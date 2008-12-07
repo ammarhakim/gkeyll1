@@ -1,0 +1,481 @@
+# -*- org -*-
+
+* WarpX Notes
+
+** November 19th
+   
+*** TODO Add script to generate XMF files from input files
+*** TODO Add subsolver to read a given HDF5 file into memory.
+
+    The input file block for this would be something like:
+
+    <reader>
+      Type = WxSubSolver
+      Kind = h5SeqFileReader
+      
+      OnGrid = [grid]
+      WriteArrays = [qnew]
+      
+      baseFileName = 'myFile'
+      dataNode = /frc/qnew
+
+    </reader>
+
+** November 6th
+
+*** TODO Crash from missing WxFunction
+
+   Fix crash when we do not find WxFunction in the various exprXXX
+   subsolvers.
+
+** November 4th
+
+   See http://buildbot.net/trac for possible continuous integration
+   system for use in WarpX.
+
+** October 20th
+
+*** Next steps for WarpX
+
+    WarpX has been used successfully for studing various equations and
+    algorithms. The next step is to apply it to real plasma
+    devices. Bhuvana has already taken the first step (with help from
+    me) in the FRC equilibrium problem. I have also performed FRC
+    formation using theta-pinch method and merging on jets to produce
+    a plasma liner.
+
+    As I see it we need the following to be able to model more complex
+    devices (a) ability to setup geometery (b) ability to specify
+    complex boundary conditions. 
+
+    We also need to start using better software engineering
+    techniques. This is critical given the size and complexity of the
+    code. I will tackle the software engineering first.
+
+    Our aim should be to do research which is reproducible. This means
+    (a) anyone can download the code and the input file and get the
+    same physics results. Anyone can run scripts to reproduce figures
+    in our papers and theses (b) the time to run a simulation should
+    be the same on the same preferences.
+
+    We are already using a version control system and an automated
+    build. We next need to start testing the code on a daily
+    basis. For this we need (a) unit tests (b) regression tests.
+
+    Unit tests are small C++ tests which exercise individual
+    classes. We have some already in the src/tests directory. Unit
+    tests give confidence that basic functionality is maintained as we
+    we modify the core code.
+
+    Regression tests are input files which exercise WarpX as a
+    whole. These tests ensure that old features keep working as we add
+    more. They also additionally serve as examples on how to use
+    various features of the code.
+
+** October 29th
+
+*** Cleanup and software engineering
+
+   WarpX main framework code (i.e. everything not in hyperapp) must be
+   thoroughly documented and cleaned up. The API documentation needs to
+   be generated nightly using doxygen and put on the wiki. User
+   documentation needs to be created using LaTeX. Unit tests need to
+   be cleaned up and also run.
+
+   Should we just use txtests? Pros: It works and would be very easy
+   to setup and use. Cons: Does not store history of results,
+   specially timing results. One option would be to get the tests in
+   place now and use txtests till we get something better.
+
+   We must introduce a process. We need to balance the need to get
+   results quickly v/s long term maintainablility of the code. For
+   this we should work in branches all the time. Only the code we
+   think works and is one we want to use should be merged into
+   branch. This could be tricky to do (need to see if SVN supports
+   this). Thus all experiemental work would still be in the branch but
+   the trunk would be "pristine". All code in the trunk must be tested
+   either through unit tests or regression tests.
+
+*** Notes on performance analysis
+
+    * Component major should be used. All components should be updated
+      at the same time. This is default in WarpX. However, for DG,
+      there are a lot of components. The means the cache may not be
+      large enough to hold the data for the components. Hence it may
+      be advantageous to keep array for each equation seperate.
+    * Use cachegrind to get cache performance numbers
+    * The poor parallel scaling generally results from sending corner
+      values using MPI. In this case a lot of time is spent in
+      MPI_Wait. The real question is: how to make custom messaging
+      patterns for each algorithm? For example if we use one sided
+      forward differences we do not need to get lower edges for the
+      sub-domains.
+
+    Tools to use: http://www.cs.virginia.edu/stream/ for memory
+    bandwidth analysis. Cachegrind for cache performance. Jumpshot for
+    messaging analysis.
+
+    WarpX should be run through the valgrind suite of tools
+    regularly. See http://valgrind.org/info/tools.html for full
+    list. The problem is that the number of possible subSolvers in
+    WarpX is very large and it would be close to impossible to profile
+    everything. So one option would be to pick specific cases and
+    profile them. One could use the regression tests for this.
+
+** October 8th
+
+*** Notes on software engineering
+
+    We must test WarpX more throughly. For this we need to run unit
+    test to check all main classes, run regression tests to check
+    physics capabilities and maintain record of run times.
+
+    Is it best to use a available tool? I think so specially if it is
+    flexible enough to write custom tests and keeps record of the past
+    activity.
+
+    Use CPPUnit for unit testing. Hudson for CI?
+
+    https://hudson.dev.java.net/
+
+** September 30th
+
+*** Documentation notes
+
+    How to document warpx? After a lot of experimenting the best
+    option seems to be LaTeX. It has everything one needs to beautiful
+    typesetting and also support some form of conversion to HTML.
+
+    Features of the documentation needed (a) index generation (b)
+    generation of hyperlinks (c) conversion to HTML with all equations
+    properly displayed (d) including source code fragments.
+
+    For making index see:
+ 
+    http://www.image.ufl.edu/help/latex/latex_indexes.shtlm
+
+    For putting source code into LaTeX use Pygments-0.11.1
+    package. For this one can run the latex fragment through the
+    'pygmentize' command and then insert the output into the LaTeX
+    file. Then this file can be run through latex to create the pdf
+    file.
+
+    This can all be automated. I.e. tex file -> extract special blocks
+    of code -> run through pygmentize -> run through latex.
+
+** September 25th
+
+*** DONE Complete wxplot script.
+
+    This should work in most cases of interest to make simple plots
+    from 1D and 2D output. Not clear if this should have an
+    interactive mode or not.
+
+*** TODO Modify H5 output to do adhere to vizschema.
+
+    Still need to decide how to handle DG coefficients. WriteOnly
+    subsolver?
+
+*** Structure of regression tests
+
+    There are multiple directories one for each major equation system
+    or feature.
+
+    In each there will be multiple regression tests. Say one is called
+    test.pin. Then there will be the following shell scripts (a)
+    test_ser.sh for serial test (b) tests_par.sh for parallel test (c)
+    tests_plt_ser.sh to plot serial results and (d) tests_plt_par.sh
+    to plot parallel results.
+
+    Each test should only write out 1 frame. The time to run the
+    advance will be added to a database.
+
+    Large tests (taking long time) should be run only once every few
+    days.
+
+    To run the regression tests scons will be used. Each script will
+    be executed using the popen command and the results grep-ed to
+    check if there are any errors. A sqlite database will be used to
+    store the results. The table structure will be as follows.
+
+    | Name | Platform | Date | WarpX version | Status | Run-time |
+    |------+----------+------+---------------+--------+----------|
+
+    This will allow us to track the progress of the tests as a
+    function of revision number.
+** September 16th
+
+*** TODO Add GSL build instructions to Wiki
+*** Notes on WarpX branch ah_sep_2008_1
+
+    This branch was created to:
+
+    - Cleanup the code (formatting and documentation).
+    - Create a new registration system in which the objects are simply
+      added to the libraries without the headache of two different
+      lists of object files needing to be specified.
+    - Addition of code to compute coil contribution to static magnetic
+      fields.
+    - Completion of the radiation transport code.
+    - Completion of the FDTD code.
+
+    The rad transport code can be simply copied/converted from the
+    fermat2 code.
+
+** September 10th
+
+*** TODO Get fermat2 into warpx.
+
+    Should the fermat2 code just be copied? Or rewritten?
+** September 9th
+
+*** TODO Registration code cleanup
+
+   Cleanup registration system so that the object files which have
+   registration code in them do not need to be passed on the command
+   line for the link line.
+
+   For this introduce namespaces which reflect the directory. For
+   example WX_LIB or WX_HYPERAPPS_EULER etc. In this namespace all the
+   registration code should go. Then these header files should be
+   included in the WxSimulation ctor and the various functions called.
+
+*** TODO Manual decomposition in input file
+
+   Add code to do manual decomposition. This is very useful when doing
+   scaling studies.
+
+*** TODO Config.h not being generated properly
+
+    The config.h file is being generated at the end of the compile and
+    not at the begining. Why? Need to fix. Once that is done we can
+    simply use the config.h file to configure the various libraries.
+
+** August 28th
+*** DONE Fix build instructions on wiki for scons 1.0 and petsc
+
+    Andree should do petsc install instructions.
+** August 25th
+
+*** TODO Write Navier Stokes solver
+
+    Write a NS solver using wave for hyperbolic fluxes and MacCormick
+    for viscous fluxes.
+
+** August 22nd
+*** DONE Complete the 1D DG solver with aux variables
+
+    This needs a routine to pack the auxillary variables into a single
+    array before passing them to the reimann and flux functions. Also
+    complete the component based limiters. Can we replace these by
+    wave based limiters?
+
+    Move the rhs calculation code into a base class so the auxSolver
+    can reuse this code.
+** August 19th 
+
+*** Potential long term problems with new DG solvers
+
+    Although the new DG method we are working on is very flexible, it
+    is also highly error prone as all the burden is now on the input
+    file writer. For example, for using component based limiters we
+    will need to specify the equations being solved 4 times: 2 in the
+    DG rhs calc and 2 in the limiters. If we do 3rd order scheme we
+    will need to specify it 6 times. Further, it is really hard to
+    understand where and when to apply BCs and limiters, which arrays
+    need to be sync()-ed etc.
+
+    This means that our input file now is like an assembly
+    language. It is really hard to figure out what exactly is
+    happening and debugging input files is becoming hard. How to solve
+    this problem is not clear to me. I think what we are doing is
+    good, but we need to make it easier to use.
+
+    For now I am going to expand the wxinpparse.py script to also have
+    macros. This will at least get rid of the repetitive input file
+    blocks. This does not solve the debugging issues, though. I am not
+    sure what the solution is in the long run. Maybe having a
+    scripting language control this process would be
+    possible. However, that would have its own set of issues.
+
+*** DONE Integrate PETSC into WarpX
+
+    Also write an example solver which will be of some use to
+    us. Maybe an implicit solver for viscous source terms? Or a
+    Poisson solver?
+
+    Before doing this I need to fix the build system to spit out the
+    config.h file before any file is built. Then the config.h file can
+    be used in configuration rather than command line -D flags.
+** August 18th
+
+*** TODO Refactor the comboSolver time-stepper.
+
+    We need to add two new time-steppers in WarpX: fixed dt stepper
+    and fuzzy dt stepper.
+
+    The fixed dt stepper will take a fixed time-step specified in the
+    input file. The total number of frames and number of steps between
+    frames will be specified. If any subsolver fails due to the
+    time-step being too large, the system will throw an exception
+    printing out the needed time step for stability.
+
+    The fuzzy dt time stepper will take variable time steps but will
+    not adjust the time step just before writing out the frame. Hence
+    the output may be a bit later than specified in the input
+    file. This method will prevent very small time steps which is
+    causing some problems in the solution, specially for those
+    problems in which the flow is highly unstable.
+
+    Three time-stepping modes need to be added: variableDt, fixedDt,
+    floatingDt. The variableDt is what we have now. The fixedDt scheme
+    will take a Nout and also the number of steps per frame. The
+    floatingDt will be same as variableDt but will not adjust the
+    time-step before the frame.
+
+** August 17th
+
+*** TODO Fix the WxSolver initialization code
+
+    The code does not complain when a subsolver name is mis-spelt in
+    the WxSubSolverStep input file block. It core dumps instead. This
+    needs to be fixed ASAP.
+
+    The SyncVars list also needs to be tested for existence of the
+    variable in question. In fact, the whole simulation needs to be
+    tested to make sure simple errors are avoided.
+
+    One option would be to take another look at the input file
+    validation scheme thought out before.
+
+*** Refactoring for WarpX Blue.
+
+    WarpX Blue will be the interactive, scriptable version of
+    WarpX. The subsolvers will not need the read and write variable
+    lists. This will need a rethink of how the system initialize
+    itself.
+
+    The inpput file should only declare grids, variables and
+    subsolvers. The actual composition of the subsolvers and the
+    parameters to run them with (in particular: time-step, read/write
+    variables) should be controlled from a script.
+
+    For this purpose, [[http://www.lua.org][LUA]] will be used. Some C++ wrapper classes will
+    be needed to use allow LUA to call C++ code easily. Although the
+    LUA to C interface is easy, it is very tedious to use. Maybe
+    something along the lines of PyCXX or Boost.Python can be
+    developed for LUA-CXX?
+
+*** DONE Add new keyword in subSolverStep for arrays to sync-ed
+
+    We need to add a new keyword, say SyncVars which indicate which
+    arrays should be sync-ed after a set of subsolvers are run. This
+    needs to be done ASAP or else the new DG code will not work.
+
+    Still need to test this stuff. <2008-08-18 Mon>
+** August 14th
+
+*** DONE Call Bhuvana and go over how to implement the input file based DG solver
+
+    The implementation needs to be done ASAP. Else will be difficult
+    to get the auxiliary variables programmed up easily.
+
+    <2008-08-14 Thu> Have now prepared an input file describing the
+    new system. Several subsolvers need to be implemented. Input files
+    are becoming very complex, but there are significant paybacks in
+    terms of flexibility.
+** August 13th
+
+*** Refactoring of hyperbolic subsolver
+
+    The hyperbolic subsolver needs refactoring. This needs to happen
+    in two ways.
+
+    First, by splitting the time advance of the schemes (specially DG)
+    into the input file. Thus, the DG subsolver would only compute the
+    RHS of the equation system and not advance the solution in
+    time. Then, this RHS solver would be used multiple times in the
+    input file to advance the solution. This will allow us to explore
+    various time stepping schemes (for example Hancock DG) from the
+    input file directly. This will also allow performing more flexible
+    updates without having to keep modifying the code every time. For
+    example, we could now interleave the computation of implicit
+    diffusive source terms directly without having to rewrite the
+    subsolvers themselves. This step would also require that the
+    limiter application be split out. This could be rather tricky but
+    worthwhile in the long run.
+
+    Second, the 1d, 2d and 3d solvers need to be unified. This should
+    involve using some other way of indexing the arrays rather than
+    (i,j,k), maybe space-filling curves or a fully unstructured
+    representation. This will open the way for doing general
+    geometries in WarpX. For general geometries one also needs each
+    equation system to specify the rotation matrices from global to
+    local coordinate system and from local to global coordinate
+    system.
+
+*** DONE Make a macro system for use in WarpX
+
+    This should allow substitution of elements in a string
+    template. Use the python string.Template class or python string
+    substitution features. Macros will allow simpler input file
+    creation.
+
+    Done. See
+
+    http://www.warpx.org/wiki/index.php?title=WarpX_Preprocessor
+
+*** Study space-filling curves (SFC) for use in indexing
+
+    This will allow for stepping over general cartesian meshes.
+    
+*** TODO Get relevant SFC references from Aftosmis paper.
+
+** August 12th
+
+*** DONE Fix problem with time-stepping scheme of comboSolver
+
+    Turns out that the time step is not adjusted to maximum allowable
+    by the CFL number. Must fix this.
+
+    This was not a problem with the comboSolver at all. The bug was in
+    the WxHyperScheme::schemeStep method. Now fixed. <2008-08-18 Mon>
+** August 11th
+
+*** DONE Compare ideal MHD to twofluid for q=1000.
+
+    The results should compare well to each other. They do with
+    dispersive waves visible in the twofluid solution.
+
+*** TODO WarpX test system.
+
+    Write special set of builders for scons for running regression
+    tests for WarpX. This needs the following things.
+
+    First, the tests need to be configured. For this one needs to
+    specify (a) the location of the warpx repository, (b) flags to use
+    with scons build of WarpX, (c) the location of the directory
+    containing the accepted results.
+
+    Second, the code needs to be downloaded from the repo. Once it is
+    downloaded, then we need to cd into the warpx/src directory and
+    run scons in it to build the code. The parallel and serial
+    versions need to be build if specified.
+
+    Third, the tests need to be run. This means: running the
+    preprocessor on the input file, running the input file with the
+    executable, and finally, comparing the output with accepted
+    results. For parallel executable the code needs to be run with the
+    number of processors specified.
+
+    There should be means to run an accepted test and store the
+    results in the appropriate place.
+
+*** Problems with auxillary variables.
+
+    The auxillary variable need to be advanced every RK step. Why is
+    the current implementation not working?
+
+    Bhuvana has fixed problem. Turns out that the auxillary variables
+    needed to be set to 0 before computing the RHS for the auxillary
+    equations. <2008-08-12 Tue>
