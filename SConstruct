@@ -3,7 +3,7 @@
 # Top level build file: controls how lucee is built.
 #
 # $Id: SConstruct 1 2006-11-03 20:26:32Z cary $
-#
+# 
 # Copyright &copy; 2008-2009. Ammar Hakim. Released under Eclipse
 # Licence version 1.0.
 ##
