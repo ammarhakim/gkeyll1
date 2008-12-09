@@ -4,13 +4,13 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makePetscConfig(petscarch):
     r"""Returns an appropriate configure object for PETSC PARALLEL
     """
     if petscarch:
-        return WxBuildConf(
+        return BuildConf(
             # package name
             'PETSCPAR',
             # base paths for incs and libs
@@ -31,7 +31,7 @@ def makePetscConfig(petscarch):
             ['../bmake/%s' % petscarch]
             )
     else:
-        return WxBuildConf(
+        return BuildConf(
             # package name
             'PETSCPAR',
             # base paths for incs and libs

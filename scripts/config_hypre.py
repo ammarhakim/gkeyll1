@@ -4,7 +4,7 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makeHypreConfig(petscIncPath, petscLibPath, petscarch=None):
     r"""Returns an appropriate configure object for hypre library
@@ -16,7 +16,7 @@ def makeHypreConfig(petscIncPath, petscLibPath, petscarch=None):
         incPath = 'include'
         libPath = 'lib'
     
-    return WxBuildConf(
+    return BuildConf(
         # package name
         'HYPRE',
         # base paths for incs and libs    

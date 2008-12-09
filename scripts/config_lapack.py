@@ -4,10 +4,10 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makeLapackConfig(lapackLib):
-    return WxBuildConf(
+    return BuildConf(
         # package name
         'LAPACK',
         # base paths for incs and libs    

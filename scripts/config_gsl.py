@@ -2,9 +2,9 @@
 # Find GNU Scientific library (GSL)
 ##
 
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
-bc = WxBuildConf(
+bc = BuildConf(
 # package name
     'GSL',
 # base paths for incs and libs
