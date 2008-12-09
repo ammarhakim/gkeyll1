@@ -2,7 +2,7 @@
 ##
 # Top level build file: controls how lucee is built.
 #
-# Copyright &copy; 2008-2009. Ammar Hakim. Released under Eclipse
+# Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
 # Licence version 1.0.
 ##
 
@@ -20,7 +20,7 @@ opts = Options(['options.cache', 'config.py'])
 # add various options used to build WarpX
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
-    BoolOption('test', 'Set to yes to compile unit tests', 'no'),
+    BoolOption('unit', 'Set to yes to compile unit tests', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
     ('CC', 'The C compiler to use', 'gcc'),
     ('CXX', 'The C++ compiler to use', 'g++'),
@@ -135,7 +135,7 @@ SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
 ##
 # build executable
 ##
-build_dir = os.path.join(buildin, 'xlucee')
+build_dir = os.path.join(buildin, 'lucee')
 SConscript('lucee/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
