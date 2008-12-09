@@ -4,13 +4,13 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makePetscConfig(petscarch):
     r"""Returns an appropriate configure object for PETSC
     """
     if petscarch:
-        return WxBuildConf(
+        return BuildConf(
             # package name
             'PETSCSER',
             # base paths for incs and libs
@@ -31,7 +31,7 @@ def makePetscConfig(petscarch):
             ['mpiuni', '../bmake/%s' % petscarch]
             )
     else:
-        return WxBuildConf(
+        return BuildConf(
             # package name
             'PETSCSER',
             # base paths for incs and libs

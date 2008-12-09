@@ -29,15 +29,15 @@ opts.AddOptions(
 )
 
 # MPI library setup
-import buildconf.config_mpi as config_mpi
+import scripts.config_mpi as config_mpi
 config_mpi.bc.begin(opts)
 
 # HDF5 serial library setup
-import buildconf.config_hdf5s as config_hdf5s
+import scripts.config_hdf5s as config_hdf5s
 config_hdf5s.bc.begin(opts)
 
 # HDF5 parallel library setup
-import buildconf.config_hdf5p as config_hdf5p
+import scripts.config_hdf5p as config_hdf5p
 config_hdf5p.bc.begin(opts)
 
 # update environment with options
@@ -48,11 +48,11 @@ opts.Save('options.cache', env) # save stuff to cache
 Help(opts.GenerateHelpText(env))
 
 # configure compiler flags
-import buildconf.config_flags as config_flags
+import scripts.config_flags as config_flags
 config_flags.configFlags(env)
 
 # determine build-directory
-import buildconf.config_builddir as config_builddir
+import scripts.config_builddir as config_builddir
 buildin = config_builddir.configBuildDir(env)
 
 # clone the environment
@@ -130,14 +130,13 @@ reg_objs = []
 # build core library
 ##
 build_dir = os.path.join(buildin, 'lib')
-reg = SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
-reg_objs = reg_objs + reg
+SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
 # build executable
 ##
 build_dir = os.path.join(buildin, 'xlucee')
-SConscript('xlucee/SConscript', build_dir=build_dir, duplicate=0)
+SConscript('lucee/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
 # build test code if requested

@@ -4,9 +4,9 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
-bc = WxBuildConf(
+bc = BuildConf(
 # package name
     'HDF5S',
 # base paths for incs and libs    

@@ -2,9 +2,9 @@
 # Find MPI library
 ##
 
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
-bc = WxBuildConf(
+bc = BuildConf(
 # package name
     'MPI',
 # base paths for incs and libs    

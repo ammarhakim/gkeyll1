@@ -4,10 +4,10 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makeBlasConfig(blasLib):
-    return WxBuildConf(
+    return BuildConf(
         # package name
         'BLAS',
         # base paths for incs and libs    

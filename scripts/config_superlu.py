@@ -4,7 +4,7 @@
 
 import os
 import re
-from wxbuildconf import WxBuildConf
+from buildconf import BuildConf
 
 def makeSuperLUConfig(petscIncPath, petscLibPath, petscarch=None):
     r"""Returns an appropriate configure object for superlu library
@@ -17,7 +17,7 @@ def makeSuperLUConfig(petscIncPath, petscLibPath, petscarch=None):
         incPath = 'include'
         libPath = 'lib'
     
-    return WxBuildConf(
+    return BuildConf(
         # package name
         'SUPERLU',
         # base paths for incs and libs    

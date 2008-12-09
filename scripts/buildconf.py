@@ -1,13 +1,15 @@
 ##
-# Class to perform WarpX configuration
+# Class to perform Lucee build configuration.
+#
+# Copyright &copy; 2008-2009. Ammar Hakim. Released under Eclipse
+# Licence version 1.0.
 ##
 
 import os
 
-class WxBuildConf:
-    r"""WxBuildConf(pkg : str, base_paths = [],
-    incs : [] str, inc_path : [] str,
-    libs : [] str, lib_path: [] str)
+class BuildConf:
+    r"""BuildConf(pkg : str, base_paths = [], incs : [] str, inc_path : []
+    str, libs : [] str, lib_path: [] str)
     
     Class to test existence of libraries and include headers for
     package `pkg`. Here `base_paths` is the list of base directories,
@@ -215,7 +217,7 @@ class WxBuildConf:
         # test for include headers
         flg = True
         for p in self.inc_paths:
-            print "*** WxBuildConf (%s): Checking headers in %s ...." % (self.pkg, p)
+            print "*** BuildConf (%s): Checking headers in %s ...." % (self.pkg, p)
             myEnv = sc_env.Clone()
             myConf = myEnv.Configure()
             myEnv.Append(CPPPATH = [p])
@@ -240,7 +242,7 @@ class WxBuildConf:
         # test for libraries
         flg = True
         for p in self.lib_paths:
-            print "*** WxBuildConf (%s): Checking libraries in %s ...." % (self.pkg, p)
+            print "*** BuildConf (%s): Checking libraries in %s ...." % (self.pkg, p)
             myEnv = sc_env.Clone()
             myConf = myEnv.Configure()
             myEnv.Append(LIBPATH = p)
@@ -261,7 +263,7 @@ class WxBuildConf:
         # test for executable
         flg = True
         for p in self.bin_paths:
-            print "*** WxBuildConf (%s): Checking executable in %s ...." % (self.pkg, p)
+            print "*** BuildConf (%s): Checking executable in %s ...." % (self.pkg, p)
             # now test if library exists
             ep = sc_env.WhereIs(self.bin, p)
             if ep:
