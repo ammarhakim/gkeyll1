@@ -34,8 +34,8 @@ namespace Lucee
  * like native-type objects (int, double, string etc.) or small
  * objects which are not expensive to copy.
  *
- * Lucee::KeyVal objects are immutable: values once added can not be
- * removed or modifed.
+ * Lucee::KeyVal objects are immutable, i.e, values once added can not
+ * be removed or modifed.
  */
   class KeyVal
   {
@@ -66,24 +66,24 @@ namespace Lucee
       KeyVal& operator=(const KeyVal& rhs);
 
 /**
- * Insert a name, value pair. Returns true if the insertion worked,
+ * Insert a key, value pair. Returns true if the insertion worked,
  * false otherwise
  *
- * @param name Name of object.
+ * @param key Key of object.
  * @param value Value of object.
  * @return true, if insertion worked, false otherwise.
  */
       template<typename VALUETYPE>
-      bool add(const std::string& name, VALUETYPE value) {
-        addName<VALUETYPE>(name);
-        return _values.insert( AnyPair_t(name, value) ).second;
+      bool add(const std::string& key, VALUETYPE value) {
+        addKey<VALUETYPE>(key);
+        return values.insert( AnyPair_t(key, value) ).second;
       }
 
 /**
  * Check if key exist in key-value pair.
  *
  * @param key Key of object to check.
- * @return true if name exists, false otherwise.
+ * @return true if key exists, false otherwise.
  */
       bool has(const std::string& key) const;
 
@@ -95,40 +95,41 @@ namespace Lucee
  */
       template <typename VALUETYPE>
       VALUETYPE get(const std::string& key) const {
-        AnyMap_t::const_iterator i = _values.find(name);
-        if (i != _values.end())
-          return wx_any_cast<VALUETYPE>((*i).second);
+        AnyMap_t::const_iterator i = values.find(key);
+        if (i != values.end())
+          return Lucee::any_cast<VALUETYPE>((*i).second);
         // value not found: throw an exception
-        WxExcept wxe;
-        wxe << "Value " << name << " not found";
-        throw wxe;
+        Lucee::Except ex;
+        ex << "Value " << key << " not found";
+        throw ex;
       }
 
 /**
- * Retrieve list of values associated with name
+ * Retrieve list of values associated with key
  *
- * @param name Return list of values associated with 'name'
+ * @param key Key for values to return
+ * @return vector of values associated with key
  */
       template <typename VALUETYPE>
-      std::vector<VALUETYPE> getVec(const std::string& name) const {
-        // first fetch vector of WxAnys
-        std::vector<WxAny> vals = 
-          this->template get<std::vector<WxAny> >(name);
+      std::vector<VALUETYPE> getVec(const std::string& key) const {
+        // first fetch vector of Lucee::Anys
+        std::vector<Lucee::Any> vals = 
+          this->template get<std::vector<Lucee::Any> >(key);
         // now convert it into vector of VALUETYPE
         std::vector<VALUETYPE> res;
         for (unsigned i=0; i<vals.size(); ++i)
-          res.push_back( wx_any_cast<VALUETYPE>(vals[i]) );
+          res.push_back( Lucee::any_cast<VALUETYPE>(vals[i]) );
         return res;
       }
 
 /**
- * Get names of inserted types 
+ * Get list of keys for a particular type
  *
- * @return list of names
+ * @return list of keys
  */
       template <typename VALUETYPE>
-      std::vector<std::string> getNames() const {
-        return wxTypeMapExtract<VALUETYPE, WxTypeToNames>(_typeToNames).names;
+      std::vector<std::string> getKeys() const {
+        return Lucee::typeMapExtract<VALUETYPE, TypeToKeys>(typeToKeys).keys;
       }
 
 /** Typedef for map of strings to values, stored as Lucee::Any */
@@ -137,35 +138,42 @@ namespace Lucee
       typedef std::pair<std::string, Lucee::Any> AnyPair_t;
 
     private:
+
 /**
- * Container to maps types -> names
+ * Container to maps types -> keys
  */
       template <typename T>
       struct TypeContainer {
-          std::vector<std::string> names;
+          std::vector<std::string> keys;
       };
-      typedef WxTypeMap<WxDataTypes_t, TypeContainer> TypeToNames;
+      typedef Lucee::TypeMap<Lucee::DataTypes_t, TypeContainer> TypeToKeys;
 
-      TypeToNames _typeToNames;
-      AnyMap_t _values;
+/** Container mapping types to keys of those types */
+      TypeToKeys typeToKeys;
+/** Map of keys to values */
+      AnyMap_t values;
 
 /**
- * Add a name to type->names map for supplied type
+ * Add a key to type->keys map for supplied type
+ *
+ * @param key Key to add
  */
       template <typename VALUETYPE>
-      void addName(const std::string& name) {
-        wxTypeMapExtract<VALUETYPE>(_typeToNames).names.push_back(name);
+      void addKey(const std::string& key) {
+        Lucee::typeMapExtract<VALUETYPE>(typeToKeys).keys.push_back(key);
       }
 
 /**
- * Copy names from crypt type map to this object
+ * Copy keys from give KeyVal object to this one
+ *
+ * @param kv KeyVal object to copy from
  */
       template <typename T>
-      void copyNames(const KeyVal& crypt) {
-        std::vector<std::string> nms = crypt.getNames<T>();
+      void copyKeys(const KeyVal& kv) {
+        std::vector<std::string> nms = kv.getKeys<T>();
         std::vector<std::string>::const_iterator i;
         for (i=nms.begin(); i!=nms.end(); ++i)
-          wxTypeMapExtract<T>(_typeToNames).names.push_back(*i);
+          Lucee::typeMapExtract<T>(typeToKeys).keys.push_back(*i);
       }
   };
 

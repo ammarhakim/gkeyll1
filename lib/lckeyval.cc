@@ -1,80 +1,95 @@
-#include "wxcrypt.h"
+/**
+ * @file	lckeyval.cc
+ *
+ * @brief	Class to hold key-value pairs.
+ *
+ * @version	$Id$ *
+ *
+ * Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
+ * Licence version 1.0.
+ */
 
+// lib includes
+#include <lckeyval.h>
 
-WxCrypt::WxCrypt() 
+namespace Lucee
 {
-}
 
-WxCrypt::~WxCrypt() 
-{
-  // delete all entries in map
-  _values.erase( _values.begin(), _values.end() );
-}
+  KeyVal::KeyVal() 
+  {
+  }
 
-WxCrypt::WxCrypt(const WxCrypt& crypt)
-{
-  AnyMap_t::const_iterator i;
-  // copy all entries
-  for (i=crypt._values.begin(); i!=crypt._values.end(); ++i)
-    _values.insert( AnyPair_t((*i).first, (*i).second) );
-  // copy the type -> names map
-  copyNames<int>(crypt);
-  copyNames<double>(crypt);
-  copyNames<std::string>(crypt);
-  copyNames<WxAny>(crypt);
-  copyNames<std::vector<WxAny> >(crypt);
-}
+  KeyVal::~KeyVal() 
+  {
+    // delete all entries in map
+    values.erase( values.begin(), values.end() );
+  }
 
-WxCrypt&
-WxCrypt::operator=(const WxCrypt& rhs)
-{
-  if (this==&rhs) return *this;
+  KeyVal::KeyVal(const KeyVal& kv)
+  {
+    AnyMap_t::const_iterator i;
+    // copy all entries
+    for (i=kv.values.begin(); i!=kv.values.end(); ++i)
+      values.insert( AnyPair_t((*i).first, (*i).second) );
+    // copy the type -> keys map
+    copyKeys<int>(kv);
+    copyKeys<double>(kv);
+    copyKeys<std::string>(kv);
+    copyKeys<Lucee::Any>(kv);
+    copyKeys<std::vector<Lucee::Any> >(kv);
+  }
 
-  // delete all entries in map
-  _values.erase( _values.begin(), _values.end() );
-  // delete all entries in type -> name map
-  wxTypeMapExtract<int>(_typeToNames).names.erase(
-      wxTypeMapExtract<int>(_typeToNames).names.begin(),
-      wxTypeMapExtract<int>(_typeToNames).names.end());
+  KeyVal&
+  KeyVal::operator=(const KeyVal& rhs)
+  {
+    if (this==&rhs) return *this;
 
-  wxTypeMapExtract<int>(_typeToNames).names.erase(
-      wxTypeMapExtract<int>(_typeToNames).names.begin(),
-      wxTypeMapExtract<int>(_typeToNames).names.end());
+    // delete all entries in map
+    values.erase( values.begin(), values.end() );
+    // delete all entries in type -> key map
+    Lucee::typeMapExtract<int>(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<int>(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<int>(typeToKeys).keys.end());
 
-  wxTypeMapExtract<double>(_typeToNames).names.erase(
-      wxTypeMapExtract<double>(_typeToNames).names.begin(),
-      wxTypeMapExtract<double>(_typeToNames).names.end());
+    Lucee::typeMapExtract<int>(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<int>(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<int>(typeToKeys).keys.end());
 
-  wxTypeMapExtract<std::string>(_typeToNames).names.erase(
-      wxTypeMapExtract<std::string>(_typeToNames).names.begin(),
-      wxTypeMapExtract<std::string>(_typeToNames).names.end());
+    Lucee::typeMapExtract<double>(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<double>(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<double>(typeToKeys).keys.end());
 
-  wxTypeMapExtract<WxAny>(_typeToNames).names.erase(
-      wxTypeMapExtract<WxAny>(_typeToNames).names.begin(),
-      wxTypeMapExtract<WxAny>(_typeToNames).names.end());
+    Lucee::typeMapExtract<std::string>(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::string>(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::string>(typeToKeys).keys.end());
 
-  wxTypeMapExtract<std::vector<WxAny> >(_typeToNames).names.erase(
-      wxTypeMapExtract<std::vector<WxAny> >(_typeToNames).names.begin(),
-      wxTypeMapExtract<std::vector<WxAny> >(_typeToNames).names.end());
+    Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.end());
 
-  // add entries from rhs
-  AnyMap_t::const_iterator i;
-  for (i=rhs._values.begin(); i!=rhs._values.end(); ++i)
-    _values.insert( AnyPair_t((*i).first, (*i).second) );
+    Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.end());
 
-  // copy the type -> names map
-  copyNames<int>(rhs);
-  copyNames<double>(rhs);
-  copyNames<std::string>(rhs);
-  copyNames<std::vector<WxAny> >(rhs);
+    // add entries from rhs
+    AnyMap_t::const_iterator i;
+    for (i=rhs.values.begin(); i!=rhs.values.end(); ++i)
+      values.insert( AnyPair_t((*i).first, (*i).second) );
 
-  return *this;
-}
+    // copy the type -> keys map
+    copyKeys<int>(rhs);
+    copyKeys<double>(rhs);
+    copyKeys<std::string>(rhs);
+    copyKeys<std::vector<Lucee::Any> >(rhs);
 
-bool 
-WxCrypt::has(const std::string& name) const
-{
-  AnyMap_t::const_iterator i;
-  i = _values.find(name);
-  return (i != _values.end()) ? true : false;
+    return *this;
+  }
+
+  bool 
+  KeyVal::has(const std::string& key) const
+  {
+    AnyMap_t::const_iterator i;
+    i = values.find(key);
+    return (i != values.end()) ? true : false;
+  }
 }

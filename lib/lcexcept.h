@@ -20,7 +20,12 @@
 namespace Lucee
 {
 /**
- * 
+ * Lucee::Except is the class to use for creating and throwing
+ * exceptions. It supports the standard I/O library operators to
+ * create the exception messages. For example, one can do
+ *
+ * Lucee:Except ex("An exception ");
+ * ex << "occured at line " << 25 << std::endl;
  */
   class Except : public std::exception, public std::ostringstream 
   {

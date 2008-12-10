@@ -39,3 +39,6 @@ myenv.Program('lcany', ['lcany.cxx'])
 
 # lcexcept
 myenv.Program('lcexcept', ['lcexcept.cxx'])
+
+# lckeyval
+myenv.Program('lckeyval', ['lckeyval.cxx'])
