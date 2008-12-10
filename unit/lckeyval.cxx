@@ -137,7 +137,7 @@ test_lckv_a()
 int
 main(void)
 {
-  LC_BEGIN_TESTS("lckv_tests");
+  LC_BEGIN_TESTS("lckeyval");
   test_lckv_a();
   LC_END_TESTS;
 }

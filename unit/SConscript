@@ -42,3 +42,6 @@ myenv.Program('lcexcept', ['lcexcept.cxx'])
 
 # lckeyval
 myenv.Program('lckeyval', ['lckeyval.cxx'])
+
+# lckeyvaltree
+myenv.Program('lckeyvaltree', ['lckeyvaltree.cxx'])
