@@ -1,7 +1,9 @@
 ## -*- python -*-
-
 ##
-# Build core WarpX library
+# Build code and create library
+#
+# Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
+# Licence version 1.0.
 ##
 
 Import('env')
@@ -19,7 +21,7 @@ myparenv = parenv.Clone()
 myparenv.Append(CPPPATH = incs)
 
 # name of library built with code in this file
-wxlibname = 'wxlib'
+libname = 'lclib'
 
 # lexical analysis code for WarpX input files
 # This is no longer being used: Wed Dec 20 19:31:43 UTC 2006 (Ammar)
@@ -53,4 +55,4 @@ for s in mpi_sources:
 ##
 # Archive into library
 ##
-Library(wxlibname, objs)
+Library(libname, objs)
