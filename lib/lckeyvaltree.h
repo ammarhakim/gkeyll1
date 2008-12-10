@@ -76,9 +76,7 @@ namespace Lucee
  *
  * @return Name of tree
  */
-      std::string getName() const {
-        return name;
-      }
+      std::string getName() const;
 
 /**
  * Add a new key-value tree to this tree.

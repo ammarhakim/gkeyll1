@@ -53,63 +53,66 @@ void
 test_keyvaltree_b()
 {
   // top level set
-  Lucee::KeyValTree wx("warpx");
-  //wx.add("description", "Two-fluid solver");
+  Lucee::KeyValTree kvt("warpx");
+  //kvt.add("description", "Two-fluid solver");
 
   // ion set
-  Lucee::KeyValTree wx_ion("ions");
-  wx_ion.add("gas_gamma", 1.4);
-  wx_ion.add("meqn", 5);
+  Lucee::KeyValTree kvt_ion("ions");
+  kvt_ion.add("gas_gamma", 1.4);
+  kvt_ion.add("meqn", 5);
   // .. add ion set
-  wx.addSet(wx_ion);
+  kvt.addSet(kvt_ion);
 
   // electron set
-  Lucee::KeyValTree wx_elc("electrons");
-  wx_elc.add("gas_gamma", 2.0);
-  wx_elc.add("meqn", 5);
+  Lucee::KeyValTree kvt_elc("electrons");
+  kvt_elc.add("gas_gamma", 2.0);
+  kvt_elc.add("meqn", 5);
 
   // properties in electron set
-  Lucee::KeyValTree wx_elc_prop("properties");
-  wx_elc_prop.add("mass", 1.0);
-  wx_elc.addSet(wx_elc_prop);
+  Lucee::KeyValTree kvt_elc_prop("properties");
+  kvt_elc_prop.add("mass", 1.0);
+  kvt_elc.addSet(kvt_elc_prop);
 
-  wx.addSet(wx_elc);
+  kvt.addSet(kvt_elc);
 
-  LC_ASSERT("Testing if ions keyvaltree exists", wx.hasSet("ions")==true);
-  const Lucee::KeyValTree& wxcr = wx.getSet("ions");
+  LC_ASSERT("Testing if ions keyvaltree exists", kvt.hasSet("ions")==true);
+  const Lucee::KeyValTree& kvtcr = kvt.getSet("ions");
 
-  LC_ASSERT("Testing for meqn", wxcr.get<int>("meqn")==5);
-  LC_ASSERT("Testing for gas_gamma", wxcr.get<double>("gas_gamma")==1.4);
+  LC_ASSERT("Testing for meqn", kvtcr.get<int>("meqn")==5);
+  LC_ASSERT("Testing for gas_gamma", kvtcr.get<double>("gas_gamma")==1.4);
 
-  const Lucee::KeyValTree& wxcra = wx.getSet("electrons");
+  const Lucee::KeyValTree& kvtcra = kvt.getSet("electrons");
 
-  LC_ASSERT("Testing for meqn", wxcra.get<int>("meqn")==5);
-  LC_ASSERT("Testing for gas_gamma", wxcra.get<double>("gas_gamma")==2.0);
+  LC_ASSERT("Testing for meqn", kvtcra.get<int>("meqn")==5);
+  LC_ASSERT("Testing for gas_gamma", kvtcra.get<double>("gas_gamma")==2.0);
 
-  const Lucee::KeyValTree& wxcrab = wxcra.getSet("properties");
-  LC_ASSERT("Testing for mass", wxcrab.get<double>("mass")==1.0);
+  const Lucee::KeyValTree& kvtcrab = kvtcra.getSet("properties");
+  LC_ASSERT("Testing for mass", kvtcrab.get<double>("mass")==1.0);
 
-  LC_RAISES("Testing if bad set can be gotten", wx.getSet("Flu"), Lucee::Except);
+  LC_RAISES("Testing if bad set can be gotten", kvt.getSet("Flu"), Lucee::Except);
 }
 
 void
 test_keyvaltree_d()
 {
-  Lucee::KeyValTree wx("warpx");
+  Lucee::KeyValTree kvt("warpx");
 
-  Lucee::KeyValTree wxa("warpx/a");
-  wxa.add<std::string>("Type", "type_a");
-  Lucee::KeyValTree wxb("warpx/b");
-  wxb.add<std::string>("Type", "type_a");
-  Lucee::KeyValTree wxc("warpx/c");
-  wxc.add<std::string>("Type", "type_a");
+  LC_ASSERT("Testing if name is correct",
+    kvt.getName() == "warpx");
 
-  wx.addSet(wxa);
-  wx.addSet(wxb);
-  wx.addSet(wxc);
+  Lucee::KeyValTree kvta("warpx/a");
+  kvta.add<std::string>("Type", "type_a");
+  Lucee::KeyValTree kvtb("warpx/b");
+  kvtb.add<std::string>("Type", "type_a");
+  Lucee::KeyValTree kvtc("warpx/c");
+  kvtc.add<std::string>("Type", "type_a");
+
+  kvt.addSet(kvta);
+  kvt.addSet(kvtb);
+  kvt.addSet(kvtc);
 
   std::vector<std::string> names = 
-    wx.getNamesOfType("type_a");
+    kvt.getNamesOfType("type_a");
   LC_ASSERT("Testing names of type list is of correct size",
     names.size() == 3);
 }
@@ -117,50 +120,50 @@ test_keyvaltree_d()
 void
 test_keyvaltree_e()
 {
-  Lucee::KeyValTree wxv("warpx");
+  Lucee::KeyValTree kvtv("warpx");
 
-  wxv.add("int_a", 1);
-  wxv.add("int_b", 2);
-  wxv.add("int_c", 3);
+  kvtv.add("int_a", 1);
+  kvtv.add("int_b", 2);
+  kvtv.add("int_c", 3);
 
-  wxv.add("double_a", 1.0);
-  wxv.add("double_b", 2.0);
-  wxv.add("double_c", 3.0);
+  kvtv.add("double_a", 1.0);
+  kvtv.add("double_b", 2.0);
+  kvtv.add("double_c", 3.0);
 
   std::vector<std::string>::const_iterator itr;
   std::vector<std::string> names;
 
-  names = wxv.getKeys<int>();
+  names = kvtv.getKeys<int>();
   LC_ASSERT("Testing name of first integer", names[0] == "int_a");
   LC_ASSERT("Testing name of second integer", names[1] == "int_b");
   LC_ASSERT("Testing name of third integer", names[2] == "int_c");
 
-  names = wxv.getKeys<double>();
+  names = kvtv.getKeys<double>();
   LC_ASSERT("Testing name of first double", names[0] == "double_a");
   LC_ASSERT("Testing name of second double", names[1] == "double_b");
   LC_ASSERT("Testing name of third double", names[2] == "double_c");
 
-  Lucee::KeyValTree wxvc = wxv;
+  Lucee::KeyValTree kvtvc = kvtv;
 
-  names = wxvc.getKeys<int>();
+  names = kvtvc.getKeys<int>();
   LC_ASSERT("Testing name of first integer", names[0] == "int_a");
   LC_ASSERT("Testing name of second integer", names[1] == "int_b");
   LC_ASSERT("Testing name of third integer", names[2] == "int_c");
 
-  names = wxvc.getKeys<double>();
+  names = kvtvc.getKeys<double>();
   LC_ASSERT("Testing name of first double", names[0] == "double_a");
   LC_ASSERT("Testing name of second double", names[1] == "double_b");
   LC_ASSERT("Testing name of third double", names[2] == "double_c");
 
-  Lucee::KeyValTree wxva;
-  wxva = wxvc;
+  Lucee::KeyValTree kvtva;
+  kvtva = kvtvc;
 
-  names = wxva.getKeys<int>();
+  names = kvtva.getKeys<int>();
   LC_ASSERT("Testing name of first integer", names[0] == "int_a");
   LC_ASSERT("Testing name of second integer", names[1] == "int_b");
   LC_ASSERT("Testing name of third integer", names[2] == "int_c");
 
-  names = wxva.getKeys<double>();
+  names = kvtva.getKeys<double>();
   LC_ASSERT("Testing name of first double", names[0] == "double_a");
   LC_ASSERT("Testing name of second double", names[1] == "double_b");
   LC_ASSERT("Testing name of third double", names[2] == "double_c");
