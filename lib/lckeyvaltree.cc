@@ -149,4 +149,15 @@ namespace Lucee
     throw ex;
   }
 
+  std::vector<std::string> 
+  KeyValTree::getNamesOfType(const std::string& type) const
+  {
+    TypeMap_t::const_iterator i;
+    i = typeMap.find(type);
+    if (i != typeMap.end())
+      return i->second;
+    else
+      return std::vector<std::string>();
+  }
+
 }
