@@ -97,43 +97,6 @@ namespace Lucee
       }
 
 /**
- * Insert a key, value pair. Returns true if the insertion worked,
- * false otherwise
- *
- * @param key Key of object.
- * @param values List of values.
- * @return true, if insertion worked, false otherwise.
- */
-      template<typename VALUETYPE>
-      bool addVec(const std::string& key, std::vector<VALUETYPE>& values) {
-        // first create a vector of Lucee::Any
-        std::vector<Lucee::Any> vals;
-        for (unsigned i=0; i<values.size(); ++i)
-          vals.push_back( values[i] );
-        return this->template add<std::vector<Lucee::Any> >(key, vals);
-      }
-
-
-/**
- * Retrieve list of values associated with key
- *
- * @param key Key for values to return
- * @return vector of values associated with key
- */
-      template <typename VALUETYPE>
-      std::vector<VALUETYPE> getVec(const std::string& key) const {
-        // first fetch vector of Lucee::Anys
-        std::vector<Lucee::Any> vals = 
-          this->template get<std::vector<Lucee::Any> >(key);
-        // now convert it into vector of VALUETYPE
-        std::vector<VALUETYPE> res;
-        for (unsigned i=0; i<vals.size(); ++i)
-          res.push_back( Lucee::any_cast<VALUETYPE>(vals[i]) );
-        return res;
-      }
-
-
-/**
  * Check if key exist in key-value pair.
  *
  * @param key Key of object to check.
