@@ -210,7 +210,7 @@ class BuildConf:
         sc_env['HAVE_%s' % self.pkg] = True
         sc_env.Append( CCFLAGS = ['-DHAVE_%s' % self.pkg] )
         conf = sc_env.Configure(config_h = 'config.h')
-        #conf.Define('HAVE_%s' % self.pkg)
+        conf.Define('HAVE_%s' % self.pkg)
         conf.Finish()
 
     def confIncs(self, sc_env):
