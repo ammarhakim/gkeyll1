@@ -63,7 +63,7 @@ namespace Lucee
  * @param kv KeyVal object to copy.
  * @return reference to assigned object.
  */
-      KeyVal& operator=(const KeyVal& rhs);
+      KeyVal& operator=(const KeyVal& kv);
 
 /**
  * Insert a key, value pair. Returns true if the insertion worked,
@@ -78,14 +78,6 @@ namespace Lucee
         addKey<VALUETYPE>(key);
         return values.insert( AnyPair_t(key, value) ).second;
       }
-
-/**
- * Check if key exist in key-value pair.
- *
- * @param key Key of object to check.
- * @return true if key exists, false otherwise.
- */
-      bool has(const std::string& key) const;
 
 /**
  * Retrieve value associated with key
@@ -105,6 +97,24 @@ namespace Lucee
       }
 
 /**
+ * Insert a key, value pair. Returns true if the insertion worked,
+ * false otherwise
+ *
+ * @param key Key of object.
+ * @param values List of values.
+ * @return true, if insertion worked, false otherwise.
+ */
+      template<typename VALUETYPE>
+      bool addVec(const std::string& key, std::vector<VALUETYPE>& values) {
+        // first create a vector of Lucee::Any
+        std::vector<Lucee::Any> vals;
+        for (unsigned i=0; i<values.size(); ++i)
+          vals.push_back( values[i] );
+        return this->template add<std::vector<Lucee::Any> >(key, vals);
+      }
+
+
+/**
  * Retrieve list of values associated with key
  *
  * @param key Key for values to return
@@ -121,6 +131,15 @@ namespace Lucee
           res.push_back( Lucee::any_cast<VALUETYPE>(vals[i]) );
         return res;
       }
+
+
+/**
+ * Check if key exist in key-value pair.
+ *
+ * @param key Key of object to check.
+ * @return true if key exists, false otherwise.
+ */
+      bool has(const std::string& key) const;
 
 /**
  * Get list of keys for a particular type
@@ -144,8 +163,10 @@ namespace Lucee
  */
       template <typename T>
       struct TypeContainer {
+/** List of keys of type T */
           std::vector<std::string> keys;
       };
+/** Typedef for container for types to keys of those types */
       typedef Lucee::TypeMap<Lucee::DataTypes_t, TypeContainer> TypeToKeys;
 
 /** Container mapping types to keys of those types */

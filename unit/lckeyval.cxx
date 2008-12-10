@@ -85,11 +85,34 @@ test_lckv_b()
   LC_ASSERT("Testing name of third double", names[2] == "double_c");
 }
 
+void
+test_lckv_c()
+{
+  Lucee::KeyVal kv;
+  std::vector<int> values;
+  values.push_back(1);
+  values.push_back(2);
+  values.push_back(3);
+
+  kv.addVec("intList", values);
+
+  std::vector<int> newValues = kv.getVec<int>("intList");
+  LC_ASSERT("Testing if size of returned array is correct",
+    newValues.size() == 3);
+  LC_ASSERT("Testing if elements of returned array are correct",
+    newValues[0] == 1);
+  LC_ASSERT("Testing if elements of returned array are correct",
+    newValues[1] == 2);
+  LC_ASSERT("Testing if elements of returned array are correct",
+    newValues[2] == 3);
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lckv_tests");
   test_lckv_a();
   test_lckv_b();
+  test_lckv_c();
   LC_END_TESTS;
 }
