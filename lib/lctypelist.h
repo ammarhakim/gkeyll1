@@ -27,7 +27,9 @@ namespace Lucee
   template<class T, class U>
   struct TypeList 
   {
+/** Type for list head */
       typedef T Head;
+/** Type for list tail */
       typedef U Tail;
   };
 
@@ -37,44 +39,64 @@ namespace Lucee
 //
 // LC_TYPELIST_4(int, usigned int, char, unsigned char)
 //
+/** For creating typelists */
 #define LC_TYPELIST_1(t1)                       \
   TypeList<t1, NullType>
+/** For creating typelists */
 #define LC_TYPELIST_2(t1, t2)                   \
   TypeList<t1, LC_TYPELIST_1(t2) >
+/** For creating typelists */
 #define LC_TYPELIST_3(t1, t2, t3)               \
   TypeList<t1, LC_TYPELIST_2(t2, t3) >
+/** For creating typelists */
 #define LC_TYPELIST_4(t1, t2, t3, t4)           \
   TypeList<t1, LC_TYPELIST_3(t2, t3, t4) >
+/** For creating typelists */
 #define LC_TYPELIST_5(t1, t2, t3, t4, t5)       \
   TypeList<t1, LC_TYPELIST_4(t2, t3, t4, t5) >
+/** For creating typelists */
 #define LC_TYPELIST_6(t1, t2, t3, t4, t5, t6)           \
   TypeList<t1, LC_TYPELIST_5(t2, t3, t4, t5, t6) >
+/** For creating typelists */
 #define LC_TYPELIST_7(t1, t2, t3, t4, t5, t6, t7)       \
   TypeList<t1, LC_TYPELIST_6(t2, t3, t4, t5, t6, t7) >
+/** For creating typelists */
 #define LC_TYPELIST_8(t1, t2, t3, t4, t5, t6, t7, t8)           \
   TypeList<t1, LC_TYPELIST_7(t2, t3, t4, t5, t6, t7, t8) >
+/** For creating typelists */
 #define LC_TYPELIST_9(t1, t2, t3, t4, t5, t6, t7, t8, t9)       \
   TypeList<t1, LC_TYPELIST_8(t2, t3, t4, t5, t6, t7, t8, t9) >
+/** For creating typelists */
 #define LC_TYPELIST_10(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10)         \
   TypeList<t1, LC_TYPELIST_9(t2, t3, t4, t5, t6, t7, t8, t9, t10) >
+/** For creating typelists */
 #define LC_TYPELIST_11(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11)    \
   TypeList<t1, LC_TYPELIST_10(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) >
+/** For creating typelists */
 #define LC_TYPELIST_12(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) \
   TypeList<t1, LC_TYPELIST_11(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) >
+/** For creating typelists */
 #define LC_TYPELIST_13(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) \
   TypeList<t1, LC_TYPELIST_12(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) >
+/** For creating typelists */
 #define LC_TYPELIST_14(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) \
   TypeList<t1, LC_TYPELIST_13(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) >
+/** For creating typelists */
 #define LC_TYPELIST_15(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) \
   TypeList<t1, LC_TYPELIST_14(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) >
+/** For creating typelists */
 #define LC_TYPELIST_16(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) \
   TypeList<t1, LC_TYPELIST_15(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) >
+/** For creating typelists */
 #define LC_TYPELIST_17(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) \
   TypeList<t1, LC_TYPELIST_16(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) >
+/** For creating typelists */
 #define LC_TYPELIST_18(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) \
   TypeList<t1, LC_TYPELIST_17(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) >
+/** For creating typelists */
 #define LC_TYPELIST_19(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) \
   TypeList<t1, LC_TYPELIST_18(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) >
+/** For creating typelists */
 #define LC_TYPELIST_20(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) \
   TypeList<t1, LC_TYPELIST_19(t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) >
 
@@ -96,8 +118,10 @@ namespace Lucee
         public TypeMap<T1, Unit> , public TypeMap<T2, Unit> 
   {
     public:
+/** Structure to allow for extraction of object */
       template <typename T> struct Rebind 
       {
+/** Type of the result */
           typedef Unit<T> Result;
       };
   };
@@ -109,8 +133,10 @@ namespace Lucee
   class TypeMap : public Unit<AtomicType> 
   {
     public:
-      template <typename T> struct Rebind 
+/** Structure to allow for extraction of object */
+      template <typename T> struct Rebind
       {
+/** Type of the result */
           typedef Unit<T> Result;
       };
   };
@@ -122,8 +148,10 @@ namespace Lucee
   class TypeMap<NullType, Unit> 
   {
     public:
+/** Structure to allow for extraction of object */
       template <typename T> struct Rebind 
       {
+/** Type of the result */
           typedef Unit<T> Result;
       };
   };

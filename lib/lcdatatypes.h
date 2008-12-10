@@ -22,11 +22,13 @@
 
 namespace Lucee
 {
-// Typelist for supported I/O and message-ing types. These can be
-// augment if needed.
-//
-// NOTE: If adding more types change typelist length. Also ensure no
-// duplicates exist in the list.
+/**
+ * Typelist for supported I/O and message-ing types. These can be
+ * augment if needed.
+ *
+ * NOTE: If adding more types change typelist length. Also ensure no
+ * duplicates exist in the list.
+ */
   typedef LC_TYPELIST_18(
       bool,
       char,
