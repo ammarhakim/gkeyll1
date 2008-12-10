@@ -15,6 +15,7 @@ incs = [
 
 # Libraries to link to
 libs = [
+    'lclib',
         ]
 
 # Library paths
@@ -33,5 +34,8 @@ myparenv.Append(CPPPATH = incs)
 myparenv.Prepend(LIBS = libs)
 myparenv.Append(LIBPATH = libp)
 
-# wxany
+# lcany
 myenv.Program('lcany', ['lcany.cxx'])
+
+# lcexcept
+myenv.Program('lcexcept', ['lcexcept.cxx'])

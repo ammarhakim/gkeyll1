@@ -1,5 +1,5 @@
 /**
- * @file	lcexcept.h
+ * @file	lcexcept.cc
  *
  * @brief	Class to represent exceptions in Lucee
  *
