@@ -33,16 +33,20 @@ namespace Lucee
       values.insert( AnyPair_t((*i).first, (*i).second) );
     // copy the type -> keys map
     copyKeys<int>(kv);
+    copyKeys<float>(kv);
     copyKeys<double>(kv);
     copyKeys<std::string>(kv);
-    copyKeys<Lucee::Any>(kv);
-    copyKeys<std::vector<Lucee::Any> >(kv);
+
+    copyKeys<std::vector<int> >(kv);
+    copyKeys<std::vector<float> >(kv);
+    copyKeys<std::vector<double> >(kv);
+    copyKeys<std::vector<std::string> >(kv);
   }
 
   KeyVal&
-  KeyVal::operator=(const KeyVal& rhs)
+  KeyVal::operator=(const KeyVal& kv)
   {
-    if (this==&rhs) return *this;
+    if (this==&kv) return *this;
 
     // delete all entries in map
     values.erase( values.begin(), values.end() );
@@ -63,24 +67,37 @@ namespace Lucee
         Lucee::typeMapExtract<std::string>(typeToKeys).keys.begin(),
         Lucee::typeMapExtract<std::string>(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<Lucee::Any>(typeToKeys).keys.end());
+    Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::vector<Lucee::Any> >(typeToKeys).keys.end());
+    Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.end());
 
-    // add entries from rhs
+    Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.end());
+
+    Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.erase(
+        Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.begin(),
+        Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.end());
+
+    // add entries from kv
     AnyMap_t::const_iterator i;
-    for (i=rhs.values.begin(); i!=rhs.values.end(); ++i)
+    for (i=kv.values.begin(); i!=kv.values.end(); ++i)
       values.insert( AnyPair_t((*i).first, (*i).second) );
 
     // copy the type -> keys map
-    copyKeys<int>(rhs);
-    copyKeys<double>(rhs);
-    copyKeys<std::string>(rhs);
-    copyKeys<std::vector<Lucee::Any> >(rhs);
+    copyKeys<int>(kv);
+    copyKeys<float>(kv);
+    copyKeys<double>(kv);
+    copyKeys<std::string>(kv);
+
+    copyKeys<std::vector<int> >(kv);
+    copyKeys<std::vector<float> >(kv);
+    copyKeys<std::vector<double> >(kv);
+    copyKeys<std::vector<std::string> >(kv);
 
     return *this;
   }

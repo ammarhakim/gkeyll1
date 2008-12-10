@@ -94,9 +94,10 @@ test_lckv_c()
   values.push_back(2);
   values.push_back(3);
 
-  kv.addVec("intList", values);
+  kv.add("intList", values);
 
-  std::vector<int> newValues = kv.getVec<int>("intList");
+  std::vector<int> newValues 
+    = kv.get<std::vector<int> >("intList");
   LC_ASSERT("Testing if size of returned array is correct",
     newValues.size() == 3);
   LC_ASSERT("Testing if elements of returned array are correct",
@@ -105,6 +106,11 @@ test_lckv_c()
     newValues[1] == 2);
   LC_ASSERT("Testing if elements of returned array are correct",
     newValues[2] == 3);
+
+  std::vector<std::string> names 
+    = kv.getKeys<std::vector<int> >();
+  LC_ASSERT("Testing if names are proper",
+    names[0] == "intList");
 }
 
 int

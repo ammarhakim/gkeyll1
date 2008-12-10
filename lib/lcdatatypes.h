@@ -43,11 +43,11 @@ namespace Lucee
       double,
       long double,
       long long int,
-      Lucee::Any,
-      std::vector<Lucee::Any>,
-      std::string,
-      float*,
-      double*
+      std::string, 
+      std::vector<int>,
+      std::vector<float>,
+      std::vector<double>,
+      std::vector<std::string>
                          ) DataTypes_t;
 }
 
