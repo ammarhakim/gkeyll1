@@ -31,6 +31,7 @@ libname = 'lclib'
 sources = [
     'lcexcept.cc',
     'lckeyval.cc',
+    'lckeyvaltree.cc',
     ]
 
 # mpi sources if compiling with parallel
