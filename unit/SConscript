@@ -1,0 +1,37 @@
+## -*- python -*-
+
+##
+# Build unit-tests for core WarpX classes
+##
+
+Import('env')
+Import('parenv')
+
+# Include directories
+incs = [
+    '.',
+    '#lib',
+    ]
+
+# Libraries to link to
+libs = [
+        ]
+
+# Library paths
+libp = ['../lib',
+        ]
+
+# add paths and libraries to environment
+myenv = env.Clone()
+myenv.Append(CPPPATH = incs)
+myenv.Prepend(LIBS = libs)
+myenv.Append(LIBPATH = libp)
+
+# add paths and libraries to environment
+myparenv = parenv.Clone()
+myparenv.Append(CPPPATH = incs)
+myparenv.Prepend(LIBS = libs)
+myparenv.Append(LIBPATH = libp)
+
+# wxany
+myenv.Program('lcany', ['lcany.cxx'])
