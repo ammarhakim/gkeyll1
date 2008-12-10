@@ -298,6 +298,6 @@ namespace Lucee
     else
       throw std::bad_cast();
   }
-}; // namespace Lucee
+}
 
 #endif // LC_ANY_H

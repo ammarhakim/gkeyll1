@@ -133,12 +133,6 @@ build_dir = os.path.join(buildin, 'lib')
 SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
-# build executable
-##
-build_dir = os.path.join(buildin, 'lucee')
-SConscript('lucee/SConscript', build_dir=build_dir, duplicate=0)
-
-##
 # build test code if requested
 ##
 if env['unit']:
