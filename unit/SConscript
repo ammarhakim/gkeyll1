@@ -48,3 +48,6 @@ myenv.Program('lckeyvaltree', ['lckeyvaltree.cxx'])
 
 # lckeyvaltreelexer
 myenv.Program('lckeyvaltreelexer', ['lckeyvaltreelexer.cxx'])
+
+# lckeyvaltreeparser
+myenv.Program('lckeyvaltreeparser', ['lckeyvaltreeparser.cxx'])

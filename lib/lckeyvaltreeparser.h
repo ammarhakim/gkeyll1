@@ -40,6 +40,12 @@ namespace Lucee
  */
       KeyValTreeParser(std::istream& istr, Lucee::KeyValTree& kvt);
 
+/**
+ * Parse input file and initialize KeyValTree set at construction
+ * time.
+ */
+      void parse();
+
     private:
 /**
  * Internal constructor

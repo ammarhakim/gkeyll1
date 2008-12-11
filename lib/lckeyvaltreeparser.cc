@@ -25,6 +25,13 @@ namespace Lucee
   }
 
   template <typename REAL>
+  void
+  KeyValTreeParser<REAL>::parse()
+  {
+    input_file();
+  }
+
+  template <typename REAL>
   KeyValTreeParser<REAL>::KeyValTreeParser(KeyValTreeParser<REAL>& kvp, Lucee::KeyValTree& kvt)
     : _fl(kvp._fl), _kvt(kvt), _sym(kvp._sym), _tokenStr(kvp._tokenStr)
   {
@@ -54,7 +61,7 @@ namespace Lucee
     Lucee::Except ex;
     ex << "Error: Unexpected symbol " << _tokenStr
        << "found  on line no "
-       << _fl.lineno();
+       << _fl.getLineno();
     throw ex;
   }
 
@@ -64,7 +71,7 @@ namespace Lucee
   {
     expect(LC_LEFT_ANGLE);
     expect(LC_ID);
-    _tokens.push_back( Lucee::Any(_tokenStr) );
+    _tokens.push_back( _tokenStr );
     expect(LC_RIGHT_ANGLE);
   }
 
@@ -83,31 +90,31 @@ namespace Lucee
   {
     if (accept(LC_INT))
     {
-      _tokens.push_back( Lucee::Any(_fl.getInteger) );
+      _tokens.push_back( _fl.getInteger() );
       if (!isParsingList)
-        _kvt.add<int>(_idName, _fl.getInteger);
+        _kvt.add<int>(_idName, _fl.getInteger());
     }
     else if (accept(LC_REAL))
     {
-      _tokens.push_back( Lucee::Any(_fl.getReal()) );
+      _tokens.push_back( _fl.getReal() );
       if (!isParsingList)
         _kvt.add<REAL>(_idName, _fl.getReal());
     }
     else if (accept(LC_ID))
     {
-      _tokens.push_back( Lucee::Any(_tokenStr) );
+      _tokens.push_back( _tokenStr );
       if (!isParsingList)
         _kvt.add<std::string>(_idName, _tokenStr);
     }
     else if (accept(LC_VALUE))
     {
-      _tokens.push_back( Lucee::Any(_tokenStr) );
+      _tokens.push_back( _tokenStr );
       if (!isParsingList)
         _kvt.add<std::string>(_idName, _tokenStr);
     }
     else if (accept(LC_STRING))
     {
-      _tokens.push_back( Lucee::Any(_tokenStr) );
+      _tokens.push_back( _tokenStr );
       if (!isParsingList)
         _kvt.add<std::string>(_idName, _tokenStr);
     }
@@ -115,7 +122,7 @@ namespace Lucee
     {
       Lucee::Except ex;
       ex << "Error: Unknown token " << _tokenStr << " encountered on line no "
-         << _fl.lineno() << std::endl;
+         << _fl.getLineno() << std::endl;
       throw ex;
     }
   }
@@ -188,7 +195,7 @@ namespace Lucee
     {
       Lucee::KeyValTree _kvt_c;
       // parse it
-      KeyValTreeParser<REAL> wxl(this, &_kvt_c);
+      KeyValTreeParser<REAL> wxl(*this, _kvt_c);
       wxl.decl();
       // add it to current cryptset
       _kvt.addSet(_kvt_c);
@@ -241,5 +248,9 @@ namespace Lucee
   KeyValTreeParser<REAL>::input_file()
   {
     decl();
-  }  
+  }
+
+  // instantiations
+  template class KeyValTreeParser<float>;
+  template class KeyValTreeParser<double>;
 }
