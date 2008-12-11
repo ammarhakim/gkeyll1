@@ -19,7 +19,7 @@
 
 namespace Lucee
 {
-/** Token definitions */
+/** Token definitions for use in lexer */
   enum 
   {
     LC_ERROR = -2,
@@ -49,7 +49,7 @@ namespace Lucee
   {
     public:
 /**
- * Set input stream to one supplied. This defaults to standard input.
+ * Create a new lexer class with a input stream.
  *
  * @param is Input stream to scan for characters
  */
@@ -59,6 +59,8 @@ namespace Lucee
 
 /**
  * Scans input stream and returns a single token.
+ *
+ * @return token of last symbol read.
  */
       int YYLex() {
         _lastSym = yylex();
@@ -66,58 +68,103 @@ namespace Lucee
       }
 
 /**
- * Returns a character pointer representing the current token scanned.
+ * String representing last token scanned.
+ *
+ * @return string representation of last token read.
  */
       std::string YYText() const {
         return _yytext;
       }
 
 /**
- * Returns the current line number being scanned
+ * Current line number being scanned.
+ *
+ * @return line number being scanned.
  */
       unsigned lineno() const {
         return _lineno;
       }
 
 /**
- * Returns integer scanned
+ * Last integer scanned
+ *
+ * @return last integer scanned.
  */
       int integer() const {
         return _integer;
       }
 
 /**
- * Returns real number scanned
+ * Last real number scanned.
+ *
+ * @return last real number scanned.
  */
       REAL real() const {
         return _real;
       }
 
+/**
+ * Last symbol scanned.
+ *
+ * @return last symbol scanned.
+ */
       int lastSym() const {
         return _lastSym;
       }
 
     private:
-      std::istream& _is; // input stream to tokenize
+/** Input stream of characters */
+      std::istream& _is;
+/** Current line number */
       unsigned _lineno;
-      std::string _yytext; // text of last token read
-      int _integer; // scanned integer
-      REAL _real; // scanned real
-      unsigned _lastSym; // last symbol scanned
+/** Text for the last token read */
+      std::string _yytext;
+/** Last integer read */
+      int _integer;
+/** Last real scanned */
+      REAL _real;
+/** Last symbols scanned */
+      unsigned _lastSym;
 
-      // do the actual tokenization
+/**
+ * Tokenize and return token scanned 
+ *
+ * @return token scanned
+ */
       int yylex();
 
-      // get next char with \'s interpreted
+/**
+ * Get next char with \'s interpreted
+ *
+ * @return next character
+ */
       char backslash(char c);
 
-      // look ahead for two character operators
+/**
+ * Look ahead for two character operators
+ *
+ * @param expect character to expect
+ * @param ifyes token to return if next character is 'expect'
+ * @param ifno token to return if next character is not 'expect'
+ * @return either 'ifyes' if next character is 'expect', 'ifno' otherwise
+ */
       unsigned follow(char expect, unsigned ifyes, unsigned ifno);
 
-      // check if character can belong to LC_ID
+/**
+ * Is character an ID character?
+ *
+ * @param c Character to check
+ * @return true if character is ID character, false otherwise.
+ */
       bool isidchar(char c);
 
-      // scans a number
+/**
+ * Scan stream for a number. Does not return the number, but this can
+ * be gotten by the integer() or real() methods, depending on the
+ * token returned.
+ *
+ * @return token, either LC_INT or LC_REAL
+ */
       int scanNumber();
   };
 }
