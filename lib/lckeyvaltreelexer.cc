@@ -25,12 +25,26 @@
 namespace Lucee
 {
   template <typename REAL>
+  KeyValTreeLexer<REAL>::KeyValTreeLexer(std::istream& is)
+    : is(is), lineno(1), integer(0), real(0.0) 
+  {
+  }
+
+  template <typename REAL>
+  int
+  KeyValTreeLexer<REAL>::YYLex() 
+  {
+    lastSym = yylex();
+    return lastSym;
+  }
+
+  template <typename REAL>
   int
   KeyValTreeLexer<REAL>::yylex()
   {
     char c;
     // skip white spaces, new lines  and tabs
-    while ((c=_is.get()) == ' ' || c == '\t')
+    while ((c=is.get()) == ' ' || c == '\t')
       ;
 
     // end-of-file
@@ -39,52 +53,52 @@ namespace Lucee
     // line continuation
     if (c == '\\')
     {
-      c = _is.get();
+      c = is.get();
       if (c == '\n')
       {
-        _lineno++;
+        lineno++;
         return YYLex();
       }
     }
     // comment
     if (c == '#')
     {
-      while ((c=_is.get()) != '\n' && c != EOF)
+      while ((c=is.get()) != '\n' && c != EOF)
         ;
       if (c=='\n')
-        _lineno++;
+        lineno++;
       return yylex();
     }
     // number
     if (c == '-' || c == '+' || c == '.' || isdigit(c))
     {
-      _yytext = ""; // clear token string
-      _is.putback(c);
+      yytext = ""; // clear token string
+      is.putback(c);
       return scanNumber();
     }
     // name
     if (isalpha(c) || c == '_' || c == '/' || c == '~')
     {
-      _yytext = ""; // clear token string
+      yytext = ""; // clear token string
       do
       {
-        _yytext.push_back(c);
-      } while ((c=_is.get()) != EOF && (isidchar(c)));
-      _is.putback(c);
+        yytext.push_back(c);
+      } while ((c=is.get()) != EOF && (isidchar(c)));
+      is.putback(c);
       return LC_KEY;
     }
     // string
     if (c == '"') 
     {
-      _yytext = ""; // clear token string
-      while ((c=_is.get()) != '"')
+      yytext = ""; // clear token string
+      while ((c=is.get()) != '"')
       {
         if (c == '\n' || c == EOF) {
           Lucee::Except ex;
           ex << "Missing quote for string";
           throw ex;
         }
-        _yytext.push_back(this->backslash(c));
+        yytext.push_back(this->backslash(c));
       }
       return LC_STRING;
     }
@@ -98,7 +112,7 @@ namespace Lucee
       case '[':	return LC_LEFT_BOX;
       case ']':	return LC_RIGHT_BOX;
       case ';': return LC_SEMI_COLON;
-      case '\n': _lineno++; return yylex(); // skip over a newline
+      case '\n': lineno++; return yylex(); // skip over a newline
       default: return c;
     }
   }
@@ -110,7 +124,7 @@ namespace Lucee
     static char transtab[] = "b\bf\fn\nr\rt\t";
     if (c != '\\')
       return c;
-    c = _is.get();
+    c = is.get();
     if (islower(c) && strchr(transtab, c))
       return strchr(transtab, c)[1];
     return c;
@@ -120,11 +134,11 @@ namespace Lucee
   unsigned
   KeyValTreeLexer<REAL>::follow(char expect, unsigned ifyes, unsigned ifno) 
   {
-    int c = _is.get();
+    int c = is.get();
     // check next character character
     if (c == expect) return ifyes;
     // unexpected one
-    _is.putback(c);
+    is.putback(c);
     return ifno;
   }
 
@@ -155,7 +169,7 @@ namespace Lucee
     // THAT AN OVERFLOW MAY OCCUR AND HANDLING THIS IS TRICKY)
     while( 1 )
     {
-      c = _is.get();
+      c = is.get();
       switch(state)
       {
         case 0:
@@ -225,18 +239,18 @@ namespace Lucee
       }
       if(state == -1)
         break; // finish parsing
-      _yytext.push_back(c); // push character to current token string
+      yytext.push_back(c); // push character to current token string
     }
-    _is.putback(c);
+    is.putback(c);
     // compute number
     if (isint)
     {
-      _integer = atoi(_yytext.c_str());
+      integer = atoi(yytext.c_str());
       return LC_INT;
     }
     else
     {
-      _real = atof(_yytext.c_str());
+      real = atof(yytext.c_str());
       return LC_REAL;
     }
   }
