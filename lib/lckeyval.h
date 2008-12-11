@@ -88,8 +88,17 @@ namespace Lucee
       template <typename VALUETYPE>
       VALUETYPE get(const std::string& key) const {
         AnyMap_t::const_iterator i = values.find(key);
-        if (i != values.end())
-          return Lucee::any_cast<VALUETYPE>((*i).second);
+        try
+        {
+          if (i != values.end())
+            return Lucee::any_cast<VALUETYPE>((*i).second);
+        }
+        catch (const std::bad_cast& bc)
+        {
+          Lucee::Except ex;
+          ex << "Value " << key << " found, but is of the wrong type.";
+          throw ex;          
+        }
         // value not found: throw an exception
         Lucee::Except ex;
         ex << "Value " << key << " not found";

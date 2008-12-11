@@ -164,8 +164,34 @@ namespace Lucee
       value_sub_list();
       expect(LC_RIGHT_BOX);
       // add it to parsed data
+      if (_valueList[0].type() == typeid(int))
+      {
+        std::vector<int> ivals;
+        for (unsigned i=0; i<_valueList.size(); ++i)
+          ivals.push_back( Lucee::any_cast<int>(_valueList[i]) );
+        _kvt.add(_idName, ivals);
+      }
+      else if (_valueList[0].type() == typeid(REAL))
+      {
+        std::vector<REAL> rvals;
+        for (unsigned i=0; i<_valueList.size(); ++i)
+          rvals.push_back( Lucee::any_cast<REAL>(_valueList[i]) );
+        _kvt.add(_idName, rvals);
+      }
+      else if (_valueList[0].type() == typeid(std::string))
+      {
+        std::vector<std::string> svals;
+        for (unsigned i=0; i<_valueList.size(); ++i)
+          svals.push_back( Lucee::any_cast<std::string>(_valueList[i]) );
+        _kvt.add(_idName, svals);
+      }
+      else
+      {
+        // this can never happen
+      }
+
       _tokens.push_back( _valueList );
-      _kvt.add(_idName, _valueList);
+      //_kvt.add(_idName, _valueList);
       isParsingList = false;
     }
     else
