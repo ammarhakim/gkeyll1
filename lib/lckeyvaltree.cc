@@ -102,6 +102,12 @@ namespace Lucee
     return *this;
   }
   
+  void
+  KeyValTree::setName(const std::string& nm)
+  {
+    name = nm;
+  }
+
   std::string
   KeyValTree::getName() const
   {

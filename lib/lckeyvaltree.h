@@ -72,6 +72,13 @@ namespace Lucee
       KeyValTree& operator=(const KeyValTree& kvt);
 
 /**
+ * Set name of tree
+ *
+ * @param name Name of tree
+ */
+      void setName(const std::string& name);
+
+/**
  * Name of tree
  *
  * @return Name of tree

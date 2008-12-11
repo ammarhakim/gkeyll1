@@ -1,7 +1,7 @@
 /**
  * @file	lckeyvaltreelexer.h
  *
- * @brief	Class to hold a tree of key-value pairs.
+ * @brief	Class to tokenize input file.
  *
  * @version	$Id$
  *
