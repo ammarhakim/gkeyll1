@@ -53,19 +53,14 @@ namespace Lucee
  *
  * @param is Input stream to scan for characters
  */
-      KeyValTreeLexer(std::istream& is)
-        : _is(is), _lineno(1), _integer(0), _real(0.0) {
-      }
+      KeyValTreeLexer(std::istream& is);
 
 /**
  * Scans input stream and returns a single token.
  *
  * @return token of last symbol read.
  */
-      int YYLex() {
-        _lastSym = yylex();
-        return _lastSym;
-      }
+      int YYLex();
 
 /**
  * String representing last token scanned.
@@ -73,7 +68,7 @@ namespace Lucee
  * @return string representation of last token read.
  */
       std::string YYText() const {
-        return _yytext;
+        return yytext;
       }
 
 /**
@@ -81,8 +76,8 @@ namespace Lucee
  *
  * @return line number being scanned.
  */
-      unsigned lineno() const {
-        return _lineno;
+      unsigned getLineno() const {
+        return lineno;
       }
 
 /**
@@ -90,8 +85,8 @@ namespace Lucee
  *
  * @return last integer scanned.
  */
-      int integer() const {
-        return _integer;
+      int getInteger() const {
+        return integer;
       }
 
 /**
@@ -99,8 +94,8 @@ namespace Lucee
  *
  * @return last real number scanned.
  */
-      REAL real() const {
-        return _real;
+      REAL getReal() const {
+        return real;
       }
 
 /**
@@ -108,23 +103,23 @@ namespace Lucee
  *
  * @return last symbol scanned.
  */
-      int lastSym() const {
-        return _lastSym;
+      int getLastSym() const {
+        return lastSym;
       }
 
     private:
 /** Input stream of characters */
-      std::istream& _is;
+      std::istream& is;
 /** Current line number */
-      unsigned _lineno;
+      unsigned lineno;
 /** Text for the last token read */
-      std::string _yytext;
+      std::string yytext;
 /** Last integer read */
-      int _integer;
+      int integer;
 /** Last real scanned */
-      REAL _real;
+      REAL real;
 /** Last symbols scanned */
-      unsigned _lastSym;
+      unsigned lastSym;
 
 /**
  * Tokenize and return token scanned 

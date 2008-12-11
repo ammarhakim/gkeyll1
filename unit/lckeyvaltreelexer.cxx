@@ -63,7 +63,7 @@ test_b()
   LC_ASSERT("Testing token in input stream",
     lex1.YYLex() == Lucee::LC_INT);
   LC_ASSERT("Testing token value in input stream",
-    lex1.integer() == 22);
+    lex1.getInteger() == 22);
 
   std::istringstream is2("val = \"Hello\"");
   Lucee::KeyValTreeLexer<float> lex2(is2);
@@ -95,7 +95,7 @@ test_b()
   LC_ASSERT("Testing token in input stream",
     lex3.YYLex() == Lucee::LC_REAL);
   LC_ASSERT("Testing token value in input stream",
-    lex3.real() == 3.14);
+    lex3.getReal() == 3.14);
 
   std::istringstream is4("val = [1, 2, 3]");
   Lucee::KeyValTreeLexer<double> lex4(is4);
@@ -114,7 +114,7 @@ test_b()
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_INT);
   LC_ASSERT("Testing token value in input stream",
-    lex4.integer() == 1);
+    lex4.getInteger() == 1);
 
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_COMMA);
@@ -122,7 +122,7 @@ test_b()
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_INT);
   LC_ASSERT("Testing token value in input stream",
-    lex4.integer() == 2);
+    lex4.getInteger() == 2);
 
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_COMMA);
@@ -130,7 +130,7 @@ test_b()
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_INT);
   LC_ASSERT("Testing token value in input stream",
-    lex4.integer() == 3);
+    lex4.getInteger() == 3);
 
   LC_ASSERT("Testing token in input stream",
     lex4.YYLex() == Lucee::LC_RIGHT_BOX);
