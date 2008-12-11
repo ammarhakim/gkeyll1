@@ -29,7 +29,7 @@ namespace Lucee
  * NOTE: If adding more types change typelist length. Also ensure no
  * duplicates exist in the list.
  */
-  typedef LC_TYPELIST_18(
+  typedef LC_TYPELIST_19(
       bool,
       char,
       unsigned char,
@@ -47,7 +47,8 @@ namespace Lucee
       std::vector<int>,
       std::vector<float>,
       std::vector<double>,
-      std::vector<std::string>
+      std::vector<std::string>,
+      std::vector<Lucee::Any>
                          ) DataTypes_t;
 }
 
