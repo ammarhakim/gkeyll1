@@ -32,6 +32,7 @@ sources = [
     'lcexcept.cc',
     'lckeyval.cc',
     'lckeyvaltree.cc',
+    'lckeyvaltreelexer.cc',
     ]
 
 # mpi sources if compiling with parallel
