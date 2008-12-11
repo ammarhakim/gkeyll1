@@ -1,5 +1,26 @@
 # -*- org -*-
 
+* Lucee Notes
+
+** December 10th
+
+   Lucee will be WarpX successor. A new code was started mainly so
+   that I can control its development, rather than worry about a bunch
+   of grad students messing it up. The code will be well documented
+   and will have all public APIs tested. Valgrind will be run on all
+   unit and regression tests to ensure that there are no memory leaks
+   or other problems in the code.
+
+*** Simulation bootstrap mechanism
+
+    Lucee will generalize the bootstrap mechanism of WarpX. A base
+    class will be provided, which will all major top-level object will
+    derive from. A ObjectConstructor class will allow one to specify
+    the sequence in which the boostrap occurs. Lucee itself will have
+    no idea about grids, arrays or solvers. It will simply construct
+    the objects in the sequence specified in the ObjectConstructor
+    class.
+
 * WarpX Notes
 
 ** November 19th
