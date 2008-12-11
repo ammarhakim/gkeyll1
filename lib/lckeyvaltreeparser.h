@@ -23,6 +23,7 @@
 
 namespace Lucee
 {
+
 /**
  * Class to parse input files and create a Lucee::KeyValTree
  * corresponding to the input file.

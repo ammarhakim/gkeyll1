@@ -26,7 +26,7 @@ test_a_keyvaltree(const Lucee::KeyValTree& kvt)
   LC_ASSERT("Testing string", kvt.get<string>("algo")==string("WAVE"));
 
   LC_RAISES("Testing if wrong data can be gotten", kvt.get<double>("gasgamma"), Lucee::Except);
-  LC_RAISES("Testing if wrong type can be gotten", kvt.get<int>("gas_gamma"), bad_cast);
+  LC_RAISES("Testing if wrong type can be gotten", kvt.get<int>("gas_gamma"), Lucee::Except);
 }
 
 void

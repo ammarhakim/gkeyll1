@@ -29,7 +29,7 @@ test_a_kv(const Lucee::KeyVal& kv)
 
   LC_ASSERT("Testing if humbug exists", kv.has("Humbug") == false);
   LC_RAISES("Testing if runtime is raised", kv.get<int>("Humbug"), Lucee::Except);
-  LC_RAISES("Testing if bad_cast is raised", kv.get<double>("meqn"), bad_cast);
+  LC_RAISES("Testing if runtime is raised", kv.get<double>("meqn"), Lucee::Except);
 
 
   std::vector<std::string>::const_iterator itr;
@@ -77,7 +77,7 @@ test_lckv_a()
   LC_ASSERT("Testing retreving string", kv.get<string>("algorithm") == string("RKDG"));
 
   LC_RAISES("Testing if runtime is raised", kv.get<int>("Humbug"), Lucee::Except);
-  LC_RAISES("Testing if bad_cast is raised", kv.get<double>("meqn"), bad_cast);
+  LC_RAISES("Testing if runtime is raised", kv.get<double>("meqn"), Lucee::Except);
 
   kv.add("int_a", 1);
   kv.add("int_b", 2);
