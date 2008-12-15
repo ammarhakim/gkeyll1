@@ -41,4 +41,10 @@ namespace Lucee
     (*this) << ex.str();
     return *this;
   }
+
+  const char*
+  Except::what() const throw()
+  {
+    return this->str().c_str();
+  }
 }
