@@ -1,32 +1,32 @@
-input_file : wx_decl
+input_file : decl
 ;
 
-wx_decl : wx_decl_top wx_decl_list wx_decl_end
+decl : decl_top decl_list decl_end
 ;
 
-wx_decl_top : WX_LEFT_ANGLE WX_ID WX_RIGHT_ANGLE
+decl_top : LEFT_ANGLE ID RIGHT_ANGLE
 ;
 
-wx_decl_end : WX_LEFT_ANGLE_FRONT_SLASH WX_ID WX_RIGHT_ANGLE
+decl_end : LEFT_ANGLE_FRONT_SLASH ID RIGHT_ANGLE
 ;
 
-wx_decl_list : wx_decl_value
-| wx_decl_list wx_decl_value
+decl_list : decl_value
+| decl_list decl_value
 ;
 
-wx_decl_value : wx_key_value | wx_decl
+decl_value : key_value | decl
 ;
 
-wx_key_value : WX_ID WX_EQUAL wx_value_list
+key_value : ID EQUAL value_list
 ;
 
-wx_value_list : wx_value
-| WX_LEFT_BOX wx_value_sub_list WX_RIGHT_BOX
+value_list : value
+| LEFT_BOX value_sub_list RIGHT_BOX
 ;
 
-wx_value_sub_list : wx_value
-| wx_value_sub_list WX_COMMA wx_value
+value_sub_list : value
+| value_sub_list COMMA value
 ;
 
-wx_value : WX_INT | WX_REAL | WX_STRING | WX_VALUE | WX_ID
+value : INT | REAL | STRING | VALUE | ID
 ;
