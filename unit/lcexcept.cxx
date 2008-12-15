@@ -12,6 +12,8 @@
 #include <lcexcept.h>
 #include <lctest.h>
 
+#include <string.h> // for c-style strcmp
+
 using namespace std;
 
 void
@@ -20,6 +22,9 @@ test_a()
   Lucee::Except ex("This is an exception message");
   LC_ASSERT("Testing if exception message set properly",
     ex.str() == "This is an exception message");
+
+  LC_ASSERT("Testing if exception message set properly",
+    strcmp(ex.what(), "This is an exception message") == 0);
 
   Lucee::Except ex1(ex);
   LC_ASSERT("Testing if copy ctor works",
@@ -33,6 +38,8 @@ test_a()
   ex << " with an addional clause";
   LC_ASSERT("Testing if exception message set properly",
     ex.str() == "This is an exception message with an addional clause");
+  LC_ASSERT("Testing if exception message set properly",
+    strcmp(ex.what(), "This is an exception message with an addional clause") == 0);
 }
 
 int

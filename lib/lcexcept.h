@@ -60,6 +60,11 @@ namespace Lucee
  * @param ex Excpetion to copy from
  */
       Except& operator=(const Except& ex);
+
+/**
+ * Return error message: this is provided for 
+ */
+      virtual const char* what() const throw();
   };
 }
 
