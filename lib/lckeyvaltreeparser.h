@@ -53,21 +53,53 @@ namespace Lucee
  */
       KeyValTreeParser(KeyValTreeParser<REAL>& kvp, Lucee::KeyValTree& kvt);
 
-      // symbol lookup functions
+/**
+ * Accept supplied symbol.
+ *
+ * @param sym Symbol to accept.
+ * @return true if symbol was accepted, false otherwise.
+ */
       bool accept(int sym);
+
+/**
+ * Expect supplied symbol.
+ *
+ * @param sym Symbol to expect.
+ * @return true if expected symbol was found, false otherwise.
+ */
       bool expect(int sym);
 
-      // non-terminals 
+/** Parse non-terminal in grammar */
       void input_file();
+
+/** Parse non-terminal in grammar */
       void decl();
+
+/** Parse non-terminal in grammar */
       void decl_top();
+
+/** Parse non-terminal in grammar */
       void decl_end();
+
+/** Parse non-terminal in grammar */
       void decl_list();
+
+/** Parse non-terminal in grammar */
       void decl_list_rest();
+
+/** Parse non-terminal in grammar */
       void decl_value();
+
+/** Parse non-terminal in grammar */
       void value();
+
+/** Parse non-terminal in grammar */
       void value_list();
+
+/** Parse non-terminal in grammar */
       void value_sub_list();
+
+/** Parse non-terminal in grammar */
       void value_sub_list_rest();
       
 /** Lexer to get tokens from stream */

@@ -1,5 +1,5 @@
 /**
- * @file	lckeyvaltreeparser.h
+ * @file	lckeyvaltreeparser.cc
  *
  * @brief	Class to hold parse input file to create Lucee::KeyValTree object
  *
