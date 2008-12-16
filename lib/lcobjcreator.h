@@ -25,6 +25,10 @@ namespace Lucee
 // forward declare register class
   template <typename B> class ObjRegisterBase;
 
+/**
+ * Base class for object creators. All action is in the derive class
+ * Lucee::ObjCreator.
+ */
   template <class B>
   class ObjCreatorBase
   {
@@ -59,9 +63,15 @@ namespace Lucee
       }
 
     protected:
+/** Map of names to creator objects */
       static CreatorMap_t *creators;
   };
 
+/**
+ * Class to create objects. This class is used in conjunction with the
+ * Lucee::ObjRegister class. Once an object has been registered this
+ * class can be used to create derived classes using their names.
+ */
   template <class B>
   class ObjCreator : public ObjCreatorBase<B>
   {
@@ -72,7 +82,8 @@ namespace Lucee
  * Get a new object whose creator has the given name. The returned
  * object points to the base class.
  *
- *   @param nm Name of the creator.
+ * @param nm Name of the creator.
+ * @return pointer to newly created object.
  */
       static B* getNew(const std::string& nm) 
       {
@@ -89,6 +100,8 @@ namespace Lucee
 
 /**
  * Get a list of registered names.
+ *
+ * @return List of registered names.
  */
       static std::vector<std::string> registeredNames() 
       {
@@ -104,6 +117,9 @@ namespace Lucee
 
 /**
  * Check if creator with given name is registered.
+ *
+ * @param nm Name of creator to check.
+ * @return true if creator exisits, false otherwise.
  */
       static bool has(const std::string& nm) 
       {
@@ -115,45 +131,6 @@ namespace Lucee
         }
         return false;
       }
-  };
-
-/**
- * 
- */
-  template<class B>
-  class ObjRegisterBase
-  {
-    public:
-/**
- * Register a new object which will be created by its given name.
- *
- * @param nm Name by which object will be created.
- */
-      ObjRegisterBase(const std::string& nm) 
-        : name(nm) 
-      {
-        Lucee::ObjCreator<B>::addCreator(name, this);
-      }
-
-/**
- * Delete the object, unregistering the creator class.
- */
-      virtual ~ObjRegisterBase() 
-      {
-        Lucee::ObjCreator<B>::removeCreator(name);
-      }
-
-/**
- * Return a newly allocated object. Must be provided by derived
- * classes.
- *
- * @return Newly allocated object.
- */
-      virtual B* getNew() = 0;
-
-    private:
-/** Name by which this object is to be created */
-      std::string name;
   };
 
   // initialize map
