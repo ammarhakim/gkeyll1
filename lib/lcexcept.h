@@ -62,7 +62,10 @@ namespace Lucee
       Except& operator=(const Except& ex);
 
 /**
- * Return error message: this is provided for 
+ * Return error message: this is provided for compatibility with
+ * std::exception interface.
+ *
+ * @return Message from exception.
  */
       virtual const char* what() const throw();
   };

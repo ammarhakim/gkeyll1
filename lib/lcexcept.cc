@@ -34,7 +34,8 @@ namespace Lucee
   {
   }
 
-  Except& Except::operator=(const Except& ex)
+  Except&
+  Except::operator=(const Except& ex)
   {
     if (this==&ex) return *this;
     (*this).str(""); // zap the string

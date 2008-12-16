@@ -17,11 +17,11 @@ namespace Lucee
 {
   template <typename REAL>
   KeyValTreeParser<REAL>::KeyValTreeParser(std::istream& istr, Lucee::KeyValTree& kvt)
-    : _fl(istr), _kvt(kvt)
+    : fl(istr), kvt(kvt)
   {
     // initialize parsing by reading first token
-    _sym = _fl.YYLex();
-    _tokenStr = _fl.YYText();
+    sym = fl.YYLex();
+    tokenStr = fl.YYText();
   }
 
   template <typename REAL>
@@ -33,19 +33,19 @@ namespace Lucee
 
   template <typename REAL>
   KeyValTreeParser<REAL>::KeyValTreeParser(KeyValTreeParser<REAL>& kvp, Lucee::KeyValTree& kvt)
-    : _fl(kvp._fl), _kvt(kvt), _sym(kvp._sym), _tokenStr(kvp._tokenStr)
+    : fl(kvp.fl), kvt(kvt), sym(kvp.sym), tokenStr(kvp.tokenStr)
   {
   }
 
   template <typename REAL>
   bool
-  KeyValTreeParser<REAL>::accept(int sym)
+  KeyValTreeParser<REAL>::accept(int lsym)
   {
-    if (sym == _sym)
+    if (lsym == sym)
     {
       // copy text of token 'sym' and advance the token stream
-      _tokenStr = _fl.YYText();
-      _sym = _fl.YYLex();
+      tokenStr = fl.YYText();
+      sym = fl.YYLex();
       return true;
     }
     return false;
@@ -53,15 +53,15 @@ namespace Lucee
 
   template <typename REAL>
   bool
-  KeyValTreeParser<REAL>::expect(int sym)
+  KeyValTreeParser<REAL>::expect(int lsym)
   {
-    if ( accept(sym) )
+    if ( accept(lsym) )
       return true;
 
     Lucee::Except ex;
-    ex << "Error: Unexpected symbol " << _tokenStr
+    ex << "Error: Unexpected symbol " << tokenStr
        << "found  on line no "
-       << _fl.getLineno();
+       << fl.getLineno();
     throw ex;
   }
 
@@ -71,7 +71,7 @@ namespace Lucee
   {
     expect(LC_LEFT_ANGLE);
     expect(LC_ID);
-    _tokens.push_back( _tokenStr );
+    tokens.push_back( tokenStr );
     expect(LC_RIGHT_ANGLE);
   }
 
@@ -90,39 +90,39 @@ namespace Lucee
   {
     if (accept(LC_INT))
     {
-      _tokens.push_back( _fl.getInteger() );
+      tokens.push_back( fl.getInteger() );
       if (!isParsingList)
-        _kvt.add<int>(_idName, _fl.getInteger());
+        kvt.add<int>(idName, fl.getInteger());
     }
     else if (accept(LC_REAL))
     {
-      _tokens.push_back( _fl.getReal() );
+      tokens.push_back( fl.getReal() );
       if (!isParsingList)
-        _kvt.add<REAL>(_idName, _fl.getReal());
+        kvt.add<REAL>(idName, fl.getReal());
     }
     else if (accept(LC_ID))
     {
-      _tokens.push_back( _tokenStr );
+      tokens.push_back( tokenStr );
       if (!isParsingList)
-        _kvt.add<std::string>(_idName, _tokenStr);
+        kvt.add<std::string>(idName, tokenStr);
     }
     else if (accept(LC_VALUE))
     {
-      _tokens.push_back( _tokenStr );
+      tokens.push_back( tokenStr );
       if (!isParsingList)
-        _kvt.add<std::string>(_idName, _tokenStr);
+        kvt.add<std::string>(idName, tokenStr);
     }
     else if (accept(LC_STRING))
     {
-      _tokens.push_back( _tokenStr );
+      tokens.push_back( tokenStr );
       if (!isParsingList)
-        _kvt.add<std::string>(_idName, _tokenStr);
+        kvt.add<std::string>(idName, tokenStr);
     }
     else
     {
       Lucee::Except ex;
-      ex << "Error: Unknown token " << _tokenStr << " encountered on line no "
-         << _fl.getLineno() << std::endl;
+      ex << "Error: Unknown token " << tokenStr << " encountered on line no "
+         << fl.getLineno() << std::endl;
       throw ex;
     }
   }
@@ -135,8 +135,8 @@ namespace Lucee
     {
       value();
       // add value ...
-      _valueList.push_back( _tokens.back() );
-      _tokens.pop_back(); // .. and remove it
+      valueList.push_back( tokens.back() );
+      tokens.pop_back(); // .. and remove it
       value_sub_list_rest();
     }
   }
@@ -147,8 +147,8 @@ namespace Lucee
   {
     value();
     // add value ...
-    _valueList.push_back( _tokens.back() );
-    _tokens.pop_back(); // .. and remove it
+    valueList.push_back( tokens.back() );
+    tokens.pop_back(); // .. and remove it
     value_sub_list_rest();
   }
 
@@ -159,39 +159,39 @@ namespace Lucee
     if (accept(LC_LEFT_BOX))
     {
       isParsingList = true;
-      // clear _valueList to insert list
-      _valueList.erase( _valueList.begin(), _valueList.end() );
+      // clear valueList to insert list
+      valueList.erase( valueList.begin(), valueList.end() );
       value_sub_list();
       expect(LC_RIGHT_BOX);
       // add it to parsed data
-      if (_valueList[0].type() == typeid(int))
+      if (valueList[0].type() == typeid(int))
       {
         std::vector<int> ivals;
-        for (unsigned i=0; i<_valueList.size(); ++i)
-          ivals.push_back( Lucee::any_cast<int>(_valueList[i]) );
-        _kvt.add(_idName, ivals);
+        for (unsigned i=0; i<valueList.size(); ++i)
+          ivals.push_back( Lucee::any_cast<int>(valueList[i]) );
+        kvt.add(idName, ivals);
       }
-      else if (_valueList[0].type() == typeid(REAL))
+      else if (valueList[0].type() == typeid(REAL))
       {
         std::vector<REAL> rvals;
-        for (unsigned i=0; i<_valueList.size(); ++i)
-          rvals.push_back( Lucee::any_cast<REAL>(_valueList[i]) );
-        _kvt.add(_idName, rvals);
+        for (unsigned i=0; i<valueList.size(); ++i)
+          rvals.push_back( Lucee::any_cast<REAL>(valueList[i]) );
+        kvt.add(idName, rvals);
       }
-      else if (_valueList[0].type() == typeid(std::string))
+      else if (valueList[0].type() == typeid(std::string))
       {
         std::vector<std::string> svals;
-        for (unsigned i=0; i<_valueList.size(); ++i)
-          svals.push_back( Lucee::any_cast<std::string>(_valueList[i]) );
-        _kvt.add(_idName, svals);
+        for (unsigned i=0; i<valueList.size(); ++i)
+          svals.push_back( Lucee::any_cast<std::string>(valueList[i]) );
+        kvt.add(idName, svals);
       }
       else
       {
         // this can never happen
       }
 
-      _tokens.push_back( _valueList );
-      //_kvt.add(_idName, _valueList);
+      tokens.push_back( valueList );
+      //kvt.add(idName, valueList);
       isParsingList = false;
     }
     else
@@ -207,28 +207,28 @@ namespace Lucee
   {
     if (accept(LC_ID))
     {
-      std::string name = _tokenStr;
-      _idName = name;
+      std::string name = tokenStr;
+      idName = name;
       expect(LC_EQUAL);
       // get value
       value_list();
 
       // add it to cryptset
-      //_kvt.add(name, _tokens.back());
-      _tokens.pop_back();
+      //kvt.add(name, tokens.back());
+      tokens.pop_back();
     }
-    else if (_sym == LC_LEFT_ANGLE)
+    else if (sym == LC_LEFT_ANGLE)
     {
-      Lucee::KeyValTree _kvt_c;
+      Lucee::KeyValTree kvt_c;
       // parse it
-      KeyValTreeParser<REAL> wxl(*this, _kvt_c);
+      KeyValTreeParser<REAL> wxl(*this, kvt_c);
       wxl.decl();
       // add it to current cryptset
-      _kvt.addSet(_kvt_c);
+      kvt.addSet(kvt_c);
       // update values of _sym and _tokenStr. This may be better
       // handled if we make _sym and _tokenStr into some sort of
       // per-class (rather than per-object) variables
-      _sym = wxl._sym; _tokenStr = wxl._tokenStr;
+      sym = wxl.sym; tokenStr = wxl.tokenStr;
     }
   }
 
@@ -236,7 +236,7 @@ namespace Lucee
   void
   KeyValTreeParser<REAL>::decl_list_rest()
   {
-    if ((_sym == LC_ID) || (_sym == LC_LEFT_ANGLE))
+    if ((sym == LC_ID) || (sym == LC_LEFT_ANGLE))
     {
       decl_value();
       decl_list_rest();
@@ -259,8 +259,8 @@ namespace Lucee
     decl_top();
 
     // get hold of name and set it
-    _kvt.setName( (_tokens.back()).template to_value<std::string>() );
-    _tokens.pop_back();
+    kvt.setName( (tokens.back()).template to_value<std::string>() );
+    tokens.pop_back();
 
     // inside stuff
     decl_list();
