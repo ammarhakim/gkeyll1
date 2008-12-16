@@ -51,3 +51,6 @@ myenv.Program('lckeyvaltreelexer', ['lckeyvaltreelexer.cxx'])
 
 # lckeyvaltreeparser
 myenv.Program('lckeyvaltreeparser', ['lckeyvaltreeparser.cxx'])
+
+# lcobjcreator
+myenv.Program('lcobjcreator', ['lcobjcreator.cxx'])

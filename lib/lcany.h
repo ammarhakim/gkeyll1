@@ -39,7 +39,8 @@ namespace Lucee
  * Create empty object
  */
       Any()
-        : content(0) {
+        : content(0) 
+      {
       }
 
 /**
@@ -49,7 +50,8 @@ namespace Lucee
  */
       template<typename VALUETYPE>
       Any(const VALUETYPE& value)
-        : content(new _Holder<VALUETYPE>(value)) {
+        : content(new _Holder<VALUETYPE>(value)) 
+      {
       }
 
 /**
@@ -58,13 +60,15 @@ namespace Lucee
  * @param other Any object to copy
  */
       Any(const Any& other)
-        : content(other.content ? other.content->clone() : 0) {
+        : content(other.content ? other.content->clone() : 0) 
+      {
       }
 
 /**
  * Destroy object
  */
-      ~Any() {
+      ~Any() 
+      {
         // destroy held object
         delete content;
       }
@@ -75,7 +79,8 @@ namespace Lucee
  * @param rhs Replace the value in this Any with 'rhs'
  * @return Reference to this object
  */
-      Any& swap(Any& rhs) {
+      Any& swap(Any& rhs) 
+      {
         std::swap(content, rhs.content);
         return *this;
       }
@@ -86,7 +91,8 @@ namespace Lucee
  * @param rhs Any to assign from
  * @return Reference to this object
  */
-      Any& operator=(const Any& rhs) {
+      Any& operator=(const Any& rhs) 
+      {
         Any(rhs).swap(*this);
         return *this;
       }
@@ -97,7 +103,8 @@ namespace Lucee
  * @return Reference to this object
  */
       template<typename VALUETYPE>
-      Any& operator=(const VALUETYPE& rhs) {
+      Any& operator=(const VALUETYPE& rhs) 
+      {
         Any(rhs).swap(*this);
         return *this;
       }
@@ -107,7 +114,8 @@ namespace Lucee
  *
  * @return true if object is empty, false otherwise
  */
-      bool isEmpty() const {
+      bool isEmpty() const 
+      {
         return !content;
       }
 
@@ -116,7 +124,8 @@ namespace Lucee
  *
  * @return type_info for held object
  */
-      const std::type_info& type() const {
+      const std::type_info& type() const 
+      {
         return content ? content->type() : typeid(void);
       }
 
@@ -127,7 +136,8 @@ namespace Lucee
  * @return pointer to held object
  */
       template<typename VALUETYPE>
-      const VALUETYPE* to_ptr() const {
+      const VALUETYPE* to_ptr() const 
+      {
         // return pointer to held object or NULL if wrong type
         return 
           type() == typeid(VALUETYPE) 
@@ -142,7 +152,8 @@ namespace Lucee
  *
  * @return pointer to held object, with type information removed
  */
-      const void* to_void_ptr() const {
+      const void* to_void_ptr() const 
+      {
         return content->void_ptr();
       }
 
@@ -156,7 +167,8 @@ namespace Lucee
  * @return value of held object
  */
       template<typename VALUETYPE>
-      VALUETYPE to_value() const {
+      VALUETYPE to_value() const 
+      {
         // return object or throw exception if types do not match
         const VALUETYPE * result =
           type() == typeid(VALUETYPE) 
@@ -181,7 +193,8 @@ namespace Lucee
 /**
  * Destructor
  */
-          virtual ~_PlaceHolder() {
+          virtual ~_PlaceHolder() 
+          {
           }
 
 /**
@@ -219,7 +232,8 @@ namespace Lucee
  * @param value Value of object
  */
           _Holder(const VALUETYPE& value)
-            : held(value) {
+            : held(value) 
+          {
           }
 
 /**
@@ -227,7 +241,8 @@ namespace Lucee
  *
  * @return type_info for held object
  */
-          virtual const std::type_info& type() const {
+          virtual const std::type_info& type() const 
+          {
             return typeid(VALUETYPE);
           }
 
@@ -236,7 +251,8 @@ namespace Lucee
  *
  * @return Pointer to wrapped held object
  */
-          virtual _PlaceHolder* clone() const {
+          virtual _PlaceHolder* clone() const 
+          {
             return new _Holder(held);
           }
 
@@ -245,7 +261,8 @@ namespace Lucee
  *
  * @return pointer to held object, with type information removed
  */
-          virtual const void * void_ptr() const {
+          virtual const void * void_ptr() const 
+          {
             return (const void*) &held;
           }
 
