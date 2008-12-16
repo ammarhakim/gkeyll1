@@ -103,19 +103,19 @@ namespace Lucee
       void value_sub_list_rest();
       
 /** Lexer to get tokens from stream */
-      Lucee::KeyValTreeLexer<REAL> _fl;
+      Lucee::KeyValTreeLexer<REAL> fl;
 /** Reference to tree being modified */
-      Lucee::KeyValTree& _kvt; // 
+      Lucee::KeyValTree& kvt; // 
 /** Current symbol read */
-      int _sym;
+      int sym;
 /** Current token string */
-      std::string _tokenStr;
+      std::string tokenStr;
 /** List of tokens */
-      std::vector<Lucee::Any> _tokens;
+      std::vector<Lucee::Any> tokens;
 /** Values read from a list */
-      std::vector<Lucee::Any> _valueList;
+      std::vector<Lucee::Any> valueList;
 /** Name os key being parser */
-      std::string _idName;
+      std::string idName;
 /** Flag to indicate is we are parsing a list */
       bool isParsingList;
   };
