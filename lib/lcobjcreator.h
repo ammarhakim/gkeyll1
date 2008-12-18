@@ -9,8 +9,8 @@
  * Licence version 1.0.
  */
 
-#ifndef LC_OBJ_CREATOR
-#define LC_OBJ_CREATOR
+#ifndef LC_OBJ_CREATOR_H
+#define LC_OBJ_CREATOR_H
 
 // lib includes
 #include <lcexcept.h>
@@ -139,4 +139,4 @@ namespace Lucee
   Lucee::ObjCreatorBase<B>::creators = 0;
 }
 
-#endif // LC_OBJ_CREATOR
+#endif // LC_OBJ_CREATOR_H

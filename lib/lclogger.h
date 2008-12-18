@@ -21,28 +21,28 @@ namespace Lucee
 // forward declare LogStream class
   class Lucee::LogStream;
 
+  enum LogMsgLevels 
+  {
+    NOTSET = 0,
+    DEBUG = 10,
+    INFO = 20,
+    WARNING = 30,
+    ERROR = 40,
+    CRITICAL = 50,
+    DISABLED = 1000
+  };
+
   class Logger : public Lucee::LoggerBase<Logger>
   {
     public:
       friend class Lucee::LoggerBase<Logger>;
 
-      enum MsgLevels 
-      {
-        NOTSET = 0,
-        DEBUG = 10,
-        INFO = 20,
-        WARNING = 30,
-        ERROR = 40,
-        CRITICAL = 50,
-        DISABLED = 1000
-      };
-
       // map type to map logger level to its string representation
       typedef std::map<unsigned, std::string, std::less<unsigned> > LevelMap_t;
       typedef std::pair<unsigned, std::string> LevelPair_t;
 
-      typedef std::map<std::string, MsgLevels, std::less<std::string> > StringMap_t;
-      typedef std::pair<std::string, MsgLevels>  StringPair_t;
+      typedef std::map<std::string, LogMsgLevels, std::less<std::string> > StringMap_t;
+      typedef std::pair<std::string, LogMsgLevels>  StringPair_t;
 
 /**
  * Creates a new logger with given name. The verbosity is set
@@ -84,12 +84,12 @@ namespace Lucee
 /**
  * Generic messsage logger.
  */
-      void log(const std::string& msg, MsgLevels withLevel) const;
+      void log(const std::string& msg, LogMsgLevels withLevel) const;
 
 /**
  * Set verbosity level
  */
-      void setLevel(MsgLevels level);
+      void setLevel(LogMsgLevels level);
 
 /**
  * Set verbosity level passing a string
@@ -99,7 +99,7 @@ namespace Lucee
 /**
  * Get verbosity level
  */
-      MsgLevels getLevel() const;
+      LogMsgLevels getLevel() const;
 
 /**
  * Get verbosity level as a string
@@ -154,7 +154,7 @@ namespace Lucee
     private:
       Logger *_parent; // parent logger
       std::string _name;
-      MsgLevels _level, _oldLevel;
+      LogMsgLevels _level, _oldLevel;
       LevelMap_t _levelMap;
       StringMap_t _stringMap;
       std::vector<LogRecordHandler*> _handlers;
