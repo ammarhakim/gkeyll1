@@ -9,8 +9,8 @@
  * Licence version 1.0.
  */
 
-#ifndef LC_OBJ_REGISTER
-#define LC_OBJ_REGISTER
+#ifndef LC_OBJ_REGISTER_H
+#define LC_OBJ_REGISTER_H
 
 // lib includes
 #include <lcexcept.h>
@@ -89,4 +89,4 @@ namespace Lucee
 
 }
 
-#endif // LC_OBJ_REGISTER
+#endif // LC_OBJ_REGISTER_H
