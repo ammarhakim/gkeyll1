@@ -43,14 +43,14 @@ namespace Lucee
  * @param name specifies the logger to get. 
  * @return the Logger object corresponding to the name.
  */    
-      static T* get(const std::string& name);
+      static T& get(const std::string& name);
 
 /**
  * Returns the default logger.
  *
  * @return default logger
  */
-      static T* getDefault();
+      static T& getDefault();
 
 /**
  * Returns a logger with a given name. If such a logger does not exist
@@ -59,7 +59,7 @@ namespace Lucee
  * @param name specifies the logger to get. 
  * @return the Logger object corresponding to the name.
  */
-      static T* getSafe(const std::string& name);
+      static T& getSafe(const std::string& name);
 
 /**
  * Delete all loggers registered in the system.
@@ -81,7 +81,7 @@ namespace Lucee
   std::map<std::string, T*, std::less<std::string> >* Lucee::LoggerBase<T>::loggers = NULL;
 
   template<class T>
-  T* 
+  T&
   Lucee::LoggerBase<T>::get(const std::string& nm) 
   {
     // TODO, handle this using a const at class level.
@@ -99,7 +99,7 @@ namespace Lucee
     typename LoggerMap_t::iterator i = loggers->find(nm);
     if (i != loggers->end())
     {
-      return i->second;
+      return *i->second;
     }
 
     // it is not, so start creation process
@@ -116,26 +116,24 @@ namespace Lucee
         // set its parent 
         if (i != 0)
         {
-          l->_parent = Lucee::LoggerBase<T>::get(nm.substr(0, nm.size()-len));
+          l->_parent = &Lucee::LoggerBase<T>::get(nm.substr(0, nm.size()-len));
         }
-        return l;
+        return *l;
       }
     }
-    // this return statement is never executed
-    return 0;
   }
 
   template<class T>
-  T* 
+  T&
   Lucee::LoggerBase<T>::getDefault()
   {
     // TODO, handle this using a const at class level.
     static const std::string defaultLoggerName = "84BEF5E7-16AB-4FFF-A33B-36DD7140AA02";
-    return Lucee::LoggerBase<T>::get(defaultLoggerName);
+    return *Lucee::LoggerBase<T>::get(defaultLoggerName);
   }
 
   template<class T>
-  T*
+  T&
   Lucee::LoggerBase<T>::getSafe(const std::string& nm) 
   {
     if (!loggers)
@@ -146,10 +144,10 @@ namespace Lucee
     typename LoggerMap_t::iterator i = loggers->find(nm);
     if (i != loggers->end())
     {
-      return i->second;
+      return *i->second;
     }
     // thow exception as logger not found
-    Lucee::Except wxe;
+    Lucee::Except ex;
     ex << "Logger " << std::string(nm) << " not found";
     throw ex;
   }

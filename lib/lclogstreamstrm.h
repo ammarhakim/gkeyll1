@@ -15,13 +15,15 @@
 namespace Lucee
 {
 // forward declare Logger class
-  class Lucee::LoggerStream;
-  class Lucee::Logger;
+  class Logger;
+// forward declare LogStream classes
+  class LoggerStream;
 
   class LogStreamStrm 
   {
     public:
-      friend class Lucee::LogStream;
+/** Let LogStream become our friend */
+      friend class LogStream;
 
 /**
  * Output supplied value
@@ -30,9 +32,9 @@ namespace Lucee
  * @return reference to this stream object
  */
       template <typename T>
-      LogStreamStrm& operator<<(T val) 
+      LogStreamStrm& operator<<(const T& val) 
       {
-        _sstrm.str(L"");
+        _sstrm.str("");
         _sstrm << val;
         this->_logIt(_sstrm);
         return *this;
@@ -47,7 +49,7 @@ namespace Lucee
       LogStreamStrm&
       operator<<(std::ostream& (*p)(std::ostream&)) 
       {
-        _sstrm.str(L"");
+        _sstrm.str("");
         _sstrm << p;
         this->_logIt(_sstrm);
         return *this;
@@ -62,7 +64,7 @@ namespace Lucee
       LogStreamStrm& 
       operator<<(std::ios& (*p)(std::ios&)) 
       {
-        _sstrm.str(L"");
+        _sstrm.str("");
         _sstrm << p;
         this->_logIt(_sstrm);
         return *this;
@@ -72,18 +74,26 @@ namespace Lucee
 /** 
  * Ctor is private so only log-stream can make instances.
  */
-      LogStreamStrm(Logger* log, int level);
+      LogStreamStrm(Logger& log, int level);
 
 /**
  * Copy ctor is private to avoid copying
  */
       LogStreamStrm(const LogStreamStrm&);
 
-      std::wostringstream _sstrm;
-      Logger *_logger;
+/** Output stream where messages are stored before being forwared to logstreams */
+      std::ostringstream _sstrm;
+/** Reference to logger*/
+      Logger& _logger;
+/** Level for log stream */
       int _level;
 
-      void _logIt(const std::wostringstream& str);
+/** 
+ * Log a message to the logger.
+ *
+ * @param str stream of log message.
+ */
+      void _logIt(const std::ostringstream& str);
   };
 }
 

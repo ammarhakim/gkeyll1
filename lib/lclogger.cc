@@ -38,13 +38,6 @@ namespace Lucee
     _stringMap.insert( StringPair_t("disabled", DISABLED) );
   }
 
-  Logger::~Logger()
-  {
-    std::vector<LogRecordHandler*>::iterator itr;
-    for (itr=_handlers.begin(); itr!=_handlers.end(); ++itr)
-      delete *itr;
-  }
-
   void 
   Logger::debug(const std::string& msg) const 
   {
@@ -91,7 +84,7 @@ namespace Lucee
       ((i != _stringMap.end()) ? (*i).second : NOTSET);
   }
 
-  Logger::eLevels 
+  LogMsgLevels 
   Logger::getLevel() const 
   {
     return _level;
@@ -104,9 +97,9 @@ namespace Lucee
   }
 
   void 
-  Logger::addHandler(LogRecordHandler *handler) 
+  Logger::addHandler(LogRecordHandler& handler)
   {
-    _handlers.push_back(handler);
+    _handlers.push_back(&handler);
   }
 
   void 
@@ -125,35 +118,35 @@ namespace Lucee
   LogStream 
   Logger::getDebugStream() 
   {
-    return LogStream(this, DEBUG);
+    return LogStream(*this, DEBUG);
   }
 
   LogStream 
   Logger::getInfoStream()
   {
-    return LogStream(this, INFO);
+    return LogStream(*this, INFO);
   }
 
   LogStream 
   Logger::getWarningStream()
   {
-    return LogStream(this, WARNING);
+    return LogStream(*this, WARNING);
   }
 
   LogStream 
   Logger::getErrorStream()
   {
-    return LogStream(this, ERROR);
+    return LogStream(*this, ERROR);
   }
 
   LogStream 
   Logger::getCriticalStream()
   {
-    return LogStream(this, CRITICAL);
+    return LogStream(*this, CRITICAL);
   }
 
   void
-  Logger::log(const std::string& msg, eLevels withLevel) const 
+  Logger::log(const std::string& msg, LogMsgLevels withLevel) const 
   {
     // check if level of logger is sufficient to log this message
     if (_level <= withLevel)

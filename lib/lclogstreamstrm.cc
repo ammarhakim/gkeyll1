@@ -13,13 +13,18 @@
 #include <lclogger.h>
 #include <lclogstream.h>
 
-WxLogStreamStrm::WxLogStreamStrm(WxLogger* log, int level)
-  : _logger(log), _level(level) 
+namespace Lucee
 {
-}
 
-void
-WxLogStreamStrm::_logIt(const std::wostringstream& str)
-{
-  _logger->log(str.str(), (WxLogger::eLevels)_level);
+  LogStreamStrm::LogStreamStrm(Lucee::Logger& log, int level)
+    : _logger(log), _level(level) 
+  {
+  }
+
+  void
+  LogStreamStrm::_logIt(const std::ostringstream& str)
+  {
+    _logger.log(str.str(), (Lucee::LogMsgLevels)_level);
+  }
+
 }
