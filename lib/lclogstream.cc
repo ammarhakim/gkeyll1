@@ -15,10 +15,9 @@
 
 namespace Lucee
 {
-  LogStream::LogStream(Logger* log, int level)
-    : useCount(new int(1))
+  LogStream::LogStream(Logger& log, int level)
+    : useCount(new int(1)), strm(new LogStreamStrm(log, level))
   {
-    strm = new LogStreamStrm(log, level);
   }
 
   LogStream::LogStream(const LogStream& ls)

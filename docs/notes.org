@@ -1,6 +1,31 @@
 # -*- org -*-
 
+* Style guide
+
+  - All classes and functions should be in namespace Lucee.
+  - Use exactly two spaces to indent lines.
+  - Pass/return pointers when handing over management of an object. In
+    all other cases use references.
+  - Make functions const-correct whenever possible.
+  - Comment so that doxygen does not produce any errors. Use terse,
+    but grammatically correct English for comments.
+  - Put braces on their own lines.
+  - Use a space between the keyword "template" and the opening angle
+    bracket.
+  - Do not use a space between name of a function/method and opening
+    parenthesis.
+
 * Lucee Notes
+
+** December 19th
+
+   First targeted applications for Lucee (a) radiation transport in
+   slabs, (b) PIC/FDTD simulations, and (c) branched cable equations.
+
+   Eventually (a) fully implicit MHD solver based on NIMROD
+   algorithms, (b) hyperbolic solvers using WAVE/DG.
+
+   Cut-cells or body-fitted grids?
 
 ** December 10th
 

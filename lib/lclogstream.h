@@ -1,5 +1,5 @@
 /**
- * @file	lclogger.h
+ * @file	lclogstream.h
  *
  * @brief	Class for loggers.
  *
@@ -27,13 +27,24 @@ namespace Lucee
   class LogStream 
   {
     public:
-/** Create new stream object **/
-      LogStream(Logger* log, int level);
+/** 
+ * Create new stream object.
+ *
+ * @param log reference to logger to which this stream is attached.
+ * @param level Verbosity level of logger.
+ */
+      LogStream(Logger& log, int level);
 
-/** Copy ctor */
+/** 
+ * Copy log stream from another logstream
+ *
+ * @param ls Logstream object to copy.
+ */
       LogStream(const LogStream& ls);
 
-/** Delete stream */
+/** 
+ * Delete stream 
+ */
       ~LogStream();
 
 /**
@@ -43,7 +54,8 @@ namespace Lucee
  * @return reference to this stream object
  */
       template <typename T>
-      LogStream& operator<<(T val) {
+      LogStream& operator<<(T val) 
+      {
         strm->operator<<(val);
         return *this;
       }
@@ -54,8 +66,9 @@ namespace Lucee
  * @param p manipulator object
  * @return reference to this stream object
  */
-      LogStream&
-      operator<<(std::wostream& (*p)(std::wostream&)) {
+      LogStream& 
+      operator<<(std::ostream& (*p)(std::ostream&))
+      {
         strm->operator<<(p);
         return *this;
       }
@@ -67,7 +80,8 @@ namespace Lucee
  * @return reference to this stream object
  */
       LogStream& 
-      operator<<(std::ios& (*p)(std::ios&)) {
+      operator<<(std::ios& (*p)(std::ios&)) 
+      {
         strm->operator<<(p);
         return *this;
       }
@@ -76,7 +90,7 @@ namespace Lucee
 /** For reference counting */
       mutable int *useCount;
 /** Pointer to stream which does output */
-      LogStreamStrm *strm;
+      LogStreamStrm* strm;
   };
 }
 
