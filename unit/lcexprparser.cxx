@@ -24,15 +24,26 @@ test_a()
   ep.appendIndVar("y");
   ep.addConstant("c0", 1.0);
   unsigned res1 = ep.addExpr("x+y+c0");
+  unsigned res2 = ep.addExpr("10*(x+y) + c0");
   ep.setup();
 
-  std::vector<double> iv;
-  iv.push_back(1.0); // x
-  iv.push_back(2.0); // y
-  
+  std::vector<double> iv(2);
+
+  iv[0]= 1.0; // x
+  iv[1] = 2.0; // y
   ep.eval(iv);
   LC_ASSERT("Testing if expression result is correct",
     ep.result(res1) == 4.0);
+  LC_ASSERT("Testing if expression result is correct",
+    ep.result(res2) == (10*(1+2) + 1.0));
+
+  iv[0]= 2.0; // x
+  iv[1] = 4.0; // y
+  ep.eval(iv);
+  LC_ASSERT("Testing if expression result is correct",
+    ep.result(res1) == 7.0);
+  LC_ASSERT("Testing if expression result is correct",
+    ep.result(res2) == (10*(2+4) + 1.0));
 }
 
 int
