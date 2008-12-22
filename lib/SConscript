@@ -32,6 +32,7 @@ libname = 'lclib'
 # source files in lib
 sources = [
     'lcexcept.cc',
+    'lcexprparser.cc',
     'lcfilehandler.cc',
     'lckeyval.cc',
     'lckeyvaltree.cc',

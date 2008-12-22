@@ -19,11 +19,13 @@ incs = [
 libs = [
     'lclib',
     'lcloki',
+    'lcmup',
         ]
 
 # Library paths
 libp = ['../lib',
         '../etc/loki',
+        '../etc/mup',
         ]
 
 # add paths and libraries to environment
@@ -61,3 +63,6 @@ myenv.Program('lcobjcreator', ['lcobjcreator.cxx'])
 
 # lclogger
 myenv.Program('lclogger', ['lclogger.cxx'])
+
+# lcexprparser
+myenv.Program('lcexprparser', ['lcexprparser.cxx'])
