@@ -51,37 +51,37 @@ namespace Lucee
     // delete all entries in map
     values.erase( values.begin(), values.end() );
     // delete all entries in type -> key map
-    Lucee::typeMapExtract<int>(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<int>(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<int>(typeToKeys).keys.end());
+    Loki::Field<int>(typeToKeys).keys.erase(
+        Loki::Field<int>(typeToKeys).keys.begin(),
+        Loki::Field<int>(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<int>(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<int>(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<int>(typeToKeys).keys.end());
+    Loki::Field<int>(typeToKeys).keys.erase(
+        Loki::Field<int>(typeToKeys).keys.begin(),
+        Loki::Field<int>(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<double>(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<double>(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<double>(typeToKeys).keys.end());
+    Loki::Field<double>(typeToKeys).keys.erase(
+        Loki::Field<double>(typeToKeys).keys.begin(),
+        Loki::Field<double>(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::string>(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::string>(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::string>(typeToKeys).keys.end());
+    Loki::Field<std::string>(typeToKeys).keys.erase(
+        Loki::Field<std::string>(typeToKeys).keys.begin(),
+        Loki::Field<std::string>(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::vector<int> >(typeToKeys).keys.end());
+    Loki::Field<std::vector<int> >(typeToKeys).keys.erase(
+        Loki::Field<std::vector<int> >(typeToKeys).keys.begin(),
+        Loki::Field<std::vector<int> >(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::vector<float> >(typeToKeys).keys.end());
+    Loki::Field<std::vector<float> >(typeToKeys).keys.erase(
+        Loki::Field<std::vector<float> >(typeToKeys).keys.begin(),
+        Loki::Field<std::vector<float> >(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::vector<double> >(typeToKeys).keys.end());
+    Loki::Field<std::vector<double> >(typeToKeys).keys.erase(
+        Loki::Field<std::vector<double> >(typeToKeys).keys.begin(),
+        Loki::Field<std::vector<double> >(typeToKeys).keys.end());
 
-    Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.erase(
-        Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.begin(),
-        Lucee::typeMapExtract<std::vector<std::string> >(typeToKeys).keys.end());
+    Loki::Field<std::vector<std::string> >(typeToKeys).keys.erase(
+        Loki::Field<std::vector<std::string> >(typeToKeys).keys.begin(),
+        Loki::Field<std::vector<std::string> >(typeToKeys).keys.end());
 
     // add entries from kv
     AnyMap_t::const_iterator i;

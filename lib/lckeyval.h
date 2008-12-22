@@ -16,7 +16,9 @@
 #include <lcany.h>
 #include <lcdatatypes.h>
 #include <lcexcept.h>
-#include <lctypelist.h>
+
+// etc includes
+#include <loki/HierarchyGenerators.h>
 
 // std includes
 #include <map>
@@ -120,7 +122,7 @@ namespace Lucee
  */
       template <typename VALUETYPE>
       std::vector<std::string> getKeys() const {
-        return Lucee::typeMapExtract<VALUETYPE, TypeToKeys>(typeToKeys).keys;
+        return Loki::Field<VALUETYPE, TypeToKeys>(typeToKeys).keys;
       }
 
 /** Typedef for map of strings to values, stored as Lucee::Any */
@@ -139,7 +141,7 @@ namespace Lucee
           std::vector<std::string> keys;
       };
 /** Typedef for container for types to keys of those types */
-      typedef Lucee::TypeMap<Lucee::DataTypes_t, TypeContainer> TypeToKeys;
+      typedef Loki::GenScatterHierarchy<Lucee::DataTypes_t, TypeContainer> TypeToKeys;
 
 /** Container mapping types to keys of those types */
       TypeToKeys typeToKeys;
@@ -153,7 +155,7 @@ namespace Lucee
  */
       template <typename VALUETYPE>
       void addKey(const std::string& key) {
-        Lucee::typeMapExtract<VALUETYPE>(typeToKeys).keys.push_back(key);
+        Loki::Field<VALUETYPE>(typeToKeys).keys.push_back(key);
       }
 
 /**
@@ -166,7 +168,7 @@ namespace Lucee
         std::vector<std::string> nms = kv.getKeys<T>();
         std::vector<std::string>::const_iterator i;
         for (i=nms.begin(); i!=nms.end(); ++i)
-          Lucee::typeMapExtract<T>(typeToKeys).keys.push_back(*i);
+          Loki::Field<T>(typeToKeys).keys.push_back(*i);
       }
   };
 

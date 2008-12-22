@@ -23,7 +23,7 @@ myparenv = parenv.Clone()
 myparenv.Append(CPPPATH = incs)
 
 # name of library built with code in this file
-libname = 'lclib'
+libname = 'lcloki'
 
 # lexical analysis code for WarpX input files
 # This is no longer being used: Wed Dec 20 19:31:43 UTC 2006 (Ammar)
@@ -31,26 +31,13 @@ libname = 'lclib'
 
 # source files in lib
 sources = [
-    'lcexcept.cc',
-    'lcfilehandler.cc',
-    'lckeyval.cc',
-    'lckeyvaltree.cc',
-    'lckeyvaltreelexer.cc',
-    'lckeyvaltreeparser.cc',
-    'lclogger.cc',
-    'lclogrecordhandler.cc',
-    'lclogstream.cc',
-    'lclogstreamstrm.cc',
-    'lcstreamhandler.cc',
+    'OrderedStatic.cpp',
+    'SafeFormat.cpp',
+    'Singleton.cpp',
+    'SmallObj.cpp',
+    'SmartPtr.cpp',
+    'StrongPtr.cpp',
     ]
-
-# mpi sources if compiling with parallel
-if myenv['parallel']:
-    mpi_sources = [
-        ]
-else:
-    mpi_sources = [
-        ]
 
 ##
 # compile sources and add them to list of objects
@@ -59,10 +46,6 @@ objs = []
 for s in sources:
     o = myenv.Object(s)
     objs.append(o)
-
-for s in mpi_sources:
-    o = myparenv.Object(s)
-    objs.append(o)    
     
 ##
 # Archive into library

@@ -11,15 +11,19 @@ Import('parenv')
 incs = [
     '.',
     '#lib',
+    '#etc',
+    '#etc/loki/include',
     ]
 
 # Libraries to link to
 libs = [
     'lclib',
+    'lcloki',
         ]
 
 # Library paths
 libp = ['../lib',
+        '../etc/loki',
         ]
 
 # add paths and libraries to environment

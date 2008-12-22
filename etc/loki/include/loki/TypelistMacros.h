@@ -20,6 +20,7 @@
 
 //#define LOKI_DISABLE_TYPELIST_MACROS
 #ifndef LOKI_DISABLE_TYPELIST_MACROS
+#include "Typelist.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // macros LOKI_TYPELIST_1, LOKI_TYPELIST_2, ... LOKI_TYPELIST_50
