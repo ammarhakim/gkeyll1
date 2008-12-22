@@ -31,11 +31,18 @@ main(void)
   // create a logger for testing
   Lucee::Logger& w = Lucee::Logger::get("lucee");
   w.setLevel(Lucee::DEBUG);
-    
-  Lucee::FileHandler fh("lucee-detailed.log");
+
+  Lucee::Logger& w2 = Lucee::Logger::get("lucee2");
+  w2.setLevel(Lucee::DEBUG);
+  
+   Loki::SmartPtr<Lucee::LogRecordHandler> fh(
+       new Lucee::FileHandler("lucee-detailed.log"));
+
   w.addHandler(fh);
+  w2.addHandler(fh);
 
   LC_BEGIN_TESTS("lclogger");
   test_a();
   LC_END_TESTS;
+  Lucee::Logger::cleanup();
 }

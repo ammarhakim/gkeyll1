@@ -64,7 +64,7 @@ namespace Lucee
 /**
  * Delete all loggers registered in the system.
  */
-      static void cleanUp();
+      static void cleanup();
 
     private:
 /** Type for map of string to loggers */
@@ -154,7 +154,7 @@ namespace Lucee
 
   template<class T>
   void 
-  Lucee::LoggerBase<T>::cleanUp()
+  Lucee::LoggerBase<T>::cleanup()
   {
     typename LoggerMap_t::iterator itr;
     for (itr = loggers->begin(); itr != loggers->end(); ++itr)

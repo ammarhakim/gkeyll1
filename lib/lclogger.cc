@@ -38,6 +38,11 @@ namespace Lucee
     _stringMap.insert( StringPair_t("disabled", DISABLED) );
   }
 
+  Logger::~Logger()
+  {
+    _handlers.erase(_handlers.begin(), _handlers.end());
+  }
+
   void 
   Logger::debug(const std::string& msg) const 
   {
@@ -97,9 +102,9 @@ namespace Lucee
   }
 
   void 
-  Logger::addHandler(LogRecordHandler& handler)
+  Logger::addHandler(const Loki::SmartPtr<Lucee::LogRecordHandler>& handler)
   {
-    _handlers.push_back(&handler);
+    _handlers.push_back(handler);
   }
 
   void 
@@ -152,7 +157,7 @@ namespace Lucee
     if (_level <= withLevel)
     {
       // send message to each handler registered with logger
-      std::vector<LogRecordHandler*>::const_iterator i;
+      std::vector<Loki::SmartPtr<Lucee::LogRecordHandler> >::const_iterator i;
       for (i=_handlers.begin(); i!=_handlers.end(); ++i) 
         (*i)->write(msg);
     }
