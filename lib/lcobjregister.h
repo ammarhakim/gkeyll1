@@ -14,76 +14,41 @@
 
 // lib includes
 #include <lcexcept.h>
-#include <lcobjcreator.h>
+
+// etc includes
+#include <loki/Factory.h>
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
 /**
- * Base class for use in registering new creators.
- */
-  template<class B>
-  class ObjRegisterBase
-  {
-    public:
-/**
- * Register a new object which will be created by its given name.
- *
- * @param nm Name by which object will be created.
- */
-      ObjRegisterBase(const std::string& nm) 
-        : name(nm)
-      {
-        Lucee::ObjCreator<B>::addCreator(name, this);
-      }
-
-/**
- * Delete the object, unregistering the creator class.
- */
-      virtual ~ObjRegisterBase() 
-      {
-        Lucee::ObjCreator<B>::removeCreator(name);
-      }
-
-/**
- * Return a newly allocated object. Must be provided by derived
- * classes.
- *
- * @return Newly allocated object.
- */
-      virtual B* getNew() = 0;
-
-    private:
-/** Name by which this object is to be created */
-      std::string name;
-  };
-
-/**
  * Class to perform registration.
  */
   template<class D, class B>
-  class ObjRegister : public ObjRegisterBase<B>
+  class ObjRegister
   {
     public:
 /**
- * Register a new object which will be created by its given name.
+ * Register a new object to be created by its given name.
  *
  * @param nm Name by which object will be created.
  */
       ObjRegister(const std::string& nm)
-        : ObjRegisterBase<B>(nm)
       {
+        Loki::SingletonHolder<Loki::Factory<B, std::string> >
+          ::Instance().Register(nm, getNew);
       }
 
+    private:
 /**
- * Return a newly allocated object. Must be provided by derived
- * classes.
+ * Return a newly allocated object. This is used as the creation
+ * mechanism for the object.
  *
  * @return Newly allocated object.
  */
-      B* getNew() 
+      static B* getNew() 
       {
-        D *d = new D;
-        return dynamic_cast<B*>(d);
+        return new D;
       }
   };
 

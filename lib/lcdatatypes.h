@@ -12,9 +12,11 @@
 #ifndef LC_DATA_TYPES_H
 #define LC_DATA_TYPES_H
 
-// lin includes
-#include <lctypelist.h>
+// lib includes
 #include <lcany.h>
+
+// etc includes
+#include <loki/TypelistMacros.h>
 
 // std includes
 #include <string>
@@ -29,7 +31,7 @@ namespace Lucee
  * NOTE: If adding more types change typelist length. Also ensure no
  * duplicates exist in the list.
  */
-  typedef LC_TYPELIST_19(
+  typedef LOKI_TYPELIST_19(
       bool,
       char,
       unsigned char,
@@ -49,7 +51,7 @@ namespace Lucee
       std::vector<double>,
       std::vector<std::string>,
       std::vector<Lucee::Any>
-                         ) DataTypes_t;
+                           ) DataTypes_t;
 }
 
 #endif // LC_DATA_TYPES_H
