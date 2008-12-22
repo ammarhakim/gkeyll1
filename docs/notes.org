@@ -17,6 +17,17 @@
 
 * Lucee Notes
 
+** December 22nd
+   
+*** TODO Complete documentation of all classes.
+
+    Both in-code and text documentation needed to be completed.
+
+*** TODO Add more complete tests for loggers and expression parsers.
+
+    May need to get tests more comprehensive. Also, must figure out a
+    way of running the tests automatically from a script.
+
 ** December 19th
 
    First targeted applications for Lucee (a) radiation transport in
