@@ -34,6 +34,7 @@ sources = [
     'lcexcept.cc',
     'lcexprparser.cc',
     'lcfilehandler.cc',
+    'lciobase.cc',
     'lckeyval.cc',
     'lckeyvaltree.cc',
     'lckeyvaltreelexer.cc',
