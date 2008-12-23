@@ -67,7 +67,8 @@ namespace Lucee
  *
  * @return string representation of last token read.
  */
-      std::string YYText() const {
+      std::string YYText() const 
+      {
         return yytext;
       }
 
@@ -76,7 +77,8 @@ namespace Lucee
  *
  * @return line number being scanned.
  */
-      unsigned getLineno() const {
+      unsigned getLineno() const 
+      {
         return lineno;
       }
 
@@ -85,7 +87,8 @@ namespace Lucee
  *
  * @return last integer scanned.
  */
-      int getInteger() const {
+      int getInteger() const 
+      {
         return integer;
       }
 
@@ -94,7 +97,8 @@ namespace Lucee
  *
  * @return last real number scanned.
  */
-      REAL getReal() const {
+      REAL getReal() const 
+      {
         return real;
       }
 
@@ -103,7 +107,8 @@ namespace Lucee
  *
  * @return last symbol scanned.
  */
-      int getLastSym() const {
+      int getLastSym() const 
+      {
         return lastSym;
       }
 

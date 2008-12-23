@@ -55,6 +55,9 @@ config_flags.configFlags(env)
 import scripts.config_builddir as config_builddir
 buildin = config_builddir.configBuildDir(env)
 
+# add flag to indicate we have config.h header
+env.Append(CCFLAGS = '-DHAVE_CONFIG_H')
+
 # clone the environment
 myEnv = env.Clone()
 
@@ -74,7 +77,6 @@ if env['parallel']:
         myEnv['CC'] = mpicc
         env['CC'] = mpicc
 
-        myEnv.Append(CCFLAGS = '-D_DO_USE_MPI_')
         # add flag to work around MPICH bug        
         myEnv.Append(CCFLAGS = '-DMPICH_IGNORE_CXX_SEEK')
     else:
