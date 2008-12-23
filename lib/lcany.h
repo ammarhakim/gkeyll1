@@ -12,6 +12,11 @@
 #ifndef LC_ANY_H
 #define LC_ANY_H
 
+// config stuff
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 // std includes
 #include <algorithm>
 #include <typeinfo>

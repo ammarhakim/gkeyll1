@@ -208,8 +208,7 @@ class BuildConf:
             sc_env.Append( LIBS = self.libs )
         
         sc_env['HAVE_%s' % self.pkg] = True
-        sc_env.Append( CCFLAGS = ['-DHAVE_%s' % self.pkg] )
-        conf = sc_env.Configure(config_h = 'config.h')
+        conf = sc_env.Configure(config_h = 'lib/config.h')
         conf.Define('HAVE_%s' % self.pkg)
         conf.Finish()
 
