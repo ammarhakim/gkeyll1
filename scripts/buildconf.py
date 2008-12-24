@@ -209,6 +209,7 @@ class BuildConf:
         
         sc_env['HAVE_%s' % self.pkg] = True
         conf = sc_env.Configure(config_h = 'lib/config.h')
+            
         conf.Define('HAVE_%s' % self.pkg)
         conf.Finish()
 
