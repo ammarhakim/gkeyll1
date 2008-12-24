@@ -36,7 +36,7 @@ namespace Lucee
 /**
  * Destructor
  */
-      virtual ~MsgBase() 
+      virtual ~ParMsgBase() 
       {
       }
 
@@ -59,7 +59,7 @@ namespace Lucee
  *
  * @return parent proccesor group
  */
-      MsgBase* parent() const 
+      ParMsgBase* parent() const 
       {
         return _parent;
       }
@@ -71,7 +71,7 @@ namespace Lucee
  * in the new communicator
  * @return new communicator
  */
-      virtual MsgBase* createSubComm(const std::vector<int>& ranks) = 0;
+      virtual ParMsgBase* createSubComm(const std::vector<int>& ranks) = 0;
 
 
 /**
@@ -183,7 +183,7 @@ namespace Lucee
 /**
  * Constructor. This is protected so only children can make instances.
  */
-      ParMsgBase(int sendTag=0, int recvTag=0, MsgBase* parent=0)
+      ParMsgBase(int sendTag=0, int recvTag=0, ParMsgBase* parent=0)
         : _sendTag(sendTag), _recvTag(recvTag), _parent(parent) 
       {
       }
@@ -201,8 +201,8 @@ namespace Lucee
     private:
 
       // To prevent use
-      ParMsgBase(const MsgBase&);
-      ParMsgBase& operator=(const MsgBase&);
+      ParMsgBase(const ParMsgBase&);
+      ParMsgBase& operator=(const ParMsgBase&);
 
       int _sendTag, _recvTag;
       ParMsgBase *_parent;
@@ -213,7 +213,7 @@ namespace Lucee
       template <typename T>
       ParMsgTmpl<T>* _getMsg() 
       {
-        ParMsgTmpl<T> *r = Field<T>(_msgTypeMap)._msg;
+        ParMsgTmpl<T> *r = Loki::Field<T>(_msgTypeMap)._msg;
         if (r) return r;
         Lucee::Except ex;
         ex << "Message type not set properly"; 

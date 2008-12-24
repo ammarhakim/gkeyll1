@@ -49,6 +49,9 @@ sources = [
 # mpi sources if compiling with parallel
 if myenv['parallel']:
     mpi_sources = [
+        'lcmpimsgop.cc',
+        'lcparmpimsg.cc',
+        'lcparmpitmpl.cc',
         ]
 else:
     mpi_sources = [
