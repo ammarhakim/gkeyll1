@@ -1,5 +1,5 @@
 /**
- * @file	lcparmsgtmpl.h
+ * @file	lcparmsgtmplbase.h
  *
  * @brief	Templated base class for parallel message passing classes.
  *
@@ -26,16 +26,17 @@ namespace Lucee
  * and should not be directly fiddled around with.
  */
   struct MsgStatus_v {};
+/** Type for handling message status as opaque objects */
   typedef MsgStatus_v* MsgStatus;
 
   template<typename T>
-  class ParMsgTmpl
+  class ParMsgTmplBase
   {
     public:
 /**
  * Destructor
  */
-      virtual ~ParMsgTmpl() 
+      virtual ~ParMsgTmplBase() 
       {
         delete [] _sendBuff;
         delete [] _recvBuff;
@@ -99,7 +100,7 @@ namespace Lucee
 /**
  * Protected so only children can make instances
  */
-      ParMsgTmpl() 
+      ParMsgTmplBase() 
         : _sendSize(0), _sendBuff(0), _recvSize(0), _recvBuff(0) 
       {
       }

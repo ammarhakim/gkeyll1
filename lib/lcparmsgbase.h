@@ -13,7 +13,7 @@
 #define LC_PAR_MSG_BASE_H
 
 // lib includes
-#include <lcparmsgtmpl.h>
+#include <lcparmsgtmplbase.h>
 #include <lcdatatypes.h>
 #include <lcexcept.h>
 
@@ -193,7 +193,7 @@ namespace Lucee
  * ParMsgBase properly
  */
       template <typename T>
-      void addMsg(Lucee::ParMsgTmpl<T> *b) 
+      void addMsg(Lucee::ParMsgTmplBase<T> *b) 
       {
         Loki::Field<T>(_msgTypeMap)._msg = b;
       }
@@ -211,9 +211,9 @@ namespace Lucee
  * Get a messager object with the proper type
  */
       template <typename T>
-      ParMsgTmpl<T>* _getMsg() 
+      ParMsgTmplBase<T>* _getMsg() 
       {
-        ParMsgTmpl<T> *r = Loki::Field<T>(_msgTypeMap)._msg;
+        ParMsgTmplBase<T> *r = Loki::Field<T>(_msgTypeMap)._msg;
         if (r) return r;
         Lucee::Except ex;
         ex << "Message type not set properly"; 
@@ -235,11 +235,11 @@ namespace Lucee
           {
             delete _msg;
           }
-          // this points to a derived class of ParMsgTmpl<T>
-          ParMsgTmpl<T> *_msg;
+          // this points to a derived class of ParMsgTmplBase<T>
+          ParMsgTmplBase<T> *_msg;
       };
 
-      // Objects of type MsgTypeMap_t inherit from all ParMsgTmpl<T>
+      // Objects of type MsgTypeMap_t inherit from all ParMsgTmplBase<T>
       // where T belongs to the MsgTypelist_t. Thus it acts like a
       // container for all message-er objects in the system.
       typedef Loki::GenScatterHierarchy<DataTypes_t, MsgContainer> MsgTypeMap_t;

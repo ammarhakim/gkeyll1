@@ -1,5 +1,5 @@
 /**
- * @file	lcionodetype.h
+ * @file	lciotmpl.h
  *
  * @brief	Base class for I/O nodes.
  *

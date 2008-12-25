@@ -1,5 +1,5 @@
 /**
- * @file	lcparmsgtmpl.h
+ * @file	lcparmsgop.h
  *
  * @brief	Base class for parallel message passing classes.
  *
@@ -9,12 +9,12 @@
  * Licence version 1.0.
  */
 
-#ifndef LC_PAR_MSG_OPS_H
-#define LC_PAR_MSG_OPS_H
+#ifndef LC_PAR_MSG_OP_H
+#define LC_PAR_MSG_OP_H
 
 namespace Lucee
 {
-// list of supported operations for all-reduce operation
+/** List of supported operations for all-reduce operations */
   enum ParMsgOps
   {
     PAR_MSG_NOP,
@@ -35,9 +35,7 @@ namespace Lucee
       ParMsgOp() 
       {
       }
-
-      
   };
 }
 
-#endif // LC_PAR_MSG_OPS_H
+#endif // LC_PAR_MSG_OP_H

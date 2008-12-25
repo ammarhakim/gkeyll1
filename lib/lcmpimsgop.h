@@ -32,6 +32,7 @@ namespace Lucee
   class MpiMsgOp : public Lucee::ParMsgOp
   {
     public:
+/** Create a new MPI all-reduce operations object.. */
       MpiMsgOp();
 
 /**
@@ -43,6 +44,7 @@ namespace Lucee
       MPI_Op getOp(Lucee::ParMsgOps op);
 
     private:
+/** Map of operations to MPI types */
       std::map<Lucee::ParMsgOps, MPI_Op> _opMap;
   };
 }
