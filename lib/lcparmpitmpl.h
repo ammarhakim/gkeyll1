@@ -22,7 +22,7 @@
 #endif
 
 // lib includes
-#include <lcparmsgtmpl.h>
+#include <lcparmsgtmplbase.h>
 #include <lcmpitraits.h>
 #include <lcmpimsgop.h>
 
@@ -45,7 +45,7 @@ namespace Lucee
   };
 
   template<typename T>
-  class ParMpiTmpl : public Lucee::ParMsgTmpl<T>
+  class ParMpiTmpl : public Lucee::ParMsgTmplBase<T>
   {
     public:
       ParMpiTmpl(MPI_Comm comm)

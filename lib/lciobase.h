@@ -281,35 +281,33 @@ namespace Lucee
         throw ex;
       }
 
+/** List of all open files */
       std::vector<Lucee::IoNodeType> openFiles; // List of all open files
-      std::string baseName; // base name for output
-      int dumpNo; // dump number
-      std::string suffix; // suffix for output
 
     public:
-      // container class for all io classes
+/** Container class for all io classes */
       template <typename T>
       struct IoContainer 
       {
+/** Create a new I/O container object */
           IoContainer() 
             : ioPtr(0)
           {
           }
 
+/** Destory the container */
           virtual ~IoContainer() 
           {
             delete ioPtr;
           }
-          // Points to a derived class of IoTmpl<T> 
+/** Pointer to a derived class of IoTmpl<T> */
           const IoTmpl<T>* ioPtr;
       };
 
-      // Objects of type IoTypeMap_t inherit from all IoTmpl<T>
-      // where T belongs to the IoTypelist_t. Thus it acts like a
-      // container for all io objects in the system.
+/** Type definition for map of types to I/O containers */
       typedef Loki::GenScatterHierarchy<DataTypes_t, IoContainer> IoTypeMap;
-
-      IoTypeMap ioTypeMap; // container of io
+/** Map for I/O containers */
+      IoTypeMap ioTypeMap;
   };
 }
 

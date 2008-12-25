@@ -25,15 +25,15 @@ namespace Lucee
   double*
   addVariable(const mu::char_type* a_szName, void* a_pUserData) 
   {
-    // at most MAX_VARS variables can be defined
-#define MAX_VARS 5000
+    // at most 5000 variables can be defined
+    const unsigned MAX_VARS = 5000;
     static double afValBuf[MAX_VARS];
     static int iVal = 0;
 
     afValBuf[iVal] = 0;
     if (iVal>=(MAX_VARS-1))
       throw mu::ParserError( _T("Variable buffer overflow.") );
-    return& afValBuf[iVal++];
+    return &afValBuf[iVal++];
   }
 
   ExprParser::ExprParser()

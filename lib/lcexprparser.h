@@ -24,23 +24,39 @@
 namespace Lucee
 {
 
-/** Variable factory */
+/** 
+ * Allocate space for a new variable.
+ *
+ * @param a_szName Name of the variable.
+ * @param a_pUserData Not used by this method.
+ * @return pointer to newly allocated space.
+ */
   double* addVariable(const mu::char_type* a_szName, void* a_pUserData);
-/** Sequence of expressions */
+
+/** 
+ * Execute a qequence of expressions
+ *
+ * @param a_afArg arguments to function. Not used.
+ * @param a_iArgc number of arguments. Not used.
+ * @return status code.
+ */
   mu::value_type Begin(const mu::value_type* a_afArg, int a_iArgc);
 
 /**
  * A class implementing interfaces to the muParser package.
  */
-  class ExprParser {
+  class ExprParser 
+  {
     public:
 
 /** Default ctor */
       ExprParser();
 
 /**
- * Append an indepent variable to system. These are expected to be in
- * the same sequence as given to the eval() function
+ * Append an independent variable to system. These are expected to be
+ * in the same sequence as given to the eval() function
+ *
+ * @param v Name of independent variable.
  */
       void appendIndVar(const std::string& v);
 

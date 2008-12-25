@@ -34,6 +34,11 @@ namespace Lucee
   template<> class MpiTraits<char> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_CHAR;
@@ -43,6 +48,11 @@ namespace Lucee
   template<> class MpiTraits<unsigned char> 
   { 
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_UNSIGNED_CHAR;
@@ -52,6 +62,11 @@ namespace Lucee
   template<> class MpiTraits<short> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_SHORT;
@@ -61,6 +76,11 @@ namespace Lucee
   template<> class MpiTraits<unsigned short> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_UNSIGNED_SHORT;
@@ -70,6 +90,11 @@ namespace Lucee
   template<> class MpiTraits<int> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_INT;
@@ -79,6 +104,11 @@ namespace Lucee
   template<> class MpiTraits<unsigned> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_UNSIGNED;
@@ -88,6 +118,11 @@ namespace Lucee
   template<> class MpiTraits<long> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_LONG;
@@ -97,6 +132,11 @@ namespace Lucee
   template<> class MpiTraits<unsigned long> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_UNSIGNED_LONG;
@@ -106,6 +146,11 @@ namespace Lucee
   template<> class MpiTraits<float> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_FLOAT;
@@ -115,6 +160,11 @@ namespace Lucee
   template<> class MpiTraits<double> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_DOUBLE;
@@ -124,6 +174,11 @@ namespace Lucee
   template<> class MpiTraits<long double> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_LONG_DOUBLE;
@@ -133,6 +188,11 @@ namespace Lucee
   template<> class MpiTraits<long long int> 
   {
     public:
+/**
+ * Return MPI type corresponding to template parameter.
+ *
+ * @return MPI type.
+ */
       static MPI_Datatype mpiType() 
       {
         return MPI_LONG_LONG_INT;
@@ -148,6 +208,11 @@ namespace Lucee
   template<> class MpiAllReduce<PAR_MSG_MIN> 
   { 
     public:
+/**
+ * Return MPI operator corresponding to template parameter.
+ *
+ * @return MPI operator.
+ */
       static MPI_Op mpiOp() 
       {
         return MPI_MIN;
@@ -157,6 +222,11 @@ namespace Lucee
   template<> class MpiAllReduce<PAR_MSG_MAX> 
   { 
     public:
+/**
+ * Return MPI operator corresponding to template parameter.
+ *
+ * @return MPI operator.
+ */
       static MPI_Op mpiOp() 
       {
         return MPI_MAX;
