@@ -82,8 +82,9 @@ namespace Lucee
 /**
  * Send a std::vector to another rank.
  * 
- * @param array std::vector of data being sent
- * @param recvRank rank that will receive array
+ * @param array std::vector of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attache to this message.
  */
       template<typename T>
       void send(const std::vector<T>& array, unsigned recvRank, int tag=-1) 
@@ -94,9 +95,10 @@ namespace Lucee
 /**
  * Send an array to another rank.
  * 
- * @parem num number of elements to send
- * @param array array of length 'num' of data being sent
- * @param recvRank rank that will receive array
+ * @param num number of elements to send.
+ * @param array array of length 'num' of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attache to this message.
  */
       template<typename T>
       void send(unsigned num, T* array, unsigned recvRank, int tag=-1) 
@@ -107,9 +109,10 @@ namespace Lucee
 /**
  * Receive a std::vector from another rank.
  * 
- * @param num number of elements to receive
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to receive.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attache to this message.
  */
       template<typename T>
       void recv(int num, std::vector<T>& array, unsigned sendRank, int tag=-1) 
@@ -120,9 +123,10 @@ namespace Lucee
 /**
  * Receive an array from another rank.
  * 
- * @param num number of elements to receive
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to receive.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attache to this message.
  */
       template<typename T>
       void recv(unsigned num, T* array, unsigned sendRank, int tag=-1) 
@@ -133,10 +137,10 @@ namespace Lucee
 /**
  * Receive an array from another rank. This is a non-blocking call.
  * 
- * @param num number of elements to receive
- * @param array array that is filled with received value
- * @param sendRank rank we want to receive from
- * @return message status
+ * @param num number of elements to receive.
+ * @param sendRank rank we want to receive from.
+ * @param tag Tag to attache to this message.
+ * @return message status.
  */
       template<typename T>
       MsgStatus startRecv(unsigned num,  unsigned sendRank, int tag=-1) 
@@ -200,11 +204,26 @@ namespace Lucee
 
     private:
 
-      // To prevent use
-      ParMsgBase(const ParMsgBase&);
-      ParMsgBase& operator=(const ParMsgBase&);
+/** 
+ * Copy constructor: private to prevent use.
+ *
+ * @param rhs Object to copy.
+ */
+      ParMsgBase(const ParMsgBase& rhs);
 
-      int _sendTag, _recvTag;
+/** 
+ * Assignment operator: private to prevent use .
+ *
+ * @param msg Object to assign from.
+ * @return reference to this object.
+ */
+      ParMsgBase& operator=(const ParMsgBase& msg);
+
+/** Tag for sent message */
+      int _sendTag;
+/** Tag for recv message */
+      int _recvTag;
+/** Pointer to parent messenger object */
       ParMsgBase *_parent;
 
 /**
@@ -222,29 +241,30 @@ namespace Lucee
 
     public:
 
-      // Container class for all message-ers
+/** Container class for all messagers */
       template<typename T>
       struct MsgContainer 
       {
+/** Create a new message container */
           MsgContainer() 
             : _msg(0) 
           {
           }
 
+/** Delete the message contsainer */
           virtual ~MsgContainer() 
           {
             delete _msg;
           }
-          // this points to a derived class of ParMsgTmplBase<T>
+/**  Pointer to messaging object: points to derived class of ParMsgTmplBase<T> */
           ParMsgTmplBase<T> *_msg;
       };
 
-      // Objects of type MsgTypeMap_t inherit from all ParMsgTmplBase<T>
-      // where T belongs to the MsgTypelist_t. Thus it acts like a
-      // container for all message-er objects in the system.
+/** Type definition of map of types to message containers */
       typedef Loki::GenScatterHierarchy<DataTypes_t, MsgContainer> MsgTypeMap_t;
 
-      MsgTypeMap_t _msgTypeMap; // container of communicators
+/** Map of types to message containers */
+      MsgTypeMap_t _msgTypeMap;
   };
 }
 

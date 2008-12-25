@@ -37,7 +37,6 @@ namespace Lucee
  * Construct a new MPI messenger give a set of communicating
  * processors.
  *
- * @param commProcs set of communicating processors
  */
       ParMpiMsg();
 
@@ -46,7 +45,8 @@ namespace Lucee
  * 
  * @return this rank
  */
-      int rank() const {
+      int rank() const 
+      {
         int r;
         MPI_Comm_rank(_comm, &r);
         return r;
@@ -57,7 +57,8 @@ namespace Lucee
  *
  * @return num of processes
  */
-      unsigned numProcs() const {
+      unsigned numProcs() const 
+      {
         int np;
         MPI_Comm_size(_comm, &np);
         return np;
@@ -105,6 +106,7 @@ namespace Lucee
  */
       ParMpiMsg(ParMpiMsg *parent, MPI_Comm comm);
 
+/** MPI communicator to use */
       MPI_Comm _comm;
   };
 }
