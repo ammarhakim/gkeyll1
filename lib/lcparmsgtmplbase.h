@@ -45,60 +45,65 @@ namespace Lucee
 /**
  * Send an array to another rank.
  *
- * @param array std::vector of data being sent
- * @param recvRank rank that will receive array
+ * @param array std::vector of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attach to message.
  */
       virtual void send(const std::vector<T>& array, unsigned recvRank, int tag) = 0;
 
 /**
  * Send an array to another rank.
  * 
- * @parem num number of elements to send
- * @param array array of length 'num' of data being sent
- * @param recvRank rank that will receive array
+ * @param num number of elements to send.
+ * @param array array of length 'num' of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attach to message.
  */
       virtual void send(unsigned num, T* array, unsigned recvRank, int tag) = 0;
 
 /**
  * Receive an array from another rank.
  * 
- * @param num number of elements to recieve
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to recieve.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
  */
       virtual void recv(unsigned num, std::vector<T>& array, unsigned sendRank, int tag) = 0;
 
 /**
  * Receive an array from another rank.
  * 
- * @param num number of elements to receive
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to receive.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
  */
       virtual void recv(unsigned num, T* array, unsigned sendRank, int tag) = 0;
 
 /**
  * Receive an array from another rank. This is a non-blocking call.
  * 
- * @param num number of elements to receive
- * @param sendRank rank that sent array
- * @return message status
+ * @param num number of elements to receive.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
+ * @return message status.
  */
       virtual MsgStatus startRecv(unsigned num, unsigned sendRank, int tag=-1) = 0;
 
 /**
  * Reduce data to all ranks
  * 
- * @param num Number of elements being reduced
- * @param sendBuff buffer to reduce
- * @param recvBuff buffer to recieve reduced data
- * @param op operation to perform. These are one of those listed in MsgOp enum
+ * @param num Number of elements being reduced.
+ * @param sendBuff buffer to reduce.
+ * @param recvBuff buffer to recieve reduced data.
+ * @param op operation to perform. These are one of those listed in MsgOp enum.
  */
       virtual void allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOp op) = 0;
 
     protected:
 /**
- * Protected so only children can make instances
+ * Protected so only children can make instances.
  */
       ParMsgTmplBase() 
         : _sendSize(0), _sendBuff(0), _recvSize(0), _recvBuff(0) 
@@ -159,11 +164,14 @@ namespace Lucee
         return;
       }
 
+/** Size of send buffer */
       unsigned _sendSize;
-      T* _sendBuff; // buffer for sending
-
+/** Pointer to buffer for send data */
+      T* _sendBuff;
+/** Size of recv buffer */
       unsigned _recvSize;
-      T* _recvBuff; // buffer for receiving
+/** Pointer to buffer for revc data */
+      T* _recvBuff;
   };
 }
 
