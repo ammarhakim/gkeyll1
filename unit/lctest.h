@@ -12,7 +12,11 @@
 #ifndef LC_TEST_H
 #define LC_TEST_H
 
-#ifdef _DO_USE_MPI_
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifdef HAVE_MPI
 #  include <mpi.h>
 #endif
 
@@ -71,7 +75,7 @@ static LcTestCounter __tc;
  * count the number of passed and failed tests, printing them out
  * after the tests are done
 */
-#ifdef _DO_USE_MPI_
+#ifdef HAVE_MPI
 
 #define LC_MPI_BEGIN_TESTS(file) \
  do {\
@@ -103,7 +107,7 @@ static LcTestCounter __tc;
 #else
 # define LC_MPI_BEGIN_TESTS(file)
 # define LC_MPI_END_TESTS
-#endif // _DO_USE_MPI_
+#endif // HAVE_MPI
 
 #define LC_BEGIN_TESTS(file)                    \
  do {\
