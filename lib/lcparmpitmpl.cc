@@ -96,14 +96,14 @@ namespace Lucee
 
   template<typename T>
   void
-  ParMpiTmpl<T>::allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOp op)
+  ParMpiTmpl<T>::allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOpCode op)
   {
-//     MPI_Allreduce(sendBuff,
-//       recvBuff,
-//       num,
-//       MpiTraits<T>::mpiType(),
-//       _ops.getOp(op),
-//       _comm);
+    MPI_Allreduce(sendBuff,
+      recvBuff,
+      num,
+      MpiTraits<T>::mpiType(),
+      _ops.getOp(op),
+      _comm);
   }
 
 // instantiate classes for all types define in wxdatatypes.h

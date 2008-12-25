@@ -41,11 +41,11 @@ namespace Lucee
  * @param op an operation.
  * @return an MPI operation.
  */
-      MPI_Op getOp(Lucee::ParMsgOps op);
+      MPI_Op getOp(Lucee::ParMsgOpCode op);
 
     private:
 /** Map of operations to MPI types */
-      std::map<Lucee::ParMsgOps, MPI_Op> _opMap;
+      std::map<Lucee::ParMsgOpCode, MPI_Op> _opMap;
   };
 }
 

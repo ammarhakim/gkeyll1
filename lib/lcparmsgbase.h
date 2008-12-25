@@ -175,10 +175,10 @@ namespace Lucee
  * @param num Number of elements being reduced
  * @param sendBuff buffer to reduce
  * @param recvBuff buffer to recieve reduced data
- * @param op operation to perform. These are one of those listed in ParMsgOps enum
+ * @param op operation to perform. These are one of those listed in ParMsgOpCode enum
  */
       template<typename T>
-      void allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOps op) 
+      void allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOpCode op) 
       {
         this->_getMsg<T>()->allReduce(num, sendBuff, recvBuff, op);
       }

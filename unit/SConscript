@@ -66,3 +66,8 @@ myenv.Program('lclogger', ['lclogger.cxx'])
 
 # lcexprparser
 myenv.Program('lcexprparser', ['lcexprparser.cxx'])
+
+if myparenv['parallel']:
+    # MPI messaging tests
+    myparenv.Program('lcparmpimsg',
+                     ['lcparmpimsg.cxx'])

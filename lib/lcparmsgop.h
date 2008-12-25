@@ -15,7 +15,7 @@
 namespace Lucee
 {
 /** List of supported operations for all-reduce operations */
-  enum ParMsgOps
+  enum ParMsgOpCode
   {
     PAR_MSG_NOP,
     PAR_MSG_MIN,

@@ -22,7 +22,7 @@ namespace Lucee
   }
 
   MPI_Op
-  MpiMsgOp::getOp(Lucee::ParMsgOps op)
+  MpiMsgOp::getOp(Lucee::ParMsgOpCode op)
   {
     return _opMap[op];
   }

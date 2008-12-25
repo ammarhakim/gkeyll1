@@ -99,7 +99,7 @@ namespace Lucee
  * @param recvBuff buffer to recieve reduced data.
  * @param op operation to perform. These are one of those listed in MsgOp enum.
  */
-      virtual void allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOp op) = 0;
+      virtual void allReduce(unsigned num, T* sendBuff, T* recvBuff, Lucee::ParMsgOpCode op) = 0;
 
     protected:
 /**
