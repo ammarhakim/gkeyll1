@@ -61,7 +61,7 @@ namespace Lucee
 /**
  * Detach from logger.
  *
- * @param logger name of logger from which this handler should be detached.
+ * @param name name of logger from which this handler should be detached.
  * @return true if detach worked, false otherwise.
  */
       bool detachFromLogger(const std::string& name);
