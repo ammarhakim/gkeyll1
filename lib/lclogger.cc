@@ -18,7 +18,7 @@ namespace Lucee
   Logger::Logger(const std::string &name) 
     : _parent(0), _name(name), _level(NOTSET), _oldLevel(NOTSET) 
   {
-
+    _maxHandlerId = -1;
     // construct level -> string mapping
     _levelMap.insert( LevelPair_t(NOTSET, "notset") );
     _levelMap.insert( LevelPair_t(DEBUG, "debug") );
@@ -41,6 +41,12 @@ namespace Lucee
   Logger::~Logger()
   {
     _handlers.erase(_handlers.begin(), _handlers.end());
+  }
+
+  std::string
+  Logger::getName() const
+  {
+    return _name;
   }
 
   void 
@@ -101,10 +107,18 @@ namespace Lucee
     return _levelMap[_level];
   }
 
-  void 
-  Logger::addHandler(const Loki::SmartPtr<Lucee::LogRecordHandler>& handler)
+  int
+  Logger::addHandler(Lucee::LogRecordHandler& handler)
   {
-    _handlers.push_back(handler);
+    // add this to our list of handlers
+    _handlers[++_maxHandlerId] = &handler;
+    return _maxHandlerId;
+  }
+
+  bool
+  Logger::removeHandler(int handlerId)
+  {
+    return _handlers.erase(handlerId) == 1;
   }
 
   void 
@@ -157,9 +171,9 @@ namespace Lucee
     if (_level <= withLevel)
     {
       // send message to each handler registered with logger
-      std::vector<Loki::SmartPtr<Lucee::LogRecordHandler> >::const_iterator i;
+      std::map<int, Lucee::LogRecordHandler*>::const_iterator i;
       for (i=_handlers.begin(); i!=_handlers.end(); ++i) 
-        (*i)->write(msg);
+        i->second->write(msg);
     }
     // now send this same message to the parent if there is one
     if (_parent)
