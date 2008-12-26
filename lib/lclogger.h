@@ -17,9 +17,6 @@
 #include <lcloggerbase.h>
 #include <lclogrecordhandler.h>
 
-// etc includes
-#include <loki/SmartPtr.h>
-
 namespace Lucee
 {
 // forward declare LogStream class
@@ -69,6 +66,13 @@ namespace Lucee
  * Delete logger, deleting all registered handlers.
  */
       virtual ~Logger();
+
+/**
+ * Return name of logger.
+ *
+ * @return Name of logger.
+ */
+      std::string getName() const;
 
 /**
  * Log a debug message.
@@ -145,11 +149,20 @@ namespace Lucee
 /**
  * Add a new handler to the logger.
  *
- * @param handler Pointer to class LogRecordHandler. Note that the
- * handler is owned by the logger and hence is deleted when the logger
- * is deleted.
+ * @param handler Pointer to class LogRecordHandler. 
+ * @return integer ID for handler. This can be used to remove the
+ * handler from the logger.
  */
-      void addHandler(const Loki::SmartPtr<Lucee::LogRecordHandler>& handler);
+      int addHandler(Lucee::LogRecordHandler& handler);
+
+/**
+ * Remove handler from logger.
+ *
+ * @param handlerId identifier for handler. This is the same value as
+ * returned by the addHandler method.
+ * @return true if remove worked, false otherwise.
+ */
+      bool removeHandler(int handlerId);
 
 /**
  * Disables all logging to this logger. Logging at the original level
@@ -225,8 +238,10 @@ namespace Lucee
       LevelMap_t _levelMap;
 /** Map of strings to level */
       StringMap_t _stringMap;
-/** List of handlers regeistered with this logger */
-      std::vector<Loki::SmartPtr<Lucee::LogRecordHandler> > _handlers;
+/** Max handler id */
+      int _maxHandlerId;
+/** Map of handlers regeistered with this logger */
+      std::map<int, Lucee::LogRecordHandler*> _handlers;
   };
 }
 

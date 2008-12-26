@@ -10,6 +10,7 @@
  */
 
 // lib includes
+#include <lclogger.h>
 #include <lclogrecordhandler.h>
 
 namespace Lucee
@@ -28,5 +29,17 @@ namespace Lucee
   {
     _outStream << msg;
     _outStream << std::flush;
+  }
+
+  void
+  LogRecordHandler::attachLogger(Lucee::Logger& logger) 
+  {
+    _loggers[logger.getName()] = &logger;
+  }
+
+  unsigned
+  LogRecordHandler::numAttached() const
+  {
+    return _loggers.size();
   }
 }
