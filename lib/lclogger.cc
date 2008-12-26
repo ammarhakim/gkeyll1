@@ -107,20 +107,6 @@ namespace Lucee
     return _levelMap[_level];
   }
 
-  int
-  Logger::addHandler(Lucee::LogRecordHandler& handler)
-  {
-    // add this to our list of handlers
-    _handlers[++_maxHandlerId] = &handler;
-    return _maxHandlerId;
-  }
-
-  bool
-  Logger::removeHandler(int handlerId)
-  {
-    return _handlers.erase(handlerId) == 1;
-  }
-
   void 
   Logger::disable() 
   {
@@ -178,5 +164,19 @@ namespace Lucee
     // now send this same message to the parent if there is one
     if (_parent)
       _parent->log(msg, withLevel);
+  }
+
+  int
+  Logger::addHandler(Lucee::LogRecordHandler& handler)
+  {
+    // add this to our list of handlers
+    _handlers[++_maxHandlerId] = &handler;
+    return _maxHandlerId;
+  }
+
+  bool
+  Logger::removeHandler(int handlerId)
+  {
+    return _handlers.erase(handlerId) == 1;
   }
 }

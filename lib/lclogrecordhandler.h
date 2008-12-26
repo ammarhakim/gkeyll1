@@ -16,6 +16,8 @@
 #include <ios>
 #include <iostream>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -43,18 +45,41 @@ namespace Lucee
       virtual void write(const std::string& msg);
 
 /**
- * Set logger to which this handler is attached.
+ * Attach handler to a logger.
  *
- * @param logger Logger to which this handler is attached.
+ * @param name name of logger to which this handler should be attached.
  */
-      void attachLogger(Lucee::Logger& logger);
+      void attachToLogger(const std::string& name);
 
 /**
- * Get number of loggers this handler is attached to.
+ * Attach handler to a logger.
  *
- * @return number of loggers this handler is attached to.
+ * @param logger logger to which this handler should be attached.
  */
-      unsigned numAttached() const;
+      void attachToLogger(Lucee::Logger& logger);
+
+/**
+ * Detach from logger.
+ *
+ * @param logger name of logger from which this handler should be detached.
+ * @return true if detach worked, false otherwise.
+ */
+      bool detachFromLogger(const std::string& name);
+
+/**
+ * Detach from logger.
+ *
+ * @param logger logger from which this handler should be detached.
+ * @return true if detach worked, false otherwise.
+ */
+      bool detachFromLogger(Lucee::Logger& logger);
+
+/**
+ * Get names of loggers this handler is attached to.
+ *
+ * @return names of loggers this handler is attached to.
+ */
+      std::vector<std::string> loggerNames() const;
 
     protected:
 /**
@@ -67,8 +92,10 @@ namespace Lucee
     private:
 /** Reference to output stream */
       std::ostream& _outStream;
-/** Map of loggers to which this handler is attached */
+/** Map of logger names to loggers */
       std::map<std::string, Logger*> _loggers;
+/** Map of logger names to handler ids */
+      std::map<std::string, int> _handlerIds;
   };
 }
 

@@ -26,10 +26,8 @@ test_a()
 
   // create a stream handler
   std::ostringstream myStrm;
-  Lucee::StreamHandler sh(myStrm);
-
-  // attach it to logger
-  int id = l.addHandler(sh);
+  Lucee::StreamHandler strmHandler(myStrm);
+  strmHandler.attachToLogger("lucee");
 
   // get a stream and log something to it
   Lucee::LogStream dbgStrm = l.getDebugStream();
@@ -39,8 +37,8 @@ test_a()
     myStrm.str() == "Hello World");
 
   // remove stream handler from logger
-  LC_ASSERT("Testing if stream handler can be removed",
-    l.removeHandler(id) == true);
+  LC_ASSERT("Checking if detaching from logger works",
+    strmHandler.detachFromLogger("lucee") == true);
 
   // now try to log to it
   dbgStrm << "This should not be logged";

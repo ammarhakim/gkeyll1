@@ -39,8 +39,10 @@ namespace Lucee
   class Logger : public Lucee::LoggerBase<Logger>
   {
     public:
-/** Delcare LoggeBase as a friend so it access our privates */
+/** Declare LoggeBase as a friend so it access our privates */
       friend class Lucee::LoggerBase<Logger>;
+/** Declare LogRecordHandler as a friend so it access our privates */
+      friend class Lucee::LogRecordHandler;
 
 /** Type for map of levels to strings */
       typedef std::map<unsigned, std::string, std::less<unsigned> > LevelMap_t;
@@ -147,24 +149,6 @@ namespace Lucee
       std::string getLevelStr();
 
 /**
- * Add a new handler to the logger.
- *
- * @param handler Pointer to class LogRecordHandler. 
- * @return integer ID for handler. This can be used to remove the
- * handler from the logger.
- */
-      int addHandler(Lucee::LogRecordHandler& handler);
-
-/**
- * Remove handler from logger.
- *
- * @param handlerId identifier for handler. This is the same value as
- * returned by the addHandler method.
- * @return true if remove worked, false otherwise.
- */
-      bool removeHandler(int handlerId);
-
-/**
  * Disables all logging to this logger. Logging at the original level
  * can be resumed by calling the 'enable' method.
  */
@@ -225,6 +209,24 @@ namespace Lucee
  * @param lg Logger to assign from.
  */
       Logger& operator=(const Logger& lg);
+
+/**
+ * Add a new handler to the logger.
+ *
+ * @param handler Pointer to class LogRecordHandler. 
+ * @return integer ID for handler. This can be used to remove the
+ * handler from the logger.
+ */
+      int addHandler(Lucee::LogRecordHandler& handler);
+
+/**
+ * Remove handler from logger.
+ *
+ * @param handlerId identifier for handler. This is the same value as
+ * returned by the addHandler method.
+ * @return true if remove worked, false otherwise.
+ */
+      bool removeHandler(int handlerId);
 
 /** Pointer to parent logger */
       Logger *_parent;
