@@ -208,7 +208,16 @@ class BuildConf:
             sc_env.Append( LIBS = self.libs )
         
         sc_env['HAVE_%s' % self.pkg] = True
-        conf = sc_env.Configure(config_h = 'lib/config.h')
+        if sc_env['parallel']:
+            if sc_env['debug']:
+                conf = sc_env.Configure(config_h = 'build-par-deb/config.h')
+            else:
+                conf = sc_env.Configure(config_h = 'build-par/config.h')
+        else:
+            if sc_env['debug']:
+                conf = sc_env.Configure(config_h = 'build-deb/config.h')
+            else:
+                conf = sc_env.Configure(config_h = 'build/config.h')
             
         conf.Define('HAVE_%s' % self.pkg)
         conf.Finish()

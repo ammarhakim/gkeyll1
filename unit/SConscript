@@ -67,11 +67,16 @@ myenv.Program('lclogger', ['lclogger.cxx'])
 # lcexprparser
 myenv.Program('lcexprparser', ['lcexprparser.cxx'])
 
+# Parallel messaging tests
 if myparenv['parallel']:
     # MPI messaging tests
-    myparenv.Program('lcparmpimsg',
-                     ['lcparmpimsg.cxx'])
+    myparenv.Program('lcparmpimsg', ['lcparmpimsg.cxx'])
 else:
     # self messaging tests
-    myparenv.Program('lcparselfmsg',
-                     ['lcparselfmsg.cxx'])
+    myenv.Program('lcparselfmsg', ['lcparselfmsg.cxx'])
+
+# HDF5 I/O tests
+if myparenv['parallel']:
+    myparenv.Program('lchdf5io', ['lchdf5io.cxx'])
+else:
+    myenv.Program('lchdf5io', ['lchdf5io.cxx'])

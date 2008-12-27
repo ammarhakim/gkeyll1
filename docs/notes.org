@@ -19,6 +19,12 @@
 
 ** December 2008
 
+*** TODO Rename files
+
+    Rename all files to be camel-cased. Also, what are good names for
+    the I/O and messaging classes? Current names seem very awkward and
+    do not reflect what the classes are for.
+
 *** TODO Fix location where config.h is written
 
     Where to write config.h file? Writing it out to the lib directory

@@ -57,6 +57,9 @@ buildin = config_builddir.configBuildDir(env)
 # add flag to indicate we have config.h header
 env.Append(CCFLAGS = '-DHAVE_CONFIG_H')
 
+# add the build directory to include path to get hold of config.h header
+env.Append(CPPPATH = buildin)
+
 # clone the environment
 myEnv = env.Clone()
 

@@ -22,7 +22,6 @@ namespace Lucee
 {
 
   Hdf5Io::Hdf5Io(MPI_Comm mc, MPI_Info mi) 
-  : IoBase(".h5") 
   {
     // Store mpi stuff, create templated IO objects
     setup(mc, mi);
@@ -69,9 +68,9 @@ namespace Lucee
     H5Pclose(plistId);
     if (fn < 0) 
     {
-      Except wxe("Hdf5Io::Hdf5Io: unable to create file ");
-      wxe << "'" << fileName << "'";
-      throw wxe;
+      Lucee::Except ex("Hdf5Io::Hdf5Io: unable to create file ");
+      ex << "'" << fileName << "'";
+      throw ex;
     }
     addOpenFile(fileNode);
     return fileNode;
@@ -100,9 +99,9 @@ namespace Lucee
     H5Pclose(plistId);
     if (fileNode < 0) 
     {
-      Except wxe("Hdf5Io::Hdf5Io: unable to create file ");
-      wxe << "'" << fileName << "'";
-      throw wxe;
+      Lucee::Except ex("Hdf5Io::Hdf5Io: unable to create file ");
+      ex << "'" << fileName << "'";
+      throw ex;
     }
     addOpenFile(fileNode);
     return fileNode;
