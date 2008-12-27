@@ -54,7 +54,9 @@ if myenv['parallel']:
         'lcparmpitmpl.cc',
         ]
 else:
-    mpi_sources = [
+    mpi_sources = [ 
+        'lcparselfmsg.cc',
+        'lcparselftmpl.cc',
         ]
 
 ##
