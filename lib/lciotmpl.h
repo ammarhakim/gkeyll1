@@ -21,7 +21,6 @@
 
 namespace Lucee
 {
-
 /**
  * IoTmpl is the base class for access to a hierarchical file
  * system with groups, data sets, and attributes for those datasets.

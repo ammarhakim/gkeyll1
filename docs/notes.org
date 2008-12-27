@@ -17,6 +17,14 @@
 
 * Lucee Notes
 
+** December 26th
+
+*** TODO Fix location where config.h is written
+
+    Where to write config.h file? Writing it out to the lib directory
+    does not seem correct as it means recompiling the code even though
+    the build is out of place.
+
 ** December 22nd
    
 *** TODO Complete documentation of all classes.
