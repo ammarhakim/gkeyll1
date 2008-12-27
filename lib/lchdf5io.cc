@@ -59,7 +59,7 @@ namespace Lucee
   {
     // Determine access properties
     hid_t plistId = H5Pcreate(H5P_FILE_ACCESS);
-#ifdef _DO_USE_MPI_
+#ifdef HAVE_MPI
     H5Pset_fapl_mpio(plistId, mpiComm, mpiInfo);
 #endif
     long fn = H5Fcreate(fileName.c_str(), H5F_ACC_TRUNC,
@@ -81,7 +81,7 @@ namespace Lucee
   {
     // Determine MPI access properties
     hid_t plistId = H5Pcreate(H5P_FILE_ACCESS);
-#ifdef _DO_USE_MPI_
+#ifdef HAVE_MPI
     H5Pset_fapl_mpio(plistId, mpiComm, mpiInfo);
 #endif
     // Determine whether writable
