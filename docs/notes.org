@@ -17,16 +17,14 @@
 
 * Lucee Notes
 
-** December 26th
+** December 2008
 
 *** TODO Fix location where config.h is written
 
     Where to write config.h file? Writing it out to the lib directory
-    does not seem correct as it means recompiling the code even though
-    the build is out of place.
+    does not seem correct as it means recompiling the code when
+    building parallel or serial even though nothing else has changed.
 
-** December 22nd
-   
 *** TODO Complete documentation of all classes.
 
     Both in-code and text documentation needed to be completed.
@@ -36,17 +34,17 @@
     May need to get tests more comprehensive. Also, must figure out a
     way of running the tests automatically from a script.
 
-** December 19th
+*** Notes
 
-   First targeted applications for Lucee (a) radiation transport in
-   slabs, (b) PIC/FDTD simulations, and (c) branched cable equations.
+    First targeted applications for Lucee (a) radiation transport in
+    slabs, (b) PIC/FDTD simulations, and (c) branched cable equations.
 
-   Eventually (a) fully implicit MHD solver based on NIMROD
-   algorithms, (b) hyperbolic solvers using WAVE/DG.
+    Eventually (a) fully implicit MHD solver based on NIMROD
+    algorithms, (b) hyperbolic solvers using WAVE/DG.
 
-   Cut-cells or body-fitted grids?
+    Cut-cells or body-fitted grids?
 
-** December 10th
+*** Notes
 
    Lucee will be WarpX successor. A new code was started mainly so
    that I can control its development, rather than worry about a bunch
