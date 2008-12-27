@@ -71,3 +71,7 @@ if myparenv['parallel']:
     # MPI messaging tests
     myparenv.Program('lcparmpimsg',
                      ['lcparmpimsg.cxx'])
+else:
+    # self messaging tests
+    myparenv.Program('lcparselfmsg',
+                     ['lcparselfmsg.cxx'])

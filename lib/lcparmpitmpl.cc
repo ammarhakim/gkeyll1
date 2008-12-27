@@ -9,12 +9,12 @@
  * Licence version 1.0.
  */
 
+// lib includes
 #include <lcdatatypes.h>
 #include <lcparmpitmpl.h>
 
 namespace Lucee
 {
-
   template<typename T>
   void 
   ParMpiTmpl<T>::send(const std::vector<T>& arr, unsigned recvRank, int tag) 
@@ -119,5 +119,4 @@ namespace Lucee
   template class ParMpiTmpl<double>;
   template class ParMpiTmpl<long double>;
   template class ParMpiTmpl<long long int>;
-
 }
