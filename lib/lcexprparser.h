@@ -12,7 +12,7 @@
 #ifndef LC_EXPR_PARSER_H
 #define LC_EXPR_PARSER_H
 
-// wxetc includes
+// etc includes
 #include <mup/muParser.h>
 
 // std includes

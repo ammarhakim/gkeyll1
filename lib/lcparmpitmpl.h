@@ -133,4 +133,4 @@ namespace Lucee
 
 }
 
-#endif //  __wxmpimsgtmpl__
+#endif // LC_PAR_MPI_TMPL_H

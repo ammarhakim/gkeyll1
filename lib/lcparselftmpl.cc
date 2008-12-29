@@ -54,7 +54,7 @@ namespace Lucee
       recvBuff[i] = sendBuff[i];
   }
 
-// instantiate classes for all types define in wxdatatypes.h
+// instantiate classes for all types define in lcdatatypes.h
   template class ParSelfTmpl<char>;
   template class ParSelfTmpl<unsigned char>;
   template class ParSelfTmpl<short>;

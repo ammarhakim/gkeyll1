@@ -50,13 +50,13 @@ namespace Lucee
   }
 
   void * 
-  ParSelfMsg::finishRecv(MsgStatus wxms)
+  ParSelfMsg::finishRecv(MsgStatus lcms)
   {
     return 0;
   }
 
   bool
-  ParSelfMsg::checkRecv(MsgStatus wxms)
+  ParSelfMsg::checkRecv(MsgStatus lcms)
   {
     return true;
   }

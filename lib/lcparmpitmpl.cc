@@ -106,7 +106,7 @@ namespace Lucee
       _comm);
   }
 
-// instantiate classes for all types define in wxdatatypes.h
+// instantiate classes for all types define in lcdatatypes.h
   template class ParMpiTmpl<char>;
   template class ParMpiTmpl<unsigned char>;
   template class ParMpiTmpl<short>;
