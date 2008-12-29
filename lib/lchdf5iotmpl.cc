@@ -22,9 +22,10 @@
 #include <iostream>
 #include <string>
 
-// HDF5
+/**  Use HDF5 1.6 API */
 #define H5_USE_16_API
 #include <hdf5.h>
+/**  Use HDF5 1.6 API */
 #define HDF5_FAIL -1
 
 namespace Lucee

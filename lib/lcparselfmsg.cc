@@ -1,5 +1,5 @@
 /**
- * @file	lcparselfmsg.h
+ * @file	lcparselfmsg.cc
  *
  * @brief	Class for messaging in serial.
  *

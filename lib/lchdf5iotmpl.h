@@ -16,7 +16,7 @@
 #include <lcionodetype.h>
 #include <lciotmpl.h>
 
-// HDF5 includes
+/** HDF5 includes */
 #define H5_USE_16_API
 #include <hdf5.h>
 
@@ -84,7 +84,7 @@ namespace Lucee
 /**
  * Sets the type of this node
  *
- * @param the type of this node
+ * @param type type of this node
  */
       void setNodeType(unsigned type) 
       {
