@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+%% AMS packages and font files
+\usepackage{amsmath} 
+\usepackage{amsfonts}
+%\usepackage[dvipdfm,colorlinks=true]{hyperref}
+\usepackage{verbatim}
+\usepackage{setspace}
+
+
+%% Autoscaled figures
+\usepackage[dvips]{graphicx}
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+
+% page size
+\setlength{\topmargin}{-.31in}
+\setlength{\oddsidemargin}{-.15in}
+\headsep -0.1in
+\textwidth 6.75in
+\textheight 9.0in
+
+\oddsidemargin  0.0in
+\evensidemargin 0.0in
+\textwidth      6.5in
+\textheight     9.0in
+\headheight     1.0in
+\headsep        0.0in
+\leftmargin      1.0in
+\rightmargin      1.0in
+\topmargin      -.75in
+
+\title{Lucee Class Reference Manual}
+\author{Ammar Hakim}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Something or the other}
+
+The \verb=Lucee::KeyValue= class is used to store key-value
+pairs. Arbitrary types can be stored.
+\begin{verbatim}
+  Lucee::Any any; // create empty object
+
+  LC_ASSERT("Testing if object is empty", any.isEmpty()==true);
+\end{verbatim}
+
+\end{document}
