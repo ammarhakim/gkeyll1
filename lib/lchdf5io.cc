@@ -14,7 +14,7 @@
 #include <lchdf5iotmpl.h>
 #include <lcexcept.h>
 
-// hdf5 includes
+/** Use HDF5 1.6 API */
 #define H5_USE_16_API
 #include <hdf5.h>
 

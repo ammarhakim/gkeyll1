@@ -39,44 +39,48 @@ namespace Lucee
 /**
  * Send an array to another rank.
  *
- * @param arr std::vector of data being sent
- * @param recvRank rank that will receive array
+ * @param arr std::vector of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attach to message.
  */
       void send(const std::vector<T>& arr, unsigned recvRank, int tag);
 
 /**
  * Send an array to another rank.
  * 
- * @parem num number of elements to send
- * @param arr array of length 'num' of data being sent
- * @param recvRank rank that will receive array
+ * @param num number of elements to send.
+ * @param arr array of length 'num' of data being sent.
+ * @param recvRank rank that will receive array.
+ * @param tag Tag to attach to message.
  */
       void send(unsigned num, T* arr, unsigned recvRank, int tag);
 
 /**
  * Receive an array from another rank.
  *
- * @param num number of elements to reciev
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to recv.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
  */
       void recv(unsigned num, std::vector<T>& array, unsigned sendRank, int tag);
 
 /**
  * Receive an array from another rank.
  *
- * @param num number of elements to receive
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to receive.
+ * @param array array that is filled with received values.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
  */
       void recv(unsigned num, T* array, unsigned sendRank, int tag);
 
 /**
  * Receive an array from another rank. This is a non-blocking call.
  * 
- * @param num number of elements to receive
- * @param array array that is filled with received values
- * @param sendRank rank that sent array
+ * @param num number of elements to receive.
+ * @param sendRank rank that sent array.
+ * @param tag Tag to attach to message.
  * @return message status
  */
       MsgStatus startRecv(unsigned num, unsigned sendRank, int tag);

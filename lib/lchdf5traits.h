@@ -17,7 +17,7 @@
 # include <config.h>
 #endif
 
-// hdf5
+/** Hdf5 */
 #define H5_USE_16_API
 #include <hdf5.h>
 
@@ -28,44 +28,52 @@ namespace Lucee
  */
   template <typename T> struct Hdf5Traits;
 
-/**
- * HDF5 traits class for char
- */
   template <> struct Hdf5Traits<char> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_CHAR;
       }
   };
 
-/**
- * HDF5 traits class for unsigned char
- */
   template <> struct Hdf5Traits<unsigned char> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_UCHAR;
       }
   };
   
-/**
- * HDF5 traits class for short
- */
   template <> struct Hdf5Traits<short> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_SHORT;
       }
   };
 
-/**
- * HDF5 traits class for unsigned short
- */
   template <> struct Hdf5Traits<unsigned short> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_USHORT;
@@ -74,6 +82,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<int> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_INT;
@@ -82,6 +95,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<unsigned int> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_UINT;
@@ -90,6 +108,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<long> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_LONG;
@@ -98,6 +121,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<unsigned long> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_ULONG;
@@ -106,6 +134,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<float> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_FLOAT;
@@ -114,6 +147,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<double> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_DOUBLE;
@@ -122,6 +160,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<long double>  
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_LDOUBLE;
@@ -130,6 +173,11 @@ namespace Lucee
 
   template <> struct Hdf5Traits<long long> 
   {
+/**
+ * Return HDF5 type for this C++ type.
+ * 
+ * @return HDF5 type.
+ */
       static hid_t hdf5Type() 
       {
         return H5T_NATIVE_LLONG;
