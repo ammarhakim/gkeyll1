@@ -221,14 +221,14 @@ namespace Lucee
     {
       Lucee::KeyValTree kvt_c;
       // parse it
-      KeyValTreeParser<REAL> wxl(*this, kvt_c);
-      wxl.decl();
+      KeyValTreeParser<REAL> kvp(*this, kvt_c);
+      kvp.decl();
       // add it to current cryptset
       kvt.addSet(kvt_c);
       // update values of _sym and _tokenStr. This may be better
       // handled if we make _sym and _tokenStr into some sort of
       // per-class (rather than per-object) variables
-      sym = wxl.sym; tokenStr = wxl.tokenStr;
+      sym = kvp.sym; tokenStr = kvp.tokenStr;
     }
   }
 

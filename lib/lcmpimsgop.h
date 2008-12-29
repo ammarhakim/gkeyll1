@@ -49,4 +49,4 @@ namespace Lucee
   };
 }
 
-#endif // __wxmpimsgop__
+#endif // LC_MPI_MSG_OP_H

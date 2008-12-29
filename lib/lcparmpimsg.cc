@@ -94,20 +94,20 @@ namespace Lucee
   }
 
   void * 
-  ParMpiMsg::finishRecv(MsgStatus wxms)
+  ParMpiMsg::finishRecv(MsgStatus lcms)
   {
-    MpiMsgStatus_v *ms = static_cast<MpiMsgStatus_v *>(wxms);
+    MpiMsgStatus_v *ms = static_cast<MpiMsgStatus_v *>(lcms);
     MPI_Status status;
     MPI_Wait(&ms->request, &status);
     void *data = ms->data;
-    delete wxms;
+    delete lcms;
     return data;
   }
 
   bool
-  ParMpiMsg::checkRecv(MsgStatus wxms)
+  ParMpiMsg::checkRecv(MsgStatus lcms)
   {
-    MpiMsgStatus_v *ms = static_cast<MpiMsgStatus_v *>(wxms);
+    MpiMsgStatus_v *ms = static_cast<MpiMsgStatus_v *>(lcms);
     MPI_Status status;
     int flag;
     MPI_Test(&ms->request, &flag, &status);
