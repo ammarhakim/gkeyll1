@@ -1,14 +1,13 @@
 \documentclass[11pt]{article}
-%% AMS packages and font files
+
 \usepackage{amsmath} 
 \usepackage{amsfonts}
-%\usepackage[dvipdfm,colorlinks=true]{hyperref}
+\usepackage[colorlinks=true]{hyperref}
 \usepackage{verbatim}
 \usepackage{setspace}
-
+\usepackage{graphicx}
 
 %% Autoscaled figures
-\usepackage[dvips]{graphicx}
 \newcommand{\incfig}{\centering\includegraphics}
 \setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
 
@@ -21,23 +20,6 @@
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-% page size
-\setlength{\topmargin}{-.31in}
-\setlength{\oddsidemargin}{-.15in}
-\headsep -0.1in
-\textwidth 6.75in
-\textheight 9.0in
-
-\oddsidemargin  0.0in
-\evensidemargin 0.0in
-\textwidth      6.5in
-\textheight     9.0in
-\headheight     1.0in
-\headsep        0.0in
-\leftmargin      1.0in
-\rightmargin      1.0in
-\topmargin      -.75in
-
 \title{Lucee Class Reference Manual}
 \author{Ammar Hakim}
 \date{}
@@ -45,14 +27,14 @@
 \begin{document}
 \maketitle
 
-\section{Something or the other}
+\section{Classes to read and manipulate input data}
 
-The \verb=Lucee::KeyValue= class is used to store key-value
-pairs. Arbitrary types can be stored.
-\begin{verbatim}
-  Lucee::Any any; // create empty object
-
-  LC_ASSERT("Testing if object is empty", any.isEmpty()==true);
-\end{verbatim}
+Input data in \textsc{Lucee} is represented as a hierarchical tree of
+key-value pairs by the class \verb=Lucee::KeyValTree=. Each node in
+the tree can store key-value pairs, where the keys are strings and
+values are basic types (\verb=int=, \verb=float=, \verb=double=,
+\verb=std::string=, and \verb=std::vectors= of these). In addition,
+each node in the tree can have any number of named child
+\verb=Lucee::KeyValTree= objects.
 
 \end{document}
