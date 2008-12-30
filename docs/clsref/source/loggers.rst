@@ -1,5 +1,11 @@
 .. -*- rst -*-
 
+.. TODO:
+.. 1) Indicate that StreamHandler and FileHandler are children of
+.. LogRecordHandler.
+.. 2) Ensure examples work.
+.. 3) Document the enum LogMsgLevels.
+
 :mod:`Lucee::Logger` --- Logging messages to multiple streams
 =============================================================
 

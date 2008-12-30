@@ -19,17 +19,29 @@
 
 ** December 2008
 
-*** TODO Rename files
+*** TODO Documentation questions and testing examples
+
+    How to indicate that a class is a derived class?
+
+    Make sure that all example code compiled. Maybe create an examples
+    directory in the docs directory or under unit?
+
+*** Rename files
 
     Rename all files to be camel-cased. Also, what are good names for
     the I/O and messaging classes? Current names seem very awkward and
     do not reflect what the classes are for.
 
-*** TODO Fix location where config.h is written
+    Won't do this. There is no need as long as one is consistent
+    throught the project. <2008-12-30 Tue>
+
+*** DONE Fix location where config.h is written
 
     Where to write config.h file? Writing it out to the lib directory
     does not seem correct as it means recompiling the code when
     building parallel or serial even though nothing else has changed.
+
+    Now writing the config.h to the proper build directory.
 
 *** TODO Complete documentation of all classes.
 
