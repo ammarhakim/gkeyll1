@@ -5,6 +5,7 @@
 .. LogRecordHandler.
 .. 2) Ensure examples work.
 .. 3) Document the enum LogMsgLevels.
+.. 4) Indicate header files for each class.
 
 :mod:`Lucee::Logger` --- Logging messages to multiple streams
 =============================================================
