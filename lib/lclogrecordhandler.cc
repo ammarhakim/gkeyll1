@@ -38,7 +38,7 @@ namespace Lucee
   void
   LogRecordHandler::attachToLogger(const std::string& name) 
   {
-    Lucee::Logger& logger = Lucee::Logger::getSafe(name);
+    Lucee::Logger& logger = Lucee::Logger::get(name);
     attachToLogger(logger);
   }
 
@@ -53,7 +53,7 @@ namespace Lucee
   bool
   LogRecordHandler::detachFromLogger(const std::string& name) 
   {
-    Lucee::Logger& logger = Lucee::Logger::getSafe(name);
+    Lucee::Logger& logger = Lucee::Logger::get(name);
     return detachFromLogger(logger);
   }
 

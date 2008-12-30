@@ -78,15 +78,15 @@ test_any_a()
 void
 test_any_b()
 {
-  vector<Lucee::Any> v_wxa;
+  vector<Lucee::Any> v_lca;
 
-  v_wxa.push_back(22);
-  v_wxa.push_back(string("Hello World"));
-  v_wxa.push_back(3.1415);
+  v_lca.push_back(22);
+  v_lca.push_back(string("Hello World"));
+  v_lca.push_back(3.1415);
 
-  LC_ASSERT("Testing value 0", Lucee::any_cast<int>(v_wxa[0]) == 22);
-  LC_ASSERT("Testing value 1", Lucee::any_cast<string>(v_wxa[1]) == "Hello World");
-  LC_ASSERT("Testing value 2", Lucee::any_cast<double>(v_wxa[2]) == 3.1415);
+  LC_ASSERT("Testing value 0", Lucee::any_cast<int>(v_lca[0]) == 22);
+  LC_ASSERT("Testing value 1", Lucee::any_cast<string>(v_lca[1]) == "Hello World");
+  LC_ASSERT("Testing value 2", Lucee::any_cast<double>(v_lca[2]) == 3.1415);
 }
 
 void

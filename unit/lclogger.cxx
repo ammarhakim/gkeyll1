@@ -18,7 +18,7 @@
 void
 test_a()
 {
-  Lucee::Logger& l = Lucee::Logger::get("lucee");
+  Lucee::Logger& l = Lucee::Logger::create("lucee");
 
   // set level for logger
   l.setLevel("debug");
@@ -50,7 +50,6 @@ test_a()
 int
 main(void)
 {
-
   LC_BEGIN_TESTS("lclogger");
   test_a();
   LC_END_TESTS;
