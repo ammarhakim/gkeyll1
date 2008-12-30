@@ -7,10 +7,6 @@
 Lucee reference documentation
 =============================
 
-Lucee (pronounced loo-see) is a framework for developing computational
-physic software. In this manual the key Lucee concepts and classes are
-described.
-
 Contents:
 
 .. toctree::

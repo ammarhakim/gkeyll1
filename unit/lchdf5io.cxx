@@ -123,9 +123,9 @@ main(int argc, char *argv[])
 {
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
-  LC_MPI_BEGIN_TESTS("wxhdf5io_tests");
+  LC_MPI_BEGIN_TESTS("lchdf5io");
 #else
-  LC_BEGIN_TESTS("wxhdf5io_tests");
+  LC_BEGIN_TESTS("lchdf5io");
 #endif
   test_1();
 

@@ -26,7 +26,7 @@ namespace Lucee
   addVariable(const mu::char_type* a_szName, void* a_pUserData) 
   {
     // at most 5000 variables can be defined
-    const unsigned MAX_VARS = 5000;
+    const int MAX_VARS = 5000;
     static double afValBuf[MAX_VARS];
     static int iVal = 0;
 

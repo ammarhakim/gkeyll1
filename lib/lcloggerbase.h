@@ -32,25 +32,15 @@ namespace Lucee
   {
     public:
 /**
- * Returns a logger with a given name. 
- * 
- * If such a logger does not exist a new logger with that name is
- * created and returned. Note that calling this method with the same
- * name will always return the same logger object. Thus once loggers
- * are created they become global objects. The logger names are case
- * sensitive.
+ * Create a logger with a given name. A new logger is created and
+ * returned. Note that calling this method with the same name will
+ * always return the same logger object. Thus once loggers are created
+ * they become global objects. The logger names are case sensitive.
  *
- * @param name specifies the logger to get. 
- * @return the Logger object corresponding to the name.
+ * @param name name of logger to create. 
+ * @return a new logger object.
  */    
-      static T& get(const std::string& name);
-
-/**
- * Returns the default logger.
- *
- * @return default logger
- */
-      static T& getDefault();
+      static T& create(const std::string& name);
 
 /**
  * Returns a logger with a given name. If such a logger does not exist
@@ -59,7 +49,7 @@ namespace Lucee
  * @param name specifies the logger to get. 
  * @return the Logger object corresponding to the name.
  */
-      static T& getSafe(const std::string& name);
+      static T& get(const std::string& name);
 
 /**
  * Delete all loggers registered in the system.
@@ -82,24 +72,20 @@ namespace Lucee
 
   template<class T>
   T&
-  Lucee::LoggerBase<T>::get(const std::string& nm) 
+  Lucee::LoggerBase<T>::create(const std::string& nm) 
   {
-    // TODO, handle this using a const at class level.
-    static const std::string defaultLoggerName("84BEF5E7-16AB-4FFF-A33B-36DD7140AA02");
-
     if (!loggers)
     {
       loggers = new LoggerMap_t();
-      // Create default logger.
-      T *l = new T(defaultLoggerName);
-      loggers->insert(LoggerPair_t(defaultLoggerName, l));
     }          
 
     // check if logger with given name is in map
     typename LoggerMap_t::iterator i = loggers->find(nm);
     if (i != loggers->end())
     {
-      return *i->second;
+      Lucee::Except ex("LoggerBase::create: Logger with name ");
+      ex << nm << " already exists";
+      throw ex;
     }
 
     // it is not, so start creation process
@@ -125,16 +111,7 @@ namespace Lucee
 
   template<class T>
   T&
-  Lucee::LoggerBase<T>::getDefault()
-  {
-    // TODO, handle this using a const at class level.
-    static const std::string defaultLoggerName = "84BEF5E7-16AB-4FFF-A33B-36DD7140AA02";
-    return *Lucee::LoggerBase<T>::get(defaultLoggerName);
-  }
-
-  template<class T>
-  T&
-  Lucee::LoggerBase<T>::getSafe(const std::string& nm) 
+  Lucee::LoggerBase<T>::get(const std::string& nm) 
   {
     if (!loggers)
     {
@@ -147,8 +124,8 @@ namespace Lucee
       return *i->second;
     }
     // thow exception as logger not found
-    Lucee::Except ex;
-    ex << "Logger " << std::string(nm) << " not found";
+    Lucee::Except ex("LoggerBase::get: Logger with name ");
+    ex << nm << " not found";
     throw ex;
   }
 
