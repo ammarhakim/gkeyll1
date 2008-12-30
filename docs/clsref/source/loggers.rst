@@ -25,6 +25,8 @@ multiple streams at the same time.
 Reference for :class:`Lucee::Logger`
 ------------------------------------
 
+Class defined in header file ``lclogger.h``.
+
 .. class:: Lucee::Logger
 
   The class :class:`Lucee::Logger` provides methods to create new
@@ -159,6 +161,8 @@ Reference for :class:`Lucee::Logger`
 Reference for :class:`Lucee::LogRecordHandler`
 ----------------------------------------------
 
+Class defined in header file ``lclogrecordhandler.h``.
+
 .. class:: Lucee::LogRecordHandler
 
   The class :class:`Lucee::LogRecordHandler` is the base class for
@@ -205,6 +209,8 @@ Reference for :class:`Lucee::LogRecordHandler`
 Reference for :class:`Lucee::StreamHandler`
 -------------------------------------------
 
+Class defined in header file ``lcstreamhandler.h``.
+
 .. class:: Lucee::StreamHandler(std::ostream& stream)
 
   :param stream: Standard C++ I/O stream to attach to
@@ -215,6 +221,8 @@ Reference for :class:`Lucee::StreamHandler`
 
 Reference for :class:`Lucee::FileHandler`
 -----------------------------------------
+
+Class defined in header file ``lcfilehandler.h``.
 
 .. class:: Lucee::FileHandler(const std::string& fn, std::ios_base::openmode mode)
 
