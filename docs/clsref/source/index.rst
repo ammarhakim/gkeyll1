@@ -7,11 +7,10 @@
 Lucee reference documentation
 =============================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
+   keyvaltree
    loggers
 
 Indices and tables

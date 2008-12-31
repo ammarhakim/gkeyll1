@@ -1,11 +1,7 @@
 .. -*- rst -*-
 
 .. TODO:
-.. 1) Indicate that StreamHandler and FileHandler are children of
-.. LogRecordHandler.
-.. 2) Ensure examples work.
-.. 3) Document the enum LogMsgLevels.
-.. 4) Indicate header files for each class.
+.. Ensure examples work.
 
 :mod:`Lucee::Logger` --- Logging messages to multiple streams
 =============================================================
@@ -21,6 +17,70 @@ console or text files. Lucee loggers are non-intrusive, i.e.  class
 and function interfaces do not need to be modified to use the
 logger. A single log call puts the message in a controlled manner into
 multiple streams at the same time.
+
+Example usage
+-------------
+
+In the following example a logger with id ``myLogger`` is created and
+its log-level is set to ``info``. This means that all messages which
+have log-level equal or higher than ``info`` will be logged, and all
+other messages will be ignored. Hence, for this particular logger, all
+``debug`` messages will be ignored. The levels, in increasing order
+are, ``debug``, ``info``, ``warning``, ``error`` and ``critical``::
+
+  Lucee::Logger& logger = Lucee::Logger::create("myLogger");
+  logger.setLevel("info");
+
+Once the logger is created we attach it to multiple handlers::
+
+  Lucee::StreamHandler strmHndlr(std::cout);
+  strmHndlr.attachToLogger(logger);
+
+  Lucee::FileHandler fileHndlr("myLogFile");
+  fileHndlr.attachToLogger(logger);
+
+With these handlers all log messages will go to the console and a file
+named "myLogFile". This completes the logger setup, which needs to be
+done, in general, only once at the top level of the application.
+
+Once loggers are created and handlers attached, they can be accessed
+from any point in the code using the :meth:`get` method. To log
+messages, log-streams are used::
+
+  Lucee::Logger& logger = Lucee::Logger::get("myLogger");
+
+  Lucee::LogStream dbgStrm = logger.getDebugStream();
+  dbgStrm << "This is a debug message" << std::endl;
+
+  Lucee::LogStream infoStrm = logger.getInfoStream();
+  infoStrm << "This is a informational message" << std::endl;
+
+As the logger's verbosity is set to ``info``, the first message will
+not appear in the console or the file, but the second message will.
+
+A hierarchical system of loggers can be created by inheriting from an
+existing logger. Child loggers are created by using a dot in the
+logger name::
+
+  Lucee::Logger& childLogger = Lucee::Logger("myLogger.child");
+
+This will create a child logger with id ``child``, which inherits all
+its handlers and its log-level from its parent. However, additional
+handlers can be added and log-level set independently::
+
+  childLogger.setLevel("debug");
+  Lucee::FileHandler childFileHndlr("childLogFile");
+  childFileHndlr.attachToLogger(childLogger);
+
+When messages are logged to the ``childLogger`` they will appear in
+the parent's handlers as well as it own::
+
+  Lucee::LogStream dbgStrm = childLogger.getDebugStrm();
+  dbgStrm << "This is a debug message" << std::endl;
+
+Due to the log-level of the ``childLogger`` the debug message will
+appear in the ``childLogFile`` but not in the parent's handler or the
+console.
 
 Reference for :class:`Lucee::Logger`
 ------------------------------------
@@ -127,14 +187,20 @@ Class defined in header file ``lclogger.h``.
 
     Set the log-level of the logger. The ``level`` parameter must be
     one of the enumerated types defined in the ``Lucee::LogMsgLevels``
-    enumeration.
+    enumeration. Only messages which have a higher level than the
+    logger's log-level will appear in the output. The ``level``
+    parameter must be one of, in increasing order, ``Lucee::DEBUG``,
+    ``Lucee::INFO``, ``Lucee::WARING``, ``Lucee::ERROR`` or,
+    ``Lucee::CRITICAL``.
 
   .. method:: setLevel(const std::string& level)
 
     :param level: Log-level specified as a string.
 
-    Set the log-level of the logger. The ``level`` parameter must be
-    one of "debug", "info", "warning", "error", or "critical".
+    Set the log-level of the logger. Only messages which have a higher
+    level than the logger's log-level will appear in the output. The
+    ``level`` parameter must be one of "debug", "info", "warning",
+    "error" or, "critical".
 
   .. method:: getLevel()
 
@@ -233,69 +299,3 @@ Class defined in header file ``lcfilehandler.h``.
   used to log messages to the file named ``fn``. By default this file
   is truncated (i.e. its contents discarded) if it already exists and
   is created if it does not exist.
-   
-
-Example usage
--------------
-
-The logging interface is defined in the ``lclogger.h`` header file. In
-the following example a logger with id ``myLogger`` is created and its
-log-level is set to ``info``. This means that all messages which have
-log-level equal or higher than ``info`` will be logged, and all other
-messages will be ignored. Hence, for this particular logger, all
-``debug`` messages will be ignored. The levels, in increasing order
-are, ``debug``, ``info``, ``warning``, ``error`` and ``critical``::
-
-  Lucee::Logger& logger = Lucee::Logger::create("myLogger");
-  logger.setLevel("info");
-
-Once the logger is created we attach it to multiple handlers::
-
-  Lucee::StreamHandler strmHndlr(std::cout);
-  strmHndlr.attachToLogger(logger);
-
-  Lucee::FileHandler fileHndlr("myLogFile");
-  fileHndlr.attachToLogger(logger);
-
-With these handlers all log messages will go to the console and a file
-named "myLogFile". This completes the logger setup, which needs to be
-done, in general, only once at the top level of the application.
-
-Once loggers are created and handlers attached, they can be accessed
-from any point in the code using the :meth:`get` method. To log
-messages, log-streams are used::
-
-  Lucee::Logger& logger = Lucee::Logger::get("myLogger");
-
-  Lucee::LogStream dbgStrm = logger.getDebugStream();
-  dbgStrm << "This is a debug message" << std::endl;
-
-  Lucee::LogStream infoStrm = logger.getInfoStream();
-  infoStrm << "This is a informational message" << std::endl;
-
-As the logger's verbosity is set to ``info``, the first message will
-not appear in the console or the file, but the second message will.
-
-A hierarchical system of loggers can be created by inheriting from an
-existing logger. Child loggers are created by using a dot in the
-logger name::
-
-  Lucee::Logger& childLogger = Lucee::Logger("myLogger.child");
-
-This will create a child logger with id ``child``, which inherits all
-its handlers and its log-level from its parent. However, additional
-handlers can be added and log-level set independently::
-
-  childLogger.setLevel("debug");
-  Lucee::FileHandler childFileHndlr("childLogFile");
-  childFileHndlr.attachToLogger(childLogger);
-
-When messages are logged to the ``childLogger`` they will appear in
-the parent's handlers as well as it own::
-
-  Lucee::LogStream dbgStrm = childLogger.getDebugStrm();
-  dbgStrm << "This is a debug message" << std::endl;
-
-Due to the log-level of the ``childLogger`` the debug message will
-appear in the ``childLogFile`` but not in the parent's handler or the
-console.
