@@ -40,16 +40,11 @@ namespace Lucee
   {
     public:
 /**
- * Create nameless key-value tree
- */
-      KeyValTree();
-
-/**
  * Create empty key-value tree with given name.
  *
  * @param name Name of the set
  */
-      KeyValTree(const std::string& name);
+      KeyValTree(const std::string& name="KeyValTree");
 
 /**
  * Destroy key-value tree object
