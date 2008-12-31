@@ -15,11 +15,6 @@
 
 namespace Lucee
 {
-
-  KeyValTree::KeyValTree()
-    : Lucee::KeyVal(), name("")
-  {}
-
   KeyValTree::KeyValTree(const std::string& name)
     : Lucee::KeyVal(), name(name)
   {}

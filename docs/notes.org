@@ -19,6 +19,12 @@
 
 ** December 2008
 
+*** Notes on KeyValTree
+
+    This needs to be rethought. The keys should be unique per-type and
+    not for the complete set. Also, removing sets and keys should be
+    supported.
+
 *** TODO Documentation questions and testing examples
 
     How to indicate that a class is a derived class?
