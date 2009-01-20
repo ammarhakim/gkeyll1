@@ -31,9 +31,13 @@ opts.AddOptions(
 import scripts.config_hdf5s as config_hdf5s
 config_hdf5s.bc.begin(opts)
 
-# ZLIB serial library setup
+# ZLIB library setup
 import scripts.config_z as config_z
 config_z.bc.begin(opts)
+
+# SZIP library setup
+import scripts.config_szip as config_szip
+config_szip.bc.begin(opts)
 
 # update environment with options
 opts.Update(env)
@@ -65,6 +69,13 @@ if config_z.bc.conf(env):
     config_z.bc.finish(myEnv)
 else:
     print "Zlib is required for HDF5, but was not found"
+    Exit(1)
+
+# configure the szip package
+if config_szip.bc.conf(env):
+    config_szip.bc.finish(myEnv)
+else:
+    print "SZIP library not found. Continuing anyway ..."
 
 if env['parallel']:
     # configure MPI if needed    
@@ -98,7 +109,6 @@ if env['parallel']:
             # than 1.6.4 is different
             myEnv.Append(CCFLAGS = '-DH5_HAVE_PARALLEL')
             myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
-            #myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS
     else:
         print "Parallel build needs parallel HDF5, which was not found"
         Exit(1)
@@ -109,7 +119,6 @@ else:
             # for some strange reason HDF5 interface for version great
             # than 1.6.4 is different
             myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
-            #myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS            
     else:
         print "Serial build needs serial HDF5, which was not found"
         Exit(1)
