@@ -30,4 +30,4 @@ for s in etc_sources:
 ##
 # Archive into library
 ##
-Library(libname, objs)
+myenv.Library(libname, objs)
