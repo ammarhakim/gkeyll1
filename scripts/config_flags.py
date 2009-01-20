@@ -2,7 +2,13 @@
 # Configure the flags for C++ compiler
 ##
 
+import os
+
 def configFlags(sc_env):
+    if os.name == 'nt':
+        sc_env.Append(CCFLAGS = '/EHsc /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE')
+        return
+
     # check if we are building for debug
     if sc_env['debug']:
         # add debug only flags
