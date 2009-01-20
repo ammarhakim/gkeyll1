@@ -25,10 +25,6 @@ myparenv.Append(CPPPATH = incs)
 # name of library built with code in this file
 libname = 'lcloki'
 
-# lexical analysis code for WarpX input files
-# This is no longer being used: Wed Dec 20 19:31:43 UTC 2006 (Ammar)
-#wxlexer = myenv.CFile(target = 'wxlexer.cc', source = 'wxlexer.l')
-
 # source files in lib
 sources = [
     'OrderedStatic.cpp',
@@ -50,4 +46,4 @@ for s in sources:
 ##
 # Archive into library
 ##
-Library(libname, objs)
+myenv.Library(libname, objs)

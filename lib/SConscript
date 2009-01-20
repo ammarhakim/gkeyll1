@@ -76,4 +76,4 @@ for s in mpi_sources:
 ##
 # Archive into library
 ##
-Library(libname, objs)
+myenv.Library(libname, objs)
