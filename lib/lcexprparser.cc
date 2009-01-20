@@ -97,11 +97,13 @@ namespace Lucee
     exprStrm << "begin(";
     // add pre-expressions in order they were appended
     unsigned si;
-    for (si=0; si<preExprs.size(); ++si) {
+    for (si=0; si<preExprs.size(); ++si) 
+    {
       exprStrm << preExprs[si] << ", ";
     }
     // add expressions
-    for (si=0; si<exprs.size()-1; ++si) {
+    for (si=0; si<exprs.size()-1; ++si) 
+    {
       std::ostringstream vn;
       vn << "__res" << si << "__";  // temp. name for result
       parser.DefineVar(vn.str(), &res[si]);
