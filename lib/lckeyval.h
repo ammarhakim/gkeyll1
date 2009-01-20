@@ -43,6 +43,11 @@ namespace Lucee
   {
     public:
 /**
+ * Create a new key-value object
+ */
+      KeyVal();
+
+/**
  * Destroy the object
  */
       virtual ~KeyVal();

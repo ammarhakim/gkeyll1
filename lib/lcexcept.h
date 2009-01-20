@@ -27,7 +27,7 @@ namespace Lucee
  * Lucee:Except ex("An exception ");
  * ex << "occured at line " << 25 << std::endl;
  */
-  class Except : public std::exception, public std::ostringstream 
+  class Except : public std::exception
   {
     public:
 /**
@@ -68,6 +68,25 @@ namespace Lucee
  * @return Message from exception.
  */
       virtual const char* what() const throw();
+
+      template <typename T>
+      Except& operator<<(const T& ex)
+      {
+        exceptStrm << ex;
+        return *this;
+      }
+
+      Except& operator<<(std::ostream& (*p)(std::ostream&))
+      {
+        exceptStrm << p;
+        return *this;
+      }
+
+    private:
+/** Stream in which message is stored */
+      mutable std::ostringstream exceptStrm;
+/** String representing exception */
+      mutable std::string exceptMsg;
   };
 }
 
