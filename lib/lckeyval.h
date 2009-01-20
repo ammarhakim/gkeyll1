@@ -76,7 +76,8 @@ namespace Lucee
  * @return true, if insertion worked, false otherwise.
  */
       template<typename VALUETYPE>
-      bool add(const std::string& key, VALUETYPE value) {
+      bool add(const std::string& key, VALUETYPE value) 
+      {
         addKey<VALUETYPE>(key);
         return values.insert( AnyPair_t(key, value) ).second;
       }
@@ -88,7 +89,8 @@ namespace Lucee
  * @return value associated with key
  */
       template <typename VALUETYPE>
-      VALUETYPE get(const std::string& key) const {
+      VALUETYPE get(const std::string& key) const 
+      {
         AnyMap_t::const_iterator i = values.find(key);
         try
         {
@@ -121,7 +123,8 @@ namespace Lucee
  * @return list of keys
  */
       template <typename VALUETYPE>
-      std::vector<std::string> getKeys() const {
+      std::vector<std::string> getKeys() const 
+      {
         return Loki::Field<VALUETYPE, TypeToKeys>(typeToKeys).keys;
       }
 
@@ -136,7 +139,8 @@ namespace Lucee
  * Container to maps types -> keys
  */
       template <typename T>
-      struct TypeContainer {
+      struct TypeContainer 
+      {
 /** List of keys of type T */
           std::vector<std::string> keys;
       };
@@ -154,7 +158,8 @@ namespace Lucee
  * @param key Key to add
  */
       template <typename VALUETYPE>
-      void addKey(const std::string& key) {
+      void addKey(const std::string& key) 
+      {
         Loki::Field<VALUETYPE>(typeToKeys).keys.push_back(key);
       }
 
@@ -164,7 +169,8 @@ namespace Lucee
  * @param kv KeyVal object to copy from
  */
       template <typename T>
-      void copyKeys(const KeyVal& kv) {
+      void copyKeys(const KeyVal& kv) 
+      {
         std::vector<std::string> nms = kv.getKeys<T>();
         std::vector<std::string>::const_iterator i;
         for (i=nms.begin(); i!=nms.end(); ++i)
