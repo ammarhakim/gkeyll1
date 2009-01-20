@@ -89,6 +89,168 @@
 
 * WarpX Notes
 
+** January 2009
+
+*** Regression testing notes
+
+    http://www.warpx.org/wiki/index.php?title=WarpXRegOverview
+
+    The procedure to create a new regression test is simple. 
+
+    First, select an input file for the test you wish to run. Do not
+    select input files which take too long to run. At most the
+    simulation should be run in a minute or so, preferably in a few
+    seconds. If you have a simulation which takes longer, then reduce
+    the end time or the resolution.
+
+    Next, put the input file into the
+
+     warpx/regtests/tests
+
+    directory. This directory already has a bunch of sub-directories
+    inside it. If your test falls into one of the categories, add it
+    to that sub-directory. If not, you will need to add a new
+    sub-directory, put the input file in it. Do not forget to svn-add
+    you new file and sub-directory!
+
+    Next, open the file
+
+      warpx/regtests/xregtests.inp
+
+    This is the file which describes how your test should be
+    run. Notice that this file looks like a usual WarpX input
+    file. Each sub-directory of the warpx/regtests/tests directory has 
+
+*** WarpX general geometry notes
+
+    We have decided to not introduce major changes in the framework
+    but use the existing arrays and subsolvers to handle body fitted
+    grids. Andree will take the lead and will work in the branch
+    geo_jan_08 branch (already created).
+
+    The first step will be get the WAVE algorithm working on
+    body-fitted grids. For this we need to first extend the
+    WxHyperbolicEqn class interface so that each equation system
+    provides a method to rotate the data back and from a local
+    coordinate system. These methods will be called:
+
+    void rotateToLocalFrame
+    void rotateToGlobalFrame
+
+    I am not completely sure of the signature but this will emerge when
+    we start writing the code. We should also provide two more methods
+
+    void rotateToCartLocalFrame
+    void rotateToCartGlobalFrame
+
+    These methods will be used for rotating data for use in the
+    rectangular grid code. Of course, one can still use
+    rotateToLocalFrame method with proper rotation matrices, but it
+    would inefficient to do so when the coordinate system is
+    rectangular.
+
+    Andree will copy the wave2d class and modify it as needed. Mainly
+    we need to add capacity form differencing to the algorithm. See
+    LeVeque's book for details. Also, data will need to be rotated
+    before and after rp() method. We do not use fluxes in WAVE so this
+    should not be a problem for now. Otherwise I think the changes are
+    minor.
+
+    The major work will be in computing the various geometrical
+    quantities needed for the algorithm. For now lets focus on 2D WAVE
+    as described by Randy. For this we need: area of cell, length of
+    left and bottom sides, normals to left and bottom sides. This is 7
+    scalars in all. Actually, the way Randy formulates the algorithm
+    we need the ratio of these quantities in physical space to
+    computational space.
+
+    Towards this end we will assume that the grid in the input file is
+    in the computational space::
+
+      <grid>
+        Type = WxGridBox
+	Lower = [0.0, 0.0]
+	Upper = [1.0, 2*PI]
+	Cells = [10, 50]
+	PeriodicDirs = [1]
+      </grid>
+
+    Then we will allocate a 7 component array which will hold the
+    geometric information::
+
+      <geo>
+        Type = WxVariable
+	Kind = parArray
+
+	OnGrid = grid
+	NumComponents = 7
+	GhostCells = [0, 1]
+      </geo>
+
+    A new SubSolver will be created which will populate this array
+    with the needed elements::
+
+      <calcGeo>
+        Type = WxSubSolver
+	Kind = exprWaveCalcGeo2d
+
+	OnGrid = grid
+	WriteVars = [geo]
+
+	progn = ["r = xc", "theta = yc"]
+	exprs = ["r*cos(theta)", "r*sin(theta)"]
+	 
+      </calcGeo>
+
+    Here we are assuming that the independent variables in
+    computational space will be "xc" and "yc". This SubSolver will
+    compute the "geo" array based on the expression provided. In the
+    future we can imagine creating another subsolver for the DG scheme
+    and Poisson solver.
+
+    The algorithms which need to work on body fitted grids will use
+    the "geo" array in their ReadVars to get a hold of the geometrical
+    quantities.
+
+    Also, for plotting we need the node coordinates. For this we
+    should write another SubSolver which just computes the nodal
+    coordinates::
+
+      <nodalCoords>
+        Type = WxVariable
+	Kind = parArray
+
+	OnGrid = grid
+	NumComponents = 2
+	GhostCells = [0, 1]
+      </nodalCoords>
+
+      <calcNodalCoords>
+        Type = WxSubSolver
+	Kind = exprCalcNodalCoords
+
+	OnGrid = grid
+	WriteVars = [nodalCoords]
+
+	progn = ["r = xc", "theta = yc"]
+	exprs = ["r*cos(theta)", "r*sin(theta)"]
+	 
+      </calcNodalCoords>
+
+    This will store the nodal coordinates into the "nodalCoords"
+    array. This subsolver will be called at StartOnly step. Thus we
+    will have an array of nodes in the output file at each time-step.
+
+    I will be coming to the UW tomorrow and will go over
+    implementation details with Andree. Meanwhile, Andree please check
+    out the branch::
+
+    svn co svn+ssh://warpx@psicenter.org/warpx/branches/geo_jan_08
+
+    Lets aim to do the following this week: create the geo array,
+    initialize another array on the grid and plot that array. Then you
+    can move to the WAVE algorithm.
+
 ** November 19th
    
 *** TODO Add script to generate XMF files from input files

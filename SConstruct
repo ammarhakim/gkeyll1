@@ -31,6 +31,10 @@ opts.AddOptions(
 import scripts.config_hdf5s as config_hdf5s
 config_hdf5s.bc.begin(opts)
 
+# ZLIB serial library setup
+import scripts.config_z as config_z
+config_z.bc.begin(opts)
+
 # update environment with options
 opts.Update(env)
 opts.Save('options.cache', env) # save stuff to cache
@@ -55,6 +59,12 @@ env.Append(CPPPATH = buildDir)
 
 # clone the environment
 myEnv = env.Clone()
+
+# we must first configure the Zlib package
+if config_z.bc.conf(env):
+    config_z.bc.finish(myEnv)
+else:
+    print "Zlib is required for HDF5, but was not found"
 
 if env['parallel']:
     # configure MPI if needed    
