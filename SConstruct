@@ -21,23 +21,15 @@ opts = Options(['options.cache', 'config.py'])
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
-    ('CC', 'The C compiler to use', 'gcc'),
-    ('CXX', 'The C++ compiler to use', 'g++'),
+#    ('CC', 'The C compiler to use', 'gcc'),
+#    ('CXX', 'The C++ compiler to use', 'g++'),
     ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
 
-# MPI library setup
-import scripts.config_mpi as config_mpi
-config_mpi.bc.begin(opts)
-
 # HDF5 serial library setup
 import scripts.config_hdf5s as config_hdf5s
 config_hdf5s.bc.begin(opts)
-
-# HDF5 parallel library setup
-import scripts.config_hdf5p as config_hdf5p
-config_hdf5p.bc.begin(opts)
 
 # update environment with options
 opts.Update(env)
