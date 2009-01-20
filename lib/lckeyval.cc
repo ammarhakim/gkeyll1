@@ -14,6 +14,10 @@
 
 namespace Lucee
 {
+  KeyVal::KeyVal()
+  {
+  }
+
   KeyVal::~KeyVal() 
   {
     // delete all entries in map

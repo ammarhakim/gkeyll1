@@ -25,9 +25,8 @@ namespace Lucee
   }
 
   Except::Except(const Except& ex)
-    : std::exception(ex) 
   {
-    (*this) << ex.str();
+    (*this) << ex.exceptStrm.str();
   }
 
   Except::~Except() throw()
@@ -38,14 +37,14 @@ namespace Lucee
   Except::operator=(const Except& ex)
   {
     if (this==&ex) return *this;
-    (*this).str(""); // zap the string
-    (*this) << ex.str();
+    this->exceptStrm.str(""); // zap the string
+    (*this) << ex.exceptStrm.str();
     return *this;
   }
 
   const char*
   Except::what() const throw()
   {
-    return this->str().c_str();
+    return this->exceptStrm.str().c_str();
   }
 }

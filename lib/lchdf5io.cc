@@ -14,8 +14,9 @@
 #include <lchdf5iotmpl.h>
 #include <lcexcept.h>
 
-/** Use HDF5 1.6 API */
-#define H5_USE_16_API
+#ifndef H5_USE_16_API
+# define H5_USE_16_API
+#endif
 #include <hdf5.h>
 
 namespace Lucee

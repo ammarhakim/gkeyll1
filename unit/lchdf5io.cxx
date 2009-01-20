@@ -19,7 +19,6 @@
 #include <lctest.h>
 
 // HDF5 includes
-#define H5_USE_16_API
 #include <hdf5.h>
 
 void

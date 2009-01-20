@@ -88,7 +88,7 @@ if env['parallel']:
             # than 1.6.4 is different
             myEnv.Append(CCFLAGS = '-DH5_HAVE_PARALLEL')
             myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
-            myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS
+            #myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS
     else:
         print "Parallel build needs parallel HDF5, which was not found"
         Exit(1)
@@ -99,7 +99,7 @@ else:
             # for some strange reason HDF5 interface for version great
             # than 1.6.4 is different
             myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
-            myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS            
+            #myEnv.Append(LIBS = 'z') # I DO NOT KNOW HOW THIS WORKS            
     else:
         print "Serial build needs serial HDF5, which was not found"
         Exit(1)
