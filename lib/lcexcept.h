@@ -31,44 +31,50 @@ namespace Lucee
   {
     public:
 /**
- * Create a new exception object with empty message.
+ * Creates a new exception object with empty message.
  */
       Except();
 
 /**
- * Create new exception with supplied message.
+ * Creates new exception with supplied message.
  *
  * @param str exception message.
  */
       Except(const std::string& str);
 
 /**
- * Copy expection from supplied expection object.
+ * Copies expection from supplied expection object.
  *
  * @param ex Excpetion to copy from
  */
       Except(const Except& ex);
 
 /**
- * Destroy exception.
+ * Deletes exception.
  */
       virtual ~Except() throw();
 
 /**
- * Assignment operator from supplied expection object.
+ * Assigns from supplied expection object.
  *
  * @param ex Excpetion to copy from
  */
       Except& operator=(const Except& ex);
 
 /**
- * Return error message: this is provided for compatibility with
+ * Returns error message: this is provided for compatibility with
  * std::exception interface.
  *
  * @return Message from exception.
  */
       virtual const char* what() const throw();
 
+/**
+ * Inserts an element into the output message.
+ *
+ * @param ex Element to insert.
+ * @return reference to this class.
+ */
       template <typename T>
       Except& operator<<(const T& ex)
       {
@@ -76,6 +82,12 @@ namespace Lucee
         return *this;
       }
 
+/**
+ * Inserts iomanip element into the output message.
+ *
+ * @param ex Iomanip element to insert.
+ * @return reference to this class.
+ */
       Except& operator<<(std::ostream& (*p)(std::ostream&))
       {
         exceptStrm << p;
