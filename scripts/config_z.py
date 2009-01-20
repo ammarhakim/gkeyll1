@@ -2,7 +2,13 @@
 # Find Z libs
 ##
 
+import os
 from buildconf import BuildConf
+
+if os.name == 'nt':
+    zlib = 'zlib'
+else:
+    zlib = 'z'
 
 bc = BuildConf(
 # package name
@@ -18,7 +24,7 @@ bc = BuildConf(
 # list of include directories
     [],
 # libraries to look for
-    ['z'],
+    [zlib],
 # list of link directories
     ['lib']
     )
