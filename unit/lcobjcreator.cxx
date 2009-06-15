@@ -18,13 +18,6 @@
 #include <loki/Factory.h>
 #include <loki/Singleton.h>
 
-template <typename B>
-class FactoryBase
-{
-  public:
-    typedef Loki::SingletonHolder<Loki::Factory<B, std::string> > ObjFactory;
-};
-
 class Base
 {
   public:
