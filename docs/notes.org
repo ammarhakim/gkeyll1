@@ -89,37 +89,45 @@
 
 * WarpX Notes
 
+** Febuary 2009
+
+*** Integrating Lucee into WarpX
+
+    The core WarpX library needs to be slowly migrated to Lucee
+    code. For now Lucee core code will be copied into WarpX and the
+    Lucee namepsace will be replaced by WarpX. Then typedefs (or
+    defines) will be introduced to make the rest of the code to use Wx
+    instead of the WarpX namespace. Maybe just use the full
+    namespacing?
+
+    This needs to be done so that the basic framework is well
+    documented and tested.
+
+*** More work on general geometry
+
+    For wave2d:
+
+    - Redo the CFL checking code to make sure we use the proper cell
+      volume for this.
+    - Complete the transverse solvers for use in wave2d.
+    - Add a new subsolver to read data from an h5 file. This needs to
+      support reading of nodal coordinates for use in the general
+      geometry subsolvers.
+    - Implement wall BCs for PhMaxwell and Euler equations.
+    - Convert the output to Vizschema format. Then we can use Visit to
+      plot the results.
+
+    For DG:
+
+    - Derive the equations needed to update the solution. For this we
+      need to figure out (a) integration for volumes and surfaces, (b)
+      basis functions to use, (c) mass-matrix and its inversion.
+
 ** January 2009
 
 *** Regression testing notes
 
-    http://www.warpx.org/wiki/index.php?title=WarpXRegOverview
-
-    The procedure to create a new regression test is simple. 
-
-    First, select an input file for the test you wish to run. Do not
-    select input files which take too long to run. At most the
-    simulation should be run in a minute or so, preferably in a few
-    seconds. If you have a simulation which takes longer, then reduce
-    the end time or the resolution.
-
-    Next, put the input file into the
-
-     warpx/regtests/tests
-
-    directory. This directory already has a bunch of sub-directories
-    inside it. If your test falls into one of the categories, add it
-    to that sub-directory. If not, you will need to add a new
-    sub-directory, put the input file in it. Do not forget to svn-add
-    you new file and sub-directory!
-
-    Next, open the file
-
-      warpx/regtests/xregtests.inp
-
-    This is the file which describes how your test should be
-    run. Notice that this file looks like a usual WarpX input
-    file. Each sub-directory of the warpx/regtests/tests directory has 
+    http://www.warpx.org/wiki/index.php?title=Warpx:Community_Portal#Regression_testing_WarpX
 
 *** WarpX general geometry notes
 
@@ -728,3 +736,51 @@
     Bhuvana has fixed problem. Turns out that the auxillary variables
     needed to be set to 0 before computing the RHS for the auxillary
     equations. <2008-08-12 Tue>
+
+* FACETS Notes
+
+** Week of Feb 16th
+
+   Added getRankOfInterface(ifc) method. This method takes the name of
+   the interface, for example "CE" or "CS" etc and returns the rank in
+   the component which should be used for communication. For this,
+   another method getParentRankForChildRank(nm, rk) was added. This
+   method returns the rank in the parent's communicator corresponding
+   to the rank in the child communicator.
+
+   Hence, in an updater, when one needs to communicate data between
+   two children component, one needs to do:
+
+     int cr1 = child1->getRankOfInterface(ifc);
+     int cr2 = child1->getRankOfInterface(ifc);
+
+     int pr1 = this->getParentRankForChildRank(child1Name, cr1);
+     int pr2 = this->getParentRankForChildRank(child2Name, cr2);
+
+   Then one can communicate using pr1 and pr2.
+
+   The above does not work as-is. Unfortunately one can not query a
+   child for the interface rank because it may not be valid on all
+   processors. For example, consider the core-edge case. When we are
+   on the core PEs we need to know which PE of the edge to send the
+   data to. Unfortunately we can't query the edge component for its
+   getRankOfInterface() as the edge component is not valid on core
+   PEs.
+
+   Hence, the map of the IFC -> rank needs to be stored in the parent
+   in a manner that this map is valid on all processors. This involves
+   adding the following method to each component:
+
+     std::vector<std::string> getNamesOfInterfaces() const;
+
+   This will return to the parent what interfaces a component
+   supports. Then in the FcComponent::setAttrib() the parent uses this
+   to query the rank for that interface, broadcasts it to all
+   processors in its communicator and stores it. Then, the updaters
+   can use instead:
+
+     int getRankOfInterface(childName, ifcName);
+
+   rather than directly querying the child component's
+   getRankOfInterface().
+
