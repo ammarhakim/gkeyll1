@@ -32,26 +32,25 @@ namespace Lucee
  * duplicates exist in the list.
  */
   typedef LOKI_TYPELIST_19(
-      bool,
-      char,
-      unsigned char,
-      short,
-      unsigned short,
-      int,
-      unsigned int,
-      long,
-      unsigned long,
-      float,
-      double,
-      long double,
-      long long int,
-      std::string, 
-      std::vector<int>,
-      std::vector<float>,
-      std::vector<double>,
-      std::vector<std::string>,
-      std::vector<Lucee::Any>
-                           ) DataTypes_t;
+    bool,
+    char,
+    unsigned char,
+    short,
+    unsigned short,
+    int,
+    unsigned int,
+    long,
+    unsigned long,
+    float,
+    double,
+    long double,
+    long long int,
+    std::string, 
+    std::vector<int>,
+    std::vector<float>,
+    std::vector<double>,
+    std::vector<std::string>,
+    std::vector<Lucee::Any>) DataTypes_t;
 }
 
 #endif // LC_DATA_TYPES_H
