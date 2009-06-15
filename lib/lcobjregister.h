@@ -51,7 +51,6 @@ namespace Lucee
         return new D;
       }
   };
-
 }
 
 #endif // LC_OBJ_REGISTER_H

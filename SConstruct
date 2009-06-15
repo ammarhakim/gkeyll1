@@ -21,8 +21,6 @@ opts = Options(['options.cache', 'config.py'])
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
-#    ('CC', 'The C compiler to use', 'gcc'),
-#    ('CXX', 'The C++ compiler to use', 'g++'),
     ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
