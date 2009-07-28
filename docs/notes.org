@@ -17,6 +17,86 @@
 
 * Lucee Notes
 
+** 27th July 2009: Rethinking Lucee
+
+   The basic architecture of Lucee needs to be radically different
+   from WarpX or FACETS. The problem with them is that the code which
+   runs the simulation is too closely tied to the code which
+   implements the algorithms. A clear separation is needed between
+   these two aspects of the system.
+
+   The low level code should consist of data-structures (for example,
+   arrays), grids and solvers. These objects should be stand alone in
+   the sense that they should not rely on being initialized or have
+   access to a specific parent object. This decoupling of the basic
+   object will allow the creation of complex high-level code to
+   control simulations. In fact, the high-level code should be written
+   in a high-level language like Common Lisp and be fully compatible
+   with it.
+
+   For example, the basic grid class could be constructed::
+
+     Lucee::CartGrid grid("grid");
+     double lower[2] = {0.0, 0.0};
+     double upper[2] = {1.0, 1.0}
+     unsigned cells[2] = {20, 20};
+     grid.setLower(lower);
+     grid.setUpper(upper);
+     grid.setCells(cells);
+     
+     grid.init();
+
+   From C, for example one can do::
+
+     LuceeCartGrid *grid = makeLuceeCartGrid("grid");
+     grid->setLower(lower);
+     grid->setUpper(upper);
+     ...
+   
+   Solver objects can be created::
+
+     Lucee::Array inpArr("inpArr"), outArr("outArr");
+     unsigned shape[2] = {20, 20};
+     inArr.setShape(shape);
+
+     inArr.init();
+
+     Lucee::Solver fluidSlvr("fluid");
+     // set up the solver object
+
+     // append input/output variables
+     fluidSlvr.setInpVar(0, inpArr);
+     fluidSlvr.setOutVar(0, outArr);
+
+     // solve equation
+     double t = 0.01;
+     fluidSlvr.advance(t);
+
+   This will allow construction of simulations by stringing together
+   sequence of solvers. For example, one can run solvers in a loop::
+
+     double tcurr = 0.0, tend = 1.0;
+     double dt = 0.1;
+     while (tcurr < tend) {
+       fluidSlvr.setInpVar(0, inpArr);
+       fluidSlvr.setOutVar(0, outArr);
+       fluidSlvr.advance(tcurr, dt);
+
+       // copy output to input array
+       copySlvr.setInpVar(0, outArr);
+       copySlvr.setOutVar(0, inpArr);
+       copySlvr.advance(tcurr, dt); // dt is ignored
+
+       tcurr += dt; // advance current time
+
+     }
+
+   Hence, each object needs a series of methods to (a) set various
+   values and fetch them (b) initialize after all sets have been
+   called (c) reset the object after calling more sets. In general
+   sets called after init() should be ignored. How to ensure
+   this?
+
 ** December 2008
 
 *** Notes on KeyValTree
