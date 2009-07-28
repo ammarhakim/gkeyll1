@@ -18,6 +18,10 @@
 void
 test_a()
 {
+  // check if we can get a non-existing logger
+  LC_RAISES("Checking if we can get non-existing logger",
+    Lucee::Logger::get("lucee"), Lucee::Except);
+
   Lucee::Logger& l = Lucee::Logger::create("lucee");
 
   // set level for logger
