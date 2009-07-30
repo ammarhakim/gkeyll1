@@ -17,7 +17,21 @@
 
 * Lucee Notes
 
+** 30th July 2009: Documentation notes. Again.
+
+   A good option for producing Lucee documentation is texinfo
+   system. It produces both printed as well as on-line documentation
+   from a single source. Also, TeX markup is supported for use in
+   printed manuals.
+
+   The style one should adopt is to write the documentation at the
+   same time as one writes the code. This will ensure that all code is
+   documented when it is written and documentation does not become a
+   burden, something to be done later on.
+
 ** 27th July 2009: Rethinking Lucee
+
+   Lucee should be a physics first code.
 
    The basic architecture of Lucee needs to be radically different
    from WarpX or FACETS. The problem with them is that the code which
@@ -40,24 +54,24 @@
      double lower[2] = {0.0, 0.0};
      double upper[2] = {1.0, 1.0}
      unsigned cells[2] = {20, 20};
-     grid.setLower(lower);
-     grid.setUpper(upper);
-     grid.setCells(cells);
+     grid.lower = lower;
+     grid.upper = upper;
+     grid.cells = cells;
      
      grid.init();
 
    From C, for example one can do::
 
      LuceeCartGrid *grid = makeLuceeCartGrid("grid");
-     grid->setLower(lower);
-     grid->setUpper(upper);
+     grid->lower = lower;
+     grid->upper = upper;
      ...
    
    Solver objects can be created::
 
      Lucee::Array inpArr("inpArr"), outArr("outArr");
      unsigned shape[2] = {20, 20};
-     inArr.setShape(shape);
+     inArr.shape = shape;
 
      inArr.init();
 
@@ -92,10 +106,11 @@
      }
 
    Hence, each object needs a series of methods to (a) set various
-   values and fetch them (b) initialize after all sets have been
-   called (c) reset the object after calling more sets. In general
-   sets called after init() should be ignored. How to ensure
-   this?
+   values and fetch them. These should be basic types (int, double,
+   string and vectors of these) and directly accessible (b) initialize
+   after all sets have been called (c) reset the object after calling
+   more sets. In general sets called after init() should be
+   ignored. How to ensure this?
 
 ** December 2008
 
