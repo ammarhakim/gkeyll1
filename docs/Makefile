@@ -7,4 +7,4 @@ pdf : lucee-ref.texi
 	pdftex lucee-ref.texi
 
 clean:
-	rm -rf lucee-ref.pdf html *.dvi *.tp *.ky *.toc *.vt *.aux *.cp *.fn *.pg *.vr
+	rm -rf lucee-ref.pdf html *.dvi *.tp *.ky *.toc *.vt *.aux *.cp *.fn *.pg *.vr *.log *~
