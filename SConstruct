@@ -21,8 +21,6 @@ opts = Options(['options.cache', 'config.py'])
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
-    ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
-    ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
 
 # update environment with options
@@ -40,31 +38,25 @@ config_flags.configFlags(env)
 import scripts.config_builddir as config_builddir
 buildin = config_builddir.configBuildDir(env)
 
-# add flag to indicate we have config.h header
-env.Append(CCFLAGS = '-DHAVE_CONFIG_H')
-
 # add the build directory to include path to get hold of config.h header
 buildDir = '#%s' % buildin
 env.Append(CPPPATH = buildDir)
+
+# add flag to indicate we have config.h header
+if os.path.exists('%s/config.h' % buildDir):
+    env.Append(CCFLAGS = '-DHAVE_CONFIG_H')
 
 # clone the environment
 myEnv = env.Clone()
 
 # create fresh clones to pass to our sub-builds
 env = myEnv.Clone()
-parenv = env.Clone()
-
-# add extra compiler and link flags if needed
-if env['EXTRA_CCFLAGS'] != '':
-    env.Append(CCFLAGS = env['EXTRA_CCFLAGS'])
-    parenv.Append(CCFLAGS = env['EXTRA_CCFLAGS'])
-if env['EXTRA_LINKFLAGS'] != '':
-    env.Append(LINKFLAGS = env['EXTRA_LINKFLAGS'])
-    parenv.Append(LINKFLAGS = env['EXTRA_LINKFLAGS'])
 
 # export environments to sub-builds
 Export('env')
-Export('parenv')
 
-# list of various object files that do registration
-reg_objs = []
+##
+# build core library
+##
+build_dir = os.path.join(buildin, 'lib')
+SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)

@@ -3,7 +3,7 @@
 @c @input config-local.texi
 @c %**start of header
 @setfilename lucee-ref.info
-@settitle Lucee: A Universal Computational Engine -- Reference Manual
+@settitle Lucee: Computational Physics Framework
 @finalout
 @ifset publish
 @set frontcontents
@@ -98,34 +98,15 @@
 \gdef\sinc{\hbox{\rm sinc}}
 @end tex
 
-@iftex
-@copying
-Copyright @copyright{} 2009 Ammar H. Hakim
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled ``GNU Free
-Documentation License''.
-
-@end copying
-@end iftex
-
 @titlepage
-@title Lucee: A Universal Computational Engine
+@title Lucee: Computational Physics Framework
 @subtitle Reference Manual
 
 @author Ammar H. Hakim
 Boulder, Colorado
-@comment @email{a.hakim777@gmail.com}
 @sp 1
 
 @end titlepage
-
-@ifset frontcontents
-@contents
-@end ifset
 
 @ifset frontcontents
 @contents
