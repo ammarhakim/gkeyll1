@@ -1,0 +1,38 @@
+## -*- python -*-
+##
+# Build code and create library
+#
+# Copyright &copy; 2008-2009, Ammar Hakim.
+##
+
+Import('env')
+
+incs = [
+    '.',
+    '#etc',
+    ]
+
+# make a local copy of the build environment
+myenv = env.Clone()
+myenv.Append(CPPPATH = incs)
+
+# name of library built with code in this file
+libname = 'lclib'
+
+# source files in lib
+sources = [
+    'LcObject.cc'
+    ]
+
+##
+# compile sources and add them to list of objects
+##
+objs = []
+for s in sources:
+    o = myenv.Object(s)
+    objs.append(o)
+
+##
+# Archive into library
+##
+myenv.Library(libname, objs)
