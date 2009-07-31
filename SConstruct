@@ -60,3 +60,9 @@ Export('env')
 ##
 build_dir = os.path.join(buildin, 'lib')
 SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
+
+##
+# build core library
+##
+build_dir = os.path.join(buildin, 'unit')
+SConscript('unit/SConscript', build_dir=build_dir, duplicate=0)

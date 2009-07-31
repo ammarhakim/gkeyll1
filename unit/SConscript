@@ -1,0 +1,33 @@
+## -*- python -*-
+
+##
+# Unit-tests
+##
+
+Import('env')
+
+# Include directories
+incs = [
+    '.',
+    '#lib',
+    '#etc',
+    ]
+
+# Libraries to link to
+libs = [
+    'lclib',
+        ]
+
+# Library paths
+libp = ['../lib',
+        '../etc',
+        ]
+
+# add paths and libraries to environment
+myenv = env.Clone()
+myenv.Append(CPPPATH = incs)
+myenv.Prepend(LIBS = libs)
+myenv.Append(LIBPATH = libp)
+
+# lcany
+myenv.Program('lcarray', ['lcarray.cxx'])

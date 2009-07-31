@@ -22,7 +22,7 @@
 namespace Lucee
 {
   template <unsigned NDIM, typename T>
-  class Array : Lucee::Object
+  class Array
   {
     public:
 /**
@@ -41,6 +41,13 @@ namespace Lucee
  * @param init Initial value to assign to all elements.
  */
       Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);
+
+/**
+ * Get rank of array.
+ *
+ * @return Rank of array.
+ */
+      unsigned getRank() const { return NDIM; }
 
 /**
  * Get shape of array.
