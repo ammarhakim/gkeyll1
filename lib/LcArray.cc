@@ -15,7 +15,6 @@ namespace Lucee
 {
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], const T& init) 
-    : Lucee::Object("Lucee::Array")
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -26,7 +25,6 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
-  : Lucee::Object("Lucee::Array")
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
