@@ -112,14 +112,7 @@ Boulder, Colorado
 @contents
 @end ifset
 
-@menu
-* Introduction::                
-
-@end menu
-
-@node  Introduction
-@chapter Introduction
-Hello world.
-@comment @include intro.texi
+@chapter Basic Classes
+@include basic.texi
 
 @bye
