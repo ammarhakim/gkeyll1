@@ -82,6 +82,8 @@ namespace Lucee
       unsigned shape[NDIM];
 /** Start index of array */
       int start[NDIM];
+/** Pointer to actual data */
+      T *data;
   };
 }
 

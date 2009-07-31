@@ -52,3 +52,7 @@ Returns @emph{one past} the last index in direction @code{dir}.
 @deftypemethod Lucee::Array @code{T} operator() @code{int} i @code{int} j ...
 Access element at @math{(i,j,\ldots)} index location in array.
 @end deftypemethod
+
+@deftypemethod Lucee::Array @code{Lucee::Array&} operator= @code{T} val
+Set all elements of array to @code{val}.
+@end deftypemethod
