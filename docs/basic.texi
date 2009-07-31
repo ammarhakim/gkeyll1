@@ -1,1 +1,54 @@
 This chapter describes the basic infrastructure classes in Lucee.
+
+@section @code{Lucee::Array}: Serial arrays.
+@cindex serial arrays
+
+@subsection Overview
+
+The @code{Lucee::Array} class provides serial array of arbitrary rank
+(dimensions). By default arrays are zero-based but other start indices
+can also be specified. Arrays can be created by specifying the shape
+and, optionally, the starting index along each rank.
+
+@example
+#include <LcArray.h>
+
+unsigned shape[2] = @{5, 10@};
+Lucee::Array<2, doube> arr1(shape);
+
+int start[2] = @{2, 0@};
+Lucee::Array<2, double> arr2(shape, start);
+@end example
+
+@noindent
+This will create rank-two @math{5\times 10} arrays @code{arr1}, indexed
+starting @math{(0,0)}, and @code{arr2}, indexed starting
+@math{(2,0)}. One can now loop over the arrays, setting them:
+
+@example
+for (int i=arr1.getStart(0); i<arr1.getEnd(0); ++i)
+  for (int j=arr1.getStart(1); j<arr1.getEnd(1); ++j)
+    arr1(i,j) = i+j;
+@end example
+
+@subsection Reference
+
+@deftypemethod Lucee::Array void getShape @code{unsigned[NDIM]} shape
+Returns the shape of the array.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @code{unsigned} getShape @code{int} dir
+Returns the shape of the array in direction @code{dir}.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @code{int} getStart @code{int} dir
+Returns the starting index in direction @code{dir}.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @code{int} getEnd @code{int} dir
+Returns @emph{one past} the last index in direction @code{dir}.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @code{T} operator() @code{int} i @code{int} j
+Access method for @math{(i,j,\ldots)} index location in arrary.
+@end deftypemethod
