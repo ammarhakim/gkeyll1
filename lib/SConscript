@@ -21,6 +21,7 @@ libname = 'lclib'
 
 # source files in lib
 sources = [
+    'LcArray.cc',
     'LcObject.cc'
     ]
 
