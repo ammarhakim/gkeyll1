@@ -1,5 +1,5 @@
 /**
- * @file	lcobject.h
+ * @file	LcObject.h
  *
  * @brief	Base class for all Lucee objects
  *
