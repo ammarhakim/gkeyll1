@@ -90,6 +90,22 @@ namespace Lucee
       int getEnd(unsigned dir) const;
 
 /**
+ * Accessor function for array.
+ *
+ * @param idx Indices into array.
+ * @return Reference to value at index.
+ */
+      T& operator()(int idx[NDIM]);
+
+/**
+ * Accessor function for array.
+ *
+ * @param idx Indices into array.
+ * @return Value at index.
+ */
+      T operator()(int idx[NDIM]) const;
+
+/**
  * Accessor function for 1D array.
  *
  * @param i Index into array.
@@ -101,7 +117,7 @@ namespace Lucee
  * Accessor function for 1D array.
  *
  * @param i Index into array.
- * @return Reference to value at (i).
+ * @return Value at (i).
  */
       T operator()(int i) const;
 
@@ -119,7 +135,7 @@ namespace Lucee
  *
  * @param i Index into array.
  * @param j Index into array.
- * @return Reference to value at (i,j).
+ * @return Value at (i,j).
  */
       T operator()(int i, int j) const;
 
@@ -139,7 +155,7 @@ namespace Lucee
  * @param i Index into array.
  * @param j Index into array.
  * @param k Index into array.
- * @return Reference to value at (i,j,k).
+ * @return Value at (i,j,k).
  */
       T operator()(int i, int j, int k) const;
 
@@ -155,13 +171,13 @@ namespace Lucee
       T& operator()(int i, int j, int k, int l);
 
 /**
- * Accessor function for 3D array.
+ * Accessor function for 4D array.
  *
  * @param i Index into array.
  * @param j Index into array.
  * @param k Index into array.
  * @param l Index into array.
- * @return Reference to value at (i,j,k,l).
+ * @return Value at (i,j,k,l).
  */
       T operator()(int i, int j, int k, int l) const;
 
@@ -262,6 +278,76 @@ namespace Lucee
   Array<NDIM, T>::getEnd(unsigned dir) const
   {
     return start[dir]+shape[dir];
+  }
+
+  template <unsigned NDIM, typename T>
+  T&
+  Array<NDIM, T>::operator()(int idx[NDIM])
+  {
+    return data[indexer.getIndex(idx)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T 
+  Array<NDIM, T>::operator()(int idx[NDIM]) const
+  {
+    return data[indexer.getIndex(idx)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T&
+  Array<NDIM, T>::operator()(int i)
+  {
+    return data[indexer.getIndex(i)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T
+  Array<NDIM, T>::operator()(int i) const
+  {
+    return data[indexer.getIndex(i)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T&
+  Array<NDIM, T>::operator()(int i, int j)
+  {
+    return data[indexer.getIndex(i, j)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T
+  Array<NDIM, T>::operator()(int i, int j) const
+  {
+    return data[indexer.getIndex(i, j)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T&
+  Array<NDIM, T>::operator()(int i, int j, int k)
+  {
+    return data[indexer.getIndex(i, j, k)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T
+  Array<NDIM, T>::operator()(int i, int j, int k) const
+  {
+    return data[indexer.getIndex(i, j, k)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T& 
+  Array<NDIM, T>::operator()(int i, int j, int k, int l)
+  {
+    return data[indexer.getIndex(i, j, k, l)];
+  }
+
+  template <unsigned NDIM, typename T>
+  T 
+  Array<NDIM, T>::operator()(int i, int j, int k, int l) const
+  {
+    return data[indexer.getIndex(i, j, k, l)];
   }
 }
 

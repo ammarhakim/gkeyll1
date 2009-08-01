@@ -34,6 +34,8 @@ namespace Lucee
  */
       ArrayIndexerBase(int start[NDIM], unsigned shape[NDIM])
       {
+        for (unsigned i=0; i<NDIM+1; ++i)
+          ai[i] = 0;
       }
 
 /**

@@ -46,10 +46,20 @@ test_array_1()
   LC_ASSERT("Testing size of array", 50 == arr2.getSize());
 }
 
+void
+test_array_2()
+{
+  unsigned shape[2] = {5, 10};
+  Lucee::Array<2, double> arr1(shape);
+
+  arr1(2,3) = 0.0;
+}
+
 int
 main(void) 
 {
   LC_BEGIN_TESTS("lcarray");
   test_array_1();
+  test_array_2();
   LC_END_TESTS;
 }
