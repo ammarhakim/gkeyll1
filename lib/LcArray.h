@@ -85,6 +85,61 @@ namespace Lucee
 /** Pointer to actual data */
       T *data;
   };
+
+  template <unsigned NDIM, typename T>
+  Array<NDIM, T>::Array(unsigned shp[NDIM], const T& init)
+  {
+    unsigned len = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = shp[i];
+      start[i] = 0;
+      len = len*shape[i];
+    }
+    data = new T[len];
+  }
+
+  template <unsigned NDIM, typename T>
+  Array<NDIM, T>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
+  {
+    unsigned len = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = shp[i];
+      start[i] = sta[i];
+      len = len*shape[i];
+    }
+    data = new T[len];
+  }
+
+  template <unsigned NDIM, typename T>
+  void 
+  Array<NDIM, T>::getShape(unsigned shp[NDIM]) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      shp[i] = shape[i];
+  }
+
+  template <unsigned NDIM, typename T>
+  unsigned 
+  Array<NDIM, T>::getShape(unsigned dir) const
+  {
+    return shape[dir];
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Array<NDIM, T>::getStart(unsigned dir) const
+  {
+    return start[dir];
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Array<NDIM, T>::getEnd(unsigned dir) const
+  {
+    return start[dir]+shape[dir];
+  }
 }
 
 #endif // LC_ARRAY_H
