@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcObject.h>
+#include <LcArrayIndexer.h>
 
 namespace Lucee
 {
@@ -43,11 +43,23 @@ namespace Lucee
       Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);
 
 /**
+ * Destroy object.
+ */
+      ~Array();
+
+/**
  * Get rank of array.
  *
  * @return Rank of array.
  */
       unsigned getRank() const { return NDIM; }
+
+/**
+ * Get total size of array.
+ *
+ * @return size of array.
+ */
+      unsigned getSize() const { return len; }
 
 /**
  * Get shape of array.
@@ -77,19 +89,123 @@ namespace Lucee
  */
       int getEnd(unsigned dir) const;
 
+/**
+ * Accessor function for 1D array.
+ *
+ * @param i Index into array.
+ * @return Reference to value at (i).
+ */
+      T& operator()(int i);
+
+/**
+ * Accessor function for 1D array.
+ *
+ * @param i Index into array.
+ * @return Reference to value at (i).
+ */
+      T operator()(int i) const;
+
+/**
+ * Accessor function for 2D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @return Reference to value at (i,j).
+ */
+      T& operator()(int i, int j);
+
+/**
+ * Accessor function for 2D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @return Reference to value at (i,j).
+ */
+      T operator()(int i, int j) const;
+
+/**
+ * Accessor function for 3D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @param k Index into array.
+ * @return Reference to value at (i,j,k).
+ */
+      T& operator()(int i, int j, int k);
+
+/**
+ * Accessor function for 3D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @param k Index into array.
+ * @return Reference to value at (i,j,k).
+ */
+      T operator()(int i, int j, int k) const;
+
+/**
+ * Accessor function for 4D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @param k Index into array.
+ * @param l Index into array.
+ * @return Reference to value at (i,j,k,l).
+ */
+      T& operator()(int i, int j, int k, int l);
+
+/**
+ * Accessor function for 3D array.
+ *
+ * @param i Index into array.
+ * @param j Index into array.
+ * @param k Index into array.
+ * @param l Index into array.
+ * @return Reference to value at (i,j,k,l).
+ */
+      T operator()(int i, int j, int k, int l) const;
+
     private:
+/** Indexer into array */
+      Lucee::ArrayIndexer<NDIM> indexer;
 /** Shape of array */
       unsigned shape[NDIM];
 /** Start index of array */
       int start[NDIM];
+/** Total size of array */
+      unsigned len;
 /** Pointer to actual data */
       T *data;
+
+/**
+ * Copy constructor is private.
+ */
+      Array(const Array&);
+
+/**
+ * Assignment operator is private.
+ */
+      Array& operator=(const Array&);
+
+/**
+ * This little private class makes a constant array of zeros.
+ */
+      class Zeros
+      {
+        public:
+          Zeros() {
+            for (unsigned i=0; i<NDIM; ++i)
+              zeros[i] = 0;
+          }
+          int zeros[NDIM];
+      };
   };
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], const T& init)
+    : indexer(typename Array<NDIM, T>::Zeros().zeros, shp)
   {
-    unsigned len = 1;
+    len = 1;
     for (unsigned i=0; i<NDIM; ++i)
     {
       shape[i] = shp[i];
@@ -101,8 +217,9 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
+    : indexer(sta, shp)
   {
-    unsigned len = 1;
+    len = 1;
     for (unsigned i=0; i<NDIM; ++i)
     {
       shape[i] = shp[i];
@@ -110,6 +227,12 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
+  }
+
+  template <unsigned NDIM, typename T>
+  Array<NDIM, T>::~Array()
+  {
+    delete [] data;
   }
 
   template <unsigned NDIM, typename T>

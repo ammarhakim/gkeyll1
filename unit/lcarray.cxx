@@ -32,7 +32,18 @@ test_array_1()
 
     LC_ASSERT("Checking shape", arr1.getShape(i) == shape[i]);
   }
-    
+
+  unsigned myShape[2];
+  arr2.getShape(myShape);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking shape", myShape[i] == shape[i]);
+
+  arr1.getShape(myShape);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking shape", myShape[i] == shape[i]);
+
+  LC_ASSERT("Testing size of array", 50 == arr1.getSize());
+  LC_ASSERT("Testing size of array", 50 == arr2.getSize());
 }
 
 int
