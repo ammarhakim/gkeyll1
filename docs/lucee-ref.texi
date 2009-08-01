@@ -115,4 +115,7 @@ Boulder, Colorado
 @chapter Basic Classes
 @include basic.texi
 
+@chapter Implementation Notes
+@include implementation.texi
+
 @bye
