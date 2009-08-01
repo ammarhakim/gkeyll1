@@ -34,16 +34,19 @@ test_array_1()
   }
 
   unsigned myShape[2];
-  arr2.getShape(myShape);
+  arr2.fillWithShape(myShape);
   for (unsigned i=0; i<2; ++i)
     LC_ASSERT("Checking shape", myShape[i] == shape[i]);
 
-  arr1.getShape(myShape);
+  arr1.fillWithShape(myShape);
   for (unsigned i=0; i<2; ++i)
     LC_ASSERT("Checking shape", myShape[i] == shape[i]);
 
   LC_ASSERT("Testing size of array", 50 == arr1.getSize());
   LC_ASSERT("Testing size of array", 50 == arr2.getSize());
+
+  LC_ASSERT("Testing is array is contigous", true == arr1.isContiguous());
+  LC_ASSERT("Testing is array is contigous", true == arr2.isContiguous());
 }
 
 void

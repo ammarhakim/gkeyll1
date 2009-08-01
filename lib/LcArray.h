@@ -21,6 +21,21 @@
 
 namespace Lucee
 {
+// Masks for array traits
+  static unsigned int arrayMasks[] =
+  {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+// set of macros for setting/getting array traits
+#define CONTIGUOUS arrayMasks[0]
+#define SET_CONTIGUOUS(bit) (bit) |= CONTIGUOUS
+#define CLEAR_CONTIGUOUS(bit) (bit) &= ~CONTIGUOUS
+#define IS_CONTIGUOUS(bit) (bit) & CONTIGUOUS
+
+#define ALLOC arrayMasks[1]
+#define SET_ALLOC(bit) (bit) |= ALLOC
+#define CLEAR_ALLOC(bit) (bit) &= ~ALLOC
+#define IS_ALLOC(bit) (bit) & ALLOC
+
   template <unsigned NDIM, typename T>
   class Array
   {
@@ -66,7 +81,7 @@ namespace Lucee
  *
  * @param shape On return contains the shape of the array.
  */
-      void getShape(unsigned shape[NDIM]) const;
+      void fillWithShape(unsigned shape[NDIM]) const;
 
 /**
  * Get shape of array in the specified direction.
@@ -88,6 +103,13 @@ namespace Lucee
  * @return one past the end index in specified direction.
  */
       int getEnd(unsigned dir) const;
+
+/**
+ * Is the aray contiguous?
+ *
+ * @return True if array is contiguous, false otherwise.
+ */
+      bool isContiguous() const { return IS_CONTIGUOUS(traits); }
 
 /**
  * Accessor function for array.
@@ -184,6 +206,8 @@ namespace Lucee
     private:
 /** Indexer into array */
       Lucee::ArrayIndexer<NDIM> indexer;
+/** Array traits stored as bit values */
+      unsigned traits;
 /** Shape of array */
       unsigned shape[NDIM];
 /** Start index of array */
@@ -219,7 +243,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], const T& init)
-    : indexer(typename Array<NDIM, T>::Zeros().zeros, shp)
+    : indexer(typename Array<NDIM, T>::Zeros().zeros, shp), traits(0)
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
@@ -229,11 +253,13 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
+    SET_CONTIGUOUS(traits);
+    SET_ALLOC(traits);
   }
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
-    : indexer(sta, shp)
+    : indexer(sta, shp), traits(0)
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
@@ -243,17 +269,20 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
+    SET_CONTIGUOUS(traits);
+    SET_ALLOC(traits);
   }
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::~Array()
   {
-    delete [] data;
+    if (IS_ALLOC(traits))
+      delete [] data;
   }
 
   template <unsigned NDIM, typename T>
   void 
-  Array<NDIM, T>::getShape(unsigned shp[NDIM]) const
+  Array<NDIM, T>::fillWithShape(unsigned shp[NDIM]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       shp[i] = shape[i];
