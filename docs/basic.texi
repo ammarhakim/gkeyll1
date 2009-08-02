@@ -32,6 +32,40 @@ for (int i=arr1.getStart(0); i<arr1.getEnd(0); ++i)
     arr1(i,j) = i+j;
 @end example
 
+View-arrays into an existing array can be created. View-arrays are
+arrays that allow access to parts of another array. Modifications made
+to the original or view-array are reflected in the other,
+i.e. view-arrays share data with their parent array.
+@example
+unsigned shape[2] = @{100, 100@};
+Lucee::Array<2, double> arr(shape);
+
+unsigned viewShape[2] = @{20, 20@};
+int viewStart[2] = @{5, 5@};
+Lucee::Array<2, double>& view =
+  arr.createView(viewShape, viewStart);
+@end example
+
+@noindent
+This will create a view-array @code{view} into the original array
+@code{arr}. Modifications made to @code{view} will also affect the
+orignal array @code{arr}. Sometimes a view-array of a lower dimension
+than the original one needs to be created. For example, say an array
+representing row @math{3} of @code{arr} is required. This can be done as
+follows:
+@example
+unsigned deflateRanks[1] = @{0@};
+int deflateIdx[1] = @{3@};
+unsigned viewShape[1] = arr.shape(1);
+int viewStart[1];
+viewStart[0] = arr.lower(1);
+
+Lucee::Array<1, double>& row3 =
+  arr.createView<1>(deflateRanks, deflateIdx, viewShape, viewStart);
+@end example
+This will create @code{row3} be an alias for row @math{3} in
+@code{arr}.
+
 @subsection Reference
 
 The class @code{Lucee::Array} provides a N-dimensional, reference
@@ -46,7 +80,7 @@ namespace Lucee
 The first template parameter indicates the rank of the array and the
 second, the type of data stored in the array.
 
-@deftypemethod Lucee::Arrayx unsigned getRank ()
+@deftypemethod Lucee::Array unsigned getRank ()
 Return the rank of the array.
 @end deftypemethod
 
