@@ -98,6 +98,9 @@
 @c \gdef\sinc{\hbox{\rm sinc}}
 @c @end tex
 
+@syncodeindex vr cp
+@syncodeindex fn cp
+
 @titlepage
 @title Lucee: Computational Physics Framework
 @subtitle Reference Manual
@@ -117,5 +120,9 @@ Boulder, Colorado
 
 @chapter Implementation Notes
 @include implementation.texi
+
+@unnumbered Index
+
+@printindex cp
 
 @bye
