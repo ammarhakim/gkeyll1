@@ -24,52 +24,12 @@ Lucee::Array<2, double> arr2(shape, start);
 This will create rank-two @math{5\times 10} arrays @code{arr1}, indexed
 starting @math{(0,0)}, and @code{arr2}, indexed starting
 @math{(2,0)}. All elements in the array can be set using the assignment
-oprtator: for example, @code{arr1}=5.0@, will set all elements of
+operator: for example, @code{arr1=5.0}, will set all elements of
 @code{arr1} to @math{5.0}. One can loop over the arrays, setting them:
 @example
 for (int i=arr1.getStart(0); i<arr1.getEnd(0); ++i)
   for (int j=arr1.getStart(1); j<arr1.getEnd(1); ++j)
     arr1(i,j) = i+j;
-@end example
-
-A common use of arrays in Lucee is to store vector fields. For example,
-to store the electric field in a 2D simulation one would create a 3D
-array (the final index for the components of the electric field):
-@example
-unsigned shape[3] = @{16, 32, 3@};
-Lucee::Array<3, double> E(shape);
-@end example
-
-@noindent
-Although this array can be indexed in the usual way, it is ofter more
-convenient to get access to all three components:
-@example
-Lucee::ArrayItr<double> ef = E.createItr();
-E.setItr(ef, 3, 4);
-ef[0] = 1.0; ef[1] = 2.0; ef[2] = 1.0;
-@end example
-
-@noindent
-The iterator @code{ef} points to the three elements of the electric
-field at location @math{(3,4)}. This code is equivalent to
-@example
-E(3, 4, 0) = 1.0;
-E(3, 4, 1) = 2.0;
-E(3, 4, 2) = 1.0;
-@end example
-
-@noindent
-The advantage of using the iterator to access the components is that the
-iterator can be passed to other functions which expect @code{double *}:
-@example
-double norm = computeNorm(&ef[0]);
-@end example
-where, for example,
-@example
-double computeNorm(double *vec) 
-@{
-  return sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
-@}
 @end example
 
 @subsection Reference
@@ -86,11 +46,11 @@ namespace Lucee
 The first template parameter indicates the rank of the array and the
 second, the type of data stored in the array.
 
-@deftypemethod Lucee::Array unsigned getRank ()
+@deftypemethod Lucee::Arrayx unsigned getRank ()
 Return the rank of the array.
 @end deftypemethod
 
-@deftypemethod Lucee::Array void fillWithShape (@code{unsigned} shape[NDIM])
+@deftypemethod Lucee::Array void fillWithShape (@code{unsigned} shape[N])
 On return fill the shape of the array in @code{shape}.
 @end deftypemethod
 
@@ -106,18 +66,17 @@ Return the starting index in direction @code{dir}.
 Return @emph{one past} the last index in direction @code{dir}.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{T} operator() (@code{int} i, @code{int} j, ...)
+@deftypemethod Lucee::Array @code{T&} operator() (@code{int} i, @code{int} j, ...)
 Access element at @math{(i,j,\ldots)} index location in array. For a
 @math{N}-dimensional array exactly @math{N} indices must be specified. A
 compile-time error will occur when trying to use this method with the
 incorrect number of indices.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{T} operator() (@code{int} i[NDIM])
-Access element at index @math{i_0,i_1,\ldots} index location in
-array.
+@deftypemethod Lucee::Array @code{T&} operator() (@code{int} i[N])
+Access element at index @math{(i_0,i_1,\ldots)} index location in array.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{Lucee::Array&} operator= (@code{T} val)
+@deftypemethod Lucee::Array @code{Lucee::Array&} operator= (@code{const T&} val)
 Set all elements of array to @code{val}.
 @end deftypemethod
