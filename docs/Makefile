@@ -5,6 +5,10 @@ html : lucee-ref.texi basic.texi implementation.texi
 
 pdf : lucee-ref.texi
 	pdftex lucee-ref.texi
+	texindex lucee-ref.??
+	pdftex lucee-ref.texi
+	texindex lucee-ref.??
+	pdftex lucee-ref.texi
 
 clean:
 	rm -rf lucee-ref.pdf html *.dvi *.tp *.ky *.toc *.vt *.aux *.cp *.fn *.pg *.vr *.log *~
