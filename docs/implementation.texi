@@ -1,0 +1,11 @@
+This chapter describes implementation details of core Lucee classes.
+
+@section Array indexing and sequencing.
+@cindex implementation of array indexing
+
+In Lucee, in most situations, array data is stored in a single chunk of
+contigous memory. Hence, a method of the mapping of the
+@math{N}-dimensional index space to a @math{1}-dimensional index space
+is needed. This mapping can be performed in several ways. The default
+method in Lucee is to perform row-major mapping.
+
