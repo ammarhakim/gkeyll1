@@ -1,6 +1,6 @@
 This chapter describes the basic infrastructure classes in Lucee.
 
-@section @code{Lucee::Array}: Basic array class.
+@section @code{Lucee::Array}: @math{N}-dimensional Array Class.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}
 

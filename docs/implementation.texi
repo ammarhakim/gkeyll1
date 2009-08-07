@@ -1,6 +1,6 @@
 This chapter describes implementation details of core Lucee classes.
 
-@section Array indexing and sequencing.
+@section Array Indexing and Sequencing.
 @cindex Array indexing, implementation
 
 In Lucee, in most situations, array data is stored in a single chunk of

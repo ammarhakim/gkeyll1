@@ -115,7 +115,7 @@ Boulder, Colorado
 @contents
 @comment @end ifset
 
-@chapter Basic Classes
+@chapter Lucee Infrastructure Class
 @include basic.texi
 
 @chapter Implementation Notes
