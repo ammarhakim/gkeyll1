@@ -26,15 +26,15 @@ namespace Lucee
   {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 // set of macros for setting/getting array traits
-#define CONTIGUOUS arrayMasks[0]
-#define SET_CONTIGUOUS(bit) (bit) |= CONTIGUOUS
-#define CLEAR_CONTIGUOUS(bit) (bit) &= ~CONTIGUOUS
-#define IS_CONTIGUOUS(bit) (bit) & CONTIGUOUS
+#define LC_CONTIGUOUS arrayMasks[0]
+#define LC_SET_CONTIGUOUS(bit) (bit) |= LC_CONTIGUOUS
+#define LC_CLEAR_CONTIGUOUS(bit) (bit) &= ~LC_CONTIGUOUS
+#define LC_IS_CONTIGUOUS(bit) (bit) & LC_CONTIGUOUS
 
-#define ALLOC arrayMasks[1]
-#define SET_ALLOC(bit) (bit) |= ALLOC
-#define CLEAR_ALLOC(bit) (bit) &= ~ALLOC
-#define IS_ALLOC(bit) (bit) & ALLOC
+#define LC_ALLOC arrayMasks[1]
+#define LC_SET_ALLOC(bit) (bit) |= LC_ALLOC
+#define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
+#define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
   template <unsigned NDIM, typename T>
   class Array
@@ -109,7 +109,7 @@ namespace Lucee
  *
  * @return True if array is contiguous, false otherwise.
  */
-      bool isContiguous() const { return IS_CONTIGUOUS(traits); }
+      bool isContiguous() const { return LC_IS_CONTIGUOUS(traits); }
 
 /**
  * Accessor function for array.
@@ -253,8 +253,8 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
-    SET_CONTIGUOUS(traits);
-    SET_ALLOC(traits);
+    LC_SET_CONTIGUOUS(traits);
+    LC_SET_ALLOC(traits);
   }
 
   template <unsigned NDIM, typename T>
@@ -269,14 +269,14 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
-    SET_CONTIGUOUS(traits);
-    SET_ALLOC(traits);
+    LC_SET_CONTIGUOUS(traits);
+    LC_SET_ALLOC(traits);
   }
 
   template <unsigned NDIM, typename T>
   Array<NDIM, T>::~Array()
   {
-    if (IS_ALLOC(traits))
+    if (LC_IS_ALLOC(traits))
       delete [] data;
   }
 
