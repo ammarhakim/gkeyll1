@@ -245,7 +245,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T, typename INDEXER>
   Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
-    : indexer(typename Array<NDIM, T, INDEXER>::Zeros().zeros, shp), traits(0),
+    : indexer(shp, typename Array<NDIM, T, INDEXER>::Zeros().zeros), traits(0),
       useCount(new int(1))
   {
     len = 1;
@@ -262,7 +262,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T, typename INDEXER>
   Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
-    : indexer(sta, shp), traits(0),
+    : indexer(shp, sta), traits(0),
       useCount(new int(1))
   {
     len = 1;
