@@ -28,8 +28,8 @@ starting @math{(0,0)}, and @code{arr2}, indexed starting
 operator: for example, @code{arr1=5.0}, will set all elements of
 @code{arr1} to @math{5.0}. One can loop over the arrays, setting them:
 @example
-for (int i=arr1.getStart(0); i<arr1.getEnd(0); ++i)
-  for (int j=arr1.getStart(1); j<arr1.getEnd(1); ++j)
+for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+  for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
     arr1(i,j) = i+j;
 @end example
 
@@ -84,6 +84,18 @@ namespace Lucee
 The first template parameter indicates the rank of the array and the
 second, the type of data stored in the array.
 
+@deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{const T&} init)
+Create a new array with given shape. An optional @emph{init} value can
+be specified and is applied to all elements of the array. By default
+@emph{init}=0.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{int} start[NDIM], @code{const T&} init)
+Create a new array with given shape and specified start indices. An
+optional @emph{init} value can be specified and is applied to all
+elements of the array. By default @emph{init}=0.
+@end deftypemethod
+
 @deftypemethod Lucee::Array unsigned getRank ()
 Return the rank of the array.
 @end deftypemethod
@@ -95,19 +107,19 @@ non-contiguous array will lead to a run-time exception being thrown.
 @end deftypemethod
 
 @deftypemethod Lucee::Array void fillWithShape (@code{unsigned} shape[N])
-On return fill the shape of the array in @code{shape}.
+On return fill the shape of the array in @emph{shape}.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{unsigned} getShape (@code{int} dir)
-Return the shape of the array in direction @code{dir}.
+Return the shape of the array in direction @emph{dir}.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{int} getStart (@code{int} dir)
-Return the starting index in direction @code{dir}.
+@deftypemethod Lucee::Array @code{int} getLower (@code{int} dir)
+Return the starting index in direction @emph{dir}.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{int} getEnd (@code{int} dir)
-Return @emph{one past} the last index in direction @code{dir}.
+@deftypemethod Lucee::Array @code{int} getUpper (@code{int} dir)
+Return @emph{one past} the last index in direction @emph{dir}.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{T&} operator() (@code{int} i, @code{int} j, ...)
@@ -118,18 +130,37 @@ incorrect number of indices.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{T&} operator() (@code{int} i[N])
-Access element at index @math{(i_0,i_1,\ldots)} index location in array.
+Access element at index @math{(i_1,\ldots,i_N)} index location in array.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{Lucee::Array&} operator= (@code{const T&} val)
-Set all elements of array to @code{val}.
+Set all elements of array to @emph{val}.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{Lucee::Array<N,T>&} createView (@code{unsigned} shape[N] , @code{int} start[N], @code{int} newStart[N])
 Returns a view-array into the original array. The view-array behaves
 exactly like a @code{Lucee::Array}. The portion of the original array
-indexed by the view-array is specified by lower bounds, @code{start},
-and the shape, @code{shape}. The indices @code{newStart} indicate the
+indexed by the view-array is specified by lower bounds, @emph{start},
+and the shape, @emph{shape}. The indices @emph{newStart} indicate the
 new starting index of the view-array. In most cases this can simply be
-set to @code{start}.
+set to @emph{start}.
 @end deftypemethod
+
+@section @code{Lucee::ColMajorIndexer}: Column Major Indexer Class.
+@cindex Column major indexer.
+@cindex Indexer, column major.
+@cindex @code{Lucee::ColMajorIndexer}
+
+@subsection Reference
+
+The @code{Lucee::ColMajorIndexer} class provides a mapping of a
+@math{N}-dimensional index space into a @math{1}-dimensional linear
+index space. It is declared as:
+@example
+namespace Lucee
+@{
+  template <unsigned NDIM> class ColMajorIndexer;
+@}
+@end example
+@noindent
+The template parameter indicates the rank of the index space.
