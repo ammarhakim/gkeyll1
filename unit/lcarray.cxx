@@ -100,6 +100,37 @@ test_2d()
     }
 }
 
+void
+test_3d()
+{
+  unsigned shape[3] = {5, 10, 12};
+  Lucee::Array<3, double> arr1(shape);
+
+  double count = 0.0;
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+        arr1(i,j,k) = count++;
+
+  count = 0.0;
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+      {
+        LC_ASSERT("Testing 3D indexer", arr1(i,j,k) == count++);
+      }
+
+  count = 0.0;
+  int idx[3];
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+      {
+        idx[0] = i; idx[1] = j; idx[2] = k;
+        LC_ASSERT("Testing 3D indexer", arr1(idx) == count++);
+      }
+}
+
 int
 main(void) 
 {
@@ -107,5 +138,6 @@ main(void)
   test_1();
   test_1d();
   test_2d();
+  test_3d();
   LC_END_TESTS;
 }
