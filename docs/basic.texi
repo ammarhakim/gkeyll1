@@ -3,6 +3,7 @@ This chapter describes the basic infrastructure classes in Lucee.
 @section @code{Lucee::Array}: @math{N}-dimensional Array Class.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}
+@cindex @code{Array} class, namespace @code{Lucee}.
 
 @subsection Overview
 
@@ -75,6 +76,7 @@ This will create @code{row3} be an alias for row @math{3} in
 The class @code{Lucee::Array} provides a N-dimensional, reference
 counted, array of arbitrary types. It is declared as:
 @example
+// LcArray.h
 namespace Lucee
 @{
   template <unsigned NDIM, typename T> class Array;
@@ -85,9 +87,9 @@ The first template parameter indicates the rank of the array and the
 second, the type of data stored in the array.
 
 @deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{const T&} init)
-Create a new array with given shape. An optional @emph{init} value can
-be specified and is applied to all elements of the array. By default
-@emph{init}=0.
+Create a new array with given shape. Start indices are assumed to be
+@math{(0,\ldots)}. An optional @emph{init} value can be specified and
+is applied to all elements of the array. By default @emph{init}=0.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{int} start[NDIM], @code{const T&} init)
@@ -146,10 +148,40 @@ new starting index of the view-array. In most cases this can simply be
 set to @emph{start}.
 @end deftypemethod
 
+@section @code{Lucee::Matrix}: Matrix class.
+@cindex Matrix class.
+@cindex @code{Lucee::Matrix}
+@cindex @code{Matrix} class, namespace @code{Lucee}.
+
+@subsection Reference
+
+The @code{Lucee::Matrix} class inherits from the @code{Lucee::Array}
+class and provides a specialized container for two-dimensional
+arrays. The matrix elements are stored in column major order to enable
+use of Fortran routines for linear algebra. It is declared as:
+@example
+// LcMatrix.h
+namespace Lucee
+@{
+  template <typename T> class Matrix;
+@}
+@end example
+
+@deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2])
+Create a new matrix with specified @emph{shape}. The start indices are
+assumed @math{(0,0)}. All matrix elements are initialized to @math{0}.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2], @code{int} start[2])
+Create a new matrix with specified @emph{shape} and given @emph{start}
+indices. All matrix elements are initialized to @math{0}.
+@end deftypemethod
+
 @section @code{Lucee::ColMajorIndexer}: Column Major Indexer Class.
 @cindex Column major indexer.
 @cindex Indexer, column major.
 @cindex @code{Lucee::ColMajorIndexer}
+@cindex @code{ColMajorIndexer} class, namespace @code{Lucee}.
 
 @subsection Reference
 
@@ -157,10 +189,40 @@ The @code{Lucee::ColMajorIndexer} class provides a mapping of a
 @math{N}-dimensional index space into a @math{1}-dimensional linear
 index space. It is declared as:
 @example
+// LcColMajorIndexer.h
 namespace Lucee
 @{
   template <unsigned NDIM> class ColMajorIndexer;
 @}
 @end example
 @noindent
-The template parameter indicates the rank of the index space.
+The template parameter @code{NDIM} indicates the rank (dimension) of the
+index space.
+
+@deftypemethod Lucee::ColMajorIndexer @emph{ctor} ColMajorIndexer (@code{unsigned} shape[NDIM], @code{int} start[NDIM])
+Create a indexer which maps a @code{NDIM} dimensional index space of
+specified @emph{shape} and given @emph{start} indices into a linear
+1-dimensional index.
+@end deftypemethod
+
+@deftypemethod Lucee::ColMajorIndexer @code{int} getLower (@code{int} dir)
+Return the starting index in direction @emph{dir}.
+@end deftypemethod
+
+@deftypemethod Lucee::ColMajorIndexer @code{int} getUpper (@code{int} dir)
+Return @emph{one past} the last index in direction @emph{dir}.
+@end deftypemethod
+
+@deftypemethod Lucee::ColMajorIndexer @code{int} getIndex (@code{int} i, @code{int} j, ...)
+Return index into the 1-dimensional space corresponding to the index in
+the @math{N}-dimensional space @math{(i,j,\ldots)}. For a
+@math{N}-dimensional space exactly @math{N} indices must be specified. A
+compile-time error will occur when trying to use this method with the
+incorrect number of indices.
+@end deftypemethod
+
+@deftypemethod Lucee::ColMajorIndexer @code{int} getGenIndex (@code{int} i[N])
+Return index into the 1-dimensional space corresponding to the index
+@math{(i_1,\ldots,i_N)} index location in @math{N}-dimensional space.
+@end deftypemethod
+

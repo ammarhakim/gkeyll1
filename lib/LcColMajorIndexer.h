@@ -32,7 +32,7 @@ namespace Lucee
  * @param start Starting index.
  * @param shape Shape of space.
  */
-      ColMajorIndexerBase(int start[NDIM], unsigned shape[NDIM])
+      ColMajorIndexerBase(unsigned shape[NDIM], int start[NDIM])
       {
         for (unsigned i=0; i<NDIM; ++i)
         {
@@ -55,7 +55,7 @@ namespace Lucee
  * @param i direction.
  * @return start index.
  */
-      int getStart(unsigned i) const { return start[i]; }
+      int getLower(unsigned i) const { return start[i]; }
 
 /**
  * Return last index into space.
@@ -63,7 +63,7 @@ namespace Lucee
  * @param i direction.
  * @return end index.
  */
-      int getEnd(unsigned i) const { return start[i]+shape[i]; }
+      int getUpper(unsigned i) const { return start[i]+shape[i]; }
 
 /**
  * Return linear index given N-dimensional index.
@@ -102,8 +102,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(int start[NDIM], unsigned shape[NDIM])
-        : ColMajorIndexerBase<NDIM>(start, shape)
+      ColMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+        : ColMajorIndexerBase<NDIM>(shape, start)
       {
       }
   };
@@ -119,8 +119,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(int start[1], unsigned shape[1])
-        : ColMajorIndexerBase<1>(start, shape)
+      ColMajorIndexer(unsigned shape[1], int start[1])
+        : ColMajorIndexerBase<1>(shape, start)
       {
       }
 
@@ -146,8 +146,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(int start[2], unsigned shape[2])
-        : ColMajorIndexerBase<2>(start, shape)
+      ColMajorIndexer(unsigned shape[2], int start[2])
+        : ColMajorIndexerBase<2>(shape, start)
       {
       }
 
@@ -174,8 +174,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(int start[3], unsigned shape[3])
-        : ColMajorIndexerBase<3>(start, shape)
+      ColMajorIndexer(unsigned shape[3], int start[3])
+        : ColMajorIndexerBase<3>(shape, start)
       {
       }
 
@@ -203,8 +203,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(int start[4], unsigned shape[4])
-        : ColMajorIndexerBase<4>(start, shape)
+      ColMajorIndexer(unsigned shape[4], int start[4])
+        : ColMajorIndexerBase<4>(shape, start)
       {
       }
 
