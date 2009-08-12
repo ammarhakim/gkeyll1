@@ -55,18 +55,21 @@ test_1d()
   unsigned shape[1] = {10};
   Lucee::Array<1, double> arr1(shape);
 
+  double count = 0;
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
-    arr1(i) = 10*i;
+    arr1(i) = count++;
 
+  count = 0.0;
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
-    LC_ASSERT("Testing 1D indexer", arr1(i) == 10*i);
+    LC_ASSERT("Testing 1D indexer", arr1(i) == count++);
 
+  count = 0.0;
   int idx[1];
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
-    {
-      idx[0] = i;
-      LC_ASSERT("Testing 2D indexer", arr1(idx) == 10*i);
-    }
+  {
+    idx[0] = i;
+    LC_ASSERT("Testing 1D indexer", arr1(idx) == count++);
+  }
 }
 
 void
@@ -75,20 +78,25 @@ test_2d()
   unsigned shape[2] = {5, 10};
   Lucee::Array<2, double> arr1(shape);
 
+  double count = 0.0;
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
     for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
-      arr1(i,j) = 10*i+j;
+      arr1(i,j) = count++;
 
+  count = 0.0;
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
     for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
-      LC_ASSERT("Testing 2D indexer", arr1(i,j) == 10*i+j);
+    {
+      LC_ASSERT("Testing 2D indexer", arr1(i,j) == count++);
+    }
 
+  count = 0.0;
   int idx[2];
   for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
     for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D indexer", arr1(idx) == 10*i+j);
+      LC_ASSERT("Testing 2D indexer", arr1(idx) == count++);
     }
 }
 
