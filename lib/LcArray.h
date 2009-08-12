@@ -95,14 +95,14 @@ namespace Lucee
  *
  * @return start index in specified direction.
  */
-      int getStart(unsigned dir) const;
+      int getLower(unsigned dir) const;
 
 /**
  * Get one past the end index in the specified direction.
  *
  * @return one past the end index in specified direction.
  */
-      int getEnd(unsigned dir) const;
+      int getUpper(unsigned dir) const;
 
 /**
  * Is the aray contiguous?
@@ -303,14 +303,14 @@ namespace Lucee
 
   template <unsigned NDIM, typename T, typename INDEXER>
   int
-  Array<NDIM, T, INDEXER>::getStart(unsigned dir) const
+  Array<NDIM, T, INDEXER>::getLower(unsigned dir) const
   {
     return start[dir];
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
   int
-  Array<NDIM, T, INDEXER>::getEnd(unsigned dir) const
+  Array<NDIM, T, INDEXER>::getUpper(unsigned dir) const
   {
     return start[dir]+shape[dir];
   }
@@ -319,14 +319,14 @@ namespace Lucee
   T&
   Array<NDIM, T, INDEXER>::operator()(int idx[NDIM])
   {
-    return data[indexer.getIndex(idx)];
+    return data[indexer.getGenIndex(idx)];
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
   T 
   Array<NDIM, T, INDEXER>::operator()(int idx[NDIM]) const
   {
-    return data[indexer.getIndex(idx)];
+    return data[indexer.getGenIndex(idx)];
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
