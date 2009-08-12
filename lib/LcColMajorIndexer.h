@@ -1,5 +1,5 @@
 /**
- * @file	LcArrayIndexer.h
+ * @file	LcColMajorIndexer.h
  *
  * @brief	Class mapping an N-dimensional index into a linear index.
  *
@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
-#ifndef LC_ARRAY_INDEXER_H
-#define LC_ARRAY_INDEXER_H
+#ifndef LC_COL_MAJOR_INDEXER_H
+#define LC_COL_MAJOR_INDEXER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -23,7 +23,7 @@ namespace Lucee
  * use in the indexing functions provided by the derived classes.
  */
   template <unsigned NDIM>
-  struct ArrayIndexerBase
+  struct ColMajorIndexerBase
   {
 /**
  * Create a new indexer for mapping an N-dimensional index into a
@@ -32,34 +32,68 @@ namespace Lucee
  * @param start Starting index.
  * @param shape Shape of space.
  */
-      ArrayIndexerBase(int start[NDIM], unsigned shape[NDIM])
+      ColMajorIndexerBase(int start[NDIM], unsigned shape[NDIM])
       {
-        for (unsigned i=0; i<NDIM+1; ++i)
-          ai[i] = 0;
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          this->start[i] = start[i];
+          this->shape[i] = shape[i];
+        }
+
+        ai[1] = 1;
+        for (unsigned i=2; i<NDIM+1; ++i)
+          ai[i] = ai[i-1]*shape[i-2];
+        int sum = 0.0;
+        for (unsigned i=1; i<NDIM+1; ++i)
+          sum += ai[i]*start[i-1];
+        ai[0] = -sum;
       }
+
+/**
+ * Return start index into space.
+ *
+ * @param i direction.
+ * @return start index.
+ */
+      int getStart(unsigned i) const { return start[i]; }
+
+/**
+ * Return last index into space.
+ *
+ * @param i direction.
+ * @return end index.
+ */
+      int getEnd(unsigned i) const { return start[i]+shape[i]; }
 
 /**
  * Return linear index given N-dimensional index.
  *
  * @return Linear index.
  */
-      int getIndex(int idx[NDIM]) const 
+      int getGenIndex(int idx[NDIM]) const
       {
-        int sum = ai[0];
-        for (unsigned i=0; i<NDIM; ++i)
+        int sum = ai[0]+idx[0];
+        for (unsigned i=2; i<NDIM+1; ++i)
           sum += ai[i]*idx[i-1];
         return sum;
       }
 
-/** Coefficients used for linear map */
+    protected:
+/** Coefficients for linear map */
       int ai[NDIM+1];
+
+    private:
+/** Start indices */
+      int start[NDIM];
+/** Shape of linear-space */
+      unsigned shape[NDIM];
   };
 
 /** 
  * Generic indexer class: empty except for base class methods.
  */
   template <unsigned NDIM>
-  class ArrayIndexer : public ArrayIndexerBase<NDIM>
+  class ColMajorIndexer : public ColMajorIndexerBase<NDIM>
   {
     public:
 /**
@@ -68,15 +102,15 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ArrayIndexer(int start[NDIM], unsigned shape[NDIM])
-        : ArrayIndexerBase<NDIM>(start, shape)
+      ColMajorIndexer(int start[NDIM], unsigned shape[NDIM])
+        : ColMajorIndexerBase<NDIM>(start, shape)
       {
       }
   };
 
 /** One dimensional indexer */
   template <>
-  class ArrayIndexer<1> : public ArrayIndexerBase<1>
+  class ColMajorIndexer<1> : public ColMajorIndexerBase<1>
   {
     public:
 /**
@@ -85,8 +119,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ArrayIndexer(int start[1], unsigned shape[1])
-        : ArrayIndexerBase<1>(start, shape)
+      ColMajorIndexer(int start[1], unsigned shape[1])
+        : ColMajorIndexerBase<1>(start, shape)
       {
       }
 
@@ -103,7 +137,7 @@ namespace Lucee
 
 /** Two dimensional indexer */
   template <>
-  class ArrayIndexer<2> : public ArrayIndexerBase<2>
+  class ColMajorIndexer<2> : public ColMajorIndexerBase<2>
   {
     public:
 /**
@@ -112,8 +146,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ArrayIndexer(int start[2], unsigned shape[2])
-        : ArrayIndexerBase<2>(start, shape)
+      ColMajorIndexer(int start[2], unsigned shape[2])
+        : ColMajorIndexerBase<2>(start, shape)
       {
       }
 
@@ -131,7 +165,7 @@ namespace Lucee
 
 /** Three dimensional indexer */
   template <>
-  class ArrayIndexer<3> : public ArrayIndexerBase<3>
+  class ColMajorIndexer<3> : public ColMajorIndexerBase<3>
   {
     public:
 /**
@@ -140,8 +174,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ArrayIndexer(int start[3], unsigned shape[3])
-        : ArrayIndexerBase<3>(start, shape)
+      ColMajorIndexer(int start[3], unsigned shape[3])
+        : ColMajorIndexerBase<3>(start, shape)
       {
       }
 
@@ -160,7 +194,7 @@ namespace Lucee
 
 /** Four dimensional indexer */
   template <>
-  class ArrayIndexer<4> : public ArrayIndexerBase<4>
+  class ColMajorIndexer<4> : public ColMajorIndexerBase<4>
   {
     public:
 /**
@@ -169,8 +203,8 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ArrayIndexer(int start[4], unsigned shape[4])
-        : ArrayIndexerBase<4>(start, shape)
+      ColMajorIndexer(int start[4], unsigned shape[4])
+        : ColMajorIndexerBase<4>(start, shape)
       {
       }
 
@@ -189,4 +223,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_ARRAY_INDEXER_H
+#endif // LC_COL_MAJOR_INDEXER_H

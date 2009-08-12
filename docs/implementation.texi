@@ -3,9 +3,51 @@ This chapter describes implementation details of core Lucee classes.
 @section Array Indexing and Sequencing.
 @cindex Array indexing, implementation
 
-In Lucee, in most situations, array data is stored in a single chunk of
-contigous memory. Hence, a method of the mapping of the
+When an array is created the data is stored in a single chunk of
+contiguous memory. Hence, a method of mapping of the
 @math{N}-dimensional index space to a @math{1}-dimensional index space
-is needed. This mapping can be performed in several ways. The default
-method in Lucee is to perform row-major mapping.
+is needed. There are two mapping functions provided in Lucee: row-major
+and column-major indexing. These are implemented in the
+@code{Lucee::ColMajorIndexer} and the @code{Lucee::RowMajorIndexer}
+classes.
+
+Let @math{(i_1,\ldots,i_N)} be the index in the @math{N}-dimensional
+index space. Let @math{(s_0,\ldots,s_N)} be the starting index and
+@math{(l_0,\ldots,l_N)} be the shape of the space. Then, a linear
+mapping, @math{0\le k<L}, where @math{L=\Pi_{n=0}^N l_n}, can be
+constructed as
+@tex
+$$
+k(i_1,\ldots,i_N) = a_0 + \sum_{n=1}^N a_n i_n
+$$
+@end tex
+where @math{a_n}, @math{i=1,\ldots,N} are coefficients determined by the
+particular indexing method, and
+@tex
+$$
+a_0 = -\sum_{n=1}^N a_n s_n.
+$$
+@end tex
+
+@cindex Array indexing, column-major order
+In column-major indexing the region in the @math{1}-dimensional space
+spanned by the last index is contigous:
+@tex
+$$
+k(i_1,\ldots,s_N+1) = k(i_1,\ldots,s_N) + 1
+$$
+@end tex
+Using this condition in the mapping function yields the recursion
+relation @math{a_{j-1}=a_j l_j} with @math{a_N=1}.
+
+@cindex Array indexing, row-major order
+In row-major indexing the region in the @math{1}-dimensional space
+spanned by the first index is contigous:
+@tex
+$$
+k(s_1+1,\ldots,i_N) = k(s_1,\ldots,i_N) + 1
+$$
+@end tex
+Using this condition in the mapping function yields the recursion
+relation @math{a_{j+1}=a_j l_j} with @math{a_1=1}.
 

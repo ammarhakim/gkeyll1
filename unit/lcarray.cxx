@@ -13,7 +13,7 @@
 #include <LcTest.h>
 
 void
-test_array_1()
+test_1()
 {
   unsigned shape[2] = {5, 10};
   Lucee::Array<2, double> arr1(shape);
@@ -45,12 +45,12 @@ test_array_1()
   LC_ASSERT("Testing size of array", 50 == arr1.getSize());
   LC_ASSERT("Testing size of array", 50 == arr2.getSize());
 
-  LC_ASSERT("Testing is array is contigous", true == arr1.isContiguous());
-  LC_ASSERT("Testing is array is contigous", true == arr2.isContiguous());
+  LC_ASSERT("Testing if array is contigous", true == arr1.isContiguous());
+  LC_ASSERT("Testing if array is contigous", true == arr2.isContiguous());
 }
 
 void
-test_array_2()
+test_2()
 {
   unsigned shape[2] = {5, 10};
   Lucee::Array<2, double> arr1(shape);
@@ -62,7 +62,7 @@ int
 main(void) 
 {
   LC_BEGIN_TESTS("lcarray");
-  test_array_1();
-  test_array_2();
+  test_1();
+  test_2();
   LC_END_TESTS;
 }

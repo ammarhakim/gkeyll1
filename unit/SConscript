@@ -29,5 +29,8 @@ myenv.Append(CPPPATH = incs)
 myenv.Prepend(LIBS = libs)
 myenv.Append(LIBPATH = libp)
 
-# lcany
+# lcarray
 myenv.Program('lcarray', ['lcarray.cxx'])
+
+# lccolmajorindexer
+myenv.Program('lccolmajorindexer', ['lccolmajorindexer.cxx'])

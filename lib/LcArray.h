@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcArrayIndexer.h>
+#include <LcColMajorIndexer.h>
 
 namespace Lucee
 {
@@ -36,7 +36,7 @@ namespace Lucee
 #define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
 #define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER = Lucee::ColMajorIndexer<NDIM> >
   class Array
   {
     public:
@@ -205,7 +205,7 @@ namespace Lucee
 
     private:
 /** Indexer into array */
-      Lucee::ArrayIndexer<NDIM> indexer;
+      INDEXER indexer;
 /** Array traits stored as bit values */
       unsigned traits;
 /** Shape of array */
@@ -216,6 +216,8 @@ namespace Lucee
       unsigned len;
 /** Pointer to actual data */
       T *data;
+/** Number of arrays pointing to this array */
+      mutable int* useCount;
 
 /**
  * Copy constructor is private.
@@ -241,9 +243,10 @@ namespace Lucee
       };
   };
 
-  template <unsigned NDIM, typename T>
-  Array<NDIM, T>::Array(unsigned shp[NDIM], const T& init)
-    : indexer(typename Array<NDIM, T>::Zeros().zeros, shp), traits(0)
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
+    : indexer(typename Array<NDIM, T, INDEXER>::Zeros().zeros, shp), traits(0),
+      useCount(new int(1))
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
@@ -257,9 +260,10 @@ namespace Lucee
     LC_SET_ALLOC(traits);
   }
 
-  template <unsigned NDIM, typename T>
-  Array<NDIM, T>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
-    : indexer(sta, shp), traits(0)
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
+    : indexer(sta, shp), traits(0),
+      useCount(new int(1))
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
@@ -273,108 +277,110 @@ namespace Lucee
     LC_SET_ALLOC(traits);
   }
 
-  template <unsigned NDIM, typename T>
-  Array<NDIM, T>::~Array()
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::~Array()
   {
-    if (LC_IS_ALLOC(traits))
+    if ((--*useCount == 0) && LC_IS_ALLOC(traits)) {
       delete [] data;
+      delete useCount;
+    }
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   void 
-  Array<NDIM, T>::fillWithShape(unsigned shp[NDIM]) const
+  Array<NDIM, T, INDEXER>::fillWithShape(unsigned shp[NDIM]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       shp[i] = shape[i];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   unsigned 
-  Array<NDIM, T>::getShape(unsigned dir) const
+  Array<NDIM, T, INDEXER>::getShape(unsigned dir) const
   {
     return shape[dir];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   int
-  Array<NDIM, T>::getStart(unsigned dir) const
+  Array<NDIM, T, INDEXER>::getStart(unsigned dir) const
   {
     return start[dir];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   int
-  Array<NDIM, T>::getEnd(unsigned dir) const
+  Array<NDIM, T, INDEXER>::getEnd(unsigned dir) const
   {
     return start[dir]+shape[dir];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T&
-  Array<NDIM, T>::operator()(int idx[NDIM])
+  Array<NDIM, T, INDEXER>::operator()(int idx[NDIM])
   {
     return data[indexer.getIndex(idx)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T 
-  Array<NDIM, T>::operator()(int idx[NDIM]) const
+  Array<NDIM, T, INDEXER>::operator()(int idx[NDIM]) const
   {
     return data[indexer.getIndex(idx)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T&
-  Array<NDIM, T>::operator()(int i)
+  Array<NDIM, T, INDEXER>::operator()(int i)
   {
     return data[indexer.getIndex(i)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T
-  Array<NDIM, T>::operator()(int i) const
+  Array<NDIM, T, INDEXER>::operator()(int i) const
   {
     return data[indexer.getIndex(i)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T&
-  Array<NDIM, T>::operator()(int i, int j)
+  Array<NDIM, T, INDEXER>::operator()(int i, int j)
   {
     return data[indexer.getIndex(i, j)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T
-  Array<NDIM, T>::operator()(int i, int j) const
+  Array<NDIM, T, INDEXER>::operator()(int i, int j) const
   {
     return data[indexer.getIndex(i, j)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T&
-  Array<NDIM, T>::operator()(int i, int j, int k)
+  Array<NDIM, T, INDEXER>::operator()(int i, int j, int k)
   {
     return data[indexer.getIndex(i, j, k)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T
-  Array<NDIM, T>::operator()(int i, int j, int k) const
+  Array<NDIM, T, INDEXER>::operator()(int i, int j, int k) const
   {
     return data[indexer.getIndex(i, j, k)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T& 
-  Array<NDIM, T>::operator()(int i, int j, int k, int l)
+  Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l)
   {
     return data[indexer.getIndex(i, j, k, l)];
   }
 
-  template <unsigned NDIM, typename T>
+  template <unsigned NDIM, typename T, typename INDEXER>
   T 
-  Array<NDIM, T>::operator()(int i, int j, int k, int l) const
+  Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
   }
