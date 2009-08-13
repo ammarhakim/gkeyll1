@@ -172,6 +172,14 @@ Create a new matrix with specified @emph{shape}. The start indices are
 assumed @math{(0,0)}. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix unsigned numRows ()
+Returns number of rows in matrix.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix unsigned numColumns ()
+Returns number of columns in matrix.
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2], @code{int} start[2])
 Create a new matrix with specified @emph{shape} and given @emph{start}
 indices. All matrix elements are initialized to @math{0}.
