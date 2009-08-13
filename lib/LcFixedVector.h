@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
-#ifndef LC_VECTOR_H
-#define LC_VECTOR_H
+#ifndef LC_FIXED_VECTOR_H
+#define LC_FIXED_VECTOR_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -56,4 +56,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_VECTOR_H
+#endif // LC_FIXED_VECTOR_H
