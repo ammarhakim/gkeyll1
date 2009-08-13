@@ -50,6 +50,7 @@ namespace Lucee
   }
 
 // instantiations
+  template class Lucee::Matrix<int>;
   template class Lucee::Matrix<float>;
   template class Lucee::Matrix<double>;
 }
