@@ -36,9 +36,23 @@ namespace Lucee
  * Construct matrix with specified shape and start indices.
  *
  * @param shape Shape of the matrix.
- * @param start indices for the matrix.
+ * @param start Start indices for the matrix.
  */
       Matrix(unsigned shape[2], int start[2]);
+
+/**
+ * Returns number of rows in matrix.
+ *
+ * @return number of rows.
+ */
+      unsigned numRows() const { return this->template getShape(0); }
+
+/**
+ * Returns number of columns in matrix.
+ *
+ * @return number of columns.
+ */
+      unsigned numColumns() const { return this->template getShape(1); }
 
 /**
  * Computes eigenvalues of the matrix. Matrix must be square or an
