@@ -115,8 +115,8 @@ Boulder, Colorado
 @contents
 @comment @end ifset
 
-@chapter Lucee Infrastructure Class
-@include basic.texi
+@chapter Array Container Classes
+@include array-classes.texi
 
 @chapter Implementation Notes
 @include implementation.texi

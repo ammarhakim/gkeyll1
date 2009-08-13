@@ -1,24 +1,31 @@
-This chapter describes the basic infrastructure classes in Lucee.
+This chapter describes the array classes in Lucee.
 
-@section @code{Lucee::FixedVector}: Fixed-size Vector Class.
+@section @code{Lucee::FixedVector}: Fixed-size Vectors.
 @cindex Fixed-size vector.
 @cindex @code{Lucee::FixedVector}
 @cindex @code{FixedVector} class, namespace @code{Lucee}.
 
-@subsection Reference
-
-@section @code{Lucee::Array}: @math{N}-dimensional Array Class.
+@section @code{Lucee::Array}: @math{N}-dimensional Arrays.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}
 @cindex @code{Array} class, namespace @code{Lucee}.
 
-@subsection Overview
+The class @code{Lucee::Array} provides a N-dimensional reference counted
+array of arbitrary types. It is declared as:
+@example
+// LcArray.h
+namespace Lucee
+@{
+  template <unsigned NDIM, typename T> class Array;
+@}
+@end example
+@noindent 
+The first template parameter indicates the rank of the array and the
+second, the type of data stored in the array.
 
-The @code{Lucee::Array} class provides serial array of arbitrary rank
-(dimensions). By default arrays are zero-based but other start indices
-can also be specified. Arrays can be created by specifying the shape
-and, optionally, the starting index along each rank.
-
+By default arrays are zero-based but other start indices can also be
+specified. Arrays can be created by specifying the shape and,
+optionally, the starting index along each rank.
 @example
 #include <LcArray.h>
 
@@ -77,21 +84,6 @@ Lucee::Array<1, double>& row3 =
 @end example
 This will create @code{row3} be an alias for row @math{3} in
 @code{arr}.
-
-@subsection Reference
-
-The class @code{Lucee::Array} provides a N-dimensional, reference
-counted, array of arbitrary types. It is declared as:
-@example
-// LcArray.h
-namespace Lucee
-@{
-  template <unsigned NDIM, typename T> class Array;
-@}
-@end example
-@noindent 
-The first template parameter indicates the rank of the array and the
-second, the type of data stored in the array.
 
 @deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{const T&} init)
 Create a new array with given shape. Start indices are assumed to be
@@ -155,12 +147,10 @@ new starting index of the view-array. In most cases this can simply be
 set to @emph{start}.
 @end deftypemethod
 
-@section @code{Lucee::Matrix}: Matrix class.
+@section @code{Lucee::Matrix}: Matrices and linear algebra.
 @cindex Matrix class.
 @cindex @code{Lucee::Matrix}
 @cindex @code{Matrix} class, namespace @code{Lucee}.
-
-@subsection Reference
 
 The @code{Lucee::Matrix} class inherits from the @code{Lucee::Array}
 class and provides a specialized container for two-dimensional arrays of
@@ -239,13 +229,11 @@ be one of @code{float} or @code{double}. A @math{LU} decomposition is
 used to solve the system of equations.
 @end deftypemethod
 
-@section @code{Lucee::ColMajorIndexer}: Column Major Indexer Class.
+@section @code{Lucee::ColMajorIndexer}: Column Major Indexer.
 @cindex Column major indexer.
 @cindex Indexer, column major.
 @cindex @code{Lucee::ColMajorIndexer}
 @cindex @code{ColMajorIndexer} class, namespace @code{Lucee}.
-
-@subsection Reference
 
 The @code{Lucee::ColMajorIndexer} class provides a mapping of a
 @math{N}-dimensional index space into a @math{1}-dimensional linear

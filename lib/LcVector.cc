@@ -29,6 +29,7 @@ namespace Lucee
   }
 
 // instantiations
+  template class Lucee::Vector<int>;
   template class Lucee::Vector<float>;
   template class Lucee::Vector<double>;
 }
