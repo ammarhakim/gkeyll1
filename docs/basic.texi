@@ -177,6 +177,56 @@ Create a new matrix with specified @emph{shape} and given @emph{start}
 indices. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi)
+Computes the eigenvalues of the matrix.  The matrix must be square or an
+exception is thrown. The real part of the eigenvalues are returned in
+@emph{evr} and the imaginary part are returned in @emph{evi}. These
+vectors must be pre-allocated. The template parameter @code{T} must be
+one of @code{float} or @code{double}.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix void eigRight (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+Computes the eigenvalues and the right eigenvectors of the matrix. The
+matrix must be square or an exception is thrown. The real part of the
+eigenvalues are returned in @emph{evr} and the imaginary part are
+returned in @emph{evi}. The right eigenvectors are returned as the
+columns of @emph{vec}, which must be of the same shape as this
+matrix. The vectors and matrices must be pre-allocated. The template
+parameter @code{T} must be one of @code{float} or @code{double}.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix void eigLeft (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+Computes the eigenvalues and the left eigenvectors of the matrix. The
+matrix must be square or an exception is thrown. The real part of the
+eigenvalues are returned in @emph{evr} and the imaginary part are
+returned in @emph{evi}. The left eigenvectors are returned as the
+columns of @emph{vec}, which must be of the same shape as this
+matrix. The vectors and matrices must be pre-allocated. The template
+parameter @code{T} must be one of @code{float} or @code{double}.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
+Computes the eigenvalues and the eignvectors of the matrix. The matrix
+must be square or an exception is thrown. The real part of the
+eigenvalues are returned in @emph{evr} and the imaginary part are
+returned in @emph{evi}. The left eigenvectors are returned as columns of
+@emph{vecl} and the right eigenvectors as the columns of
+@emph{vecr}. The vectors and matrices must be pre-allocated. The
+template parameter @code{T} must be one of @code{float} or
+@code{double}.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
+Solves the linear system of equations @math{Ax=b}, where @math{A} is
+this matrix and @math{b} are columns of the matrix @emph{rhs}. The
+matrix @emph{A} must be square or an exception is thrown. The @emph{rhs}
+matrix must have same number of rows as @emph{A}. On output the columns
+of the @emph{rhs} matrix are replaced by the corresponding solution
+vector. The template parameter @code{T} must be one of @code{float} or
+@code{double}. An @math{LU} decomposition is used to solve the system of
+equations.
+@end deftypemethod
+
 @section @code{Lucee::ColMajorIndexer}: Column Major Indexer Class.
 @cindex Column major indexer.
 @cindex Indexer, column major.
