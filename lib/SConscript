@@ -21,7 +21,8 @@ libname = 'lclib'
 
 # source files in lib
 sources = [
-    'LcObject.cc'
+    'LcMatrix.cc',
+    'LcObject.cc',    
     ]
 
 ##
