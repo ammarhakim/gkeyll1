@@ -1,5 +1,12 @@
 This chapter describes the basic infrastructure classes in Lucee.
 
+@section @code{Lucee::FixedVector}: Fixed-size Vector Class.
+@cindex Fixed-size vector.
+@cindex @code{Lucee::FixedVector}
+@cindex @code{FixedVector} class, namespace @code{Lucee}.
+
+@subsection Reference
+
 @section @code{Lucee::Array}: @math{N}-dimensional Array Class.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}
