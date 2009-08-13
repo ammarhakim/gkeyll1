@@ -164,9 +164,10 @@ set to @emph{start}.
 
 The @code{Lucee::Matrix} class inherits from the @code{Lucee::Array}
 class and provides a specialized container for two-dimensional arrays of
-@code{float} or @code{double}. The matrix elements are stored in column
-major order to enable use of Fortran routines for linear algebra. It is
-declared as:
+@code{int}, @code{float} or @code{double}. Certain linear algebra
+functions are only defined for @code{float} or @code{double}. The matrix
+elements are stored in column major order to enable use of Fortran
+routines for linear algebra. It is declared as:
 @example
 // LcMatrix.h
 namespace Lucee
@@ -219,7 +220,7 @@ matrix. The vectors and matrices must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
-Computes the eigenvalues and the eignvectors of the matrix. The matrix
+Computes the eigenvalues and the eigenvectors of the matrix. The matrix
 must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as columns of
@@ -229,13 +230,13 @@ returned in @emph{evi}. The left eigenvectors are returned as columns of
 
 @deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
 Solves the linear system of equations @math{Ax=b}, where @math{A} is
-this matrix and @math{b} are columns of the matrix @emph{rhs}. The
-matrix @emph{A} must be square or an exception is thrown. The @emph{rhs}
-matrix must have same number of rows as @emph{A}. On output the columns
-of the @emph{rhs} matrix are replaced by the corresponding solution
-vector. The template parameter @code{T} must be one of @code{float} or
-@code{double}. An @math{LU} decomposition is used to solve the system of
-equations.
+@emph{this} matrix and @math{b} are columns of the matrix
+@emph{rhs}. The matrix @emph{A} must be square or an exception is
+thrown. The @emph{rhs} matrix must have same number of rows as
+@emph{A}. On output the columns of the @emph{rhs} matrix are replaced by
+the corresponding solution vector. The template parameter @code{T} must
+be one of @code{float} or @code{double}. A @math{LU} decomposition is
+used to solve the system of equations.
 @end deftypemethod
 
 @section @code{Lucee::ColMajorIndexer}: Column Major Indexer Class.
