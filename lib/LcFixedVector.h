@@ -18,7 +18,7 @@
 
 namespace Lucee
 {
-  template <usigned NELEM, typename T>
+  template <unsigned NELEM, typename T>
   class FixedVector
   {
     public:
@@ -33,6 +33,13 @@ namespace Lucee
  * @param vals Values of vector elements.
  */
       FixedVector(T vals[NELEM]);
+
+/**
+ * Return number of elements in vector.
+ *
+ * @return number of elements in vector.
+ */
+      unsigned numElem() const { return NELEM; }
 
 /**
  * Return value of vector at location.
@@ -51,9 +58,23 @@ namespace Lucee
       T& operator[](unsigned i) { return data[i]; }
 
     private:
-/** Data stored in fixed-size vector */
+/** Data */
       T data[NELEM];
   };
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>::FixedVector(const T& init)
+  {
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = init;
+  }
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>::FixedVector(T vals[NELEM])
+  {
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = vals[i];
+  }
 }
 
 #endif // LC_FIXED_VECTOR_H

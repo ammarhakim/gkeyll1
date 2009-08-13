@@ -163,9 +163,10 @@ set to @emph{start}.
 @subsection Reference
 
 The @code{Lucee::Matrix} class inherits from the @code{Lucee::Array}
-class and provides a specialized container for two-dimensional
-arrays. The matrix elements are stored in column major order to enable
-use of Fortran routines for linear algebra. It is declared as:
+class and provides a specialized container for two-dimensional arrays of
+@code{float} or @code{double}. The matrix elements are stored in column
+major order to enable use of Fortran routines for linear algebra. It is
+declared as:
 @example
 // LcMatrix.h
 namespace Lucee
@@ -196,8 +197,7 @@ indices. All matrix elements are initialized to @math{0}.
 Computes the eigenvalues of the matrix.  The matrix must be square or an
 exception is thrown. The real part of the eigenvalues are returned in
 @emph{evr} and the imaginary part are returned in @emph{evi}. These
-vectors must be pre-allocated. The template parameter @code{T} must be
-one of @code{float} or @code{double}.
+vectors must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eigRight (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
@@ -206,8 +206,7 @@ matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The right eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
-matrix. The vectors and matrices must be pre-allocated. The template
-parameter @code{T} must be one of @code{float} or @code{double}.
+matrix. The vectors and matrices must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eigLeft (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
@@ -216,8 +215,7 @@ matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
-matrix. The vectors and matrices must be pre-allocated. The template
-parameter @code{T} must be one of @code{float} or @code{double}.
+matrix. The vectors and matrices must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
@@ -226,9 +224,7 @@ must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as columns of
 @emph{vecl} and the right eigenvectors as the columns of
-@emph{vecr}. The vectors and matrices must be pre-allocated. The
-template parameter @code{T} must be one of @code{float} or
-@code{double}.
+@emph{vecr}. The vectors and matrices must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
