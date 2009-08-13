@@ -38,7 +38,7 @@ namespace Lucee
  * @param len Length of the vector.
  * @param start Start index for the vector.
  */
-      Vector(unsigned shape, int start);
+      Vector(unsigned len, int start);
   };
 }
 

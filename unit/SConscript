@@ -34,3 +34,6 @@ myenv.Program('lcarray', ['lcarray.cxx'])
 
 # lccolmajorindexer
 myenv.Program('lccolmajorindexer', ['lccolmajorindexer.cxx'])
+
+# lcfixedvector
+myenv.Program('lcfixedvector', ['lcfixedvector.cxx'])
