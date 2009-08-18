@@ -64,10 +64,21 @@ test_1()
   LC_ASSERT("Testing norm", norm2==myNorm);
 }
 
+void
+test_2()
+{
+  Lucee::FixedVector<3, double> xv(1.0, 2.0, 3.0);
+
+  LC_ASSERT("Testing first entry in array", xv[0]==1.0);
+  LC_ASSERT("Testing second entry in array", xv[1]==2.0);
+  LC_ASSERT("Testing third entry in array", xv[2]==3.0);
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcfixedvector");
   test_1();
+  test_2();
   LC_END_TESTS;
 }

@@ -9,10 +9,18 @@
  */
 
 // lucee includes
+#include <LcFixedVector.h>
 #include <LcMatrix.h>
 
 namespace Lucee
 {
+  template <typename T>
+  Matrix<T>::Matrix(unsigned row, unsigned col)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(
+        &Lucee::FixedVector<2, unsigned>(row, col)[0])
+  {
+  }
+
   template <typename T>
   Matrix<T>::Matrix(unsigned shape[2])
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape)
