@@ -147,7 +147,7 @@ new starting index of the view-array. In most cases this can simply be
 set to @emph{start}.
 @end deftypemethod
 
-@section @code{Lucee::Matrix}: Matrices and linear algebra.
+@section @code{Lucee::Matrix}: Matrices and Linear Algebra.
 @cindex Matrix class.
 @cindex @code{Lucee::Matrix}
 @cindex @code{Matrix} class, namespace @code{Lucee}.
