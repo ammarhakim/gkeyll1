@@ -25,7 +25,7 @@ namespace Lucee
 /**
  * Construct new fixed-size vector setting all values to 0.
  */
-      FixedVector(const T& init=T(0));
+      FixedVector(T init=T(0));
 
 /**
  * Construct new fixed-size vector with specified initial values.
@@ -63,7 +63,7 @@ namespace Lucee
   };
 
   template <unsigned NELEM, typename T>
-  FixedVector<NELEM, T>::FixedVector(const T& init)
+  FixedVector<NELEM, T>::FixedVector(T init)
   {
     for (unsigned i=0; i<NELEM; ++i)
       data[i] = init;

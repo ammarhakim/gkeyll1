@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcColMajorIndexer.h>
+#include <LcFixedVector.h>
 
 namespace Lucee
 {
@@ -228,25 +229,14 @@ namespace Lucee
  * Assignment operator is private.
  */
       Array& operator=(const Array&);
-
-/**
- * This little private class makes a constant array of zeros.
- */
-      class Zeros
-      {
-        public:
-          Zeros() {
-            for (unsigned i=0; i<NDIM; ++i)
-              zeros[i] = 0;
-          }
-          int zeros[NDIM];
-      };
   };
 
   template <unsigned NDIM, typename T, typename INDEXER>
   Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
-    : indexer(shp, typename Array<NDIM, T, INDEXER>::Zeros().zeros), traits(0),
-      useCount(new int(1))
+    :
+    indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
+    traits(0),
+    useCount(new int(1))
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
