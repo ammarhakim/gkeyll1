@@ -26,6 +26,14 @@ namespace Lucee
   {
     public:
 /**
+ * Construct matrix with specified number of rows and columns.
+ *
+ * @param row Rows in matrix.
+ * @param col Columns in matrix.
+ */      
+      Matrix(unsigned row, unsigned col);
+
+/**
  * Construct matrix with specified shape.
  *
  * @param shape Shape of the matrix.
