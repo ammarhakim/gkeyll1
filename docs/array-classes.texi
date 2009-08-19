@@ -5,6 +5,40 @@ This chapter describes the array classes in Lucee.
 @cindex @code{Lucee::FixedVector}
 @cindex @code{FixedVector} class, namespace @code{Lucee}.
 
+The class @code{Lucee::FixedVector} provides a one-dimensional array of
+fixed size. The size of the array must be know at compile time. It is
+declared as
+@example
+namespace Lucee
+@{
+  template <unsigned NELEM, typename T>
+  class FixedVector;
+@}
+@end example
+@noindent
+The first template parameter specifies the size of the vector and second
+parameter specifies the type.
+
+@deftypemethod Lucee::FixedVector @emph{ctor} FixedVector (@code{const T&} init)
+Create a new fixed-size vector and set all values to @emph{init}
+@end deftypemethod
+
+@deftypemethod Lucee::FixedVector @emph{ctor} FixedVector (@code{T} vals[NELEM])
+Create a new fixed-size vector and set values to ones specified in
+@emph{val} array.
+@end deftypemethod
+
+@deftypemethod Lucee::FixedVector @emph{ctor} FixedVector (@code{T} v1, ...)
+Create a new fixed-size vector and set values @math{(v_1, \ldots)}. Note
+that exactly @code{NELEM} values must be specified for this function to
+work correctly. The method will fail silently if incorrect number of
+values are specified.
+@end deftypemethod
+
+@deftypemethod Lucee::FixedVector @code{T&} operator[] (@code{int} i)
+Access element at index @math{i} in vector.
+@end deftypemethod
+
 @section @code{Lucee::Array}: @math{N}-dimensional Arrays.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}
@@ -166,6 +200,12 @@ namespace Lucee
 @}
 @end example
 
+@deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} row, @code{unsigned} col)
+Create a new matrix with specified @emph{row}s and @emph{col}s. The
+start indices are assumed @math{(0,0)}. All matrix elements are
+initialized to @math{0}.
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2])
 Create a new matrix with specified @emph{shape}. The start indices are
 assumed @math{(0,0)}. All matrix elements are initialized to @math{0}.
@@ -191,6 +231,15 @@ exception is thrown. The real part of the eigenvalues are returned in
 vectors must be pre-allocated.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
+Computes the eigenvalues and the eigenvectors of the matrix. The matrix
+must be square or an exception is thrown. The real part of the
+eigenvalues are returned in @emph{evr} and the imaginary part are
+returned in @emph{evi}. The left eigenvectors are returned as columns of
+@emph{vecl} and the right eigenvectors as the columns of
+@emph{vecr}. The vectors and matrices must be pre-allocated.
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix void eigRight (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
 Computes the eigenvalues and the right eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
@@ -207,15 +256,6 @@ eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
 matrix. The vectors and matrices must be pre-allocated.
-@end deftypemethod
-
-@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
-Computes the eigenvalues and the eigenvectors of the matrix. The matrix
-must be square or an exception is thrown. The real part of the
-eigenvalues are returned in @emph{evr} and the imaginary part are
-returned in @emph{evi}. The left eigenvectors are returned as columns of
-@emph{vecl} and the right eigenvectors as the columns of
-@emph{vecr}. The vectors and matrices must be pre-allocated.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)

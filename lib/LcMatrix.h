@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcArray.h>
+#include <LcVector.h>
 
 namespace Lucee
 {
@@ -69,7 +70,41 @@ namespace Lucee
  * @param evr Real part of eigenvalues.
  * @param evi Imaginary part of eigenvalues.
  */
-      void eig(Lucee::Array<1, T>& evr, Lucee::Array<1, T>& evi);
+      void eig(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi);
+
+/**
+ * Computes eigenvalues and left, right eigenvectors of matrix. Matrix
+ * must be square or an exception will be thrown.
+ *
+ * @param evr Real part of eigenvalues.
+ * @param evi Imaginary part of eigenvalues.
+ * @param vecl Left eigenvectors of matrix.
+ * @param vecr Right eigenvectors of matrix.
+ */
+      void eig(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi, 
+        Matrix<T>& vecl, Matrix<T>& vecr);
+
+/**
+ * Computes eigenvalues and right eigenvectors of matrix. Matrix must
+ * be square or an exception will be thrown.
+ *
+ * @param evr Real part of eigenvalues.
+ * @param evi Imaginary part of eigenvalues.
+ * @param vec Left eigenvectors of matrix.
+ */
+      void eigRight(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi, 
+        Matrix<T>& vec);
+
+/**
+ * Computes eigenvalues and left eigenvectors of matrix. Matrix must
+ * be square or an exception will be thrown.
+ *
+ * @param evr Real part of eigenvalues.
+ * @param evi Imaginary part of eigenvalues.
+ * @param vec Left eigenvectors of matrix.
+ */
+      void eigLeft(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi,
+        Matrix<T>& vec);
 
 /**
  * Solves the linear system of equations Ax = b, where A is this

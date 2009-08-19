@@ -35,19 +35,28 @@ namespace Lucee
 
   template <>
   void
-  Matrix<float>::eig(Lucee::Array<1, float>& evr, Lucee::Array<1, float>& evi)
+  Matrix<double>::eig(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi)
+  {
+  }
+
+  template <>
+  void 
+  Matrix<double>::eig(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi, 
+    Matrix<double>& vecl, Matrix<double>& vecr)
   {
   }
 
   template <>
   void
-  Matrix<double>::eig(Lucee::Array<1, double>& evr, Lucee::Array<1, double>& evi)
+  Matrix<double>::eigRight(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi, 
+    Matrix<double>& vec)
   {
   }
 
   template <>
-  void
-  Matrix<float>::solve(Lucee::Matrix<float>& rhs)
+  void 
+  Matrix<double>::eigLeft(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi,
+    Matrix<double>& vec)
   {
   }
 
