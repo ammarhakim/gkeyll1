@@ -27,6 +27,10 @@ opts.AddOptions(
 opts.Update(env)
 opts.Save('options.cache', env) # save stuff to cache
 
+# when on OS X use -Framework Accelerate to pull in LAPACK and BLAS
+# symbols
+env.AppendUnique(FRAMEWORKS=['Accelerate'])
+
 # generate help messages
 Help(opts.GenerateHelpText(env))
 
