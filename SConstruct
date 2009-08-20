@@ -22,6 +22,8 @@ opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
     BoolOption('usepetsc', 'Set to yes to compile with PETSc', 'no'),
+    ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
+    ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
 
 # update environment with options
@@ -58,6 +60,12 @@ if os.path.exists('%s/config.h' % buildDir):
 
 # create fresh clones to pass to our sub-builds
 env = myEnv.Clone()
+
+# add extra compiler and link flags if needed
+if env['EXTRA_CCFLAGS'] != '':
+    env.Append(CCFLAGS = env['EXTRA_CCFLAGS'])
+if env['EXTRA_LINKFLAGS'] != '':
+    env.Append(LINKFLAGS = env['EXTRA_LINKFLAGS'])
 
 # export environments to sub-builds
 Export('env')
