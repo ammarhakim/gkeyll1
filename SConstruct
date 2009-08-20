@@ -21,6 +21,7 @@ opts = Options(['options.cache', 'config.py'])
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
+    BoolOption('usepetsc', 'Set to yes to compile with PETSc', 'no'),
 )
 
 # update environment with options
@@ -42,6 +43,11 @@ config_flags.configFlags(env)
 import scripts.config_builddir as config_builddir
 buildin = config_builddir.configBuildDir(env)
 
+# clone the environment
+myEnv = env.Clone()
+
+# CONFIGURATION OF INDIVIDUAL DEPENDENCIES GO BELOW
+
 # add the build directory to include path to get hold of config.h header
 buildDir = '#%s' % buildin
 env.Append(CPPPATH = buildDir)
@@ -49,9 +55,6 @@ env.Append(CPPPATH = buildDir)
 # add flag to indicate we have config.h header
 if os.path.exists('%s/config.h' % buildDir):
     env.Append(CCFLAGS = '-DHAVE_CONFIG_H')
-
-# clone the environment
-myEnv = env.Clone()
 
 # create fresh clones to pass to our sub-builds
 env = myEnv.Clone()
