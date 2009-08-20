@@ -57,68 +57,6 @@ namespace Lucee
 The first template parameter indicates the rank of the array and the
 second, the type of data stored in the array.
 
-By default arrays are zero-based but other start indices can also be
-specified. Arrays can be created by specifying the shape and,
-optionally, the starting index along each rank.
-@example
-#include <LcArray.h>
-
-unsigned shape[2] = @{5, 10@};
-Lucee::Array<2, double> arr1(shape);
-
-int start[2] = @{2, 0@};
-Lucee::Array<2, double> arr2(shape, start);
-@end example
-
-@noindent
-This will create rank-two @math{5\times 10} arrays @code{arr1}, indexed
-starting @math{(0,0)}, and @code{arr2}, indexed starting
-@math{(2,0)}. All elements in the array can be set using the assignment
-operator: for example, @code{arr1=5.0}, will set all elements of
-@code{arr1} to @math{5.0}. One can loop over the arrays, setting them:
-@example
-for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
-  for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
-    arr1(i,j) = i+j;
-@end example
-
-View-arrays into an existing array can be created. View-arrays are
-arrays that allow access to parts of another array. Modifications made
-to the original or view-array are reflected in the other,
-i.e. view-arrays share data with their parent array.
-@example
-unsigned shape[2] = @{100, 100@};
-Lucee::Array<2, double> arr(shape);
-
-unsigned viewShape[2] = @{20, 20@};
-int viewStart[2] = @{5, 5@};
-int zeros[2] = @{0, 0@};
-Lucee::Array<2, double>& view =
-  arr.createView(viewShape, viewStart, zeros);
-@end example
-
-@noindent
-This will create a view-array @code{view} into the original array
-@code{arr}. The view-array's start index will be @math{(0,0)}.
-Modifications made to either the view-array or the original array will
-also affect the other.
-
-Sometimes a view-array of a lower dimension than the original one needs
-to be created. For example, say an array representing row @math{3} of
-@code{arr} is required. This can be done as follows:
-@example
-unsigned deflateRanks[1] = @{0@};
-int deflateIdx[1] = @{3@};
-unsigned viewShape[1] = arr.shape(1);
-int viewStart[1];
-viewStart[0] = arr.lower(1);
-
-Lucee::Array<1, double>& row3 =
-  arr.createView<1>(deflateRanks, deflateIdx, viewShape, viewStart);
-@end example
-This will create @code{row3} be an alias for row @math{3} in
-@code{arr}.
-
 @deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{const T&} init)
 Create a new array with given shape. Start indices are assumed to be
 @math{(0,\ldots)}. An optional @emph{init} value can be specified and
@@ -211,17 +149,17 @@ Create a new matrix with specified @emph{shape}. The start indices are
 assumed @math{(0,0)}. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2], @code{int} start[2])
+Create a new matrix with specified @emph{shape} and given @emph{start}
+indices. All matrix elements are initialized to @math{0}.
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix unsigned numRows ()
 Returns number of rows in matrix.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix unsigned numColumns ()
 Returns number of columns in matrix.
-@end deftypemethod
-
-@deftypemethod Lucee::Matrix @emph{ctor} Matrix (@code{unsigned} shape[2], @code{int} start[2])
-Create a new matrix with specified @emph{shape} and given @emph{start}
-indices. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi)

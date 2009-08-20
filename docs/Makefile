@@ -1,9 +1,9 @@
 all: html pdf
 
-html : lucee-ref.texi basic.texi implementation.texi
+html : lucee-ref.texi array-classes.texi implementation.texi
 	makeinfo --html lucee-ref.texi -o html
 
-pdf : lucee-ref.texi
+pdf : lucee-ref.texi array-classes.texi implementation.texi
 	pdftex lucee-ref.texi
 	texindex lucee-ref.??
 	pdftex lucee-ref.texi
