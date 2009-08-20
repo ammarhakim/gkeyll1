@@ -40,6 +40,29 @@ namespace Lucee
  */
       Vector(unsigned len, int start);
 
+/**
+ * Return value at i-th index.
+ *
+ * @param i index location.
+ * @return value at location.
+ */
+      T operator[](int i) const { return this->operator()(i); }
+
+/**
+ * Return value at i-th index.
+ *
+ * @param i index location.
+ * @return value at location.
+ */
+      T& operator[](int i) { return this->operator()(i); }
+
+/**
+ * Get length of vector
+ *
+ * @return length of vector.
+ */
+      unsigned getLength() const { return this->getShape(0); }
+
   };
 }
 

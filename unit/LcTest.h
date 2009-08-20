@@ -31,6 +31,8 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <limits>
+#include <cmath>
 
 /**
  * Keeps track of how many tests have passed or failed
@@ -233,6 +235,18 @@ bool arraycmp(const std::vector<T>& a, const std::vector<T>& b)
             return false;
     }
     return true;
+}
+
+/**
+ * Compares two floating point numbers to with precision.
+ *
+ * @param a first value to compare.
+ * @param b second value to compare.
+ */
+template <typename T>
+bool epsCmp(T a, T b)
+{
+  return fabs(1-b/a) <= std::numeric_limits<T>::epsilon();
 }
 
 #endif // LC_TEST_H
