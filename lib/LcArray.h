@@ -64,6 +64,14 @@ namespace Lucee
       ~Array();
 
 /**
+ * Assign all elements in array to specified value.
+ *
+ * @param val Value to assign.
+ * @return Reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& operator=(const T& val);
+
+/**
  * Get rank of array.
  *
  * @return Rank of array.
@@ -274,6 +282,21 @@ namespace Lucee
       delete [] data;
       delete useCount;
     }
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::operator=(const T& val)
+  {
+    if (isContiguous())
+// just copy value directly into data-space
+      for (unsigned i=0; i<getSize(); ++i)
+        data[i] = val;
+    else
+    {
+    }
+
+    return *this;
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>

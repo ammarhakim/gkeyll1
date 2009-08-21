@@ -48,6 +48,18 @@ test_1()
   S.eig(evr, evi);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+
+// compute eigenvalues and eigenvectors of matrix
+  Lucee::Matrix<double> vecl(2,2), vecr(2,2);
+  S.eig(evr, evi, vecl, vecr);
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+
+  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(0,0), 1/sqrt(2.0)));
+  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(1,0), 1/sqrt(2.0)));
+
+  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(0,1), -1/sqrt(2.0)));
+  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(1,1), 1/sqrt(2.0)));
 }
 
 int

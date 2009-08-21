@@ -47,6 +47,16 @@ test_1()
 
   LC_ASSERT("Testing if array is contigous", true == arr1.isContiguous());
   LC_ASSERT("Testing if array is contigous", true == arr2.isContiguous());
+
+  arr1 = 10.0;
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      LC_ASSERT("Testing is setting all values worked", arr1(i,j)==10.0);
+
+  arr2 = 10.0;
+  for (int i=arr2.getLower(0); i<arr2.getUpper(0); ++i)
+    for (int j=arr2.getLower(1); j<arr2.getUpper(1); ++j)
+      LC_ASSERT("Testing is setting all values worked", arr2(i,j)==10.0);
 }
 
 void
