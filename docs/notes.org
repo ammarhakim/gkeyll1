@@ -3,6 +3,16 @@
 
 * Lucee Notes
 
+** 20th August 2009.
+
+*** TODO Complete RowMajor indexer and test it.
+*** TODO Implement the createView() operator.
+
+*** Symmetric matrix.
+
+    Implement a SymmetricMatrix class. This should use the same
+    indexing mechanism as used in LAPACK.
+
 ** 30th July 2009: Documentation notes. Again.
 
    A good option for producing Lucee documentation is texinfo
