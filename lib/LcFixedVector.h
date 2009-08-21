@@ -18,6 +18,7 @@
 
 // std includes
 #include <stdarg.h>
+#include <cmath>
 
 namespace Lucee
 {
@@ -70,6 +71,13 @@ namespace Lucee
  */
       T& operator[](unsigned i) { return data[i]; }
 
+/**
+ * Return 2-norm of vector.
+ *
+ * @return 2-norm of vector.
+ */
+      T get2Norm() const;
+
     private:
 /** Data */
       T data[NELEM];
@@ -100,6 +108,16 @@ namespace Lucee
   {
     for (unsigned i=0; i<NELEM; ++i)
       data[i] = vals[i];
+  }
+
+  template <unsigned NELEM, typename T>
+  T
+  FixedVector<NELEM, T>::get2Norm() const
+  {
+    T norm = 0.0;
+    for (unsigned i=0; i<NELEM; ++i)
+      norm += data[i]*data[i];
+    return sqrt(norm);
   }
 }
 
