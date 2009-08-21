@@ -60,6 +60,22 @@ test_1()
 
   LC_ASSERT("Testing eignevector of S", epsCmp(vecl(0,1), -1/sqrt(2.0)));
   LC_ASSERT("Testing eignevector of S", epsCmp(vecl(1,1), 1/sqrt(2.0)));
+
+// compute eigenvalues and right-eigenvectors of matrix
+  Lucee::Matrix<double> vec(2,2);
+  S.eigLeft(evr, evi, vec);
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+
+  LC_ASSERT("Testing eignevector of S", epsCmp(vec(0,0), 1/sqrt(2.0)));
+  LC_ASSERT("Testing eignevector of S", epsCmp(vec(1,0), 1/sqrt(2.0)));
+
+  LC_ASSERT("Testing eignevector of S", epsCmp(vec(0,1), -1/sqrt(2.0)));
+  LC_ASSERT("Testing eignevector of S", epsCmp(vec(1,1), 1/sqrt(2.0)));
+
+  S.eigRight(evr, evi, vec);
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 }
 
 int

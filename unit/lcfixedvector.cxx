@@ -72,6 +72,9 @@ test_2()
   LC_ASSERT("Testing first entry in array", xv[0]==1.0);
   LC_ASSERT("Testing second entry in array", xv[1]==2.0);
   LC_ASSERT("Testing third entry in array", xv[2]==3.0);
+
+  double norm = sqrt(1.0*1.0 + 2.0*2.0 + 3.0*3.0);
+  LC_ASSERT("Testing norm of vector", epsCmp(xv.getNorm(), norm));
 }
 
 int
