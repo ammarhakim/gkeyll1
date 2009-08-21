@@ -39,6 +39,15 @@ values are specified.
 Access element at index @math{i} in vector.
 @end deftypemethod
 
+@deftypemethod Lucee::FixedVector unsigned getLength ()
+Get length of vector.
+@end deftypemethod
+
+@deftypemethod Lucee::FixedVector T getNorm ()
+Compute @math{l_2}-norm of vector. The norm only makes sense for double
+and floating point vectors.
+@end deftypemethod
+
 @section @code{Lucee::Array}: @math{N}-dimensional Arrays.
 @cindex Arrays, basic class.
 @cindex @code{Lucee::Array}

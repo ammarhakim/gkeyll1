@@ -76,7 +76,7 @@ namespace Lucee
  *
  * @return 2-norm of vector.
  */
-      T get2Norm() const;
+      T getNorm() const;
 
     private:
 /** Data */
@@ -112,7 +112,7 @@ namespace Lucee
 
   template <unsigned NELEM, typename T>
   T
-  FixedVector<NELEM, T>::get2Norm() const
+  FixedVector<NELEM, T>::getNorm() const
   {
     T norm = 0.0;
     for (unsigned i=0; i<NELEM; ++i)
