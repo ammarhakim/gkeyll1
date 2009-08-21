@@ -54,21 +54,21 @@ namespace Lucee
     LDVL = 1;
     LDVR = 1;
 
-     LDA = numRows();
-     N = LDA;
-     JOBVR = 'N';
-     JOBVL = 'N';
-     LWORK = 5*N;
-     std::vector<double> WORK(LWORK);
+    LDA = numRows();
+    N = LDA;
+    JOBVR = 'N';
+    JOBVL = 'N';
+    LWORK = 5*N;
+    std::vector<double> WORK(LWORK);
 
 // call LAPACK routine to compute eigenvalues
-     dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
-       &evr[evr.getLower(0)],
-       &evi[evi.getLower(0)],
-       0, &LDVL,
-       0, &LDVR, 
-       &WORK[0], &LWORK, 
-       &INFO);
+    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+      &evr[evr.getLower(0)],
+      &evi[evi.getLower(0)],
+      0, &LDVL,
+      0, &LDVR, 
+      &WORK[0], &LWORK, 
+      &INFO);
 
   }
 
@@ -77,6 +77,33 @@ namespace Lucee
   Matrix<double>::eig(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi, 
     Matrix<double>& vecl, Matrix<double>& vecr)
   {
+// copy data from matrix into temporary array. Use column major order.
+    std::vector<double> A(numRows()*numColumns());
+    unsigned count = 0;
+    for (int j=getLower(1); j<getUpper(1); ++j)
+      for (int i=getLower(0); i<getUpper(0); ++i)
+        A[count++] = this->operator()(i,j);
+
+    char JOBVR, JOBVL;
+    int INFO, LWORK, LDA, N, LDVL, LDVR;
+    LDVL = vecl.numRows();
+    LDVR = vecl.numRows();
+
+    LDA = numRows();
+    N = LDA;
+    JOBVR = 'V';
+    JOBVL = 'V';
+    LWORK = 5*N;
+    std::vector<double> WORK(LWORK);
+     
+// call LAPACK routine to compute eigenvalues and eigenvectors
+    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+      &evr[evr.getLower(0)],
+      &evi[evi.getLower(0)],
+      &vecl(vecl.getLower(0), vecl.getLower(1)), &LDVL,
+      &vecr(vecr.getLower(0), vecr.getLower(1)), &LDVR,
+      &WORK[0], &LWORK,
+      &INFO);
   }
 
   template <>
