@@ -66,8 +66,8 @@ namespace Lucee
       &evr[evr.getLower(0)],
       &evi[evi.getLower(0)],
       0, &LDVL,
-      0, &LDVR, 
-      &WORK[0], &LWORK, 
+      0, &LDVR,
+      &WORK[0], &LWORK,
       &INFO);
 
   }

@@ -119,6 +119,38 @@ new starting index of the view-array. In most cases this can simply be
 set to @emph{start}.
 @end deftypemethod
 
+@section @code{Lucee::Vector}: One-dimensional Arrays.
+@cindex Vector class.
+@cindex @code{Lucee::Vector}
+@cindex @code{Vector} class, namespace @code{Lucee}.
+
+The @code{Lucee::Vector} class inherits from the @code{Lucee::Array}
+class and provides a specialized container for one-dimensional arrays of
+@code{int}, @code{float} or @code{double}. Certain linear algebra
+functions are only defined for @code{float} or @code{double}. It is
+declared as:
+@example
+// LcVector.h
+namespace Lucee
+@{
+  template <typename T> class Vector;
+@}
+@end example
+
+@deftypemethod Lucee::Vector @emph{ctor} Vector (@code{unsigned} len)
+Create a new vector with specified length. The start index is assumed
+@math{0}. All vector elements are initialized to @math{0}.
+@end deftypemethod
+
+@deftypemethod Lucee::Vector @emph{ctor} Vector (@code{unsigned} len, @code{int} start)
+Create a new vector with specified length and start index
+@emph{start}. All vector elements are initialized to @math{0}.
+@end deftypemethod
+
+@deftypemethod Lucee::Vector @code{T&} operator[] (@code{int} i)
+Access element at index @math{i} in vector.
+@end deftypemethod
+
 @section @code{Lucee::Matrix}: Matrices and Linear Algebra.
 @cindex Matrix class.
 @cindex @code{Lucee::Matrix}
@@ -162,11 +194,19 @@ Returns number of rows in matrix.
 Returns number of columns in matrix.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix  Lucee::Vector<T>& getColumn (unsigned col)
+Returns the @emph{col} column of the matrix.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix  Lucee::Vector<T>& getRow (unsigned row)
+Returns the @emph{row} row of the matrix.
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi)
 Computes the eigenvalues of the matrix.  The matrix must be square or an
 exception is thrown. The real part of the eigenvalues are returned in
 @emph{evr} and the imaginary part are returned in @emph{evi}. These
-vectors must be pre-allocated.
+vectors must be pre-allocated and contiguous.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
@@ -175,7 +215,8 @@ must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as columns of
 @emph{vecl} and the right eigenvectors as the columns of
-@emph{vecr}. The vectors and matrices must be pre-allocated.
+@emph{vecr}. The vectors and matrices must be pre-allocated and
+contiguous.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eigRight (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
@@ -184,7 +225,7 @@ matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The right eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
-matrix. The vectors and matrices must be pre-allocated.
+matrix. The vectors and matrices must be pre-allocated and contiguous.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eigLeft (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
@@ -193,7 +234,7 @@ matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
-matrix. The vectors and matrices must be pre-allocated.
+matrix. The vectors and matrices must be pre-allocated and contiguous.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
