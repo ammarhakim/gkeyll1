@@ -55,27 +55,47 @@ test_1()
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(0,0), 1/sqrt(2.0)));
-  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(1,0), 1/sqrt(2.0)));
+// check A*r = lambda*r for all right eigenvectors
+  Lucee::Vector<double> eigVec(2);
+  for (unsigned p=0; p<2; ++p)
+  {
+    for (unsigned i=0; i<2; ++i)
+    {
+      double sum = 0.0;
+      for (unsigned j=0; j<2; ++j)
+        sum += S(i,j)*vecr(j,p);
+      eigVec[i] = sum;
+    }
 
-  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(0,1), -1/sqrt(2.0)));
-  LC_ASSERT("Testing eignevector of S", epsCmp(vecl(1,1), 1/sqrt(2.0)));
+    for (unsigned i=0; i<2; ++i)
+      LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
+  }
 
-// compute eigenvalues and right-eigenvectors of matrix
+// compute eigenvalues and left-eigenvectors of matrix
   Lucee::Matrix<double> vec(2,2);
   S.eigLeft(evr, evi, vec);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-  LC_ASSERT("Testing eignevector of S", epsCmp(vec(0,0), 1/sqrt(2.0)));
-  LC_ASSERT("Testing eignevector of S", epsCmp(vec(1,0), 1/sqrt(2.0)));
-
-  LC_ASSERT("Testing eignevector of S", epsCmp(vec(0,1), -1/sqrt(2.0)));
-  LC_ASSERT("Testing eignevector of S", epsCmp(vec(1,1), 1/sqrt(2.0)));
-
   S.eigRight(evr, evi, vec);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+
+// check A*r = lambda*r for all right eigenvectors
+  eigVec = 0.0;
+  for (unsigned p=0; p<2; ++p)
+  {
+    for (unsigned i=0; i<2; ++i)
+    {
+      double sum = 0.0;
+      for (unsigned j=0; j<2; ++j)
+        sum += S(i,j)*vecr(j,p);
+      eigVec[i] = sum;
+    }
+
+    for (unsigned i=0; i<2; ++i)
+      LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
+  }
 }
 
 int

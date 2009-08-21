@@ -244,9 +244,9 @@ bool arraycmp(const std::vector<T>& a, const std::vector<T>& b)
  * @param b second value to compare.
  */
 template <typename T>
-bool epsCmp(T a, T b)
+bool epsCmp(T a, T b, int fact=10)
 {
-  return fabs(1-b/a) <= std::numeric_limits<T>::epsilon();
+  return fabs(1-b/a) <= 10*std::numeric_limits<T>::epsilon();
 }
 
 #endif // LC_TEST_H

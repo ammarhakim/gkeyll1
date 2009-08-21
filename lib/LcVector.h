@@ -41,6 +41,14 @@ namespace Lucee
       Vector(unsigned len, int start);
 
 /**
+ * Assign all elements in vector to specified value.
+ *
+ * @param val Value to assign.
+ * @return Reference to this vector.
+ */
+      Vector<T>& operator=(const T& val);
+
+/**
  * Return value at i-th index.
  *
  * @param i index location.
