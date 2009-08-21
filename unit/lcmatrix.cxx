@@ -59,6 +59,7 @@ test_1()
   Lucee::Vector<double> eigVec(2);
   for (unsigned p=0; p<2; ++p)
   {
+    eigVec = 0.0;
     for (unsigned i=0; i<2; ++i)
     {
       double sum = 0.0;
@@ -66,7 +67,6 @@ test_1()
         sum += S(i,j)*vecr(j,p);
       eigVec[i] = sum;
     }
-
     for (unsigned i=0; i<2; ++i)
       LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
   }
@@ -82,9 +82,9 @@ test_1()
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
 // check A*r = lambda*r for all right eigenvectors
-  eigVec = 0.0;
   for (unsigned p=0; p<2; ++p)
   {
+    eigVec = 0.0;
     for (unsigned i=0; i<2; ++i)
     {
       double sum = 0.0;
@@ -92,7 +92,6 @@ test_1()
         sum += S(i,j)*vecr(j,p);
       eigVec[i] = sum;
     }
-
     for (unsigned i=0; i<2; ++i)
       LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
   }
