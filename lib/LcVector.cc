@@ -28,6 +28,14 @@ namespace Lucee
   {
   }
 
+  template <typename T>
+  Vector<T>&
+  Vector<T>::operator=(const T& val)
+  {
+    Lucee::Array<1, T>::operator=(val);
+    return *this;
+  }
+
 // instantiations
   template class Lucee::Vector<int>;
   template class Lucee::Vector<float>;

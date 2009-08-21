@@ -70,6 +70,9 @@ namespace Lucee
       &WORK[0], &LWORK,
       &INFO);
 
+// check if eigensolver worked
+    if (INFO!=0)
+      throw Lucee::Except("Matrix::eig: Eigenvalue solver failed");
   }
 
   template <>
@@ -104,6 +107,10 @@ namespace Lucee
       &vecr(vecr.getLower(0), vecr.getLower(1)), &LDVR,
       &WORK[0], &LWORK,
       &INFO);
+
+// check if eigensolver worked
+    if (INFO!=0)
+      throw Lucee::Except("Matrix::eig: Eigenvalue solver failed");
   }
 
   template <>
@@ -138,6 +145,10 @@ namespace Lucee
       &vec(vec.getLower(0), vec.getLower(1)), &LDVR,
       &WORK[0], &LWORK,
       &INFO);
+
+// check if eigensolver worked
+    if (INFO!=0)
+      throw Lucee::Except("Matrix::eigRight: Eigenvalue solver failed");
   }
 
   template <>
@@ -172,6 +183,10 @@ namespace Lucee
       0, &LDVR,
       &WORK[0], &LWORK,
       &INFO);
+
+// check if eigensolver worked
+    if (INFO!=0)
+      throw Lucee::Except("Matrix::eigLeft: Eigenvalue solver failed");
   }
 
   template <>
