@@ -50,6 +50,14 @@ namespace Lucee
       Matrix(unsigned shape[2], int start[2]);
 
 /**
+ * Assign all elements in matrix to specified value.
+ *
+ * @param val Value to assign.
+ * @return Reference to this matrix.
+ */
+      Matrix<T>& operator=(const T& val);
+
+/**
  * Returns number of rows in matrix.
  *
  * @return number of rows.
