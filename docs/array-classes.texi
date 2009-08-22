@@ -160,6 +160,10 @@ Create a new vector with specified length and start index
 Access element at index @math{i} in vector.
 @end deftypemethod
 
+@deftypemethod Lucee::Vector unsigned getLength ()
+Get length of the vector.
+@end deftypemethod
+
 @section @code{Lucee::Matrix}: Matrices and Linear Algebra.
 @cindex Matrix class.
 @cindex @code{Lucee::Matrix}
