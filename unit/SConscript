@@ -38,5 +38,8 @@ myenv.Program('lccolmajorindexer', ['lccolmajorindexer.cxx'])
 # lcfixedvector
 myenv.Program('lcfixedvector', ['lcfixedvector.cxx'])
 
+# lcvector
+myenv.Program('lcvector', ['lcvector.cxx'])
+
 # lcmatrix
 myenv.Program('lcmatrix', ['lcmatrix.cxx'])
