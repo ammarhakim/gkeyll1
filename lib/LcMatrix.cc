@@ -38,6 +38,14 @@ namespace Lucee
   {
   }
 
+  template <typename T>
+  Matrix<T>&
+  Matrix<T>::operator=(const T& val)
+  {
+    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(val);
+    return *this;
+  }
+
   template <>
   void
   Matrix<double>::eig(Lucee::Vector<double>& evr, Lucee::Vector<double>& evi)
