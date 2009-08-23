@@ -65,9 +65,9 @@ namespace Lucee
     if (&mat == this)
       return *this;
 
-    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(mat);
     traits = mat.traits;
-
+// call base class assignment operator
+    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(mat);
     return *this;
   }
 

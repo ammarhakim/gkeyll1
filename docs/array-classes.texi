@@ -85,6 +85,16 @@ actually allocated and the new array points to the same memory space as
 @emph{arr}.
 @end deftypemethod
 
+@deftypemethod Lucee::Array Lucee::Array& operator= (@code{const Array<T>}& arr)
+Shallow copy @emph{arr}. The call makes this array an alias for
+@emph{arr}. I.e. no data is allocated and modifying one changes the
+other.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @code{Lucee::Array&} operator= (@code{const T&} val)
+Set all elements of array to @emph{val}.
+@end deftypemethod
+
 @deftypemethod Lucee::Array unsigned getRank ()
 Return the rank of the array.
 @end deftypemethod
@@ -120,10 +130,6 @@ incorrect number of indices.
 
 @deftypemethod Lucee::Array @code{T&} operator() (@code{int} i[N])
 Access element at index @math{(i_1,\ldots,i_N)} index location in array.
-@end deftypemethod
-
-@deftypemethod Lucee::Array @code{Lucee::Array&} operator= (@code{const T&} val)
-Set all elements of array to @emph{val}.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{Lucee::Array<N,T>&} createView @ 
