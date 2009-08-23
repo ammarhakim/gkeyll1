@@ -229,38 +229,56 @@ Return the @emph{col} column of the matrix.
 Return the @emph{row} row of the matrix.
 @end deftypemethod
 
-@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi)
-Compute the eigenvalues of the matrix.  The matrix must be square or an
-exception is thrown. The real part of the eigenvalues are returned in
-@emph{evr} and the imaginary part are returned in @emph{evi}. These
-vectors must be pre-allocated and contiguous.
+@deftypemethod Lucee::Matrix Matrix<T> transpose ()
+Create the transpose of the matrix. No data is actually allocated and
+the transposed matrix shares data with this matrix. Hence, modifying one
+will affect the other.
 @end deftypemethod
 
-@deftypemethod Lucee::Matrix void eig @
- (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
+@subsection Linear Algebra Functions.
 
-Compute the eigenvalues and the eigenvectors of the matrix. The matrix
-must be square or an exception is thrown. The real part of the
+Linear algebra functions are defined in the header file
+@code{LcLinAlgebra.h}. The available linear algebra methods are
+described below. In the following the template type is either
+@code{double} or @code{float}.
+
+@deftypefn {Linear Algebra Functions} void eig (@code{const Matrix<T>&} A, @
+  @code{Vector<T>&} evr, @code{Vector<T>&} evi)
+
+Compute the eigenvalues of the matrix @math{A}. The matrix must be
+square or an exception is thrown. The real part of the eigenvalues are
+returned in @emph{evr} and the imaginary part are returned in
+@emph{evi}. These vectors must be pre-allocated and contiguous.
+@end deftypefn
+
+@deftypefn {Linear Algebra Functions} void eig @
+ (@code{const Matrix<T>&} A, @code{Vector<T>&} evr, @code{Vector<T>&} evi, @
+  @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
+
+Compute the eigenvalues and the eigenvectors of the matrix @math{A}. The
+matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as columns of
 @emph{vecl} and the right eigenvectors as the columns of
 @emph{vecr}. The vectors and matrices must be pre-allocated and
 contiguous.
-@end deftypemethod
+@end deftypefn
 
-@deftypemethod Lucee::Matrix void eigRight @ 
- (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+@deftypefn {Linear Algebra Functions} void eigRight @ 
+ (@code{const Matrix<T>&} A, @code{Vector<T>&} evr, @
+ @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
 
-Compute the eigenvalues and the right eigenvectors of the matrix. The
-matrix must be square or an exception is thrown. The real part of the
-eigenvalues are returned in @emph{evr} and the imaginary part are
-returned in @emph{evi}. The right eigenvectors are returned as the
-columns of @emph{vec}, which must be of the same shape as this
+Compute the eigenvalues and the right eigenvectors of the matrix
+@math{A}. The matrix must be square or an exception is thrown. The real
+part of the eigenvalues are returned in @emph{evr} and the imaginary
+part are returned in @emph{evi}. The right eigenvectors are returned as
+the columns of @emph{vec}, which must be of the same shape as this
 matrix. The vectors and matrices must be pre-allocated and contiguous.
-@end deftypemethod
+@end deftypefn
 
-@deftypemethod Lucee::Matrix void eigLeft @
- (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+@deftypefn {Linear Algebra Functions} void eigLeft @
+ (@code{const Matrix<T>&} A, @code{Vector<T>&} evr, @
+  @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
 
 Compute the eigenvalues and the left eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
@@ -268,25 +286,18 @@ eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as the
 columns of @emph{vec}, which must be of the same shape as this
 matrix. The vectors and matrices must be pre-allocated and contiguous.
-@end deftypemethod
+@end deftypefn
 
-@deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
+@deftypefn {Linear Algebra Functions} void solve (@code{const Matrix<T>&} A, @
+ @code{Matrix<T>&} rhs)
 
-Solve the linear system of equations @math{Ax=b}, where @math{A} is
-@emph{this} matrix and @math{b} are columns of the matrix
-@emph{rhs}. The matrix @emph{A} must be square or an exception is
-thrown. The @emph{rhs} matrix must have same number of rows as
-@emph{A}. On output the columns of the @emph{rhs} matrix are replaced by
-the corresponding solution vector. The template parameter @code{T} must
-be one of @code{float} or @code{double}. A @math{LU} decomposition is
-used to solve the system of equations.
-@end deftypemethod
-
-@deftypemethod Lucee::Matrix Matrix<T> transpose ()
-Create the transpose of the matrix. No data is actually allocated and
-the transposed matrix shares data with this matrix. Hence, modifying one
-will affect the other.
-@end deftypemethod
+Solve the linear system of equations @math{Ax=b}, where @math{b} are
+columns of the matrix @emph{rhs}. The matrix @emph{A} must be square or
+an exception is thrown. The @emph{rhs} matrix must have same number of
+rows as @emph{A}. On output the columns of the @emph{rhs} matrix are
+replaced by the corresponding solution vector. A @math{LU} decomposition
+is used to solve the system of equations.
+@end deftypefn
 
 @section @code{Lucee::ColMajorIndexer}: Column Major Indexer.
 @cindex Column major indexer.
