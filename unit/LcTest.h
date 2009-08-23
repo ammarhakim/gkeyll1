@@ -1,5 +1,5 @@
 /**
- * @file	lctest.h
+ * @file	LcTest.h
  *
  * @brief	Macros for unit testing
  *
@@ -209,12 +209,12 @@ do {\
 template<typename T>
 bool arraycmp(T a[], T b[], unsigned length)
 {
-    for (unsigned i = 0; i < length; ++i) 
-    {
-        if (a[i] != b[i]) 
-            return false;
-    }
-    return true;
+  for (unsigned i = 0; i < length; ++i) 
+  {
+    if (a[i] != b[i]) 
+      return false;
+  }
+  return true;
 }
 
 /**
@@ -227,26 +227,27 @@ bool arraycmp(T a[], T b[], unsigned length)
 template<typename T>
 bool arraycmp(const std::vector<T>& a, const std::vector<T>& b)
 {
-    if (a.size() != b.size())
-        return false;
-    for (unsigned i=0; i<a.size(); ++i)
-    {
-        if (a[i] != b[i]) 
-            return false;
-    }
-    return true;
+  if (a.size() != b.size())
+    return false;
+  for (unsigned i=0; i<a.size(); ++i)
+  {
+    if (a[i] != b[i]) 
+      return false;
+  }
+  return true;
 }
 
 /**
- * Compares two floating point numbers to with precision.
+ * Compares two floating point numbers to floating-point precision.
  *
  * @param a first value to compare.
  * @param b second value to compare.
+ * @param fact Factor of floating-point epsilon.
  */
 template <typename T>
-bool epsCmp(T a, T b, int fact=10)
+bool epsCmp(T a, T b, int fact=5)
 {
-  return fabs(1-b/a) <= 10*std::numeric_limits<T>::epsilon();
+  return fabs(1-b/a) <= fact*std::numeric_limits<T>::epsilon();
 }
 
 #endif // LC_TEST_H

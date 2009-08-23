@@ -16,6 +16,8 @@
 # include <config.h>
 #endif
 
+#include <iostream>
+
 namespace Lucee
 {
 /**
@@ -23,8 +25,9 @@ namespace Lucee
  * use in the indexing functions provided by the derived classes.
  */
   template <unsigned NDIM>
-  struct ColMajorIndexerBase
+  class ColMajorIndexerBase
   {
+    public:
 /**
  * Create a new indexer for mapping an N-dimensional index into a
  * linear index.
@@ -47,6 +50,22 @@ namespace Lucee
         for (unsigned i=1; i<NDIM+1; ++i)
           sum += ai[i]*start[i-1];
         ai[0] = -sum;
+      }
+
+/**
+ * Create a new indexer copying from input indexer.
+ *
+ * @param indexer Indexer to copy from.
+ */
+      ColMajorIndexerBase(const ColMajorIndexerBase<NDIM>& indexer)
+      {
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          start[i] = indexer.start[i];
+          shape[i] = indexer.shape[i];
+          ai[i] = indexer.ai[i];
+        }
+        ai[NDIM] = indexer.ai[NDIM];
       }
 
 /**

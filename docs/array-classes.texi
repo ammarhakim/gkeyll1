@@ -72,10 +72,17 @@ Create a new array with given shape. Start indices are assumed to be
 is applied to all elements of the array. By default @emph{init}=0.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @emph{ctor} Array (@code{unsigned} shape[NDIM], @code{int} start[NDIM], @code{const T&} init)
+@deftypemethod Lucee::Array @emph{ctor} Array @
+ (@code{unsigned} shape[NDIM], @code{int} start[NDIM], @code{const T&} init)
 Create a new array with given shape and specified start indices. An
 optional @emph{init} value can be specified and is applied to all
 elements of the array. By default @emph{init}=0.
+@end deftypemethod
+
+@deftypemethod Lucee::Array @emph{ctor} Array (@code{const Array}& arr) 
+Create a new array that is a shallow copy of @emph{arr}. No data is
+actually allocated and the new array points to the same memory space as
+@emph{arr}.
 @end deftypemethod
 
 @deftypemethod Lucee::Array unsigned getRank ()
@@ -119,7 +126,8 @@ Access element at index @math{(i_1,\ldots,i_N)} index location in array.
 Set all elements of array to @emph{val}.
 @end deftypemethod
 
-@deftypemethod Lucee::Array @code{Lucee::Array<N,T>&} createView (@code{unsigned} shape[N] , @code{int} start[N], @code{int} newStart[N])
+@deftypemethod Lucee::Array @code{Lucee::Array<N,T>&} createView @ 
+  (@code{unsigned} shape[N] , @code{int} start[N], @code{int} newStart[N])
 Returns a view-array into the original array. The view-array behaves
 exactly like a @code{Lucee::Array}. The portion of the original array
 indexed by the view-array is specified by lower bounds, @emph{start},
@@ -222,7 +230,8 @@ exception is thrown. The real part of the eigenvalues are returned in
 vectors must be pre-allocated and contiguous.
 @end deftypemethod
 
-@deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
+@deftypemethod Lucee::Matrix void eig @
+ (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
 Computes the eigenvalues and the eigenvectors of the matrix. The matrix
 must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
@@ -232,7 +241,8 @@ returned in @emph{evi}. The left eigenvectors are returned as columns of
 contiguous.
 @end deftypemethod
 
-@deftypemethod Lucee::Matrix void eigRight (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+@deftypemethod Lucee::Matrix void eigRight @ 
+ (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
 Computes the eigenvalues and the right eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
@@ -241,7 +251,8 @@ columns of @emph{vec}, which must be of the same shape as this
 matrix. The vectors and matrices must be pre-allocated and contiguous.
 @end deftypemethod
 
-@deftypemethod Lucee::Matrix void eigLeft (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
+@deftypemethod Lucee::Matrix void eigLeft @
+ (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
 Computes the eigenvalues and the left eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
@@ -259,6 +270,12 @@ thrown. The @emph{rhs} matrix must have same number of rows as
 the corresponding solution vector. The template parameter @code{T} must
 be one of @code{float} or @code{double}. A @math{LU} decomposition is
 used to solve the system of equations.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix Matrix<T> transpose ()
+Returns the transpose of the matrix. No data is actually allocated and
+the transposed matrix shares data with this matrix. Hence, modifying one
+will affect the other.
 @end deftypemethod
 
 @section @code{Lucee::ColMajorIndexer}: Column Major Indexer.
@@ -281,7 +298,8 @@ namespace Lucee
 The template parameter @code{NDIM} indicates the rank (dimension) of the
 index space.
 
-@deftypemethod Lucee::ColMajorIndexer @emph{ctor} ColMajorIndexer (@code{unsigned} shape[NDIM], @code{int} start[NDIM])
+@deftypemethod Lucee::ColMajorIndexer @emph{ctor} ColMajorIndexer @
+  (@code{unsigned} shape[NDIM], @code{int} start[NDIM])
 Create a indexer which maps a @code{NDIM} dimensional index space of
 specified @emph{shape} and given @emph{start} indices into a linear
 1-dimensional index.

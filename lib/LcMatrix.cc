@@ -24,18 +24,21 @@ namespace Lucee
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(
         &Lucee::FixedVector<2, unsigned>(row, col)[0])
   {
+    LC_CLEAR_TRANSPOSE(traits);
   }
 
   template <typename T>
   Matrix<T>::Matrix(unsigned shape[2])
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape)
   {
+    LC_CLEAR_TRANSPOSE(traits);
   }
 
   template <typename T>
   Matrix<T>::Matrix(unsigned shape[2], int start[2])
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape, start)
   {
+    LC_CLEAR_TRANSPOSE(traits);
   }
 
   template <typename T>

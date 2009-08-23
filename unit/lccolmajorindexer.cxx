@@ -104,6 +104,57 @@ test_4()
         }
 }
 
+void
+test_5()
+{
+  int start[2] = {1, 2};
+  unsigned shape[2] = {10, 15};
+  Lucee::ColMajorIndexer<2> col(shape, start);
+  Lucee::ColMajorIndexer<2> colCopy(col); // copy it
+ 
+// now test the copied indexer (testing copy ctor)
+  int count=0;
+  for (int j=colCopy.getLower(1); j<colCopy.getUpper(1); ++j)
+    for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
+      LC_ASSERT("Testing 2D indedxer", colCopy.getIndex(i,j) == count++);
+
+  count=0;
+  int idx[2];
+  for (int j=colCopy.getLower(1); j<colCopy.getUpper(1); ++j)
+    for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
+    {
+      idx[0] = i; idx[1] = j;
+      LC_ASSERT("Testing 2D indedxer", colCopy.getGenIndex(idx) == count++);
+    }
+}
+
+void
+test_6()
+{
+  int start[4] = {1, 2, -2, 3};
+  unsigned shape[4] = {10, 15, 20, 12};
+  Lucee::ColMajorIndexer<4> col(shape, start);
+  Lucee::ColMajorIndexer<4> colCopy(col);
+
+  int count=0;
+  for (int l=colCopy.getLower(3); l<colCopy.getUpper(3); ++l)
+    for (int k=colCopy.getLower(2); k<colCopy.getUpper(2); ++k)
+      for (int j=colCopy.getLower(1); j<colCopy.getUpper(1); ++j)
+        for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
+          LC_ASSERT("Testing 4D indedxer", colCopy.getIndex(i,j,k,l) == count++);
+
+  count=0;
+  int idx[4];
+  for (int l=colCopy.getLower(3); l<colCopy.getUpper(3); ++l)
+    for (int k=colCopy.getLower(2); k<colCopy.getUpper(2); ++k)
+      for (int j=colCopy.getLower(1); j<colCopy.getUpper(1); ++j)
+        for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
+        {
+          idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
+          LC_ASSERT("Testing 4D indedxer", colCopy.getGenIndex(idx) == count++);
+        }
+}
+
 int
 main(void) 
 {
@@ -112,5 +163,7 @@ main(void)
   test_2();
   test_3();
   test_4();
+  test_5();
+  test_6();
   LC_END_TESTS;
 }

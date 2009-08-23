@@ -59,6 +59,14 @@ namespace Lucee
       Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);
 
 /**
+ * Create this array from the input array. The copy does not allocate
+ * new space but simply points to the input array.
+ *
+ * @param arr Array to create from.
+ */
+      Array(const Array<NDIM, T, INDEXER>& arr);
+
+/**
  * Destroy object.
  */
       ~Array();
@@ -229,11 +237,6 @@ namespace Lucee
       mutable int* useCount;
 
 /**
- * Copy constructor is private.
- */
-      Array(const Array&);
-
-/**
  * Assignment operator is private.
  */
       Array& operator=(const Array&);
@@ -273,6 +276,21 @@ namespace Lucee
     data = new T[len];
     LC_SET_CONTIGUOUS(traits);
     LC_SET_ALLOC(traits);
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(const Array<NDIM, T, INDEXER>& arr)
+    : indexer(arr.indexer), traits(arr.traits), len(arr.len), data(arr.data)
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      start[i] = arr.start[i];
+      shape[i] = arr.shape[i];
+    }
+    LC_CLEAR_ALLOC(traits); // no memory was allocated
+// increment use-count of input array
+    ++*arr.useCount;
+    useCount = arr.useCount;
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
