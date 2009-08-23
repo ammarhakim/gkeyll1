@@ -94,59 +94,6 @@ namespace Lucee
  */
       Matrix<T> transpose() const;
 
-/**
- * Computes eigenvalues of the matrix. Matrix must be square or an
- * exception will be thrown.
- *
- * @param evr Real part of eigenvalues.
- * @param evi Imaginary part of eigenvalues.
- */
-      void eig(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi);
-
-/**
- * Computes eigenvalues and left, right eigenvectors of matrix. Matrix
- * must be square or an exception will be thrown.
- *
- * @param evr Real part of eigenvalues.
- * @param evi Imaginary part of eigenvalues.
- * @param vecl Left eigenvectors of matrix.
- * @param vecr Right eigenvectors of matrix.
- */
-      void eig(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi, 
-        Matrix<T>& vecl, Matrix<T>& vecr);
-
-/**
- * Computes eigenvalues and right eigenvectors of matrix. Matrix must
- * be square or an exception will be thrown.
- *
- * @param evr Real part of eigenvalues.
- * @param evi Imaginary part of eigenvalues.
- * @param vec Left eigenvectors of matrix.
- */
-      void eigRight(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi, 
-        Matrix<T>& vec);
-
-/**
- * Computes eigenvalues and left eigenvectors of matrix. Matrix must
- * be square or an exception will be thrown.
- *
- * @param evr Real part of eigenvalues.
- * @param evi Imaginary part of eigenvalues.
- * @param vec Left eigenvectors of matrix.
- */
-      void eigLeft(Lucee::Vector<T>& evr, Lucee::Vector<T>& evi,
-        Matrix<T>& vec);
-
-/**
- * Solves the linear system of equations Ax = b, where A is this
- * matrix and b are column vectors of the 'rhs' matrix. On output the
- * 'rhs' matrix is replaced by the solution vectors. An LU
- * decomposition algorithm is used.
- *
- * @param rhs On input columns contain RHS and on output solution.
- */
-      void solve(Lucee::Matrix<T>& rhs);
-
     private:
 /** Matrix traits stored as bit values */
       unsigned traits;
