@@ -69,6 +69,28 @@ namespace Lucee
       }
 
 /**
+ * Copy the values from the input indexer.
+ *
+ * @param indexer Indexer to copy from.
+ * @return reference to this indexer.
+ */
+      ColMajorIndexerBase<NDIM>& operator=(const ColMajorIndexerBase<NDIM>& indexer)
+      {
+        if (&indexer == this)
+          return *this;
+
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          start[i] = indexer.start[i];
+          shape[i] = indexer.shape[i];
+          ai[i] = indexer.ai[i];
+        }
+        ai[NDIM] = indexer.ai[NDIM];
+
+        return *this;
+      }
+
+/**
  * Return start index into space.
  *
  * @param i direction.

@@ -22,16 +22,6 @@
 
 namespace Lucee
 {
-// Masks for matrix traits
-  static unsigned int matrixMasks[] =
-  {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-
-// set of macros for setting/getting matrix traits
-#define LC_TRANSPOSE matrixMasks[0]
-#define LC_SET_TRANSPOSE(bit) (bit) |= LC_TRANSPOSE
-#define LC_CLEAR_TRANSPOSE(bit) (bit) &= ~LC_TRANSPOSE
-#define LC_IS_TRANSPOSE(bit) (bit) & LC_TRANSPOSE
-
   template <typename T>
   class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >
   {
@@ -58,6 +48,21 @@ namespace Lucee
  * @param start Start indices for the matrix.
  */
       Matrix(unsigned shape[2], int start[2]);
+
+/**
+ * Creat a new matrix from input matrix.
+ *
+ * @param mat Matrix to copy from
+ */
+      Matrix(const Matrix<T>& mat);
+
+/**
+ * Copy input matrix.
+ *
+ * @param mat Matrix to copy.
+ * @return Reference to this matrix.
+ */
+      Matrix<T>& operator=(const Matrix<T>& mat);
 
 /**
  * Assign all elements in matrix to specified value.

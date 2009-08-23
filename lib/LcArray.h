@@ -67,6 +67,15 @@ namespace Lucee
       Array(const Array<NDIM, T, INDEXER>& arr);
 
 /**
+ * Copy array from input array. The copy does not allocate new space
+ * but simply points to the input array.
+ *
+ * @param arr Array to copy from.
+ * @return Reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& operator=(const Array<NDIM, T, INDEXER>& arr);
+
+/**
  * Destroy object.
  */
       ~Array();
@@ -235,11 +244,6 @@ namespace Lucee
       T *data;
 /** Number of arrays pointing to this array */
       mutable int* useCount;
-
-/**
- * Assignment operator is private.
- */
-      Array& operator=(const Array&);
   };
 
   template <unsigned NDIM, typename T, typename INDEXER>
@@ -290,6 +294,43 @@ namespace Lucee
     LC_CLEAR_ALLOC(traits); // no memory was allocated
 // increment use-count of input array
     ++*arr.useCount;
+    useCount = arr.useCount;
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::operator=(const Array<NDIM, T, INDEXER>& arr)
+  {
+    if (&arr == this)
+      return *this;
+
+// increment use count of input array
+    ++*arr.useCount; 
+
+// decrement our use count and delete memory if no one else is
+// pointing to us
+    if (--*useCount == 0)
+    {
+      if (LC_IS_ALLOC(traits))
+      {
+        delete [] data;
+        delete useCount;
+      }
+    }
+
+// copy stuff over
+    indexer = arr.indexer;
+    traits = arr.traits;
+    len = arr.len;
+
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      start[i] = arr.start[i];
+      shape[i] = arr.shape[i];
+    }
+    LC_CLEAR_ALLOC(traits); // no memory was allocated
+
+    data = arr.data;
     useCount = arr.useCount;
   }
 
