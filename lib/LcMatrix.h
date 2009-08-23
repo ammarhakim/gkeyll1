@@ -22,6 +22,16 @@
 
 namespace Lucee
 {
+// Masks for matrix traits
+  static unsigned int matrixMasks[] =
+  {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+// set of macros for setting/getting matrix traits
+#define LC_TRANSPOSE matrixMasks[0]
+#define LC_SET_TRANSPOSE(bit) (bit) |= LC_TRANSPOSE
+#define LC_CLEAR_TRANSPOSE(bit) (bit) &= ~LC_TRANSPOSE
+#define LC_IS_TRANSPOSE(bit) (bit) & LC_TRANSPOSE
+
   template <typename T>
   class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >
   {
@@ -70,6 +80,14 @@ namespace Lucee
  * @return number of columns.
  */
       unsigned numColumns() const { return this->template getShape(1); }
+
+/**
+ * Return the transpose the matrix. No data is actually allocated and
+ * the transpose matrix and shares data with this matrix.
+ *
+ * @return transpose of this matrix.
+ */
+      Matrix<T> transpose() const;
 
 /**
  * Computes eigenvalues of the matrix. Matrix must be square or an
@@ -123,7 +141,12 @@ namespace Lucee
  * @param rhs On input columns contain RHS and on output solution.
  */
       void solve(Lucee::Matrix<T>& rhs);
+
+    private:
+/** Matrix traits stored as bit values */
+      unsigned traits;
   };
+
 }
 
 #endif //  LC_MATRIX_H

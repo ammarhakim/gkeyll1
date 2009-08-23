@@ -21,10 +21,14 @@ opts = Options(['options.cache', 'config.py'])
 opts.AddOptions(
     BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
     BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
-    BoolOption('usepetsc', 'Set to yes to compile with PETSc', 'no'),
+    BoolOption('usegsl', 'Set to yes to compile with GSL', 'no'),
     ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
+
+# GSL library setup
+import scripts.config_gsl as config_gsl
+config_gsl.bc.begin(opts)
 
 # update environment with options
 opts.Update(env)
@@ -49,6 +53,14 @@ buildin = config_builddir.configBuildDir(env)
 myEnv = env.Clone()
 
 # CONFIGURATION OF INDIVIDUAL DEPENDENCIES GO BELOW
+
+# configure GSL library if requested
+if env['usegsl']:
+    if config_gsl.bc.conf(env):
+        config_gsl.bc.finish(myEnv)
+    else:
+        print "GSL requested but not found"
+        Exit(1)
 
 # add the build directory to include path to get hold of config.h header
 buildDir = '#%s' % buildin
