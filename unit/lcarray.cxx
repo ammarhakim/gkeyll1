@@ -269,6 +269,83 @@ test_6()
   LC_ASSERT("Testing if copy is shallow copy", arr(2,2) == 12.5);
 }
 
+void
+test_7()
+{
+  unsigned shape[2] = {5, 10};
+  Lucee::Array<2, double> arr1(shape);
+  int start[2] = {2, 0};
+  Lucee::Array<2, double> arr2(shape, start);
+
+// create small 2D arrays
+  int zeros[2] = {0, 0};
+  unsigned ones[2] = {1, 1};
+  Lucee::Array<2, double> arrCopy(ones, zeros);
+  Lucee::Array<2, double> arr2Copy(ones, zeros);
+
+// test assignment operator
+  arrCopy = arr1;
+  arr2Copy = arr2;
+
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking start indices", arrCopy.getLower(i) == 0);
+    LC_ASSERT("Checking start indices", arr2Copy.getLower(i) == start[i]);
+
+    LC_ASSERT("Checking end indices", arrCopy.getUpper(i) == (int) shape[i]);
+    int end = start[i]+shape[i];
+    LC_ASSERT("Checking end indices", arr2Copy.getUpper(i) == end);
+
+    LC_ASSERT("Checking shape", arrCopy.getShape(i) == shape[i]);
+  }
+
+  unsigned myShape[2];
+  arr2Copy.fillWithShape(myShape);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking shape", myShape[i] == shape[i]);
+
+  arrCopy.fillWithShape(myShape);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking shape", myShape[i] == shape[i]);
+
+  LC_ASSERT("Testing size of array", 50 == arrCopy.getSize());
+  LC_ASSERT("Testing size of array", 50 == arr2Copy.getSize());
+
+  LC_ASSERT("Testing if array is contigous", true == arrCopy.isContiguous());
+  LC_ASSERT("Testing if array is contigous", true == arr2Copy.isContiguous());
+
+  arrCopy = 10.0;
+  for (int i=arrCopy.getLower(0); i<arrCopy.getUpper(0); ++i)
+    for (int j=arrCopy.getLower(1); j<arrCopy.getUpper(1); ++j)
+      LC_ASSERT("Testing is setting all values worked", arrCopy(i,j)==10.0);
+
+  arr2Copy = 10.0;
+  for (int i=arr2Copy.getLower(0); i<arr2Copy.getUpper(0); ++i)
+    for (int j=arr2Copy.getLower(1); j<arr2Copy.getUpper(1); ++j)
+      LC_ASSERT("Testing is setting all values worked", arr2Copy(i,j)==10.0);
+
+  double count = 0.0;
+  for (int i=arrCopy.getLower(0); i<arrCopy.getUpper(0); ++i)
+    for (int j=arrCopy.getLower(1); j<arrCopy.getUpper(1); ++j)
+      arrCopy(i,j) = count++;
+
+  count = 0.0;
+  for (int i=arrCopy.getLower(0); i<arrCopy.getUpper(0); ++i)
+    for (int j=arrCopy.getLower(1); j<arrCopy.getUpper(1); ++j)
+    {
+      LC_ASSERT("Testing 2D indexer", arrCopy(i,j) == count++);
+    }
+
+  count = 0.0;
+  int idx[2];
+  for (int i=arrCopy.getLower(0); i<arrCopy.getUpper(0); ++i)
+    for (int j=arrCopy.getLower(1); j<arrCopy.getUpper(1); ++j)
+    {
+      idx[0] = i; idx[1] = j;
+      LC_ASSERT("Testing 2D indexer", arrCopy(idx) == count++);
+    }
+}
+
 int
 main(void) 
 {
@@ -280,5 +357,6 @@ main(void)
   test_4d();
   test_5();
   test_6();
+  test_7();
   LC_END_TESTS;
 }
