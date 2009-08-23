@@ -19,6 +19,16 @@
 
 namespace Lucee
 {
+// Masks for matrix traits
+  static unsigned int matrixMasks[] =
+  {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+// set of macros for setting/getting matrix traits
+#define LC_TRANSPOSE matrixMasks[0]
+#define LC_SET_TRANSPOSE(bit) (bit) |= LC_TRANSPOSE
+#define LC_CLEAR_TRANSPOSE(bit) (bit) &= ~LC_TRANSPOSE
+#define LC_IS_TRANSPOSE(bit) (bit) & LC_TRANSPOSE
+
   template <typename T>
   Matrix<T>::Matrix(unsigned row, unsigned col)
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(
@@ -39,6 +49,26 @@ namespace Lucee
     : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape, start)
   {
     LC_CLEAR_TRANSPOSE(traits);
+  }
+
+  template <typename T>
+  Matrix<T>::Matrix(const Matrix<T>& mat)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(mat)
+  {
+    traits = mat.traits;
+  }
+
+  template <typename T>
+  Matrix<T>&
+  Matrix<T>::operator=(const Matrix<T>& mat)
+  {
+    if (&mat == this)
+      return *this;
+
+    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(mat);
+    traits = mat.traits;
+
+    return *this;
   }
 
   template <typename T>
