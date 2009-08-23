@@ -214,23 +214,23 @@ indices. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix unsigned numRows ()
-Returns number of rows in matrix.
+Return number of rows in matrix.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix unsigned numColumns ()
-Returns number of columns in matrix.
+Return number of columns in matrix.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix  Lucee::Vector<T>& getColumn (unsigned col)
-Returns the @emph{col} column of the matrix.
+Return the @emph{col} column of the matrix.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix  Lucee::Vector<T>& getRow (unsigned row)
-Returns the @emph{row} row of the matrix.
+Return the @emph{row} row of the matrix.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void eig (@code{Vector<T>&} evr, @code{Vector<T>&} evi)
-Computes the eigenvalues of the matrix.  The matrix must be square or an
+Compute the eigenvalues of the matrix.  The matrix must be square or an
 exception is thrown. The real part of the eigenvalues are returned in
 @emph{evr} and the imaginary part are returned in @emph{evi}. These
 vectors must be pre-allocated and contiguous.
@@ -238,7 +238,8 @@ vectors must be pre-allocated and contiguous.
 
 @deftypemethod Lucee::Matrix void eig @
  (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vecl, @code{Matrix<T>&} vecr)
-Computes the eigenvalues and the eigenvectors of the matrix. The matrix
+
+Compute the eigenvalues and the eigenvectors of the matrix. The matrix
 must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as columns of
@@ -249,7 +250,8 @@ contiguous.
 
 @deftypemethod Lucee::Matrix void eigRight @ 
  (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
-Computes the eigenvalues and the right eigenvectors of the matrix. The
+
+Compute the eigenvalues and the right eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The right eigenvectors are returned as the
@@ -259,7 +261,8 @@ matrix. The vectors and matrices must be pre-allocated and contiguous.
 
 @deftypemethod Lucee::Matrix void eigLeft @
  (@code{Vector<T>&} evr, @code{Vector<T>&} evi, @code{Matrix<T>&} vec)
-Computes the eigenvalues and the left eigenvectors of the matrix. The
+
+Compute the eigenvalues and the left eigenvectors of the matrix. The
 matrix must be square or an exception is thrown. The real part of the
 eigenvalues are returned in @emph{evr} and the imaginary part are
 returned in @emph{evi}. The left eigenvectors are returned as the
@@ -268,7 +271,8 @@ matrix. The vectors and matrices must be pre-allocated and contiguous.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix void solve (@code{Matrix<T>&} rhs)
-Solves the linear system of equations @math{Ax=b}, where @math{A} is
+
+Solve the linear system of equations @math{Ax=b}, where @math{A} is
 @emph{this} matrix and @math{b} are columns of the matrix
 @emph{rhs}. The matrix @emph{A} must be square or an exception is
 thrown. The @emph{rhs} matrix must have same number of rows as
@@ -279,7 +283,7 @@ used to solve the system of equations.
 @end deftypemethod
 
 @deftypemethod Lucee::Matrix Matrix<T> transpose ()
-Returns the transpose of the matrix. No data is actually allocated and
+Create the transpose of the matrix. No data is actually allocated and
 the transposed matrix shares data with this matrix. Hence, modifying one
 will affect the other.
 @end deftypemethod

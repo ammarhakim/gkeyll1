@@ -9,9 +9,10 @@
  */
 
 // lucee includes
+#include <LcLinAlgebra.h>
 #include <LcMatrix.h>
-#include <LcVector.h>
 #include <LcTest.h>
+#include <LcVector.h>
 
 // std includes
 #include <cmath>
@@ -38,20 +39,20 @@ test_1()
   Lucee::Vector<double> evi(2);
 
 // compute eigenvalues of matrix
-  S.eig(evr, evi);
+  Lucee::eig(S, evr, evi);
   LC_ASSERT("Testing eigenvalues of S", evr[0]==1.0);
   LC_ASSERT("Testing eigenvalues of S", evr[1]==2.0);
 
   S(0,0) = 1.0; S(0,1) = 8.0;
   S(1,0) = 8.0; S(1,1) = 1.0;
 
-  S.eig(evr, evi);
+  Lucee::eig(S, evr, evi);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
 // compute eigenvalues and eigenvectors of matrix
   Lucee::Matrix<double> vecl(2,2), vecr(2,2);
-  S.eig(evr, evi, vecl, vecr);
+  Lucee::eig(S, evr, evi, vecl, vecr);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
@@ -88,7 +89,7 @@ test_1()
 
 // compute eigenvalues and left-eigenvectors of matrix
   Lucee::Matrix<double> vec(2,2);
-  S.eigLeft(evr, evi, vec);
+  Lucee::eigLeft(S, evr, evi, vec);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
@@ -108,7 +109,7 @@ test_1()
   }
 
 // compute eigenvalues and right-eigenvectors of matrix
-  S.eigRight(evr, evi, vec);
+  Lucee::eigRight(S, evr, evi, vec);
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
