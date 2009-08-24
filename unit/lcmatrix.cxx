@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcLinAlgebra.h>
 #include <LcMatrix.h>
 #include <LcTest.h>
@@ -183,6 +184,21 @@ test_4()
       LC_ASSERT("Testing matrix assignment operator", A(i,j) == 12.5);
 }
 
+void
+test_5()
+{
+  Lucee::Matrix<double> S(2,3);
+  Lucee::Vector<double> evr(2);
+  Lucee::Vector<double> evi(2);
+  Lucee::Matrix<double> vecr(2,2);
+  Lucee::Matrix<double> vecl(2,2);
+
+  LC_RAISES("Testing if exception is thrown", Lucee::eig(S, evr, evi), Lucee::Except);
+  LC_RAISES("Testing if exception is thrown", Lucee::eig(S, evr, evi, vecl, vecr), Lucee::Except);
+  LC_RAISES("Testing if exception is thrown", Lucee::eigRight(S, evr, evi, vecl), Lucee::Except);
+  LC_RAISES("Testing if exception is thrown", Lucee::eigLeft (S, evr, evi, vecl), Lucee::Except);
+}
+
 int
 main(void) 
 {
@@ -191,5 +207,6 @@ main(void)
   test_2();
   test_3();
   test_4();
+  test_5();
   LC_END_TESTS;
 }

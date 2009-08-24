@@ -18,10 +18,19 @@
 
 namespace Lucee
 {
+  template <typename T>
+  static bool checkIfMatrixIsSquare(const Lucee::Matrix<T>& mat)
+  {
+    return mat.numRows() == mat.numColumns();
+  }
+
   void 
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi)
   {
+    if (checkIfMatrixIsSquare(mat)==false)
+      throw Lucee::Except("Lucee:eig: Matrix must be square.");
+
 // copy data from matrix into temporary array. Use column major order.
     std::vector<double> A(mat.numRows()*mat.numColumns());
     unsigned count = 0;
@@ -59,6 +68,9 @@ namespace Lucee
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi, Matrix<double>& vecl, Matrix<double>& vecr)
   {
+    if (checkIfMatrixIsSquare(mat)==false)
+      throw Lucee::Except("Lucee:eig: Matrix must be square.");
+
 // copy data from matrix into temporary array. Use column major order.
     std::vector<double> A(mat.numRows()*mat.numColumns());
     unsigned count = 0;
@@ -96,6 +108,9 @@ namespace Lucee
   eigRight(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi, Matrix<double>& vec)
   {
+    if (checkIfMatrixIsSquare(mat)==false)
+      throw Lucee::Except("Lucee:eig: Matrix must be square.");
+
 // copy data from matrix into temporary array. Use column major order.
     std::vector<double> A(mat.numRows()*mat.numColumns());
     unsigned count = 0;
@@ -133,6 +148,9 @@ namespace Lucee
   eigLeft(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr,
     Lucee::Vector<double>& evi, Matrix<double>& vec)
   {
+    if (checkIfMatrixIsSquare(mat)==false)
+      throw Lucee::Except("Lucee:eig: Matrix must be square.");
+
 // copy data from matrix into temporary array. Use column major order.
     std::vector<double> A(mat.numRows()*mat.numColumns());
     unsigned count = 0;
