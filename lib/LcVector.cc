@@ -29,6 +29,22 @@ namespace Lucee
   }
 
   template <typename T>
+  Vector<T>::Vector(const Vector<T>& vec)
+    : Lucee::Array<1, T>(vec)
+  {
+  }
+
+  template <typename T>
+  Vector<T>&
+  Vector<T>::operator=(const Vector<T>& vec)
+  {
+    if (&vec == this)
+      return *this;
+    Lucee::Array<1, T>::operator=(vec);
+    return *this;
+  }
+
+  template <typename T>
   Vector<T>&
   Vector<T>::operator=(const T& val)
   {

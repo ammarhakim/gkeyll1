@@ -41,6 +41,21 @@ namespace Lucee
       Vector(unsigned len, int start);
 
 /**
+ * Create a new vector from input vector.
+ *
+ * @param vec Vector to create from.
+ */
+      Vector(const Vector<T>& vec);
+
+/**
+ * Copy input vector.
+ *
+ * @param vec Vector to copy from.
+ * @return Reference to this vector.
+ */
+      Vector<T>& operator=(const Vector<T>& vec);
+
+/**
  * Assign all elements in vector to specified value.
  *
  * @param val Value to assign.
