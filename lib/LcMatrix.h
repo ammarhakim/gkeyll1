@@ -98,7 +98,6 @@ namespace Lucee
 /** Matrix traits stored as bit values */
       unsigned traits;
   };
-
 }
 
 #endif //  LC_MATRIX_H

@@ -141,11 +141,55 @@ test_2()
       LC_ASSERT("Testing matrix assignment operator", A(i,j) == 10.5);
 }
 
+void
+test_3()
+{
+  unsigned shape[2] = {2, 5};
+  int start[2] = {-1, -5};
+  Lucee::Matrix<double> A(shape, start);
+  Lucee::Matrix<double> ACopy(A);
+  A = 10.5;
+ 
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing matrix assignment operator", ACopy(i,j) == 10.5);
+  
+  ACopy = 12.5;
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing matrix assignment operator", A(i,j) == 12.5);
+}
+
+void
+test_4()
+{
+  unsigned shape[2] = {2, 5};
+  int start[2] = {-1, -5};
+  Lucee::Matrix<double> A(shape, start);
+
+  unsigned ones[2] = {1, 1};
+  int zeros[2] = {0, 0}; 
+  Lucee::Matrix<double> AAss(ones, zeros);
+  AAss = A;
+ 
+  A = 10.5;
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing matrix assignment operator", AAss(i,j) == 10.5);
+  
+  AAss = 12.5;
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing matrix assignment operator", A(i,j) == 12.5);
+}
+
 int
 main(void) 
 {
   LC_BEGIN_TESTS("lcmatrix");
   test_1();
   test_2();
+  test_3();
+  test_4();
   LC_END_TESTS;
 }
