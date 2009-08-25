@@ -73,6 +73,13 @@ namespace Lucee
       Matrix<T>& operator=(const T& val);
 
 /**
+ * Duplicate this matrix.
+ *
+ * @return Copy of this matrix.
+ */
+      Matrix<T> duplicate() const;
+
+/**
  * Returns number of rows in matrix.
  *
  * @return number of rows.
@@ -85,6 +92,20 @@ namespace Lucee
  * @return number of columns.
  */
       unsigned numColumns() const { return this->template getShape(1); }
+
+/**
+ * Is this matrix a transpose of another one?
+ *
+ * @return true if this matrix is transpose of another one.
+ */
+      bool isTranspose() const;
+
+/**
+ * Is this matrix square?
+ *
+ * @return true if this matrix is square, false otherwise.
+ */
+      bool isSquare() const { return numColumns() == numRows(); }
 
 /**
  * Return the transpose the matrix. No data is actually allocated and

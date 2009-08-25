@@ -110,6 +110,13 @@ namespace Lucee
       void fillWithShape(unsigned shape[NDIM]) const;
 
 /**
+ * Get start index of array.
+ *
+ * @param start On return contains the start index of array.
+ */
+      void fillWithStart(int start[NDIM]) const;
+
+/**
  * Get shape of array in the specified direction.
  *
  * @return shape in specified direction.
@@ -126,7 +133,7 @@ namespace Lucee
 /**
  * Get one past the end index in the specified direction.
  *
- * @return one past the end index in specified direction.
+ * @return One past the end index in specified direction.
  */
       int getUpper(unsigned dir) const;
 
@@ -136,6 +143,13 @@ namespace Lucee
  * @return True if array is contiguous, false otherwise.
  */
       bool isContiguous() const { return LC_IS_CONTIGUOUS(traits); }
+
+/**
+ * Return reference to the first element in array.
+ *
+ * @param Reference to first element in array.
+ */
+      T& first();
 
 /**
  * Accessor function for array.
@@ -366,6 +380,15 @@ namespace Lucee
       shp[i] = shape[i];
   }
 
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  void 
+  Array<NDIM, T, INDEXER>::fillWithStart(int strt[NDIM]) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      strt[i] = start[i];
+  }
+
   template <unsigned NDIM, typename T, typename INDEXER>
   unsigned 
   Array<NDIM, T, INDEXER>::getShape(unsigned dir) const
@@ -385,6 +408,13 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::getUpper(unsigned dir) const
   {
     return start[dir]+shape[dir];
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  T&
+  Array<NDIM, T, INDEXER>::first()
+  {
+    return data[indexer.getGenIndex(start)];
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>

@@ -18,17 +18,25 @@
 
 namespace Lucee
 {
-  template <typename T>
-  static bool checkIfMatrixIsSquare(const Lucee::Matrix<T>& mat)
+  Lucee::Matrix<double>&
+  accumulate(double beta, Lucee::Matrix<double>& C,
+    double alpha, const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B)
   {
-    return mat.numRows() == mat.numColumns();
+// check if input and output matrices are contigous
+    Matrix<double> Cdup(C);
+    if (C.isContiguous() == false)
+      Cdup = C.duplicate();
+
+
+    return C;
   }
+
 
   void 
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi)
   {
-    if (checkIfMatrixIsSquare(mat)==false)
+    if (mat.isSquare()==false)
       throw Lucee::Except("Lucee:eig: Matrix must be square.");
 
 // copy data from matrix into temporary array. Use column major order.
@@ -52,8 +60,8 @@ namespace Lucee
 
 // call LAPACK routine to compute eigenvalues
     dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
-      &evr[evr.getLower(0)],
-      &evi[evi.getLower(0)],
+      &evr.first(),
+      &evi.first(),
       0, &LDVL,
       0, &LDVR,
       &WORK[0], &LWORK,
@@ -68,7 +76,7 @@ namespace Lucee
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi, Matrix<double>& vecl, Matrix<double>& vecr)
   {
-    if (checkIfMatrixIsSquare(mat)==false)
+    if (mat.isSquare()==false)
       throw Lucee::Except("Lucee:eig: Matrix must be square.");
 
 // copy data from matrix into temporary array. Use column major order.
@@ -92,8 +100,8 @@ namespace Lucee
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
     dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
-      &evr[evr.getLower(0)],
-      &evi[evi.getLower(0)],
+      &evr.first(),
+      &evi.first(),
       &vecl(vecl.getLower(0), vecl.getLower(1)), &LDVL,
       &vecr(vecr.getLower(0), vecr.getLower(1)), &LDVR,
       &WORK[0], &LWORK,
@@ -108,7 +116,7 @@ namespace Lucee
   eigRight(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi, Matrix<double>& vec)
   {
-    if (checkIfMatrixIsSquare(mat)==false)
+    if (mat.isSquare()==false)
       throw Lucee::Except("Lucee:eig: Matrix must be square.");
 
 // copy data from matrix into temporary array. Use column major order.
@@ -132,8 +140,8 @@ namespace Lucee
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
     dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
-      &evr[evr.getLower(0)],
-      &evi[evi.getLower(0)],
+      &evr.first(),
+      &evi.first(),
       0, &LDVL,
       &vec(vec.getLower(0), vec.getLower(1)), &LDVR,
       &WORK[0], &LWORK,
@@ -148,7 +156,7 @@ namespace Lucee
   eigLeft(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr,
     Lucee::Vector<double>& evi, Matrix<double>& vec)
   {
-    if (checkIfMatrixIsSquare(mat)==false)
+    if (mat.isSquare()==false)
       throw Lucee::Except("Lucee:eig: Matrix must be square.");
 
 // copy data from matrix into temporary array. Use column major order.
@@ -172,8 +180,8 @@ namespace Lucee
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
     dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
-      &evr[evr.getLower(0)],
-      &evi[evi.getLower(0)],
+      &evr.first(),
+      &evi.first(),
       &vec(vec.getLower(0), vec.getLower(1)), &LDVL,
       0, &LDVR,
       &WORK[0], &LWORK,

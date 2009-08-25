@@ -40,7 +40,7 @@ Access element at index @math{i} in vector.
 @end deftypemethod
 
 @deftypemethod Lucee::FixedVector unsigned getLength ()
-Get length of vector.
+Get number of elements in vector.
 @end deftypemethod
 
 @deftypemethod Lucee::FixedVector T getNorm ()
@@ -109,6 +109,10 @@ non-contiguous array will lead to a run-time exception being thrown.
 On return fill the shape of the array in @emph{shape}.
 @end deftypemethod
 
+@deftypemethod Lucee::Array void fillWithStart (@code{int} start[N])
+On return fill the start index of the array in @emph{start}.
+@end deftypemethod
+
 @deftypemethod Lucee::Array @code{unsigned} getShape (@code{int} dir)
 Return the shape of the array in direction @emph{dir}.
 @end deftypemethod
@@ -126,6 +130,13 @@ Access element at @math{(i,j,\ldots)} index location in array. For a
 @math{N}-dimensional array exactly @math{N} indices must be specified. A
 compile-time error will occur when trying to use this method with the
 incorrect number of indices.
+@end deftypemethod
+
+@deftypemethod Lucee::Array T& first ()
+Return reference to the first element in array. This is useful when
+passing the raw pointer to the array data to functions expecting
+@code{T*}. Note that this only makes sense if the @code{isContiguous()}
+returns true.
 @end deftypemethod
 
 @deftypemethod Lucee::Array @code{T&} operator() (@code{int} i[N])
@@ -213,6 +224,19 @@ Create a new matrix with specified @emph{shape} and given @emph{start}
 indices. All matrix elements are initialized to @math{0}.
 @end deftypemethod
 
+@deftypemethod Lucee::Matrix Lucee::Matrix<T> duplicate ()
+Duplicate the matrix. The returned matrix is contiguous and has
+identical data as this matrix.
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix bool isSquare ()
+Is the matrix square?
+@end deftypemethod
+
+@deftypemethod Lucee::Matrix bool isTranspose ()
+Is the matrix transpose of another matrix?
+@end deftypemethod
+
 @deftypemethod Lucee::Matrix unsigned numRows ()
 Return number of rows in matrix.
 @end deftypemethod
@@ -241,6 +265,17 @@ Linear algebra functions are defined in the header file
 @code{LcLinAlgebra.h}. The available linear algebra methods are
 described below. In the following the template type is either
 @code{double} or @code{float}.
+
+@deftypefn {Linear Algebra Functions} Lucee::Matrix<double>& accumulate (@
+ @code{double} beta, @code{Lucee::Matrix<double>&} C, @
+ @code{double} alpha, @code{const Lucee::Matrix<double>&} A, @
+ @code{const Lucee::Matrix<double>&} B)
+
+Compute the matrix-matrix product @math{C \leftarrow \alpha AB + \beta
+C}. This routine automatically takes into account transposed
+matrices. An exception is thrown if the @math{A} and @math{B} are not of
+the correct shape. A reference to @math{C} is returned.
+@end deftypefn
 
 @deftypefn {Linear Algebra Functions} void eig (@code{const Matrix<T>&} A, @
   @code{Vector<T>&} evr, @code{Vector<T>&} evi)

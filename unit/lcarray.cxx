@@ -42,6 +42,15 @@ test_1()
   for (unsigned i=0; i<2; ++i)
     LC_ASSERT("Checking shape", myShape[i] == shape[i]);
 
+  int myStart[2];
+  arr2.fillWithStart(myStart);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking start", myStart[i] == start[i]);
+
+  arr1.fillWithStart(myStart);
+  for (unsigned i=0; i<2; ++i)
+    LC_ASSERT("Checking shape", myStart[i] == 0);
+
   LC_ASSERT("Testing size of array", 50 == arr1.getSize());
   LC_ASSERT("Testing size of array", 50 == arr2.getSize());
 

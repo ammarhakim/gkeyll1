@@ -23,6 +23,19 @@
 namespace Lucee
 {
 /**
+ * Computes matrix-matrix product C = alpha*A*B + beta*C.
+ *
+ * @param beta Coefficient in front of C.
+ * @param C output/input matrix.
+ * @param alpha Coefficient in from on A*B.
+ * @param A Input matrix appearing in A*B.
+ * @param B Out matrix appearing in A*B.
+ * @return Reference to updated matrix C.
+ */
+  Lucee::Matrix<double>& accumulate(double beta, Lucee::Matrix<double>& C,
+    double alpha, const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B);
+
+/**
  * Computes eigenvalues of a matrix. Matrix must be square or an
  * exception will be thrown.
  *
