@@ -272,9 +272,8 @@ described below. In the following the template type is either
  @code{const Lucee::Matrix<double>&} B)
 
 Compute the matrix-matrix product @math{C \leftarrow \alpha AB + \beta
-C}. This routine automatically takes into account transposed
-matrices. An exception is thrown if the @math{A} and @math{B} are not of
-the correct shape. A reference to @math{C} is returned.
+C}. An exception is thrown if the @math{A} and @math{B} are not of the
+correct shape. A reference to @math{C} is returned.
 @end deftypefn
 
 @deftypefn {Linear Algebra Functions} void eig (@code{const Matrix<T>&} A, @
