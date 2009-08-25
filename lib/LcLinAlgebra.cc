@@ -29,28 +29,35 @@ namespace Lucee
     unsigned brows = B.numRows();
     unsigned bcols = B.numColumns();
 
-    char TRANSA, TRANSB;
-    TRANSA = 'N'; TRANSB = 'N'; // by default do not transpose A and B
-
-// Check that shapes of matrices are consistent. One needs to be
-// careful as matrices may be transposed
-    if (A.isTranspose())
-    {
-      arows = A.numColumns();
-      acols = A.numRows();
-      TRANSA = 'T';
-    }
-    if (B.isTranspose())
-    {
-      brows = B.numColumns();
-      bcols = B.numRows();
-      TRANSB = 'T';
-    }
-
+// check that shapes of matrices are consistent
     if ((arows != crows) || (bcols != ccols) || (acols != brows))
       throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrices");
 
-// Check if input and output matrices are contiguous.
+// stuff needed by BLAS routine
+    int M, N, K, LDA, LDB, LDC;
+    char TRANSA, TRANSB;
+    TRANSA = 'N'; TRANSB = 'N'; // by default do not transpose A and B
+
+    M = arows;
+    N = bcols;
+    K = acols;
+    LDA = arows;
+    LDB = brows;
+    LDC = crows;
+
+// determine job flags and sizes to pass to LAPACK
+    if (A.isTranspose())
+    {
+      TRANSA = 'T';
+      LDA = acols; // underlying data is not really transposed
+    }
+    if (B.isTranspose())
+    {
+      TRANSB = 'T';
+      LDB = bcols; // underlying data is not really transposed
+    }
+
+// check if input and output matrices are contiguous
     Matrix<double> Cdup(C);
     if (C.isContiguous() == false)
       Cdup = C.duplicate(); // not, so allocate fresh matrix
@@ -60,6 +67,19 @@ namespace Lucee
     Matrix<double> Bdup(B);
     if (B.isContiguous() == false)
       Bdup = B.duplicate(); // not, so allocate fresh matrix
+
+// call BLAS routine to do the multiplication
+    dgemm_(&TRANSA, &TRANSB, &M, &N, &K,
+      &alpha, &Adup.first(), &LDA, &Bdup.first(), &LDB,
+      &beta, &Cdup.first(), &LDC);
+
+    if (C.isContiguous() == false)
+    {
+// C was not contiguous, so copy data from Cdup to C
+      for (int i=C.getLower(0); i<C.getUpper(0); ++i)
+        for (int j=C.getLower(1); j<C.getUpper(1); ++j)
+          C(i,j) = Cdup(i,j);
+    }
 
     return C;
   }
