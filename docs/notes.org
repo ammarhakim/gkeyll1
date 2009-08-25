@@ -14,8 +14,8 @@
     Lucee::Matrix<double> S(2,3);
     Lucee::Matrix<double> ST = transpose(S);
 
-*** TODO Test matrix copy ctor and assignment operators.
-*** TODO Add copy ctor and assignment operators to vector.
+*** DONE Test matrix copy ctor and assignment operators.
+*** DONE Add copy ctor and assignment operators to vector.
 *** TODO Complete RowMajor indexer and test it.
 *** TODO Implement the createView() operator.
 *** TODO Finish implementing RT in homogenous slab.
