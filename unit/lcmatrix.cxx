@@ -199,6 +199,30 @@ test_5()
   LC_RAISES("Testing if exception is thrown", Lucee::eigLeft (S, evr, evi, vecl), Lucee::Except);
 }
 
+void
+test_6()
+{
+  Lucee::Matrix<double> S(2,2);
+  S(0,0) = 1.0; S(0,1) = 2.0;
+  S(1,0) = 3.0; S(1,1) = 4.0;
+
+  Lucee::Matrix<double> Sdup(S.duplicate());
+  LC_ASSERT("Testing duplicated matrix", Sdup(0,0) == 1.0);
+  LC_ASSERT("Testing duplicated matrix", Sdup(0,1) == 2.0);
+  LC_ASSERT("Testing duplicated matrix", Sdup(1,0) == 3.0);
+  LC_ASSERT("Testing duplicated matrix", Sdup(1,1) == 4.0);
+}
+
+void
+test_7()
+{
+  Lucee::Matrix<double> A(2,3), B(2,4), C(2,4);
+
+  A = 1.0;
+  B = 2.0;
+  Lucee::accumulate(0.0, C, 1.0, A, B); // C = A*B
+}
+
 int
 main(void) 
 {
@@ -208,5 +232,7 @@ main(void)
   test_3();
   test_4();
   test_5();
+  test_6();
+  test_7();
   LC_END_TESTS;
 }
