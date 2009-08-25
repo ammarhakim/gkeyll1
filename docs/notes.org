@@ -3,9 +3,7 @@
 
 * Lucee Notes
 
-** 20th August 2009.
-
-*** Notes on matrix class and linear algebra.
+** Notes on matrix class and linear algebra.
 
     How to implement transpose operators? For example, several LAPACK
     routines work with flags to indicate transpose. One option would
@@ -14,23 +12,24 @@
     Lucee::Matrix<double> S(2,3);
     Lucee::Matrix<double> ST = transpose(S);
 
-*** DONE Test matrix copy ctor and assignment operators.
-*** DONE Add copy ctor and assignment operators to vector.
-*** TODO Complete RowMajor indexer and test it.
-*** TODO Implement the createView() operator.
-*** TODO Finish implementing RT in homogenous slab.
+** DONE Test matrix copy ctor and assignment operators.
+** DONE Add copy ctor and assignment operators to vector.
+** TODO Complete RowMajor indexer and test it.
+** TODO Implement the createView() operator.
+** TODO Finish implementing RT in homogenous slab.
 
     Complete the ADO algorithm so the delta-backward paper can be
     finished.
 
-*** TODO Implement a 1D ES-PIC code.
+** TODO Implement a 1D ES-PIC code.
 
     Replicate Birdsal and Langdon book problems.
 
-*** Symmetric matrix.
+** Symmetric matrix.
 
     Implement a SymmetricMatrix class. This should use the same
     indexing mechanism as used in LAPACK.
+
 
 ** 30th July 2009: Documentation notes. Again.
 
