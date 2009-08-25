@@ -22,11 +22,44 @@ namespace Lucee
   accumulate(double beta, Lucee::Matrix<double>& C,
     double alpha, const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B)
   {
-// check if input and output matrices are contigous
+    unsigned crows = C.numRows();
+    unsigned ccols = C.numColumns();
+    unsigned arows = A.numRows();
+    unsigned acols = A.numColumns();
+    unsigned brows = B.numRows();
+    unsigned bcols = B.numColumns();
+
+    char TRANSA, TRANSB;
+    TRANSA = 'N'; TRANSB = 'N'; // by default do not transpose A and B
+
+// Check that shapes of matrices are consistent. One needs to be
+// careful as matrices may be transposed
+    if (A.isTranspose())
+    {
+      arows = A.numColumns();
+      acols = A.numRows();
+      TRANSA = 'T';
+    }
+    if (B.isTranspose())
+    {
+      brows = B.numColumns();
+      bcols = B.numRows();
+      TRANSB = 'T';
+    }
+
+    if ((arows != crows) || (bcols != ccols) || (acols != brows))
+      throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrices");
+
+// Check if input and output matrices are contiguous.
     Matrix<double> Cdup(C);
     if (C.isContiguous() == false)
-      Cdup = C.duplicate();
-
+      Cdup = C.duplicate(); // not, so allocate fresh matrix
+    Matrix<double> Adup(A);
+    if (A.isContiguous() == false)
+      Adup = A.duplicate(); // not, so allocate fresh matrix
+    Matrix<double> Bdup(B);
+    if (B.isContiguous() == false)
+      Bdup = B.duplicate(); // not, so allocate fresh matrix
 
     return C;
   }

@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcColMajorIndexer.h>
+#include <LcExcept.h>
 #include <LcFixedVector.h>
 
 namespace Lucee
@@ -346,6 +347,8 @@ namespace Lucee
 
     data = arr.data;
     useCount = arr.useCount;
+
+    return *this;
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
@@ -367,6 +370,7 @@ namespace Lucee
         data[i] = val;
     else
     {
+      throw Lucee::Except("Array::operator=: NOT IMPLEMENTED");
     }
 
     return *this;
