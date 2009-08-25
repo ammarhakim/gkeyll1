@@ -78,6 +78,30 @@ namespace Lucee
     return *this;
   }
 
+  template <typename T>
+  Matrix<T>
+  Matrix<T>::duplicate() const
+  {
+    unsigned shape[2];
+    int start[2];
+// get our shape and start indices
+    this->fillWithShape(shape);
+    this->fillWithStart(start);
+// create new matrix and copy data into it
+    Matrix<T> dup(shape, start);
+    for (int i=this->getLower(0); i<this->getUpper(0); ++i)
+      for (int j=this->getLower(1); j<this->getUpper(1); ++j)
+        dup(i,j) = this->operator()(i,j);
+    return dup;
+  }
+
+  template <typename T>
+  bool
+  Matrix<T>::isTranspose() const
+  {
+    return LC_IS_TRANSPOSE(traits);
+  }
+
 // instantiations
   template class Lucee::Matrix<int>;
   template class Lucee::Matrix<float>;
