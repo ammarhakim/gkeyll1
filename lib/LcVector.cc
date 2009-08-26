@@ -52,6 +52,22 @@ namespace Lucee
     return *this;
   }
 
+  template <typename T>
+  Vector<T>
+  Vector<T>::duplicate() const
+  {
+    unsigned shape[1];
+    int start[1];
+// get out shape and start indices
+    this->fillWithShape(shape);
+    this->fillWithStart(start);
+// create new vector and copy data into it
+    Vector<T> dup(shape[0], start[0]);
+    for (int i=this->getLower(0); i<this->getUpper(0); ++i)
+      dup[i] = this->operator[](i);
+    return dup;
+  }
+
 // instantiations
   template class Lucee::Vector<int>;
   template class Lucee::Vector<float>;

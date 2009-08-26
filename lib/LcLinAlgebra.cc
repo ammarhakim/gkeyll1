@@ -80,7 +80,6 @@ namespace Lucee
         for (int j=C.getLower(1); j<C.getUpper(1); ++j)
           C(i,j) = Cdup(i,j);
     }
-
     return C;
   }
 
@@ -120,10 +119,10 @@ namespace Lucee
       Adup = A.duplicate(); // not, so allocate fresh matrix
     Lucee::Vector<double> xdup(x);
     if (x.isContiguous() == false)
-      ; // not, so allocate fresh vector
+      xdup = x.duplicate(); // not, so allocate fresh vector
     Lucee::Vector<double> ydup(y);
     if (y.isContiguous() == false)
-      ; // not, so allocate fresh vector
+      ydup = y.duplicate(); // not, so allocate fresh vector
 
 // call BLAS routine to do the multiplication    
     dgemv_(&TRANS, &M, &N, &alpha, &Adup.first(), &LDA,
@@ -135,7 +134,6 @@ namespace Lucee
       for (int i=y.getLower(0); i<y.getUpper(0); ++i)
         y[i] = ydup[i];
     }
-
     return y;
   }
 
