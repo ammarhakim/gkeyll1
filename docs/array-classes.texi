@@ -189,6 +189,11 @@ Access element at index @math{i} in vector.
 Get length of the vector.
 @end deftypemethod
 
+@deftypemethod Lucee::Vector Lucee::Vector<T> duplicate ()
+Duplicate the vector. The returned vector is contiguous and has
+identical data as this vector.
+@end deftypemethod
+
 @section @code{Lucee::Matrix}: Matrices and Linear Algebra.
 @cindex Matrix class.
 @cindex @code{Lucee::Matrix}
@@ -274,6 +279,16 @@ described below. In the following the template type is either
 Compute the matrix-matrix product @math{C \leftarrow \alpha AB + \beta
 C}. An exception is thrown if the @math{A} and @math{B} are not of the
 correct shape. A reference to @math{C} is returned.
+@end deftypefn
+
+@deftypefn {Linear Algebra Functions} Lucee::Vector<double>& accumulate @
+ (@code{double} beta, @code{Lucee::Vector<double>&} y, @
+ @code{double} alpha, @code{const Lucee::Matrix<double>&} A, @
+ @code{const Lucee::Vector<double>&} x)
+
+Compute the matrix-vector product @math{y \leftarrow \alpha Ax + \beta
+y}. An exception is thrown if the @math{A}, @math{x} and @math{y} are
+not of the correct shape. A reference to @math{y} is returned.
 @end deftypefn
 
 @deftypefn {Linear Algebra Functions} void eig (@code{const Matrix<T>&} A, @

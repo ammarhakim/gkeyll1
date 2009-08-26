@@ -86,6 +86,13 @@ namespace Lucee
  */
       unsigned getLength() const { return this->getShape(0); }
 
+/**
+ * Duplicate this vector.
+ *
+ * @return Copy of this vector.
+ */
+      Vector<T> duplicate() const;
+
   };
 }
 
