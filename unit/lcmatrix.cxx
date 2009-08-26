@@ -216,11 +216,27 @@ test_6()
 void
 test_7()
 {
-  Lucee::Matrix<double> A(2,3), B(2,4), C(2,4);
+  Lucee::Matrix<double> A(2,3), B(3,4), C(2,4);
 
   A = 1.0;
   B = 2.0;
   Lucee::accumulate(0.0, C, 1.0, A, B); // C = A*B
+// check if the accumulate worked
+  for (int i=C.getLower(0); i<C.getUpper(0); ++i)
+    for (int j=C.getLower(1); j<C.getUpper(1); ++j)
+      LC_ASSERT("Testing if accumulate worked", C(i,j)==6.0);
+
+  Lucee::Matrix<double> A1(2,2), B1(2,1), C1(2,1);
+  A1(0,0) = 2.0; A1(0,1) = 1.0;
+  A1(1,0) = 3.0; A1(1,1) = 2.0;
+
+  B1(0,0) = 6.0;
+  B1(1,0) = 8.0;
+
+  Lucee::accumulate(0.0, C1, 1.0, A1, B1);
+// check if accumulate worked
+  LC_ASSERT("Testing if accumulate worked", C1(0,0) == 20.0);
+  LC_ASSERT("Testing if accumulate worked", C1(1,0) == 34.0);
 }
 
 int
