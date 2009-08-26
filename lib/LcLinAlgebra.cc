@@ -45,7 +45,7 @@ namespace Lucee
     LDB = brows;
     LDC = crows;
 
-// determine job flags and sizes to pass to LAPACK
+// determine job flags and sizes to pass to BLAS
     if (A.isTranspose())
     {
       TRANSA = 'T';
@@ -84,6 +84,60 @@ namespace Lucee
     return C;
   }
 
+  Lucee::Vector<double>&
+  accumulate(double beta, Lucee::Vector<double>& y,
+    double alpha, const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x)
+  {
+    unsigned ylen = y.getLength();
+    unsigned arows = A.numRows();
+    unsigned acols = A.numColumns();
+    unsigned xlen = x.getLength();
+
+// check that shapes of matrices and vectors are consistent
+    if ((acols != xlen) || (ylen != arows))
+      throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrix and vector.");
+
+    char TRANS;
+    int M, N, LDA, INCX, INCY;
+    TRANS = 'N';
+
+    M = arows;
+    N = acols;
+    LDA = arows;
+    INCX = 1;
+    INCY = 1;
+
+// determine flag to pass to BLAS
+    if (A.isTranspose())
+    {
+      TRANS = 'T';
+      LDA = acols;
+    }
+
+// check if input and output matrices/vectors are contigous
+    Lucee::Matrix<double> Adup(A);
+    if (A.isContiguous() == false)
+      Adup = A.duplicate(); // not, so allocate fresh matrix
+    Lucee::Vector<double> xdup(x);
+    if (x.isContiguous() == false)
+      ; // not, so allocate fresh vector
+    Lucee::Vector<double> ydup(y);
+    if (y.isContiguous() == false)
+      ; // not, so allocate fresh vector
+
+// call BLAS routine to do the multiplication    
+    dgemv_(&TRANS, &M, &N, &alpha, &Adup.first(), &LDA,
+      &xdup.first(), &INCX, &beta, &ydup.first(), &INCY);
+
+    if (y.isContiguous() == false)
+    {
+// y was not contigous so copy data from ydup to y
+      for (int i=y.getLower(0); i<y.getUpper(0); ++i)
+        y[i] = ydup[i];
+    }
+
+    return y;
+  }
 
   void 
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
