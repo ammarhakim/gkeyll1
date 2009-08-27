@@ -13,7 +13,6 @@
 
 extern "C"
 {
-/** DGEEV */
 // *  Purpose
 // *  =======
 // *
@@ -118,7 +117,6 @@ extern "C"
       double *vr, int *ldvr,
       double *work, int *lwork, int *info);
 
-/** DGEMM */
 // *
 // *  Purpose
 // *  =======
@@ -319,6 +317,65 @@ extern "C"
     
     void dgemv_(char *TRANS, int *M, int *N, double *ALPHA, double A[], int *LDA, 
       double X[], int *INCX, double *BETA, double Y[], int *INCY);
+
+// C  DGER   performs the rank 1 operation
+// C
+// C     A := alpha*x*y' + A,
+// C
+// C  where alpha is a scalar, x is an m element vector, y is an n element
+// C  vector and A is an m by n matrix.
+// C
+// C  Parameters
+// C  ==========
+// C
+// C  M      - INTEGER.
+// C           On entry, M specifies the number of rows of the matrix A.
+// C           M must be at least zero.
+// C           Unchanged on exit.
+// C
+// C  N      - INTEGER.
+// C           On entry, N specifies the number of columns of the matrix A.
+// C           N must be at least zero.
+// C           Unchanged on exit.
+// C
+// C  ALPHA  - DOUBLE PRECISION.
+// C           On entry, ALPHA specifies the scalar alpha.
+// C           Unchanged on exit.
+// C
+// C  X      - DOUBLE PRECISION array of dimension at least
+// C           ( 1 + ( m - 1)*abs( INCX)).
+// C           Before entry, the incremented array X must contain the m
+// C           element vector x.
+// C           Unchanged on exit.
+// C
+// C  INCX   - INTEGER.
+// C           On entry, INCX specifies the increment for the elements of
+// C           X. INCX must not be zero.
+// C           Unchanged on exit.
+// C
+// C  Y      - DOUBLE PRECISION array of dimension at least
+// C           ( 1 + ( n - 1 )*abs( INCY ) ).
+// C           Before entry, the incremented array Y must contain the n
+// C           element vector y.
+// C           Unchanged on exit.
+// C
+// C  INCY   - INTEGER.
+// C           On entry, INCY specifies the increment for the elements of
+// C           Y. INCY must not be zero.
+// C           Unchanged on exit.
+// C
+// C  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+// C           Before entry, the leading m by n part of the array A must
+// C           contain the matrix of coefficients. On exit, A is
+// C           overwritten by the updated matrix.
+// C
+// C  LDA    - INTEGER.
+// C           On entry, LDA specifies the first dimension of A as declared
+// C           in the calling (sub) program. LDA must be at least
+// C           max( 1, m ).
+// C           Unchanged on exit.
+    void dger_(int *M, int *N, double *ALPHA, double X[], int *INCX,
+      double Y[], int *INCY, double A[], int *LDA);
 }
 
 #endif // LC_LAPACK_DECLARATIONS_H
