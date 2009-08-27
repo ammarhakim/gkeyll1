@@ -3,6 +3,8 @@
 
 * Lucee Notes
 
+** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
+** TODO Complete the solve() method in LcLinAlgebra.
 ** Notes on matrix class and linear algebra.
 
     How to implement transpose operators? For example, several LAPACK
