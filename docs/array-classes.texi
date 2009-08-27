@@ -291,6 +291,17 @@ y}. An exception is thrown if the @math{A}, @math{x} and @math{y} are
 not of the correct shape. A reference to @math{y} is returned.
 @end deftypefn
 
+
+@deftypefn {Linear Algebra Functions} Lucee::Matrix<double>& accumulate @
+ (@code{Lucee::Matrix<double>&} A, @
+ @code{double} alpha, @code{const Lucee::Vector<double>&} x, @
+ @code{const Lucee::Vector<double>&} y)
+
+Compute the vector-vector outer product @math{A \leftarrow \alpha xy^T +
+A}. An exception is thrown if the @math{A}, @math{x} and @math{y} are
+not of the correct shape. A reference to @math{A} is returned.
+@end deftypefn
+
 @deftypefn {Linear Algebra Functions} void eig (@code{const Matrix<T>&} A, @
   @code{Vector<T>&} evr, @code{Vector<T>&} evi)
 

@@ -50,6 +50,19 @@ namespace Lucee
     double alpha, const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x);
 
 /**
+ * Computes vector-vector outer product A = alpha*x*y' + A, where A is
+ * a matrix and x and y are vectors.
+ *
+ * @param A input/output matrix
+ * @param alpha Coefficient in from on x*y'.
+ * @param x Input matrix appearing in x*y'.
+ * @param y Input matrix appearing in x*y'.
+ * @return Reference to updated matrix A.
+ */
+  Lucee::Matrix<double>& accumulate(Lucee::Matrix<double>& A,
+    double alpha, const Lucee::Vector<double>& x, const Lucee::Vector<double>& y);
+
+/**
  * Computes eigenvalues of a matrix. Matrix must be square or an
  * exception will be thrown.
  *

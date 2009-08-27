@@ -137,6 +137,53 @@ namespace Lucee
     return y;
   }
 
+  Lucee::Matrix<double>&
+  accumulate(Lucee::Matrix<double>& A, double alpha, 
+    const Lucee::Vector<double>& x, const Lucee::Vector<double>& y)
+  {
+    unsigned arows = A.numRows();
+    unsigned acols = A.numColumns();
+    unsigned xlen = x.getLength();
+    unsigned ylen = y.getLength();
+
+// check that shapes of matrices and vectors are consistent
+    if ((arows != xlen) || (acols != ylen))
+      throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrices");
+
+    int M, N, INCX, INCY, LDA;
+    M = arows;
+    N = acols;
+    INCX = 1;
+    INCY = 1;
+    LDA = arows;
+
+    if (A.isTranspose())
+      LDA = acols;
+
+// check if input and output matrices/vectors are contigous
+    Lucee::Matrix<double> Adup(A);
+    if (A.isContiguous() == false)
+      Adup = A.duplicate(); // not, so allocate fresh matrix
+    Lucee::Vector<double> xdup(x);
+    if (x.isContiguous() == false)
+      xdup = x.duplicate(); // not, so allocate fresh vector
+    Lucee::Vector<double> ydup(y);
+    if (y.isContiguous() == false)
+      ydup = y.duplicate(); // not, so allocate fresh vector
+
+// call BLAS routine to do the multiplication
+    dger_(&M, &N, &alpha, &xdup.first(), &INCX, &ydup.first(), &INCY, &Adup.first(), &LDA);
+
+    if (A.isContiguous() == false)
+    {
+// A is not contiguous, so copy data from Adup to A
+      for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+        for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+          A(i,j) = Adup(i,j);
+    }
+    return A;
+  }
+
   void 
   eig(const Lucee::Matrix<double>& mat, Lucee::Vector<double>& evr, 
     Lucee::Vector<double>& evi)
