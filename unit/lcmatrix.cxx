@@ -252,6 +252,30 @@ test_8()
   accumulate(y, A, x);
   LC_ASSERT("Testing matrix-vector product", y[0] == 6.0);
   LC_ASSERT("Testing matrix-vector product", y[1] == 6.0);
+
+  Lucee::Matrix<double> A1(2,3);
+  Lucee::Vector<double> x1(3), y1(2);
+
+  A1 = 2.0;
+  x1[0] = 1.0; x1[1] = 2.0; x1[2] = 3.0;
+  accumulate(y1, A1, x1);
+  LC_ASSERT("Testing matrix-vector product", y1[0] == 12.0);
+  LC_ASSERT("Testing matrix-vector product", y1[1] == 12.0);
+}
+
+void
+test_9()
+{
+  Lucee::Vector<double> x(3), y(2);
+  Lucee::Matrix<double> A(3, 2);
+
+  A = 0.0;
+  x = 1.0;
+  y = 2.0;
+  accumulate(A, 1.0, x, y);
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing if vector-vector outer product worked", A(i,j)==2.0);
 }
 
 int
@@ -266,5 +290,6 @@ main(void)
   test_6();
   test_7();
   test_8();
+  test_9();
   LC_END_TESTS;
 }
