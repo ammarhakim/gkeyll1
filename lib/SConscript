@@ -24,7 +24,7 @@ sources = [
     'LcExcept.cc',
     'LcLinAlgebra.cc',
     'LcMatrix.cc',
-    'LcObject.cc',
+    'LcSettableObject.cc',
     'LcVector.cc',
     ]
 
