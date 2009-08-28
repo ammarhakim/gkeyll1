@@ -239,6 +239,21 @@ test_7()
   LC_ASSERT("Testing if accumulate worked", C1(1,0) == 34.0);
 }
 
+void
+test_8()
+{
+  Lucee::Matrix<double> A(2,3);
+  Lucee::Vector<double> x(3), y(2);
+
+  A = 2.0;
+  x = 1.0;
+  y = 0.0;
+
+  accumulate(0.0, y, 1.0, A, x);
+  LC_ASSERT("Testing matrix-vector product", y[0] == 6.0);
+  LC_ASSERT("Testing matrix-vector product", y[1] == 6.0);
+}
+
 int
 main(void) 
 {
@@ -250,5 +265,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }
