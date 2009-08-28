@@ -1,15 +1,15 @@
 /**
- * @file	LcObject.h
+ * @file	LcSettableObject
  *
- * @brief	Base class for all Lucee objects
+ * @brief       Base class for all Lucee objects which can be set from name/values pairs.
  *
  * @version	$Id$
  *
  * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
-#ifndef LC_OBJECT_H
-#define LC_OBJECT_H
+#ifndef LC_SETTABLE_OBJECT_H
+#define LC_SETTABLE_OBJECT_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -22,9 +22,10 @@
 namespace Lucee
 {
 /**
- * Base class for all Lucee objects.
+ * Base class for all Lucee objects that can be set from string/value
+ * pairs.
  */
-  class Object
+  class SettableObject
   {
     public:
 /**
@@ -32,12 +33,12 @@ namespace Lucee
  *
  * @param name Name of object.
  */
-      Object(const std::string& name);
+      SettableObject(const std::string& name);
 
 /**
  * Destroy object.
  */
-      virtual ~Object();
+      virtual ~SettableObject();
 
 /**
  * Get object name.
@@ -56,8 +57,9 @@ namespace Lucee
       virtual bool init() = 0;
 
     private:
+/** Name of object */
       std::string name;
   };
 }
 
-#endif // LC_OBJECT_H
+#endif // LC_SETTABLE_OBJECT_H
