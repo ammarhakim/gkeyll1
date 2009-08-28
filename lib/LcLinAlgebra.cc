@@ -83,6 +83,12 @@ namespace Lucee
     return C;
   }
 
+  Lucee::Matrix<double>& accumulate(Lucee::Matrix<double>& C,
+    const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B)
+  {
+    return accumulate(0.0, C, 1.0, A, B);
+  }
+
   Lucee::Vector<double>&
   accumulate(double beta, Lucee::Vector<double>& y,
     double alpha, const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x)
@@ -135,6 +141,12 @@ namespace Lucee
         y[i] = ydup[i];
     }
     return y;
+  }
+
+  Lucee::Vector<double>& accumulate(Lucee::Vector<double>& y,
+    const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x)
+  {
+    return accumulate(0.0, y, 1.0, A, x);
   }
 
   Lucee::Matrix<double>&

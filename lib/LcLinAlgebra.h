@@ -36,6 +36,18 @@ namespace Lucee
     double alpha, const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B);
 
 /**
+ * Computes matrix-matrix product C = A*B. This is simply a wrapper
+ * around the more general matrix-matrix product rountine.
+ *
+ * @param C output/input matrix.
+ * @param A Input matrix appearing in A*B.
+ * @param B Input matrix appearing in A*B.
+ * @return Reference to updated matrix C.
+ */
+  Lucee::Matrix<double>& accumulate(Lucee::Matrix<double>& C,
+    const Lucee::Matrix<double>& A, const Lucee::Matrix<double>& B);
+
+/**
  * Computes matrix-vector product y = alpha*A*x + beta*y, where A is a
  * matrix and x and y are vectors.
  *
@@ -48,6 +60,18 @@ namespace Lucee
  */
   Lucee::Vector<double>& accumulate(double beta, Lucee::Vector<double>& y,
     double alpha, const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x);
+
+/**
+ * Computes matrix-vector product y = alpha*A*x + beta*y, where A is a
+ * matrix and x and y are vectors.
+ *
+ * @param y output/input vector.
+ * @param A Input matrix appearing in A*x.
+ * @param x Input matrix appearing in A*x.
+ * @return Reference to updated vector y.
+ */
+  Lucee::Vector<double>& accumulate(Lucee::Vector<double>& y,
+    const Lucee::Matrix<double>& A, const Lucee::Vector<double>& x);
 
 /**
  * Computes vector-vector outer product A = alpha*x*y' + A, where A is
