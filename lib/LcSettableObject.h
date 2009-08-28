@@ -1,5 +1,5 @@
 /**
- * @file	LcSettableObject
+ * @file	LcSettableObject.h
  *
  * @brief       Base class for all Lucee objects which can be set from name/values pairs.
  *
