@@ -17,7 +17,9 @@
 #endif
 
 // std includes
+#include <map>
 #include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -59,6 +61,12 @@ namespace Lucee
     private:
 /** Name of object */
       std::string name;
+/** Map of names -> integers */
+      std::map<std::string, int*> intMap;
+/** Map of names -> double */
+      std::map<std::string, double*> doubleMap;
+/** Map of names -> string */
+      std::map<std::string, std::string*> strMap;
   };
 }
 
