@@ -51,6 +51,7 @@ buildin = config_builddir.configBuildDir(env)
 
 # clone the environment
 myEnv = env.Clone()
+parenv = env.Clone()
 
 # CONFIGURATION OF INDIVIDUAL DEPENDENCIES GO BELOW
 
@@ -81,6 +82,13 @@ if env['EXTRA_LINKFLAGS'] != '':
 
 # export environments to sub-builds
 Export('env')
+Export('parenv')
+
+##
+# build loki library
+##
+build_dir = os.path.join(buildin, 'etc/loki')
+SConscript('etc/loki/src/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
 # build core library
