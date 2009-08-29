@@ -43,3 +43,6 @@ myenv.Program('lcvector', ['lcvector.cxx'])
 
 # lcmatrix
 myenv.Program('lcmatrix', ['lcmatrix.cxx'])
+
+# lcsettableobject
+myenv.Program('lcsettableobject', ['lcsettableobject.cxx'])
