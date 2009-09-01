@@ -11,7 +11,6 @@ bc = BuildConf(
     'HDF5P',
 # base paths for incs and libs    
     ['$HOME/software/hdf5mpi',
-     '/usr/local/hdf5p',
      '/usr/local/hdf5mpi',
      '/usr/local',
      '/usr',

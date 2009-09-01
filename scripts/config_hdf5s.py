@@ -11,7 +11,6 @@ bc = BuildConf(
     'HDF5S',
 # base paths for incs and libs    
     ['$HOME/software/hdf5',
-     '/usr/local/hdf5s',
      '/usr/local/hdf5',     
      '/usr/local',
      '/usr',
