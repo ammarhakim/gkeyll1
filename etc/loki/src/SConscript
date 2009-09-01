@@ -1,0 +1,49 @@
+## -*- python -*-
+##
+# Build code and create library
+#
+# Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
+# Licence version 1.0.
+##
+
+Import('env')
+Import('parenv')
+
+incs = [
+    '.',
+    '#etc',
+    '#etc/loki/include',
+    ]
+
+# make a local copy of the build environment
+myenv = env.Clone()
+myenv.Append(CPPPATH = incs)
+
+myparenv = parenv.Clone()
+myparenv.Append(CPPPATH = incs)
+
+# name of library built with code in this file
+libname = 'lcloki'
+
+# source files in lib
+sources = [
+    'OrderedStatic.cpp',
+    'SafeFormat.cpp',
+    'Singleton.cpp',
+    'SmallObj.cpp',
+    'SmartPtr.cpp',
+    'StrongPtr.cpp',
+    ]
+
+##
+# compile sources and add them to list of objects
+##
+objs = []
+for s in sources:
+    o = myenv.Object(s)
+    objs.append(o)
+    
+##
+# Archive into library
+##
+myenv.Library(libname, objs)

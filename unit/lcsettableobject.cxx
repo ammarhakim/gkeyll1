@@ -37,7 +37,7 @@ test_1()
 {
   Grid grid;
 
-  LC_RAISES("Testing to see if incorrect data can be added", 
+  LC_RAISES("Testing to see if incorrect data can be set", 
     grid.setData("foo", 3), Lucee::Except);
 
   grid.setData("numCells", 10);

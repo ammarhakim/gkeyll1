@@ -85,13 +85,19 @@ Export('env')
 Export('parenv')
 
 ##
+# build loki library
+##
+build_dir = os.path.join(buildin, 'etc/loki')
+SConscript('etc/loki/src/SConscript', build_dir=build_dir, duplicate=0)
+
+##
 # build core library
 ##
 build_dir = os.path.join(buildin, 'lib')
 SConscript('lib/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
-# build core library
+# build unit tests
 ##
 build_dir = os.path.join(buildin, 'unit')
 SConscript('unit/SConscript', build_dir=build_dir, duplicate=0)
