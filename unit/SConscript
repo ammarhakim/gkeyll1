@@ -11,6 +11,7 @@ incs = [
     '.',
     '#lib',
     '#etc',
+    '#etc/loki/include',
     ]
 
 # Libraries to link to
@@ -46,3 +47,6 @@ myenv.Program('lcmatrix', ['lcmatrix.cxx'])
 
 # lcsettableobject
 myenv.Program('lcsettableobject', ['lcsettableobject.cxx'])
+
+# lckeyval
+myenv.Program('lckeyval', ['lckeyval.cxx'])
