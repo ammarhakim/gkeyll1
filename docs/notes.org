@@ -17,6 +17,11 @@
    init() method is called the object should set itself up completely,
    without the attendent need to verify the inputs.
 
+   The init() method should take a KeyValTree as its parameter. The
+   KeyValTree can be constructed in various ways: through XML files
+   like in WarpX or through Lua tables. The latter allows the
+   possibility for the KeyVal object to hold pointers to functions.
+
 ** 9th September 2009: A way to build interactive Lucee
 
    Have two panes: a top pane for entering blocks of code (maybe Lua,
@@ -52,7 +57,7 @@
 
     Replicate Birdsal and Langdon book problems.
 
-** Symmetric matrix.
+** TODO Symmetric matrix.
 
     Implement a SymmetricMatrix class. This should use the same
     indexing mechanism as used in LAPACK.
