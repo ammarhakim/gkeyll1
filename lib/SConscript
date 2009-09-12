@@ -10,6 +10,7 @@ Import('env')
 incs = [
     '.',
     '#etc',
+    '#etc/loki/include',
     ]
 
 # make a local copy of the build environment
@@ -22,6 +23,7 @@ libname = 'lclib'
 # source files in lib
 sources = [
     'LcExcept.cc',
+    'LcKeyVal.cc',
     'LcLinAlgebra.cc',
     'LcMatrix.cc',
     'LcSettableObject.cc',

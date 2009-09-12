@@ -3,6 +3,30 @@
 
 * Lucee Notes
 
+** 11th September 2009: How to initialize Lucee objects?
+
+   Initializing objects is not a trivial task. The intialization
+   process should not be split into many stages. For example, calling
+   a series of set methods should not be relied upon. The problem is
+   that the order in which the sets are called can not be
+   controlled. In many situation one needs a particular order for the
+   initialization to work correctly.
+
+   Looks like a warpx/facets like approach will be the best. The
+   validation of the inputs should be done outside the class. Once the
+   init() method is called the object should set itself up completely,
+   without the attendent need to verify the inputs.
+
+** 9th September 2009: A way to build interactive Lucee
+
+   Have two panes: a top pane for entering blocks of code (maybe Lua,
+   maybe Lisp) and a bottom pane for interaction. User enters code in
+   the top pane, hits "Evaluate" button and is put on the
+   prompt. There, one can examine the objects created, plot data and
+   run solvers/simulations.
+
+   Provide buttons to viz results and initial conditions and meshes.
+
 ** TODO Implement sequencers for arrays.
 ** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
 ** TODO Complete the solve() method in LcLinAlgebra.
@@ -216,6 +240,23 @@
     parenthesis.
 
 * WarpX Notes
+
+** Restructring WarpX
+
+   What is needed in a good plasma physics solver? There seems no need
+   to modify the core infrastructure of warpx but simply clean it up,
+   document it thouroughly and make sure that solvers are robust.
+
+   - A robust hyperbolic equation solver. This is the wave propagation
+     scheme.
+
+   - A robust Euler solver, divergence free Maxwell solver, MHD solver
+     with and without heat transport (Braginskii).
+
+   - A robust Poisson solver.
+
+   All the above should work on both rectangular geometry as well as
+   body fitted grids.
 
 ** Febuary 2009
 
