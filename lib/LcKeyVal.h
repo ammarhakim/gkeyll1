@@ -49,14 +49,9 @@ namespace Lucee
   {
     public:
 /**
- * Create a new key-value object
+ * Create a new key -> value set.
  */
       KeyVal();
-
-/**
- * Destroy the object
- */
-      virtual ~KeyVal();
 
 /**
  * Copy ctor: make a deep copy of supplied KeyVal class
@@ -74,6 +69,41 @@ namespace Lucee
       KeyVal& operator=(const KeyVal& kv);
 
 /**
+ * Set to first element in key, values pair map.
+ */
+      template <typename VALUETYPE>
+      unsigned getNum() const
+      {
+        return Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.size();
+      }
+
+/**
+ * Set to first element in key, values pair map.
+ */
+      template <typename VALUETYPE>
+      void setToFirst() const
+      {
+        Loki::Field<VALUETYPE>(dataStoreItrTypeMap).itr =
+          Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.begin();
+      }
+
+/**
+ * Return value of current key, value pair and increment the iterator
+ * to the next entry.
+ *
+ * @param kvp key, value stored as a std::pair
+ */
+      template <typename VALUETYPE>
+      std::pair<std::string, VALUETYPE> getAndBump() const
+      {
+        typename KeyVal::DataStoreItr<VALUETYPE>& dsi 
+          = Loki::Field<VALUETYPE>(dataStoreItrTypeMap);
+        std::pair<std::string, VALUETYPE> kvp(dsi.itr->first, dsi.itr->second);
+        dsi.itr++;
+        return kvp;
+      }
+
+/**
  * Insert a key, value pair. Returns true if the insertion worked,
  * false otherwise.
  *
@@ -81,26 +111,11 @@ namespace Lucee
  * @param value Value of object.
  * @return true, if insertion worked, false otherwise.
  */
-      template<typename VALUETYPE>
+      template <typename VALUETYPE>
       bool add(const std::string& key, VALUETYPE value) 
       {
         return Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.insert(
           std::pair<std::string, VALUETYPE>(key, value)).second;
-      }
-
-/**
- * Insert a key, vector of values pair. Returns true if the insertion
- * worked, false otherwise.
- *
- * @param key Key of object.
- * @param value Value of object.
- * @return true, if insertion worked, false otherwise.
- */
-      template<typename VALUETYPE>
-      bool addVec(const std::string& key, const std::vector<VALUETYPE>& value) 
-      {
-        return Loki::Field<std::vector<VALUETYPE> >(dataStoreTypeMap).dataMap.insert(
-          std::pair<std::string, std::vector<VALUETYPE> >(key, value)).second;
       }
 
 /**
@@ -122,24 +137,6 @@ namespace Lucee
       }
 
 /**
- * Retrieve vector value associated with key.
- *
- * @param key Key of value to return.
- * @return value associated with key.
- */
-      template <typename VALUETYPE>
-      std::vector<VALUETYPE> getVec(const std::string& key) const
-      {
-        typename std::map<std::string, std::vector<VALUETYPE> >::const_iterator itr = 
-          Loki::Field<std::vector<VALUETYPE> >(dataStoreTypeMap).dataMap.find(key);
-        if (itr != Loki::Field<std::vector<VALUETYPE> >(dataStoreTypeMap).dataMap.end())
-          return itr->second;
-        Lucee::Except lce("KeyVal::getVec: Key ");
-        lce << key << " does not exists in KeyVal object" << std::endl;
-        throw lce;
-      }
-
-/**
  * Check if key exist in key-value pair.
  *
  * @param key Key of object to check.
@@ -151,22 +148,6 @@ namespace Lucee
         typename std::map<std::string, VALUETYPE>::const_iterator itr = 
           Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.find(key);
         if (itr != Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.end())
-          return true;
-        return false;
-      }
-
-/**
- * Check if key exist in key-vector-value pair.
- *
- * @param key Key of object to check.
- * @return true if key exists, false otherwise.
- */
-      template <typename VALUETYPE>
-      bool hasVec(const std::string& key) const
-      {
-        typename std::map<std::string, std::vector<VALUETYPE> >::const_iterator itr = 
-          Loki::Field<std::vector<VALUETYPE> >(dataStoreTypeMap).dataMap.find(key);
-        if (itr != Loki::Field<std::vector<VALUETYPE> >(dataStoreTypeMap).dataMap.end())
           return true;
         return false;
       }
@@ -185,6 +166,37 @@ namespace Lucee
       typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStore> DataStoreMap;
 /** Map for containers for name -> data */
       DataStoreMap dataStoreTypeMap;
+
+/**
+ * Iterator over key value pairs.
+ */
+      template <typename T>
+      struct DataStoreItr
+      {
+/** Iterator into map */
+          typename std::map<std::string, T>::const_iterator itr;
+      };
+/** Type definition for map of types to data containers iterators */
+      typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStoreItr> DataStoreItrMap;
+/** Map for containers for name -> data iterators */
+      mutable DataStoreItrMap dataStoreItrTypeMap;
+
+/**
+ * Copy stuff over from supplied set.
+ *
+ * @param kv Set to copy from.
+ */
+      template <typename VALUETYPE>
+      void copyFromSet(const KeyVal& kv)
+      {
+// loop and copy from supplied set
+        kv.setToFirst<VALUETYPE>();
+        for (unsigned i=0; i<kv.getNum<VALUETYPE>(); ++i)
+        {
+          std::pair<std::string, VALUETYPE> p = kv.getAndBump<VALUETYPE>();
+          this->add<VALUETYPE>(p.first, p.second);
+        }
+      }
   };
 }
 
