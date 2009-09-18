@@ -3,6 +3,18 @@
 
 * Lucee Notes
 
+** 18th September 2009: Documentation notes. AGAIN!!
+
+   On more thought the API documentation should be in the code and
+   automatically created using doxygen. The writing of texinfo files
+   duplicates the documentation that is already in the code.
+
+   The documentation which one should write is user documentation,
+   i.e. on how to use the classes. This should all be HTML with the
+   option of pdf for printing. So I am now thinking Lucee should be
+   documented with Sphinx rather than texinfo. Will I never find a
+   solution to this dilemma?
+   
 ** 11th September 2009: How to initialize Lucee objects?
 
    Initializing objects is not a trivial task. The intialization
@@ -235,7 +247,8 @@
   - Use exactly two spaces to indent lines.
   - Pass/return pointers when handing over management of an object. In
     all other cases use references.
-  - Make functions const-correct whenever possible.
+  - Make functions const-correct whenever possible. This may mean
+    declaring some private members mutable.
   - Comment so that doxygen does not produce any errors. Use terse,
     but grammatically correct English for comments.
   - Put braces on their own lines.
