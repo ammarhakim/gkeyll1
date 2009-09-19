@@ -105,7 +105,7 @@ jsMath.Easy = {
   //  loaded automatically.  E.g.
   //      ["plugins/mimeTeX.js","extensions/AMSsymbols.js"]
   //  
-  loadFiles: [],
+    loadFiles: ["extensions/AMSmath.js"],
   
   //
   //  List of fonts to load automatically.  E.g.
