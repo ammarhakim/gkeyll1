@@ -194,4 +194,4 @@ latex_documents = [
 #latex_use_modindex = True
 
 # path to jsMath package
-smath_path = 'easy/load.js'
+jsmath_path = 'easy/load.js'
