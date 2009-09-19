@@ -126,7 +126,13 @@ jsMath.Easy = {
   //        bold: ['{\\bf #1}', 1]
   //      }
   //
-  macros: {},
+    macros: { pfrac: ['{\\frac{\\partial #1}{\\partial #2}}', 2],
+	      pfraca: ['{\\frac{\\partial #1}{\\partial #2}}', 1],
+	      pfracb: ['{\\partial #1/\\partial #2}', 2],
+	      mvec: ['{\\mathbf{#1}}', 1],
+	      gvec: ['{\\boldsymbol{#1}}', 1],
+	      script: ['{\\mathpzc{#1}}', 1]
+	    },
   
   //
   //  Allow jsMath to enter global mode?

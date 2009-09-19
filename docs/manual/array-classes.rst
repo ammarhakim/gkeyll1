@@ -34,3 +34,32 @@ where, for example,::
     return sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
   }
 
+Of course, one must remember that the Maxwell equations are
+
+.. math::
+
+   \pfrac{f}{t} + v \frac{\partial f}{\partial x} = 0
+
+It that cool or what? Now, one can take the moments of this equation
+to get
+
+.. math::
+
+  \begin{align}
+    a &= b \\
+    c &= d
+  \end{align}
+
+So AMSMATH should work with. Below are Maxwell equations.
+
+.. math::
+
+  \begin{align}
+    \nabla\times \mvec{E} &= -\pfrac{\mvec{B}}{t} \\
+    \nabla\times \mvec{B} &=
+    \mu_0\mvec{J}+\frac{1}{c^2}\pfrac{\mvec{E}}{t} \\
+    \nabla\cdot\mvec{E} &= \frac{\varrho_c}{\varepsilon_0} \\
+    \nabla\cdot\mvec{B} &= 0.
+  \end{align}
+
+Did this work or not?
