@@ -1,65 +1,164 @@
 Array classes
 -------------
 
-A common use of arrays in Lucee is to store vector fields. For example,
-to store the electric field in a 2D simulation one would create a 3D
-array (the final index for the components of the electric field)::
+Lucee provides several array classes to store data efficiently.
 
-  unsigned shape[3] = {16, 32, 3};
-  Lucee::Array<3, double> E(shape);
+``Lucee::FixedVector``: Fixed-size vectors
+++++++++++++++++++++++++++++++++++++++++++
 
-Although this array can be indexed in the usual way, it is ofter more
-convenient to get access to all three components::
+.. class:: Lucee::FixedVector
 
-  Lucee::ArrayItr<double> ef = E.createItr();
-  E.setItr(ef, 3, 4);
-  ef[0] = 1.0; ef[1] = 2.0; ef[2] = 1.0;
+  The class ``Lucee::FixedVector`` provides a one-dimensional array of
+  fixed size. The size of the array must be know at compile time. It
+  is declared as::
 
-The iterator ``ef`` points to the three elements of the electric
-field at location :math:`(3,4)`. This code is equivalent to::
+    namespace Lucee
+    {
+      template <unsigned NELEM, typename T>
+      class FixedVector;
+    }
 
-  E(3, 4, 0) = 1.0;
-  E(3, 4, 1) = 2.0;
-  E(3, 4, 2) = 1.0;
+  The first template parameter specifies the size of the vector and
+  second parameter specifies the type of data stored in the vector.
 
-The advantage of using the iterator to access the components is that the
-iterator can be passed to other functions which expect ``double *``::
+  .. cfunction:: ctor FixedVector (const T& init)
+    :noindex:
 
- double norm = computeNorm(&ef[0]);
+    Create a new fixed-size vector and set all values to ``init``.
 
-where, for example,::
+  .. cfunction:: ctor FixedVector (const T& init)
+    :noindex:
 
-  double computeNorm(double *vec) 
-  {
-    return sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
-  }
+    Create a new fixed-size vector and set all values to ``init``.
 
-Of course, one must remember that the Maxwell equations are
+  .. cfunction:: ctor FixedVector (T vals[NELEM])
+    :noindex:
+
+    Create a new fixed-size vector and set values to ones specified in
+    the ``val`` array.
+
+  .. cfunction:: ctor FixedVector (T v1, ...)
+    :noindex:
+
+    Create a new fixed-size vector and set values :math:`(v_1,
+    \ldots)`. Note that exactly ``NELEM`` values must be specified for
+    this function to work correctly. The method will fail silently if
+    incorrect number of values are specified.
+
+  .. cfunction:: T& operator[](int i)
+    :noindex:
+
+    Access element at index :math:`i` in vector.
+
+  .. cfunction:: unsigned getLength ()
+    :noindex:
+
+    Get number of elements in vector.
+
+  .. cfunction:: T getNorm ()
+    :noindex:
+
+    Compute :math:`l_2`-norm of vector. The norm only makes sense for
+    double and floating point vectors.
+
+``Lucee::Array``: :math:`N`-dimensional arrays
+++++++++++++++++++++++++++++++++++++++++++++++
+
+.. class:: Lucee::Array
+
+  The class ``Lucee::Array`` provides a :math:`N`-dimensional
+  reference counted array to store data of arbitrary types. It is
+  declared as::
+
+    namespace Lucee
+    {
+      template <unsigned NDIM, typename T> class Array;
+    }
+
+  The first template parameter indicates the rank of the array and the
+  second, the type of data stored in the array.
+
+  .. cfunction:: ctor Array (unsigned shape[NDIM], const T& init)
+    :noindex:
+
+    Create a new array with given shape. Start indices are assumed to
+    be :math:`(0,\ldots)`. An optional ``init`` value can be specified
+    and is applied to all elements of the array. By default
+    ``init=0``.
+
+  .. cfunction:: ctor Array (unsigned shape[NDIM], int start[NDIM], const T& init)
+    :noindex:
+
+    Create a new array with given shape and specified start
+    indices. An optional ``init11 value can be specified and is
+    applied to all elements of the array. By default ``init=0``.
+
+  .. cfunction:: ctor Array (const Array& arr)
+    :noindex:
+
+    Create a new array that is a shallow copy of ``arr``. No data is
+    actually allocated and the new array points to the same memory
+    space as ``arr``.
+
+  .. cfunction:: Lucee::Array& operator= (const Array<T>& arr)
+    :noindex:
+
+    Shallow copy ``arr``. The call creates an alias for ``arr``,
+    i.e. no data is allocated and modifying one changes the other.
+
+  .. cfunction:: Lucee::Array& operator= (const T& val)
+    :noindex:
+
+    Set all elements of array to ``val``.
+
+  .. cfunction:: unsigned getRank ()
+    :noindex:
+
+    Return the rank of the array.
+
+Array indexing and sequencing
++++++++++++++++++++++++++++++
+
+When an array is created the data is stored in a single chunk of
+contiguous memory. Hence, a method of mapping of the
+:math:`N`-dimensional index space to a :math:`1`-dimensional index
+space is needed. There are two mapping functions provided in Lucee:
+row-major and column-major indexing. These are implemented in the
+``Lucee::ColMajorIndexer`` and the ``Lucee::RowMajorIndexer`` classes.
+
+Let :math:`(i_1,\ldots,i_N)` be the index in the :math:`N`-dimensional
+index space. Let :math`(s_0,\ldots,s_N)` be the starting index and
+:math:`(l_0,\ldots,l_N)` be the shape of the space. Then, a linear
+mapping, :math:`0\le k<L`, where :math:`L=\Pi_{n=0}^N l_n`, can be
+constructed as
 
 .. math::
 
-   \pfrac{f}{t} + v \frac{\partial f}{\partial x} = 0
+  k(i_1,\ldots,i_N) = a_0 + \sum_{n=1}^N a_n i_n
 
-It that cool or what? Now, one can take the moments of this equation
-to get
-
-.. math::
-
-  \begin{align}
-    a &= b \\
-    c &= d
-  \end{align}
-
-So AMSMATH should work with. Below are Maxwell equations.
+where :math:`a_n`, :math:`i=1,\ldots,N` are coefficients determined by the
+particular indexing method, and
 
 .. math::
 
-  \begin{align}
-    \nabla\times \mvec{E} &= -\pfrac{\mvec{B}}{t} \\
-    \nabla\times \mvec{B} &=
-    \mu_0\mvec{J}+\frac{1}{c^2}\pfrac{\mvec{E}}{t} \\
-    \nabla\cdot\mvec{E} &= \frac{\varrho_c}{\varepsilon_0} \\
-    \nabla\cdot\mvec{B} &= 0.
-  \end{align}
+  a_0 = -\sum_{n=1}^N a_n s_n.
 
-Did this work or not?
+In column-major indexing the region in the :math:`1`-dimensional space
+spanned by the last index is contigous:
+
+.. math::
+
+  k(i_1,\ldots,s_N+1) = k(i_1,\ldots,s_N) + 1
+
+Using this condition in the mapping function yields the recursion
+relation :math:`a_{j-1}=a_j l_j` with :math:`a_N=1`.
+
+In row-major indexing the region in the :math:`1`-dimensional space
+spanned by the first index is contigous:
+
+.. math::
+
+  k(s_1+1,\ldots,i_N) = k(s_1,\ldots,i_N) + 1
+
+Using this condition in the mapping function yields the recursion
+relation :math:`a_{j+1}=a_j l_j` with :math:`a_1=1`.

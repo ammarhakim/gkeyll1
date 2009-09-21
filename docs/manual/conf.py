@@ -185,7 +185,17 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = r'''
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+'''
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []

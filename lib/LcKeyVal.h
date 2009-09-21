@@ -69,7 +69,7 @@ namespace Lucee
       KeyVal& operator=(const KeyVal& kv);
 
 /**
- * Set to first element in key, values pair map.
+ * Get the number of values stored for the specified type.
  */
       template <typename VALUETYPE>
       unsigned getNum() const
