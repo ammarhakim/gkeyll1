@@ -17,6 +17,7 @@ Contents:
    :maxdepth: 2
 
    array-classes
+   key-value-tree
 
 Indices and tables
 ==================
