@@ -90,7 +90,7 @@ Lucee provides several array classes to store data efficiently.
     :noindex:
 
     Create a new array with given shape and specified start
-    indices. An optional ``init11 value can be specified and is
+    indices. An optional ``init`` value can be specified and is
     applied to all elements of the array. By default ``init=0``.
 
   .. cfunction:: ctor Array (const Array<T>& arr)
@@ -327,7 +327,7 @@ below. In the following the template type is either ``double`` or
 .. cfunction:: Vector<double>& accumulate (double beta, Vector<double>& y, double alpha, const Matrix<double>& A, const Vector<double>& x)
 
   Compute the matrix-vector product :math:`y \leftarrow \alpha Ax +
-  \beta y`. An exception is thrown if the :math:`A`, :math`x` and
+  \beta y`. An exception is thrown if the :math:`A`, :math:`x` and
   :math:`y` are not of the correct shape. A reference to :math:`y` is
   returned.
 
@@ -451,7 +451,7 @@ row-major and column-major indexing. These are implemented in the
 ``Lucee::ColMajorIndexer`` and the ``Lucee::RowMajorIndexer`` classes.
 
 Let :math:`(i_1,\ldots,i_N)` be the index in the :math:`N`-dimensional
-index space. Let :math`(s_0,\ldots,s_N)` be the starting index and
+index space. Let :math:`(s_0,\ldots,s_N)` be the starting index and
 :math:`(l_0,\ldots,l_N)` be the shape of the space. Then, a linear
 mapping, :math:`0\le k<L`, where :math:`L=\Pi_{n=0}^N l_n`, can be
 constructed as
