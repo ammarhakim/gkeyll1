@@ -50,3 +50,6 @@ myenv.Program('lcsettableobject', ['lcsettableobject.cxx'])
 
 # lckeyval
 myenv.Program('lckeyval', ['lckeyval.cxx'])
+
+# lckeyvaltree
+myenv.Program('lckeyvaltree', ['lckeyvaltree.cxx'])

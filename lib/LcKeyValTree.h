@@ -46,9 +46,12 @@ namespace Lucee
 /**
  * Create empty key-value tree with given name.
  *
- * @param name Name of the set
+ * @param name Name of the set.
+ * @param type Type of the set
+ * @param kind Kind of the set.
  */
-      KeyValTree(const std::string& name="KeyValTree");
+      KeyValTree(const std::string& name, const std::string& type="Generic",
+        const std::string& kind="null");
 
 /**
  * Destroy key-value tree object
@@ -71,18 +74,25 @@ namespace Lucee
       KeyValTree& operator=(const KeyValTree& kvt);
 
 /**
- * Set name of tree
+ * Name of tree.
  *
- * @param name Name of tree
+ * @return Name of tree.
  */
-      void setName(const std::string& name);
+      std::string getName() const { return name; }
 
 /**
- * Name of tree
+ * Type of tree.
  *
- * @return Name of tree
+ * @return type of tree.
  */
-      std::string getName() const;
+      std::string getType() const { return type; }
+
+/**
+ * Kind of tree.
+ *
+ * @return kind of tree.
+ */
+      std::string getKind() const { return kind; }
 
 /**
  * Add a new key-value tree to this tree.
@@ -130,6 +140,11 @@ namespace Lucee
     private:
 /** Name of tree */
       std::string name;
+/** Type of tree */
+      std::string type;
+/** Kind of tree */
+      std::string kind;
+
 /** Map of tree names to trees */
       KeyValTreeMap_t kvTreeMap;
 /** Map of tree-type to tree names */
