@@ -264,7 +264,7 @@ Lucee provides several array classes to store data efficiently.
     :noindex:
 
     Duplicate the matrix. The returned matrix is contiguous and has
-    identical data as this matrix.
+    identical data as the original matrix.
 
   .. cfunction:: bool isSquare ()
     :noindex:
@@ -300,8 +300,8 @@ Lucee provides several array classes to store data efficiently.
     :noindex:
 
     Create the transpose of the matrix. No data is actually allocated
-    and the transposed matrix shares data with this matrix. Hence,
-    modifying one will affect the other.
+    and the transposed matrix shares data with the original
+    matrix. Hence, modifying one will affect the other.
 
 Linear algebra functions
 ++++++++++++++++++++++++
