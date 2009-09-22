@@ -3,6 +3,22 @@
 
 * Lucee Notes
 
+** 22nd September 2009: Functions in KeyVal pair.
+
+   One should be able to store functions in the KeyVal pair
+   object. For example
+
+     KeyVal kv;
+     InitialCondition func(4); // construct new function taking 4 args
+     kv.addFunction("initalCondition", func);
+ 
+     Function& fnc = kv.get("initalCondition");
+     val = fnc.eval(t, x, y, z);
+
+   Not clear on how to implement this: (a) should one make a copy of
+   the function object? (b) how would this be specified in an input
+   file?
+
 ** 18th September 2009: Documentation notes. AGAIN!!
 
    The documentation which one should write is user documentation,

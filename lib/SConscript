@@ -24,6 +24,7 @@ libname = 'lclib'
 sources = [
     'LcExcept.cc',
     'LcKeyVal.cc',
+    'LcKeyValTree.cc',
     'LcLinAlgebra.cc',
     'LcMatrix.cc',
     'LcSettableObject.cc',
