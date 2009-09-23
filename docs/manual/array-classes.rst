@@ -286,12 +286,12 @@ Lucee provides several array classes to store data efficiently.
 
     Return number of columns in matrix.
 
-  .. cfunction:: Lucee::Vector<T>& getColumn (unsigned col)
+  .. cfunction:: Vector<T>& getColumn (unsigned col)
     :noindex:
 
     Return the ``col`` column of the matrix.
 
-  .. cfunction:: Lucee::Vector<T>& getRow (unsigned row)
+  .. cfunction:: Vector<T>& getRow (unsigned row)
     :noindex:
 
     Return the ``row`` row of the matrix.
