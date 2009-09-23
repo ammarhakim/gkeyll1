@@ -18,6 +18,7 @@ Contents:
 
    array-classes
    key-value-tree
+   rad-transport
 
 Indices and tables
 ==================
