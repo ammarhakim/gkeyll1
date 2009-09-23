@@ -88,3 +88,56 @@ objects.
         std::pair<std::string, int> p = kv.getAndBump();
 	std::cout << p.first << " = " << p.second << std::endl;
       }
+
+``Lucee::KeyValTree``: Hierarchical data storage
+++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. class:: KeyValTree
+
+  This class derives from the class ``Lucee::KeyVal``, adding the
+  ability to store arbitrary number of children of
+  ``Lucee::KeyValTree`` objects.
+
+  .. cfunction:: ctor KeyValTree(const std::string& name, const std::string& type, const std::string& kind)
+    :noindex:
+
+    Create a new ``KeyValTree`` object with given name. Optionally,
+    two additional identifier strings can be provided: a "type" and a
+    "kind". These strings are used in dynamic object creation and
+    represent, in that case, a C++ base class and its derived class
+    respectively. In other cases these strings need not be provided.
+
+  .. cfunction:: std::string getName()
+    :noindex:
+
+    Return name of the tree.
+
+  .. cfunction:: std::string getType()
+    :noindex:
+
+    Return "type" of the tree.
+
+  .. cfunction:: std::string getKind()
+    :noindex:
+
+    Return "kind" of the tree.
+
+  .. cfunction:: bool addTree(const KeyValTree& kvt)
+    :noindex:
+
+    Add a new child tree object to this tree. The complete supplied
+    tree is copied over into this tree.  Returns ``true`` if the tree
+    was added and ``false`` if a child named ``kvt.getName()`` already
+    exists in the tree.
+
+  .. cfunction:: bool hasTree(const std::string& name)
+    :noindex:
+
+    Return ``true`` if a child tree with the supplied ``name`` exists
+    in this tree. Return ``false`` otherwise.
+
+  .. cfunction:: const KeyValTree& getTree(const std::string& name)
+    :noindex:
+
+    Return an immutable reference to the child tree with the specified
+    ``name``. An exception is throw if the child does not exist.
