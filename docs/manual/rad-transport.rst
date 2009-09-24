@@ -104,9 +104,9 @@ occurring in :math:`\pm` pairs. Denoting this set of eigenvalues by
 
   \notag
   \begin{align}
-  \mvec{\Phi}_+ &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}+\nu_j \mvec{E})
+  \mvec{\Phi}_+(\nu_j) &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}+\nu_j \mvec{E})
   \mvec{X}(\lambda_j) \\
-  \mvec{\Phi}_- &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}-\nu_j \mvec{E})
+  \mvec{\Phi}_-(\nu_j) &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}-\nu_j \mvec{E})
   \mvec{X}(\lambda_j),
   \end{align}
 
@@ -141,7 +141,7 @@ and
 
   \notag
   \begin{align}
-  \pm\nu_j = \pm \frac{1}{\lambda_j^{1/2}}.
+  \pm\nu_j = \pm \lambda_j^{-1/2}.
   \end{align}
 
 The homogeneous solution can be written as a linear combination of the
@@ -162,3 +162,181 @@ eigenvectors, i.e.,
 
 where :math:`A_j` and :math:`B_j` are constants to be determined from
 the boundary condition.
+
+A general form of the particular solution applicable to any
+:math:`Q(\tau,\mu)` can be found using the Green's function
+technique. A Green's function for a homogeneous infinite medium is
+constructed.  Expressing this in terms of the eigenvectors of the
+homogeneous RTE it can be shown that for any source function a
+particular solution is given by
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{L}_{p\pm}(\tau) = 
+  \sum_{j=1}^N 
+  \frac{1}{N(\nu_j)}
+  \bigg[
+  \script{A}_j(\tau) \mvec{\Phi}_{\pm}(\nu_j)
+  +
+  \script{B}_j(\tau) \mvec{\Phi}_{\mp}(\nu_j)
+  \bigg],
+  \end{align}
+
+where
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  N(\nu_j) = 
+  \mvec{\Phi}_+(\nu_j)^T \mvec{W}\mvec{M} \mvec{\Phi}_+(\nu_j)
+  -
+  \mvec{\Phi}_-(\nu_j)^T \mvec{W}\mvec{M} \mvec{\Phi}_-(\nu_j)
+  \end{align}
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \script{A}_j(\tau) &=
+  \int_{\tau_0}^\tau 
+  \bigg[
+  \mvec{Q}_+(x)^T \mvec{W} \mvec{\Phi}_+(\nu_j)
+  +
+  \mvec{Q}_-(x)^T \mvec{W} \mvec{\Phi}_-(\nu_j)
+  \bigg]
+  e^{-(\tau-x)/\nu_j}
+  dx, \\
+  \script{B}_j(\tau) &=
+  \int_\tau^{\tau_1}
+  \bigg[
+  \mvec{Q}_+(x)^T \mvec{W} \mvec{\Phi}_-(\nu_j)
+  +
+  \mvec{Q}_-(x)^T \mvec{W} \mvec{\Phi}_+(\nu_j)
+  \bigg]
+  e^{-(x-\tau)/\nu_j}
+  dx,
+  \end{align}
+
+and
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{Q}_\pm(\tau) &= [ Q(\tau,\pm\mu_1),\ldots,Q(\tau,\pm\mu_N)]^T.
+  \end{align}
+
+With the particular solution computed the general solution to the RTE
+is
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{L}_\pm(\tau) = \mvec{L}_{p\pm}(\tau) +
+  \sum_{j=1}^N
+  \bigg[
+  A_j \gvec{\Phi}_{\pm}(\nu_j) e^{-(\tau-\tau_0)/\nu_j}
+  +
+  B_j \gvec{\Phi}_{\mp}(\nu_j) e^{-(\tau_1-\tau)/\nu_j}
+  \bigg].
+  \end{align}
+
+To complete the solution the constants :math:`A_j` and :math:`B_j`
+must be determined using the boundary conditions. For example,
+consider
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  L(\tau_0,+\mu) &= 0, \\
+  L(\tau_1,-\mu) &= 0,
+  \end{align}
+
+for :math:`\mu\in(0,1]`. Using the general solution gives
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \sum_{j=1}^N
+  \bigg[
+  A_j \gvec{\Phi}_+(\nu_j)
+  +
+  B_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_1-\tau_0)/\nu_j}
+  \bigg]
+  = - \mvec{L}_{p+}(\tau_0),
+  \end{align}
+
+for  :math:`\tau=\tau_0`, and
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \sum_{j=1}^N
+  \bigg[
+  A_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_1-\tau_0)/\nu_j}
+  +
+  B_j \gvec{\Phi}_+(\nu_j)
+  \bigg]
+  = - \mvec{L}_{p-}(\tau_1),
+  \end{align}
+
+for :math:`\tau=\tau_1`. This system of linear equations can be
+inverted to solve for :math:`A_j` and :math:`B_j`.
+
+In general, for other linear boundary conditions one can construct a
+system of linear equations written in matix form
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \left[
+  \begin{matrix}
+    \mvec{M}_{11} & \mvec{M}_{12} \\
+    \mvec{M}_{21} & \mvec{M}_{22}
+  \end{matrix}
+  \right]
+  \left[
+    \begin{matrix}
+      \mvec{A} \\
+      \mvec{B}
+    \end{matrix}
+  \right]
+  =
+  \left[
+    \begin{matrix}
+      \mvec{P}_1 \\
+      \mvec{P}_2
+    \end{matrix}
+  \right],
+  \end{align}
+
+where
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{A} &= [A_1,\ldots,A_N]^T, \\
+  \mvec{B} &= [B_1,\ldots,B_N]^T,
+  \end{align}
+
+and :math:`\mvec{M}_{ij}`, :math:`\mvec{P}_i`, :math:`i,j=1,2` are
+submatrices which depend on boundary conditions at the two surfaces.

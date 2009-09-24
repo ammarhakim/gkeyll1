@@ -12,23 +12,11 @@
 #include <LcKeyVal.h>
 #include <LcTest.h>
 
-void
-test_1()
+void test_kv(const Lucee::KeyVal& kv)
 {
-  Lucee::KeyVal kv;
-
-// add stuff to set
-  kv.add("nx", 10);
-  kv.add("ny", 20);
-  kv.add("nz", 30);
-  kv.add("lengthx", 1.0);
-  kv.add("lengthy", 2.0);
-  kv.add("lengthz", 3.0);
   std::vector<int> cells(2);
   cells[0] = 10; cells[1] = 20;
-  kv.add("cells", cells);
 
-// check stuff
   LC_ASSERT("Testing number of integers set", kv.getNum<int>() == 3);
   LC_ASSERT("Testing number of doubles set", kv.getNum<double>() == 3);
   LC_ASSERT("Testing number of vector of ints set", 
@@ -88,6 +76,48 @@ test_1()
     for (unsigned k=0; k<vec.size(); ++k)
       LC_ASSERT("Testing if returned pair was correct", vec[k] == kvp.second[k]);
   }
+}
+
+void
+test_1()
+{
+  Lucee::KeyVal kv;
+
+// add stuff to set
+  kv.add("nx", 10);
+  kv.add("ny", 20);
+  kv.add("nz", 30);
+  kv.add("lengthx", 1.0);
+  kv.add("lengthy", 2.0);
+  kv.add("lengthz", 3.0);
+  std::vector<int> cells(2);
+  cells[0] = 10; cells[1] = 20;
+  kv.add("cells", cells);
+
+// check stuff
+  test_kv(kv);
+
+// make a copy
+  Lucee::KeyVal kvc(kv);
+  test_kv(kvc);
+
+// make an assignment
+  Lucee::KeyVal kva;
+  kva = kv;
+  test_kv(kva);
+
+// make a duplicate
+  Lucee::KeyVal kvd = kv.duplicate();
+  test_kv(kvd);
+
+// modify to see shallow copies were made
+  kva.add("components", 5);
+  LC_ASSERT("Testing if copy is shallow", kv.get<int>("components") == 5);
+  LC_ASSERT("Testing if copy is shallow", kvc.get<int>("components") == 5);
+
+// make sure duplicate copy did not change
+  LC_RAISES("Ensuring that duplicate was not changed", kvd.get<int>("components"),
+    Lucee::Except);
 }
 
 int

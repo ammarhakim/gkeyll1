@@ -28,6 +28,10 @@ objects.
     std::cout << kv.get<int>("nx") << std::endl; // 10
     std::cout << kv.get<double>("length") << std::endl; // 12.5
 
+  This class is refrence counted: i.e copying or assigning from
+  another ``KeyVal`` object creates a shallow copy and the two objects
+  share data. If a true copy is needed use the ``duplicate()`` method.
+
   .. cfunction:: bool add(const std::string& key, VALUETYPE value)
     :noindex:
 
@@ -88,6 +92,13 @@ objects.
         std::pair<std::string, int> p = kv.getAndBump();
 	std::cout << p.first << " = " << p.second << std::endl;
       }
+
+  .. cfunction:: KeyVal duplicate()
+    :noindex:
+
+    Create a duplicate of the object. All data is copied and the
+    object returned by this method is independent of the original
+    object.
 
 ``Lucee::KeyValTree``: Hierarchical data storage
 ++++++++++++++++++++++++++++++++++++++++++++++++
