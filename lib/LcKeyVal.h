@@ -21,6 +21,7 @@
 
 // Loki includes
 #include <loki/HierarchyGenerators.h>
+#include <loki/SmartPtr.h>
 
 // std includes
 #include <map>
@@ -43,7 +44,9 @@ namespace Lucee
  * std::string and vectors of these.
  *
  * Lucee::KeyVal objects are immutable, i.e, values once added can not
- * be removed or modifed.
+ * be removed or modifed. Copying or assigning from another KeyVal
+ * object creates shallow copies. Use the duplicate() method if a deep
+ * copy is needed.
  */
   class KeyVal
   {
@@ -54,14 +57,14 @@ namespace Lucee
       KeyVal();
 
 /**
- * Copy ctor: make a deep copy of supplied KeyVal class
+ * Copy ctor: make a shallow copy of supplied KeyVal class
  *
  * @param kv KeyVal object to copy.
  */
       KeyVal(const KeyVal& kv);
 
 /**
- * Assignment operator: make a deep copy.
+ * Assignment operator: make a shallow copy.
  *
  * @param kv KeyVal object to copy.
  * @return reference to assigned object.
@@ -74,7 +77,7 @@ namespace Lucee
       template <typename VALUETYPE>
       unsigned getNum() const
       {
-        return Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.size();
+        return Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.size();
       }
 
 /**
@@ -84,7 +87,7 @@ namespace Lucee
       void setToFirst() const
       {
         Loki::Field<VALUETYPE>(dataStoreItrTypeMap).itr =
-          Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.begin();
+          Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.begin();
       }
 
 /**
@@ -114,7 +117,7 @@ namespace Lucee
       template <typename VALUETYPE>
       bool add(const std::string& key, VALUETYPE value) 
       {
-        return Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.insert(
+        return Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.insert(
           std::pair<std::string, VALUETYPE>(key, value)).second;
       }
 
@@ -128,8 +131,8 @@ namespace Lucee
       VALUETYPE get(const std::string& key) const
       {
         typename std::map<std::string, VALUETYPE>::const_iterator itr = 
-          Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.find(key);
-        if (itr != Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.end())
+          Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.find(key);
+        if (itr != Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.end())
           return itr->second;
         Lucee::Except lce("KeyVal::get: Key ");
         lce << key << " does not exists in KeyVal object" << std::endl;
@@ -146,11 +149,18 @@ namespace Lucee
       bool has(const std::string& key) const
       {
         typename std::map<std::string, VALUETYPE>::const_iterator itr = 
-          Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.find(key);
-        if (itr != Loki::Field<VALUETYPE>(dataStoreTypeMap).dataMap.end())
+          Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.find(key);
+        if (itr != Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.end())
           return true;
         return false;
       }
+
+/**
+ * Create a duplicate from this object.
+ *
+ * @return duplicate of this object.
+ */
+      KeyVal duplicate() const;
 
     private:
 /**
@@ -164,8 +174,15 @@ namespace Lucee
       };
 /** Type definition for map of types to data containers */
       typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStore> DataStoreMap;
+
+/** Structure to hold map */
+      struct DataStoreMapCntr 
+      { // this is a struct so we can reference count it
 /** Map for containers for name -> data */
-      DataStoreMap dataStoreTypeMap;
+          DataStoreMap dataStoreTypeMap;
+      };
+/** Container for map */
+      Loki::SmartPtr<DataStoreMapCntr> mapCntr;
 
 /**
  * Iterator over key value pairs.
@@ -187,14 +204,14 @@ namespace Lucee
  * @param kv Set to copy from.
  */
       template <typename VALUETYPE>
-      void copyFromSet(const KeyVal& kv)
+      void copyFromSet(KeyVal& dest, const KeyVal& src) const
       {
 // loop and copy from supplied set
-        kv.setToFirst<VALUETYPE>();
-        for (unsigned i=0; i<kv.getNum<VALUETYPE>(); ++i)
+        src.setToFirst<VALUETYPE>();
+        for (unsigned i=0; i<src.getNum<VALUETYPE>(); ++i)
         {
-          std::pair<std::string, VALUETYPE> p = kv.getAndBump<VALUETYPE>();
-          this->add<VALUETYPE>(p.first, p.second);
+          std::pair<std::string, VALUETYPE> p = src.getAndBump<VALUETYPE>();
+          dest.add<VALUETYPE>(p.first, p.second);
         }
       }
   };

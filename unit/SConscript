@@ -17,11 +17,12 @@ incs = [
 # Libraries to link to
 libs = [
     'lclib',
+    'lcloki',
         ]
 
 # Library paths
 libp = ['../lib',
-        '../etc',
+        '../etc/loki',
         ]
 
 # add paths and libraries to environment

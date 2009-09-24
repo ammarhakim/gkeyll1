@@ -105,7 +105,7 @@ jsMath.Easy = {
   //  loaded automatically.  E.g.
   //      ["plugins/mimeTeX.js","extensions/AMSsymbols.js"]
   //  
-    loadFiles: ["extensions/AMSmath.js", "extensions/AMSsymbols.js"],
+    loadFiles: ["extensions/AMSmath.js", "extensions/AMSsymbols.js", "extensions/boldsymbol.js"],
   
   //
   //  List of fonts to load automatically.  E.g.
@@ -131,7 +131,7 @@ jsMath.Easy = {
 	      pfracb: ['{\\partial #1/\\partial #2}', 2],
 	      mvec: ['{\\mathbf{#1}}', 1],
 	      gvec: ['{\\boldsymbol{#1}}', 1],
-	      script: ['{\\mathpzc{#1}}', 1]
+	      script: ['{\\mathcal{#1}}', 1]
 	    },
   
   //

@@ -98,8 +98,9 @@ namespace Lucee
  * Add a new key-value tree to this tree.
  *
  * @param kvt Add given key-value tree to this set.
+ * @return true if insertion worked, false otherwise.
  */
-      void addSet(const KeyValTree& kvt);
+      bool addTree(const KeyValTree& kvt);
 
 /**
  * Check if tree with given name exists in this tree.
@@ -107,7 +108,7 @@ namespace Lucee
  * @param name Name of tree to test for.
  * @return true if tree exists, false otherwise.
  */
-      bool hasSet(const std::string& name) const;
+      bool hasTree(const std::string& name) const;
 
 /**
  * Get key-value tree with given name. The returned set is immutable.
@@ -115,7 +116,7 @@ namespace Lucee
  * @param name Name of key-value tree to get.
  * @return immutable reference to tree.
  */
-      const KeyValTree& getSet(const std::string& name) const;
+      const KeyValTree& getTree(const std::string& name) const;
 
 /**
  * Return list of key-value tree names with the given type. The "type"

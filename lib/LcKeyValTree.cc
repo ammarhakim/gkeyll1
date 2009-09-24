@@ -67,15 +67,16 @@ namespace Lucee
     return *this;
   }
   
-  void 
-  KeyValTree::addSet(const KeyValTree& kvt) 
+  bool
+  KeyValTree::addTree(const KeyValTree& kvt) 
   {
     KeyValTree *kvtp = new KeyValTree(kvt);
-    kvTreeMap.insert( KeyValTreePair_t(kvt.getName(), kvtp) );
+    return kvTreeMap.insert(
+      KeyValTreePair_t(kvt.getName(), kvtp)).second;
   }
 
   bool
-  KeyValTree::hasSet(const std::string& name) const 
+  KeyValTree::hasTree(const std::string& name) const 
   {
     KeyValTreeMap_t::const_iterator i = kvTreeMap.find(name);
     return (i != kvTreeMap.end()) ? true : false;
@@ -83,14 +84,14 @@ namespace Lucee
 
   const 
   KeyValTree& 
-  KeyValTree::getSet(const std::string& name) const 
+  KeyValTree::getTree(const std::string& name) const 
   {
     KeyValTreeMap_t::const_iterator i;
     i = kvTreeMap.find(name);
     if (i != kvTreeMap.end())
       return *(i->second);
     Lucee::Except ex;
-    ex << "KeyValTree::getSet: set " << name << " not found";
+    ex << "KeyValTree::getTree: set " << name << " not found";
     throw ex;
   }
 
