@@ -96,7 +96,12 @@ objects.
 
   This class derives from the class ``Lucee::KeyVal``, adding the
   ability to store arbitrary number of children of
-  ``Lucee::KeyValTree`` objects.
+  ``Lucee::KeyValTree`` objects. It is declared as::
+
+    namespace Lucee
+    {
+      class KeyValTree : public KeyVal;
+    }
 
   .. cfunction:: ctor KeyValTree(const std::string& name, const std::string& type, const std::string& kind)
     :noindex:

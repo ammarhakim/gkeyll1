@@ -192,7 +192,7 @@ Lucee provides several array classes to store data efficiently.
 
     namespace Lucee
     {
-      template <typename T> class Vector;
+      template <typename T> class Vector : public Array<1, T>;
     }
 
   .. cfunction:: ctor Vector (unsigned len)
@@ -237,7 +237,7 @@ Lucee provides several array classes to store data efficiently.
 
     namespace Lucee
     {
-      template <typename T> class Matrix;
+      template <typename T> class Matrix : public Array<2, T, Lucee::ColMajorIndexer<2> >
     }
 
   .. cfunction:: ctor Matrix (unsigned row, unsigned col)

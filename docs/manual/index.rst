@@ -11,13 +11,19 @@ physics software. It is primarily developed to solve plasma physics
 problems. However, it is general enough that solvers for other physics
 systems can be easily added.
 
-Contents:
+**Class Reference**:
 
 .. toctree::
    :maxdepth: 2
 
    array-classes
    key-value-tree
+
+**Algorithm Reference**:
+
+.. toctree::
+   :maxdepth: 2
+
    rad-transport
 
 Indices and tables
