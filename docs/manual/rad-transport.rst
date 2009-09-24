@@ -34,7 +34,8 @@ for :math:`\tau_0<\tau<\tau_1` and where
 * :math:`\mu` is the cosine of the polar angle measured with the
   positive Z-axis,
 * :math:`\varpi` is the albedo of single scattering,
-* :math:`Q(\tau,\mu)` are spatially distributed sources.
+* :math:`Q(\tau,\mu)` are spatially distributed sources, and
+* :math:`P_l(\mu)` is the Legendre polynomial of order :math:`l`.
 
 Further, :math:`\beta_l`, :math:`l=0,\dots,L` are the expansion
 coefficients of the phase function :math:`p(\cos\Theta)`, i.e.
@@ -62,8 +63,102 @@ order scheme are denoted by :math:`\{w_i\}` and :math:`\{\mu_i\}`,
   \notag
   \begin{align}
     \mvec{\Pi}_l &= [P_l(\mu_i),\ldots,P_l(\mu_N)]^T, \\ 
-    \mvec{M} &= \textrm{diag}\{\mu_i,\ldots,\mu_N\}, \\
-    \mvec{W} &= \textrm{diag}\{w_i,\ldots,w_N\},
+    \mvec{M} &= \textrm{diag}\thinspace \{\mu_i,\ldots,\mu_N\}, \\
+    \mvec{W} &= \textrm{diag}\thinspace \{w_i,\ldots,w_N\},
   \end{align}
 
 and :math:`\mvec{I}` denotes a :math:`N\times N` unit matrix.
+
+To find the homogeneous solutions of the RTE, solutions of the form
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  L_h(\tau,\pm\mu_i) = \phi(\pm\mu_i,\nu) e^{-\tau/\nu}
+  \end{align}
+
+are introduced. Here :math:`\phi(\pm\mu_i,\nu)` and :math:`\nu` are
+yet to be determined eigenvectors and eigenvalues of the homogeneous
+discrete RTE. Denoting
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{\Phi}_{\pm}(\nu) &=
+  [\phi(\pm\mu_1,\nu),\ldots,\phi(\pm\mu_N,\nu)]^T, \\
+  \mvec{L}_{h\pm}(\tau) &= 
+  [L_h(\tau,\pm\mu_1),\ldots,L_h(\tau,\pm\mu_N)]^T
+  \end{align}
+
+and using the assumed form in the homogeneous transfer equation it can
+be shown that for :math:`\varpi\ne 1` there are exactly 2N eigenvalues
+occurring in :math:`\pm` pairs. Denoting this set of eigenvalues by
+:math:`\{\pm\nu_j\}, j=1\ldots,N` the eigenvectors are given by
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{\Phi}_+ &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}+\nu_j \mvec{E})
+  \mvec{X}(\lambda_j) \\
+  \mvec{\Phi}_- &= \frac{1}{2}\mvec{M}^{-1}(\mvec{I}-\nu_j \mvec{E})
+  \mvec{X}(\lambda_j),
+  \end{align}
+
+where :math:`\lambda_j` and :math:`\mvec{X}(\lambda_j)` are the
+eigenvalues and eigenvectors of :math:`\mvec{F}\mvec{E}`, and where
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{F} &= 
+  \bigg[
+  \mvec{I} - \frac{\varpi}{2}
+  \sum_{l=0}^L 
+  \beta_l \mvec{\Pi}_l\mvec{\Pi}_l^T \mvec{W}(1-(-1)^l)
+  \bigg]
+  \mvec{M}^{-1}, \\
+  \mvec{E} &= 
+  \bigg[
+  \mvec{I} - \frac{\varpi}{2}
+  \sum_{l=0}^L 
+  \beta_l \mvec{\Pi}_l\mvec{\Pi}_l^T \mvec{W}(1+(-1)^l)
+  \bigg]
+  \mvec{M}^{-1},
+  \end{align}
+
+and
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \pm\nu_j = \pm \frac{1}{\lambda_j^{1/2}}.
+  \end{align}
+
+The homogeneous solution can be written as a linear combination of the
+eigenvectors, i.e.,
+
+.. math::
+  :nowrap:
+
+  \notag
+  \begin{align}
+  \mvec{L}_{h\pm}(\tau) = \sum_{j=1}^N
+  \bigg[
+  A_j \mvec{\Phi}_{\pm}(\nu_j) e^{-(\tau-\tau_0)/\nu_j}
+  +
+  B_j \mvec{\Phi}_{\mp}(\nu_j) e^{-(\tau_1-\tau)/\nu_j}
+  \bigg],
+  \end{align}
+
+where :math:`A_j` and :math:`B_j` are constants to be determined from
+the boundary condition.
