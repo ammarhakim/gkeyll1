@@ -90,10 +90,63 @@ test_1()
   }
 }
 
+void
+test_kvt(const Lucee::KeyValTree& kvt)
+{
+  LC_ASSERT("Testing name", kvt.getName() == "lucee");
+  LC_ASSERT("Testing parent tree", kvt.get<int>("nout") == 10);
+  LC_ASSERT("Testing parent tree", kvt.get<double>("tstart") == 0.0);
+  LC_ASSERT("Testing parent tree", kvt.get<double>("tend") == 1.0);
+
+  const Lucee::KeyVal& kv = kvt.getTree("child1");
+  LC_ASSERT("Testing child tree", kv.get<std::string>("type") == "eulerEqn");
+  LC_ASSERT("Testing child tree", kv.get<double>("gas_gamma") == 1.4);
+}
+
+void
+test_2()
+{
+  Lucee::KeyValTree kvt("lucee");
+  kvt.add("nout", 10);
+  kvt.add("tstart", 0.0);
+  kvt.add("tend", 1.0);
+
+  Lucee::KeyValTree kvtC1("child1");
+  kvtC1.add<std::string>("type", "eulerEqn");
+  kvtC1.add("gas_gamma", 1.4);
+
+  kvt.addTree(kvtC1);
+
+// check stuff
+  test_kvt(kvt);
+
+// now copy tree over
+  Lucee::KeyValTree kvtc(kvt);
+  test_kvt(kvtc);
+
+// now assign to the tree
+  Lucee::KeyValTree kvta("dummy");
+  kvta = kvt;
+  test_kvt(kvta);
+
+// now modify the child tree
+  kvtC1.add("cs", 3.0);
+
+  const Lucee::KeyValTree& childc = kvtc.getTree("child1");
+  LC_ASSERT("Testing if child in tree got modified", childc.get<double>("cs") == 3.0);
+
+  const Lucee::KeyValTree& childa = kvta.getTree("child1");
+  LC_ASSERT("Testing if child in tree got modified", childa.get<double>("cs") == 3.0);
+
+  const Lucee::KeyValTree& child = kvt.getTree("child1");
+  LC_ASSERT("Testing if child in tree got modified", child.get<double>("cs") == 3.0);
+}
+
 int
 main(void) 
 {
   LC_BEGIN_TESTS("lckeyvaltree");
   test_1();
+  test_2();
   LC_END_TESTS;
 }

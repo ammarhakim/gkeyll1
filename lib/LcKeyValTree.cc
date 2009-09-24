@@ -49,6 +49,9 @@ namespace Lucee
     if (this==&kvt) return *this;
 
     Lucee::KeyVal::operator= (kvt);
+    name = kvt.name;
+    type = kvt.type;
+    kind = kvt.kind;
 
     KeyValTreeMap_t::const_iterator i;
 // delete all entries in map
@@ -56,8 +59,6 @@ namespace Lucee
       delete i->second;
     kvTreeMap.erase( kvTreeMap.begin(), kvTreeMap.end() );
 
-// copy entries from kvt
-    name = kvt.name;
     for (i=kvt.kvTreeMap.begin(); i!=kvt.kvTreeMap.end(); ++i)
     {
       KeyValTree *kvtp = new KeyValTree(*(i->second));

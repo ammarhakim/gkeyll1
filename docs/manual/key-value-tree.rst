@@ -141,10 +141,9 @@ objects.
   .. cfunction:: bool addTree(const KeyValTree& kvt)
     :noindex:
 
-    Add a new child tree object to this tree. The complete supplied
-    tree is copied over into this tree.  Returns ``true`` if the tree
-    was added and ``false`` if a child named ``kvt.getName()`` already
-    exists in the tree.
+    Add a new child tree object to this tree. Returns ``true`` if the
+    tree was added and ``false`` if a child named ``kvt.getName()``
+    already exists in the tree.
 
   .. cfunction:: bool hasTree(const std::string& name)
     :noindex:
