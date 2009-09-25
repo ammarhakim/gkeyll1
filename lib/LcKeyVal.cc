@@ -52,4 +52,30 @@ namespace Lucee
 
     return kv;
   }
+
+  bool
+  KeyVal::addFunc(const std::string& nm,
+    Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> func)
+  {
+    return this->mapCntr->functorMap.insert(
+      std::pair<std::string, Functor_t>(nm, func)).second;
+  }
+
+  void
+  KeyVal::setToFunc(const std::string& key)
+  {
+    functorItr = this->mapCntr->functorMap.find(key);
+    if (functorItr == this->mapCntr->functorMap.end())
+    {
+      Lucee::Except lce("KeyVal::setToFunc: Function '");
+      lce << key << "' does not exist" << std::endl;
+      throw lce;
+    }
+  }
+
+  double
+  KeyVal::evalCurrentFunc(const std::vector<double>& inp)
+  {
+    return functorItr->second(inp);
+  }
 }

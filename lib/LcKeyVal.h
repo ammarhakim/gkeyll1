@@ -20,6 +20,7 @@
 #include <LcExcept.h>
 
 // Loki includes
+#include <loki/Functor.h>
 #include <loki/HierarchyGenerators.h>
 #include <loki/SmartPtr.h>
 
@@ -115,11 +116,38 @@ namespace Lucee
  * @return true, if insertion worked, false otherwise.
  */
       template <typename VALUETYPE>
-      bool add(const std::string& key, VALUETYPE value) 
+      bool add(const std::string& key, const VALUETYPE& value) 
       {
         return Loki::Field<VALUETYPE>(mapCntr->dataStoreTypeMap).dataMap.insert(
           std::pair<std::string, VALUETYPE>(key, value)).second;
       }
+
+/**
+ * Insert a new functor object. This should be a callable object:
+ * i.e. a function pointer or an object with operator() overloaded.
+ *
+ * @param nm name of function.
+ * @param func Functor object.
+ * @return true, if addition worked, false otherwise.
+ */
+      bool addFunc(const std::string& nm,
+        Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> func);
+
+/**
+ * Set internal iterator to function.
+ *
+ * @param nm Name of function.
+ */
+      void setToFunc(const std::string& nm);
+
+/**
+ * Evaulate the current function. This can be called only after the
+ * setToFunc() method has been called.
+ *
+ * @param inp Parameters to pass to function.
+ * @return value of function.
+ */
+      double evalCurrentFunc(const std::vector<double>& inp);
 
 /**
  * Retrieve value associated with key.
@@ -174,12 +202,16 @@ namespace Lucee
       };
 /** Type definition for map of types to data containers */
       typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStore> DataStoreMap;
+/** Type definition for functor */
+      typedef Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> Functor_t;
 
 /** Structure to hold map */
       struct DataStoreMapCntr 
       { // this is a struct so we can reference count it
 /** Map for containers for name -> data */
           DataStoreMap dataStoreTypeMap;
+/** Map for key -> functor objects */
+          std::map<std::string,  Functor_t> functorMap;
       };
 /** Container for map */
       Loki::SmartPtr<DataStoreMapCntr> mapCntr;
@@ -197,6 +229,8 @@ namespace Lucee
       typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStoreItr> DataStoreItrMap;
 /** Map for containers for name -> data iterators */
       mutable DataStoreItrMap dataStoreItrTypeMap;
+/** */
+      mutable std::map<std::string, Functor_t>::iterator functorItr;
 
 /**
  * Copy stuff over from supplied set.

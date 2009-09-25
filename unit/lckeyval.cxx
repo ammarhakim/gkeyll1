@@ -120,10 +120,35 @@ test_1()
     Lucee::Except);
 }
 
+double foo(const std::vector<double>& x)
+{
+  double sum = 0.0;
+  for (unsigned i=0; i<x.size(); ++i)
+    sum += x[i];
+  return sum;
+}
+
+void
+test_2()
+{
+  Lucee::KeyVal kv;
+  kv.addFunc("foo", foo);
+
+  std::vector<double> inp(3);
+  inp[0] = 1.0; inp[1] = 2.0; inp[2] = 3.0;
+
+// test the function
+  kv.setToFunc("foo");
+  LC_ASSERT("Testing if evaluation of function worked", kv.evalCurrentFunc(inp) == 6.0);
+  inp[0] = 3.0;
+  LC_ASSERT("Testing if evaluation of function worked", kv.evalCurrentFunc(inp) == 8.0);
+}
+
 int
 main(void) 
 {
   LC_BEGIN_TESTS("lckeyval");
   test_1();
+  test_2();
   LC_END_TESTS;
 }
