@@ -42,13 +42,13 @@ namespace Lucee
   {
     KeyVal kv;
 // copy stuff from us into kv
-    copyFromSet<int>(kv, *this);
-    copyFromSet<double>(kv, *this);
-    copyFromSet<std::string>(kv, *this);
+    copyToSet<int>(kv);
+    copyToSet<double>(kv);
+    copyToSet<std::string>(kv);
 
-    copyFromSet<std::vector<int> >(kv, *this);
-    copyFromSet<std::vector<double> >(kv, *this);
-    copyFromSet<std::vector<std::string> >(kv, *this);
+    copyToSet<std::vector<int> >(kv);
+    copyToSet<std::vector<double> >(kv);
+    copyToSet<std::vector<std::string> >(kv);
 
     return kv;
   }

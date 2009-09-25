@@ -204,13 +204,13 @@ namespace Lucee
  * @param kv Set to copy from.
  */
       template <typename VALUETYPE>
-      void copyFromSet(KeyVal& dest, const KeyVal& src) const
+      void copyToSet(KeyVal& dest) const
       {
 // loop and copy from supplied set
-        src.setToFirst<VALUETYPE>();
-        for (unsigned i=0; i<src.getNum<VALUETYPE>(); ++i)
+        this->setToFirst<VALUETYPE>();
+        for (unsigned i=0; i<this->getNum<VALUETYPE>(); ++i)
         {
-          std::pair<std::string, VALUETYPE> p = src.getAndBump<VALUETYPE>();
+          std::pair<std::string, VALUETYPE> p = this->getAndBump<VALUETYPE>();
           dest.add<VALUETYPE>(p.first, p.second);
         }
       }
