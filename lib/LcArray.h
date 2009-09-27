@@ -419,6 +419,8 @@ namespace Lucee
   T&
   Array<NDIM, T, INDEXER>::first()
   {
+    if (isContiguous() == false)
+      throw Lucee::Except("Array::first: Array must be contiguous.");
     return data[indexer.getGenIndex(start)];
   }
 

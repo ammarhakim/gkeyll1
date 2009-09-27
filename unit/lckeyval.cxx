@@ -120,11 +120,12 @@ test_1()
     Lucee::Except);
 }
 
-double foo(const std::vector<double>& x)
+std::vector<double> foo(const std::vector<double>& x)
 {
-  double sum = 0.0;
+  std::vector<double> sum(1);
+  sum[0] = 0.0;
   for (unsigned i=0; i<x.size(); ++i)
-    sum += x[i];
+    sum[0] += x[i];
   return sum;
 }
 
@@ -137,11 +138,17 @@ test_2()
   std::vector<double> inp(3);
   inp[0] = 1.0; inp[1] = 2.0; inp[2] = 3.0;
 
+  std::vector<double> res;
 // test the function
   kv.setToFunc("foo");
-  LC_ASSERT("Testing if evaluation of function worked", kv.evalCurrentFunc(inp) == 6.0);
+  res = kv.evalCurrentFunc(inp);
+  LC_ASSERT("Testing if evaluation of function worked",  res[0]==6.0);
   inp[0] = 3.0;
-  LC_ASSERT("Testing if evaluation of function worked", kv.evalCurrentFunc(inp) == 8.0);
+  res = kv.evalCurrentFunc(inp);
+  LC_ASSERT("Testing if evaluation of function worked", res[0]==8.0);
+
+  LC_RAISES("Testing if exception is raised when getting non-existent function",
+    kv.setToFunc("notThere"), Lucee::Except);
 }
 
 int

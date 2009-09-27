@@ -28,16 +28,42 @@ objects.
     std::cout << kv.get<int>("nx") << std::endl; // 10
     std::cout << kv.get<double>("length") << std::endl; // 12.5
 
+  ``KeyVal`` class also allows one to store functors that take a
+  ``std::vector<double>`` and return a ``double``. The functors can be
+  pointers to C functions or objects with an operator() method. For
+  example::
+
+    std::vector<double> sumVec(const std::vector<double>& inp)
+    {
+      std::vector<double> sum(1);
+      sum[0] = 0.0;
+      for (unsigned i=0; i<x.size(); ++i)
+	sum[0] += x[i];
+      return sum;
+    }
+
+    kv.addFunc("adder", sumVec);
+
+  Once the function is added it can be later retrived and evaluated::
+
+    kv.setToFunc("adder");
+    std::vector<double> inp(3);
+    inp[0] = 1.0; inp[1] = 2.0; inp[2] = 3.0;
+    std::vector<double> val = kv.evalCurrentFunc(inp);
+
   This class is refrence counted: i.e copying or assigning from
   another ``KeyVal`` object creates a shallow copy and the two objects
   share data. If a true copy is needed use the ``duplicate()`` method.
 
-  .. cfunction:: bool add(const std::string& key, VALUETYPE value)
+  .. cfunction:: bool add(const std::string& key, const VALUETYPE& value)
     :noindex:
 
     Add a new (key, value) pair to the object. Returns ``true`` if the
     data was added and ``false`` if the ``key`` already exists in the
-    object.
+    object. For adding strings some compilers need an explicit
+    specification of the type being added::
+
+      kv.add<std::string>("name", "Lucee");
 
   .. cfunction:: VALUETYPE& get(const std::string& key)
     :noindex:
@@ -92,6 +118,45 @@ objects.
         std::pair<std::string, int> p = kv.getAndBump();
 	std::cout << p.first << " = " << p.second << std::endl;
       }
+
+  .. cfunction:: bool addFunc(const std::string& nm, Functor func)
+    :noindex:
+    
+    Add a new functor named ``nm`` to the object. The function
+    ``func`` should be a C function or an object with ``operator()``
+    defined. The functor should take as input ``const
+    std::vector<double>&`` as input and return a
+    ``std::vector<double>`` as output. For example::
+
+      std::vector<double> sumVec(const std::vector<double>& inp)
+      {
+        std::vector<double> sum(1);
+	sum[0] = 0.0;
+	for (unsigned i=0; i<x.size(); ++i)
+	  sum[0] += x[i];
+	return sum;
+      }
+
+      kv.addFunc("adder", sumVec);
+
+  .. cfunction:: void setToFunc(const std::string& nm)
+    :noindex:
+
+    Functors added to the object are not directly accessible. This
+    method sets the internal state of the object to point to the
+    functor with name ``nm``.
+
+  .. cfunction:: std::vector<double> evalCurrentFunc(const std::vector<double>& inp)
+    :noindex:
+
+    Evalute the current function by passing it ``inp``. This method
+    should only be called after the ``setToFunc()`` method is
+    called. For example::
+
+      kv.setToFunc("adder");
+      std::vector<double> inp(3);
+      inp[0] = 1.0; inp[1] = 2.0; inp[2] = 3.0;
+      std::vector<double> val = kv.evalCurrentFunc(inp);
 
   .. cfunction:: KeyVal duplicate()
     :noindex:
