@@ -133,17 +133,17 @@ Lucee provides several array classes to store data efficiently.
 
     On return fill the start index of the array in ``start``.
 
-  .. cfunction:: unsigned getShape (int dir)
+  .. cfunction:: unsigned getShape (unsigned dir)
     :noindex:
 
     Return the shape of the array in direction ``dir``.
 
-  .. cfunction:: int getLower (int dir)
+  .. cfunction:: int getLower (unsigned dir)
     :noindex:
 
     Return the starting index in direction ``dir``.
 
-  .. cfunction:: int getUpper (int dir)
+  .. cfunction:: int getUpper (unsigned dir)
     :noindex:
 
     Return *one past* the last index in direction ``dir``.
@@ -161,8 +161,8 @@ Lucee provides several array classes to store data efficiently.
 
     Return reference to the first element in array. This is useful
     when passing the raw pointer to the array data to functions
-    expecting ``T*``. Note that this only makes sense if the
-    ``isContiguous()`` returns true.
+    expecting ``T*``. An exception is thrown if the array is not
+    contiguous.
 
   .. cfunction:: T& operator() (int i[N])
     :noindex:
@@ -170,15 +170,14 @@ Lucee provides several array classes to store data efficiently.
     Access element at index :math:`(i_1,\ldots,i_N)` index location in
     array.
 
-  .. cfunction:: Array<N,T>& createView (unsigned shape[N] , int start[N], int newStart[N])
+  .. cfunction:: Array<N,T> createView (unsigned shape[N] , int start[N], int newStart[N])
     :noindex:
 
-    Returns a view into the original array. The view-array behaves
-    exactly like a ``Lucee::Array``. The portion of the original array
-    indexed by the view-array is specified by lower bounds, ``start``,
-    and the shape, ``shape``. The indices ``newStart`` indicate the
-    new starting index of the view-array. In most cases this can
-    simply be set to ``start``.
+    Returns a view into the original array. The portion of the
+    original array indexed by the view-array is specified by lower
+    bounds, ``start``, and the shape, ``shape``. The indices
+    ``newStart`` indicate the new starting index of the view-array. In
+    most cases this can simply be set to ``start``.
 
 ``Lucee::Vector``: One-dimensional arrays
 +++++++++++++++++++++++++++++++++++++++++
@@ -414,12 +413,12 @@ below. In the following the template type is either ``double`` or
     specified ``shape`` and given ``start`` indices into a linear
     1-dimensional index.
 
-  .. cfunction:: int getLower (int dir)
+  .. cfunction:: int getLower (unsigned dir)
     :noindex:
 
     Return the starting index in direction @emph{dir}.
 
-  .. cfunction:: int getUpper (int dir)
+  .. cfunction:: int getUpper (unsigned dir)
     :noindex:
 
     Return *one past* the last index in direction ``dir``.

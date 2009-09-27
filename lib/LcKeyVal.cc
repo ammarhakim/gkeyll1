@@ -55,7 +55,7 @@ namespace Lucee
 
   bool
   KeyVal::addFunc(const std::string& nm,
-    Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> func)
+    Loki::Functor<std::vector<double>, LOKI_TYPELIST_1(const std::vector<double>&)> func)
   {
     return this->mapCntr->functorMap.insert(
       std::pair<std::string, Functor_t>(nm, func)).second;
@@ -73,7 +73,7 @@ namespace Lucee
     }
   }
 
-  double
+  std::vector<double>
   KeyVal::evalCurrentFunc(const std::vector<double>& inp)
   {
     return functorItr->second(inp);

@@ -131,7 +131,7 @@ namespace Lucee
  * @return true, if addition worked, false otherwise.
  */
       bool addFunc(const std::string& nm,
-        Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> func);
+        Loki::Functor<std::vector<double>, LOKI_TYPELIST_1(const std::vector<double>&)> func);
 
 /**
  * Set internal iterator to function.
@@ -147,7 +147,7 @@ namespace Lucee
  * @param inp Parameters to pass to function.
  * @return value of function.
  */
-      double evalCurrentFunc(const std::vector<double>& inp);
+      std::vector<double> evalCurrentFunc(const std::vector<double>& inp);
 
 /**
  * Retrieve value associated with key.
@@ -203,7 +203,7 @@ namespace Lucee
 /** Type definition for map of types to data containers */
       typedef Loki::GenScatterHierarchy<BasicTypeList_t, DataStore> DataStoreMap;
 /** Type definition for functor */
-      typedef Loki::Functor<double, LOKI_TYPELIST_1(const std::vector<double>&)> Functor_t;
+      typedef Loki::Functor<std::vector<double>, LOKI_TYPELIST_1(const std::vector<double>&)> Functor_t;
 
 /** Structure to hold map */
       struct DataStoreMapCntr 
