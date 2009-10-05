@@ -16,12 +16,12 @@ env = Environment(ENV=os.environ)
 #env = Environment()
 # construct options: values are stored in options.cache
 # defaults are read from config.py
-opts = Options(['options.cache', 'config.py'])
+opts = Variables(['options.cache', 'config.py'])
 # add various options used to build WarpX
-opts.AddOptions(
-    BoolOption('debug', 'Set to yes to compile for debugging', 'no'),
-    BoolOption('parallel', 'Set to yes to compile parallel version', 'no'),
-    BoolOption('usegsl', 'Set to yes to compile with GSL', 'no'),
+opts.AddVariables(
+    BoolVariable('debug', 'Set to yes to compile for debugging', 'no'),
+    BoolVariable('parallel', 'Set to yes to compile parallel version', 'no'),
+    BoolVariable('usegsl', 'Set to yes to compile with GSL', 'no'),
     ('EXTRA_CCFLAGS', 'Extra compiler flags to pass to build', ''),
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )

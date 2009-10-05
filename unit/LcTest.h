@@ -26,13 +26,13 @@
  */
 
 // std includes
+#include <cmath>
+#include <fstream>
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <fstream>
-#include <limits>
-#include <cmath>
 
 /**
  * Keeps track of how many tests have passed or failed
@@ -41,7 +41,7 @@ class LcTestCounter
 {
   public:
     LcTestCounter()
-            : passed(0), failed(0) {
+      : passed(0), failed(0) {
     }
 
     int passed;
@@ -50,22 +50,22 @@ class LcTestCounter
 
     std::vector<std::string> failedTests;
 
-    void addFailedTest(int line, char *file, std::string s) {
-        std::ostringstream lf;
-        lf << s << " In file " << file ;
-        failedTests.push_back(std::string(lf.str()));
+    void addFailedTest(int line, const char *file, const std::string& s) {
+      std::ostringstream lf;
+      lf << s << " In file " << file ;
+      failedTests.push_back(std::string(lf.str()));
     }
 
     void showFailedTests() {
-        std::vector<std::string>::iterator i;
-        for (i=failedTests.begin(); i!=failedTests.end(); ++i) {
-            std::cout << "FAILED TEST: " << *i << std::endl;
-            msgFile   << "FAILED TEST: " << *i << std::endl;
-        }
+      std::vector<std::string>::iterator i;
+      for (i=failedTests.begin(); i!=failedTests.end(); ++i) {
+        std::cout << "FAILED TEST: " << *i << std::endl;
+        msgFile   << "FAILED TEST: " << *i << std::endl;
+      }
     }
     
     void clearFailedTests() {
-        failedTests.erase( failedTests.begin(), failedTests.end() );
+      failedTests.erase( failedTests.begin(), failedTests.end() );
     }
 };
 // `tc` is global to ease counting process
@@ -76,58 +76,58 @@ static LcTestCounter __tc;
  * set of LC_ASSERT and LC_RAISES macros defined below. These macros
  * count the number of passed and failed tests, printing them out
  * after the tests are done
-*/
+ */
 #ifdef HAVE_MPI
 
-#define LC_MPI_BEGIN_TESTS(file) \
- do {\
-     __tc.passed = 0;\
-     __tc.failed = 0;\
-     int myrank; \
-     std::ostringstream fname; \
-     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);\
-     fname << file << "-" << myrank << ".log";         \
-     __tc.msgFile.open(fname.str().c_str(), std::fstream::out);\
- } while (0)
+#define LC_MPI_BEGIN_TESTS(file)                                        \
+    do {                                                                \
+      __tc.passed = 0;                                                  \
+      __tc.failed = 0;                                                  \
+      int myrank;                                                       \
+      std::ostringstream fname;                                         \
+      MPI_Comm_rank(MPI_COMM_WORLD, &myrank);                           \
+      fname << file << "-" << myrank << ".log";                         \
+      __tc.msgFile.open(fname.str().c_str(), std::fstream::out);        \
+    } while (0)
 
-#define LC_MPI_END_TESTS \
- do {\
-    MPI_Barrier(MPI_COMM_WORLD); \
-    unsigned totalPassed, totalFailed; \
-    MPI_Reduce(&__tc.passed, &totalPassed, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD); \
-    MPI_Reduce(&__tc.failed, &totalFailed, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD); \
-    int __myrank; \
-    MPI_Comm_rank(MPI_COMM_WORLD, &__myrank); \
-    if (__myrank == 0) { \
+#define LC_MPI_END_TESTS                                                \
+    do {                                                                \
+      MPI_Barrier(MPI_COMM_WORLD);                                      \
+      unsigned totalPassed, totalFailed;                                \
+      MPI_Reduce(&__tc.passed, &totalPassed, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD); \
+      MPI_Reduce(&__tc.failed, &totalFailed, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD); \
+      int __myrank;                                                     \
+      MPI_Comm_rank(MPI_COMM_WORLD, &__myrank);                         \
+      if (__myrank == 0) {                                              \
         std::cout << "PASSED = " << totalPassed <<  ". FAILED = " << totalFailed << std::endl; \
-    } \
-    __tc.showFailedTests(); \
-    __tc.passed = 0;\
-    __tc.failed = 0;\
-    __tc.clearFailedTests(); \
- } while (0)
+      }                                                                 \
+      __tc.showFailedTests();                                           \
+      __tc.passed = 0;                                                  \
+      __tc.failed = 0;                                                  \
+      __tc.clearFailedTests();                                          \
+    } while (0)
 #else
 # define LC_MPI_BEGIN_TESTS(file)
 # define LC_MPI_END_TESTS
 #endif // HAVE_MPI
 
-#define LC_BEGIN_TESTS(file)                    \
- do {\
-     __tc.passed = 0;\
-     __tc.failed = 0;\
-     std::ostringstream fname;\
-     fname << file << "-" << "0" << ".log";\
-     __tc.msgFile.open(fname.str().c_str(), std::fstream::out); \
- } while (0)
+#define LC_BEGIN_TESTS(file)                                            \
+    do {                                                                \
+      __tc.passed = 0;                                                  \
+      __tc.failed = 0;                                                  \
+      std::ostringstream fname;                                         \
+      fname << file << "-" << "0" << ".log";                            \
+      __tc.msgFile.open(fname.str().c_str(), std::fstream::out);        \
+    } while (0)
 
-#define LC_END_TESTS \
- do {\
-     std::cout << "PASSED = " << __tc.passed <<  ". FAILED = " << __tc.failed << std::endl; \
-     __tc.showFailedTests(); \
-     __tc.passed = 0;\
-     __tc.failed = 0;\
-     __tc.clearFailedTests(); \
- } while (0)
+#define LC_END_TESTS                                                    \
+    do {                                                                \
+      std::cout << "PASSED = " << __tc.passed <<  ". FAILED = " << __tc.failed << std::endl; \
+      __tc.showFailedTests();                                           \
+      __tc.passed = 0;                                                  \
+      __tc.failed = 0;                                                  \
+      __tc.clearFailedTests();                                          \
+    } while (0)
 
 /** 
  * The following macro can be used for running test cases. To test
@@ -141,22 +141,22 @@ static LcTestCounter __tc;
  * fails the program does not halt.
  *
  */
-#define LC_ASSERT(msg,expr) \
-  do {\
-   __tc.msgFile << msg << "\n";  \
-   __tc.msgFile << "   Testing if " << #expr << "\n"; \
-   if ((expr) == true)                               \
-   {\
-       __tc.msgFile << "     PASSED\n"; \
-       __tc.passed++; \
-   }\
-   else \
-   {\
-       __tc.msgFile << "     FAILED\n"; \
-       __tc.failed++; \
-       __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
-   }\
-  } while (0)
+#define LC_ASSERT(msg,expr)                                             \
+    do {                                                                \
+      __tc.msgFile << msg << "\n";                                      \
+      __tc.msgFile << "   Testing if " << #expr << "\n";                \
+      if ((expr) == true)                                               \
+      {                                                                 \
+        __tc.msgFile << "     PASSED\n";                                \
+        __tc.passed++;                                                  \
+      }                                                                 \
+      else                                                              \
+      {                                                                 \
+        __tc.msgFile << "     FAILED\n";                                \
+        __tc.failed++;                                                  \
+        __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
+      }                                                                 \
+    } while (0)
 
 /**
  * The following macro can be used for running test cases. To test
@@ -170,33 +170,33 @@ static LcTestCounter __tc;
  * fails the program does not halt. The third parameter is a type
  * indicating the type of exception which needs to be caught.
  */
-#define LC_RAISES(msg,expr,expc) \
-do {\
-    try\
-    {\
-        __tc.msgFile << msg << std::endl; \
-        __tc.msgFile << "   Executing " << #expr << "...\n";                \
+#define LC_RAISES(msg,expr,expc)                                        \
+    do {                                                                \
+      try                                                               \
+      {                                                                 \
+        __tc.msgFile << msg << std::endl;                               \
+        __tc.msgFile << "   Executing " << #expr << "...\n";            \
         __tc.msgFile << "   Expecting exception of type " << #expc << "...\n"; \
-        expr; \
-        __tc.msgFile << "     No exception thrown...\n";    \
-        __tc.msgFile << "     FAILED\n";                    \
-        __tc.failed++;\
-       __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
-    }\
-    catch(expc e)\
-    {\
-        __tc.msgFile << "     Caught exception of type " << #expc << "...\n";   \
-        __tc.msgFile << "     PASSED\n"; \
-        __tc.passed++;\
-    }\
-    catch(...)\
-    {\
-        __tc.msgFile << "     Caught exception of unexpected type\n"; \
-        __tc.msgFile << "     FAILED\n";                              \
-        __tc.failed++;\
-       __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
-    }\
-}while (0)
+        expr;                                                           \
+        __tc.msgFile << "     No exception thrown...\n";                \
+        __tc.msgFile << "     FAILED\n";                                \
+        __tc.failed++;                                                  \
+        __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
+      }                                                                 \
+      catch(expc e)                                                     \
+      {                                                                 \
+        __tc.msgFile << "     Caught exception of type " << #expc << "...\n"; \
+        __tc.msgFile << "     PASSED\n";                                \
+        __tc.passed++;                                                  \
+      }                                                                 \
+      catch(...)                                                        \
+      {                                                                 \
+        __tc.msgFile << "     Caught exception of unexpected type\n";   \
+        __tc.msgFile << "     FAILED\n";                                \
+        __tc.failed++;                                                  \
+        __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
+      }                                                                 \
+    }while (0)
 
 /**
  * Compares two arrays and returns true if they are equal.
