@@ -93,13 +93,13 @@ class BuildConf:
         """
 
         pkg = self.pkg.lower()
-        sc_opts.AddOptions(
+        sc_opts.AddVariables(
             (pkg, 'Directory for %s package' % self.pkg, './'),
             (pkg + '_incdir', 'Include directory for %s package' % self.pkg, './'),
             (pkg + '_libdir', 'Library directory for %s package' % self.pkg, './'),
             )
         if self.bin:
-            sc_opts.AddOptions(
+            sc_opts.AddVariables(
                 (pkg + '_bindir', 'Executables directory for %s package' % self.pkg, './')
                 )
 
