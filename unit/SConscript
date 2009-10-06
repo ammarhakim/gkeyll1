@@ -12,17 +12,20 @@ incs = [
     '#lib',
     '#etc',
     '#etc/loki/include',
+    '#etc/lua/src',
     ]
 
 # Libraries to link to
 libs = [
     'lclib',
     'lcloki',
+    'lclua',
         ]
 
 # Library paths
 libp = ['../lib',
         '../etc/loki',
+        '../etc/lua',
         ]
 
 # add paths and libraries to environment
@@ -54,3 +57,6 @@ myenv.Program('lckeyval', ['lckeyval.cxx'])
 
 # lckeyvaltree
 myenv.Program('lckeyvaltree', ['lckeyvaltree.cxx'])
+
+# lclua
+myenv.Program('lclua', ['lclua.cxx'])

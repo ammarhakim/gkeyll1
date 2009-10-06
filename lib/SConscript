@@ -11,6 +11,7 @@ incs = [
     '.',
     '#etc',
     '#etc/loki/include',
+    '#etc/lua/src',
     ]
 
 # make a local copy of the build environment
