@@ -13,6 +13,9 @@ if platform.system() == 'Darwin':
     mcType = 'LUA_USE_LINUX'
 elif platform.system() == 'Linux':
     mcType = 'LUA_USE_LINUX'
+else:
+    print "SET CORRECT PLATFORM TO BUILD LUA"
+    Exit(1)
 
 Import('env')
 Import('parenv')
