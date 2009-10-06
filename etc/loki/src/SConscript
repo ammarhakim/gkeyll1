@@ -2,8 +2,7 @@
 ##
 # Build code and create library
 #
-# Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
-# Licence version 1.0.
+# Copyright &copy; 2008-2009, Ammar Hakim.
 ##
 
 Import('env')
