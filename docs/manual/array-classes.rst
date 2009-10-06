@@ -26,11 +26,6 @@ Lucee provides several array classes to store data efficiently.
 
     Create a new fixed-size vector and set all values to ``init``.
 
-  .. cfunction:: ctor FixedVector (const T& init)
-    :noindex:
-
-    Create a new fixed-size vector and set all values to ``init``.
-
   .. cfunction:: ctor FixedVector (T vals[NELEM])
     :noindex:
 
