@@ -91,6 +91,12 @@ build_dir = os.path.join(buildin, 'etc/loki')
 SConscript('etc/loki/src/SConscript', build_dir=build_dir, duplicate=0)
 
 ##
+# build lua library
+##
+build_dir = os.path.join(buildin, 'etc/lua')
+SConscript('etc/lua/src/SConscript', build_dir=build_dir, duplicate=0)
+
+##
 # build core library
 ##
 build_dir = os.path.join(buildin, 'lib')
