@@ -3,6 +3,47 @@
 
 * Lucee Notes
 
+** 14th October 2009: On reproducible research
+
+   How would one publish reproducible research? The convectional answer
+   is to give access to the code as well as the input files used to
+   run simulations. Further, the scripts to make the published
+   research need to be provided. However, this does not seem like a
+   general solution as (a) the code may be proprietary and under
+   licence agreement (b) the code may be very complex to build and run
+   and may need significant effort to learn.
+   
+   A more general solution can be provided by a hierarchy of access to
+   the code/data. The later entries in the list indicate less
+   portability and greater effort on part of the author as well as the
+   reader.
+
+   - Data and script to make the plots must be provided. This should
+     mandatory for publication. The reason is that a reader may not be
+     always interested in running the code but getting access to the
+     data to compare.
+   - Detailed annotated input files must be provided. These input
+     files should indicate the sequence of steps (including time-step)
+     to run the simulations and the exact parameters used. The input
+     files should be structured such that a dedicated reader can
+     understand the precise steps required in the simulation.
+   - Code to actually execute the simulation should be provided.
+
+   I consider only the first two levels as mandatory for reproducible
+   research. The author is under no obligation to provide the source
+   code or spend the time to make the code available to the
+   reader. For example: an experimentalist should describe the setup
+   in detail so it can be reproduced but is not required to actually
+   provide access to the experimental setup.
+
+   The data files could be plain text or HDF5 files. The plotting
+   scripts should be python, gnuplot or use some tool that is easily
+   and freely available.
+
+   The input file annotation should be provided as an XML file. This
+   is because XML files are universal and enormous commercial support
+   exists to parse XML.
+
 ** 22nd September 2009: Functions in KeyVal pair.
 
    One should be able to store functions in the KeyVal pair
@@ -330,7 +371,6 @@
 *** Regression testing notes
 
     http://www.warpx.org/wiki/index.php?title=Warpx:Community_Portal#Regression_testing_WarpX
-
 *** WarpX general geometry notes
 
     We have decided to not introduce major changes in the framework
@@ -686,7 +726,7 @@
 *** TODO Get fermat2 into warpx.
 
     Should the fermat2 code just be copied? Or rewritten?
-** September 9th
+** September 9thg
 
 *** TODO Registration code cleanup
 
