@@ -1,18 +1,96 @@
 # -*- org -*-
 
+* General Notes
+
+** 19th October 2009: Symbolic calculations needed for HOM paper.
+
+   Write a python script/program to automatically generate all the
+   needed matrices/equations needed in the high-order moment
+   equations. Python could spit out straight LaTeX that is then
+   typeset to visualize the equations.
+
+   Other languages can be considered, however, the time learning them
+   should be balanced against maintainability, availability of tools
+   and power. 
+
+   One option would be to have python spit out the code for Maxima
+   that will in turn be used to compute eigenvalues of the equation
+   system.
+
+   Another option would to be integrate the code into Sage, so Maxima
+   can compute the eigenvalues.
+
+*** More on this ...
+
+   I have now implemented a simple class called Variable that
+   represents a tensor::
+
+     P = Variable('P', 2, 3)
+
+   This will create a rank-2 tensor named "P" each index of which goes
+   from (0,1,2). How to use this? One needs the following basic
+   operations
+
+   - Contraction with another tensor.
+   - Derivate operator (with/without contractions)
+   - Combination in expressions using operators.
+
+   For example:
+   
+     u = Variable('u', 1, 3)
+     P = Variable('P', 2, 3)
+     uP = Contract(u, [0], P, [0])
+
+   This should create a new variable that is a contraction of the
+   first index of "u" and first index of "P".
+
+     uPi = generateAllIndices(uP)
+     for up in uPi:
+       print uPi.show()
+
+   should print "u[0]*P[0,0]+u[1]*P[1,0]+u[2]*P[2,0]" etc.
+
+*** Just use Maxima's tensor package
+
+    Why not just use Maxima? Should explore this option too.
+
+*** Problems with Maxima: Mathematica?
+
+    Maxima has trouble computing eigenvales of sparse matrices. This
+    is a problem and maybe one can try Mathematica.
+
+** 19th October 2009: How to determine nature of non-linear dispersive eqns?
+
+   When writing the HOM paper one needs to understand the structure of
+   dispersive equations, i.e. equations that have hyperbolic part and
+   oscillating source terms. The structure of linearize equations is
+   easy to understand using the dispersion relations. However, what to
+   do about non-linear equations?
+   
+   For example, consider the case of hyperbolic equations. One can
+   linearize and derive the dispersion relation. This will always be
+   of the form w(k) = lambda*k, where lambda is an eigenvalue of the
+   system and k is the wave number. This simply tells us that the
+   linearized system supports waves moving at the eigenspeeds of the
+   system. It tells us nothing about the possibility of shocks,
+   contact discontinuities or rarefaction waves. For this we need to
+   consult hyperbolic equation theory. What is the similar set of
+   mathematical tools to understand hyperbolic-dispersive equations?
+
 * Lucee Notes
 
 ** 14th October 2009: On reproducible research
 
-   How would one publish reproducible research? The convectional answer
-   is to give access to the code as well as the input files used to
-   run simulations. Further, the scripts to make the published
-   research need to be provided. However, this does not seem like a
-   general solution as (a) the code may be proprietary and under
-   licence agreement (b) the code may be very complex to build and run
-   and may need significant effort to learn.
+   How would one publish reproducible research? The convectional
+   answer, and the most general solution, is to give access to the
+   code as well as the input files used to run simulations. Further,
+   the scripts to make the published research need to be
+   provided. However, this does not seem like a general solution as
+   (a) the code may be proprietary and under licence agreement (b) the
+   code may be very complex to build and run and may need significant
+   effort to learn.
    
-   A more general solution can be provided by a hierarchy of access to
+   A less general solution can be provided by a hierarchy of access to
    the code/data. The later entries in the list indicate less
    portability and greater effort on part of the author as well as the
    reader.
