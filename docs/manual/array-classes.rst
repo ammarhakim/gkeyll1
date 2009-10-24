@@ -1,7 +1,8 @@
 Array classes
 -------------
 
-Lucee provides several array classes to store data efficiently.
+Lucee provides several array classes to store data in indexed
+containers.
 
 ``Lucee::FixedVector``: Fixed-size vectors
 ++++++++++++++++++++++++++++++++++++++++++
@@ -9,7 +10,7 @@ Lucee provides several array classes to store data efficiently.
 .. class:: FixedVector
 
   The class ``Lucee::FixedVector`` provides a one-dimensional array of
-  fixed size. The size of the array must be know at compile time. It
+  fixed size. The size of the array must be known at compile time. It
   is declared as::
 
     namespace Lucee
@@ -411,7 +412,7 @@ below. In the following the template type is either ``double`` or
   .. cfunction:: int getLower (unsigned dir)
     :noindex:
 
-    Return the starting index in direction @emph{dir}.
+    Return the starting index in direction ``dir``.
 
   .. cfunction:: int getUpper (unsigned dir)
     :noindex:
@@ -434,8 +435,8 @@ below. In the following the template type is either ``double`` or
     index :math:`(i_1,\ldots,i_N)` index location in N-dimensional
     space.
 
-Array indexing and sequencing
-+++++++++++++++++++++++++++++
+Implementation notes: Array indexing and sequencing
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 When an array is created the data is stored in a single chunk of
 contiguous memory. Hence, a method of mapping of the
