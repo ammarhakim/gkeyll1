@@ -1,6 +1,5 @@
 # -*- org -*-
 
-
 * Lucee Notes
 
 ** 14th October 2009: On reproducible research
@@ -59,6 +58,13 @@
    Not clear on how to implement this: (a) should one make a copy of
    the function object? (b) how would this be specified in an input
    file?
+
+*** Solution to the functions problem.
+
+    The idea here is that one can add a Functor object as described in
+    "Modern C++ Programming" book. With this one can add functions or
+    objects with operator() and that take a std::vector<double> and
+    return std::vector<double>.
 
 ** 18th September 2009: Documentation notes. AGAIN!!
 
