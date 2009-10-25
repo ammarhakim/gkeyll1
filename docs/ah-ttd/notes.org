@@ -1,6 +1,6 @@
 # -*- org -*-
 
-* General Notes
+* High-order moment paper
 
 ** 19th October 2009: Symbolic calculations needed for HOM paper.
 
@@ -380,6 +380,16 @@
     the objects in the sequence specified in the ObjectConstructor
     class.
 
+* FACETS and TxFluids notes
+** TODO Send Sveta slide on UEDIE proposal
+
+   Why this is needed, what we propose to do. Maybe a figure.
+
+** TODO TxFluids: Implement a FDTD solver
+
+   Add a new FDTD updater to solve Maxwell equations. Make it work in
+   any dimension, later in general geometries. This is to gain
+   experience in writing dimension independent manner.
 
 * Style guide
 
