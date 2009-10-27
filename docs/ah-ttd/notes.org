@@ -381,7 +381,7 @@
     class.
 
 * FACETS and TxFluids notes
-** TODO Send Sveta slide on UEDIE proposal
+** DONE Send Sveta slide on UEDIE proposal
 
    Why this is needed, what we propose to do. Maybe a figure.
 
@@ -390,6 +390,29 @@
    Add a new FDTD updater to solve Maxwell equations. Make it work in
    any dimension, later in general geometries. This is to gain
    experience in writing dimension independent manner.
+
+** TODO TxFluids: Write a PointCloud class
+
+   This will be a starting point to get a particle infrastructure in
+   TxFluids.
+
+     TxfPointCloud& pc = this->getIn<TxfPointCloud>(0);
+     TxfPointCloudItr pcItr = pc.createItr();
+     pc.setItr(pcItr, N); // set iterator to Nth point
+
+     // now use it
+     double x = pcItr.x();
+     double y = pcItr.y();
+     double x = pcItr.z();
+
+** FACETS: Disable decomposition of grid if a flag is specified
+
+   This is to avoid the decomp of a small grid in a large simulation.
+
+** TODO FACETS: Call dtors for FMCFM handles in the C++ wrapper classes
+
+   Will need to modify the FmTransportModel and children classes for
+   this.
 
 * Style guide
 
