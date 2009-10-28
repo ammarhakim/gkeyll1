@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* Persoal notes
+** Get first draft of website on server
+
+   Just make something for now and worry about fixing it later.
+
+** Put together application for the fellowship at ANL
+
+   Need three letters, a research interest statement, abstracts of
+   papers.
+
 * High-order moment paper
 
 ** 19th October 2009: Symbolic calculations needed for HOM paper.
@@ -400,11 +410,32 @@
      TxfPointCloudItr pcItr = pc.createItr();
      pc.setItr(pcItr, N); // set iterator to Nth point
 
-     // now use it
-     double x = pcItr.x();
-     double y = pcItr.y();
-     double x = pcItr.z();
+     // get the coordinates
+     double x = pcItr.getX();
+     double y = pcItr.getY();
+     double x = pcItr.getZ();
 
+     // get the extra variables
+     for (unsigned i=0; i<pcItr.getNumComponents(); ++i)
+       std::cout << pcItr[i] << std::endl;
+
+     // create a new point and add it to cloud
+     TxfPointCloudItr& pcNew = pc.createNewPoint();
+     // set its coordinates
+     pcNew.setX(0.0);
+     pcNew.setY(0.0);
+     pcNew.setZ(0.0);
+
+     // set its weight
+     pcNew[0] = 1.0;
+     
+   From the input file one can create the point cloud:
+
+     <DataStruct rays>
+       kind = pointCloud
+       numComponents = 1 # store weight in addition to position
+     </DataStruct>
+     
 ** FACETS: Disable decomposition of grid if a flag is specified
 
    This is to avoid the decomp of a small grid in a large simulation.
