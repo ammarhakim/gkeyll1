@@ -1,6 +1,6 @@
 # -*- org -*-
 
-* Persoal notes
+* Personal notes
 ** Get first draft of website on server
 
    Just make something for now and worry about fixing it later.
@@ -391,9 +391,23 @@
     class.
 
 * FACETS and TxFluids notes
-** DONE Send Sveta slide on UEDIE proposal
+** TODO TxFluids: Implement an "alias" for data-structures
 
-   Why this is needed, what we propose to do. Maybe a figure.
+   This should work as follows:
+
+     <DataStruct q>
+       kind = distArray1D
+       numComponents = 5
+     </DataStruct>
+
+     <DataStruct vel>
+       kind = distArrayAlias1D
+       aliasFor = q
+       components = [1, 2, 3]
+     </DataStruct>
+
+   This should create a 3 element array 'vel'. Modifying component 0
+   of 'vel' should modify component 1 of q.
 
 ** TODO TxFluids: Implement a FDTD solver
 
@@ -444,6 +458,11 @@
 
    Will need to modify the FmTransportModel and children classes for
    this.
+
+** TODO TxFluids: store last inserted data in dynVector
+
+   Presently the last inserted data is not available in the dynVector
+   once the vector is flushed out. This should be fixed.
 
 * Style guide
 
