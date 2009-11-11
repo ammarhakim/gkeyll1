@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcBasicTypeList.h>
 #include <LcExcept.h>
 
 // Loki includes
@@ -31,14 +32,6 @@
 
 namespace Lucee
 {
-  typedef LOKI_TYPELIST_6(
-      int,
-      double,
-      std::string,
-      std::vector<int>,
-      std::vector<double>,
-      std::vector<std::string>) BasicTypeList_t;
-
 /**
  * Lucee::KeyVal provides a container to store/retrive key-value
  * pairs. The key are strings, while the values can int, double,
