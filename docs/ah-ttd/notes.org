@@ -2,10 +2,11 @@
 
 * Personal notes
 ** Get first draft of website on server
+>>>>>>> .r214
 
    Just make something for now and worry about fixing it later.
 
-** Put together application for the fellowship at ANL
+** TODO Put together application for the fellowship at ANL
 
    Need three letters, a research interest statement, abstracts of
    papers.
