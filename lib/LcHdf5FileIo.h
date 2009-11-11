@@ -12,6 +12,18 @@
 #ifndef LC_HDF5_FILE_IO_H
 #define LC_HDF5_FILE_IO_H
 
+// config stuff
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+// lucee includes
+#include <LcExcept.h>
+#include <LcIoNode.h>
+
+// Loki includes
+#include <loki/HierarchyGenerators.h>
+
 // std includes
 #include <string>
 
@@ -83,6 +95,7 @@ namespace Lucee
  * @return the node to the read data
  */
       Lucee::IoNode openDataSet(Lucee::IoNode node, const std::string& dataName) const;
+
     private:
   };
 }
