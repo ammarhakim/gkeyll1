@@ -26,6 +26,10 @@ opts.AddVariables(
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
 
+# MPI library setup
+import scripts.config_mpi as config_mpi
+config_mpi.bc.begin(opts)
+
 # HDF5 serial library setup
 import scripts.config_hdf5s as config_hdf5s
 config_hdf5s.bc.begin(opts)
@@ -100,7 +104,6 @@ if env['parallel']:
         myEnv['CC'] = mpicc
         env['CC'] = mpicc
 
-        myEnv.Append(CCFLAGS = '-D_DO_USE_MPI_')
         # add flag to work around MPICH bug        
         myEnv.Append(CCFLAGS = '-DMPICH_IGNORE_CXX_SEEK')
     else:
