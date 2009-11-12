@@ -26,6 +26,22 @@ opts.AddVariables(
     ('EXTRA_LINKFLAGS', 'Extra link flags to pass to build', ''),
 )
 
+# HDF5 serial library setup
+import scripts.config_hdf5s as config_hdf5s
+config_hdf5s.bc.begin(opts)
+
+# ZLIB library setup
+import scripts.config_z as config_z
+config_z.bc.begin(opts)
+
+# SZIP library setup
+import scripts.config_szip as config_szip
+config_szip.bc.begin(opts)
+
+# HDF5 parallel library setup
+import scripts.config_hdf5p as config_hdf5p
+config_hdf5p.bc.begin(opts)
+
 # GSL library setup
 import scripts.config_gsl as config_gsl
 config_gsl.bc.begin(opts)
@@ -54,6 +70,66 @@ myEnv = env.Clone()
 parenv = env.Clone()
 
 # CONFIGURATION OF INDIVIDUAL DEPENDENCIES GO BELOW
+
+# configure the zlib package
+if config_z.bc.conf(env):
+    config_z.bc.finish(myEnv)
+else:
+    print "Zlib is required for HDF5, but was not found"
+    Exit(1)
+
+# configure the szip package
+if config_szip.bc.conf(env):
+    config_szip.bc.finish(myEnv)
+else:
+    print "SZIP library not found. Continuing anyway ..."
+
+if env['parallel']:
+    # configure MPI if needed    
+    if config_mpi.bc.conf(env):
+        config_mpi.bc.finish(myEnv, addIncs=False, addLibs=False)
+        # set C++ compiler to mpicxx
+        mpicxx = config_mpi.bc.getBinWithPath()
+        myEnv['CXX'] = mpicxx
+        env['CXX'] = mpicxx        
+        # determine location of mpicc file
+        sp = mpicxx.split('/')
+        sp[-1] = 'mpicc'
+        mpicc = string.join(sp, '/')
+        # set C compiler to mpicc
+        myEnv['CC'] = mpicc
+        env['CC'] = mpicc
+
+        myEnv.Append(CCFLAGS = '-D_DO_USE_MPI_')
+        # add flag to work around MPICH bug        
+        myEnv.Append(CCFLAGS = '-DMPICH_IGNORE_CXX_SEEK')
+    else:
+        print "Parallel build requested, but mpi not found"
+        Exit(1)
+
+# configure HDF5: we need different configurations depending on serial
+# or parallel
+if env['parallel']:
+    if config_hdf5p.bc.conf(env):
+        config_hdf5p.bc.finish(myEnv)
+        if config_hdf5p.testNewIfc(config_hdf5p.bc.getIncPath()):
+            # for some strange reason HDF5 interface for version great
+            # than 1.6.4 is different
+            myEnv.Append(CCFLAGS = '-DH5_HAVE_PARALLEL')
+            myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
+    else:
+        print "Parallel build needs parallel HDF5, which was not found"
+        Exit(1)
+else:
+    if config_hdf5s.bc.conf(env):
+        config_hdf5s.bc.finish(myEnv)
+        if config_hdf5s.testNewIfc(config_hdf5s.bc.getIncPath()):
+            # for some strange reason HDF5 interface for version great
+            # than 1.6.4 is different
+            myEnv.Append(CCFLAGS = '-DNEW_H5S_SELECT_HYPERSLAB_IFC')
+    else:
+        print "Serial build needs serial HDF5, which was not found"
+        Exit(1)
 
 # configure GSL library if requested
 if env['usegsl']:
