@@ -2,7 +2,6 @@
 
 * Personal notes
 ** Get first draft of website on server
->>>>>>> .r214
 
    Just make something for now and worry about fixing it later.
 
@@ -14,6 +13,9 @@
 * High-order moment paper
 
 ** 19th October 2009: Symbolic calculations needed for HOM paper.
+
+   [NOT REALLY. All that is needed for eigenvalues but not derive
+   equations. Just derive by hand.]
 
    Write a python script/program to automatically generate all the
    needed matrices/equations needed in the high-order moment
@@ -90,16 +92,64 @@
 
 * Lucee Notes
 
+** 14th November 2009: On storing simulations
+
+   An efficient and systematic method needs to be developed to store
+   simulations and generated data. For this (a) input files, (b) run
+   script, and (c) plotting scripts need to be put into version
+   control. For analysis, enough generated data for plotting should be
+   stored. The full data need not be kept or can be stored on an
+   external archival drive. Each simulation should be labeled with an
+   integer, say starting from 1000. Each simulation should be
+   described in an XML file, which serves as a database. One can
+   imagine generating HTML files from the XML file. A directory called
+   "paper" should be created in which one or more tex files and final
+   images and descriptions should be written. Each figure caption
+   should have the list of simulation ids that were used to make the
+   plot. A make-file should be provided to generated pdf from the tex
+   files. The data to make plots should be stored as HDF5 file. The
+   data should be annotated with attributes to indicate units of the
+   axis and quantities being plotted. Data files should be
+   self-contained, i.e., both the array data and complete annotation
+   should be in the same file.
+
+   Example directory structure:
+
+   simulation-record.xml
+   paper/
+     Makefile
+     simulation-results.tex
+   1000/
+     1000.inp
+     1000.sh
+   1001/
+     1001.inp
+     1001.sh
+
+   The structure of the XML file should be:
+
+     <Simulation id="1000">
+       <Description>
+         Sod-shock with wave-propagation method.
+       </Description>
+     </Simulation>
+
+     <Simulation id="1001">
+       <Description>
+         Sod-shock with DG second order.
+       </Description>
+     </Simulation>
+
 ** 14th October 2009: On reproducible research
 
    How would one publish reproducible research? The convectional
    answer, and the most general solution, is to give access to the
    code as well as the input files used to run simulations. Further,
    the scripts to make the published research need to be
-   provided. However, this does not seem like a general solution as
-   (a) the code may be proprietary and under licence agreement (b) the
-   code may be very complex to build and run and may need significant
-   effort to learn.
+   provided. Although general, however, is not always a practical
+   solution as (a) the code may be proprietary and under licence
+   agreement (b) the code may be very complex to build and run and may
+   need significant effort to learn.
    
    A less general solution can be provided by a hierarchy of access to
    the code/data. The later entries in the list indicate less
@@ -108,8 +158,8 @@
 
    - Data and script to make the plots must be provided. This should
      mandatory for publication. The reason is that a reader may not be
-     always interested in running the code but getting access to the
-     data to compare.
+     always interested in running the code but getting access only to
+     the data.
    - Detailed annotated input files must be provided. These input
      files should indicate the sequence of steps (including time-step)
      to run the simulations and the exact parameters used. The input
