@@ -92,6 +92,19 @@
 
 * Lucee Notes
 
+** 16th November 2009: On HDF5 I/O classes.
+
+   As the binary I/O system for Lucee is HDF5, a cleaner solution to
+   wrapping the HDF5 C-API needs to be developed. A possible solution
+   is
+
+     Hdf5FileIo io;
+
+     HdfFileNode fn = io.openFile("myfile.h5", "w+");
+     Hdf5GroupNode gn = io.openGroup("myGrp");
+     // create a child of "myGrp" node
+     Hdf5GroupNode childGn = io.createGroup(gn, "myChild");
+
 ** 14th November 2009: On storing simulations
 
    An efficient and systematic method needs to be developed to store
