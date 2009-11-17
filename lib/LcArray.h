@@ -139,7 +139,7 @@ namespace Lucee
       int getUpper(unsigned dir) const;
 
 /**
- * Is the aray contiguous?
+ * Is the array contiguous?
  *
  * @return True if array is contiguous, false otherwise.
  */
@@ -263,10 +263,9 @@ namespace Lucee
 
   template <unsigned NDIM, typename T, typename INDEXER>
   Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
-    :
-    indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
-    traits(0),
-    useCount(new int(1))
+    : indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
+      traits(0),
+      useCount(new int(1))
   {
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)

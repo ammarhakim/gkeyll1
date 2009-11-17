@@ -24,6 +24,15 @@
 // Loki includes
 #include <loki/HierarchyGenerators.h>
 
+#ifdef HAVE_MPI
+#include <mpi.h>
+#else
+/** Set to void* */
+#define MPI_Comm void*
+/** Set to void* */
+#define MPI_Info void*
+#endif
+
 // std includes
 #include <string>
 
@@ -37,12 +46,20 @@ namespace Lucee
   {
     public:
 /**
+ * Create a new HDF5FileIo object to perform I/O.
+ *
+ * @param mc the MPI communicator
+ * @param mi info for the MPI communicator
+ */
+      Hdf5FileIo(MPI_Comm mc, MPI_Info mi);
+
+/**
  * Create a file.
  *
  * @param fileName the name for the file.  Assumed to be rw.
  * @return node for the file
  */
-      Lucee::IoNode createFile(const std::string& fileName);
+      IoNode createFile(const std::string& fileName);
 
 /**
  * Open a file.
@@ -51,12 +68,12 @@ namespace Lucee
  * @param perms: the read and write permissions.  "r" or "rw"
  * @return node for the file
  */
-      Lucee::IoNode openFile(const std::string& fileName, const std::string& perms);
+      IoNode openFile(const std::string& fileName, const std::string& perms);
 
 /**
  * Close a file node
  */
-      void closeFile(Lucee::IoNode fileNode);
+      void closeFile(IoNode fileNode);
 
 /**
  * Create an empty group
@@ -65,7 +82,7 @@ namespace Lucee
  * @param grp Name of the group
  * @return group node.
  */
-      Lucee::IoNode createGroup(Lucee::IoNode node, const std::string& grp) const;
+      IoNode createGroup(IoNode node, const std::string& grp) const;
 
 /**
  * Open a group
@@ -74,7 +91,7 @@ namespace Lucee
  * @param grp Name of the group to open
  * @return group node
  */
-      Lucee::IoNode openGroup(Lucee::IoNode node, const std::string& dataName) const;
+      IoNode openGroup(IoNode node, const std::string& dataName) const;
 
 /**
  * Create an empty data node.
@@ -84,7 +101,7 @@ namespace Lucee
  *
  * @return the node to the written data.  This is not closed.
  */
-      Lucee::IoNode createDataSet(Lucee::IoNode node, const std::string& dataName) const;
+      IoNode createDataSet(IoNode node, const std::string& dataName) const;
 
 /**
  * Open a node
@@ -94,9 +111,13 @@ namespace Lucee
  *
  * @return the node to the read data
  */
-      Lucee::IoNode openDataSet(Lucee::IoNode node, const std::string& dataName) const;
+      IoNode openDataSet(IoNode node, const std::string& dataName) const;
 
     private:
+/** MPI communicator to use */
+    MPI_Comm mpiComm;
+/** MPI info object to use */
+    MPI_Info mpiInfo;
   };
 }
 

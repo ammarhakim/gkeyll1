@@ -23,11 +23,11 @@ namespace Lucee
 {
 /**
  * I/O node to represent nodes in HDF5 files. This class represents
- * files, groups and datasets.
+ * files, groups and datasets. This is used as an opaque struct to
+ * prevent access to internals.
  */
-  class IoNode_v 
+  struct IoNode_v 
   {
-    private:
 /**
  * Create a new node object to represent a HDF5 node.
  *
