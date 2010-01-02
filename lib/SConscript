@@ -24,8 +24,8 @@ libname = 'lclib'
 # source files in lib
 sources = [
     'LcExcept.cc',
-    'LcHdf5FileIo.cc',
-    'LcIoNode.cc',
+#    'LcHdf5FileIo.cc',
+#    'LcIoNode.cc',
     'LcKeyVal.cc',
     'LcKeyValTree.cc',
     'LcLinAlgebra.cc',
