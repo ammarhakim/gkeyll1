@@ -8,10 +8,12 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lclib 
+  LcCmdLineArgs.cpp
   LcExcept.cc 
   LcKeyVal.cc
   LcKeyValTree.cc
   LcLinAlgebra.cc
   LcMatrix.cc
   LcSettableObject.cc
-  LcVector.cc)
+  LcVector.cc
+)
