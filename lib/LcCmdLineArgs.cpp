@@ -46,6 +46,7 @@ namespace Lucee
     std::map<std::string, std::string>::const_iterator itr;
     for (itr=switchMap.begin(); itr!=switchMap.end(); ++itr) 
     {
+// show help strings for all switches except for "-h"
       if (itr->first != "h") 
       {
         std::cout << " -" << itr->first << std::endl;
@@ -65,12 +66,13 @@ namespace Lucee
   CmdLineArgs::parse(int argc, char *argv[]) 
   {
     int i=1;
+// loop over each argument, putting it into proper maps
     while (i<argc) 
     {
       if (argv[i][0] == '-') 
       {
 // this is an a switch or an argument
-        char *nm = &argv[i][1]; // kill the '-'
+        char *nm = &argv[i][1]; // eat the '-'
         if (isSwitch(nm)) 
         {
           switchVal[nm] = true;
@@ -79,7 +81,7 @@ namespace Lucee
         {
           char *val = argv[i+1];
           nmVal[nm] = val;
-          i = i+1;
+          i = i+1; // skip over value
         }
         i = i+1;
       }
