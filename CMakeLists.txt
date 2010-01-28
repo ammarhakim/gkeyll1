@@ -25,3 +25,6 @@ add_subdirectory(etc/lua/src)
 # Build code in lib
 add_subdirectory(lib)
 
+# Build all unit tests
+add_subdirectory(unit)
+
