@@ -50,3 +50,7 @@ target_link_libraries(lckeyval lclib lcloki lclua)
 # lckeyvaltree
 add_executable(lckeyvaltree lckeyvaltree.cxx)
 target_link_libraries(lckeyvaltree lclib lcloki lclua)
+
+# lckeyvaltree
+add_executable(lccmdlineargs lccmdlineargs.cxx)
+target_link_libraries(lccmdlineargs lclib lcloki lclua)
