@@ -19,6 +19,9 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BIN
 # Build code in loki
 add_subdirectory(etc/loki/src)
 
+# Build code in lua
+add_subdirectory(etc/lua/src)
+
 # Build code in lib
 add_subdirectory(lib)
 
