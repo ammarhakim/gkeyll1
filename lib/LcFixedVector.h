@@ -117,7 +117,7 @@ namespace Lucee
     T norm = 0.0;
     for (unsigned i=0; i<NELEM; ++i)
       norm += data[i]*data[i];
-    return sqrt(norm);
+    return std::sqrt(norm);
   }
 }
 
