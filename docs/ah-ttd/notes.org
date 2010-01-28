@@ -1,14 +1,15 @@
 # -*- org -*-
 
 * Personal notes
-** Get first draft of website on server
+** DONE Get first draft of website on server
 
    Just make something for now and worry about fixing it later.
 
-** TODO Put together application for the fellowship at ANL
+   I have now created a website on
 
-   Need three letters, a research interest statement, abstracts of
-   papers.
+   http://www.ammar-hakim.org
+
+   This has papers and will have technical notes.
 
 * High-order moment paper
 
@@ -91,6 +92,16 @@
    mathematical tools to understand hyperbolic-dispersive equations?
 
 * Lucee Notes
+
+** 27th January 2010: Transition to CMake and documentation
+
+   Scons is a crappy build system. So transition to CMake. Also,
+   rename the .cc files to .cpp.
+
+   The Sphinx documentation of individual functions is not needed. The
+   API documentation should be ripped out and replaced by more user
+   examples. Links to doxygen generated documents should be provided
+   from the Sphinx documentation.
 
 ** 16th November 2009: On HDF5 I/O classes.
 
