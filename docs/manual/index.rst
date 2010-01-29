@@ -19,6 +19,7 @@ systems can be easily added.
    array-classes
    key-value-tree
    hdf5-file-io
+   util-classes
 
 **Algorithm Reference**:
 
