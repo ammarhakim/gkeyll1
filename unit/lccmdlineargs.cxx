@@ -82,5 +82,29 @@ main(void)
   LC_ASSERT("Checking for argument", cmd.hasArg("o") == false);
   LC_RAISES("Checking if exception is thrown", cmd.getArg("o"), Lucee::Except);
 
+// test it
+  char *argv4[] = {
+    "lccmdlineargs",
+    "-xml",
+    "file-1",
+    "file-2",
+    "file-3"
+  };
+  cmd.parse(5, argv4);
+  
+// fetch extra arguments
+  std::vector<std::string> extraArgs = cmd.getExtraArgs();
+  
+  LC_ASSERT("Checking if switch was specified", cmd.hasSwitch("xml") == true);
+  LC_ASSERT("Checking if switch was specified", cmd.hasSwitch("r") == false);
+  LC_ASSERT("Checking if number of extra arguments is correct",
+    extraArgs.size() == 3);
+  LC_ASSERT("Checking if extra argument is correct",
+    extraArgs[0] == "file-1");
+  LC_ASSERT("Checking if extra argument is correct",
+    extraArgs[1] == "file-2");
+  LC_ASSERT("Checking if extra argument is correct",
+    extraArgs[2] == "file-3");
+
   LC_END_TESTS;
 }
