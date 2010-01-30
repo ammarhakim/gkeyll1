@@ -65,6 +65,11 @@ namespace Lucee
   void
   CmdLineArgs::parse(int argc, char *argv[]) 
   {
+// clear existing maps
+    switchVal.clear();
+    nmVal.clear();
+    extraArgs.clear();
+
     int i=1;
 // loop over each argument, putting it into proper maps
     while (i<argc) 
