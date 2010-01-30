@@ -38,5 +38,13 @@ the following code fragment can be used::
       inputFile = cmd.getArg("i");
   }
 
-  
-  
+The class also provides a method for parsing out *extra arguments*,
+i.e. those which are not switches or arguments. For example, in the
+command line::
+ 
+   program -xml file-1.c file-2.c file-3.c
+
+the names ``file-1.c``, ``file-2.c`` and ``file-3.c`` are extra
+arguments and can be retrieved using::
+
+  std::vector<std::string> extra = cmd.getExtraArgs();
