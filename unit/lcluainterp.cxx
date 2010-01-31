@@ -11,8 +11,6 @@
 // lucee includes
 #include <LcTest.h>
 #include <lua.hpp>
-#include <lauxlib.h>
-#include <lualib.h>
 
 int
 main(void)
