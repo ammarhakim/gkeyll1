@@ -13,6 +13,7 @@ add_library(lclib
   LcKeyVal.cpp
   LcKeyValTree.cpp
   LcLinAlgebra.cpp
+  LcLuaSaveRstrStack.cpp
   LcLuaState.cpp
   LcMatrix.cpp
   LcSettableObject.cpp

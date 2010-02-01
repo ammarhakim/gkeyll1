@@ -4,6 +4,11 @@ project(lucee)
 # Required version
 cmake_minimum_required(VERSION 2.4)
 
+if (WIN32)
+# On Windows we need to shut up security warnings
+   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif (WIN32)
+
 # Add in path to additional modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
 

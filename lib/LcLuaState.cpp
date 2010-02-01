@@ -16,12 +16,18 @@ namespace Lucee
   LuaState::LuaState()
     : state(lua_open())
   {
+    isValidState = false;
+    if (state) 
+      isValidState = true;
+      
+    if (isValid())
 // load all standard libraries
-    luaL_openlibs(state);
+      luaL_openlibs(state);
   }
 
   LuaState::~LuaState()
   {
-    lua_close(state);
+    if (isValid())
+      lua_close(state);
   }
 }

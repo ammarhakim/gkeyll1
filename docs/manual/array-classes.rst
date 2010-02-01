@@ -2,60 +2,33 @@ Array classes
 -------------
 
 Lucee provides several array classes to store data in indexed
-containers.
+containers. The array classes can be instantiated for any type,
+although some algorithms and functions are defined only for ``float``
+and ``double``.
 
 ``Lucee::FixedVector``: Fixed-size vectors
 ++++++++++++++++++++++++++++++++++++++++++
 
-.. class:: FixedVector
+The class ``Lucee::FixedVector`` provides a one-dimensional,
+fixed-size array. The size of the array must be known at compile
+time. For example, to create a vector with three double-precision
+elements one can use::
 
-  The class ``Lucee::FixedVector`` provides a one-dimensional array of
-  fixed size. The size of the array must be known at compile time. It
-  is declared as::
+  Lucee::FixedVector<3, double> v1(1.0);
+  Lucee::FixedVector<3, double> v2(1.0, 2.0, 3.0);
 
-    namespace Lucee
-    {
-      template <unsigned NELEM, typename T>
-      class FixedVector;
-    }
+This will create ``v1`` and initialize all its elements to 1.0 and
+create ``v2`` and initialize its elements to 1.0, 2.0 and 3.0. The
+elements can be accessed using standard array notation::
 
-  The first template parameter specifies the size of the vector and
-  second parameter specifies the type of data stored in the vector.
+  double sum = 0.0;
+  for (unsigned i=0; i<3; ++i)
+    sum += v1[i]*v1[i];
 
-  .. cfunction:: ctor FixedVector (const T& init)
-    :noindex:
+For the complete API of this class see the Doxygen generated
+documentation for `Lucee::FixedVector`_.
 
-    Create a new fixed-size vector and set all values to ``init``.
-
-  .. cfunction:: ctor FixedVector (T vals[NELEM])
-    :noindex:
-
-    Create a new fixed-size vector and set values to ones specified in
-    the ``val`` array.
-
-  .. cfunction:: ctor FixedVector (T v1, ...)
-    :noindex:
-
-    Create a new fixed-size vector and set values :math:`(v_1,
-    \ldots)`. Note that exactly ``NELEM`` values must be specified for
-    this function to work correctly. The method will fail silently if
-    incorrect number of values are specified.
-
-  .. cfunction:: T& operator[](int i)
-    :noindex:
-
-    Access element at index :math:`i` in vector.
-
-  .. cfunction:: unsigned getLength ()
-    :noindex:
-
-    Get number of elements in vector.
-
-  .. cfunction:: T getNorm ()
-    :noindex:
-
-    Compute :math:`l_2`-norm of vector. The norm only makes sense for
-    double and floating point vectors.
+.. _Lucee::FixedVector: ../../../api/html/class_lucee_1_1_fixed_vector.html
 
 ``Lucee::Array``: :math:`N`-dimensional arrays
 ++++++++++++++++++++++++++++++++++++++++++++++
