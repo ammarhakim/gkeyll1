@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcLuaState.h>
 #include <LcTest.h>
 
 // lua include
@@ -19,21 +20,20 @@ main(void)
 {
   LC_BEGIN_TESTS("lcluainterp");
   
-  lua_State *L = lua_open();
-  luaL_openlibs(L);
+// create a new LUA state
+  Lucee::LuaState state;
 
   char buff[256];
   while (fgets(buff, sizeof(buff), stdin) != NULL) 
   {
-    int error = luaL_loadbuffer(L, buff, strlen(buff), "line") ||
-      lua_pcall(L, 0, 0, 0);
+    int error = luaL_loadbuffer(state, buff, strlen(buff), "line") ||
+      lua_pcall(state, 0, 0, 0);
     if (error) 
     {
-      fprintf(stderr, "%s", lua_tostring(L, -1));
-      lua_pop(L, 1);  /* pop error message from the stack */
+      fprintf(stderr, "%s", lua_tostring(state, -1));
+      lua_pop(state, 1);  /* pop error message from the stack */
     }
   }
-  lua_close(L);
 
   LC_END_TESTS;
 }

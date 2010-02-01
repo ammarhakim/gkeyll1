@@ -5,7 +5,7 @@
  *
  * @version	$Id: LcLuaState.h 157 2009-08-26 17:27:55Z a.hakim777 $
  *
- * Copyright &copy; 2008-2009, Ammar Hakim.
+ * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_STATE_H
@@ -21,6 +21,10 @@
 
 namespace Lucee
 {
+/** 
+ * Opens a new instance of a LUA interpreter and closes it on
+ * destruction.
+ */
   class LuaState
   {
     public:
@@ -40,9 +44,32 @@ namespace Lucee
         return state;
       }
 
+/**
+ * Cast operator so this can be passed to functions expecting
+ * lua_State*.
+ *
+ * @return lua_State pointer.
+ */
+      operator lua_State* ()
+      {
+        return state;
+      }
+
+/**
+ * Check if state is valid.
+ *
+ * @return true if state is valid, false otherwise. 
+ */
+      bool isValid() const
+      {
+        return isValidState;
+      }
+
     private:
 /** Pointer to LUA state */
       lua_State *state;
+/** Flag to indicate if state is valid */
+      bool isValidState;
   };
 }
 

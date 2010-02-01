@@ -57,4 +57,4 @@ target_link_libraries(lccmdlineargs lclib lcloki lclua)
 
 # lcluainterp
 add_executable(lcluainterp lcluainterp.cxx)
-target_link_libraries(lcluainterp lclua)
+target_link_libraries(lcluainterp lclib lcloki lclua)
