@@ -27,6 +27,10 @@ target_link_libraries(lcarray lclib lcloki lclua)
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
 target_link_libraries(lccolmajorindexer lclib lcloki lclua)
 
+# lcrowmajorindexer
+add_executable(lcrowmajorindexer lcrowmajorindexer.cxx)
+target_link_libraries(lcrowmajorindexer lclib lcloki lclua)
+
 # lcfixedvector
 add_executable(lcfixedvector lcfixedvector.cxx)
 target_link_libraries(lcfixedvector lclib lcloki lclua)

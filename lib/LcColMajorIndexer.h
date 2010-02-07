@@ -171,7 +171,8 @@ namespace Lucee
  * @param i Index location.
  * @return Index of (i) into linear space.
  */
-      int getIndex(int i) const {
+      int getIndex(int i) const 
+      {
         return ai[0]+i;
       }
   };
@@ -199,7 +200,8 @@ namespace Lucee
  * @param j Index location.
  * @return Index of (i,j) into linear space.
  */
-      int getIndex(int i, int j) const {
+      int getIndex(int i, int j) const 
+      {
         return ai[0]+i+ai[2]*j;
       }
   };
@@ -228,7 +230,8 @@ namespace Lucee
  * @param k Index location.
  * @return Index of (i,j,k) into linear space.
  */
-      int getIndex(int i, int j, int k) const {
+      int getIndex(int i, int j, int k) const 
+      {
         return ai[0]+i+ai[2]*j+ai[3]*k;
       }
   };
@@ -258,7 +261,8 @@ namespace Lucee
  * @param l Index location.
  * @return Index of (i,j,k,l) into linear space.
  */
-      int getIndex(int i, int j, int k, int l) const {
+      int getIndex(int i, int j, int k, int l) const 
+      {
         return ai[0]+i+ai[2]*j+ai[3]*k+ai[4]*l;
       }
   };
