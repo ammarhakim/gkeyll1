@@ -1,11 +1,11 @@
-Utility Classes and Functions
+Utility classes and functions
 -----------------------------
 
 Lucee provides several utility classes to perform miscellenous
 jobs. These are described below.
 
-``Lucee::CmdLineArgs``: Parsing Command Lines
-+++++++++++++++++++++++++++++++++++++++++++++
+``Lucee::CmdLineArgs``: Parsing command line arguments
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The class ``Lucee::CmdLineArgs`` provides a simple class to parse
 command line arguments. Two types of arguments are supported,
