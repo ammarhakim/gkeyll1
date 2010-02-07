@@ -283,7 +283,7 @@
 
 ** DONE Test matrix copy ctor and assignment operators.
 ** DONE Add copy ctor and assignment operators to vector.
-** TODO Complete RowMajor indexer and test it.
+** DONE Complete RowMajor indexer and test it.
 ** TODO Implement the createView() operator.
 ** TODO Finish implementing RT in homogenous slab.
 
