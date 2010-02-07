@@ -1,22 +1,19 @@
 Array indexing and sequencing
 -----------------------------
 
+This note describes the indexing and sequencing algorithgms
+implemented in Lucee.
+
 Array indexing
 ++++++++++++++
 
-When an array is created the data is stored in a single chunk of
-contiguous memory. Hence, a method of mapping of the
- is needed.
-
 An *indexing function* maps an :math:`N`-dimensional index space to a
 :math:`1`-dimensional index space. Indexing functions are used in the
-Lucee array classes to map array indices into a linear index into the
-chunk of memory
-
-There are several sets of mapping
-classes provided in Lucee: row-major, column-major and fully symmetric
-tensor indexing. These are implemented in the
-``Lucee::ColMajorIndexer`` and the ``Lucee::RowMajorIndexer`` classes.
+Lucee array classes to map array indices into a linear index. There
+are several sets of mapping classes provided in Lucee: row-major,
+column-major and completely symmetric-tensor indexing. These are
+implemented in the ``Lucee::ColMajorIndexer`` and the
+``Lucee::RowMajorIndexer`` classes. 
 
 Let :math:`(i_1,\ldots,i_N)` be the index in the :math:`N`-dimensional
 index space. Let :math:`(s_1,\ldots,s_N)` be the starting index and

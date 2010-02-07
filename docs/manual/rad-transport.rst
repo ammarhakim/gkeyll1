@@ -1,12 +1,5 @@
-Radiation transport
--------------------
-
-Lucee provides algorithms for the solution of the radiation transport
-equation (RTE) in various geometries and under different physical
-conditions.
-
 Radiation transport in a homogeneous slab
-+++++++++++++++++++++++++++++++++++++++++
+-----------------------------------------
 
 Radiation transport in homogeneous slabs (plane parallel geometry)
 describes several situations of physical interest in ocean and
