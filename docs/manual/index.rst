@@ -11,22 +11,29 @@ physics software. It is primarily developed to solve plasma physics
 problems. However, it is general enough that solvers for other physics
 systems can be easily added.
 
-**Class Reference**:
+**Programming Manual**:
 
 .. toctree::
-   :maxdepth: 2
+  :maxdepth: 2
 
-   array-classes
-   key-value-tree
-   hdf5-file-io
-   util-classes
+  array-classes
+  key-value-tree
+  hdf5-file-io
+  util-classes
+
+**Implementation Notes**:
+
+.. toctree::
+  :maxdepth: 2
+
+  array-idx-seq  
 
 **Algorithm Reference**:
 
 .. toctree::
-   :maxdepth: 2
+  :maxdepth: 2
 
-   rad-transport
+  rad-transport
 
 Indices and tables
 ==================
