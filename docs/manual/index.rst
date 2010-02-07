@@ -6,10 +6,8 @@
 Lucee: Light-weight Universal Computational Engine
 ==================================================
 
-Lucee is a framework written in C++ to build parallel computational
-physics software. It is primarily developed to solve plasma physics
-problems. However, it is general enough that solvers for other physics
-systems can be easily added.
+Lucee is a collection of efficient and parallel computational plasma
+physics solvers written in C++.
 
 **Programming Manual**:
 
@@ -33,6 +31,7 @@ systems can be easily added.
 .. toctree::
   :maxdepth: 2
 
+  hyper-solvers
   rad-transport
 
 Indices and tables
