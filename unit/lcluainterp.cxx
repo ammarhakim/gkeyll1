@@ -19,7 +19,7 @@ int
 main(void)
 {
   LC_BEGIN_TESTS("lcluainterp");
-  
+
 // create a new LUA state
   Lucee::LuaState state;
 

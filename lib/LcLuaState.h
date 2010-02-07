@@ -73,5 +73,4 @@ namespace Lucee
   };
 }
 
-
 #endif // LC_LUA_STATE_H
