@@ -187,7 +187,7 @@ test_7()
 }
 
 void
-test_8()
+test_2_2()
 {
   int lower[2] = {1, 2};
   int upper[2] = {10+1, 15+2};
@@ -220,6 +220,7 @@ main(void)
   test_5();
   test_6();
   test_7();
-  test_8();
+
+  test_2_2();
   LC_END_TESTS;
 }
