@@ -16,7 +16,8 @@
 # include <config.h>
 #endif
 
-#include <iostream>
+// lucee include
+#include <LcRegion.h>
 
 namespace Lucee
 {
@@ -32,24 +33,29 @@ namespace Lucee
  * Create a new indexer for mapping an N-dimensional index into a
  * linear index.
  *
- * @param start Starting index.
- * @param shape Shape of space.
+ * @param shp Shape of space.
+ * @param sta Starting index.
  */
-      ColMajorIndexerBase(unsigned shape[NDIM], int start[NDIM])
+      ColMajorIndexerBase(unsigned shp[NDIM], int sta[NDIM])
       {
+        createColMajorIndexer(shp, sta);
+      }
+
+/**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexerBase(const Region<NDIM, int>& rgn)
+      {
+        unsigned shp[NDIM];
+        int sta[NDIM];
         for (unsigned i=0; i<NDIM; ++i)
         {
-          this->start[i] = start[i];
-          this->shape[i] = shape[i];
+          shp[i] = rgn.getShape(i);
+          sta[i] = rgn.getLower(i);
         }
-
-        ai[1] = 1;
-        for (unsigned i=2; i<NDIM+1; ++i)
-          ai[i] = ai[i-1]*shape[i-2];
-        int sum = 0.0;
-        for (unsigned i=1; i<NDIM+1; ++i)
-          sum += ai[i]*start[i-1];
-        ai[0] = -sum;
+        createColMajorIndexer(shp, sta);
       }
 
 /**
@@ -128,6 +134,27 @@ namespace Lucee
       int start[NDIM];
 /** Shape of linear-space */
       unsigned shape[NDIM];
+
+/**
+ *
+ */
+      void createColMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+      {
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          this->start[i] = start[i];
+          this->shape[i] = shape[i];
+        }
+
+        ai[1] = 1;
+        for (unsigned i=2; i<NDIM+1; ++i)
+          ai[i] = ai[i-1]*shape[i-2];
+        int sum = 0.0;
+        for (unsigned i=1; i<NDIM+1; ++i)
+          sum += ai[i]*start[i-1];
+        ai[0] = -sum;
+
+      }
   };
 
 /** 
@@ -147,6 +174,16 @@ namespace Lucee
         : ColMajorIndexerBase<NDIM>(shape, start)
       {
       }
+
+/**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexer(const Region<NDIM, int>& rgn)
+        : ColMajorIndexerBase<NDIM>(rgn)
+      {
+      }
   };
 
 /** One dimensional indexer */
@@ -162,6 +199,16 @@ namespace Lucee
  */
       ColMajorIndexer(unsigned shape[1], int start[1])
         : ColMajorIndexerBase<1>(shape, start)
+      {
+      }
+
+/**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexer(const Region<1, int>& rgn)
+        : ColMajorIndexerBase<1>(rgn)
       {
       }
 
@@ -190,6 +237,16 @@ namespace Lucee
  */
       ColMajorIndexer(unsigned shape[2], int start[2])
         : ColMajorIndexerBase<2>(shape, start)
+      {
+      }
+
+/**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexer(const Region<2, int>& rgn)
+        : ColMajorIndexerBase<2>(rgn)
       {
       }
 
@@ -223,6 +280,16 @@ namespace Lucee
       }
 
 /**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexer(const Region<3, int>& rgn)
+        : ColMajorIndexerBase<3>(rgn)
+      {
+      }
+
+/**
  * Map 3D index to a linear index.
  *
  * @param i Index location.
@@ -249,6 +316,16 @@ namespace Lucee
  */
       ColMajorIndexer(unsigned shape[4], int start[4])
         : ColMajorIndexerBase<4>(shape, start)
+      {
+      }
+
+/**
+ * Create a new indexer over given N-dimensional region.
+ *
+ * @param rgn Region to index.
+ */
+      ColMajorIndexer(const Region<4, int>& rgn)
+        : ColMajorIndexerBase<4>(rgn)
       {
       }
 
