@@ -16,7 +16,7 @@
 # include <config.h>
 #endif
 
-// lucee include
+// lucee includes
 #include <LcRegion.h>
 
 namespace Lucee
@@ -136,7 +136,10 @@ namespace Lucee
       unsigned shape[NDIM];
 
 /**
+ * Create a new indexer object.
  *
+ * @param shape Shape of region to index.
+ * @param start Start index.
  */
       void createColMajorIndexer(unsigned shape[NDIM], int start[NDIM])
       {
