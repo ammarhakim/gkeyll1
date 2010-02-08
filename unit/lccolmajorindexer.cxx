@@ -186,6 +186,29 @@ test_7()
         }
 }
 
+void
+test_8()
+{
+  int lower[2] = {1, 2};
+  int upper[2] = {10+1, 15+2};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::ColMajorIndexer<2> col(rgn);
+
+  int count=0;
+  for (int j=col.getLower(1); j<col.getUpper(1); ++j)
+    for (int i=col.getLower(0); i<col.getUpper(0); ++i)
+      LC_ASSERT("Testing 2D indexer", col.getIndex(i,j) == count++);
+
+  count=0;
+  int idx[2];
+  for (int j=col.getLower(1); j<col.getUpper(1); ++j)
+    for (int i=col.getLower(0); i<col.getUpper(0); ++i)
+    {
+      idx[0] = i; idx[1] = j;
+      LC_ASSERT("Testing 2D indexer", col.getGenIndex(idx) == count++);
+    }
+}
+
 int
 main(void) 
 {
@@ -197,5 +220,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }

@@ -16,8 +16,6 @@
 # include <config.h>
 #endif
 
-#include <iostream>
-
 namespace Lucee
 {
 /**
