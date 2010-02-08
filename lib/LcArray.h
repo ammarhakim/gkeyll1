@@ -54,7 +54,7 @@ namespace Lucee
  * Construct array with specified shape and start indices.
  *
  * @param shape Shape of the array.
- * @param start indices for the array.
+ * @param start Start indices for the array.
  * @param init Initial value to assign to all elements.
  */
       Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);

@@ -26,9 +26,7 @@ elements can be accessed using standard array notation::
     sum += v1[i]*v1[i];
 
 For the complete API of this class see the Doxygen generated
-documentation for `Lucee::FixedVector`_.
-
-.. _Lucee::FixedVector: ../../../api/html/class_lucee_1_1_fixed_vector.html
+documentation for `Lucee::FixedVector`.
 
 ``Lucee::Array``: :math:`N`-dimensional arrays
 ++++++++++++++++++++++++++++++++++++++++++++++
