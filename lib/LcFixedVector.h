@@ -46,7 +46,22 @@ namespace Lucee
  *
  * @param vals Values of vector elements.
  */
-      FixedVector(T vals[NELEM]);
+      FixedVector(const T vals[NELEM]);
+
+/**
+ * Create new fixed-vector from existing one.
+ *
+ * @param fv Fixed-vector to copy from.
+ */
+      FixedVector(const FixedVector<NELEM, T>& fv);
+
+/**
+ * Create new fixed-vector from existing one.
+ *
+ * @param fv Fixed-vector to copy from.
+ * @return reference to created vector.
+ */
+      FixedVector<NELEM, T>& operator=(const FixedVector<NELEM, T>& fv);
 
 /**
  * Return number of elements in vector.
@@ -104,10 +119,29 @@ namespace Lucee
   }
 
   template <unsigned NELEM, typename T>
-  FixedVector<NELEM, T>::FixedVector(T vals[NELEM])
+  FixedVector<NELEM, T>::FixedVector(const T vals[NELEM])
   {
     for (unsigned i=0; i<NELEM; ++i)
       data[i] = vals[i];
+  }
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>::FixedVector(const FixedVector<NELEM, T>& fv)
+  {
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = fv.data[i];
+  }
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>& 
+  FixedVector<NELEM, T>::operator=(const FixedVector<NELEM, T>& fv)
+  {
+    if (&fv == this)
+      return *this;
+
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = fv.data[i];
+    return *this;
   }
 
   template <unsigned NELEM, typename T>
