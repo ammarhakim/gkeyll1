@@ -81,11 +81,64 @@ test_2()
     rgn.isInside(p5) == false);
 }
 
+void
+test_3()
+{
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox_o(lower, upper);
+
+  Lucee::Region<2, int> ibox(ibox_o);
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking lower bounds", ibox.getLower(i) == lower[i]);
+    LC_ASSERT("Checking upper bounds", ibox.getUpper(i) == upper[i]);
+    LC_ASSERT("Checking shape", ibox.getShape(i) == (upper[i]-lower[i]));
+  }
+  LC_ASSERT("Checking volume", ibox.getVolume() == 100);
+
+  Lucee::FixedVector<2, int> lfv = ibox.getLower();
+  Lucee::FixedVector<2, int> ufv = ibox.getUpper();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking lower bounds", ibox.getLower(i) == lfv[i]);
+    LC_ASSERT("Checking upper bounds", ibox.getUpper(i) == ufv[i]);
+  }
+}
+
+void
+test_4()
+{
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox_o(lower, upper);
+
+  Lucee::Region<2, int> ibox(lower, upper);
+  ibox = ibox_o;
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking lower bounds", ibox.getLower(i) == lower[i]);
+    LC_ASSERT("Checking upper bounds", ibox.getUpper(i) == upper[i]);
+    LC_ASSERT("Checking shape", ibox.getShape(i) == (upper[i]-lower[i]));
+  }
+  LC_ASSERT("Checking volume", ibox.getVolume() == 100);
+
+  Lucee::FixedVector<2, int> lfv = ibox.getLower();
+  Lucee::FixedVector<2, int> ufv = ibox.getUpper();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking lower bounds", ibox.getLower(i) == lfv[i]);
+    LC_ASSERT("Checking upper bounds", ibox.getUpper(i) == ufv[i]);
+  }
+}
+
 int
 main(void) 
 {
   LC_BEGIN_TESTS("lcregion");
   test_1();
   test_2();
+  test_3();
+  test_4();
   LC_END_TESTS;
 }

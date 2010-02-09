@@ -77,11 +77,35 @@ test_2()
   LC_ASSERT("Testing norm of vector", epsCmp(xv.getNorm(), norm));
 }
 
+void
+test_3()
+{
+  Lucee::FixedVector<3, double> xv(0.0);
+  double arr[3] = {1.0, 2.0, 3.0};
+
+  xv = arr;
+  LC_ASSERT("Testing first entry in array", xv[0]==1.0);
+  LC_ASSERT("Testing second entry in array", xv[1]==2.0);
+  LC_ASSERT("Testing third entry in array", xv[2]==3.0);
+
+  xv = 10.5;
+  LC_ASSERT("Testing first entry in array", xv[0]==10.5);
+  LC_ASSERT("Testing second entry in array", xv[1]==10.5);
+  LC_ASSERT("Testing third entry in array", xv[2]==10.5);
+
+  Lucee::FixedVector<3, double> xv2(12.0, 13.0, 14.0);
+  xv = xv2;
+  LC_ASSERT("Testing first entry in array", xv[0]==12.0);
+  LC_ASSERT("Testing second entry in array", xv[1]==13.0);
+  LC_ASSERT("Testing third entry in array", xv[2]==14.0);
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcfixedvector");
   test_1();
   test_2();
+  test_3();
   LC_END_TESTS;
 }

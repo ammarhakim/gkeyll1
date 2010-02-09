@@ -64,6 +64,23 @@ namespace Lucee
       FixedVector<NELEM, T>& operator=(const FixedVector<NELEM, T>& fv);
 
 /**
+ * Create new fixed-vector from an array.
+ *
+ * @param arr Array to copy from.
+ * @return reference to created vector.
+ */
+      FixedVector<NELEM, T>& operator=(const T arr[NELEM]);
+
+/**
+ * Create new fixed-vector from a scalar value. Same value is assigned
+ * to all elements.
+ *
+ * @param val Array to copy from.
+ * @return reference to created vector.
+ */
+      FixedVector<NELEM, T>& operator=(const T& val);
+
+/**
  * Return number of elements in vector.
  *
  * @return number of elements in vector.
@@ -141,6 +158,24 @@ namespace Lucee
 
     for (unsigned i=0; i<NELEM; ++i)
       data[i] = fv.data[i];
+    return *this;
+  }
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>& 
+  FixedVector<NELEM, T>::operator=(const T arr[NELEM])
+  {
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = arr[i];
+    return *this;
+  }
+
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>&
+  FixedVector<NELEM, T>::operator=(const T& val)
+  {
+    for (unsigned i=0; i<NELEM; ++i)
+      data[i] = val;
     return *this;
   }
 
