@@ -355,6 +355,42 @@ test_7()
     }
 }
 
+void
+test_8()
+{
+  int lower[4] = {0, 0, 0};
+  int upper[4] = {5, 10, 12, 6};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::Array<4, double> arr1(rgn);
+
+  double count = 0.0;
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+        for (int l=arr1.getLower(3); l<arr1.getUpper(3); ++l)
+          arr1(i,j,k,l) = count++;
+
+  count = 0.0;
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+        for (int l=arr1.getLower(3); l<arr1.getUpper(3); ++l)
+        {
+          LC_ASSERT("Testing 4D indexer", arr1(i,j,k,l) == count++);
+        }
+
+  count = 0.0;
+  int idx[4];
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      for (int k=arr1.getLower(2); k<arr1.getUpper(2); ++k)
+        for (int l=arr1.getLower(3); l<arr1.getUpper(3); ++l)
+        {
+          idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
+          LC_ASSERT("Testing 4D indexer", arr1(idx) == count++);
+        }
+}
+
 int
 main(void) 
 {
@@ -367,5 +403,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }
