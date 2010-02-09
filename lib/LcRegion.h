@@ -24,8 +24,8 @@ namespace Lucee
 /**
  * A region in an N-dimension space represents a rectangular
  * hyper-box, closed on the lower end but open on the upper end. For
- * example, a two-dimensional region [a,b) X [c,d) has volume
- * (b-a)*(d-c).
+ * example, a two-dimensional region can be represented by the
+ * Cartesian product [a,b) X [c,d) has volume (b-a)*(d-c).
  */
   template <unsigned NDIM, typename T>
   class Region
@@ -46,6 +46,21 @@ namespace Lucee
  * @param upper Upper limits of region.
  */
       Region(T lower[NDIM], T upper[NDIM]);
+
+/**
+ * Create a region object from an existing one.
+ *
+ * @param rgn Region object to copy.
+ */
+      Region(const Region<NDIM, T>& rgn);
+
+/**
+ * Copy a region object from an existing one.
+ *
+ * @param rgn Region object to copy.
+ * @return reference to copy.
+ */
+      Region<NDIM, T>& operator=(const Region<NDIM, T>& rgn);
 
 /**
  * Return lower bound of region in a given direction.
@@ -80,20 +95,14 @@ namespace Lucee
  *
  * @return lower bounds of box.
  */
-      FixedVector<NDIM, T> getLower() const 
-      { 
-        return FixedVector<NDIM, T>(lower);
-      }
+      FixedVector<NDIM, T> getLower() const { return lower; }
 
 /**
  * Get upper bounds of box.
  *
  * @return upper bounds of box.
  */
-      FixedVector<NDIM, T> getUpper() const
-      {
-        return FixedVector<NDIM, T>(upper);
-      }
+      FixedVector<NDIM, T> getUpper() const { return upper; }
 
 /**
  * Check if point is inside region.
@@ -102,35 +111,57 @@ namespace Lucee
  */
       bool isInside(T point[NDIM]) const;
 
+/**
+ * Extend the region by specified size on lower and upper sides of
+ * region. This region is not modified but a new region is returned.
+ *
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return extended region.
+ */
+      Region<NDIM, T> extend(T lowerExt[NDIM], T upperExt[NDIM]) const;
+
     private:
 /** Lower and upper coordinates of region */
-      T lower[NDIM], upper[NDIM];
+      Lucee::FixedVector<NDIM, T> lower, upper;
 /** Volume of region */
       T volume;
   };
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>::Region(T shape[NDIM])
+    : lower(0), upper(shape)
   {
     volume = 1;
     for (unsigned i=0; i<NDIM; ++i)
-    {
-      lower[i] = 0;
-      upper[i] = shape[i];
       volume *= shape[i];
-    }
   }
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>::Region(T lo[NDIM], T up[NDIM])
+    : lower(lo), upper(up)
   {
     volume = 1;
     for (unsigned i=0; i<NDIM; ++i)
-    {
-      lower[i] = lo[i];
-      upper[i] = up[i];
       volume *= (up[i]-lo[i]);
-    }
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>::Region(const Region<NDIM, T>& rgn)
+    : lower(rgn.lower), upper(rgn.upper), volume(rgn.volume)
+  {
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>&
+  Region<NDIM, T>::operator=(const Region<NDIM, T>& rgn)
+  {
+    if (&rgn == this)
+      return *this;    
+    lower = rgn.lower;
+    upper = rgn.upper;
+    volume = rgn.volume;
+    return *this;
   }
 
   template <unsigned NDIM, typename T>
@@ -142,6 +173,12 @@ namespace Lucee
       if ((point[i] < lower[i]) || (point[i] >= upper[i]))
         return false;
     return true;
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>
+  Region<NDIM, T>::extend(T lowerExt[NDIM], T upperExt[NDIM]) const
+  {
   }
 }
 
