@@ -244,6 +244,34 @@ namespace Lucee
  */
       T operator()(int i, int j, int k, int l) const;
 
+    protected:
+/**
+ * Create a new array without specifying its shape or start
+ * indices. Data is allocated but region is not specified.
+ *
+ * @param nelem Number of elemenets in array.
+ */
+      Array(unsigned nelem);
+
+/**
+ * Create a new array without specifying its shape or start
+ * indices. Data is not allocated, the supplied pointer is used
+ * instead. No checks are done to ensure that supplied pointer has
+ * sufficient space.
+ *
+ * @param nelem Number of elemenets in array.
+ * @param dataSpace Data space to re-use.
+ */
+      Array(unsigned nelem, T *dataSpace);
+
+/**
+ * Set array shape and start indices.
+ *
+ * @param shape Shape of array.
+ * @param start Start indices of array.
+ */
+      void setRegion(unsigned shape[NDIM], int start[NDIM]);
+
     private:
 /** Indexer into array */
       INDEXER indexer;
@@ -491,6 +519,33 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(unsigned nelem)
+    : len(nelem), data(new T[nelem]), useCount(new int(1))
+  {
+    LC_SET_CONTIGUOUS(traits);
+    LC_SET_ALLOC(traits);
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(unsigned nelem, T *dataSpace)
+    : len(nelem), data(dataSpace), useCount(new int(1))
+  {
+    LC_SET_CONTIGUOUS(traits);
+    LC_CLEAR_ALLOC(traits); // we did not allocate this array
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  void
+  Array<NDIM, T, INDEXER>::setRegion(unsigned shp[NDIM], int sta[NDIM])
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = shp[i];
+      start[i] = sta[i];
+    }
   }
 }
 
