@@ -10,6 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 add_library(lclib 
   LcCmdLineArgs.cpp
   LcExcept.cpp 
+  LcField.cpp
   LcKeyVal.cpp
   LcKeyValTree.cpp
   LcLinAlgebra.cpp

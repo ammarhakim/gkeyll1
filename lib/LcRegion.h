@@ -80,8 +80,8 @@ namespace Lucee
  *
  * @return lower bounds of box.
  */
-      FixedVector<NDIM, T> getLower() const
-      {
+      FixedVector<NDIM, T> getLower() const 
+      { 
         return FixedVector<NDIM, T>(lower);
       }
 
@@ -94,6 +94,13 @@ namespace Lucee
       {
         return FixedVector<NDIM, T>(upper);
       }
+
+/**
+ * Check if point is inside region.
+ *
+ * @param point Point to check.
+ */
+      bool isInside(T point[NDIM]) const;
 
     private:
 /** Lower and upper coordinates of region */
@@ -124,6 +131,17 @@ namespace Lucee
       upper[i] = up[i];
       volume *= (up[i]-lo[i]);
     }
+  }
+
+  template <unsigned NDIM, typename T>
+  bool
+  Region<NDIM, T>::isInside(T point[NDIM]) const
+  {
+    bool isIn = false;
+    for (unsigned i=0; i<NDIM; ++i)
+      if ((point[i] < lower[i]) || (point[i] >= upper[i]))
+        return false;
+    return true;
   }
 }
 
