@@ -132,6 +132,50 @@ test_4()
   }
 }
 
+void
+test_5()
+{
+  int lower[3] = {1, 1, 1};
+  int upper[3] = {10, 10, 10};
+  Lucee::Region<3, int> rgn(lower, upper);
+
+  int lowerExt[3] = {1, 1, 1};
+  int upperExt[3] = {3, 3, 3};
+  Lucee::Region<3, int> extRgn(rgn.extend(lowerExt, upperExt));
+  
+  for (unsigned i=0; i<3; ++i)
+  {
+    LC_ASSERT("Checking extended region", extRgn.getLower(i) == 0);
+    LC_ASSERT("Checking extended region", extRgn.getUpper(i) == 13);
+  }
+  LC_ASSERT("Checking extended region volume", extRgn.getVolume() == 13*13*13);
+}
+
+void
+test_6()
+{
+  int lower[2] = {1, 0};
+  int upper[2] = {10, 12};
+  Lucee::Region<2, int> rgn(lower, upper);
+
+  Lucee::Region<3, int> infRgn(rgn.inflate(-2, 10));
+  
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Checking inflated region lower bounds", 
+      infRgn.getLower(i) == rgn.getLower(i));
+    LC_ASSERT("Checking inflated region upper bounds", 
+      infRgn.getUpper(i) == rgn.getUpper(i));
+  }
+  LC_ASSERT("Checking inflated region lower bounds", 
+    infRgn.getLower(2) == -2);
+  LC_ASSERT("Checking inflated region upper bounds", 
+    infRgn.getUpper(2) == 10);
+
+  LC_ASSERT("Checking inflated region volume", 
+    infRgn.getVolume() == rgn.getVolume()*(10+2));
+}
+
 int
 main(void) 
 {
@@ -140,5 +184,7 @@ main(void)
   test_2();
   test_3();
   test_4();
+  test_5();
+  test_6();
   LC_END_TESTS;
 }

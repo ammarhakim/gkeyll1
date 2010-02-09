@@ -121,6 +121,16 @@ namespace Lucee
  */
       Region<NDIM, T> extend(T lowerExt[NDIM], T upperExt[NDIM]) const;
 
+/**
+ * Inflate the region by adding one additional dimension by setting
+ * lower and upper bounds of the dimension. The dimension is added as
+ * the final dimension. A new region object is returned.
+ *
+ * @param lo Lower bound for new dimension.
+ * @param up Upper bound for new dimension.
+ */
+      Region<NDIM+1, T> inflate(T lo, T up) const;
+
     private:
 /** Lower and upper coordinates of region */
       Lucee::FixedVector<NDIM, T> lower, upper;
@@ -179,6 +189,28 @@ namespace Lucee
   Region<NDIM, T>
   Region<NDIM, T>::extend(T lowerExt[NDIM], T upperExt[NDIM]) const
   {
+    int newLo[NDIM], newUp[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      newLo[i] = lower[i]-lowerExt[i];
+      newUp[i] = upper[i]+upperExt[i];
+    }
+    return Region<NDIM, T>(newLo, newUp);
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM+1, T>
+  Region<NDIM, T>::inflate(T lo, T up) const
+  {
+    int newLo[NDIM+1], newUp[NDIM+1];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      newLo[i] = lower[i];
+      newUp[i] = upper[i];
+    }
+    newLo[NDIM] = lo;
+    newUp[NDIM] = up;
+    return Region<NDIM+1, T>(newLo, newUp);
   }
 }
 

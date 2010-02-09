@@ -20,6 +20,7 @@
 #include <LcColMajorIndexer.h>
 #include <LcExcept.h>
 #include <LcFixedVector.h>
+#include <LcRegion.h>
 
 namespace Lucee
 {
@@ -58,6 +59,14 @@ namespace Lucee
  * @param init Initial value to assign to all elements.
  */
       Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);
+
+/**
+ * Construct array with specified index region.
+ *
+ * @param rgn Region indexed by array.
+ * @param init Initial value to assign to all elements.
+ */
+      Array(const Lucee::Region<NDIM, int>& rgn, const T& init=(T)0);
 
 /**
  * Create this array from the input array. The copy does not allocate
@@ -244,7 +253,22 @@ namespace Lucee
  */
       T operator()(int i, int j, int k, int l) const;
 
-    protected:
+    private:
+/** Indexer into array */
+      INDEXER indexer;
+/** Array traits stored as bit values */
+      unsigned traits;
+/** Shape of array */
+      unsigned shape[NDIM];
+/** Start index of array */
+      int start[NDIM];
+/** Total size of array */
+      unsigned len;
+/** Pointer to actual data */
+      T *data;
+/** Number of arrays pointing to this array */
+      mutable int* useCount;
+
 /**
  * Create a new array without specifying its shape or start
  * indices. Data is allocated but region is not specified.
@@ -271,22 +295,6 @@ namespace Lucee
  * @param start Start indices of array.
  */
       void setRegion(unsigned shape[NDIM], int start[NDIM]);
-
-    private:
-/** Indexer into array */
-      INDEXER indexer;
-/** Array traits stored as bit values */
-      unsigned traits;
-/** Shape of array */
-      unsigned shape[NDIM];
-/** Start index of array */
-      int start[NDIM];
-/** Total size of array */
-      unsigned len;
-/** Pointer to actual data */
-      T *data;
-/** Number of arrays pointing to this array */
-      mutable int* useCount;
   };
 
   template <unsigned NDIM, typename T, typename INDEXER>
@@ -303,6 +311,9 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
+    for (unsigned i=0; i<len; ++i)
+      data[i] = init;
+
     LC_SET_CONTIGUOUS(traits);
     LC_SET_ALLOC(traits);
   }
@@ -320,6 +331,28 @@ namespace Lucee
       len = len*shape[i];
     }
     data = new T[len];
+    for (unsigned i=0; i<len; ++i)
+      data[i] = init;
+
+    LC_SET_CONTIGUOUS(traits);
+    LC_SET_ALLOC(traits);
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(const Lucee::Region<NDIM, int>& rgn, const T& init)
+    : indexer(rgn), traits(0), useCount(new int(1))
+  {
+    len = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = rgn.getShape(i);
+      start[i] = rgn.getLower(i);
+      len = len*shape[i];
+    }
+    data = new T[len];
+    for (unsigned i=0; i<len; ++i)
+      data[i] = init;
+
     LC_SET_CONTIGUOUS(traits);
     LC_SET_ALLOC(traits);
   }
