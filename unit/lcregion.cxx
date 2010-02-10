@@ -193,6 +193,26 @@ test_7()
   LC_ASSERT("Checking extended box", expRgn.getUpper(1) == 12);
 }
 
+void
+test_8()
+{
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox(lower, upper);
+
+  LC_ASSERT("Testing self containment", ibox.contains(ibox) == true);
+
+  int lo1[2] = {3, 4};
+  int up1[2] = {10, 10};
+  Lucee::Region<2, int> ibox1(lo1, up1);
+  //LC_ASSERT("Testing self containment", ibox.contains(ibox1) == true);
+
+  int lo2[2] = {3, 4};
+  int up2[2] = {14, 10};
+  Lucee::Region<2, int> ibox2(lo2, up2);
+  LC_ASSERT("Testing self containment", ibox.contains(ibox2) == false);
+}
+
 int
 main(void) 
 {
@@ -204,5 +224,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }

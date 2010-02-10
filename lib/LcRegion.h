@@ -19,6 +19,8 @@
 // lucee includes
 #include <LcFixedVector.h>
 
+#include <iostream>
+
 namespace Lucee
 {
 /**
