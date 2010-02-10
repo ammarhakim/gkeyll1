@@ -66,6 +66,15 @@ test_1()
   for (int i=arr2.getLower(0); i<arr2.getUpper(0); ++i)
     for (int j=arr2.getLower(1); j<arr2.getUpper(1); ++j)
       LC_ASSERT("Testing is setting all values worked", arr2(i,j)==10.0);
+
+  Lucee::Region<2, int> rgn = arr2.getRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing region returned by array",
+      rgn.getLower(i) == start[i]);
+    LC_ASSERT("Testing region returned by array",
+      rgn.getUpper(i) == (start[i]+shape[i]));
+  }
 }
 
 void
