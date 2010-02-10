@@ -57,7 +57,8 @@ by. For example::
 will create a new box ``expRgn`` :math:`[0,11) \times [0,12)`.
 
 Regions can be inflated, i.e. their dimension can be increased by one
-and their lower and upper bound specified. For example::
+and the lower and upper bound of the newly added dimension
+specified. For example::
 
   int lower[2] = {1,2};
   int upper[2] = {10, 10};
@@ -67,6 +68,8 @@ and their lower and upper bound specified. For example::
 
 will create a 3-dimensional region :math:`[1,10) \times [2,10) \times
 [0,3)` from a 2-dimensional region :math:`[1,10) \times [2,10)`.
+
+Intersection of two regions can also be computed. For example::
 
 ``Lucee::CmdLineArgs``: Parsing command line arguments
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++

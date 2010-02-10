@@ -205,7 +205,7 @@ test_8()
   int lo1[2] = {3, 4};
   int up1[2] = {10, 10};
   Lucee::Region<2, int> ibox1(lo1, up1);
-  //LC_ASSERT("Testing self containment", ibox.contains(ibox1) == true);
+  LC_ASSERT("Testing self containment", ibox.contains(ibox1) == true);
 
   int lo2[2] = {3, 4};
   int up2[2] = {14, 10};
