@@ -19,17 +19,15 @@
 namespace Lucee
 {
   template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& idxRgn, unsigned nc, const T& init)
-    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(idxRgn.getVolume()*nc)
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
+      numComponents(nc), rgn(rgn)
   {
-  }
-
-  template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& idxRgn,
-    unsigned lowerGhost[NDIM], unsigned upperGhost[NDIM],
-    unsigned nc, const T& init)
-    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(idxRgn.getVolume()*nc)
-  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = 0;
+      upperGhost[i] = 0;
+    }
   }
 
 // instantiations
