@@ -66,3 +66,7 @@ target_link_libraries(lcluainterp lclib lcloki lclua)
 # lcregion
 add_executable(lcregion lcregion.cxx)
 target_link_libraries(lcregion lclib lcloki lclua)
+
+# lcfield
+add_executable(lcfield lcfield.cxx)
+target_link_libraries(lcfield lclib lcloki lclua)
