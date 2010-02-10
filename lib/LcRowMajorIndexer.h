@@ -36,7 +36,7 @@ namespace Lucee
  * @param shp Shape of space.
  * @param sta Starting index.
  */
-      RowMajorIndexerBase(unsigned shp[NDIM], int sta[NDIM])
+      RowMajorIndexerBase(const unsigned shp[NDIM], const int sta[NDIM])
       {
         createRowMajorIndexer(shp, sta);
       }
@@ -141,7 +141,7 @@ namespace Lucee
  * @param shape Shape of region to index.
  * @param start Start index.
  */
-      void createRowMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+      void createRowMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
       {
         for (unsigned i=0; i<NDIM; ++i)
         {
@@ -173,7 +173,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      RowMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+      RowMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
         : RowMajorIndexerBase<NDIM>(shape, start)
       {
       }
@@ -200,7 +200,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      RowMajorIndexer(unsigned shape[1], int start[1])
+      RowMajorIndexer(const unsigned shape[1], const int start[1])
         : RowMajorIndexerBase<1>(shape, start)
       {
       }
@@ -238,7 +238,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      RowMajorIndexer(unsigned shape[2], int start[2])
+      RowMajorIndexer(const unsigned shape[2], const int start[2])
         : RowMajorIndexerBase<2>(shape, start)
       {
       }
@@ -277,7 +277,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      RowMajorIndexer(unsigned shape[3], int start[3])
+      RowMajorIndexer(const unsigned shape[3], const int start[3])
         : RowMajorIndexerBase<3>(shape, start)
       {
       }
@@ -317,7 +317,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      RowMajorIndexer(unsigned shape[4], int start[4])
+      RowMajorIndexer(const unsigned shape[4], const int start[4])
         : RowMajorIndexerBase<4>(shape, start)
       {
       }

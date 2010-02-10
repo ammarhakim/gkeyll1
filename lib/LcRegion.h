@@ -111,7 +111,7 @@ namespace Lucee
  *
  * @param point Point to check.
  */
-      bool isInside(T point[NDIM]) const;
+      bool isInside(const T point[NDIM]) const;
 
 /**
  * Return intersection of supplied region with this one.
@@ -201,7 +201,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   bool
-  Region<NDIM, T>::isInside(T point[NDIM]) const
+  Region<NDIM, T>::isInside(const T point[NDIM]) const
   {
     bool isIn = false;
     for (unsigned i=0; i<NDIM; ++i)
@@ -231,17 +231,8 @@ namespace Lucee
   bool
   Region<NDIM, T>::contains(const Region<NDIM, T>& rgn) const
   {
-    T lo[NDIM], up[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-// lower is max of regions' lower coordinates
-      lo[i] = lower[i] > rgn.lower[i] ? lower[i] : rgn.lower[i];
-// upper is min of regions' upper coordinates
-      up[i] = upper[i] < rgn.upper[i] ? upper[i] : rgn.upper[i];
-      if (up[i] <= lo[i])
-        return false;
-    }
-    return true;
+    return
+      isInside(rgn.getLower()) && isInside(rgn.getUpper());
   }
 
   template <unsigned NDIM, typename T>
