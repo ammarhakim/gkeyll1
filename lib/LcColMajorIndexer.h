@@ -36,7 +36,7 @@ namespace Lucee
  * @param shp Shape of space.
  * @param sta Starting index.
  */
-      ColMajorIndexerBase(unsigned shp[NDIM], int sta[NDIM])
+      ColMajorIndexerBase(const unsigned shp[NDIM], const int sta[NDIM])
       {
         createColMajorIndexer(shp, sta);
       }
@@ -117,7 +117,7 @@ namespace Lucee
  *
  * @return Linear index.
  */
-      int getGenIndex(int idx[NDIM]) const
+      int getGenIndex(const int idx[NDIM]) const
       {
         int sum = ai[0]+idx[0];
         for (unsigned i=2; i<NDIM+1; ++i)
@@ -141,7 +141,7 @@ namespace Lucee
  * @param shape Shape of region to index.
  * @param start Start index.
  */
-      void createColMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+      void createColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
       {
         for (unsigned i=0; i<NDIM; ++i)
         {
@@ -173,7 +173,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(unsigned shape[NDIM], int start[NDIM])
+      ColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
         : ColMajorIndexerBase<NDIM>(shape, start)
       {
       }
@@ -200,7 +200,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(unsigned shape[1], int start[1])
+      ColMajorIndexer(const unsigned shape[1], const int start[1])
         : ColMajorIndexerBase<1>(shape, start)
       {
       }
@@ -238,7 +238,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(unsigned shape[2], int start[2])
+      ColMajorIndexer(const unsigned shape[2], const int start[2])
         : ColMajorIndexerBase<2>(shape, start)
       {
       }
@@ -277,7 +277,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(unsigned shape[3], int start[3])
+      ColMajorIndexer(const unsigned shape[3], const int start[3])
         : ColMajorIndexerBase<3>(shape, start)
       {
       }
@@ -317,7 +317,7 @@ namespace Lucee
  * @param start Starting indices.
  * @param shape Shape of space.
  */
-      ColMajorIndexer(unsigned shape[4], int start[4])
+      ColMajorIndexer(const unsigned shape[4], const int start[4])
         : ColMajorIndexerBase<4>(shape, start)
       {
       }

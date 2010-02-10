@@ -48,8 +48,8 @@ namespace Lucee
  *
  * @param shape Shape of the array.
  * @param init Initial value to assign to all elements.
- */      
-      Array(unsigned shape[NDIM], const T& init=(T)0);
+ */
+      Array(const unsigned shape[NDIM], const T& init=(T)0);
 
 /**
  * Construct array with specified shape and start indices.
@@ -58,7 +58,7 @@ namespace Lucee
  * @param start Start indices for the array.
  * @param init Initial value to assign to all elements.
  */
-      Array(unsigned shape[NDIM], int start[NDIM], const T& init=(T)0);
+      Array(const unsigned shape[NDIM], const int start[NDIM], const T& init=(T)0);
 
 /**
  * Construct array with specified index region.
@@ -183,7 +183,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Reference to value at index.
  */
-      T& operator()(int idx[NDIM]);
+      T& operator()(const int idx[NDIM]);
 
 /**
  * Accessor function for array.
@@ -191,7 +191,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Value at index.
  */
-      T operator()(int idx[NDIM]) const;
+      T operator()(const int idx[NDIM]) const;
 
 /**
  * Accessor function for 1D array.
@@ -287,7 +287,7 @@ namespace Lucee
   };
   
   template <unsigned NDIM, typename T, typename INDEXER>
-  Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
+  Array<NDIM, T, INDEXER>::Array(const unsigned shp[NDIM], const T& init)
     : indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
       traits(0),
       useCount(new int(1))
@@ -308,7 +308,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
-  Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], int sta[NDIM], const T& init)
+  Array<NDIM, T, INDEXER>::Array(const unsigned shp[NDIM], const int sta[NDIM], const T& init)
     : indexer(shp, sta), traits(0),
       useCount(new int(1))
   {
@@ -492,14 +492,14 @@ namespace Lucee
 
   template <unsigned NDIM, typename T, typename INDEXER>
   T&
-  Array<NDIM, T, INDEXER>::operator()(int idx[NDIM])
+  Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM])
   {
     return data[indexer.getGenIndex(idx)];
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
   T 
-  Array<NDIM, T, INDEXER>::operator()(int idx[NDIM]) const
+  Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM]) const
   {
     return data[indexer.getGenIndex(idx)];
   }
