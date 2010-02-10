@@ -157,9 +157,25 @@ namespace Lucee
 /**
  * Return reference to the first element in array.
  *
- * @param Reference to first element in array.
+ * @return Reference to first element in array.
  */
       T& first();
+
+/**
+ * Region indexed by array.
+ *
+ * @return region indexed by array.
+ */
+      Lucee::Region<NDIM, int> getRegion() const;
+
+/**
+ * Return a slice into the array. The returned array shares the data
+ * with this array.
+ *
+ * @param rgn Region of the slice.
+ * @return Sliced array.
+ */
+      Array<NDIM, T, INDEXER> getSlice(const Lucee::Region<NDIM, int>& rgn);
 
 /**
  * Accessor function for array.
@@ -268,35 +284,8 @@ namespace Lucee
       T *data;
 /** Number of arrays pointing to this array */
       mutable int* useCount;
-
-/**
- * Create a new array without specifying its shape or start
- * indices. Data is allocated but region is not specified.
- *
- * @param nelem Number of elemenets in array.
- */
-      Array(unsigned nelem);
-
-/**
- * Create a new array without specifying its shape or start
- * indices. Data is not allocated, the supplied pointer is used
- * instead. No checks are done to ensure that supplied pointer has
- * sufficient space.
- *
- * @param nelem Number of elemenets in array.
- * @param dataSpace Data space to re-use.
- */
-      Array(unsigned nelem, T *dataSpace);
-
-/**
- * Set array shape and start indices.
- *
- * @param shape Shape of array.
- * @param start Start indices of array.
- */
-      void setRegion(unsigned shape[NDIM], int start[NDIM]);
   };
-
+  
   template <unsigned NDIM, typename T, typename INDEXER>
   Array<NDIM, T, INDEXER>::Array(unsigned shp[NDIM], const T& init)
     : indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
@@ -485,6 +474,23 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, typename INDEXER>
+  Lucee::Region<NDIM, int>
+  Array<NDIM, T, INDEXER>::getRegion() const
+  {
+    int upper[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+      upper[i] = start[i]+shape[i];
+    return Lucee::Region<NDIM, int>(start, upper);
+  }
+
+//   template <unsigned NDIM, typename T, typename INDEXER>
+//   Array<NDIM, T, INDEXER>
+//   Array<NDIM, T, INDEXER>::getSlice(const Lucee::Region<NDIM, int>& rgn)
+//   {
+    
+//   }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
   T&
   Array<NDIM, T, INDEXER>::operator()(int idx[NDIM])
   {
@@ -552,33 +558,6 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
-  }
-
-  template <unsigned NDIM, typename T, typename INDEXER>
-  Array<NDIM, T, INDEXER>::Array(unsigned nelem)
-    : len(nelem), data(new T[nelem]), useCount(new int(1))
-  {
-    LC_SET_CONTIGUOUS(traits);
-    LC_SET_ALLOC(traits);
-  }
-
-  template <unsigned NDIM, typename T, typename INDEXER>
-  Array<NDIM, T, INDEXER>::Array(unsigned nelem, T *dataSpace)
-    : len(nelem), data(dataSpace), useCount(new int(1))
-  {
-    LC_SET_CONTIGUOUS(traits);
-    LC_CLEAR_ALLOC(traits); // we did not allocate this array
-  }
-
-  template <unsigned NDIM, typename T, typename INDEXER>
-  void
-  Array<NDIM, T, INDEXER>::setRegion(unsigned shp[NDIM], int sta[NDIM])
-  {
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      shape[i] = shp[i];
-      start[i] = sta[i];
-    }
   }
 }
 

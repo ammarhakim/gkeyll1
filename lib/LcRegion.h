@@ -37,7 +37,7 @@ namespace Lucee
  *
  * @param shape Shape of region.
  */
-      Region(T shape[NDIM]);
+      Region(const T shape[NDIM]);
 
 /**
  * Create a region object with given lower and upper bounds.
@@ -45,7 +45,7 @@ namespace Lucee
  * @param lower Lower limits of region.
  * @param upper Upper limits of region.
  */
-      Region(T lower[NDIM], T upper[NDIM]);
+      Region(const T lower[NDIM], const T upper[NDIM]);
 
 /**
  * Create a region object from an existing one.
@@ -112,6 +112,23 @@ namespace Lucee
       bool isInside(T point[NDIM]) const;
 
 /**
+ * Return intersection of supplied region with this one.
+ *
+ * @param rgn Region to intersect.
+ * @return Intersected region.
+ */
+      Region<NDIM, T> intersect(const Region<NDIM, T>& rgn) const;
+
+/**
+ * Check if supplied region is inside this region. Tests true for self
+ * containment.
+ *
+ * @param rgn Region to check.
+ * @return True if this box contains rgn, false otherwise.
+ */
+      bool contains(const Region<NDIM, T>& rgn) const;
+
+/**
  * Extend the region by specified size on lower and upper sides of
  * region. This region is not modified but a new region is returned.
  *
@@ -132,6 +149,12 @@ namespace Lucee
       Region<NDIM+1, T> inflate(T lo, T up) const;
 
     private:
+/**
+ * Creates an empty box, i.e. with 0 volume and same lower and upper
+ * bounds.
+ */
+      Region();
+
 /** Lower and upper coordinates of region */
       Lucee::FixedVector<NDIM, T> lower, upper;
 /** Volume of region */
@@ -139,7 +162,7 @@ namespace Lucee
   };
 
   template <unsigned NDIM, typename T>
-  Region<NDIM, T>::Region(T shape[NDIM])
+  Region<NDIM, T>::Region(const T shape[NDIM])
     : lower(0), upper(shape)
   {
     volume = 1;
@@ -148,7 +171,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
-  Region<NDIM, T>::Region(T lo[NDIM], T up[NDIM])
+  Region<NDIM, T>::Region(const T lo[NDIM], const T up[NDIM])
     : lower(lo), upper(up)
   {
     volume = 1;
@@ -187,6 +210,40 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>
+  Region<NDIM, T>::intersect(const Region<NDIM, T>& rgn) const
+  {
+    T lo[NDIM], up[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+// lower is max of regions' lower coordinates
+      lo[i] = lower[i] > rgn.lower[i] ? lower[i] : rgn.lower[i];
+// upper is min of regions' upper coordinates
+      up[i] = upper[i] < rgn.upper[i] ? upper[i] : rgn.upper[i];
+      if (up[i] <= lo[i])
+        return Region<NDIM, T>();
+    }
+    return Region<NDIM, T>(lo, up);
+  }
+
+  template <unsigned NDIM, typename T>
+  bool
+  Region<NDIM, T>::contains(const Region<NDIM, T>& rgn) const
+  {
+    T lo[NDIM], up[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+// lower is max of regions' lower coordinates
+      lo[i] = lower[i] > rgn.lower[i] ? lower[i] : rgn.lower[i];
+// upper is min of regions' upper coordinates
+      up[i] = upper[i] < rgn.upper[i] ? upper[i] : rgn.upper[i];
+      if (up[i] <= lo[i])
+        return false;
+    }
+    return true;
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>
   Region<NDIM, T>::extend(T lowerExt[NDIM], T upperExt[NDIM]) const
   {
     int newLo[NDIM], newUp[NDIM];
@@ -211,6 +268,12 @@ namespace Lucee
     newLo[NDIM] = lo;
     newUp[NDIM] = up;
     return Region<NDIM+1, T>(newLo, newUp);
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>::Region()
+    : lower(0), upper(0), volume(0)
+  {
   }
 }
 

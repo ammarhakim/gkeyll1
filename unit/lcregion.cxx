@@ -176,6 +176,23 @@ test_6()
     infRgn.getVolume() == rgn.getVolume()*(10+2));
 }
 
+void
+test_7()
+{
+  int lower[2] = {1,2};
+  int upper[2] = {10, 10};
+  Lucee::Region<2, int> rgn(lower, upper);
+
+  int lowerExp[2] = {1, 2};
+  int upperExp[2] = {1, 2};
+  Lucee::Region<2, int> expRgn = rgn.extend(lowerExp, upperExp);
+
+  LC_ASSERT("Checking extended box", expRgn.getLower(0) == 0);
+  LC_ASSERT("Checking extended box", expRgn.getLower(1) == 0);
+  LC_ASSERT("Checking extended box", expRgn.getUpper(0) == 11);
+  LC_ASSERT("Checking extended box", expRgn.getUpper(1) == 12);
+}
+
 int
 main(void) 
 {
@@ -186,5 +203,6 @@ main(void)
   test_4();
   test_5();
   test_6();
+  test_7();
   LC_END_TESTS;
 }

@@ -55,9 +55,9 @@ namespace Lucee
       unsigned getNumComponents() const { return numComponents; }
 
 /**
- * Indexed region.
+ * Region indexed by field.
  *
- * @return indexed region.
+ * @return region indexed by field.
  */
       Lucee::Region<NDIM, int> getRegion() const { return rgn; }
 
