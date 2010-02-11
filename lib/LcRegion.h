@@ -231,8 +231,14 @@ namespace Lucee
   bool
   Region<NDIM, T>::contains(const Region<NDIM, T>& rgn) const
   {
-    return
-      isInside(rgn.getLower()) && isInside(rgn.getUpper());
+    bool isIn = false;
+    for (unsigned i=0; i<NDIM; ++i)
+      if ((rgn.lower[i] < lower[i]) || (rgn.lower[i] >= upper[i]))
+        return false;
+    for (unsigned i=0; i<NDIM; ++i)
+      if ((rgn.upper[i] < lower[i]) || (rgn.upper[i] > upper[i]))
+        return false;
+    return true;
   }
 
   template <unsigned NDIM, typename T>
