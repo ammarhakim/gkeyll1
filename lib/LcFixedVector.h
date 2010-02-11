@@ -90,7 +90,7 @@ namespace Lucee
 /**
  * Cast to a const array.
  */
-      operator const T*() { return data; }
+//      operator const T[NELEM]() { return data; }
 
 /**
  * Return value of vector at location.
