@@ -138,7 +138,7 @@ namespace Lucee
  * @param upperExt Lenght of extension along upper end in each direction.
  * @return extended region.
  */
-      Region<NDIM, T> extend(T lowerExt[NDIM], T upperExt[NDIM]) const;
+      Region<NDIM, T> extend(const T lowerExt[NDIM], const T upperExt[NDIM]) const;
 
 /**
  * Inflate the region by adding one additional dimension by setting
@@ -243,7 +243,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>
-  Region<NDIM, T>::extend(T lowerExt[NDIM], T upperExt[NDIM]) const
+  Region<NDIM, T>::extend(const T lowerExt[NDIM], const T upperExt[NDIM]) const
   {
     int newLo[NDIM], newUp[NDIM];
     for (unsigned i=0; i<NDIM; ++i)
