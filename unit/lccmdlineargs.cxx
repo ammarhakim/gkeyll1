@@ -30,15 +30,16 @@ main(void)
   //cmd.showHelp();
 
 // test it
-  char *argv1[] = {
-    "lccmdlineargs",
-    "-r",
-    "-xml",
-    "-i",
-    "input-file",
-    "-o",
+  char *argv1[] = 
+    {
+      "lccmdlineargs",
+      "-r",
+      "-xml",
+      "-i",
+      "input-file",
+      "-o",
     "output-file"
-  };
+    };
   cmd.parse(7, argv1);
 
   LC_ASSERT("Checking for switch", cmd.hasSwitch("r") == true);
@@ -48,12 +49,13 @@ main(void)
   LC_ASSERT("Checking for argument value", cmd.getArg("o") == "output-file");
 
 // test it
-  char *argv2[] = {
-    "lccmdlineargs",
-    "-xml",
-    "-i",
-    "input-file",
-  };
+  char *argv2[] = 
+    {
+      "lccmdlineargs",
+      "-xml",
+      "-i",
+      "input-file",
+    };
   cmd.parse(4, argv2);
 
   LC_ASSERT("Checking for switch", cmd.hasSwitch("r") == false);
@@ -64,15 +66,16 @@ main(void)
   LC_RAISES("Checking if exception is thrown", cmd.getArg("o"), Lucee::Except);
 
 // test it
-  char *argv3[] = {
-    "lccmdlineargs",
-    "-x",
-    "-y",
-    "unknown",
-    "-xml",
-    "-i",
-    "input-file"
-  };
+  char *argv3[] = 
+    {
+      "lccmdlineargs",
+      "-x",
+      "-y",
+      "unknown",
+      "-xml",
+      "-i",
+      "input-file"
+    };
   cmd.parse(7, argv3);
 
   LC_ASSERT("Checking for switch", cmd.hasSwitch("r") == false);
@@ -83,13 +86,14 @@ main(void)
   LC_RAISES("Checking if exception is thrown", cmd.getArg("o"), Lucee::Except);
 
 // test it
-  char *argv4[] = {
-    "lccmdlineargs",
-    "-xml",
-    "file-1",
-    "file-2",
-    "file-3"
-  };
+  char *argv4[] = 
+    {
+      "lccmdlineargs",
+      "-xml",
+      "file-1",
+      "file-2",
+      "file-3"
+    };
   cmd.parse(5, argv4);
   
 // fetch extra arguments

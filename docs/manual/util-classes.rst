@@ -71,6 +71,19 @@ will create a 3-dimensional region :math:`[1,10) \times [2,10) \times
 
 Intersection of two regions can also be computed. For example::
 
+  int lo1[2] = {0, 0};
+  int up1[2] = {10, 10};
+  Lucee::Region<2, int> ibox1(lo3, up3);
+
+  int lo2[2] = {5, 5};
+  int up2[2] = {15, 15};
+  Lucee::Region<2, int> ibox2(lo4, up4);
+
+  Lucee::Region<2, int> ibox12 = ibox1.intersect(ibox2);
+
+This will create the region :math:`[5,10)\times[5,10)`.
+
+
 ``Lucee::CmdLineArgs``: Parsing command line arguments
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -84,7 +97,8 @@ command line like::
 
 the following code fragment can be used::
 
-  void main(int argc, char *agrv[]) {
+  void main(int argc, char *agrv[]) 
+  {
     Lucee::CmdLineArgs cmd;
     // set up parser with expected values and help string
     cmd.addSwitch("xml", "Set to output XML");
@@ -95,7 +109,8 @@ the following code fragment can be used::
     cmd.parse(argc, argv);
 
     // check if "xml" switch was specified
-    if (cmd.hasSwitch("xml")) {
+    if (cmd.hasSwitch("xml")) 
+    {
       // XML specific code
     }
  
