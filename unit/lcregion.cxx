@@ -205,12 +205,30 @@ test_8()
   int lo1[2] = {3, 4};
   int up1[2] = {10, 10};
   Lucee::Region<2, int> ibox1(lo1, up1);
-  LC_ASSERT("Testing self containment", ibox.contains(ibox1) == true);
+  LC_ASSERT("Testing containment", ibox.contains(ibox1) == true);
 
   int lo2[2] = {3, 4};
   int up2[2] = {14, 10};
   Lucee::Region<2, int> ibox2(lo2, up2);
-  LC_ASSERT("Testing self containment", ibox.contains(ibox2) == false);
+  LC_ASSERT("Testing containment", ibox.contains(ibox2) == false);
+
+  int lo3[2] = {0, 0};
+  int up3[2] = {10, 10};
+  Lucee::Region<2, int> ibox3(lo3, up3);
+
+  int lo4[2] = {5, 5};
+  int up4[2] = {15, 15};
+  Lucee::Region<2, int> ibox4(lo4, up4);
+
+  Lucee::Region<2, int> ibox34 = ibox3.intersect(ibox4);
+
+  LC_ASSERT("Checking intersected box", ibox34.getLower(0) == 5);
+  LC_ASSERT("Checking intersected box", ibox34.getLower(1) == 5);
+
+  LC_ASSERT("Checking intersected box", ibox34.getUpper(0) == 10);
+  LC_ASSERT("Checking intersected box", ibox34.getUpper(1) == 10);
+
+  LC_ASSERT("Checking volume of intersection", ibox34.getVolume() == 25);
 }
 
 int
