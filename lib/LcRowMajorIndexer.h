@@ -117,7 +117,7 @@ namespace Lucee
  *
  * @return Linear index.
  */
-      int getGenIndex(int idx[NDIM]) const
+      int getGenIndex(const int idx[NDIM]) const
       {
         int sum = ai[0];
         for (unsigned i=1; i<NDIM+1; ++i)
