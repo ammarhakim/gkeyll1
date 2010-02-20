@@ -33,3 +33,8 @@ add_subdirectory(lib)
 # Build all unit tests
 add_subdirectory(unit)
 
+# Add individual tests
+ENABLE_TESTING()
+# lcfield
+add_test(lcfield unit/lcfield)
+
