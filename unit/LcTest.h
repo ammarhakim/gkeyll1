@@ -121,13 +121,16 @@ static LcTestCounter __tc;
     } while (0)
 
 #define LC_END_TESTS                                                    \
+    int __tflag;                                                        \
     do {                                                                \
       std::cout << "PASSED = " << __tc.passed <<  ". FAILED = " << __tc.failed << std::endl; \
       __tc.showFailedTests();                                           \
+      __tflag = __tc.failed > 0 ? 1 : 0;                                \
       __tc.passed = 0;                                                  \
       __tc.failed = 0;                                                  \
       __tc.clearFailedTests();                                          \
-    } while (0)
+    } while (0);                                                        \
+    return __tflag;
 
 /** 
  * The following macro can be used for running test cases. To test
