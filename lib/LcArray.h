@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcColMajorIndexer.h>
+#include <LcRowMajorIndexer.h>
 #include <LcExcept.h>
 #include <LcFixedVector.h>
 #include <LcRegion.h>
@@ -39,7 +39,7 @@ namespace Lucee
 #define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
 #define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
-  template <unsigned NDIM, typename T, typename INDEXER = Lucee::ColMajorIndexer<NDIM> >
+  template <unsigned NDIM, typename T, typename INDEXER = Lucee::RowMajorIndexer<NDIM> >
   class Array
   {
     public:

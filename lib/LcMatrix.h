@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcArray.h>
+#include <LcColMajorIndexer.h>
 #include <LcVector.h>
 
 namespace Lucee
