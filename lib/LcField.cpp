@@ -31,10 +31,23 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::operator=(const T& val)
+  {
+// simply call base class assignment operator    
+    Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >::operator=(val);
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
   Lucee::FieldPtr<T>
   Field<NDIM, T>::createPtr()
   {
-    return Lucee::FieldPtr<T>(numComponents, 0);
+    int start[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+      start[i] = rgn.getLower(i);
+    unsigned loc = rgnIdx.getGenIndex(start);
+    return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
   }
 
 // instantiations

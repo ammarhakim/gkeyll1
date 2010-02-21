@@ -19,6 +19,25 @@ namespace Lucee
   {
   }
 
+  template <typename T>
+  FieldPtr<T>::FieldPtr(const FieldPtr<T>& ptr)
+  {
+    numComponents = ptr.numComponents;
+    data = ptr.data;
+  }
+
+  template <typename T>
+  FieldPtr<T>&
+  FieldPtr<T>::operator=(const FieldPtr<T>& ptr)
+  {
+    if (this == &ptr)
+      return *this;
+
+    numComponents = ptr.numComponents;
+    data = ptr.data;
+    return *this;
+  }
+
 // instantiations
   template class Lucee::FieldPtr<int>;
   template class Lucee::FieldPtr<float>;
