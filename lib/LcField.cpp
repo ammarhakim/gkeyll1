@@ -18,37 +18,6 @@
 
 namespace Lucee
 {
-  template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
-    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn)
-  {
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      lowerGhost[i] = 0;
-      upperGhost[i] = 0;
-    }
-  }
-
-  template <unsigned NDIM, typename T>
-  Field<NDIM, T>&
-  Field<NDIM, T>::operator=(const T& val)
-  {
-// simply call base class assignment operator    
-    Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >::operator=(val);
-    return *this;
-  }
-
-  template <unsigned NDIM, typename T>
-  Lucee::FieldPtr<T>
-  Field<NDIM, T>::createPtr()
-  {
-    int start[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-      start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenIndex(start);
-    return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
-  }
 
 // instantiations
   template class Lucee::Field<1, int>;

@@ -67,6 +67,24 @@ test_2()
   LC_ASSERT("Testing if assignment worked", ptr[0] == 1.5);
   LC_ASSERT("Testing if assignment worked", ptr[1] == 2.5);
   LC_ASSERT("Testing if assignment worked", ptr[2] == 3.5);
+
+  LC_ASSERT("Testing if assignment worked", elcField(0,0,0) == 1.5);
+  LC_ASSERT("Testing if assignment worked", elcField(0,0,1) == 2.5);
+  LC_ASSERT("Testing if assignment worked", elcField(0,0,2) == 3.5);
+
+  elcField.setPtr(ptr, 5, 5);
+  ptr[0] = 1.5;
+  ptr[1] = 2.5;
+  ptr[2] = 3.5;
+
+// see if setting worked
+  LC_ASSERT("Testing if assignment worked", ptr[0] == 1.5);
+  LC_ASSERT("Testing if assignment worked", ptr[1] == 2.5);
+  LC_ASSERT("Testing if assignment worked", ptr[2] == 3.5);
+
+  LC_ASSERT("Testing if assignment worked", elcField(5,5,0) == 1.5);
+  LC_ASSERT("Testing if assignment worked", elcField(5,5,1) == 2.5);
+  LC_ASSERT("Testing if assignment worked", elcField(5,5,2) == 3.5);
 }
 
 int
