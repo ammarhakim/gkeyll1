@@ -269,6 +269,15 @@ namespace Lucee
  */
       T operator()(int i, int j, int k, int l) const;
 
+    protected:
+/**
+ * Returns reference to location in underlying memory space.
+ *
+ * @param loc Location into memory space.
+ * @return reference to data.
+ */
+      T& getRefToLoc(unsigned loc);
+
     private:
 /** Indexer into array */
       INDEXER indexer;
@@ -558,6 +567,13 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  T& 
+  Array<NDIM, T, INDEXER>::getRefToLoc(unsigned loc)
+  {
+    return data[loc];
   }
 }
 

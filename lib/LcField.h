@@ -48,6 +48,14 @@ namespace Lucee
       Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init=(T)0);
 
 /**
+ * Assign field to given value.
+ *
+ * @param val Value to assign.
+ * @return reference to this field.
+ */
+      Field<NDIM, T> & operator=(const T& val);
+
+/**
  * Number of components per index location.
  *
  * @return number of components.

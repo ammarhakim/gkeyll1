@@ -34,6 +34,20 @@ namespace Lucee
       template <unsigned NDIM, typename TT> friend class Lucee::Field;
 
 /**
+ * Copy from a given field pointer.
+ *
+ * @param ptr Pointer to copy from.
+ */
+      FieldPtr(const FieldPtr<T>& ptr);
+
+/**
+ * Assign from a given field pointer.
+ *
+ * @param ptr Pointer to copy from.
+ */
+      FieldPtr& operator=(const FieldPtr<T>& ptr);
+
+/**
  * Return element in field data.
  *
  * @param n Element index to fetch.

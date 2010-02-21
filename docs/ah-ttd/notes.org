@@ -93,7 +93,7 @@
 
 * Lucee Notes
 
-** 27th January 2010: Transition to CMake and documentation
+** DONE 27th January 2010: Transition to CMake and documentation
 
    Scons is a crappy build system. So transition to CMake. Also,
    rename the .cc files to .cpp.
