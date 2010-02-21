@@ -74,6 +74,41 @@ namespace Lucee
  */
       Lucee::FieldPtr<T> createPtr();
 
+/**
+ * Set pointer to given (i) 1D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ */
+      void setPtr(Lucee::FieldPtr<T>& ptr, int i);
+
+/**
+ * Set pointer to given (i,j) 2D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ * @param j Location to set to.
+ */
+      void setPtr(Lucee::FieldPtr<T>& ptr, int i, int j);
+
+/**
+ * Set pointer to given (i,j,k) 3D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ * @param j Location to set to.
+ * @param k Location to set to.
+ */
+      void setPtr(Lucee::FieldPtr<T>& ptr, int i, int j, int k);
+
+/**
+ * Set pointer to given N-dimensional location.
+ *
+ * @param ptr Pointer to set.
+ * @param idx Location to set to.
+ */
+      void setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM]);
+
     private:
 /** Number of components */
       unsigned numComponents;
@@ -84,6 +119,66 @@ namespace Lucee
 /** Lower and upper ghost indices */
       unsigned lowerGhost[NDIM], upperGhost[NDIM];
   };
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
+      numComponents(nc), rgn(rgn), rgnIdx(rgn)
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = 0;
+      upperGhost[i] = 0;
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::operator=(const T& val)
+  {
+// simply call base class assignment operator    
+    Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >::operator=(val);
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
+  Lucee::FieldPtr<T>
+  Field<NDIM, T>::createPtr()
+  {
+    int start[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+      start[i] = rgn.getLower(i);
+    unsigned loc = rgnIdx.getGenIndex(start);
+    return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i)
+  {
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j)
+  {
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j, int k)
+  {
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j,k)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM])
+  {
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIGenIndex(idx)));
+  }
 }
 
 #endif // LC_FIELD_H
