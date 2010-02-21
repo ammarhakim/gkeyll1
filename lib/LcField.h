@@ -18,7 +18,7 @@
 
 // lucee includes
 #include <LcArray.h>
-#include <LcExcept.h>
+#include <LcFieldPtr.h>
 #include <LcRegion.h>
 #include <LcRowMajorIndexer.h>
 
@@ -61,11 +61,18 @@ namespace Lucee
  */
       Lucee::Region<NDIM, int> getRegion() const { return rgn; }
 
+/**
+ * Create a new pointer object to elements in field.
+ */
+      Lucee::FieldPtr<T> createPtr();
+
     private:
 /** Number of components */
       unsigned numComponents;
 /** Region indexed by grid */
       Lucee::Region<NDIM, int> rgn;
+/** Indexer over region over which field is valid */
+      Lucee::RowMajorIndexer<NDIM> rgnIdx;
 /** Lower and upper ghost indices */
       unsigned lowerGhost[NDIM], upperGhost[NDIM];
   };

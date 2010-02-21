@@ -21,13 +21,20 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
-      numComponents(nc), rgn(rgn)
+      numComponents(nc), rgn(rgn), rgnIdx(rgn)
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
       lowerGhost[i] = 0;
       upperGhost[i] = 0;
     }
+  }
+
+  template <unsigned NDIM, typename T>
+  Lucee::FieldPtr<T>
+  Field<NDIM, T>::createPtr()
+  {
+    return Lucee::FieldPtr<T>(numComponents, 0);
   }
 
 // instantiations
