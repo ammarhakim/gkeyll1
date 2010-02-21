@@ -35,6 +35,40 @@ add_subdirectory(unit)
 
 # Add individual tests
 ENABLE_TESTING()
+
+# lcarray
+add_test(lcarray unit/lcarray)
+
+# lccolmajorindexer
+add_test(lccolmajorindexer unit/lccolmajorindexer)
+
+# lcrowmajorindexer
+add_test(lcrowmajorindexer unit/lcrowmajorindexer)
+
+# lcfixedvector
+add_test(lcfixedvector unit/lcfixedvector)
+
+# lcvector
+add_test(lcvector unit/lcvector)
+
+# lcmatrix
+add_test(lcmatrix unit/lcmatrix)
+
+# lcsettableobject
+add_test(lcsettableobject unit/lcsettableobject)
+
+# lckeyval
+add_test(lckeyval unit/lckeyval)
+
+# lckeyvaltree
+add_test(lckeyvaltree unit/lckeyvaltree)
+
+# lckeyvaltree
+add_test(lccmdlineargs unit/lccmdlineargs)
+
+# lcregion
+add_test(lcregion unit/lcregion)
+
 # lcfield
 add_test(lcfield unit/lcfield)
 
