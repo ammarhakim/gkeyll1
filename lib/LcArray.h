@@ -301,6 +301,14 @@ namespace Lucee
       T *data;
 /** Number of arrays pointing to this array */
       mutable int* useCount;
+
+/**
+ * Construct array with specified index region.
+ *
+ * @param rgn Region indexed by array.
+ * @param dp Pointer to data space to use.
+ */
+      Array(const Lucee::Region<NDIM, int>& rgn, T* dp);
   };
   
   template <unsigned NDIM, typename T, typename INDEXER>
@@ -500,12 +508,22 @@ namespace Lucee
     return Lucee::Region<NDIM, int>(start, upper);
   }
 
-//   template <unsigned NDIM, typename T, typename INDEXER>
-//   Array<NDIM, T, INDEXER>
-//   Array<NDIM, T, INDEXER>::getSlice(const Lucee::Region<NDIM, int>& rgn)
-//   {
-    
-//   }
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>
+  Array<NDIM, T, INDEXER>::getSlice(const Lucee::Region<NDIM, int>& rgn)
+  {
+// check if specified region is contained in this    
+    if (!getRegion().contains(rgn))
+      throw Lucee::Except("Array::getSlice: Slice region must be contained in the array region");
+
+    ++*useCount; // increment use count in case array is deleted before slice
+    Lucee::Array<NDIM, T, INDEXER> na(rgn, data);
+    na.indexer = indexer; // slice uses same indexer as this array
+    delete na.useCount;
+    na.useCount = useCount;
+
+    return na;
+  }
 
   template <unsigned NDIM, typename T, typename INDEXER>
   T&
@@ -589,6 +607,21 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::getConstRefToLoc(unsigned loc) const
   {
     return data[loc];
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  Array<NDIM, T, INDEXER>::Array(const Lucee::Region<NDIM, int>& rgn, T* dp)
+    : indexer(rgn), traits(0), useCount(new int(1)), data(dp)
+  {
+    len = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = rgn.getShape(i);
+      start[i] = rgn.getLower(i);
+      len = len*shape[i];
+    }
+    LC_CLEAR_CONTIGUOUS(traits);
+    LC_CLEAR_ALLOC(traits);
   }
 }
 

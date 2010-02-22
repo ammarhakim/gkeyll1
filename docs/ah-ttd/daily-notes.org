@@ -1,26 +1,28 @@
 # -*- org -*-
 
+* Feb 22nd 2009
+
 * Feb 21st 2009
 
   - Hooked in ctests into Lucee. Now one can run all the tests with
     one commmand in the top-level build directory, either 'ctest' or
     'make tests'.
   - Finished FieldItr class. This allows the following:
+#+BEGIN_EXAMPLE
+    int lo[2], up[2];
+    Lucee::Box<2, int> rgn(lo, up);
+    Lucee::Field<2, double> elcFld(rgn, 3);
 
-     int lo[2], up[2];
-     Lucee::Box<2, int> rgn(lo, up);
-     Lucee::Field<2, double> elcFld(rgn, 3);
-
-     Lucee::FieldPtr<2> ptr = eclFld.createPtr();
-     elcFld.setPtr(ptr, 5, 5);
-
-     ptr[0] = 1.0;
-     ptr[1] = 2.0;
-     ptr[2] = 3.0;
-
+    Lucee::FieldPtr<2> ptr = eclFld.createPtr();
+    elcFld.setPtr(ptr, 5, 5);
+    
+    ptr[0] = 1.0;
+    ptr[1] = 2.0;
+    ptr[2] = 3.0;
+#+END_EXAMPLE
     I.e, using FieldPtr one can access/modify the elements at a
     location in the field.
   - Finished ConstFieldPtr class. Same semantics as FieldPtr except
     that is allows pointing to constant Field objects.
-
-
+  - Finished the getSlice() method in Array object. How to slices of
+    derived classes work?

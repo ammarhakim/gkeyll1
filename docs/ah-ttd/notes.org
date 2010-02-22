@@ -99,6 +99,9 @@
    indexing of lower dimensional spaces within the space an indexer
    indexes.
 
+   The indexer classes are is becoming very clunky as there are
+   different classes for each NDIM. Need to stream-line this.
+
 ** DONE 27th January 2010: Transition to CMake and documentation
 
    Scons is a crappy build system. So transition to CMake. Also,
