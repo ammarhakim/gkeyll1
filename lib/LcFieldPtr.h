@@ -48,6 +48,13 @@ namespace Lucee
       FieldPtr& operator=(const FieldPtr<T>& ptr);
 
 /**
+ * Number of elements indexed by pointer.
+ *
+ * @return Number of elements indexed by pointer.
+ */
+      unsigned getNumComponents() const { return numComponents; }
+
+/**
  * Return element in field data.
  *
  * @param n Element index to fetch.
