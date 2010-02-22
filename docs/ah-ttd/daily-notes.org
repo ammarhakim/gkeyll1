@@ -25,4 +25,5 @@
   - Finished ConstFieldPtr class. Same semantics as FieldPtr except
     that is allows pointing to constant Field objects.
   - Finished the getSlice() method in Array object. How to slices of
-    derived classes work?
+    derived classes work? Also, this brought up the issue of being
+    able to assign all the elements of a sliced-array.
