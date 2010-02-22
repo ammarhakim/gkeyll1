@@ -165,6 +165,37 @@ test_5()
       }
 }
 
+void
+test_6()
+{
+  int lower[3] = {2, 5, 6};
+  int upper[3] = {12, 32, 12};
+  Lucee::Region<3, int> rgn(lower, upper);
+  Lucee::Field<3, double> elcFld(rgn, 3, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<rgn.getUpper(2); ++k)
+      {
+        elcFld.setPtr(ptr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          ptr[n] = (i+3*j+5.5*k+0.5)*n;
+      }
+
+// create constant reference to field
+  const Lucee::Field<3, double>& elcFldCnst = elcFld;
+  Lucee::ConstFieldPtr<double> cPtr = elcFld.createConstPtr();
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<rgn.getUpper(2); ++k)
+      {
+        elcFld.setPtr(cPtr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          LC_ASSERT("Testing if setting worked", cPtr[n] == (i+3*j+5.5*k+0.5)*n);
+      }
+}
+
 int
 main(void)
 {
@@ -174,5 +205,6 @@ main(void)
   test_3();
   test_4();
   test_5();
+  test_6();
   LC_END_TESTS;
 }

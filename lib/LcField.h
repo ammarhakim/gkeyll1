@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcArray.h>
+#include <LcConstFieldPtr.h>
 #include <LcFieldPtr.h>
 #include <LcRegion.h>
 #include <LcRowMajorIndexer.h>
@@ -71,8 +72,17 @@ namespace Lucee
 
 /**
  * Create a new pointer object to elements in field.
+ *
+ * @return Pointer to first-element in field.
  */
       Lucee::FieldPtr<T> createPtr();
+
+/**
+ * Create a new pointer object to elements in field.
+ *
+ * @return Pointer to first-element in field.
+ */
+      Lucee::ConstFieldPtr<T> createConstPtr() const;
 
 /**
  * Set pointer to given (i) 1D location.
@@ -108,6 +118,41 @@ namespace Lucee
  * @param idx Location to set to.
  */
       void setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM]);
+
+/**
+ * Set pointer to given (i) 1D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ */
+      void setPtr(Lucee::ConstFieldPtr<T>& ptr, int i) const;
+
+/**
+ * Set pointer to given (i,j) 2D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ * @param j Location to set to.
+ */
+      void setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j) const;
+
+/**
+ * Set pointer to given (i,j,k) 3D location.
+ *
+ * @param ptr Pointer to set.
+ * @param i Location to set to.
+ * @param j Location to set to.
+ * @param k Location to set to.
+ */
+      void setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j, int k) const;
+
+/**
+ * Set pointer to given N-dimensional location.
+ *
+ * @param ptr Pointer to set.
+ * @param idx Location to set to.
+ */
+      void setPtr(Lucee::ConstFieldPtr<T>& ptr, const int idx[NDIM]) const;
 
     private:
 /** Number of components */
@@ -153,6 +198,17 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Lucee::ConstFieldPtr<T>
+  Field<NDIM, T>::createConstPtr() const
+  {
+    int start[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+      start[i] = rgn.getLower(i);
+    unsigned loc = rgnIdx.getGenLowIndex(start);
+    return Lucee::ConstFieldPtr<T>(numComponents, &this->getConstRefToLoc(loc));
+  }
+
+  template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i)
   {
@@ -178,6 +234,34 @@ namespace Lucee
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM])
   {
     ptr.setData(&this->getRefToLoc(rgnIdx.getGenLowIndex(idx)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i) const
+  {
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j) const
+  {
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i,j)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j, int k) const
+  {
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i,j,k)));
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, const int idx[NDIM]) const
+  {
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getGenLowIndex(idx)));
   }
 }
 
