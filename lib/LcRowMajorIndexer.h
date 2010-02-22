@@ -42,6 +42,25 @@ namespace Lucee
       }
 
 /**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexerBase(const unsigned shp[NDIM], const int sta[NDIM], int ai[NDIM+1])
+      {
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          this->start[i] = sta[i];
+          this->shape[i] = shp[i];
+          this->ai[i] = ai[i];
+        }
+        this->ai[NDIM] = ai[NDIM];
+      }
+
+/**
  * Create a new indexer over given N-dimensional region.
  *
  * @param rgn Region to index.
@@ -201,6 +220,19 @@ namespace Lucee
         : RowMajorIndexerBase<NDIM>(rgn)
       {
       }
+
+/**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexer(const unsigned shp[NDIM], const int sta[NDIM], int ai[NDIM+1])
+        : RowMajorIndexerBase<NDIM>(shp, sta, ai)
+      {
+      }
   };
 
 /** One dimensional indexer */
@@ -226,6 +258,19 @@ namespace Lucee
  */
       RowMajorIndexer(const Region<1, int>& rgn)
         : RowMajorIndexerBase<1>(rgn)
+      {
+      }
+
+/**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexer(const unsigned shp[1], const int sta[1], int ai[2])
+        : RowMajorIndexerBase<1>(shp, sta, ai)
       {
       }
 
@@ -264,6 +309,19 @@ namespace Lucee
  */
       RowMajorIndexer(const Region<2, int>& rgn)
         : RowMajorIndexerBase<2>(rgn)
+      {
+      }
+
+/**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexer(const unsigned shp[2], const int sta[2], int ai[3])
+        : RowMajorIndexerBase<2>(shp, sta, ai)
       {
       }
 
@@ -319,6 +377,19 @@ namespace Lucee
       }
 
 /**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexer(const unsigned shp[3], const int sta[3], int ai[4])
+        : RowMajorIndexerBase<3>(shp, sta, ai)
+      {
+      }
+
+/**
  * Map 3D index to a linear index.
  *
  * @param i Index location.
@@ -368,6 +439,19 @@ namespace Lucee
  */
       RowMajorIndexer(const Region<4, int>& rgn)
         : RowMajorIndexerBase<4>(rgn)
+      {
+      }
+
+/**
+ * Create a new indexer for mapping an N-dimensional index into a
+ * linear index.
+ *
+ * @param shp Shape of space.
+ * @param sta Starting index.
+ * @param ai Indexing coefficients.
+ */
+      RowMajorIndexer(const unsigned shp[4], const int sta[4], int ai[5])
+        : RowMajorIndexerBase<4>(shp, sta, ai)
       {
       }
 
