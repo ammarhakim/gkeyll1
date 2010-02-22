@@ -41,7 +41,7 @@ test_2()
 
   int count=0;
   for (int i=row.getLower(0); i<row.getUpper(0); ++i)
-  for (int j=row.getLower(1); j<row.getUpper(1); ++j)
+    for (int j=row.getLower(1); j<row.getUpper(1); ++j)
       LC_ASSERT("Testing 2D indexer", row.getIndex(i,j) == count++);
 
   count=0;

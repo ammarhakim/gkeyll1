@@ -2,6 +2,13 @@
 
 * Feb 22nd 2009
 
+  - Discovered a bug in indexers. It seems indexer hierachy needs to
+    be rethought. The basic indexer class (common to linear indexing
+    mechanisms) needs to be abstracted out into a base class. Then,
+    the row and column major indexers will inhert from this base class
+    and provide the coefficients in the linear mapping. It is not so
+    clear what the system should be for non-linear mapping.
+
 * Feb 21st 2009
 
   - Hooked in ctests into Lucee. Now one can run all the tests with
