@@ -5,7 +5,7 @@
   - Hooked in ctests into Lucee. Now one can run all the tests with
     one commmand in the top-level build directory, either 'ctest' or
     'make tests'.
-  - Working on FieldItr class. This should allow the following:
+  - Finished FieldItr class. This allows the following:
 
      int lo[2], up[2];
      Lucee::Box<2, int> rgn(lo, up);
@@ -20,4 +20,7 @@
 
     I.e, using FieldPtr one can access/modify the elements at a
     location in the field.
+  - Finished ConstFieldPtr class. Same semantics as FieldPtr except
+    that is allows pointing to constant Field objects.
+
 

@@ -93,6 +93,12 @@
 
 * Lucee Notes
 
+** TODO Generalizing indexers
+
+   Indexer classes may need to be generalized. This is to allow the
+   indexing of lower dimensional spaces within the space an indexer
+   indexes.
+
 ** DONE 27th January 2010: Transition to CMake and documentation
 
    Scons is a crappy build system. So transition to CMake. Also,
