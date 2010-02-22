@@ -115,7 +115,7 @@ namespace Lucee
 /** Region indexed by grid */
       Lucee::Region<NDIM, int> rgn;
 /** Indexer over region over which field is valid */
-      Lucee::RowMajorIndexer<NDIM> rgnIdx;
+      Lucee::RowMajorIndexer<NDIM+1> rgnIdx;
 /** Lower and upper ghost indices */
       unsigned lowerGhost[NDIM], upperGhost[NDIM];
   };
@@ -123,7 +123,7 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn)
+      numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -148,7 +148,7 @@ namespace Lucee
     int start[NDIM];
     for (unsigned i=0; i<NDIM; ++i)
       start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenIndex(start);
+    unsigned loc = rgnIdx.getGenLowIndex(start);
     return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
   }
 
@@ -156,28 +156,28 @@ namespace Lucee
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i,j)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j, int k)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j,k)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i,j,k)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM])
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getIGenIndex(idx)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getGenLowIndex(idx)));
   }
 }
 

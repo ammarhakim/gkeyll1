@@ -125,13 +125,27 @@ namespace Lucee
         return sum;
       }
 
+/**
+ * Return linear index given N-dimensional index.
+ *
+ * @return Linear index.
+ */
+      int getGenLowIndex(const int idx[NDIM-1]) const
+      {
+        int sum = ai[0];
+        for (unsigned i=1; i<NDIM; ++i)
+          sum += ai[i]*idx[i-1];
+        sum += ai[NDIM]*start[NDIM-1];
+        return sum;
+      }
+
     protected:
 /** Coefficients for linear map */
       int ai[NDIM+1];
-
-    private:
 /** Start indices */
       int start[NDIM];
+
+    private:
 /** Shape of linear-space */
       unsigned shape[NDIM];
 
@@ -264,6 +278,18 @@ namespace Lucee
       {
         return ai[0]+ai[1]*i+j;
       }
+
+/**
+ * Map 2D index to a linear index. The mapping is performed assuming
+ * that the final lower indices are the start indices.
+ *
+ * @param i Index location.
+ * @return Index of (i,j) into linear space.
+ */
+      int getLowIndex(int i) const 
+      {
+        return getIndex(i, start[1]);
+      }
   };
 
 /** Three dimensional indexer */
@@ -303,6 +329,19 @@ namespace Lucee
       int getIndex(int i, int j, int k) const 
       {
         return ai[0]+ai[1]*i+ai[2]*j+k;
+      }
+
+/**
+ * Map 3D index to a linear index. Assume last indices are start
+ * indices.
+ *
+ * @param i Index location.
+ * @param j Index location.
+ * @return Index of (i,j,s3) into linear space.
+ */
+      int getLowIndex(int i, int j) const 
+      {
+        return getIndex(i, j, start[2]);
       }
   };
 
@@ -344,6 +383,19 @@ namespace Lucee
       int getIndex(int i, int j, int k, int l) const 
       {
         return ai[0]+ai[1]*i+ai[2]*j+ai[3]*k+l;
+      }
+
+/**
+ * Map 4D index to a linear index.
+ *
+ * @param i Index location.
+ * @param j Index location.
+ * @param k Index location.
+ * @return Index of (i,j,k,s4) into linear space.
+ */
+      int getLowIndex(int i, int j, int k) const 
+      {
+        return getIndex(i, j, k, start[3]);
       }
   };
 }

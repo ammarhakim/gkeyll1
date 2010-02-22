@@ -58,6 +58,9 @@ test_2()
 
 // create ptr to field elements
   Lucee::FieldPtr<double> ptr = elcField.createPtr();
+
+  LC_ASSERT("Testing if numComponents is 3", ptr.getNumComponents() == 3);
+
 // set values at initial location (0,0)
   ptr[0] = 1.5;
   ptr[1] = 2.5;
@@ -87,11 +90,89 @@ test_2()
   LC_ASSERT("Testing if assignment worked", elcField(5,5,2) == 3.5);
 }
 
+void
+test_3()
+{
+  int lower[1] = {2};
+  int upper[1] = {12};
+  Lucee::Region<1, int> rgn(lower, upper);
+  Lucee::Field<1, double> elcFld(rgn, 3, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+  {
+    elcFld.setPtr(ptr, i);
+    for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+      ptr[n] = (i+0.5)*n;
+  }
+
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+  {
+    for (int k=0; k<elcFld.getNumComponents(); ++k)
+      LC_ASSERT("Testing if 1D setting worked", elcFld(i,k) == (i+0.5)*k);
+  }
+}
+
+void
+test_4()
+{
+  int lower[2] = {2, 5};
+  int upper[2] = {12, 32};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcFld(rgn, 2, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+    {
+      elcFld.setPtr(ptr, i, j);
+      for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+        ptr[n] = (i+3*j+0.5)*n;
+    }
+
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+    {
+      for (int k=0; k<elcFld.getNumComponents(); ++k)
+        LC_ASSERT("Testing if 2D setting worked", elcFld(i,j,k) == (i+3*j+0.5)*k);
+    }
+}
+
+void
+test_5()
+{
+  int lower[3] = {2, 5, 6};
+  int upper[3] = {12, 32, 12};
+  Lucee::Region<3, int> rgn(lower, upper);
+  Lucee::Field<3, double> elcFld(rgn, 3, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<rgn.getUpper(2); ++k)
+      {
+        elcFld.setPtr(ptr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          ptr[n] = (i+3*j+5.5*k+0.5)*n;
+      }
+
+  for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<rgn.getUpper(2); ++k)
+      {
+        for (int n=0; n<elcFld.getNumComponents(); ++n)
+          LC_ASSERT("Testing if 3D setting worked", elcFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*n);
+      }
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcfield");
   test_1();
   test_2();
+  test_3();
+  test_4();
+  test_5();
   LC_END_TESTS;
 }
