@@ -278,6 +278,14 @@ namespace Lucee
  */
       T& getRefToLoc(unsigned loc);
 
+/**
+ * Returns reference to location in underlying memory space.
+ *
+ * @param loc Location into memory space.
+ * @return reference to data.
+ */
+      const T& getConstRefToLoc(unsigned loc) const;
+
     private:
 /** Indexer into array */
       INDEXER indexer;
@@ -572,6 +580,13 @@ namespace Lucee
   template <unsigned NDIM, typename T, typename INDEXER>
   T& 
   Array<NDIM, T, INDEXER>::getRefToLoc(unsigned loc)
+  {
+    return data[loc];
+  }
+
+  template <unsigned NDIM, typename T, typename INDEXER>
+  const T& 
+  Array<NDIM, T, INDEXER>::getConstRefToLoc(unsigned loc) const
   {
     return data[loc];
   }
