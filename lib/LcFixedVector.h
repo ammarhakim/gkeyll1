@@ -88,11 +88,6 @@ namespace Lucee
       unsigned numElem() const { return NELEM; }
 
 /**
- * Cast to a const array.
- */
-//      operator const T[NELEM]() { return data; }
-
-/**
  * Return value of vector at location.
  *
  * @param i index location.

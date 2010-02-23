@@ -17,28 +17,72 @@
 #endif
 
 // lucee includes
+#include <LcLinIndexer.h>
 #include <LcRegion.h>
 
 namespace Lucee
 {
 /**
- * Base class provides key coefficient contruction functionality for
- * use in the indexing functions provided by the derived classes.
+ * Create a new indexer mapping coefficients.
+ *
+ * @param shape Shape of space.
+ * @param start Start index.
  */
   template <unsigned NDIM>
-  class ColMajorIndexerBase
+  Lucee::FixedVector<NDIM+1, int>
+  createColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
+  {
+    Lucee::FixedVector<NDIM+1, int> ai(0);
+    ai[1] = 1;
+    for (unsigned i=2; i<NDIM+1; ++i)
+      ai[i] = ai[i-1]*shape[i-2];
+    int sum = 0.0;
+    for (unsigned i=1; i<NDIM+1; ++i)
+      sum += ai[i]*start[i-1];
+    ai[0] = -sum;
+    
+    return ai;
+  }
+
+/**
+ * Create a new indexer mapping coefficients.
+ *
+ * @param start Start index.
+ * @param end Ending index.
+ */
+  template <unsigned NDIM>
+  Lucee::FixedVector<NDIM+1, int>
+  createColMajorIndexer(const Lucee::Region<NDIM, int>& rgn)
+  {
+    Lucee::FixedVector<NDIM+1, int> ai(0);
+    ai[1] = 1;
+    for (unsigned i=2; i<NDIM+1; ++i)
+      ai[i] = ai[i-1]*rgn.getShape(i-2);
+    int sum = 0.0;
+    for (unsigned i=1; i<NDIM+1; ++i)
+      sum += ai[i]*rgn.getLower(i-1);
+    ai[0] = -sum;
+
+    return ai;
+  }
+
+/**
+ * Col-major indexer.
+ */
+  template <unsigned NDIM>
+  class ColMajorIndexer : public Lucee::LinIndexer<NDIM>
   {
     public:
 /**
  * Create a new indexer for mapping an N-dimensional index into a
  * linear index.
  *
- * @param shp Shape of space.
- * @param sta Starting index.
+ * @param shape Shape of space.
+ * @param start Starting index.
  */
-      ColMajorIndexerBase(const unsigned shp[NDIM], const int sta[NDIM])
+      ColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
+        : Lucee::LinIndexer<NDIM>(shape, start, createColMajorIndexer<NDIM>(shape, start))
       {
-        createColMajorIndexer(shp, sta);
       }
 
 /**
@@ -46,35 +90,9 @@ namespace Lucee
  *
  * @param rgn Region to index.
  */
-      ColMajorIndexerBase(const Region<NDIM, int>& rgn)
+      ColMajorIndexer(const Lucee::Region<NDIM, int>& rgn)
+        : Lucee::LinIndexer<NDIM>(rgn, createColMajorIndexer<NDIM>(rgn))
       {
-        unsigned shp[NDIM];
-        int sta[NDIM];
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          shp[i] = rgn.getShape(i);
-          sta[i] = rgn.getLower(i);
-        }
-        createColMajorIndexer(shp, sta);
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexerBase(const unsigned shp[NDIM], const int sta[NDIM], int aii[NDIM+1])
-      {
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          start[i] = sta[i];
-          shape[i] = shp[i];
-          ai[i] = aii[i];
-        }
-        ai[NDIM] = aii[NDIM];
       }
 
 /**
@@ -82,15 +100,9 @@ namespace Lucee
  *
  * @param indexer Indexer to copy from.
  */
-      ColMajorIndexerBase(const ColMajorIndexerBase<NDIM>& indexer)
+      ColMajorIndexer(const ColMajorIndexer<NDIM>& indexer)
+        : Lucee::LinIndexer<NDIM>(indexer)
       {
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          start[i] = indexer.start[i];
-          shape[i] = indexer.shape[i];
-          ai[i] = indexer.ai[i];
-        }
-        ai[NDIM] = indexer.ai[NDIM];
       }
 
 /**
@@ -99,335 +111,13 @@ namespace Lucee
  * @param indexer Indexer to copy from.
  * @return reference to this indexer.
  */
-      ColMajorIndexerBase<NDIM>& operator=(const ColMajorIndexerBase<NDIM>& indexer)
+      ColMajorIndexer<NDIM>&
+      operator=(const ColMajorIndexer<NDIM>& indexer)
       {
         if (&indexer == this)
           return *this;
-
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          start[i] = indexer.start[i];
-          shape[i] = indexer.shape[i];
-          ai[i] = indexer.ai[i];
-        }
-        ai[NDIM] = indexer.ai[NDIM];
-
+        Lucee::LinIndexer<NDIM>::operator=(indexer);
         return *this;
-      }
-
-/**
- * Return start index into space.
- *
- * @param i direction.
- * @return start index.
- */
-      int getLower(unsigned i) const { return start[i]; }
-
-/**
- * Return last index into space.
- *
- * @param i direction.
- * @return end index.
- */
-      int getUpper(unsigned i) const { return start[i]+shape[i]; }
-
-/**
- * Return linear index given N-dimensional index.
- *
- * @return Linear index.
- */
-      int getGenIndex(const int idx[NDIM]) const
-      {
-        int sum = ai[0]+idx[0];
-        for (unsigned i=2; i<NDIM+1; ++i)
-          sum += ai[i]*idx[i-1];
-        return sum;
-      }
-
-    protected:
-/** Coefficients for linear map */
-      int ai[NDIM+1];
-
-    private:
-/** Start indices */
-      int start[NDIM];
-/** Shape of linear-space */
-      unsigned shape[NDIM];
-
-/**
- * Create a new indexer object.
- *
- * @param shape Shape of region to index.
- * @param start Start index.
- */
-      void createColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
-      {
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          this->start[i] = start[i];
-          this->shape[i] = shape[i];
-        }
-
-        ai[1] = 1;
-        for (unsigned i=2; i<NDIM+1; ++i)
-          ai[i] = ai[i-1]*shape[i-2];
-        int sum = 0.0;
-        for (unsigned i=1; i<NDIM+1; ++i)
-          sum += ai[i]*start[i-1];
-        ai[0] = -sum;
-
-      }
-  };
-
-/** 
- * Generic indexer class: empty except for base class methods.
- */
-  template <unsigned NDIM>
-  class ColMajorIndexer : public ColMajorIndexerBase<NDIM>
-  {
-    public:
-/**
- * Create a new indexer.
- *
- * @param start Starting indices.
- * @param shape Shape of space.
- */
-      ColMajorIndexer(const unsigned shape[NDIM], const int start[NDIM])
-        : ColMajorIndexerBase<NDIM>(shape, start)
-      {
-      }
-
-/**
- * Create a new indexer over given N-dimensional region.
- *
- * @param rgn Region to index.
- */
-      ColMajorIndexer(const Region<NDIM, int>& rgn)
-        : ColMajorIndexerBase<NDIM>(rgn)
-      {
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexer(const unsigned shp[NDIM], const int sta[NDIM], int aii[NDIM+1])
-        : ColMajorIndexerBase<NDIM>(shp, sta, aii)
-      {
-      }
-  };
-
-/** One dimensional indexer */
-  template <>
-  class ColMajorIndexer<1> : public ColMajorIndexerBase<1>
-  {
-    public:
-/**
- * Create a new indexer.
- *
- * @param start Starting indices.
- * @param shape Shape of space.
- */
-      ColMajorIndexer(const unsigned shape[1], const int start[1])
-        : ColMajorIndexerBase<1>(shape, start)
-      {
-      }
-
-/**
- * Create a new indexer over given N-dimensional region.
- *
- * @param rgn Region to index.
- */
-      ColMajorIndexer(const Region<1, int>& rgn)
-        : ColMajorIndexerBase<1>(rgn)
-      {
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexer(const unsigned shp[1], const int sta[1], int aii[2])
-        : ColMajorIndexerBase<1>(shp, sta, aii)
-      {
-      }
-
-/**
- * Map 1D index to a linear index.
- *
- * @param i Index location.
- * @return Index of (i) into linear space.
- */
-      int getIndex(int i) const 
-      {
-        return ai[0]+i;
-      }
-  };
-
-/** Two dimensional indexer */
-  template <>
-  class ColMajorIndexer<2> : public ColMajorIndexerBase<2>
-  {
-    public:
-/**
- * Create a new indexer.
- *
- * @param start Starting indices.
- * @param shape Shape of space.
- */
-      ColMajorIndexer(const unsigned shape[2], const int start[2])
-        : ColMajorIndexerBase<2>(shape, start)
-      {
-      }
-
-/**
- * Create a new indexer over given N-dimensional region.
- *
- * @param rgn Region to index.
- */
-      ColMajorIndexer(const Region<2, int>& rgn)
-        : ColMajorIndexerBase<2>(rgn)
-      {
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexer(const unsigned shp[2], const int sta[2], int aii[3])
-        : ColMajorIndexerBase<2>(shp, sta, aii)
-      {
-      }
-
-/**
- * Map 2D index to a linear index.
- *
- * @param i Index location.
- * @param j Index location.
- * @return Index of (i,j) into linear space.
- */
-      int getIndex(int i, int j) const 
-      {
-        return ai[0]+i+ai[2]*j;
-      }
-  };
-
-/** Three dimensional indexer */
-  template <>
-  class ColMajorIndexer<3> : public ColMajorIndexerBase<3>
-  {
-    public:
-/**
- * Create a new indexer.
- *
- * @param start Starting indices.
- * @param shape Shape of space.
- */
-      ColMajorIndexer(const unsigned shape[3], const int start[3])
-        : ColMajorIndexerBase<3>(shape, start)
-      {
-      }
-
-/**
- * Create a new indexer over given N-dimensional region.
- *
- * @param rgn Region to index.
- */
-      ColMajorIndexer(const Region<3, int>& rgn)
-        : ColMajorIndexerBase<3>(rgn)
-      {
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexer(const unsigned shp[3], const int sta[3], int aii[4])
-        : ColMajorIndexerBase<3>(shp, sta, aii)
-      {
-      }
-
-/**
- * Map 3D index to a linear index.
- *
- * @param i Index location.
- * @param j Index location.
- * @param k Index location.
- * @return Index of (i,j,k) into linear space.
- */
-      int getIndex(int i, int j, int k) const 
-      {
-        return ai[0]+i+ai[2]*j+ai[3]*k;
-      }
-  };
-
-/** Four dimensional indexer */
-  template <>
-  class ColMajorIndexer<4> : public ColMajorIndexerBase<4>
-  {
-    public:
-/**
- * Create a new indexer.
- *
- * @param start Starting indices.
- * @param shape Shape of space.
- */
-      ColMajorIndexer(const unsigned shape[4], const int start[4])
-        : ColMajorIndexerBase<4>(shape, start)
-      {
-      }
-
-/**
- * Create a new indexer over given N-dimensional region.
- *
- * @param rgn Region to index.
- */
-      ColMajorIndexer(const Region<4, int>& rgn)
-        : ColMajorIndexerBase<4>(rgn)
-      {
-      }
-
-/**
- * Create a new indexer for mapping an N-dimensional index into a
- * linear index.
- *
- * @param shp Shape of space.
- * @param sta Starting index.
- * @param ai Indexing coefficients.
- */
-      ColMajorIndexer(const unsigned shp[4], const int sta[4], int aii[5])
-        : ColMajorIndexerBase<4>(shp, sta, aii)
-      {
-      }
-
-/**
- * Map 4D index to a linear index.
- *
- * @param i Index location.
- * @param j Index location.
- * @param k Index location.
- * @param l Index location.
- * @return Index of (i,j,k,l) into linear space.
- */
-      int getIndex(int i, int j, int k, int l) const 
-      {
-        return ai[0]+i+ai[2]*j+ai[3]*k+ai[4]*l;
       }
   };
 }
