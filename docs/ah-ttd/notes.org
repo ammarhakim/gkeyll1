@@ -93,7 +93,11 @@
 
 * Lucee Notes
 
-** TODO Generalizing indexers
+** TODO Need to add Loggers to Lucee
+
+   Rethink the WarpX loggers for this.
+
+** DONE Generalizing indexers
 
    Indexer classes may need to be generalized. This is to allow the
    indexing of lower dimensional spaces within the space an indexer
@@ -101,6 +105,10 @@
 
    The indexer classes are is becoming very clunky as there are
    different classes for each NDIM. Need to stream-line this.
+
+   <2010-02-22 Mon> Added a generic base class for all linear
+   indexers. This includes row and column major indexers and indexers
+   that index sub-spaces indexed by these.
 
 ** DONE 27th January 2010: Transition to CMake and documentation
 
@@ -308,7 +316,6 @@
     Implement a SymmetricMatrix class. This should use the same
     indexing mechanism as used in LAPACK.
 
-
 ** 30th July 2009: Documentation notes. Again.
 
    A good option for producing Lucee documentation is texinfo
@@ -440,10 +447,12 @@
 
     Both in-code and text documentation needed to be completed.
 
-*** TODO Add more complete tests for loggers and expression parsers.
+*** DONE Add more complete tests for loggers and expression parsers.
 
     May need to get tests more comprehensive. Also, must figure out a
     way of running the tests automatically from a script.
+
+    <2010-02-22 Mon> Using Ctest for automatic testing now.
 
 *** Notes
 
