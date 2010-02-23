@@ -326,7 +326,6 @@ test_2_r()
   unsigned shape[2] = {10, 15};
   int ai[3];
   createRowMajorIndexer<2>(shape, start, ai);
-  std::cout << ai[0] << " " << ai[1] << " " << ai[2] << std::endl;
   
   Lucee::LinIndexer<2> lin(shape, start, ai);
   int count=0;
@@ -340,8 +339,65 @@ test_2_r()
     for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D indexer", lin.getGenIndex(idx) == count++);
+      LC_ASSERT("Testing 2D row-lin indexer", lin.getGenIndex(idx) == count++);
     }
+}
+
+void
+test_3_r()
+{
+  int start[3] = {1, 2, -2};
+  unsigned shape[3] = {10, 15, 20};
+  int ai[4];
+  createRowMajorIndexer<3>(shape, start, ai);
+
+  Lucee::LinIndexer<3> lin(shape, start, ai);
+
+  int count=0;
+  for (int i=lin.getLower(0); i<lin.getUpper(0); ++i)
+    for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
+      for (int k=lin.getLower(2); k<lin.getUpper(2); ++k)
+        LC_ASSERT("Testing 3D row-lin indexer", lin.getIndex(i,j,k) == count++);
+
+  count=0;
+  int idx[3];
+
+  for (int i=lin.getLower(0); i<lin.getUpper(0); ++i)
+    for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
+      for (int k=lin.getLower(2); k<lin.getUpper(2); ++k)
+      {
+        idx[0] = i; idx[1] = j; idx[2] = k;
+        LC_ASSERT("Testing 3D row-lin indexer", lin.getGenIndex(idx) == count++);
+      }
+}
+
+void
+test_4_r()
+{
+  int start[4] = {1, 2, -2, 3};
+  unsigned shape[4] = {10, 15, 20, 12};
+  int ai[5];
+  createRowMajorIndexer<4>(shape, start, ai);
+
+  Lucee::LinIndexer<4> lin(shape, start, ai);
+
+  int count=0;
+  for (int i=lin.getLower(0); i<lin.getUpper(0); ++i)
+    for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
+      for (int k=lin.getLower(2); k<lin.getUpper(2); ++k)
+        for (int l=lin.getLower(3); l<lin.getUpper(3); ++l)
+          LC_ASSERT("Testing 4D row-lin indexer", lin.getIndex(i,j,k,l) == count++);
+
+  count=0;
+  int idx[4];
+  for (int i=lin.getLower(0); i<lin.getUpper(0); ++i)
+    for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
+      for (int k=lin.getLower(2); k<lin.getUpper(2); ++k)
+        for (int l=lin.getLower(3); l<lin.getUpper(3); ++l)
+        {
+          idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
+          LC_ASSERT("Testing 4D row-lin indexer", lin.getGenIndex(idx) == count++);
+        }
 }
 
 int
@@ -363,5 +419,7 @@ main(void)
 
   test_1_r();
   test_2_r();
+  test_3_r();
+  test_4_r();
   LC_END_TESTS;
 }
