@@ -185,7 +185,7 @@ test_6()
 
 // create constant reference to field
   const Lucee::Field<3, double>& elcFldCnst = elcFld;
-  Lucee::ConstFieldPtr<double> cPtr = elcFld.createConstPtr();
+  Lucee::ConstFieldPtr<double> cPtr = elcFldCnst.createConstPtr();
   for (int i=elcFld.getLower(0); i<rgn.getUpper(0); ++i)
     for (int j=elcFld.getLower(1); j<rgn.getUpper(1); ++j)
       for (int k=elcFld.getLower(2); k<rgn.getUpper(2); ++k)
