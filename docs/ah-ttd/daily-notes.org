@@ -1,6 +1,6 @@
 # -*- org -*-
 
-* Feb 22nd 2009
+* Feb 22nd 2010
 
   - Discovered a bug in indexers. It seems indexer hierachy needs to
     be rethought. The basic indexer class (common to linear indexing
@@ -8,8 +8,11 @@
     the row and column major indexers will inhert from this base class
     and provide the coefficients in the linear mapping. It is not so
     clear what the system should be for non-linear mapping.
+  - Completely redid the indexing system. Introduced a LinIndexer
+    class from which the RowMajor and ColMajor indexer classes
+    derive. Now should allow for slicing and deflating of arrays.
 
-* Feb 21st 2009
+* Feb 21st 2010
 
   - Hooked in ctests into Lucee. Now one can run all the tests with
     one commmand in the top-level build directory, either 'ctest' or
