@@ -421,7 +421,6 @@ test_9()
   LC_ASSERT("Testing slice upper bounds", arrSl.getUpper(1) == 8);
 
 // set complete sliced array
-//  arrSl = 18.5;
   for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
     for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
       arrSl(i,j) = 18.5;
@@ -429,6 +428,33 @@ test_9()
   for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
     for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
       LC_ASSERT("Testing if setting slice worked", arr(i,j) == 18.5);
+}
+
+void
+test_10()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {15, 10};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Array<2, double> arr(rgn, 12.5);
+
+  int loSl[2] = {2, 3};
+  int upSl[2] = {12, 8};
+  Lucee::Region<2, int> rgnSl(loSl, upSl);
+// slice it
+  Lucee::Array<2, double> arrSl = arr.getSlice(rgnSl);
+// check slice
+  LC_ASSERT("Testing slice lower bounds", arrSl.getLower(0) == 2);
+  LC_ASSERT("Testing slice lower bounds", arrSl.getLower(1) == 3);
+
+  LC_ASSERT("Testing slice upper bounds", arrSl.getUpper(0) == 12);
+  LC_ASSERT("Testing slice upper bounds", arrSl.getUpper(1) == 8);
+
+// set complete sliced array
+  arrSl = 18.5;
+  for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
+    for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
+      arrSl(i,j) = 18.5;
 }
 
 int
@@ -445,5 +471,6 @@ main(void)
   test_7();
   test_8();
   test_9();
+  test_10();
   LC_END_TESTS;
 }
