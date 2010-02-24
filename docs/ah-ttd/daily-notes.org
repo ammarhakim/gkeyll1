@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* Feb 23rd 2010
+
+  - Started work on row-major sequencers. Not complete yet.
+  - Indexers may need to return associated sequencers.
+
 * Feb 22nd 2010
 
   - Discovered a bug in indexers. It seems indexer hierachy needs to
@@ -34,6 +39,7 @@
     location in the field.
   - Finished ConstFieldPtr class. Same semantics as FieldPtr except
     that is allows pointing to constant Field objects.
-  - Finished the getSlice() method in Array object. How to slices of
-    derived classes work? Also, this brought up the issue of being
-    able to assign all the elements of a sliced-array.
+  - Finished the getSlice() method in Array object. How do slices of
+    derived classes work? Probably need a covariante return
+    thunk. Also, this brought up the issue of being able to assign all
+    the elements of a sliced-array.

@@ -457,6 +457,21 @@ test_10()
       arrSl(i,j) = 18.5;
 }
 
+void
+test_11()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {15, 10};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Array<2, double> arr(rgn, 12.5);
+
+  int loSl[2] = {2, 3};
+  int upSl[2] = {17, 8};
+  Lucee::Region<2, int> rgnSl(loSl, upSl);
+// try to slice it
+  LC_RAISES("Testing if slicing invalid region works", arr.getSlice(rgnSl), Lucee::Except);
+}
+
 int
 main(void) 
 {
@@ -471,6 +486,7 @@ main(void)
   test_7();
   test_8();
   test_9();
-  test_10();
+  //test_10();
+  test_11();
   LC_END_TESTS;
 }
