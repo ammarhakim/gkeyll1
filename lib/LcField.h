@@ -35,7 +35,7 @@ namespace Lucee
  * example, in computing finite-difference stencils on the field.
  */
   template <unsigned NDIM, typename T>
-  class Field : public Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >
+  class Field : public Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>
   {
     public:
 /**
@@ -167,7 +167,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
-    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >(rgn.inflate(0, nc), init),
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
       numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
   {
     for (unsigned i=0; i<NDIM; ++i)
@@ -182,7 +182,7 @@ namespace Lucee
   Field<NDIM, T>::operator=(const T& val)
   {
 // simply call base class assignment operator    
-    Array<NDIM+1, T, Lucee::RowMajorIndexer<NDIM+1> >::operator=(val);
+    Array<NDIM+1, T, Lucee::RowMajorIndexer>::operator=(val);
     return *this;
   }
 

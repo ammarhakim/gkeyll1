@@ -30,7 +30,7 @@ namespace Lucee
 
   template <typename T>
   Matrix<T>::Matrix(unsigned row, unsigned col)
-    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(
         &Lucee::FixedVector<2, unsigned>(row, col)[0])
   {
     LC_CLEAR_TRANSPOSE(traits);
@@ -38,21 +38,21 @@ namespace Lucee
 
   template <typename T>
   Matrix<T>::Matrix(unsigned shape[2])
-    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(shape)
   {
     LC_CLEAR_TRANSPOSE(traits);
   }
 
   template <typename T>
   Matrix<T>::Matrix(unsigned shape[2], int start[2])
-    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(shape, start)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(shape, start)
   {
     LC_CLEAR_TRANSPOSE(traits);
   }
 
   template <typename T>
   Matrix<T>::Matrix(const Matrix<T>& mat)
-    : Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >(mat)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(mat)
   {
     traits = mat.traits;
   }
@@ -66,7 +66,7 @@ namespace Lucee
 
     traits = mat.traits;
 // call base class assignment operator
-    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(mat);
+    Lucee::Array<2, T, Lucee::ColMajorIndexer>::operator=(mat);
     return *this;
   }
 
@@ -74,7 +74,7 @@ namespace Lucee
   Matrix<T>&
   Matrix<T>::operator=(const T& val)
   {
-    Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >::operator=(val);
+    Lucee::Array<2, T, Lucee::ColMajorIndexer>::operator=(val);
     return *this;
   }
 
