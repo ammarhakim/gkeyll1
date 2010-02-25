@@ -112,6 +112,16 @@ namespace Lucee
       }
 
 /**
+ * Create a new indexer copying from input indexer.
+ *
+ * @param indexer Indexer to copy from.
+ */
+      RowMajorIndexer(const LinIndexer<NDIM>& indexer)
+        : Lucee::LinIndexer<NDIM>(indexer)
+      {
+      }
+
+/**
  * Copy the values from the input indexer.
  *
  * @param indexer Indexer to copy from.
@@ -124,6 +134,13 @@ namespace Lucee
           return *this;
         Lucee::LinIndexer<NDIM>::operator=(indexer);
         return *this;
+      }
+
+      template <unsigned RDIM>
+      RowMajorIndexer<RDIM>
+      deflate(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM]) const
+      {
+        return this->template deflateLin<RDIM>(defDims, defDimsIdx);
       }
   };
 }

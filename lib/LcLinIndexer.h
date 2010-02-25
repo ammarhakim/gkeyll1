@@ -162,13 +162,17 @@ namespace Lucee
  */
       int getGenLowIndex(const int idx[NDIM-1]) const;
 
+    protected:
 /**
- * Return an indexer that allows indexing a lower-dimensional space.
+ * Return an indexer that allows indexing a lower-dimensional sub-space.
  *
+ * @param defDims Dimensions to remove from space.
+ * @param defDimsIdx Index along the removed dimensions.
+ * @return deflated indexer.
  */
       template <unsigned RDIM>
       LinIndexer<RDIM>
-      deflate(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM]) const
+      deflateLin(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM]) const
       {
 // extend defDims array for use in creating new lower/upper bounds
         unsigned extDefDims[NDIM];
@@ -214,6 +218,7 @@ namespace Lucee
         }
         return LinIndexer<RDIM>(defShape, defStart, defAi);
       }
+
 
     private:
 /** Start indices */

@@ -285,6 +285,34 @@ test_4_4()
         }
 }
 
+void
+test_8()
+{
+  int lower[4] = {3, 6, 8, 10};
+  int upper[4] = {15, 20, 25, 30};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::RowMajorIndexer<4> row(rgn);
+
+// deflate the 4D indexer into a 2D indexer
+  unsigned defDims[2] = {1, 2};
+  int defDimsIdx[2] = {10, 10};
+
+  Lucee::RowMajorIndexer<2> defRow
+    = row.deflate<2>(defDims, defDimsIdx);
+
+  LC_ASSERT("Testing lower bounds of deflated indexer", 
+    defRow.getLower(0) == 3);
+  LC_ASSERT("Testing lower bounds of deflated indexer", 
+    defRow.getLower(1) == 10);
+
+  LC_ASSERT("Testing upper bounds of deflated indexer", 
+    defRow.getUpper(0) == 15);
+  LC_ASSERT("Testing upper bounds of deflated indexer", 
+    defRow.getUpper(1) == 13);
+
+}
+
+
 int
 main(void) 
 {
@@ -296,6 +324,7 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
 
   test_1_1();
   test_2_2();
