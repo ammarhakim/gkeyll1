@@ -93,7 +93,14 @@
 
 * Lucee Notes
 
-** TODO Implement sequencers for arrays.
+** TODO Impliment a subDimSlice() function
+
+   This should allow creating a lower-dimensional array from an array
+   of a given dimension. The function should take an array of
+   dimensions to keep.
+
+** TODO <2010-02-24 Wed> Fix doxygen errors.
+** DONE Implement sequencers for arrays.
 ** TODO Need to add Loggers to Lucee
 
    Rethink the WarpX loggers for this.
@@ -121,7 +128,7 @@
    examples. Links to doxygen generated documents should be provided
    from the Sphinx documentation.
 
-** 16th November 2009: On HDF5 I/O classes.
+** TODO 16th November 2009: On HDF5 I/O classes.
 
    As the binary I/O system for Lucee is HDF5, a cleaner solution to
    wrapping the HDF5 C-API needs to be developed. A possible solution
@@ -301,7 +308,7 @@
 ** DONE Test matrix copy ctor and assignment operators.
 ** DONE Add copy ctor and assignment operators to vector.
 ** DONE Complete RowMajor indexer and test it.
-** TODO Implement the createView() operator.
+** DONE Implement the slice() operator.
 ** TODO Finish implementing RT in homogenous slab.
 
     Complete the ADO algorithm so the delta-backward paper can be
