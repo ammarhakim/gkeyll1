@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* Feb 24th 2010
+
+  - Completed Row and Col major sequencers.
+  - Added a typedef to Row and Col indexers to allow creation of
+    proper sequencers. This allows arrays and derived classes to use
+    the correct indexer/sequencer pair.
+
 * Feb 23rd 2010
 
   - Started work on row-major sequencers. Not complete yet.
