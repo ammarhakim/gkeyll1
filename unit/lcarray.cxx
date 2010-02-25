@@ -472,6 +472,28 @@ test_11()
   LC_RAISES("Testing if slicing invalid region works", arr.getSlice(rgnSl), Lucee::Except);
 }
 
+void
+test_12()
+{
+  int lower[4] = {3, 6, 8, 10};
+  int upper[4] = {15, 20, 25, 30};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::Array<4, double> arr(rgn, 12.5);
+
+// deflate the 4D array into a 2D array
+  unsigned defDims[2] = {1, 2};
+  int defDimsIdx[2] = {10, 10};
+
+  Lucee::Array<2, double> defArr = arr.deflate<2>(defDims, defDimsIdx);
+
+  LC_ASSERT("Testing deflated array lower bound", defArr.getLower(0) == 3);
+  LC_ASSERT("Testing deflated array lower bound", defArr.getLower(1) == 10);
+
+  LC_ASSERT("Testing deflated array upper bound", defArr.getUpper(0) == 15);
+  LC_ASSERT("Testing deflated array upper bound", defArr.getUpper(1) == 30);
+
+}
+
 int
 main(void) 
 {
@@ -488,5 +510,6 @@ main(void)
   test_9();
   test_10();
   test_11();
+  test_12();
   LC_END_TESTS;
 }

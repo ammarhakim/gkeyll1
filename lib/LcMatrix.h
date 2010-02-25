@@ -24,7 +24,7 @@
 namespace Lucee
 {
   template <typename T>
-  class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer<2> >
+  class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer >
   {
     public:
 /**

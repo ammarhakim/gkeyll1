@@ -39,10 +39,13 @@ namespace Lucee
 #define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
 #define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
-  template <unsigned NDIM, typename T, typename INDEXER = Lucee::RowMajorIndexer<NDIM> >
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::RowMajorIndexer>
   class Array
   {
     public:
+/** We need to friend ourself to allow accessing private stuff from another dimension */
+      template <unsigned RDIM, typename TT, template <unsigned> class IINDEXER> friend class Array;
+
 /**
  * Construct array with specified shape.
  *
@@ -75,6 +78,16 @@ namespace Lucee
  * @param arr Array to create from.
  */
       Array(const Array<NDIM, T, INDEXER>& arr);
+
+/**
+ * Construct array with specified index region and re-using the
+ * supplied data-space.
+ *
+ * @param rgn Region indexed by array.
+ * @param dp Pointer to data space to use.
+ */
+      Array(const Lucee::Region<NDIM, int>& rgn, T* dp);
+
 
 /**
  * Copy array from input array. The copy does not allocate new space
@@ -176,6 +189,51 @@ namespace Lucee
  * @return Sliced array.
  */
       Array<NDIM, T, INDEXER> getSlice(const Lucee::Region<NDIM, int>& rgn);
+
+/**
+ * Deflate the array into a lower-dimensional array. The returned
+ * array shares the data with this array.
+ *
+ * @param defDims Dimensions to remove from array.
+ * @param defDimsIdx Index along the removed dimensions.
+ * @return deflated array.
+ */
+      template <unsigned RDIM>
+      Array<RDIM, T, INDEXER> 
+      deflate(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM])
+      {
+        ++*useCount; // increment use count in case array is deleted before slice
+// extend defDims array for use in creating new lower/upper bounds
+        unsigned extDefDims[NDIM];
+        for (unsigned i=0; i<NDIM-RDIM; ++i)
+          extDefDims[i] = defDims[i];
+        for (unsigned i=NDIM-RDIM; i<NDIM; ++i)
+          extDefDims[i] = NDIM+1; // so that cmp in if-statement fails
+
+// construct deflated lower and upper bounds
+        int defLower[RDIM], defUpper[RDIM];
+        unsigned ddIdx = 0, nddIdx = 0;
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          if (extDefDims[ddIdx] != i)
+          {
+            defLower[nddIdx] = getLower(i);
+            defUpper[nddIdx] = getUpper(i);
+            nddIdx++;
+          }
+          else
+          {
+            ddIdx++;
+          }
+        }
+        Lucee::Region<RDIM, int> defRgn(defLower, defUpper);
+        Lucee::Array<RDIM, T, INDEXER> na(defRgn, data);
+        //na.indexer = indexer; // slice uses same indexer as this array
+        delete na.useCount;
+        na.useCount = useCount;
+        
+        return na;
+      }
 
 /**
  * Accessor function for array.
@@ -288,7 +346,7 @@ namespace Lucee
 
     private:
 /** Indexer into array */
-      INDEXER indexer;
+      INDEXER<NDIM> indexer;
 /** Array traits stored as bit values */
       unsigned traits;
 /** Shape of array */
@@ -301,17 +359,9 @@ namespace Lucee
       T *data;
 /** Number of arrays pointing to this array */
       mutable int* useCount;
-
-/**
- * Construct array with specified index region.
- *
- * @param rgn Region indexed by array.
- * @param dp Pointer to data space to use.
- */
-      Array(const Lucee::Region<NDIM, int>& rgn, T* dp);
   };
   
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::Array(const unsigned shp[NDIM], const T& init)
     : indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
       traits(0),
@@ -332,7 +382,7 @@ namespace Lucee
     LC_SET_ALLOC(traits);
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::Array(const unsigned shp[NDIM], const int sta[NDIM], const T& init)
     : indexer(shp, sta), traits(0),
       useCount(new int(1))
@@ -352,7 +402,7 @@ namespace Lucee
     LC_SET_ALLOC(traits);
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::Array(const Lucee::Region<NDIM, int>& rgn, const T& init)
     : indexer(rgn), traits(0), useCount(new int(1))
   {
@@ -371,7 +421,7 @@ namespace Lucee
     LC_SET_ALLOC(traits);
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::Array(const Array<NDIM, T, INDEXER>& arr)
     : indexer(arr.indexer), traits(arr.traits), len(arr.len), data(arr.data)
   {
@@ -386,7 +436,7 @@ namespace Lucee
     useCount = arr.useCount;
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>&
   Array<NDIM, T, INDEXER>::operator=(const Array<NDIM, T, INDEXER>& arr)
   {
@@ -425,7 +475,7 @@ namespace Lucee
     return *this;
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::~Array()
   {
     if ((--*useCount == 0) && LC_IS_ALLOC(traits)) 
@@ -435,7 +485,7 @@ namespace Lucee
     }
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>&
   Array<NDIM, T, INDEXER>::operator=(const T& val)
   {
@@ -448,7 +498,7 @@ namespace Lucee
 // create sequencer
       Lucee::Region<NDIM, int> rgn
         = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
-      typename INDEXER::Sequencer seq(rgn);
+      typename INDEXER<NDIM>::Sequencer seq(rgn);
 // loop over region
       while (seq.step())
         data[indexer.getGenIndex(seq.getIndex())] = val;
@@ -457,7 +507,7 @@ namespace Lucee
     return *this;
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   void 
   Array<NDIM, T, INDEXER>::fillWithShape(unsigned shp[NDIM]) const
   {
@@ -466,7 +516,7 @@ namespace Lucee
   }
 
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   void 
   Array<NDIM, T, INDEXER>::fillWithStart(int strt[NDIM]) const
   {
@@ -474,28 +524,28 @@ namespace Lucee
       strt[i] = start[i];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   unsigned 
   Array<NDIM, T, INDEXER>::getShape(unsigned dir) const
   {
     return shape[dir];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   int
   Array<NDIM, T, INDEXER>::getLower(unsigned dir) const
   {
     return start[dir];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   int
   Array<NDIM, T, INDEXER>::getUpper(unsigned dir) const
   {
     return start[dir]+shape[dir];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T&
   Array<NDIM, T, INDEXER>::first()
   {
@@ -504,7 +554,7 @@ namespace Lucee
     return data[indexer.getGenIndex(start)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Lucee::Region<NDIM, int>
   Array<NDIM, T, INDEXER>::getRegion() const
   {
@@ -514,7 +564,7 @@ namespace Lucee
     return Lucee::Region<NDIM, int>(start, upper);
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>
   Array<NDIM, T, INDEXER>::getSlice(const Lucee::Region<NDIM, int>& rgn)
   {
@@ -531,91 +581,91 @@ namespace Lucee
     return na;
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T&
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM])
   {
     return data[indexer.getGenIndex(idx)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T 
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM]) const
   {
     return data[indexer.getGenIndex(idx)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T&
   Array<NDIM, T, INDEXER>::operator()(int i)
   {
     return data[indexer.getIndex(i)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T
   Array<NDIM, T, INDEXER>::operator()(int i) const
   {
     return data[indexer.getIndex(i)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T&
   Array<NDIM, T, INDEXER>::operator()(int i, int j)
   {
     return data[indexer.getIndex(i, j)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T
   Array<NDIM, T, INDEXER>::operator()(int i, int j) const
   {
     return data[indexer.getIndex(i, j)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T&
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k)
   {
     return data[indexer.getIndex(i, j, k)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k) const
   {
     return data[indexer.getIndex(i, j, k)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T& 
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l)
   {
     return data[indexer.getIndex(i, j, k, l)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T 
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T& 
   Array<NDIM, T, INDEXER>::getRefToLoc(unsigned loc)
   {
     return data[loc];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   const T& 
   Array<NDIM, T, INDEXER>::getConstRefToLoc(unsigned loc) const
   {
     return data[loc];
   }
 
-  template <unsigned NDIM, typename T, typename INDEXER>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::Array(const Lucee::Region<NDIM, int>& rgn, T* dp)
     : indexer(rgn), traits(0), useCount(new int(1)), data(dp)
   {
