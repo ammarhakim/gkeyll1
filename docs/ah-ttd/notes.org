@@ -93,11 +93,47 @@
 
 * Lucee Notes
 
-** TODO Impliment a subDimSlice() function
+** TODO Implement a getLowerDimSlice() function
 
    This should allow creating a lower-dimensional array from an array
    of a given dimension. The function should take an array of
-   dimensions to keep.
+   dimensions to keep. For example:
+#+BEGIN_EXAMPLE
+   int lower[3] = {1, 3, 2};
+   int upper[3] = {10, 9, 12};
+   Lucee::Region<3, int> rgn(lower, upper);
+   Lucee::Array<3, double> arr(rgn);
+
+   int selectDims[2] = {0, 2};
+   int missingDimsIdx[1] = {3}
+   Lucee::Array<2, double> sl2d = 
+     arr.getLowerDimSlice<2>(selectDims, missingDimsIdx);
+#+END_EXAMPLE
+
+   This should create a 2D array sl2d with lower bounds {1, 2} and
+   upper bounds {10, 12} that shares data with the arr array. The
+   indexing semantics are: sl2d(i,j) maps to arr(i,3,j).
+
+   Another way to do this could be:
+#+BEGIN_EXAMPLE
+   int lower[3] = {1, 3, 2};
+   int upper[3] = {10, 9, 12};
+   Lucee::Region<3, int> rgn(lower, upper);
+   Lucee::Array<3, double> arr(rgn);
+
+   int missingDims[1] = {1};
+   int missingDimsIdx[1] = {3}
+   Lucee::Array<2, double> sl2d = 
+     arr.getLowerDimSlice<2>(missingDims, missingDimsIdx);
+#+END_EXAMPLE
+     The function declaration in the latter case would be:
+#+BEGIN_EXAMPLE
+     template <RDIM>
+     Array<RDIM, T, INDEXER>
+     getLowerDimSlice(const unsigned missingDims[NDIM-RDIM],
+       const int missingDimsIdx[NDIM-RDIM]);
+#+END_EXAMPLE
+   The latter seems better.
 
 ** TODO <2010-02-24 Wed> Fix doxygen errors.
 ** DONE Implement sequencers for arrays.
