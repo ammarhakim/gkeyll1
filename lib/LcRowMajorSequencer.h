@@ -69,6 +69,58 @@ namespace Lucee
 /** Is region empty */
       bool isEmpty;
   };
+
+  template <unsigned NDIM>
+  RowMajorSequencer<NDIM>::RowMajorSequencer(const Lucee::Region<NDIM, int>& rgn)
+    : rgn(rgn), isFirst(true)
+  {
+    isEmpty = rgn.getVolume() <= 0 ? true : false;
+    for (unsigned i=0; i<NDIM; ++i)
+      idx[i] = rgn.getLower(i);
+  }
+
+  template <unsigned NDIM>
+  void
+  RowMajorSequencer<NDIM>::fillWithIndex(int oidx[NDIM]) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      oidx[i] = idx[i];
+  }
+
+  template <unsigned NDIM>
+  bool
+  RowMajorSequencer<NDIM>::step()
+  {
+    if (isEmpty)
+    { // if region has zero volume, do nothing
+      return false;
+    }
+
+    if (isFirst)
+    { // first time around: indices already set in ctor
+      isFirst = false;
+      return true;
+    }
+
+    for (int i=NDIM-1; i>=0; --i)
+    {
+      idx[i] += 1;
+      if (idx[i] > rgn.getUpper(i)-1)
+        idx[i] = rgn.getLower(i);
+      else
+        return true;
+    }
+    return false;
+  }
+
+  template <unsigned NDIM>
+  void
+  RowMajorSequencer<NDIM>::reset()
+  {
+    isFirst = true;
+    for (unsigned i=0; i<NDIM; ++i)
+      idx[i] = rgn.getLower(i);
+  }
 }
 
 #endif // LC_ROW_MAJOR_SEQUENCER_H
