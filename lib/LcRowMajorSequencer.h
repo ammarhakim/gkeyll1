@@ -40,6 +40,25 @@ namespace Lucee
  */
       bool step();
 
+/**
+ * Reset the sequencer to point to the first location in region.
+ */
+      void reset();
+
+/**
+ * Return pointer to current indices in region.
+ *
+ * @return pointer to indices in region.
+ */
+      const int* getIndex() const { return idx; }
+
+/**
+ * Fill supplied array with current index in region.
+ *
+ * @param idx On output the current index in region.
+ */
+      void fillWithIndex(int idx[NDIM]) const;
+
     private:
 /** Region over which sequencer works */
       Lucee::Region<NDIM, int> rgn;
