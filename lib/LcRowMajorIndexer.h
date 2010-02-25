@@ -17,9 +17,9 @@
 #endif
 
 // lucee includes
-#include <LcFixedVector.h>
 #include <LcLinIndexer.h>
 #include <LcRegion.h>
+#include <LcRowMajorSequencer.h>
 
 namespace Lucee
 {
@@ -76,6 +76,9 @@ namespace Lucee
   class RowMajorIndexer : public Lucee::LinIndexer<NDIM>
   {
     public:
+/** Type of sequencer that goes with this indexer */
+      typedef RowMajorSequencer<NDIM> Sequencer;
+
 /**
  * Create a new indexer for mapping an N-dimensional index into a
  * linear index.

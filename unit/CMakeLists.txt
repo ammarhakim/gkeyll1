@@ -74,3 +74,7 @@ target_link_libraries(lcfield lclib lcloki lclua)
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
 target_link_libraries(lcrowmajorsequencer lclib lcloki lclua)
+
+# lccolmajorsequencer
+add_executable(lccolmajorsequencer lccolmajorsequencer.cxx)
+target_link_libraries(lccolmajorsequencer lclib lcloki lclua)
