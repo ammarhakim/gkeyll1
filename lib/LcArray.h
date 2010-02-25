@@ -292,7 +292,7 @@ namespace Lucee
 /** Array traits stored as bit values */
       unsigned traits;
 /** Shape of array */
-      unsigned shape[NDIM];
+      int shape[NDIM];
 /** Start index of array */
       int start[NDIM];
 /** Total size of array */
@@ -440,12 +440,18 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::operator=(const T& val)
   {
     if (isContiguous())
-// just copy value directly into data-space
+// just set value directly into data-space
       for (unsigned i=0; i<getSize(); ++i)
         data[i] = val;
     else
     {
-      throw Lucee::Except("Array::operator=: NOT IMPLEMENTED");
+// create sequencer
+      Lucee::Region<NDIM, int> rgn
+        = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+      typename INDEXER::Sequencer seq(rgn);
+// loop over region
+      while (seq.step())
+        data[indexer.getGenIndex(seq.getIndex())] = val;
     }
 
     return *this;

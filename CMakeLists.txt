@@ -75,3 +75,6 @@ add_test(lcfield unit/lcfield)
 # lcrowmajorsequencer
 add_test(lcrowmajorsequencer unit/lcrowmajorsequencer)
 
+# lccolmajorsequencer
+add_test(lccolmajorsequencer unit/lccolmajorsequencer)
+

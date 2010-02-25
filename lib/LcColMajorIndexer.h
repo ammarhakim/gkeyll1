@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcColMajorSequencer.h>
 #include <LcLinIndexer.h>
 #include <LcRegion.h>
 
@@ -73,6 +74,9 @@ namespace Lucee
   class ColMajorIndexer : public Lucee::LinIndexer<NDIM>
   {
     public:
+/** Type of sequencer that goes with this indexer */
+      typedef ColMajorSequencer<NDIM> Sequencer;
+
 /**
  * Create a new indexer for mapping an N-dimensional index into a
  * linear index.

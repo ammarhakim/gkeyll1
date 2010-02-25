@@ -274,6 +274,16 @@ namespace Lucee
     : lower(0), upper(0), volume(0)
   {
   }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>
+  createRegionFromStartAndShape(const T start[NDIM], const T shape[NDIM])
+  {
+    T upper[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+      upper[i] = start[i] + shape[i];
+    return Region<NDIM, T>(start, upper);
+  }
 }
 
 #endif // LC_REGION_H

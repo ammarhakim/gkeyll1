@@ -486,7 +486,7 @@ main(void)
   test_7();
   test_8();
   test_9();
-  //test_10();
+  test_10();
   test_11();
   LC_END_TESTS;
 }
