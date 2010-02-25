@@ -162,6 +162,59 @@ namespace Lucee
  */
       int getGenLowIndex(const int idx[NDIM-1]) const;
 
+/**
+ * Return an indexer that allows indexing a lower-dimensional space.
+ *
+ */
+      template <unsigned RDIM>
+      LinIndexer<RDIM>
+      deflate(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM]) const
+      {
+// extend defDims array for use in creating new lower/upper bounds
+        unsigned extDefDims[NDIM];
+        for (unsigned i=0; i<NDIM-RDIM; ++i)
+          extDefDims[i] = defDims[i];
+        for (unsigned i=NDIM-RDIM; i<NDIM; ++i)
+          extDefDims[i] = NDIM+1; // so that cmp in if-statement fails
+
+// construct deflated-indexer start and shape
+        int defStart[RDIM];
+        unsigned defShape[RDIM], ddIdx = 0, nddIdx = 0;
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          if (extDefDims[ddIdx] != i)
+          {
+            defStart[nddIdx] = start[i];
+            defShape[nddIdx] = shape[i];
+            nddIdx++;
+          }
+          else
+          {
+            ddIdx++;
+          }
+        }
+
+// construct deflated-indexer coefficients
+        int defAi[RDIM+1];
+        int sum = ai[0];
+        for (unsigned i=0; i<NDIM-RDIM; ++i)
+          sum += defDimsIdx[i]*ai[defDims[i]+1];
+        ddIdx = 0, nddIdx = 0;
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          if (extDefDims[ddIdx] != i)
+          {
+            defStart[nddIdx+1] = ai[i+1];
+            nddIdx++;
+          }
+          else
+          {
+            ddIdx++;
+          }
+        }
+        return LinIndexer<RDIM>(defShape, defStart, defAi);
+      }
+
     private:
 /** Start indices */
       Lucee::FixedVector<NDIM, int> start;

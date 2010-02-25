@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* Feb 25th 2010
+
+  - To support deflating of Array the INDEXER template parameter had
+    to be made a class template. Now, the Array declaration looks
+    mighty ugly:
+#+BEGIN_EXAMPLE
+    template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::RowMajorIndexer>
+    class Array;
+#+END_EXAMPLE
+    Further, Array<NDIM class needs to friend itself to access private
+    stuff from Array<RDIM>, where NDIM != RDIM. This horror looks
+    like:
+#+BEGIN_EXAMPLE
+    template <unsigned RDIM, typename TT, template <unsigned> class IINDEXER> friend class Array;
+#+END_EXAMPLE
+
 * Feb 24th 2010
 
   - Completed Row and Col major sequencers.
