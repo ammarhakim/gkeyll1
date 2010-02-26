@@ -200,15 +200,15 @@ namespace Lucee
 
 // construct deflated-indexer coefficients
         int defAi[RDIM+1];
-        int sum = ai[0];
+        defAi[0] = ai[0];
         for (unsigned i=0; i<NDIM-RDIM; ++i)
-          sum += defDimsIdx[i]*ai[defDims[i]+1];
-        ddIdx = 0, nddIdx = 0;
+          defAi[0] += defDimsIdx[i]*ai[defDims[i]+1];
+        ddIdx = 0; nddIdx = 0;
         for (unsigned i=0; i<NDIM; ++i)
         {
           if (extDefDims[ddIdx] != i)
           {
-            defStart[nddIdx+1] = ai[i+1];
+            defAi[nddIdx+1] = ai[i+1];
             nddIdx++;
           }
           else

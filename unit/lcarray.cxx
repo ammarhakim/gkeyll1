@@ -492,6 +492,19 @@ test_12()
   LC_ASSERT("Testing deflated array upper bound", defArr.getUpper(0) == 15);
   LC_ASSERT("Testing deflated array upper bound", defArr.getUpper(1) == 30);
 
+// set the 4D array
+  Lucee::RowMajorSequencer<4> seq(rgn);
+  double count = 1.5;
+  while (seq.step())
+  {
+    arr(seq.getIndex()) = count;
+    count += 1.5;
+  }
+
+// now check deflated array
+  for (int i=defArr.getLower(0); i<defArr.getUpper(0); ++i)
+    for (int j=defArr.getLower(1); j<defArr.getUpper(1); ++j)
+      LC_ASSERT("Testing deflated array", defArr(i,j) == arr(i,10,10,j));
 }
 
 int

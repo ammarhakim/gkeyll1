@@ -15,8 +15,8 @@ written as
 
 where :math:`q(x,y,z,t)` is a system of m conserved variables,
 :math:`f(q), g(q), h(q)` are flux functions and :math:`s(q,t)` are
-sources. This system of equations is called a system of *hyperbolic
-balance laws* if the Jacobian matrix 
+sources. This set of equations is called a system of *hyperbolic
+balance laws* if the Jacobian matrix
 
 .. math::
   :nowrap:

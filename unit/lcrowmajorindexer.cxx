@@ -308,8 +308,68 @@ test_8()
   LC_ASSERT("Testing upper bounds of deflated indexer", 
     defRow.getUpper(0) == 15);
   LC_ASSERT("Testing upper bounds of deflated indexer", 
-    defRow.getUpper(1) == 13);
+    defRow.getUpper(1) == 30);
 
+// now check deflated indexer
+  for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=rgn.getLower(1); j<rgn.getUpper(1); ++j)
+      LC_ASSERT("Testing deflated indexer", defRow.getIndex(i,j) == row.getIndex(i,10,10,j));
+}
+
+void
+test_9()
+{
+  int lower[4] = {3, 6, 8, 10};
+  int upper[4] = {15, 20, 25, 30};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::RowMajorIndexer<4> row(rgn);
+
+// deflate the 4D indexer into a 2D indexer
+  unsigned defDims[2] = {0, 3};
+  int defDimsIdx[2] = {4, 15};
+
+  Lucee::RowMajorIndexer<2> defRow
+    = row.deflate<2>(defDims, defDimsIdx);
+
+  LC_ASSERT("Testing lower bounds of deflated indexer", 
+    defRow.getLower(0) == 6);
+  LC_ASSERT("Testing lower bounds of deflated indexer", 
+    defRow.getLower(1) == 8);
+
+  LC_ASSERT("Testing upper bounds of deflated indexer", 
+    defRow.getUpper(0) == 20);
+  LC_ASSERT("Testing upper bounds of deflated indexer", 
+    defRow.getUpper(1) == 25);
+
+// now check deflated indexer
+  for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+    for (int j=rgn.getLower(1); j<rgn.getUpper(1); ++j)
+      LC_ASSERT("Testing deflated indexer", defRow.getIndex(i,j) == row.getIndex(4,i,j,15));
+}
+
+void
+test_10()
+{
+  int lower[4] = {3, 6, 8, 10};
+  int upper[4] = {15, 20, 25, 30};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::RowMajorIndexer<4> row(rgn);
+
+// deflate the 4D indexer into a 1D indexer
+  unsigned defDims[3] = {0, 1, 2};
+  int defDimsIdx[3] = {4, 15, 20};
+
+  Lucee::RowMajorIndexer<1> defRow
+    = row.deflate<1>(defDims, defDimsIdx);
+
+  LC_ASSERT("Testing lower bounds of deflated indexer", 
+    defRow.getLower(0) == 10);
+  LC_ASSERT("Testing upper bounds of deflated indexer", 
+    defRow.getUpper(0) == 30);
+
+// now check deflated indexer
+  for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+    LC_ASSERT("Testing deflated indexer", defRow.getIndex(i) == row.getIndex(4,15,20,i));
 }
 
 
@@ -325,6 +385,8 @@ main(void)
   test_6();
   test_7();
   test_8();
+  test_9();
+  test_10();
 
   test_1_1();
   test_2_2();

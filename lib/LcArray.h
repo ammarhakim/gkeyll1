@@ -228,7 +228,7 @@ namespace Lucee
         }
         Lucee::Region<RDIM, int> defRgn(defLower, defUpper);
         Lucee::Array<RDIM, T, INDEXER> na(defRgn, data);
-        //na.indexer = indexer; // slice uses same indexer as this array
+        na.indexer = indexer.template deflate<RDIM>(defDims, defDimsIdx);
         delete na.useCount;
         na.useCount = useCount;
         
