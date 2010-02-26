@@ -1,8 +1,8 @@
 Array indexing and sequencing
 -----------------------------
 
-This note describes the indexing and sequencing algorithgms
-implemented in Lucee.
+This note describes the indexing and sequencing algorithms implemented
+in Lucee.
 
 Array indexing
 ++++++++++++++
