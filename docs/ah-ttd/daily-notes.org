@@ -9,12 +9,17 @@
     template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::RowMajorIndexer>
     class Array;
 #+END_EXAMPLE
-    Further, Array<NDIM class needs to friend itself to access private
+    Further, Array<NDIM> class needs to friend itself to access private
     stuff from Array<RDIM>, where NDIM != RDIM. This horror looks
     like:
 #+BEGIN_EXAMPLE
     template <unsigned RDIM, typename TT, template <unsigned> class IINDEXER> friend class Array;
 #+END_EXAMPLE
+  - Added deflate() methods to both indexer classes and to the array
+    class. Seems to work just fine.
+  - Derived classes of Array will need to provide their own deflate
+    methods. In particular, Matrix class should support getting a row
+    or a column. What should Field do?
 
 * Feb 24th 2010
 
