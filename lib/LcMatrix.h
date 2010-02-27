@@ -95,6 +95,22 @@ namespace Lucee
       unsigned numColumns() const { return this->template getShape(1); }
 
 /**
+ * Return a row of the martrix.
+ *
+ * @param row Row to return.
+ * @return Row of the matrix.
+ */
+      Lucee::Vector<T> getRow(unsigned row);
+
+/**
+ * Return a column of the martrix.
+ *
+ * @param col Column to return.
+ * @return Column of the matrix.
+ */
+      Lucee::Vector<T> getCol(unsigned col);
+
+/**
  * Is this matrix a transpose of another one?
  *
  * @return true if this matrix is transpose of another one.

@@ -181,33 +181,21 @@ namespace Lucee
         for (unsigned i=NDIM-RDIM; i<NDIM; ++i)
           extDefDims[i] = NDIM+1; // so that cmp in if-statement fails
 
-// construct deflated-indexer start and shape
+// construct deflated-indexer start, shape and coefficients
         int defStart[RDIM];
         unsigned defShape[RDIM], ddIdx = 0, nddIdx = 0;
+        int defAi[RDIM+1];
+// compute 0th coefficient
+        defAi[0] = ai[0];
+        for (unsigned i=0; i<NDIM-RDIM; ++i)
+          defAi[0] += defDimsIdx[i]*ai[defDims[i]+1];
+// now compute the other stuff
         for (unsigned i=0; i<NDIM; ++i)
         {
           if (extDefDims[ddIdx] != i)
           {
             defStart[nddIdx] = start[i];
             defShape[nddIdx] = shape[i];
-            nddIdx++;
-          }
-          else
-          {
-            ddIdx++;
-          }
-        }
-
-// construct deflated-indexer coefficients
-        int defAi[RDIM+1];
-        defAi[0] = ai[0];
-        for (unsigned i=0; i<NDIM-RDIM; ++i)
-          defAi[0] += defDimsIdx[i]*ai[defDims[i]+1];
-        ddIdx = 0; nddIdx = 0;
-        for (unsigned i=0; i<NDIM; ++i)
-        {
-          if (extDefDims[ddIdx] != i)
-          {
             defAi[nddIdx+1] = ai[i+1];
             nddIdx++;
           }
@@ -218,7 +206,6 @@ namespace Lucee
         }
         return LinIndexer<RDIM>(defShape, defStart, defAi);
       }
-
 
     private:
 /** Start indices */

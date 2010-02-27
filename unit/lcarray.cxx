@@ -10,6 +10,7 @@
 
 // lucee includes
 #include <LcArray.h>
+#include <LcRowMajorSequencer.h>
 #include <LcTest.h>
 
 void

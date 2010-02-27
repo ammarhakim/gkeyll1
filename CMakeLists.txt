@@ -4,19 +4,25 @@ project(lucee)
 # Required version
 cmake_minimum_required(VERSION 2.4)
 
+# Add path to additional modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
+
 if (WIN32)
 # On Windows we need to shut up security warnings
    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif (WIN32)
 
-# Add in path to additional modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
-
 # Check for include files
 add_definitions(-DHAVE_CONFIG_H)
-INCLUDE(CheckIncludeFileCXX)
+INDCLUDE(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(iostream HAVE_STD_STREAMS)
 CHECK_INCLUDE_FILE_CXX(sstream HAVE_SSTREAM)
+
+# Check for GSL
+find_package(GSL)
+if (GSL_FOUND)
+   message ("GSL Found")
+endif (GSL_FOUND)
 
 # Create configure file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
@@ -77,4 +83,3 @@ add_test(lcrowmajorsequencer unit/lcrowmajorsequencer)
 
 # lccolmajorsequencer
 add_test(lccolmajorsequencer unit/lccolmajorsequencer)
-

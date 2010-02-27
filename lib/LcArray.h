@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcRowMajorIndexer.h>
+#include <LcColMajorIndexer.h>
 #include <LcExcept.h>
 #include <LcFixedVector.h>
 #include <LcRegion.h>
@@ -39,7 +39,7 @@ namespace Lucee
 #define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
 #define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
-  template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::RowMajorIndexer>
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::ColMajorIndexer>
   class Array
   {
     public:
@@ -78,16 +78,6 @@ namespace Lucee
  * @param arr Array to create from.
  */
       Array(const Array<NDIM, T, INDEXER>& arr);
-
-/**
- * Construct array with specified index region and re-using the
- * supplied data-space.
- *
- * @param rgn Region indexed by array.
- * @param dp Pointer to data space to use.
- */
-      Array(const Lucee::Region<NDIM, int>& rgn, T* dp);
-
 
 /**
  * Copy array from input array. The copy does not allocate new space
@@ -328,6 +318,15 @@ namespace Lucee
       T operator()(int i, int j, int k, int l) const;
 
     protected:
+/**
+ * Construct array with specified index region and re-using the
+ * supplied data-space.
+ *
+ * @param rgn Region indexed by array.
+ * @param dp Pointer to data space to use.
+ */
+      Array(const Lucee::Region<NDIM, int>& rgn, T* dp);
+
 /**
  * Returns reference to location in underlying memory space.
  *
