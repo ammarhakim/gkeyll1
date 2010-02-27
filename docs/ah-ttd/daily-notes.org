@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* Feb 26th 2010
+
+  - Added getRow() and getCol() methods to Matrix class. Also added
+    the ability to create Vector object from a Array<1, T>
+    object. This allows the getRow() and getCol() methods to return
+    Vector objects.
+
 * Feb 25th 2010
 
   - To support deflating of Array the INDEXER template parameter had

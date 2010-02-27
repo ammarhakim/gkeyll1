@@ -48,6 +48,14 @@ namespace Lucee
       Vector(const Vector<T>& vec);
 
 /**
+ * Create a new vector from 1D array object. Created vector and array
+ * share data.
+ *
+ * @param arr Array to create from.
+ */
+      Vector(const Lucee::Array<1, T>& arr);
+
+/**
  * Copy input vector.
  *
  * @param vec Vector to copy from.
@@ -92,7 +100,6 @@ namespace Lucee
  * @return Copy of this vector.
  */
       Vector<T> duplicate() const;
-
   };
 }
 

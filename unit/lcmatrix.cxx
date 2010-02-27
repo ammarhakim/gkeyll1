@@ -278,6 +278,41 @@ test_9()
       LC_ASSERT("Testing if vector-vector outer product worked", A(i,j)==2.0);
 }
 
+void
+test_10()
+{
+  Lucee::Matrix<double> A(3, 5);
+  A = 10.5;
+  for (int i=0; i<5; ++i)
+    A(2,i) = (i+0.5)*2.5;
+
+  LC_RAISES("Testing if exception if thrown", A.getRow(3), Lucee::Except);
+  LC_RAISES("Testing if exception if thrown", A.getCol(5), Lucee::Except);
+
+  Lucee::Vector<double> x = A.getRow(2);
+  LC_ASSERT("Testing if row of matrix got correctly", x.getLength() == 5);
+
+  for (int i=0; i<5; ++i)
+    LC_ASSERT("Testing if row of matrix has proper data", x(i) == (i+0.5)*2.5);
+
+  x = 12.5;
+  for (int i=0; i<5; ++i)
+    LC_ASSERT("Testing if matrix changed", A(2,i) == 12.5);
+
+  Lucee::Vector<double> y = A.getCol(4);
+  LC_ASSERT("Testing if row of matrix got correctly", y.getLength() == 3);
+
+  for (int i=0; i<3; ++i)
+    A(i,4) = (i+0.5)*2.5;
+
+  for (int i=0; i<3; ++i)
+    LC_ASSERT("Testing if row of matrix has proper data", y(i) == (i+0.5)*2.5);
+
+  y = 12.5;
+  for (int i=0; i<3; ++i)
+    LC_ASSERT("Testing if matrix changed", A(i,4) == 12.5);
+}
+
 int
 main(void) 
 {
@@ -291,5 +326,6 @@ main(void)
   test_7();
   test_8();
   test_9();
+  test_10();
   LC_END_TESTS;
 }

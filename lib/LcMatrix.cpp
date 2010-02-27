@@ -79,6 +79,44 @@ namespace Lucee
   }
 
   template <typename T>
+  Lucee::Vector<T>
+  Matrix<T>::getRow(unsigned row)
+  {
+    if (row > numRows()-1)
+    {
+      Lucee::Except lce("Matrix::getRow: Incorrect row ");
+      lce << row << " specified"  << std::endl;
+      throw lce;
+    }
+
+    unsigned defDims[1] = {0};
+    int defDimsIdx[1];
+    defDimsIdx[0] = row;
+// call parent class to get row
+    Lucee::Array<1, T> myRow = this->template deflate<1>(defDims, defDimsIdx);
+    return Lucee::Vector<T>(myRow);
+  }
+
+  template <typename T>
+  Lucee::Vector<T>
+  Matrix<T>::getCol(unsigned col)
+  {
+    if (col > numColumns()-1)
+    {
+      Lucee::Except lce("Matrix::getCol: Incorrect col ");
+      lce << col << " specified"  << std::endl;
+      throw lce;
+    }
+
+    unsigned defDims[1] = {1};
+    int defDimsIdx[1];
+    defDimsIdx[0] = col;
+// call parent class to get column
+    Lucee::Array<1, T> myCol = this->template deflate<1>(defDims, defDimsIdx);
+    return Lucee::Vector<T>(myCol);
+  }
+
+  template <typename T>
   Matrix<T>
   Matrix<T>::duplicate() const
   {

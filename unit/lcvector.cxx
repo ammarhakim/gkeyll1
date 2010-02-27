@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcArray.h>
 #include <LcVector.h>
 #include <LcTest.h>
 
@@ -33,10 +34,28 @@ test_1()
     LC_ASSERT("Testing value of fixed vector", vec[i] == i);
 }
 
+void
+test_2()
+{
+  int lower[1] = {10};
+  int upper[1] = {20};
+  Lucee::Region<1, int> rgn(lower, upper);
+  Lucee::Array<1, double> arr1d(rgn);
+
+  for (int i=arr1d.getLower(0); i<arr1d.getUpper(0); ++i)
+    arr1d(i) = (0.5+i)*2.5;
+
+// create vector from array
+  Lucee::Vector<double> vec(arr1d);
+  for (int i=arr1d.getLower(0); i<arr1d.getUpper(0); ++i)
+    LC_ASSERT("Testing vector created from 1D array", vec(i) == (0.5+i)*2.5);
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcvector");
   test_1();
+  test_2();
   LC_END_TESTS;
 }
