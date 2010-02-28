@@ -244,44 +244,6 @@ test_7()
       }
 }
 
-void
-test_8()
-{
-  int lower[3] = {2, 5, 6};
-  int upper[3] = {12, 32, 12};
-  Lucee::Region<3, int> rgn(lower, upper);
-  Lucee::Field<3, double> elcFld(rgn, 3, 10.0);
-
-  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
-  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
-    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
-      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
-      {
-        elcFld.setPtr(ptr, i, j, k);
-        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
-          ptr[n] = (i+3*j+5.5*k+0.5)*n;
-      }
-
-  int vlo[3] = {4, 8, 8};
-  int vup[3] = {10, 30, 10};
-  Lucee::Region<3, int> vrgn(vlo, vup);
-  Lucee::Array<4, double, Lucee::RowMajorIndexer> subElcFld 
-    = elcFld.getSlice(vrgn.inflate(0, 3));
-
-// check bounds of view
-  for (unsigned i=0; i<3; ++i)
-  {
-    LC_ASSERT("Testing bounds of view", subElcFld.getLower(i) == vlo[i]);
-    LC_ASSERT("Testing bounds of view", subElcFld.getUpper(i) == vup[i]);
-  }
-
-  for (int i=subElcFld.getLower(0); i<subElcFld.getUpper(0); ++i)
-    for (int j=subElcFld.getLower(1); j<subElcFld.getUpper(1); ++j)
-      for (int k=subElcFld.getLower(2); k<subElcFld.getUpper(2); ++k)
-        for (int n=0; n<3; ++n)
-          LC_ASSERT("Testing view components", subElcFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*n);
-}
-
 int
 main(void)
 {
@@ -293,6 +255,5 @@ main(void)
   test_5();
   test_6();
   test_7();
-  test_8();
   LC_END_TESTS;
 }
