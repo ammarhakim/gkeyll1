@@ -4,6 +4,7 @@
 
   - Starting to add ability to find external libraries. First one: GSL
     for RTE work.
+  - Now have getView() method to work in LcField.
 
 * Feb 26th 2010
 
