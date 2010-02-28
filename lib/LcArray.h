@@ -354,10 +354,10 @@ namespace Lucee
       int start[NDIM];
 /** Total size of array */
       unsigned len;
-/** Pointer to actual data */
-      T *data;
 /** Number of arrays pointing to this array */
       mutable int* useCount;
+/** Pointer to actual data */
+      T *data;
   };
   
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
@@ -548,8 +548,6 @@ namespace Lucee
   T&
   Array<NDIM, T, INDEXER>::first()
   {
-    if (isContiguous() == false)
-      throw Lucee::Except("Array::first: Array must be contiguous.");
     return data[indexer.getGenIndex(start)];
   }
 

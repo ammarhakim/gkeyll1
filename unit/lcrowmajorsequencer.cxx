@@ -21,14 +21,14 @@ test_1()
   Lucee::RowMajorSequencer<1> seq(rgn);
 
   int idx[1];
-  for (unsigned i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+  for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
   {
     seq.step();
     seq.fillWithIndex(idx);
     LC_ASSERT("Testing if 1D sequencer worked", idx[0] == i);
   }
 
-  for (unsigned i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+  for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
   {
     seq.step();
     const int *cidx = seq.getIndex();

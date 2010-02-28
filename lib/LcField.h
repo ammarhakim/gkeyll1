@@ -71,6 +71,36 @@ namespace Lucee
       Lucee::Region<NDIM, int> getRegion() const { return rgn; }
 
 /**
+ * Get a lower-dimensional field object. The returned object shares
+ * data with this object. The return field has access to all
+ * components stored in this field.
+ *
+ * @param defDims Dimensions to remove.
+ * @param defDimsIdx Index of removed dimensions.
+ * @return Lower dimensional field object.
+ */
+      template <unsigned RDIM, T>
+      Field<RDIM, T>
+      getLowDimField(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM])
+      {
+      }
+
+/**
+ * Get a view into the field. The returned object has the
+ * same-dimensionality and shares data with this object. The view has
+ * access to all components stored in this field.
+ *
+ * @param rgn Region of the slice.
+ * @return View into field.
+ */
+      Field<NDIM, T> getView(const Lucee::Region<NDIM, int>& rgn);
+
+/**
+ * Get a field with same indexed region as this one, but with 
+ */
+      Field<NDIM, T> getSubCompField(unsigned sc, unsigned ec);
+
+/**
  * Create a new pointer object to elements in field.
  *
  * @return Pointer to first-element in field.
@@ -155,6 +185,16 @@ namespace Lucee
       void setPtr(Lucee::ConstFieldPtr<T>& ptr, const int idx[NDIM]) const;
 
     private:
+/**
+ * Create a field attached to a given data space.
+ *
+ * @param rgn Region for field.
+ * @param nc Number of components in field.
+ * @param subArr Array space to reuse.
+ */
+      Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc,
+        Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr);
+
 /** Number of components */
       unsigned numComponents;
 /** Region indexed by grid */
@@ -164,49 +204,6 @@ namespace Lucee
 /** Lower and upper ghost indices */
       unsigned lowerGhost[NDIM], upperGhost[NDIM];
   };
-
-  template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
-    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
-  {
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      lowerGhost[i] = 0;
-      upperGhost[i] = 0;
-    }
-  }
-
-  template <unsigned NDIM, typename T>
-  Field<NDIM, T>&
-  Field<NDIM, T>::operator=(const T& val)
-  {
-// simply call base class assignment operator    
-    Array<NDIM+1, T, Lucee::RowMajorIndexer>::operator=(val);
-    return *this;
-  }
-
-  template <unsigned NDIM, typename T>
-  Lucee::FieldPtr<T>
-  Field<NDIM, T>::createPtr()
-  {
-    int start[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-      start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenLowIndex(start);
-    return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
-  }
-
-  template <unsigned NDIM, typename T>
-  Lucee::ConstFieldPtr<T>
-  Field<NDIM, T>::createConstPtr() const
-  {
-    int start[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-      start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenLowIndex(start);
-    return Lucee::ConstFieldPtr<T>(numComponents, &this->getConstRefToLoc(loc));
-  }
 
   template <unsigned NDIM, typename T>
   void
