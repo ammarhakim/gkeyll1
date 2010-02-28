@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* Feb 27th 2010
+
+  - Starting to add ability to find external libraries. First one: GSL
+    for RTE work.
+
 * Feb 26th 2010
 
   - Added getRow() and getCol() methods to Matrix class. Also added

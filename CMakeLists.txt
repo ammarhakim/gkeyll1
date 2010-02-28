@@ -2,10 +2,22 @@
 project(lucee)
 
 # Required version
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.8)
 
 # Add path to additional modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
+
+# Always build with warnings turned on
+set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall")
+
+# for debug builds use -g
+set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+
+# for optimized builds use
+set(CMAKE_C_FLAGS_RELEASE "-O3 -funroll-loops")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops")
 
 if (WIN32)
 # On Windows we need to shut up security warnings
@@ -14,14 +26,20 @@ endif (WIN32)
 
 # Check for include files
 add_definitions(-DHAVE_CONFIG_H)
-INDCLUDE(CheckIncludeFileCXX)
+INCLUDE(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(iostream HAVE_STD_STREAMS)
 CHECK_INCLUDE_FILE_CXX(sstream HAVE_SSTREAM)
+
+# Check for HDF5
+find_package(HDF5)
+if (HDF5_FOUND)
+
+endif (HDF5_FOUND)
 
 # Check for GSL
 find_package(GSL)
 if (GSL_FOUND)
-   message ("GSL Found")
+
 endif (GSL_FOUND)
 
 # Create configure file

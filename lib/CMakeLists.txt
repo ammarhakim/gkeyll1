@@ -11,6 +11,7 @@ add_library(lclib
   LcCmdLineArgs.cpp
   LcConstFieldPtr.cpp
   LcExcept.cpp 
+  LcField.cpp
   LcFieldPtr.cpp
   LcKeyVal.cpp
   LcKeyValTree.cpp

@@ -422,12 +422,12 @@ test_9()
   LC_ASSERT("Testing slice upper bounds", arrSl.getUpper(1) == 8);
 
 // set complete sliced array
-  for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
-    for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
+  for (int i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
+    for (int j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
       arrSl(i,j) = 18.5;
 
-  for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
-    for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
+  for (int i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
+    for (int j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
       LC_ASSERT("Testing if setting slice worked", arr(i,j) == 18.5);
 }
 
@@ -453,8 +453,8 @@ test_10()
 
 // set complete sliced array
   arrSl = 18.5;
-  for (unsigned i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
-    for (unsigned j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
+  for (int i=arrSl.getLower(0); i<arrSl.getUpper(0); ++i)
+    for (int j=arrSl.getLower(1); j<arrSl.getUpper(1); ++j)
       arrSl(i,j) = 18.5;
 }
 
