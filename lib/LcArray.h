@@ -500,7 +500,7 @@ namespace Lucee
       typename INDEXER<NDIM>::Sequencer seq(rgn);
 // loop over region
       while (seq.step())
-        data[indexer.getGenIndex(seq.getIndex())] = val;
+        data[indexer.getIndex(seq.getIndex())] = val;
     }
 
     return *this;
@@ -548,7 +548,7 @@ namespace Lucee
   T&
   Array<NDIM, T, INDEXER>::first()
   {
-    return data[indexer.getGenIndex(start)];
+    return data[indexer.getIndex(start)];
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
@@ -582,14 +582,14 @@ namespace Lucee
   T&
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM])
   {
-    return data[indexer.getGenIndex(idx)];
+    return data[indexer.getIndex(idx)];
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   T 
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM]) const
   {
-    return data[indexer.getGenIndex(idx)];
+    return data[indexer.getIndex(idx)];
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
