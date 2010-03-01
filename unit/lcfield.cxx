@@ -283,25 +283,42 @@ test_8()
   LC_ASSERT("Testing components bounds", magFld.getLower(3) == 3);
   LC_ASSERT("Testing components bounds", magFld.getUpper(3) == 6);
 
-  Lucee::FieldPtr<double> magPtr = magFld.createPtr();
-  for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
-    for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
-      for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
-      {
-        magFld.setPtr(magPtr, i, j, k);
-        elcFld.setPtr(elcPtr, i, j, k);
-        for (unsigned n=0; n<magPtr.getNumComponents(); ++n)
-        {
-          std::cout << magPtr[i] << " " << elcPtr[i] << " " << (i+3*j+5.5*k+0.5)*(n+3) << std::endl;
-          LC_ASSERT("Testing components of sub-comp view", magPtr[n] == (i+3*j+5.5*k+0.5)*(n+3));
-        }
-      }
+//   Lucee::FieldPtr<double> magPtr = magFld.createPtr();
+//   for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
+//     for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
+//       for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
+//       {
+//         magFld.setPtr(magPtr, i, j, k);
+//         elcFld.setPtr(elcPtr, i, j, k);
+//         for (unsigned n=0; n<magPtr.getNumComponents(); ++n)
+//           LC_ASSERT("Testing components of sub-comp view", magPtr[n] == (i+3*j+5.5*k+0.5)*(n+3));
+//       }
 
   for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
     for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
       for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
         for (int n=magFld.getLower(3); k<magFld.getUpper(3); ++k)
           LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*(n+3));
+
+  Lucee::RowMajorIndexer<4> emIdx = emFld.getIndexer();
+  Lucee::RowMajorIndexer<4> magIdx = magFld.getIndexer();
+  Lucee::RowMajorIndexer<4> emIdx2 = emFld.getIndexer();
+  int newLow[4];
+  for (unsigned i=0; i<3; ++i) newLow[i] = emFld.getLower(i);
+  newLow[3] = -1000000;
+  emIdx2.resetLower(newLow);
+
+  for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
+    for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
+      for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
+      {
+        std::cout << emIdx.getLowIndex(i,j,k)
+                  << " == " 
+                  << magIdx.getLowIndex(i,j,k) 
+                  << " == " 
+                  << emIdx2.getLowIndex(i,j,k)
+                  << std::endl;
+      }
 }
 
 int

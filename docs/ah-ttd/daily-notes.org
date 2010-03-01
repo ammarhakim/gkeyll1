@@ -4,6 +4,12 @@
 
   - Now getView() method works in LcField. The selection of
     sub-components of the field object seems rather tricky.
+  - Discovered problem: when chaging start index both ai[0] and
+    start[] are modified such that the modfied and new indexer return
+    the same linear index. That is not what we want in selecting the
+    sub-components. Instead, we want to just change ai[0] by sc so
+    that the correct reference to the sc component is returned on
+    passing 0 in the sub-comp-view field. Not yet fixed.
 
 * Feb 27th 2010
 
