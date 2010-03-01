@@ -222,56 +222,62 @@ namespace Lucee
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i,j)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, int i, int j, int k)
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getLowIndex(i,j,k)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(i,j,k,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::FieldPtr<T>& ptr, const int idx[NDIM])
   {
-    ptr.setData(&this->getRefToLoc(rgnIdx.getGenLowIndex(idx)));
+    int myIdx[NDIM+1];
+    for (unsigned i=0; i<NDIM; ++i) myIdx[i] = idx[i];
+    myIdx[NDIM] = 0;
+    ptr.setData(&this->getRefToLoc(rgnIdx.getGenIndex(myIdx)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i) const
   {
-    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i)));
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getIndex(i,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j) const
   {
-    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i,j)));
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getIndex(i,j,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, int i, int j, int k) const
   {
-    ptr.setData(&this->getConstRefToLoc(rgnIdx.getLowIndex(i,j,k)));
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getIndex(i,j,k,0)));
   }
 
   template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::setPtr(Lucee::ConstFieldPtr<T>& ptr, const int idx[NDIM]) const
   {
-    ptr.setData(&this->getConstRefToLoc(rgnIdx.getGenLowIndex(idx)));
+    int myIdx[NDIM+1];
+    for (unsigned i=0; i<NDIM; ++i) myIdx[i] = idx[i];
+    myIdx[NDIM] = 0;
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getGenIndex(myIdx)));
   }
 }
 
