@@ -93,7 +93,10 @@
 
 * Lucee Notes
 
-** TODO Implement a getLowerDimSlice() function
+** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
+** TODO Complete the solve() method in LcLinAlgebra.
+
+** DONE Implement a getLowerDimSlice() function
 
    This should allow creating a lower-dimensional array from an array
    of a given dimension. The function should take an array of
@@ -330,8 +333,6 @@
 
    Provide buttons to viz results and initial conditions and meshes.
 
-** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
-** TODO Complete the solve() method in LcLinAlgebra.
 ** Notes on matrix class and linear algebra.
 
     How to implement transpose operators? For example, several LAPACK
