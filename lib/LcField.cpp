@@ -52,9 +52,18 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Field<NDIM, T>
-  Field<NDIM, T>::getSubCompField(unsigned sc, unsigned ec)
+  Field<NDIM, T>::getSubCompView(unsigned sc, unsigned ec)
   {
-    return *this;
+    Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
+      = this->getSlice(rgn.inflate(sc, ec));
+    Field<NDIM, T> fld(rgn, ec-sc, subArr);
+    fld.rgnIdx = this->rgnIdx;
+    int newLower[NDIM+1];
+    for (unsigned i=0; i<NDIM; ++i)
+      newLower[i] = rgnIdx.getLower(i);
+    newLower[NDIM] = -sc; // returned field's 0th component should be sc
+    fld.rgnIdx.resetLower(newLower);
+    return fld;
   }
 
   template <unsigned NDIM, typename T>

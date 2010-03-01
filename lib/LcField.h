@@ -96,9 +96,15 @@ namespace Lucee
       Field<NDIM, T> getView(const Lucee::Region<NDIM, int>& rgn);
 
 /**
- * Get a field with same indexed region as this one, but with 
+ * Get a field with same indexed region as this one, but with only a
+ * range of the components indexed. The returned field has access to
+ * components [sc, ec).
+ *
+ * @param sc Index into components.
+ * @param ec One past the last index into components.
+ * @return View into field.
  */
-      Field<NDIM, T> getSubCompField(unsigned sc, unsigned ec);
+      Field<NDIM, T> getSubCompView(unsigned sc, unsigned ec);
 
 /**
  * Create a new pointer object to elements in field.

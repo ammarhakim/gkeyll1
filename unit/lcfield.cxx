@@ -244,6 +244,66 @@ test_7()
       }
 }
 
+void
+test_8()
+{
+  int lower[3] = {2, 5, 6};
+  int upper[3] = {12, 32, 12};
+  Lucee::Region<3, int> rgn(lower, upper);
+  Lucee::Field<3, double> emFld(rgn, 6, 10.0);
+
+  Lucee::FieldPtr<double> ptr = emFld.createPtr();
+  for (int i=emFld.getLower(0); i<emFld.getUpper(0); ++i)
+    for (int j=emFld.getLower(1); j<emFld.getUpper(1); ++j)
+      for (int k=emFld.getLower(2); k<emFld.getUpper(2); ++k)
+      {
+        emFld.setPtr(ptr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          ptr[n] = (i+3*j+5.5*k+0.5)*n;
+      }
+
+// now extract first three components of field
+  Lucee::Field<3, double> elcFld = emFld.getSubCompView(0, 3);
+
+  LC_ASSERT("Testing number of components in sub-comp view", elcFld.getNumComponents() == 3);
+  Lucee::FieldPtr<double> elcPtr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
+      {
+        elcFld.setPtr(elcPtr, i, j, k);
+        for (unsigned n=0; n<elcPtr.getNumComponents(); ++n)
+          LC_ASSERT("Testing components of sub-comp view", elcPtr[n] == (i+3*j+5.5*k+0.5)*n);
+      }
+
+// now extract last three components of field
+  Lucee::Field<3, double> magFld = emFld.getSubCompView(3, 6);
+
+  LC_ASSERT("Testing number of components in sub-comp view", magFld.getNumComponents() == 3);
+  LC_ASSERT("Testing components bounds", magFld.getLower(3) == 3);
+  LC_ASSERT("Testing components bounds", magFld.getUpper(3) == 6);
+
+  Lucee::FieldPtr<double> magPtr = magFld.createPtr();
+  for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
+    for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
+      for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
+      {
+        magFld.setPtr(magPtr, i, j, k);
+        elcFld.setPtr(elcPtr, i, j, k);
+        for (unsigned n=0; n<magPtr.getNumComponents(); ++n)
+        {
+          std::cout << magPtr[i] << " " << elcPtr[i] << " " << (i+3*j+5.5*k+0.5)*(n+3) << std::endl;
+          LC_ASSERT("Testing components of sub-comp view", magPtr[n] == (i+3*j+5.5*k+0.5)*(n+3));
+        }
+      }
+
+  for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
+    for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
+      for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
+        for (int n=magFld.getLower(3); k<magFld.getUpper(3); ++k)
+          LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*(n+3));
+}
+
 int
 main(void)
 {
@@ -255,5 +315,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }

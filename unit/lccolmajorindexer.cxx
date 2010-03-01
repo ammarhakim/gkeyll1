@@ -487,6 +487,31 @@ test_10()
     LC_ASSERT("Testing deflated indexer", defCol.getIndex(i) == col.getIndex(4,15,20,i));
 }
 
+void
+test_11()
+{
+  int lower[2] = {3, 6};
+  int upper[2] = {15, 20};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::ColMajorIndexer<2> col(rgn), col1(rgn);
+
+// reset start indices of one indexer
+  int newLower[2] = {0, 0};
+  col1.resetLower(newLower);
+
+// test reset indexer bounds
+  LC_ASSERT("Testing reset index bounds", col1.getLower(0) == 0);
+  LC_ASSERT("Testing reset index bounds", col1.getLower(1) == 0);
+
+  LC_ASSERT("Testing reset index bounds", col1.getUpper(0) == 15-3);
+  LC_ASSERT("Testing reset index bounds", col1.getUpper(1) == 20-6);
+
+// test reset indexer
+  for (int i=col.getLower(0), ir=col1.getLower(0); i<col.getUpper(0); ++i, ++ir)
+    for (int j=col.getLower(1), jr=col1.getLower(1); j<col.getUpper(1); ++j, ++jr)
+      LC_ASSERT("Testing reset index indexing", col.getIndex(i,j) == col1.getIndex(ir,jr));
+}
+
 int
 main(void) 
 {
@@ -501,6 +526,7 @@ main(void)
   test_8();
   test_9();
   test_10();
+  test_11();
 
   test_1_1();
   test_2_2();
