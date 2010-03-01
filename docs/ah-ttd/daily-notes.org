@@ -1,10 +1,14 @@
 # -*- org -*-
 
+* Feb 28th 2010
+
+  - Now getView() method works in LcField. The selection of
+    sub-components of the field object seems rather tricky.
+
 * Feb 27th 2010
 
   - Starting to add ability to find external libraries. First one: GSL
     for RTE work.
-  - Now have getView() method to work in LcField.
 
 * Feb 26th 2010
 

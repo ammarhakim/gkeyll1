@@ -82,6 +82,14 @@ namespace Lucee
       int getUpper(unsigned i) const { return start[i]+shape[i]; }
 
 /**
+ * Reset the lower indices to specified ones. Shape of space is
+ * unchanged.
+ *
+ * @param newLower New lower indices for space.
+ */
+      void resetLower(const int newLower[NDIM]);
+
+/**
  * Map 1D index to a linear index.
  *
  * @param i Index location.
@@ -261,6 +269,19 @@ namespace Lucee
     ai[NDIM] = indexer.ai[NDIM];
     
     return *this;
+  }
+
+  template <unsigned NDIM>
+  void
+  LinIndexer<NDIM>::resetLower(const int newLower[NDIM])
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      start[i] = newLower[i];
+// recompute a0 coefficient
+    int sum = 0;
+    for (unsigned i=1; i<NDIM+1; ++i)
+      sum += ai[i]*start[i-1];
+    ai[0] = -sum;
   }
 
   template <unsigned NDIM>
