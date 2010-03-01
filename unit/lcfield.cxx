@@ -301,6 +301,45 @@ test_8()
           LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*(n+3));
 }
 
+void
+test_9()
+{
+  int lower[3] = {2, 5, 6};
+  int upper[3] = {12, 32, 12};
+  Lucee::Region<3, int> rgn(lower, upper);
+  Lucee::Field<3, double> elcFld(rgn, 3, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
+      {
+        elcFld.setPtr(ptr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          ptr[n] = (i+3*j+5.5*k+0.5)*n;
+      }
+
+  int vlo[3] = {4, 8, 8};
+  int vup[3] = {10, 30, 10};
+  Lucee::Region<3, int> vrgn(vlo, vup);
+  Lucee::Field<3, double> subElcFld = elcFld.getView(vrgn);
+
+// now select last two components of view-field
+  Lucee::Field<3, double> eyez = subElcFld.getSubCompView(1,3);
+
+  LC_ASSERT("Testing numComponents of sub-comp field", eyez.getNumComponents() == 2);
+
+  Lucee::ConstFieldPtr<double> eyezPtr = eyez.createConstPtr();
+  for (int i=eyez.getLower(0); i<eyez.getUpper(0); ++i)
+    for (int j=eyez.getLower(1); j<eyez.getUpper(1); ++j)
+      for (int k=eyez.getLower(2); k<eyez.getUpper(2); ++k)
+      {
+        eyez.setPtr(eyezPtr, i, j, k);
+        for (unsigned n=0; n<eyez.getNumComponents(); ++n)
+          LC_ASSERT("Testing sub-comp field", eyezPtr[n] == (i+3*j+5.5*k+0.5)*(n+1));
+      }
+}
+
 int
 main(void)
 {
@@ -313,5 +352,6 @@ main(void)
   test_6();
   test_7();
   test_8();
+  test_9();
   LC_END_TESTS;
 }

@@ -357,7 +357,38 @@ namespace Lucee
   }
 
   void
-  solve(const Lucee::Matrix<double>& mat, Lucee::Matrix<double>& rhs)
+  solve(Lucee::Matrix<double>& A, Lucee::Matrix<double>& B)
   {
+// check pre-conditions
+    if (A.isSquare() == false)
+      throw Lucee::Except("Lucee::solve: LHS matrix must be square.");
+    if (A.isContiguous() == false)
+      throw Lucee::Except("Lucee::solve: LHS matrix must be contiguous.");
+    if (B.isContiguous() == false)
+      throw Lucee::Except("Lucee::solve: RHS matrix must be contiguous.");
+
+    int INFO, LDA, LDB, M, N, NRHS;
+    int *IPIV;
+    char TRANS;
+
+    M = N = LDA = LDB = A.getShape(0);
+// allocate memory for permutation array
+    IPIV = (int*) malloc( sizeof(int)*M );
+
+// compute LU factorization
+    dgetrf_(&M, &N, &A.first(), &LDA, IPIV, &INFO);
+    if(INFO != 0)
+      throw Lucee::Except("Lucee::solve: Unable to compute LU factorization");
+
+// solve systems
+    TRANS = 'N';
+    NRHS = B.getShape(1);
+// make call
+    dgetrs_(&TRANS, &N, &NRHS, &A.first(), &LDA, IPIV, &B.first(), &LDB, &INFO);
+// check if solution obtained okay
+    if(INFO != 0)
+      throw Lucee::Except("Lucee::solve: Failure in LAPACK linear solver");
+
+    free(IPIV);
   }
 }

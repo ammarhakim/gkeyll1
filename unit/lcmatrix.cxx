@@ -313,6 +313,28 @@ test_10()
     LC_ASSERT("Testing if matrix changed", A(i,4) == 12.5);
 }
 
+void
+test_11()
+{
+  Lucee::Matrix<double> A(3,3);
+  A = 0.0; // everything is zero, but ...
+  A(0,0) = 3;
+  A(1,1) = 2;
+  A(2,2) = 12.5;
+
+  Lucee::Matrix<double> B(3,1);
+  B(0,0) = 6.0;
+  B(1,0) = 4.0;
+  B(2,0) = 25.0;
+
+// solve linear system
+  Lucee::solve(A, B);
+// test solution
+  LC_ASSERT("Testing solution to linear system", B(0,0) == 2);
+  LC_ASSERT("Testing solution to linear system", B(1,0) == 2);
+  LC_ASSERT("Testing solution to linear system", B(2,0) == 2);
+}
+
 int
 main(void) 
 {
@@ -327,5 +349,6 @@ main(void)
   test_8();
   test_9();
   test_10();
+  test_11();
   LC_END_TESTS;
 }

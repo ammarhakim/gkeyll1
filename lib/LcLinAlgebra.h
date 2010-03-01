@@ -139,11 +139,12 @@ namespace Lucee
  * are the column vectors of the 'rhs' matrix. On output 'rhs'
  * contains the corresponding solution vectors.
  *
- * @param mat Matrix in linear system Ax = b.  
- * @param rhs Column vectors of 'rhs' are 'b'. On output 'rhs' is
- *   replaced by the corresponding solution vectors.
+ * @param mat Matrix in linear system Ax = b.  On output this matrix
+ *   is replaced by the LU decomposition of A.
+ *  @param rhs Column vectors of 'rhs' are 'b'. On output
+ *   'rhs' is replaced by the corresponding solution vectors.
  */
-  void solve(const Lucee::Matrix<double>& mat, Lucee::Matrix<double>& rhs);
+  void solve(Lucee::Matrix<double>& mat, Lucee::Matrix<double>& rhs);
 }
 
 #endif // LC_LIN_ALGEBRA_H

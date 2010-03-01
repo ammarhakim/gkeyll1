@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* Match 1st 2010
+
+  - Fixed the getSubCompView() method. The solution is to get rid of
+    the getLowIndex() method and use getIndex() method with 0 as the
+    final index. This now allows selection of a range of components in
+    a field to create a new field.
+  - Renamed getGenIndex() -> genIndex().
+  - Completed the solve() method in LcLinAlgebra. Unlike other
+    linear-algebra methods, this one modifies the input matrix and
+    also expects the matrices to be contiguous.
+
 * Feb 28th 2010
 
   - Now getView() method works in LcField. The selection of

@@ -94,8 +94,7 @@
 * Lucee Notes
 
 ** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
-** TODO Complete the solve() method in LcLinAlgebra.
-
+** DONE Complete the solve() method in LcLinAlgebra.
 ** DONE Implement a getLowerDimSlice() function
 
    This should allow creating a lower-dimensional array from an array
