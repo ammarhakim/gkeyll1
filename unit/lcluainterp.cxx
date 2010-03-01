@@ -15,6 +15,9 @@
 // lua include
 #include <lua.hpp>
 
+// std includes
+#include <cstring>
+
 int
 main(void)
 {

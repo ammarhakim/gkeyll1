@@ -15,6 +15,7 @@
 
 // std includes
 #include <vector>
+#include <cstdlib>
 
 namespace Lucee
 {
