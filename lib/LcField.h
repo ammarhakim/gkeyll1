@@ -71,6 +71,13 @@ namespace Lucee
       Lucee::Region<NDIM, int> getRegion() const { return rgn; }
 
 /**
+ * Get indexer into field.
+ *
+ * @return Indexer into field.
+ */
+      Lucee::RowMajorIndexer<NDIM+1> getIndexer() const { return rgnIdx; }
+
+/**
  * Get a lower-dimensional field object. The returned object shares
  * data with this object. The return field has access to all
  * components stored in this field.
