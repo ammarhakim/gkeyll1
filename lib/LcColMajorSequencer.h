@@ -1,7 +1,7 @@
 /**
  * @file	LcColMajorSequencer.h
  *
- * @brief	Sequence over region using row-major order.
+ * @brief	Sequence over region using column-major order.
  *
  * @version	$Id: LcColMajorSequencer.h 278 2010-02-22 17:15:09Z a.hakim777 $
  *
