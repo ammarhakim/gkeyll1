@@ -133,42 +133,7 @@ namespace Lucee
  * @param idx NDIM-D index.
  * @return Index into linear space.
  */
-      int getGenIndex(const int idx[NDIM]) const;
-
-/**
- * Map 2D index to a linear index.
- *
- * @param i Index location.
- * @return Index of (i, s2) into linear space.
- */
-      int getLowIndex(int i) const;
-
-/**
- * Map 3D index to a linear index.
- *
- * @param i Index location.
- * @param j Index location.
- * @return Index of (i, j, s3) into linear space.
- */
-      int getLowIndex(int i, int j) const;
-
-/**
- * Map 4D index to a linear index.
- *
- * @param i Index location.
- * @param j Index location.
- * @param k Index location.
- * @return Index of (i, j, k, s4) into linear space.
- */
-      int getLowIndex(int i, int j, int k) const;
-
-/**
- * Map NDIM index to a linear index.
- *
- * @param idx NDIM-D index.
- * @return Index into linear space.
- */
-      int getGenLowIndex(const int idx[NDIM-1]) const;
+      int getIndex(const int idx[NDIM]) const;
 
     protected:
 /**
@@ -314,43 +279,11 @@ namespace Lucee
 
   template <unsigned NDIM>
   int
-  LinIndexer<NDIM>::getGenIndex(const int idx[NDIM]) const
+  LinIndexer<NDIM>::getIndex(const int idx[NDIM]) const
   {
     int sum = ai[0];
     for (unsigned i=1; i<NDIM+1; ++i)
       sum += idx[i-1]*ai[i];
-    return sum;
-  }
-
-  template <unsigned NDIM>
-  int
-  LinIndexer<NDIM>::getLowIndex(int i) const
-  {
-    return getIndex(i, start[1]);
-  }
-
-  template <unsigned NDIM>
-  int
-  LinIndexer<NDIM>::getLowIndex(int i, int j) const
-  {
-    return getIndex(i, j, start[2]);
-  }
-
-  template <unsigned NDIM>
-  int
-  LinIndexer<NDIM>::getLowIndex(int i, int j, int k) const
-  {
-    return getIndex(i, j, k, start[3]);
-  }
-
-  template <unsigned NDIM>
-  int
-  LinIndexer<NDIM>::getGenLowIndex(const int idx[NDIM-1]) const
-  {
-    int sum = ai[0];
-    for (unsigned i=1; i<NDIM; ++i)
-      sum += ai[i]*idx[i-1];
-    sum += ai[NDIM]*start[NDIM-1];
     return sum;
   }
 }

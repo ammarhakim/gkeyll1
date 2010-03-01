@@ -246,7 +246,7 @@ namespace Lucee
     int myIdx[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i) myIdx[i] = idx[i];
     myIdx[NDIM] = 0;
-    ptr.setData(&this->getRefToLoc(rgnIdx.getGenIndex(myIdx)));
+    ptr.setData(&this->getRefToLoc(rgnIdx.getIndex(myIdx)));
   }
 
   template <unsigned NDIM, typename T>
@@ -277,7 +277,7 @@ namespace Lucee
     int myIdx[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i) myIdx[i] = idx[i];
     myIdx[NDIM] = 0;
-    ptr.setData(&this->getConstRefToLoc(rgnIdx.getGenIndex(myIdx)));
+    ptr.setData(&this->getConstRefToLoc(rgnIdx.getIndex(myIdx)));
   }
 }
 

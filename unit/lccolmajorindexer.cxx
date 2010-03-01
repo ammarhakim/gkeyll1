@@ -28,7 +28,7 @@ test_1()
   for (int i=col.getLower(0); i<col.getUpper(0); ++i)
   {
     idx[0] = i;
-    LC_ASSERT("Testing 1D indexer", col.getGenIndex(idx) == count++);
+    LC_ASSERT("Testing 1D indexer", col.getIndex(idx) == count++);
   }
 }
 
@@ -50,7 +50,7 @@ test_2()
     for (int i=col.getLower(0); i<col.getUpper(0); ++i)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D indexer", col.getGenIndex(idx) == count++);
+      LC_ASSERT("Testing 2D indexer", col.getIndex(idx) == count++);
     }
 }
 
@@ -74,7 +74,7 @@ test_3()
       for (int i=col.getLower(0); i<col.getUpper(0); ++i)
       {
         idx[0] = i; idx[1] = j; idx[2] = k;
-        LC_ASSERT("Testing 3D indexer", col.getGenIndex(idx) == count++);
+        LC_ASSERT("Testing 3D indexer", col.getIndex(idx) == count++);
       }
 }
 
@@ -100,7 +100,7 @@ test_4()
         for (int i=col.getLower(0); i<col.getUpper(0); ++i)
         {
           idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
-          LC_ASSERT("Testing 4D indexer", col.getGenIndex(idx) == count++);
+          LC_ASSERT("Testing 4D indexer", col.getIndex(idx) == count++);
         }
 }
 
@@ -124,7 +124,7 @@ test_5()
     for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D indexer", colCopy.getGenIndex(idx) == count++);
+      LC_ASSERT("Testing 2D indexer", colCopy.getIndex(idx) == count++);
     }
 }
 
@@ -151,7 +151,7 @@ test_6()
         for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
         {
           idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
-          LC_ASSERT("Testing 4D indexer", colCopy.getGenIndex(idx) == count++);
+          LC_ASSERT("Testing 4D indexer", colCopy.getIndex(idx) == count++);
         }
 }
 
@@ -182,7 +182,7 @@ test_7()
         for (int i=colCopy.getLower(0); i<colCopy.getUpper(0); ++i)
         {
           idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
-          LC_ASSERT("Testing 4D indexer", colCopy.getGenIndex(idx) == count++);
+          LC_ASSERT("Testing 4D indexer", colCopy.getIndex(idx) == count++);
         }
 }
 
@@ -203,7 +203,7 @@ test_1_1()
   for (int i=col.getLower(0); i<col.getUpper(0); ++i)
   {
     idx[0] = i;
-    LC_ASSERT("Testing 1D indexer", col.getGenIndex(idx) == count++);
+    LC_ASSERT("Testing 1D indexer", col.getIndex(idx) == count++);
   }
 }
 
@@ -226,7 +226,7 @@ test_2_2()
     for (int i=col.getLower(0); i<col.getUpper(0); ++i)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D indexer", col.getGenIndex(idx) == count++);
+      LC_ASSERT("Testing 2D indexer", col.getIndex(idx) == count++);
     }
 }
 
@@ -251,7 +251,7 @@ test_3_3()
       for (int i=col.getLower(0); i<col.getUpper(0); ++i)
       {
         idx[0] = i; idx[1] = j; idx[2] = k;
-        LC_ASSERT("Testing 3D indexer", col.getGenIndex(idx) == count++);
+        LC_ASSERT("Testing 3D indexer", col.getIndex(idx) == count++);
       }
 }
 
@@ -278,7 +278,7 @@ test_4_4()
         for (int i=col.getLower(0); i<col.getUpper(0); ++i)
         {
           idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
-          LC_ASSERT("Testing 4D indexer", col.getGenIndex(idx) == count++);
+          LC_ASSERT("Testing 4D indexer", col.getIndex(idx) == count++);
         }
 }
 
@@ -315,7 +315,7 @@ test_1_r()
   for (int i=lin.getLower(0); i<lin.getUpper(0); ++i)
   {
     idx[0] = i;
-    LC_ASSERT("Testing 1D indexer", lin.getGenIndex(idx) == count++);
+    LC_ASSERT("Testing 1D indexer", lin.getIndex(idx) == count++);
   }
 }
 
@@ -339,7 +339,7 @@ test_2_r()
     for (int j=lin.getLower(1); j<lin.getUpper(1); ++j)
     {
       idx[0] = i; idx[1] = j;
-      LC_ASSERT("Testing 2D row-lin indexer", lin.getGenIndex(idx) == count++);
+      LC_ASSERT("Testing 2D row-lin indexer", lin.getIndex(idx) == count++);
     }
 }
 
@@ -367,7 +367,7 @@ test_3_r()
       for (int k=lin.getLower(2); k<lin.getUpper(2); ++k)
       {
         idx[0] = i; idx[1] = j; idx[2] = k;
-        LC_ASSERT("Testing 3D row-lin indexer", lin.getGenIndex(idx) == count++);
+        LC_ASSERT("Testing 3D row-lin indexer", lin.getIndex(idx) == count++);
       }
 }
 
@@ -396,7 +396,7 @@ test_4_r()
         for (int l=lin.getLower(3); l<lin.getUpper(3); ++l)
         {
           idx[0] = i; idx[1] = j; idx[2] = k; idx[3] = l;
-          LC_ASSERT("Testing 4D row-lin indexer", lin.getGenIndex(idx) == count++);
+          LC_ASSERT("Testing 4D row-lin indexer", lin.getIndex(idx) == count++);
         }
 }
 

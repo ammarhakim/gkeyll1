@@ -70,10 +70,11 @@ namespace Lucee
   Lucee::FieldPtr<T>
   Field<NDIM, T>::createPtr()
   {
-    int start[NDIM];
+    int start[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
       start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenLowIndex(start);
+    start[NDIM] = 0;
+    unsigned loc = rgnIdx.getIndex(start);
     return Lucee::FieldPtr<T>(numComponents, &this->getRefToLoc(loc));
   }
 
@@ -81,10 +82,11 @@ namespace Lucee
   Lucee::ConstFieldPtr<T>
   Field<NDIM, T>::createConstPtr() const
   {
-    int start[NDIM];
+    int start[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
       start[i] = rgn.getLower(i);
-    unsigned loc = rgnIdx.getGenLowIndex(start);
+    start[NDIM] = 0;
+    unsigned loc = rgnIdx.getIndex(start);
     return Lucee::ConstFieldPtr<T>(numComponents, &this->getConstRefToLoc(loc));
   }
 
