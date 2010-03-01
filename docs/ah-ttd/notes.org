@@ -93,7 +93,25 @@
 
 * Lucee Notes
 
-** TODO Complete transpose(), getRow() and getCol() methods in Matrix.
+** Initializing Lucee with LUA tables.
+
+   This needs to be done NOW. The basic idea is to have the top-level
+   Lucee executable read a Lua script file and initialize and run the
+   simulation. For example, one can imagine
+#+BEGIN_EXAMPLE
+   rteSlab = RteHomogenousSlab {
+     L = 300,
+     N = 650,
+     mmin = 0,
+     mmax = 1,
+     mu0 = 1.0,
+     tau0 = 64,
+     varpi = 0.9,
+   }
+#+END_EXAMPLE
+
+** DONE getRow() and getCol() methods in Matrix.
+** TODO Complete transpose()
 ** DONE Complete the solve() method in LcLinAlgebra.
 ** DONE Implement a getLowerDimSlice() function
 
