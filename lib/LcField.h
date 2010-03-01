@@ -38,6 +38,9 @@ namespace Lucee
   class Field : public Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>
   {
     public:
+/** We need to friend ourself to allow accessing private stuff from another dimension */
+      template <unsigned RDIM, typename TT> friend class Field;
+
 /**
  * Create a new field indexing given region. This constructor creates
  * an empty set of ghost indices.
@@ -86,11 +89,15 @@ namespace Lucee
  * @param defDimsIdx Index of removed dimensions.
  * @return Lower dimensional field object.
  */
-      template <unsigned RDIM, T>
-      Field<RDIM, T>
-      getLowDimField(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM])
-      {
-      }
+//       template <unsigned RDIM, T>
+//       Field<RDIM, T>
+//       getLowDimField(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM])
+//       {
+//         Lucee::Array<NDIM-RDIM+1, T, RowMajorIndexer> arr
+//           = this->template deflate(defDims, defDimsIdx);
+
+//         Field<NDIM-RDIM, T> fld(newRgn, nc, arr);
+//       }
 
 /**
  * Get a view into the field. The returned object has the

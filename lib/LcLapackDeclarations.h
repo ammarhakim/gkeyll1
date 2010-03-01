@@ -376,6 +376,106 @@ extern "C"
 // C           Unchanged on exit.
     void dger_(int *M, int *N, double *ALPHA, double X[], int *INCX,
       double Y[], int *INCY, double A[], int *LDA);
+
+
+//
+//  Purpose
+//  =======
+//
+//  DGETRF computes an LU factorization of a general M-by-N matrix A
+//  using partial pivoting with row interchanges.
+//
+//  The factorization has the form
+//     A = P * L * U
+//  where P is a permutation matrix, L is lower triangular with unit
+//  diagonal elements (lower trapezoidal if m > n), and U is upper
+//  triangular (upper trapezoidal if m < n).
+//
+//  This is the right-looking Level 3 BLAS version of the algorithm.
+//
+//  Arguments
+//  =========
+//
+//  M       (input) INTEGER
+//          The number of rows of the matrix A.  M >= 0.
+//
+//  N       (input) INTEGER
+//          The number of columns of the matrix A.  N >= 0.
+//
+//  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+//          On entry, the M-by-N matrix to be factored.
+//          On exit, the factors L and U from the factorization
+//          A = P*L*U; the unit diagonal elements of L are not stored.
+//
+//  LDA     (input) INTEGER
+//          The leading dimension of the array A.  LDA >= max(1,M).
+//
+//  IPIV    (output) INTEGER array, dimension (min(M,N))
+//          The pivot indices; for 1 <= i <= min(M,N), row i of the
+//          matrix was interchanged with row IPIV(i).
+//
+//  INFO    (output) INTEGER
+//          = 0:  successful exit
+//          < 0:  if INFO = -i, the i-th argument had an illegal value
+//          > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
+//                has been completed, but the factor U is exactly
+//                singular, and division by zero will occur if it is used
+//                to solve a system of equations.
+//
+//  =====================================================================
+//
+    void dgetrf_(int* M, int* N, double A[], int* LDA, int IPIV[], int* INFO);
+
+//  Purpose
+//  =======
+//
+//  DGETRS solves a system of linear equations
+//     A * X = B  or  A' * X = B
+//  with a general N-by-N matrix A using the LU factorization computed
+//  by DGETRF.
+//
+//  Arguments
+//  =========
+//
+//  TRANS   (input) CHARACTER*1
+//          Specifies the form of the system of equations:
+//          = 'N':  A * X = B  (No transpose)
+//          = 'T':  A'* X = B  (Transpose)
+//          = 'C':  A'* X = B  (Conjugate transpose = Transpose)
+//
+//  N       (input) INTEGER
+//          The order of the matrix A.  N >= 0.
+//
+//  NRHS    (input) INTEGER
+//          The number of right hand sides, i.e., the number of columns
+//          of the matrix B.  NRHS >= 0.
+//
+//  A       (input) DOUBLE PRECISION array, dimension (LDA,N)
+//          The factors L and U from the factorization A = P*L*U
+//          as computed by DGETRF.
+//
+//  LDA     (input) INTEGER
+//          The leading dimension of the array A.  LDA >= max(1,N).
+//
+//  IPIV    (input) INTEGER array, dimension (N)
+//          The pivot indices from DGETRF; for 1<=i<=N, row i of the
+//          matrix was interchanged with row IPIV(i).
+//
+//  B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)
+//          On entry, the right hand side matrix B.
+//          On exit, the solution matrix X.
+//
+//  LDB     (input) INTEGER
+//          The leading dimension of the array B.  LDB >= max(1,N).
+//
+//  INFO    (output) INTEGER
+//          = 0:  successful exit
+//          < 0:  if INFO = -i, the i-th argument had an illegal value
+//
+//  =====================================================================
+//
+    void dgetrs_(char* TRANS, int* N, int* NRHS, double A[], int* LDA, int IPIV[],
+      double B[], int *LDB, int *INFO);
 }
 
 #endif // LC_LAPACK_DECLARATIONS_H
