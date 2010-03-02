@@ -110,7 +110,7 @@
    One way would be to define a basic "solver" class which implements
    basic interface methods like::
 #+BEGIN_EXAMPLE
-   slvr->readInp("input.lua");
+   slvr->readInp(luaTbl); // use LUA table object for input
    slvr->buildData();
    slvr->buildSolvers();
    slvr->initialize();
@@ -126,6 +126,18 @@
    The slvr object should read its input file (Lua scripts), and then
    bootstrap itself and be read to take the first time-step once
    initialize() is called.
+
+   There should be a Simulation object that drived the top-level
+   solver.
+
+   There should be a derived class that allows for sub-solvers and
+   data-structures. For example, we should be able to do::
+#+BEGIN_EXAMPLE
+   ss->setIn(0, q);
+   ss->setIn(1, u);
+   ss->setOut(0, qnew);
+   ss->advance(t);
+#+END_EXAMPLE
 
 ** DONE getRow() and getCol() methods in Matrix.
 ** TODO Complete transpose()
