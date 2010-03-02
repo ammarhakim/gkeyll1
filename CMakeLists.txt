@@ -24,6 +24,11 @@ if (WIN32)
    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif (WIN32)
 
+if (LINUX)
+# On LINUX we need to add the dl library
+   SET(EXTRA_LIBS dl)
+endif (LINUX)
+
 # Check for include files
 add_definitions(-DHAVE_CONFIG_H)
 INCLUDE(CheckIncludeFileCXX)
