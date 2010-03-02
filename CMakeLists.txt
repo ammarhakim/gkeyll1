@@ -24,7 +24,7 @@ if (WIN32)
    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif (WIN32)
 
-if (LINUX)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # On LINUX we need to add the dl library
    SET(EXTRA_LIBS dl)
 endif (LINUX)
