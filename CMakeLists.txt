@@ -26,8 +26,8 @@ endif (WIN32)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # On LINUX we need to add the dl library
-   SET(EXTRA_LIBS dl)
-endif (LINUX)
+  LINK_LIBRARIES(-ldl)
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Check for include files
 add_definitions(-DHAVE_CONFIG_H)
