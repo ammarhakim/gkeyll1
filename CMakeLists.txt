@@ -26,6 +26,7 @@ endif (WIN32)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # On LINUX we need to add the dl library
+### NO LONGER NEEDED, I THINK. LUA IS COMPILED WITHOUT DLOPEN
   #LINK_LIBRARIES(-ldl)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 

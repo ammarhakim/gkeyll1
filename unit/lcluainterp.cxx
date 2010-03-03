@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcLuaState.h>
 #include <LcTest.h>
 
@@ -16,13 +17,12 @@
 #include <lua.hpp>
 
 // std includes
+#include <string>
 #include <cstring>
 
-int
-main(void)
+void
+interp()
 {
-  LC_BEGIN_TESTS("lcluainterp");
-
 // create a new LUA state
   Lucee::LuaState state;
 
@@ -37,6 +37,29 @@ main(void)
       lua_pop(state, 1);  /* pop error message from the stack */
     }
   }
+}
+
+void
+load(Lucee::LuaState& L, const std::string& fname)
+{
+  if (luaL_loadfile(L, fname.c_str()) || lua_pcall(L, 0, 0, 0))
+  {
+    Lucee::Except lce("Cannot read config file ");
+    lce << fname << std::endl;
+    throw lce;
+  }
+  lua_getglobal(L, "width");
+  lua_getglobal(L, "height");
+  LC_ASSERT("Testing if reading from LUA worked", lua_tointeger(L, -2) == 200);
+  LC_ASSERT("Testing if reading from LUA worked", lua_tointeger(L, -1) == 300);
+}
+
+int
+main(void)
+{
+  LC_BEGIN_TESTS("lcluainterp");
+  Lucee::LuaState luaState;
+  load(luaState, "lcluainterp-1.lua");
 
   LC_END_TESTS;
 }
