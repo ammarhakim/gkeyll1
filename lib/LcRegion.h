@@ -203,7 +203,6 @@ namespace Lucee
   bool
   Region<NDIM, T>::isInside(const T point[NDIM]) const
   {
-    bool isIn = false;
     for (unsigned i=0; i<NDIM; ++i)
       if ((point[i] < lower[i]) || (point[i] >= upper[i]))
         return false;

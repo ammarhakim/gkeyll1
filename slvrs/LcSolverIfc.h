@@ -51,6 +51,18 @@ namespace Lucee
   {
     public:
 /**
+ * Create a new solver object with given name.
+ *
+ * @param nm Name of solver.
+ */
+      SolverIfc(const std::string& nm);
+
+/**
+ * Destroy solver object.
+ */
+      virtual ~SolverIfc();
+
+/**
  * Get name of solver.
  *
  * @return Name of solver.
@@ -101,7 +113,7 @@ namespace Lucee
  * @param t Time to advance the solution to.
  * @return Status of solution.
  */
-      virtual int advance(double t);
+      virtual int advance(double t) = 0;
 
 /**
  * Write solver data to file.
@@ -118,7 +130,7 @@ namespace Lucee
  * @param baseName Base name of input files. This should serves as a
  *   prefix for all input files.
  */
-      virtual void restoreFromFile(const std::string& baseName) const = 0;
+      virtual void restoreFromFile(const std::string& baseName) = 0;
 
 /**
  * Finalize solver: free resources, deallocate memory, close files
