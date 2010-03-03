@@ -30,11 +30,33 @@ namespace Lucee
  * themselves. The time-step interface methods expose methods to
  * advance solution in time. The I/O interface allow writing
  * simulation data to output files and restarting simulations from
- * previous output.
+ * previous output. The order in the bootstrap methods are called is
+ * readInput(), buildData() and buildAlgorithms().
+ *
+ * Next, if the simulation is a retstart, the method restoreFromFile()
+ * is called. Otherwise, if the simulation is not a restart, the
+ * method initialize() is called.
+ *
+ * The advance phase methods are called in the order setCurrTime(told)
+ * and then advance(t). The solver should advance itself by time
+ * t-told. The return code of the advance() method tells Lucee if
+ * solver failed or passed and what should be done next.
+ *
+ * The writeToFile() method is called for the solver to write out its
+ * data to a file.
+ *
+ * The finalize() method is called to shut-down the solver.
  */
   class SolverIfc
   {
     public:
+/**
+ * Get name of solver.
+ *
+ * @return Name of solver.
+ */
+      std::string getName() const;
+
 /**
  * Bootstrap method: Read input from specified stream.
  */
@@ -62,7 +84,7 @@ namespace Lucee
  *
  * @param tm Current time.
  */
-      virtual void setCurrTime(double tm) { currTime = tm; }
+      void setCurrTime(double tm);
 
 /**
  * Get the current time for solver. This is the time at which the
@@ -70,7 +92,7 @@ namespace Lucee
  *
  * @retrun Current time.
  */
-      virtual double getCurrTime() const { return currTime; }
+      double getCurrTime() const;
 
 /**
  * Advance the solution to specified time. Solvers that do not have a
@@ -103,6 +125,15 @@ namespace Lucee
  * etc.
  */
       virtual void finalize() = 0;
+
+    protected:
+/**
+ * Set name of solver. This should be called by derived classes to set
+ * their names.
+ *
+ * @param nm Name of solver.
+ */
+      void setName(const std::string& nm);
       
     private:
 /** Solver name */
