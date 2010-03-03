@@ -39,6 +39,31 @@ interp()
   }
 }
 
+double
+getFromTable(Lucee::LuaState& L, const std::string& key)
+{
+  lua_pushstring(L, key.c_str());
+  lua_gettable(L, -2); // -1 is key, -2 is table
+  double res = lua_tonumber(L, -1);
+  lua_pop(L, 1);
+  return res;
+}
+
+double
+luaFunc(Lucee::LuaState& L, const std::string& fn, double x, double y)
+{
+  lua_getglobal(L, fn.c_str());
+  lua_pushnumber(L, x);
+  lua_pushnumber(L, y);
+
+  if (lua_pcall(L, 2, 1, 0) != 0)
+    throw Lucee::Except("Unable to call function");
+
+  double z = lua_tonumber(L, -1);
+  lua_pop(L, 1);
+  return z;
+}
+
 void
 load(Lucee::LuaState& L, const std::string& fname)
 {
@@ -49,9 +74,19 @@ load(Lucee::LuaState& L, const std::string& fname)
     throw lce;
   }
   lua_getglobal(L, "width");
+  LC_ASSERT("Testing if reading from LUA worked", lua_tonumber(L, -1) == 200);
   lua_getglobal(L, "height");
-  LC_ASSERT("Testing if reading from LUA worked", lua_tointeger(L, -2) == 200);
-  LC_ASSERT("Testing if reading from LUA worked", lua_tointeger(L, -1) == 300);
+  LC_ASSERT("Testing if reading from LUA worked", lua_tonumber(L, -1) == 300);
+  lua_getglobal(L, "background");
+  if (! lua_istable(L, -1))
+    throw Lucee::Except("Table 'background' not found");
+  
+  LC_ASSERT("Testing if table got properly", getFromTable(L, "r") == 0.3);
+  LC_ASSERT("Testing if table got properly", getFromTable(L, "b") == 0.1);
+  LC_ASSERT("Testing if table got properly", getFromTable(L, "g") == 0.0);
+
+  LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
+  LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
 }
 
 int
