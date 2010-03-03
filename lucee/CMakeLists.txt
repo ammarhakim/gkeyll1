@@ -2,7 +2,7 @@
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/lucee)
-include_directories(${PROJECT_SOURCE_DIR}/slvr)
+include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
@@ -21,5 +21,5 @@ ENDIF (APPLE)
 
 # Create lucee executable
 
-add_executable(lucee lucee.cxx)
+add_executable(lucee lucee.cxx LcSimulation.cpp)
 target_link_libraries(lucee lcslvrs lclib lcloki lclua)

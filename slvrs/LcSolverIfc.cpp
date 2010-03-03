@@ -21,6 +21,15 @@
 
 namespace Lucee
 {
+  SolverIfc::SolverIfc(const std::string& nm)
+    : name(nm)
+  {
+  }
+
+  SolverIfc::~SolverIfc()
+  {
+  }
+
   std::string
   SolverIfc::getName() const
   {
