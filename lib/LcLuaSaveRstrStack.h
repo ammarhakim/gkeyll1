@@ -25,7 +25,7 @@
 namespace Lucee
 {
 /**
- * Saves the state of the stack on creations and restores it on
+ * Saves the state of the stack on creation and restores it on
  * destruction.
  */
   class LuaSaveRstrStack
