@@ -697,13 +697,16 @@ union luai_Cast { double l_d; long l_l; };
 ** options.
 ** By default, _WIN32 gets LUA_DL_DLL and MAC OS X gets LUA_DL_DYLD.
 */
-#if defined(LUA_USE_DLOPEN)
-#define LUA_DL_DLOPEN
-#endif
 
-#if defined(LUA_WIN)
-#define LUA_DL_DLL
-#endif
+#undef LUA_DL_DLOPEN
+#undef LUA_DL_DLL
+//#if defined(LUA_USE_DLOPEN)
+//#define LUA_DL_DLOPEN
+//#endif
+
+//#if defined(LUA_WIN)
+//#define LUA_DL_DLL
+//#endif
 
 
 /*

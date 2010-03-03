@@ -26,7 +26,7 @@ endif (WIN32)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # On LINUX we need to add the dl library
-  LINK_LIBRARIES(-ldl)
+  #LINK_LIBRARIES(-ldl)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Check for include files
