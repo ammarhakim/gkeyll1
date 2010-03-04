@@ -99,7 +99,7 @@
    script file and initialize and run the simulation. For example, one
    can imagine
 #+BEGIN_EXAMPLE
-   rteSlab = RteHomogenousSlab {
+   rteSlab = Solvers.rteHomogenousSlab {
      L = 300,
      N = 650,
      mmin = 0,
