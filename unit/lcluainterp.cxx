@@ -64,9 +64,57 @@ luaFunc(Lucee::LuaState& L, const std::string& fn, double x, double y)
   return z;
 }
 
+class MyClass
+{
+  public:
+    static int build(lua_State *L)
+    {
+      std::cout << "MyClass::build" << std::endl;
+      lua_pushinteger(L, 0);
+      return 1;
+    }
+
+  private:
+
+};
+
+int
+l_double(lua_State *L)
+{
+  double d = lua_tonumber(L, 1);
+  lua_pushnumber(L, 2*d);
+  return 1;
+}
+
+int
+l_tblctor(lua_State *L)
+{
+  std::cout << "l_tblctor" << std::endl;
+
+  lua_pushinteger(L, 0);
+  return 1;
+}
+
+static const struct luaL_Reg mylib[] = 
+{
+  {"twice", l_double},
+  {"myClass", MyClass::build},
+  {"tblctor", l_tblctor},
+  {NULL, NULL}
+};
+
+int
+luaopen_mylib(lua_State *L)
+{
+  luaL_register(L, "lucee", mylib);
+  return 1;
+}
+
 void
 load(Lucee::LuaState& L, const std::string& fname)
 {
+  luaopen_mylib(L);
+
   if (luaL_loadfile(L, fname.c_str()) || lua_pcall(L, 0, 0, 0))
   {
     Lucee::Except lce("Cannot read config file ");
@@ -83,10 +131,10 @@ load(Lucee::LuaState& L, const std::string& fname)
   
   LC_ASSERT("Testing if table got properly", getFromTable(L, "r") == 0.3);
   LC_ASSERT("Testing if table got properly", getFromTable(L, "b") == 0.1);
-  LC_ASSERT("Testing if table got properly", getFromTable(L, "g") == 0.0);
+  LC_ASSERT("Testing if table got properly", getFromTable(L, "g") == 0.0);  
 
-  LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
-  LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
+//   LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
+//   LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
 }
 
 int
