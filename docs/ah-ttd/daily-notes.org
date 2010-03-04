@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* March 4th
+
+  - Added ObjRegistry and ObjCreator classes. These were simply copied
+    over from a old Lucee tag.
+
+* March 3rd 2010
+
+  - More playing around with Lua and object registration/creation
+    process. Now figured out how to get global values and from tables,
+    add new C call-back methods and register new modules.
+  - Added lucee executable and command-line parsing, Simulation class.
+
 * March 2nd 2010
 
   - Made notes on ideas for solvers Lucee. Added a class SolverIfc

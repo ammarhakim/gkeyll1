@@ -19,6 +19,7 @@
 // std includes
 #include <string>
 #include <cstring>
+#include <vector>
 
 void
 interp()
@@ -95,18 +96,33 @@ l_tblctor(lua_State *L)
   return 1;
 }
 
-static const struct luaL_Reg mylib[] = 
+int
+l_tblctor_2(lua_State *L)
 {
-  {"twice", l_double},
-  {"myClass", MyClass::build},
-  {"tblctor", l_tblctor},
-  {NULL, NULL}
-};
+  std::cout << "l_tblctor_2" << std::endl;
+
+  lua_pushinteger(L, 0);
+  return 1;
+}
 
 int
 luaopen_mylib(lua_State *L)
 {
-  luaL_register(L, "lucee", mylib);
+  std::vector<luaL_Reg> libList;
+
+  luaL_Reg double_lr = {"twice", l_double};
+  libList.push_back(double_lr);
+
+  luaL_Reg tableCtor_lr = {"tableCtor", l_tblctor};
+  libList.push_back(tableCtor_lr);
+
+  luaL_Reg tableCtor_lr_2 = {"tableCtor_2", l_tblctor_2};
+  libList.push_back(tableCtor_lr_2);
+
+  luaL_Reg null_lr = {NULL, NULL};
+  libList.push_back(null_lr);
+
+  luaL_register(L, "lucee", &libList[0]);
   return 1;
 }
 
@@ -133,8 +149,8 @@ load(Lucee::LuaState& L, const std::string& fname)
   LC_ASSERT("Testing if table got properly", getFromTable(L, "b") == 0.1);
   LC_ASSERT("Testing if table got properly", getFromTable(L, "g") == 0.0);  
 
-//   LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
-//   LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
+  LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
+  LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
 }
 
 int

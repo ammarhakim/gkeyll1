@@ -113,3 +113,6 @@ add_test(lcrowmajorsequencer unit/lcrowmajorsequencer)
 
 # lccolmajorsequencer
 add_test(lccolmajorsequencer unit/lccolmajorsequencer)
+
+# lcobjcreator
+add_test(lcobjcreator unit/lcobjcreator)

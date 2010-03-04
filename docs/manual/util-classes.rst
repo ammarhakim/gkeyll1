@@ -4,6 +4,11 @@ Utility classes and functions
 Lucee provides several utility classes to perform miscellenous
 jobs. These are described below.
 
+``Lucee::ObjRegistry`` and ``Lucee::ObjCreator``: Object factories
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Blah ..
+
 ``Lucee::Region``: Half-open regions in N-dimensional space
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
