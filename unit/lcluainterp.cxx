@@ -50,6 +50,14 @@ getFromTable(Lucee::LuaState& L, const std::string& key)
   return res;
 }
 
+void
+putIntoTable(lua_State *L, const std::string& key, const std::string& val)
+{
+  lua_pushstring(L, key.c_str());
+  lua_pushstring(L, val.c_str());
+  lua_settable(L, -3);
+}
+
 double
 luaFunc(Lucee::LuaState& L, const std::string& fn, double x, double y)
 {
@@ -65,20 +73,6 @@ luaFunc(Lucee::LuaState& L, const std::string& fn, double x, double y)
   return z;
 }
 
-class MyClass
-{
-  public:
-    static int build(lua_State *L)
-    {
-      std::cout << "MyClass::build" << std::endl;
-      lua_pushinteger(L, 0);
-      return 1;
-    }
-
-  private:
-
-};
-
 int
 l_double(lua_State *L)
 {
@@ -91,17 +85,12 @@ int
 l_tblctor(lua_State *L)
 {
   std::cout << "l_tblctor" << std::endl;
+  if (! lua_istable(L, 1) )
+    throw Lucee::Except("Function expects table as single parameter");
+// add meta-data keys into table
+  putIntoTable(L, "__kind", "RteHomogenousSlab");
+  putIntoTable(L, "__type", "Solvers");
 
-  lua_pushinteger(L, 0);
-  return 1;
-}
-
-int
-l_tblctor_2(lua_State *L)
-{
-  std::cout << "l_tblctor_2" << std::endl;
-
-  lua_pushinteger(L, 0);
   return 1;
 }
 
@@ -115,9 +104,6 @@ luaopen_mylib(lua_State *L)
 
   luaL_Reg tableCtor_lr = {"tableCtor", l_tblctor};
   libList.push_back(tableCtor_lr);
-
-  luaL_Reg tableCtor_lr_2 = {"tableCtor_2", l_tblctor_2};
-  libList.push_back(tableCtor_lr_2);
 
   luaL_Reg null_lr = {NULL, NULL};
   libList.push_back(null_lr);
