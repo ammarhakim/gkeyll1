@@ -1,5 +1,9 @@
 # -*- org -*-
 
+* March 5th
+
+  No work on Lucee
+
 * March 4th
 
   - Added ObjRegistry and ObjCreator classes. These were simply copied

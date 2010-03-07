@@ -93,6 +93,32 @@
 
 * Lucee Notes
 
+** What should Lua do?
+
+   In an input file, say one has
+#+BEGIN_EXAMPLE
+   sim = Solver.rteHomogenousSlab {
+     ....
+   }
+#+END_EXAMPLE 
+
+   then, Lucee should just return the table after inserting into it
+   another table which has the module and object names in it. For
+   example, the C function which Lua calls (i.e. the table
+   constructor) should add return the following
+#+BEGIN_EXAMPLE
+   {
+     __metadata = {module = Solver, object = rteHomogenousSlab},
+     ....
+   }
+#+END_EXAMPLE 
+   
+   Then, the C++ code should get the table "sim", query it for its
+   __metadata.object data-element and construct the appropriate solver
+   object, in this case class RteHomogenousSlab. To this class, the
+   C++ code should pass the Lua table as its parameter for its
+   readInput() method.
+
 ** Initializing Lucee with LUA tables.
 
    The basic idea is to have the top-level Lucee executable read a Lua
