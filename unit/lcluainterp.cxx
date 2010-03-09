@@ -130,7 +130,6 @@ class LuaTable
     {
       lua_rawgeti(ls, LUA_REGISTRYINDEX, tblRef);
       return getFromTable(ls, key);
-      lua_pop(ls, 1);
     }
 
     LuaTable getTable(const std::string& nm)

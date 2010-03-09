@@ -1,7 +1,7 @@
 /**
  * @file	LcLuaState.h
  *
- * @brief	Class to represent LUA state
+ * @brief	Class to represent Lua state
  *
  * @version	$Id: LcLuaState.h 157 2009-08-26 17:27:55Z a.hakim777 $
  *
@@ -22,20 +22,20 @@
 namespace Lucee
 {
 /** 
- * Opens a new instance of a LUA interpreter and closes it on
+ * Opens a new instance of a Lua interpreter and closes it on
  * destruction.
  */
   class LuaState
   {
     public:
-/** Create a new LUA state */
+/** Create a new Lua state */
       LuaState();
 
 /** Destroy state */
       virtual ~LuaState();
 
 /**
- * Get a pointer to native LUA state object.
+ * Get a pointer to native Lua state object.
  *
  * @return lua_state object.
  */
@@ -66,7 +66,7 @@ namespace Lucee
       }
 
     private:
-/** Pointer to LUA state */
+/** Pointer to Lua state */
       lua_State *state;
 /** Flag to indicate if state is valid */
       bool isValidState;

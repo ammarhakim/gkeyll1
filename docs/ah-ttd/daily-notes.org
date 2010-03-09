@@ -1,6 +1,14 @@
 # -*- org -*-
 
-* March 5th
+* March 8th
+
+  - Figured out way to use Lua tables. The basic idea it to use the
+    luaL_ref() method to get a reference to the internal Lua table
+    object. This can then be used to implement a persistent table
+    access class.
+  - Added a class LcLuaTable to represent tables. Not completed.
+
+* March 5th, 6th and 7th
 
   No work on Lucee
 
