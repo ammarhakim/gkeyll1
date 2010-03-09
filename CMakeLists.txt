@@ -116,3 +116,6 @@ add_test(lccolmajorsequencer unit/lccolmajorsequencer)
 
 # lcobjcreator
 add_test(lcobjcreator unit/lcobjcreator)
+
+# lcluatable
+add_test(lcluatable unit/lcluatable)

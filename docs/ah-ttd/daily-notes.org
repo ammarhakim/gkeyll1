@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 9th
+
+  - Added basic methods in LuaTable. Tested these. Next to implement
+    the vector forms of these methods. Also, need to be careful about
+    not polluting the stack.
+
 * March 8th
 
   - Figured out way to use Lua tables. The basic idea it to use the
