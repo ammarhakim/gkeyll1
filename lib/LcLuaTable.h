@@ -29,14 +29,14 @@
 namespace Lucee
 {
 /**
- * Class to represent a Lua table.
+ * Class to represent a Lua table. This constructor assumes that the
+ * Lua table is on top of the stack.
  */
   class LuaTable
   {
     public:
 /**
- * Create a new table object. This constructor assumes that the Lua
- * table is on top of the stack.
+ * Create a new table object.
  *
  * @param L Lua state.
  * @param nm Name of table.
@@ -80,6 +80,54 @@ namespace Lucee
  * @return vector of numbers corresponding to key.
  */
       std::vector<double> getNumVec(const std::string& key);
+
+/**
+ * Get a table inside this table.
+ * 
+ * @param nm Name of table to fetch.
+ * @return table object.
+ */
+      LuaTable getTable(const std::string& nm);
+
+/**
+ * Check if string is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise
+ */
+      bool hasString(const std::string& key);
+
+/**
+ * Check if number is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasNumber(const std::string& key);
+
+/**
+ * Check if vector of strings is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasStrVec(const std::string& key);
+
+/**
+ * Check if vector of numbers is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasNumVec(const std::string& key);
+
+/**
+ * Check if a table is inside this table.
+ * 
+ * @param nm Name of table to fetch.
+ * @return true if exists, false otherwise.
+ */
+      bool hasTable(const std::string& nm);
 
     private:
 /** Reference to lua state */

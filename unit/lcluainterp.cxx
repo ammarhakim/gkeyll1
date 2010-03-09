@@ -5,7 +5,7 @@
  *
  * @version	$Id: lcluainterp.cxx 162 2009-08-28 20:07:10Z a.hakim777 $
  *
- * Copyright &copy; 2008-2009, Ammar Hakim.
+ * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes
