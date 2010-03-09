@@ -1,7 +1,7 @@
 /**
  * @file	LcLuaModule.cpp
  *
- * @brief	Class to store functions in a LUA module.
+ * @brief	Class to store functions in a Lua module.
  *
  * @version	$Id$
  *

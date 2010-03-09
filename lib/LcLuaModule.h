@@ -29,8 +29,8 @@
 namespace Lucee
 {
 /**
- * Class to hold list of LUA functions that are then registered into a
- * module. These then become available from LUA script.
+ * Class to hold list of Lua functions that are then registered into a
+ * module. These then become available from Lua script.
  */
   class LuaModule
   {
@@ -54,7 +54,7 @@ namespace Lucee
       void addFunction(const std::string& nm, int (*fptr)(lua_State *));
 
 /**
- * Register the module into LUA. This method should be called only
+ * Register the module into Lua. This method should be called only
  * after all funcitons are added to the module.
  *
  * @param L object representing Lua state.

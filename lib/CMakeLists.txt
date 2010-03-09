@@ -19,6 +19,7 @@ add_library(lclib
   LcLuaModule.cpp
   LcLuaSaveRstrStack.cpp
   LcLuaState.cpp
+  LcLuaTable.cpp
   LcMatrix.cpp
   LcSettableObject.cpp
   LcVector.cpp

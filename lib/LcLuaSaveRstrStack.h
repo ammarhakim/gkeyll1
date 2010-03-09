@@ -1,7 +1,7 @@
 /**
  * @file	LcLuaSaveRstrStack.h
  *
- * @brief	Class to save/restore LUA stack.
+ * @brief	Class to save/restore Lua stack.
  *
  * @version	$Id: LcLuaSaveRstrStack.h 157 2009-08-26 17:27:55Z a.hakim777 $
  *
@@ -45,7 +45,7 @@ namespace Lucee
       virtual ~LuaSaveRstrStack();
 
     private:
-/** Pointer to LUA state */
+/** Pointer to Lua state */
       lua_State *state;
 /** Index to stack top */
       int stackTop;

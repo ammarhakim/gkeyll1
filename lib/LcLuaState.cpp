@@ -1,7 +1,7 @@
 /**
  * @file	LcLuaState.cpp
  *
- * @brief	Class to represent LUA state
+ * @brief	Class to represent Lua state
  *
  * @version	$Id: LcLuaState.cpp 157 2009-08-26 17:27:55Z a.hakim777 $
  *

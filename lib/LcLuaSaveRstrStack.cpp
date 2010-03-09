@@ -1,7 +1,7 @@
 /**
  * @file	LcLuaSaveRstrStack.cpp
  *
- * @brief	Class to save/restore LUA stack.
+ * @brief	Class to save/restore Lua stack.
  *
  * @version	$Id: LcLuaSaveRstrStack.cpp 157 2009-08-26 17:27:55Z a.hakim777 $
  *
