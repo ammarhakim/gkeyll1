@@ -112,6 +112,45 @@ luaopen_mylib(lua_State *L)
   return 1;
 }
 
+class LuaTable
+{
+  public:
+    LuaTable(Lucee::LuaState& L)
+      : ls(L) 
+    {
+      tblRef = luaL_ref(L, LUA_REGISTRYINDEX);
+    }
+
+    ~LuaTable()
+    {
+      luaL_unref(ls, LUA_REGISTRYINDEX, tblRef);
+    }
+
+    double getDouble(const std::string& key)
+    {
+      lua_rawgeti(ls, LUA_REGISTRYINDEX, tblRef);
+      return getFromTable(ls, key);
+      lua_pop(ls, 1);
+    }
+
+    LuaTable getTable(const std::string& nm)
+    {
+      lua_rawgeti(ls, LUA_REGISTRYINDEX, tblRef);
+      lua_pushstring(ls, nm.c_str());
+      lua_gettable(ls, -2); // -1 is key, -2 is table
+      if (! lua_istable(ls, -1) )
+      {
+        Lucee::Except lce("Key ");
+        lce << nm << " is not a table" << std::endl;
+      }
+      return LuaTable(ls);
+    }
+
+  private:
+    Lucee::LuaState& ls;
+    int tblRef;
+};
+
 void
 load(Lucee::LuaState& L, const std::string& fname)
 {
@@ -131,12 +170,24 @@ load(Lucee::LuaState& L, const std::string& fname)
   if (! lua_istable(L, -1))
     throw Lucee::Except("Table 'background' not found");
   
-  LC_ASSERT("Testing if table got properly", getFromTable(L, "r") == 0.3);
-  LC_ASSERT("Testing if table got properly", getFromTable(L, "b") == 0.1);
-  LC_ASSERT("Testing if table got properly", getFromTable(L, "g") == 0.0);  
+  LuaTable ltbl(L);
+  
+  LC_ASSERT("Testing if table got properly", ltbl.getDouble("r") == 0.3);
+  LC_ASSERT("Testing if table got properly", ltbl.getDouble("b") == 0.1);
+  LC_ASSERT("Testing if table got properly", ltbl.getDouble("g") == 0.0);
+
+  LuaTable ltbl2 = ltbl.getTable("sub_table");
+  LC_ASSERT("Testing if sub-table got properly", ltbl2.getDouble("s") == 2.0);
+  LC_ASSERT("Testing if sub-table got properly", ltbl2.getDouble("v") == 1.0);
+
+  LC_ASSERT("Testing if table got properly", ltbl.getDouble("h") == 3.0);
 
   LC_ASSERT("Testing if function called worked", luaFunc(L, "addTwo", 2.0, 1.5) == 3.5);
   LC_ASSERT("Testing if function called worked", luaFunc(L, "minusTwo", 2.0, 1.5) == 0.5);
+
+  LuaTable ltbl3 = ltbl2.getTable("subsub_table");
+  LC_ASSERT("Testing if function called worked", ltbl3.getDouble("d") == 0.0);
+  LC_ASSERT("Testing if function called worked", ltbl3.getDouble("e") == 1.0);
 }
 
 int
