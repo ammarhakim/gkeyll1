@@ -63,6 +63,9 @@ add_subdirectory(lib)
 # Build code in slvrs
 add_subdirectory(slvrs)
 
+# Build library in rte directory
+add_subdirectory(rte)
+
 # Build Lucee executable
 add_subdirectory(lucee)
 

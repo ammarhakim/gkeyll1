@@ -6,7 +6,7 @@ tStart = 0.0
 tEnd = 1.0
 
 -- top-level simulation object
-simulation = Solver.RteHomogenousSlab {
+simulation = Solver.RteHomogeneousSlab {
 -- number of phase function coefficients
    L = 128,
 -- number of quadrature points in each hemisphere
