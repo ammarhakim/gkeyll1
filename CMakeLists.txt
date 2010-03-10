@@ -90,16 +90,7 @@ add_test(lcvector unit/lcvector)
 # lcmatrix
 add_test(lcmatrix unit/lcmatrix)
 
-# lcsettableobject
-add_test(lcsettableobject unit/lcsettableobject)
-
-# lckeyval
-add_test(lckeyval unit/lckeyval)
-
-# lckeyvaltree
-add_test(lckeyvaltree unit/lckeyvaltree)
-
-# lckeyvaltree
+# lccmdlineargs
 add_test(lccmdlineargs unit/lccmdlineargs)
 
 # lcregion
