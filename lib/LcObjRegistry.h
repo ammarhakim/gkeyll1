@@ -13,6 +13,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaModule.h>
 
 // loki includes
 #include <loki/Factory.h>
@@ -28,14 +29,38 @@ namespace Lucee
   {
     public:
 /**
- * Register a new object to be created by its given name.
- *
- * @param nm Name by which object will be created.
+ * Register a new object to be created by its id.
  */
-      ObjRegistry(const std::string& nm)
+      ObjRegistry()
       {
+// register creator function
         Loki::SingletonHolder<Loki::Factory<B, std::string> >
-          ::Instance().Register(nm, getNew);
+          ::Instance().Register(D::id, getNew);
+// add a function
+        luaL_Reg reg = {D::id, getModuleTable};
+        Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance().regFuncs.push_back(reg);
+      }
+
+/**
+ * Function called by Lua for constructing object table.
+ *
+ * @return Newly allocated object.
+ */
+      static int getModuleTable(lua_State *L)
+      {
+        if (! lua_istable(L, 1) )
+          throw Lucee::Except("ObjRegistry::getModuleTable: expects table as single parameter");
+// add meta-data keys into table
+        lua_pushstring(L, "__type");
+        lua_pushstring(L, B::id);
+        lua_settable(L, -3);
+
+        lua_pushstring(L, "__kind");
+        lua_pushstring(L, D::id);
+        lua_settable(L, -3);
+
+        return 1;
       }
 
     private:

@@ -110,3 +110,6 @@ add_test(lcobjcreator unit/lcobjcreator)
 
 # lcluatable
 add_test(lcluatable unit/lcluatable)
+
+# lcluamodule
+add_test(lcluamodule unit/lcluamodule)

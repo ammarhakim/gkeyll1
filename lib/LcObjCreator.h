@@ -13,6 +13,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaModule.h>
 
 // loki includes
 #include <loki/Factory.h>
@@ -40,6 +41,15 @@ namespace Lucee
       {
         return Loki::SingletonHolder<Loki::Factory<B, std::string> >
           ::Instance().CreateObject(nm);
+      }
+
+      static void registerModule(lua_State *L)
+      {
+        luaL_Reg reg = {NULL, NULL};
+        Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance().regFuncs.push_back(reg);
+        luaL_register(L, B::id, &Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance().regFuncs[0]);
       }
 
 /**

@@ -74,3 +74,7 @@ target_link_libraries(lcobjcreator lclib lcloki lclua)
 # lcluatable
 add_executable(lcluatable lcluatable.cxx)
 target_link_libraries(lcluatable lclib lcloki lclua)
+
+# lcluamodule
+add_executable(lcluamodule lcluamodule.cxx)
+target_link_libraries(lcluamodule lclib lcloki lclua)

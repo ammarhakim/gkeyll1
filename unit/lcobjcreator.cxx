@@ -16,32 +16,38 @@
 class Base
 {
   public:
+    static const char *id;
 
     virtual ~Base() {}
 
     virtual std::string getMessage() = 0;
 };
+const char *Base::id = "Base";
 
 class Derived : public Base 
 {
   public:
+    static const char *id;
     std::string getMessage()
     {
       return "I am Derived";
     }
 };
+const char *Derived::id = "derived";
 
 class Derived2 : public Base 
 {
   public:
+    static const char *id;
     std::string getMessage()
     {
       return "I am Derived2";
     }
 };
+const char *Derived2::id = "derived2";
 
-Lucee::ObjRegistry<Base, Derived> derived("derived");
-Lucee::ObjRegistry<Base, Derived2> derived2("derived2");
+Lucee::ObjRegistry<Base, Derived> derived;
+Lucee::ObjRegistry<Base, Derived2> derived2;
 
 void
 test_1()
