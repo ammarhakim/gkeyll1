@@ -24,7 +24,7 @@ namespace Lucee
   }
 
   void
-  Simulation::readInput()
+  Simulation::readInput(Lucee::LuaTable& tbl)
   {
   }
 

@@ -37,9 +37,11 @@ namespace Lucee
       Simulation();
 
 /**
- * Bootstrap method: Read input from specified stream.
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
  */
-      void readInput();
+      void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Bootstrap method: Allocate data for solver.

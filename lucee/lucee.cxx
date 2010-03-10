@@ -14,8 +14,9 @@
 #include <LcSimulation.h>
 
 // std includes
-#include <string>
+#include <fstream>
 #include <iostream>
+#include <string>
 
 int
 main(int argc, char **argv)
@@ -48,13 +49,55 @@ main(int argc, char **argv)
     exit(1);
   }
 
+// check if input file exist
+  std::ifstream inp(inpFile.c_str());
+  if (! inp )
+  {
+    std::cerr << "Unable to open file " << inpFile << std::endl;
+    exit(1);
+  }
+
 // create top-level simulation object
   Lucee::Simulation sim;
 
-// now open input file to determine some global variables
+// load lua library: this must be done before loading input file
+
+// load input file using Lua to determine some global variables
+  Lucee::LuaState L;
+  if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
+  {
+    std::cerr << "Error parsing input file " << inpFile << std::endl;
+    exit(1);
+  }
+
+  double t0, t1;
+
+// get start and end times
+  lua_getglobal(L, "tStart");
+  if (! lua_type(L, -1) == LUA_TNUMBER)
+    t0 = 0.0;
+  else
+    t0 = lua_tonumber(L, -1);
+
+  lua_getglobal(L, "tEnd");
+  if (! lua_type(L, -1) == LUA_TNUMBER)
+    t1 = 1.0;
+  else
+    t1 = lua_tonumber(L, -1);
+
+  if (t1 < t0)
+  {
+    std::cerr << "tEnd must be greater than tStart" << std::endl;
+    exit(1);
+  }
+
+// put the top-level simulation table on stack
+  lua_getglobal(L, "simulation");
+// construct table object with this table
+  Lucee::LuaTable tbl(L, "simulation");
 
 // go through simulation boot-strap process
-  sim.readInput();
+  sim.readInput(tbl);
   sim.buildData();
   sim.buildAlgorithms();
 
@@ -65,9 +108,9 @@ main(int argc, char **argv)
     sim.initialize();
 
 // set current time
-  sim.setCurrTime(0.0); // FROM INPUT FILE
+  sim.setCurrTime(t0);
 // run simulation
-  sim.advance(1.0); // FROM INPUT FILE
+  sim.advance(t1);
 
 // shut-down simulaiton
   sim.finalize();
