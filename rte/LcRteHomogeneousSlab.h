@@ -30,11 +30,11 @@ namespace Lucee
   class RteHomogeneousSlab : public Lucee::SolverIfc
   {
     public:
-/** Class id: this is used by the registration system */
+/** Class id: this is used by registration system */
       static const char *id;
 
 /**
- * Create a new solver object with given name.
+ * Create a new RET solver object.
  */
       RteHomogeneousSlab();
 
