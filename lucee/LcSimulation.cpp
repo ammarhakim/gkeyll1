@@ -14,7 +14,9 @@
 #endif
 
 // lucee includes
+#include <LcObjCreator.h>
 #include <LcSimulation.h>
+
 
 namespace Lucee
 {
@@ -26,21 +28,26 @@ namespace Lucee
   void
   Simulation::readInput(Lucee::LuaTable& tbl)
   {
+    slvr = Lucee::ObjCreator<Lucee::SolverIfc>::getNew(tbl.getKind());
+    slvr->readInput(tbl);
   }
 
   void
   Simulation::buildData()
   {
+    slvr->buildData();
   }
 
   void
   Simulation::buildAlgorithms()
   {
+    slvr->buildAlgorithms();
   }
 
   void
   Simulation::initialize()
   {
+    slvr->initialize();
   }
 
   int
