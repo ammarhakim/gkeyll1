@@ -98,6 +98,14 @@ namespace Lucee
  */
       virtual void finalize();
     private:
+/** Number of expansion coefficients */
+      unsigned L;
+/** Number of quadrature points in each hemisphere */
+      unsigned N;
+/** Cosine of incidence angle */
+      double mu0;
+/** Optical depth */
+      double tau0;
   };
 }
 

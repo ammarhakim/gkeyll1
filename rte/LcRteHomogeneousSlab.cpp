@@ -11,6 +11,9 @@
 // lucee includes
 #include <LcRteHomogeneousSlab.h>
 
+// std includes
+#include <iostream>
+
 namespace Lucee
 {
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
@@ -27,6 +30,10 @@ namespace Lucee
   void
   RteHomogeneousSlab::readInput(Lucee::LuaTable& tbl)
   {
+    L = tbl.getNumber("L");
+    N = tbl.getNumber("N");
+    mu0 = tbl.getNumber("mu0");
+    tau0 = tbl.getNumber("tau0");
   }
 
   void 

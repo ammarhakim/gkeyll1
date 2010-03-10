@@ -92,6 +92,8 @@ namespace Lucee
       void finalize();
 
     private:
+/** Top-level solver */
+      Lucee::SolverIfc *slvr;
   };
 }
 
