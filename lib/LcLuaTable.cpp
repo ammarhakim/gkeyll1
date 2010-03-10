@@ -46,6 +46,12 @@ namespace Lucee
     lua_pushstring(L, key.c_str());
 // get data from table
     lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TSTRING)
+    {
+      Lucee::Except lce("LuaTable::getString: ");
+      lce << key << " is not a string";
+      throw lce;
+    }
     std::string res = lua_tostring(L, -1);
 
     lua_pop(L, 1);
@@ -60,9 +66,67 @@ namespace Lucee
     lua_pushstring(L, key.c_str());
 // get data from table
     lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TNUMBER)
+    {
+      Lucee::Except lce("LuaTable::getNumber: ");
+      lce << key << " is not a number";
+      throw lce;
+    }
     double res = lua_tonumber(L, -1);
 
     lua_pop(L, 1);
+    return res;
+  }
+
+  std::vector<std::string>
+  LuaTable::getStrVec(const std::string& key)
+  {
+    std::vector<std::string> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TSTRING)
+      {
+        Lucee::Except lce("LuaTable::getStrVec: ");
+        lce << key << " is not a table of strings";
+        throw lce;
+      }
+      res.push_back(lua_tostring(L, -1));
+      lua_pop(L, 1);
+    }
+    return res;
+  }
+
+  std::vector<double>
+  LuaTable::getNumVec(const std::string& key)
+  {
+    std::vector<double> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TNUMBER)
+      {
+        Lucee::Except lce("LuaTable::getNumVec: ");
+        lce << key << " is not a table of numbers";
+        throw lce;
+      }
+      res.push_back(lua_tonumber(L, -1));
+      lua_pop(L, 1);
+    }
     return res;
   }
 
