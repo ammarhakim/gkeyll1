@@ -22,6 +22,8 @@ test_1(Lucee::LuaState& L)
     "background = {"
     "r = 0.3, b = 0.1, g = 0.0,"
     "name = \"blue_green\","
+    "cells = {100, 50},"
+    "address = {\"hello\", \"world\"},"
     "subcolors = {a=1.0, b=2.0, c=3.0},"
     "}";
 // evaluate string as Lua code
@@ -51,6 +53,18 @@ test_1(Lucee::LuaState& L)
   LC_ASSERT("Testing Lua table", back.getNumber("b") == 0.1);
   LC_ASSERT("Testing Lua table", back.getNumber("g") == 0.0);
   LC_ASSERT("Testing Lua table", back.getString("name") == "blue_green");
+
+  LC_RAISES("Testing Lua table", back.getNumber("name"), Lucee::Except);
+
+  std::vector<double> cells = back.getNumVec("cells");
+  LC_ASSERT("Testing list of numbers", cells.size() == 2);
+  LC_ASSERT("Testing list of numbers", cells[0] == 100);
+  LC_ASSERT("Testing list of numbers", cells[1] == 50);
+
+  std::vector<std::string> address = back.getStrVec("address");
+  LC_ASSERT("Testing list of strings", address.size() == 2);
+  LC_ASSERT("Testing list of strings", address[0] == "hello");
+  LC_ASSERT("Testing list of strings", address[1] == "world");
 }
 
 int
