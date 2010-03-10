@@ -11,6 +11,7 @@
 // lucee includes
 #include <LcCmdLineArgs.h>
 #include <LcLuaState.h>
+#include <LcRegisterModules.h>
 #include <LcSimulation.h>
 
 // std includes
@@ -60,10 +61,11 @@ main(int argc, char **argv)
 // create top-level simulation object
   Lucee::Simulation sim;
 
-// load lua library: this must be done before loading input file
-
 // load input file using Lua to determine some global variables
   Lucee::LuaState L;
+// load lua library: this must be done before loading input file
+  Lucee::registerModules(L);
+
   if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
   {
     std::cerr << "Error parsing input file " << inpFile << std::endl;
@@ -71,7 +73,6 @@ main(int argc, char **argv)
   }
 
   double t0, t1;
-
 // get start and end times
   lua_getglobal(L, "tStart");
   if (! lua_type(L, -1) == LUA_TNUMBER)

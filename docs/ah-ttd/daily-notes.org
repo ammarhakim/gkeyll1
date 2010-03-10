@@ -5,6 +5,9 @@
   - Added basic methods in LuaTable. Tested these. Next to implement
     the vector forms of these methods. Also, need to be careful about
     not polluting the stack.
+  - All methos in LuaTable now implemented. Need to think about how to
+    get and evaluate functions in Lua.
+  - Module registration system needed re-work. Now seems to work.
 
 * March 8th
 
