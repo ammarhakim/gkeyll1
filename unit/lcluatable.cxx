@@ -37,12 +37,19 @@ test_1(Lucee::LuaState& L)
   Lucee::LuaTable back(L, "background");
 
 // test it
+  LC_ASSERT("Testing Lua table", back.hasNumber("r"));
+  LC_ASSERT("Testing Lua table", back.hasNumber("b"));
+  LC_ASSERT("Testing Lua table", back.hasNumber("g"));
+  LC_ASSERT("Testing Lua table", back.hasString("name"));
+  LC_ASSERT("Testing Lua table", back.hasNumber("zzz") == false);
+
   LC_ASSERT("Testing Lua table", back.getNumber("r") == 0.3);
   LC_ASSERT("Testing Lua table", back.getNumber("b") == 0.1);
   LC_ASSERT("Testing Lua table", back.getNumber("g") == 0.0);
   LC_ASSERT("Testing Lua table", back.getString("name") == "blue_green");
 
 // get subtable
+  LC_ASSERT("Testing Lua table", back.hasTable("subcolors"));
   Lucee::LuaTable sub = back.getTable("subcolors");
 
   LC_ASSERT("Testing Lua table", sub.getNumber("a") == 1.0);
@@ -56,11 +63,13 @@ test_1(Lucee::LuaState& L)
 
   LC_RAISES("Testing Lua table", back.getNumber("name"), Lucee::Except);
 
+  LC_ASSERT("Testing Lua table", back.hasNumVec("cells"));
   std::vector<double> cells = back.getNumVec("cells");
   LC_ASSERT("Testing list of numbers", cells.size() == 2);
   LC_ASSERT("Testing list of numbers", cells[0] == 100);
   LC_ASSERT("Testing list of numbers", cells[1] == 50);
 
+  LC_ASSERT("Testing Lua table", back.hasStrVec("address"));
   std::vector<std::string> address = back.getStrVec("address");
   LC_ASSERT("Testing list of strings", address.size() == 2);
   LC_ASSERT("Testing list of strings", address[0] == "hello");

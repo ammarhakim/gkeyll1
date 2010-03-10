@@ -138,4 +138,81 @@ namespace Lucee
     lua_gettable(L, -2);
     return LuaTable(L, nm);
   }
+
+  bool
+  LuaTable::hasString(const std::string& key)
+  {
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TSTRING)
+      return false;
+    return true;
+  }
+
+  bool
+  LuaTable::hasNumber(const std::string& key)
+  {
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TNUMBER)
+      return false;
+    return true;
+  }
+
+  bool
+  LuaTable::hasStrVec(const std::string& key)
+  {
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TSTRING)
+        return false;
+      lua_pop(L, 1);
+    }
+    return true;
+  }
+
+  bool
+  LuaTable::hasNumVec(const std::string& key)
+  {
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TNUMBER)
+        return false;
+      lua_pop(L, 1);
+    }
+    return true;
+  }
+
+  bool
+  LuaTable::hasTable(const std::string& nm)
+  {
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, nm.c_str());
+    lua_gettable(L, -2);
+    if (! lua_istable(L, -1) )
+      return false;
+    return true;
+  }
 }
