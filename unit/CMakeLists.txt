@@ -43,19 +43,7 @@ target_link_libraries(lcvector lclib lcloki lclua)
 add_executable(lcmatrix lcmatrix.cxx)
 target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS})
 
-# lcsettableobject
-add_executable(lcsettableobject lcsettableobject.cxx)
-target_link_libraries(lcsettableobject lclib lcloki lclua)
-
-# lckeyval
-add_executable(lckeyval lckeyval.cxx)
-target_link_libraries(lckeyval lclib lcloki lclua)
-
-# lckeyvaltree
-add_executable(lckeyvaltree lckeyvaltree.cxx)
-target_link_libraries(lckeyvaltree lclib lcloki lclua)
-
-# lckeyvaltree
+# lccmdlineargs
 add_executable(lccmdlineargs lccmdlineargs.cxx)
 target_link_libraries(lccmdlineargs lclib lcloki lclua)
 

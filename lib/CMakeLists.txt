@@ -13,14 +13,11 @@ add_library(lclib
   LcExcept.cpp 
   LcField.cpp
   LcFieldPtr.cpp
-  LcKeyVal.cpp
-  LcKeyValTree.cpp
   LcLinAlgebra.cpp
   LcLuaModule.cpp
   LcLuaSaveRstrStack.cpp
   LcLuaState.cpp
   LcLuaTable.cpp
   LcMatrix.cpp
-  LcSettableObject.cpp
   LcVector.cpp
 )
