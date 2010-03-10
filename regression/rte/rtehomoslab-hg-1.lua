@@ -1,4 +1,4 @@
--- Input file for RTE solution in homogenous slav
+-- Input file for RTE solution in homogeneous slab
 
 -- start time
 tStart = 0.0
