@@ -16,6 +16,7 @@
 
 namespace Lucee
 {
+// set class ID for use in registration system
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
 
   RteHomogeneousSlab::RteHomogeneousSlab()

@@ -13,7 +13,6 @@ add_library(lclib
   LcField.cpp
   LcFieldPtr.cpp
   LcLinAlgebra.cpp
-  LcLuaSaveRstrStack.cpp
   LcLuaState.cpp
   LcLuaTable.cpp
   LcMatrix.cpp
