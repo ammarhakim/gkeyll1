@@ -39,6 +39,18 @@ namespace Lucee
   }
 
   std::string
+  LuaTable::getType()
+  {
+    return getString("__type");
+  }
+
+  std::string
+  LuaTable::getKind()
+  {
+    return getString("__kind");
+  }
+
+  std::string
   LuaTable::getString(const std::string& key)
   {
 // push table object on stack

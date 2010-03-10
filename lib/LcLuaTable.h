@@ -50,6 +50,20 @@ namespace Lucee
       ~LuaTable();
 
 /**
+ * Get the type of this table. Not all tables will have a type field.
+ *
+ * @return type of this table.
+ */
+      std::string getType();
+
+/**
+ * Get the kind of this table. Not all tables will have a kind field.
+ *
+ * @return kind of this table.
+ */
+      std::string getKind();
+
+/**
  * Get a string from table.
  *
  * @param key Key in table.

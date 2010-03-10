@@ -16,6 +16,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcLuaTable.h>
+
 // std includes
 #include <string>
 
@@ -70,9 +73,11 @@ namespace Lucee
       std::string getName() const;
 
 /**
- * Bootstrap method: Read input from specified stream.
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
  */
-      virtual void readInput() = 0;
+      virtual void readInput(Lucee::LuaTable& tbl) = 0;
 
 /**
  * Bootstrap method: Allocate data for solver.

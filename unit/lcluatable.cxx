@@ -20,6 +20,8 @@ test_1(Lucee::LuaState& L)
 // string with table
   std::string tblStr = 
     "background = {"
+    "__kind = \"color\","
+    "__type = \"Lucee\","
     "r = 0.3, b = 0.1, g = 0.0,"
     "name = \"blue_green\","
     "cells = {100, 50},"
@@ -35,6 +37,9 @@ test_1(Lucee::LuaState& L)
 
 // construct LuaTable object
   Lucee::LuaTable back(L, "background");
+
+  LC_ASSERT("Testing kind field", back.getKind() == "color");
+  LC_ASSERT("Testing type field", back.getType() == "Lucee");
 
 // test it
   LC_ASSERT("Testing Lua table", back.hasNumber("r"));
