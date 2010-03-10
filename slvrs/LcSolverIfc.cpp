@@ -21,6 +21,9 @@
 
 namespace Lucee
 {
+// set madule name
+  const char * SolverIfc::id = "Solver";
+
   SolverIfc::SolverIfc(const std::string& nm)
     : name(nm)
   {

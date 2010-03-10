@@ -53,6 +53,9 @@ namespace Lucee
   class SolverIfc
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /**
  * Create a new solver object with given name.
  *

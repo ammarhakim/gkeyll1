@@ -14,7 +14,6 @@ add_library(lclib
   LcField.cpp
   LcFieldPtr.cpp
   LcLinAlgebra.cpp
-  LcLuaModule.cpp
   LcLuaSaveRstrStack.cpp
   LcLuaState.cpp
   LcLuaTable.cpp
