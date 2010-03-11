@@ -21,7 +21,10 @@
 
 namespace Lucee
 {
-  void registerRteObjects();
+/**
+ * Register RTE specific objects and modules.
+ */
+  void registerRteObjects(Lucee::LuaState& L);
 }
 
 #endif // LC_RTE_REGISTRY_H

@@ -111,6 +111,8 @@ namespace Lucee
       double mu0;
 /** Optical depth */
       double tau0;
+/** Albedo of single scattering */
+      double albedo;
 /** Weights and ordinates for Gaussian quadrature */
       Lucee::Vector<double> w, mu;
   };
