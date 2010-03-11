@@ -15,6 +15,8 @@ simulation = Solver.RteHomogeneousSlab {
    mu0 = 0.5,
 -- optical depth of slab
    tau0 = 50.0,
+-- albedo of single scattering
+   albedo = 0.95,
 -- number of azimuthal modes
    numModes = 1,
 -- phase function: Henyey-Greenstein

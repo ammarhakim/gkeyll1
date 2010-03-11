@@ -32,11 +32,13 @@ namespace Lucee
   void
   RteHomogeneousSlab::readInput(Lucee::LuaTable& tbl)
   {
+// read basic parameters
     L = tbl.getNumber("L");
     N = tbl.getNumber("N");
     mu0 = tbl.getNumber("mu0");
     tau0 = tbl.getNumber("tau0");
     numModes = tbl.getNumber("numModes");
+    albedo = tbl.getNumber("albedo");
   }
 
   void 

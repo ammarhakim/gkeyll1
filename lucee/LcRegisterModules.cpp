@@ -19,7 +19,7 @@ namespace Lucee
   void registerModules(Lucee::LuaState& L)
   {
 // register objects
-    Lucee::registerRteObjects();
+    Lucee::registerRteObjects(L);
 
 // register modules into Lua
     Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);

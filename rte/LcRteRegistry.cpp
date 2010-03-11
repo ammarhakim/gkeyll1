@@ -9,17 +9,23 @@
  */
 
 // lucee includes
+#include <LcObjCreator.h>
 #include <LcRteHomogeneousSlab.h>
+#include <LcRtePhaseFunction.h>
 #include <LcRteRegistry.h>
 #include <LcSolverIfc.h>
 
 namespace Lucee
 {
-  void registerRteObjects()
+  void registerRteObjects(Lucee::LuaState& L)
   {
 // register stuff
     new Lucee::ObjRegistry<Lucee::SolverIfc, Lucee::RteHomogeneousSlab>;
 
+// register phase functions
+
+// register phase function library into Lua
+    Lucee::ObjCreator<Lucee::RtePhaseFunction>::registerModule(L);
   }
 }
 
