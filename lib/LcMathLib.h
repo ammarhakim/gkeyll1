@@ -3,7 +3,7 @@
  *
  * @brief	Math library for use in Lucee.
  *
- * @version	$Id: LcMathLib.h 305 2010-03-01 23:08:07Z a.hakim777 $
+ * @version	$Id: LcMathLib.h 312 2010-03-02 18:37:24Z a.hakim777 $
  *
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
