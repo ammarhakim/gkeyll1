@@ -111,6 +111,8 @@ namespace Lucee
       double mu0;
 /** Optical depth */
       double tau0;
+/** Weights and ordinates for Gaussian quadrature */
+      Lucee::Vector<double> w, mu;
   };
 }
 

@@ -22,6 +22,5 @@ IF(APPLE)
 ENDIF (APPLE)
 
 # Create lucee executable
-
 add_executable(lucee lucee.cxx LcRegisterModules.cpp)
-target_link_libraries(lucee lcrte lcslvrs lclib lcloki lclua)
+target_link_libraries(lucee lcrte lcslvrs lclib lcloki lclua ${GSL_CONFIG_LIBS})
