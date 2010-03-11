@@ -26,7 +26,7 @@ main(int argc, char **argv)
   Lucee::CmdLineArgs cmdParser("lucee");
 // add command line options
   cmdParser.addArg("i", "INPUT", "Input file");
-  cmdParser.addArg("op", "OUTPUT-PREFIX", "Prefix for all output files");
+  cmdParser.addArg("o", "OUTPUT-PREFIX", "Prefix for all output files");
   cmdParser.addArg("verbosity", "VERBOSITY", "Verbosity of log messages."
     " Should be one of disable,\n   debug, info, error. Defaults to info.");
   cmdParser.addSwitch("r", "Restart simulation");
@@ -57,6 +57,19 @@ main(int argc, char **argv)
   {
     std::cerr << "Unable to open file " << inpFile << std::endl;
     exit(1);
+  }
+
+// create output prefix
+  std::string outPrefix;
+  if (cmdParser.hasArg("o"))
+    outPrefix = cmdParser.getArg("o");
+  else
+  {
+    std::string snm = inpFile;
+    unsigned trunc = inpFile.find_last_of(".", snm.size());
+    if (trunc > 0)
+      snm.erase(trunc, snm.size());
+    outPrefix = snm;
   }
 
 // load input file using Lua
@@ -90,6 +103,14 @@ main(int argc, char **argv)
     exit(1);
   }
 
+// get number of output frames to write
+  unsigned outFrames;
+  lua_getglobal(L, "outFrames");
+  if (! lua_type(L, -1) == LUA_TNUMBER)
+    outFrames = 1;
+  else
+    outFrames = lua_tonumber(L, -1);
+
 // put top-level simulation table on stack
   lua_getglobal(L, "simulation");
 // construct table object
@@ -114,11 +135,17 @@ main(int argc, char **argv)
 
 // set current time
   sim->setCurrTime(t0);
+
+// dump initial data before running simulation
+  sim->writeToFile(outPrefix, 0);
 // run simulation
   sim->advance(t1);
+// dump final data after running simulation
+  sim->writeToFile(outPrefix, outFrames);
 
 // shut-down simulaiton
   sim->finalize();
+  delete sim;
 
   return 0;
 }

@@ -24,28 +24,18 @@ if (WIN32)
    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif (WIN32)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-# On LINUX we need to add the dl library
-### NO LONGER NEEDED, I THINK. LUA IS COMPILED WITHOUT DLOPEN
-  #LINK_LIBRARIES(-ldl)
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
 # Check for include files
 add_definitions(-DHAVE_CONFIG_H)
 INCLUDE(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(iostream HAVE_STD_STREAMS)
 CHECK_INCLUDE_FILE_CXX(sstream HAVE_SSTREAM)
 
-# Check for HDF5
-find_package(HDF5)
-if (HDF5_FOUND)
-
-endif (HDF5_FOUND)
-
 # Check for GSL
 find_package(GSL)
 if (GSL_FOUND)
-
+   add_definitions(-DHAVE_GSL)
+   include_directories(${GSL_INCLUDE_DIR})
+   link_directories(${GSL_LIBRARIES})
 endif (GSL_FOUND)
 
 # Create configure file

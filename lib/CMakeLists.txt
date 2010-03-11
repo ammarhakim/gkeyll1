@@ -15,6 +15,7 @@ add_library(lclib
   LcLinAlgebra.cpp
   LcLuaState.cpp
   LcLuaTable.cpp
+  LcMathLib.cpp
   LcMatrix.cpp
   LcVector.cpp
 )

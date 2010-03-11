@@ -80,8 +80,9 @@ namespace Lucee
  *
  * @param baseName Base name of output files. This should serve as a
  *   prefix for all output files.
+ * @param d Dump number.
  */
-      virtual void writeToFile(const std::string& baseName) const;
+      virtual void writeToFile(const std::string& baseName, unsigned d) const;
 
 /**
  * Restore solver data from file. This is called instead of the
