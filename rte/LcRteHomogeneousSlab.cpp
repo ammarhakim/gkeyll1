@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcMathLib.h>
 #include <LcRteHomogeneousSlab.h>
 
 // std includes
@@ -20,7 +21,7 @@ namespace Lucee
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
 
   RteHomogeneousSlab::RteHomogeneousSlab()
-    : SolverIfc(RteHomogeneousSlab::id)
+    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1)
   {
   }
 
@@ -41,11 +42,15 @@ namespace Lucee
   void 
   RteHomogeneousSlab::buildData()
   {
+    w = Lucee::Vector<double>(N);
+    mu = Lucee::Vector<double>(N);
   }
 
   void 
   RteHomogeneousSlab::buildAlgorithms()
   {
+// compute ordinates and quadrature for use in Gaussian quadrature
+    Lucee::gauleg(N, 0, 1, mu, w);
   }
 
   void

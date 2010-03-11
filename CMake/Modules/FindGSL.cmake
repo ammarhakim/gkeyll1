@@ -43,7 +43,9 @@ ELSE(WIN32)
       SET(GSL_INCLUDE_DIR ${GSL_PREFIX}/include CACHE STRING INTERNAL)
 
       # set link libraries and link flags
-      SET(GSL_LIBRARIES "`${GSL_CONFIG} --libs`")
+      EXEC_PROGRAM(${GSL_CONFIG}
+        ARGS --libs 
+        OUTPUT_VARIABLE GSL_LIBRARIES)
       
       ## extract link dirs for rpath  
       EXEC_PROGRAM(${GSL_CONFIG}

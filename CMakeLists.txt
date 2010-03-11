@@ -35,7 +35,6 @@ find_package(GSL)
 if (GSL_FOUND)
    add_definitions(-DHAVE_GSL)
    include_directories(${GSL_INCLUDE_DIR})
-   link_directories(${GSL_LIBRARIES})
 endif (GSL_FOUND)
 
 # Create configure file
