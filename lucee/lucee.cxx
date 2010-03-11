@@ -11,8 +11,9 @@
 // lucee includes
 #include <LcCmdLineArgs.h>
 #include <LcLuaState.h>
+#include <LcObjCreator.h>
 #include <LcRegisterModules.h>
-#include <LcSimulation.h>
+#include <LcSolverIfc.h>
 
 // std includes
 #include <fstream>
@@ -58,10 +59,7 @@ main(int argc, char **argv)
     exit(1);
   }
 
-// create top-level simulation object
-  Lucee::Simulation sim;
-
-// load input file using Lua to determine some global variables
+// load input file using Lua
   Lucee::LuaState L;
 // load lua library: this must be done before loading input file
   Lucee::registerModules(L);
@@ -73,13 +71,13 @@ main(int argc, char **argv)
   }
 
   double t0, t1;
-// get start and end times
+// get simulation start time
   lua_getglobal(L, "tStart");
   if (! lua_type(L, -1) == LUA_TNUMBER)
     t0 = 0.0;
   else
     t0 = lua_tonumber(L, -1);
-
+// get simulation end time
   lua_getglobal(L, "tEnd");
   if (! lua_type(L, -1) == LUA_TNUMBER)
     t1 = 1.0;
@@ -92,29 +90,35 @@ main(int argc, char **argv)
     exit(1);
   }
 
-// put the top-level simulation table on stack
+// put top-level simulation table on stack
   lua_getglobal(L, "simulation");
-// construct table object with this table
+// construct table object
   Lucee::LuaTable tbl(L, "simulation");
 
+// get kind of simulation object
+  std::string kind = tbl.getKind();
+// create a new simulation of this kind
+  Lucee::SolverIfc *sim = Lucee::ObjCreator<Lucee::SolverIfc>
+    ::getNew(kind);
+
 // go through simulation boot-strap process
-  sim.readInput(tbl);
-  sim.buildData();
-  sim.buildAlgorithms();
+  sim->readInput(tbl);
+  sim->buildData();
+  sim->buildAlgorithms();
 
 // check if we are restarting
   if (cmdParser.hasSwitch("r"))
-    sim.restoreFromFile(inpFile);
+    sim->restoreFromFile(inpFile);
   else
-    sim.initialize();
+    sim->initialize();
 
 // set current time
-  sim.setCurrTime(t0);
+  sim->setCurrTime(t0);
 // run simulation
-  sim.advance(t1);
+  sim->advance(t1);
 
 // shut-down simulaiton
-  sim.finalize();
+  sim->finalize();
 
   return 0;
 }
