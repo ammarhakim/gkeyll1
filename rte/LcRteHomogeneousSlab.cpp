@@ -60,7 +60,7 @@ namespace Lucee
   }
 
   void
-  RteHomogeneousSlab::writeToFile(const std::string& baseName) const
+  RteHomogeneousSlab::writeToFile(const std::string& baseName, unsigned d) const
   {
   }
 

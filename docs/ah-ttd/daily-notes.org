@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 10th
+
+  - Added LcMathLib file with math functions. Added gauleg() method.
+  - Removed FcSimulation files. Now main() directly creates the
+    SolverIfc class and drives.
+
 * March 9th
 
   - Added basic methods in LuaTable. Tested these. Next to implement
