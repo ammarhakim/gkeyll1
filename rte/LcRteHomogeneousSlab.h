@@ -17,7 +17,9 @@
 #endif
 
 // lucee includes
+#include <LcMatrix.h>
 #include <LcSolverIfc.h>
+#include <LcVector.h>
 
 // std includes
 #include <string>
@@ -103,6 +105,8 @@ namespace Lucee
       unsigned L;
 /** Number of quadrature points in each hemisphere */
       unsigned N;
+/** Number of azimuthal modes */
+      unsigned numModes;
 /** Cosine of incidence angle */
       double mu0;
 /** Optical depth */

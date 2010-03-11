@@ -35,6 +35,7 @@ namespace Lucee
     N = tbl.getNumber("N");
     mu0 = tbl.getNumber("mu0");
     tau0 = tbl.getNumber("tau0");
+    numModes = tbl.getNumber("numModes");
   }
 
   void 
