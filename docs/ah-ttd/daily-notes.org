@@ -5,6 +5,8 @@
   - Added LcMathLib file with math functions. Added gauleg() method.
   - Removed FcSimulation files. Now main() directly creates the
     SolverIfc class and drives.
+  - Now have GSL properly linked. Some more familiarity with cmake is
+    needed to get this figured out properly.
 
 * March 9th
 
