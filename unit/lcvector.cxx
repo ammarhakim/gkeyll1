@@ -51,11 +51,22 @@ test_2()
     LC_ASSERT("Testing vector created from 1D array", vec(i) == (0.5+i)*2.5);
 }
 
+void
+test_3()
+{
+  Lucee::Vector<double> vec(20);
+  vec = 25.0;
+  vec.scale(0.5);
+  for (int i=vec.getLower(0); i<vec.getUpper(0); ++i)
+    LC_ASSERT("Testing scale() function", vec[i] == 12.5);
+}
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcvector");
   test_1();
   test_2();
+  test_3();
   LC_END_TESTS;
 }

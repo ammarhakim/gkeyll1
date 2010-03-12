@@ -116,6 +116,15 @@ namespace Lucee
       Lucee::Vector<double> w, mu;
 /** Phase function expasion coefficients */
       Lucee::Vector<double> betal;
+
+/**
+ * Computes Qp and Qm needed to compute particular solutions.
+ *
+ * @param m Azimuthal mode number.
+ * @param Qp on output, beam source in positive hemisphere.
+ * @param Qm on output, beam source in negative hemisphere.
+ */
+      void qbeam(int m, Lucee::Vector<double>& Qp, Lucee::Vector<double>& Qm);
   };
 }
 

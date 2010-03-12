@@ -13,7 +13,7 @@ simulation = Solver.RteHomogeneousSlab {
    -- albedo of single scattering
    albedo = 0.9,
    -- number of azimuthal modes
-   numModes = 1,
+   numModes = 10,
    -- phase function
    phaseFunction = RtePhaseFunction.HG { g = 0.9 },
 }

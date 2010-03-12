@@ -10,6 +10,8 @@
 
 // lucee includes
 #include <LcLinAlgebra.h>
+#include <LcLogStream.h>
+#include <LcLogger.h>
 #include <LcMathLib.h>
 #include <LcMatrix.h>
 #include <LcObjCreator.h>
@@ -79,6 +81,10 @@ namespace Lucee
   int
   RteHomogeneousSlab::advance(double t)
   {
+// get hold of log stream
+    Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+    Lucee::LogStream infoStrm = l.getInfoStream();
+
 // allocate various matrices and vectors
     Lucee::Vector<double> nu(N), Nj(N), A(N), B(N), 
       Lp(N), Lm(N), Qp(N), Qm(N);
@@ -87,6 +93,9 @@ namespace Lucee
 // solve each azimuthal component of RTE
     for (unsigned m=0; m<numModes; ++m)
     {
+      infoStrm << "Solving azimuthal mode " << m << " ..." << std::endl;
+// compute Qp, Qm
+      qbeam(m, Qp, Qm);
     }
 
     return 0;
@@ -105,5 +114,28 @@ namespace Lucee
   void 
   RteHomogeneousSlab::finalize()
   {
+  }
+
+  void
+  RteHomogeneousSlab::qbeam(int m, Lucee::Vector<double>& Qp, Lucee::Vector<double>& Qm)
+  {
+    Lucee::Vector<double> PL(N);
+    double fact = 0.5*albedo;
+
+    Qp = 0.0;
+    Qm = 0.0;
+// \sum_{l=m}^L \beta_l P_l^m(\mu_0) P_l^m(\mu)
+    for (unsigned l=m; l<=L; ++l)
+    {
+      double Plmu0 = Lucee::legendre(l, m, mu0);
+      Lucee::legendre(l, m, mu, PL);
+      for (unsigned i=0; i<N; i++)
+      {
+        Qp[i] += PL[i]*betal[l]*Plmu0;
+        Qm[i] += PL[i]*pow(-1, l-m)*betal[l]*Plmu0;
+      }
+    }
+    Qp.scale(fact);
+    Qm.scale(fact);
   }
 }
