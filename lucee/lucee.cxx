@@ -10,15 +10,21 @@
 
 // lucee includes
 #include <LcCmdLineArgs.h>
+#include <LcFileHandler.h>
+#include <LcLogStream.h>
+#include <LcLogger.h>
+#include <LcLogger.h>
 #include <LcLuaState.h>
 #include <LcObjCreator.h>
 #include <LcRegisterModules.h>
 #include <LcSolverIfc.h>
+#include <LcStreamHandler.h>
 
 // std includes
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <ctime>
 
 int
 main(int argc, char **argv)
@@ -65,6 +71,7 @@ main(int argc, char **argv)
     outPrefix = cmdParser.getArg("o");
   else
   {
+// use input file name sans the .lua extension
     std::string snm = inpFile;
     unsigned trunc = inpFile.find_last_of(".", snm.size());
     if (trunc > 0)
@@ -72,11 +79,33 @@ main(int argc, char **argv)
     outPrefix = snm;
   }
 
+// create top-level logger
+  Lucee::Logger& logger = Lucee::Logger::create("lucee");
+  logger.setLevel("debug"); // base logger should log everything
+// create file stream
+  Lucee::FileHandler fhndlr(outPrefix + "_0.log");
+  fhndlr.attachToLogger("lucee");
+
+// create console logger
+  Lucee::Logger& conLogger = Lucee::Logger::create("lucee.console");
+  if (cmdParser.hasArg("verbosity"))
+    conLogger.setLevel(cmdParser.getArg("verbosity"));
+  else
+    conLogger.setLevel("info");
+// create console stream
+  Lucee::StreamHandler conStrm(std::cout);
+  conStrm.attachToLogger("lucee.console");
+
+// get stream for logging
+  Lucee::LogStream infoStrm = conLogger.getInfoStream();
+
 // load input file using Lua
   Lucee::LuaState L;
 // load lua library: this must be done before loading input file
   Lucee::registerModules(L);
 
+  infoStrm << "** Welcome to Lucee!" << std::endl;
+  infoStrm << "Reading input file " << inpFile << std::endl;
   if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
   {
     std::cerr << "Error parsing input file " << inpFile << std::endl;
@@ -118,6 +147,7 @@ main(int argc, char **argv)
 
 // get kind of simulation object
   std::string kind = tbl.getKind();
+  infoStrm << "Creating top level simulation object '" << kind << "'" << std::endl;
 // create a new simulation of this kind
   Lucee::SolverIfc *sim = Lucee::ObjCreator<Lucee::SolverIfc>
     ::getNew(kind);
@@ -138,8 +168,20 @@ main(int argc, char **argv)
 
 // dump initial data before running simulation
   sim->writeToFile(outPrefix, 0);
+
+  time_t start = time(0);
+  struct tm *timeinfo;
+  timeinfo = localtime(&start);
+  infoStrm << std::endl;
+  infoStrm << "Simulation started at time " << asctime(timeinfo) << std::endl;
+
 // run simulation
   sim->advance(t1);
+
+  time_t end = time(0); // time at end of main loop
+  timeinfo = localtime ( &end );
+  infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
+
 // dump final data after running simulation
   sim->writeToFile(outPrefix, outFrames);
 

@@ -105,3 +105,6 @@ add_test(lcluatable unit/lcluatable)
 
 # lcluamodule
 add_test(lcluamodule unit/lcluamodule)
+
+# lclogger
+add_test(lclogger unit/lclogger)

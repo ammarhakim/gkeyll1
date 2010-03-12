@@ -9,7 +9,9 @@
  */
 
 // lucee includes
+#include <LcLinAlgebra.h>
 #include <LcMathLib.h>
+#include <LcMatrix.h>
 #include <LcObjCreator.h>
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
@@ -57,7 +59,7 @@ namespace Lucee
   void 
   RteHomogeneousSlab::buildData()
   {
-// allocate space of weights and ordinates
+// allocate space for weights and ordinates
     w = Lucee::Vector<double>(N);
     mu = Lucee::Vector<double>(N);
   }
@@ -77,6 +79,15 @@ namespace Lucee
   int
   RteHomogeneousSlab::advance(double t)
   {
+// allocate various matrices and vectors
+    Lucee::Vector<double> nu(N), Nj(N), A(N), B(N), 
+      Lp(N), Lm(N), Qp(N), Qm(N);
+    Lucee::Matrix<double> phi_p(N, N), phi_m(N, N);
+
+// solve each azimuthal component of RTE
+    for (unsigned m=0; m<numModes; ++m)
+    {
+    }
 
     return 0;
   }
