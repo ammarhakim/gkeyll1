@@ -81,12 +81,36 @@ test_1(Lucee::LuaState& L)
   LC_ASSERT("Testing list of strings", address[1] == "world");
 }
 
+void
+test_2(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = "coeffs = {1.0, 0.0, 0.5}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "coeffs");
+
+// construct LuaTable object
+  Lucee::LuaTable coeffs(L, "coeffs");
+// test it
+  std::vector<double> vals = coeffs.getAllNumbers();
+  LC_ASSERT("Testing if vals has proper size", vals.size() == 3);
+  LC_ASSERT("Testing if vals is correct", vals[0] == 1.0);
+  LC_ASSERT("Testing if vals is correct", vals[1] == 0.0);
+  LC_ASSERT("Testing if vals is correct", vals[2] == 0.5);
+}
+
+
 int
 main(void)
 {
   LC_BEGIN_TESTS("lcluatable");
   Lucee::LuaState L;
   test_1(L);
+  test_2(L);
 
   LC_END_TESTS;
 }

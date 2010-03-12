@@ -31,6 +31,13 @@ namespace Lucee
   {
     Lucee::Vector<double> coeffs(L+1);
 
+    coeffs[0] = 1.0; // normalization
+    double prod = g;
+    for (unsigned i=1; i<=L; ++i)
+    {
+      coeffs[i] = (2*i+1)*prod;
+      prod = prod*g;
+    }
     return coeffs;
   }
 }

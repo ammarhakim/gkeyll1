@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* March 11th
+
+  - Added phase function classes: HG phase function and phase function
+    based on expansion coefficients.
+
 * March 10th
 
   - Added LcMathLib file with math functions. Added gauleg() method.

@@ -11,6 +11,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 # Create the library
 add_library(lcrte
   LcHgPhaseFunction.cpp
+  LcPlCoeffsPhaseFunction.cpp
   LcRteHomogeneousSlab.cpp
   LcRtePhaseFunction.cpp
   LcRteRegistry.cpp

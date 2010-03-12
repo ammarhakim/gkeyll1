@@ -10,7 +10,9 @@
 
 // lucee includes
 #include <LcMathLib.h>
+#include <LcObjCreator.h>
 #include <LcRteHomogeneousSlab.h>
+#include <LcRtePhaseFunction.h>
 
 // std includes
 #include <iostream>
@@ -21,7 +23,7 @@ namespace Lucee
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
 
   RteHomogeneousSlab::RteHomogeneousSlab()
-    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1)
+    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1)
   {
   }
 
@@ -39,11 +41,23 @@ namespace Lucee
     tau0 = tbl.getNumber("tau0");
     numModes = tbl.getNumber("numModes");
     albedo = tbl.getNumber("albedo");
+
+// read in phase function
+    Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
+    std::string pfKind = pfTbl.getKind(); // kind of phase function
+    Lucee::RtePhaseFunction *pf =
+      Lucee::ObjCreator<Lucee::RtePhaseFunction>::getNew(pfKind);
+// initialize PF from its table
+    pf->readInput(pfTbl);
+// get expansion coefficients
+    betal = pf->getExpCoeffs(L);
+    delete pf; // no need for PF object
   }
 
   void 
   RteHomogeneousSlab::buildData()
   {
+// allocate space of weights and ordinates
     w = Lucee::Vector<double>(N);
     mu = Lucee::Vector<double>(N);
   }
@@ -51,7 +65,7 @@ namespace Lucee
   void 
   RteHomogeneousSlab::buildAlgorithms()
   {
-// compute ordinates and quadrature for use in Gaussian quadrature
+// compute ordinates and wights for use in Gaussian quadrature
     Lucee::gauleg(N, 0, 1, mu, w);
   }
 

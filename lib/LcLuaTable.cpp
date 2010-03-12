@@ -50,6 +50,23 @@ namespace Lucee
     return getString("__kind");
   }
 
+  std::vector<double>
+  LuaTable::getAllNumbers()
+  {
+    std::vector<double> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) == LUA_TNUMBER)
+        res.push_back(lua_tonumber(L, -1));
+      lua_pop(L, 1);
+    }
+    return res;
+  }
+
   std::string
   LuaTable::getString(const std::string& key)
   {
