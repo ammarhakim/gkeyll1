@@ -64,6 +64,13 @@ namespace Lucee
       std::string getKind();
 
 /**
+ * Get all numbers in table.
+ *
+ * @return numbers in table.
+ */
+      std::vector<double> getAllNumbers();
+
+/**
  * Get a string from table.
  *
  * @param key Key in table.

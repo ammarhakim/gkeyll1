@@ -15,7 +15,6 @@ physics solvers written in C++.
   :maxdepth: 2
 
   array-classes
-  key-value-tree
   hdf5-file-io
   util-classes
 

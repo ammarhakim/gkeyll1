@@ -1,5 +1,5 @@
 /**
- * @file	LcHgPhaseFunction.h
+ * @file	LcPlCoeffsPhaseFunction.h
  *
  * @brief	Henyey-Greenstien phase function.
  *
@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
-#ifndef LC_HG_PHASE_FUNCTION_H
-#define LC_HG_PHASE_FUNCTION_H
+#ifndef LC_PL_COEFFS_PHASE_FUNCTION_H
+#define LC_PL_COEFFS_PHASE_FUNCTION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -23,9 +23,9 @@
 namespace Lucee
 {
 /**
- * One-term Henyey-Greenstien phase function.
+ * Phase function from input-file specified coefficients.
  */
-  class HgPhaseFunction : public Lucee::RtePhaseFunction
+  class PlCoeffsPhaseFunction : public Lucee::RtePhaseFunction
   {
     public:
 /** Class id: this is used by registration system */
@@ -48,9 +48,9 @@ namespace Lucee
       Lucee::Vector<double> getExpCoeffs(unsigned L);
 
     private:
-/** Coefficient of HG phase function */
-      double g;
+/** Coefficients */
+      std::vector<double> coeffs;
   };
 }
 
-#endif // LC_HG_PHASE_FUNCTION_H
+#endif // LC_PL_COEFFS_PHASE_FUNCTION_H

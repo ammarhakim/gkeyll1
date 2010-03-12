@@ -115,6 +115,8 @@ namespace Lucee
       double albedo;
 /** Weights and ordinates for Gaussian quadrature */
       Lucee::Vector<double> w, mu;
+/** Phase function expasion coefficients */
+      Lucee::Vector<double> betal;
   };
 }
 
