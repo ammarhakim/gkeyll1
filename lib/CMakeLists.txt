@@ -12,10 +12,16 @@ add_library(lclib
   LcExcept.cpp 
   LcField.cpp
   LcFieldPtr.cpp
+  LcFileHandler.cpp
   LcLinAlgebra.cpp
+  LcLogRecordHandler.cpp
+  LcLogStream.cpp
+  LcLogStreamStrm.cpp
+  LcLogger.cpp
   LcLuaState.cpp
   LcLuaTable.cpp
   LcMathLib.cpp
   LcMatrix.cpp
+  LcStreamHandler.cpp
   LcVector.cpp
 )

@@ -17,7 +17,6 @@
 #endif
 
 // lucee includes
-#include <LcMatrix.h>
 #include <LcSolverIfc.h>
 #include <LcVector.h>
 

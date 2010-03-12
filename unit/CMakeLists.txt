@@ -74,3 +74,7 @@ target_link_libraries(lcluatable lclib lcloki lclua)
 # lcluamodule
 add_executable(lcluamodule lcluamodule.cxx)
 target_link_libraries(lcluamodule lclib lcloki lclua)
+
+# lclogger
+add_executable(lclogger lclogger.cxx)
+target_link_libraries(lclogger lclib lcloki lclua)
