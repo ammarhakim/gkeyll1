@@ -16,7 +16,7 @@ namespace Lucee
 {
   LogRecordHandler::~LogRecordHandler()
   {
-    // detach from all loggers
+// detach from all loggers
     std::vector<std::string> nms = loggerNames();
     for (unsigned i=0; i<nms.size(); ++i)
       detachFromLogger(nms[i]);
@@ -60,14 +60,14 @@ namespace Lucee
   LogRecordHandler::detachFromLogger(Lucee::Logger& logger) 
   {
     std::string name = logger.getName();
-    // check if this handler is really attached to the logger
+// check if this handler is really attached to the logger
     std::map<std::string, Logger*>::iterator itr
       = _loggers.find(name);
     if (itr != _loggers.end())
     {
-      // detach handler from the logger
+// detach handler from the logger
       itr->second->removeHandler(_handlerIds[name]);
-      // remove entries from the map
+// remove entries from the map
       _loggers.erase(name);
       _handlerIds.erase(name);
       return true;
