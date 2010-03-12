@@ -88,6 +88,13 @@ namespace Lucee
       T& operator[](int i) { return this->operator()(i); }
 
 /**
+ * Multiply vector by factor.
+ *
+ * @param fact Factor to multiply by.
+ */
+      void scale(const T& fact);
+
+/**
  * Get length of vector
  *
  * @return length of vector.

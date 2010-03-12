@@ -59,6 +59,14 @@ namespace Lucee
   }
 
   template <typename T>
+  void
+  Vector<T>::scale(const T& fact)
+  {
+    for (int i=this->getLower(0); i<this->getUpper(0); ++i)
+      this->operator[](i) *= fact;
+  }
+
+  template <typename T>
   Vector<T>
   Vector<T>::duplicate() const
   {
