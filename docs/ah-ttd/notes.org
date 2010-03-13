@@ -93,6 +93,11 @@
 
 * Lucee Notes
 
+** Document before you implement
+
+   Document each step in an algorithm before or as the implementation
+   proceeds. Do this in LaTeX using the Beamer presentation package.
+
 ** What should Lua do?
 
    In an input file, say one has
@@ -212,7 +217,7 @@
 
 ** TODO <2010-02-24 Wed> Fix doxygen errors.
 ** DONE Implement sequencers for arrays.
-** TODO Need to add Loggers to Lucee
+** DONE Need to add Loggers to Lucee
 
    Rethink the WarpX loggers for this.
 
