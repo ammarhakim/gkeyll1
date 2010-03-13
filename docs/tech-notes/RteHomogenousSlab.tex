@@ -1,0 +1,172 @@
+\documentclass[14]{beamer}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+
+%% autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.7\linewidth,keepaspectratio}
+
+\usepackage{beamerthemesplit}
+
+% Setup TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\tikzstyle{block}=[draw opacity=0.7,line width=1.4cm]
+
+\title[RTE in homogeneous slab]{%
+  Algorithm for solution of the radiation transport equation in homogeneous slab}
+
+\author{Ammar H. Hakim}
+
+\date[Lucee]
+{Lucee: Algorithm Details}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ----------------------------------------------------------------
+\begin{frame}{Problem statement: basic equations}
+  \begin{align}
+    \mu\pfrac{L(\tau,\mu,\phi)}{\tau} + L(\tau,\mu,\phi)
+    =
+    \frac{\varpi}{4\pi}
+    \int_{-1}^1 \int_0^{2\pi}
+    p(\cos\Theta) L(\tau,\mu,\phi) d\mu d\phi
+  \end{align}
+  where
+  \begin{itemize}
+  \item $L(\tau,\mu,\phi)$ is the radiance in units of Watt m$^{-2}$
+    sr$^{-1}$ nm$^{-1}$,
+  \item $\tau$ is the optical depth,
+  \item $\varpi$ is the albedo of single scattering,
+  \item $\mu$ is the cosine of the polar angle measured with the
+    positive $Z$-axis and $\phi$ is the azimuthal angle,
+  \item $p(\cos\Theta) = \sum_{l=0}^L\beta_lP_l(\cos\Theta)$ is the
+    phase function, where $\Theta$ is the scattering angle and
+    $\beta_0=1$.
+  \end{itemize}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Problem statement: boundary conditions}
+  \begin{align}
+    L(0, \mu) &= \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) \\
+    L(\tau_0, -\mu) &= 0
+  \end{align}
+  for $\mu\in [0,1]$, and where
+  \begin{itemize}
+  \item $\tau_0$ is the optical depth of the slab,
+  \item $\mu_0$ and $\phi_0$ are the cosine of the polar angle and
+    azimuthal angle of incident beam,
+  \item $\mu_0\pi F$ is the total downward irradiance incident on the
+    slab.
+  \end{itemize}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{The reduced problem}
+  Remove the singular component of the radiance using
+  \begin{align}
+    L(\tau,\mu,\phi) = L_*(\tau,\mu,\phi) 
+    + \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) e^{-\tau/\mu_0}
+  \end{align}
+  Use addition theorem of spherical harmonics to write
+  \begin{align}
+    p(cos\Theta) = \sum_{m=0}^L(2-\delta_{0,m})
+    \sum_{l=m}^L\beta_l P_l^m(\mu) P_l^m(\mu')
+    \cos[m(\phi'-\phi)]
+  \end{align}
+  where
+  \begin{align}
+    P_l^m(\mu) = \left[
+      \frac{(l-m)!}{(l+m)!}
+      \right]^{1/2}
+      (1-\mu^2)^{1/2}\frac{d^m}{d\mu^m}
+      P_l(\mu)
+  \end{align}
+  are the normalized Legendre functions.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{The reduced problem}
+  The diffuse field can be written as
+  \begin{align}
+    L_*(\tau,\mu,\phi) = \frac{1}{2} \sum_{m=0}^L
+    (2-\delta_{0,m})L^m(\tau,\mu) cos[m(\phi-\phi_0)]
+  \end{align}
+  where
+  \begin{align}
+    \mu\pfrac{L^m(\tau,\mu)}{\tau} + &L^m(\tau,\mu)
+    = \\
+    &\frac{\varpi}{2}
+    \sum_{l=m}^L \beta_l P_l^m(\mu)
+    \int_{-1}^1
+    P_l^m(\mu') L(\tau,\mu') d\mu'
+    + Q^m(\tau,\mu)
+  \end{align}
+  and 
+  \begin{align}
+    Q^m(\tau,\mu) = \frac{\varpi}{2}e^{-\tau/\mu_0}
+    \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\mu)
+  \end{align}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{The reduced boundary conditions}
+  The boundary conditions now reduce to
+  \begin{align}
+    L^m(0, \mu) &= 0 \\
+    L^m(\tau_0, -\mu) &= 0
+  \end{align}
+  The aim of the algorithm is to compute the azimulthal components of
+  the radiance $L^m(\tau,\mu)$ and the \emph{irradiances} defined by
+  \begin{align}
+    E_\pm^l(\tau) \equiv \int_0^1 \int_0^{2\pi}
+    P_l(\mu) L(\tau,\pm \mu, \phi) d\mu d\phi
+  \end{align}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Initialization of algorithm}
+  \begin{itemize}
+  \item First, pick a set of $N$ quadrature points in the domain $\mu
+    \in[0,1]$. Denote these as $\mu_i$ and the corresponding weights as
+    $w_i$, for $i=1,\ldots,N$.
+  \item The $N$ quadrature points in the domain $\mu \in[0,-1]$ are
+    $-\mu_i$ and the corresponding weights as $w_i$, for
+    $i=1,\ldots,N$.
+  \item The algorithm solves the radiance at the discrete quadrature
+    points in each hemisphere, i.e. $L^m(\tau,\pm \mu_i)$ are
+    computed.
+  \item Gaussian quadrature is usually used. 
+  \item It is may also be valuable to use a quadrature scheme that has
+    $\mu = \pm 1$. This directly gives the \emph{remote-sensing
+      reflectance} $L(0,-1)/E_+^1(0)$ without any need for
+    interpolation.
+  \end{itemize}
+\end{frame}
+% ----------------------------------------------------------------
+
+\end{document}
+
+% ----------------------------------------------------------------
+\begin{frame}
+\end{frame}
+% ----------------------------------------------------------------
