@@ -147,20 +147,75 @@
 \begin{frame}{Initialization of algorithm}
   \begin{itemize}
   \item First, pick a set of $N$ quadrature points in the domain $\mu
-    \in[0,1]$. Denote these as $\mu_i$ and the corresponding weights as
-    $w_i$, for $i=1,\ldots,N$.
+    \in[0,1]$. Denote these as $\mu_i$ and the corresponding weights
+    as $w_i$, for $i=1,\ldots,N$. Gaussian\footnote{It is may also be
+      valuable to use a quadrature scheme that has includes $\pm
+      1$. This directly gives the \emph{remote-sensing reflectance}
+      $L(0,-1)/E_+^1(0)$ without any need for interpolation.}
+    quadrature is used\footnote{See {\tt buildAlgorithms()}}.
   \item The $N$ quadrature points in the domain $\mu \in[0,-1]$ are
     $-\mu_i$ and the corresponding weights as $w_i$, for
     $i=1,\ldots,N$.
   \item The algorithm solves the radiance at the discrete quadrature
     points in each hemisphere, i.e. $L^m(\tau,\pm \mu_i)$ are
     computed.
-  \item Gaussian quadrature is usually used. 
-  \item It is may also be valuable to use a quadrature scheme that has
-    $\mu = \pm 1$. This directly gives the \emph{remote-sensing
-      reflectance} $L(0,-1)/E_+^1(0)$ without any need for
-    interpolation.
   \end{itemize}
+  
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Compute $Q^m(\pm \mu_i)$ for the inhomgenous source}
+  \begin{align}
+    Q^m(\pm \mu_i) = \frac{\varpi}{2}
+    \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\pm \mu_i)
+  \end{align}
+  Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$\footnote{See
+    function {\tt qbeam()}}.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Compute the eigensystem of the RTE: Stage 1}
+  Compute the matrices $\mvec{E}$ and $\mvec{F}$ as follows
+  \begin{align}
+    \mvec{E} &= \left(
+      1-\frac{\varpi}{2}\sum_{l=m}^L
+    \beta_l
+    \left[1+(-1)^{l-m}\right] 
+    \gvec{\Pi}(l,m) \gvec{\Pi}^T(l,m) \mvec{W}
+    \right)
+    \mvec{M}^{-1}
+  \end{align}
+  \begin{align}
+    \mvec{F} &= \left(
+      1-\frac{\varpi}{2}\sum_{l=m}^L
+    \beta_l
+    \left[1-(-1)^{l-m}\right] 
+    \gvec{\Pi}(l,m) \gvec{\Pi}^T(l,m) \mvec{W}
+    \right)
+    \mvec{M}^{-1}
+  \end{align}
+  where $\mvec{M} = \textrm{diag}(\mu_1,\ldots,\mu_N)$, $\mvec{W} =
+  \textrm{diag}(w_i,\ldots,w_N)$ and $\gvec{\Pi}(l,m) =
+  [P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$\footnote{See function {\tt
+      calc\_FE()}}.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Compute the eigensystem of the RTE: Stage 2}
+  Then compute the matrix product $\mvec{F}\mvec{E}$ and determine its
+  eigenvalues and eignevectors. Denote these by $\lambda_j$ and
+  $\mvec{X}(\lambda_j)$.  Then, the eigenvalues of the RTE are $\pm
+  \nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors are
+  \begin{align}
+    \gvec{\Phi}_\pm (\nu_j)
+    = \frac{1}{2}\mvec{M}^{-1}
+    (\mvec{I} \pm \nu_j\mvec{E})\mvec{X}(\lambda_j)
+  \end{align}
+  Note the identity $\gvec{\Phi}_+(-\nu_j) =
+  \gvec{\Phi}_-(\nu_j)$\footnote{See function {\tt calc\_RTE\_eigensystem()}}.
 \end{frame}
 % ----------------------------------------------------------------
 

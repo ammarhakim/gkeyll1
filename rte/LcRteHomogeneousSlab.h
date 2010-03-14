@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcMatrix.h>
 #include <LcSolverIfc.h>
 #include <LcVector.h>
 
@@ -125,6 +126,24 @@ namespace Lucee
  * @param Qm on output, beam source in negative hemisphere.
  */
       void qbeam(int m, Lucee::Vector<double>& Qp, Lucee::Vector<double>& Qm);
+
+/**
+ * Computes the eigensystem of the RTE.
+ *
+ * @param phi_p on output, eigenvectors of the RTE corresponding to nu_j
+ * @param phi_m on outout, eigenvectors of the RTE  corresponding to -nu_j
+ * @param nu on ouput, eigevalues of the RTE
+ */
+      void calc_RTE_eigensystem(int m, Lucee::Matrix<double>& phi_p,
+        Lucee::Matrix<double>& phi_m, Lucee::Vector<double>& nu);
+
+/**
+ * Comppute the matrices F and E.
+ *
+ * @param F on ouput, F matrix.
+ * @param E on ouput, E matrix.
+ */
+      void calc_FE(Lucee::Matrix<double>& F, Lucee::Matrix<double>& E);
   };
 }
 
