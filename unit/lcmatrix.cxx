@@ -335,6 +335,31 @@ test_11()
   LC_ASSERT("Testing solution to linear system", B(2,0) == 2);
 }
 
+void
+test_12()
+{
+  Lucee::Matrix<double> A(10, 12);
+  Lucee::Vector<double> rowFact(10), colFact(12);
+
+  for (int i=rowFact.getLower(0); i<rowFact.getUpper(0); ++i)
+    rowFact[i] = i;
+
+  for (int i=colFact.getLower(0); i<colFact.getUpper(0); ++i)
+    colFact[i] = i;
+
+  A = 1.0;
+  A.scaleRows(rowFact);
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing if row-scaling worked", A(i,j) == rowFact[i]);
+
+  A = 1.0;
+  A.scaleCols(colFact);
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing if col-scaling worked", A(i,j) == colFact[j]);
+}
+
 int
 main(void) 
 {
@@ -350,5 +375,6 @@ main(void)
   test_9();
   test_10();
   test_11();
+  test_12();
   LC_END_TESTS;
 }
