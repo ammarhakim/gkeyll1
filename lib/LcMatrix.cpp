@@ -140,10 +140,10 @@ namespace Lucee
       throw Lucee::Except("Matrix::scaleCols: Number of elements should match number of columns");
 
     int ifv = fv.getLower(0);
-    for (int i=this->getLower(1); i<this->getUpper(1); ++i)
+    for (int j=this->getLower(1); j<this->getUpper(1); ++j)
     {
       double t1 = fv[ifv++];
-      for (int j=this->getLower(0); j<this->getUpper(0); ++j)
+      for (int i=this->getLower(0); i<this->getUpper(0); ++i)
         this->operator()(i,j) *= t1;
     }
   }

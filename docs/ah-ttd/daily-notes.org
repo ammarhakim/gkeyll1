@@ -6,6 +6,7 @@
 
   - Added a document RteHomogeneousSlab.tex that describes the
     algorithm step by step.
+  - Added scaleRows() and scaleCols() methods to the Matrix class.
   - More work on RTE solver.
 
 * March 11th
