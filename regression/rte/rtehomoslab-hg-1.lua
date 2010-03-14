@@ -8,6 +8,8 @@ simulation = Solver.RteHomogeneousSlab {
    N = 32,
    -- cosine of incident angle
    mu0 = 0.5,
+   -- beam flux: downward irradiance is mu0*pi*flux
+   flux = 1.0,
    -- optical depth of slab
    tau0 = 50.0,
    -- albedo of single scattering

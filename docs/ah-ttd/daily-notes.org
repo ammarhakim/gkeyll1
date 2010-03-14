@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* March 14
+
+* March 12, 13th
+
+  - Added a document RteHomogeneousSlab.tex that describes the
+    algorithm step by step.
+  - More work on RTE solver.
+
 * March 11th
 
   - Added phase function classes: HG phase function and phase function

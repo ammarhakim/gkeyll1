@@ -102,13 +102,15 @@ namespace Lucee
       virtual void finalize();
     private:
 /** Number of expansion coefficients */
-      unsigned L;
+      int L;
 /** Number of quadrature points in each hemisphere */
-      unsigned N;
+      int N;
 /** Number of azimuthal modes */
-      unsigned numModes;
+      int numModes;
 /** Cosine of incidence angle */
       double mu0;
+/** Downward irradiance is mu0*pi*F */
+      double flux;
 /** Optical depth */
       double tau0;
 /** Albedo of single scattering */
@@ -140,10 +142,21 @@ namespace Lucee
 /**
  * Comppute the matrices F and E.
  *
+ * @param m azimuthal mode.
  * @param F on ouput, F matrix.
  * @param E on ouput, E matrix.
  */
-      void calc_FE(Lucee::Matrix<double>& F, Lucee::Matrix<double>& E);
+      void calc_FE(int m, Lucee::Matrix<double>& F, Lucee::Matrix<double>& E);
+
+/**
+ * Compute eigesystem normalization.
+ *
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Nj on output, normalization coefficients
+ */
+      void get_norms(const Lucee::Matrix<double>& phi_p,
+        const Lucee::Matrix<double>& phi_m, Lucee::Vector<double>& Nj);
   };
 }
 

@@ -96,7 +96,15 @@
 ** Document before you implement
 
    Document each step in an algorithm before or as the implementation
-   proceeds. Do this in LaTeX using the Beamer presentation package.
+   proceeds. Do this in LaTeX using the Beamer presentation
+   package. Describe the equations and boundary conditions in the
+   first few slides. Then describe every step in the algorithm and
+   name the method where it is implemented in a footnote.
+
+   This means that major steps in the algorithm must be broken down
+   into individual methods.
+
+   Put up the PDF of the algorithm on the Lucee website.
 
 ** What should Lua do?
 

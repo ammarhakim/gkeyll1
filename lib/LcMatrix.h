@@ -111,6 +111,22 @@ namespace Lucee
       Lucee::Vector<T> getCol(unsigned col);
 
 /**
+ * Scale all rows of the matrix with by multipling with elements of
+ * supplied vector. I.e. M[i,j] <- M[i,j]*fv[i];
+ *
+ * @param fv Vector with same number of elements as number of rows.
+ */
+      void scaleRows(const Lucee::Vector<double>& fv);
+
+/**
+ * Scale all columns of the matrix with by multipling with elements of
+ * supplied vector. I.e. M[i,j] <- M[i,j]*fv[j];
+ *
+ * @param fv Vector with same number of elements as number of columns.
+ */
+      void scaleCols(const Lucee::Vector<double>& fv);
+
+/**
  * Is this matrix a transpose of another one?
  *
  * @return true if this matrix is transpose of another one.

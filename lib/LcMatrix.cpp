@@ -117,6 +117,38 @@ namespace Lucee
   }
 
   template <typename T>
+  void
+  Matrix<T>::scaleRows(const Lucee::Vector<double>& fv)
+  {
+    if (fv.getLength() != numRows())
+      throw Lucee::Except("Matrix::scaleRows: Number of elements should match number of rows");
+
+    int ifv = fv.getLower(0);
+    for (int i=this->getLower(0); i<this->getUpper(0); ++i)
+    {
+      double t1 = fv[ifv++];
+      for (int j=this->getLower(1); j<this->getUpper(1); ++j)
+        this->operator()(i,j) *= t1;
+    }
+  }
+
+  template <typename T>
+  void
+  Matrix<T>::scaleCols(const Lucee::Vector<double>& fv)
+  {
+    if (fv.getLength() != numColumns())
+      throw Lucee::Except("Matrix::scaleCols: Number of elements should match number of columns");
+
+    int ifv = fv.getLower(0);
+    for (int i=this->getLower(1); i<this->getUpper(1); ++i)
+    {
+      double t1 = fv[ifv++];
+      for (int j=this->getLower(0); j<this->getUpper(0); ++j)
+        this->operator()(i,j) *= t1;
+    }
+  }
+
+  template <typename T>
   Matrix<T>
   Matrix<T>::duplicate() const
   {
