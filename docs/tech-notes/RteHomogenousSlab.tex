@@ -152,7 +152,7 @@
       valuable to use a quadrature scheme that has includes $\pm
       1$. This directly gives the \emph{remote-sensing reflectance}
       $L(0,-1)/E_+^1(0)$ without any need for interpolation.}
-    quadrature is used\footnote{See {\tt buildAlgorithms()}}.
+    quadrature is used\footnote{See {\tt RteHomogeneousSlab::buildAlgorithms()}}.
   \item The $N$ quadrature points in the domain $\mu \in[0,-1]$ are
     $-\mu_i$ and the corresponding weights as $w_i$, for
     $i=1,\ldots,N$.
@@ -167,11 +167,11 @@
 % ----------------------------------------------------------------
 \begin{frame}{Compute $Q^m(\pm \mu_i)$ for the inhomgenous source}
   \begin{align}
-    Q^m(\pm \mu_i) = \frac{\varpi}{2}
+    Q^m(\pm \mu_i) = \frac{\varpi F}{2}
     \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\pm \mu_i)
   \end{align}
   Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$\footnote{See
-    function {\tt qbeam()}}.
+    function {\tt RteHomogeneousSlab::qbeam()}}.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -199,14 +199,14 @@
   where $\mvec{M} = \textrm{diag}(\mu_1,\ldots,\mu_N)$, $\mvec{W} =
   \textrm{diag}(w_i,\ldots,w_N)$ and $\gvec{\Pi}(l,m) =
   [P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$\footnote{See function {\tt
-      calc\_FE()}}.
+      RteHomogeneousSlab::calc\_FE()}}.
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
 \begin{frame}{Compute the eigensystem of the RTE: Stage 2}
   Then compute the matrix product $\mvec{F}\mvec{E}$ and determine its
-  eigenvalues and eignevectors. Denote these by $\lambda_j$ and
+  eigenvalues and eigenvectors. Denote these by $\lambda_j$ and
   $\mvec{X}(\lambda_j)$.  Then, the eigenvalues of the RTE are $\pm
   \nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors are
   \begin{align}
@@ -215,7 +215,24 @@
     (\mvec{I} \pm \nu_j\mvec{E})\mvec{X}(\lambda_j)
   \end{align}
   Note the identity $\gvec{\Phi}_+(-\nu_j) =
-  \gvec{\Phi}_-(\nu_j)$\footnote{See function {\tt calc\_RTE\_eigensystem()}}.
+  \gvec{\Phi}_-(\nu_j)$\footnote{See function {\tt
+      RteHomogeneousSlab::calc\_RTE\_eigensystem()}}.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Compute eigensystem normalization coefficients}
+  These are given by\footnote{See RteHomogeneousSlab::get\_norms}
+  \begin{align}
+    N(\nu_j) = \sum_{\alpha=1}^N
+    w_\alpha \mu_\alpha
+    \left[
+      \phi^2(\nu_j,\mu_\alpha) - \phi^2(\nu_j,-\mu_\alpha)
+    \right]
+  \end{align}
+  Here $\phi(\nu_j,\mu_\alpha) = \gvec{\Phi}_{+\alpha}(\nu_j)$ and
+  $\phi(\nu_j,-\mu_\alpha) = \gvec{\Phi}_{-\alpha}(\nu_j)$.
+
 \end{frame}
 % ----------------------------------------------------------------
 

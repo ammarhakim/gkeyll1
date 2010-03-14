@@ -45,6 +45,7 @@ namespace Lucee
     tau0 = tbl.getNumber("tau0");
     numModes = tbl.getNumber("numModes");
     albedo = tbl.getNumber("albedo");
+    flux = tbl.getNumber("flux");
 
 // read in phase function
     Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
@@ -91,13 +92,15 @@ namespace Lucee
     Lucee::Matrix<double> phi_p(N, N), phi_m(N, N);
 
 // solve each azimuthal component of RTE
-    for (unsigned m=0; m<numModes; ++m)
+    for (int m=0; m<numModes; ++m)
     {
       infoStrm << "Solving azimuthal mode " << m << " ..." << std::endl;
 // compute Qp, Qm
       qbeam(m, Qp, Qm);
 // compute eigensystem of RTE
       calc_RTE_eigensystem(m, phi_p, phi_m, nu);
+// compute eigensystem normalization
+      get_norms(phi_p, phi_m, Nj);
     }
 
     return 0;
@@ -122,17 +125,16 @@ namespace Lucee
   RteHomogeneousSlab::qbeam(int m, Lucee::Vector<double>& Qp, Lucee::Vector<double>& Qm)
   {
     Lucee::Vector<double> PL(N);
-    double fact = 0.5*albedo;
 
     Qp = 0.0;
     Qm = 0.0;
-    for (unsigned l=m; l<=L; ++l)
+    for (int l=m; l<=L; ++l)
     {
 // compute P_l^m(\mu_0)
       double Plmu0 = Lucee::legendre(l, m, mu0);
 // compute P_l^m(\mu_i)
       Lucee::legendre(l, m, mu, PL);
-      for (unsigned i=0; i<N; i++)
+      for (int i=0; i<N; i++)
       { // loop over \mu_i
         Qp[i] += PL[i]*betal[l];
         Qm[i] += PL[i]*pow(-1, l-m)*betal[l];
@@ -140,7 +142,8 @@ namespace Lucee
       Qp.scale(Plmu0);
       Qm.scale(Plmu0);
     }
-// multiply by \varpi/2
+// multiply by \varpi/2*flux
+    double fact = 0.5*albedo*flux;
     Qp.scale(fact);
     Qm.scale(fact);
   }
@@ -151,7 +154,7 @@ namespace Lucee
   {
 // compute matrices E and F
     Lucee::Matrix<double> E(N,N), F(N,N);
-    calc_FE(F, E);
+    calc_FE(m, F, E);
 // compute F*E
     Lucee::Matrix<double> FE(N,N);
     Lucee::accumulate(FE, F, E);
@@ -161,14 +164,88 @@ namespace Lucee
     Lucee::eig(FE, evr, evi, VL, VL);
 
 // compute eigenvalues of RTE
-    for (unsigned i=0; i<N; ++i)
+    for (int i=0; i<N; ++i)
       nu[i] = 1.0/sqrt(evr[i]);
 
 // compute eigenvectors of RTE
+    Lucee::Vector<double> mu1(N);
+    for (int i=0; i<N; ++i)
+      mu1[i] = 1/mu[i];
+    E.scaleRows(mu1); // M^{-1}*E
+// RETHINK THIS: CAN RESCALE X <- nu[j]*M^{1-}*E*X
+    for (int j=0; j<N; ++j)
+    {
+// get j-th right eigenvector
+      Lucee::Vector<double> X = VR.getCol(j);
+
+// compute phi_p
+      Lucee::Vector<double> phi = phi_p.getCol(j);
+// compute phi <- nu[j]*M^{-1}*E*X
+      accumulate(0.0, phi, nu[j], E, X);
+// do final update to add in M^{-1}*X and
+      for (int i=0; i<N; ++i)
+        phi[i] = 0.5*(mu1[i]*X[i] + phi[i]);
+
+// compute phi_m
+      phi = phi_m.getCol(j);
+// compute phi <- nu[j]*M^{-1}*E*X
+      accumulate(0.0, phi, nu[j], E, X);
+// do final update to add in M^{-1}*X and
+      for (int i=0; i<N; ++i)
+        phi[i] = 0.5*(mu1[i]*X[i] - phi[i]);
+    }
   }
 
   void
-  RteHomogeneousSlab::calc_FE(Lucee::Matrix<double>& F, Lucee::Matrix<double>& E)
+  RteHomogeneousSlab::calc_FE(int m, Lucee::Matrix<double>& F, Lucee::Matrix<double>& E)
   {
+// clear existing matrices
+    F = 0.0;
+    E = 0.0;
+    int sign = 1;
+    for (int l=m; l<=L; ++l)
+    {
+      Lucee::Vector<double> PL(N);
+      Lucee::legendre(l, m, mu, PL);
+// compute \beta_l P_l^m(\mu_i) P_l^m(\mu_j) and put into proper matrix
+      if (sign == 1)
+        accumulate(E, betal[l], PL, PL);
+      else
+        accumulate(F, betal[l], PL, PL);
+      sign = -1*sign;
+    }
+// compute \varpi*W*M^{-1}. Note we do not need 1/2 factor as it
+// cancels the accumulation done above.
+    Lucee::Vector<double> WMinv(N);
+    for (int i=0; i<N; ++i)
+      WMinv[i] = -albedo*w[i]/mu[i];
+// accumulate into F and E matrices
+    E.scaleCols(WMinv);
+    F.scaleCols(WMinv);
+
+// do final accumulation of M^{-1}
+    for (int i=0; i<N; ++i)
+    {
+      double mu1 = 1/mu[i];
+      E(i,i) += mu1;
+      F(i,i) += mu1;
+    }
+  }
+
+  void
+  RteHomogeneousSlab::get_norms(const Lucee::Matrix<double>& phi_p,
+    const Lucee::Matrix<double>& phi_m, Lucee::Vector<double>& Nj)
+  {
+    for (int i=0; i<N; ++i)
+    {
+      double sum = 0;
+      for (int k=0; k<N; ++k)
+      {
+        double t1 = phi_p(k,i); // columns of phi_p are eigenvectors
+        double t2 = phi_m(k,i); // columns of phi_m are eigenvectors
+        sum += (t1*t1 - t2*t2)*mu[k]*w[k];
+      }
+      Nj[i] = sum;
+    }
   }
 }
