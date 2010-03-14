@@ -96,6 +96,8 @@ namespace Lucee
       infoStrm << "Solving azimuthal mode " << m << " ..." << std::endl;
 // compute Qp, Qm
       qbeam(m, Qp, Qm);
+// compute eigensystem of RTE
+      calc_RTE_eigensystem(m, phi_p, phi_m, nu);
     }
 
     return 0;
@@ -124,18 +126,49 @@ namespace Lucee
 
     Qp = 0.0;
     Qm = 0.0;
-// \sum_{l=m}^L \beta_l P_l^m(\mu_0) P_l^m(\mu)
     for (unsigned l=m; l<=L; ++l)
     {
+// compute P_l^m(\mu_0)
       double Plmu0 = Lucee::legendre(l, m, mu0);
+// compute P_l^m(\mu_i)
       Lucee::legendre(l, m, mu, PL);
       for (unsigned i=0; i<N; i++)
-      {
-        Qp[i] += PL[i]*betal[l]*Plmu0;
-        Qm[i] += PL[i]*pow(-1, l-m)*betal[l]*Plmu0;
+      { // loop over \mu_i
+        Qp[i] += PL[i]*betal[l];
+        Qm[i] += PL[i]*pow(-1, l-m)*betal[l];
       }
+      Qp.scale(Plmu0);
+      Qm.scale(Plmu0);
     }
+// multiply by \varpi/2
     Qp.scale(fact);
     Qm.scale(fact);
+  }
+
+  void
+  RteHomogeneousSlab::calc_RTE_eigensystem(int m, Lucee::Matrix<double>& phi_p,
+    Lucee::Matrix<double>& phi_m, Lucee::Vector<double>& nu)
+  {
+// compute matrices E and F
+    Lucee::Matrix<double> E(N,N), F(N,N);
+    calc_FE(F, E);
+// compute F*E
+    Lucee::Matrix<double> FE(N,N);
+    Lucee::accumulate(FE, F, E);
+// compute eigenvalues and eignevectors of F*E
+    Lucee::Vector<double> evr(N), evi(N); // real and imaginary
+    Lucee::Matrix<double> VL(N,N), VR(N,N); // left and right
+    Lucee::eig(FE, evr, evi, VL, VL);
+
+// compute eigenvalues of RTE
+    for (unsigned i=0; i<N; ++i)
+      nu[i] = 1.0/sqrt(evr[i]);
+
+// compute eigenvectors of RTE
+  }
+
+  void
+  RteHomogeneousSlab::calc_FE(Lucee::Matrix<double>& F, Lucee::Matrix<double>& E)
+  {
   }
 }
