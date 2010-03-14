@@ -3,6 +3,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
@@ -165,19 +167,24 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Compute $Q^m(\pm \mu_i)$ for the inhomgenous source}
+\begin{frame}{Compute $Q^m(\pm \mu_i)$ for the inhomogeneous source}
+  Compute $\mvec{Q}_\pm$ where\footnote{See {\tt
+      RteHomogeneousSlab::qbeam()}}
+  \begin{align}
+    \mvec{Q}_\pm = [Q^m(\pm\mu_1), \ldots, Q^m(\pm\mu_N)]^T
+  \end{align}
   \begin{align}
     Q^m(\pm \mu_i) = \frac{\varpi F}{2}
     \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\pm \mu_i)
   \end{align}
-  Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$\footnote{See
-    function {\tt RteHomogeneousSlab::qbeam()}}.
+  Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$.
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
 \begin{frame}{Compute the eigensystem of the RTE: Stage 1}
-  Compute the matrices $\mvec{E}$ and $\mvec{F}$ as follows
+  Compute the matrices $\mvec{E}$ and $\mvec{F}$ as
+  follows\footnote{See {\tt RteHomogeneousSlab::calc\_FE()}}
   \begin{align}
     \mvec{E} &= \left(
       1-\frac{\varpi}{2}\sum_{l=m}^L
@@ -198,8 +205,7 @@
   \end{align}
   where $\mvec{M} = \textrm{diag}(\mu_1,\ldots,\mu_N)$, $\mvec{W} =
   \textrm{diag}(w_i,\ldots,w_N)$ and $\gvec{\Pi}(l,m) =
-  [P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$\footnote{See function {\tt
-      RteHomogeneousSlab::calc\_FE()}}.
+  [P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -208,21 +214,21 @@
   Then compute the matrix product $\mvec{F}\mvec{E}$ and determine its
   eigenvalues and eigenvectors. Denote these by $\lambda_j$ and
   $\mvec{X}(\lambda_j)$.  Then, the eigenvalues of the RTE are $\pm
-  \nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors are
+  \nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors
+  are\footnote{See {\tt RteHomogeneousSlab::calc\_RTE\_eigensystem()}}
   \begin{align}
     \gvec{\Phi}_\pm (\nu_j)
     = \frac{1}{2}\mvec{M}^{-1}
     (\mvec{I} \pm \nu_j\mvec{E})\mvec{X}(\lambda_j)
   \end{align}
   Note the identity $\gvec{\Phi}_+(-\nu_j) =
-  \gvec{\Phi}_-(\nu_j)$\footnote{See function {\tt
-      RteHomogeneousSlab::calc\_RTE\_eigensystem()}}.
+  \gvec{\Phi}_-(\nu_j)$.
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
 \begin{frame}{Compute eigensystem normalization coefficients}
-  These are given by\footnote{See RteHomogeneousSlab::get\_norms}
+  These are given by\footnote{See RteHomogeneousSlab::get\_norms()}
   \begin{align}
     N(\nu_j) = \sum_{\alpha=1}^N
     w_\alpha \mu_\alpha
@@ -233,6 +239,109 @@
   Here $\phi(\nu_j,\mu_\alpha) = \gvec{\Phi}_{+\alpha}(\nu_j)$ and
   $\phi(\nu_j,-\mu_\alpha) = \gvec{\Phi}_{-\alpha}(\nu_j)$.
 
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Notes: Homogeneous solution can now be determined upto
+    constant coefficients}
+  Once we have the eigensystem, we can compute the homogenous solution
+  \begin{align}
+    \mvec{L}^h_+(\tau) = \sum_{j=1}^B
+    \left[
+      A_j \gvec{\Phi}_+(\nu_j) e^{-\tau/\nu_j} +
+      B_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
+    \right]
+  \end{align}
+  and
+  \begin{align}
+    \mvec{L}^h_-(\tau) = \sum_{j=1}^B
+    \left[
+      A_j \gvec{\Phi}_-(\nu_j) e^{-\tau/\nu_j} +
+      B_j \gvec{\Phi}_+(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
+    \right]
+  \end{align}
+  Here $\mvec{L}_\pm(\tau) = [L(\tau,\pm\mu_1),\ldots,
+  L(\tau,\pm\mu_N)]^T$. The coefficients $A_j$ and $B_j$ are unknown.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Particular solution can now be determined}
+  The particular solutions can be written as\footnote{See
+    RteHomogeneousSlab::particular\_solution()}
+  \begin{align}
+    \mvec{L}^p_+(\tau) = \sum_{j=1}^B
+    \left[
+      \script{A}_j(\tau) \gvec{\Phi}_+(\nu_j) +
+      \script{B}_j(\tau) \gvec{\Phi}_-(\nu_j)
+    \right]
+  \end{align}
+  and
+  \begin{align}
+    \mvec{L}^p_-(\tau) = \sum_{j=1}^B
+    \left[
+      \script{A}_j(\tau) \gvec{\Phi}_-(\nu_j) +
+      \script{B}_j(\tau) \gvec{\Phi}_+(\nu_j)
+    \right]
+  \end{align}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Functions appearung in particular solution can be
+    computed}
+  The functions appearing in the particular solutions can be computed
+  as
+  \begin{align}
+    \script{A}_j(\tau) = &\frac{1}{N(\nu_j)}
+    \int_0^\tau dx
+    \sum_{\alpha=1}^N w_\alpha e^{-(\tau-x)/\nu_j} \times \notag \\
+    & \left[
+      Q(x,\mu_\alpha)\phi(\nu_j,\mu_\alpha) +
+      Q(x,-\mu_\alpha)\phi(\nu_j,-\mu_\alpha)
+      \right]
+  \end{align}
+  and
+  \begin{align}
+    \script{B}_j(\tau) = &\frac{1}{N(\nu_j)}
+    \int_\tau^{\tau_0} dx
+    \sum_{\alpha=1}^N w_\alpha e^{-(x-\tau)/\nu_j} \times \notag \\
+    &\left[
+      Q(x,\mu_\alpha)\phi(\nu_j,-\mu_\alpha) +
+      Q(x,-\mu_\alpha)\phi(\nu_j,\mu_\alpha)
+      \right]
+  \end{align}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{For beam illumination $\script{A}$ and $\script{B}$ can
+    be explicitly computed}
+  For uniform illumination we can compute explicitly\footnote{See
+    RteHomogeneousSlab::scriptAB()}
+  \begin{align}
+    \script{A}_j(\tau) = \frac{\mu_0 \nu_j F}{N(\nu_j)}
+    C(\tau ; \nu_j, \mu_0)
+    \left[
+      \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_+ +
+      \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_-
+    \right]
+  \end{align}
+  and
+  \begin{align}
+    \script{B}_j(\tau) = \frac{\mu_0 \nu_j F}{N(\nu_j)}
+    e^{-\tau/\mu_0}S(\tau_0-\tau ; \nu_j, \mu_0)
+    \left[
+      \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_+ +
+      \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_-
+    \right]
+  \end{align}
+  Here
+  \begin{align}
+    S(\tau;x,y) = \frac{1-e^{-\tau/x}e^{-\tau/y}}{x+y} \quad\textrm{and}\quad
+    C(\tau;x,y) = \frac{e^{-\tau/x}-e^{-\tau/y}}{x-y}
+  \end{align}
 \end{frame}
 % ----------------------------------------------------------------
 
