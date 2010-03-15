@@ -1,6 +1,9 @@
 # -*- org -*-
 
 * March 14
+  
+  - Added getView() method to matrix class.
+  - Lot more work on RTE slab solver.
 
 * March 12, 13th
 
