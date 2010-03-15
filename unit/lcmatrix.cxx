@@ -360,6 +360,47 @@ test_12()
       LC_ASSERT("Testing if col-scaling worked", A(i,j) == colFact[j]);
 }
 
+void
+test_13()
+{
+  Lucee::Matrix<double> A(10, 10);
+  A = 2.0;
+
+// get view
+  Lucee::Matrix<double> view = A.getView(0, 5, 0, 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(0) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(0) == 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(1) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(1) == 5);
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      view(i,j) = (10*i+j)*0.5;
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
+
+// get view
+  Lucee::Matrix<double> view2 = A.getView(5, 10, 0, 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(0) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(0) == 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(1) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(1) == 5);
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      view(i,j) = (10*i+j)*0.5;
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
+}
+
 int
 main(void) 
 {
@@ -376,5 +417,6 @@ main(void)
   test_10();
   test_11();
   test_12();
+  test_13();
   LC_END_TESTS;
 }

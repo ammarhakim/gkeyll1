@@ -127,6 +127,18 @@ namespace Lucee
       void scaleCols(const Lucee::Vector<double>& fv);
 
 /**
+ * Get view into matrix. The returned matrix shares data with this
+ * matrix.
+ * 
+ * @param lr Lower row index into view.
+ * @param ur Upper row index into view.
+ * @param lc Lower column index into view.
+ * @param uc Upper column index index view.
+ * @param view matrix.
+ */
+      Lucee::Matrix<T> getView(int lr, int ur, int lc, int uc);
+
+/**
  * Is this matrix a transpose of another one?
  *
  * @return true if this matrix is transpose of another one.
@@ -151,6 +163,13 @@ namespace Lucee
     private:
 /** Matrix traits stored as bit values */
       unsigned traits;
+
+/**
+ * Create matrix from given array.
+ *
+ * @param arr Array to create from.
+ */
+      Matrix(Lucee::Array<2, T, Lucee::ColMajorIndexer>& arr);
   };
 }
 

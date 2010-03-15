@@ -101,6 +101,16 @@ namespace Lucee
       calc_RTE_eigensystem(m, phi_p, phi_m, nu);
 // compute eigensystem normalization
       get_norms(phi_p, phi_m, Nj);
+
+// assemble matrix to determine the unknown expansion coefficients
+      Lucee::Matrix<double> BLOCK(2*N, 2*N);
+      Lucee::Vector<double> RHS(2*N);
+
+// compute particular solution at top surface
+      particular_solution(0, nu, phi_p, phi_m, Nj, Lp, Lm);
+
+// compute particular solution at bottom surface
+      particular_solution(tau0, nu, phi_p, phi_m, Nj, Lp, Lm);
     }
 
     return 0;
@@ -247,5 +257,13 @@ namespace Lucee
       }
       Nj[i] = sum;
     }
+  }
+
+  void
+  RteHomogeneousSlab::particular_solution(double tau, const Lucee::Vector<double>& nu,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& Nj,
+    Lucee::Vector<double>& Lp_p, Lucee::Vector<double>& Lp_m)
+  {
   }
 }

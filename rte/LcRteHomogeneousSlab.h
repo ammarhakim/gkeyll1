@@ -157,6 +157,22 @@ namespace Lucee
  */
       void get_norms(const Lucee::Matrix<double>& phi_p,
         const Lucee::Matrix<double>& phi_m, Lucee::Vector<double>& Nj);
+
+/**
+ * Compute particular solution at a given depth.
+ *
+ * @param tau Depth at which particular solution is needed.
+ * @param nu Eigenvalues of RTE.
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Nj Normalization coefficients.
+ * @param Lp_p on output, particular solution in positive hemisphere.
+ * @param Lp_m on output, particular solution in negative hemisphere.
+ */
+      void particular_solution(double tau, const Lucee::Vector<double>& nu,
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& Nj,
+        Lucee::Vector<double>& Lp_p, Lucee::Vector<double>& Lp_m);
   };
 }
 
