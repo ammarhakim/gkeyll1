@@ -93,6 +93,19 @@
 
 * Lucee Notes
 
+** TODO Finish implementing RT in homogenous slab.
+
+    Complete the ADO algorithm so the delta-backward paper can be
+    finished. Throughly test it with Siewert publish solutions. Then
+    add refracting top and a Lambertian bottom.
+
+    For layered slabs (inhomgenous medium) develop an iterative scheme
+    in which one sweeps from the top to the bottom layer and then
+    bottom to top and iterates to convergence. Probably faster than
+    doing a large linear solve, specially if the iteration converges
+    rapidly. May need to refactor RteHomogeneousSlab to make this
+    work.
+
 ** Document before you implement
 
    Document each step in an algorithm before or as the implementation
@@ -431,11 +444,6 @@
 ** DONE Add copy ctor and assignment operators to vector.
 ** DONE Complete RowMajor indexer and test it.
 ** DONE Implement the slice() operator.
-** TODO Finish implementing RT in homogenous slab.
-
-    Complete the ADO algorithm so the delta-backward paper can be
-    finished.
-
 ** TODO Implement a 1D ES-PIC code.
 
     Replicate Birdsal and Langdon book problems.
