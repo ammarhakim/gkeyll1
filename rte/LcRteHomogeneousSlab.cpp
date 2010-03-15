@@ -102,15 +102,25 @@ namespace Lucee
 // compute eigensystem normalization
       get_norms(phi_p, phi_m, Nj);
 
-// assemble matrix to determine the unknown expansion coefficients
+// assemble BLOCKS and RHS matrices to determine unknown expansion coefficients
       Lucee::Matrix<double> BLOCK(2*N, 2*N);
-      Lucee::Vector<double> RHS(2*N);
+      Lucee::Matrix<double> RHS(2*N, 1);
 
 // compute particular solution at top surface
-      particular_solution(0, nu, phi_p, phi_m, Nj, Lp, Lm);
+      particular_solution(0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp, Lm);
+
+// compute contribution to BLOCKS and RHS from top-surface BCs
+      Lucee::Matrix<double> b1 = BLOCK.getView(0, N, 0, N);
+      Lucee::Matrix<double> b2 = BLOCK.getView(0, N, N, 2*N);
+      Lucee::Matrix<double> rhsb = RHS.getView(0, N, 0, 1);
 
 // compute particular solution at bottom surface
-      particular_solution(tau0, nu, phi_p, phi_m, Nj, Lp, Lm);
+      particular_solution(tau0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp, Lm);
+
+// compute contribution to BLOCKS and RHS from bottom-surface BCs
+      b1 = BLOCK.getView(N, 2*N, 0, N);
+      b2 = BLOCK.getView(N, 2*N, N, 2*N);
+      rhsb = RHS.getView(N, 2*N, 0, 1);
     }
 
     return 0;
@@ -263,7 +273,78 @@ namespace Lucee
   RteHomogeneousSlab::particular_solution(double tau, const Lucee::Vector<double>& nu,
     const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
     const Lucee::Vector<double>& Nj,
+    const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
     Lucee::Vector<double>& Lp_p, Lucee::Vector<double>& Lp_m)
   {
+    Lp_p = 0.0;
+    Lp_m = 0.0;
+
+    Lucee::Vector<double> As(N), Bs(N);
+// compute \script{A}_j and \script{B}_j
+    scriptAB(tau, nu, phi_p, phi_m, Nj, Qp, Qm, As, Bs);
+// compute particular solution
+    for (int i=0; i<N; ++i)
+    {
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      for (int j=0; j<N; j++)
+      {
+        sum1 += (As[j]*phi_p(i,j) + Bs[j]*phi_m(i,j));
+        sum2 += (As[j]*phi_m(i,j) + Bs[j]*phi_p(i,j));
+      }
+      Lp_p[i] = sum1;
+      Lp_m[i] = sum2;
+    }
+  }
+
+  void
+  RteHomogeneousSlab::scriptAB(double tau, const Lucee::Vector<double>& nu,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& Nj,
+    const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
+    Lucee::Vector<double>& As, Lucee::Vector<double>& Bs)
+  {
+    double tau1 = tau0-tau;
+    for (int j=0; j<N; ++j)
+    {
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+// factor in front of \script{A}
+      double t1 = mu0*nu[j]*flux*Cfunc(tau, nu[j], mu0)/Nj[j];
+// factor in front of \script{B}
+      double t2 = mu0*nu[j]*flux*exp(-tau/mu0)*Sfunc(tau1, nu[j], mu0)/Nj[j];
+
+      for (int i=0; i<N; ++i)
+      {
+        sum1 += w[i]*(Qp[i]*phi_p(i,j) + Qm[i]*phi_m(i,j));
+        sum2 += w[i]*(Qp[i]*phi_m(i,j) + Qm[i]*phi_p(i,j));
+      }
+      As[j] = t1*sum1;
+      Bs[j] = t2*sum2;
+    }
+  }
+
+  double
+  RteHomogeneousSlab::Cfunc(double tau, double x, double y)
+  {
+    if(fabs(x-y) < 1e-14)
+      return tau*exp(-tau/y)/(y*y);
+    if(fabs(x) < 1e-14)
+      return exp(-tau/y)/y;
+    if(fabs(y) < 1e-14)
+      return exp(-tau/x)/x;
+    
+    return (exp(-tau/x)-exp(-tau/y))/(x-y);
+  }
+
+  double
+  RteHomogeneousSlab::Sfunc(double tau, double x, double y)
+  {
+    if(fabs(x) < 1e-14)
+      return 1/y;
+    if(fabs(y) < 1e-14)
+      return 1/x;
+    
+    return (1-exp(-tau/x)*exp(-tau/y))/(x+y);    
   }
 }

@@ -166,13 +166,53 @@ namespace Lucee
  * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
  * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
  * @param Nj Normalization coefficients.
+ * @param Qp beam source in positive hemisphere.
+ * @param Qm beam source in negative hemisphere.
  * @param Lp_p on output, particular solution in positive hemisphere.
  * @param Lp_m on output, particular solution in negative hemisphere.
  */
       void particular_solution(double tau, const Lucee::Vector<double>& nu,
         const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
         const Lucee::Vector<double>& Nj,
+        const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
         Lucee::Vector<double>& Lp_p, Lucee::Vector<double>& Lp_m);
+
+/**
+ * Compute functions that appear in the particular solution.
+ *
+ * @param tau Depth at which functions are to be evaluated.
+ * @param nu Eigenvalues of RTE.
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Nj Normalization coefficients.
+ * @param Qp beam source in positive hemisphere.
+ * @param Qm beam source in negative hemisphere.
+ * @param As on output, \script{A}.
+ * @param Bs on output, \script{B}.
+ */
+      void scriptAB(double tau, const Lucee::Vector<double>& nu,
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& Nj,
+        const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
+        Lucee::Vector<double>& As, Lucee::Vector<double>& Bs);
+
+/**
+ * C(\tau; x, y) appearing in the particular solution.
+ *
+ * @param tau Depth.
+ * @param x parameter in function.
+ * @param y parameter in function.
+ */
+      double Cfunc(double tau, double x, double y);
+
+/**
+ * S(\tau; x, y) appearing in the particular solution.
+ *
+ * @param tau Depth.
+ * @param x parameter in function.
+ * @param y parameter in function.
+ */
+      double Sfunc(double tau, double x, double y);
   };
 }
 
