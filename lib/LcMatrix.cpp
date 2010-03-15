@@ -149,6 +149,19 @@ namespace Lucee
   }
 
   template <typename T>
+  Lucee::Matrix<T>
+  Matrix<T>::getView(int lr, int ur, int lc, int uc)
+  {
+    int lo[2], up[2];
+    lo[0] = lr; lo[1] = lc;
+    up[0] = ur; up[1] = uc;
+    Lucee::Region<2, int> rgn(lo, up);
+    Lucee::Array<2, T, Lucee::ColMajorIndexer> slice
+      = this->getSlice(rgn);
+    return Matrix<T>(slice);
+  }
+
+  template <typename T>
   Matrix<T>
   Matrix<T>::duplicate() const
   {
@@ -170,6 +183,12 @@ namespace Lucee
   Matrix<T>::isTranspose() const
   {
     return LC_IS_TRANSPOSE(traits);
+  }
+
+  template <typename T>
+  Matrix<T>::Matrix(Lucee::Array<2, T, Lucee::ColMajorIndexer>& arr)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(arr)
+  {
   }
 
 // instantiations

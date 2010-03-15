@@ -247,7 +247,7 @@
     constant coefficients}
   Once we have the eigensystem, we can compute the homogenous solution
   \begin{align}
-    \mvec{L}^h_+(\tau) = \sum_{j=1}^B
+    \mvec{L}^h_+(\tau) = \sum_{j=1}^N
     \left[
       A_j \gvec{\Phi}_+(\nu_j) e^{-\tau/\nu_j} +
       B_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
@@ -255,7 +255,7 @@
   \end{align}
   and
   \begin{align}
-    \mvec{L}^h_-(\tau) = \sum_{j=1}^B
+    \mvec{L}^h_-(\tau) = \sum_{j=1}^N
     \left[
       A_j \gvec{\Phi}_-(\nu_j) e^{-\tau/\nu_j} +
       B_j \gvec{\Phi}_+(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
@@ -271,7 +271,7 @@
   The particular solutions can be written as\footnote{See
     RteHomogeneousSlab::particular\_solution()}
   \begin{align}
-    \mvec{L}^p_+(\tau) = \sum_{j=1}^B
+    \mvec{L}^p_+(\tau) = \sum_{j=1}^N
     \left[
       \script{A}_j(\tau) \gvec{\Phi}_+(\nu_j) +
       \script{B}_j(\tau) \gvec{\Phi}_-(\nu_j)
@@ -279,7 +279,7 @@
   \end{align}
   and
   \begin{align}
-    \mvec{L}^p_-(\tau) = \sum_{j=1}^B
+    \mvec{L}^p_-(\tau) = \sum_{j=1}^N
     \left[
       \script{A}_j(\tau) \gvec{\Phi}_-(\nu_j) +
       \script{B}_j(\tau) \gvec{\Phi}_+(\nu_j)
