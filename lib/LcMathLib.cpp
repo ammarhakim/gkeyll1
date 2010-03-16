@@ -70,7 +70,7 @@ namespace Lucee
     int i, j = plm.getLower(0);
     double fact = 2*sqrt(PI)/sqrt(2.0*l+1);
 // use GSL routine to do actual computation
-    for(i = x.getLower(0); i<x.getUpper(0); i++)
+    for(i = x.getLower(0); i<x.getUpper(0); ++i)
       plm[j++] = fact*gsl_sf_legendre_sphPlm(l, m, x[i]);
   }
 

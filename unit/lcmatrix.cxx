@@ -386,18 +386,18 @@ test_13()
 // get view
   Lucee::Matrix<double> view2 = A.getView(5, 10, 0, 5);
 
-  LC_ASSERT("Testing view bounds", view.getLower(0) == 0);
-  LC_ASSERT("Testing view bounds", view.getUpper(0) == 5);
+  LC_ASSERT("Testing view bounds", view2.getLower(0) == 5);
+  LC_ASSERT("Testing view bounds", view2.getUpper(0) == 10);
 
-  LC_ASSERT("Testing view bounds", view.getLower(1) == 0);
-  LC_ASSERT("Testing view bounds", view.getUpper(1) == 5);
+  LC_ASSERT("Testing view bounds", view2.getLower(1) == 0);
+  LC_ASSERT("Testing view bounds", view2.getUpper(1) == 5);
 
-  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
-    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
-      view(i,j) = (10*i+j)*0.5;
+  for (int i=view2.getLower(0); i<view2.getUpper(0); ++i)
+    for (int j=view2.getLower(1); j<view2.getUpper(1); ++j)
+      view2(i,j) = (10*i+j)*0.5;
 
-  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
-    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+  for (int i=view2.getLower(0); i<view2.getUpper(0); ++i)
+    for (int j=view2.getLower(1); j<view2.getUpper(1); ++j)
       LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
 }
 
