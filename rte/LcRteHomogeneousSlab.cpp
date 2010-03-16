@@ -33,6 +33,8 @@ namespace Lucee
 
   RteHomogeneousSlab::~RteHomogeneousSlab()
   {
+    delete radiancep;
+    delete radiancem;
   }
 
   void
@@ -46,6 +48,7 @@ namespace Lucee
     numModes = tbl.getNumber("numModes");
     albedo = tbl.getNumber("albedo");
     flux = tbl.getNumber("flux");
+    tauOut = tbl.getNumVec("tauOut");
 
 // read in phase function
     Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
@@ -65,6 +68,12 @@ namespace Lucee
 // allocate space for weights and ordinates
     w = Lucee::Vector<double>(N);
     mu = Lucee::Vector<double>(N);
+// allocate data for storing radiance
+    int lo[2] = {0, 0}, up[2];
+    up[0] = numModes; up[1] = tauOut.size();
+    Lucee::Region<2, int> rgn(lo, up);
+    radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
+    radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
   }
 
   void 
@@ -88,7 +97,7 @@ namespace Lucee
 
 // allocate various matrices and vectors
     Lucee::Vector<double> nu(N), Nj(N), A(N), B(N), 
-      Lp(N), Lm(N), Qp(N), Qm(N);
+      Lp0(N), Lm0(N), Lpt0(N), Lmt0(N), Qp(N), Qm(N);
     Lucee::Matrix<double> phi_p(N, N), phi_m(N, N);
 
 // solve each azimuthal component of RTE
@@ -101,26 +110,41 @@ namespace Lucee
       calc_RTE_eigensystem(m, phi_p, phi_m, nu);
 // compute eigensystem normalization
       get_norms(phi_p, phi_m, Nj);
-
-// assemble BLOCKS and RHS matrices to determine unknown expansion coefficients
-      Lucee::Matrix<double> BLOCK(2*N, 2*N);
-      Lucee::Matrix<double> RHS(2*N, 1);
-
 // compute particular solution at top surface
-      particular_solution(0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp, Lm);
-
-// compute contribution to BLOCKS and RHS from top-surface BCs
-      Lucee::Matrix<double> b1 = BLOCK.getView(0, N, 0, N);
-      Lucee::Matrix<double> b2 = BLOCK.getView(0, N, N, 2*N);
-      Lucee::Matrix<double> rhsb = RHS.getView(0, N, 0, 1);
-
+      particular_solution(0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
 // compute particular solution at bottom surface
-      particular_solution(tau0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp, Lm);
+      particular_solution(tau0, nu, phi_p, phi_m, Nj, Qp, Qm, Lpt0, Lmt0);
+// compute coefficients appearing in homogenoeus solution
+      calc_AB_coeffs(nu, phi_p, phi_m, Lp0, Lm0, Lpt0, Lmt0, A, B);
 
-// compute contribution to BLOCKS and RHS from bottom-surface BCs
-      b1 = BLOCK.getView(N, 2*N, 0, N);
-      b2 = BLOCK.getView(N, 2*N, N, 2*N);
-      rhsb = RHS.getView(N, 2*N, 0, 1);
+// now compute radiance at requested depths
+      Lucee::FieldPtr<double> radp = radiancep->createPtr();
+      Lucee::FieldPtr<double> radm = radiancem->createPtr();
+      for (unsigned k=0; k<tauOut.size(); ++k)
+      {
+        radiancep->setPtr(radp, m, k);
+        radiancem->setPtr(radm, m, k);
+// compute particular solution at this depth
+        double tau = tauOut[k];
+        particular_solution(tau, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
+// copy into radiance
+        for (int i=0; i<N; ++i)
+        {
+          radp[i] = Lp0[i];
+          radm[i] = Lm0[i];
+        }
+// now compute total radiance by adding in homogeneous solution
+        for (int j=0; j<N; ++j)
+        {
+          double t1 = A[j]*exp(-tau/nu[j]);
+          double t2 = B[j]*exp(-(tau0-tau)/nu[j]);
+          for (int i=0; i<N; ++i)
+          {
+            radp[i] += t1*phi_p(i,j) + t2*phi_m(i,j);
+            radm[i] += t1*phi_m(i,j) + t2*phi_p(i,j);
+          }
+        }
+      }
     }
 
     return 0;
@@ -180,8 +204,8 @@ namespace Lucee
     Lucee::accumulate(FE, F, E);
 // compute eigenvalues and eignevectors of F*E
     Lucee::Vector<double> evr(N), evi(N); // real and imaginary
-    Lucee::Matrix<double> VL(N,N), VR(N,N); // left and right
-    Lucee::eig(FE, evr, evi, VL, VL);
+    Lucee::Matrix<double> VR(N,N); // right eigenvectors
+    Lucee::eigRight(FE, evr, evi, VR);
 
 // compute eigenvalues of RTE
     for (int i=0; i<N; ++i)
@@ -191,6 +215,7 @@ namespace Lucee
     Lucee::Vector<double> mu1(N);
     for (int i=0; i<N; ++i)
       mu1[i] = 1/mu[i];
+
     E.scaleRows(mu1); // M^{-1}*E
 // RETHINK THIS: CAN RESCALE X <- nu[j]*M^{1-}*E*X
     for (int j=0; j<N; ++j)
@@ -223,9 +248,9 @@ namespace Lucee
     F = 0.0;
     E = 0.0;
     int sign = 1;
+    Lucee::Vector<double> PL(N);
     for (int l=m; l<=L; ++l)
     {
-      Lucee::Vector<double> PL(N);
       Lucee::legendre(l, m, mu, PL);
 // compute \beta_l P_l^m(\mu_i) P_l^m(\mu_j) and put into proper matrix
       if (sign == 1)
@@ -247,8 +272,8 @@ namespace Lucee
     for (int i=0; i<N; ++i)
     {
       double mu1 = 1/mu[i];
-      E(i,i) += mu1;
-      F(i,i) += mu1;
+      E(i,i) = mu1 + E(i,i);
+      F(i,i) = mu1 + F(i,i);
     }
   }
 
@@ -346,5 +371,46 @@ namespace Lucee
       return 1/x;
     
     return (1-exp(-tau/x)*exp(-tau/y))/(x+y);    
+  }
+
+  void
+  RteHomogeneousSlab::calc_AB_coeffs(
+    const Lucee::Vector<double>& nu,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
+    const Lucee::Vector<double>& Lpt0, const Lucee::Vector<double>& Lmt0,
+    Lucee::Vector<double>& A, Lucee::Vector<double>& B)
+  {
+    Lucee::Matrix<double> BLOCKS(2*N, 2*N), RHS(2*N, 1);
+
+    for (int j=0; j<N; ++j)
+    {
+      double t = exp(-tau0/nu[j]);
+      for (int i=0; i<N; ++i)
+      {
+// compute blocks from top-surface boundary conditions
+        BLOCKS(i,j) = phi_p(i,j);
+        BLOCKS(i, j+N) = phi_m(i,j)*t;
+// compute blocks from bottom-surface boundary conditions
+        BLOCKS(i+N,j) = phi_m(i,j)*t;
+        BLOCKS(i+N, j+N) = phi_p(i,j);
+      }
+    }
+    for (int i=0; i<N; ++i)
+    {
+// compute RHS contribution from top boundary contribution
+      RHS(i,0) = -Lp0[i];
+// compute RHS contribution from bottom boundary contribution
+      RHS(i+N,0) = -Lmt0[i];
+    }
+
+// invert system to get solution
+    Lucee::solve(BLOCKS, RHS);
+// copy solution to A and B
+    for (int i=0; i<N; ++i)
+    {
+      A[i] = RHS(i,0);
+      B[i] = RHS(i+N,0);
+    }
   }
 }

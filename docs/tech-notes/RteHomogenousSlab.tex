@@ -345,6 +345,31 @@
 \end{frame}
 % ----------------------------------------------------------------
 
+% ----------------------------------------------------------------
+\begin{frame}{Use boundary conditions to determine linear system for
+    $A_j$ and $B_j$}
+  Using the boundary conditions we get
+  \begin{align}
+    \sum_{j=1}^N
+    \left[
+      A_j \gvec{\Phi}_+(\nu_j) +
+      B_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j}
+    \right]
+    &= -\mvec{L}_+^p(0) \\
+    \sum_{j=1}^N
+    \left[
+      A_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j} +
+      B_j \gvec{\Phi}_+(\nu_j)
+    \right]
+    &= -\mvec{L}_-^p(\tau_0)
+  \end{align}
+  This is a linear system that can be solved to determine the
+  coefficients $A_i$ and $B_i$\footnote{See {\tt
+      RteHomogeneousSlab::calc\_AB\_coeffs()}}.
+
+\end{frame}
+% ----------------------------------------------------------------
+
 \end{document}
 
 % ----------------------------------------------------------------

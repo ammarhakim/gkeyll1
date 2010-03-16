@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcField.h>
 #include <LcMatrix.h>
 #include <LcSolverIfc.h>
 #include <LcVector.h>
@@ -119,6 +120,10 @@ namespace Lucee
       Lucee::Vector<double> w, mu;
 /** Phase function expasion coefficients */
       Lucee::Vector<double> betal;
+/** Optical depths at which output is written */
+      std::vector<double> tauOut;
+/** Array to store output data (numModes*ntau) with N components per location */
+      Lucee::Field<2, double> *radiancep, *radiancem;
 
 /**
  * Computes Qp and Qm needed to compute particular solutions.
@@ -213,6 +218,25 @@ namespace Lucee
  * @param y parameter in function.
  */
       double Sfunc(double tau, double x, double y);
+
+/**
+ * Compute the coefficients appearing in the homogeneous solution.
+ *
+ * @param nu Eigenvalues of RTE.
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Lp0 Particular solution in [0,1] on top surface.
+ * @param Lm0 Particular solution in [0,-1] on top surface.
+ * @param Lpt0 Particular solution in [0,1] on bottom surface.
+ * @param Lmt0 Particular solution in [0,-1] on bottom surface.
+ * @param A on output, A coefficients in homogeneous solution.
+ * @param B on output, B coefficients in homogeneous solution.
+ */
+      void calc_AB_coeffs(const Lucee::Vector<double>& nu,
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
+        const Lucee::Vector<double>& Lpt0, const Lucee::Vector<double>& Lmt0,
+        Lucee::Vector<double>& A, Lucee::Vector<double>& B);
   };
 }
 
