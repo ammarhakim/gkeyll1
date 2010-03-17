@@ -5,7 +5,7 @@ simulation = Solver.RteHomogeneousSlab {
    -- number of phase function coefficients (degree of anisotropy)
    L = 128,
    -- number of quadrature points in each hemisphere
-   N = 64,
+   N = 4,
    -- cosine of incident angle
    mu0 = 0.5,
    -- beam flux: downward irradiance is mu0*pi*flux
@@ -17,9 +17,9 @@ simulation = Solver.RteHomogeneousSlab {
    -- number of azimuthal modes
    numModes = 1,
    -- phase function
-   phaseFunction = RtePhaseFunction.HG { g = 0.9 },
+   phaseFunction = RtePhaseFunction.HG { g = 0.2 },
    -- irradiance moments to compute
    irradOut = {0, 1},
    -- optical depths at which outputs are to be computed
-   tauOut = {0.0, 0.5, 1.0},
+   tauOut = {0.0, 1.0},
 }

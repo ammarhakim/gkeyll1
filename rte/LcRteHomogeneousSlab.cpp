@@ -223,11 +223,9 @@ namespace Lucee
       Lucee::legendre(l, m, mu, PL);
       for (int i=0; i<N; i++)
       { // loop over \mu_i
-        Qp[i] += PL[i]*betal[l];
-        Qm[i] += PL[i]*pow(-1, l-m)*betal[l];
+        Qp[i] += Plmu0*PL[i]*betal[l];
+        Qm[i] += Plmu0*PL[i]*pow(-1, l-m)*betal[l];
       }
-      Qp.scale(Plmu0);
-      Qm.scale(Plmu0);
     }
 // multiply by \varpi/2*flux
     double fact = 0.5*albedo*flux;
@@ -350,6 +348,7 @@ namespace Lucee
     Lucee::Vector<double> As(N), Bs(N);
 // compute \script{A}_j and \script{B}_j
     scriptAB(tau, nu, phi_p, phi_m, Nj, Qp, Qm, As, Bs);
+
 // compute particular solution
     for (int i=0; i<N; ++i)
     {
@@ -372,6 +371,8 @@ namespace Lucee
     const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
     Lucee::Vector<double>& As, Lucee::Vector<double>& Bs)
   {
+    As = 0.0;
+    Bs = 0.0;
     double tau1 = tau0-tau;
     for (int j=0; j<N; ++j)
     {
