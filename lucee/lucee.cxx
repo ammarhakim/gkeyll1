@@ -121,10 +121,8 @@ main(int argc, char **argv)
     t0 = lua_tonumber(L, -1);
 // get simulation end time
   lua_getglobal(L, "tEnd");
-  if (! lua_type(L, -1) == LUA_TNUMBER)
-    t1 = 1.0;
-  else
-    t1 = lua_tonumber(L, -1);
+  t1 = lua_tonumber(L, -1);
+  if (t1 == 0) t1 = 1.0;
 
   if (t1 < t0)
   {
@@ -135,10 +133,8 @@ main(int argc, char **argv)
 // get number of output frames to write
   unsigned outFrames;
   lua_getglobal(L, "outFrames");
-  if (! lua_type(L, -1) == LUA_TNUMBER)
-    outFrames = 1;
-  else
-    outFrames = lua_tonumber(L, -1);
+  outFrames = lua_tonumber(L, -1);
+  if (outFrames == 0) outFrames = 1;
 
 // put top-level simulation table on stack
   lua_getglobal(L, "simulation");
@@ -186,7 +182,6 @@ main(int argc, char **argv)
     infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
 
 // dump final data after running simulation
-    infoStrm << "Writing data at dump 0 ...." << std::endl;
     sim->writeToFile(outPrefix, outFrames);
 
 // shut-down simulaiton

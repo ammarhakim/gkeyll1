@@ -20,6 +20,8 @@
 
 // std includes
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
 namespace Lucee
 {
@@ -165,10 +167,34 @@ namespace Lucee
     if (d == 0)
 // nothing to write at simulation sart
       return;
+    Lucee::ConstFieldPtr<double> radp = radiancep->createConstPtr();
+    Lucee::ConstFieldPtr<double> radm = radiancem->createConstPtr();
 // dump all radiances
     for (unsigned k=0; k<tauOut.size(); ++k)
     {
+      std::ostringstream fnp, fnm;
+      fnp << baseName << "rad_d_" << k << ".txt";
+      fnm << baseName << "rad_u_" << k << ".txt";
+// open file for I/O
+      std::ofstream outFilep(fnp.str().c_str());
+      std::ofstream outFilem(fnm.str().c_str());
+// write data to file
+      for (int m=0; m<numModes; ++m)
+      {
+        radiancep->setPtr(radp, m, k);
+        outFilep << "# Radiance [W/m^2/sr] in downward direction at optical depth " 
+                 << tauOut[k] << std::endl;
+        for (int i=0; i<N; ++i)
+          outFilep << radp[i] << " ";
+        outFilep << std::endl;
 
+        radiancem->setPtr(radm, m, k);
+        outFilem << "# Radiance [W/m^2/sr] in upward direction at optical depth " 
+                 << tauOut[k] << std::endl;
+        for (int i=0; i<N; ++i)
+          outFilem << radm[i] << " ";
+        outFilem << std::endl;
+      }
     }
   }
 

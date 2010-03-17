@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* March 15, 16
+
+  - Now RteHomogeneousSlab solver basic algorithm is complete. Data
+    yet to be written out. Now sure if to just do it in HDF5 or do
+    some intermediate step before that.
+  - Still need to figure out how to compute the irradiances.
+
 * March 14
   
   - Added getView() method to matrix class.
