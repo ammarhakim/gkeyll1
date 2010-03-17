@@ -182,9 +182,11 @@ main(int argc, char **argv)
 
     time_t end = time(0); // time at end of main loop
     timeinfo = localtime ( &end );
+    infoStrm << std::endl;
     infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
 
 // dump final data after running simulation
+    infoStrm << "Writing data at dump 0 ...." << std::endl;
     sim->writeToFile(outPrefix, outFrames);
 
 // shut-down simulaiton
