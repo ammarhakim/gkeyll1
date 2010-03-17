@@ -194,19 +194,19 @@ namespace Lucee
 // open file for I/O
       std::ofstream outFilep(fnp.str().c_str());
       std::ofstream outFilem(fnm.str().c_str());
+      outFilep << "# Radiance [W/m^2/sr] in downward direction at optical depth " 
+               << tauOut[k] << std::endl;
+      outFilem << "# Radiance [W/m^2/sr] in upward direction at optical depth " 
+               << tauOut[k] << std::endl;
 // write data to file
       for (int m=0; m<numModes; ++m)
       {
         radiancep->setPtr(radp, m, k);
-        outFilep << "# Radiance [W/m^2/sr] in downward direction at optical depth " 
-                 << tauOut[k] << std::endl;
         for (int i=0; i<N; ++i)
           outFilep << radp[i] << " ";
         outFilep << std::endl;
 
         radiancem->setPtr(radm, m, k);
-        outFilem << "# Radiance [W/m^2/sr] in upward direction at optical depth " 
-                 << tauOut[k] << std::endl;
         for (int i=0; i<N; ++i)
           outFilem << radm[i] << " ";
         outFilem << std::endl;
