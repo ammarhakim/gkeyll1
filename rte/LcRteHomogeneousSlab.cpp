@@ -165,16 +165,32 @@ namespace Lucee
   RteHomogeneousSlab::writeToFile(const std::string& baseName, unsigned d) const
   {
     if (d == 0)
-// nothing to write at simulation sart
+    {
+// write ordinates and weights
+      std::ostringstream fnmu, fnw;
+      fnmu << baseName << "_mu" << ".txt";
+      fnw << baseName << "_w_" << ".txt";
+// open file for I/O
+      std::ofstream outFilemu(fnmu.str().c_str());
+      std::ofstream outFilew(fnw.str().c_str());
+      for (int i=0; i<N; ++i)
+      {
+        outFilemu << mu[i] << " ";
+        outFilew << w[i] << " ";
+      }
+      outFilemu << std::endl;
+      outFilew << std::endl;
+// nothing else to write at simulation start
       return;
+    }
     Lucee::ConstFieldPtr<double> radp = radiancep->createConstPtr();
     Lucee::ConstFieldPtr<double> radm = radiancem->createConstPtr();
-// dump all radiances
+// write all radiances
     for (unsigned k=0; k<tauOut.size(); ++k)
     {
       std::ostringstream fnp, fnm;
-      fnp << baseName << "rad_d_" << k << ".txt";
-      fnm << baseName << "rad_u_" << k << ".txt";
+      fnp << baseName << "_rad_d_" << k << ".txt";
+      fnm << baseName << "_rad_u_" << k << ".txt";
 // open file for I/O
       std::ofstream outFilep(fnp.str().c_str());
       std::ofstream outFilem(fnm.str().c_str());
