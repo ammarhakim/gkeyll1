@@ -162,6 +162,14 @@ namespace Lucee
   void
   RteHomogeneousSlab::writeToFile(const std::string& baseName, unsigned d) const
   {
+    if (d == 0)
+// nothing to write at simulation sart
+      return;
+// dump all radiances
+    for (unsigned k=0; k<tauOut.size(); ++k)
+    {
+
+    }
   }
 
   void
