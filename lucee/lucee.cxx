@@ -152,41 +152,50 @@ main(int argc, char **argv)
   Lucee::SolverIfc *sim = Lucee::ObjCreator<Lucee::SolverIfc>
     ::getNew(kind);
 
+  try
+  {
 // go through simulation boot-strap process
-  sim->readInput(tbl);
-  sim->buildData();
-  sim->buildAlgorithms();
+    sim->readInput(tbl);
+    sim->buildData();
+    sim->buildAlgorithms();
 
 // check if we are restarting
-  if (cmdParser.hasSwitch("r"))
-    sim->restoreFromFile(inpFile);
-  else
-    sim->initialize();
-
+    if (cmdParser.hasSwitch("r"))
+      sim->restoreFromFile(inpFile);
+    else
+      sim->initialize();
+    
 // set current time
-  sim->setCurrTime(t0);
+    sim->setCurrTime(t0);
 
 // dump initial data before running simulation
-  sim->writeToFile(outPrefix, 0);
+    sim->writeToFile(outPrefix, 0);
 
-  time_t start = time(0);
-  struct tm *timeinfo;
-  timeinfo = localtime(&start);
-  infoStrm << std::endl;
-  infoStrm << "Simulation started at time " << asctime(timeinfo) << std::endl;
+    time_t start = time(0);
+    struct tm *timeinfo;
+    timeinfo = localtime(&start);
+    infoStrm << std::endl;
+    infoStrm << "Simulation started at time " << asctime(timeinfo) << std::endl;
 
 // run simulation
-  sim->advance(t1);
+    sim->advance(t1);
 
-  time_t end = time(0); // time at end of main loop
-  timeinfo = localtime ( &end );
-  infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
+    time_t end = time(0); // time at end of main loop
+    timeinfo = localtime ( &end );
+    infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
 
 // dump final data after running simulation
-  sim->writeToFile(outPrefix, outFrames);
+    sim->writeToFile(outPrefix, outFrames);
 
 // shut-down simulaiton
-  sim->finalize();
+    sim->finalize();
+  }
+  catch (Lucee::Except& lce)
+  {
+    infoStrm << "Lucee exception ..." << std::endl;
+    infoStrm << lce.what() << std::endl;
+  }
+
   delete sim;
 
   return 0;

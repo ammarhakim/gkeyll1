@@ -49,6 +49,15 @@ namespace Lucee
     albedo = tbl.getNumber("albedo");
     flux = tbl.getNumber("flux");
     tauOut = tbl.getNumVec("tauOut");
+// ensure that data is not requested deeper tau0
+    for (unsigned k=0; k<tauOut.size(); ++k)
+      if (tauOut[k] > tau0)
+      {
+        Lucee::Except lce(
+          "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
+        lce << tau0 << ")" << std::endl;
+        throw lce;
+      }
 
 // read in phase function
     Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
