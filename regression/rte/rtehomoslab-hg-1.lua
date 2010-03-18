@@ -5,7 +5,7 @@ simulation = Solver.RteHomogeneousSlab {
    -- number of phase function coefficients (degree of anisotropy)
    L = 128,
    -- number of quadrature points in each hemisphere
-   N = 64,
+   N = 8,
    -- cosine of incident angle
    mu0 = 0.5,
    -- beam flux: downward irradiance is mu0*pi*flux
