@@ -16,6 +16,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcVector.h>
+
 namespace Lucee
 {
 // forward declaration for making Field class friend
@@ -67,6 +70,13 @@ namespace Lucee
  * @param n Element index to fetch.
  */
       T operator[](unsigned n) const { return data[n]; }
+
+/**
+ * Get a Lucee::Vector class from this field pointer.
+ *
+ * @param vector class for pointer.
+ */
+      Lucee::Vector<T> asVector();
 
     private:
 /**

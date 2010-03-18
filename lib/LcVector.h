@@ -21,10 +21,16 @@
 
 namespace Lucee
 {
+// forward declaration for making vector class friend
+  template <typename T> class FieldPtr;
+
   template <typename T>
   class Vector : public Lucee::Array<1, T>
   {
     public:
+/** Friend  so it can create Vector */
+      template <typename TT> friend class Lucee::FieldPtr;
+
 /**
  * Construct vector with specified length.
  *
@@ -107,6 +113,15 @@ namespace Lucee
  * @return Copy of this vector.
  */
       Vector<T> duplicate() const;
+
+    private:
+/**
+ * Create a new vector of give size by reusing data pointer.
+ *
+ * @param len Length of vector.
+ * @param dp Data pointer.
+ */
+      Vector(unsigned len, T *dp);
   };
 }
 

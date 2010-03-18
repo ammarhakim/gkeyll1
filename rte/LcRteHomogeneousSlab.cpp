@@ -9,6 +9,8 @@
  */
 
 // lucee includes
+#include <LcArrayIo.h>
+#include <LcHdf5Io.h>
 #include <LcLinAlgebra.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
@@ -162,54 +164,50 @@ namespace Lucee
   }
 
   void
-  RteHomogeneousSlab::writeToFile(const std::string& baseName, unsigned d) const
+  RteHomogeneousSlab::writeToFile(const std::string& baseName, unsigned d)
   {
     if (d == 0)
-    {
-// write ordinates and weights
-      std::ostringstream fnmu, fnw;
-      fnmu << baseName << "_mu" << ".txt";
-      fnw << baseName << "_w_" << ".txt";
-// open file for I/O
-      std::ofstream outFilemu(fnmu.str().c_str());
-      std::ofstream outFilew(fnw.str().c_str());
-      for (int i=0; i<N; ++i)
-      {
-        outFilemu << mu[i] << " ";
-        outFilew << w[i] << " ";
-      }
-      outFilemu << std::endl;
-      outFilew << std::endl;
-// nothing else to write at simulation start
+// don't write anything at start
       return;
-    }
-    Lucee::ConstFieldPtr<double> radp = radiancep->createConstPtr();
-    Lucee::ConstFieldPtr<double> radm = radiancem->createConstPtr();
+// create HDF5 for storing data
+    Lucee::Hdf5Io io(0, 0);
+    std::string fn = baseName + ".h5";
+    Lucee::IoNodeType fNode = io.createFile(fn);
+
+    Lucee::IoNodeType vn;
+// write ordinates and weights
+    vn = Lucee::writeToFile(io, fNode, "mu", mu);
+    io.writeStrAttribute(vn, "description", "ordinates in [0,1]");
+    vn = Lucee::writeToFile(io, fNode, "w", w);
+    io.writeStrAttribute(vn, "description", "weights in [0,1]");
+
+    Lucee::FieldPtr<double> radp = radiancep->createPtr();
+    Lucee::FieldPtr<double> radm = radiancem->createPtr();
 // write all radiances
     for (unsigned k=0; k<tauOut.size(); ++k)
     {
       std::ostringstream fnp, fnm;
-      fnp << baseName << "_rad_d_" << k << ".txt";
-      fnm << baseName << "_rad_u_" << k << ".txt";
-// open file for I/O
-      std::ofstream outFilep(fnp.str().c_str());
-      std::ofstream outFilem(fnm.str().c_str());
-      outFilep << "# Radiance [W/m^2/sr] in downward direction at optical depth " 
-               << tauOut[k] << std::endl;
-      outFilem << "# Radiance [W/m^2/sr] in upward direction at optical depth " 
-               << tauOut[k] << std::endl;
-// write data to file
+      fnp << "downward_radiance_" << k;
+      fnm << "upward_radiance_" << k;
+// open groups for writing radiance at this depth
+      Lucee::IoNodeType rdn = io.createGroup(fNode, fnp.str());
+      Lucee::IoNodeType run = io.createGroup(fNode, fnm.str());
+      io.writeAttribute(rdn, "opticalDepth", tauOut[k]);
+      io.writeAttribute(run, "opticalDepth", tauOut[k]);
+// write each mode into the group
+      Lucee::Vector<double> vec(0);
       for (int m=0; m<numModes; ++m)
       {
+        std::ostringstream modeStr;
+        modeStr << "mode_" << m;
+// downward radiance
         radiancep->setPtr(radp, m, k);
-        for (int i=0; i<N; ++i)
-          outFilep << radp[i] << " ";
-        outFilep << std::endl;
-
+        vec = radp.asVector();
+        Lucee::writeToFile(io, rdn, modeStr.str(), vec);
+// upward radiance
         radiancem->setPtr(radm, m, k);
-        for (int i=0; i<N; ++i)
-          outFilem << radm[i] << " ";
-        outFilem << std::endl;
+        vec = radm.asVector();
+        Lucee::writeToFile(io, run, modeStr.str(), vec);
       }
     }
   }

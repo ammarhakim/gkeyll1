@@ -17,14 +17,14 @@ namespace Lucee
   template <typename T>
   Vector<T>::Vector(unsigned len)
     : Lucee::Array<1, T>(
-        &Lucee::FixedVector<1,unsigned>(len)[0])
+      &Lucee::FixedVector<1, unsigned>(len)[0])
   {
   }
 
   template <typename T>
   Vector<T>::Vector(unsigned len, int start)
     : Lucee::Array<1, T>(
-        &Lucee::FixedVector<1,unsigned>(len)[0], &Lucee::FixedVector<1,int>(start)[0])
+      &Lucee::FixedVector<1, unsigned>(len)[0], &Lucee::FixedVector<1,int>(start)[0])
   {
   }
 
@@ -80,6 +80,14 @@ namespace Lucee
     for (int i=this->getLower(0); i<this->getUpper(0); ++i)
       dup[i] = this->operator[](i);
     return dup;
+  }
+
+  template <typename T>
+  Vector<T>::Vector(unsigned len, T *dp)
+    : Lucee::Array<1, T>(
+      Lucee::Region<1, int>(&Lucee::FixedVector<1, int>(len)[0]),
+      dp)
+  {
   }
 
 // instantiations
