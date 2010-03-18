@@ -23,4 +23,12 @@ ENDIF (APPLE)
 
 # Create lucee executable
 add_executable(lucee lucee.cxx LcRegisterModules.cpp)
-target_link_libraries(lucee lcrte lcslvrs lclib lcloki lclua ${GSL_CONFIG_LIBS} ${EXTRA_LIBS})
+target_link_libraries(lucee 
+  lcrte
+  lcslvrs
+  lclib
+  lcloki
+  lclua
+  ${HDF5_LIBRARIES}
+  ${GSL_CONFIG_LIBS}
+  ${EXTRA_LIBS})

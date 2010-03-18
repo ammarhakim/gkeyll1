@@ -37,6 +37,14 @@ if (GSL_FOUND)
    include_directories(${GSL_INCLUDE_DIR})
 endif (GSL_FOUND)
 
+# Check for HDF5
+find_package(HDF5)
+if (HDF5_FOUND)
+   add_definitions(-DHAVE_HDF5)
+   add_definitions(-DNEW_H5S_SELECT_HYPERSLAB_IFC)
+   include_directories(${HDF5_INCLUDE_DIR})
+endif (HDF5_FOUND)
+
 # Create configure file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
@@ -108,3 +116,6 @@ add_test(lcluamodule unit/lcluamodule)
 
 # lclogger
 add_test(lclogger unit/lclogger)
+
+# lchdf5io
+add_test(lchdf5io unit/lchdf5io)
