@@ -203,11 +203,13 @@ namespace Lucee
 // downward radiance
         radiancep->setPtr(radp, m, k);
         vec = radp.asVector();
-        Lucee::writeToFile(io, rdn, modeStr.str(), vec);
+        vn = Lucee::writeToFile(io, rdn, modeStr.str(), vec);
+        io.writeStrAttribute(vn, "units", "W/m^2/sr");
 // upward radiance
         radiancem->setPtr(radm, m, k);
         vec = radm.asVector();
-        Lucee::writeToFile(io, run, modeStr.str(), vec);
+        vn = Lucee::writeToFile(io, run, modeStr.str(), vec);
+        io.writeStrAttribute(vn, "units", "W/m^2/sr");
       }
     }
   }
