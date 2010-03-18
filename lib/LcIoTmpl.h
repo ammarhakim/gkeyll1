@@ -23,13 +23,6 @@ namespace Lucee
 /**
  * IoTmpl is the base class for access to a hierarchical file
  * system with groups, data sets, and attributes for those datasets.
- * The exemplar is HDF5, but one may eventually other systems, like
- * netCDF, PDB, or ?
- *
- * This is the base class.  It will provide for output of the
- * basic data structures of the STL library and boost objects.
- * Derived classes will allow for output of Facets objects, such
- * as Facets arrays, whether distributed or not.
  */
   template <class DATATYPE>
   class IoTmpl 
