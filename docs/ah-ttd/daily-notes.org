@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 17
+
+  - Debugged RteHomogeneousSlab. It now works.
+  - Added HDF5 I/O classes to Lucee. Do not work for reading Vec
+    attributes.
+
 * March 15, 16
 
   - Now RteHomogeneousSlab solver basic algorithm is complete. Data

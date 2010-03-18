@@ -93,11 +93,22 @@
 
 * Lucee Notes
 
-** TODO Finish implementing RT in homogenous slab.
+** TODO Fix HDF5 I/O problems
 
-    Complete the ADO algorithm so the delta-backward paper can be
-    finished. Throughly test it with Siewert publish solutions. Then
-    add refracting top and a Lambertian bottom.
+   For some reason reading of vector-attributes is not working.
+
+** TODO Finish implementing RT in homogenous slab 1:
+
+    Complete the ADO algorithm for homogeneous slab so the
+    delta-backward paper can be finished.
+
+    Test using Siewert published results.
+
+** TODO Finish implementing RT in homogenous slab 2:
+
+   Then add refracting top and a Lambertian bottom.
+
+** TODO Add layered slab solver.
 
     For layered slabs (inhomgenous medium) develop an iterative scheme
     in which one sweeps from the top to the bottom layer and then
@@ -265,7 +276,7 @@
    examples. Links to doxygen generated documents should be provided
    from the Sphinx documentation.
 
-** TODO 16th November 2009: On HDF5 I/O classes.
+** DONE 16th November 2009: On HDF5 I/O classes.
 
    As the binary I/O system for Lucee is HDF5, a cleaner solution to
    wrapping the HDF5 C-API needs to be developed. A possible solution
@@ -277,6 +288,8 @@
      Hdf5GroupNode gn = io.openGroup("myGrp");
      // create a child of "myGrp" node
      Hdf5GroupNode childGn = io.createGroup(gn, "myChild");
+
+**** NOTE: Did it the old WarpX way. Not worth the effort to do it all over again
 
 ** 14th November 2009: On storing simulations
 
