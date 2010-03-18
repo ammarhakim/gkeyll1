@@ -38,6 +38,13 @@ namespace Lucee
     return *this;
   }
 
+  template <typename T>
+  Lucee::Vector<T>
+  FieldPtr<T>::asVector()
+  {
+    return Lucee::Vector<T>(numComponents, &this->operator[](0));
+  }
+
 // instantiations
   template class Lucee::FieldPtr<int>;
   template class Lucee::FieldPtr<float>;

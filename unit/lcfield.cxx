@@ -340,6 +340,36 @@ test_9()
       }
 }
 
+void
+test_10()
+{
+  int lower[3] = {2, 5, 6};
+  int upper[3] = {12, 32, 12};
+  Lucee::Region<3, int> rgn(lower, upper);
+  Lucee::Field<3, double> elcFld(rgn, 3);
+
+  Lucee::FieldPtr<double> ptr = elcFld.createPtr();
+  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
+      {
+        elcFld.setPtr(ptr, i, j, k);
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          ptr[n] = (i+3*j+5.5*k+0.5)*n;
+      }
+
+  Lucee::Vector<double> vec(1);
+  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
+    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
+      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
+      {
+        elcFld.setPtr(ptr, i, j, k);
+        vec = ptr.asVector();
+        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+          LC_ASSERT("Testing Vector from asVector", vec[n] == (i+3*j+5.5*k+0.5)*n);
+      }
+}
+
 int
 main(void)
 {
@@ -353,5 +383,6 @@ main(void)
   test_7();
   test_8();
   test_9();
+  test_10();
   LC_END_TESTS;
 }
