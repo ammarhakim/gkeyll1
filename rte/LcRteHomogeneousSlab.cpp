@@ -206,7 +206,7 @@ namespace Lucee
         vn = Lucee::writeToFile(io, rdn, modeStr.str(), vec);
         io.writeStrAttribute(vn, "units", "W/m^2/sr");
 // upward radiance
-        radiancem->setPtr(radm, m, k);
+        radiancem->setPtr(radm, k, m);
         vec = radm.asVector();
         vn = Lucee::writeToFile(io, run, modeStr.str(), vec);
         io.writeStrAttribute(vn, "units", "W/m^2/sr");
