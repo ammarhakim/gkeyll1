@@ -124,9 +124,9 @@ namespace Lucee
       Lucee::Vector<double> betal;
 /** Optical depths at which output is written */
       std::vector<double> tauOut;
-/** Array to store downward radiance (numModes*ntau) with N components per location */
+/** Array to store downward radiance (ntau X numModes) with N components */
       Lucee::Field<2, double> *radiancep;
-/** Array to store upward radiance data (numModes*ntau) with N components per location */
+/** Array to store upward radiance data (ntau X numModes) with N components */
       Lucee::Field<2, double> *radiancem;
 
 /**

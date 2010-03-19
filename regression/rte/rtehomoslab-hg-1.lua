@@ -15,11 +15,11 @@ simulation = Solver.RteHomogeneousSlab {
    -- albedo of single scattering
    albedo = 0.9,
    -- number of azimuthal modes
-   numModes = 1,
+   numModes = 10,
    -- phase function
    phaseFunction = RtePhaseFunction.HG { g = 0.8 },
    -- irradiance moments to compute
    irradOut = {0, 1},
    -- optical depths at which outputs are to be computed
-   tauOut = {0.0, 1.0},
+   tauOut = {0.0, 0.25, 0.5, 1.0},
 }
