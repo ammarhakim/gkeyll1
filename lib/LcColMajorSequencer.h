@@ -21,6 +21,9 @@
 
 namespace Lucee
 {
+/**
+ * Class to sequence over region in column-major order.
+ */
   template <unsigned NDIM>
   class ColMajorSequencer
   {

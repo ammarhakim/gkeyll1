@@ -36,6 +36,7 @@ namespace Lucee
   class LuaModule
   {
     public:
+/** List of registered functions */
       std::vector<luaL_Reg> regFuncs;
   };
 }

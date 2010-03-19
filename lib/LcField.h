@@ -81,25 +81,6 @@ namespace Lucee
       Lucee::RowMajorIndexer<NDIM+1> getIndexer() const { return rgnIdx; }
 
 /**
- * Get a lower-dimensional field object. The returned object shares
- * data with this object. The return field has access to all
- * components stored in this field.
- *
- * @param defDims Dimensions to remove.
- * @param defDimsIdx Index of removed dimensions.
- * @return Lower dimensional field object.
- */
-//       template <unsigned RDIM, T>
-//       Field<RDIM, T>
-//       getLowDimField(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM])
-//       {
-//         Lucee::Array<NDIM-RDIM+1, T, RowMajorIndexer> arr
-//           = this->template deflate(defDims, defDimsIdx);
-
-//         Field<NDIM-RDIM, T> fld(newRgn, nc, arr);
-//       }
-
-/**
  * Get a view into the field. The returned object has the
  * same-dimensionality and shares data with this object. The view has
  * access to all components stored in this field.
@@ -221,8 +202,10 @@ namespace Lucee
       Lucee::Region<NDIM, int> rgn;
 /** Indexer over region over which field is valid */
       Lucee::RowMajorIndexer<NDIM+1> rgnIdx;
-/** Lower and upper ghost indices */
-      unsigned lowerGhost[NDIM], upperGhost[NDIM];
+/** Lower ghost indices */
+      unsigned lowerGhost[NDIM];
+/** Upper ghost indices */
+      unsigned upperGhost[NDIM];
   };
 
   template <unsigned NDIM, typename T>

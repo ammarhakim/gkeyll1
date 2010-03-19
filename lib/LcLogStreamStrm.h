@@ -21,6 +21,9 @@ namespace Lucee
 // forward declare LogStream classes
   class LoggerStream;
 
+/**
+ * Helper class for log stream.
+ */
   class LogStreamStrm 
   {
     public:

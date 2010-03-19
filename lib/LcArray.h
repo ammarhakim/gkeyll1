@@ -29,16 +29,28 @@ namespace Lucee
   {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 // set of macros for setting/getting array traits
+
+/** Contiguous mask */
 #define LC_CONTIGUOUS arrayMasks[0]
+/** Set contiguous mask */
 #define LC_SET_CONTIGUOUS(bit) (bit) |= LC_CONTIGUOUS
+/** Clear contiguous mask */
 #define LC_CLEAR_CONTIGUOUS(bit) (bit) &= ~LC_CONTIGUOUS
+/** Check if contiguous mask is set */
 #define LC_IS_CONTIGUOUS(bit) (bit) & LC_CONTIGUOUS
 
+/** Allocation mask */
 #define LC_ALLOC arrayMasks[1]
+/** Set allocation mask */
 #define LC_SET_ALLOC(bit) (bit) |= LC_ALLOC
+/** Clear allocation mask */
 #define LC_CLEAR_ALLOC(bit) (bit) &= ~LC_ALLOC
+/** Check if allocation mask is set */
 #define LC_IS_ALLOC(bit) (bit) & LC_ALLOC
 
+/**
+ * Basic multi-dimensional array class.
+ */
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::ColMajorIndexer>
   class Array
   {

@@ -1,5 +1,5 @@
 /**
- * @file	LcHdf5Io.cc
+ * @file	LcHdf5Io.cpp
  *
  * @brief	Class for I/O using HDF5.
  *

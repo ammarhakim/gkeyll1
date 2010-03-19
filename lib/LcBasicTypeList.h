@@ -26,6 +26,7 @@
 
 namespace Lucee
 {
+/** Basic supported types */
   typedef LOKI_TYPELIST_6(
     int,
     double,

@@ -74,7 +74,7 @@ namespace Lucee
 /**
  * Get a Lucee::Vector class from this field pointer.
  *
- * @param vector class for pointer.
+ * @return vector class for pointer.
  */
       Lucee::Vector<T> asVector();
 

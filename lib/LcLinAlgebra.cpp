@@ -1,5 +1,5 @@
 /**
- * @file	LcLinAlgebra.cc
+ * @file	LcLinAlgebra.cpp
  *
  * @brief	Linear algebra functions. Mainly wrappers around LAPACK.
  *

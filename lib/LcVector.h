@@ -24,6 +24,9 @@ namespace Lucee
 // forward declaration for making vector class friend
   template <typename T> class FieldPtr;
 
+/**
+ * One-dimensional vector of data.
+ */
   template <typename T>
   class Vector : public Lucee::Array<1, T>
   {

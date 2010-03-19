@@ -1,5 +1,5 @@
 /**
- * @file	LcVector.cc
+ * @file	LcVector.cpp
  *
  * @brief	Vector class.
  *
