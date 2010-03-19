@@ -83,7 +83,7 @@ namespace Lucee
     mu = Lucee::Vector<double>(N);
 // allocate data for storing radiance
     int lo[2] = {0, 0}, up[2];
-    up[0] = numModes; up[1] = tauOut.size();
+    up[0] = tauOut.size();  up[1] = numModes;
     Lucee::Region<2, int> rgn(lo, up);
     radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
     radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
@@ -135,8 +135,8 @@ namespace Lucee
       Lucee::FieldPtr<double> radm = radiancem->createPtr();
       for (unsigned k=0; k<tauOut.size(); ++k)
       {
-        radiancep->setPtr(radp, m, k);
-        radiancem->setPtr(radm, m, k);
+        radiancep->setPtr(radp, k, m);
+        radiancem->setPtr(radm, k, m);
 // compute particular solution at this depth
         double tau = tauOut[k];
         particular_solution(tau, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
@@ -201,7 +201,7 @@ namespace Lucee
         std::ostringstream modeStr;
         modeStr << "mode_" << m;
 // downward radiance
-        radiancep->setPtr(radp, m, k);
+        radiancep->setPtr(radp, k, m);
         vec = radp.asVector();
         vn = Lucee::writeToFile(io, rdn, modeStr.str(), vec);
         io.writeStrAttribute(vn, "units", "W/m^2/sr");

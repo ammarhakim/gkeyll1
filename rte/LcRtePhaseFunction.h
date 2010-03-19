@@ -44,11 +44,11 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl) = 0;
 
 /**
- * Return the first L expansion coefficients of the phase
+ * Return the first L+1 expansion coefficients of the phase
  * function. The first coefficient should be 1.0.
  *
  * @param L number of coefficients required.
- * @return Vector of coefficients.
+ * @return Vector of coefficients. Should be of size L+1.
  */
       virtual Lucee::Vector<double> getExpCoeffs(unsigned L) = 0;
   };
