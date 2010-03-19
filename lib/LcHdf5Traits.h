@@ -27,6 +27,7 @@ namespace Lucee
  */
   template <typename T> struct Hdf5Traits;
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<char> 
   {
 /**
@@ -40,6 +41,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<unsigned char> 
   {
 /**
@@ -53,6 +55,7 @@ namespace Lucee
       }
   };
   
+/** HDF5 traits class */
   template <> struct Hdf5Traits<short> 
   {
 /**
@@ -66,6 +69,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<unsigned short> 
   {
 /**
@@ -79,6 +83,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<int> 
   {
 /**
@@ -92,6 +97,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<unsigned int> 
   {
 /**
@@ -105,6 +111,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<long> 
   {
 /**
@@ -118,6 +125,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<unsigned long> 
   {
 /**
@@ -131,6 +139,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<float> 
   {
 /**
@@ -144,6 +153,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<double> 
   {
 /**
@@ -157,6 +167,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<long double>  
   {
 /**
@@ -170,6 +181,7 @@ namespace Lucee
       }
   };
 
+/** HDF5 traits class */
   template <> struct Hdf5Traits<long long> 
   {
 /**

@@ -16,6 +16,11 @@
 
 namespace Lucee
 {
+/**
+ * Register all modules in Lucee.
+ *
+ * @param L Lua state object in which modules should be registered.
+ */
   void registerModules(Lucee::LuaState& L)
   {
 // register objects

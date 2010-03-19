@@ -23,6 +23,9 @@ namespace Lucee
 // forward declare logger class
   class Lucee::Logger;
 
+/**
+ * Class that represents a output stream for logging.
+ */
   class LogStream 
   {
     public:

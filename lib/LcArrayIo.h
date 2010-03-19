@@ -46,9 +46,14 @@ namespace Lucee
     dataSetSize[0] = vec.getLength();
     dataSetBeg[0] = 0;
     dataSetLen[0] = vec.getLength();
+// make sure vector is contiguous
+    Lucee::Vector<T> vecDup(vec);
+    if (vec.isContiguous() == false)
+      vecDup = vec.duplicate(); // not, so allocate fresh vector
+
 // write it out
     return 
-      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &vec[0]);
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &vecDup[0]);
   }
 }
 

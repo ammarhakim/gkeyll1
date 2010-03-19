@@ -35,6 +35,9 @@ namespace Lucee
     DISABLED = 1000
   };
 
+/**
+ * Logger to log messages to various output streams.
+ */
   class Logger : public Lucee::LoggerBase<Logger>
   {
     public:

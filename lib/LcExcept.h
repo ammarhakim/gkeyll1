@@ -85,7 +85,7 @@ namespace Lucee
 /**
  * Inserts iomanip element into the output message.
  *
- * @param ex Iomanip element to insert.
+ * @param p Iomanip element to insert.
  * @return reference to this class.
  */
       Except& operator<<(std::ostream& (*p)(std::ostream&))

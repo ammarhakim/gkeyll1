@@ -21,6 +21,9 @@
 
 namespace Lucee
 {
+/**
+ * Class to sequence over region in row-major order.
+ */
   template <unsigned NDIM>
   class RowMajorSequencer
   {

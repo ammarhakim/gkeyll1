@@ -43,6 +43,11 @@ namespace Lucee
           ::Instance().CreateObject(nm);
       }
 
+/**
+ * Register modules added to this creator.
+ *
+ * @param L Lua state in which modules should be registered.
+ */
       static void registerModule(lua_State *L)
       {
         luaL_Reg reg = {NULL, NULL};

@@ -157,8 +157,10 @@ namespace Lucee
  */
       Region();
 
-/** Lower and upper coordinates of region */
-      Lucee::FixedVector<NDIM, T> lower, upper;
+/** Lower coordinates of region */
+      Lucee::FixedVector<NDIM, T> lower;
+/** Upper coordinates of region */
+      Lucee::FixedVector<NDIM, T> upper;
 /** Volume of region */
       T volume;
   };
@@ -273,6 +275,13 @@ namespace Lucee
   {
   }
 
+/**
+ * Create a new region from start and shape arrays.
+ *
+ * @param start Start indices of region.
+ * @param shape Shape of region.
+ * @return region with given start and shape.
+ */
   template <unsigned NDIM, typename T>
   Region<NDIM, T>
   createRegionFromStartAndShape(const T start[NDIM], const T shape[NDIM])

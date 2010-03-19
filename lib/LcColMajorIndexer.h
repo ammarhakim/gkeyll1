@@ -134,6 +134,14 @@ namespace Lucee
         return *this;
       }
 
+/**
+ * Deflate the index into a lower-dimensional indexer. The returned
+ * array shares the data with this indexer.
+ *
+ * @param defDims Dimensions to remove from indexer.
+ * @param defDimsIdx Index along the removed dimensions.
+ * @return deflated indexer.
+ */
       template <unsigned RDIM>
       ColMajorIndexer<RDIM>
       deflate(const unsigned defDims[NDIM-RDIM], const int defDimsIdx[NDIM-RDIM]) const

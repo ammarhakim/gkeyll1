@@ -1,5 +1,5 @@
 /**
- * @file	LcMatrix.cc
+ * @file	LcMatrix.cpp
  *
  * @brief	Matrix class.
  *
@@ -23,9 +23,13 @@ namespace Lucee
   {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 // set of macros for setting/getting matrix traits
+/** Transpose mask */
 #define LC_TRANSPOSE matrixMasks[0]
+/** Set transpose mask */
 #define LC_SET_TRANSPOSE(bit) (bit) |= LC_TRANSPOSE
+/** Clear transpose mask */
 #define LC_CLEAR_TRANSPOSE(bit) (bit) &= ~LC_TRANSPOSE
+/** Check if transpose mask is set */
 #define LC_IS_TRANSPOSE(bit) (bit) & LC_TRANSPOSE
 
   template <typename T>

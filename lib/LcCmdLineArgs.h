@@ -23,6 +23,9 @@
 
 namespace Lucee
 {
+/**
+ * Class to parse simple command line arguments.
+ */
   class CmdLineArgs 
   {
     public:

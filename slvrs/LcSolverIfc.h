@@ -110,7 +110,7 @@ namespace Lucee
  * Get the current time for solver. This is the time at which the
  * present state of the solver is valid.
  *
- * @retrun Current time.
+ * @return Current time.
  */
       double getCurrTime() const;
 

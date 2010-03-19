@@ -42,7 +42,7 @@ namespace Lucee
 /**
  * Sets the type of this node
  *
- * @param the type of this node
+ * @param type the type of this node
  */
       void setNodeType(unsigned type);
 

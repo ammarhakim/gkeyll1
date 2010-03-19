@@ -22,6 +22,9 @@
 
 namespace Lucee
 {
+/**
+ * Vector of compiled time fixed-size data.
+ */
   template <unsigned NELEM, typename T>
   class FixedVector
   {
@@ -36,8 +39,8 @@ namespace Lucee
 /**
  * Construct new fixed-size vector with specified initial values.
  *
- * @param vals v1 Value of first element.
- * @param vals v2 Value of second element.
+ * @param v1 Value of first element.
+ * @param v2 Value of second element.
  */
       FixedVector(T v1, T v2, ...);
 

@@ -116,14 +116,18 @@ namespace Lucee
       double tau0;
 /** Albedo of single scattering */
       double albedo;
-/** Weights and ordinates for Gaussian quadrature */
-      Lucee::Vector<double> w, mu;
+/** Weights for Gaussian quadrature */
+      Lucee::Vector<double> w;
+/** Ordinates for Gaussian quadrature */
+      Lucee::Vector<double> mu;
 /** Phase function expasion coefficients */
       Lucee::Vector<double> betal;
 /** Optical depths at which output is written */
       std::vector<double> tauOut;
-/** Array to store output data (numModes*ntau) with N components per location */
-      Lucee::Field<2, double> *radiancep, *radiancem;
+/** Array to store downward radiance (numModes*ntau) with N components per location */
+      Lucee::Field<2, double> *radiancep;
+/** Array to store upward radiance data (numModes*ntau) with N components per location */
+      Lucee::Field<2, double> *radiancem;
 
 /**
  * Computes Qp and Qm needed to compute particular solutions.
@@ -137,6 +141,7 @@ namespace Lucee
 /**
  * Computes the eigensystem of the RTE.
  *
+ * @param m Azimuthal mode number.
  * @param phi_p on output, eigenvectors of the RTE corresponding to nu_j
  * @param phi_m on outout, eigenvectors of the RTE  corresponding to -nu_j
  * @param nu on ouput, eigevalues of the RTE

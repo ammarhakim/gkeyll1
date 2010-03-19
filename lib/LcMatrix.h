@@ -23,6 +23,9 @@
 
 namespace Lucee
 {
+/**
+ * Class to represent matrices.
+ */
   template <typename T>
   class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer >
   {
@@ -134,7 +137,7 @@ namespace Lucee
  * @param ur Upper row index into view.
  * @param lc Lower column index into view.
  * @param uc Upper column index index view.
- * @param view matrix.
+ * @return view matrix.
  */
       Lucee::Matrix<T> getView(int lr, int ur, int lc, int uc);
 
