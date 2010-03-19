@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* March 18
+
+  - Now writing out RteHomogeneousSlab data as HDF5 files.
+  - Started on benchmarking exercise with Garcia and Siewert paper.
+
 * March 17
 
   - Debugged RteHomogeneousSlab. It now works.

@@ -93,6 +93,12 @@
 
 * Lucee Notes
 
+** What is a good way to publish results?
+
+   Best thing to do is to: (a) make PDF from LaTeX with plots (b)
+   publish data in plain-text format for each plot. No need to do it
+   in spread-sheets or other fancy tools.
+
 ** TODO Fix HDF5 I/O problems
 
    For some reason reading of vector-attributes is not working.
@@ -247,7 +253,7 @@
 #+END_EXAMPLE
    The latter seems better.
 
-** TODO <2010-02-24 Wed> Fix doxygen errors.
+** DONE <2010-02-24 Wed> Fix doxygen errors.
 ** DONE Implement sequencers for arrays.
 ** DONE Need to add Loggers to Lucee
 
