@@ -98,8 +98,8 @@ namespace Lucee
     int lo[2] = {0, 0}, up[2];
     up[0] = tauOut.size();  up[1] = numModes;
     Lucee::Region<2, int> rgn(lo, up);
-    radiancep = new Lucee::Field<2, double>(rgn, N+Nd, 0.0);
-    radiancem = new Lucee::Field<2, double>(rgn, N+Nd, 0.0);
+    radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
+    radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
   }
 
   void 
