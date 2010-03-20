@@ -33,6 +33,7 @@ namespace Lucee
   RteHomogeneousSlab::RteHomogeneousSlab()
     : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1)
   {
+    isHalfSpace = false;
   }
 
   RteHomogeneousSlab::~RteHomogeneousSlab()
@@ -48,20 +49,32 @@ namespace Lucee
     L = tbl.getNumber("L");
     N = tbl.getNumber("N");
     mu0 = tbl.getNumber("mu0");
-    tau0 = tbl.getNumber("tau0");
     numModes = tbl.getNumber("numModes");
     albedo = tbl.getNumber("albedo");
     flux = tbl.getNumber("flux");
+// check if this is a half-space problem
+    isHalfSpace = false;
+    if (tbl.hasNumber("isHalfSpace"))
+    {
+      if (tbl.getNumber("isHalfSpace") == 1)
+        isHalfSpace = true;
+    }
+
+// depths at which output is to be written
     tauOut = tbl.getNumVec("tauOut");
+    if (isHalfSpace == false)
+    {
+      tau0 = tbl.getNumber("tau0");
 // ensure that data is not requested deeper tau0
-    for (unsigned k=0; k<tauOut.size(); ++k)
-      if (tauOut[k] > tau0)
-      {
-        Lucee::Except lce(
-          "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
-        lce << tau0 << ")" << std::endl;
-        throw lce;
-      }
+      for (unsigned k=0; k<tauOut.size(); ++k)
+        if (tauOut[k] > tau0)
+        {
+          Lucee::Except lce(
+            "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
+          lce << tau0 << ")" << std::endl;
+          throw lce;
+        }
+    }
 
 // read in phase function
     Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
@@ -85,8 +98,8 @@ namespace Lucee
     int lo[2] = {0, 0}, up[2];
     up[0] = tauOut.size();  up[1] = numModes;
     Lucee::Region<2, int> rgn(lo, up);
-    radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
-    radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
+    radiancep = new Lucee::Field<2, double>(rgn, N+Nd, 0.0);
+    radiancem = new Lucee::Field<2, double>(rgn, N+Nd, 0.0);
   }
 
   void 
@@ -125,10 +138,19 @@ namespace Lucee
       get_norms(phi_p, phi_m, Nj);
 // compute particular solution at top surface
       particular_solution(0, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
+      if (isHalfSpace)
+      {
+        B = 0.0; // must not allow for growing solutions
+// compute coefficients appearing in homogeneous solution
+        calc_A_coeffsInf(nu, phi_p, phi_m, Lp0, Lm0, A);
+      }
+      else
+      {
 // compute particular solution at bottom surface
-      particular_solution(tau0, nu, phi_p, phi_m, Nj, Qp, Qm, Lpt0, Lmt0);
-// compute coefficients appearing in homogenoeus solution
-      calc_AB_coeffs(nu, phi_p, phi_m, Lp0, Lm0, Lpt0, Lmt0, A, B);
+        particular_solution(tau0, nu, phi_p, phi_m, Nj, Qp, Qm, Lpt0, Lmt0);
+// compute coefficients appearing in homogeneous solution
+        calc_AB_coeffs(nu, phi_p, phi_m, Lp0, Lm0, Lpt0, Lmt0, A, B);
+      }
 
 // now compute radiance at requested depths
       Lucee::FieldPtr<double> radp = radiancep->createPtr();
@@ -150,7 +172,9 @@ namespace Lucee
         for (int j=0; j<N; ++j)
         {
           double t1 = A[j]*exp(-tau/nu[j]);
-          double t2 = B[j]*exp(-(tau0-tau)/nu[j]);
+          double t2 = 0;
+          if (isHalfSpace == false)
+            t2 = B[j]*exp(-(tau0-tau)/nu[j]);
           for (int i=0; i<N; ++i)
           {
             radp[i] += t1*phi_p(i,j) + t2*phi_m(i,j);
@@ -389,15 +413,18 @@ namespace Lucee
   {
     As = 0.0;
     Bs = 0.0;
-    double tau1 = tau0-tau;
     for (int j=0; j<N; ++j)
     {
       double sum1 = 0.0;
       double sum2 = 0.0;
 // factor in front of \script{A}
-      double t1 = mu0*nu[j]*flux*Cfunc(tau, nu[j], mu0)/Nj[j];
+      double t1 = mu0*nu[j]*Cfunc(tau, nu[j], mu0)/Nj[j];
 // factor in front of \script{B}
-      double t2 = mu0*nu[j]*flux*exp(-tau/mu0)*Sfunc(tau1, nu[j], mu0)/Nj[j];
+      double t2 = 0.0;
+      if (isHalfSpace)
+        t2 = mu0*nu[j]*exp(-tau/mu0)*SfuncInf(nu[j], mu0)/Nj[j];
+      else
+        t2 = mu0*nu[j]*exp(-tau/mu0)*Sfunc(tau0-tau, nu[j], mu0)/Nj[j];
 
       for (int i=0; i<N; ++i)
       {
@@ -430,7 +457,18 @@ namespace Lucee
     if(fabs(y) < 1e-14)
       return 1/x;
     
-    return (1-exp(-tau/x)*exp(-tau/y))/(x+y);    
+    return (1-exp(-tau/x)*exp(-tau/y))/(x+y);
+  }
+
+  double
+  RteHomogeneousSlab::SfuncInf(double x, double y)
+  {
+    if(fabs(x) < 1e-14)
+      return 1/y;
+    if(fabs(y) < 1e-14)
+      return 1/x;
+    
+    return 1/(x+y);
   }
 
   void
@@ -471,6 +509,37 @@ namespace Lucee
     {
       A[i] = RHS(i,0);
       B[i] = RHS(i+N,0);
+    }
+  }
+
+  void
+  RteHomogeneousSlab::calc_A_coeffsInf(const Lucee::Vector<double>& nu,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
+    Lucee::Vector<double>& A)
+  {
+    Lucee::Matrix<double> BLOCKS(N, N), RHS(N, 1);
+
+    for (int j=0; j<N; ++j)
+    {
+      for (int i=0; i<N; ++i)
+      {
+// compute blocks from top-surface boundary conditions
+        BLOCKS(i,j) = phi_p(i,j);
+      }
+    }
+    for (int i=0; i<N; ++i)
+    {
+// compute RHS contribution from top boundary contribution
+      RHS(i,0) = -Lp0[i];
+    }
+
+// invert system to get solution
+    Lucee::solve(BLOCKS, RHS);
+// copy solution to A and B
+    for (int i=0; i<N; ++i)
+    {
+      A[i] = RHS(i,0);
     }
   }
 }

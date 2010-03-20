@@ -28,7 +28,7 @@ namespace Lucee
     const double PI = 3.14159265358979323846;
 #endif
 
-    // code below assumes arrays start from 1
+// code below assumes arrays start from 1
     double *x = &xv[0] - 1;
     double *w = &wv[0] - 1;
 // adapted from Numerical Recipies in C book

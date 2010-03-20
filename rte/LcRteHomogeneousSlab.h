@@ -106,12 +106,16 @@ namespace Lucee
       int L;
 /** Number of quadrature points in each hemisphere */
       int N;
+/** Number of "dummy" quadrature points in each hemisphere */
+      int Nd;
 /** Number of azimuthal modes */
       int numModes;
 /** Cosine of incidence angle */
       double mu0;
 /** Downward irradiance is mu0*pi*F */
       double flux;
+/** Flag to indicate if this is a half-space problem */
+      bool isHalfSpace;
 /** Optical depth */
       double tau0;
 /** Albedo of single scattering */
@@ -225,6 +229,15 @@ namespace Lucee
       double Sfunc(double tau, double x, double y);
 
 /**
+ * S(x, y) appearing in the particular solution for a half-space
+ * problem.
+ *
+ * @param x parameter in function.
+ * @param y parameter in function.
+ */
+      double SfuncInf(double x, double y);
+
+/**
  * Compute the coefficients appearing in the homogeneous solution.
  *
  * @param nu Eigenvalues of RTE.
@@ -242,6 +255,22 @@ namespace Lucee
         const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
         const Lucee::Vector<double>& Lpt0, const Lucee::Vector<double>& Lmt0,
         Lucee::Vector<double>& A, Lucee::Vector<double>& B);
+
+/**
+ * Compute the coefficients appearing in the homogeneous solution for
+ * a half-space problem.
+ *
+ * @param nu Eigenvalues of RTE.
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Lp0 Particular solution in [0,1] on top surface.
+ * @param Lm0 Particular solution in [0,-1] on top surface.
+ * @param A on output, A coefficients in homogeneous solution.
+ */
+      void calc_A_coeffsInf(const Lucee::Vector<double>& nu,
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
+        Lucee::Vector<double>& A);
   };
 }
 
