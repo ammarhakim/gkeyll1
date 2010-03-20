@@ -109,7 +109,7 @@
   The diffuse field can be written as
   \begin{align}
     L_*(\tau,\mu,\phi) = \frac{1}{2} \sum_{m=0}^L
-    (2-\delta_{0,m})L^m(\tau,\mu) cos[m(\phi-\phi_0)]
+    (2-\delta_{0,m})L^m(\tau,\mu) \cos[m(\phi-\phi_0)]
   \end{align}
   where
   \begin{align}
@@ -123,7 +123,7 @@
   \end{align}
   and 
   \begin{align}
-    Q^m(\tau,\mu) = \frac{\varpi}{2}e^{-\tau/\mu_0}
+    Q^m(\tau,\mu) = \frac{\varpi F}{2}e^{-\tau/\mu_0}
     \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\mu)
   \end{align}
 \end{frame}
@@ -136,7 +136,7 @@
     L^m(0, \mu) &= 0 \\
     L^m(\tau_0, -\mu) &= 0
   \end{align}
-  The aim of the algorithm is to compute the azimulthal components of
+  The aim of the algorithm is to compute the azimuthal components of
   the radiance $L^m(\tau,\mu)$ and the \emph{irradiances} defined by
   \begin{align}
     E_\pm^l(\tau) \equiv \int_0^1 \int_0^{2\pi}
@@ -243,9 +243,9 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Notes: Homogeneous solution can now be determined upto
+\begin{frame}{Notes: Homogeneous solution can now be determined up to
     constant coefficients}
-  Once we have the eigensystem, we can compute the homogenous solution
+  Once we have the eigensystem, we can compute the homogeneous solution
   \begin{align}
     \mvec{L}^h_+(\tau) = \sum_{j=1}^N
     \left[
@@ -289,7 +289,7 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Functions appearung in particular solution can be
+\begin{frame}{Functions appearing in particular solution can be
     computed}
   The functions appearing in the particular solutions can be computed
   as
@@ -321,7 +321,7 @@
   For uniform illumination we can compute explicitly\footnote{See
     RteHomogeneousSlab::scriptAB()}
   \begin{align}
-    \script{A}_j(\tau) = \frac{\mu_0 \nu_j F}{N(\nu_j)}
+    \script{A}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
     C(\tau ; \nu_j, \mu_0)
     \left[
       \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_+ +
@@ -330,7 +330,7 @@
   \end{align}
   and
   \begin{align}
-    \script{B}_j(\tau) = \frac{\mu_0 \nu_j F}{N(\nu_j)}
+    \script{B}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
     e^{-\tau/\mu_0}S(\tau_0-\tau ; \nu_j, \mu_0)
     \left[
       \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_+ +
@@ -367,6 +367,25 @@
   coefficients $A_i$ and $B_i$\footnote{See {\tt
       RteHomogeneousSlab::calc\_AB\_coeffs()}}.
 
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{For half-space problems algorithm needs modification}
+  For half-space problems $L(\tau,\mu,\phi) \rightarrow 0$ as $\tau
+  \rightarrow \infty$. Hence, we must set $B_j = 0$. Further, the
+  functions $\script{B}_j(\tau)$ must now be computed with the
+  function $S^\infty(x,y) = 1/(x+y)$ instead. Note, there is no
+  dependence on $\tau$ in $S^\infty$.
+
+  Finally, the linear system to solve now reduces to a $N\times N$
+  system for the $N$ unknowns $A_j$
+  \begin{align}
+    \sum_{j=1}^N
+      A_j \gvec{\Phi}_+(\nu_j) = -\mvec{L}_+^p(0)
+  \end{align}
+  which can now be inverted to determine $A_j$\footnote{See
+    {\tt RteHomogeneousSlab::calc\_A\_coeffsInf()}}
 \end{frame}
 % ----------------------------------------------------------------
 
