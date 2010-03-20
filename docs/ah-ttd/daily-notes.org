@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 19th
+
+  - Added code to compute half-space solution. Not tested.
+  - Thought of using dummy node inclusion method as an interpolation
+    technique for the RTE.
+
 * March 18
 
   - Now writing out RteHomogeneousSlab data as HDF5 files.

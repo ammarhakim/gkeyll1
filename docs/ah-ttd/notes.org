@@ -96,8 +96,13 @@
 ** What is a good way to publish results?
 
    Best thing to do is to: (a) make PDF from LaTeX with plots (b)
-   publish data in plain-text format for each plot. No need to do it
-   in spread-sheets or other fancy tools.
+   publish data in plain-text format for each plot. 
+
+   Spread sheets are useful as they allow encapsulation of all data in
+   a single document, rather than spread out over multiple files. One
+   option would be to convert the HDF5 to CSV file and then import ito
+   into a spread-sheet. One can imagine putting data on-line and make
+   plots with Google Charts.
 
 ** TODO Fix HDF5 I/O problems
 
@@ -464,9 +469,9 @@
 ** DONE Complete RowMajor indexer and test it.
 ** DONE Implement the slice() operator.
 ** TODO Implement a 1D ES-PIC code.
-
+   
     Replicate Birdsal and Langdon book problems.
-
+    
 ** TODO Symmetric matrix.
 
     Implement a SymmetricMatrix class. This should use the same
@@ -638,80 +643,6 @@
     no idea about grids, arrays or solvers. It will simply construct
     the objects in the sequence specified in the ObjectConstructor
     class.
-
-* FACETS and TxFluids notes
-** TODO TxFluids: Implement an "alias" for data-structures
-
-   This should work as follows:
-
-     <DataStruct q>
-       kind = distArray1D
-       numComponents = 5
-     </DataStruct>
-
-     <DataStruct vel>
-       kind = distArrayAlias1D
-       aliasFor = q
-       components = [1, 2, 3]
-     </DataStruct>
-
-   This should create a 3 element array 'vel'. Modifying component 0
-   of 'vel' should modify component 1 of q.
-
-** TODO TxFluids: Implement a FDTD solver
-
-   Add a new FDTD updater to solve Maxwell equations. Make it work in
-   any dimension, later in general geometries. This is to gain
-   experience in writing dimension independent manner.
-
-** TODO TxFluids: Write a PointCloud class
-
-   This will be a starting point to get a particle infrastructure in
-   TxFluids.
-
-     TxfPointCloud& pc = this->getIn<TxfPointCloud>(0);
-     TxfPointCloudItr pcItr = pc.createItr();
-     pc.setItr(pcItr, N); // set iterator to Nth point
-
-     // get the coordinates
-     double x = pcItr.getX();
-     double y = pcItr.getY();
-     double x = pcItr.getZ();
-
-     // get the extra variables
-     for (unsigned i=0; i<pcItr.getNumComponents(); ++i)
-       std::cout << pcItr[i] << std::endl;
-
-     // create a new point and add it to cloud
-     TxfPointCloudItr& pcNew = pc.createNewPoint();
-     // set its coordinates
-     pcNew.setX(0.0);
-     pcNew.setY(0.0);
-     pcNew.setZ(0.0);
-
-     // set its weight
-     pcNew[0] = 1.0;
-     
-   From the input file one can create the point cloud:
-
-     <DataStruct rays>
-       kind = pointCloud
-       numComponents = 1 # store weight in addition to position
-     </DataStruct>
-     
-** FACETS: Disable decomposition of grid if a flag is specified
-
-   This is to avoid the decomp of a small grid in a large simulation.
-
-** TODO FACETS: Call dtors for FMCFM handles in the C++ wrapper classes
-
-   Will need to modify the FmTransportModel and children classes for
-   this.
-
-** TODO TxFluids: store last inserted data in dynVector
-
-   Presently the last inserted data is not available in the dynVector
-   once the vector is flushed out. This should be fixed.
 
 * Style guide
 
