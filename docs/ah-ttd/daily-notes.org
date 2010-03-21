@@ -1,10 +1,18 @@
 # -*- org -*-
 
+* March 20th
+
+  - Added duplicate() method to Array class.
+  - Added method to write an array to HDF5 file.
+  - Now writing out the radiance data as a numMode x N array rather
+    than a separate array per mode.
+
 * March 19th
 
   - Added code to compute half-space solution. Not tested.
   - Thought of using dummy node inclusion method as an interpolation
-    technique for the RTE.
+    technique for the RTE. Seems a better technique than the
+    source-function integration method of Siwert.
 
 * March 18
 
