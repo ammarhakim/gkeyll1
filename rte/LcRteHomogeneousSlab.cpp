@@ -236,9 +236,11 @@ namespace Lucee
 // write radiances
       vn = Lucee::writeToFile(io, fNode, fnp.str(), radmi_p);
       io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+      io.writeStrAttribute(vn, "units", "W/m^2/sr");
 
       vn = Lucee::writeToFile(io, fNode, fnm.str(), radmi_m);
       io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+      io.writeStrAttribute(vn, "units", "W/m^2/sr");
     }
   }
 
