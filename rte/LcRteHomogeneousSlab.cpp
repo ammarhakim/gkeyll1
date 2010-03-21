@@ -205,6 +205,13 @@ namespace Lucee
     vn = Lucee::writeToFile(io, fNode, "w", w);
     io.writeStrAttribute(vn, "description", "weights in [0,1]");
 
+// arrays to store radiance
+    int start[2] = {0, 0};
+    unsigned shape[2];
+    shape[0] = numModes; shape[1] = N;
+    Lucee::Array<2, double> radmi_p(shape, start);
+    Lucee::Array<2, double> radmi_m(shape, start);
+
     Lucee::FieldPtr<double> radp = radiancep->createPtr();
     Lucee::FieldPtr<double> radm = radiancem->createPtr();
 // write all radiances
@@ -213,28 +220,25 @@ namespace Lucee
       std::ostringstream fnp, fnm;
       fnp << "downward_radiance_" << k;
       fnm << "upward_radiance_" << k;
-// open groups for writing radiance at this depth
-      Lucee::IoNodeType rdn = io.createGroup(fNode, fnp.str());
-      Lucee::IoNodeType run = io.createGroup(fNode, fnm.str());
-      io.writeAttribute(rdn, "opticalDepth", tauOut[k]);
-      io.writeAttribute(run, "opticalDepth", tauOut[k]);
-// write each mode into the group
-      Lucee::Vector<double> vec(0);
+// copy radiance into arrays
       for (int m=0; m<numModes; ++m)
       {
-        std::ostringstream modeStr;
-        modeStr << "mode_" << m;
 // downward radiance
         radiancep->setPtr(radp, k, m);
-        vec = radp.asVector();
-        vn = Lucee::writeToFile(io, rdn, modeStr.str(), vec);
-        io.writeStrAttribute(vn, "units", "W/m^2/sr");
 // upward radiance
         radiancem->setPtr(radm, k, m);
-        vec = radm.asVector();
-        vn = Lucee::writeToFile(io, run, modeStr.str(), vec);
-        io.writeStrAttribute(vn, "units", "W/m^2/sr");
+        for (int i=0; i<N; ++i)
+        {
+          radmi_p(m,i) = radp[i];
+          radmi_m(m,i) = radm[i];
+        }
       }
+// write radiances
+      vn = Lucee::writeToFile(io, fNode, fnp.str(), radmi_p);
+      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+
+      vn = Lucee::writeToFile(io, fNode, fnm.str(), radmi_m);
+      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
     }
   }
 

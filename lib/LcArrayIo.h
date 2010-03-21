@@ -20,6 +20,7 @@
 #include <LcArray.h>
 #include <LcIoBase.h>
 #include <LcMatrix.h>
+#include <LcRowMajorSequencer.h>
 #include <LcVector.h>
 
 // std includes
@@ -69,23 +70,25 @@ namespace Lucee
   Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
     const std::string& nm, Lucee::Array<NDIM, T>& arr)
   {
-// construct sizes and shapes to write stuff out
     std::vector<size_t> dataSetSize(NDIM), dataSetBeg(NDIM), dataSetLen(NDIM);
-
+// construct sizes and shapes to write stuff out
     for (unsigned i=0; i<NDIM; ++i)
     {
       dataSetSize[i] = arr.getShape(i);
       dataSetBeg[i] = 0;
       dataSetLen[i] = arr.getShape(i);
     }
-// make sure vector is contiguous
-    Lucee::Array<NDIM, T> arrDup(arr);
-    if (arr.isContiguous() == false)
-      arrDup = arr.duplicate(); // not, so allocate fresh array
 
+    Lucee::Region<NDIM, int> rgn = arr.getRegion();
+    std::vector<T> buff(rgn.getVolume());
+    Lucee::RowMajorSequencer<NDIM> seq(rgn); // must be row-major for HDF5
+// copy data into buffer
+    unsigned count = 0;
+    while (seq.step())
+      buff[count++] = arr(seq.getIndex());
 // write it out
     return 
-      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &arrDup.first());
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
   }
 }
 
