@@ -3,7 +3,9 @@
 * March 20th
 
   - Added duplicate() method to Array class.
-  - Added method to write an array to HDF5 file.
+  - Added method to write an array to HDF5 file. One needs to be a bit
+    careful here as HDF5 expects data in row-major order while the
+    default array layout is column major order.
   - Now writing out the radiance data as a numMode x N array rather
     than a separate array per mode.
 
