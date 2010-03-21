@@ -170,6 +170,13 @@ namespace Lucee
       bool isContiguous() const { return LC_IS_CONTIGUOUS(traits); }
 
 /**
+ * Make a copy of the array.
+ *
+ * @return copy of the array.
+ */
+      Lucee::Array<NDIM, T> duplicate();
+
+/**
  * Return reference to the first element in array.
  *
  * @return Reference to first element in array.
@@ -554,6 +561,22 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::getUpper(unsigned dir) const
   {
     return start[dir]+shape[dir];
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Lucee::Array<NDIM, T>
+  Array<NDIM, T, INDEXER>::duplicate()
+  {
+    Lucee::Region<NDIM, int> rgn
+      = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+    Lucee::Array<NDIM, T, INDEXER> dup(rgn);
+// create sequencer to copy stuff over
+    typename INDEXER<NDIM>::Sequencer seq(rgn);
+// copy into new array
+    while (seq.step())
+      dup(seq.getIndex()) = this->operator()(seq.getIndex());
+
+    return dup;
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
