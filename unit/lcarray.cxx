@@ -508,6 +508,29 @@ test_12()
       LC_ASSERT("Testing deflated array", defArr(i,j) == arr(i,10,10,j));
 }
 
+void
+test_13()
+{
+  int lower[4] = {3, 6, 8, 10};
+  int upper[4] = {15, 20, 25, 30};
+  Lucee::Region<4, int> rgn(lower, upper);
+  Lucee::Array<4, double> arr(rgn, 12.5);
+// make duplicate
+  Lucee::Array<4, double> arrDup = arr.duplicate();
+  
+// test it
+  for (unsigned i=0; i<4; ++i)
+  {
+    LC_ASSERT("Testing duplicate array", arrDup.getLower(i) == arr.getLower(i));
+    LC_ASSERT("Testing duplicate array", arrDup.getUpper(i) == arr.getUpper(i));
+    LC_ASSERT("Testing duplicate array", arrDup.getShape(i) == arr.getShape(i));
+  }
+
+  Lucee::ColMajorSequencer<4> seq(rgn);
+  while (seq.step())
+    LC_ASSERT("Testing duplicate array", arrDup(seq.getIndex()) == arr(seq.getIndex()));
+}
+
 int
 main(void) 
 {
@@ -525,5 +548,6 @@ main(void)
   test_10();
   test_11();
   test_12();
+  test_13();
   LC_END_TESTS;
 }

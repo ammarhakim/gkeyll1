@@ -31,15 +31,17 @@ namespace Lucee
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
 
   RteHomogeneousSlab::RteHomogeneousSlab()
-    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1)
+    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1),
+      radiancep(&Lucee::FixedVector<3, unsigned>(1)[0],
+        &Lucee::FixedVector<3, int>(0)[0]),
+      radiancem(&Lucee::FixedVector<3, unsigned>(1)[0],
+        &Lucee::FixedVector<3, int>(0)[0])
   {
     isHalfSpace = false;
   }
 
   RteHomogeneousSlab::~RteHomogeneousSlab()
   {
-    delete radiancep;
-    delete radiancem;
   }
 
   void
@@ -95,11 +97,12 @@ namespace Lucee
     w = Lucee::Vector<double>(N);
     mu = Lucee::Vector<double>(N);
 // allocate data for storing radiance
-    int lo[2] = {0, 0}, up[2];
-    up[0] = tauOut.size();  up[1] = numModes;
-    Lucee::Region<2, int> rgn(lo, up);
-    radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
-    radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
+    unsigned shape[3];
+    shape[0] = tauOut.size(); shape[1] = numModes; shape[2] = N;
+    int start[3] = {0, 0, 0};
+
+    radiancep = Lucee::Array<3, double>(shape, start);
+    radiancem = Lucee::Array<3, double>(shape, start);
   }
 
   void 
@@ -153,20 +156,16 @@ namespace Lucee
       }
 
 // now compute radiance at requested depths
-      Lucee::FieldPtr<double> radp = radiancep->createPtr();
-      Lucee::FieldPtr<double> radm = radiancem->createPtr();
       for (unsigned k=0; k<tauOut.size(); ++k)
       {
-        radiancep->setPtr(radp, k, m);
-        radiancem->setPtr(radm, k, m);
 // compute particular solution at this depth
         double tau = tauOut[k];
         particular_solution(tau, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
 // copy into radiance
         for (int i=0; i<N; ++i)
         {
-          radp[i] = Lp0[i];
-          radm[i] = Lm0[i];
+          radiancep(k,m,i) = Lp0[i];
+          radiancem(k,m,i) = Lm0[i];
         }
 // now compute total radiance by adding in homogeneous solution
         for (int j=0; j<N; ++j)
@@ -177,8 +176,8 @@ namespace Lucee
             t2 = B[j]*exp(-(tau0-tau)/nu[j]);
           for (int i=0; i<N; ++i)
           {
-            radp[i] += t1*phi_p(i,j) + t2*phi_m(i,j);
-            radm[i] += t1*phi_m(i,j) + t2*phi_p(i,j);
+            radiancep(k,m,i) += t1*phi_p(i,j) + t2*phi_m(i,j);
+            radiancem(k,m,i) += t1*phi_m(i,j) + t2*phi_p(i,j);
           }
         }
       }
@@ -205,36 +204,28 @@ namespace Lucee
     vn = Lucee::writeToFile(io, fNode, "w", w);
     io.writeStrAttribute(vn, "description", "weights in [0,1]");
 
-    Lucee::FieldPtr<double> radp = radiancep->createPtr();
-    Lucee::FieldPtr<double> radm = radiancem->createPtr();
 // write all radiances
+    unsigned defDims[1] = {0};
+    int defDimsIdx[1];
+
     for (unsigned k=0; k<tauOut.size(); ++k)
     {
       std::ostringstream fnp, fnm;
       fnp << "downward_radiance_" << k;
       fnm << "upward_radiance_" << k;
-// open groups for writing radiance at this depth
-      Lucee::IoNodeType rdn = io.createGroup(fNode, fnp.str());
-      Lucee::IoNodeType run = io.createGroup(fNode, fnm.str());
-      io.writeAttribute(rdn, "opticalDepth", tauOut[k]);
-      io.writeAttribute(run, "opticalDepth", tauOut[k]);
-// write each mode into the group
-      Lucee::Vector<double> vec(0);
-      for (int m=0; m<numModes; ++m)
-      {
-        std::ostringstream modeStr;
-        modeStr << "mode_" << m;
-// downward radiance
-        radiancep->setPtr(radp, k, m);
-        vec = radp.asVector();
-        vn = Lucee::writeToFile(io, rdn, modeStr.str(), vec);
-        io.writeStrAttribute(vn, "units", "W/m^2/sr");
-// upward radiance
-        radiancem->setPtr(radm, k, m);
-        vec = radm.asVector();
-        vn = Lucee::writeToFile(io, run, modeStr.str(), vec);
-        io.writeStrAttribute(vn, "units", "W/m^2/sr");
-      }
+// get slice of downward radiance data to write
+      defDimsIdx[0] = k;
+      Lucee::Array<2, double> radp_k = 
+        radiancep.deflate<2>(defDims, defDimsIdx);
+      vn = Lucee::writeToFile(io, fNode, fnp.str(), radp_k);
+      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+
+// get slice of upward radiance data to write
+      defDimsIdx[0] = k;
+      Lucee::Array<2, double> radm_k = 
+        radiancem.deflate<2>(defDims, defDimsIdx);
+      vn = Lucee::writeToFile(io, fNode, fnm.str(), radm_k);
+      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
     }
   }
 

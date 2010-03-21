@@ -55,6 +55,38 @@ namespace Lucee
     return 
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &vecDup[0]);
   }
+
+/**
+ * Write a Lucee::Array to file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of data as it should appear in output.
+ * @param arr Array to write.
+ * @return node to which data was written.
+ */
+  template <unsigned NDIM, typename T>
+  Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+    const std::string& nm, Lucee::Array<NDIM, T>& arr)
+  {
+// construct sizes and shapes to write stuff out
+    std::vector<size_t> dataSetSize(NDIM), dataSetBeg(NDIM), dataSetLen(NDIM);
+
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      dataSetSize[i] = arr.getShape(i);
+      dataSetBeg[i] = 0;
+      dataSetLen[i] = arr.getShape(i);
+    }
+// make sure vector is contiguous
+    Lucee::Array<NDIM, T> arrDup(arr);
+    if (arr.isContiguous() == false)
+      arrDup = arr.duplicate(); // not, so allocate fresh array
+
+// write it out
+    return 
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &arrDup.first());
+  }
 }
 
 #endif // LC_ARRAY_IO_H
