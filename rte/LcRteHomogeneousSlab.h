@@ -128,10 +128,10 @@ namespace Lucee
       Lucee::Vector<double> betal;
 /** Optical depths at which output is written */
       std::vector<double> tauOut;
-/** Array to store downward radiance (ntau X numModes X  N) */
-      Lucee::Array<3, double> radiancep;
-/** Array to store upward radiance data (ntau X numModes X N) */
-      Lucee::Array<3, double> radiancem;
+/** Array to store downward radiance (ntau X numModes) with N components */
+      Lucee::Field<2, double> *radiancep;
+/** Array to store upward radiance data (ntau X numModes) with N components */
+      Lucee::Field<2, double> *radiancem;
 
 /**
  * Computes Qp and Qm needed to compute particular solutions.
