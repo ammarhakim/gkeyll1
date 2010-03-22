@@ -31,7 +31,11 @@ namespace Lucee
   const char *RteHomogeneousSlab::id = "RteHomogeneousSlab";
 
   RteHomogeneousSlab::RteHomogeneousSlab()
-    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1)
+    : SolverIfc(RteHomogeneousSlab::id), w(1), mu(1), betal(1),
+      irradp(&Lucee::FixedVector<2, unsigned>(1)[0],
+        &Lucee::FixedVector<2, int>(0)[0]),
+      irradm(&Lucee::FixedVector<2, unsigned>(1)[0],
+        &Lucee::FixedVector<2, int>(0)[0])
   {
     isHalfSpace = false;
   }
@@ -60,20 +64,49 @@ namespace Lucee
         isHalfSpace = true;
     }
 
-// depths at which output is to be written
-    tauOut = tbl.getNumVec("tauOut");
-    if (isHalfSpace == false)
+    if (tbl.hasNumVec("tauRadOut"))
     {
-      tau0 = tbl.getNumber("tau0");
+// depths at which radiance output is to be written
+      tauRadOut = tbl.getNumVec("tauRadOut");
+      if (isHalfSpace == false)
+      {
+        tau0 = tbl.getNumber("tau0");
 // ensure that data is not requested deeper tau0
-      for (unsigned k=0; k<tauOut.size(); ++k)
-        if (tauOut[k] > tau0)
-        {
-          Lucee::Except lce(
-            "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
-          lce << tau0 << ")" << std::endl;
-          throw lce;
-        }
+        for (unsigned k=0; k<tauRadOut.size(); ++k)
+          if (tauRadOut[k] > tau0)
+          {
+            Lucee::Except lce(
+              "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
+            lce << tau0 << ")" << std::endl;
+            throw lce;
+          }
+      }
+    }
+
+    if (tbl.hasNumVec("irradOut"))
+    {
+// get irradiance moments to compute
+      std::vector<double> iro = tbl.getNumVec("irradOut");
+      for (unsigned i=0; i<iro.size(); ++i)
+        irradOut.push_back(iro[i]);
+    }
+
+    if (tbl.hasNumVec("tauIrradOut"))
+    {
+// depths at which irradiance output is to be written
+      tauIrradOut = tbl.getNumVec("tauIrradOut");
+      if (isHalfSpace == false)
+      {
+// ensure that data is not requested deeper tau0
+        for (unsigned k=0; k<tauIrradOut.size(); ++k)
+          if (tauIrradOut[k] > tau0)
+          {
+            Lucee::Except lce(
+              "RteHomogeneousSlab::readInput: output can't be requested at depths greater than tau0 (");
+            lce << tau0 << ")" << std::endl;
+            throw lce;
+          }
+      }
     }
 
 // read in phase function
@@ -96,10 +129,20 @@ namespace Lucee
     mu = Lucee::Vector<double>(N);
 // allocate data for storing radiance
     int lo[2] = {0, 0}, up[2];
-    up[0] = tauOut.size();  up[1] = numModes;
+    up[0] = tauRadOut.size();  up[1] = numModes;
     Lucee::Region<2, int> rgn(lo, up);
     radiancep = new Lucee::Field<2, double>(rgn, N, 0.0);
     radiancem = new Lucee::Field<2, double>(rgn, N, 0.0);
+// allocate data for storing irradiance
+    if ((tauIrradOut.size() > 0) && (irradOut.size() > 0))
+    {
+      int start[2] = {0, 0};
+      unsigned shape[2];
+      shape[0] = tauIrradOut.size(); 
+      shape[1] = irradOut.size();
+      irradp = Lucee::Array<2, double>(shape, start);
+      irradm = Lucee::Array<2, double>(shape, start);
+    }
   }
 
   void 
@@ -152,15 +195,19 @@ namespace Lucee
         calc_AB_coeffs(nu, phi_p, phi_m, Lp0, Lm0, Lpt0, Lmt0, A, B);
       }
 
+// compute irradiances (only m=0)
+      if (m==0)
+        calc_irradiances(nu, phi_p, phi_m, Nj, Qp, Qm, A, B);
+
 // now compute radiance at requested depths
       Lucee::FieldPtr<double> radp = radiancep->createPtr();
       Lucee::FieldPtr<double> radm = radiancem->createPtr();
-      for (unsigned k=0; k<tauOut.size(); ++k)
+      for (unsigned k=0; k<tauRadOut.size(); ++k)
       {
         radiancep->setPtr(radp, k, m);
         radiancem->setPtr(radm, k, m);
 // compute particular solution at this depth
-        double tau = tauOut[k];
+        double tau = tauRadOut[k];
         particular_solution(tau, nu, phi_p, phi_m, Nj, Qp, Qm, Lp0, Lm0);
 // copy into radiance
         for (int i=0; i<N; ++i)
@@ -205,6 +252,8 @@ namespace Lucee
     vn = Lucee::writeToFile(io, fNode, "w", w);
     io.writeStrAttribute(vn, "description", "weights in [0,1]");
 
+// write irradiances to file
+
 // arrays to store radiance
     int start[2] = {0, 0};
     unsigned shape[2];
@@ -215,7 +264,7 @@ namespace Lucee
     Lucee::FieldPtr<double> radp = radiancep->createPtr();
     Lucee::FieldPtr<double> radm = radiancem->createPtr();
 // write all radiances
-    for (unsigned k=0; k<tauOut.size(); ++k)
+    for (unsigned k=0; k<tauRadOut.size(); ++k)
     {
       std::ostringstream fnp, fnm;
       fnp << "downward_radiance_" << k;
@@ -235,11 +284,11 @@ namespace Lucee
       }
 // write radiances
       vn = Lucee::writeToFile(io, fNode, fnp.str(), radmi_p);
-      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+      io.writeAttribute(vn, "opticalDepth", tauRadOut[k]);
       io.writeStrAttribute(vn, "units", "W/m^2/sr");
 
       vn = Lucee::writeToFile(io, fNode, fnm.str(), radmi_m);
-      io.writeAttribute(vn, "opticalDepth", tauOut[k]);
+      io.writeAttribute(vn, "opticalDepth", tauRadOut[k]);
       io.writeStrAttribute(vn, "units", "W/m^2/sr");
     }
   }
@@ -547,5 +596,14 @@ namespace Lucee
     {
       A[i] = RHS(i,0);
     }
+  }
+
+  void
+  RteHomogeneousSlab::calc_irradiances(const Lucee::Vector<double>& nu,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& Nj,
+    const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
+    const Lucee::Vector<double>& A, const Lucee::Vector<double>& B)
+  {
   }
 }

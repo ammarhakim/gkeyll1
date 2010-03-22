@@ -389,6 +389,23 @@
 \end{frame}
 % ----------------------------------------------------------------
 
+% ----------------------------------------------------------------
+\begin{frame}{Computing irradiances}
+  The irradiances, defined previously, can be written as
+  \begin{align}
+    E_+^l(\tau) &= \pi \int_0^1
+     P_l(\mu) L^0(\tau,\mu) d\mu
+    + \pi F e^{-\tau/\mu_0} P_l(\mu_0) \\
+    E_-^l(\tau) &= \pi \int_0^1
+    P_l(\mu) L^0(\tau,-\mu) d\mu
+  \end{align}
+  Note that to compute the irradiances only the $m=0$ solution is
+  needed. Using homogenous and particular solution expressions the
+  irradiances can be computed as\footnote{See {\tt
+      RteHomogeneousSlab::calc\_irradiances()}}.
+\end{frame}
+% ----------------------------------------------------------------
+
 \end{document}
 
 % ----------------------------------------------------------------

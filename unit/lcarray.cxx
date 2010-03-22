@@ -531,6 +531,17 @@ test_13()
     LC_ASSERT("Testing duplicate array", arrDup(seq.getIndex()) == arr(seq.getIndex()));
 }
 
+void
+test_14()
+{
+  int lower[1] = {3};
+  int upper[1] = {3};
+  Lucee::Region<1, int> rgn(lower, upper);
+  Lucee::Array<1, double> zeroVol(rgn);
+
+  LC_ASSERT("Testing zero-volume region", rgn.getVolume() == 0);
+}
+
 int
 main(void) 
 {
@@ -549,5 +560,6 @@ main(void)
   test_11();
   test_12();
   test_13();
+  test_14();
   LC_END_TESTS;
 }

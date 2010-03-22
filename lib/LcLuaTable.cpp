@@ -203,6 +203,11 @@ namespace Lucee
     lua_pushstring(L, key.c_str());
 // now put table of values on stack
     lua_gettable(L, -2);
+
+// check if this is a table in the first place
+    if (lua_type(L, -1) != LUA_TTABLE)
+      return false;
+
     int t = lua_gettop(L);
     lua_pushnil(L);
     while (lua_next(L, t) != 0) 
@@ -223,6 +228,10 @@ namespace Lucee
     lua_pushstring(L, key.c_str());
 // now put table of values on stack
     lua_gettable(L, -2);
+// check if this is a table in the first place
+    if (lua_type(L, -1) != LUA_TTABLE)
+      return false;
+
     int t = lua_gettop(L);
     lua_pushnil(L);
     while (lua_next(L, t) != 0) 

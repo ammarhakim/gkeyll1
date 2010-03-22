@@ -126,8 +126,16 @@ namespace Lucee
       Lucee::Vector<double> mu;
 /** Phase function expasion coefficients */
       Lucee::Vector<double> betal;
-/** Optical depths at which output is written */
-      std::vector<double> tauOut;
+/** Irrdiance moments to compute */
+      std::vector<int> irradOut;
+/** Optical depths at which radiance output is written */
+      std::vector<double> tauRadOut;
+/** Optical depths at which irradiance output is written */
+      std::vector<double> tauIrradOut;
+/** Arrays for storing downward irradiances */
+      Lucee::Array<2, double> irradp;
+/** Arrays for storing upward irradiances */
+      Lucee::Array<2, double> irradm;
 /** Array to store downward radiance (ntau X numModes) with N components */
       Lucee::Field<2, double> *radiancep;
 /** Array to store upward radiance data (ntau X numModes) with N components */
@@ -271,6 +279,25 @@ namespace Lucee
         const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
         const Lucee::Vector<double>& Lp0, const Lucee::Vector<double>& Lm0,
         Lucee::Vector<double>& A);
+
+/**
+ * Compute required irradiances at specified depths
+ *
+ * @param nu Eigenvalues of RTE.
+ * @param phi_p Eigenvectors correspoding to +ve eigenvalues.
+ * @param phi_m Eigenvectors correspoding to -ve eigenvalues.
+ * @param Nj Normalization coefficients.
+ * @param Qp beam source in positive hemisphere.
+ * @param Qm beam source in negative hemisphere.
+ * @param A expansion coefficients for homogeneous solution.
+ * @param B expansion coefficients for homogeneous solution.
+ */
+      void calc_irradiances(const Lucee::Vector<double>& nu,
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& Nj,
+        const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
+        const Lucee::Vector<double>& A, const Lucee::Vector<double>& B);
+        
   };
 }
 
