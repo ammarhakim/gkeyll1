@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 21st
+
+  - Fixed a bug in hasStrVec() and hasNumVec() methods of LuaTable
+    class. Not enough tests or else this would be caught earlier.
+  - Added basic code to compute irradiances. Not complete yet.
+
 * March 20th
 
   - Added duplicate() method to Array class.

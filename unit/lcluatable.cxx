@@ -103,6 +103,33 @@ test_2(Lucee::LuaState& L)
   LC_ASSERT("Testing if vals is correct", vals[2] == 0.5);
 }
 
+void
+test_3(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "background = {"
+    "__kind = \"color\","
+    "__type = \"Lucee\","
+    "r = 0.3, b = 0.1, g = 0.0,"
+    "name = \"blue_green\","
+    "cells = {100, 50},"
+    "address = {\"hello\", \"world\"},"
+    "subcolors = {a=1.0, b=2.0, c=3.0},"
+    "}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "background");
+
+// construct LuaTable object
+  Lucee::LuaTable back(L, "background");
+
+  LC_ASSERT("Testing Lua table", back.hasNumVec("cells-nothere") == false);
+  LC_ASSERT("Testing Lua table", back.hasStrVec("cells-nothere") == false);
+}
 
 int
 main(void)
@@ -111,6 +138,7 @@ main(void)
   Lucee::LuaState L;
   test_1(L);
   test_2(L);
+  test_3(L);
 
   LC_END_TESTS;
 }
