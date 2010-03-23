@@ -293,7 +293,7 @@ namespace Lucee
  * @param B expansion coefficients for homogeneous solution.
  */
       void calc_irradiances(const Lucee::Vector<double>& nu,
-        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        Lucee::Matrix<double>& phi_p, Lucee::Matrix<double>& phi_m,
         const Lucee::Vector<double>& Nj,
         const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
         const Lucee::Vector<double>& A, const Lucee::Vector<double>& B);

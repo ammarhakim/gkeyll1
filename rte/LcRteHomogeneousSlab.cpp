@@ -20,6 +20,9 @@
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
 
+// gsl includes
+#include <gsl/gsl_math.h>
+
 // std includes
 #include <iostream>
 #include <sstream>
@@ -600,10 +603,57 @@ namespace Lucee
 
   void
   RteHomogeneousSlab::calc_irradiances(const Lucee::Vector<double>& nu,
-    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    Lucee::Matrix<double>& phi_p, Lucee::Matrix<double>& phi_m,
     const Lucee::Vector<double>& Nj,
     const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
     const Lucee::Vector<double>& A, const Lucee::Vector<double>& B)
   {
+// allocate various arrays
+    unsigned nirrad = irradOut.size();
+    Lucee::Matrix<double> Rp(N, nirrad), Rm(N, nirrad);
+    Lucee::Vector<double> PLW(N), PL(N), As(N), Bs(N);
+
+    double fact = flux*mu0;
+
+// compute Rp and Rm
+    for (unsigned mi=0; mi<nirrad; ++mi)
+    {
+      int mom = irradOut[mi];
+// compute PL
+      Lucee::legendre(mom, 0, mu, PL);
+// compute PL^T*W
+      for (int j=0; j<N; ++j) PLW[j] = PL[j]*w[j];
+// compute Rp and Rm
+      for (int j=0; j<N; ++j)
+      {
+        Lucee::Vector<double> phi_p_j = phi_p.getCol(j);
+        Rp(j,mi) = PLW.innerProduct(phi_p_j);
+        Lucee::Vector<double> phi_m_j = phi_m.getCol(j);
+        Rm(j,mi) = PLW.innerProduct(phi_m_j);
+      }
+    }
+// loop over depths
+    for (unsigned depth=0; depth<tauIrradOut.size(); ++depth)
+    {
+      double tau = tauIrradOut[depth];
+// compute script{A} and script{B}
+      scriptAB(tau, nu, phi_p, phi_m, Nj, Qp, Qm, As, Bs);
+// now compute irradiances
+      for (unsigned mi=0; mi<irradOut.size(); ++mi)
+      {
+        int mom = irradOut[mi];
+        double sum1 = 0.0, sum2 = 0.0;
+        for (int j=0; j<N; j++)
+        {
+          double t1 = A[j]*exp(-tau/nu[j]) + As[j];
+          double t2 = B[j]*exp(-(tau0-tau)/nu[j]) + Bs[j];
+          sum1 += t1*Rp(j,mi) + t2*Rm(j,mi);
+          sum2 += t1*Rm(j,mi) + t2*Rp(j,mi);
+        }
+        double direct = Lucee::legendre(mom, 0, mu0)*exp(-tau/mu0)*fact;
+        irradp(depth, mi) = M_PI*(sum1+direct);
+        irradm(depth, mi) = M_PI*sum2;
+      }
+    }
   }
 }
