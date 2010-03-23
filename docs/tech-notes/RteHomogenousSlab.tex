@@ -390,7 +390,7 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Computing irradiances}
+\begin{frame}{Computing irradiances: I}
   The irradiances, defined previously, can be written as
   \begin{align}
     E_+^l(\tau) &= \pi \int_0^1
@@ -400,9 +400,33 @@
     P_l(\mu) L^0(\tau,-\mu) d\mu
   \end{align}
   Note that to compute the irradiances only the $m=0$ solution is
-  needed. Using homogenous and particular solution expressions the
-  irradiances can be computed as\footnote{See {\tt
-      RteHomogeneousSlab::calc\_irradiances()}}.
+  needed. 
+\end{frame}
+% ----------------------------------------------------------------
+
+\begin{frame}{The irradiances can be computed as\footnote{See {\tt
+        RteHomogeneousSlab::calc\_irradiances()}}}
+  \begin{align}
+    E_+^l(\tau) &= \pi \sum_{k=1}^N
+    \left[
+      A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
+    \right] R_+^l(\nu_k) \notag \\
+    &+ \pi \sum_{k=1}^N
+    \left[
+      B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
+    \right] R_-^l(\nu_k)
+    + \pi P_l(\mu_0) e^{-\tau/\nu_0} \\
+    E_-^l(\tau) &= \pi \sum_{k=1}^N
+    \left[
+      A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
+    \right] R_-^l(\nu_k) \notag \\
+    &+ \pi \sum_{k=1}^N
+    \left[
+      B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
+    \right] R_+^l(\nu_k)
+  \end{align}
+  where $R_\pm^l(\nu_j) \equiv \mvec{\Pi}(l,0) \mvec{W}
+  \gvec{\Phi}_\pm(\nu_j)$.
 \end{frame}
 % ----------------------------------------------------------------
 
