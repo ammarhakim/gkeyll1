@@ -117,6 +117,14 @@ namespace Lucee
  */
       Vector<T> duplicate() const;
 
+/**
+ * Return inner-product of vector with given vector.
+ *
+ * @param vec Vector to compute inner-product with.
+ * @return inner-product.
+ */
+      T innerProduct(const Vector<T>& vec) const;
+
     private:
 /**
  * Create a new vector of give size by reusing data pointer.

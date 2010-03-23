@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcVector.h>
 #include <LcFixedVector.h>
 
@@ -80,6 +81,20 @@ namespace Lucee
     for (int i=this->getLower(0); i<this->getUpper(0); ++i)
       dup[i] = this->operator[](i);
     return dup;
+  }
+
+  template <typename T>
+  T
+  Vector<T>::innerProduct(const Vector<T>& vec) const
+  {
+    if (getLength() != vec.getLength())
+      throw Lucee::Except("Vector::innerProduct: vectors should be of same size");
+    int ss = this->getLower(0);
+    int sv = this->getLower(0);
+    T sum = 0;
+    for (unsigned i=0; i<getLength(); ++i)
+      sum += this->operator[](ss++)*vec[sv++];
+    return sum;
   }
 
   template <typename T>

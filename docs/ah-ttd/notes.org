@@ -93,6 +93,11 @@
 
 * Lucee Notes
 
+** TODO Fix const-correctness problem with matrices etc
+
+   Essentially, getCol(), getRow() do not work for const matrices. How
+   to solve this problem in a generic way?
+
 ** What is a good way to publish results?
 
    Best thing to do is to: (a) make PDF from LaTeX with plots (b)
