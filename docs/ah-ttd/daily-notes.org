@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* March 22nd
+
+  - Added code to compute irradiances. Not tested and irradiances not
+    yet written to file.
+  - Added innerProduct() method to Vector class. NOT TESTED. Too tired
+    to do this tonight but must do this.
+
 * March 21st
 
   - Fixed a bug in hasStrVec() and hasNumVec() methods of LuaTable
