@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* March 23rd
+
+  - Now writing out irradiances. Tested irradiance E_0 with Siewert
+    benchmark paper. Are exactly correct to all significant digits.
+  - Next need to impliment dummy-node-inclusion method to get
+    radiances at ordinates with zero weight.
+
 * March 22nd
 
   - Added code to compute irradiances. Not tested and irradiances not
