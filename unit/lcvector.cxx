@@ -61,6 +61,21 @@ test_3()
     LC_ASSERT("Testing scale() function", vec[i] == 12.5);
 }
 
+void
+test_4()
+{
+  Lucee::Vector<double> v1(4), v2(4);
+  v1[0] = 1.0; v1[1] = 2.0; v1[2] = 3.0; v1[3] = 4.0;
+  v2[0] = 2.0; v2[1] = 3.0; v2[2] = 4.0; v2[3] = 5.0;
+  
+  double ip = v1.innerProduct(v2);
+  LC_ASSERT("Testing inner-product", ip == (2+6+12+20));
+
+  Lucee::Vector<double> v3(5);
+  LC_RAISES("Testing if exception is raised", v1.innerProduct(v3),
+    Lucee::Except);
+}
+
 int
 main(void)
 {
@@ -68,5 +83,6 @@ main(void)
   test_1();
   test_2();
   test_3();
+  test_4();
   LC_END_TESTS;
 }
