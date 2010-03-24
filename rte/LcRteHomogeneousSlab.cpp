@@ -255,7 +255,21 @@ namespace Lucee
     vn = Lucee::writeToFile(io, fNode, "w", w);
     io.writeStrAttribute(vn, "description", "weights in [0,1]");
 
+// save depths at which irradiances are computed
+    Lucee::Vector<double> tauIrradOut_v(tauIrradOut.size());
+    for (unsigned i=0; i<tauIrradOut_v.getLength(); ++i)
+      tauIrradOut_v[i] = tauIrradOut[i];
+
+    vn = Lucee::writeToFile(io, fNode, "tauIrrad", tauIrradOut_v);
+    io.writeStrAttribute(vn, "description", 
+      "optical depths at which irradiances are output");
+
 // write irradiances to file
+    vn = Lucee::writeToFile(io, fNode, "downward_irradiance", irradp);
+    io.writeStrAttribute(vn, "units", "W/m^2");
+
+    vn = Lucee::writeToFile(io, fNode, "upward_irradiance", irradm);
+    io.writeStrAttribute(vn, "units", "W/m^2");
 
 // arrays to store radiance
     int start[2] = {0, 0};
@@ -615,15 +629,16 @@ namespace Lucee
 
     double fact = flux*mu0;
 
-// compute Rp and Rm
+// compute Rp and Rm for each irradiance requested
     for (unsigned mi=0; mi<nirrad; ++mi)
     {
       int mom = irradOut[mi];
 // compute PL
       Lucee::legendre(mom, 0, mu, PL);
 // compute PL^T*W
-      for (int j=0; j<N; ++j) PLW[j] = PL[j]*w[j];
-// compute Rp and Rm
+      for (int j=0; j<N; ++j) 
+        PLW[j] = PL[j]*w[j];
+
       for (int j=0; j<N; ++j)
       {
         Lucee::Vector<double> phi_p_j = phi_p.getCol(j);
