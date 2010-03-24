@@ -627,8 +627,6 @@ namespace Lucee
     Lucee::Matrix<double> Rp(N, nirrad), Rm(N, nirrad);
     Lucee::Vector<double> PLW(N), PL(N), As(N), Bs(N);
 
-    double fact = flux*mu0;
-
 // compute Rp and Rm for each irradiance requested
     for (unsigned mi=0; mi<nirrad; ++mi)
     {
@@ -665,7 +663,7 @@ namespace Lucee
           sum1 += t1*Rp(j,mi) + t2*Rm(j,mi);
           sum2 += t1*Rm(j,mi) + t2*Rp(j,mi);
         }
-        double direct = Lucee::legendre(mom, 0, mu0)*exp(-tau/mu0)*fact;
+        double direct = Lucee::legendre(mom, 0, mu0)*exp(-tau/mu0)*flux;
         irradp(depth, mi) = M_PI*(sum1+direct);
         irradm(depth, mi) = M_PI*sum2;
       }
