@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* March 25th
+
+  - Added cases 4 and 5 to verification studies. Setting
+    varpi=1.0-1e-8 works well for cases when varpi=1.0. All decimal
+    places for irradiances are computed correctly for irradiances.
+
+* March 24th.
+
+  No work.
+
 * March 23rd
 
   - Now writing out irradiances. Tested irradiance E_0 with Siewert
