@@ -1,5 +1,9 @@
 # -*- org -*-
 
+* March 26th, 27th, 28th
+
+  No work on Lucee.
+
 * March 25th
 
   - Added cases 4 and 5 to verification studies. Setting
