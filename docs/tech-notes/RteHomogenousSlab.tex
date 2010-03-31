@@ -404,6 +404,7 @@
 \end{frame}
 % ----------------------------------------------------------------
 
+% ----------------------------------------------------------------
 \begin{frame}{The irradiances can be computed as\footnote{See {\tt
         RteHomogeneousSlab::calc\_irradiances()}}}
   \begin{align}
@@ -427,6 +428,48 @@
   \end{align}
   where $R_\pm^l(\nu_j) \equiv \mvec{\Pi}(l,0) \mvec{W}
   \gvec{\Phi}_\pm(\nu_j)$.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Angular interpolation: I}
+  To interpolate the radiance at $\mu$ other than the ordinates, we
+  introduce a set of $M$ dummy nodes $\mu_i$, $i=N+1,\ldots,N+M$ with
+  zero weights. Then, the eigenvectors of the RTE become the extended
+  length $N+M$ vector $[\gvec{\Phi}_\pm(\nu),
+  \hat{\gvec{\Phi}}_\pm(\nu)]^T$. We can show that for $i=1,\ldots,N$
+  and $j=N+1,\ldots,N+M$
+  \begin{align}
+    \hat{\phi}(\nu_i,\mu_j) = \frac{\nu_k}{\nu_k-\mu_j} \frac{\varpi}{2}
+    \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
+    w_k P_l^m(\mu_k) \notag \\
+    \times \left[
+      \phi(\nu_i,\mu_k) + (-1)^{l-m}\phi(\nu_i,-\mu_j)
+    \right]
+    \end{align}
+    \begin{align}
+    \hat{\phi}(\nu_i,-\mu_j) = \frac{\nu_k}{\nu_k+\mu_j} \frac{\varpi}{2}
+    \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
+    w_k P_l^m(\mu_k) \notag \\
+    \times \left[
+      (-1)^{l-m} \phi(\nu_i,\mu_k) + \phi(\nu_i,-\mu_j)
+    \right]
+  \end{align}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Angular interpolation: II}
+  We can also show that the extra eigenvalues are simply the dummy
+  nodes themselves, i.e. $\nu_j = \mu_j$ for
+  $i=N+1,\ldots,N+M$. Further
+  \begin{align}
+    \phi(\nu_i,\mu_j) = \phi(\nu_i,-\mu_j) = 0
+  \end{align}
+  and
+  \begin{align}
+    \hat{\phi}(\nu_i,\mu_j) = \hat{\phi}(\nu_i,-\mu_j) = \delta_{ij}.
+  \end{align}
 \end{frame}
 % ----------------------------------------------------------------
 
