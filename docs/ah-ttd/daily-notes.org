@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* March 31th
+
+  Started work on dummy-node inclusion. Not working or complete
+  yet. However basic ideas are clear.
+
 * March 26th, 27th, 28th, 29th, 30th
 
   No work on Lucee.
