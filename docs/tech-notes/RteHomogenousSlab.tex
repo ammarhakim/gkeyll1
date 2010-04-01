@@ -433,12 +433,12 @@
 
 % ----------------------------------------------------------------
 \begin{frame}{Angular interpolation: I}
-  To interpolate the radiance at $\mu$ other than the ordinates, we
-  introduce a set of $M$ dummy nodes $\mu_i$, $i=N+1,\ldots,N+M$ with
+  Introduce a set of $M$ dummy nodes $\mu_i$, $i=N+1,\ldots,N+M$ with
   zero weights. Then, the eigenvectors of the RTE become the extended
   length $N+M$ vector $[\gvec{\Phi}_\pm(\nu),
   \hat{\gvec{\Phi}}_\pm(\nu)]^T$. We can show that for $i=1,\ldots,N$
-  and $j=N+1,\ldots,N+M$
+  and $j=N+1,\ldots,N+M$, we get\footnote{See {\tt
+      RteHomogeneousSlab::calc\_extended\_eigensystem}}
   \begin{align}
     \hat{\phi}(\nu_i,\mu_j) = \frac{\nu_k}{\nu_k-\mu_j} \frac{\varpi}{2}
     \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
@@ -470,9 +470,8 @@
   \begin{align}
     \hat{\phi}(\nu_i,\mu_j) = \hat{\phi}(\nu_i,-\mu_j) = \delta_{ij}.
   \end{align}
-  Note that we really do not ever need to use the above expressions in
-  the code itself. Only the expressions on the previous slide are ever
-  really required.
+  Note that we really do not need to explicity use the above
+  expressions in the code itself.
 \end{frame}
 % ----------------------------------------------------------------
 
