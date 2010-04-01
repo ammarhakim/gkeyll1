@@ -38,7 +38,8 @@ namespace Lucee
       irradp(&Lucee::FixedVector<2, unsigned>(1)[0],
         &Lucee::FixedVector<2, int>(0)[0]),
       irradm(&Lucee::FixedVector<2, unsigned>(1)[0],
-        &Lucee::FixedVector<2, int>(0)[0])
+        &Lucee::FixedVector<2, int>(0)[0]),
+      dummymu(1)
   {
     isHalfSpace = false;
   }
@@ -110,6 +111,17 @@ namespace Lucee
             throw lce;
           }
       }
+    }
+
+    M = 0; // by default no dummy nodes
+// check if there are dummy nodes specified
+    if (tbl.hasNumVec("dummyNodes"))
+    {
+      std::vector<double> dn = tbl.getNumVec("dummyNodes");
+      M = dn.size();
+      dummymu = Lucee::Vector<double>(M);
+      for (int i=0; i<M; ++i)
+        dummymu[i] = dn[i];
     }
 
 // read in phase function
@@ -668,5 +680,13 @@ namespace Lucee
         irradm(depth, mi) = M_PI*sum2;
       }
     }
+  }
+
+  void
+  RteHomogeneousSlab::calc_extended_eigensystem(int m,
+    const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+    const Lucee::Vector<double>& nu,
+    Lucee::Matrix<double>& hphi_p, Lucee::Matrix<double>& hphi_m)
+  {
   }
 }

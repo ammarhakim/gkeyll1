@@ -140,6 +140,10 @@ namespace Lucee
       Lucee::Field<2, double> *radiancep;
 /** Array to store upward radiance data (ntau X numModes) with N components */
       Lucee::Field<2, double> *radiancem;
+/** Number of dummy nodes */
+      int M;
+/** Set of dummy nodes */
+      Lucee::Vector<double> dummymu;
 
 /**
  * Computes Qp and Qm needed to compute particular solutions.
@@ -297,6 +301,22 @@ namespace Lucee
         const Lucee::Vector<double>& Nj,
         const Lucee::Vector<double>& Qp, const Lucee::Vector<double>& Qm,
         const Lucee::Vector<double>& A, const Lucee::Vector<double>& B);
+
+/**
+ * Calculate the extended eigensystem. Note that only the first N
+ * extended eigenvectors are computed.
+ *
+ * @param m Azimuthal mode number.
+ * @param phi_p eigenvectors of the RTE corresponding to nu_j
+ * @param phi_m eigenvectors of the RTE  corresponding to -nu_j
+ * @param nu eigenvalues of the RTE
+ * @param hphi_p on output, extended eigenvectors of the RTE corresponding to nu_j
+ * @param hphi_m on outout, extended eigenvectors of the RTE  corresponding to -nu_j
+ */
+      void calc_extended_eigensystem(int m, 
+        const Lucee::Matrix<double>& phi_p, const Lucee::Matrix<double>& phi_m,
+        const Lucee::Vector<double>& nu,
+        Lucee::Matrix<double>& hphi_p, Lucee::Matrix<double>& hphi_m);
         
   };
 }
