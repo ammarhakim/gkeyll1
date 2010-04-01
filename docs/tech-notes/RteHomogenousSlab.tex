@@ -1,10 +1,31 @@
-\documentclass{beamer}
-
+\documentclass[11pt]{article}
+%% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
 
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
+%% Set page size properly
+\oddsidemargin  0.0in
+\evensidemargin 0.0in
+\textwidth      6.5in
+\textheight     9.0in
+\headheight     1.0in
+\headsep        0.0in
+\leftmargin      1.0in
+\rightmargin      1.0in
+\topmargin      -.75in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
@@ -13,481 +34,482 @@
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-%% autoscaled figures
-\newcommand{\incfig}{\centering\includegraphics}
-\setkeys{Gin}{width=0.7\linewidth,keepaspectratio}
-
-\usepackage{beamerthemesplit}
-
-% Setup TikZ
-\usepackage{tikz}
-\usetikzlibrary{arrows}
-\tikzstyle{block}=[draw opacity=0.7,line width=1.4cm]
-
-\title[RTE in homogeneous slab]{%
-  Algorithm for solution of the radiation transport equation in homogeneous slab}
-
+\title{Algorithms for solution of the radiation transport equation in%
+  a slab}
 \author{Ammar H. Hakim}
-
-\date[Lucee]
-{Lucee: Algorithm Details}
+\date{}
 
 \begin{document}
+% header text
+\lhead{Tech-Note 1002}
+\maketitle
 
-\begin{frame}
-  \titlepage
-\end{frame}
+\section{Homogeneous slab algorithm}
 
-% ----------------------------------------------------------------
-\begin{frame}{Problem statement: basic equations}
-  \begin{align}
-    \mu\pfrac{L(\tau,\mu,\phi)}{\tau} + L(\tau,\mu,\phi)
-    =
-    \frac{\varpi}{4\pi}
-    \int_{-1}^1 \int_0^{2\pi}
-    p(\cos\Theta) L(\tau,\mu,\phi) d\mu d\phi
-  \end{align}
-  where
-  \begin{itemize}
-  \item $L(\tau,\mu,\phi)$ is the radiance in units of Watt m$^{-2}$
-    sr$^{-1}$ nm$^{-1}$,
-  \item $\tau$ is the optical depth,
-  \item $\varpi$ is the albedo of single scattering,
-  \item $\mu$ is the cosine of the polar angle measured with the
-    positive $Z$-axis and $\phi$ is the azimuthal angle,
-  \item $p(\cos\Theta) = \sum_{l=0}^L\beta_lP_l(\cos\Theta)$ is the
-    phase function, where $\Theta$ is the scattering angle and
-    $\beta_0=1$.
-  \end{itemize}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Problem statement: boundary conditions}
-  \begin{align}
-    L(0, \mu) &= \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) \\
-    L(\tau_0, -\mu) &= 0
-  \end{align}
-  for $\mu\in [0,1]$, and where
-  \begin{itemize}
-  \item $\tau_0$ is the optical depth of the slab,
-  \item $\mu_0$ and $\phi_0$ are the cosine of the polar angle and
-    azimuthal angle of incident beam,
-  \item $\mu_0\pi F$ is the total downward irradiance incident on the
-    slab.
-  \end{itemize}
-\end{frame}
-% ----------------------------------------------------------------
+\subsection{Basic equations}
+\begin{align}
+  \mu\pfrac{L(\tau,\mu,\phi)}{\tau} + L(\tau,\mu,\phi)
+  =
+  \frac{\varpi}{4\pi}
+  \int_{-1}^1 \int_0^{2\pi}
+  p(\cos\Theta) L(\tau,\mu,\phi) d\mu d\phi
+\end{align}
+where
+\begin{itemize}
+\item $L(\tau,\mu,\phi)$ is the radiance in units of Watt m$^{-2}$
+  sr$^{-1}$ nm$^{-1}$,
+\item $\tau$ is the optical depth,
+\item $\varpi$ is the albedo of single scattering,
+\item $\mu$ is the cosine of the polar angle measured with the
+  positive $Z$-axis and $\phi$ is the azimuthal angle,
+\item $p(\cos\Theta) = \sum_{l=0}^L\beta_lP_l(\cos\Theta)$ is the
+  phase function, where $\Theta$ is the scattering angle and
+  $\beta_0=1$.
+\end{itemize}
 
-% ----------------------------------------------------------------
-\begin{frame}{The reduced problem}
-  Remove the singular component of the radiance using
-  \begin{align}
-    L(\tau,\mu,\phi) = L_*(\tau,\mu,\phi) 
-    + \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) e^{-\tau/\mu_0}
-  \end{align}
-  Use addition theorem of spherical harmonics to write
-  \begin{align}
-    p(cos\Theta) = \sum_{m=0}^L(2-\delta_{0,m})
-    \sum_{l=m}^L\beta_l P_l^m(\mu) P_l^m(\mu')
-    \cos[m(\phi'-\phi)]
-  \end{align}
-  where
-  \begin{align}
-    P_l^m(\mu) = \left[
-      \frac{(l-m)!}{(l+m)!}
-      \right]^{1/2}
-      (1-\mu^2)^{1/2}\frac{d^m}{d\mu^m}
-      P_l(\mu)
-  \end{align}
-  are the normalized Legendre functions.
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{The reduced problem}
-  The diffuse field can be written as
-  \begin{align}
-    L_*(\tau,\mu,\phi) = \frac{1}{2} \sum_{m=0}^L
-    (2-\delta_{0,m})L^m(\tau,\mu) \cos[m(\phi-\phi_0)]
-  \end{align}
-  where
-  \begin{align}
-    \mu\pfrac{L^m(\tau,\mu)}{\tau} + &L^m(\tau,\mu)
-    = \\
-    &\frac{\varpi}{2}
-    \sum_{l=m}^L \beta_l P_l^m(\mu)
-    \int_{-1}^1
-    P_l^m(\mu') L(\tau,\mu') d\mu'
-    + Q^m(\tau,\mu)
-  \end{align}
-  and 
-  \begin{align}
-    Q^m(\tau,\mu) = \frac{\varpi F}{2}e^{-\tau/\mu_0}
-    \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\mu)
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{The reduced boundary conditions}
-  The boundary conditions now reduce to
-  \begin{align}
-    L^m(0, \mu) &= 0 \\
-    L^m(\tau_0, -\mu) &= 0
-  \end{align}
-  The aim of the algorithm is to compute the azimuthal components of
-  the radiance $L^m(\tau,\mu)$ and the \emph{irradiances} defined by
-  \begin{align}
-    E_\pm^l(\tau) \equiv \int_0^1 \int_0^{2\pi}
-    P_l(\mu) L(\tau,\pm \mu, \phi) d\mu d\phi
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Initialization of algorithm}
-  \begin{itemize}
-  \item First, pick a set of $N$ quadrature points in the domain $\mu
-    \in[0,1]$. Denote these as $\mu_i$ and the corresponding weights
-    as $w_i$, for $i=1,\ldots,N$. Gaussian\footnote{It is may also be
-      valuable to use a quadrature scheme that has includes $\pm
-      1$. This directly gives the \emph{remote-sensing reflectance}
-      $L(0,-1)/E_+^1(0)$ without any need for interpolation.}
-    quadrature is used\footnote{See {\tt RteHomogeneousSlab::buildAlgorithms()}}.
-  \item The $N$ quadrature points in the domain $\mu \in[0,-1]$ are
-    $-\mu_i$ and the corresponding weights as $w_i$, for
-    $i=1,\ldots,N$.
-  \item The algorithm solves the radiance at the discrete quadrature
-    points in each hemisphere, i.e. $L^m(\tau,\pm \mu_i)$ are
-    computed.
-  \end{itemize}
-  
-\end{frame}
-% ----------------------------------------------------------------
+\subsection{Boundary conditions}
+\begin{align}
+  L(0, \mu) &= \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) \\
+  L(\tau_0, -\mu) &= 0
+\end{align}
+for $\mu\in [0,1]$, and where
+\begin{itemize}
+\item $\tau_0$ is the optical depth of the slab,
+\item $\mu_0$ and $\phi_0$ are the cosine of the polar angle and
+  azimuthal angle of incident beam,
+\item $\mu_0\pi F$ is the total downward irradiance incident on the
+  slab.
+\end{itemize}
 
-% ----------------------------------------------------------------
-\begin{frame}{Compute $Q^m(\pm \mu_i)$ for the inhomogeneous source}
-  Compute $\mvec{Q}_\pm$ where\footnote{See {\tt
-      RteHomogeneousSlab::qbeam()}}
-  \begin{align}
-    \mvec{Q}_\pm = [Q^m(\pm\mu_1), \ldots, Q^m(\pm\mu_N)]^T
-  \end{align}
-  \begin{align}
-    Q^m(\pm \mu_i) = \frac{\varpi F}{2}
-    \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\pm \mu_i)
-  \end{align}
-  Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$.
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Compute the eigensystem of the RTE: Stage 1}
-  Compute the matrices $\mvec{E}$ and $\mvec{F}$ as
-  follows\footnote{See {\tt RteHomogeneousSlab::calc\_FE()}}
-  \begin{align}
-    \mvec{E} &= \left(
-      1-\frac{\varpi}{2}\sum_{l=m}^L
+
+
+\subsection{The reduced problem}
+Remove the singular component of the radiance using
+\begin{align}
+  L(\tau,\mu,\phi) = L_*(\tau,\mu,\phi) 
+  + \pi F \delta(\mu-\mu_0) \delta(\phi-\phi_0) e^{-\tau/\mu_0}
+\end{align}
+Use addition theorem of spherical harmonics to write
+\begin{align}
+  p(cos\Theta) = \sum_{m=0}^L(2-\delta_{0,m})
+  \sum_{l=m}^L\beta_l P_l^m(\mu) P_l^m(\mu')
+  \cos[m(\phi'-\phi)]
+\end{align}
+where
+\begin{align}
+  P_l^m(\mu) = \left[
+    \frac{(l-m)!}{(l+m)!}
+  \right]^{1/2}
+  (1-\mu^2)^{1/2}\frac{d^m}{d\mu^m}
+  P_l(\mu)
+\end{align}
+are the normalized Legendre functions.
+
+The diffuse field can be written as
+\begin{align}
+  L_*(\tau,\mu,\phi) = \frac{1}{2} \sum_{m=0}^L
+  (2-\delta_{0,m})L^m(\tau,\mu) \cos[m(\phi-\phi_0)]
+\end{align}
+where
+\begin{align}
+  \mu\pfrac{L^m(\tau,\mu)}{\tau} + L^m(\tau,\mu)
+  = 
+  \frac{\varpi}{2}
+  \sum_{l=m}^L \beta_l P_l^m(\mu)
+  \int_{-1}^1
+  P_l^m(\mu') L(\tau,\mu') d\mu'
+  + Q^m(\tau,\mu)
+\end{align}
+and 
+\begin{align}
+  Q^m(\tau,\mu) = \frac{\varpi F}{2}e^{-\tau/\mu_0}
+  \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\mu)
+\end{align}
+
+
+
+
+\subsection{The reduced boundary conditions}
+The boundary conditions now reduce to
+\begin{align}
+  L^m(0, \mu) &= 0 \\
+  L^m(\tau_0, -\mu) &= 0
+\end{align}
+The aim of the algorithm is to compute the azimuthal components of
+the radiance $L^m(\tau,\mu)$ and the \emph{irradiances} defined by
+\begin{align}
+  E_\pm^l(\tau) \equiv \int_0^1 \int_0^{2\pi}
+  P_l(\mu) L(\tau,\pm \mu, \phi) d\mu d\phi
+\end{align}
+
+
+
+
+\subsection{Initialization of algorithm}
+\begin{itemize}
+\item First, pick a set of $N$ quadrature points in the domain $\mu
+  \in[0,1]$. Denote these as $\mu_i$ and the corresponding weights
+  as $w_i$, for $i=1,\ldots,N$. Gaussian\footnote{It is may also be
+    valuable to use a quadrature scheme that has includes $\pm
+    1$. This directly gives the \emph{remote-sensing reflectance}
+    $L(0,-1)/E_+^1(0)$ without any need for interpolation.}
+  quadrature is used\footnote{See {\tt RteHomogeneousSlab::buildAlgorithms()}}.
+\item The $N$ quadrature points in the domain $\mu \in[0,-1]$ are
+  $-\mu_i$ and the corresponding weights as $w_i$, for
+  $i=1,\ldots,N$.
+\item The algorithm solves the radiance at the discrete quadrature
+  points in each hemisphere, i.e. $L^m(\tau,\pm \mu_i)$ are
+  computed.
+\end{itemize}
+
+
+
+
+
+\subsection{Compute $Q^m(\pm \mu_i)$ for the inhomogeneous source}
+Compute $\mvec{Q}_\pm$ where\footnote{See {\tt
+    RteHomogeneousSlab::qbeam()}}
+\begin{align}
+  \mvec{Q}_\pm = [Q^m(\pm\mu_1), \ldots, Q^m(\pm\mu_N)]^T
+\end{align}
+\begin{align}
+  Q^m(\pm \mu_i) = \frac{\varpi F}{2}
+  \sum_{l=m}^L \beta_l P^m_l(\mu_0) P_l^m(\pm \mu_i)
+\end{align}
+Note that $P_l^m(-\mu_i) = (-1)^{l-m}P_l^m(\mu_i)$.
+
+
+
+
+\subsection{Compute the eigensystem of the RTE}
+Compute the matrices $\mvec{E}$ and $\mvec{F}$ as
+follows\footnote{See {\tt RteHomogeneousSlab::calc\_FE()}}
+\begin{align}
+  \mvec{E} &= \left(
+    1-\frac{\varpi}{2}\sum_{l=m}^L
     \beta_l
     \left[1+(-1)^{l-m}\right] 
     \gvec{\Pi}(l,m) \gvec{\Pi}^T(l,m) \mvec{W}
-    \right)
-    \mvec{M}^{-1}
-  \end{align}
-  \begin{align}
-    \mvec{F} &= \left(
-      1-\frac{\varpi}{2}\sum_{l=m}^L
+  \right)
+  \mvec{M}^{-1}
+\end{align}
+\begin{align}
+  \mvec{F} &= \left(
+    1-\frac{\varpi}{2}\sum_{l=m}^L
     \beta_l
     \left[1-(-1)^{l-m}\right] 
     \gvec{\Pi}(l,m) \gvec{\Pi}^T(l,m) \mvec{W}
-    \right)
-    \mvec{M}^{-1}
-  \end{align}
-  where $\mvec{M} = \textrm{diag}(\mu_1,\ldots,\mu_N)$, $\mvec{W} =
-  \textrm{diag}(w_i,\ldots,w_N)$ and $\gvec{\Pi}(l,m) =
-  [P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$.
-\end{frame}
-% ----------------------------------------------------------------
+  \right)
+  \mvec{M}^{-1}
+\end{align}
+where $\mvec{M} = \textrm{diag}(\mu_1,\ldots,\mu_N)$, $\mvec{W} =
+\textrm{diag}(w_i,\ldots,w_N)$ and $\gvec{\Pi}(l,m) =
+[P_l^m(\mu_1),\ldots,P_l^m(\mu_N)]^T$.
 
-% ----------------------------------------------------------------
-\begin{frame}{Compute the eigensystem of the RTE: Stage 2}
-  Then compute the matrix product $\mvec{F}\mvec{E}$ and determine its
-  eigenvalues and eigenvectors. Denote these by $\lambda_j$ and
-  $\mvec{X}(\lambda_j)$.  Then, the eigenvalues of the RTE are $\pm
-  \nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors
-  are\footnote{See {\tt RteHomogeneousSlab::calc\_RTE\_eigensystem()}}
-  \begin{align}
-    \gvec{\Phi}_\pm (\nu_j)
-    = \frac{1}{2}\mvec{M}^{-1}
-    (\mvec{I} \pm \nu_j\mvec{E})\mvec{X}(\lambda_j)
-  \end{align}
-  Note the identity $\gvec{\Phi}_+(-\nu_j) =
-  \gvec{\Phi}_-(\nu_j)$.
-\end{frame}
-% ----------------------------------------------------------------
+Then compute the matrix product $\mvec{F}\mvec{E}$ and determine its
+eigenvalues and eigenvectors. Denote these by $\lambda_j$ and
+$\mvec{X}(\lambda_j)$.  Then, the eigenvalues of the RTE are $\pm
+\nu_j$, where $\nu_j = 1/\sqrt\lambda_j$. The eigenvectors
+are\footnote{See {\tt RteHomogeneousSlab::calc\_RTE\_eigensystem()}}
+\begin{align}
+  \gvec{\Phi}_\pm (\nu_j)
+  = \frac{1}{2}\mvec{M}^{-1}
+  (\mvec{I} \pm \nu_j\mvec{E})\mvec{X}(\lambda_j)
+\end{align}
+Note the identity $\gvec{\Phi}_+(-\nu_j) =
+\gvec{\Phi}_-(\nu_j)$.
 
-% ----------------------------------------------------------------
-\begin{frame}{Compute eigensystem normalization coefficients}
-  These are given by\footnote{See RteHomogeneousSlab::get\_norms()}
-  \begin{align}
-    N(\nu_j) = \sum_{\alpha=1}^N
-    w_\alpha \mu_\alpha
-    \left[
-      \phi^2(\nu_j,\mu_\alpha) - \phi^2(\nu_j,-\mu_\alpha)
-    \right]
-  \end{align}
-  Here $\phi(\nu_j,\mu_\alpha) = \gvec{\Phi}_{+\alpha}(\nu_j)$ and
-  $\phi(\nu_j,-\mu_\alpha) = \gvec{\Phi}_{-\alpha}(\nu_j)$.
 
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Notes: Homogeneous solution can now be determined up to
-    constant coefficients}
-  Once we have the eigensystem, we can compute the homogeneous solution
-  \begin{align}
-    \mvec{L}^h_+(\tau) = \sum_{j=1}^N
-    \left[
-      A_j \gvec{\Phi}_+(\nu_j) e^{-\tau/\nu_j} +
-      B_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
-    \right]
-  \end{align}
-  and
-  \begin{align}
-    \mvec{L}^h_-(\tau) = \sum_{j=1}^N
-    \left[
-      A_j \gvec{\Phi}_-(\nu_j) e^{-\tau/\nu_j} +
-      B_j \gvec{\Phi}_+(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
-    \right]
-  \end{align}
-  Here $\mvec{L}_\pm(\tau) = [L(\tau,\pm\mu_1),\ldots,
-  L(\tau,\pm\mu_N)]^T$. The coefficients $A_j$ and $B_j$ are unknown.
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Particular solution can now be determined}
-  The particular solutions can be written as\footnote{See
-    RteHomogeneousSlab::particular\_solution()}
-  \begin{align}
-    \mvec{L}^p_+(\tau) = \sum_{j=1}^N
-    \left[
-      \script{A}_j(\tau) \gvec{\Phi}_+(\nu_j) +
-      \script{B}_j(\tau) \gvec{\Phi}_-(\nu_j)
-    \right]
-  \end{align}
-  and
-  \begin{align}
-    \mvec{L}^p_-(\tau) = \sum_{j=1}^N
-    \left[
-      \script{A}_j(\tau) \gvec{\Phi}_-(\nu_j) +
-      \script{B}_j(\tau) \gvec{\Phi}_+(\nu_j)
-    \right]
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
+\subsection{Compute eigensystem normalization coefficients}
+These are given by\footnote{See RteHomogeneousSlab::get\_norms()}
+\begin{align}
+  N(\nu_j) = \sum_{\alpha=1}^N
+  w_\alpha \mu_\alpha
+  \left[
+    \phi^2(\nu_j,\mu_\alpha) - \phi^2(\nu_j,-\mu_\alpha)
+  \right]
+\end{align}
+Here $\phi(\nu_j,\mu_\alpha) = \gvec{\Phi}_{+\alpha}(\nu_j)$ and
+$\phi(\nu_j,-\mu_\alpha) = \gvec{\Phi}_{-\alpha}(\nu_j)$.
 
-% ----------------------------------------------------------------
-\begin{frame}{Functions appearing in particular solution can be
-    computed}
-  The functions appearing in the particular solutions can be computed
-  as
-  \begin{align}
-    \script{A}_j(\tau) = &\frac{1}{N(\nu_j)}
-    \int_0^\tau dx
-    \sum_{\alpha=1}^N w_\alpha e^{-(\tau-x)/\nu_j} \times \notag \\
-    & \left[
-      Q(x,\mu_\alpha)\phi(\nu_j,\mu_\alpha) +
-      Q(x,-\mu_\alpha)\phi(\nu_j,-\mu_\alpha)
-      \right]
-  \end{align}
-  and
-  \begin{align}
-    \script{B}_j(\tau) = &\frac{1}{N(\nu_j)}
-    \int_\tau^{\tau_0} dx
-    \sum_{\alpha=1}^N w_\alpha e^{-(x-\tau)/\nu_j} \times \notag \\
-    &\left[
-      Q(x,\mu_\alpha)\phi(\nu_j,-\mu_\alpha) +
-      Q(x,-\mu_\alpha)\phi(\nu_j,\mu_\alpha)
-      \right]
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{For beam illumination $\script{A}$ and $\script{B}$ can
-    be explicitly computed}
-  For uniform illumination we can compute explicitly\footnote{See
-    RteHomogeneousSlab::scriptAB()}
-  \begin{align}
-    \script{A}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
-    C(\tau ; \nu_j, \mu_0)
-    \left[
-      \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_+ +
-      \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_-
-    \right]
-  \end{align}
-  and
-  \begin{align}
-    \script{B}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
-    e^{-\tau/\mu_0}S(\tau_0-\tau ; \nu_j, \mu_0)
-    \left[
-      \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_+ +
-      \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_-
-    \right]
-  \end{align}
-  Here
-  \begin{align}
-    S(\tau;x,y) = \frac{1-e^{-\tau/x}e^{-\tau/y}}{x+y} \quad\textrm{and}\quad
-    C(\tau;x,y) = \frac{e^{-\tau/x}-e^{-\tau/y}}{x-y}
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Use boundary conditions to determine linear system for
-    $A_j$ and $B_j$}
-  Using the boundary conditions we get
-  \begin{align}
-    \sum_{j=1}^N
-    \left[
-      A_j \gvec{\Phi}_+(\nu_j) +
-      B_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j}
-    \right]
-    &= -\mvec{L}_+^p(0) \\
-    \sum_{j=1}^N
-    \left[
-      A_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j} +
-      B_j \gvec{\Phi}_+(\nu_j)
-    \right]
-    &= -\mvec{L}_-^p(\tau_0)
-  \end{align}
-  This is a linear system that can be solved to determine the
-  coefficients $A_i$ and $B_i$\footnote{See {\tt
-      RteHomogeneousSlab::calc\_AB\_coeffs()}}.
 
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{For half-space problems algorithm needs modification}
-  For half-space problems $L(\tau,\mu,\phi) \rightarrow 0$ as $\tau
-  \rightarrow \infty$. Hence, we must set $B_j = 0$. Further, the
-  functions $\script{B}_j(\tau)$ must now be computed with the
-  function $S^\infty(x,y) = 1/(x+y)$ instead. Note, there is no
-  dependence on $\tau$ in $S^\infty$.
+\subsection{Homogeneous solution can now be determined up to constant
+  coefficients}
+Once we have the eigensystem, we can compute the homogeneous solution
+\begin{align}
+  \mvec{L}^h_+(\tau) = \sum_{j=1}^N
+  \left[
+    A_j \gvec{\Phi}_+(\nu_j) e^{-\tau/\nu_j} +
+    B_j \gvec{\Phi}_-(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
+  \right]
+\end{align}
+and
+\begin{align}
+  \mvec{L}^h_-(\tau) = \sum_{j=1}^N
+  \left[
+    A_j \gvec{\Phi}_-(\nu_j) e^{-\tau/\nu_j} +
+    B_j \gvec{\Phi}_+(\nu_j) e^{-(\tau_0-\tau)/\nu_j}
+  \right]
+\end{align}
+Here $\mvec{L}_\pm(\tau) = [L(\tau,\pm\mu_1),\ldots,
+L(\tau,\pm\mu_N)]^T$. The coefficients $A_j$ and $B_j$ are unknown.
 
-  Finally, the linear system to solve now reduces to a $N\times N$
-  system for the $N$ unknowns $A_j$
-  \begin{align}
-    \sum_{j=1}^N
-      A_j \gvec{\Phi}_+(\nu_j) = -\mvec{L}_+^p(0)
-  \end{align}
-  which can now be inverted to determine $A_j$\footnote{See
-    {\tt RteHomogeneousSlab::calc\_A\_coeffsInf()}}
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Computing irradiances: I}
-  The irradiances, defined previously, can be written as
-  \begin{align}
-    E_+^l(\tau) &= \pi \int_0^1
-     P_l(\mu) L^0(\tau,\mu) d\mu
-    + \pi F e^{-\tau/\mu_0} P_l(\mu_0) \\
-    E_-^l(\tau) &= \pi \int_0^1
-    P_l(\mu) L^0(\tau,-\mu) d\mu
-  \end{align}
-  Note that to compute the irradiances only the $m=0$ solution is
-  needed. 
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{The irradiances can be computed as\footnote{See {\tt
-        RteHomogeneousSlab::calc\_irradiances()}}}
-  \begin{align}
-    E_+^l(\tau) &= \pi \sum_{k=1}^N
-    \left[
-      A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
-    \right] R_+^l(\nu_k) \notag \\
-    &+ \pi \sum_{k=1}^N
-    \left[
-      B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
-    \right] R_-^l(\nu_k)
-    + \pi P_l(\mu_0) e^{-\tau/\nu_0} \\
-    E_-^l(\tau) &= \pi \sum_{k=1}^N
-    \left[
-      A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
-    \right] R_-^l(\nu_k) \notag \\
-    &+ \pi \sum_{k=1}^N
-    \left[
-      B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
-    \right] R_+^l(\nu_k)
-  \end{align}
-  where $R_\pm^l(\nu_j) \equiv \mvec{\Pi}(l,0) \mvec{W}
-  \gvec{\Phi}_\pm(\nu_j)$.
-\end{frame}
-% ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Angular interpolation: I}
-  Introduce a set of $M$ dummy nodes $\mu_i$, $i=N+1,\ldots,N+M$ with
-  zero weights. Then, the eigenvectors of the RTE become the extended
-  length $N+M$ vector $[\gvec{\Phi}_\pm(\nu),
-  \hat{\gvec{\Phi}}_\pm(\nu)]^T$. We can show that for $i=1,\ldots,N$
-  and $j=N+1,\ldots,N+M$, we get\footnote{See {\tt
-      RteHomogeneousSlab::calc\_extended\_eigensystem}}
-  \begin{align}
-    \hat{\phi}(\nu_i,\mu_j) = \frac{\nu_k}{\nu_k-\mu_j} \frac{\varpi}{2}
-    \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
-    w_k P_l^m(\mu_k) \notag \\
-    \times \left[
-      \phi(\nu_i,\mu_k) + (-1)^{l-m}\phi(\nu_i,-\mu_j)
-    \right]
-    \end{align}
-    \begin{align}
-    \hat{\phi}(\nu_i,-\mu_j) = \frac{\nu_k}{\nu_k+\mu_j} \frac{\varpi}{2}
-    \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
-    w_k P_l^m(\mu_k) \notag \\
-    \times \left[
-      (-1)^{l-m} \phi(\nu_i,\mu_k) + \phi(\nu_i,-\mu_j)
-    \right]
-  \end{align}
-\end{frame}
-% ----------------------------------------------------------------
+\subsection{Particular solution can now be determined}
+The particular solutions can be written as\footnote{See
+  RteHomogeneousSlab::particular\_solution()}
+\begin{align}
+  \mvec{L}^p_+(\tau) = \sum_{j=1}^N
+  \left[
+    \script{A}_j(\tau) \gvec{\Phi}_+(\nu_j) +
+    \script{B}_j(\tau) \gvec{\Phi}_-(\nu_j)
+  \right]
+\end{align}
+and
+\begin{align}
+  \mvec{L}^p_-(\tau) = \sum_{j=1}^N
+  \left[
+    \script{A}_j(\tau) \gvec{\Phi}_-(\nu_j) +
+    \script{B}_j(\tau) \gvec{\Phi}_+(\nu_j)
+  \right]
+\end{align}
 
-% ----------------------------------------------------------------
-\begin{frame}{Angular interpolation: II}
-  The extra eigenvalues are simply the dummy nodes themselves,
-  i.e. $\nu_j = \mu_j$ for $i=N+1,\ldots,N+M$. We can show
-  \begin{align}
-    \phi(\nu_i,\mu_j) &= \phi(\nu_i,-\mu_j) = 0 \\
-    \hat{\phi}(\nu_i,\mu_j) &= \hat{\phi}(-\nu_i,-\mu_j) = \delta_{ij}.
-  \end{align}
-  Hence, homogeneous solution at dummy nodes is
-  \begin{align}
-    L^h(\tau,\mu_i) &= \sum_{j=1}^N
-    \left[
-      A_j \hat{\phi}(\nu_j, \mu_i) e^{-\tau/\nu_j} +
-      B_j \hat{\phi}(-\nu_j, \mu_i) e^{-(\tau_0-\tau)/\nu_j}
-    \right] \notag \\
-    + &A_i e^{-\tau/\nu_i} \\
-    L^h(\tau,-\mu_i) &= \sum_{j=1}^N
-    \left[
-      A_j \hat{\phi}(\nu_j, -\mu_i) e^{-\tau/\nu_j} +
-      B_j \hat{\phi}(-\nu_j, -\mu_i) e^{-(\tau_0-\tau)/\nu_j}
-    \right] \notag \\
-    + &B_i e^{-(\tau_0-\tau)/\nu_i}
-  \end{align}
-  for $i=N+1,\ldots,N+M$.
-\end{frame}
-% ----------------------------------------------------------------
+The functions appearing in the particular solutions can be computed as
+\begin{align}
+  \script{A}_j(\tau) = &\frac{1}{N(\nu_j)}
+  \int_0^\tau dx
+  \sum_{\alpha=1}^N w_\alpha e^{-(\tau-x)/\nu_j}
+  \left[
+    Q(x,\mu_\alpha)\phi(\nu_j,\mu_\alpha) +
+    Q(x,-\mu_\alpha)\phi(\nu_j,-\mu_\alpha)
+  \right]
+\end{align}
+and
+\begin{align}
+  \script{B}_j(\tau) = &\frac{1}{N(\nu_j)}
+  \int_\tau^{\tau_0} dx
+  \sum_{\alpha=1}^N w_\alpha e^{-(x-\tau)/\nu_j}
+  \left[
+    Q(x,\mu_\alpha)\phi(\nu_j,-\mu_\alpha) +
+    Q(x,-\mu_\alpha)\phi(\nu_j,\mu_\alpha)
+  \right]
+\end{align}
+
+
+\subsection{For beam illumination $\script{A}$ and $\script{B}$ can
+  be explicitly computed}
+For uniform illumination we can compute explicitly\footnote{See
+  RteHomogeneousSlab::scriptAB()}
+\begin{align}
+  \script{A}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
+  C(\tau ; \nu_j, \mu_0)
+  \left[
+    \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_+ +
+    \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_-
+  \right]
+\end{align}
+and
+\begin{align}
+  \script{B}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
+  e^{-\tau/\mu_0}S(\tau_0-\tau ; \nu_j, \mu_0)
+  \left[
+    \gvec{\Phi}_-^T \mvec{W} \mvec{Q}_+ +
+    \gvec{\Phi}_+^T \mvec{W} \mvec{Q}_-
+  \right]
+\end{align}
+Here
+\begin{align}
+  S(\tau;x,y) = \frac{1-e^{-\tau/x}e^{-\tau/y}}{x+y} \quad\textrm{and}\quad
+  C(\tau;x,y) = \frac{e^{-\tau/x}-e^{-\tau/y}}{x-y}
+\end{align}
+
+
+
+
+\subsection{Use boundary conditions to determine linear system for
+  $A_j$ and $B_j$}
+Using the boundary conditions we get
+\begin{align}
+  \sum_{j=1}^N
+  \left[
+    A_j \gvec{\Phi}_+(\nu_j) +
+    B_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j}
+  \right]
+  &= -\mvec{L}_+^p(0) \\
+  \sum_{j=1}^N
+  \left[
+    A_j \gvec{\Phi}_-(\nu_j) e^{-\tau_0/\nu_j} +
+    B_j \gvec{\Phi}_+(\nu_j)
+  \right]
+  &= -\mvec{L}_-^p(\tau_0)
+\end{align}
+This is a linear system that can be solved to determine the
+coefficients $A_i$ and $B_i$\footnote{See {\tt
+    RteHomogeneousSlab::calc\_AB\_coeffs()}}.
+
+
+
+
+
+\subsection{For half-space problems algorithm needs modification}
+For half-space problems $L(\tau,\mu,\phi) \rightarrow 0$ as $\tau
+\rightarrow \infty$. Hence, we must set $B_j = 0$. Further, the
+functions $\script{B}_j(\tau)$ must now be computed with the
+function $S^\infty(x,y) = 1/(x+y)$ instead. Note, there is no
+dependence on $\tau$ in $S^\infty$.
+
+Finally, the linear system to solve now reduces to a $N\times N$
+system for the $N$ unknowns $A_j$
+\begin{align}
+  \sum_{j=1}^N
+  A_j \gvec{\Phi}_+(\nu_j) = -\mvec{L}_+^p(0)
+\end{align}
+which can now be inverted to determine $A_j$\footnote{See
+  {\tt RteHomogeneousSlab::calc\_A\_coeffsInf()}}
+
+
+
+
+\subsection{Computing irradiances}
+The irradiances, defined previously, can be written as
+\begin{align}
+  E_+^l(\tau) &= \pi \int_0^1
+  P_l(\mu) L^0(\tau,\mu) d\mu
+  + \pi F e^{-\tau/\mu_0} P_l(\mu_0) \\
+  E_-^l(\tau) &= \pi \int_0^1
+  P_l(\mu) L^0(\tau,-\mu) d\mu
+\end{align}
+Note that to compute the irradiances only the $m=0$ solution is
+needed. The irradiances can be computed as\footnote{See {\tt
+    RteHomogeneousSlab::calc\_irradiances()}}
+\begin{align}
+  E_+^l(\tau) &= \pi \sum_{k=1}^N
+  \left[
+    A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
+  \right] R_+^l(\nu_k)
+  + \pi \sum_{k=1}^N
+  \left[
+    B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
+  \right] R_-^l(\nu_k)
+  + \pi P_l(\mu_0) e^{-\tau/\nu_0} \\
+  E_-^l(\tau) &= \pi \sum_{k=1}^N
+  \left[
+    A_k e^{-\tau/\nu_k} + \script{A}_k(\tau)
+  \right] R_-^l(\nu_k)
+  + \pi \sum_{k=1}^N
+  \left[
+    B_k e^{-(\tau_0-\tau)/\nu_k} + \script{B}_k(\tau)
+  \right] R_+^l(\nu_k)
+\end{align}
+where $R_\pm^l(\nu_j) \equiv \mvec{\Pi}(l,0) \mvec{W}
+\gvec{\Phi}_\pm(\nu_j)$.
+
+
+
+
+\subsection{Angular interpolation}
+Introduce a set of $M$ dummy nodes $\mu_i$, $i=N+1,\ldots,N+M$ with
+zero weights. Then, the eigenvectors of the RTE become the extended
+length $N+M$ vector $[\gvec{\Phi}_\pm(\nu),
+\hat{\gvec{\Phi}}_\pm(\nu)]^T$. We can show that for $i=1,\ldots,N$
+and $j=N+1,\ldots,N+M$, we get\footnote{See {\tt
+    RteHomogeneousSlab::calc\_extended\_eigensystem}}
+\begin{align}
+  \hat{\phi}(\nu_i,\mu_j) &= \frac{\nu_i}{\nu_i-\mu_j} \frac{\varpi}{2}
+  \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
+  w_k P_l^m(\mu_k)
+  \left[
+    \phi(\nu_i,\mu_k) + (-1)^{l-m}\phi(\nu_i,-\mu_j)
+  \right] \\
+  \hat{\phi}(\nu_i,-\mu_j) &= \frac{\nu_i}{\nu_i+\mu_j} \frac{\varpi}{2}
+  \sum_{l=m}^L \beta_l P_l^m(\mu_j) \sum_{k=1}^N
+  w_k P_l^m(\mu_k)
+  \left[
+    (-1)^{l-m} \phi(\nu_i,\mu_k) + \phi(\nu_i,-\mu_j)
+  \right]
+\end{align}
+The extra $M$ eigenvalues are simply the dummy nodes themselves,
+i.e. $\nu_j = \mu_j$ for $i=N+1,\ldots,N+M$. We can show
+\begin{align}
+  \phi(\nu_i,\mu_j) &= \phi(\nu_i,-\mu_j) = 0 \\
+  \hat{\phi}(\nu_i,\mu_j) &= \hat{\phi}(-\nu_i,-\mu_j) = \delta_{ij}.
+\end{align}
+Hence, homogeneous solution at dummy nodes is
+\begin{align}
+  L^h(\tau,\mu_i) &= \sum_{j=1}^N
+  \left[
+    A_j \hat{\phi}(\nu_j, \mu_i) e^{-\tau/\nu_j} +
+    B_j \hat{\phi}(-\nu_j, \mu_i) e^{-(\tau_0-\tau)/\nu_j}
+  \right]
+  + A_i e^{-\tau/\nu_i} \\
+  L^h(\tau,-\mu_i) &= \sum_{j=1}^N
+  \left[
+    A_j \hat{\phi}(\nu_j, -\mu_i) e^{-\tau/\nu_j} +
+    B_j \hat{\phi}(-\nu_j, -\mu_i) e^{-(\tau_0-\tau)/\nu_j}
+  \right]
+  + B_i e^{-(\tau_0-\tau)/\nu_i}
+\end{align}
+for $i=N+1,\ldots,N+M$.
+
+\appendix
+
+\section{A note on particular solutions of the RTE}
+
+To compute particular solutions we need to first find a Green's
+function for the infinite medium RTE. Denote the Green's function by
+$G(\tau,\pm\mu_i; x,\zeta_\alpha)$, where $\alpha = \pm 1, \ldots, \pm
+N$ and $\zeta_{-i} = -\mu_i$. Then, we can show that the Green's
+function must satisfy the jump conditions
+\begin{align}
+  &\lim_{\epsilon \rightarrow 0} \mu_i
+  \left[
+    G(x+\epsilon, \mu_i; x, \zeta_\alpha)
+    -
+    G(x-\epsilon, \mu_i; x, \zeta_\alpha)
+  \right] = \delta_{i,\alpha} \\
+  &\lim_{\epsilon \rightarrow 0} \mu_i
+  \left[
+    G(x+\epsilon, -\mu_i; x, \zeta_\alpha)
+    -
+    G(x-\epsilon, -\mu_i; x, \zeta_\alpha)
+  \right] = -\delta_{-i,\alpha}
+\end{align}
+for $i=1,\ldots,N$. At regular nodes we can assume a solution of the
+form
+\begin{align}
+  G(\tau,\mu_i;x,\zeta_\alpha) 
+  &= \sum_{j=1}^N A_{j,\alpha} \phi(\nu_j,\mu_i) e^{-(\tau-x)/\nu_j} 
+  \quad \tau>x
+  \\
+  &= \sum_{j=1}^N B_{j,\alpha} \phi(-\nu_j,\mu_i) e^{-(x-\tau)/\nu_j}
+  \quad \tau<x
+\end{align}
+and
+\begin{align}
+  G(\tau,-\mu_i;x,\zeta_\alpha) 
+  &= \sum_{j=1}^N A_{j,\alpha} \phi(\nu_j,-\mu_i) e^{-(\tau-x)/\nu_j} 
+  \quad \tau>x
+  \\
+  &= \sum_{j=1}^N B_{j,\alpha} \phi(-\nu_j,-\mu_i) e^{-(x-\tau)/\nu_j}
+  \quad \tau<x
+\end{align}
+Substituting these in the jump condition and using the orthogonality
+of the eignefunctions we can show that we have
+\begin{align}
+  A_{k,\alpha} &= \frac{1}{N(\nu_k)} w_\alpha \phi(\nu_k,\zeta_\alpha) \\
+  B_{k,\alpha} &= \frac{1}{N(\nu_k)} w_\alpha \phi(-\nu_k,\zeta_\alpha).
+\end{align}
 
 \end{document}
-
-% ----------------------------------------------------------------
-\begin{frame}
-\end{frame}
-% ----------------------------------------------------------------
