@@ -1,4 +1,4 @@
-\documentclass[14]{beamer}
+\documentclass{beamer}
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -460,18 +460,28 @@
 
 % ----------------------------------------------------------------
 \begin{frame}{Angular interpolation: II}
-  We can also show that the extra eigenvalues are simply the dummy
-  nodes themselves, i.e. $\nu_j = \mu_j$ for
-  $i=N+1,\ldots,N+M$. Further
+  The extra eigenvalues are simply the dummy nodes themselves,
+  i.e. $\nu_j = \mu_j$ for $i=N+1,\ldots,N+M$. We can show
   \begin{align}
-    \phi(\nu_i,\mu_j) = \phi(\nu_i,-\mu_j) = 0
+    \phi(\nu_i,\mu_j) &= \phi(\nu_i,-\mu_j) = 0 \\
+    \hat{\phi}(\nu_i,\mu_j) &= \hat{\phi}(-\nu_i,-\mu_j) = \delta_{ij}.
   \end{align}
-  and
+  Hence, homogeneous solution at dummy nodes is
   \begin{align}
-    \hat{\phi}(\nu_i,\mu_j) = \hat{\phi}(\nu_i,-\mu_j) = \delta_{ij}.
+    L^h(\tau,\mu_i) &= \sum_{j=1}^N
+    \left[
+      A_j \hat{\phi}(\nu_j, \mu_i) e^{-\tau/\nu_j} +
+      B_j \hat{\phi}(-\nu_j, \mu_i) e^{-(\tau_0-\tau)/\nu_j}
+    \right] \notag \\
+    + &A_i e^{-\tau/\nu_i} \\
+    L^h(\tau,-\mu_i) &= \sum_{j=1}^N
+    \left[
+      A_j \hat{\phi}(\nu_j, -\mu_i) e^{-\tau/\nu_j} +
+      B_j \hat{\phi}(-\nu_j, -\mu_i) e^{-(\tau_0-\tau)/\nu_j}
+    \right] \notag \\
+    + &B_i e^{-(\tau_0-\tau)/\nu_i}
   \end{align}
-  Note that we really do not need to explicity use the above
-  expressions in the code itself.
+  for $i=N+1,\ldots,N+M$.
 \end{frame}
 % ----------------------------------------------------------------
 
