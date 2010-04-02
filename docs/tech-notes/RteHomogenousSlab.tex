@@ -465,51 +465,93 @@ for $i=N+1,\ldots,N+M$.
 
 \appendix
 
-\section{A note on particular solutions of the RTE}
+\section{A note on particular solutions of the RTE at dummy nodes}
 
 To compute particular solutions we need to first find a Green's
-function for the infinite medium RTE. Denote the Green's function by
-$G(\tau,\pm\mu_i; x,\zeta_\alpha)$, where $\alpha = \pm 1, \ldots, \pm
-N$ and $\zeta_{-i} = -\mu_i$. Then, we can show that the Green's
-function must satisfy the jump conditions
+function for the infinite medium RTE at the dummy nodes. Denote the
+Green's function by $G(\tau,\pm\mu_i; x,\zeta_\alpha)$, where
+$i=N+1,\ldots,N+M$, $\alpha = \pm 1, \ldots, \pm (N+M)$ and
+$\zeta_{-i} = -\mu_i$. Then, we can show that the Green's function
+must satisfy the jump conditions
 \begin{align}
   &\lim_{\epsilon \rightarrow 0} \mu_i
   \left[
     G(x+\epsilon, \mu_i; x, \zeta_\alpha)
     -
     G(x-\epsilon, \mu_i; x, \zeta_\alpha)
-  \right] = \delta_{i,\alpha} \\
+  \right] = \delta_{i,\alpha} \label{eqn:positive_jump} \\
   &\lim_{\epsilon \rightarrow 0} \mu_i
   \left[
     G(x+\epsilon, -\mu_i; x, \zeta_\alpha)
     -
     G(x-\epsilon, -\mu_i; x, \zeta_\alpha)
-  \right] = -\delta_{-i,\alpha}
+  \right] = -\delta_{-i,\alpha} \label{eqn:negative_jump}
 \end{align}
-for $i=1,\ldots,N$. At regular nodes we can assume a solution of the
-form
+At dummy nodes we can assume a solution of the form
 \begin{align}
   G(\tau,\mu_i;x,\zeta_\alpha) 
-  &= \sum_{j=1}^N A_{j,\alpha} \phi(\nu_j,\mu_i) e^{-(\tau-x)/\nu_j} 
-  \quad \tau>x
+  &= \sum_{j=1}^N 
+  A_{j,\alpha} \hat{\phi}(\nu_j,\mu_i) e^{-(\tau-x)/\nu_j}
+  + A_{i,\alpha} e^{-(\tau-x)/\nu_i}
+  \quad \tau>x \label{eqn:positive_up_dn_gf}
   \\
-  &= \sum_{j=1}^N B_{j,\alpha} \phi(-\nu_j,\mu_i) e^{-(x-\tau)/\nu_j}
-  \quad \tau<x
+  &= \sum_{j=1}^N 
+  B_{j,\alpha} \hat{\phi}(-\nu_j,\mu_i) e^{-(x-\tau)/\nu_j}
+  \quad \tau<x \label{eqn:positive_down_dn_gf}
 \end{align}
 and
 \begin{align}
   G(\tau,-\mu_i;x,\zeta_\alpha) 
-  &= \sum_{j=1}^N A_{j,\alpha} \phi(\nu_j,-\mu_i) e^{-(\tau-x)/\nu_j} 
-  \quad \tau>x
+  &= \sum_{j=1}^N 
+  A_{j,\alpha} \hat{\phi}(\nu_j,-\mu_i) e^{-(\tau-x)/\nu_j} 
+  \quad \tau>x \label{eqn:negative_up_dn_gf}
   \\
-  &= \sum_{j=1}^N B_{j,\alpha} \phi(-\nu_j,-\mu_i) e^{-(x-\tau)/\nu_j}
-  \quad \tau<x
+  &= \sum_{j=1}^N 
+  B_{j,\alpha} \hat{\phi}(-\nu_j,-\mu_i) e^{-(x-\tau)/\nu_j}
+  + B_{i,\alpha} e^{-(x-\tau)/\nu_i}
+  \quad \tau<x \label{eqn:negative_down_dn_gf}
 \end{align}
-Substituting these in the jump condition and using the orthogonality
-of the eignefunctions we can show that we have
+In these equations the coefficients $A_{j,\alpha}$ and $B_{j,\alpha}$
+are given by
 \begin{align}
-  A_{k,\alpha} &= \frac{1}{N(\nu_k)} w_\alpha \phi(\nu_k,\zeta_\alpha) \\
-  B_{k,\alpha} &= \frac{1}{N(\nu_k)} w_\alpha \phi(-\nu_k,\zeta_\alpha).
+  A_{j,\alpha} &= \frac{1}{N(\nu_j)} w_\alpha \phi(\nu_j,\zeta_\alpha) \\
+  B_{j,\alpha} &= \frac{1}{N(\nu_j)} w_\alpha \phi(-\nu_j,\zeta_\alpha).
+\end{align}
+Using Eqns.\thinspace(\ref{eqn:positive_up_dn_gf}) and
+(\ref{eqn:positive_down_dn_gf}) in \eqr{\ref{eqn:positive_jump}} we
+get the expression
+\begin{align}
+  A_{i,\alpha} =
+  \frac{\delta_{i,\alpha}}{\mu_i}
+  -
+  \sum_{j=1}^N
+  \left[
+     A_{j,\alpha} \hat{\phi}(\nu_j,\mu_i)
+    - B_{j,\alpha} \hat{\phi}(-\nu_j,\mu_i)
+ \right]
+\end{align}
+Similarly, using Eqns.\thinspace(\ref{eqn:negative_up_dn_gf}) and
+(\ref{eqn:negative_down_dn_gf}) in \eqr{\ref{eqn:negative_jump}} we
+get the expression
+\begin{align}
+  B_{i,\alpha} =
+  \frac{\delta_{-i,\alpha}}{\mu_i}
+  +
+  \sum_{j=1}^N
+  \left[
+     A_{j,\alpha} \hat{\phi}(\nu_j,-\mu_i)
+    - B_{j,\alpha} \hat{\phi}(-\nu_j,-\mu_i)
+ \right]
+\end{align}
+Now that we have the needed coefficients the particular solution at a
+dummy node for a specified source, $Q(\tau,\zeta_\alpha)$, can be
+computed as
+\begin{align}
+  L^p(\tau,\pm\mu_i) = \int_0^{\tau_0}
+  \sum_\alpha
+  Q(x,\zeta_\alpha)
+  G(\tau,\pm\mu_i,x,\mu_\alpha)
+  dx
 \end{align}
 
 \end{document}
