@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* April 1st
+
+  Trying to figure out particular solutions at dummy nodes. Seems like
+  a real mess.
+
 * March 31th
 
   Started work on dummy-node inclusion. Not working or complete
