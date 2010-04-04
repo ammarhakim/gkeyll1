@@ -285,8 +285,7 @@ and
     \script{B}_j(\tau) \gvec{\Phi}_+(\nu_j)
   \right]
 \end{align}
-
-The functions appearing in the particular solutions can be computed as
+where
 \begin{align}
   \script{A}_j(\tau) = &\frac{1}{N(\nu_j)}
   \int_0^\tau dx
@@ -308,8 +307,6 @@ and
 \end{align}
 
 
-\subsection{For beam illumination $\script{A}$ and $\script{B}$ can
-  be explicitly computed}
 For uniform illumination we can compute explicitly\footnote{See
   RteHomogeneousSlab::scriptAB()}
 \begin{align}
@@ -547,11 +544,35 @@ Now that we have the needed coefficients the particular solution at a
 dummy node for a specified source, $Q(\tau,\zeta_\alpha)$, can be
 computed as
 \begin{align}
-  L^p(\tau,\pm\mu_i) = \int_0^{\tau_0}
+  L^p(\tau,\pm\mu_i) 
+  &= 
+  \int_0^{\tau_0}
   \sum_\alpha
   Q(x,\zeta_\alpha)
-  G(\tau,\pm\mu_i,x,\mu_\alpha)
+  G(\tau,\pm\mu_i,x,\zeta_\alpha)
+  dx \notag \\
+  &=
+  \int_0^{\tau}
+  \sum_\alpha
+  Q(x,\zeta_\alpha)
+  G(\tau,\pm\mu_i,x,\zeta_\alpha)
   dx
+  +
+  \int_\tau^{\tau_0}
+  \sum_\alpha
+  Q(x,\zeta_\alpha)
+  G(\tau,\pm\mu_i,x,\zeta_\alpha)
+  dx
+\end{align}
+
+Using the general solution we get
+\begin{align}
+  L^p(\tau,\mu_i) = 
+  \sum_{j=1}^N
+  \left[
+    \script{A}_j(\tau) \hat{\phi}(\nu_j,\mu_i) +
+    \script{B}_j(\tau) \hat{\phi}(-\nu_j,\mu_i)
+  \right]
 \end{align}
 
 \end{document}
