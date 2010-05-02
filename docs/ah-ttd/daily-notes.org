@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* April 2nd - 6th
+
+  No work on Lucee. Need to get back on this and bring the RTE solver
+  to a completion.
+
 * April 1st
 
   Trying to figure out particular solutions at dummy nodes. Seems like
