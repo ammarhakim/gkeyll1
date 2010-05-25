@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcLuaTable.h>
+#include <LcBasicObj.h>
 
 // std includes
 #include <string>
@@ -50,7 +51,7 @@ namespace Lucee
  *
  * The finalize() method is called to shut-down the solver.
  */
-  class SolverIfc
+  class SolverIfc : public Lucee::BasicObj
   {
     public:
 /** Class id: this is used by the registration system */
@@ -67,13 +68,6 @@ namespace Lucee
  * Destroy solver object.
  */
       virtual ~SolverIfc();
-
-/**
- * Get name of solver.
- *
- * @return Name of solver.
- */
-      std::string getName() const;
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -147,18 +141,7 @@ namespace Lucee
  */
       virtual void finalize() = 0;
 
-    protected:
-/**
- * Set name of solver. This should be called by derived classes to set
- * their names.
- *
- * @param nm Name of solver.
- */
-      void setName(const std::string& nm);
-      
     private:
-/** Solver name */
-      std::string name;
 /** Current time */
       double currTime;
   };

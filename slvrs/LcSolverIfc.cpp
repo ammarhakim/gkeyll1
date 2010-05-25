@@ -25,18 +25,12 @@ namespace Lucee
   const char *SolverIfc::id = "Solver";
 
   SolverIfc::SolverIfc(const std::string& nm)
-    : name(nm)
+    : Lucee::BasicObj(nm)
   {
   }
 
   SolverIfc::~SolverIfc()
   {
-  }
-
-  std::string
-  SolverIfc::getName() const
-  {
-    return name;
   }
 
   void
@@ -49,11 +43,5 @@ namespace Lucee
   SolverIfc::getCurrTime() const 
   {
     return currTime;
-  }
-
-  void
-  SolverIfc::setName(const std::string& nm)
-  {
-    name = nm;
   }
 }
