@@ -22,10 +22,12 @@
 namespace Lucee
 {
   BasicObj::BasicObj(const std::string& nm)
-    : nm(nm) {
+    : nm(nm) 
+  {
   }
 
-  BasicObj::~BasicObj() {
+  BasicObj::~BasicObj() 
+  {
   }
 
   std::string
