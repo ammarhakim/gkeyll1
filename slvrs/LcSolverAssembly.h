@@ -20,6 +20,7 @@
 #include <LcSolverIfc.h>
 
 // std includes
+#include <map>
 #include <string>
 
 namespace Lucee
@@ -102,6 +103,14 @@ namespace Lucee
  * etc.
  */
       virtual void finalize();
+
+    private:
+/** Map of data fields */
+
+/** Map of data-aliases */
+
+/** Map of updaters */
+
   };
 }
 

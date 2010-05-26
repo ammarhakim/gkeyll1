@@ -10,7 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 link_directories(${PROJECT_BINARY_DIR}/lib)
 link_directories(${PROJECT_BINARY_DIR}/rte)
-link_directories(${PROJECT_BINARY_DIR}/slvr)
+link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
 

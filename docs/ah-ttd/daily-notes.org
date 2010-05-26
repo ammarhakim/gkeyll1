@@ -9,6 +9,49 @@
   Need to figure out a way to avoid specifying dimensions in the input
   file. Everything can be determined from the dimension of the grid.
 
+  Example::
+
+    simulation = Solver.Assembly {
+      domain = Grid.CartGrid {
+        lower = {0.0, 0.0},
+	upper = {1.0, 2.0},
+	cells = {10, 20},
+      },
+
+      q = Data.Field { 
+        onGrid = domain,	
+	numComponents = 5
+      },
+
+      qOld = Data.Field { 
+        onGrid = domain, numComponents = 5 
+      },
+
+      qMom = DataAlias.Field {
+        target = q,
+	componentRange = {1, 4},
+      },
+
+      init = Updater.InitField {
+        onGrid = domain,
+      },
+
+      stepper = Stepper.ConstantDt {
+        dt = 1.5e-3,
+	initialize = {initQStep, initiQoldStep},
+
+	initQStep = Step {
+	  updater = init,
+	  out = {q}
+	},
+	initQoldStep = Step {
+	  updater = init,
+	  out = {q}
+	},
+
+      },
+    }
+
 * April 2nd - 6th
 
   No work on Lucee. Need to get back on this and bring the RTE solver
