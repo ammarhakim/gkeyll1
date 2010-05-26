@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* May 25th
+
+  Back to working on Lucee after a long while. Added a SolverAssembly
+  class that will serve as a general purpose solver to assemble a
+  simulation using grids, data and updaters.
+
+  Need to figure out a way to avoid specifying dimensions in the input
+  file. Everything can be determined from the dimension of the grid.
+
 * April 2nd - 6th
 
   No work on Lucee. Need to get back on this and bring the RTE solver
