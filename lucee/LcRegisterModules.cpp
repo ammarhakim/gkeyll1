@@ -9,10 +9,11 @@
  */
 
 // lucee includes
-#include <LcLuaState.h>
 #include <LcObjCreator.h>
 #include <LcRegisterModules.h>
+#include <LcRteRegistry.h>
 #include <LcSolverIfc.h>
+#include <LcSolverRegistry.h>
 
 namespace Lucee
 {
@@ -24,6 +25,7 @@ namespace Lucee
   void registerModules(Lucee::LuaState& L)
   {
 // register objects
+    Lucee::registerSolverObjects(L);
     Lucee::registerRteObjects(L);
 
 // register modules into Lua

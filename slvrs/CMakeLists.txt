@@ -9,5 +9,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lcslvrs
+  LcSolverAssembly.cpp
   LcSolverIfc.cpp
+  LcSolverRegistry.cpp
 )

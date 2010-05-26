@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcRteRegistry.h>
+#include <LcLuaState.h>
 
 namespace Lucee
 {
