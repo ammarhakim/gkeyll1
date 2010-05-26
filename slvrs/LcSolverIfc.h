@@ -70,6 +70,22 @@ namespace Lucee
       virtual ~SolverIfc();
 
 /**
+ * Set the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @param tm Current time.
+ */
+      void setCurrTime(double tm);
+
+/**
+ * Get the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @return Current time.
+ */
+      double getCurrTime() const;
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
@@ -91,22 +107,6 @@ namespace Lucee
  * this call, the solver should be ready for evolving the solution.
  */
       virtual void initialize() = 0;
-
-/**
- * Set the current time for solver. This is the time at which the
- * present state of the solver is valid.
- *
- * @param tm Current time.
- */
-      void setCurrTime(double tm);
-
-/**
- * Get the current time for solver. This is the time at which the
- * present state of the solver is valid.
- *
- * @return Current time.
- */
-      double getCurrTime() const;
 
 /**
  * Advance the solution to specified time. Solvers that do not have a
