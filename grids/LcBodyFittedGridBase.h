@@ -17,7 +17,6 @@
 #endif
 
 // lucee includes
-#include <LcField.h>
 #include <LcRegion.h>
 
 namespace Lucee
@@ -44,8 +43,6 @@ namespace Lucee
       Lucee::Region<NDIM, int> globalBox;
 /** Region spanned by grid in computational space */
       Lucee::Region<NDIM, double> compSpace;
-/** Coordinates of nodes in grid */
-      Lucee::Field<NDIM, double> nodalCoords;
   };
 }
 

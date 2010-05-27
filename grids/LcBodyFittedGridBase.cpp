@@ -21,7 +21,7 @@ namespace Lucee
   template <unsigned NDIM>
   BodyFittedGridBase<NDIM>::BodyFittedGridBase(const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& compSpace)
-    : globalBox(globalBox), compSpace(compSpace), nodalCoords(globalBox, 3)
+    : globalBox(globalBox), compSpace(compSpace)
   {
   }
 
