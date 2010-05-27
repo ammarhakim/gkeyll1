@@ -27,5 +27,6 @@ add_library(lclib
   LcMathLib.cpp
   LcMatrix.cpp
   LcStreamHandler.cpp
+  LcVec3.cpp
   LcVector.cpp
 )

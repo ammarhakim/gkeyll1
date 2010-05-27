@@ -82,3 +82,7 @@ target_link_libraries(lclogger lclib lcloki lclua)
 # lchdf5io
 add_executable(lchdf5io lchdf5io.cxx)
 target_link_libraries(lchdf5io lclib lcloki lclua ${HDF5_LIBRARIES})
+
+# lcvec3
+add_executable(lcvec3 lcvec3.cxx)
+target_link_libraries(lcvec3 lclib)
