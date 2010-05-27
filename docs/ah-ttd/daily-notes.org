@@ -2,8 +2,12 @@
 
 * May 26th
 
-  Created a Vec3 class to store vectors in 3D space. In preparation
-  for adding a body-fitted grid class.
+  - Created a Vec3 class to store vectors in 3D space. In preparation
+    for adding a body-fitted grid class.
+
+  - Started on BodyFittedGrid. The idea is to have a base class called
+    BodyFittedGridBase from which BodyFittedGrid and CartGrid will be
+    derived.
 
 * May 25th
 
