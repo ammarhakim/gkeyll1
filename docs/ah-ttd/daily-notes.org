@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* May 26th
+
+  Created a Vec3 class to store vectors in 3D space. In preparation
+  for adding a body-fitted grid class.
+
 * May 25th
 
   Back to working on Lucee after a long while. Added a SolverAssembly
