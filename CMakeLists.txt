@@ -119,3 +119,6 @@ add_test(lclogger unit/lclogger)
 
 # lchdf5io
 add_test(lchdf5io unit/lchdf5io)
+
+# lcvec3
+add_test(lcvec3 unit/lcvec3)

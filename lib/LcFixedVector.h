@@ -113,6 +113,23 @@ namespace Lucee
  */
       T getNorm() const;
 
+    protected:
+/**
+ * Get value at location.
+ *
+ * @param i index location.
+ * @return value.
+ */
+      const T& getVal(unsigned i) const { return data[i]; }
+
+/**
+ * Set value at location.
+ *
+ * @param i index location.
+ * @param val value to set
+ */
+      void setVal(unsigned i, const T& val) { data[i] = val; }
+
     private:
 /** Data */
       T data[NELEM];
@@ -186,7 +203,7 @@ namespace Lucee
   T
   FixedVector<NELEM, T>::getNorm() const
   {
-    T norm = 0.0;
+    T norm = 0;
     for (unsigned i=0; i<NELEM; ++i)
       norm += data[i]*data[i];
     return std::sqrt(norm);
