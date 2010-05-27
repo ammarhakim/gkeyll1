@@ -57,6 +57,9 @@ add_subdirectory(etc/lua/src)
 # Build code in lib
 add_subdirectory(lib)
 
+# Build code in grids
+add_subdirectory(grids)
+
 # Build code in slvrs
 add_subdirectory(slvrs)
 
