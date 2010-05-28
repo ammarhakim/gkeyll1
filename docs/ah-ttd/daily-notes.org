@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* May 27th
+
+  Added ghost indices to fields. A lot of work to fix. Still does not
+  work with slicing and sub-component views.
+
 * May 26th
 
   - Created a Vec3 class to store vectors in 3D space. In preparation

@@ -65,6 +65,21 @@ namespace Lucee
         int lg[NDIM], int ug[NDIM], const T& init=(T)0);
 
 /**
+ * Create a field from supplied one (shallow copy).
+ *
+ * @param fld Field to copy from.
+ */
+      Field(const Field<NDIM, T>& fld);
+
+/**
+ * Assign a field from supplied one (shallow copy).
+ *
+ * @param fld Field to assign from.
+ * @return Reference to this field.
+ */
+      Field<NDIM, T>& operator=(const Field<NDIM, T>& fld);
+
+/**
  * Assign field to given value.
  *
  * @param val Value to assign.
@@ -80,11 +95,52 @@ namespace Lucee
       unsigned getNumComponents() const { return numComponents; }
 
 /**
+ * Get start index in the specified direction.
+ *
+ * @return start index in specified direction.
+ */
+      int getLower(unsigned dir) const
+      { return rgn.inflate(scIdx, numComponents+scIdx).getLower(dir); }
+
+/**
+ * Get one past the end index in the specified direction.
+ *
+ * @return One past the end index in specified direction.
+ */
+      int getUpper(unsigned dir) const
+      { return rgn.inflate(scIdx, numComponents+scIdx).getUpper(dir); }
+
+/**
+ * Get start index of the extended region (including ghost indices) in
+ * the specified direction.
+ *
+ * @return start index in specified direction.
+ */
+      int getLowerExt(unsigned dir) const
+      { 
+        return rgn.extend(lowerGhost, upperGhost)
+          .inflate(scIdx, numComponents+scIdx).getLower(dir); 
+      }
+
+/**
+ * Get one past the end index of the extended region (including ghost
+ * indices) in the specified direction.
+ *
+ * @return One past the end index in specified direction.
+ */
+      int getUpperExt(unsigned dir) const
+      { 
+        return rgn.extend(lowerGhost, upperGhost)
+          .inflate(scIdx, numComponents+scIdx).getUpper(dir);
+      }
+
+/**
  * Region indexed by field.
  *
  * @return region indexed by field.
  */
-      Lucee::Region<NDIM, int> getRegion() const { return rgn; }
+      Lucee::Region<NDIM, int> getRegion() const 
+      { return rgn; }
 
 /**
  * Region extended region (including ghost indices) indexed by field.
@@ -211,12 +267,18 @@ namespace Lucee
  * Create a field attached to a given data space.
  *
  * @param rgn Region for field.
+ * @param sc Start index into component.
+ * @param ec End index into component.
  * @param nc Number of components in field.
+ * @param lg Ghost indexes along lower index range in each dimension.
+ * @param ug Ghost indexes along upper index range in each dimension.
  * @param subArr Array space to reuse.
  */
-      Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc,
+      Field(const Lucee::Region<NDIM, int>& rgn, unsigned sc, unsigned ec,
         int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr);
 
+/** Start index into components */
+      unsigned scIdx;
 /** Number of components */
       unsigned numComponents;
 /** Region indexed by grid */

@@ -21,7 +21,7 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
+      scIdx(0), numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -35,13 +35,49 @@ namespace Lucee
     int lg[NDIM], int ug[NDIM], const T& init)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
       rgn.extend(lg, ug).inflate(0, nc), init),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
+      scIdx(0), numComponents(nc), rgn(rgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
       lowerGhost[i] = lg[i];
       upperGhost[i] = ug[i];
     }
+  }
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Field<NDIM, T>& fld)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(fld),
+      scIdx(fld.scIdx),
+      numComponents(fld.numComponents),
+      rgn(fld.rgn),
+      rgnIdx(fld.rgnIdx)
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = fld.lowerGhost[i];
+      upperGhost[i] = fld.upperGhost[i];
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::operator=(const Field<NDIM, T>& fld)
+  {
+    if (&fld == this)
+      return *this;
+
+// call base class assignment operator
+    Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::operator=(fld);
+    scIdx = fld.scIdx;
+    numComponents = fld.numComponents;
+    rgn = fld.rgn;
+    rgnIdx = fld.rgnIdx;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = fld.lowerGhost[i];
+      upperGhost[i] = fld.upperGhost[i];
+    }
+    return *this;
   }
 
   template <unsigned NDIM, typename T>
@@ -59,8 +95,8 @@ namespace Lucee
   {
 //    Lucee::Region<NDIM, int> extVrgn = vrgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
-      = this->getSlice(vrgn.inflate(0, numComponents));
-    Field<NDIM, T> fld(vrgn, numComponents, lowerGhost, upperGhost, subArr);
+      = this->getSlice(vrgn.inflate(scIdx, numComponents+scIdx));
+    Field<NDIM, T> fld(vrgn, scIdx, scIdx+numComponents, lowerGhost, upperGhost, subArr);
     fld.rgnIdx = this->rgnIdx;
     return fld;
   }
@@ -72,7 +108,8 @@ namespace Lucee
 //    Lucee::Region<NDIM, int> extVrgn = rgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
       = this->getSlice(rgn.inflate(sc, ec));
-    Field<NDIM, T> fld(rgn, ec-sc, lowerGhost, upperGhost, subArr);
+    Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
+
     fld.rgnIdx = this->rgnIdx;
     int newLower[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
@@ -107,10 +144,10 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc,
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned sc, unsigned ec,
     int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(subArr),
-      numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
+      scIdx(sc), numComponents(ec-sc), rgn(rgn), rgnIdx(rgn.inflate(sc, ec))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
