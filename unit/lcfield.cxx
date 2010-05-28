@@ -289,7 +289,6 @@ test_8()
       for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
       {
         magFld.setPtr(magPtr, i, j, k);
-        elcFld.setPtr(elcPtr, i, j, k);
         for (unsigned n=0; n<magPtr.getNumComponents(); ++n)
           LC_ASSERT("Testing components of sub-comp view", magPtr[n] == (i+3*j+5.5*k+0.5)*(n+3));
       }
@@ -297,8 +296,8 @@ test_8()
   for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
     for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
       for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
-        for (int n=magFld.getLower(3); k<magFld.getUpper(3); ++k)
-          LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*(n+3));
+        for (int n=magFld.getLower(3); n<magFld.getUpper(3); ++n)
+          LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*n);
 }
 
 void
@@ -375,37 +374,104 @@ test_11()
 {
   int lower[2] = {0, 0};
   int upper[2] = {10, 12};
-  int lg[2] = {1, 1};
-  int ug[2] = {2, 2};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
   Lucee::Region<2, int> rgn(lower, upper);
   Lucee::Field<2, double> elcField(rgn, 3, lg, ug, 10.0);
 
   LC_ASSERT("Testing if number of components is correct", 
     elcField.getNumComponents() == 3);
 
-  Lucee::Region<2, int> idxRgn = elcField.getRegion();
+  Lucee::Region<2, int> localRgn = elcField.getRegion();
   for (unsigned i=0; i<2; ++i)
   {
     LC_ASSERT("Testing if index region is correct",
-      idxRgn.getLower(i) == rgn.getLower(i));
+      localRgn.getLower(i) == rgn.getLower(i));
     LC_ASSERT("Testing if index region is correct",
-      idxRgn.getUpper(i) == rgn.getUpper(i));
+      localRgn.getUpper(i) == rgn.getUpper(i));
   }
 
-  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
-    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
-    {
-      for (unsigned k=0; k<elcField.getNumComponents(); ++k)
+  Lucee::Region<2, int> extRgn = elcField.getExtRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getLower(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getUpper(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      elcField.getLowerExt(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      elcField.getUpperExt(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+      for (int k=elcField.getLower(2); k<elcField.getUpper(2); ++k)
         LC_ASSERT("Testing default values", elcField(i,j,k) == 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcField.createPtr();
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+    {
+      elcField.setPtr(ptr, i, j);
+      for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+        ptr[n] = (i+0.5*j)*n;
     }
 
-  elcField = 3.0;
-  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
-    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
-    {
-      for (unsigned k=0; k<elcField.getNumComponents(); ++k)
-        LC_ASSERT("Testing assigned values", elcField(i,j,k) == 3.0);
-    }
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+      for (int k=elcField.getLower(2); k<elcField.getUpper(2); ++k)
+        LC_ASSERT("Testing set values", elcField(i,j,k) == (i+0.5*j)*k);
+
+// make a copy of elcField
+  Lucee::Field<2, double> elcField2(elcField);
+  LC_ASSERT("Testing if number of components is correct", 
+    elcField2.getNumComponents() == 3);
+
+  localRgn = elcField2.getRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      localRgn.getLower(i) == rgn.getLower(i));
+    LC_ASSERT("Testing if index region is correct",
+      localRgn.getUpper(i) == rgn.getUpper(i));
+  }
+
+  extRgn = elcField2.getExtRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getLower(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getUpper(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      elcField2.getLowerExt(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      elcField2.getUpperExt(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  for (int i=elcField2.getLowerExt(0); i<elcField2.getUpperExt(0); ++i)
+    for (int j=elcField2.getLowerExt(1); j<elcField2.getUpperExt(1); ++j)
+      for (int k=elcField2.getLower(2); k<elcField2.getUpper(2); ++k)
+        LC_ASSERT("Testing set values", elcField2(i,j,k) == (i+0.5*j)*k);
+
+  for (int i=elcField2.getLowerExt(0); i<elcField2.getUpperExt(0); ++i)
+    for (int j=elcField2.getLowerExt(1); j<elcField2.getUpperExt(1); ++j)
+      for (int k=elcField2.getLower(2); k<elcField2.getUpper(2); ++k)
+        elcField2(i,j,k) = 5.0*(i+0.5*j)*k;
+
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+      for (int k=elcField.getLower(2); k<elcField.getUpper(2); ++k)
+        LC_ASSERT("Testing set values", elcField(i,j,k) == 5.0*(i+0.5*j)*k);
 }
 
 int
