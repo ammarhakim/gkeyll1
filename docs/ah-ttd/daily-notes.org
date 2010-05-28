@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* May 28th
+
+  - Fixed getSubCompView with ghost indices.
+  - Seems like that for getSubCompView() should really have its
+    component indices always starting with index 0.
+
 * May 27th
 
   Added ghost indices to fields. A lot of work to fix. Still does not

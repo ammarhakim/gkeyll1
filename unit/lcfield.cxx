@@ -474,6 +474,83 @@ test_11()
         LC_ASSERT("Testing set values", elcField(i,j,k) == 5.0*(i+0.5*j)*k);
 }
 
+void
+test_12()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+//   int lg[2] = {1, 3};
+//   int ug[2] = {2, 5};
+  int lg[2] = {0, 0};
+  int ug[2] = {0, 0};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcField(rgn, 3, lg, ug, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcField.createPtr();
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+    {
+      elcField.setPtr(ptr, i, j);
+      for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+        ptr[n] = (i+0.5*j)*(n+1);
+    }
+
+  Lucee::Field<2, double> Ex = elcField.getSubCompView(0, 1);
+  Lucee::Region<2, int> localRgn = Ex.getRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      localRgn.getLower(i) == rgn.getLower(i));
+    LC_ASSERT("Testing if index region is correct",
+      localRgn.getUpper(i) == rgn.getUpper(i));
+  }
+
+  Lucee::Region<2, int> extRgn = Ex.getExtRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getLower(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      extRgn.getUpper(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      Ex.getLowerExt(i) == rgn.getLower(i)-lg[i]);
+    LC_ASSERT("Testing if index region is correct",
+      Ex.getUpperExt(i) == rgn.getUpper(i)+ug[i]);
+  }
+
+  LC_ASSERT("Testing if number of components is correct", Ex.getNumComponents() == 1);
+  Lucee::FieldPtr<double> exPtr = Ex.createPtr();
+  for (int i=Ex.getLowerExt(0); i<Ex.getUpperExt(0); ++i)
+    for (int j=Ex.getLowerExt(1); j<Ex.getUpperExt(1); ++j)
+    {
+      Ex.setPtr(exPtr, i, j);
+      for (unsigned n=0; n<exPtr.getNumComponents(); ++n)
+        LC_ASSERT("Testing Ex values", exPtr[n] == (i+0.5*j));
+    }
+  for (int i=Ex.getLowerExt(0); i<Ex.getUpperExt(0); ++i)
+    for (int j=Ex.getLowerExt(1); j<Ex.getUpperExt(1); ++j)
+      LC_ASSERT("Testing Ex values", Ex(i,j,0) == (i+0.5*j));
+
+  Lucee::Field<2, double> Eyz = elcField.getSubCompView(1, 3);
+  LC_ASSERT("Checking number of components", Eyz.getNumComponents() == 2);
+  Lucee::FieldPtr<double> eyzPtr = Eyz.createPtr();
+  for (int i=Eyz.getLowerExt(0); i<Eyz.getUpperExt(0); ++i)
+    for (int j=Eyz.getLowerExt(1); j<Eyz.getUpperExt(1); ++j)
+    {
+      Eyz.setPtr(eyzPtr, i, j);
+      for (unsigned n=0; n<eyzPtr.getNumComponents(); ++n)
+        LC_ASSERT("Testing Eym Ez values", eyzPtr[n] == (i+0.5*j)*(n+1+1));
+    }
+  for (int i=Eyz.getLowerExt(0); i<Eyz.getUpperExt(0); ++i)
+    for (int j=Eyz.getLowerExt(1); j<Eyz.getUpperExt(1); ++j)
+      for (int k=Eyz.getLowerExt(2); k<Eyz.getUpperExt(2); ++k)
+        LC_ASSERT("Testing Eym Ez values", Eyz(i,j,k) == (i+0.5*j)*(k+1));
+}
+
 int
 main(void)
 {
@@ -489,5 +566,6 @@ main(void)
   test_9();
   test_10();
   test_11();
+  test_12();
   LC_END_TESTS;
 }

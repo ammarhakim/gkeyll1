@@ -93,9 +93,9 @@ namespace Lucee
   Field<NDIM, T>
   Field<NDIM, T>::getView(const Lucee::Region<NDIM, int>& vrgn)
   {
-//    Lucee::Region<NDIM, int> extVrgn = vrgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
-      = this->getSlice(vrgn.inflate(scIdx, numComponents+scIdx));
+      = this->getSlice(
+        vrgn.extend(lowerGhost, upperGhost).inflate(scIdx, numComponents+scIdx));
     Field<NDIM, T> fld(vrgn, scIdx, scIdx+numComponents, lowerGhost, upperGhost, subArr);
     fld.rgnIdx = this->rgnIdx;
     return fld;
@@ -105,9 +105,9 @@ namespace Lucee
   Field<NDIM, T>
   Field<NDIM, T>::getSubCompView(unsigned sc, unsigned ec)
   {
-//    Lucee::Region<NDIM, int> extVrgn = rgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
-      = this->getSlice(rgn.inflate(sc, ec));
+      = this->getSlice(
+        rgn.extend(lowerGhost, upperGhost).inflate(sc, ec));
     Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
 
     fld.rgnIdx = this->rgnIdx;
