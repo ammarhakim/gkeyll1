@@ -52,6 +52,19 @@ namespace Lucee
       Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init=(T)0);
 
 /**
+ * Create a new field indexing given region. This constructor creates
+ * an empty set of ghost indices.
+ *
+ * @param rgn Region indexed by array.
+ * @param nc Number of components at each index location.
+ * @param lg Ghost indexes along lower index range in each dimension.
+ * @param ug Ghost indexes along upper index range in each dimension.
+ * @param init Inital value to assigned to all components.
+ */      
+      Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, 
+        int lg[NDIM], int ug[NDIM], const T& init=(T)0);
+
+/**
  * Assign field to given value.
  *
  * @param val Value to assign.
@@ -72,6 +85,14 @@ namespace Lucee
  * @return region indexed by field.
  */
       Lucee::Region<NDIM, int> getRegion() const { return rgn; }
+
+/**
+ * Region extended region (including ghost indices) indexed by field.
+ *
+ * @return extended region indexed by field.
+ */
+      Lucee::Region<NDIM, int> getExtRegion() const 
+      { return rgn.extend(lowerGhost, upperGhost); }
 
 /**
  * Get indexer into field.
@@ -194,7 +215,7 @@ namespace Lucee
  * @param subArr Array space to reuse.
  */
       Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc,
-        Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr);
+        int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr);
 
 /** Number of components */
       unsigned numComponents;
@@ -203,9 +224,9 @@ namespace Lucee
 /** Indexer over region over which field is valid */
       Lucee::RowMajorIndexer<NDIM+1> rgnIdx;
 /** Lower ghost indices */
-      unsigned lowerGhost[NDIM];
+      int lowerGhost[NDIM];
 /** Upper ghost indices */
-      unsigned upperGhost[NDIM];
+      int upperGhost[NDIM];
   };
 
   template <unsigned NDIM, typename T>

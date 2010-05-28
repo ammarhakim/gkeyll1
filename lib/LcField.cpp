@@ -31,6 +31,20 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, 
+    int lg[NDIM], int ug[NDIM], const T& init)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
+      rgn.extend(lg, ug).inflate(0, nc), init),
+      numComponents(nc), rgn(rgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = lg[i];
+      upperGhost[i] = ug[i];
+    }
+  }
+
+  template <unsigned NDIM, typename T>
   Field<NDIM, T>&
   Field<NDIM, T>::operator=(const T& val)
   {
@@ -43,9 +57,10 @@ namespace Lucee
   Field<NDIM, T>
   Field<NDIM, T>::getView(const Lucee::Region<NDIM, int>& vrgn)
   {
+//    Lucee::Region<NDIM, int> extVrgn = vrgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
       = this->getSlice(vrgn.inflate(0, numComponents));
-    Field<NDIM, T> fld(vrgn, numComponents, subArr);
+    Field<NDIM, T> fld(vrgn, numComponents, lowerGhost, upperGhost, subArr);
     fld.rgnIdx = this->rgnIdx;
     return fld;
   }
@@ -54,9 +69,10 @@ namespace Lucee
   Field<NDIM, T>
   Field<NDIM, T>::getSubCompView(unsigned sc, unsigned ec)
   {
+//    Lucee::Region<NDIM, int> extVrgn = rgn.extend(lowerGhost, upperGhost);
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
       = this->getSlice(rgn.inflate(sc, ec));
-    Field<NDIM, T> fld(rgn, ec-sc, subArr);
+    Field<NDIM, T> fld(rgn, ec-sc, lowerGhost, upperGhost, subArr);
     fld.rgnIdx = this->rgnIdx;
     int newLower[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
@@ -92,14 +108,14 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc,
-    Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr)
+    int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(subArr),
       numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
-      lowerGhost[i] = 0;
-      upperGhost[i] = 0;
+      lowerGhost[i] = lg[i];
+      upperGhost[i] = ug[i];
     }
   }
 

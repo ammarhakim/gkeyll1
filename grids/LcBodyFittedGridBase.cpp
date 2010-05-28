@@ -19,11 +19,27 @@
 namespace Lucee
 {
   template <unsigned NDIM>
-  BodyFittedGridBase<NDIM>::BodyFittedGridBase(const Lucee::Region<NDIM, int>& globalBox,
+  BodyFittedGridBase<NDIM>::BodyFittedGridBase(const Lucee::Region<NDIM, int>& localBox,
+    const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& compSpace)
-    : globalBox(globalBox), compSpace(compSpace)
+    : localBox(localBox), globalBox(globalBox), compSpace(compSpace)
   {
   }
+
+  template <unsigned NDIM>
+  Lucee::Region<NDIM, int>
+  BodyFittedGridBase<NDIM>::getGlobalBox() const 
+  { return globalBox; }
+
+  template <unsigned NDIM>
+  Lucee::Region<NDIM, int>
+  BodyFittedGridBase<NDIM>::getLocalBox() const 
+  { return localBox; }
+
+  template <unsigned NDIM>
+  Lucee::Region<NDIM, double>
+  BodyFittedGridBase<NDIM>::getComputationalSpace() const 
+  { return compSpace; }
 
 // instantiations
   template class BodyFittedGridBase<1>;
