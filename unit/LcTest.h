@@ -199,7 +199,7 @@ static LcTestCounter __tc;
         __tc.failed++;                                                  \
         __tc.addFailedTest(__LINE__, __FILE__, std::string(msg)+" [ "+std::string(#expr)+" ]"); \
       }                                                                 \
-    }while (0)
+    } while (0)
 
 /**
  * Compares two arrays and returns true if they are equal.

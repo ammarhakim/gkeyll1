@@ -35,6 +35,12 @@ namespace Lucee
  * represents the full grid, while the localBox represents the portion
  * of the grid handled by the rank the grid lives on.
  *
+ * To get data from the grid, first set the index into the grid by
+ * using the setIndex() method. Then access the needed data for that
+ * cell. For structured grids, the edges on the lower side (left,
+ * bottom, back) are labeled by the cell index. Further, the lower
+ * left corner of each cell is also labelled by the cell index.
+ *
  * @param localBox Local index region for this grid.
  * @param globalBox Global index region for this grid.
  * @param compSpace Region in computation space.
@@ -64,12 +70,47 @@ namespace Lucee
  */
       Lucee::Region<NDIM, double> getComputationalSpace() const;
 
+/**
+ * Set the current cell location in grid to (i).
+ *
+ * @param i Index location into grid.
+ */
+      void setIndex(int i);
+
+/**
+ * Set the current cell location in grid to (i, j).
+ *
+ * @param i Index location into grid.
+ * @param j Index location into grid.
+ */
+      void setIndex(int i, int j);
+
+/**
+ * Set the current cell location in grid to (i, j, k).
+ *
+ * @param i Index location into grid.
+ * @param j Index location into grid.
+ * @param k Index location into grid.
+ */
+      void setIndex(int i, int j, int k);
+
+/**
+ * Set the current cell location in grid to specified index.
+ *
+ * @param idx Index location into grid.
+ */
+      void setIndex(const int idx[NDIM]);
+
+    protected:
+/** Index into current cell */
+      int currIdx[NDIM];
+
     private:
 /** Local region indexed by grid */
       Lucee::Region<NDIM, int> localBox;
 /** Global region indexed by grid */
       Lucee::Region<NDIM, int> globalBox;
-/** Region spanned by grid in computational space */
+/** Global region spanned by grid in computational space */
       Lucee::Region<NDIM, double> compSpace;
   };
 }

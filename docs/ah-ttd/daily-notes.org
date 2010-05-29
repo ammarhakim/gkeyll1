@@ -4,7 +4,7 @@
 
   - Fixed getSubCompView with ghost indices.
   - Seems like that for getSubCompView() should really have its
-    component indices always starting with index 0.
+    component indices always starting with index 0. (Now fixed)
 
 * May 27th
 
