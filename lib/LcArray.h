@@ -336,6 +336,13 @@ namespace Lucee
  */
       T operator()(int i, int j, int k, int l) const;
 
+/**
+ * Reset the lower bounds of the array.
+ *
+ * @param nlo New lower bounds.
+ */
+      void resetLower(const int nlo[NDIM]);
+
     protected:
 /**
  * Construct array with specified index region and re-using the
@@ -695,6 +702,15 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::getConstRefToLoc(unsigned loc) const
   {
     return data[loc];
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  void
+  Array<NDIM, T, INDEXER>::resetLower(const int nlo[NDIM])
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      start[i] = nlo[i];
+    indexer.resetLower(nlo);
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
