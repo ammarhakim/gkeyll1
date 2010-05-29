@@ -108,13 +108,16 @@ namespace Lucee
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
       = this->getSlice(
         rgn.extend(lowerGhost, upperGhost).inflate(sc, ec));
-    Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
 
-    fld.rgnIdx = this->rgnIdx;
     int newLower[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
       newLower[i] = rgnIdx.getLower(i);
     newLower[NDIM] = -sc; // returned field's 0th component should be sc
+
+    subArr.resetLower(newLower);
+    Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
+
+    fld.rgnIdx = this->rgnIdx;
     fld.rgnIdx.resetLower(newLower);
     return fld;
   }

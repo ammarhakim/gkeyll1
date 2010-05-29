@@ -280,8 +280,8 @@ test_8()
   Lucee::Field<3, double> magFld = emFld.getSubCompView(3, 6);
 
   LC_ASSERT("Testing number of components in sub-comp view", magFld.getNumComponents() == 3);
-  LC_ASSERT("Testing components bounds", magFld.getLower(3) == 3);
-  LC_ASSERT("Testing components bounds", magFld.getUpper(3) == 6);
+  LC_ASSERT("Testing components bounds", magFld.getLower(3) == 0);
+  LC_ASSERT("Testing components bounds", magFld.getUpper(3) == 3);
 
   Lucee::FieldPtr<double> magPtr = magFld.createPtr();
   for (int i=magFld.getLower(0); i<magFld.getUpper(0); ++i)
@@ -297,7 +297,8 @@ test_8()
     for (int j=magFld.getLower(1); j<magFld.getUpper(1); ++j)
       for (int k=magFld.getLower(2); k<magFld.getUpper(2); ++k)
         for (int n=magFld.getLower(3); n<magFld.getUpper(3); ++n)
-          LC_ASSERT("Testing components of sub-comp view", magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*n);
+          LC_ASSERT("Testing components of sub-comp view", 
+            magFld(i,j,k,n) == (i+3*j+5.5*k+0.5)*(n+3));
 }
 
 void
@@ -479,10 +480,8 @@ test_12()
 {
   int lower[2] = {0, 0};
   int upper[2] = {10, 12};
-//   int lg[2] = {1, 3};
-//   int ug[2] = {2, 5};
-  int lg[2] = {0, 0};
-  int ug[2] = {0, 0};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
   Lucee::Region<2, int> rgn(lower, upper);
   Lucee::Field<2, double> elcField(rgn, 3, lg, ug, 10.0);
 
@@ -543,12 +542,17 @@ test_12()
     {
       Eyz.setPtr(eyzPtr, i, j);
       for (unsigned n=0; n<eyzPtr.getNumComponents(); ++n)
-        LC_ASSERT("Testing Eym Ez values", eyzPtr[n] == (i+0.5*j)*(n+1+1));
+        LC_ASSERT("Testing Eyz values", eyzPtr[n] == (i+0.5*j)*(n+1+1));
     }
+  LC_ASSERT("Testing component bounds of Eyz", Eyz.getLower(2) == 0);
+  LC_ASSERT("Testing component bounds of Eyz", Eyz.getUpper(2) == 2);
+  LC_ASSERT("Testing component bounds of Eyz", Eyz.getLowerExt(2) == 0);
+  LC_ASSERT("Testing component bounds of Eyz", Eyz.getUpperExt(2) == 2);
+
   for (int i=Eyz.getLowerExt(0); i<Eyz.getUpperExt(0); ++i)
     for (int j=Eyz.getLowerExt(1); j<Eyz.getUpperExt(1); ++j)
       for (int k=Eyz.getLowerExt(2); k<Eyz.getUpperExt(2); ++k)
-        LC_ASSERT("Testing Eym Ez values", Eyz(i,j,k) == (i+0.5*j)*(k+1));
+        LC_ASSERT("Testing Eyz values", Eyz(i,j,k) == (i+0.5*j)*(k+1+1));
 }
 
 int

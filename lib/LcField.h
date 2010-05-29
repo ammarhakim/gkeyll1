@@ -100,7 +100,7 @@ namespace Lucee
  * @return start index in specified direction.
  */
       int getLower(unsigned dir) const
-      { return rgn.inflate(scIdx, numComponents+scIdx).getLower(dir); }
+      { return rgn.inflate(0, numComponents).getLower(dir); }
 
 /**
  * Get one past the end index in the specified direction.
@@ -108,7 +108,7 @@ namespace Lucee
  * @return One past the end index in specified direction.
  */
       int getUpper(unsigned dir) const
-      { return rgn.inflate(scIdx, numComponents+scIdx).getUpper(dir); }
+      { return rgn.inflate(0, numComponents).getUpper(dir); }
 
 /**
  * Get start index of the extended region (including ghost indices) in
@@ -119,7 +119,7 @@ namespace Lucee
       int getLowerExt(unsigned dir) const
       { 
         return rgn.extend(lowerGhost, upperGhost)
-          .inflate(scIdx, numComponents+scIdx).getLower(dir); 
+          .inflate(0, numComponents).getLower(dir); 
       }
 
 /**
@@ -131,7 +131,7 @@ namespace Lucee
       int getUpperExt(unsigned dir) const
       { 
         return rgn.extend(lowerGhost, upperGhost)
-          .inflate(scIdx, numComponents+scIdx).getUpper(dir);
+          .inflate(0, numComponents).getUpper(dir);
       }
 
 /**
