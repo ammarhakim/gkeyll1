@@ -41,6 +41,30 @@ namespace Lucee
   BodyFittedGridBase<NDIM>::getComputationalSpace() const 
   { return compSpace; }
 
+  template <unsigned NDIM>
+  void
+  BodyFittedGridBase<NDIM>::setIndex(int i)
+  {
+  }
+  
+  template <unsigned NDIM>
+  void
+  BodyFittedGridBase<NDIM>::setIndex(int i, int j)
+  {
+  }
+
+  template <unsigned NDIM>
+  void
+  BodyFittedGridBase<NDIM>::setIndex(int i, int j, int k)
+  {
+  }
+
+  template <unsigned NDIM>
+  void
+  BodyFittedGridBase<NDIM>::setIndex(const int idx[NDIM])
+  {
+  }
+
 // instantiations
   template class BodyFittedGridBase<1>;
   template class BodyFittedGridBase<2>;
