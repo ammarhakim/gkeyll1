@@ -8,12 +8,12 @@ cmake_minimum_required(VERSION 2.4)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
 
 # Always build with warnings turned on
-set(CMAKE_C_FLAGS "-Wall -g")
-set(CMAKE_CXX_FLAGS "-Wall -g")
+set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 # for debug builds use -g
-set(CMAKE_C_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_C_FLAGS_DEBUG "-g -DLC_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -DLC_DEBUG")
 
 # for optimized builds use
 set(CMAKE_C_FLAGS_RELEASE "-O3 -funroll-loops")
