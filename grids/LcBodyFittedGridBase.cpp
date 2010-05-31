@@ -29,40 +29,54 @@ namespace Lucee
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
   BodyFittedGridBase<NDIM>::getGlobalBox() const 
-  { return globalBox; }
+  { 
+    return globalBox; 
+  }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
   BodyFittedGridBase<NDIM>::getLocalBox() const 
-  { return localBox; }
+  { 
+    return localBox; 
+  }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, double>
   BodyFittedGridBase<NDIM>::getComputationalSpace() const 
-  { return compSpace; }
+  { 
+    return compSpace; 
+  }
 
   template <unsigned NDIM>
   void
   BodyFittedGridBase<NDIM>::setIndex(int i)
   {
+    currIdx[0] = i;
   }
   
   template <unsigned NDIM>
   void
   BodyFittedGridBase<NDIM>::setIndex(int i, int j)
   {
+    currIdx[0] = i;
+    currIdx[1] = j;
   }
 
   template <unsigned NDIM>
   void
   BodyFittedGridBase<NDIM>::setIndex(int i, int j, int k)
   {
+    currIdx[0] = i;
+    currIdx[1] = j;
+    currIdx[2] = k;
   }
 
   template <unsigned NDIM>
   void
   BodyFittedGridBase<NDIM>::setIndex(const int idx[NDIM])
   {
+    for (unsigned i=0; i<NDIM; ++i)
+      currIdx[i] = idx[i];
   }
 
 // instantiations
