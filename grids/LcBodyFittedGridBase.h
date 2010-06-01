@@ -30,6 +30,14 @@ namespace Lucee
   {
     public:
 /**
+ * Get number of cells in given direction.
+ *
+ * @param dir Direction in which number of cells is needed.
+ * @return Number of cells.
+ */
+      unsigned getNumCells(unsigned dir) const
+
+/**
  * Return global region indexed by grid.
  *
  * @return global region indexed by grid.
@@ -79,14 +87,14 @@ namespace Lucee
  *
  * @param idx Index location into grid.
  */
-      void setIndex(const int idx[NDIM]);
+      void setIndex(const int idx[3]);
 
 /**
  * Return coordinates in physical space of cell centroid.
  *
  * @param xc On output, centroid of cell.
  */
-      virtual void getCentriod(double xc[NDIM]) const = 0;
+      virtual void getCentriod(double xc[3]) const = 0;
 
 /**
  * Return volume of cell.
@@ -111,7 +119,7 @@ namespace Lucee
  * @param dir Direction perpendicular to face.
  * @param norm On output, normal to face.
  */
-      virtual void getSurfNormal(unsigned dir, double norm[NDIM]) const = 0;
+      virtual void getSurfNormal(unsigned dir, double norm[3]) const = 0;
 
 /**
  * Return two mutually perpendicular unit tangents to face
@@ -122,8 +130,7 @@ namespace Lucee
  * @param tan1 On output, first tangent to face.
  * @param tan2 On output, second tangent to face.
  */
-      virtual void getSurfTangents(unsigned dir, 
-        double tan1[NDIM], double tan2[NDIM]) const = 0;
+      virtual void getSurfTangents(unsigned dir, double tan1[3], double tan2[3]) const = 0;
 
     protected:
 /**
