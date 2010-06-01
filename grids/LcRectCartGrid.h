@@ -44,6 +44,55 @@ namespace Lucee
       RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
         const Lucee::Region<NDIM, int>& globalBox,
         const Lucee::Region<NDIM, double>& physBox);
+
+/**
+ * Return coordinates in physical space of cell centroid.
+ *
+ * @param xc On output, centroid of cell.
+ */
+      virtual void getCentriod(double xc[3]) const;
+
+/**
+ * Return volume of cell.
+ *
+ * @return Cell volume.
+ */
+      virtual double getVolume() const;
+
+/**
+ * Return physical surface area of face perpendicular (in
+ * computational space) to specified direction.
+ *
+ * @param dir Direction perpendicular to face.
+ * @return surface area of face.
+ */
+      virtual double getSurfArea(unsigned dir) const;
+
+/**
+ * Return unit normal to face perpendicular (in computational space)
+ * to specified direction.
+ *
+ * @param dir Direction perpendicular to face.
+ * @param norm On output, normal to face.
+ */
+      virtual void getSurfNormal(unsigned dir, double norm[3]) const;
+
+/**
+ * Return two mutually perpendicular unit tangents to face
+ * perpendicular (in computational space) to specified direction. If
+ * 'norm' is the surface normal then 'tan1 x tan2 = norm'.
+ *
+ * @param dir Direction perpendicular to face.
+ * @param tan1 On output, first tangent to face.
+ * @param tan2 On output, second tangent to face.
+ */
+      virtual void getSurfTangents(unsigned dir, double tan1[3], double tan2[3]) const;
+
+    private:
+/** Grid spacing in each direction */      
+      double dx[3];
+/** Volume of each cell */
+      double cellVolume;
   };
 }
 
