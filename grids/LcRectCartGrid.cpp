@@ -27,7 +27,7 @@ namespace Lucee
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
-      physBox.getShape(i)/globalBox.getShape(i);
+      dx[i] = physBox.getShape(i)/globalBox.getShape(i);
     cellVolume = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
       cellVolume = cellVolume*dx[i];
@@ -38,7 +38,7 @@ namespace Lucee
   RectCartGrid<NDIM>::getCentriod(double xc[3]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
-      xc[i] = (currIdx[i]-globalBox.getLower(i) + 0.5)*dx[i];
+      xc[i] = (this->currIdx[i]-this->globalBox.getLower(i) + 0.5)*dx[i];
     for (unsigned i=NDIM; i<3; ++i)
       xc[i] = 0.0;
   }
@@ -55,11 +55,11 @@ namespace Lucee
   RectCartGrid<NDIM>::getSurfArea(unsigned dir) const
   {
     if (dir==0)
-      return dx[1];
+      return dx[1]*dx[2];
     else if (dir==1)
-      return dx[0];
+      return dx[0]*dx[2];
     else if (dir=2)
-      retun dx[2];
+      return dx[0]*dx[1];
     return 1.0;
   }
 
@@ -67,6 +67,24 @@ namespace Lucee
   void
   RectCartGrid<NDIM>::getSurfNormal(unsigned dir, double norm[3]) const
   {
+    if (dir==0)
+    {
+      norm[0] = 1.0;
+      norm[1] = 0.0;
+      norm[2] = 0.0;
+    }
+    else if (dir==1)
+    {
+      norm[0] = 0.0;
+      norm[1] = 1.0;
+      norm[2] = 0.0;
+    }
+    else if (dir==2)
+    {
+      norm[0] = 0.0;
+      norm[1] = 0.0;
+      norm[2] = 1.0;
+    }
   }
 
   template <unsigned NDIM>

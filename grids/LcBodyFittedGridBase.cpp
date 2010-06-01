@@ -27,9 +27,14 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  BodyFittedGridBase<NDIM>::~BodyFittedGridBase()
+  {
+  }
+
+  template <unsigned NDIM>
   unsigned
-  BodyFittedGridBase<NDIM>::getNumCells(dir) const
-  { 
+  BodyFittedGridBase<NDIM>::getNumCells(unsigned dir) const
+  {
     return globalBox.getShape(dir);
   }
 
