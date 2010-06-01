@@ -30,12 +30,17 @@ namespace Lucee
   {
     public:
 /**
+ * Destroy object.
+ */
+      virtual ~BodyFittedGridBase();
+
+/**
  * Get number of cells in given direction.
  *
  * @param dir Direction in which number of cells is needed.
  * @return Number of cells.
  */
-      unsigned getNumCells(unsigned dir) const
+      unsigned getNumCells(unsigned dir) const;
 
 /**
  * Return global region indexed by grid.
