@@ -29,6 +29,13 @@ namespace Lucee
   {
     public:
 /**
+ * Create new 3D vector with all components set to specified value
+ *
+ * @param val Value of all components. 
+ */
+      Vec3(const double& val=0.0);
+
+/**
  * Create new 3D vector from specified values.
  *
  * @param x X-component of vector.

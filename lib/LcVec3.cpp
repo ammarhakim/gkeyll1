@@ -21,6 +21,11 @@
 
 namespace Lucee
 {
+  Vec3::Vec3(const double& val)
+    : Lucee::FixedVector<3, double>(val) 
+  {
+  }
+
   Vec3::Vec3(double x, double y, double z)
     : Lucee::FixedVector<3, double>(x, y, z) 
   {
