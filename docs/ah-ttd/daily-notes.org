@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* June 1st
+
+  Completed BodyFittedGridBase and RectCartGrid classes. Tested the
+  methods. Also added default ctor in Vec3.
+
+  Why not use Vec3 for coordinates and vectors? The answer is that
+  fixed sized vectors of size 3 are simpler, and probably much faster.
+
 * May 28th
 
   - Fixed getSubCompView with ghost indices.
