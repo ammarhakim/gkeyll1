@@ -125,3 +125,6 @@ add_test(lchdf5io unit/lchdf5io)
 
 # lcvec3
 add_test(lcvec3 unit/lcvec3)
+
+# lcrectcartgrid
+add_test(lcrectcartgrid unit/lcrectcartgrid)

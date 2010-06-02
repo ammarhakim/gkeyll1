@@ -29,13 +29,20 @@ namespace Lucee
   {
     public:
 /**
- * Create a new 3D vector from specified values.
+ * Create new 3D vector from specified values.
  *
  * @param x X-component of vector.
  * @param y Y-component of vector.
  * @param z Z-component of vector.
  */
       Vec3(double x, double y, double z);
+
+/**
+ * Construct new 3D vector from specified values.
+ *
+ * @param xyz Values of vector elements.
+ */
+      Vec3(const double xyz[3]);
 
 /**
  * Compute the dot product of this vector with the supplied one.
