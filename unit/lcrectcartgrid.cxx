@@ -50,6 +50,18 @@ test_1()
       LC_ASSERT("Testing surface area volume", grid3.getSurfArea(i) == 1.0);
   }
 
+  double xc[3];
+  seq.reset();
+  while (seq.step())
+  {
+    seq.fillWithIndex(idx);
+    grid3.setIndex(idx);
+
+    grid3.getCentriod(xc);
+    for (unsigned i=0; i<3; ++i)
+      LC_ASSERT("Testing centroid coordinates", xc[i] == 1.0*(idx[i]+0.5));
+  }
+
   double norm[3], tan1[3], tan2[3];
   Lucee::Vec3 ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
 
@@ -132,6 +144,19 @@ test_2()
     LC_ASSERT("Testing surface area volume", grid3.getSurfArea(0) == 0.5*0.25);
     LC_ASSERT("Testing surface area volume", grid3.getSurfArea(1) == 1.0*0.25);
     LC_ASSERT("Testing surface area volume", grid3.getSurfArea(2) == 1.0*0.5);
+  }
+
+  double xc[3];
+  seq.reset();
+  while (seq.step())
+  {
+    seq.fillWithIndex(idx);
+    grid3.setIndex(idx);
+
+    grid3.getCentriod(xc);
+    LC_ASSERT("Testing centroid coordinates", xc[0] == 1.0*(idx[0]+0.5));
+    LC_ASSERT("Testing centroid coordinates", xc[1] == 0.5*(idx[1]+0.5));
+    LC_ASSERT("Testing centroid coordinates", xc[2] == 0.25*(idx[2]+0.5));
   }
 
   double norm[3], tan1[3], tan2[3];
