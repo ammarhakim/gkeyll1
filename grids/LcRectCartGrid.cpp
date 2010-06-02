@@ -58,39 +58,58 @@ namespace Lucee
       return dx[1]*dx[2];
     else if (dir==1)
       return dx[0]*dx[2];
-    else if (dir=2)
+    else if (dir==2)
       return dx[0]*dx[1];
     return 1.0;
   }
 
   template <unsigned NDIM>
   void
-  RectCartGrid<NDIM>::getSurfNormal(unsigned dir, double norm[3]) const
+  RectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[3],
+    double tan1[3], double tan2[3]) const
   {
     if (dir==0)
     {
       norm[0] = 1.0;
       norm[1] = 0.0;
       norm[2] = 0.0;
+
+      tan1[0] = 0.0;
+      tan1[1] = 1.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 0.0;
+      tan2[2] = 1.0;
     }
     else if (dir==1)
     {
       norm[0] = 0.0;
       norm[1] = 1.0;
       norm[2] = 0.0;
+
+      tan1[0] = -1.0;
+      tan1[1] = 0.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 0.0;
+      tan2[2] = 1.0;
     }
     else if (dir==2)
     {
       norm[0] = 0.0;
       norm[1] = 0.0;
       norm[2] = 1.0;
-    }
-  }
 
-  template <unsigned NDIM>
-  void
-  RectCartGrid<NDIM>::getSurfTangents(unsigned dir, double tan1[3], double tan2[3]) const
-  {
+      tan1[0] = 1.0;
+      tan1[1] = 0.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 1.0;
+      tan2[2] = 0.0;
+    }
   }
 
 // instantiations

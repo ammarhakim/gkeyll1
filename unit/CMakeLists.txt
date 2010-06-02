@@ -2,10 +2,12 @@
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/unit)
+include_directories(${PROJECT_SOURCE_DIR}/grids)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
+link_directories(${PROJECT_BINARY_DIR}/grids)
 link_directories(${PROJECT_BINARY_DIR}/lib)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
@@ -86,3 +88,7 @@ target_link_libraries(lchdf5io lclib lcloki lclua ${HDF5_LIBRARIES})
 # lcvec3
 add_executable(lcvec3 lcvec3.cxx)
 target_link_libraries(lcvec3 lclib)
+
+# lcrectcartgrid
+add_executable(lcrectcartgrid lcrectcartgrid.cxx)
+target_link_libraries(lcrectcartgrid lcgrids lclib)

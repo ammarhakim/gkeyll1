@@ -69,24 +69,21 @@ namespace Lucee
       virtual double getSurfArea(unsigned dir) const;
 
 /**
- * Return unit normal to face perpendicular (in computational space)
- * to specified direction.
+ * Get the coordinate system attached to the surface perpendicular (in
+ * computational space) to specified direction. The corrdinate system
+ * is defined by three unit vectors, norm, tan1 and tan2. The norm
+ * vector is normal to the surface and points into the cell. The
+ * vectors tan1 and tan2 lie in the plane of the surface. The system
+ * is such that tan1 x tan2 = norm.
  *
  * @param dir Direction perpendicular to face.
  * @param norm On output, normal to face.
- */
-      virtual void getSurfNormal(unsigned dir, double norm[3]) const;
-
-/**
- * Return two mutually perpendicular unit tangents to face
- * perpendicular (in computational space) to specified direction. If
- * 'norm' is the surface normal then 'tan1 x tan2 = norm'.
- *
- * @param dir Direction perpendicular to face.
  * @param tan1 On output, first tangent to face.
  * @param tan2 On output, second tangent to face.
+ * 
  */
-      virtual void getSurfTangents(unsigned dir, double tan1[3], double tan2[3]) const;
+      virtual void getSurfCoordSys(unsigned dir, double norm[3],
+        double tan1[3], double tan2[3]) const;
 
     private:
 /** Grid spacing in each direction */      
