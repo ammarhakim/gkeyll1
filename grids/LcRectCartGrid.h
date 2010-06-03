@@ -17,12 +17,12 @@
 #endif
 
 // lucee includes
-#include <LcBodyFittedGridBase.h>
+#include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
   template <unsigned NDIM>
-  class RectCartGrid : public Lucee::BodyFittedGridBase<NDIM>
+  class RectCartGrid : public Lucee::StructuredGridBase<NDIM>
   {
     public:
 /**
