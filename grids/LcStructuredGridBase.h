@@ -1,5 +1,5 @@
 /**
- * @file	LcBodyFittedGridBase.h
+ * @file	LcStructuredGridBase.h
  *
  * @brief	Base class for body fitted grid in arbitrary dimensions.
  *
@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
-#ifndef LC_BODY_FITTED_GRID_BASE_H
-#define LC_BODY_FITTED_GRID_BASE_H
+#ifndef LC_STRUCTURED_GRID_BASE_H
+#define LC_STRUCTURED_GRID_BASE_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,13 +26,13 @@ namespace Lucee
  * to represent a single-block rectangular body-fitted grid.
  */
   template <unsigned NDIM>
-  class BodyFittedGridBase
+  class StructuredGridBase
   {
     public:
 /**
  * Destroy object.
  */
-      virtual ~BodyFittedGridBase();
+      virtual ~StructuredGridBase();
 
 /**
  * Get number of cells in given direction.
@@ -151,7 +151,7 @@ namespace Lucee
  * @param globalBox Global index region for this grid.
  * @param compSpace Region in computation space.
  */
-      BodyFittedGridBase(const Lucee::Region<NDIM, int>& localBox,
+      StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
         const Lucee::Region<NDIM, int>& globalBox,
         const Lucee::Region<NDIM, double>& compSpace);
 
@@ -166,4 +166,4 @@ namespace Lucee
   };
 }
 
-#endif //  LC_BODY_FITTED_GRID_H
+#endif //  LC_STRUCTURED_GRID_BASE_H

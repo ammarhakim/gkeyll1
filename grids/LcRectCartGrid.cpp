@@ -22,7 +22,7 @@ namespace Lucee
   RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
     const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& physBox) 
-    : Lucee::BodyFittedGridBase<NDIM>(localBox, globalBox, physBox)
+    : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, physBox)
   {
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;

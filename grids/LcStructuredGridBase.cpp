@@ -1,5 +1,5 @@
 /**
- * @file	LcBodyFittedGridBase.cpp
+ * @file	LcStructuredGridBase.cpp
  *
  * @brief	Base class for body fitted grid in arbitrary dimensions.
  *
@@ -14,12 +14,12 @@
 #endif
 
 // lucee includes
-#include <LcBodyFittedGridBase.h>
+#include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
   template <unsigned NDIM>
-  BodyFittedGridBase<NDIM>::BodyFittedGridBase(const Lucee::Region<NDIM, int>& localBox,
+  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
     const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& compSpace)
     : localBox(localBox), globalBox(globalBox), compSpace(compSpace)
@@ -27,48 +27,48 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  BodyFittedGridBase<NDIM>::~BodyFittedGridBase()
+  StructuredGridBase<NDIM>::~StructuredGridBase()
   {
   }
 
   template <unsigned NDIM>
   unsigned
-  BodyFittedGridBase<NDIM>::getNumCells(unsigned dir) const
+  StructuredGridBase<NDIM>::getNumCells(unsigned dir) const
   {
     return globalBox.getShape(dir);
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
-  BodyFittedGridBase<NDIM>::getGlobalBox() const 
+  StructuredGridBase<NDIM>::getGlobalBox() const 
   { 
     return globalBox; 
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
-  BodyFittedGridBase<NDIM>::getLocalBox() const 
+  StructuredGridBase<NDIM>::getLocalBox() const 
   { 
     return localBox; 
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, double>
-  BodyFittedGridBase<NDIM>::getComputationalSpace() const 
+  StructuredGridBase<NDIM>::getComputationalSpace() const 
   { 
     return compSpace; 
   }
 
   template <unsigned NDIM>
   void
-  BodyFittedGridBase<NDIM>::setIndex(int i)
+  StructuredGridBase<NDIM>::setIndex(int i)
   {
     currIdx[0] = i;
   }
   
   template <unsigned NDIM>
   void
-  BodyFittedGridBase<NDIM>::setIndex(int i, int j)
+  StructuredGridBase<NDIM>::setIndex(int i, int j)
   {
     currIdx[0] = i;
     currIdx[1] = j;
@@ -76,7 +76,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  BodyFittedGridBase<NDIM>::setIndex(int i, int j, int k)
+  StructuredGridBase<NDIM>::setIndex(int i, int j, int k)
   {
     currIdx[0] = i;
     currIdx[1] = j;
@@ -85,14 +85,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  BodyFittedGridBase<NDIM>::setIndex(const int idx[NDIM])
+  StructuredGridBase<NDIM>::setIndex(const int idx[NDIM])
   {
     for (unsigned i=0; i<NDIM; ++i)
       currIdx[i] = idx[i];
   }
 
 // instantiations
-  template class BodyFittedGridBase<1>;
-  template class BodyFittedGridBase<2>;
-  template class BodyFittedGridBase<3>;
+  template class StructuredGridBase<1>;
+  template class StructuredGridBase<2>;
+  template class StructuredGridBase<3>;
 }
