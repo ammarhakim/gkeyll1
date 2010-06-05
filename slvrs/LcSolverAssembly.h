@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcGridBase.h>
 #include <LcSolverIfc.h>
 
 // std includes
@@ -105,9 +106,11 @@ namespace Lucee
       virtual void finalize();
 
     private:
-/** Map of data fields */
+/** Map of grids */
+      std::map<std::string, Lucee::GridBase*> gridMap;
+/** Map of fields */
 
-/** Map of data-aliases */
+/** Map of field-aliases */
 
 /** Map of updaters */
 

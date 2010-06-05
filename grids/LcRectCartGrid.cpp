@@ -30,7 +30,7 @@ namespace Lucee
     : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, physBox)
   {
 // set name
-    this->setName("RectCart");
+    this->setName(RectCartGrid<NDIM>::id);
 
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;
