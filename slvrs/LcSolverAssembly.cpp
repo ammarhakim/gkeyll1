@@ -27,6 +27,11 @@ namespace Lucee
 
   SolverAssembly::~SolverAssembly()
   {
+// delete all grids
+    std::map<std::string, Lucee::GridBase*>::iterator gItr;
+    for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
+      delete gItr->second;
+    gridMap.clear();
   }
   
   void 
