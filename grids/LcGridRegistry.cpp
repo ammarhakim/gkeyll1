@@ -14,9 +14,8 @@
 #endif
 
 // lucee includes
-#include <LcGridBase.h>
 #include <LcGridRegistry.h>
-#include <LcRectCartGrid.h>
+#include <LcRectCartGridFactory.h>
 
 namespace Lucee
 {
@@ -24,8 +23,11 @@ namespace Lucee
   registerGridObjects(Lucee::LuaState& L)
   {
 // register grids
-//     new Lucee::ObjRegistry<Lucee::GridBase, Lucee::RectCartGrid<1> >;
-//     new Lucee::ObjRegistry<Lucee::GridBase, Lucee::RectCartGrid<2> >;
-//     new Lucee::ObjRegistry<Lucee::GridBase, Lucee::RectCartGrid<3> >;
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+      Lucee::RectCartGridFactory<1> >;
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+      Lucee::RectCartGridFactory<2> >;
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+      Lucee::RectCartGridFactory<3> >;
   }
 }
