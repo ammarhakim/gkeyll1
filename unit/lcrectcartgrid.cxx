@@ -27,6 +27,14 @@ test_1()
   Lucee::Region<3, double> physBox(lower, upper);
   Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
 
+// check id
+  LC_ASSERT("Checking if ID is correct", 
+    std::string(Lucee::RectCartGrid<1>::id) == "RectCart1D");
+  LC_ASSERT("Checking if ID is correct",
+    std::string(Lucee::RectCartGrid<2>::id) == "RectCart2D");
+  LC_ASSERT("Checking if ID is correct",
+    std::string(Lucee::RectCartGrid<3>::id) == "RectCart3D");
+
 // cell volume
   int idx[3];
   Lucee::RowMajorSequencer<3> seq(localBox);

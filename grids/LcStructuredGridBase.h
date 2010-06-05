@@ -17,16 +17,20 @@
 #endif
 
 // lucee includes
+#include <LcGridBase.h>
 #include <LcRegion.h>
 
 namespace Lucee
 {
 /**
- * Body-fitted grid class in arbitrary dimensions. Provides an class
- * to represent a single-block rectangular body-fitted grid.
+ * A base class to represent a single-block rectangular body-fitted
+ * grid. The indexing scheme is designed such that the cell owns the
+ * faces on the "left", "bottom" and "back" (0, 1, 2
+ * directions). I.e. the cell index also can be used to get surface
+ * variables on these faces using the proper direction index.
  */
   template <unsigned NDIM>
-  class StructuredGridBase
+  class StructuredGridBase : public Lucee::GridBase
   {
     public:
 /**
