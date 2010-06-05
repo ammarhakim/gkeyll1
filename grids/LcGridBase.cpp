@@ -18,9 +18,6 @@
 
 namespace Lucee
 {
-// set madule name
-  const char *GridBase::id = "Grid";
-
   GridBase::GridBase()
     : Lucee::BasicObj("Grid")
   {

@@ -28,9 +28,6 @@ namespace Lucee
   class GridBase : public Lucee::BasicObj
   {
     public:
-/** Class id: this is used by the registration system */
-      static const char *id;
-
 /** Destroy grid */
       virtual ~GridBase();
 

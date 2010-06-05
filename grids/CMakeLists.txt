@@ -10,7 +10,9 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 # Create the library
 add_library(lcgrids
   LcGridBase.cpp
+  LcGridFactory.cpp
   LcGridRegistry.cpp
   LcRectCartGrid.cpp
+  LcRectCartGridFactory.cpp
   LcStructuredGridBase.cpp
 )
