@@ -18,12 +18,20 @@
 
 namespace Lucee
 {
+// set class ID for use in registration system
+  template <> const char *RectCartGrid<1>::id = "RectCart1D";
+  template <> const char *RectCartGrid<2>::id = "RectCart2D";
+  template <> const char *RectCartGrid<3>::id = "RectCart3D";
+
   template <unsigned NDIM>
   RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
     const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& physBox) 
     : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, physBox)
   {
+// set name
+    this->setName("RectCart");
+
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;
     for (unsigned i=0; i<NDIM; ++i)

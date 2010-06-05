@@ -24,6 +24,5 @@ namespace Lucee
   {
 // register solver assembly
     new Lucee::ObjRegistry<Lucee::SolverIfc, Lucee::SolverAssembly>;
-
   }
 }

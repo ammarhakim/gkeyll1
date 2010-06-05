@@ -9,6 +9,8 @@
  */
 
 // lucee includes
+#include <LcGridBase.h>
+#include <LcGridRegistry.h>
 #include <LcObjCreator.h>
 #include <LcRegisterModules.h>
 #include <LcRteRegistry.h>
@@ -27,8 +29,10 @@ namespace Lucee
 // register objects
     Lucee::registerSolverObjects(L);
     Lucee::registerRteObjects(L);
+    Lucee::registerGridObjects(L);
 
 // register modules into Lua
     Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);
+    Lucee::ObjCreator<Lucee::GridBase>::registerModule(L);
   }
 }

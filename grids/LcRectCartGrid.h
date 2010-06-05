@@ -25,6 +25,9 @@ namespace Lucee
   class RectCartGrid : public Lucee::StructuredGridBase<NDIM>
   {
     public:
+/** Class id: this is used by registration system */
+      static const char *id;
+
 /**
  * Create a new rectangular Cartesian grid on specified region. In
  * serial the local and global boxes coincide. In parallel, the
