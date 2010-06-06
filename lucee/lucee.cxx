@@ -13,7 +13,6 @@
 #include <LcFileHandler.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
-#include <LcLogger.h>
 #include <LcLuaState.h>
 #include <LcObjCreator.h>
 #include <LcRegisterModules.h>

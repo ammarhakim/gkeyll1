@@ -112,6 +112,15 @@ namespace Lucee
     }
   }
 
+  template <unsigned NDIM>
+  Lucee::IoNodeType
+  RectCartGrid<NDIM>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+    const std::string& nm)
+  {
+
+    return node;
+  }
+
 // instantiations
   template class RectCartGrid<1>;
   template class RectCartGrid<2>;

@@ -85,6 +85,17 @@ namespace Lucee
       virtual void getSurfCoordSys(unsigned dir, double norm[3],
         double tan1[3], double tan2[3]) const;
 
+/**
+ * Write grid to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of the grid as it should appear in output.
+ * @return node to which data was written.
+ */
+      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+        const std::string& nm);
+
     private:
 /** Grid spacing in each direction */      
       double dx[3];

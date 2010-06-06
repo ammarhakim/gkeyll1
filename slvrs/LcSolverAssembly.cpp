@@ -14,7 +14,14 @@
 #endif
 
 // lucee includes
+#include <LcGenericFactory.h>
+#include <LcLogStream.h>
+#include <LcLogger.h>
+#include <LcObjCreator.h>
 #include <LcSolverAssembly.h>
+
+// std includes
+#include <memory>
 
 namespace Lucee
 {
@@ -37,6 +44,24 @@ namespace Lucee
   void 
   SolverAssembly::readInput(Lucee::LuaTable& tbl)
   {
+// get stream for logging
+    Lucee::Logger& logger = Lucee::Logger::get("lucee.console");
+    Lucee::LogStream infoStrm = logger.getInfoStream();
+
+// create all grids in assembly
+    std::vector<std::string> gridNms = tbl.getNamesOfType("Grid");
+    for (unsigned i=0; i<gridNms.size(); ++i)
+    {
+      std::string gnm = gridNms[i];
+      Lucee::LuaTable gtbl = tbl.getTable(gnm);
+      std::string kind = gtbl.getKind();
+      infoStrm << "Setting up grid '" << gnm << "' of kind '"
+               << kind << "'" << std::endl;
+      std::auto_ptr<Lucee::GenericFactory<Lucee::GridBase> > gfact(
+        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridBase> >::getNew(kind));
+      gfact->readInput(gtbl); // read input from grid block
+      gridMap[gnm] = gfact->create(); // create grid
+    }
   }
 
   void
