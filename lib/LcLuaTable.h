@@ -23,6 +23,7 @@
 #include <lua.hpp>
 
 // std include
+#include <map>
 #include <string>
 #include <vector>
 
@@ -150,6 +151,14 @@ namespace Lucee
  */
       bool hasTable(const std::string& nm);
 
+/**
+ * Get list of all table names with specified type.
+ *
+ * @param type Type of table.
+ * @return list of table names.
+ */
+      std::vector<std::string> getNamesOfType(const std::string& type) const;
+
     private:
 /** Reference to lua state */
       Lucee::LuaState& L;
@@ -157,6 +166,18 @@ namespace Lucee
       std::string name;
 /** Pointer to Lua table */
       int ref;
+/** Map of "types" to table names */
+      std::map<std::string, std::vector<std::string> > typeMap;
+
+/**
+ * Loop over all tables and create the typeMap.
+ */
+      void createTypeMap();
+
+/**
+ * 
+ */
+      void addToTypeMap(const std::string& var, const std::string& type);
   };
 }
 

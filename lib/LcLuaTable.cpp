@@ -17,6 +17,8 @@
 #include <LcExcept.h>
 #include <LcLuaTable.h>
 
+#include <iostream>
+
 namespace Lucee
 {
   LuaTable::LuaTable(Lucee::LuaState& lin, const std::string& nm)
@@ -31,6 +33,8 @@ namespace Lucee
     }
 // get reference to table object
     ref = luaL_ref(L, LUA_REGISTRYINDEX);
+// create typeMap
+    createTypeMap();
   }
 
   LuaTable::~LuaTable()
@@ -252,5 +256,47 @@ namespace Lucee
     if (! lua_istable(L, -1) )
       return false;
     return true;
+  }
+
+  void
+  LuaTable::createTypeMap()
+  {
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if ( lua_istable(L, -1) )
+      {
+        std::string var = lua_tostring(L, -2);
+        lua_pushstring(L, "__type");
+        lua_gettable(L, -2);
+        if (lua_type(L, -1) == LUA_TSTRING)
+        {
+          addToTypeMap(var, lua_tostring(L, -1));
+        }
+        lua_pop(L, 1);
+      }
+      lua_pop(L, 1);
+    }
+  }
+
+  std::vector<std::string>
+  LuaTable::getNamesOfType(const std::string& type) const
+  {
+    std::map<std::string, std::vector<std::string> >::const_iterator itr
+      = typeMap.find(type);
+    if (itr != typeMap.end())
+      return itr->second;
+    Lucee::Except lce("LuaTable::getNamesOfType: Type ");
+    lce << type << " does not exist in table " << name << std::endl;
+    throw lce;
+  }
+
+  void
+  LuaTable::addToTypeMap(const std::string& var, const std::string& type)
+  {
+    typeMap[type].push_back(var);
   }
 }

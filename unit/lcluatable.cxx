@@ -131,6 +131,45 @@ test_3(Lucee::LuaState& L)
   LC_ASSERT("Testing Lua table", back.hasStrVec("cells-nothere") == false);
 }
 
+void
+test_4(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "background = {"
+    "  grida = {__type = \"Grid\"}, "
+    "  gridb = {__type = \"Grid\"}, "
+    "  gridc = {__type = \"Grid\"}, "
+    "  solvera = {__type = \"Updater\"}, "
+    "  solverb = {__type = \"Updater\"}, "
+    "}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "background");
+
+// construct LuaTable object
+  Lucee::LuaTable back(L, "background");
+
+  std::vector<std::string> grids = back.getNamesOfType("Grid");
+  LC_ASSERT("Testing if objects of Grid type are correct",
+    grids.size() == 3);
+  LC_ASSERT("Testing names of Grid", grids[0] == "gridc");
+  LC_ASSERT("Testing names of Grid", grids[1] == "gridb");
+  LC_ASSERT("Testing names of Grid", grids[2] == "grida");
+
+  std::vector<std::string> updaters = back.getNamesOfType("Updater");
+  LC_ASSERT("Testing if objects of Updater type are correct",
+    updaters.size() == 2);
+  LC_ASSERT("Testing names of Updater", updaters[0] == "solvera");
+  LC_ASSERT("Testing names of Updater", updaters[1] == "solverb");
+
+  LC_RAISES("Testing if incoorect type can be queried",
+    back.getNamesOfType("not-there"), Lucee::Except);
+}
+
 int
 main(void)
 {
@@ -139,6 +178,7 @@ main(void)
   test_1(L);
   test_2(L);
   test_3(L);
+  test_4(L);
 
   LC_END_TESTS;
 }
