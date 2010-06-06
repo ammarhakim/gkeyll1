@@ -18,7 +18,11 @@
 
 // lucee includes
 #include <LcBasicObj.h>
+#include <LcIoBase.h>
 #include <LcLuaTable.h>
+
+// std includes
+#include <string>
 
 namespace Lucee
 {
@@ -37,6 +41,17 @@ namespace Lucee
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
+ * Write grid to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of the grid as it should appear in output.
+ * @return node to which data was written.
+ */
+      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+        const std::string& nm) = 0;
 
     protected:
 /**
