@@ -160,6 +160,9 @@ test_4(Lucee::LuaState& L)
   LC_ASSERT("Testing names of Grid", grids[1] == "gridb");
   LC_ASSERT("Testing names of Grid", grids[2] == "grida");
 
+  Lucee::LuaTable grida = back.getTable("grida");
+  LC_ASSERT("Testing type of table", grida.getString("__type") == "Grid");
+
   std::vector<std::string> updaters = back.getNamesOfType("Updater");
   LC_ASSERT("Testing if objects of Updater type are correct",
     updaters.size() == 2);
