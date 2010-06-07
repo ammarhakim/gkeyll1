@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcGridBase.h>
+#include <LcHdf5Io.h>
 #include <LcSolverIfc.h>
 
 // std includes

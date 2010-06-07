@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcGenericFactory.h>
+#include <LcHdf5Io.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
 #include <LcObjCreator.h>
@@ -82,6 +83,16 @@ namespace Lucee
   void 
   SolverAssembly::writeToFile(const std::string& baseName, unsigned d)
   {
+// create HDF5 for storing data
+    Lucee::Hdf5Io io(0, 0);
+    std::ostringstream fn;
+    fn << baseName << "_" << d << ".h5";
+    Lucee::IoNodeType fNode = io.createFile(fn.str());
+
+// write out all grids
+    std::map<std::string, Lucee::GridBase*>::iterator gItr;
+    for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
+      gItr->second->writeToFile(io, fNode, gItr->first);
   }
 
   int
