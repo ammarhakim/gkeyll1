@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <memory>
 
 int
 main(int argc, char **argv)
@@ -33,7 +34,7 @@ main(int argc, char **argv)
   cmdParser.addArg("i", "INPUT", "Input file");
   cmdParser.addArg("o", "OUTPUT-PREFIX", "Prefix for all output files");
   cmdParser.addArg("verbosity", "VERBOSITY", "Verbosity of log messages."
-    " Should be one of disable,\n   debug, info, error. Defaults to info.");
+    " Should be one of disabled,\n   debug, info, error. Defaults to info.");
   cmdParser.addSwitch("r", "Restart simulation");
 
 // parse command line
@@ -144,8 +145,8 @@ main(int argc, char **argv)
   std::string kind = tbl.getKind();
   infoStrm << "Creating top level simulation object '" << kind << "'" << std::endl;
 // create a new simulation of this kind
-  Lucee::SolverIfc *sim = Lucee::ObjCreator<Lucee::SolverIfc>
-    ::getNew(kind);
+  std::auto_ptr<Lucee::SolverIfc> sim(
+    Lucee::ObjCreator<Lucee::SolverIfc>::getNew(kind));
 
   try
   {
@@ -191,8 +192,6 @@ main(int argc, char **argv)
     infoStrm << "Lucee exception ..." << std::endl;
     infoStrm << lce.what() << std::endl;
   }
-
-  delete sim;
 
   return 0;
 }
