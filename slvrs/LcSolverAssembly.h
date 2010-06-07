@@ -106,6 +106,25 @@ namespace Lucee
  */
       virtual void finalize();
 
+/**
+ * Return a constant reference to grid with given name.
+ *
+ * @param nm Name of grid to fetch.
+ * @return reference to grid.
+ */
+      template <class G>
+      const G&
+      getConstGrid(const std::string& nm) const
+      {
+        std::map<std::string, Lucee::GridBase*>::const_iterator gItr
+          = gridMap.find(nm); // get iterator to grid
+        if (gItr == gridMap.end())
+          return dynamic_cast<const G&>(*gItr->second); // return const reference
+        Lucee::Except lce("SolverAssembly::getConstGrid: No grid named '");
+        lce << nm << "' exists in assembly" << std::endl;
+        throw lce;
+      }
+
     private:
 /** Map of grids */
       std::map<std::string, Lucee::GridBase*> gridMap;

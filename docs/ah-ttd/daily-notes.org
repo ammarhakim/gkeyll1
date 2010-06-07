@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* June 5/6th
+
+  Completed reading of grids from input files and writing them out to
+  HDF5.
+
+  Major work to create typeMap in the LuaTable class. This allows the
+  implementation of the getNamesOfType() method needed in
+  SolverAssembly.
+  
 * June 4th
   
   Added GridBase class, derived StructuredGridBase from it and created
