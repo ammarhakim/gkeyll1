@@ -36,7 +36,7 @@ namespace Lucee
   SolverAssembly::~SolverAssembly()
   {
 // delete all grids
-    std::map<std::string, Lucee::GridBase*>::iterator gItr;
+    std::map<std::string, Lucee::GridIfc*>::iterator gItr;
     for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
       delete gItr->second;
     gridMap.clear();
@@ -58,8 +58,8 @@ namespace Lucee
       std::string kind = gtbl.getKind();
       infoStrm << "Setting up grid '" << gnm << "' of kind '"
                << kind << "'" << std::endl;
-      std::auto_ptr<Lucee::GenericFactory<Lucee::GridBase> > gfact(
-        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridBase> >::getNew(kind));
+      std::auto_ptr<Lucee::GenericFactory<Lucee::GridIfc> > gfact(
+        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::getNew(kind));
       gfact->readInput(gtbl); // read input from grid block
       gridMap[gnm] = gfact->create(*this); // create grid
     }
@@ -90,7 +90,7 @@ namespace Lucee
     Lucee::IoNodeType fNode = io.createFile(fn.str());
 
 // write out all grids
-    std::map<std::string, Lucee::GridBase*>::iterator gItr;
+    std::map<std::string, Lucee::GridIfc*>::iterator gItr;
     for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
       gItr->second->writeToFile(io, fNode, gItr->first);
   }
