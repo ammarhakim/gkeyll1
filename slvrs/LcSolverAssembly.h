@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcGridBase.h>
+#include <LcGridIfc.h>
 #include <LcHdf5Io.h>
 #include <LcSolverIfc.h>
 
@@ -116,7 +116,7 @@ namespace Lucee
       const G&
       getConstGrid(const std::string& nm) const
       {
-        std::map<std::string, Lucee::GridBase*>::const_iterator gItr
+        std::map<std::string, Lucee::GridIfc*>::const_iterator gItr
           = gridMap.find(nm); // get iterator to grid
         if (gItr == gridMap.end())
           return dynamic_cast<const G&>(*gItr->second); // return const reference
@@ -127,7 +127,7 @@ namespace Lucee
 
     private:
 /** Map of grids */
-      std::map<std::string, Lucee::GridBase*> gridMap;
+      std::map<std::string, Lucee::GridIfc*> gridMap;
 /** Map of fields */
 
 /** Map of field-aliases */
