@@ -17,7 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcGridBase.h>
+#include <LcGridIfc.h>
 #include <LcRegion.h>
 
 namespace Lucee
@@ -30,7 +30,7 @@ namespace Lucee
  * variables on these faces using the proper direction index.
  */
   template <unsigned NDIM>
-  class StructuredGridBase : public Lucee::GridBase
+  class StructuredGridBase : public Lucee::GridIfc
   {
     public:
 /**

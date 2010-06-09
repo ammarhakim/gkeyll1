@@ -18,7 +18,7 @@
 
 // lucee includes
 #include <LcGenericFactory.h>
-#include <LcGridBase.h>
+#include <LcGridIfc.h>
 #include <LcRegion.h>
 
 // std includes
@@ -27,7 +27,7 @@
 namespace Lucee
 {
   template <unsigned NDIM>
-  class RectCartGridFactory : public Lucee::GenericFactory<Lucee::GridBase>
+  class RectCartGridFactory : public Lucee::GenericFactory<Lucee::GridIfc>
   {
     public:
 /** Class id: this is used by the registration system */
@@ -45,7 +45,7 @@ namespace Lucee
  *
  * @return pointer to new grid.
  */
-      Lucee::GridBase* create(const Lucee::SolverIfc& solver);
+      Lucee::GridIfc* create(const Lucee::SolverIfc& solver);
 
     private:
 /** Number of cells in domain */

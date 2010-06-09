@@ -1,5 +1,5 @@
 /**
- * @file	LcGridBase.cpp
+ * @file	LcGridIfc.cpp
  *
  * @brief	Base class for all grids in Lucee.
  *
@@ -14,21 +14,21 @@
 #endif
 
 // lucee includes
-#include <LcGridBase.h>
+#include <LcGridIfc.h>
 
 namespace Lucee
 {
-  GridBase::GridBase()
+  GridIfc::GridIfc()
     : Lucee::BasicObj("Grid")
   {
   }
 
-  GridBase::~GridBase()
+  GridIfc::~GridIfc()
   {
   }
 
   void
-  GridBase::readInput(Lucee::LuaTable& tbl)
+  GridIfc::readInput(Lucee::LuaTable& tbl)
   {
   }
 }

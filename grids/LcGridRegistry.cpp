@@ -23,11 +23,11 @@ namespace Lucee
   registerGridObjects(Lucee::LuaState& L)
   {
 // register grids
-    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridIfc>, 
       Lucee::RectCartGridFactory<1> >;
-    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridIfc>, 
       Lucee::RectCartGridFactory<2> >;
-    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridBase>, 
+    new Lucee::ObjRegistry<Lucee::GenericFactory<Lucee::GridIfc>, 
       Lucee::RectCartGridFactory<3> >;
   }
 }
