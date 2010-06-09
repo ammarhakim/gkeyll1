@@ -15,11 +15,11 @@
 
 // lucee includes
 #include <LcGenericFactory.h>
-#include <LcGridBase.h>
+#include <LcGridIfc.h>
 
 namespace Lucee
 {
 // instantiate factory base class for grids and set module name
-  template class Lucee::GenericFactory<Lucee::GridBase>;
-  template <> const char *Lucee::GenericFactory<Lucee::GridBase>::id = "Grid";
+  template class Lucee::GenericFactory<Lucee::GridIfc>;
+  template <> const char *Lucee::GenericFactory<Lucee::GridIfc>::id = "Grid";
 }

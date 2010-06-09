@@ -1,5 +1,5 @@
 /**
- * @file	LcGridBase.h
+ * @file	LcGridIfc.h
  *
  * @brief	Base class for all grids in Lucee.
  *
@@ -29,11 +29,11 @@ namespace Lucee
 /**
  * Base class for all grids in Lucee.
  */
-  class GridBase : public Lucee::BasicObj
+  class GridIfc : public Lucee::BasicObj
   {
     public:
 /** Destroy grid */
-      virtual ~GridBase();
+      virtual ~GridIfc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -57,7 +57,7 @@ namespace Lucee
 /**
  * Create a new grid. Name should be provided by a derived class.
  */
-      GridBase();
+      GridIfc();
   };
 }
 
