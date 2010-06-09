@@ -61,7 +61,7 @@ namespace Lucee
       std::auto_ptr<Lucee::GenericFactory<Lucee::GridBase> > gfact(
         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridBase> >::getNew(kind));
       gfact->readInput(gtbl); // read input from grid block
-      gridMap[gnm] = gfact->create(); // create grid
+      gridMap[gnm] = gfact->create(*this); // create grid
     }
   }
 

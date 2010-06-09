@@ -19,6 +19,7 @@
 
 // lucee include
 #include <LcLuaTable.h>
+#include <LcSolverIfc.h>
 
 namespace Lucee
 {
@@ -46,9 +47,10 @@ namespace Lucee
  * Create a new object derived from BASEOBJ and return pointer to
  * created object.
  *
+ * @param solver Reference to containing solver.
  * @return pointer to class derived from BASEOBJ.
  */
-      virtual BASEOBJ* create() = 0;
+      virtual BASEOBJ* create(const Lucee::SolverIfc& solver) = 0;
   };
 }
 
