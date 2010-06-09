@@ -10,6 +10,7 @@ add_library(lclib
   LcBasicObj.cpp
   LcCmdLineArgs.cpp
   LcConstFieldPtr.cpp
+  LcDataStructFactory.cpp
   LcDataStructIfc.cpp
   LcExcept.cpp 
   LcField.cpp
