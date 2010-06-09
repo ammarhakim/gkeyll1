@@ -1,15 +1,15 @@
 /**
- * @file	LcGridIfc.h
+ * @file	LcDataStructIfc.h
  *
- * @brief	Base class for all grids in Lucee.
+ * @brief	Base class for all data in Lucee.
  *
  * @version	$Id$
  *
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
-#ifndef LC_GRID_IFC_H
-#define LC_GRID_IFC_H
+#ifndef LC_DATA_STRUCT_IFC_H
+#define LC_DATA_STRUCT_IFC_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -27,13 +27,13 @@
 namespace Lucee
 {
 /**
- * Base class for all grids in Lucee.
+ * Base class for all dataStruct in Lucee.
  */
-  class GridIfc : public Lucee::BasicObj
+  class DataStructIfc : public Lucee::BasicObj
   {
     public:
-/** Destroy grid */
-      virtual ~GridIfc();
+/** Destroy dataStruct */
+      virtual ~DataStructIfc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -43,7 +43,14 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Write grid to given node in HDF5 file.
+ * Clone data and return pointer to cloned object.
+ *
+ * @return cloned object.
+ */
+      virtual DataStructIfc* clone() const;
+
+/**
+ * Write dataStruct to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
  * @param node Node to write to.
@@ -55,10 +62,11 @@ namespace Lucee
 
     protected:
 /**
- * Create a new grid. Name should be provided by a derived class.
+ * Create a new dataStruct. Name should be provided by a derived
+ * class.
  */
-      GridIfc();
+      DataStructIfc();
   };
 }
 
-#endif // LC_GRID_IFC_H
+#endif // LC_DATA_STRUCT_IFC_H
