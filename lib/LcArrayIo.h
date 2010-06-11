@@ -19,7 +19,6 @@
 // lucee includes
 #include <LcArray.h>
 #include <LcIoBase.h>
-#include <LcMatrix.h>
 #include <LcRowMajorSequencer.h>
 #include <LcVector.h>
 

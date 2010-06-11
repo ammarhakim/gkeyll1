@@ -36,6 +36,10 @@ namespace Lucee
 /** Class id: this is used by the registration system */
       static const char *id;
 
+/** Destructor */
+      virtual ~GenericFactory()
+      {}
+
 /**
  * Bootstrap method: Read input from specified table.
  *
