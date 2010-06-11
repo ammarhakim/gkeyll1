@@ -18,9 +18,15 @@
 
 // lucee includes
 #include <LcColMajorIndexer.h>
+#include <LcDataStructIfc.h>
 #include <LcExcept.h>
 #include <LcFixedVector.h>
 #include <LcRegion.h>
+#include <LcRowMajorSequencer.h>
+
+// std includes
+#include <vector>
+#include <string>
 
 namespace Lucee
 {
@@ -52,7 +58,7 @@ namespace Lucee
  * Basic multi-dimensional array class.
  */
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER  = Lucee::ColMajorIndexer>
-  class Array
+  class Array : public DataStructIfc
   {
     public:
 /** We need to friend ourself to allow accessing private stuff from another dimension */
@@ -342,6 +348,17 @@ namespace Lucee
  * @param nlo New lower bounds.
  */
       void resetLower(const int nlo[NDIM]);
+
+/**
+ * Write dataStruct to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of the grid as it should appear in output.
+ * @return node to which data was written.
+ */
+      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+        const std::string& nm);
 
     protected:
 /**
@@ -726,6 +743,34 @@ namespace Lucee
     }
     LC_CLEAR_CONTIGUOUS(traits);
     LC_CLEAR_ALLOC(traits);
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Lucee::IoNodeType
+  Array<NDIM, T, INDEXER>::writeToFile(Lucee::IoBase& io, 
+    Lucee::IoNodeType& node, const std::string& nm)
+  {
+    std::vector<size_t> dataSetSize(NDIM), dataSetBeg(NDIM), dataSetLen(NDIM);
+// construct sizes and shapes to write stuff out
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      dataSetSize[i] = this->getShape(i);
+      dataSetBeg[i] = 0;
+      dataSetLen[i] = this->getShape(i);
+    }
+
+    Lucee::Region<NDIM, int> rgn = this->getRegion();
+    std::vector<T> buff(rgn.getVolume());
+    Lucee::RowMajorSequencer<NDIM> seq(rgn); // must be row-major for HDF5
+// copy data into buffer
+    unsigned count = 0;
+    while (seq.step())
+      buff[count++] = this->operator()(seq.getIndex());
+// write it out
+    Lucee::IoNodeType dn =
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
+
+    return dn;
   }
 }
 
