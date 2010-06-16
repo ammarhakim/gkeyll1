@@ -9,6 +9,8 @@
  */
 
 // lucee includes
+#include <LcDataStructIfc.h>
+#include <LcDataStructRegistry.h>
 #include <LcGenericFactory.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
@@ -31,9 +33,11 @@ namespace Lucee
     Lucee::registerSolverObjects(L);
     Lucee::registerRteObjects(L);
     Lucee::registerGridObjects(L);
+    Lucee::registerDataStructObjects(L);
 
 // register modules into Lua
     Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);
     Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::registerModule(L);
+    Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::registerModule(L);
   }
 }

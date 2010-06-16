@@ -1,7 +1,7 @@
 /**
  * @file	LcRectCartGridFactory.h
  *
- * @brief	A facotry to make rectangular cartesian grids.
+ * @brief	A factory to make rectangular cartesian grids.
  *
  * @version	$Id$
  *
@@ -19,7 +19,6 @@
 // lucee includes
 #include <LcGenericFactory.h>
 #include <LcGridIfc.h>
-#include <LcRegion.h>
 
 // std includes
 #include <vector>
