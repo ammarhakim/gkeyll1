@@ -289,9 +289,7 @@ namespace Lucee
       = typeMap.find(type);
     if (itr != typeMap.end())
       return itr->second;
-    Lucee::Except lce("LuaTable::getNamesOfType: Type ");
-    lce << type << " does not exist in table " << name << std::endl;
-    throw lce;
+    return std::vector<std::string>();
   }
 
   void
