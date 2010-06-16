@@ -119,7 +119,7 @@ namespace Lucee
       {
         std::map<std::string, Lucee::GridIfc*>::const_iterator gItr
           = gridMap.find(nm); // get iterator to grid
-        if (gItr == gridMap.end())
+        if (gItr != gridMap.end())
           return dynamic_cast<const G&>(*gItr->second); // return const reference
         Lucee::Except lce("SolverAssembly::getConstGrid: No grid named '");
         lce << nm << "' exists in assembly" << std::endl;
