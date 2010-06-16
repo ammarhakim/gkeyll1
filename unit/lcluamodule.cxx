@@ -20,6 +20,7 @@ class Solver
 {
   public:
     static const char *id;
+    virtual ~Solver() {}
 
     virtual std::string what() = 0;
 };
@@ -29,6 +30,8 @@ class RteSolver : public Solver
 {
   public:
     static const char *id;
+
+    virtual ~RteSolver() {}
 
     virtual std::string what()
     {

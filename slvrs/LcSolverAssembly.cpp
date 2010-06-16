@@ -40,6 +40,11 @@ namespace Lucee
     for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
       delete gItr->second;
     gridMap.clear();
+// delete all data-structs
+    std::map<std::string, Lucee::DataStructIfc*>::iterator dsItr;
+    for (dsItr = dataStructMap.begin(); dsItr != dataStructMap.end(); ++dsItr)
+      delete dsItr->second;
+    dataStructMap.clear();
   }
   
   void 
@@ -62,6 +67,21 @@ namespace Lucee
         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::getNew(kind));
       gfact->readInput(gtbl); // read input from grid block
       gridMap[gnm] = gfact->create(*this); // create grid
+    }
+
+// create all data-structs in assembly
+    std::vector<std::string> dsNms = tbl.getNamesOfType("DataStruct");
+    for (unsigned i=0; i<dsNms.size(); ++i)
+    {
+      std::string dsnm = dsNms[i];
+      Lucee::LuaTable dstbl = tbl.getTable(dsnm);
+      std::string kind = dstbl.getKind();
+      infoStrm << "Setting up data-structure '" << dsnm << "' of kind '"
+               << kind << "'" << std::endl;
+      std::auto_ptr<Lucee::GenericFactory<Lucee::DataStructIfc> > dsfact(
+        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::getNew(kind));
+      dsfact->readInput(dstbl); // read input from grid block
+      dataStructMap[dsnm] = dsfact->create(*this); // create grid
     }
   }
 

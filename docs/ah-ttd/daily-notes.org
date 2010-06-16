@@ -60,17 +60,18 @@
 	cells = {10, 20},
       },
 
-      q = Data.Field { 
+      q = DataStruct.Field { 
         onGrid = domain,	
-	numComponents = 5
+	numComponents = 5,
+	ghost = {1, 1},
       },
 
-      qOld = Data.Field { 
+      qOld = DataStruct.Field { 
         onGrid = domain, 
 	numComponents = 5
       },
 
-      qMom = DataAlias.Field {
+      qMom = DataStructAlias.Field {
         target = q,
 	componentRange = {1, 4},
       },

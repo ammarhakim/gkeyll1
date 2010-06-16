@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcDataStructIfc.h>
 #include <LcGridIfc.h>
 #include <LcHdf5Io.h>
 #include <LcSolverIfc.h>
@@ -128,8 +129,8 @@ namespace Lucee
     private:
 /** Map of grids */
       std::map<std::string, Lucee::GridIfc*> gridMap;
-/** Map of fields */
-
+/** Map of data-struct */
+      std::map<std::string, Lucee::DataStructIfc*> dataStructMap;
 /** Map of field-aliases */
 
 /** Map of updaters */
