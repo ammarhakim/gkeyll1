@@ -175,7 +175,7 @@ namespace Lucee
       void createTypeMap();
 
 /**
- * 
+ * Add a new variable to type map.
  */
       void addToTypeMap(const std::string& var, const std::string& type);
   };
