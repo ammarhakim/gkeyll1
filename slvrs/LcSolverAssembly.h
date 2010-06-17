@@ -120,7 +120,19 @@ namespace Lucee
         std::map<std::string, Lucee::GridIfc*>::const_iterator gItr
           = gridMap.find(nm); // get iterator to grid
         if (gItr != gridMap.end())
-          return dynamic_cast<const G&>(*gItr->second); // return const reference
+        {
+          try
+          {
+            const G& ret = dynamic_cast<const G&>(*gItr->second); // return const reference
+            return ret;
+          }
+          catch (std::bad_cast& e)
+          { // grid not of expected type
+            Lucee::Except lce("SolverAssembly::getConstGrid: Grid named '");
+            lce << nm << "' exists in assembly but is not of the correct type" << std::endl;
+            throw lce;
+          }
+        }
         Lucee::Except lce("SolverAssembly::getConstGrid: No grid named '");
         lce << nm << "' exists in assembly" << std::endl;
         throw lce;
