@@ -136,6 +136,9 @@ main(int argc, char **argv)
   outFrames = lua_tonumber(L, -1);
   if (outFrames == 0) outFrames = 1;
 
+// pop off the top 7 objects
+  lua_pop(L, 7);
+
 // put top-level simulation table on stack
   lua_getglobal(L, "simulation");
 // construct table object
