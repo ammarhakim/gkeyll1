@@ -169,7 +169,7 @@ test_4(Lucee::LuaState& L)
   LC_ASSERT("Testing names of Updater", updaters[0] == "solvera");
   LC_ASSERT("Testing names of Updater", updaters[1] == "solverb");
 
-  LC_RAISES("Testing if incoorect type can be queried",
+  LC_RAISES("Testing if incorrect type can be queried",
     back.getNamesOfType("not-there"), Lucee::Except);
 }
 
