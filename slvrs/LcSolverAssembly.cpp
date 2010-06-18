@@ -113,6 +113,11 @@ namespace Lucee
     std::map<std::string, Lucee::GridIfc*>::iterator gItr;
     for (gItr = gridMap.begin(); gItr != gridMap.end(); ++gItr)
       gItr->second->writeToFile(io, fNode, gItr->first);
+
+// write out all dataStructs
+    std::map<std::string, Lucee::DataStructIfc*>::iterator dsItr;
+    for (dsItr = dataStructMap.begin(); dsItr != dataStructMap.end(); ++dsItr)
+      dsItr->second->writeToFile(io, fNode, dsItr->first);
   }
 
   int
