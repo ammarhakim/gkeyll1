@@ -195,47 +195,37 @@ test_5(Lucee::LuaState& L)
 // push name of function on stack
   lua_pushstring(L, "init");
   lua_gettable(L, -2);
-  Lucee::LuaFunction fun(L, "init");
+  Lucee::LuaFunction fun(L, "init", 1);
 
-  double t, xyz[3];
+  std::vector<double> txyz(4);
+  double t = 10.0;
 
-  t = 1.0;
-  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
-  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
-
-  t = 2.0;
-  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
-  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
-
-  t = 3.0;
-  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
-  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
-
-  t = 10.0;
   double dx=0.1, dy=0.2, dz=0.3;
   for (unsigned i=0; i<100; ++i)
     for (unsigned j=0; j<100; ++j)
-      for (unsigned k=0; k<100; ++k)
+      for (unsigned k=0; k<10; ++k)
       {
         double x = 1.0 + dx*i;
         double y = 2.0 + dy*j;
         double z = 3.0 + dz*k;
-        xyz[0] = x; xyz[1] = y; xyz[2] = z;
-        LC_ASSERT("Testing function evaluation", 
-          fun.eval(t, xyz) == t*(x+y+z));
+        txyz[0] = t; txyz[1] = x; txyz[2] = y; txyz[3] = z;
+        std::vector<double> res = fun.eval(txyz);
+        LC_ASSERT("Testing size of return vector", res.size() == 1);
+        LC_ASSERT("Testing return results", res[0] == t*(x+y+z));
       }
 
   t = 10.0;
   for (unsigned i=0; i<100; ++i)
     for (unsigned j=0; j<100; ++j)
-      {
-        double x = 1.0 + dx*i;
-        double y = 2.0 + dy*j;
-        double z = 0.0;
-        xyz[0] = x; xyz[1] = y; xyz[2] = z;
-        LC_ASSERT("Testing function evaluation", 
-          fun.eval(t, xyz) == t*(x+y+z));
-      }
+    {
+      double x = 1.0 + dx*i;
+      double y = 2.0 + dy*j;
+      double z = 0.0;
+      txyz[0] = t; txyz[1] = x; txyz[2] = y; txyz[3] = z;
+      std::vector<double> res = fun.eval(txyz);
+      LC_ASSERT("Testing size of return vector", res.size() == 1);
+      LC_ASSERT("Testing return results", res[0] == t*(x+y+z));
+    }
 }
 
 int

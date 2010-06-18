@@ -40,8 +40,8 @@
 
 namespace Lucee
 {
-  LuaFunction::LuaFunction(Lucee::LuaState& lin, const std::string& nm)
-    : L(lin), name(nm)
+  LuaFunction::LuaFunction(Lucee::LuaState& lin, const std::string& nm, unsigned numOut)
+    : L(lin), name(nm), numOut(numOut)
   {
 // test top of stack
     if (! lua_isfunction(L, -1) )
@@ -60,25 +60,30 @@ namespace Lucee
     luaL_unref(L, LUA_REGISTRYINDEX, ref);
   }
 
-  double
-  LuaFunction::eval(double t, double xyz[3])
+  std::vector<double>
+  LuaFunction::eval(const std::vector<double>& inp)
   {
-    SHOW_LUA_STACK_SIZE("eval", L)
+    SHOW_LUA_STACK_SIZE("eval", L);
+
+    std::vector<double> res(numOut);
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 // push variables on stack
-    lua_pushnumber(L, t);
-    for (unsigned i=0; i<3; ++i)
-      lua_pushnumber(L, xyz[i]);
-    if (lua_pcall(L, 4, 1, 0) != 0)
+    for (unsigned i=0; i<inp.size(); ++i)
+      lua_pushnumber(L, inp[i]);
+    if (lua_pcall(L, inp.size(), numOut, 0) != 0)
     {
       Lucee::Except lce("LuaFunction::eval: Problem evaluating function ");
       lce << name;
       throw lce;
     }
-    if (!lua_isnumber(L, -1))
-      throw Lucee::Except("LuaFunction::eval: Return value not a number");
-    double res = lua_tonumber(L, -1);
+// fetch results
+    for (int i=-numOut; i<0; ++i)
+    {
+      if (!lua_isnumber(L, i))
+        throw Lucee::Except("LuaFunction::eval: Return value not a number");
+      res[numOut+i] = lua_tonumber(L, i);
+    }
     lua_pop(L, 1);
     SHOW_LUA_STACK_SIZE2(L)
     return res;

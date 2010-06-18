@@ -24,6 +24,7 @@
 
 // std includes
 #include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -39,8 +40,9 @@ namespace Lucee
  *
  * @param L Lua state.
  * @param nm Name of function.
+ * @param numOut size of result vector.
  */
-      LuaFunction(Lucee::LuaState& L, const std::string& nm);
+      LuaFunction(Lucee::LuaState& L, const std::string& nm, unsigned numOut);
 
 /**
  * Destroy table: frees Lua table and allows the garbage collector to
@@ -51,11 +53,10 @@ namespace Lucee
 /**
  * Evaluate function and return result.
  *
- * @param t Time to evaluate function.
- * @param xyz Coordinates of location.
- * @return value at (t, xyz)
+ * @param inp Vector of input values.
+ * @return function output.
  */
-      double eval(double t, double xyz[3]);
+      std::vector<double> eval(const std::vector<double>& inp);
 
     private:
 /** Reference to lua state */
@@ -64,6 +65,8 @@ namespace Lucee
       std::string name;
 /** Pointer to Lua table */
       int ref;
+/** Number of output results */
+      unsigned numOut;
   };
 }
 
