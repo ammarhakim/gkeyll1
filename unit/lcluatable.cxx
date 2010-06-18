@@ -10,6 +10,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaFunction.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
 #include <LcTest.h>
@@ -173,6 +174,70 @@ test_4(Lucee::LuaState& L)
     back.getNamesOfType("not-there").size() == 0);
 }
 
+void
+test_5(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "background = {"
+    "  init = function (t, x, y, z)"
+    "    return t*(x+y+z)"
+    "  end"
+    "}";
+
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "background");
+
+// push name of function on stack
+  lua_pushstring(L, "init");
+  lua_gettable(L, -2);
+  Lucee::LuaFunction fun(L, "init");
+
+  double t, xyz[3];
+
+  t = 1.0;
+  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
+  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
+
+  t = 2.0;
+  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
+  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
+
+  t = 3.0;
+  xyz[0] = 1.0; xyz[1] = 2.0; xyz[2] = 3.0;
+  LC_ASSERT("Testing function evaluation", fun.eval(t, xyz) == t*(1+2+3));
+
+  t = 10.0;
+  double dx=0.1, dy=0.2, dz=0.3;
+  for (unsigned i=0; i<100; ++i)
+    for (unsigned j=0; j<100; ++j)
+      for (unsigned k=0; k<100; ++k)
+      {
+        double x = 1.0 + dx*i;
+        double y = 2.0 + dy*j;
+        double z = 3.0 + dz*k;
+        xyz[0] = x; xyz[1] = y; xyz[2] = z;
+        LC_ASSERT("Testing function evaluation", 
+          fun.eval(t, xyz) == t*(x+y+z));
+      }
+
+  t = 10.0;
+  for (unsigned i=0; i<100; ++i)
+    for (unsigned j=0; j<100; ++j)
+      {
+        double x = 1.0 + dx*i;
+        double y = 2.0 + dy*j;
+        double z = 0.0;
+        xyz[0] = x; xyz[1] = y; xyz[2] = z;
+        LC_ASSERT("Testing function evaluation", 
+          fun.eval(t, xyz) == t*(x+y+z));
+      }
+}
+
 int
 main(void)
 {
@@ -182,6 +247,7 @@ main(void)
   test_2(L);
   test_3(L);
   test_4(L);
+  test_5(L);
 
   LC_END_TESTS;
 }
