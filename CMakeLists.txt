@@ -128,3 +128,6 @@ add_test(lcvec3 unit/lcvec3)
 
 # lcrectcartgrid
 add_test(lcrectcartgrid unit/lcrectcartgrid)
+
+# lcluafunction
+add_test(lcluafunction unit/lcluafunction)
