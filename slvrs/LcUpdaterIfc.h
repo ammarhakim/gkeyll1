@@ -25,7 +25,7 @@
 // std includes
 #include <map>
 #include <string>
-#include <vector>
+#include <typeinfo>
 
 // forward declare SolverAssembly class
 class Lucee::SolverAssembly;
@@ -109,7 +109,33 @@ namespace Lucee
  */
       virtual void finalize();
 
+/**
+ * Set list of input variables for use in updater.
+ *
+ * @param nms list on input variables.
+ */
+      void setInpVarNames(const std::vector<std::string>& nms);
+
+/**
+ * Set list of output variables for use in updater.
+ *
+ * @param nms list on output variables.
+ */
+      void setOutVarNames(const std::vector<std::string>& nms);
+
     protected:
+/**
+ * Get grid on which updater should be applied.
+ *
+ * @return reference to grid.
+ */
+      template <typename G>
+      const G&
+      getGrid() const
+      {
+        return parent->template getConstGrid<G>(onGrid);
+      }
+
 /**
  * Get input dataStruct at specified location.
  *
@@ -133,7 +159,7 @@ namespace Lucee
       DS& getOut(unsigned loc)
       {
         return parent->template
-          getDataStruct<DS>(inpVarNames[loc]);
+          getDataStruct<DS>(outVarNames[loc]);
       }
 
     private:

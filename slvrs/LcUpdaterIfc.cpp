@@ -67,4 +67,14 @@ namespace Lucee
   UpdaterIfc::finalize()
   {
   }
+
+  void
+  UpdaterIfc::setInpVarNames(const std::vector<std::string>& nms)
+  {
+  }
+
+  void
+  UpdaterIfc::setOutVarNames(const std::vector<std::string>& nms)
+  {
+  }
 }
