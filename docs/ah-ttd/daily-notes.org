@@ -1,5 +1,23 @@
 # -*- org -*-
 
+* June 17th
+
+  (A few days). Now have Fields initialized from input files. Also
+  added a LuaFunction class that allows wrapping a Lua function in
+  C++.
+
+  The LuaTable class had a major bug in which the Lua stack size kept
+  growing. This caused a segfault on my new Mac. Wrote a set of macros
+  to track stack size. Now the stack is exactly balanced in each call.
+
+  One think that Lucee needs is a general set of vector operators:
+  div, grad and curl. These operators should work on body fitted grids
+  and should preserve the discrete vector calculus identities. One way
+  to do this is to implement the Support Operator Method (SOM) for the
+  discrete vector calculus operators. This would allow a combination
+  of these operators to construct, for example, a Navier-Stokes
+  solver.
+
 * June 5/6th
 
   Completed reading of grids from input files and writing them out to
