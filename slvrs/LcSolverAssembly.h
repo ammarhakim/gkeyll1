@@ -138,6 +138,12 @@ namespace Lucee
         throw lce;
       }
 
+/**
+ * Returns a constant reference to specified data-structure.
+ *
+ * @param nm Name of data-structure to fetch.
+ * @return reference to data-structure.
+ */
       template <typename DS>
       const DS&
       getConstDataStruct(const std::string& nm) const
@@ -159,6 +165,37 @@ namespace Lucee
           }
         }
         Lucee::Except lce("SolverAssembly::getConstDataStruct: No data-structure named '");
+        lce << nm << "' exists in assembly" << std::endl;
+        throw lce;
+      }
+
+/**
+ * Returns a reference to specified data-structure.
+ *
+ * @param nm Name of data-structure to fetch.
+ * @return reference to data-structure.
+ */
+      template <typename DS>
+      DS&
+      getDataStruct(const std::string& nm)
+      {
+        std::map<std::string, Lucee::DataStructIfc*>::const_iterator dsItr
+          = dataStructMap.find(nm); // get iterator to ds
+        if (dsItr != dataStructMap.end())
+        {
+          try
+          {
+            DS& ret = dynamic_cast<DS&>(*dsItr->second);
+            return ret;
+          }
+          catch (std::bad_cast& e)
+          { // dataStruct not of expected type
+            Lucee::Except lce("SolverAssembly::getDataStruct: DataStruct names '");
+            lce << nm << "' exists in assembly but is not of the correct type" << std::endl;
+            throw lce;
+          }
+        }
+        Lucee::Except lce("SolverAssembly::getDataStruct: No data-structure named '");
         lce << nm << "' exists in assembly" << std::endl;
         throw lce;
       }
