@@ -113,7 +113,7 @@ namespace Lucee
  * @param nm Name of grid to fetch.
  * @return reference to grid.
  */
-      template <class G>
+      template <typename G>
       const G&
       getConstGrid(const std::string& nm) const
       {
@@ -138,13 +138,36 @@ namespace Lucee
         throw lce;
       }
 
+      template <typename DS>
+      const DS&
+      getConstDataStruct(const std::string& nm) const
+      {
+        std::map<std::string, Lucee::DataStructIfc*>::const_iterator dsItr
+          = dataStructMap.find(nm); // get iterator to ds
+        if (dsItr != dataStructMap.end())
+        {
+          try
+          {
+            const DS& ret = dynamic_cast<const DS&>(*dsItr->second);
+            return ret;
+          }
+          catch (std::bad_cast& e)
+          { // dataStruct not of expected type
+            Lucee::Except lce("SolverAssembly::getConstDataStruct: DataStruct names '");
+            lce << nm << "' exists in assembly but is not of the correct type" << std::endl;
+            throw lce;
+          }
+        }
+        Lucee::Except lce("SolverAssembly::getConstDataStruct: No data-structure named '");
+        lce << nm << "' exists in assembly" << std::endl;
+        throw lce;
+      }
+
     private:
 /** Map of grids */
       std::map<std::string, Lucee::GridIfc*> gridMap;
 /** Map of data-struct */
       std::map<std::string, Lucee::DataStructIfc*> dataStructMap;
-/** Map of field-aliases */
-
 /** Map of updaters */
 
   };

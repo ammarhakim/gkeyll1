@@ -14,4 +14,5 @@ add_library(lcslvrs
   LcFieldFactory.cpp
   LcSolverAssembly.cpp
   LcSolverRegistry.cpp
+  LcUpdaterIfc.cpp
 )
