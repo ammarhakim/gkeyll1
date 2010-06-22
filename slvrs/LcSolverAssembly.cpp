@@ -45,6 +45,11 @@ namespace Lucee
     for (dsItr = dataStructMap.begin(); dsItr != dataStructMap.end(); ++dsItr)
       delete dsItr->second;
     dataStructMap.clear();
+// delete all updaters
+    std::map<std::string, Lucee::UpdaterIfc*>::iterator uItr;
+    for (uItr = updaterMap.begin(); uItr != updaterMap.end(); ++uItr)
+      delete uItr->second;
+    updaterMap.clear();
   }
   
   void 
@@ -82,6 +87,20 @@ namespace Lucee
         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::getNew(kind));
       dsfact->readInput(dstbl); // read input from grid block
       dataStructMap[dsnm] = dsfact->create(*this); // create grid
+    }
+
+// create all updaters in assembly
+    std::vector<std::string> uNms = tbl.getNamesOfType("Updater");
+    for (unsigned i=0; i<uNms.size(); ++i)
+    {
+      std::string unm = uNms[i];
+      Lucee::LuaTable utbl = tbl.getTable(unm);
+      std::string kind = utbl.getKind();
+      infoStrm << "Setting up updater '" << unm << "' of kind '"
+               << kind << "'" << std::endl;
+      Lucee::UpdaterIfc *u = Lucee::ObjCreator<Lucee::UpdaterIfc>::getNew(kind);
+      u->readInput(utbl);
+      updaterMap[unm] = u;
     }
   }
 

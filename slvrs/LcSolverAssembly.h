@@ -21,6 +21,7 @@
 #include <LcGridIfc.h>
 #include <LcHdf5Io.h>
 #include <LcSolverIfc.h>
+#include <LcUpdaterIfc.h>
 
 // std includes
 #include <map>
@@ -206,7 +207,7 @@ namespace Lucee
 /** Map of data-struct */
       std::map<std::string, Lucee::DataStructIfc*> dataStructMap;
 /** Map of updaters */
-
+      std::map<std::string, Lucee::UpdaterIfc*> updaterMap;
   };
 }
 

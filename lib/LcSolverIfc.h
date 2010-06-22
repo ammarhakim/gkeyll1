@@ -90,7 +90,7 @@ namespace Lucee
  *
  * @param tbl Table of input values.
  */
-      virtual void readInput(Lucee::LuaTable& tbl) = 0;
+      virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Bootstrap method: Allocate data for solver.
