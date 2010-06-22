@@ -44,4 +44,9 @@ namespace Lucee
   {
     return currTime;
   }
+
+  void
+  SolverIfc::readInput(Lucee::LuaTable& tbl)
+  {
+  }
 }

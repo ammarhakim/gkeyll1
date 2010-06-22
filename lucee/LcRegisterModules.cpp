@@ -19,6 +19,7 @@
 #include <LcRteRegistry.h>
 #include <LcSolverIfc.h>
 #include <LcSolverRegistry.h>
+#include <LcUpdaterIfc.h>
 
 namespace Lucee
 {
@@ -39,5 +40,6 @@ namespace Lucee
     Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);
     Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::registerModule(L);
     Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::registerModule(L);
+    Lucee::ObjCreator<Lucee::UpdaterIfc>::registerModule(L);
   }
 }

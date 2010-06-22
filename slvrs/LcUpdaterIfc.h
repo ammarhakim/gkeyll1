@@ -23,15 +23,15 @@
 #include <LcSolverIfc.h>
 
 // std includes
-#include <map>
 #include <string>
 #include <typeinfo>
-
-// forward declare SolverAssembly class
-class Lucee::SolverAssembly;
+#include <vector>
 
 namespace Lucee
 {
+// forward declare SolverAssembly class
+  class SolverAssembly;
+
 /**
  * An updater is analogous to a subroutine: it takes a set of
  * input/output DataStructIfc objects and advances them to a specified
@@ -81,9 +81,20 @@ namespace Lucee
  * concept of time should ignore the time parameter.
  *
  * @param t Time to advance the solution to.
- * @return Status of solution.
+ * @return Status of updater: 0 for pass, 1 otherwise.
  */
       virtual int advance(double t) = 0;
+
+/**
+ * Get a suggested time-step. This method is called after advance()
+ * method is called. This method is called even if advance() fails
+ * (i.e. return 0). If advance() returns 0 this step may be retaken
+ * depending on the time-stepping mode used. If advance() returns 1
+ * the next step may be larger than one supplied.
+ *
+ * @param suggested time-step.
+ */
+      virtual double getSuggestedDt() = 0;
 
 /**
  * Write solver data to file.
@@ -123,7 +134,69 @@ namespace Lucee
  */
       void setOutVarNames(const std::vector<std::string>& nms);
 
+/**
+ * Get actual number of input data structures passed to updater.
+ *
+ * @return actual number of input data structures.
+ */
+      unsigned getActualNumInpVars() const
+      { return inpVarNames.size(); }
+
+/**
+ * Get actual number of output data structures passed to updater.
+ *
+ * @return actual number of output data structures.
+ */
+      unsigned getActualNumOutVars() const
+      { return outVarNames.size(); }
+
+/**
+ * Type-check if the supplied list of input/output data structures are
+ * of the proper type.
+ *
+ * @param inp Names of input data structures.
+ * @param out Names of output data structures.
+ * 
+ * @return true if type-checking passes, fail otherwise.
+ */
+      bool typeCheck(const std::vector<std::string>& inp,
+        const std::vector<std::string>& out) const;
+
     protected:
+/**
+ * Set type information for an input data structure. This method must
+ * be called for each input variable in the order they are expected.
+ *
+ * @param type Typeid of input variable.
+ */
+      void appendInpVarType(const std::type_info& type);
+
+/**
+ * Set type information for an output data structure. This method must
+ * be called for each output variable in the order they are expected.
+ *
+ * @param type Typeid of output variable.
+ */
+      void appendOutVarType(const std::type_info& type);
+
+/**
+ * Set type information for the last input data structure. This method
+ * should only be called if there are a variable number of input data
+ * structures expected by the updater.
+ *
+ * @param type Typeid of last input variable.
+ */
+      void setLastInpVarType(const std::type_info& type);
+
+/**
+ * Set type information for the last output data structure. This
+ * method should only be called if there are a variable number of
+ * output data structures expected by the updater.
+ *
+ * @param type Typeid of last output variable.
+ */
+      void setLastOutVarType(const std::type_info& type);
+
 /**
  * Get grid on which updater should be applied.
  *
@@ -163,6 +236,17 @@ namespace Lucee
       }
 
     private:
+/**
+ * Input/output variable typeids.
+ */
+      struct VarTypeIds
+      {
+/** Map of variable locations to typeids */
+          std::vector<const std::type_info*> varTypes;
+/** Last variable type (all others after this are assumed to be this) */
+          const std::type_info* lastVarType;
+      };
+
 /** List of input data structure names */
       std::vector<std::string> inpVarNames;
 /** List of output data structure names */
@@ -171,6 +255,10 @@ namespace Lucee
       std::string onGrid;
 /** Pointer to containing solver assembly */
       Lucee::SolverIfc *parent;
+/** Input variable types */
+      VarTypeIds inpVarTypes;
+/** Output variable types */
+      VarTypeIds outVarTypes;
   };
 }
 
