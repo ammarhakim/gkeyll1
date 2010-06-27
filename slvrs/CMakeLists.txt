@@ -15,4 +15,5 @@ add_library(lcslvrs
   LcSolverAssembly.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
+  LcUpdaterStatus.cpp
 )

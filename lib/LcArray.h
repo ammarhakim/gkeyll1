@@ -354,7 +354,7 @@ namespace Lucee
  *
  * @param io I/O object for I/O.
  * @param node Node to write to.
- * @param nm Name of the grid as it should appear in output.
+ * @param nm Name of the array as it should appear in output.
  * @return node to which data was written.
  */
       virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,

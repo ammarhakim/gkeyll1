@@ -14,6 +14,7 @@
 #endif
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcSolverAssembly.h>
 #include <LcUpdaterIfc.h>
 
@@ -26,7 +27,7 @@ namespace Lucee
   const char *UpdaterIfc::id = "Updater";
 
   UpdaterIfc::UpdaterIfc()
-    : SolverIfc(UpdaterIfc::id)
+    : Lucee::BasicObj(UpdaterIfc::id)
   {
   }
 
@@ -37,44 +38,26 @@ namespace Lucee
   void
   UpdaterIfc::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
-    SolverIfc::readInput(tbl);
-  }
-
-  void
-  UpdaterIfc::buildData()
-  {
-  }
-
-  void
-  UpdaterIfc::buildAlgorithms()
-  {
+    throw Lucee::Except("UpdaterIfc::readInput: This method is not implemented");
   }
 
   void
   UpdaterIfc::initialize()
   {
+    inpVars.resize(getNumInpVars());
+    outVars.resize(getNumOutVars());
+  }
+
+  void
+  UpdaterIfc::setCurrTime(double tm) 
+  {
+    currTime = tm;
   }
 
   double
-  UpdaterIfc::getSuggestedDt()
+  UpdaterIfc::getCurrTime() const 
   {
-    return std::numeric_limits<double>::max();
-  }
-
-  void
-  UpdaterIfc::writeToFile(const std::string& baseName, unsigned d)
-  { // updaters in general should not write anything to file
-  }
-
-  void
-  UpdaterIfc::restoreFromFile(const std::string& baseName)
-  { // updaters in general should not restore anything from file
-  }
-
-  void
-  UpdaterIfc::finalize()
-  {
+    return currTime;
   }
 
   void
@@ -86,20 +69,25 @@ namespace Lucee
   void
   UpdaterIfc::setInpVar(unsigned loc, const Lucee::DataStructIfc& ds)
   {
+    if (loc >= getNumInpVars())
+    {
+      Lucee::Except lce("UpdaterIfc::setInpVar: Location ");
+      lce << loc << " out-of-bounds.";
+      throw lce;
+    }
     inpVars[loc] = &ds;
   }
 
   void
   UpdaterIfc::setOutVar(unsigned loc, Lucee::DataStructIfc& ds)
   {
+    if (loc >= getNumOutVars())
+    {
+      Lucee::Except lce("UpdaterIfc::setOutVar: Location ");
+      lce << loc << " out-of-bounds.";
+      throw lce;
+    }
     outVars[loc] = &ds;
-  }
-
-  bool
-  UpdaterIfc::typeCheck(const std::vector<std::string>& inp,
-    const std::vector<std::string>& out) const
-  {
-    return true;
   }
 
   void
