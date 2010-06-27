@@ -110,10 +110,11 @@ namespace Lucee
 
 /**
  * Advance the solution to specified time. Solvers that do not have a
- * concept of time should ignore the time parameter.
+ * concept of time should ignore the time parameter. The solver should
+ * return 0 if it fails and 1 it passes.
  *
  * @param t Time to advance the solution to.
- * @return Status of solution.
+ * @return Status of solution: 1 for pass, 0 for fail.
  */
       virtual int advance(double t) = 0;
 
