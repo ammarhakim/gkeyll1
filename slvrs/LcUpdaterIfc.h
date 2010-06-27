@@ -20,7 +20,6 @@
 #include <LcDataStructIfc.h>
 #include <LcGridIfc.h>
 #include <LcHdf5Io.h>
-#include <LcSolverIfc.h>
 
 // std includes
 #include <string>
@@ -36,6 +35,15 @@ namespace Lucee
  * An updater is analogous to a subroutine: it takes a set of
  * input/output DataStructIfc objects and advances them to a specified
  * time.
+ *
+ * When updaters are used directly, they must be first constructed,
+ * either using the constructor or using the set of provided
+ * methods. and then the following methods *must* be called in the
+ * specified order: declareTypes(), setGrid(), initialize(). Updaters
+ * may not work if these methods are not called in this order. If the
+ * setGrid() method is called then the initialize() method must be
+ * called before using the updater.
+ *
  */
   class UpdaterIfc : public Lucee::SolverIfc
   {
@@ -92,9 +100,13 @@ namespace Lucee
  * depending on the time-stepping mode used. If advance() returns 1
  * the next step may be larger than one supplied.
  *
+ * By default this method will return the largest possible
+ * time-step. This may not always be desirable and derived classes
+ * should override this method.
+ *
  * @param suggested time-step.
  */
-      virtual double getSuggestedDt() = 0;
+      virtual double getSuggestedDt();
 
 /**
  * Write solver data to file.
@@ -121,34 +133,54 @@ namespace Lucee
       virtual void finalize();
 
 /**
- * Set list of input variables for use in updater.
- *
- * @param nms list on input variables.
+ * Declare the types of input and output variables accepted by this
+ * updater. This must be provided by the derived classes for the
+ * type-checking to pass.
  */
-      void setInpVarNames(const std::vector<std::string>& nms);
+      virtual void declareTypes() = 0;
 
 /**
- * Set list of output variables for use in updater.
+ * Set the grid on which to run this updater.
  *
- * @param nms list on output variables.
+ * @param grd Grid to run this updater on.
  */
-      void setOutVarNames(const std::vector<std::string>& nms);
+      void setGrid(const Lucee::GridIfc& grd);
 
 /**
- * Get actual number of input data structures passed to updater.
+ * Set input data-structure at specified location.
  *
- * @return actual number of input data structures.
+ * @param loc Location in input data structure list.
+ * @param ds Data structure.
  */
-      unsigned getActualNumInpVars() const
-      { return inpVarNames.size(); }
+      void setInpVar(unsigned loc, const Lucee::DataStructIfc& ds);
 
 /**
- * Get actual number of output data structures passed to updater.
+ * Set output data-structure at specified location.
  *
- * @return actual number of output data structures.
+ * @param loc Location in output data structure list.
+ * @param ds Data structure.
  */
-      unsigned getActualNumOutVars() const
-      { return outVarNames.size(); }
+      void setOutVar(unsigned loc, Lucee::DataStructIfc& ds);
+
+/**
+ * Get number of input data structures passed to updater.
+ *
+ * @return number of input data structures.
+ */
+      unsigned getNumInpVars() const
+      { 
+        return inpVarTypes.varTypes.size();
+      }
+
+/**
+ * Get number of output data structures passed to updater.
+ *
+ * @return number of output data structures.
+ */
+      unsigned getNumOutVars() const
+      {
+        return outVarTypes.varTypes.size();
+      }
 
 /**
  * Type-check if the supplied list of input/output data structures are
@@ -206,7 +238,7 @@ namespace Lucee
       const G&
       getGrid() const
       {
-        return parent->template getConstGrid<G>(onGrid);
+        return dynamic_cast<const G&>(*grid);
       }
 
 /**
@@ -218,8 +250,7 @@ namespace Lucee
       template <typename DS>
       const DS& getInp(unsigned loc) const
       {
-        return parent->template
-          getConstDataStruct<DS>(inpVarNames[loc]);
+        return dynamic_cast<const DS&>(*inpVars[loc]);
       }
 
 /**
@@ -231,8 +262,7 @@ namespace Lucee
       template <typename DS>
       DS& getOut(unsigned loc)
       {
-        return parent->template
-          getDataStruct<DS>(outVarNames[loc]);
+        return dynamic_cast<DS&>(*outVars[loc]);
       }
 
     private:
@@ -247,18 +277,17 @@ namespace Lucee
           const std::type_info* lastVarType;
       };
 
-/** List of input data structure names */
-      std::vector<std::string> inpVarNames;
-/** List of output data structure names */
-      std::vector<std::string> outVarNames;
-/** Name of domain on which updater should be applied */
-      std::string onGrid;
-/** Pointer to containing solver assembly */
-      Lucee::SolverIfc *parent;
 /** Input variable types */
       VarTypeIds inpVarTypes;
 /** Output variable types */
       VarTypeIds outVarTypes;
+
+/** Grid on which updater should be applied */
+      const Lucee::GridIfc *grid;
+/** List of input data structures */
+      std::vector<const Lucee::DataStructIfc*> inpVars;
+/** List of output data structures */
+      std::vector<Lucee::DataStructIfc*> outVars;
   };
 }
 

@@ -17,6 +17,9 @@
 #include <LcSolverAssembly.h>
 #include <LcUpdaterIfc.h>
 
+// std includes
+#include <limits>
+
 namespace Lucee
 {
 // set module name
@@ -53,6 +56,12 @@ namespace Lucee
   {
   }
 
+  double
+  UpdaterIfc::getSuggestedDt()
+  {
+    return std::numeric_limits<double>::max();
+  }
+
   void
   UpdaterIfc::writeToFile(const std::string& baseName, unsigned d)
   { // updaters in general should not write anything to file
@@ -69,15 +78,21 @@ namespace Lucee
   }
 
   void
-  UpdaterIfc::setInpVarNames(const std::vector<std::string>& nms)
+  UpdaterIfc::setGrid(const Lucee::GridIfc& grd)
   {
-    inpVarNames = nms;
+    grid = &grd;
   }
 
   void
-  UpdaterIfc::setOutVarNames(const std::vector<std::string>& nms)
+  UpdaterIfc::setInpVar(unsigned loc, const Lucee::DataStructIfc& ds)
   {
-    outVarNames = nms;
+    inpVars[loc] = &ds;
+  }
+
+  void
+  UpdaterIfc::setOutVar(unsigned loc, Lucee::DataStructIfc& ds)
+  {
+    outVars[loc] = &ds;
   }
 
   bool
