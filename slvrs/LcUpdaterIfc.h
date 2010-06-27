@@ -17,9 +17,11 @@
 #endif
 
 // lucee includes
+#include <LcBasicObj.h>
 #include <LcDataStructIfc.h>
 #include <LcGridIfc.h>
 #include <LcHdf5Io.h>
+#include <LcUpdaterStatus.h>
 
 // std includes
 #include <string>
@@ -28,24 +30,40 @@
 
 namespace Lucee
 {
-// forward declare SolverAssembly class
-  class SolverAssembly;
-
 /**
  * An updater is analogous to a subroutine: it takes a set of
  * input/output DataStructIfc objects and advances them to a specified
  * time.
  *
- * When updaters are used directly, they must be first constructed,
- * either using the constructor or using the set of provided
- * methods. and then the following methods *must* be called in the
- * specified order: declareTypes(), setGrid(), initialize(). Updaters
- * may not work if these methods are not called in this order. If the
- * setGrid() method is called then the initialize() method must be
- * called before using the updater.
+ * The updater provides two sets of methods: initialization and
+ * advancement. The initialization sequence is: 
  *
+ * derived class construction methods if the updator is used directly
+ * from code or readInput() if the updater is being used from input
+ * file.
+ *
+ * declareTypes() to declare the input/output types the updater accepts.
+ * 
+ * setGrid() to set the grid on which the updater should run.
+ *
+ * initialize() to setup the updater.
+ *
+ * Note: if the grid is changed using a setGrid() method the
+ * initialize() method must be called again.
+ *
+ * To advancement sequence is:
+ *
+ * a series of calls to setInp(), setOut() to set the input/output
+ * data structures used by the updater.
+ *
+ * setCurrTime(tm) to set the current time (i.e. the time at which the
+ * solution is already computed).
+ *
+ * update(t) to advance the solution to time t. The time-step to use
+ * is dt = t-getCurrTime(). This method must return an instance of
+ * UpdaterStatus class, indicating the status of the update() method.
  */
-  class UpdaterIfc : public Lucee::SolverIfc
+  class UpdaterIfc : public Lucee::BasicObj
   {
     public:
 /** Class id: this is used by registration system */
@@ -69,68 +87,35 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Bootstrap method: Allocate data for solver.
- */
-      virtual void buildData();
-
-/**
- * Initialize algorithms needed for solver.
- */
-      virtual void buildAlgorithms();
-
-/**
  * Initialize solver, i.e. setup initial conditions. At the end of
  * this call, the solver should be ready for evolving the solution.
  */
       virtual void initialize();
 
 /**
+ * Set the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @param tm Current time.
+ */
+      void setCurrTime(double tm);
+
+/**
+ * Get the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @return Current time.
+ */
+      double getCurrTime() const;
+
+/**
  * Advance the solution to specified time. Updaters that do not have a
  * concept of time should ignore the time parameter.
  *
  * @param t Time to advance the solution to.
- * @return Status of updater: 0 for pass, 1 otherwise.
+ * @return Status of updater.
  */
-      virtual int advance(double t) = 0;
-
-/**
- * Get a suggested time-step. This method is called after advance()
- * method is called. This method is called even if advance() fails
- * (i.e. return 0). If advance() returns 0 this step may be retaken
- * depending on the time-stepping mode used. If advance() returns 1
- * the next step may be larger than one supplied.
- *
- * By default this method will return the largest possible
- * time-step. This may not always be desirable and derived classes
- * should override this method.
- *
- * @param suggested time-step.
- */
-      virtual double getSuggestedDt();
-
-/**
- * Write solver data to file.
- *
- * @param baseName Base name of output files. This should serve as a
- *   prefix for all output files.
- * @param d Dump number.
- */
-      virtual void writeToFile(const std::string& baseName, unsigned d);
-
-/**
- * Restore solver data from file. This is called instead of the
- * initialize() method if the simulation is being restarted.
- *
- * @param baseName Base name of input files. This should serves as a
- *   prefix for all input files.
- */
-      virtual void restoreFromFile(const std::string& baseName);
-
-/**
- * Finalize solver: free resources, deallocate memory, close files
- * etc.
- */
-      virtual void finalize();
+      virtual Lucee::UpdaterStatus update(double t) = 0;
 
 /**
  * Declare the types of input and output variables accepted by this
@@ -181,18 +166,6 @@ namespace Lucee
       {
         return outVarTypes.varTypes.size();
       }
-
-/**
- * Type-check if the supplied list of input/output data structures are
- * of the proper type.
- *
- * @param inp Names of input data structures.
- * @param out Names of output data structures.
- * 
- * @return true if type-checking passes, fail otherwise.
- */
-      bool typeCheck(const std::vector<std::string>& inp,
-        const std::vector<std::string>& out) const;
 
     protected:
 /**
@@ -281,7 +254,8 @@ namespace Lucee
       VarTypeIds inpVarTypes;
 /** Output variable types */
       VarTypeIds outVarTypes;
-
+/** Current time */
+      double currTime;
 /** Grid on which updater should be applied */
       const Lucee::GridIfc *grid;
 /** List of input data structures */
