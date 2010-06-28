@@ -10,7 +10,7 @@
 
 // lucee includes
 #include <LcExcept.h>
-#include <LcLuaFunction.h>
+#include <LcLuaTXYZFunction.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
 #include <LcTest.h>
@@ -36,7 +36,7 @@ test_1(Lucee::LuaState& L)
 // push name of function on stack
   lua_pushstring(L, "init");
   lua_gettable(L, -2);
-  Lucee::LuaFunction fun(L, "init", 1);
+  Lucee::LuaTXYZFunction fun(L, "init", 1);
 
   std::vector<double> txyz(4);
   double t = 10.0;
