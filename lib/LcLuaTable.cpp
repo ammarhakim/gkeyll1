@@ -20,7 +20,7 @@
 #include <iostream>
 
 /*
-#define SHOW_LUA_STACK_SIZE(nm, L)               \
+#define SHOW_LUA_STACK_SIZE(nm, L) \
     do { \
       std::cout << "Stack size in " << nm << " is " << lua_gettop(L) << std::endl; \
     } while (0);
@@ -31,7 +31,7 @@
     } while (0);
 */
 
-#define SHOW_LUA_STACK_SIZE(nm, L)               \
+#define SHOW_LUA_STACK_SIZE(nm, L) \
     do {} while (0);
 
 #define SHOW_LUA_STACK_SIZE2(L) \
