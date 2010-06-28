@@ -1,5 +1,5 @@
 /**
- * @file	LcLuaFunction.h
+ * @file	LcLuaTXYZFunction.h
  *
  * @brief	Class to represent Lua function.
  *
@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcFunctionIfc.h>
 #include <LcLuaState.h>
 
 // lua includes
@@ -32,9 +33,12 @@ namespace Lucee
  * Class to represent a Lua function. This constructor assumes that the
  * Lua function is on top of the stack.
  */
-  class LuaFunction
+  class LuaTXYZFunction : public Lucee::FunctionIfc
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /**
  * Create a new function object.
  *
@@ -42,13 +46,13 @@ namespace Lucee
  * @param nm Name of function.
  * @param numOut size of result vector.
  */
-      LuaFunction(Lucee::LuaState& L, const std::string& nm, unsigned numOut);
+      LuaTXYZFunction(Lucee::LuaState& L, const std::string& nm, unsigned numOut);
 
 /**
  * Destroy table: frees Lua table and allows the garbage collector to
  * free memory.
  */
-      ~LuaFunction();
+      ~LuaTXYZFunction();
 
 /**
  * Evaluate function and return result.
@@ -65,8 +69,6 @@ namespace Lucee
       std::string name;
 /** Pointer to Lua table */
       int ref;
-/** Number of output results */
-      unsigned numOut;
   };
 }
 
