@@ -16,6 +16,7 @@ add_library(lclib
   LcField.cpp
   LcFieldPtr.cpp
   LcFileHandler.cpp
+  LcFunctionIfc.cpp
   LcHdf5Io.cpp
   LcHdf5IoTmpl.cpp
   LcIoBase.cpp

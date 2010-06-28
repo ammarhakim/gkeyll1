@@ -1,5 +1,5 @@
 /**
- * @file	LcLuaFunction.cpp
+ * @file	LcLuaTXYZFunction.cpp
  *
  * @brief	Class to represent Lua function.
  *
@@ -15,7 +15,7 @@
 
 // lucee includes
 #include <LcExcept.h>
-#include <LcLuaFunction.h>
+#include <LcLuaTXYZFunction.h>
 
 // std include
 #include <iostream>
@@ -40,13 +40,15 @@
 
 namespace Lucee
 {
-  LuaFunction::LuaFunction(Lucee::LuaState& lin, const std::string& nm, unsigned numOut)
-    : L(lin), name(nm), numOut(numOut)
+  const char *LuaTXYZFunction::id = "LuaTXYZ";
+
+  LuaTXYZFunction::LuaTXYZFunction(Lucee::LuaState& lin, const std::string& nm, unsigned numOut)
+    : Lucee::FunctionIfc(4, numOut), L(lin), name(nm)
   {
 // test top of stack
     if (! lua_isfunction(L, -1) )
     {
-      Lucee::Except lce("LuaFunction::LuaFunction: ");
+      Lucee::Except lce("LuaTXYZFunction::LuaTXYZFunction: ");
       lce << nm << " is not a Lua function";
       throw lce;
     }
@@ -55,16 +57,16 @@ namespace Lucee
 // create typeMap
   }
 
-  LuaFunction::~LuaFunction()
+  LuaTXYZFunction::~LuaTXYZFunction()
   {
     luaL_unref(L, LUA_REGISTRYINDEX, ref);
   }
 
   std::vector<double>
-  LuaFunction::eval(const std::vector<double>& inp)
+  LuaTXYZFunction::eval(const std::vector<double>& inp)
   {
     SHOW_LUA_STACK_SIZE("eval", L);
-
+    unsigned numOut = this->getOutSize();
     std::vector<double> res(numOut);
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -73,7 +75,7 @@ namespace Lucee
       lua_pushnumber(L, inp[i]);
     if (lua_pcall(L, inp.size(), numOut, 0) != 0)
     {
-      Lucee::Except lce("LuaFunction::eval: Problem evaluating function ");
+      Lucee::Except lce("LuaTXYZFunction::eval: Problem evaluating function ");
       lce << name;
       throw lce;
     }
@@ -81,7 +83,7 @@ namespace Lucee
     for (int i=-numOut; i<0; ++i)
     {
       if (!lua_isnumber(L, i))
-        throw Lucee::Except("LuaFunction::eval: Return value not a number");
+        throw Lucee::Except("LuaTXYZFunction::eval: Return value not a number");
       res[numOut+i] = lua_tonumber(L, i);
     }
     lua_pop(L, 1);
