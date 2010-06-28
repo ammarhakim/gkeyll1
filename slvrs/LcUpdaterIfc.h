@@ -120,7 +120,10 @@ namespace Lucee
 /**
  * Declare the types of input and output variables accepted by this
  * updater. This must be provided by the derived classes for the
- * type-checking to pass.
+ * type-checking to pass. Inside the implementation of this method the
+ * derived class must make a sequence of appendInpVarType() and
+ * appendOutVarType() calls to declare the input/output data structure
+ * types.
  */
       virtual void declareTypes() = 0;
 
