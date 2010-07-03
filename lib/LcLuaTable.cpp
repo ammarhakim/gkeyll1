@@ -18,7 +18,6 @@
 #include <LcLuaTable.h>
 
 #include <iostream>
-
 /*
 #define SHOW_LUA_STACK_SIZE(nm, L) \
     do { \
@@ -62,6 +61,12 @@ namespace Lucee
     SHOW_LUA_STACK_SIZE("~LuaTable", L);
     luaL_unref(L, LUA_REGISTRYINDEX, ref);
     SHOW_LUA_STACK_SIZE2(L);
+  }
+
+  Lucee::LuaState&
+  LuaTable::getLuaState()
+  {
+    return L;
   }
 
   std::string
@@ -217,6 +222,28 @@ namespace Lucee
     return tbl;
   }
 
+  int
+  LuaTable::getFunctionRef(const std::string& nm)
+  {
+    SHOW_LUA_STACK_SIZE("getFunctionRef", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, nm.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (! lua_isfunction(L, -1) )
+    {
+      lua_pop(L, 1);
+      Lucee::Except lce("LuaTable::getFunctionRef: ");
+      lce << nm << " is not a Lua function";
+      throw lce;
+    }
+    int fnRef = luaL_ref(L, LUA_REGISTRYINDEX);
+    lua_pop(L, 1);
+    SHOW_LUA_STACK_SIZE2(L);
+    return fnRef;
+  }
+
   bool
   LuaTable::hasString(const std::string& key)
   {
@@ -334,6 +361,26 @@ namespace Lucee
     lua_pushstring(L, nm.c_str());
     lua_gettable(L, -2);
     if (! lua_istable(L, -1) )
+    {
+      lua_pop(L, 2);
+      SHOW_LUA_STACK_SIZE2(L);
+      return false;
+    }
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return true;
+  }
+
+  bool
+  LuaTable::hasFunction(const std::string& nm)
+  {
+    SHOW_LUA_STACK_SIZE("hasFunction", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, nm.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (! lua_isfunction(L, -1) )
     {
       lua_pop(L, 2);
       SHOW_LUA_STACK_SIZE2(L);

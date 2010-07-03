@@ -11,6 +11,7 @@
 // lucee includes
 #include <LcDataStructIfc.h>
 #include <LcDataStructRegistry.h>
+#include <LcFunctionIfc.h>
 #include <LcGenericFactory.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
@@ -41,5 +42,6 @@ namespace Lucee
     Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::registerModule(L);
     Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::registerModule(L);
     Lucee::ObjCreator<Lucee::UpdaterIfc>::registerModule(L);
+    Lucee::ObjCreator<Lucee::FunctionIfc>::registerModule(L);
   }
 }

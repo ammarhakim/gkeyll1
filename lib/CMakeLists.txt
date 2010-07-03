@@ -20,13 +20,14 @@ add_library(lclib
   LcHdf5Io.cpp
   LcHdf5IoTmpl.cpp
   LcIoBase.cpp
+  LcLibRegistry.cpp
   LcLinAlgebra.cpp
   LcLogRecordHandler.cpp
   LcLogStream.cpp
   LcLogStreamStrm.cpp
   LcLogger.cpp
-  LcLuaTXYZFunction.cpp
   LcLuaState.cpp
+  LcLuaTXYZFunction.cpp
   LcLuaTable.cpp
   LcMathLib.cpp
   LcMatrix.cpp
