@@ -1,5 +1,31 @@
 # -*- org -*-
 
+* July 2nd
+
+  (A few days) No work for a while.
+
+  Added UpdaterIfc class to represent updaters in Lucee. Initially
+  these were derived from SolverIfc but had to break this up and make
+  UpdaterIfc its own base class.
+
+  One key objective was to allow use of updaters directly from code
+  rather than just input files. This was achieved by letting users
+  create an updater in code, set the inp/out data structures, and call
+  the update(t) method.
+
+  Added FunctionIfc class. This allows the creation of function
+  objects that provide a eval() method:
+#+BEGIN_EXAMPLE
+    std::vector<double> eval(const std::vector<double>& inp);
+#+END_EXAMPLE
+  The size of input and out vectors can be specified as ctor
+  parameters. 
+
+  Redid the LuaFunction class: renamed it LuaTXYZFunction and it now
+  derives from FunctionIfc. The LuaTable class had to be expanded to
+  allow for getting access to references to Lua functions. This allows
+  creation of LuaTXYZFunction from input file blocks.
+
 * June 17th
 
   (A few days). Now have Fields initialized from input files. Also
@@ -10,7 +36,7 @@
   growing. This caused a segfault on my new Mac. Wrote a set of macros
   to track stack size. Now the stack is exactly balanced in each call.
 
-  One think that Lucee needs is a general set of vector operators:
+  One thing that Lucee needs is a general set of vector operators:
   div, grad and curl. These operators should work on body fitted grids
   and should preserve the discrete vector calculus identities. One way
   to do this is to implement the Support Operator Method (SOM) for the
@@ -70,7 +96,7 @@
   file. Everything can be determined from the dimension of the grid.
 
   Example::
-
+#+BEGIN_EXAMPLE
     simulation = Solver.Assembly {
       domain = Grid.CartGrid {
         lower = {0.0, 0.0},
@@ -113,6 +139,7 @@
 
       },
     }
+#+END_EXAMPLE
 
 * April 2nd - 6th
 

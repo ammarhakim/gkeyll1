@@ -51,6 +51,13 @@ namespace Lucee
       ~LuaTable();
 
 /**
+ * Get a reference to the LuaState object connected to this table.
+ *
+ * @param reference to the LuaState object.
+ */
+      Lucee::LuaState& getLuaState();
+
+/**
  * Get the type of this table. Not all tables will have a type field.
  *
  * @return type of this table.
@@ -112,6 +119,14 @@ namespace Lucee
       LuaTable getTable(const std::string& nm);
 
 /**
+ * Get reference to specified Lua function.
+ *
+ * @param nm Name of function.
+ * @return reference reference to function.
+ */
+      int getFunctionRef(const std::string& nm);
+
+/**
  * Check if string is in table.
  *
  * @param key Key in table.
@@ -150,6 +165,14 @@ namespace Lucee
  * @return true if exists, false otherwise.
  */
       bool hasTable(const std::string& nm);
+
+/**
+ * Check if a function is inside this table.
+ * 
+ * @param nm Name of function to check.
+ * @return true if exists, false otherwise.
+ */
+      bool hasFunction(const std::string& nm);
 
 /**
  * Get list of all table names with specified type.
