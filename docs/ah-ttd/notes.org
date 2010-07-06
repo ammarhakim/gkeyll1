@@ -1298,7 +1298,7 @@
     The results should compare well to each other. They do with
     dispersive waves visible in the twofluid solution.
 
-*** TODO WarpX test system.
+*** DONE WarpX test system.
 
     Write special set of builders for scons for running regression
     tests for WarpX. This needs the following things.

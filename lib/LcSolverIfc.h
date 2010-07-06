@@ -70,6 +70,20 @@ namespace Lucee
       virtual ~SolverIfc();
 
 /**
+ * Set number of output frames to write. This does not include the
+ * first and last frames.
+ */
+      void setNumOutFrames(unsigned n);
+
+/**
+ * Get number of output frames to write. This does not include the
+ * first and last frames.
+ *
+ * @return number of output frames.
+ */
+      unsigned getNumOutFrames(unsigned n) const { return numOutFrames; }
+
+/**
  * Set the current time for solver. This is the time at which the
  * present state of the solver is valid.
  *
@@ -83,7 +97,7 @@ namespace Lucee
  *
  * @return Current time.
  */
-      double getCurrTime() const;
+      double getCurrTime() const { return currTime; }
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -145,6 +159,8 @@ namespace Lucee
     private:
 /** Current time */
       double currTime;
+/** Number of output frames to write */
+      unsigned numOutFrames;
   };
 }
 

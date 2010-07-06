@@ -39,10 +39,10 @@ namespace Lucee
     currTime = tm;
   }
 
-  double
-  SolverIfc::getCurrTime() const 
+  void
+  SolverIfc::setNumOutFrames(unsigned n)
   {
-    return currTime;
+    numOutFrames = n;
   }
 
   void
