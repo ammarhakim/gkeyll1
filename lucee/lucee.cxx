@@ -151,6 +151,7 @@ main(int argc, char **argv)
   std::auto_ptr<Lucee::SolverIfc> sim(
     Lucee::ObjCreator<Lucee::SolverIfc>::getNew(kind));
 
+  sim->setNumOutFrames(outFrames-1);
   try
   {
 // go through simulation boot-strap process
@@ -187,7 +188,7 @@ main(int argc, char **argv)
 // dump final data after running simulation
     sim->writeToFile(outPrefix, outFrames);
 
-// shut-down simulaiton
+// shut-down simulation
     sim->finalize();
   }
   catch (Lucee::Except& lce)

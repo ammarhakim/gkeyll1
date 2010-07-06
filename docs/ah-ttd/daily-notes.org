@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* July 3rd
+  
+  The next step is to add a Stepper base class. This should run
+  specified updater using a time-stepping mode. The stepping mode
+  should be provided by derived classes. For example: ConstantDt class
+  should provide a constant time-stepping mode where the dt is
+  specified.
+
 * July 2nd
 
   (A few days) No work for a while.
