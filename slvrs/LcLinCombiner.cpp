@@ -80,7 +80,7 @@ namespace Lucee
         outFld.setPtr(outItr, seq.getIndex());
         inpFld.setPtr(ptr, seq.getIndex());
         for (unsigned n=0; n<outItr.getNumComponents(); ++n)
-          outItr[n] += coeff[n]*ptr[n];
+          outItr[n] += coeff[i]*ptr[n];
       }
     }
 

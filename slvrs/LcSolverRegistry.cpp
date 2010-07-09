@@ -14,8 +14,9 @@
 #endif
 
 // lucee includes
-#include <LcSolverRegistry.h>
+#include <LcLinCombiner.h>
 #include <LcSolverAssembly.h>
+#include <LcSolverRegistry.h>
 
 namespace Lucee
 {
@@ -24,5 +25,10 @@ namespace Lucee
   {
 // register solver assembly
     new Lucee::ObjRegistry<Lucee::SolverIfc, Lucee::SolverAssembly>;
+
+// register updaters
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<3> >;
   }
 }

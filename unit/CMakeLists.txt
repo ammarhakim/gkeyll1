@@ -2,11 +2,13 @@
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/unit)
+include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/grids)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
+link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/grids)
 link_directories(${PROJECT_BINARY_DIR}/lib)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
@@ -96,3 +98,7 @@ target_link_libraries(lcrectcartgrid lcgrids lclib)
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)
 target_link_libraries(lcluafunction lclib lcloki lclua)
+
+# lclincombiner
+add_executable(lclincombiner lclincombiner.cxx)
+target_link_libraries(lclincombiner lcslvrs lcgrids lclib lcloki lclua)

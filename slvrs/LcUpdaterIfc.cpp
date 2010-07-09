@@ -44,8 +44,6 @@ namespace Lucee
   void
   UpdaterIfc::initialize()
   {
-    inpVars.resize(getNumInpVars());
-    outVars.resize(getNumOutVars());
   }
 
   void
