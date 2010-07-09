@@ -53,8 +53,8 @@ namespace Lucee
  *
  * To advancement sequence is:
  *
- * a series of calls to setInp(), setOut() to set the input/output
- * data structures used by the updater.
+ * calls to setInpVars(), setOutVars() to set the input/output data
+ * structures used by the updater.
  *
  * setCurrTime(tm) to set the current time (i.e. the time at which the
  * solution is already computed).
