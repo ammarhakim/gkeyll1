@@ -135,20 +135,18 @@ namespace Lucee
       void setGrid(const Lucee::GridIfc& grd);
 
 /**
- * Set input data-structure at specified location.
+ * Set input data-structures.
  *
- * @param loc Location in input data structure list.
- * @param ds Data structure.
+ * @param dsl List of input data structures.
  */
-      void setInpVar(unsigned loc, const Lucee::DataStructIfc& ds);
+      void setInpVars(const std::vector<const Lucee::DataStructIfc*>& dsl);
 
 /**
- * Set output data-structure at specified location.
+ * Set output data-structures.
  *
- * @param loc Location in output data structure list.
- * @param ds Data structure.
+ * @param dsl List of output data structures.
  */
-      void setOutVar(unsigned loc, Lucee::DataStructIfc& ds);
+      void setOutVars(const std::vector<Lucee::DataStructIfc*>& dsl);
 
 /**
  * Get number of input data structures passed to updater.
@@ -157,7 +155,7 @@ namespace Lucee
  */
       unsigned getNumInpVars() const
       { 
-        return inpVarTypes.varTypes.size();
+        return inpVars.size();
       }
 
 /**
@@ -167,7 +165,7 @@ namespace Lucee
  */
       unsigned getNumOutVars() const
       {
-        return outVarTypes.varTypes.size();
+        return outVars.size();
       }
 
     protected:

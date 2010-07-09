@@ -67,27 +67,19 @@ namespace Lucee
   }
 
   void
-  UpdaterIfc::setInpVar(unsigned loc, const Lucee::DataStructIfc& ds)
+  UpdaterIfc::setInpVars(const std::vector<const Lucee::DataStructIfc*>& dsl)
   {
-    if (loc >= getNumInpVars())
-    {
-      Lucee::Except lce("UpdaterIfc::setInpVar: Location ");
-      lce << loc << " out-of-bounds.";
-      throw lce;
-    }
-    inpVars[loc] = &ds;
+    inpVars.resize(dsl.size());
+     for (unsigned i=0; i<dsl.size(); ++i)
+       inpVars[i] = dsl[i];
   }
 
   void
-  UpdaterIfc::setOutVar(unsigned loc, Lucee::DataStructIfc& ds)
+  UpdaterIfc::setOutVars(const std::vector<Lucee::DataStructIfc*>& dsl)
   {
-    if (loc >= getNumOutVars())
-    {
-      Lucee::Except lce("UpdaterIfc::setOutVar: Location ");
-      lce << loc << " out-of-bounds.";
-      throw lce;
-    }
-    outVars[loc] = &ds;
+    outVars.resize(dsl.size());
+    for (unsigned i=0; i<dsl.size(); ++i)
+      outVars[i] = dsl[i];
   }
 
   void
