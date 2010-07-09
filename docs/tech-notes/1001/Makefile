@@ -1,4 +1,4 @@
-1001.pdf: 1001.tex
-	pdflatex 1001.tex
-	pdflatex 1001.tex
-	pdflatex 1001.tex
+1001.pdf: 1001-coupled-black-box.tex
+	pdflatex 1001-coupled-black-box.tex
+	pdflatex 1001-coupled-black-box.tex
+	pdflatex 1001-coupled-black-box.tex
