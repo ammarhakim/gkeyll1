@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* July 9th
+
+  Added TXYZFieldSetter updater. Tested from code. This updater sets
+  the supplied array using the provided function.
+
+  Also ensured that updaters are now recognized from input files.
+
 * July 8th
 
   Added LinCombiner updater. Tested from code. From input file this
@@ -16,7 +23,6 @@
     coeffs = {0.5, 0.5},
   }
 #+END_EXAMPLE
-
 
 * July 3rd
   

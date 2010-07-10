@@ -17,6 +17,7 @@
 #include <LcLinCombiner.h>
 #include <LcSolverAssembly.h>
 #include <LcSolverRegistry.h>
+#include <LcTXYZFieldSetter.h>
 
 namespace Lucee
 {
@@ -30,5 +31,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<3> >;
   }
 }
