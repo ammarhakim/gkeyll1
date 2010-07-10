@@ -102,3 +102,7 @@ target_link_libraries(lcluafunction lclib lcloki lclua)
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)
 target_link_libraries(lclincombiner lcslvrs lcgrids lclib lcloki lclua)
+
+# lctxyzfieldsetter
+add_executable(lctxyzfieldsetter lctxyzfieldsetter.cxx)
+target_link_libraries(lctxyzfieldsetter lcslvrs lcgrids lclib lcloki lclua)

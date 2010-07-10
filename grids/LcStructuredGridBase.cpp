@@ -61,14 +61,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  StructuredGridBase<NDIM>::setIndex(int i)
+  StructuredGridBase<NDIM>::setIndex(int i) const
   {
     currIdx[0] = i;
   }
   
   template <unsigned NDIM>
   void
-  StructuredGridBase<NDIM>::setIndex(int i, int j)
+  StructuredGridBase<NDIM>::setIndex(int i, int j) const
   {
     currIdx[0] = i;
     currIdx[1] = j;
@@ -76,7 +76,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  StructuredGridBase<NDIM>::setIndex(int i, int j, int k)
+  StructuredGridBase<NDIM>::setIndex(int i, int j, int k) const
   {
     currIdx[0] = i;
     currIdx[1] = j;
@@ -85,7 +85,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  StructuredGridBase<NDIM>::setIndex(const int idx[NDIM])
+  StructuredGridBase<NDIM>::setIndex(const int idx[NDIM]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       currIdx[i] = idx[i];

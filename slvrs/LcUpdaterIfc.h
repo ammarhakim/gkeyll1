@@ -212,6 +212,8 @@ namespace Lucee
       const G&
       getGrid() const
       {
+        if (grid == 0)
+          throw Lucee::Except("UpdaterIfc::getGrid: grid pointer is not valid");
         return dynamic_cast<const G&>(*grid);
       }
 

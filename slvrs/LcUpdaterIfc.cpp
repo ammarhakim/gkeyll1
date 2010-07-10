@@ -27,7 +27,7 @@ namespace Lucee
   const char *UpdaterIfc::id = "Updater";
 
   UpdaterIfc::UpdaterIfc()
-    : Lucee::BasicObj(UpdaterIfc::id)
+    : Lucee::BasicObj(UpdaterIfc::id), grid(0)
   {
   }
 
