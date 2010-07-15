@@ -44,6 +44,16 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  RectCartGrid<NDIM>::getVertex(double xc[3]) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      xc[i] = (this->currIdx[i]-this->globalBox.getLower(i))*dx[i];
+    for (unsigned i=NDIM; i<3; ++i)
+      xc[i] = 0.0;
+  }
+
+  template <unsigned NDIM>
   double
   RectCartGrid<NDIM>::getVolume() const
   {

@@ -53,6 +53,13 @@ namespace Lucee
       virtual void getCentriod(double xc[3]) const;
 
 /**
+ * Return coordinates in physical space of bottom left node.
+ *
+ * @param xc On output, vertex coordinate of cell.
+ */
+      virtual void getVertex(double xc[3]) const;
+
+/**
  * Return volume of cell.
  *
  * @return Cell volume.

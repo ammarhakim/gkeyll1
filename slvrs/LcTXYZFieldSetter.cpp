@@ -29,13 +29,15 @@ namespace Lucee
 
   template <unsigned NDIM>
   TXYZFieldSetter<NDIM>::TXYZFieldSetter()
-    : Lucee::UpdaterIfc(), func(0)
+    : Lucee::UpdaterIfc(), func(0), isOwner(false)
   {
   }
 
   template <unsigned NDIM>
   TXYZFieldSetter<NDIM>::~TXYZFieldSetter()
   {
+    if (isOwner)
+      delete func;
   }
 
   template <unsigned NDIM>
@@ -50,6 +52,8 @@ namespace Lucee
     std::string kind = funcTbl.getKind();
     func = Lucee::ObjCreator<Lucee::FunctionIfc>::getNew(kind);
     func->readInput(funcTbl);
+
+    isOwner = true; // we own it as we made it
   }
 
   template <unsigned NDIM>
@@ -98,7 +102,10 @@ namespace Lucee
   void
   TXYZFieldSetter<NDIM>::setFunObj(Lucee::FunctionIfc& f)
   {
+    if (isOwner)
+      delete func;
     func = &f;
+    isOwner = false;
   }
 
 // instantiations
