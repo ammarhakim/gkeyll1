@@ -76,6 +76,8 @@ namespace Lucee
     private:
 /** Pointer to function object */
       Lucee::FunctionIfc *func;
+/** Flag to indicate if this class owns func pointer */
+      bool isOwner;
   };
 }
 

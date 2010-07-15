@@ -1,7 +1,7 @@
 /**
  * @file	lcrectcartgrid.cxx
  *
- * @brief	Unit tests for Lucee::FixedVector class
+ * @brief	Unit tests for Lucee::RectCartGrid class
  *
  * @version	$Id$
  *

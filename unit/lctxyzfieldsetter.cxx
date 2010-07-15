@@ -88,7 +88,7 @@ test_1()
 int
 main(void)
 {
-  LC_BEGIN_TESTS("lctxyfieldsetter");
+  LC_BEGIN_TESTS("lctxyzfieldsetter");
   test_1();
   LC_END_TESTS;
 }
