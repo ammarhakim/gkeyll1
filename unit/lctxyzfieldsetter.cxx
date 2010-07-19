@@ -49,7 +49,7 @@ test_1()
   std::string tblStr = 
     "func = {"
     "  f = function (t, x, y, z)"
-    "    return x,y,z"
+    "    return t*x, t*y, t*z"
     "  end"
     "}";
 
@@ -82,6 +82,20 @@ test_1()
       LC_ASSERT("Testing txyzFieldSetter", aPtr[0] == xc[0]);
       LC_ASSERT("Testing txyzFieldSetter", aPtr[1] == xc[1]);
       LC_ASSERT("Testing txyzFieldSetter", aPtr[2] == xc[2]);
+    }
+
+// run updater
+  txyzFieldSetter.update(0.25);
+
+  for (int i=a.getLower(0); i<a.getUpper(0); ++i)
+    for (int j=a.getLower(1); j<a.getUpper(1); ++j)
+    {
+      grid2.setIndex(i, j);
+      grid2.getCentriod(xc);
+      a.setPtr(aPtr, i, j);
+      LC_ASSERT("Testing txyzFieldSetter", aPtr[0] == 0.25*xc[0]);
+      LC_ASSERT("Testing txyzFieldSetter", aPtr[1] == 0.25*xc[1]);
+      LC_ASSERT("Testing txyzFieldSetter", aPtr[2] == 0.25*xc[2]);
     }
 }
 
