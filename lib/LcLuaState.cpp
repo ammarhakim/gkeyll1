@@ -14,7 +14,7 @@
 namespace Lucee
 {
   LuaState::LuaState()
-    : state(lua_open())
+    : state(lua_open()), isOwner(true)
   {
     isValidState = false;
     if (state) 
@@ -24,10 +24,21 @@ namespace Lucee
 // load all standard libraries
       luaL_openlibs(state);
   }
+  
+  LuaState::LuaState(lua_State *L)
+    : state(L), isOwner(false)
+  {
+    isValidState = false;
+    if (state) 
+      isValidState = true;
+  }
 
   LuaState::~LuaState()
   {
-    if (isValid())
-      lua_close(state);
+    if (isOwner)
+    {
+      if (isValid())
+        lua_close(state);
+    }
   }
 }
