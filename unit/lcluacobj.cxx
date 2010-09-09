@@ -78,13 +78,10 @@ newField(lua_State *L)
 {
   size_t nbytes = sizeof(MyFieldData);
   MyFieldData *fd = (MyFieldData*) lua_newuserdata(L, nbytes);
+    
   //Lucee::LuaState myL(L);
   //Lucee::LuaTable lt(myL, "field");
-//   lua_pushstring(L, "lower");
-//   lua_gettable(L, 1);
-//   double data = lua_tonumber(L, -1);
-//   std::cout << "Data " << data << std::endl;
-//   fd->lower = data;
+  std::cout << "Stack size in is " << lua_gettop(L) << std::endl;
 
   return 1;
 }
