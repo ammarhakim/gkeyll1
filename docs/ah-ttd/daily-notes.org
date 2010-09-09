@@ -1,5 +1,44 @@
 # -*- org -*-
 
+* September 8th
+
+  After a long time I am getting back to Lucee. I wish to complete the
+  system at least to a point where I can solve 1D hyperbolic
+  equations. This should be in preparation for the PPPL interview at
+  which I would like to present results (if possible) only from Lucee.
+
+  A better way needs to be found than the "table-driven" approach. It
+  will be a radical departure from both Facets and Warpx. One option
+  would be to have a file like
+#+BEGIN_EXAMPLE
+  grid = Grid.RectCart1D {
+    cells = {10},
+    lower = {0.0},
+    upper = {1.0},
+  }
+
+  q1 = DataStruct.Field1D {
+    onGrid = grid,
+    numComponents = 5,
+    ghost = {1, 2},
+  }
+
+  initField = Updater.TXYZFieldSetter2D {
+    func = Function.LuaTXYZ {
+    numOut = 5,
+    f = function (t, x, y, z)
+    return 1, 2, 3, 4, 5
+    end,
+  }
+
+  initField.update(0.0, outVars = {q1})
+  q1.sync()
+  q1.dump("output.h5")
+#+END_EXAMPLE
+
+  This may be a radical change in the way Lucee works, but perhaps
+  easier than I think.
+
 * July 9th
 
   Added TXYZFieldSetter updater. Tested from code. This updater sets

@@ -84,8 +84,6 @@ namespace Lucee
       }
     }
 
-// loop over each
-
     return Lucee::UpdaterStatus();
   }
 

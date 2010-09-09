@@ -31,6 +31,13 @@ namespace Lucee
 /** Create a new Lua state */
       LuaState();
 
+/**
+ * Create a new Lua state from given state.
+ *
+ * @param L lua state to use
+ */
+      LuaState(lua_State *L);
+
 /** Destroy state */
       virtual ~LuaState();
 
@@ -68,6 +75,8 @@ namespace Lucee
     private:
 /** Pointer to Lua state */
       lua_State *state;
+/** Flag to indicate if we own this state */
+      bool isOwner;
 /** Flag to indicate if state is valid */
       bool isValidState;
   };
