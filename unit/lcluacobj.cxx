@@ -73,15 +73,56 @@ struct MyFieldData
     int cells;
 };
 
+void
+showLuaType(int ty)
+{
+  switch (ty)
+  {
+      case LUA_TNIL:
+          std::cout << "LUA_TNIL" << std::endl;
+          break;
+      case LUA_TBOOLEAN:
+          std::cout << "LUA_TBOOLEAN" << std::endl;
+          break;
+      case LUA_TNUMBER:
+          std::cout << "LUA_TNUMBER" << std::endl;
+          break;
+      case LUA_TSTRING:
+          std::cout << "LUA_TSTRING" << std::endl;
+          break;
+      case LUA_TTABLE:
+          std::cout << "LUA_TTABLE" << std::endl;
+          break;
+      case LUA_TTHREAD:
+          std::cout << "LUA_TTHREAD" << std::endl;
+          break;
+      case LUA_TUSERDATA:
+          std::cout << "LUA_TUSERDATA" << std::endl;
+          break;
+      case LUA_TFUNCTION:
+          std::cout << "LUA_TFUNCTION" << std::endl;
+          break;
+  }
+}
+
 int
 newField(lua_State *L)
 {
   size_t nbytes = sizeof(MyFieldData);
   MyFieldData *fd = (MyFieldData*) lua_newuserdata(L, nbytes);
-    
-  //Lucee::LuaState myL(L);
-  //Lucee::LuaTable lt(myL, "field");
-  std::cout << "Stack size in is " << lua_gettop(L) << std::endl;
+// make the table top of stack
+  lua_pushvalue(L, 1);
+  Lucee::LuaState myL(L);
+  Lucee::LuaTable tbl(myL, "field");
+  lua_pop(L, 1); // pop off table from top
+
+  double lower = tbl.getNumber("lower");
+  double upper = tbl.getNumber("upper");
+  double cells = tbl.getNumber("cells");
+
+  fd->lower = lower;
+  fd->upper = upper;
+  fd->cells = (int) cells;
 
   return 1;
 }
@@ -90,8 +131,15 @@ int
 getFieldLower(lua_State *L)
 {
   MyFieldData *fd = (MyFieldData *) lua_touserdata(L, 1);
-  std::cout << "Inside getFieldLower" << std::endl;
   lua_pushnumber(L, fd->lower);
+  return 1;
+}
+
+int
+getFieldUpper(lua_State *L)
+{
+  MyFieldData *fd = (MyFieldData *) lua_touserdata(L, 1);
+  lua_pushnumber(L, fd->upper);
   return 1;
 }
 
@@ -103,6 +151,7 @@ static const struct luaL_Reg mylib[] = {
   {"getY", getY},
   {"newField", newField},
   {"fieldLower", getFieldLower},
+  {"fieldUpper", getFieldUpper},
   {NULL, NULL}
 };
 
