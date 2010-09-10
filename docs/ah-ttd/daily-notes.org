@@ -1,5 +1,24 @@
 # -*- org -*-
 
+* September 10th
+
+  Wrapping a C struct in Lua is very easy. There could still be a
+  problem with wrapping C++ classes, though. The issue is that at
+  first sight it seems impossible to call the default ctor of the
+  class while creating it. Need to figure this out.
+
+  However, once done, getting direct access to Lucee object in Lua
+  should be relatively easy task. The main thing is to make the object
+  contruction a two-step process: in the first, we register the object
+  as usual. In the second we add a method to Lua to call the getNew()
+  method. This method will get called, the object will be passed the
+  table to construct itself and the resulting data returned. Will need
+  to be careful with resource handling.
+
+  A global singleton object holding pointers to all DataStructs,
+  Updaters, Grids etc will need to be made. This will allow the C++
+  code to access these objects so as to use them when needed.
+
 * September 8th
 
   After a long time I am getting back to Lucee. I wish to complete the
