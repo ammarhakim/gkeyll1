@@ -67,11 +67,6 @@ twice(lua_State *L)
   return 1;
 }
 
-struct MyFieldData
-{
-    double lower, upper;
-    int cells;
-};
 
 void
 showLuaType(int ty)
@@ -104,6 +99,12 @@ showLuaType(int ty)
           break;
   }
 }
+
+struct MyFieldData
+{
+    double lower, upper;
+    int cells;
+};
 
 int
 newField(lua_State *L)
@@ -143,6 +144,66 @@ getFieldUpper(lua_State *L)
   return 1;
 }
 
+class Array
+{
+  public:
+    Array()
+      : n(0), data(0)
+    {
+    }
+
+    void alloc(unsigned num)
+    {
+      if (data)
+        delete [] data;
+      n = num;
+      data = new double[n];
+    }
+
+    void set(unsigned i, double val)
+    {
+      data[i] = val;
+    }
+
+    double get(unsigned i)
+    {
+      return data[i];
+    }
+
+  private:
+    int n;
+    double *data;
+};
+
+int
+newArray(lua_State *L)
+{
+  size_t nbytes = sizeof(Array);
+  Array *fd = (Array*) lua_newuserdata(L, nbytes);
+// make the table top of stack
+  lua_pushvalue(L, 1);
+  Lucee::LuaState myL(L);
+  Lucee::LuaTable tbl(myL, "array");
+  lua_pop(L, 1); // pop off table from top
+
+  unsigned size = (unsigned) tbl.getNumber("size");
+  fd->alloc(size);
+  double val = tbl.getNumber("value");
+  for (unsigned i=0; i<size; ++i)
+    fd->set(i, val);
+
+  return 1;
+}
+
+int
+getArrayVal(lua_State *L)
+{
+   Array *ar = (Array *) lua_touserdata(L, 1);
+   int idx = (int) lua_tonumber(L, 2);
+   lua_pushnumber(L, ar->get(idx));
+  return 1;
+}
+
 static const struct luaL_Reg mylib[] = {
   {"twice", twice},
   {"newPoint", newPoint},
@@ -152,6 +213,8 @@ static const struct luaL_Reg mylib[] = {
   {"newField", newField},
   {"fieldLower", getFieldLower},
   {"fieldUpper", getFieldUpper},
+  {"newArray", newArray},
+  {"arrayVal", getArrayVal},
   {NULL, NULL}
 };
 
