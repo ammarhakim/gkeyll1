@@ -37,7 +37,7 @@ namespace Lucee
  * previous output. The order in the bootstrap methods are called is
  * readInput(), buildData() and buildAlgorithms().
  *
- * Next, if the simulation is a retstart, the method restoreFromFile()
+ * Next, if the simulation is a restart, the method restoreFromFile()
  * is called. Otherwise, if the simulation is not a restart, the
  * method initialize() is called.
  *

@@ -147,17 +147,9 @@ getFieldUpper(lua_State *L)
 class Array
 {
   public:
-    Array()
-      : n(0), data(0)
+    Array(unsigned n)
+      : n(n), data(new double[n])
     {
-    }
-
-    void alloc(unsigned num)
-    {
-      if (data)
-        delete [] data;
-      n = num;
-      data = new double[n];
     }
 
     void set(unsigned i, double val)
@@ -175,11 +167,18 @@ class Array
     double *data;
 };
 
+template <typename T>
+struct PtrHolder
+{
+    T *ptr;
+};
+
 int
 newArray(lua_State *L)
 {
-  size_t nbytes = sizeof(Array);
-  Array *fd = (Array*) lua_newuserdata(L, nbytes);
+  size_t nbytes = sizeof(PtrHolder<Array>);
+  PtrHolder<Array> *fd = 
+    (PtrHolder<Array>*) lua_newuserdata(L, nbytes);
 // make the table top of stack
   lua_pushvalue(L, 1);
   Lucee::LuaState myL(L);
@@ -187,10 +186,10 @@ newArray(lua_State *L)
   lua_pop(L, 1); // pop off table from top
 
   unsigned size = (unsigned) tbl.getNumber("size");
-  fd->alloc(size);
+  fd->ptr = new Array(size);
   double val = tbl.getNumber("value");
   for (unsigned i=0; i<size; ++i)
-    fd->set(i, val);
+    fd->ptr->set(i, val);
 
   return 1;
 }
@@ -198,9 +197,10 @@ newArray(lua_State *L)
 int
 getArrayVal(lua_State *L)
 {
-   Array *ar = (Array *) lua_touserdata(L, 1);
-   int idx = (int) lua_tonumber(L, 2);
-   lua_pushnumber(L, ar->get(idx));
+  PtrHolder<Array> *ph = (PtrHolder<Array>*)
+    lua_touserdata(L, 1);
+  int idx = (int) lua_tonumber(L, 2);
+  lua_pushnumber(L, ph->ptr->get(idx));
   return 1;
 }
 
