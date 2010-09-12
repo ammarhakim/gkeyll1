@@ -1,5 +1,34 @@
 # -*- org -*-
 
+* September 12th
+
+  Figured out how to wrap C++ objects using the current Lucee
+  system. Essentially just small modifications to the ObjCreator and
+  ObjRegistry classes was needed. This work is in a branch
+
+  https://lucee.googlecode.com/svn/branches/lua-obj
+
+  At this point I have two tasks (a) create two new classes
+  corresponding to ObjCreator and ObjRegistry to make Lua objects from
+  Lucee objects (I could also simply modify the existing two classes)
+  (b) create some means of allowing both base classes and derived
+  classes to register methods to operate on the Lua objects.
+
+  The latter task seems much harder to handle in a uniform manner. One
+  obvious way to do this would be expect static methods in derived and
+  base classes that are always called when the registration
+  happens. Of course, this means that these methods must always be
+  provided for the system to compile. Even after this is resolved, I
+  still need to think of how the call will actually occur. The
+  simplest, but least elegant way would be for each class to provide a
+  static wrapper method that gets called from Lua. Then, the class
+  would do a cast and make the call. Perhaps there is no other way to
+  do this.
+
+  However, once this is done, Lucee will have a very powerful manner
+  of working. Objects could be created, queried for debugging and
+  complete simulations written using Lua.
+
 * September 10th
 
   Wrapping a C struct in Lua is very easy. There could still be a
