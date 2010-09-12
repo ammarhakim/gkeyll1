@@ -144,12 +144,31 @@ getFieldUpper(lua_State *L)
   return 1;
 }
 
+
+static const struct luaL_Reg mylib[] = {
+  {"twice", twice},
+  {"newPoint", newPoint},
+  {"setXY", setXY},
+  {"getX", getX},
+  {"getY", getY},
+  {"newField", newField},
+  {"fieldLower", getFieldLower},
+  {"fieldUpper", getFieldUpper},
+  {NULL, NULL}
+};
+
 class Array
 {
   public:
     Array(unsigned n)
       : n(n), data(new double[n])
     {
+    }
+
+    ~Array()
+    {
+      std::cout << "Inside Array::~Array" << std::endl;
+      delete [] data;
     }
 
     void set(unsigned i, double val)
@@ -160,6 +179,11 @@ class Array
     double get(unsigned i)
     {
       return data[i];
+    }
+
+    int size()
+    {
+      return n;
     }
 
   private:
@@ -191,32 +215,79 @@ newArray(lua_State *L)
   for (unsigned i=0; i<size; ++i)
     fd->ptr->set(i, val);
 
+// set metatable for each array
+  luaL_getmetatable(L, "Lucee.array");
+  lua_setmetatable(L, -2);
+
   return 1;
+}
+
+template <typename T>
+PtrHolder<T>*
+check_PtrHolder(lua_State *L)
+{
+  return (PtrHolder<T>*) luaL_checkudata(L, 1, "Lucee.array");
 }
 
 int
 getArrayVal(lua_State *L)
 {
-  PtrHolder<Array> *ph = (PtrHolder<Array>*)
-    lua_touserdata(L, 1);
+  PtrHolder<Array> *ph = check_PtrHolder<Array>(L);  
   int idx = (int) lua_tonumber(L, 2);
   lua_pushnumber(L, ph->ptr->get(idx));
   return 1;
 }
 
-static const struct luaL_Reg mylib[] = {
-  {"twice", twice},
-  {"newPoint", newPoint},
-  {"setXY", setXY},
-  {"getX", getX},
-  {"getY", getY},
-  {"newField", newField},
-  {"fieldLower", getFieldLower},
-  {"fieldUpper", getFieldUpper},
-  {"newArray", newArray},
-  {"arrayVal", getArrayVal},
+int
+setArrayVal(lua_State *L)
+{
+  PtrHolder<Array> *ph = check_PtrHolder<Array>(L);  
+  int idx = (int) lua_tonumber(L, 2);
+  double val = lua_tonumber(L, 3);
+  ph->ptr->set(idx, val);
+  return 0;
+}
+
+int
+getArraySize(lua_State *L)
+{
+  PtrHolder<Array> *ph = check_PtrHolder<Array>(L);  
+  lua_pushnumber(L, ph->ptr->size());
+  return 1;
+}
+
+int
+delArray(lua_State *L)
+{
+  PtrHolder<Array> *ph = check_PtrHolder<Array>(L);
+  delete ph->ptr;
+  return 0;
+}
+
+static const struct luaL_Reg myArrLib[] = {
+  {"new", newArray},
   {NULL, NULL}
 };
+
+static const struct luaL_Reg myArrMetLib[] = {
+  {"get", getArrayVal},
+  {"set", setArrayVal},
+  {"size", getArraySize},
+  {"__gc", delArray},
+  {NULL, NULL}
+};
+
+int
+open_array_lib(lua_State *L)
+{
+  luaL_newmetatable(L, "Lucee.array");
+  lua_pushvalue(L, -1); // copy metatable
+  lua_setfield(L, -2, "__index");
+
+  luaL_register(L, NULL, myArrMetLib);
+  luaL_register(L, "array", myArrLib);
+  return 1;
+}
 
 int
 main(int argc, char *argv[])
@@ -236,11 +307,15 @@ main(int argc, char *argv[])
 
   Lucee::LuaState L;
   luaL_register(L, "lucee", mylib);
+  open_array_lib(L);
 
 // read lua script file
   if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
   {
     std::cerr << "Error parsing input file " << inpFile << std::endl;
+    std::string err(lua_tostring(L, -1));
+    lua_pop(L, 1);
+    std::cerr << err << std::endl;
     exit(1);
   }
 
