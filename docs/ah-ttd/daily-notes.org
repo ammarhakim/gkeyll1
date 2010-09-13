@@ -29,6 +29,22 @@
   of working. Objects could be created, queried for debugging and
   complete simulations written using Lua.
 
+  Some notes on how to get this to work:
+
+  - Need to rename the ObjCreator class to something more
+    meaningful. I.e. as this class adds the Lua call-backs and does
+    not really "create" anything.
+
+  - The getNew() method from the ObjCreator can go away as it no
+    longer will be needed.
+
+  - The name of the metatable must be combination of the base-class ID
+    and the derived class ID. How to do this? This can be done by
+    extending the LuaModule class. In this, add the derived class ID
+    (store in a vector of strings) and a map of derived class ID to
+    callable methods. Then, in the ObjCreator's registerModule method
+    we can loop over this and register stuff. (Will this really work?)
+
 * September 10th
 
   Wrapping a C struct in Lua is very easy. There could still be a
