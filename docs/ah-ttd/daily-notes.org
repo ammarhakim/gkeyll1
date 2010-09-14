@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* September 13th
+
+  The LuaModule class needs to be modified to have a map:
+#+BEGIN_EXAMPLE
+  std::map<std::string, std::vector<luaL_Reg> > refFuncs;
+#+END_EXAMPLE or a more complex data-structure. The key could be the
+  derived class Id and the vector could be the list of functions to
+  register. When the ObjCreator class moduleRegister() method is
+  called it should create add the base class exposed methods and
+  register the methods in a loop.
+
 * September 12th
 
   Figured out how to wrap C++ objects using the current Lucee
