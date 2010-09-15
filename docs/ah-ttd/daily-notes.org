@@ -7,9 +7,22 @@
   std::map<std::string, std::vector<luaL_Reg> > refFuncs;
 #+END_EXAMPLE or a more complex data-structure. The key could be the
   derived class Id and the vector could be the list of functions to
-  register. When the ObjCreator class moduleRegister() method is
-  called it should create add the base class exposed methods and
-  register the methods in a loop.
+  register. The derived class should add all the methods it needs to
+  this list.
+
+  When the ObjCreator class moduleRegister() method is called it
+  should add, in addition to the methods already added, the base class
+  exposed methods and register all these methods. It should create a
+  unique meta-table per derived class in so these methods become
+  available in a object oriented manner.
+
+  The main method to create the derived class itself should be as it
+  is now: i.e. the module name should be the base class ID while the
+  creation method name should be derived class ID.
+
+  This will impose a requirement on all Lua callable class to provide
+  a static method names appendLuaCallableMethods() to the supplied
+  list.
 
 * September 12th
 
