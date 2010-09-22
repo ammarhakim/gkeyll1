@@ -21,6 +21,10 @@ class Base
     virtual ~Base() {}
 
     virtual std::string getMessage() = 0;
+
+    virtual void readInput(Lucee::LuaTable& tbl)
+    {
+    }
 };
 const char *Base::id = "Base";
 

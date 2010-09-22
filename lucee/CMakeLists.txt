@@ -35,3 +35,16 @@ target_link_libraries(lucee
   ${HDF5_LIBRARIES}
   ${GSL_CONFIG_LIBS}
   ${EXTRA_LIBS})
+
+# Create lucee executable
+add_executable(xlucee xlucee.cxx LcRegisterModules.cpp)
+target_link_libraries(xlucee
+  lcrte
+  lcslvrs
+  lcgrids
+  lclib
+  lcloki
+  lclua
+  ${HDF5_LIBRARIES}
+  ${GSL_CONFIG_LIBS}
+  ${EXTRA_LIBS})

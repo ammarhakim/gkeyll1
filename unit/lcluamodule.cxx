@@ -23,6 +23,10 @@ class Solver
     virtual ~Solver() {}
 
     virtual std::string what() = 0;
+
+    virtual void readInput(Lucee::LuaTable& tbl)
+    {
+    }
 };
 const char *Solver::id = "Solver";
 

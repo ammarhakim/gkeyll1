@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* September 21st
+
+  Just some notes to keep track of things. First, documentation needs
+  to be started *now* to ensure it does not get too late to
+  document. Need to update the doxygen comments to add more details.
+
 * September 13th
 
   The LuaModule class needs to be modified to have a map:
