@@ -1,5 +1,5 @@
 /**
- * @file	LcObjCreator.h
+ * @file	LcLuaModuleRegistry.h
  *
  * @brief	Class for handling object creation.
  *
@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
-#ifndef LC_OBJ_CREATOR_H
-#define LC_OBJ_CREATOR_H
+#ifndef LC_LUA_MODULE_REGISTRY_H
+#define LC_LUA_MODULE_REGISTRY_H
 
 // lucee includes
 #include <LcExcept.h>
@@ -76,4 +76,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_OBJ_CREATOR_H
+#endif // LC_LUA_MODULE_REGISTRY_H
