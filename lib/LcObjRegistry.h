@@ -14,6 +14,8 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcLuaModule.h>
+#include <LcLuaTable.h>
+#include <LcPointerHolder.h>
 
 // loki includes
 #include <loki/Factory.h>
@@ -36,8 +38,8 @@ namespace Lucee
 // register creator function
         Loki::SingletonHolder<Loki::Factory<B, std::string> >
           ::Instance().Register(D::id, getNew);
-// add a function
-        luaL_Reg reg = {D::id, getModuleTable};
+// add a function to make Lua object
+        luaL_Reg reg = {D::id, makeLuaObj};
         Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance().regFuncs.push_back(reg);
       }
@@ -47,18 +49,21 @@ namespace Lucee
  *
  * @return Newly allocated object.
  */
-      static int getModuleTable(lua_State *L)
+      static int makeLuaObj(lua_State *L)
       {
-        if (! lua_istable(L, 1) )
-          throw Lucee::Except("ObjRegistry::getModuleTable: expects table as single parameter");
-// add meta-data keys into table
-        lua_pushstring(L, "__type");
-        lua_pushstring(L, B::id);
-        lua_settable(L, -3);
+        size_t nbytes = sizeof(Lucee::PointerHolder<B>);
+        Lucee::PointerHolder<B> *ph =
+          (Lucee::PointerHolder<B>*) lua_newuserdata(L, nbytes);
+// make the table top of stack
+        lua_pushvalue(L, 1);
+        Lucee::LuaState myL(L);
+        Lucee::LuaTable tbl(myL, "Module");
+        lua_pop(L, 1); // pop off table from top
 
-        lua_pushstring(L, "__kind");
-        lua_pushstring(L, D::id);
-        lua_settable(L, -3);
+// create object
+        ph->pointer = getNew();
+// setup object
+        ph->pointer->readInput(tbl);
 
         return 1;
       }
