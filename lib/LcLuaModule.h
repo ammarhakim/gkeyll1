@@ -38,6 +38,8 @@ namespace Lucee
     public:
 /** List of registered functions */
       std::vector<luaL_Reg> regFuncs;
+/** List of registered functions to make object */
+      std::vector<luaL_Reg> regObjFuncs;
   };
 }
 

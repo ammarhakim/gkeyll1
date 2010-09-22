@@ -10,7 +10,7 @@
 
 // lucee includes
 #include <LcHgPhaseFunction.h>
-#include <LcObjCreator.h>
+#include <LcLuaModuleRegistry.h>
 #include <LcPlCoeffsPhaseFunction.h>
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
@@ -29,7 +29,7 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::RtePhaseFunction, Lucee::PlCoeffsPhaseFunction>;
 
 // register phase function library into Lua
-    Lucee::ObjCreator<Lucee::RtePhaseFunction>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::RtePhaseFunction>::registerModule(L);
   }
 }
 
