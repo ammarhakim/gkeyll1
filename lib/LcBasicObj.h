@@ -27,7 +27,9 @@ namespace Lucee
 /**
  * Represents the simplest possible object in Lucee. This object can
  * be initialized from a lua table. Its main purpose is to provide a
- * method of holding pointers to derived type objects in maps.
+ * method of holding pointers to derived type objects in maps. It also
+ * provides a default implementation of a static function to add Lua
+ * callable methods to Lucee.
  */
   class BasicObj
   {
@@ -43,6 +45,15 @@ namespace Lucee
  * Destroy object.
  */
       virtual ~BasicObj();
+
+/**
+ * Default method that performs registration of Lua functions. This
+ * function does nothing: if derived classes need to register Lua
+ * callable functions they must provide this method.
+ *
+ * @param lcm Append Lua callable method to this list.
+ */
+      static void appendLuaCallableMethods(const std::vector<luaL_Reg>& lcm);
 
 /**
  * Get name of solver.

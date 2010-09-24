@@ -10,6 +10,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaModuleRegistry.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
 #include <LcObjCreator.h>
@@ -60,16 +61,17 @@ test_1(Lucee::LuaState& L)
     "}";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
-    throw Lucee::Except("Unable to parse Lua string");
+  {
+    std::string err(lua_tostring(L, -1));
+    lua_pop(L, 1);
+    std::cerr << err << std::endl;
+    exit(1);
+  }
 
 // put table on top of stack
   lua_getglobal(L, "simulation");
 // create table
-  Lucee::LuaTable tbl(L, "simulation");
-  std::string kind = tbl.getKind();
-  LC_ASSERT("Testing kind of simulation", kind == "RteSolver");
-
-  Solver *slvr = Lucee::ObjCreator<Solver>::getNew(kind);
+  Solver *slvr = Lucee::ObjCreator<Solver>::getNew("RteSolver");
   LC_ASSERT("Testing created object", slvr->what() == "RteSolver");
 
 }
@@ -82,6 +84,7 @@ main(void)
 
   registerEverything();
   Lucee::ObjCreator<Solver>::registerModule(L);
+  Lucee::LuaModuleRegistry<Solver>::registerModule(L);
 
   test_1(L);
 

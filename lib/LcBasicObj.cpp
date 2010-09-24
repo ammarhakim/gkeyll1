@@ -30,6 +30,11 @@ namespace Lucee
   {
   }
 
+  void
+  appendLuaCallableMethods(const std::vector<luaL_Reg>& lcm)
+  { // do nothing
+  }
+
   std::string
   BasicObj::getName() const { return nm; }
 

@@ -23,8 +23,9 @@
 #include <lua.hpp>
 
 // std includes
-#include <vector>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -40,6 +41,8 @@ namespace Lucee
       std::vector<luaL_Reg> regFuncs;
 /** List of registered functions to make object */
       std::vector<luaL_Reg> regObjFuncs;
+/** Map of dervied class IDs to Lua callable functions */
+      std::map<std::string, std::vector<luaL_Reg> > callableFuncs;
   };
 }
 
