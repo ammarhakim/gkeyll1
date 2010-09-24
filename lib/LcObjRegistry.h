@@ -41,7 +41,7 @@ namespace Lucee
 // add a function to make Lua object
         luaL_Reg reg = {D::id, makeLuaObj};
         Loki::SingletonHolder<Lucee::LuaModule<B> >
-          ::Instance().regObjFuncs.push_back(reg);
+          ::Instance().regCreateFuncs.push_back(reg);
 // add Lua callable functions for base class
 
 // add Lua callable functions for derived class

@@ -46,9 +46,9 @@ namespace Lucee
 // register the functions to create children objects
         luaL_Reg reg = {NULL, NULL};
         Loki::SingletonHolder<Lucee::LuaModule<B> >
-          ::Instance().regObjFuncs.push_back(reg);
+          ::Instance().regCreateFuncs.push_back(reg);
         luaL_register(L, B::id, &Loki::SingletonHolder<Lucee::LuaModule<B> >
-          ::Instance().regObjFuncs[0]);
+          ::Instance().regCreateFuncs[0]);
       }
 
 /**
