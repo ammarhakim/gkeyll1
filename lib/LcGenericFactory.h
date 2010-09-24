@@ -26,8 +26,9 @@ namespace Lucee
 /**
  * This class serves as a "proxy factory" to create objects based on
  * input files for those classes that can not initialize themselves
- * from the readInput() method. This can happen when the object to be
- * created has a non-trivial constructor that must be used.
+ * from the readInput() method. This is generally the case with most
+ * classes as they have default constructors that need to be called
+ * instead or before calling the readInput() method.
  */
   template <class BASEOBJ>
   class GenericFactory
