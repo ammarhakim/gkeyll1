@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* September 23rd
+
+  One way to automatically run the top-level simulation (if it exists)
+  is to get the simulation object from C++, check if it really is a
+  derived class of SolverIfc, check if it has already been run, and if
+  not, run it.
+
 * September 21st
 
   Just some notes to keep track of things. First, documentation needs

@@ -40,9 +40,19 @@ namespace Lucee
 /** List of registered functions */
       std::vector<luaL_Reg> regFuncs;
 /** List of registered functions to make object */
-      std::vector<luaL_Reg> regObjFuncs;
+      std::vector<luaL_Reg> regCreateFuncs;
+
+/** 
+ * Struct to store function name to pointer to function.
+ */
+      struct FuncData
+      {
+/** Map of function */
+          std::map<std::string, int (*func)(lua_State *L)> funcs;
+      };
+
 /** Map of dervied class IDs to Lua callable functions */
-      std::map<std::string, std::vector<luaL_Reg> > callableFuncs;
+      std::map<std::string, std::vector<FuncData> > callableFuncs;
   };
 }
 
