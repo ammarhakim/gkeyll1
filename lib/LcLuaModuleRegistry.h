@@ -22,9 +22,10 @@
 namespace Lucee
 {
 /**
- * Class to create objects. This class is used in conjunction with the
- * Lucee::ObjRegistry class. Once an object has been registered this
- * class can be used to create derived classes using their names.
+ * Class to register Lua callable functions. The registerModule() method
+ * must be called for each base class type to register the table
+ * constructors for all its derived classes. In addition, this method
+ * also registers the Lua-callable functions
  */
   template <class B>
   class LuaModuleRegistry

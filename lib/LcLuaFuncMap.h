@@ -40,7 +40,7 @@ namespace Lucee
       void appendFunc(const std::string& nm, int (*func)(lua_State *L));
 
     private:
-/** Map of function */
+/** Map of function name to function pointer */
       std::map<std::string, int (*)(lua_State *L)> funcs;
   };
 }

@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcLuaFuncMap.h>
 #include <LcLuaState.h>
 
 // lua includes
@@ -37,10 +38,10 @@ namespace Lucee
   class LuaModule
   {
     public:
-/** List of registered functions */
-      std::vector<luaL_Reg> regFuncs;
 /** List of registered functions to make object */
       std::vector<luaL_Reg> regCreateFuncs;
+/** Map of derived class name to Lua callable functions */
+      std::map<std::string, Lucee::LuaFuncMap> funcMaps;
   };
 }
 

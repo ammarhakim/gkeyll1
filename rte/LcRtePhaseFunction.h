@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcBasicObj.h>
 #include <LcLuaTable.h>
 #include <LcVector.h>
 
@@ -27,7 +28,7 @@ namespace Lucee
  * single method that computes and returns the expansion coefficients
  * of the normalized phase function, with normalization \beta_0 = 1.
  */
-  class RtePhaseFunction
+  class RtePhaseFunction : public Lucee::BasicObj
   {
     public:
 /** Class id: this is used by registration system */

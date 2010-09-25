@@ -45,7 +45,7 @@ namespace Lucee
  *
  * @return pointer to new field.
  */
-      Lucee::DataStructIfc* create(const Lucee::SolverIfc& solver);
+      Lucee::DataStructIfc* create();
 
     private:
 /** Name of grid on which field lives */

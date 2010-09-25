@@ -21,6 +21,11 @@
 
 namespace Lucee
 {
+  BasicObj::BasicObj()
+    : nm("--NO-NAME--") 
+  {
+  }
+
   BasicObj::BasicObj(const std::string& nm)
     : nm(nm) 
   {
@@ -31,8 +36,8 @@ namespace Lucee
   }
 
   void
-  appendLuaCallableMethods(const std::vector<luaL_Reg>& lcm)
-  { // do nothing
+  BasicObj::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
   }
 
   std::string

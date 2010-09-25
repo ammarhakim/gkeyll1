@@ -44,7 +44,7 @@ namespace Lucee
  *
  * @return pointer to new grid.
  */
-      Lucee::GridIfc* create(const Lucee::SolverIfc& solver);
+      Lucee::GridIfc* create();
 
     private:
 /** Number of cells in domain */

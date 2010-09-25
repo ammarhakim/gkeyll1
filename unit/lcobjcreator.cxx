@@ -9,11 +9,12 @@
  */
 
 // lib includes
-#include <LcObjRegistry.h>
+#include <LcBasicObj.h>
 #include <LcObjCreator.h>
+#include <LcObjRegistry.h>
 #include <LcTest.h>
 
-class Base
+class Base : public Lucee::BasicObj
 {
   public:
     static const char *id;

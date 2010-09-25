@@ -21,6 +21,9 @@
 #include <loki/Factory.h>
 #include <loki/Singleton.h>
 
+// std includes
+#include <typeinfo>
+
 namespace Lucee
 {
 /**
@@ -38,18 +41,26 @@ namespace Lucee
 // register creator function
         Loki::SingletonHolder<Loki::Factory<B, std::string> >
           ::Instance().Register(D::id, getNew);
-// add a function to make Lua object
+        Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance();
+// add a function to make Lua object from table constructor
         luaL_Reg reg = {D::id, makeLuaObj};
-        Loki::SingletonHolder<Lucee::LuaModule<B> >
-          ::Instance().regCreateFuncs.push_back(reg);
+        lm.regCreateFuncs.push_back(reg);
+
+// add an empty map to using derived class ID as key
+        lm.funcMaps.insert(std::pair<std::string, Lucee::LuaFuncMap>(
+            typeid(D).name(), Lucee::LuaFuncMap()));
+        std::map<std::string, Lucee::LuaFuncMap>::iterator itr
+          = lm.funcMaps.find(typeid(D).name());
 // add Lua callable functions for base class
-
+        B::appendLuaCallableMethods(itr->second);
 // add Lua callable functions for derived class
-
+        D::appendLuaCallableMethods(itr->second);
       }
 
 /**
- * Function called by Lua for constructing object table.
+ * Function called by Lua for constructing object and returning it as
+ * a Lua variable.
  *
  * @return Newly allocated object.
  */
@@ -74,8 +85,10 @@ namespace Lucee
 
     private:
 /**
- * Return a newly allocated object. This is used as the creation
- * mechanism for the object.
+ * Return a newly allocated object. This method creates a new derived
+ * class object and returns it as a base class pointer. The calling
+ * function owns the object and is responsible for deleting it
+ * properly.
  *
  * @return Newly allocated object.
  */
