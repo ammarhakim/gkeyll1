@@ -56,6 +56,8 @@ namespace Lucee
         B::appendLuaCallableMethods(itr->second);
 // add Lua callable functions for derived class
         D::appendLuaCallableMethods(itr->second);
+// set deletion function for derived class
+        itr->second.setDelFunc(Lucee::PointerHolder<D>::deleteObject);
       }
 
 /**
