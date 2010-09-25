@@ -66,9 +66,9 @@ namespace Lucee
  */
       static int makeLuaObj(lua_State *L)
       {
-        size_t nbytes = sizeof(Lucee::PointerHolder<B>);
-        Lucee::PointerHolder<B> *ph =
-          (Lucee::PointerHolder<B>*) lua_newuserdata(L, nbytes);
+        size_t nbytes = sizeof(Lucee::PointerHolder<D>);
+        Lucee::PointerHolder<D> *ph =
+          (Lucee::PointerHolder<D>*) lua_newuserdata(L, nbytes);
 // make the table top of stack
         lua_pushvalue(L, 1);
         Lucee::LuaState myL(L);
@@ -76,9 +76,13 @@ namespace Lucee
         lua_pop(L, 1); // pop off table from top
 
 // create object
-        ph->pointer = getNew();
-// setup object
+        ph->pointer = new D;
+// initialize object using Lua table
         ph->pointer->readInput(tbl);
+
+// create a meta-table for this object and set it
+        luaL_getmetatable(L, typeid(D).name());
+        lua_setmetatable(L, -2);
 
         return 1;
       }

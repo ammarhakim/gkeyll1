@@ -32,4 +32,17 @@ namespace Lucee
           nm, func));
     }
   }
+
+  void
+  LuaFuncMap::fillWithFuncList(std::vector<luaL_Reg>& funcLst)
+  {
+    funcLst.clear(); // get rid of existing stuff
+    std::map<std::string, int (*)(lua_State *L)>::iterator itr
+      = funcs.begin();
+    for ( ; itr != funcs.end(); ++itr)
+    {
+      luaL_Reg reg = {itr->first.c_str(), itr->second};
+      funcLst.push_back(reg);
+    }
+  }
 }
