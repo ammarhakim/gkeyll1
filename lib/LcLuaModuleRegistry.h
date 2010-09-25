@@ -14,6 +14,7 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcLuaModule.h>
+#include <LcPointerHolder.h>
 
 // loki includes
 #include <loki/Factory.h>
@@ -50,7 +51,7 @@ namespace Lucee
         luaL_register(L, B::id, &lm.regCreateFuncs[0]);
 
 // now create a meta-table for each derived class methods and register
-// them so that they become available using the Lua OO notation.
+// them so that they become available using Lua OO notation.
         std::map<std::string, Lucee::LuaFuncMap>::iterator itr
           = lm.funcMaps.begin();
         for ( ; itr != lm.funcMaps.end(); ++itr)
@@ -58,7 +59,16 @@ namespace Lucee
           luaL_newmetatable(L, itr->first.c_str());
           lua_pushvalue(L, -1); // copy metatable
           lua_setfield(L, -2, "__index");
-          
+// get list of functions
+          std::vector<luaL_Reg> funcLst;
+          itr->second.fillWithFuncList(funcLst);
+// append delete so object is cleaned-up when garbage collector runs
+          luaL_Reg gc = {"__gc", itr->second.getDelFunc()};
+          funcLst.push_back(gc);
+          luaL_Reg fin = {NULL, NULL};
+          funcLst.push_back(fin);
+// now register it
+          luaL_register(L, NULL, &funcLst[0]);
         }
       }
 

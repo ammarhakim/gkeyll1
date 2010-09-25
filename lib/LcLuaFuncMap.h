@@ -41,6 +41,23 @@ namespace Lucee
       void appendFunc(const std::string& nm, int (*func)(lua_State *L));
 
 /**
+ * Set the deletion function to delete the object.
+ *
+ * @param func Pointer to Lua callable function.
+ */
+      void setDelFunc(int (*func)(lua_State *L));
+
+/**
+ * Get the deletion function to delete the object.
+ *
+ * @return Pointer to Lua callable function.
+ */
+      int (*getDelFunc())(lua_State *)
+      {
+        return delFunc;
+      }
+
+/**
  * Get list of methods added to this class in a std::vector that can
  * then be passed to Lua registration system.
  *
@@ -51,6 +68,8 @@ namespace Lucee
     private:
 /** Map of function name to function pointer */
       std::map<std::string, int (*)(lua_State *L)> funcs;
+/** Function pointer to deletion function */
+      int (*delFunc)(lua_State *L);
   };
 }
 

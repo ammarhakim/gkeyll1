@@ -34,6 +34,12 @@ namespace Lucee
   }
 
   void
+  LuaFuncMap::setDelFunc(int (*func)(lua_State *L))
+  {
+    delFunc = func;
+  }
+
+  void
   LuaFuncMap::fillWithFuncList(std::vector<luaL_Reg>& funcLst)
   {
     funcLst.clear(); // get rid of existing stuff
