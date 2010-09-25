@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcLuaFuncMap.h>
 #include <LcLuaTable.h>
 
 // std includes
@@ -25,15 +26,20 @@
 namespace Lucee
 {
 /**
- * Represents the simplest possible object in Lucee. This object can
- * be initialized from a lua table. Its main purpose is to provide a
- * method of holding pointers to derived type objects in maps. It also
- * provides a default implementation of a static function to add Lua
- * callable methods to Lucee.
+ * Represents a simple object in Lucee that can be initialized from a
+ * Lua script. Its main purpose is to provide a method of holding
+ * pointers to derived type objects in maps. It also provides a
+ * default implementation of a static function to add Lua callable
+ * methods to Lucee.
  */
   class BasicObj
   {
     public:
+/**
+ * Create an object.
+ */
+      BasicObj();
+
 /**
  * Create an object with specified name.
  *
@@ -49,11 +55,12 @@ namespace Lucee
 /**
  * Default method that performs registration of Lua functions. This
  * function does nothing: if derived classes need to register Lua
- * callable functions they must provide this method.
+ * callable functions they must provide this method. Methods should be
+ * added to the lfm object by calling the appendFunc() method.
  *
- * @param lcm Append Lua callable method to this list.
+ * @param lfm Lua function map object.
  */
-      static void appendLuaCallableMethods(const std::vector<luaL_Reg>& lcm);
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
 /**
  * Get name of solver.

@@ -71,7 +71,7 @@ namespace Lucee
       std::auto_ptr<Lucee::GenericFactory<Lucee::GridIfc> > gfact(
         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::getNew(kind));
       gfact->readInput(gtbl); // read input from grid block
-      gridMap[gnm] = gfact->create(*this); // create grid
+      gridMap[gnm] = gfact->create(); // create grid
     }
 
 // create all data-structs in assembly
@@ -86,7 +86,7 @@ namespace Lucee
       std::auto_ptr<Lucee::GenericFactory<Lucee::DataStructIfc> > dsfact(
         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::getNew(kind));
       dsfact->readInput(dstbl); // read input from grid block
-      dataStructMap[dsnm] = dsfact->create(*this); // create grid
+      dataStructMap[dsnm] = dsfact->create(); // create grid
     }
 
 // create all updaters in assembly

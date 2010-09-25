@@ -53,7 +53,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   GridIfc*
-  RectCartGridFactory<NDIM>::create(const Lucee::SolverIfc& solver)
+  RectCartGridFactory<NDIM>::create()
   {
     int ilo[NDIM], iup[NDIM];
     double xlo[NDIM], xup[NDIM];

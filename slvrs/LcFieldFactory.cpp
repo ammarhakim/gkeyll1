@@ -62,19 +62,21 @@ namespace Lucee
 
   template <unsigned NDIM>
   Lucee::DataStructIfc*
-  FieldFactory<NDIM>::create(const Lucee::SolverIfc& solver)
+  FieldFactory<NDIM>::create()
   {
-// cast to solver assembly
-    const Lucee::SolverAssembly& slvrAssembly
-      = dynamic_cast<const Lucee::SolverAssembly&>(solver);
-// get grid
-    const Lucee::StructuredGridBase<NDIM>& grid
-      = slvrAssembly.template getConstGrid<Lucee::StructuredGridBase<NDIM> >(onGrid);
-// local region for field 
-    typename Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
-// create new field and return pointer to it
-    return new Field<NDIM, double>(localRgn,
-      numComponents, lowerGhost, upperGhost);
+    throw Lucee::Except("FieldFactory<NDIM>::create: NOT IMPLEMENTED!");
+    return 0;
+// // cast to solver assembly
+//     const Lucee::SolverAssembly& slvrAssembly
+//       = dynamic_cast<const Lucee::SolverAssembly&>(solver);
+// // get grid
+//     const Lucee::StructuredGridBase<NDIM>& grid
+//       = slvrAssembly.template getConstGrid<Lucee::StructuredGridBase<NDIM> >(onGrid);
+// // local region for field 
+//     typename Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+// // create new field and return pointer to it
+//     return new Field<NDIM, double>(localRgn,
+//       numComponents, lowerGhost, upperGhost);
   }
 
 // instantiations

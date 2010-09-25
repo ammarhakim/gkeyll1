@@ -18,8 +18,8 @@
 #endif
 
 // lucee include
+#include <LcBasicObj.h>
 #include <LcLuaTable.h>
-#include <LcSolverIfc.h>
 
 namespace Lucee
 {
@@ -31,31 +31,28 @@ namespace Lucee
  * instead or before calling the readInput() method.
  */
   template <class BASEOBJ>
-  class GenericFactory
+  class GenericFactory : public Lucee::BasicObj
   {
     public:
 /** Class id: this is used by the registration system */
       static const char *id;
+
+/** Default construct */
+      GenericFactory()
+        : Lucee::BasicObj("name") {
+      }
 
 /** Destructor */
       virtual ~GenericFactory()
       {}
 
 /**
- * Bootstrap method: Read input from specified table.
- *
- * @param tbl Table of input values.
- */
-      virtual void readInput(Lucee::LuaTable& tbl) = 0;
-
-/**
  * Create a new object derived from BASEOBJ and return pointer to
  * created object.
  *
- * @param solver Reference to containing solver.
  * @return pointer to class derived from BASEOBJ.
  */
-      virtual BASEOBJ* create(const Lucee::SolverIfc& solver) = 0;
+      virtual BASEOBJ* create() = 0;
   };
 }
 
