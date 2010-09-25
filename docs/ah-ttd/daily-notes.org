@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* September 25th
+
+  Most code to make Lucee objects usable from Lua scripts is now
+  complete. Testing is needed. Also, need to figure out how to fetch a
+  user-data object from a table (i.e. LuaTable object). All need for
+  getNew() should now be over. Then, I can remove the ObjCreator class
+  from the system and cleanup.
+
 * September 23rd
 
   One way to automatically run the top-level simulation (if it exists)
