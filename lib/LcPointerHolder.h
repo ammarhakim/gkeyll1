@@ -23,6 +23,12 @@ namespace Lucee
   {
       T *pointer;
   };
+
+  template <typename T>
+  void deletePtr(T *ptr)
+  {
+    delete ptr;
+  }
 }
 
 #endif // LC_POINTER_HOLDER_H

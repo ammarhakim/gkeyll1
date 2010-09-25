@@ -22,6 +22,7 @@
 // std includes
 #include <map>
 #include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -38,6 +39,14 @@ namespace Lucee
  * @param func Pointer to Lua callable function.
  */
       void appendFunc(const std::string& nm, int (*func)(lua_State *L));
+
+/**
+ * Get list of methods added to this class in a std::vector that can
+ * then be passed to Lua registration system.
+ *
+ * @param funcLst On output filled with Lua functions added to this class.
+ */
+      void fillWithFuncList(std::vector<luaL_Reg>& funcLst);
 
     private:
 /** Map of function name to function pointer */

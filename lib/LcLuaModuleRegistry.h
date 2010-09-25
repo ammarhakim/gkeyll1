@@ -40,16 +40,26 @@ namespace Lucee
  */
       static void registerModule(lua_State *L)
       {
-// create name for a metatable for this object type
-        std::string mtblNm("Lucee.");
-        mtblNm.append(std::string(B::id));
-        luaL_newmetatable(L, mtblNm.c_str()); // create a new metatable
 // register the functions to create children objects
         luaL_Reg reg = {NULL, NULL};
         Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance().regCreateFuncs.push_back(reg);
-        luaL_register(L, B::id, &Loki::SingletonHolder<Lucee::LuaModule<B> >
-          ::Instance().regCreateFuncs[0]);
+
+        Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance();
+        luaL_register(L, B::id, &lm.regCreateFuncs[0]);
+
+// now create a meta-table for each derived class methods and register
+// them so that they become available using the Lua OO notation.
+        std::map<std::string, Lucee::LuaFuncMap>::iterator itr
+          = lm.funcMaps.begin();
+        for ( ; itr != lm.funcMaps.end(); ++itr)
+        {
+          luaL_newmetatable(L, itr->first.c_str());
+          lua_pushvalue(L, -1); // copy metatable
+          lua_setfield(L, -2, "__index");
+          
+        }
       }
 
 /**
