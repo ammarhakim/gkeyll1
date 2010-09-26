@@ -8,12 +8,13 @@
   getNew() should now be over. Then, I can remove the ObjCreator class
   from the system and cleanup.
 
-  There is a problem with the meta-table name embedded in each object:
-  i.e. the meta-table name is constructured using the typid of the
-  derived class but often the PointerHolder::checkUserType() method is
-  called with the base class type. Hence, there is a mis-match of
-  typeid() and Lua refuses to run the code. For now, I have switched
-  out the luaL_checkudata() method for the lua_touserdata() method.
+  [Later] There is a problem with the meta-table name embedded in each
+  object: i.e. the meta-table name is constructured using the typid of
+  the derived class but often the PointerHolder::checkUserType()
+  method is called with the base class type. Hence, there is a
+  mis-match of typeid() and Lua refuses to run the code. For now, I
+  have switched out the luaL_checkudata() method for the
+  lua_touserdata() method. Perhaps dynamic casting is needed?
 
   One other major problem is the existence of the Factories: when a
   Lua object will be created, it will return a pointer to the factory
@@ -23,6 +24,17 @@
   Also, writing the Lua callable methods will become rather
   tedious. Perhaps I need to add some helper classes to make this
   easier?
+
+  [Later] The solution to the Factory created objects problem is to
+  have two different methods that make the Lua object from C++ code:
+  the first applies to classes that support readInput() directly. The
+  second applies to classes that are created from a Factory. The
+  choice between these methods can be made using two classes, one
+  speclized to any T and the other to GenericFactory<T>.
+
+  Also, the method appendLuaCallableMethods() from the derived Factory
+  class will need to call the constructed object's
+  appendLuaCallableMethods().
 
 * September 23rd
 
