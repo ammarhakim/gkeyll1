@@ -150,7 +150,9 @@ namespace Lucee
  * Create a new body-fitted grid on specified region. In serial the
  * local and global boxes coincide. In parallel, the globalBox
  * represents the full grid, while the localBox represents the portion
- * of the grid handled by the rank the grid lives on.
+ * of the grid handled by the rank the grid lives on. The full
+ * computational domain (i.e. indexed by the global region) is
+ * specified using the Region object compSpace.
  *
  * To get data from the grid, first set the index into the grid by
  * using the setIndex() method. Then access the needed data for that

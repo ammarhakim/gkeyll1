@@ -52,6 +52,25 @@ namespace Lucee
  * @return Vector of coefficients. Should be of size L+1.
  */
       virtual Lucee::Vector<double> getExpCoeffs(unsigned L) = 0;
+
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * This Lua callable method prints out first L+1 phase function
+ * coefficients. The lua function should pass a single integer L and
+ * has the signature:
+ *
+ *   phaseFunction:print(L)
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaPrintExpCoeffs(lua_State *L);
   };
 }
 
