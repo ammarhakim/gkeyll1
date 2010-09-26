@@ -106,13 +106,21 @@ main(int argc, char **argv)
 
   infoStrm << "** Welcome to Lucee!" << std::endl;
   infoStrm << "Reading input file " << inpFile << std::endl;
-  if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
+  try 
   {
-    std::cerr << "Error parsing input file: " << inpFile << std::endl;
-    std::string err(lua_tostring(L, -1));
-    lua_pop(L, 1);
-    std::cerr << err << std::endl;
-    exit(1);
+    if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
+    {
+      std::cerr << "Error parsing input file: " << inpFile << std::endl;
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
+      std::cerr << err << std::endl;
+      exit(1);
+    }
+  }
+  catch (Lucee::Except& lce)
+  {
+    infoStrm << "*** Lucee exception!" << std::endl;
+    infoStrm << lce.what() << std::endl;
   }
 
   return 0;

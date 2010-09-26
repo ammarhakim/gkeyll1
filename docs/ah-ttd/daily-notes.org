@@ -8,6 +8,22 @@
   getNew() should now be over. Then, I can remove the ObjCreator class
   from the system and cleanup.
 
+  There is a problem with the meta-table name embedded in each object:
+  i.e. the meta-table name is constructured using the typid of the
+  derived class but often the PointerHolder::checkUserType() method is
+  called with the base class type. Hence, there is a mis-match of
+  typeid() and Lua refuses to run the code. For now, I have switched
+  out the luaL_checkudata() method for the lua_touserdata() method.
+
+  One other major problem is the existence of the Factories: when a
+  Lua object will be created, it will return a pointer to the factory
+  and not the actual object itself. This means the calls are made to
+  the factory. This needs to be fixed ASAP.
+
+  Also, writing the Lua callable methods will become rather
+  tedious. Perhaps I need to add some helper classes to make this
+  easier?
+
 * September 23rd
 
   One way to automatically run the top-level simulation (if it exists)

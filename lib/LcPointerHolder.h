@@ -11,13 +11,16 @@
 #ifndef LC_POINTER_HOLDER_H
 #define LC_POINTER_HOLDER_H
 
-// lua includes
-#include <lua.hpp>
-
 // config stuff
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+
+// lua includes
+#include <lua.hpp>
+
+// std includes
+#include <typeinfo>
 
 namespace Lucee
 {
@@ -32,8 +35,11 @@ namespace Lucee
  */
       static T* checkUserType(lua_State *L)
       {
+        //Lucee::PointerHolder<T> *ph =
+        //  (Lucee::PointerHolder<T>*) luaL_checkudata(L, 1, typeid(T).name());
+// THIS BREAKS SAFTEY!!
         Lucee::PointerHolder<T> *ph =
-          (Lucee::PointerHolder<T>*) luaL_checkudata(L, 1, typeid(T).name());
+          (Lucee::PointerHolder<T>*) lua_touserdata(L, 1);
         return ph->pointer;
       }
 

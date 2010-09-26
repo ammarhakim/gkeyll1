@@ -46,21 +46,26 @@ namespace Lucee
         const Lucee::Region<NDIM, double>& physBox);
 
 /**
- * Return coordinates in physical space of cell centroid.
+ * Return coordinates in physical space of cell centroid. The
+ * setIndex() method must be called before this to set the current
+ * cell index.
  *
  * @param xc On output, centroid of cell.
  */
       virtual void getCentriod(double xc[3]) const;
 
 /**
- * Return coordinates in physical space of bottom left node.
+ * Return coordinates in physical space of bottom left node. The
+ * setIndex() method must be called before this to set the current
+ * cell index.
  *
  * @param xc On output, vertex coordinate of cell.
  */
       virtual void getVertex(double xc[3]) const;
 
 /**
- * Return volume of cell.
+ * Return volume of cell. The setIndex() method must be called before
+ * this to set the current cell index.
  *
  * @return Cell volume.
  */
@@ -68,7 +73,8 @@ namespace Lucee
 
 /**
  * Return physical surface area of face perpendicular (in
- * computational space) to specified direction.
+ * computational space) to specified direction. The setIndex() method
+ * must be called before this to set the current cell index.
  *
  * @param dir Direction perpendicular to face.
  * @return surface area of face.
@@ -77,11 +83,12 @@ namespace Lucee
 
 /**
  * Get the coordinate system attached to the surface perpendicular (in
- * computational space) to specified direction. The corrdinate system
+ * computational space) to specified direction. The coordinate system
  * is defined by three unit vectors, norm, tan1 and tan2. The norm
  * vector is normal to the surface and points into the cell. The
  * vectors tan1 and tan2 lie in the plane of the surface. The system
- * is such that tan1 x tan2 = norm.
+ * is such that tan1 x tan2 = norm. The setIndex() method must be
+ * called before this to set the current cell index.
  *
  * @param dir Direction perpendicular to face.
  * @param norm On output, normal to face.

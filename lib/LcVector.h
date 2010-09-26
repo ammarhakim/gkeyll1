@@ -111,6 +111,13 @@ namespace Lucee
       unsigned getLength() const { return this->getShape(0); }
 
 /**
+ * Get length of vector
+ *
+ * @return length of vector.
+ */
+      unsigned size() const { return this->getShape(0); }
+
+/**
  * Duplicate this vector.
  *
  * @return Copy of this vector.

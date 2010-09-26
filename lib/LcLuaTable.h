@@ -119,6 +119,16 @@ namespace Lucee
       LuaTable getTable(const std::string& nm);
 
 /**
+ * Get a Lucee object from this table. The type of the object must be
+ * passed as a template parameter.
+ * 
+ * @param nm Name of object to fetch.
+ * @return reference to object.
+ */
+      template <typename T>
+      T& getObject(const std::string& nm);
+
+/**
  * Get reference to specified Lua function.
  *
  * @param nm Name of function.
@@ -173,6 +183,16 @@ namespace Lucee
  * @return true if exists, false otherwise.
  */
       bool hasFunction(const std::string& nm);
+
+/**
+ * Check if a Lucee object exists in this table. The type of the
+ * object must be passed as a template parameter.
+ * 
+ * @param nm Name of object to check.
+ * @return true if exisit, false otherwise.
+ */
+      template <typename T>
+      bool hasObject(const std::string& nm);
 
 /**
  * Get list of all table names with specified type.
