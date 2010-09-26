@@ -39,12 +39,25 @@ namespace Lucee
 
 /** Default construct */
       GenericFactory()
-        : Lucee::BasicObj("name") {
+        : Lucee::BasicObj("name") 
+      {
       }
 
 /** Destructor */
       virtual ~GenericFactory()
-      {}
+      {
+      }
+
+/**
+ * Method that performs registration of Lua functions. This function
+ * simply redirects the call to the BASEOBJ class. 
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+      {
+        BASEOBJ::appendLuaCallableMethods(lfm);
+      }
 
 /**
  * Create a new object derived from BASEOBJ and return pointer to

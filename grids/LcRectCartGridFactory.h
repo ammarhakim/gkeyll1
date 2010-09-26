@@ -46,6 +46,14 @@ namespace Lucee
  */
       Lucee::GridIfc* create();
 
+/**
+ * Method that performs registration of Lua functions. This function
+ * simply redirects the call to the RectCartGrid class.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     private:
 /** Number of cells in domain */
       std::vector<double> cells;
