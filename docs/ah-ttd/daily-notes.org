@@ -6,6 +6,16 @@
   confusion of registering a factory instead of the actual object
   itself.
 
+  [Later] Removed registration of factory for Grid. To do this I
+  simply call the grid factory from the grid class and use the
+  assignment operator to construct the object.
+
+  Added a write method to GridIfc class to write grid to hdf5
+  file. Seems to work just fine. At this point it seems all basic code
+  for making Lucee objects callable from Lua is in place. Next to add
+  methods to the LuaTable class to get userdata from the readInput()
+  method.
+
 * September 25th
 
   Most code to make Lucee objects usable from Lua scripts is now
