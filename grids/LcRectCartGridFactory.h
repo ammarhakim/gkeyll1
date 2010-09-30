@@ -29,9 +29,6 @@ namespace Lucee
   class RectCartGridFactory : public Lucee::GenericFactory<Lucee::GridIfc>
   {
     public:
-/** Class id: this is used by the registration system */
-      static const char *id;
-
 /**
  * Bootstrap method: Read input from specified table.
  *

@@ -42,7 +42,7 @@ namespace Lucee
 
 // register modules into Lua
     //Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);
-    Lucee::LuaModuleRegistry<Lucee::GenericFactory<Lucee::GridIfc> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     //Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::registerModule(L);
     //Lucee::ObjCreator<Lucee::UpdaterIfc>::registerModule(L);
     //Lucee::ObjCreator<Lucee::FunctionIfc>::registerModule(L);

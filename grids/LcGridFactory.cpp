@@ -19,7 +19,6 @@
 
 namespace Lucee
 {
-// instantiate factory base class for grids and set module name
+// instantiate factory base class for grids
   template class Lucee::GenericFactory<Lucee::GridIfc>;
-  template <> const char *Lucee::GenericFactory<Lucee::GridIfc>::id = "Grid";
 }

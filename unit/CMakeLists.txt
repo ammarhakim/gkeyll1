@@ -93,7 +93,7 @@ target_link_libraries(lcvec3 lclib)
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
-target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua)
+target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)
@@ -105,7 +105,7 @@ target_link_libraries(lclincombiner lcslvrs lcgrids lclib lcloki lclua)
 
 # lctxyzfieldsetter
 add_executable(lctxyzfieldsetter lctxyzfieldsetter.cxx)
-target_link_libraries(lctxyzfieldsetter lcslvrs lcgrids lclib lcloki lclua)
+target_link_libraries(lctxyzfieldsetter lcslvrs lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)

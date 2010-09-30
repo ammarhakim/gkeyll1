@@ -20,11 +20,6 @@
 
 namespace Lucee
 {
-// set ids for grid creators
-  template <> const char *RectCartGridFactory<1>::id = "RectCart1D";
-  template <> const char *RectCartGridFactory<2>::id = "RectCart2D";
-  template <> const char *RectCartGridFactory<3>::id = "RectCart3D";
-  
   template <unsigned NDIM>
   void
   RectCartGridFactory<NDIM>::readInput(Lucee::LuaTable& tbl)
@@ -34,6 +29,7 @@ namespace Lucee
     {
       Lucee::Except lce("RectCartGridFactory::readInput: 'cells' should have exactly ");
       lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
+      throw lce;
     }
 
     lower = tbl.getNumVec("lower");
@@ -41,6 +37,7 @@ namespace Lucee
     {
       Lucee::Except lce("RectCartGridFactory::readInput: 'lower' should have exactly ");
       lce << NDIM << " elements. Instead has " << lower.size() << std::endl;
+      throw lce;
     }
 
     upper = tbl.getNumVec("upper");
@@ -48,6 +45,7 @@ namespace Lucee
     {
       Lucee::Except lce("RectCartGridFactory::readInput: 'upper' should have exactly ");
       lce << NDIM << " elements. Instead has " << upper.size() << std::endl;
+      throw lce;
     }
   }
 
