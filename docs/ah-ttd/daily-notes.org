@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* September 29th
+
+  The factory methods need to be removed. This will eliminate the
+  confusion of registering a factory instead of the actual object
+  itself.
+
 * September 25th
 
   Most code to make Lucee objects usable from Lua scripts is now

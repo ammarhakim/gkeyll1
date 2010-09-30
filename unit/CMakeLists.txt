@@ -93,7 +93,7 @@ target_link_libraries(lcvec3 lclib)
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
-target_link_libraries(lcrectcartgrid lcgrids lclib)
+target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua)
 
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)

@@ -15,9 +15,15 @@
 
 // lucee includes
 #include <LcRectCartGrid.h>
+#include <LcRectCartGridFactory.h>
 
 namespace Lucee
 {
+  template <unsigned NDIM>
+  RectCartGrid<NDIM>::RectCartGrid()
+  {
+  }
+
   template <unsigned NDIM>
   RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
     const Lucee::Region<NDIM, int>& globalBox,
@@ -31,6 +37,15 @@ namespace Lucee
     cellVolume = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
       cellVolume = cellVolume*dx[i];
+  }
+
+  template <unsigned NDIM>
+  void
+  RectCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
+  {
+    Lucee::RectCartGridFactory<NDIM> rgf;
+    rgf.readInput(tbl);
+    *this = *( (RectCartGrid<NDIM>*) rgf.create());
   }
 
   template <unsigned NDIM>
@@ -150,6 +165,21 @@ namespace Lucee
       writeVecAttribute<double>(grdGrp, "vsUpperBounds", upper);
 
     return grdGrp;
+  }
+
+  template <unsigned NDIM>
+  RectCartGrid<NDIM>&
+  RectCartGrid<NDIM>::operator=(const RectCartGrid<NDIM>& rg)
+  {
+    if (&rg == this)
+      return *this;
+
+    Lucee::StructuredGridBase<NDIM>::operator=(rg);
+    for (unsigned i=0; i<NDIM; ++i)
+      dx[i] = rg.dx[i];
+    cellVolume = rg.cellVolume;
+
+    return *this;
   }
 
 // instantiations

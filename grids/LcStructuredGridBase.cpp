@@ -19,14 +19,6 @@
 namespace Lucee
 {
   template <unsigned NDIM>
-  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
-    const Lucee::Region<NDIM, int>& globalBox,
-    const Lucee::Region<NDIM, double>& compSpace)
-    : localBox(localBox), globalBox(globalBox), compSpace(compSpace)
-  {
-  }
-
-  template <unsigned NDIM>
   StructuredGridBase<NDIM>::~StructuredGridBase()
   {
   }
@@ -89,6 +81,38 @@ namespace Lucee
   {
     for (unsigned i=0; i<NDIM; ++i)
       currIdx[i] = idx[i];
+  }
+
+  template <unsigned NDIM>
+  StructuredGridBase<NDIM>::StructuredGridBase()
+    : localBox(&Lucee::FixedVector<NDIM, int>(1)[0]),
+      globalBox(&Lucee::FixedVector<NDIM, int>(1)[0]),
+      compSpace(&Lucee::FixedVector<NDIM, double>(1.0)[0])
+  {
+  }
+
+  template <unsigned NDIM>
+  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
+    const Lucee::Region<NDIM, int>& globalBox,
+    const Lucee::Region<NDIM, double>& compSpace)
+    : localBox(localBox), globalBox(globalBox), compSpace(compSpace)
+  {
+  }
+
+  template <unsigned NDIM>
+  StructuredGridBase<NDIM>&
+  StructuredGridBase<NDIM>::operator=(const StructuredGridBase<NDIM>& sg)
+  {
+    if (&sg == this)
+      return *this;
+
+    for (unsigned i=0; i<NDIM; ++i)
+      currIdx[i] = sg.currIdx[i];
+    localBox = sg.localBox;
+    globalBox = sg.globalBox;
+    compSpace = sg.compSpace;
+    
+    return *this;
   }
 
 // instantiations
