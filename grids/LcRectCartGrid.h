@@ -26,6 +26,11 @@ namespace Lucee
   {
     public:
 /**
+ * Default ctor
+ */
+      RectCartGrid();
+
+/**
  * Create a new rectangular Cartesian grid on specified region. In
  * serial the local and global boxes coincide. In parallel, the
  * globalBox represents the full grid, while the localBox represents
@@ -44,6 +49,13 @@ namespace Lucee
       RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
         const Lucee::Region<NDIM, int>& globalBox,
         const Lucee::Region<NDIM, double>& physBox);
+
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Return coordinates in physical space of cell centroid. The
@@ -111,7 +123,15 @@ namespace Lucee
         const std::string& nm);
 
     private:
-/** Grid spacing in each direction */      
+/**
+ * Copy from supplied rectangular grid.
+ *
+ * @param rg Rectangular grid to copy from.
+ * @return reference to this object.
+ */
+      RectCartGrid<NDIM>& operator=(const RectCartGrid<NDIM>& rg);
+
+/** Grid spacing in each direction */
       double dx[3];
 /** Volume of each cell */
       double cellVolume;

@@ -167,7 +167,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>::Region(const T shape[NDIM])
-    : lower(0), upper(shape)
+    : lower((T) 0), upper(shape)
   {
     volume = 1;
     for (unsigned i=0; i<NDIM; ++i)

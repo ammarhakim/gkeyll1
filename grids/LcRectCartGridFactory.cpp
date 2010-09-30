@@ -70,13 +70,6 @@ namespace Lucee
     return new RectCartGrid<NDIM>(lrgn, grgn, dom); 
   }
 
-  template <unsigned NDIM>
-  void
-  RectCartGridFactory<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
-  {
-    RectCartGrid<NDIM>::appendLuaCallableMethods(lfm);
-  }
-
 // instantiations
   template class RectCartGridFactory<1>;
   template class RectCartGridFactory<2>;

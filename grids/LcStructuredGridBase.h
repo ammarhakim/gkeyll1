@@ -147,6 +147,11 @@ namespace Lucee
 
     protected:
 /**
+ * Default ctor: only derived classes can make default objects.
+ */
+      StructuredGridBase();
+
+/**
  * Create a new body-fitted grid on specified region. In serial the
  * local and global boxes coincide. In parallel, the globalBox
  * represents the full grid, while the localBox represents the portion
@@ -167,6 +172,14 @@ namespace Lucee
       StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
         const Lucee::Region<NDIM, int>& globalBox,
         const Lucee::Region<NDIM, double>& compSpace);
+
+/**
+ * Set structured grid from supplied one.
+ *
+ * @param sg Structured grid to assign from.
+ * @return reference to this object.
+ */
+      StructuredGridBase<NDIM>& operator=(const StructuredGridBase<NDIM>& sg);
 
 /** Index into current cell */
       mutable int currIdx[NDIM];
