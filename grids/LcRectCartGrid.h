@@ -125,6 +125,13 @@ namespace Lucee
       virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
         const std::string& nm);
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     private:
 /**
  * Copy from supplied rectangular grid.

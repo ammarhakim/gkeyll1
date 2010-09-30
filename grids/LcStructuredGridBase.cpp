@@ -14,6 +14,7 @@
 #endif
 
 // lucee includes
+#include <LcPointerHolder.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
@@ -81,6 +82,40 @@ namespace Lucee
   {
     for (unsigned i=0; i<NDIM; ++i)
       currIdx[i] = idx[i];
+  }
+
+  template <unsigned NDIM>
+  void
+  StructuredGridBase<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("localLower", luaGetLocalLower);
+    lfm.appendFunc("localUpper", luaGetLocalUpper);
+  }
+
+  template <unsigned NDIM>
+  int
+  StructuredGridBase<NDIM>::luaGetLocalLower(lua_State *L)
+  {
+    StructuredGridBase<NDIM> *g
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+
+    int dir = lua_tonumber(L, 2);
+    Lucee::Region<NDIM, int> lb = g->getLocalBox();
+    lua_pushnumber(L, lb.getLower(dir));
+    return 1;
+  }
+
+  template <unsigned NDIM>
+  int
+  StructuredGridBase<NDIM>::luaGetLocalUpper(lua_State *L)
+  {
+    StructuredGridBase<NDIM> *g
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+
+    int dir = lua_tonumber(L, 2);
+    Lucee::Region<NDIM, int> lb = g->getLocalBox();
+    lua_pushnumber(L, lb.getUpper(dir));
+    return 1;
   }
 
   template <unsigned NDIM>

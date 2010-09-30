@@ -46,21 +46,6 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Method that performs registration of Lua functions.
- *
- * @param lfm Lua function map object.
- */
-      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
-
-/**
- * Lua callable method for writing out grid data to HDF5 file.
- *
- * @param L Lua state to use.
- * @return number of output parameters.
- */
-      static int luaWrite(lua_State *L);
-
-/**
  * Write grid to specified HDF5 file.
  *
  * @param nm Name of file to write.
@@ -77,6 +62,21 @@ namespace Lucee
  */
       virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
         const std::string& nm) = 0;
+
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method for writing out grid data to HDF5 file.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaWrite(lua_State *L);
 
     protected:
 /**
