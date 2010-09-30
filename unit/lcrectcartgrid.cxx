@@ -110,6 +110,9 @@ test_1()
       LC_ASSERT("Testing right-handedness of coord-sys", t1t2[i] == lz[i]);
   }
 
+// write grid to file
+  grid3.write("lcrectcartgrid-grid3.h5");
+
 }
 
 void

@@ -25,6 +25,9 @@ namespace Lucee
   class RectCartGrid : public Lucee::StructuredGridBase<NDIM>
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /**
  * Default ctor
  */

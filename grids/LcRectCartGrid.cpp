@@ -19,6 +19,11 @@
 
 namespace Lucee
 {
+// set ids for grid creators
+  template <> const char *RectCartGrid<1>::id = "RectCart1D";
+  template <> const char *RectCartGrid<2>::id = "RectCart2D";
+  template <> const char *RectCartGrid<3>::id = "RectCart3D";
+
   template <unsigned NDIM>
   RectCartGrid<NDIM>::RectCartGrid()
   {
@@ -45,7 +50,7 @@ namespace Lucee
   {
     Lucee::RectCartGridFactory<NDIM> rgf;
     rgf.readInput(tbl);
-    *this = *( (RectCartGrid<NDIM>*) rgf.create());
+    *this = *(RectCartGrid<NDIM>*) rgf.create();
   }
 
   template <unsigned NDIM>
@@ -175,7 +180,7 @@ namespace Lucee
       return *this;
 
     Lucee::StructuredGridBase<NDIM>::operator=(rg);
-    for (unsigned i=0; i<NDIM; ++i)
+    for (unsigned i=0; i<3; ++i)
       dx[i] = rg.dx[i];
     cellVolume = rg.cellVolume;
 
