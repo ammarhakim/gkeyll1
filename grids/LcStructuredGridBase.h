@@ -145,6 +145,29 @@ namespace Lucee
       virtual void getSurfCoordSys(unsigned dir, double norm[3],
         double tan1[3], double tan2[3]) const = 0;
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to get lower index of local box.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetLocalLower(lua_State *L);
+
+/**
+ * Lua callable method to get upper index of local box.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetLocalUpper(lua_State *L);
+
     protected:
 /**
  * Default ctor: only derived classes can make default objects.

@@ -173,6 +173,14 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  RectCartGrid<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+// call base class to register its methods
+    Lucee::StructuredGridBase<NDIM>::appendLuaCallableMethods(lfm);
+  }
+
+  template <unsigned NDIM>
   RectCartGrid<NDIM>&
   RectCartGrid<NDIM>::operator=(const RectCartGrid<NDIM>& rg)
   {
