@@ -125,20 +125,11 @@ namespace Lucee
     }
 
 // read in phase function
-    Lucee::LuaTable pfTbl = tbl.getTable("phaseFunction");
-    std::string pfKind = pfTbl.getKind(); // kind of phase function
-    Lucee::RtePhaseFunction *pf =
-      Lucee::ObjCreator<Lucee::RtePhaseFunction>::getNew(pfKind);
-// initialize PF from its table
-    pf->readInput(pfTbl);
+    Lucee::RtePhaseFunction& pf 
+      = tbl.getObject<Lucee::RtePhaseFunction>("phaseFunction");
 // get expansion coefficients
-    betal = pf->getExpCoeffs(L);
-    delete pf; // no need for PF object
-  }
+    betal = pf.getExpCoeffs(L);
 
-  void 
-  RteHomogeneousSlab::buildData()
-  {
 // allocate space for weights and ordinates
     w = Lucee::Vector<double>(N);
     mu = Lucee::Vector<double>(N);
@@ -158,11 +149,7 @@ namespace Lucee
       irradp = Lucee::Array<2, double>(shape, start);
       irradm = Lucee::Array<2, double>(shape, start);
     }
-  }
 
-  void 
-  RteHomogeneousSlab::buildAlgorithms()
-  {
 // compute ordinates and wights for use in Gaussian quadrature
     Lucee::gauleg(N, 0, 1, mu, w);
   }

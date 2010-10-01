@@ -34,8 +34,8 @@ namespace Lucee
  * themselves. The time-step interface methods expose methods to
  * advance solution in time. The I/O interface allow writing
  * simulation data to output files and restarting simulations from
- * previous output. The order in the bootstrap methods are called is
- * readInput(), buildData() and buildAlgorithms().
+ * previous output. The order in the bootstrap methods is called
+ * readInput().
  *
  * Next, if the simulation is a restart, the method restoreFromFile()
  * is called. Otherwise, if the simulation is not a restart, the
@@ -107,16 +107,6 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Bootstrap method: Allocate data for solver.
- */
-      virtual void buildData() = 0;
-
-/**
- * Initialize algorithms needed for solver.
- */
-      virtual void buildAlgorithms() = 0;
-
-/**
  * Initialize solver, i.e. setup initial conditions. At the end of
  * this call, the solver should be ready for evolving the solution.
  */
@@ -155,6 +145,37 @@ namespace Lucee
  * etc.
  */
       virtual void finalize() = 0;
+
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to advance solver to given time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaAdvance(lua_State *L);
+
+/**
+ * Lua callable method to initialize solver to given time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaInitialize(lua_State *L);
+
+/**
+ * Lua callable method to write data to file.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaWrite(lua_State *L);
 
     private:
 /** Current time */

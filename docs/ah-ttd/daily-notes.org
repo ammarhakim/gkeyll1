@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* September 30th
+
+  Added more methods to StructuredGridBase class for access from
+  Lua. This is an easy but tedious job. However, the basic code is now
+  in place. Some objects like Region etc will need to be put into a
+  global module (like Lucee.Region {}) so they become available from
+  Lua. This can be done later.
+
 * September 29th
 
   The factory methods need to be removed. This will eliminate the

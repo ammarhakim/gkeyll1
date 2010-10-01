@@ -54,16 +54,6 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Bootstrap method: Allocate data for solver.
- */
-      virtual void buildData();
-
-/**
- * Initialize algorithms needed for solver.
- */
-      virtual void buildAlgorithms();
-
-/**
  * Initialize solver, i.e. setup initial conditions. At the end of
  * this call, the solver should be ready for evolving the solution.
  */

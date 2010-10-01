@@ -105,16 +105,6 @@ namespace Lucee
   }
 
   void
-  SolverAssembly::buildData()
-  {
-  }
-
-  void 
-  SolverAssembly::buildAlgorithms()
-  {
-  }
-
-  void
   SolverAssembly::initialize()
   {
   }

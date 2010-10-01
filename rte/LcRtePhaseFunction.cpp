@@ -24,7 +24,6 @@ namespace Lucee
   void
   RtePhaseFunction::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
-// function to print the first L+1 coefficients
     lfm.appendFunc("print", luaPrintExpCoeffs);
   }
 
