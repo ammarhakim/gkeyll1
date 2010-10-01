@@ -34,14 +34,14 @@ namespace Lucee
   void registerModules(Lucee::LuaState& L)
   {
 // register objects
-    //Lucee::registerSolverObjects(L);
+    Lucee::registerSolverObjects(L);
     Lucee::registerRteObjects(L);
     Lucee::registerGridObjects(L);
     //Lucee::registerDataStructObjects(L);
     //Lucee::registerLibObjects(L);
 
 // register modules into Lua
-    //Lucee::ObjCreator<Lucee::SolverIfc>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::SolverIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     //Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::registerModule(L);
     //Lucee::ObjCreator<Lucee::UpdaterIfc>::registerModule(L);

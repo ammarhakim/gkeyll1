@@ -17,7 +17,9 @@
 #endif
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcLuaState.h>
+#include <LcPointerHolder.h>
 
 // lua includes
 #include <lua.hpp>
@@ -26,6 +28,24 @@
 #include <map>
 #include <string>
 #include <vector>
+
+/*
+#define SHOW_LUA_STACK_SIZE(nm, L) \
+    do { \
+      std::cout << "Stack size in " << nm << " is " << lua_gettop(L) << std::endl; \
+    } while (0);
+
+#define SHOW_LUA_STACK_SIZE2(L) \
+    do { \
+    std::cout << "End stack size is " << lua_gettop(L) << std::endl; \
+    } while (0);
+*/
+
+#define SHOW_LUA_STACK_SIZE(nm, L) \
+    do {} while (0);
+
+#define SHOW_LUA_STACK_SIZE2(L) \
+    do {} while (0);
 
 namespace Lucee
 {
@@ -95,6 +115,36 @@ namespace Lucee
       double getNumber(const std::string& key);
 
 /**
+ * Get user data (i.e. pointer to Lucee object) from table. The object
+ * type must be specified as the template parameter.
+ *
+ * @param key Key in table.
+ * @return reference to object.
+ */
+      template <typename T>
+      T& getObject(const std::string& key)
+      {
+// push table object on stack
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+        lua_pushstring(L, key.c_str());
+// get data from table
+        lua_gettable(L, -2);
+        if (lua_type(L, -1) != LUA_TUSERDATA)
+        {
+          lua_pop(L, 2);
+          Lucee::Except lce("LuaTable::getObject: ");
+          lce << key << " is not a Lucee object";
+          throw lce;
+        }
+        Lucee::PointerHolder<T> *ph =
+          (Lucee::PointerHolder<T>*) lua_touserdata(L, -1);
+        
+        lua_pop(L, 2);
+        SHOW_LUA_STACK_SIZE2(L);
+        return *ph->pointer;
+      }
+
+/**
  * Get vector of strings from table.
  *
  * @param key Key in table.
@@ -117,16 +167,6 @@ namespace Lucee
  * @return table object.
  */
       LuaTable getTable(const std::string& nm);
-
-/**
- * Get a Lucee object from this table. The type of the object must be
- * passed as a template parameter.
- * 
- * @param nm Name of object to fetch.
- * @return reference to object.
- */
-      template <typename T>
-      T& getObject(const std::string& nm);
 
 /**
  * Get reference to specified Lua function.

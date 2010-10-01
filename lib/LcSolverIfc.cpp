@@ -49,4 +49,43 @@ namespace Lucee
   SolverIfc::readInput(Lucee::LuaTable& tbl)
   {
   }
+
+  void
+  SolverIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("advance", luaAdvance);
+    lfm.appendFunc("initialize", luaInitialize);
+    lfm.appendFunc("write", luaWrite);
+  }
+
+  int
+  SolverIfc::luaAdvance(lua_State *L)
+  {
+    SolverIfc *solver
+      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+    double t = lua_tonumber(L, 2); // time to advance to
+    int res = solver->advance(t);
+    lua_pushnumber(L, res);
+    return 1;
+  }
+
+  int
+  SolverIfc::luaInitialize(lua_State *L)
+  {
+    SolverIfc *solver
+      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+    solver->initialize();
+    return 0;
+  }
+
+  int
+  SolverIfc::luaWrite(lua_State *L)
+  {
+    SolverIfc *solver
+      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+    std::string nm = lua_tostring(L, 2); // base name
+    int d = lua_tonumber(L, 3); // dump-number
+    solver->writeToFile(nm, d);
+    return 0;
+  }
 }

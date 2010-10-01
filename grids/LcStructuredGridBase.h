@@ -168,6 +168,40 @@ namespace Lucee
  */
       static int luaGetLocalUpper(lua_State *L);
 
+/**
+ * Lua callable method to get lower index of global box.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetGlobalLower(lua_State *L);
+
+/**
+ * Lua callable method to get upper index of global box.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetGlobalUpper(lua_State *L);
+
+/**
+ * Lua callable method to get coordinate of lower corner of domain in
+ * computational space.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetLowerCoord(lua_State *L);
+
+/**
+ * Lua callable method to get coordinate of upper corner of domain in
+ * computational space.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetUpperCoord(lua_State *L);
+
     protected:
 /**
  * Default ctor: only derived classes can make default objects.
