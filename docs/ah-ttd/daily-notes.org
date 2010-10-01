@@ -8,6 +8,15 @@
   global module (like Lucee.Region {}) so they become available from
   Lua. This can be done later.
 
+  Added getObject() method to LuaTable class. This allows fetching
+  reference to Lucee objects stored in Lua tables.
+
+  Made SolverIfc class available from Lua scripts. Now RTE solver
+  works from the script. The advance() method needs to be called
+  explicitly.
+
+  Removed builData() and buildAlgorithms() methods from SolverIfc.
+
 * September 29th
 
   The factory methods need to be removed. This will eliminate the
