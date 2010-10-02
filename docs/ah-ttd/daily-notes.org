@@ -1,5 +1,32 @@
 # -*- org -*-
 
+* October 1st
+
+  I have written code to convert FieldPtr and ConstFieldPtr to T* and
+  const T* respectively. This has two issues: loss of information
+  (length is lost) and access to the raw data pointer.
+
+  Perhaps one idea would be to introduce new classes (ConstVecWrap,
+  VecWrap) that stores the pointer and the length and that can be
+  constructed from FieldPtr and ConstFieldPtr, in addition to a
+  std::vector<>. Then, basic functions like flux calculators can have
+  signature
+
+#+BEGIN_EXAMPLE
+  void flux(ConstVecWrap q, VecWrap flx);
+#+END_EXAMPLE 
+
+  Which can be used as
+#+BEGIN_EXAMPLE
+  std::vector<double> q, flx;
+  // set q
+  q[0] = 0.0; q[1] = 1.0;
+  flux(q, flx);
+#+END_EXAMPLE
+
+  This would mean that the Wrap objects must be passed as values as
+  references can not be created to temporary.
+
 * September 30th
 
   Added more methods to StructuredGridBase class for access from
@@ -85,12 +112,14 @@
 * September 13th
 
   The LuaModule class needs to be modified to have a map:
+
 #+BEGIN_EXAMPLE
   std::map<std::string, std::vector<luaL_Reg> > refFuncs;
-#+END_EXAMPLE or a more complex data-structure. The key could be the
-  derived class Id and the vector could be the list of functions to
-  register. The derived class should add all the methods it needs to
-  this list.
+#+END_EXAMPLE 
+
+  or a more complex data-structure. The key could be the derived class
+  Id and the vector could be the list of functions to register. The
+  derived class should add all the methods it needs to this list.
 
   When the ObjCreator class moduleRegister() method is called it
   should add, in addition to the methods already added, the base class
