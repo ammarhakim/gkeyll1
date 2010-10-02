@@ -32,6 +32,9 @@ namespace Lucee
   class DataStructIfc : public Lucee::BasicObj
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /** Destroy dataStruct */
       virtual ~DataStructIfc();
 

@@ -88,6 +88,13 @@ namespace Lucee
       Field<NDIM, T> & operator=(const T& val);
 
 /**
+ * Create from Lua table data.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
  * Number of components per index location.
  *
  * @return number of components.
