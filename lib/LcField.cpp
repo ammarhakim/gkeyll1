@@ -90,6 +90,12 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::readInput(Lucee::LuaTable& tbl)
+  {
+  }
+
+  template <unsigned NDIM, typename T>
   Field<NDIM, T>
   Field<NDIM, T>::getView(const Lucee::Region<NDIM, int>& vrgn)
   {

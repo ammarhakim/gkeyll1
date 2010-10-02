@@ -12,8 +12,10 @@ add_library(lclib
   LcConstFieldPtr.cpp
   LcDataStructFactory.cpp
   LcDataStructIfc.cpp
+  LcDataStructRegistry.cpp
   LcExcept.cpp 
   LcField.cpp
+  LcFieldFactory.cpp
   LcFieldPtr.cpp
   LcFileHandler.cpp
   LcFunctionIfc.cpp

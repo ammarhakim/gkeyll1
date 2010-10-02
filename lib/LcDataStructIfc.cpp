@@ -18,6 +18,9 @@
 
 namespace Lucee
 {
+// set madule name
+  const char *DataStructIfc::id = "DataStruct";
+
   DataStructIfc::DataStructIfc()
     : Lucee::BasicObj("DataStruct")
   {

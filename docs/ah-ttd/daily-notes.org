@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* October 2nd
+
+  Now completed the creation of FieldPtr and ConstFieldPtr from
+  std::vector.
+
+  Need to now allow direct creation of DataStruct without the
+  intervention of factories.
+
 * October 1st
 
   I have written code to convert FieldPtr and ConstFieldPtr to T* and

@@ -16,16 +16,10 @@
 // lucee includes
 #include <LcField.h>
 #include <LcFieldFactory.h>
-#include <LcSolverAssembly.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
-// set ids for creators
-  template <> const char *FieldFactory<1>::id = "Field1D";
-  template <> const char *FieldFactory<2>::id = "Field2D";
-  template <> const char *FieldFactory<3>::id = "Field3D";
-
   template <unsigned NDIM>
   void
   FieldFactory<NDIM>::readInput(Lucee::LuaTable& tbl)
