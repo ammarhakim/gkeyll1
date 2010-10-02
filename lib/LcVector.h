@@ -18,6 +18,8 @@
 
 // lucee includes
 #include <LcArray.h>
+#include <LcConstFieldPtr.h>
+#include <LcFieldPtr.h>
 
 namespace Lucee
 {
@@ -63,6 +65,14 @@ namespace Lucee
  * @param arr Array to create from.
  */
       Vector(const Lucee::Array<1, T>& arr);
+
+/**
+ * Create a new vector from FieldPtr. Created vector and ptr share
+ * data.
+ *
+ * @param ptr FieldPtr to create from.
+ */
+      Vector(Lucee::FieldPtr<T>& ptr);
 
 /**
  * Copy input vector.

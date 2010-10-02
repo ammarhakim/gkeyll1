@@ -72,11 +72,11 @@ namespace Lucee
       T operator[](unsigned n) const { return data[n]; }
 
 /**
- * Get a Lucee::Vector class from this field pointer.
+ * Return pointer to underlying data.
  *
- * @return vector class for pointer.
+ * @return Pointer to data.
  */
-      Lucee::Vector<T> asVector();
+      operator T* () { return data; }
 
     private:
 /**
