@@ -42,14 +42,6 @@ namespace Lucee
   }
 
   template <typename T>
-  Vector<T>::Vector(Lucee::FieldPtr<T>& ptr)
-    : Lucee::Array<1, T>(
-      Lucee::Region<1, int>(&Lucee::FixedVector<1, int>(ptr.getNumComponents())[0]),
-      &ptr[0])
-  {
-  }
-
-  template <typename T>
   Vector<T>&
   Vector<T>::operator=(const Vector<T>& vec)
   {

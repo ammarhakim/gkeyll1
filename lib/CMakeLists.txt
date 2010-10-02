@@ -9,14 +9,8 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 add_library(lclib 
   LcBasicObj.cpp
   LcCmdLineArgs.cpp
-  LcConstFieldPtr.cpp
-  LcDataStructFactory.cpp
   LcDataStructIfc.cpp
-  LcDataStructRegistry.cpp
   LcExcept.cpp 
-  LcField.cpp
-  LcFieldFactory.cpp
-  LcFieldPtr.cpp
   LcFileHandler.cpp
   LcFunctionIfc.cpp
   LcHdf5Io.cpp
