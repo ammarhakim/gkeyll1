@@ -228,11 +228,26 @@ namespace Lucee
  * Check if a Lucee object exists in this table. The type of the
  * object must be passed as a template parameter.
  * 
- * @param nm Name of object to check.
+ * @param key Name of object to check.
  * @return true if exisit, false otherwise.
  */
       template <typename T>
-      bool hasObject(const std::string& nm);
+      bool hasObject(const std::string& key)
+      {
+// push table object on stack
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+        lua_pushstring(L, key.c_str());
+// get data from table
+        lua_gettable(L, -2);
+        if (lua_type(L, -1) != LUA_TUSERDATA)
+        {
+          lua_pop(L, 2);
+          return false;
+        }
+        lua_pop(L, 2);
+        SHOW_LUA_STACK_SIZE2(L);
+        return true;
+      }
 
 /**
  * Get list of all table names with specified type.
