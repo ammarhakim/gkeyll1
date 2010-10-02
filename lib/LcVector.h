@@ -18,14 +18,9 @@
 
 // lucee includes
 #include <LcArray.h>
-#include <LcConstFieldPtr.h>
-#include <LcFieldPtr.h>
 
 namespace Lucee
 {
-// forward declaration for making vector class friend
-  template <typename T> class FieldPtr;
-
 /**
  * One-dimensional vector of data.
  */
@@ -33,9 +28,6 @@ namespace Lucee
   class Vector : public Lucee::Array<1, T>
   {
     public:
-/** Friend  so it can create Vector */
-      template <typename TT> friend class Lucee::FieldPtr;
-
 /**
  * Construct vector with specified length.
  *
@@ -65,14 +57,6 @@ namespace Lucee
  * @param arr Array to create from.
  */
       Vector(const Lucee::Array<1, T>& arr);
-
-/**
- * Create a new vector from FieldPtr. Created vector and ptr share
- * data.
- *
- * @param ptr FieldPtr to create from.
- */
-      Vector(Lucee::FieldPtr<T>& ptr);
 
 /**
  * Copy input vector.

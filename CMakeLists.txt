@@ -60,6 +60,9 @@ add_subdirectory(lib)
 # Build code in grids
 add_subdirectory(grids)
 
+# Build code in datastructs
+add_subdirectory(datastructs)
+
 # Build code in slvrs
 add_subdirectory(slvrs)
 

@@ -6,10 +6,12 @@ include_directories(${PROJECT_SOURCE_DIR}/rte)
 include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/grids)
+include_directories(${PROJECT_SOURCE_DIR}/datastructs)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 link_directories(${PROJECT_BINARY_DIR}/lib)
+link_directories(${PROJECT_BINARY_DIR}/datastructs)
 link_directories(${PROJECT_BINARY_DIR}/grids)
 link_directories(${PROJECT_BINARY_DIR}/rte)
 link_directories(${PROJECT_BINARY_DIR}/slvrs)
@@ -28,6 +30,7 @@ add_executable(lucee lucee.cxx LcRegisterModules.cpp)
 target_link_libraries(lucee
   lcrte
   lcslvrs
+  lcdatastructs
   lcgrids
   lclib
   lcloki

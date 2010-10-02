@@ -14,21 +14,6 @@
 #include <LcVector.h>
 
 void
-fooVec(const Lucee::Vector<double>& cv, Lucee::Vector<double> v)
-{
-}
-
-void
-fooPtr(const double *cv, double *v)
-{
-}
-
-void
-fooPtr1(const double *cv)
-{
-}
-
-void
 test_1()
 {
   int lower[2] = {0, 0};
@@ -202,7 +187,6 @@ test_6()
 // create constant reference to field
   const Lucee::Field<3, double>& elcFldCnst = elcFld;
   Lucee::ConstFieldPtr<double> cPtr = elcFldCnst.createConstPtr();
-  fooPtr1(cPtr);
   for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
     for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
       for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
@@ -373,18 +357,6 @@ test_10()
         elcFld.setPtr(ptr, i, j, k);
         for (unsigned n=0; n<ptr.getNumComponents(); ++n)
           ptr[n] = (i+3*j+5.5*k+0.5)*n;
-      }
-
-  for (int i=elcFld.getLower(0); i<elcFld.getUpper(0); ++i)
-    for (int j=elcFld.getLower(1); j<elcFld.getUpper(1); ++j)
-      for (int k=elcFld.getLower(2); k<elcFld.getUpper(2); ++k)
-      {
-        elcFld.setPtr(ptr, i, j, k);
-        Lucee::Vector<double> vec(ptr);
-        for (unsigned n=0; n<ptr.getNumComponents(); ++n)
-          LC_ASSERT("Testing Vector from asVector", vec[n] == (i+3*j+5.5*k+0.5)*n);
-        fooVec(ptr, ptr);
-        fooPtr(ptr, ptr);
       }
 }
 
