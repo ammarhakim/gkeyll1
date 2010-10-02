@@ -21,9 +21,8 @@ namespace Lucee
 
   template <typename T>
   ConstFieldPtr<T>::ConstFieldPtr(const ConstFieldPtr<T>& ptr)
+    : numComponents(ptr.numComponents), data(ptr.data)
   {
-    numComponents = ptr.numComponents;
-    data = ptr.data;
   }
 
   template <typename T>

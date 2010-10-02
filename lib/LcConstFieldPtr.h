@@ -16,6 +16,9 @@
 # include <config.h>
 #endif
 
+// std includes
+#include <vector>
+
 namespace Lucee
 {
 // forward declaration for making Field class friend

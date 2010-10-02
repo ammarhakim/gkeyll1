@@ -11,6 +11,7 @@
 // lucee includes
 #include <LcField.h>
 #include <LcTest.h>
+#include <LcVector.h>
 
 void
 fooVec(const Lucee::Vector<double>& cv, Lucee::Vector<double> v)

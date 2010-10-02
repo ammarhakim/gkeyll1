@@ -16,8 +16,8 @@
 # include <config.h>
 #endif
 
-// lucee includes
-#include <LcVector.h>
+// std includes
+#include <vector>
 
 namespace Lucee
 {

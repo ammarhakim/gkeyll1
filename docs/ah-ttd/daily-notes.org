@@ -27,6 +27,9 @@
   This would mean that the Wrap objects must be passed as values as
   references can not be created to temporary.
 
+  WAIT: This is exactly what a FieldPtr is!! So just extend it to
+  initialize in addition from std::vector<>.
+
 * September 30th
 
   Added more methods to StructuredGridBase class for access from
