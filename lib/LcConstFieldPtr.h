@@ -61,6 +61,13 @@ namespace Lucee
  */
       const T& operator[](unsigned n) const { return data[n]; }
 
+/**
+ * Return pointer to underlying data.
+ *
+ * @return Pointer to data.
+ */
+      operator const T* () { return data; }
+
     private:
 /**
  * Create a new field pointer to point to given data pointer.
