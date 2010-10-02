@@ -44,6 +44,15 @@ namespace Lucee
       FieldPtr(const FieldPtr<T>& ptr);
 
 /**
+ * Create from a std::vector. The new object shares data with the
+ * supplied vector. Hence, the created object is no longer valid when
+ * the supplied std::vector goes away.
+ *
+ * @param vec Vector to create from.
+ */
+      FieldPtr(std::vector<T>& vec);
+
+/**
  * Assign from a given field pointer.
  *
  * @param ptr Pointer to copy from.

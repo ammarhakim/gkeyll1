@@ -110,3 +110,7 @@ target_link_libraries(lctxyzfieldsetter lcslvrs lcgrids lclib lcloki lclua ${HDF
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)
 target_link_libraries(lcluacobj lclib lcloki lclua)
+
+# lcfieldptr
+add_executable(lcfieldptr lcfieldptr.cxx)
+target_link_libraries(lcfieldptr lclib lcloki lclua)
