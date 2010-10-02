@@ -26,6 +26,12 @@ namespace Lucee
   }
 
   template <typename T>
+  FieldPtr<T>::FieldPtr(std::vector<T>& vec)
+    : numComponents(vec.size()), data(&vec[0])
+  {
+  }
+
+  template <typename T>
   FieldPtr<T>&
   FieldPtr<T>::operator=(const FieldPtr<T>& ptr)
   {
