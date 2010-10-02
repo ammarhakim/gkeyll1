@@ -24,34 +24,34 @@ namespace Lucee
   void
   FieldFactory<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// get name of grid on which field lives
-    if (tbl.hasString("onGrid"))
-      onGrid = tbl.getString("onGrid");
-    else
-      throw Lucee::Except("FieldFactory::readInput: must specify 'onGrid', the grid on which field lives");
+// // get name of grid on which field lives
+//     if (tbl.hasString("onGrid"))
+//       onGrid = tbl.getString("onGrid");
+//     else
+//       throw Lucee::Except("FieldFactory::readInput: must specify 'onGrid', the grid on which field lives");
 
-    numComponents = 1;
-// get number of components in field
-    if (tbl.hasNumber("numComponents"))
-      numComponents = tbl.getNumber("numComponents");
+//     numComponents = 1;
+// // get number of components in field
+//     if (tbl.hasNumber("numComponents"))
+//       numComponents = tbl.getNumber("numComponents");
 
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      lowerGhost[i] = 0;
-      upperGhost[i] = 0;
-    }
-// read number of ghost cells
-    if (tbl.hasNumVec("ghost"))
-    {
-      std::vector<double> gstDbl = tbl.getNumVec("ghost");
-      if (gstDbl.size() != 2)
-        throw Lucee::Except("FieldFactory::readInput: must specify exactly two entries in 'ghost' table");
-      for (unsigned i=0; i<NDIM; ++i)
-      {
-        lowerGhost[i] = gstDbl[0];
-        upperGhost[i] = gstDbl[1];
-      }
-    }
+//     for (unsigned i=0; i<NDIM; ++i)
+//     {
+//       lowerGhost[i] = 0;
+//       upperGhost[i] = 0;
+//     }
+// // read number of ghost cells
+//     if (tbl.hasNumVec("ghost"))
+//     {
+//       std::vector<double> gstDbl = tbl.getNumVec("ghost");
+//       if (gstDbl.size() != 2)
+//         throw Lucee::Except("FieldFactory::readInput: must specify exactly two entries in 'ghost' table");
+//       for (unsigned i=0; i<NDIM; ++i)
+//       {
+//         lowerGhost[i] = gstDbl[0];
+//         upperGhost[i] = gstDbl[1];
+//       }
+//     }
   }
 
   template <unsigned NDIM>
