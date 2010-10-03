@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcFieldFactory.h>
 
 namespace Lucee
 {
@@ -111,6 +112,9 @@ namespace Lucee
   void
   Field<NDIM, T>::readInput(Lucee::LuaTable& tbl)
   {
+    Lucee::FieldFactory<NDIM, T> ff;
+    ff.readInput(tbl);
+    *this = *ff.create();
   }
 
   template <unsigned NDIM, typename T>

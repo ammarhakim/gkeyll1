@@ -59,7 +59,8 @@ target_link_libraries(lcregion lclib lcloki lclua)
 
 # lcfield
 add_executable(lcfield lcfield.cxx)
-target_link_libraries(lcfield lcdatastructs lcgrids lclib lcloki lclua)
+target_link_libraries(lcfield
+  lcdatastructs lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
@@ -100,7 +101,7 @@ target_link_libraries(lcluafunction lclib lcloki lclua)
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)
 target_link_libraries(lclincombiner lcslvrs lcdatastructs 
-  lcgrids lclib lcloki lclua)
+  lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lctxyzfieldsetter
 add_executable(lctxyzfieldsetter lctxyzfieldsetter.cxx)

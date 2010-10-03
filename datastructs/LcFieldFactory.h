@@ -28,13 +28,10 @@ namespace Lucee
 // forward declare Field
   template <unsigned NDIM, typename T> class Field;
 
-  template <unsigned NDIM>
+  template <unsigned NDIM, typename T>
   class FieldFactory
   {
     public:
-/** Class id: this is used by the registration system */
-      static const char *id;
-
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -47,11 +44,11 @@ namespace Lucee
  *
  * @return pointer to new field.
  */
-      Lucee::Field<NDIM, double>* create();
+      Lucee::Field<NDIM, T>* create();
 
     private:
-/** Name of grid on which field lives */
-      std::string onGrid;
+/** Grid on which field lives */
+      Lucee::StructuredGridBase<NDIM> *onGrid;
 /** Number of components in field */
       unsigned numComponents;
 /** Ghost cells along lower side */

@@ -19,13 +19,14 @@
 
 namespace Lucee
 {
-  template <unsigned NDIM>
+  template <unsigned NDIM, typename T>
   void
-  FieldFactory<NDIM>::readInput(Lucee::LuaTable& tbl)
+  FieldFactory<NDIM, T>::readInput(Lucee::LuaTable& tbl)
   {
 // get name of grid on which field lives
-    if (tbl.hasString("onGrid"))
-      onGrid = tbl.getString("onGrid");
+    if (tbl.template hasObject<Lucee::StructuredGridBase<NDIM> >("onGrid"))
+      onGrid = &tbl.template
+        getObject<Lucee::StructuredGridBase<NDIM> > ("onGrid");
     else
       throw Lucee::Except("FieldFactory::readInput: must specify 'onGrid', the grid on which field lives");
 
@@ -53,27 +54,38 @@ namespace Lucee
     }
   }
 
-  template <unsigned NDIM>
-  Lucee::Field<NDIM, double>*
-  FieldFactory<NDIM>::create()
+  template <unsigned NDIM, typename T>
+  Lucee::Field<NDIM, T>*
+  FieldFactory<NDIM, T>::create()
   {
-    throw Lucee::Except("FieldFactory<NDIM>::create: NOT IMPLEMENTED!");
-    return 0;
-// // cast to solver assembly
-//     const Lucee::SolverAssembly& slvrAssembly
-//       = dynamic_cast<const Lucee::SolverAssembly&>(solver);
-// // get grid
-//     const Lucee::StructuredGridBase<NDIM>& grid
-//       = slvrAssembly.template getConstGrid<Lucee::StructuredGridBase<NDIM> >(onGrid);
-// // local region for field 
-//     typename Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
-// // create new field and return pointer to it
-//     return new Field<NDIM, double>(localRgn,
-//       numComponents, lowerGhost, upperGhost);
+// local region for field
+    typename Lucee::Region<NDIM, int> localRgn = onGrid->getLocalBox();
+// create new field and return pointer to it
+    return new Field<NDIM, T>(localRgn, numComponents, lowerGhost, upperGhost);
   }
 
 // instantiations
-  template class FieldFactory<1>;
-  template class FieldFactory<2>;
-  template class FieldFactory<3>;
+  template class FieldFactory<1, int>;
+  template class FieldFactory<2, int>;
+  template class FieldFactory<3, int>;
+  template class FieldFactory<4, int>;
+  template class FieldFactory<5, int>;
+  template class FieldFactory<6, int>;
+  template class FieldFactory<7, int>;
+
+  template class FieldFactory<1, float>;
+  template class FieldFactory<2, float>;
+  template class FieldFactory<3, float>;
+  template class FieldFactory<4, float>;
+  template class FieldFactory<5, float>;
+  template class FieldFactory<6, float>;
+  template class FieldFactory<7, float>;
+
+  template class FieldFactory<1, double>;
+  template class FieldFactory<2, double>;
+  template class FieldFactory<3, double>;
+  template class FieldFactory<4, double>;
+  template class FieldFactory<5, double>;
+  template class FieldFactory<6, double>;
+  template class FieldFactory<7, double>;
 }
