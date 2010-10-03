@@ -27,7 +27,7 @@ ENDIF (APPLE)
 
 # lcarray
 add_executable(lcarray lcarray.cxx)
-target_link_libraries(lcarray lclib lcloki lclua)
+target_link_libraries(lcarray lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lccolmajorindexer
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
@@ -43,11 +43,11 @@ target_link_libraries(lcfixedvector lclib lcloki lclua)
 
 # lcvector
 add_executable(lcvector lcvector.cxx)
-target_link_libraries(lcvector lclib lcloki lclua)
+target_link_libraries(lcvector lclib lcloki lclua ${HDF5_LIBRARIES})
 
 # lcmatrix
 add_executable(lcmatrix lcmatrix.cxx)
-target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS})
+target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${HDF5_LIBRARIES})
 
 # lccmdlineargs
 add_executable(lccmdlineargs lccmdlineargs.cxx)
