@@ -23,6 +23,10 @@
   error. [Does this not mean there should only be a derived class
   metatable? Perhaps something better is needed.]
 
+  Added a method to write Field. Need to improve this by putting this
+  in Field class and (a) writing the grid in the same h5 file and (b)
+  not writing the ghost cells.
+
 * October 1st
 
   I have written code to convert FieldPtr and ConstFieldPtr to T* and
