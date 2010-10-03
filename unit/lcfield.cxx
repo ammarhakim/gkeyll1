@@ -545,6 +545,45 @@ test_12()
         LC_ASSERT("Testing Eyz values", Eyz(i,j,k) == (i+0.5*j)*(k+1+1));
 }
 
+void
+test_13()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcField(rgn, 3, lg, ug, 10.0);
+
+  Lucee::FieldPtr<double> ptr = elcField.createPtr();
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+    {
+      elcField.setPtr(ptr, i, j);
+      for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+        ptr[n] = (i+0.5*j)*(n+1);
+    }
+
+  Lucee::Field<2, double> defFld;
+  LC_ASSERT("Number components of default field", defFld.getNumComponents() == 1);
+  Lucee::Region<2, int> defRgn = defFld.getRegion();
+  LC_ASSERT("Testing region", defFld.getLower(0) == 0);
+  LC_ASSERT("Testing region", defFld.getUpper(0) == 1);
+  LC_ASSERT("Testing region", defFld.getLower(1) == 0);
+  LC_ASSERT("Testing region", defFld.getUpper(1) == 1);
+
+  defFld = elcField;
+  Lucee::ConstFieldPtr<double> defPtr = defFld.createConstPtr();
+  for (int i=elcField.getLowerExt(0); i<elcField.getUpperExt(0); ++i)
+    for (int j=elcField.getLowerExt(1); j<elcField.getUpperExt(1); ++j)
+    {
+      elcField.setPtr(ptr, i, j);
+      defFld.setPtr(defPtr, i, j);
+      for (unsigned n=0; n<ptr.getNumComponents(); ++n)
+        LC_ASSERT("Testing assigned field", ptr[n] == defPtr[n]);
+    }
+}
+
 int
 main(void)
 {
@@ -561,5 +600,6 @@ main(void)
   test_10();
   test_11();
   test_12();
+  test_13();
   LC_END_TESTS;
 }

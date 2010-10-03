@@ -17,8 +17,7 @@
 #endif
 
 // lucee includes
-#include <LcDataStructIfc.h>
-#include <LcGenericFactory.h>
+#include <LcStructuredGridBase.h>
 
 // std includes
 #include <string>
@@ -26,8 +25,11 @@
 
 namespace Lucee
 {
+// forward declare Field
+  template <unsigned NDIM, typename T> class Field;
+
   template <unsigned NDIM>
-  class FieldFactory : public Lucee::GenericFactory<Lucee::DataStructIfc>
+  class FieldFactory
   {
     public:
 /** Class id: this is used by the registration system */
@@ -45,7 +47,7 @@ namespace Lucee
  *
  * @return pointer to new field.
  */
-      Lucee::DataStructIfc* create();
+      Lucee::Field<NDIM, double>* create();
 
     private:
 /** Name of grid on which field lives */

@@ -17,16 +17,18 @@
 #endif
 
 // lucee includes
-#include <LcGenericFactory.h>
-#include <LcGridIfc.h>
+#include <LcLuaTable.h>
 
 // std includes
 #include <vector>
 
 namespace Lucee
 {
+// forward declare RectCartGrid
+  template <unsigned NDIM> class RectCartGrid;
+
   template <unsigned NDIM>
-  class RectCartGridFactory : public Lucee::GenericFactory<Lucee::GridIfc>
+  class RectCartGridFactory
   {
     public:
 /**
@@ -41,7 +43,7 @@ namespace Lucee
  *
  * @return pointer to new grid.
  */
-      Lucee::GridIfc* create();
+      Lucee::RectCartGrid<NDIM>* create();
 
     private:
 /** Number of cells in domain */

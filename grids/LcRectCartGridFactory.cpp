@@ -50,7 +50,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  GridIfc*
+  Lucee::RectCartGrid<NDIM>*
   RectCartGridFactory<NDIM>::create()
   {
     int ilo[NDIM], iup[NDIM];
@@ -65,7 +65,7 @@ namespace Lucee
     Lucee::Region<NDIM, int> lrgn(ilo, iup);
     Lucee::Region<NDIM, int> grgn(ilo, iup);
     Lucee::Region<NDIM, double> dom(xlo, xup);
-    return new RectCartGrid<NDIM>(lrgn, grgn, dom); 
+    return new Lucee::RectCartGrid<NDIM>(lrgn, grgn, dom); 
   }
 
 // instantiations

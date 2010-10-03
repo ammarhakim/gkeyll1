@@ -18,6 +18,24 @@
 
 namespace Lucee
 {
+// names used in registration system
+  template <> const char *Field<1, double>::id = "Field1D";
+  template <> const char *Field<2, double>::id = "Field2D";
+  template <> const char *Field<3, double>::id = "Field3D";
+  template <> const char *Field<4, double>::id = "Field4D";
+  template <> const char *Field<5, double>::id = "Field5D";
+  template <> const char *Field<6, double>::id = "Field6D";
+  template <> const char *Field<7, double>::id = "Field7D";
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field()
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
+      &Lucee::FixedVector<NDIM+1, unsigned>(1)[0], (T)0),
+      scIdx(0), numComponents(1), rgn(&Lucee::FixedVector<NDIM, int>(1)[0]),
+      rgnIdx(rgn.inflate(0, 1))
+  {
+  }
+
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
