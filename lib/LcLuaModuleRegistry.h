@@ -14,7 +14,6 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcLuaModule.h>
-#include <LcPointerHolder.h>
 
 // loki includes
 #include <loki/Factory.h>
@@ -41,11 +40,10 @@ namespace Lucee
  */
       static void registerModule(lua_State *L)
       {
-// register the functions to create children objects
-        luaL_Reg reg = {NULL, NULL};
+        luaL_Reg reg = {NULL, NULL}; // this is a sentinel
         Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance().regCreateFuncs.push_back(reg);
-
+// register the functions to create children objects
         Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance();
         luaL_register(L, B::id, &lm.regCreateFuncs[0]);
@@ -65,7 +63,7 @@ namespace Lucee
 // append delete so object is cleaned-up when garbage collector runs
           luaL_Reg gc = {"__gc", itr->second.getDelFunc()};
           funcLst.push_back(gc);
-          luaL_Reg fin = {NULL, NULL};
+          luaL_Reg fin = {NULL, NULL}; // this is sentinel
           funcLst.push_back(fin);
 // now register it
           luaL_register(L, NULL, &funcLst[0]);

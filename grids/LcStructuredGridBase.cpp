@@ -210,4 +210,8 @@ namespace Lucee
   template class StructuredGridBase<1>;
   template class StructuredGridBase<2>;
   template class StructuredGridBase<3>;
+  template class StructuredGridBase<4>;
+  template class StructuredGridBase<5>;
+  template class StructuredGridBase<6>;
+  template class StructuredGridBase<7>;
 }

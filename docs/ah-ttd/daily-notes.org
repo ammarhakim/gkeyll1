@@ -6,7 +6,22 @@
   std::vector.
 
   Need to now allow direct creation of DataStruct without the
-  intervention of factories.
+  intervention of factories. DONE!
+
+  There is a significant problem with type-saftey for objects created
+  in Lua and accessed in Lucee. The issue is that Lua stores the
+  object as a void* which means that all type information is lost!
+  Although Lua suggests to use the luaL_checkudata method, the problem
+  with this in Lucee is a confusion between base class and dervied
+  class names. I.e. we wish to access base class pointers even when
+  the Lua object is a derived object.
+  
+  One solution is to add *two* metatables: one named after the base
+  class and the other named after the derived class. Then, the access
+  method should first check for the derived class metatable and then
+  the base class metatable. If neither are found it should throw an
+  error. [Does this not mean there should only be a derived class
+  metatable? Perhaps something better is needed.]
 
 * October 1st
 

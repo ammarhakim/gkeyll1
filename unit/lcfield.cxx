@@ -566,6 +566,7 @@ test_13()
 
   Lucee::Field<2, double> defFld;
   LC_ASSERT("Number components of default field", defFld.getNumComponents() == 1);
+  LC_ASSERT("Testing size of field", defFld.getSize() == 1);
   Lucee::Region<2, int> defRgn = defFld.getRegion();
   LC_ASSERT("Testing region", defFld.getLower(0) == 0);
   LC_ASSERT("Testing region", defFld.getUpper(0) == 1);

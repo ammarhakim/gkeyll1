@@ -72,4 +72,8 @@ namespace Lucee
   template class RectCartGridFactory<1>;
   template class RectCartGridFactory<2>;
   template class RectCartGridFactory<3>;
+  template class RectCartGridFactory<4>;
+  template class RectCartGridFactory<5>;
+  template class RectCartGridFactory<6>;
+  template class RectCartGridFactory<7>;
 }
