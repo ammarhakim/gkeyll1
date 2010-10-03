@@ -16,7 +16,6 @@
 #include <LcLogger.h>
 #include <LcMathLib.h>
 #include <LcMatrix.h>
-#include <LcObjCreator.h>
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
 

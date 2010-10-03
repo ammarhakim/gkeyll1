@@ -18,7 +18,6 @@
 #include <LcHdf5Io.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
-#include <LcObjCreator.h>
 #include <LcSolverAssembly.h>
 
 // std includes
@@ -68,10 +67,10 @@ namespace Lucee
       std::string kind = gtbl.getKind();
       infoStrm << "Setting up grid '" << gnm << "' of kind '"
                << kind << "'" << std::endl;
-      std::auto_ptr<Lucee::GenericFactory<Lucee::GridIfc> > gfact(
-        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::getNew(kind));
-      gfact->readInput(gtbl); // read input from grid block
-      gridMap[gnm] = gfact->create(); // create grid
+//       std::auto_ptr<Lucee::GenericFactory<Lucee::GridIfc> > gfact(
+//         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::GridIfc> >::getNew(kind));
+//       gfact->readInput(gtbl); // read input from grid block
+//       gridMap[gnm] = gfact->create(); // create grid
     }
 
 // create all data-structs in assembly
@@ -83,10 +82,10 @@ namespace Lucee
       std::string kind = dstbl.getKind();
       infoStrm << "Setting up data-structure '" << dsnm << "' of kind '"
                << kind << "'" << std::endl;
-      std::auto_ptr<Lucee::GenericFactory<Lucee::DataStructIfc> > dsfact(
-        Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::getNew(kind));
-      dsfact->readInput(dstbl); // read input from grid block
-      dataStructMap[dsnm] = dsfact->create(); // create grid
+//       std::auto_ptr<Lucee::GenericFactory<Lucee::DataStructIfc> > dsfact(
+//         Lucee::ObjCreator<Lucee::GenericFactory<Lucee::DataStructIfc> >::getNew(kind));
+//       dsfact->readInput(dstbl); // read input from grid block
+//       dataStructMap[dsnm] = dsfact->create(); // create grid
     }
 
 // create all updaters in assembly
@@ -98,9 +97,9 @@ namespace Lucee
       std::string kind = utbl.getKind();
       infoStrm << "Setting up updater '" << unm << "' of kind '"
                << kind << "'" << std::endl;
-      Lucee::UpdaterIfc *u = Lucee::ObjCreator<Lucee::UpdaterIfc>::getNew(kind);
-      u->readInput(utbl);
-      updaterMap[unm] = u;
+//       Lucee::UpdaterIfc *u = Lucee::ObjCreator<Lucee::UpdaterIfc>::getNew(kind);
+//       u->readInput(utbl);
+//       updaterMap[unm] = u;
     }
   }
 

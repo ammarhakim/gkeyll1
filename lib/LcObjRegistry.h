@@ -38,9 +38,6 @@ namespace Lucee
  */
       ObjRegistry()
       {
-// register creator function
-        Loki::SingletonHolder<Loki::Factory<B, std::string> >
-          ::Instance().Register(D::id, getNew);
         Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance();
 // add a function to make Lua object from table constructor

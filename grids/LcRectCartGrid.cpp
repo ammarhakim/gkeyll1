@@ -50,7 +50,7 @@ namespace Lucee
   {
     Lucee::RectCartGridFactory<NDIM> rgf;
     rgf.readInput(tbl);
-    *this = *(RectCartGrid<NDIM>*) rgf.create();
+    *this = *rgf.create();
   }
 
   template <unsigned NDIM>

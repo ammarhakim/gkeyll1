@@ -38,8 +38,21 @@ namespace Lucee
   class Field : public Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /** We need to friend ourself to allow accessing private stuff from another dimension */
       template <unsigned RDIM, typename TT> friend class Field;
+
+/**
+ * Create an empty field. This should not be use directly: it is
+ * provided for use in creation of fields from Lua scripts.
+ *
+ * @param rgn Region indexed by array.
+ * @param nc Number of components at each index location.
+ * @param init Inital value to assigned to all components.
+ */      
+      Field();
 
 /**
  * Create a new field indexing given region. This constructor creates
