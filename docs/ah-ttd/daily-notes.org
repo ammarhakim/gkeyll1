@@ -15,7 +15,15 @@
   field data and the grid.
 
   Created a dummy method set() that will (when completed) initialize
-  the field using a Lua function.
+  the field using a Lua function. [Later] DONE!!
+
+  A problem: what happens when a Lucee object goes out of scope in Lua
+  and gets garbage collected, while another Lucee object still has a
+  reference to it? Potential solution: reference count each object?
+  Can this be done transparently without changing any Lucee classes?
+
+  Another problem: should time be a global in a Lucee simulation? Most
+  likely not.
 
 * October 2nd
 
