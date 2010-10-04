@@ -41,6 +41,26 @@ namespace Lucee
       void appendFunc(const std::string& nm, int (*func)(lua_State *L));
 
 /**
+ * Set the base-class name for the class whose function map is stored.
+ *
+ * @param nm Base class name.
+ */
+      void setBaseName(const std::string& nm)
+      {
+        baseNm = nm;
+      }
+
+/**
+ * Get the base-class name for the class whose function map is stored.
+ *
+ * @return base class name.
+ */
+      std::string getBaseName() const
+      {
+        return baseNm;
+      }
+
+/**
  * Set the deletion function to delete the object.
  *
  * @param func Pointer to Lua callable function.
@@ -66,6 +86,8 @@ namespace Lucee
       void fillWithFuncList(std::vector<luaL_Reg>& funcLst);
 
     private:
+/** Name of base class */
+      std::string baseNm;
 /** Map of function name to function pointer */
       std::map<std::string, int (*)(lua_State *L)> funcs;
 /** Function pointer to deletion function */

@@ -12,7 +12,7 @@
   in Lua and accessed in Lucee. The issue is that Lua stores the
   object as a void* which means that all type information is lost!
   Although Lua suggests to use the luaL_checkudata method, the problem
-  with this in Lucee is a confusion between base class and dervied
+  with this in Lucee is a confusion between base class and derived
   class names. I.e. we wish to access base class pointers even when
   the Lua object is a derived object.
   
@@ -55,7 +55,7 @@
   references can not be created to temporary.
 
   WAIT: This is exactly what a FieldPtr is!! So just extend it to
-  initialize in addition from std::vector<>.
+  initialize in addition from std::vector<>. DONE!
 
 * September 30th
 
@@ -104,7 +104,9 @@
   method is called with the base class type. Hence, there is a
   mis-match of typeid() and Lua refuses to run the code. For now, I
   have switched out the luaL_checkudata() method for the
-  lua_touserdata() method. Perhaps dynamic casting is needed?
+  lua_touserdata() method. Perhaps dynamic casting is needed? [Oct 2:
+  Dynamic casts will not work as the basic object is a void* and hence
+  C++ has no way of determining the object type]
 
   One other major problem is the existence of the Factories: when a
   Lua object will be created, it will return a pointer to the factory
