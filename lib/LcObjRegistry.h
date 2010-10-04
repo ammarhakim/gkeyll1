@@ -48,7 +48,9 @@ namespace Lucee
         lm.funcMaps.insert(std::pair<std::string, Lucee::LuaFuncMap>(
             typeid(D).name(), Lucee::LuaFuncMap()));
         std::map<std::string, Lucee::LuaFuncMap>::iterator itr
-          = lm.funcMaps.find(typeid(D).name());
+          = lm.funcMaps.find(typeid(D).name()); // fetch just-added map entry
+// set its base class name
+        itr->second.setBaseName(typeid(B).name());
 // add Lua callable functions for base class
         B::appendLuaCallableMethods(itr->second);
 // add Lua callable functions for derived class
@@ -79,25 +81,11 @@ namespace Lucee
 // initialize object using Lua table
         ph->pointer->readInput(tbl);
 
-// create a meta-table for this object and set it
+// get a meta-table for this object and set it
         luaL_getmetatable(L, typeid(D).name());
         lua_setmetatable(L, -2);
 
         return 1;
-      }
-
-    private:
-/**
- * Return a newly allocated object. This method creates a new derived
- * class object and returns it as a base class pointer. The calling
- * function owns the object and is responsible for deleting it
- * properly.
- *
- * @return Newly allocated object.
- */
-      static B* getNew() 
-      {
-        return new D;
       }
   };
 }
