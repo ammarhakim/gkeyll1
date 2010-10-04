@@ -282,6 +282,17 @@ namespace Lucee
  */
       void setPtr(Lucee::ConstFieldPtr<T>& ptr, const int idx[NDIM]) const;
 
+/**
+ * Write dataStruct to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of the array as it should appear in output.
+ * @return node to which data was written.
+ */
+      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+         const std::string& nm);
+
     private:
 /**
  * Create a field attached to a given data space.

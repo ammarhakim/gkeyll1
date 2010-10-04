@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* October 3rd
+
+  Should setPtr method be in the FieldItr class instead? I.e. that
+  would prevent using an iterator with the incorrect field.
+
+  Should there be another class GridField? This would store the grid
+  information inside it in addition to being a field. Perhaps call it
+  a StructGridField to distinguish it from possible future
+  UnStructGridField?
+
 * October 2nd
 
   Now completed the creation of FieldPtr and ConstFieldPtr from
