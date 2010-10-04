@@ -65,8 +65,9 @@ namespace Lucee
       Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, const T& init=(T)0);
 
 /**
- * Create a new field indexing given region. This constructor creates
- * an empty set of ghost indices.
+ * Create a new field indexing given region. This constructor set
+ * ghost region from specified array.
+ * 
  *
  * @param rgn Region indexed by array.
  * @param nc Number of components at each index location.
