@@ -96,7 +96,7 @@ namespace Lucee
  *
  * @param idx Index location into grid.
  */
-      void setIndex(const int idx[3]) const;
+      void setIndex(const int idx[NDIM]) const;
 
 /**
  * Return coordinates in physical space of cell centroid.

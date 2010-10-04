@@ -91,6 +91,15 @@ namespace Lucee
  */
       static int luaSet(lua_State *L);
 
+/**
+ * Set field from Lua function. The function itself is specified using
+ * a reference to the Lua function on stack.
+ *
+ * @param L Lua state to use.
+ * @param ref Reference to Lua function.
+ */
+      void setFromLuaFunction(lua_State *L, int ref);
+
     private:
 /** Pointer to grid */
       Lucee::StructuredGridBase<NDIM> *grid;
