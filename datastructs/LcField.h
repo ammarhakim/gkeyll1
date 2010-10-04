@@ -38,9 +38,6 @@ namespace Lucee
   class Field : public Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>
   {
     public:
-/** Class id: this is used by the registration system */
-      static const char *id;
-
 /** We need to friend ourself to allow accessing private stuff from another dimension */
       template <unsigned RDIM, typename TT> friend class Field;
 
@@ -100,13 +97,6 @@ namespace Lucee
  * @return reference to this field.
  */
       Field<NDIM, T> & operator=(const T& val);
-
-/**
- * Create from Lua table data.
- *
- * @param tbl Table of input values.
- */
-      virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Number of components per index location.

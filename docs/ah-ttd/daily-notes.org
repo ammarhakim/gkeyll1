@@ -10,6 +10,13 @@
   a StructGridField to distinguish it from possible future
   UnStructGridField?
 
+  Creates a StructGridField class for fields that live on structured
+  grids. When its writeToFile() method is called it writes both the
+  field data and the grid.
+
+  Created a dummy method set() that will (when completed) initialize
+  the field using a Lua function.
+
 * October 2nd
 
   Now completed the creation of FieldPtr and ConstFieldPtr from

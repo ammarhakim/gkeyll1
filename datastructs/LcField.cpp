@@ -15,19 +15,9 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcFieldFactory.h>
 
 namespace Lucee
 {
-// names used in registration system
-  template <> const char *Field<1, double>::id = "Field1D";
-  template <> const char *Field<2, double>::id = "Field2D";
-  template <> const char *Field<3, double>::id = "Field3D";
-  template <> const char *Field<4, double>::id = "Field4D";
-  template <> const char *Field<5, double>::id = "Field5D";
-  template <> const char *Field<6, double>::id = "Field6D";
-  template <> const char *Field<7, double>::id = "Field7D";
-
   template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field()
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
@@ -106,15 +96,6 @@ namespace Lucee
 // simply call base class assignment operator    
     Array<NDIM+1, T, Lucee::RowMajorIndexer>::operator=(val);
     return *this;
-  }
-
-  template <unsigned NDIM, typename T>
-  void
-  Field<NDIM, T>::readInput(Lucee::LuaTable& tbl)
-  {
-    Lucee::FieldFactory<NDIM, T> ff;
-    ff.readInput(tbl);
-    *this = *ff.create();
   }
 
   template <unsigned NDIM, typename T>
