@@ -54,7 +54,6 @@ namespace Lucee
   void
   DataStructIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
-// function to write grid to HDF5 file
     lfm.appendFunc("write", luaWrite);
   }
 

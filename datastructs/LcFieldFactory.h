@@ -40,6 +40,16 @@ namespace Lucee
       void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Return pointer to grid.
+ *
+ * @return pointer to grid.
+ */
+      Lucee::StructuredGridBase<NDIM> *getGridPtr()
+      {
+        return onGrid;
+      }
+
+/**
  * Create a new field that lives on a grid.
  *
  * @return pointer to new field.
