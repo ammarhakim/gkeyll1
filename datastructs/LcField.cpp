@@ -187,6 +187,37 @@ namespace Lucee
     }
   }
 
+  template <unsigned NDIM, typename T>
+  Lucee::IoNodeType
+  Field<NDIM, T>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node, const std::string& nm)
+  {
+    std::vector<size_t> dataSetSize(NDIM+1), dataSetBeg(NDIM+1), dataSetLen(NDIM+1);
+// construct sizes and shapes to write stuff out
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      unsigned dirShape = getUpper(i)-getLower(i);
+      dataSetSize[i] = dirShape;
+      dataSetBeg[i] = 0;
+      dataSetLen[i] = dirShape;
+    }
+    dataSetSize[NDIM] = numComponents;
+    dataSetBeg[NDIM] = 0;
+    dataSetLen[NDIM] = numComponents;
+
+    Lucee::Region<NDIM+1, int> myRgn = rgn.inflate(0, numComponents);
+    std::vector<T> buff(myRgn.getVolume());
+    Lucee::RowMajorSequencer<NDIM+1> seq(myRgn); // must be row-major for HDF5
+// copy data into buffer
+    unsigned count = 0;
+    while (seq.step())
+      buff[count++] = this->operator()(seq.getIndex());
+// write it out
+    Lucee::IoNodeType dn =
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
+
+    return dn;
+  }
+
 // instantiations
   template class Field<1, int>;
   template class Field<2, int>;
