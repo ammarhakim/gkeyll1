@@ -41,6 +41,16 @@
   
   q:set(initQ)
   qOld:copy(q)
+
+  dt = 0.02
+  tStart, tEnd = 0.0, 0.2
+  tcurr = tStart
+  while tcurr<=tEnd
+    Lucee.setCurrTime(tcurr)
+    status, suggestedDt = hyper.update(tcurr+dt)
+    qOld:copy(q)
+    tcurr = tcurr + dt
+  end
 #+END_EXAMPLE
 
 * October 3rd
