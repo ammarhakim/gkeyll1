@@ -209,11 +209,20 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::accumulate(double coeff, const Field<NDIM, T>& fld)
+  {
+    Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::accumulate(coeff, fld);
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("copy", luaCopy);
+    lfm.appendFunc("accumulate", luaAccumulate);
   }
 
   template <unsigned NDIM, typename T>
@@ -246,6 +255,30 @@ namespace Lucee
     Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =
       (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 2);
     fld->copy(*fldPtr->pointer);
+
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaAccumulate(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+    if (! lua_isnumber(L, 2))
+    {
+      Lucee::Except lce("Field::luaAccumulate: Must provide a number to 'accumulatr' method");
+      throw lce;
+    }
+    T coeff = (T) lua_tonumber(L, 2);
+    if (lua_type(L, 3) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce("Field::luaAccumulate: Must provide a field to 'accumulate' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =
+      (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 3);
+    fld->accumulate(coeff, *fldPtr->pointer);
 
     return 0;
   }

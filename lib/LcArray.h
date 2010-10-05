@@ -359,6 +359,17 @@ namespace Lucee
       Array<NDIM, T, INDEXER>& copy(const Array<NDIM, T, INDEXER>& arr);
 
 /**
+ * Accumulate array into this one after weighing it with
+ * coefficient. I.e. coeff*arr is added to this array. The input array
+ * must have the exact same shape as this array.
+ *
+ * @param coeff Coefficient for weighing.
+ * @param arr Array to accumulate from.
+ * @return reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& accumulate(double coeff, const Array<NDIM, T, INDEXER>& arr);
+
+/**
  * Write dataStruct to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
@@ -811,6 +822,39 @@ namespace Lucee
       arrSeq.step();
       data[indexer.getIndex(seq.getIndex())]
         = arr.data[arr.indexer.getIndex(arrSeq.getIndex())];
+    }
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::accumulate(double coeff, const Array<NDIM, T, INDEXER>& arr)
+  {
+// make sure arrays have same shape
+    bool isSame = true;
+    if (len != arr.len)
+      isSame = false;
+    for (unsigned i=0; i<NDIM; ++i)
+      if (shape[i] != arr.shape[i])
+        isSame = false;
+
+    if (!isSame)
+      throw Lucee::Except("Array::accumulate: Array shape must match.");
+
+// create regions for this array
+    Lucee::Region<NDIM, int> rgn
+      = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+    typename INDEXER<NDIM>::Sequencer seq(rgn);
+// create regions for supplied array
+    Lucee::Region<NDIM, int> arrRgn
+      = Lucee::createRegionFromStartAndShape<NDIM, int>(arr.start, arr.shape);
+    typename INDEXER<NDIM>::Sequencer arrSeq(arrRgn);
+// copy over data
+    while (seq.step())
+    {
+      arrSeq.step();
+      data[indexer.getIndex(seq.getIndex())]
+        += coeff*arr.data[arr.indexer.getIndex(arrSeq.getIndex())];
     }
     return *this;
   }

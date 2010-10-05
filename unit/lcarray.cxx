@@ -560,6 +560,17 @@ test_15()
   for (int i=arr1.getLower(0), i1=arr2.getLower(0); i<arr1.getUpper(0); ++i, ++i1)
     for (int j=arr1.getLower(1), j1=arr2.getLower(1); j<arr1.getUpper(1); ++j, ++j1)
       LC_ASSERT("Testing if array copy worked", arr1(i,j) == arr2(i1,j1));
+
+  arr2 = 0.0;
+  arr2.accumulate(0.5, arr1);
+  for (int i=arr1.getLower(0), i1=arr2.getLower(0); i<arr1.getUpper(0); ++i, ++i1)
+    for (int j=arr1.getLower(1), j1=arr2.getLower(1); j<arr1.getUpper(1); ++j, ++j1)
+      LC_ASSERT("Testing if array accumulate worked", 0.5*arr1(i,j) == arr2(i1,j1));
+
+  arr2.accumulate(1.0, arr2);
+  for (int i=arr1.getLower(0), i1=arr2.getLower(0); i<arr1.getUpper(0); ++i, ++i1)
+    for (int j=arr1.getLower(1), j1=arr2.getLower(1); j<arr1.getUpper(1); ++j, ++j1)
+      LC_ASSERT("Testing if array accumulate worked", arr1(i,j) == arr2(i1,j1));
 }
 
 int
