@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcPointerHolder.h>
 
 namespace Lucee
 {
@@ -197,6 +198,56 @@ namespace Lucee
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
 
     return dn;
+  }
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::copy(const Field<NDIM, T>& fld)
+  {
+    Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::copy(fld);
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  Field<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("clear", luaClear);
+    lfm.appendFunc("copy", luaCopy);
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaClear(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+    if (! lua_isnumber(L, 2))
+    {
+      Lucee::Except lce("Field::luaClear: Must provide a number to 'clear' method");
+      throw lce;
+    }
+    T num = (T) lua_tonumber(L, 2);
+    (*fld) = num;
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaCopy(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce("Field::luaCopy: Must provide a field to 'copy' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =
+      (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 2);
+    fld->copy(*fldPtr->pointer);
+
+    return 0;
   }
 
 // instantiations

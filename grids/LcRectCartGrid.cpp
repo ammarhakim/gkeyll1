@@ -58,7 +58,8 @@ namespace Lucee
   RectCartGrid<NDIM>::getCentriod(double xc[3]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
-      xc[i] = (this->currIdx[i]-this->globalBox.getLower(i) + 0.5)*dx[i];
+      xc[i] = this->compSpace.getLower(i) +
+        (this->currIdx[i]-this->globalBox.getLower(i) + 0.5)*dx[i];
     for (unsigned i=NDIM; i<3; ++i)
       xc[i] = 0.0;
   }

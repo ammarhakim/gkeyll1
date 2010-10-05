@@ -86,6 +86,9 @@ namespace Lucee
   void
   StructGridField<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
+// call base class Lua methods
+    Field<NDIM, T>::appendLuaCallableMethods(lfm);
+// now append local methods
     lfm.appendFunc("set", luaSet);
   }
 
@@ -130,7 +133,7 @@ namespace Lucee
         lua_pushnumber(L, xc[i]);
       if (lua_pcall(L, 3, numOut, 0) != 0)
       {
-        Lucee::Except lce("StructGridField::setFromLuaFunction:");
+        Lucee::Except lce("StructGridField::setFromLuaFunction: ");
         lce << "Problem evaluating function supplied to 'set' method";
         throw lce;
       }

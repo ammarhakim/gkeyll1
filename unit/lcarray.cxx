@@ -542,6 +542,26 @@ test_14()
   LC_ASSERT("Testing zero-volume region", rgn.getVolume() == 0);
 }
 
+void
+test_15()
+{
+  unsigned shape[2] = {5, 10};
+  Lucee::Array<2, double> arr1(shape);
+
+  int start[2] = {2, 0};
+  Lucee::Array<2, double> arr2(shape, start);
+
+  for (int i=arr1.getLower(0); i<arr1.getUpper(0); ++i)
+    for (int j=arr1.getLower(1); j<arr1.getUpper(1); ++j)
+      arr1(i,j) = (5*i+j)*0.5;
+
+// copy to arr2
+  arr2.copy(arr1);
+  for (int i=arr1.getLower(0), i1=arr2.getLower(0); i<arr1.getUpper(0); ++i, ++i1)
+    for (int j=arr1.getLower(1), j1=arr2.getLower(1); j<arr1.getUpper(1); ++j, ++j1)
+      LC_ASSERT("Testing if array copy worked", arr1(i,j) == arr2(i1,j1));
+}
+
 int
 main(void) 
 {
@@ -561,5 +581,6 @@ main(void)
   test_12();
   test_13();
   test_14();
+  test_15();
   LC_END_TESTS;
 }

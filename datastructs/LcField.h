@@ -284,6 +284,39 @@ namespace Lucee
       virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
          const std::string& nm);
 
+/**
+ * Copy field from supplied one. The input field must have the exact
+ * same shape as this field.
+ *
+ * @param fld Field to copy from.
+ * @return reference to this field.
+ */
+      Field<NDIM, T>& copy(const Field<NDIM, T>& fld);
+
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method for clearing field and setting all element in
+ * to supllied value.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaClear(lua_State *L);
+
+/**
+ * Lua callable method for copying field from supplied one.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaCopy(lua_State *L);
+
     private:
 /**
  * Create a field attached to a given data space.
@@ -303,7 +336,7 @@ namespace Lucee
       unsigned scIdx;
 /** Number of components */
       unsigned numComponents;
-/** Region indexed by grid */
+/** Region indexed by field */
       Lucee::Region<NDIM, int> rgn;
 /** Indexer over region over which field is valid */
       Lucee::RowMajorIndexer<NDIM+1> rgnIdx;
