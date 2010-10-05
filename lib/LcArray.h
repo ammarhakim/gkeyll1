@@ -350,6 +350,15 @@ namespace Lucee
       void resetLower(const int nlo[NDIM]);
 
 /**
+ * Copy array from supplied one. The input array must have the exact
+ * same shape as this array.
+ *
+ * @param arr Array to copy from.
+ * @return reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& copy(const Array<NDIM, T, INDEXER>& arr);
+
+/**
  * Write dataStruct to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
@@ -771,6 +780,39 @@ namespace Lucee
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
 
     return dn;
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::copy(const Array<NDIM, T, INDEXER>& arr)
+  {
+// make sure arrays have same shape
+    bool isSame = true;
+    if (len != arr.len)
+      isSame = false;
+    for (unsigned i=0; i<NDIM; ++i)
+      if (shape[i] != arr.shape[i])
+        isSame = false;
+
+    if (!isSame)
+      throw Lucee::Except("Array::copy: Array shape must match.");
+
+// create regions for this array
+    Lucee::Region<NDIM, int> rgn
+      = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+    typename INDEXER<NDIM>::Sequencer seq(rgn);
+// create regions for supplied array
+    Lucee::Region<NDIM, int> arrRgn
+      = Lucee::createRegionFromStartAndShape<NDIM, int>(arr.start, arr.shape);
+    typename INDEXER<NDIM>::Sequencer arrSeq(arrRgn);
+// copy over data
+    while (seq.step())
+    {
+      arrSeq.step();
+      data[indexer.getIndex(seq.getIndex())]
+        = arr.data[arr.indexer.getIndex(arrSeq.getIndex())];
+    }
+    return *this;
   }
 }
 

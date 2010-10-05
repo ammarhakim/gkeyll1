@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* October 4th
+
+  Added methods copy() and clear() to Field class. This allows copying
+  from a field and setting all field values to given number.
+
+  Also found a nasty bug in the RectCartGrid which was returning the
+  incorrect centriod coordinates. Shows need to for more careful
+  testing: essentially the getCentriod() method was assuming lower
+  bounds of 0.0 for all grids irrespective of actual lower bounds.
+
 * October 3rd
 
   Should setPtr method be in the FieldItr class instead? I.e. that
