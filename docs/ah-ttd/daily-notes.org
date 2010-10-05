@@ -17,6 +17,31 @@
   Should I rename Updater -> Algorithm? Seems like a more natural name
   than updater. One issue is what to do with time? Perhaps the
   simulation time needs to become a global? Not sure what to do yet.
+#+BEGIN_EXAMPLE
+  grid = Grid.RectCart1D { 
+    lower = {0.0}, upper = {1.0}, cells = {100}
+  }
+
+  q = DataStruct.Field1D {
+    onGrid = grid, numComponents = 5, ghost = {2, 2}
+  }
+
+  qOld = DataStruct.Field1D {
+    onGrid = grid, numComponents = 5, ghost = {2, 2}
+  }
+
+  function initQ(x, y, z)
+    local rho, pr=3.0
+    if x>0.5 then
+      rho, pr = 1.0, 1.0
+    end
+    Er = pr/(1.4-1)
+    return rho, 0, 0, 0, Er
+  end
+  
+  q:set(initQ)
+  qOld:copy(q)
+#+END_EXAMPLE
 
 * October 3rd
 
