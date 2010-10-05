@@ -294,6 +294,17 @@ namespace Lucee
       Field<NDIM, T>& copy(const Field<NDIM, T>& fld);
 
 /**
+ * Accumulate field into this one after weighing it with
+ * coefficient. I.e. coeff*fld is added to this field. The input field
+ * must have the exact same shape as this field.
+ *
+ * @param coeff Coefficient for weighing.
+ * @param fld Field to accumulate from.
+ * @return reference to this field.
+ */
+      Field<NDIM, T>& accumulate(double coeff, const Field<NDIM, T>& fld);
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
@@ -316,6 +327,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaCopy(lua_State *L);
+
+/**
+ * Lua callable method for accumulating field from supplied one.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaAccumulate(lua_State *L);
 
     private:
 /**

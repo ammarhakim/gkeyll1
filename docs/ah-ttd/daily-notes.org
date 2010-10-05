@@ -10,6 +10,14 @@
   testing: essentially the getCentriod() method was assuming lower
   bounds of 0.0 for all grids irrespective of actual lower bounds.
 
+  Added accumulate() method to Field and Array classes. This now
+  completes basic operations of fields and makes them available from
+  Lua, allowing for writing more complex algorithms.
+
+  Should I rename Updater -> Algorithm? Seems like a more natural name
+  than updater. One issue is what to do with time? Perhaps the
+  simulation time needs to become a global? Not sure what to do yet.
+
 * October 3rd
 
   Should setPtr method be in the FieldItr class instead? I.e. that
