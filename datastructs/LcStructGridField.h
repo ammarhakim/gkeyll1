@@ -35,10 +35,6 @@ namespace Lucee
 /**
  * Create an empty field. This should not be use directly: it is
  * provided for use in creation of fields from Lua scripts.
- *
- * @param rgn Region indexed by array.
- * @param nc Number of components at each index location.
- * @param init Inital value to assigned to all components.
  */      
       StructGridField();
 

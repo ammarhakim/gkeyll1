@@ -45,7 +45,7 @@
   dt = 0.02
   tStart, tEnd = 0.0, 0.2
   tcurr = tStart
-  while tcurr<=tEnd
+  while tcurr<=tEnd do
     Lucee.setCurrTime(tcurr)
     status, suggestedDt = hyper.update(tcurr+dt)
     qOld:copy(q)
