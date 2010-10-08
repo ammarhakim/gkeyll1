@@ -99,6 +99,42 @@ namespace Lucee
       std::vector<double> getAllNumbers();
 
 /**
+ * Get all strings in table.
+ *
+ * @return strings in table.
+ */
+      std::vector<std::string> getAllStrings();
+
+/**
+ * Get all objects in table as a vector of pointers.
+ *
+ * @return objects in table.
+ */
+      template <typename T>
+      std::vector<T*> getAllObjects()
+      {
+        SHOW_LUA_STACK_SIZE("getAllObjects", L);
+        std::vector<T*> res;
+// push table object on stack
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+        int t = lua_gettop(L);
+        lua_pushnil(L);
+        while (lua_next(L, t) != 0) 
+        {
+          if (lua_type(L, -1) == LUA_TUSERDATA)
+          {
+            Lucee::PointerHolder<T> *ph =
+              (Lucee::PointerHolder<T>*) lua_touserdata(L, -1);
+            res.push_back(ph->pointer);
+          }
+          lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+        SHOW_LUA_STACK_SIZE2(L);
+        return res;
+      }
+
+/**
  * Get a string from table.
  *
  * @param key Key in table.

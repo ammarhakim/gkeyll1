@@ -228,6 +228,47 @@ test_5(Lucee::LuaState& L)
     }
 }
 
+void
+test_6(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "myNumbers = {1,2,3,4,5}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "myNumbers");
+
+// construct LuaTable object
+  Lucee::LuaTable back(L, "myNumbers");
+  std::vector<double> nums = back.getAllNumbers();
+  for (unsigned i=0; i<nums.size(); ++i)
+    LC_ASSERT("Tesitng list of numbers", nums[i] == i+1);
+}
+
+void
+test_7(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "myNumbers = {\"a\", \"b\", \"c\"}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "myNumbers");
+
+// construct LuaTable object
+  Lucee::LuaTable back(L, "myNumbers");
+  std::vector<std::string> strs = back.getAllStrings();
+  LC_ASSERT("Tesitng list of strings", strs[0] == "a");
+  LC_ASSERT("Tesitng list of strings", strs[1] == "b");
+  LC_ASSERT("Tesitng list of strings", strs[2] == "c");
+}
+
 int
 main(void)
 {
@@ -238,6 +279,8 @@ main(void)
   test_3(L);
   test_4(L);
   test_5(L);
+  test_6(L);
+  test_7(L);
 
   LC_END_TESTS;
 }
