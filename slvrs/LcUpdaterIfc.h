@@ -168,6 +168,29 @@ namespace Lucee
         return outVars.size();
       }
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to initialize solver to given time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaInitialize(lua_State *L);
+
+/**
+ * Lua callable method to advance solver to given time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaAdvance(lua_State *L);
+
     protected:
 /**
  * Set type information for an input data structure. This method must

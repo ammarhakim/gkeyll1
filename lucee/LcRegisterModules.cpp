@@ -44,7 +44,7 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::SolverIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
-    //Lucee::ObjCreator<Lucee::UpdaterIfc>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::FunctionIfc>::registerModule(L);
   }
 }

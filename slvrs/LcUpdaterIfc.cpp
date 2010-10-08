@@ -38,7 +38,9 @@ namespace Lucee
   void
   UpdaterIfc::readInput(Lucee::LuaTable& tbl)
   {
-    throw Lucee::Except("UpdaterIfc::readInput: This method is not implemented");
+// read in grid if specified (otherwise assume it will be set by setGrid)
+    if (tbl.hasObject<Lucee::GridIfc>("onGrid"))
+      grid = &tbl.getObject<Lucee::GridIfc>("onGrid");
   }
 
   void
@@ -102,5 +104,38 @@ namespace Lucee
   UpdaterIfc::setLastOutVarType(const std::type_info& type)
   {
     outVarTypes.lastVarType = &type;
+  }
+
+  void
+  UpdaterIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("advance", luaAdvance);
+    lfm.appendFunc("initialize", luaInitialize);
+  }
+
+  int
+  UpdaterIfc::luaInitialize(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+    updater->initialize();
+    return 0;
+  }
+
+  int
+  UpdaterIfc::luaAdvance(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+    double t = lua_tonumber(L, 2); // time to advance to
+    Lucee::UpdaterStatus s = updater->update(t);
+// push status and suggested time-step on stack
+    if (s.getStatus())
+      lua_pushboolean(L, 1);
+    else
+      lua_pushboolean(L, 0);
+    lua_pushnumber(L, s.getSuggestedDt());
+
+    return 2;
   }
 }

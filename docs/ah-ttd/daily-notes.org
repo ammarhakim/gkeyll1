@@ -1,5 +1,9 @@
 # -*- org -*-
 
+* October 8th
+
+  Working on wrapping Updater in Lua.
+
 * October 4th
 
   Added methods copy() and clear() to Field class. This allows copying

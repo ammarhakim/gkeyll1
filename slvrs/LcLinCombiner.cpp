@@ -35,6 +35,9 @@ namespace Lucee
   void
   LinCombiner<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+// call base class method
+    UpdaterIfc::readInput(tbl);
+
     if (tbl.hasNumVec("coeffs"))
       coeff = tbl.getNumVec("coeffs");
     else
