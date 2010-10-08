@@ -62,29 +62,14 @@ namespace Lucee
       getOut<Lucee::Field<NDIM, double> >(0);
 
 // set output array to 0.0
-    Lucee::RowMajorSequencer<NDIM> seq(outFld.getExtRegion());
-    Lucee::FieldPtr<double> outItr = outFld.createPtr();
-    while (seq.step())
-    {
-      outFld.setPtr(outItr, seq.getIndex());
-      for (unsigned n=0; n<outItr.getNumComponents(); ++n)
-        outItr[n] = 0.0;
-    }
+    outFld = 0.0;
 
 // combine input arrays accumulating it in output array
     for (unsigned i=0; i<this->getNumInpVars(); ++i)
     {
       const Lucee::Field<NDIM, double>& inpFld = this->template 
         getInp<Lucee::Field<NDIM, double> >(i);
-      Lucee::ConstFieldPtr<double> ptr = inpFld.createConstPtr();
-      seq.reset();
-      while (seq.step())
-      {
-        outFld.setPtr(outItr, seq.getIndex());
-        inpFld.setPtr(ptr, seq.getIndex());
-        for (unsigned n=0; n<outItr.getNumComponents(); ++n)
-          outItr[n] += coeff[i]*ptr[n];
-      }
+      outFld.accumulate(coeff[i], inpFld);
     }
 
     return Lucee::UpdaterStatus();
