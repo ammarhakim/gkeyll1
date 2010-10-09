@@ -105,7 +105,11 @@ main(int argc, char **argv)
   Lucee::registerModules(L);
 
   infoStrm << "** Welcome to Lucee!" << std::endl;
-  infoStrm << "Reading input file " << inpFile << std::endl;
+
+  time_t start = time(0); // time at start of main loop
+  struct tm * timeinfo;
+  timeinfo = localtime ( &start );
+  infoStrm << "Simulation started at time " << asctime(timeinfo) << std::endl;
   try 
   {
     if (luaL_loadfile(L, inpFile.c_str()) || lua_pcall(L, 0, 0, 0))
@@ -122,6 +126,10 @@ main(int argc, char **argv)
     infoStrm << "*** Lucee exception!" << std::endl;
     infoStrm << lce.what() << std::endl;
   }
+
+  time_t end = time(0); // time at end of main loop
+  timeinfo = localtime ( &end );
+  infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
 
   return 0;
 }

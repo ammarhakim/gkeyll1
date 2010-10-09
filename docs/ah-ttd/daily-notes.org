@@ -2,7 +2,18 @@
 
 * October 8th
 
-  Working on wrapping Updater in Lua.
+  Working on wrapping Updater in Lua. Completed this. Now updaters can
+  be called from Lua. The setIn() and setOut() methods must be called
+  before the advance() method is called. Advance() returns a status
+  and a suggested time-step. One issue is that the input and output
+  types are not type-checked. This may be impossible in the present
+  system as the type information is lost in putting stuff into Lua and
+  getting it back (Lua stores void* to an object). One option would be
+  store the typeid of each created object in the ObjRegistry
+  class. Then, this could be queried when needed to ensure type
+  saftey.
+
+  Need to start documenting the Lua API.
 
 * October 4th
 

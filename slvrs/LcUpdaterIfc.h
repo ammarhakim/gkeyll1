@@ -191,6 +191,22 @@ namespace Lucee
  */
       static int luaAdvance(lua_State *L);
 
+/**
+ * Lua callable method to set input datastructures.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetInpVars(lua_State *L);
+
+/**
+ * Lua callable method to set output datastructures.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetOutVars(lua_State *L);
+
     protected:
 /**
  * Set type information for an input data structure. This method must
