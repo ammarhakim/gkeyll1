@@ -35,9 +35,6 @@ namespace Lucee
  */
       static T* checkUserType(lua_State *L)
       {
-//         Lucee::PointerHolder<T> *ph =
-//           (Lucee::PointerHolder<T>*) luaL_checkudata(L, 1, typeid(T).name());
-// THIS BREAKS SAFTEY!!
         Lucee::PointerHolder<T> *ph =
           (Lucee::PointerHolder<T>*) lua_touserdata(L, 1);
         return ph->pointer;

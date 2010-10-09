@@ -53,16 +53,6 @@ namespace Lucee
       virtual ~BasicObj();
 
 /**
- * Default method that performs registration of Lua functions. This
- * function does nothing: if derived classes need to register Lua
- * callable functions they must provide this method. Methods should be
- * added to the lfm object by calling the appendFunc() method.
- *
- * @param lfm Lua function map object.
- */
-      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
-
-/**
  * Get name of solver.
  *
  * @return Name of solver.
@@ -76,6 +66,50 @@ namespace Lucee
  */
       virtual void readInput(Lucee::LuaTable& tbl) = 0;
 
+/**
+ * Set the type of the base class for object.
+ */
+      template <typename B>
+      void setBaseType()
+      {
+        baseType = typeid(B).name();
+      }
+
+/**
+ * Set the type of the derived class for object.
+ */
+      template <typename D>
+      void setDerivedType()
+      {
+        derivedType = typeid(D).name();
+      }
+
+/**
+ * Get base type of object.
+ *
+ * @param base type ID of object.
+ */
+      std::string getBaseType() const 
+      { return baseType; }
+
+/**
+ * Get derived type of object.
+ *
+ * @param derived type ID of object.
+ */
+      std::string getDerivedType() const 
+      { return derivedType; }
+      
+/**
+ * Default method that performs registration of Lua functions. This
+ * function does nothing: if derived classes need to register Lua
+ * callable functions they must provide this method. Methods should be
+ * added to the lfm object by calling the appendFunc() method.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     protected:
 /**
  * Set name of object. This should be called by derived classes to set
@@ -88,6 +122,10 @@ namespace Lucee
     private:
 /** Name of the object */      
       std::string nm;
+/** Base type of object */
+      std::string baseType;
+/** Derived type of object */
+      std::string derivedType;
   };
 }
 

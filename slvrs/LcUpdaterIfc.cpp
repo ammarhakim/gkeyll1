@@ -111,6 +111,8 @@ namespace Lucee
   {
     lfm.appendFunc("advance", luaAdvance);
     lfm.appendFunc("initialize", luaInitialize);
+    lfm.appendFunc("setIn", luaSetInpVars);
+    lfm.appendFunc("setOut", luaSetOutVars);
   }
 
   int
@@ -137,5 +139,45 @@ namespace Lucee
     lua_pushnumber(L, s.getSuggestedDt());
 
     return 2;
+  }
+
+  int
+  UpdaterIfc::luaSetInpVars(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+    if (lua_type(L, 2) != LUA_TTABLE)
+    {
+      Lucee::Except lce("UpdaterIfc::luaSetInpVars: Must provide a table of datastructures to 'setInp' method");
+      throw lce;
+    }
+    lua_pushvalue(L, 2); // push table on stack
+    Lucee::LuaState ls(L);
+    LuaTable tbl = Lucee::LuaTable(ls, "setInp");
+    lua_pop(L, 2);
+// get list of all inputs
+    std::vector<const DataStructIfc*> inp = tbl.getAllObjects<const DataStructIfc>();
+    updater->setInpVars(inp);
+    return 0;
+  }
+
+  int
+  UpdaterIfc::luaSetOutVars(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+    if (lua_type(L, 2) != LUA_TTABLE)
+    {
+      Lucee::Except lce("UpdaterIfc::luaSetOutVars: Must provide a table of datastructures to 'setOut' method");
+      throw lce;
+    }
+    lua_pushvalue(L, 2); // push table on stack
+    Lucee::LuaState ls(L);
+    LuaTable tbl = Lucee::LuaTable(ls, "setOut");
+    lua_pop(L, 2);
+// get list of all inputs
+    std::vector<DataStructIfc*> out = tbl.getAllObjects<DataStructIfc>();
+    updater->setOutVars(out);
+    return 0;
   }
 }

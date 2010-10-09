@@ -80,6 +80,9 @@ namespace Lucee
         ph->pointer = new D;
 // initialize object using Lua table
         ph->pointer->readInput(tbl);
+// set base and derived types
+        ph->pointer->template setBaseType<B>();
+        ph->pointer->template setDerivedType<D>();
 
 // get a meta-table for this object and set it
         luaL_getmetatable(L, typeid(D).name());
