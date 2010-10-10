@@ -71,14 +71,14 @@ namespace Lucee
  *
  * @param n Element index to fetch.
  */
-      T& operator[](unsigned n) { return data[n]; }
+      T& operator[](int n) { return data[n]; }
 
 /**
  * Return element in field data.
  *
  * @param n Element index to fetch.
  */
-      T operator[](unsigned n) const { return data[n]; }
+      T operator[](int n) const { return data[n]; }
 
 /**
  * Return pointer to underlying data.
