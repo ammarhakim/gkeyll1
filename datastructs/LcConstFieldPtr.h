@@ -71,7 +71,7 @@ namespace Lucee
  *
  * @param n Element index to fetch.
  */
-      const T& operator[](unsigned n) const { return data[n]; }
+      const T& operator[](int n) const { return data[n]; }
 
 /**
  * Return pointer to underlying data.
