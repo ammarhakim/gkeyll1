@@ -119,7 +119,7 @@ namespace Lucee
   UpdaterIfc::luaInitialize(lua_State *L)
   {
     UpdaterIfc *updater
-      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     updater->initialize();
     return 0;
   }
@@ -128,7 +128,7 @@ namespace Lucee
   UpdaterIfc::luaAdvance(lua_State *L)
   {
     UpdaterIfc *updater
-      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
     Lucee::UpdaterStatus s = updater->update(t);
 // push status and suggested time-step on stack
@@ -145,7 +145,7 @@ namespace Lucee
   UpdaterIfc::luaSetInpVars(lua_State *L)
   {
     UpdaterIfc *updater
-      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     if (lua_type(L, 2) != LUA_TTABLE)
     {
       Lucee::Except lce("UpdaterIfc::luaSetInpVars: Must provide a table of datastructures to 'setInp' method");
@@ -165,7 +165,7 @@ namespace Lucee
   UpdaterIfc::luaSetOutVars(lua_State *L)
   {
     UpdaterIfc *updater
-      = Lucee::PointerHolder<UpdaterIfc>::checkUserType(L);
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     if (lua_type(L, 2) != LUA_TTABLE)
     {
       Lucee::Except lce("UpdaterIfc::luaSetOutVars: Must provide a table of datastructures to 'setOut' method");

@@ -230,7 +230,7 @@ namespace Lucee
   Field<NDIM, T>::luaClear(lua_State *L)
   {
     Field<NDIM, T> *fld
-      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
     if (! lua_isnumber(L, 2))
     {
       Lucee::Except lce("Field::luaClear: Must provide a number to 'clear' method");
@@ -246,7 +246,7 @@ namespace Lucee
   Field<NDIM, T>::luaCopy(lua_State *L)
   {
     Field<NDIM, T> *fld
-      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
     if (lua_type(L, 2) != LUA_TUSERDATA)
     {
       Lucee::Except lce("Field::luaCopy: Must provide a field to 'copy' method");
@@ -264,7 +264,7 @@ namespace Lucee
   Field<NDIM, T>::luaAccumulate(lua_State *L)
   {
     Field<NDIM, T> *fld
-      = Lucee::PointerHolder<Field<NDIM, T> >::checkUserType(L);
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
     if (! lua_isnumber(L, 2))
     {
       Lucee::Except lce("Field::luaAccumulate: Must provide a number to 'accumulatr' method");

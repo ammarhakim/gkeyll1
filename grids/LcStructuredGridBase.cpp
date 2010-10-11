@@ -101,7 +101,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetLocalLower(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, int> lb = g->getLocalBox();
@@ -114,7 +114,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetLocalUpper(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, int> lb = g->getLocalBox();
@@ -127,7 +127,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetGlobalLower(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, int> gb = g->getGlobalBox();
@@ -140,7 +140,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetGlobalUpper(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, int> gb = g->getGlobalBox();
@@ -153,7 +153,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetLowerCoord(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, double> cs = g->getComputationalSpace();
@@ -166,7 +166,7 @@ namespace Lucee
   StructuredGridBase<NDIM>::luaGetUpperCoord(lua_State *L)
   {
     StructuredGridBase<NDIM> *g
-      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::checkUserType(L);
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, double> cs = g->getComputationalSpace();

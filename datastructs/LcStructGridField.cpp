@@ -97,7 +97,7 @@ namespace Lucee
   StructGridField<NDIM, T>::luaSet(lua_State *L)
   {
     StructGridField<NDIM, T> *sgf
-      = Lucee::PointerHolder<StructGridField<NDIM, T> >::checkUserType(L);
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObj(L);
     if (! lua_isfunction(L, 2))
     {
       Lucee::Except lce("StructGridField::luaSet: Must provide a Lua function to 'set' method");
