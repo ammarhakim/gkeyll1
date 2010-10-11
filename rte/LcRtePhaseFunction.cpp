@@ -31,7 +31,7 @@ namespace Lucee
   RtePhaseFunction::luaPrintExpCoeffs(lua_State *L)
   {
     RtePhaseFunction *pf 
-      = Lucee::PointerHolder<RtePhaseFunction>::checkUserType(L);
+      = Lucee::PointerHolder<RtePhaseFunction>::getObjAsBase(L);
     int nL = (int) lua_tonumber(L, 2);
     Lucee::Vector<double> coeffs = pf->getExpCoeffs(nL);
     for (unsigned i=0; i<coeffs.size(); ++i)

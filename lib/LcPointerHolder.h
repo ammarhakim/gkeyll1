@@ -33,12 +33,14 @@ namespace Lucee
   struct PointerHolder
   {
 /**
- * Check user type and if correct return pointer to help object.
+ * Get a pointer to an object of type T stored as a Lua object. This
+ * method is not always safe to use as there is no guarantee that the
+ * cast from Lua stored void* to T is valid.
  *
  * @param L Lua state object to use for the user-data.
  * @return pointer to user object.
  */
-      static T* checkUserType(lua_State *L)
+      static T* getObj(lua_State *L)
       {
         Lucee::PointerHolder<T> *ph =
           (Lucee::PointerHolder<T>*) lua_touserdata(L, 1);
@@ -50,17 +52,18 @@ namespace Lucee
  * system of Lucee classes.
  *
  * @param L Lua state object to use for the user-data.
+ * @param loc Location in Lua stack.
  * @return pointer to user object.
  */
-      static T* getObjAsBase(lua_State *L)
+      static T* getObjAsBase(lua_State *L, int loc=1)
       {
         void *obj;
         bool status = 
-          Lucee::LuaObjTypeId::checkBaseTypeId(L, typeid(T).name(), obj);
+          Lucee::LuaObjTypeId::checkBaseTypeId(L, typeid(T).name(), &obj, loc);
         if (status == false)
         {
           Lucee::Except lce("Error fetching Lua userdata with ID ");
-          lce << T::ID;
+          lce << T::id;
           throw lce;
         }
         PointerHolder<T> *ph = (PointerHolder<T>*) (obj);
@@ -72,17 +75,18 @@ namespace Lucee
  * system of Lucee classes.
  *
  * @param L Lua state object to use for the user-data.
+ * @param loc Location in Lua stack.
  * @return pointer to user object.
  */
-      static T* getObjAsDerived(lua_State *L)
+      static T* getObjAsDerived(lua_State *L, int loc=1)
       {
         void *obj;
         bool status = 
-          Lucee::LuaObjTypeId::checkDerivedTypeId(L, typeid(T).name(), obj);
+          Lucee::LuaObjTypeId::checkDerivedTypeId(L, typeid(T).name(), &obj, loc);
         if (status == false)
         {
           Lucee::Except lce("Error fetching Lua userdata with ID ");
-          lce << T::ID;
+          lce << T::id;
           throw lce;
         }
         PointerHolder<T> *ph = (PointerHolder<T>*) (obj);
@@ -96,7 +100,7 @@ namespace Lucee
  */
       static int deleteObject(lua_State *L)
       {
-        T *myPtr = PointerHolder<T>::checkUserType(L);
+        T *myPtr = PointerHolder<T>::getObjAsDerived(L);
         delete myPtr;
         return 0;
       }

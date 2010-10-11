@@ -39,8 +39,10 @@ namespace Lucee
  * @param L Lua state pointer.
  * @param dtype Typeid for derived class.
  * @param obj On output pointer to usedata object.
+ * @param loc Location in Lua stack.
+ * @return true if types match, false otherwise.
  */
-      static bool checkDerivedTypeId(lua_State *L, const std::string& dtype, void *obj);
+      static bool checkDerivedTypeId(lua_State *L, const std::string& dtype, void **obj, int loc);
 
 /**
  * Check the type of Lua userdata object against the base type type-ID
@@ -50,8 +52,10 @@ namespace Lucee
  * @param L Lua state pointer.
  * @param btype Typeid for base class.
  * @param obj On output pointer to usedata object.
+ * @param loc Location in Lua stack.
+ * @return true if types match, false otherwise.
  */
-      static bool checkBaseTypeId(lua_State *L, const std::string& btype, void *obj);
+      static bool checkBaseTypeId(lua_State *L, const std::string& btype, void **obj, int loc);
   };
 }
 

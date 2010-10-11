@@ -62,7 +62,7 @@ namespace Lucee
   SolverIfc::luaAdvance(lua_State *L)
   {
     SolverIfc *solver
-      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+      = Lucee::PointerHolder<SolverIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
     int res = solver->advance(t);
     lua_pushnumber(L, res);
@@ -73,7 +73,7 @@ namespace Lucee
   SolverIfc::luaInitialize(lua_State *L)
   {
     SolverIfc *solver
-      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+      = Lucee::PointerHolder<SolverIfc>::getObj(L);
     solver->initialize();
     return 0;
   }
@@ -82,7 +82,7 @@ namespace Lucee
   SolverIfc::luaWrite(lua_State *L)
   {
     SolverIfc *solver
-      = Lucee::PointerHolder<SolverIfc>::checkUserType(L);
+      = Lucee::PointerHolder<SolverIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2); // base name
     int d = lua_tonumber(L, 3); // dump-number
     solver->writeToFile(nm, d);

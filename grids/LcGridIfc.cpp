@@ -48,7 +48,7 @@ namespace Lucee
   GridIfc::luaWrite(lua_State *L)
   {
     GridIfc *g
-      = Lucee::PointerHolder<GridIfc>::checkUserType(L);
+      = Lucee::PointerHolder<GridIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
     g->write(nm);
 

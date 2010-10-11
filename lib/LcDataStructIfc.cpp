@@ -61,7 +61,7 @@ namespace Lucee
   DataStructIfc::luaWrite(lua_State *L)
   {
     DataStructIfc *d
-      = Lucee::PointerHolder<DataStructIfc>::checkUserType(L);
+      = Lucee::PointerHolder<DataStructIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
     d->write(nm);
 

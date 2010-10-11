@@ -20,34 +20,34 @@
 namespace Lucee
 {
   bool
-  LuaObjTypeId::checkDerivedTypeId(lua_State *L, const std::string& dtype, void *obj)
+  LuaObjTypeId::checkDerivedTypeId(lua_State *L, const std::string& dtype, void **obj, int loc)
   {
     Lucee::PointerHolder<Lucee::BasicObj> *ph =
-      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 1);
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, loc);
 
     if (ph->pointer->getDerivedType() == dtype)
     {
-      obj = (void*) ph;
+      *obj = (void*) ph;
       return true;
     }
 // did not match
-    obj = 0;
+    *obj = 0;
     return false;
   }
 
   bool
-  LuaObjTypeId::checkBaseTypeId(lua_State *L, const std::string& btype, void *obj)
+  LuaObjTypeId::checkBaseTypeId(lua_State *L, const std::string& btype, void **obj, int loc)
   {
     Lucee::PointerHolder<Lucee::BasicObj> *ph =
-      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 1);
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, loc);
 
     if (ph->pointer->getBaseType() == btype)
     {
-      obj = (void*) ph;
+      *obj = (void*) ph;
       return true;
     }
 // did not match
-    obj = 0;
+    *obj = 0;
     return false;
   }
 }
