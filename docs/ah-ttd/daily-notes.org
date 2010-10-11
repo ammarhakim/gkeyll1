@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* October 10th
+
+  Why is a PointerHolder class needed. One can simply store the object
+  pointer itself and register the deletion class. ANS: It is needed
+  because the new() method can be called after the pointer holder is
+  allocated.
+
+  Added a class LuaObjTypeId. This checks type of the object by
+  casting to PointerHolder<BasicObj> and getting the stored ID
+  strings.
+
 * October 8th
 
   Working on wrapping Updater in Lua. Completed this. Now updaters can
