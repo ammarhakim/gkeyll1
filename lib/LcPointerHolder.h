@@ -62,8 +62,7 @@ namespace Lucee
           Lucee::LuaObjTypeId::checkBaseTypeId(L, typeid(T).name(), &obj, loc);
         if (status == false)
         {
-          Lucee::Except lce("Error fetching Lua userdata with ID ");
-          lce << T::id;
+          Lucee::Except lce("Error fetching Lua userdata");
           throw lce;
         }
         PointerHolder<T> *ph = (PointerHolder<T>*) (obj);
@@ -85,8 +84,7 @@ namespace Lucee
           Lucee::LuaObjTypeId::checkDerivedTypeId(L, typeid(T).name(), &obj, loc);
         if (status == false)
         {
-          Lucee::Except lce("Error fetching Lua userdata with ID ");
-          lce << T::id;
+          Lucee::Except lce("Error fetching Lua userdata");
           throw lce;
         }
         PointerHolder<T> *ph = (PointerHolder<T>*) (obj);
