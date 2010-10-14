@@ -1,5 +1,25 @@
 # -*- org -*-
 
+* October 13th
+
+  Probably should switch to Tech-X CMake system. Need to design the
+  basic hyperbolic equation class. The solver should be numerical flux
+  based and not wave based. This allows flexibility as the wave
+  numerical fluxe can then be used in other schemes like MUSCL, DG
+  etc. Somehow, when using wave propagation scheme the system should
+  use the wave/fluctuation form of the updater formula. The schemes
+  should be dimensionally independent, i.e. work in 1D, 2D and 3D and
+  on body fitted grids. Hence, one set of updaters should be enough
+  for all structured grids.
+
+  In the future I may wish to use unstructured grids.
+  
+  For documentation I should start using Spinx more extensively than
+  now. Each piece needs to be documented carefully. The RTE solver
+  needs to be documented and can perhaps serve as a template for other
+  documents. GUI/Mouse driven systems like LyX or TeXMac do not work
+  documentsfor me.
+
 * October 10th
 
   Why is a PointerHolder class needed. One can simply store the object

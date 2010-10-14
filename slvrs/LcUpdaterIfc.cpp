@@ -40,7 +40,7 @@ namespace Lucee
   {
 // read in grid if specified (otherwise assume it will be set by setGrid)
     if (tbl.hasObject<Lucee::GridIfc>("onGrid"))
-      grid = &tbl.getObject<Lucee::GridIfc>("onGrid");
+      grid = &tbl.getObjectAsBase<Lucee::GridIfc>("onGrid");
   }
 
   void

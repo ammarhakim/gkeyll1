@@ -181,6 +181,68 @@ namespace Lucee
       }
 
 /**
+ * Get user data (i.e. pointer to Lucee object) from table. The object
+ * type must be specified as the template parameter. This method
+ * checks the type of the object, making sure it corresponds to the
+ * base class for the class system.
+ *
+ * @param key Key in table.
+ * @return reference to object.
+ */
+      template <typename T>
+      T& getObjectAsBase(const std::string& key)
+      {
+// push table object on stack
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+        lua_pushstring(L, key.c_str());
+// get data from table
+        lua_gettable(L, -2);
+        if (lua_type(L, -1) != LUA_TUSERDATA)
+        {
+          lua_pop(L, 2);
+          Lucee::Except lce("LuaTable::getObject: ");
+          lce << key << " is not a Lucee object";
+          throw lce;
+        }
+        T *obj = Lucee::PointerHolder<T>::getObjAsBase(L, -1);
+        
+        lua_pop(L, 2);
+        SHOW_LUA_STACK_SIZE2(L);
+        return *obj;
+      }
+
+/**
+ * Get user data (i.e. pointer to Lucee object) from table. The object
+ * type must be specified as the template parameter. This method
+ * checks the type of the object, making sure it corresponds to the
+ * derived class for the class system.
+ *
+ * @param key Key in table.
+ * @return reference to object.
+ */
+      template <typename T>
+      T& getObjectAsDerived(const std::string& key)
+      {
+// push table object on stack
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+        lua_pushstring(L, key.c_str());
+// get data from table
+        lua_gettable(L, -2);
+        if (lua_type(L, -1) != LUA_TUSERDATA)
+        {
+          lua_pop(L, 2);
+          Lucee::Except lce("LuaTable::getObject: ");
+          lce << key << " is not a Lucee object";
+          throw lce;
+        }
+        T *obj = Lucee::PointerHolder<T>::getObjAsDerived(L, -1);
+        
+        lua_pop(L, 2);
+        SHOW_LUA_STACK_SIZE2(L);
+        return *obj;
+      }
+
+/**
  * Get vector of strings from table.
  *
  * @param key Key in table.
