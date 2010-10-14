@@ -125,7 +125,7 @@ namespace Lucee
 
 // read in phase function
     Lucee::RtePhaseFunction& pf 
-      = tbl.getObject<Lucee::RtePhaseFunction>("phaseFunction");
+      = tbl.getObjectAsBase<Lucee::RtePhaseFunction>("phaseFunction");
 // get expansion coefficients
     betal = pf.getExpCoeffs(L);
 
