@@ -1,4 +1,4 @@
-\documentclass[11pt]{amsart}
+\documentclass[11pt, reqno]{amsart}
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -34,18 +34,6 @@
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
-
-%% For typesetting examples
-\newtheoremstyle{example}{\topsep}{\topsep}%
-{}%         Body font
-{}%         Indent amount (empty = no indent, \parindent = para indent)
-{\bfseries}% Thm head font
-{}%        Punctuation after thm head
-{\newline}%     Space after thm head (\newline = linebreak)
-{\thmname{#1}\thmnumber{ #2}\thmnote{ #3}}%         Thm head spec
-
-\theoremstyle{example}
-\newtheorem{example}{Example}[subsection]
 
 \title{Transport equations, finite-volume schemes and coupling
   algorithms}%
@@ -119,10 +107,11 @@ where
 \end{align}
 is a numerical flux function that represents the flux at the cell
 edge. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv
-(x_{i+1}-x_i)$. The time index on the edge fluxes and sources are
+x_{i+1}-x_i$. The time index on the edge fluxes and sources are
 deliberately omitted: choosing to evaluate these at various points in
 the interval $[t_n,t_{n+1}]$ will give scheme with different
-implicitness. The numerical flux function must satisfy
+implicitness. The numerical flux function must satisfy the consistency
+condition
 \begin{align}
   \lim_{\epsilon\rightarrow 0} \mvec{H}
   \left(
@@ -132,14 +121,46 @@ implicitness. The numerical flux function must satisfy
   =
   \mvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})
 \end{align}
-which ensures the consistency of the numerical scheme.
+which ensures the convergence of the solution as $\Delta x \rightarrow
+0$ and $\Delta t \rightarrow 0$.
 
-{\bf Example: Critical Gradient Flux} Let conserved quantities be
-located at cell-centers $\mvec{Q}_i^n = \mvec{Q}(x_{i+1/2},t_n)$,
-fluxes located at cell-edges $\gvec{\Gamma}_{i-1/2} =
-\gvec{\Gamma}(x_{i-1/2})$ and sources located at cell-centers
-$\mvec{S}_i = \mvec{S}(\mvec{Q}_i, x_i,t_{n})$.
+The boundary condition at $x=0$ can be applied by simply setting
+$\mvec{F}_{1/2}=0$. If the flux is specified at $x=x_m$, then this can
+be enforced using $\mvec{F}_{N+1/2}=\mvec{F}_m(t)$. For the second
+type of boundary conditions (specified conserved variables) we
+introduce a ``ghost-cell'' the same size as the last cell $C_N$. Then,
+if we set $\mvec{Q}_{N+1} = 2\mvec{Q}_m(t) - \mvec{Q}_N$, then we will
+enforce $\mvec{Q}(x_m,t) = \mvec{Q}_m(t)$ to $\textrm{O}(\Delta
+x^2)$. Using this in the definition of the numerical flux, we get the
+flux at the last edge as
+\begin{align}
+  \mvec{F}_{N+1/2} = \mvec{H}(\mvec{Q}_N, 2\mvec{Q}_m(t) - \mvec{Q}_N).
+\end{align}
 
+\section{Nonlinear diffusion with temperature-gradient dependent
+  diffusivity}
+
+A scalar nonlinear equation relevant to turbulent transport in plasmas
+is the nonlinear heat diffusion equation in which diffusivity depends
+on the temperature gradient. In this case the conserved variable is
+the thermal energy 
+\begin{align}
+  Q = \frac{3}{2} n(x)T(x,t)
+\end{align}
+where $n(x)$ is the number density of the plasma (which is spatially
+dependent but fixed in time) and $T(x,t)$ is the plasma
+temperature. In this case the flux is defined by
+\begin{align}
+  \Gamma = -\chi n T'
+\end{align}
+here primes indicate derivatives with respect to $x$ and where $\chi$
+is the diffusivity given by
+\begin{align}
+  \chi &= k(|T'| - T'_c)^\alpha + \chi_0 &\quad |T'| > T'_c \\
+  &= \chi_0 &\quad |T'| \leq T'_c,
+\end{align}
+where $\alpha$, $k$ and $\chi_0$ are constants and $T_c$ is some
+critical gradient.
 
 \end{document}
 
