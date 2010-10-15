@@ -17,8 +17,8 @@
 \textheight     9.0in
 \headheight     1.0in
 \headsep        0.0in
-\leftmargin      1.0in
-\rightmargin      1.0in
+\leftmargin     1.0in
+\rightmargin    1.0in
 \topmargin      -.75in
 
 %% Autoscaled figures
@@ -35,8 +35,8 @@
 \newcommand{\script}[1]{\mathpzc{#1}}
 
 \title{Transport equations, finite-volume schemes and coupling
-  algorithms}
-\author{Ammar H. Hakim}
+  algorithms}%
+\author{Ammar H. Hakim}%
 \date{}
 
 \begin{document}
@@ -46,107 +46,62 @@
 
 \section{Transport Equations and Finite-Volume Schemes}
 
-Consider the one-dimensional transport equation written in the form
+Transport in the core of a tokamak is approximately described by a
+system of one-dimensional equations for the evolution of density,
+momentum and energy for each species in the plasma. In addition, the
+magnetic field geometry is also evolved. The key challenge in
+one-dimensional transport modelling is determination of accurate flux
+models. Over the years many complex and sophisticated flux models, of
+varying physical fidelity, have been developed. Even though the
+physical realism of core transport calculations has increased over the
+years, ultimately core transport remains an approximate description
+and recourse to more fundamental descriptions must be made to fully
+understand and describe the complex physics in a tokomak.
+
+The system of transport equations can be written in the form
 \begin{align}
-  \pfrac{Q}{t} + \frac{1}{V'} \pfraca{x} \left( V' \Gamma \right) = S
+  \pfrac{\mvec{Q}}{t} 
+  + \frac{1}{V'} \pfraca{x} \left( V' \gvec{\Gamma} \right) = \mvec{S}
 \end{align}
-where $Q = Q(x,t)$ is an unknown quantity, $\Gamma(x) =
-\Gamma(Q,\pfracb{Q}{x})$ is a flux function, $S(x,t) = S(Q,x,t)$ is a
-source function and $V' = V'(x)$ is a given function. To descritize
-this equation consider a finite-volume grid in which a cell is defined
-as $C_i \equiv [x_i, x_{i+1}]$, with $i=1,\ldots,N$ and the unknown
-quantities are located at cell-centers $Q_i^n = Q(x_{i+1/2},t_n)$,
-fluxes are located at cell-edges $\Gamma_i = \Gamma(x_i)$ and sources
-are located at cell-centers $S_i = S(x_{i+1/2},t)$. Here, $x_{i+1/2}
-\equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv (x_{i+1}-x_i)$. Using a
-second order central difference for the spatial operator and
-first-order implicit difference for the time derivate we get an update
-formula
+where $\mvec{Q} = \mvec{Q}(x,t)$ is a $m$-dimensional vector of
+conserved quanties (density, momentum, temperature), $\gvec{\Gamma}(x)
+= \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
+$\mvec{S}(x,t) = \mvec{S}(\mvec{Q},x,t)$ is a source function. The
+coordinate $x$ is dimensionless and represents normalized distance
+from the magentic axis, $x=0$, to the seperatrix, $x=1$. The function
+$V(x)$ represents the volume of plasma (in m$^3$) enclosed between
+$[0,x]$ and encodes the geoemtry of the tokamak core region. For
+realistic tokamak simulations the geometry changes with time and
+$V(x)$ is a function of time. For most applications only plasma
+density, electron and ion energies are evolved.
+
+To descretize the system of equations consider a finite-volume grid in
+which a cell is defined as $C_i \equiv [x_i, x_{i+1}]$, with
+$i=1,\ldots,N$.  Let conserved quantities be located at cell-centers
+$\mvec{Q}_i^n = \mvec{Q}(x_{i+1/2},t_n)$, fluxes located at cell-edges
+$\gvec{\Gamma}_{i-1/2} = \gvec{\Gamma}(x_{i-1/2})$ and sources located
+at cell-centers $\mvec{S}_i = \mvec{S}(\mvec{Q}_i^{n+1},
+x_i,t_{n+1})$. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta
+x_i \equiv (x_{i+1}-x_i)$. Integrating the transport equation over a
+cell and using a first-order implicit difference for the time derivate
+we get the update formula
 \begin{align}
-  Q_i^{n+1} = Q^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
+  \mvec{Q}_i^{n+1} = \mvec{Q}^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
   \left (
-    V'(x_{i+1/2}) F_{i+1} - V'(x_{i-1/2}) F_i
+    V'(x_{i+1/2}) \mvec{F}_{i+1/2} - 
+    V'(x_{i-1/2}) \mvec{F}_{i-1/2}
   \right)
   +
-  \Delta t S_i \equiv D(F_{i+1}, F_{i}) \label{eqn:update-form}
+  \Delta t \mvec{S}_i \label{eqn:update-form}
 \end{align}
 where
 \begin{align}
-  F_i = H(Q_i^{n+1}, Q_{i-1}^{n+1}) \label{eqn:flux-func}
+  \mvec{F}_{i-1/2} = 
+  \mvec{H}(
+  \mvec{Q}_i^{n+1},
+  \mvec{Q}_{i-1}^{n+1}
+  ) \label{eqn:flux-func}
 \end{align}
-is the numerical flux function defined such that $H(Q,Q) =
-\Gamma(Q,\pfracb{Q}{x})$.
-
-A standard implicit method would solve the system of equations arising
-from inserting the definition of the numerical flux into the update
-formula, resulting a system of non-linear algebraic equations for the
-$N$ unknowns $Q_i^{n+1}$. However, in this note we consider the
-possibility of instread solving the system of coupled $2N$ algebraic
-equations (dropping the superscripts)
-\begin{align}
-  Q_i - D(F_{i+1}, F_i) &= 0  \label{eqn:q-eqn} \\
-  F_i - H(Q_i, Q_{i-1}) &= 0. \label{eqn:f-eqn}
-\end{align}
-for the $2N$ unknowns $[Q_1, \ldots, Q_N, F_1, \ldots F_N
-]^T$. Letting $\mvec{V} \equiv [\mvec{Q}, \mvec{F}]^T$, where
-$\mvec{Q} \equiv [Q_1, \ldots, Q_N]^T$ and $\mvec{F} \equiv [F_1,
-\ldots, F_N]^T$ we can write the problem schematically as finding the
-roots of the non-linear system of algebraic equations
-\begin{align}
-  \mvec{G}(\mvec{V}) = \mvec{0} \label{eqn:g-eqn}
-\end{align}
-where $G_i \equiv Q_i - D(F_{i+1}, F_i)$, and $G_{i+N} \equiv F_i -
-F(Q_i, Q_{i-1})$ for $i=1,\ldots,N$. In the following also let
-$\mvec{D} \equiv [D_1,\ldots,D_N]^T$ and $\gvec{H} \equiv
-[H_1,\ldots,H_N]^T$.
-
-To use a Newton method for solving the non-linear system we need to
-compute, at least approximately, the inverse of the Jacobian matrix
-$\mvec{J} \equiv \mvec{G}'(\mvec{V})$. The Jacobian itself can be
-computed using \eqr{\ref{eqn:g-eqn}} and Eqns.\thinspace
-(\ref{eqn:q-eqn}) and (\ref{eqn:f-eqn}) as
-\begin{align}
-  \mvec{J} =
-  \left[
-    \begin{array}{cc}
-      \mvec{I} & -\pfracb{\mvec{D}}{\mvec{F}} \\
-      -\pfracb{\mvec{H}}{\mvec{Q}} & \mvec{I}
-    \end{array}
-  \right]
-\end{align}
-Here $\mvec{I}$ is a $N\times N$ unit matrix. Also, it is clear from
-Eqns.\thinspace (\ref{eqn:update-form}) and (\ref{eqn:flux-func}),
-$\mvec{J}_{12} \equiv -\pfracb{\mvec{D}}{\mvec{F}}$ and $
-\mvec{J}_{21} \equiv -\pfracb{\mvec{H}}{\mvec{Q}}$ are bi-diagonal
-matrices, the former with a super-diagonal and the latter with a
-sub-diagonal. Further, due to the assumed functional form of
-$\mvec{S}$, the matrix $\mvec{J}_{12}$ is linear, i.e. does not depend
-on either $\mvec{Q}$ or $\mvec{F}$.
-
-Let $\mvec{K} = \mvec{J}^{-1}$, and
-\begin{align}
-  \mvec{K} = 
-  \left[
-    \begin{array}{cc}
-      \mvec{K}_{11} & \mvec{K}_{12} \\
-      \mvec{K}_{21} & \mvec{K}_{22}
-    \end{array}
-  \right]
-\end{align}
-Then, using $\mvec{J}\mvec{K} = \mvec{I}$, we can show that
-\begin{align}
-  \mvec{K}_{11} &= (\mvec{I} - \mvec{J}_{12}\mvec{J}_{21})^{-1} \\
-  \mvec{K}_{22} &= (\mvec{I} - \mvec{J}_{21}\mvec{J}_{12})^{-1} \\
-  \mvec{K}_{12} &= -\mvec{J}_{12} \mvec{K}_{22} \\
-  \mvec{K}_{21} &= -\mvec{J}_{21} \mvec{K}_{11}.
-\end{align}
-As $\mvec{J}_{12}$ and $\mvec{J}_{21}$ are bidiagonal matrices one
-with a sub-diagonal and the other with a super-diagonal, the matrices
-$\mvec{I} - \mvec{J}_{12}\mvec{J}_{21}$ and $\mvec{I} -
-\mvec{J}_{21}\mvec{J}_{12}$ are tri-diagonal. Hence, to compute the
-Newton iteration increments in a naive brute-force algorithm requires
-two matrix-matrix multiplications of bi-diagonal matrices, two
-tri-diagonal inversions and two matrix-vector products with a
-bi-diagonal matrix.
+is a numerical flux function that represents the flux at the cell edge.
 
 \end{document}
