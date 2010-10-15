@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[11pt]{amsart}
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -77,14 +77,9 @@ density, electron and ion energies are evolved.
 
 To descretize the system of equations consider a finite-volume grid in
 which a cell is defined as $C_i \equiv [x_i, x_{i+1}]$, with
-$i=1,\ldots,N$.  Let conserved quantities be located at cell-centers
-$\mvec{Q}_i^n = \mvec{Q}(x_{i+1/2},t_n)$, fluxes located at cell-edges
-$\gvec{\Gamma}_{i-1/2} = \gvec{\Gamma}(x_{i-1/2})$ and sources located
-at cell-centers $\mvec{S}_i = \mvec{S}(\mvec{Q}_i^{n+1},
-x_i,t_{n+1})$. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta
-x_i \equiv (x_{i+1}-x_i)$. Integrating the transport equation over a
-cell and using a first-order implicit difference for the time derivate
-we get the update formula
+$i=1,\ldots,N$. Integrating the transport equation over a
+cell and using a first-order difference for the time derivate we get
+the update formula
 \begin{align}
   \mvec{Q}_i^{n+1} = \mvec{Q}^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
   \left (
@@ -98,10 +93,30 @@ where
 \begin{align}
   \mvec{F}_{i-1/2} = 
   \mvec{H}(
-  \mvec{Q}_i^{n+1},
-  \mvec{Q}_{i-1}^{n+1}
+  \mvec{Q}_{i-1},
+  \mvec{Q}_i
   ) \label{eqn:flux-func}
 \end{align}
-is a numerical flux function that represents the flux at the cell edge.
+is a numerical flux function that represents the flux at the cell
+edge. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv
+(x_{i+1}-x_i)$. The time index on the edge fluxes and sources are
+delibrately ommited: choosing to evaluate these at various points in
+the interval $[t_n,t_{n+1}]$ will give scheme with different
+implicitness. The numercial flux function must satisfy
+\begin{align}
+  \lim_{\epsilon\rightarrow 0} \mvec{H}
+  \left(
+    \mvec{Q}(x-\epsilon,t),
+    \mvec{Q}(x+\epsilon,t)
+  \right)
+  =
+  \mvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})
+\end{align}
+which ensures the consistency of the numerical scheme.
 
 \end{document}
+
+Let conserved quantities be located at cell-centers $\mvec{Q}_i^n =
+\mvec{Q}(x_{i+1/2},t_n)$, fluxes located at cell-edges
+$\gvec{\Gamma}_{i-1/2} = \gvec{\Gamma}(x_{i-1/2})$ and sources located
+at cell-centers $\mvec{S}_i = \mvec{S}(\mvec{Q}_i, x_i,t_{n})$.
