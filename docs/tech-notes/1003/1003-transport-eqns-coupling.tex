@@ -64,21 +64,21 @@ The system of transport equations can be written in the form
   + \frac{1}{V'} \pfraca{x} \left( V' \gvec{\Gamma} \right) = \mvec{S}
 \end{align}
 where $\mvec{Q} = \mvec{Q}(x,t)$ is a $m$-dimensional vector of
-conserved quanties (density, momentum, temperature), $\gvec{\Gamma}(x)
-= \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
-$\mvec{S}(x,t) = \mvec{S}(\mvec{Q},x,t)$ is a source function. The
-coordinate $x$ is dimensionless and represents normalized distance
-from the magentic axis, $x=0$, to the seperatrix, $x=1$. The function
-$V(x)$ represents the volume of plasma (in m$^3$) enclosed between
-$[0,x]$ and encodes the geoemtry of the tokamak core region. For
-realistic tokamak simulations the geometry changes with time and
-$V(x)$ is a function of time. For most applications only plasma
-density, electron and ion energies are evolved.
+conserved quantities (density, momentum, temperature),
+$\gvec{\Gamma}(x) = \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a
+flux function, $\mvec{S}(x,t) = \mvec{S}(\mvec{Q},x,t)$ is a source
+function. The coordinate $x$ is dimensionless and represents
+normalized distance from the magnetic axis, $x=0$, to the separatrix,
+$x=1$. The function $V(x)$ represents the volume of plasma (in m$^3$)
+enclosed between $[0,x]$ and encodes the geometry of the tokamak core
+region. For realistic tokamak simulations the geometry changes
+continuously and $V(x)$ is a function of time. For most applications
+only plasma density, electron and ion energies are evolved.
 
-To descretize the system of equations consider a finite-volume grid in
+To discretize the system of equations consider a finite-volume grid in
 which a cell is defined as $C_i \equiv [x_i, x_{i+1}]$, with
 $i=1,\ldots,N$. Integrating the transport equation over a
-cell and using a first-order difference for the time derivate we get
+cell and using a first-order difference for the time derivative we get
 the update formula
 \begin{align}
   \mvec{Q}_i^{n+1} = \mvec{Q}^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
@@ -100,9 +100,9 @@ where
 is a numerical flux function that represents the flux at the cell
 edge. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv
 (x_{i+1}-x_i)$. The time index on the edge fluxes and sources are
-delibrately ommited: choosing to evaluate these at various points in
+deliberately omitted: choosing to evaluate these at various points in
 the interval $[t_n,t_{n+1}]$ will give scheme with different
-implicitness. The numercial flux function must satisfy
+implicitness. The numerical flux function must satisfy
 \begin{align}
   \lim_{\epsilon\rightarrow 0} \mvec{H}
   \left(
