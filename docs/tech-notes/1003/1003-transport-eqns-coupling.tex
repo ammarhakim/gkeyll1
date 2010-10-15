@@ -2,6 +2,7 @@
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{amsthm}
 \usepackage[dvips]{graphicx}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{setspace}
@@ -11,15 +12,15 @@
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
 %% Set page size properly
-\oddsidemargin  0.0in
-\evensidemargin 0.0in
-\textwidth      6.5in
-\textheight     9.0in
-\headheight     1.0in
-\headsep        0.0in
-\leftmargin     1.0in
-\rightmargin    1.0in
-\topmargin      -.75in
+%\oddsidemargin  0.0in
+%\evensidemargin 0.0in
+%\textwidth      6.5in
+%\textheight     9.0in
+%\headheight     1.0in
+%\headsep        0.0in
+%\leftmargin     1.0in
+%\rightmargin    1.0in
+%\topmargin      -.75in
 
 %% Autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
@@ -33,6 +34,18 @@
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
+
+%% For typesetting examples
+\newtheoremstyle{example}{\topsep}{\topsep}%
+{}%         Body font
+{}%         Indent amount (empty = no indent, \parindent = para indent)
+{\bfseries}% Thm head font
+{}%        Punctuation after thm head
+{\newline}%     Space after thm head (\newline = linebreak)
+{\thmname{#1}\thmnumber{ #2}\thmnote{ #3}}%         Thm head spec
+
+\theoremstyle{example}
+\newtheorem{example}{Example}[subsection]
 
 \title{Transport equations, finite-volume schemes and coupling
   algorithms}%
@@ -64,16 +77,23 @@ The system of transport equations can be written in the form
   + \frac{1}{V'} \pfraca{x} \left( V' \gvec{\Gamma} \right) = \mvec{S}
 \end{align}
 where $\mvec{Q} = \mvec{Q}(x,t)$ is a $m$-dimensional vector of
-conserved quantities (density, momentum, temperature),
-$\gvec{\Gamma}(x) = \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a
-flux function, $\mvec{S}(x,t) = \mvec{S}(\mvec{Q},x,t)$ is a source
-function. The coordinate $x$ is dimensionless and represents
-normalized distance from the magnetic axis, $x=0$, to the separatrix,
-$x=1$. The function $V(x)$ represents the volume of plasma (in m$^3$)
-enclosed between $[0,x]$ and encodes the geometry of the tokamak core
-region. For realistic tokamak simulations the geometry changes
-continuously and $V(x)$ is a function of time. For most applications
-only plasma density, electron and ion energies are evolved.
+conserved quantities (density, momentum, temperature), $\gvec{\Gamma}
+= \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
+$\mvec{S} = \mvec{S}(\mvec{Q},x,t)$ is a source function. The
+coordinate $x$ is dimensionless and represents normalized distance
+from the magnetic axis, $x=0$, to the separatrix, $x=1$. The function
+$V(x)$ represents the volume of plasma (in m$^3$) enclosed between
+$[0,x]$ and encodes the geometry of the tokamak core region. For
+realistic tokamak simulations the geometry changes continuously and
+$V(x)$ is a function of time. For most applications only plasma
+density, electron and ion energies are evolved.
+
+The point $x=0$ represents a symmetry axis in the tokamak which means
+we must set $\gvec{\Gamma}=0$ at $x=0$. At $x=x_m$ one can either be a
+specify the flux, $\gvec{\Gamma}(x_m)=\gvec{\Gamma}_m(t)$, or the
+values of the conserved variables $\mvec{Q}(x_m,t)=\mvec{Q}_m(t)$,
+where $\gvec{\Gamma}_m(t)$ and $\mvec{Q}_m(t)$ are specified
+functions.
 
 To discretize the system of equations consider a finite-volume grid in
 which a cell is defined as $C_i \equiv [x_i, x_{i+1}]$, with
@@ -114,9 +134,12 @@ implicitness. The numerical flux function must satisfy
 \end{align}
 which ensures the consistency of the numerical scheme.
 
+{\bf Example: Critical Gradient Flux} Let conserved quantities be
+located at cell-centers $\mvec{Q}_i^n = \mvec{Q}(x_{i+1/2},t_n)$,
+fluxes located at cell-edges $\gvec{\Gamma}_{i-1/2} =
+\gvec{\Gamma}(x_{i-1/2})$ and sources located at cell-centers
+$\mvec{S}_i = \mvec{S}(\mvec{Q}_i, x_i,t_{n})$.
+
+
 \end{document}
 
-Let conserved quantities be located at cell-centers $\mvec{Q}_i^n =
-\mvec{Q}(x_{i+1/2},t_n)$, fluxes located at cell-edges
-$\gvec{\Gamma}_{i-1/2} = \gvec{\Gamma}(x_{i-1/2})$ and sources located
-at cell-centers $\mvec{S}_i = \mvec{S}(\mvec{Q}_i, x_i,t_{n})$.
