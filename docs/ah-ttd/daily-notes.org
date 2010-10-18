@@ -7,7 +7,7 @@
   based and not wave based. This allows flexibility as the wave
   numerical fluxe can then be used in other schemes like MUSCL, DG
   etc. Somehow, when using wave propagation scheme the system should
-  use the wave/fluctuation form of the updater formula. The schemes
+  use the wave/fluctuation form of the update formula. The schemes
   should be dimensionally independent, i.e. work in 1D, 2D and 3D and
   on body fitted grids. Hence, one set of updaters should be enough
   for all structured grids.
