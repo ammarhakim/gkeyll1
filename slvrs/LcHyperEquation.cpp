@@ -36,4 +36,10 @@ namespace Lucee
   {
     throw Lucee::Except("HyperEquation::flux: Method not implemented");
   }
+
+  void
+  HyperEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s)
+  {
+    throw Lucee::Except("HyperEquation::speeds: Method not implemented");
+  }
 }

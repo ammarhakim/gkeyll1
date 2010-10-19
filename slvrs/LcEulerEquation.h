@@ -49,6 +49,14 @@ namespace Lucee
  */
       virtual void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
+/**
+ * Compute the wave speeds in the system.
+ *
+ * @param q Conserved variables for which to compute speeds.
+ * @param s On output, this constains the speeds.
+ */
+      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s);
+
     protected:
 
     private:
