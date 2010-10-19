@@ -15,6 +15,9 @@
 // lucee includes
 #include <LcEulerEquation.h>
 
+// std includes
+#include <cmath>
+
 namespace Lucee
 {
 // set ids for creators
@@ -30,7 +33,10 @@ namespace Lucee
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
-    gas_gamma = tbl.getNumber("gas_gamma");
+    if (tbl.hasNumber("gas_gamma"))
+      gas_gamma = tbl.getNumber("gas_gamma");
+    else
+      throw Lucee::Except("EulerEquation::readInput: Must specify gas_gamma (gas constant)");
   }
 
   void
@@ -44,5 +50,17 @@ namespace Lucee
     f[2] = q[1]*q[2]/q[0]; // rho*u*v
     f[3] = q[1]*q[3]/q[0]; // rho*u*w
     f[4] = (q[4]+pr)*q[1]/q[0]; // (E+pr)*u
+  }
+
+  void
+  EulerEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s)
+  {
+// compute pressure
+    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
+    double cs = std::sqrt(gas_gamma*pr/q[0]);
+    double u = q[1]/q[0];
+    s[0] = u-cs;
+    s[1] = u;
+    s[2] = u+cs;
   }
 }
