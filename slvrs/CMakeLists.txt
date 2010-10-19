@@ -11,6 +11,9 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lcslvrs
+  LcEulerEquation.cpp
+  LcHyperEquation.cpp
+  LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
   LcSolverAssembly.cpp
   LcSolverRegistry.cpp

@@ -15,6 +15,8 @@
 #include <LcGenericFactory.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
+#include <LcHyperEquation.h>
+#include <LcHyperEquationRegistry.h>
 #include <LcLibRegistry.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcObjCreator.h>
@@ -35,6 +37,7 @@ namespace Lucee
   {
 // register objects
     Lucee::registerSolverObjects(L);
+    Lucee::registerHyperEquationsObjects(L);
     Lucee::registerRteObjects(L);
     Lucee::registerGridObjects(L);
     Lucee::registerDataStructObjects(L);
@@ -42,6 +45,7 @@ namespace Lucee
 
 // register modules into Lua
     Lucee::LuaModuleRegistry<Lucee::SolverIfc>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::HyperEquation>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
