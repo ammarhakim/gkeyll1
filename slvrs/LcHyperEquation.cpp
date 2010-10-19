@@ -13,10 +13,14 @@
 #endif
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcHyperEquation.h>
 
 namespace Lucee
 {
+// set module name
+  const char *HyperEquation::id = "HyperEquation";
+
   HyperEquation::HyperEquation(unsigned meqn, unsigned mwave)
     : meqn(meqn), mwave(mwave)
   {
@@ -28,7 +32,8 @@ namespace Lucee
   }
 
   void
-  HyperEquation::flux(Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  HyperEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
+    throw Lucee::Except("HyperEquation::flux: Method not implemented");
   }
 }

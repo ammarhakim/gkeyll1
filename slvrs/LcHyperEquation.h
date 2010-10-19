@@ -28,6 +28,9 @@ namespace Lucee
   class HyperEquation : public Lucee::BasicObj
   {
     public:
+/** Class id: this is used by registration system */
+      static const char *id;
+
 /**
  * Create a new hyperbolic equation system.
  *
@@ -44,18 +47,32 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Return number of equations in system.
+ *
+ * @return number of equations.
+ */
+      unsigned getNumEqns() const { return meqn; }
+
+/**
+ * Return number of waves in system.
+ *
+ * @return number of waves.
+ */
+      unsigned getNumWaves() const { return mwave; }
+
+/**
  * Compute flux for this equation system.
  *
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
     protected:
 
     private:
 /** Number of equations */
-      unsigned meqns;
+      unsigned meqn;
 /** Number of waves */
       unsigned mwave;
   };

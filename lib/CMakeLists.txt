@@ -15,7 +15,6 @@ add_library(lclib
   LcFunctionIfc.cpp
   LcHdf5Io.cpp
   LcHdf5IoTmpl.cpp
-  LcHyperEquation.cpp
   LcIoBase.cpp
   LcLibRegistry.cpp
   LcLinAlgebra.cpp
