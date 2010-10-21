@@ -32,6 +32,12 @@ namespace Lucee
   }
 
   template <typename T>
+  ConstFieldPtr<T>::ConstFieldPtr(const FieldPtr<T>& ptr)
+    : numComponents(ptr.numComponents), data(ptr.data)
+  {
+  }
+
+  template <typename T>
   ConstFieldPtr<T>&
   ConstFieldPtr<T>::operator=(const ConstFieldPtr<T>& ptr)
   {

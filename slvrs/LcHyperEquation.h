@@ -19,11 +19,17 @@
 #include <LcBasicObj.h>
 #include <LcConstFieldPtr.h>
 #include <LcFieldPtr.h>
+#include <LcMatrix.h>
 
 namespace Lucee
 {
 /**
- * Represents a hyperbolic equation.
+ * Represents a system of hyperbolic equations. This class provides a
+ * rich interface to compute various quantities (fluxes, speeds,
+ * waves, eigensystem) for use in various numercial schemes. Not all
+ * methods are required for every scheme and the documentation for a
+ * particular scheme should be consulted to determine which methods
+ * are actually used.
  */
   class HyperEquation : public Lucee::BasicObj
   {
@@ -74,7 +80,40 @@ namespace Lucee
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, this constains the speeds.
  */
-      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s);
+      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
+
+/**
+ * Compute primitive variables given conserved variables.
+ *
+ * @param q Conserved variables for which to primitive variables.
+ * @param v On output, primitive variables.
+ */
+      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left states.
+ *
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      virtual void waves(const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
+
+/**
+ * Compute eigensystem for equations give a state. This method should
+ * return all eigenvalues and right and left eigenvectors.
+ *
+ * @param q State at which to compute eigensystem.
+ * @param ev On output, eigenvalues of system.
+ * @param rev On output, right eigenvectors of system.
+ * @param lev On output, left eigenvectors of system.
+ */
+      virtual void eigensystem(const Lucee::ConstFieldPtr<double>& q,
+        Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev);
 
     protected:
 

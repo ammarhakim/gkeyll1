@@ -16,6 +16,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcFieldPtr.h>
+
 // std includes
 #include <vector>
 
@@ -51,6 +54,13 @@ namespace Lucee
  * @param vec Vector to create from.
  */
       ConstFieldPtr(const std::vector<T>& vec);
+
+/**
+ * Copy from a given field pointer.
+ *
+ * @param ptr Pointer to copy from.
+ */
+      ConstFieldPtr(const FieldPtr<T>& ptr);
 
 /**
  * Assign from a given field pointer.

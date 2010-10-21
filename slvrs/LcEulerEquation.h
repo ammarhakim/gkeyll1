@@ -55,7 +55,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, this constains the speeds.
  */
-      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s);
+      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
 
     protected:
 

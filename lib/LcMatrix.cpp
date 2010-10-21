@@ -56,9 +56,8 @@ namespace Lucee
 
   template <typename T>
   Matrix<T>::Matrix(const Matrix<T>& mat)
-    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(mat)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(mat), traits(mat.traits)
   {
-    traits = mat.traits;
   }
 
   template <typename T>

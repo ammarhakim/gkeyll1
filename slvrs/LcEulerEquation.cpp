@@ -44,7 +44,6 @@ namespace Lucee
   {
 // compute pressure
     double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
-// compute flux
     f[0] = q[1]; // rho*u
     f[1] = q[1]*q[1]/q[0] + pr; // rho*u*u + pr
     f[2] = q[1]*q[2]/q[0]; // rho*u*v
@@ -53,12 +52,12 @@ namespace Lucee
   }
 
   void
-  EulerEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double> s)
+  EulerEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
   {
 // compute pressure
     double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
-    double cs = std::sqrt(gas_gamma*pr/q[0]);
-    double u = q[1]/q[0];
+    double cs = std::sqrt(gas_gamma*pr/q[0]); // sound speed
+    double u = q[1]/q[0]; // fluid velocity
     s[0] = u-cs;
     s[1] = u;
     s[2] = u+cs;
