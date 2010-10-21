@@ -23,6 +23,8 @@ namespace Lucee
 {
 // forward declaration for making Field class friend
   template <unsigned NDIM, typename TT> class Field;
+// forward declaration for making ConstFieldPtr class friend
+  template <typename TT> class ConstFieldPtr;
 
 /**
  * A field pointer can be used to access/modify the elements of a
@@ -35,6 +37,9 @@ namespace Lucee
     public:
 /** Friend Field so it can create ptr objects */
       template <unsigned NDIM, typename TT> friend class Lucee::Field;
+
+/** Friend ConstFieldPtr so it can create ptr objects */
+      template <typename TT> friend class Lucee::ConstFieldPtr;
 
 /**
  * Copy from a given field pointer.
@@ -53,11 +58,30 @@ namespace Lucee
       FieldPtr(std::vector<T>& vec);
 
 /**
+ * Create an empty field pointer that allows storing data.
+ *
+ * @param num Number of elements in vector.
+ */
+      FieldPtr(unsigned num);
+
+/**
+ * Delete field pointer.
+ */
+      ~FieldPtr();
+
+/**
  * Assign from a given field pointer.
  *
  * @param ptr Pointer to copy from.
  */
       FieldPtr& operator=(const FieldPtr<T>& ptr);
+
+/**
+ * Assign all values to supplied one.
+ *
+ * @param val Value to set.
+ */
+      FieldPtr& operator=(const T& val);
 
 /**
  * Number of elements indexed by pointer.
@@ -107,6 +131,8 @@ namespace Lucee
       unsigned numComponents;
 /** Pointer to field data */
       T *data;
+/** Was data allocated */
+      bool isAlloc;
   };
 }
 
