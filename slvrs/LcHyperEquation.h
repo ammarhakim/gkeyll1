@@ -75,12 +75,13 @@ namespace Lucee
       virtual void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
 /**
- * Compute the wave speeds in the system.
+ * Compute the minimum and maximum wave speeds in the system. s[0] is
+ * the minimum wave speed and s[1] is the maximum wave speed.
  *
  * @param q Conserved variables for which to compute speeds.
- * @param s On output, this constains the speeds.
+ * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
+      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, double s[2]);
 
 /**
  * Compute primitive variables given conserved variables.
@@ -89,6 +90,14 @@ namespace Lucee
  * @param v On output, primitive variables.
  */
       virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param v Primitive variables for which to conserved variables.
+ * @param q On output, conserved variables.
+ */
+      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
 
 /**
  * Decompose jump into waves and wave-speeds using right and left states.
@@ -109,11 +118,20 @@ namespace Lucee
  *
  * @param q State at which to compute eigensystem.
  * @param ev On output, eigenvalues of system.
- * @param rev On output, right eigenvectors of system.
- * @param lev On output, left eigenvectors of system.
+ * @param rev On output, right eigenvectors of system stored in columns.
+ * @param lev On output, left eigenvectors of system stored in columns.
  */
       virtual void eigensystem(const Lucee::ConstFieldPtr<double>& q,
         Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev);
+
+/**
+ * Check if conserved variables satisfies invariant domains of the
+ * system. Return true if it does, false otherwise.
+ *
+ * @param q Conserved variables.
+ * @return true if invariant domains are satisfied, false otherwise.
+ */
+      virtual bool isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const;
 
     protected:
 

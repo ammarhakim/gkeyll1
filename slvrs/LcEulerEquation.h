@@ -57,11 +57,34 @@ namespace Lucee
  */
       virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
 
+/**
+ * Compute primitive variables given conserved variables.
+ *
+ * @param q Conserved variables for which to primitive variables.
+ * @param v On output, primitive variables.
+ */
+      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param v Primitive variables for which to conserved variables.
+ * @param q On output, conserved variables.
+ */
+      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
+
     protected:
 
     private:
 /** Gas gamma */
       double gas_gamma;
+/**
+ * Compute pressure from conserved variables.
+ *
+ * @param q conserved variables.
+ * @return pressure
+ */
+      double pressure(const Lucee::ConstFieldPtr<double>& q) const;
   };
 }
 
