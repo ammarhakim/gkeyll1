@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* October 31st
+
+  Numerical flux class needs to be defined. The interface method
+  should have the following interface.
+#+BEGIN_EXAMPLE
+    flux(ql, qr, fl, fr, sl, sr)
+#+END_EXAMPLE
+  where ql, qr are left/right conserved variables, fl, fr are
+  left/right fluxes and sl, sr and left/right speeds.
+
 * October 13th
 
   Probably should switch to Tech-X CMake system. Need to design the

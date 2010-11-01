@@ -50,13 +50,47 @@ namespace Lucee
   }
 
   void
+  HyperEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q)
+  {
+    throw Lucee::Except("HyperEquation::conserved: Method not implemented");
+  }
+
+  void
   HyperEquation::waves(const Lucee::ConstFieldPtr<double>& jump, 
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
 // calculate left and right primitive variables
-    //Lucee::FieldPtr<double> 
+    Lucee::FieldPtr<double> vl(meqn), vr(meqn);
+    primitive(ql, vl);
+    primitive(qr, vr);
+// average it
+    Lucee::FieldPtr<double> vavg(meqn);
+    for (unsigned i=0; i<meqn; ++i)
+      vavg[i] = 0.5*(vl[i]+vr[i]);
+// compute conserved variables
+    Lucee::FieldPtr<double> qavg(meqn);
+    conserved(vavg, qavg);
 
+// compute eigensystem
+    Lucee::Vector<double> ev(meqn);
+    Lucee::Matrix<double> rev(meqn, meqn), lev(meqn, meqn);
+    eigensystem(qavg, ev, rev, lev);
+// split jump using left eigenvectors
+    Lucee::Vector<double> alpha(meqn);
+    for (unsigned p=0; p<meqn; ++p)
+    {
+      alpha[p] = 0.0;
+      for (unsigned i=0; i<meqn; ++i)
+        alpha[p] += lev(i,p)*jump[i];
+    }
+// compute waves
+    for (unsigned p=0; p<meqn; ++p)
+    {
+      for (unsigned i=0; i<meqn; ++i)
+        waves(i,p) = alpha[p]*rev(i,p);
+      s[p] = ev[p]; // set speeds
+    }
   }
 
   void
@@ -64,5 +98,11 @@ namespace Lucee
     Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev)
   {
     throw Lucee::Except("HyperEquation::eigensystem: Method not implemented");
+  }
+
+  bool
+  HyperEquation::isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const
+  {
+    throw Lucee::Except("HyperEquation::isInvariantDomain: Method not implemented");
   }
 }

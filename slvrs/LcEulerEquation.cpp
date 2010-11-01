@@ -43,7 +43,7 @@ namespace Lucee
   EulerEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
 // compute pressure
-    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
+    double pr = pressure(q);
     f[0] = q[1]; // rho*u
     f[1] = q[1]*q[1]/q[0] + pr; // rho*u*u + pr
     f[2] = q[1]*q[2]/q[0]; // rho*u*v
@@ -55,11 +55,37 @@ namespace Lucee
   EulerEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
   {
 // compute pressure
-    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
+    double pr = pressure(q);
     double cs = std::sqrt(gas_gamma*pr/q[0]); // sound speed
     double u = q[1]/q[0]; // fluid velocity
     s[0] = u-cs;
     s[1] = u;
     s[2] = u+cs;
+  }
+
+  void
+  EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v)
+  {
+    v[0] = q[0]; // rho
+    v[1] = q[1]/q[0]; // u
+    v[2] = q[2]/q[0]; // v
+    v[3] = q[3]/q[0]; // w
+    v[4] = pressure(q); // pressure
+  }
+
+  void
+  EulerEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q)
+  {
+    q[0] = v[0]; // rho
+    q[1] = v[0]*v[1]; // rho*u
+    q[2] = v[0]*v[2]; // rho*v
+    q[3] = v[0]*v[3]; // rho*w
+    q[4] = v[4]/(gas_gamma-1) + 0.5*v[0]*(v[1]*v[1] + v[2]*v[2] + v[3]*v[3]); // pressure
+  }
+
+  double
+  EulerEquation::pressure(const Lucee::ConstFieldPtr<double>& q) const
+  {
+    return (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
   }
 }
