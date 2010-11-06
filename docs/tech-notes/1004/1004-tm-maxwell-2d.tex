@@ -16,11 +16,8 @@
 \evensidemargin 0.0in
 \textwidth      6.5in
 \textheight     9.0in
-\headheight     1.0in
-\headsep        0.0in
 \leftmargin     1.0in
 \rightmargin    1.0in
-\topmargin      -.75in
 
 %% Autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
@@ -29,6 +26,7 @@
 %% Commonly used macros
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\pfracb}[2]{\partial #1/\partial #2}
 \newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
@@ -164,7 +162,7 @@ c$. Discretizing this system using the wave propagation scheme gives
     E^z_{i,j+1} - E^z_{i,j-1}
   \right)
   +
-  \frac{c^2 \Delta t^2}{2\Delta x^2}
+  \frac{c^2 \Delta t^2}{2\Delta y^2}
   \left(
     B^x_{i,j+1} - 2B^x_{i,j} + B^x_{i,j-1}
   \right) \notag \\
@@ -185,11 +183,12 @@ c$. Discretizing this system using the wave propagation scheme gives
   \left(
     E^z_{i+1,j} - E^z_{i-1,j}
   \right)
-  + \frac{c^2 \Delta t^2}{2\Delta y^2}
+  + \frac{c^2 \Delta t^2}{2\Delta x^2}
   \left(
     B^y_{i+1,j} - 2B^y_{i,j} + B^y_{i-1,j}
   \right) \notag \\
-  &+
+  &
+  -
   \frac{\gamma \Delta t}{2\Delta y}
   \left(
     \psi_{i,j+1}-\psi_{i,j-1}
@@ -240,6 +239,29 @@ and
   \left(
     \psi_{i,j+1} - 2\psi_{i,j} + \psi_{i,j-1}
   \right)
+\end{align}
+As expected, the wave propagation scheme approximates the spatial
+derivatives using central differences and adds a diffusion term to
+stabilize the scheme. For the PH Maxwell case we now have
+\begin{align}
+  \pfraca{t}
+  \left(
+    \pfrac{B^x}{x} + \pfrac{B^y}{y}
+  \right)
+  +
+  \gamma \pfracc{\psi}{x} + \gamma \pfracc{\psi}{y}
+  =
+  \frac{c^2 \Delta t}{\Delta y}
+  \frac{\partial^3B^x}{\partial x \partial y^2}
+  +
+  \frac{c^2 \Delta t}{\Delta x}
+  \frac{\partial^3B^y}{\partial y \partial x^2}
+  +
+  \frac{\gamma^2 c^2 \Delta t}{\Delta x}
+  \frac{\partial^3B^x}{\partial x^3}
+  +
+  \frac{\gamma^2 c^2 \Delta t}{\Delta y}
+  \frac{\partial^3B^y}{\partial y^3}
 \end{align}
 
 \end{document}
