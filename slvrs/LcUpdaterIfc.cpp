@@ -144,11 +144,11 @@ namespace Lucee
     double t = lua_tonumber(L, 2); // time to advance to
     Lucee::UpdaterStatus s = updater->update(t);
 // push status and suggested time-step on stack
-    if (s.getStatus())
+    if (s.status)
       lua_pushboolean(L, 1);
     else
       lua_pushboolean(L, 0);
-    lua_pushnumber(L, s.getSuggestedDt());
+    lua_pushnumber(L, s.dt);
 
     return 2;
   }
