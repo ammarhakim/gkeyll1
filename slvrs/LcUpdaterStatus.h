@@ -52,7 +52,6 @@ namespace Lucee
  */
       bool getSuggestedDt() const { return dt; }
 
-    private:
 /** Status of update */
       bool status;
 /** Suggested time-step */
