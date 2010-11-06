@@ -15,6 +15,7 @@ add_library(lcslvrs
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
+  LcMaxwellTM2DUpdater.cpp
   LcSolverAssembly.cpp
   LcSolverRegistry.cpp
   LcTXYZFieldSetter.cpp

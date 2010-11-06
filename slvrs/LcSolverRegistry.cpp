@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcLinCombiner.h>
+#include <LcMaxwellTm2DUpdater.h>
 #include <LcSolverAssembly.h>
 #include <LcSolverRegistry.h>
 #include <LcTXYZFieldSetter.h>
@@ -35,5 +36,7 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
   }
 }

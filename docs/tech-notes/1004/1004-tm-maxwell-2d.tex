@@ -116,7 +116,11 @@ approximation for $c^2\Delta t/\Delta y \pfracbb{B^x}{y}$. This
 additional term makes the wave propagation scheme second order both in
 space and time, however, it can lead to divergence errors even when
 $\nabla \cdot \mvec{B} = 0$ at $t=0$. In fact, we can easily show that
-the scheme effectively evolves the divergence of the magnetic field as
+the scheme effectively\footnote{By effectively we mean that
+  discretizing the effective equation using central differences for
+  spatial derivative and forward differences for temporal derivatives
+  is equivalent to solving the original equation using the wave
+  propagation method.} evolves the divergence of the magnetic field as
 \begin{align}
   \pfraca{t}
   \left(

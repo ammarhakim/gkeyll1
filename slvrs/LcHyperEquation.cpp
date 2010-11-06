@@ -38,7 +38,7 @@ namespace Lucee
   }
 
   void
-  HyperEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
+  HyperEquation::speeds(const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
     throw Lucee::Except("HyperEquation::speeds: Method not implemented");
   }
