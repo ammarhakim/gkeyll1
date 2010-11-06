@@ -184,6 +184,14 @@ namespace Lucee
       static int luaInitialize(lua_State *L);
 
 /**
+ * Lua callable method to set current time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetCurrTime(lua_State *L);
+
+/**
  * Lua callable method to advance solver to given time.
  *
  * @param L Lua state to use.

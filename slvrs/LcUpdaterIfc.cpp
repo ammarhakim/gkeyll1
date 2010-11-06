@@ -109,6 +109,7 @@ namespace Lucee
   void
   UpdaterIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
+    lfm.appendFunc("setCurrTime", luaSetCurrTime);
     lfm.appendFunc("advance", luaAdvance);
     lfm.appendFunc("initialize", luaInitialize);
     lfm.appendFunc("setIn", luaSetInpVars);
@@ -121,6 +122,17 @@ namespace Lucee
     UpdaterIfc *updater
       = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     updater->initialize();
+    return 0;
+  }
+
+  int
+  UpdaterIfc::luaSetCurrTime(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
+    double t = lua_tonumber(L, 2); // current time to set
+    updater->setCurrTime(t);
+
     return 0;
   }
 
