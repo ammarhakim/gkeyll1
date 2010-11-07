@@ -53,6 +53,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  double
+  StructuredGridBase<NDIM>::getDx(unsigned dir) const
+  { 
+    return compSpace.getShape(dir)/globalBox.getShape(dir);
+  }
+
+  template <unsigned NDIM>
   void
   StructuredGridBase<NDIM>::setIndex(int i) const
   {

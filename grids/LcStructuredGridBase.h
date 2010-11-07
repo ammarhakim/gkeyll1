@@ -68,6 +68,14 @@ namespace Lucee
       Lucee::Region<NDIM, double> getComputationalSpace() const;
 
 /**
+ * Return cell spacing in computational space in specifed direction.
+ *
+ * @param dir Direction in which spacing is needed.
+ * @return spacing in computational space in direction 'dir'
+ */
+      double getDx(unsigned dir) const;
+
+/**
  * Set the current cell location in grid to (i).
  *
  * @param i Index location into grid.
