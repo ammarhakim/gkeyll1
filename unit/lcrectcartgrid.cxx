@@ -27,6 +27,11 @@ test_1()
   Lucee::Region<3, double> physBox(lower, upper);
   Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
 
+// cell spacing
+  LC_ASSERT("Testing spacing in x-direction", grid3.getDx(0) == 1.0);
+  LC_ASSERT("Testing spacing in y-direction", grid3.getDx(1) == 1.0);
+  LC_ASSERT("Testing spacing in z-direction", grid3.getDx(2) == 1.0);
+
 // cell volume
   int idx[3];
   Lucee::RowMajorSequencer<3> seq(localBox);
