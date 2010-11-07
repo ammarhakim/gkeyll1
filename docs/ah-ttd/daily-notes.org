@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* November 6th
+
+  Completed TM Maxwell solver in 2D. This is to test ideas on how to
+  conserve divergence errors in Maxwell equations.
+
+  Need to write an alias function.
+
 * October 31st
 
   Numerical flux class needs to be defined. The interface method

@@ -90,6 +90,7 @@ namespace Lucee
     Field<NDIM, T>::appendLuaCallableMethods(lfm);
 // now append local methods
     lfm.appendFunc("set", luaSet);
+    lfm.appendFunc("alias", luaAlias);
   }
 
   template <unsigned NDIM, typename T>
@@ -108,6 +109,38 @@ namespace Lucee
 
     sgf->setFromLuaFunction(L, fnRef);
     return 0;
+  }
+
+  
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaAlias(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+    if (! lua_isnumber(L, 2) && ! lua_isnumber(L, 3))
+    {
+      Lucee::Except lce("StructGridField::luaAlias: 'alias' method must be passed half-open interval as [s,e)");
+      throw lce;
+    }
+    unsigned s = lua_tonumber(L, 2);
+    unsigned e = lua_tonumber(L, 3);
+
+    Lucee::Field<NDIM, T> aliasFld = sgf->getSubCompView(s, e);
+    Lucee::StructGridField<NDIM, T>* aliasSgf = 
+      new Lucee::StructGridField<NDIM, T>(aliasFld, *sgf->grid);
+
+    size_t nbytes = sizeof(Lucee::PointerHolder<StructGridField<NDIM, T> >);
+    Lucee::PointerHolder<StructGridField<NDIM, T> > *ph =
+      (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_newuserdata(L, nbytes);
+    ph->pointer = aliasSgf;
+    ph->pointer->template setBaseType<Lucee::DataStructIfc>();
+    ph->pointer->template setDerivedType<StructGridField<NDIM, T> >();
+
+    luaL_getmetatable(L, typeid(StructGridField<NDIM, T>).name());
+    lua_setmetatable(L, -2);
+
+    return 1;
   }
 
   template <unsigned NDIM, typename T>
@@ -146,6 +179,12 @@ namespace Lucee
       }
       lua_pop(L, 1);
     }
+  }
+
+  template <unsigned NDIM, typename T>
+  StructGridField<NDIM, T>::StructGridField(const Field<NDIM, T>& fld, Lucee::StructuredGridBase<NDIM>& grd)
+    : Lucee::Field<NDIM, T>(fld), grid(&grd)
+  {
   }
 
 // instantiations
