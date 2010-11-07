@@ -88,6 +88,14 @@ namespace Lucee
       static int luaSet(lua_State *L);
 
 /**
+ * Lua callable method to return an alias to this field.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaAlias(lua_State *L);
+
+/**
  * Set field from Lua function. The function itself is specified using
  * a reference to the Lua function on stack.
  *
@@ -99,6 +107,14 @@ namespace Lucee
     private:
 /** Pointer to grid */
       Lucee::StructuredGridBase<NDIM> *grid;
+
+/**
+ * Create a field from supplied one (shallow copy).
+ *
+ * @param fld Field to copy from.
+ * @param grd Grid to use
+ */
+      StructGridField(const Field<NDIM, T>& fld, Lucee::StructuredGridBase<NDIM>& grd);
   };
 }
 
