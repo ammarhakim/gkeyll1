@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* November 7th
+
+  Completed alias method for fields. This was relatively simple. Also
+  added divergence operator to the structured grid field. Presently
+  only works on rectangular grids.
+
+  In the 2D TM Maxwell solver, the boundary conditions need to be
+  figured out for the psi (correction) potential.
+
+  Need to add BC updaters.
+
+  Lucee is turning into a mixed OO and procedural system. Which is
+  good as not everything needs to be an updater and this simplifies
+  the input file code enormously. No endless writing of updater
+  anymore.
+
 * November 6th
 
   Completed TM Maxwell solver in 2D. This is to test ideas on how to

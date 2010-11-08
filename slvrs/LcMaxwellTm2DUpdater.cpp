@@ -100,10 +100,12 @@ namespace Lucee
           + c2dtdx2*( q(i+1,j,EZ)-2*q(i,j,EZ)+q(i-1,j,EZ) )
           + c2dtdy2*( q(i,j+1,EZ)-2*q(i,j,EZ)+q(i,j-1,EZ) );
 // update psi
+//         qNew(i,j,PSI) = q(i,j,PSI)
+//           + gc2dtdx*( q(i+1,j,BX)-q(i-1,j,BX) ) + gc2dtdy*( q(i,j+1,BY)-q(i,j-1,BY) )
+//           + g2c2dtdx2*( q(i+1,j,PSI)-2*q(i,j,PSI)+q(i-1,j,PSI) )
+//           + g2c2dtdy2*( q(i,j+1,PSI)-2*q(i,j,PSI)+q(i,j-1,PSI) );
         qNew(i,j,PSI) = q(i,j,PSI)
-          + gc2dtdx*( q(i+1,j,BX)-q(i-1,j,BX) ) + gc2dtdy*( q(i,j+1,BY)-q(i,j-1,BY) )
-          + g2c2dtdx2*( q(i+1,j,PSI)-2*q(i,j,PSI)+q(i-1,j,PSI) )
-          + g2c2dtdy2*( q(i,j+1,PSI)-2*q(i,j,PSI)+q(i,j-1,PSI) );
+          + gc2dtdx*( q(i+1,j,BX)-q(i-1,j,BX) ) + gc2dtdy*( q(i,j+1,BY)-q(i,j-1,BY) );
       }
     }
 
