@@ -55,6 +55,54 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  StructGridField<NDIM, T>&
+  StructGridField<NDIM, T>::operator=(const T& val)
+  {
+    Field<NDIM, T>::operator=(val);
+
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::divergence(Lucee::StructGridField<NDIM, T>& div) const
+  {
+// WARNING: THIS CODE PRESENTLY ONLY WORKS FOR RECTCART GRIDS
+
+    if (this->getNumComponents() != NDIM)
+    {
+      Lucee::Except lce("StructGridField::divergence: Incorrect number of components. Should be ");
+      lce << NDIM << " but has " << this->getNumComponents() << " components." ;
+      throw lce;
+    }
+
+// allocate variaous iterators
+    Lucee::FieldPtr<T> divPtr = div.createPtr();
+    Lucee::ConstFieldPtr<T> rPtr = this->createConstPtr();
+    Lucee::ConstFieldPtr<T> lPtr = this->createConstPtr();
+
+    int idx[NDIM]; // for indexing
+
+    div = 0.0; // clear divergence field
+    for (unsigned n=0; n<NDIM; ++n)
+    {
+      double dx1 = 1/grid->getDx(n);
+      Lucee::RowMajorSequencer<NDIM> seq(this->getExtRegion());
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        div.setPtr(divPtr, idx); // current cell
+        idx[n] = idx[n]+1;
+        this->setPtr(rPtr, idx); // right cell
+        idx[n] = idx[n]-1-1;
+        this->setPtr(lPtr, idx); // left cell
+        divPtr[0] += dx1*(rPtr[n]-lPtr[n]);
+      }
+    }
+
+  }
+
+  template <unsigned NDIM, typename T>
   void
   StructGridField<NDIM, T>::readInput(Lucee::LuaTable& tbl)
   {
@@ -91,6 +139,7 @@ namespace Lucee
 // now append local methods
     lfm.appendFunc("set", luaSet);
     lfm.appendFunc("alias", luaAlias);
+    lfm.appendFunc("div", luaDivergence);
   }
 
   template <unsigned NDIM, typename T>
@@ -141,6 +190,25 @@ namespace Lucee
     lua_setmetatable(L, -2);
 
     return 1;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaDivergence(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce("StructGridField::luaDivergence: Must provide a field to 'div' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<StructGridField<NDIM, T> > *fldPtr =
+      (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_touserdata(L, 2);
+// compute divergence
+    sgf->divergence(*fldPtr->pointer);
+
+    return 0;
   }
 
   template <unsigned NDIM, typename T>
