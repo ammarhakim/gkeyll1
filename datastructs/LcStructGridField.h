@@ -54,11 +54,26 @@ namespace Lucee
       StructGridField<NDIM, T>& operator=(const StructGridField<NDIM, T>& fld);
 
 /**
+ * Set all values of field to supplied one.
+ *
+ * @param val Value to set.
+ * @return Reference to this field.
+ */
+      StructGridField<NDIM, T>& operator=(const T& val);
+
+/**
  * Create from Lua table data.
  *
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
+ * Compute divergence of this field and store in supplied field.
+ *
+ * @param div Divergence is stored in this field.
+ */
+      void divergence(Lucee::StructGridField<NDIM, T>& div) const;
 
 /**
  * Write dataStruct to given node in HDF5 file.
@@ -94,6 +109,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaAlias(lua_State *L);
+
+/**
+ * Lua callable method to compute divergence of this field.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaDivergence(lua_State *L);
 
 /**
  * Set field from Lua function. The function itself is specified using
