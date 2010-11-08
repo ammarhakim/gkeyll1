@@ -76,7 +76,7 @@ namespace Lucee
       throw lce;
     }
 
-// allocate variaous iterators
+// create various iterators
     Lucee::FieldPtr<T> divPtr = div.createPtr();
     Lucee::ConstFieldPtr<T> rPtr = this->createConstPtr();
     Lucee::ConstFieldPtr<T> lPtr = this->createConstPtr();
@@ -86,8 +86,8 @@ namespace Lucee
     div = 0.0; // clear divergence field
     for (unsigned n=0; n<NDIM; ++n)
     {
-      double dx1 = 1/grid->getDx(n);
-      Lucee::RowMajorSequencer<NDIM> seq(this->getExtRegion());
+      double dx1 = 0.5/grid->getDx(n);
+      Lucee::RowMajorSequencer<NDIM> seq(this->getRegion());
       while (seq.step())
       {
         seq.fillWithIndex(idx);
