@@ -1,5 +1,22 @@
 # -*- org -*-
 
+* November 8th
+
+  Field and array classes need to be tested with the alias-ed
+  fields. Aliases don't always seem to work, for some reason.
+
+  Turns out that the Field::getSubCompView() method is not returning
+  the correct sub-array. The base class methods in Array do not work
+  correctly with sliced fields. This is a very important bug to fix
+  ASAP. A clue: when using a sliced subComView field one does, for
+  example, ez(i,j,0). However, the base class code actually uses the
+  index ez(i,j,-2), in case ez points to the 3rd component of a
+  3-component field.
+
+  Big fixed! The solution is to reset the indexer and array start
+  indices separately. This makes the getSubCompView a very tricky
+  method to implement, but it looks likes the only way it can be done.
+
 * November 7th
 
   Completed alias method for fields. This was relatively simple. Also

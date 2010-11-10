@@ -160,7 +160,6 @@ namespace Lucee
     return 0;
   }
 
-  
   template <unsigned NDIM, typename T>
   int
   StructGridField<NDIM, T>::luaAlias(lua_State *L)

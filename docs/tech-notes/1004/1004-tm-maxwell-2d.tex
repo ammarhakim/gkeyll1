@@ -224,7 +224,7 @@ c$. Discretizing this system using the wave propagation scheme gives
 and
 \begin{align}
   \Delta \psi_{i,j} = 
-  \frac{\gamma c^2 \Delta t}{2 \Delta x}
+  -\frac{\gamma c^2 \Delta t}{2 \Delta x}
   \left(
     B^x_{i+1,j} - B^x_{i-1,j}
   \right)
@@ -233,7 +233,7 @@ and
   \left(
     \psi_{i+1,j} - 2\psi_{i,j} + \psi_{i-1,j}
   \right) \notag \\
-  +
+  -
   \frac{\gamma c^2 \Delta t}{2 \Delta y}
   \left(
     B^y_{i,j+1} - B^y_{i,j-1}

@@ -343,13 +343,6 @@ namespace Lucee
       T operator()(int i, int j, int k, int l) const;
 
 /**
- * Reset the lower bounds of the array.
- *
- * @param nlo New lower bounds.
- */
-      void resetLower(const int nlo[NDIM]);
-
-/**
  * Copy array from supplied one. The input array must have the exact
  * same shape as this array.
  *
@@ -405,6 +398,23 @@ namespace Lucee
  * @return reference to data.
  */
       const T& getConstRefToLoc(unsigned loc) const;
+
+/**
+ * Reset the lower bounds of the array.
+ *
+ * @param nlo New lower bounds.
+ */
+      void resetLower(const int nlo[NDIM]);
+
+/**
+ * Reset the lower bounds of the just the indexer for this array. The
+ * lower bound of the array itself is not changed. This is for use in
+ * derived classes that have overloaded the getLower() and getUpper()
+ * methods.
+ *
+ * @param nlo New lower bounds.
+ */
+      void resetLowerForIndexer(const int nlo[NDIM]);
 
     private:
 /** Indexer into array */
@@ -747,6 +757,12 @@ namespace Lucee
   {
     for (unsigned i=0; i<NDIM; ++i)
       start[i] = nlo[i];
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  void
+  Array<NDIM, T, INDEXER>::resetLowerForIndexer(const int nlo[NDIM])
+  {
     indexer.resetLower(nlo);
   }
 
