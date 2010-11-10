@@ -124,11 +124,14 @@ namespace Lucee
       newLower[i] = rgnIdx.getLower(i);
     newLower[NDIM] = -sc; // returned field's 0th component should be sc
 
-    subArr.resetLower(newLower);
     Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
-
+    fld.resetLowerForIndexer(newLower); // reset the Array indexer
     fld.rgnIdx = this->rgnIdx;
     fld.rgnIdx.resetLower(newLower);
+
+    newLower[NDIM] = 0; // start index should be 0, always
+    fld.resetLower(newLower); // reset Array start
+
     return fld;
   }
 

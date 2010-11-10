@@ -585,6 +585,46 @@ test_13()
     }
 }
 
+void
+test_14()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcField(rgn, 3, lg, ug, 0.0);
+  Lucee::Field<2, double> current(rgn, 1, lg, ug, 10.5);
+
+  elcField = 0.0;
+  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+      elcField(i,j,2) = 10.0;
+
+  Lucee::Field<2, double> ez = elcField.getSubCompView(2, 3);
+  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+      LC_ASSERT("Testing sub-comp field", ez(i,j,0) == 10.0);
+
+  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+      ez(i,j,0) = 12.5;
+
+  for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+    for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+      LC_ASSERT("Testing sub-comp field", elcField(i,j,2) == 12.5);
+
+  ez = 100.0;
+   for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+     for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+       LC_ASSERT("Testing sub-comp field", elcField(i,j,2) == 100.0);
+
+   ez.accumulate(1.0, current);
+   for (int i=elcField.getLower(0); i<elcField.getUpper(0); ++i)
+     for (int j=elcField.getLower(1); j<elcField.getUpper(1); ++j)
+       LC_ASSERT("Testing accumulated", elcField(i,j,2) == 110.5);
+}
+
 int
 main(void)
 {
@@ -602,5 +642,6 @@ main(void)
   test_11();
   test_12();
   test_13();
+  test_14();
   LC_END_TESTS;
 }
