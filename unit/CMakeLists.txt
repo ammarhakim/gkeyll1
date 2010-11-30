@@ -115,3 +115,7 @@ target_link_libraries(lcluacobj lclib lcloki lclua)
 # lcfieldptr
 add_executable(lcfieldptr lcfieldptr.cxx)
 target_link_libraries(lcfieldptr lcdatastructs lclib lcloki lclua)
+
+# lcgslelliptic
+add_executable(lcgslelliptic lcgslelliptic.cxx)
+target_link_libraries(lcgslelliptic ${GSL_CONFIG_LIBS})
