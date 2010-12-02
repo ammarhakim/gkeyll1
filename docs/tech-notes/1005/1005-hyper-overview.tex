@@ -1,7 +1,8 @@
-\documentclass[11pt]{article}
+\documentclass[11pt, reqno]{amsart}
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{amsthm}
 \usepackage[dvips]{graphicx}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{setspace}
@@ -15,11 +16,8 @@
 \evensidemargin 0.0in
 \textwidth      6.5in
 \textheight     9.0in
-\headheight     1.0in
-\headsep        0.0in
-\leftmargin      1.0in
-\rightmargin      1.0in
-\topmargin      -.75in
+\leftmargin     1.0in
+\rightmargin    1.0in
 
 %% Autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
@@ -28,29 +26,22 @@
 %% Commonly used macros
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-\title{List of technical notes in Lucee}
-\author{}
+\title{An overview of hyperbolic balance laws and numerical schemes}%
+\author{Ammar H. Hakim}%
 \date{}
 
 \begin{document}
+% header text
+\lhead{Tech-Note 1005}
 \maketitle
 
-\begin{itemize}
-  \item {\bf 1001} Algorithms for coupling two ``black box'' solvers.
-  \item {\bf 1002} Algorithms for solution of the radiation transport
-    equation in a slab.
-  \item {\bf 1003} Transport equations, finite-volume schemes and
-    coupling algorithms.
-  \item {\bf 1004} An analysis of High-Resolution Wave Propagation
-    scheme for 2D TM mode Maxwell equations.
-  \item {\bf 1005} An overview of hyperbolic balance laws and
-    numerical schemes.
-\end{itemize}
-
 \end{document}
+
