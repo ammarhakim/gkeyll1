@@ -27,10 +27,11 @@
   Remark 1: Is this not just the standard "verification" analysis? At
   first sight it seems like it, however, the distinction made in the
   first paragraph holds between verification and what is being
-  proposed here. I.e. verification, as it is a post-algorithm step,
-  can only uncover bugs but not prove they do not exist. Here, an
-  analysis is being made on what it takes to construct a provably
-  correct algorithm, i.e. a pre-algorithm step. [End remark]
+  proposed here. I.e. verification, as it is a post-algorithm and
+  implementation step, can only uncover bugs but not prove they do not
+  exist. Here, an analysis is being made on what it takes to construct
+  a provably correct algorithm. It need not even be implemented [End
+  remark]
 
   Remark 2: Is this not what all numerical scheme developers do?
   I.e. do they not show that their scheme converges, has so-and-so
@@ -42,10 +43,10 @@
   What is being proposed here is the following. A scheme must solve
   the mathematical equations accurately, i.e. the scheme must provably
   converge to the correct solution in the appropriate limit. However,
-  this is not enough. If the mathematical equations has important
+  this is not enough. If the mathematical equations have certain
   properties, it must be proved that the scheme satisfies those
   properties. The larger the set of properties the scheme can be
-  prover to satisfy, the greater the confidence in having developed a
+  proved to satisfy, the greater the confidence in having developed a
   correct scheme. Note that this step does not actually require the
   implementation of the scheme in executable code, but only a
   sufficient knowledge of the mathematical properties of the system
@@ -56,14 +57,18 @@
   implementation must be constructed. This step is fraught with
   difficulties. First, although our scheme may satisfy a broad variety
   of properties, its implementation is not guaranteed to automatically
-  inherit this. This is essentially a problem with the disjoint
-  between the computer implementation language and the language in
-  which mathematical manipulations are done. A major reason for the
-  gap is the lack of formalization of the manipulations needed in the
-  proofs. [Descartes calculating machine]. This gap will not close
-  anytime soon. What is required is a new approach in which the scheme
-  can be expressed directly, proofs performed (manually would be good
-  enough) and transformed into executable code.
+  inherit this. This is due to the gap between a programming language
+  and the language in which mathematical manipulations are done. A
+  reason for the gap is the lack of formalization of the manipulations
+  needed in the proofs. [Descartes calculating machine]. This gap will
+  not close anytime soon. What is required is a new approach in which
+  the scheme can be expressed directly, proofs performed (manually
+  would be good enough) and transformed into executable code.
+
+  Remark: The construction of a scheme is not unique: i.e. several
+  schemes can be constructed for the same mathematical model. If each
+  of these schemes is proved to be correct, then the one with the most
+  efficient implementation can be selected. [End remark]
 
   So the question comes up: given the state of art, what programming
   techniques to adopt to ensure, as far as possible that the
