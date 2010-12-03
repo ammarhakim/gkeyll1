@@ -12,12 +12,12 @@
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
 %% Set page size properly
-\oddsidemargin  0.0in
-\evensidemargin 0.0in
-\textwidth      6.5in
-\textheight     9.0in
-\leftmargin     1.0in
-\rightmargin    1.0in
+%\oddsidemargin  0.0in
+%\evensidemargin 0.0in
+%\textwidth      6.5in
+%\textheight     9.0in
+%\leftmargin     1.0in
+%\rightmargin    1.0in
 
 %% Autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
@@ -30,11 +30,19 @@
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\pfracb}[2]{\partial #1/\partial #2}
 \newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-\title{An overview of hyperbolic balance laws and numerical schemes}%
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title{An overview of hyperbolic balance laws and numerical schemes
+  with application to plasma fluid equations}%
 \author{Ammar H. Hakim}%
 \date{}
 
@@ -42,6 +50,128 @@
 % header text
 \lhead{Tech-Note 1005}
 \maketitle
+
+Hyperbolic balance laws are a broad class of equations that describe
+phenomena propagating with finite wave speeds. Coupled with source
+terms they can model a diverse set of physical systems in continuum
+mechanics including neutral (relativistic and nonrelativistic) fluids,
+electromagnetism, a variety of magnetohydrodynamics (MHD) equations,
+linear and nonlinear elasticity and even equations of general
+relativity. In this note an overview of hyperbolic balance laws and
+numerical schemes to solve them is given. The intended applications
+are to plasma fluid equations that introduce unique challenges due to
+thier inherently multiphysics nature and from the disparate time/space
+scales involved. No claim to originality of the material is made, but
+useful results are collected in one place for use of students and
+researchers not familiar with this important class of equations.
+
+The rest of this note is organized as follows. First, the basic
+properties of hyperbolic balance laws are given, specially those
+important to designing robust numerical schemes. The mathematical
+machinery is kept a minimum and hence some of the arguments may not be
+rigorous. Then, a set of example equations are given, drawn from fluid
+mechanics, electromagnetic and plasma physics. Next, the concepts of
+Riemann problems and relaxation systems are introduced. These are
+essential to the construction of numerical schemes. Three broad
+families of numerical schemes are described. The first one is based on
+expansion of the solution using Taylor series. This family is not
+dealt with in detail as the schemes do not preserve, in general,
+important properties of the continuous balance laws. The second family
+of numerical scheme are based on the reconstruction of high-order
+polynomial representation of the solution in each grid cell from cell
+averages. The third family of schemes are based on representing the
+solution in each cell using a set of basis functions. Example
+applications of these each of these schemes are then given.
+
+\section{Basic properties of hyperbolic balance laws}
+
+Consider the $N$ dimensional system of $m$ balance laws
+\begin{align}
+  \spfrac{t}{U} + \sum_{i=1}^N \spfrac{i}{F_i(U)} = S(U,x,t) 
+  \label{eq:hypbalance}
+\end{align}
+where $x = [x_1,\ldots,x_N] \in \mathbb{R}^N$, $U(x,t) \in
+\mathbb{R}^m$, the smooth function $F_i(U)$ is the flux in the $i$-th
+direction and $S(U,x,t) \in \mathbb{R}^m$ are source terms. In this
+and the following we denote $\partial_i \equiv \partial/\partial x_i$
+and $D \equiv \partial/\partial U$.
+
+\begin{dfn}[Hyperbolic Equations]
+  The system of balance laws \eqr{\ref{eq:hypbalance}} are said to be
+  \emph{hyperbolic} if for any admissible $U$ the flux Jacobian
+  \begin{align}
+    A(U,n) \equiv \sum_{i=0}^N n_i DF_i(U)
+  \end{align}
+  where $n\equiv [n_1,\ldots,n_N]$ are components of a unit vector,
+  has real eigenvalues and a complete set of right eigenvectors. The
+  eigenvalues $\lambda_1(U,n) \le \ldots \le \lambda_m(U,n)$ are
+  called the \emph{characteristic speeds} of the system. We will
+  denote $r_p(U,n)$ and $l_p(U,n)$, $p=1,\ldots,m$, as the right and
+  left eigenvectors and assume the normalization $l_p r_q =
+  \delta_{pg}$.  The system is said to be \emph{strictly hyperbolic}
+  if all characteristic speeds are distinct and \emph{isotropic} if
+  the eigenvalues and eigenvectors do not depend on the unit vector
+  $n$.
+\end{dfn}
+
+Intuitively, hyperbolic equations describe the propagation of waves,
+the wave speeds given by the characteristic speeds and the local
+propagation direction by the right eigenvectors. If the system is
+nonlinear the wave speeds will vary and complex phenomena can
+result. This is specially true in presence of sources, in which case
+the waves can undergo dispersion and diffusion.
+
+It is well known that the solution to \eqr{\ref{eq:hypbalance}} can
+develop discontinuities in finite amount of time even if the initial
+data $U(x,0)$ is smooth. In this case we must deal with \emph{weak
+  solutions}, i.e. in the sense of distributions. Discontinuous weak
+solutions to \eqr{\ref{eq:hypbalance}} with $S(U,x,t)=0$ are
+characterized by the so called \emph{Rankine-Hugoniot} jump
+conditions. For simplicity consider a one-dimensional system of
+homogeneous equations
+\begin{align}
+  \spfrac{t}{U} + \spfrac{x}{F(U)} = 0
+  \label{eq:hypbalance-1d}
+\end{align}
+Then the following Lemma holds.
+\begin{lem}
+  Let $\script{C}$ be a smooth curve defined by $x=\xi(t)$. Then
+  $U(x,t)$ is a \emph{weak} solution to \eqr{\ref{eq:hypbalance-1d}}
+  if it a smooth solution in $x<\xi(t)$ and $x>\xi(t)$ and satisfies
+  the jump condition
+  \begin{align}
+    F(U_+) - F(U_-) = \dot{\xi}(U_+ - U_-)
+  \end{align}
+  where $U_\pm \equiv \lim_{x\rightarrow \xi(t)^\pm}U(x,t)$ .
+\end{lem}
+
+In the $N$-dimensional case we can generalize the Lemma as
+follows. Let $\script{S}$ be a $N-1$ dimensional surface embedded in
+$\mathbb{R}^N$ with local surface normal $n(\xi,t)$, where $\xi$ is a
+point on $\script{S}$. Let the normal velocity of the surface be
+$s$. Then the \emph{Rankine-Hugoniot} condition reads
+\begin{align}
+  \sum_{i=1}^N 
+  n_i[F_i(U_+) - F_i(U_-)] = s(U_+ - U_-)
+\end{align}
+
+Not all solutions to a hyperbolic balance law are admissible. For
+example, for fluid equations the density and pressure must remain
+non-negative. This leads to the concept of \emph{invariant domains},
+defined below
+\begin{dfn}[Invariant Domains]
+  The convex set $\script{U} \subset \mathbb{R}^m$ is said to be an
+  invariant domain of \eqr{\ref{eq:hypbalance}} if it has the property
+  that if $U(x,0) \in \script{U}$ then $U(x,t) \in \script{U}$ for all
+  $x,t$.
+\end{dfn}
+
+Essentially, an invariant domain is the set in solution space that is
+preserved by the balance law. When constructing numerical schemes it
+is often, though not always, important to use a scheme that provably
+preserves invariant domains. This is specially true if the expected
+solutions are know to lie on invariant domains boundaries, for
+example, in fluid flow with vacuum regions.
 
 \end{document}
 
