@@ -57,10 +57,10 @@ terms they can model a diverse set of physical systems in continuum
 mechanics including neutral (relativistic and nonrelativistic) fluids,
 electromagnetism, a variety of magnetohydrodynamics (MHD) equations,
 linear and nonlinear elasticity and even equations of general
-relativity. In this note an overview of hyperbolic balance laws and
-numerical schemes to solve them is given. The intended applications
-are to plasma fluid equations that introduce unique challenges due to
-thier inherently multiphysics nature and from the disparate time/space
+relativity. This note is an overview of hyperbolic balance laws and
+numerical schemes to solve them. The intended applications are to
+plasma fluid equations. Plasmas introduce unique challenges from their
+inherently multiphysics nature and from the disparate time/space
 scales involved. No claim to originality of the material is made, but
 useful results are collected in one place for use of students and
 researchers not familiar with this important class of equations.
@@ -68,20 +68,21 @@ researchers not familiar with this important class of equations.
 The rest of this note is organized as follows. First, the basic
 properties of hyperbolic balance laws are given, specially those
 important to designing robust numerical schemes. The mathematical
-machinery is kept a minimum and hence some of the arguments may not be
-rigorous. Then, a set of example equations are given, drawn from fluid
-mechanics, electromagnetic and plasma physics. Next, the concepts of
-Riemann problems and relaxation systems are introduced. These are
-essential to the construction of numerical schemes. Three broad
-families of numerical schemes are described. The first one is based on
-expansion of the solution using Taylor series. This family is not
-dealt with in detail as the schemes do not preserve, in general,
-important properties of the continuous balance laws. The second family
-of numerical scheme are based on the reconstruction of high-order
-polynomial representation of the solution in each grid cell from cell
-averages. The third family of schemes are based on representing the
-solution in each cell using a set of basis functions. Example
-applications of these each of these schemes are then given.
+machinery is kept to a minimum and hence some of the arguments may not
+be rigorous. Then, a set of example equations are given, drawn from
+fluid mechanics, electromagnetic and plasma physics. Next, the
+concepts of Riemann problems and relaxation systems are
+introduced. These are essential to the construction of numerical
+schemes. Three broad families of numerical schemes are described. The
+first one is based on expansion of the solution using Taylor
+series. This family is not dealt with in detail as the schemes do not
+preserve, in general, important properties of the continuous balance
+laws. The second family of numerical scheme are based on the
+reconstruction of high-order polynomial representation of the solution
+in each grid cell from cell averages. The third family of schemes are
+based on representing the solution in each cell using a set of basis
+functions. Example applications of these each of these schemes are
+then given.
 
 \section{Basic properties of hyperbolic balance laws}
 

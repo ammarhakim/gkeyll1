@@ -1,5 +1,74 @@
 # -*- org -*-
 
+* December 2nd
+
+  Black box testing can only uncover bugs but never prove that there
+  are none. To ensure that bugs do not exist one needs to examine the
+  structure of the algorithm and prove, mathematically, that it is
+  correct, i.e. does what it promises. Such verification may not be
+  possible to automate and that could explain the extreme labor
+  required to produce correct software.
+
+  How can such a proof-based method be applied to computational
+  physics? There are several challenges. First, we need to ensure that
+  the chosen mathematical equations describe the physical system to be
+  modelled with sufficient detail. This is impossible in general and
+  approximations always need to be made. The degree to which these
+  approximations affect the physical realism of the model is hard to
+  determine and, ultimately, direct comparisons with experimental
+  observations must be made. [Scientific Conception of the World]
+  Second, once the mathematical equations are selected, a method to
+  solve them needs to be developed.
+
+  As a first step we can ignore the complexities of selecting an
+  accurate mathematical model and focus on developing a provably
+  correct algorithm.
+
+  Remark 1: Is this not just the standard "verification" analysis? At
+  first sight it seems like it, however, the distinction made in the
+  first paragraph holds between verification and what is being
+  proposed here. I.e. verification, as it is a post-algorithm step,
+  can only uncover bugs but not prove they do not exist. Here, an
+  analysis is being made on what it takes to construct a provably
+  correct algorithm, i.e. a pre-algorithm step. [End remark]
+
+  Remark 2: Is this not what all numerical scheme developers do?
+  I.e. do they not show that their scheme converges, has so-and-so
+  order? I submit that this process is only the first step. Even if
+  the scheme converges with some order, it is not clear if it actually
+  preserves the mathematical properties of the equation system. [End
+  remark]
+
+  What is being proposed here is the following. A scheme must solve
+  the mathematical equations accurately, i.e. the scheme must provably
+  converge to the correct solution in the appropriate limit. However,
+  this is not enough. If the mathematical equations has important
+  properties, it must be proved that the scheme satisfies those
+  properties. The larger the set of properties the scheme can be
+  prover to satisfy, the greater the confidence in having developed a
+  correct scheme. Note that this step does not actually require the
+  implementation of the scheme in executable code, but only a
+  sufficient knowledge of the mathematical properties of the system
+  being solved and certain dexterity in manipulating the formulas
+  involved in the scheme.
+
+  What about actual implementation? For the scheme to be useful an
+  implementation must be constructed. This step is fraught with
+  difficulties. First, although our scheme may satisfy a broad variety
+  of properties, its implementation is not guaranteed to automatically
+  inherit this. This is essentially a problem with the disjoint
+  between the computer implementation language and the language in
+  which mathematical manipulations are done. A major reason for the
+  gap is the lack of formalization of the manipulations needed in the
+  proofs. [Descartes calculating machine]. This gap will not close
+  anytime soon. What is required is a new approach in which the scheme
+  can be expressed directly, proofs performed (manually would be good
+  enough) and transformed into executable code.
+
+  So the question comes up: given the state of art, what programming
+  techniques to adopt to ensure, as far as possible that the
+  implementation is faithful to the scheme?
+
 * November 8th
 
   Field and array classes need to be tested with the alias-ed
