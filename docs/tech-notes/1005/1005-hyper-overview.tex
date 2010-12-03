@@ -41,8 +41,8 @@
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
 
-\title{An overview of hyperbolic balance laws and numerical schemes
-  with application to plasma fluid equations}%
+\title[Hyperbolic balance laws]{An overview of hyperbolic balance laws
+  and numerical schemes with application to plasma fluid equations}%
 \author{Ammar H. Hakim}%
 \date{}
 
@@ -86,6 +86,8 @@ then given.
 
 \section{Basic properties of hyperbolic balance laws}
 
+\subsection{Definition of hyperbolic balance laws}
+
 Consider the $N$ dimensional system of $m$ balance laws
 \begin{align}
   \spfrac{t}{U} + \sum_{i=1}^N \spfrac{i}{F_i(U)} = S(U,x,t) 
@@ -122,11 +124,49 @@ nonlinear the wave speeds will vary and complex phenomena can
 result. This is specially true in presence of sources, in which case
 the waves can undergo dispersion and diffusion.
 
+Consider a change of variables defined by $U=\varphi(V)$, where
+$V(x,t) \in \mathbb{R}^m$. Such a change of variables occurs
+frequently in applications, for example, going between the
+non-conservative and conservative form of fluid equations. With this
+change of variables \eqr{\ref{eq:hypbalance}} become
+\begin{align}
+  \spfrac{t}{V} + \sum_{i=1}^N 
+  \varphi'(V)^{-1}
+  DF_i(U)
+  \varphi'(V)
+  \spfrac{i}{V}
+  = 
+  \varphi'(V)^{-1}S(U,x,t)
+  \label{eq:hypbalance}
+\end{align}
+
+\subsection{Weak solutions and Rankine-Hugoniot conditions}
+
 It is well known that the solution to \eqr{\ref{eq:hypbalance}} can
 develop discontinuities in finite amount of time even if the initial
 data $U(x,0)$ is smooth. In this case we must deal with \emph{weak
-  solutions}, i.e. in the sense of distributions. Discontinuous weak
-solutions to \eqr{\ref{eq:hypbalance}} with $S(U,x,t)=0$ are
+  solutions}, i.e. in the sense of distributions. For every smooth
+test function $\phi(x,t)$ with compact support in
+$\mathbb{R}^m\times[0,T)$ the weak solution satifies
+\begin{align}
+  \int_0^T\int_{\mathbb{R}^m}
+  \left[
+    U\spfrac{t}{\phi}
+    +
+    \sum_{i=1}^N F_i(U)\spfrac{i}{\phi}
+  \right]
+  dx dt
+  &+
+  \int_{\mathbb{R}^m}
+  \phi(x,0)U(x,0) dx
+  = \notag \\
+  &-
+  \int_0^T\int_{\mathbb{R}^m}
+  S(U,x,t)\phi(x,t)
+  dx dt  
+\end{align}
+
+Discontinuous weak solutions to \eqr{\ref{eq:hypbalance}} are
 characterized by the so called \emph{Rankine-Hugoniot} jump
 conditions. For simplicity consider a one-dimensional system of
 homogeneous equations
@@ -156,10 +196,12 @@ $s$. Then the \emph{Rankine-Hugoniot} condition reads
   n_i[F_i(U_+) - F_i(U_-)] = s(U_+ - U_-)
 \end{align}
 
-Not all solutions to a hyperbolic balance law are admissible. For
-example, for fluid equations the density and pressure must remain
-non-negative. This leads to the concept of \emph{invariant domains},
-defined below
+\subsection{Invariant domains}
+
+The solution vector $U(x,t)$, in general, can take values only in a
+open subset of $\mathbb{R}^m$. For example, for fluid equations the
+density and pressure must remain non-negative. This leads to the
+concept of \emph{invariant domains}, defined below
 \begin{dfn}[Invariant Domains]
   The convex set $\script{U} \subset \mathbb{R}^m$ is said to be an
   invariant domain of \eqr{\ref{eq:hypbalance}} if it has the property
@@ -168,11 +210,11 @@ defined below
 \end{dfn}
 
 Essentially, an invariant domain is the set in solution space that is
-preserved by the balance law. When constructing numerical schemes it
-is often, though not always, important to use a scheme that provably
-preserves invariant domains. This is specially true if the expected
-solutions are know to lie on invariant domains boundaries, for
-example, in fluid flow with vacuum regions.
+preserved on evolution by the balance law. When constructing numerical
+schemes it is important to use a scheme that provably preserves
+invariant domains. This is specially true if the expected solutions
+are know to lie close to invariant domains boundaries, for example, in
+fluid flow with vacuum regions.
 
 \end{document}
 
