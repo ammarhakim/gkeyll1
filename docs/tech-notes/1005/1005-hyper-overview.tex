@@ -8,6 +8,7 @@
 \usepackage{setspace}
 \usepackage{fancyhdr}
 %\pagestyle{fancyplain}
+\usepackage{hyperref}
 
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
@@ -54,7 +55,7 @@
 Hyperbolic balance laws are a broad class of equations that describe
 phenomena propagating with finite wave speeds. Coupled with source
 terms they can model a diverse set of physical systems in continuum
-mechanics including neutral (relativistic and nonrelativistic) fluids,
+mechanics including neutral (relativistic and non-relativistic) fluids,
 electromagnetism, a variety of magnetohydrodynamics (MHD) equations,
 linear and nonlinear elasticity and even equations of general
 relativity. This note is an overview of hyperbolic balance laws and
@@ -107,17 +108,18 @@ and $D \equiv \partial/\partial U$.
   has real eigenvalues and a complete set of right eigenvectors. The
   eigenvalues $\lambda_1(U,n) \le \ldots \le \lambda_m(U,n)$ are
   called the \emph{characteristic speeds} of the system. We will
-  denote $r_p(U,n)$ and $l_p(U,n)$, $p=1,\ldots,m$, as the right and
-  left eigenvectors and assume the normalization $l_p r_q =
-  \delta_{pg}$.  The system is said to be \emph{strictly hyperbolic}
-  if all characteristic speeds are distinct and \emph{isotropic} if
-  the eigenvalues and eigenvectors do not depend on the unit vector
-  $n$.
+  denote $r_p(U,n)$ (column vector) and $l_p(U,n)$ (row vector),
+  $p=1,\ldots,m$, as the right and left eigenvectors and assume the
+  normalization $l_p r_q = \delta_{pg}$.  The system is said to be
+  \emph{strictly hyperbolic} if all characteristic speeds are distinct
+  and \emph{isotropic} if the eigenvalues and eigenvectors do not
+  depend on the unit vector $n$.
 \end{dfn}
 
 Intuitively, hyperbolic equations describe the propagation of waves,
 the wave speeds given by the characteristic speeds and the local
-propagation direction by the right eigenvectors. If the system is
+propagation direction by the right eigenvectors. The curves traced out
+by the waves are called the \emph{characteristics}. If the system is
 nonlinear the wave speeds will vary and complex phenomena can
 result. This is specially true in presence of sources, in which case
 the waves can undergo dispersion and diffusion.
@@ -135,8 +137,26 @@ change of variables \eqr{\ref{eq:hypbalance}} become
   \spfrac{i}{V}
   = 
   \varphi'(V)^{-1}S(U,x,t)
-  \label{eq:hypbalance}
+  \label{eq:hypbalance_V}
 \end{align}
+Here primes denote differentiation with $V$. The flux Jacobian for
+this system is
+\begin{align}
+  \tilde{A}(V,n) 
+  &=
+  \varphi'(V)^{-1} A(\varphi(V),n) \varphi'(V) \notag \\
+  &=
+  \varphi'(V)^{-1} R(\varphi(V),n) \Lambda(\varphi(V),n) L(\varphi(V),n) \varphi'(V)
+\end{align}
+where $L$ and $R$ are matrices of the left (arranged as rows) and
+right (arranged as columns) eigenvectors and $\Lambda$ is a diagonal
+matrix of the eigenvalues of $A$. From the form of this equation it is
+clear that the eigenvalues of the flux Jacobian of
+\eqr{\ref{eq:hypbalance_V}} are identical to the original system,
+i.e. $\lambda_p(\varphi(V), n)$ while the right and left eigenvectors
+are given by $\varphi'(V)^{-1} r_p(\varphi(V),n)$ and
+$l_p(\varphi(V),n) \varphi'(V)$. Hence, hyperbolicity is invariant
+under a invertible non-linear transform.
 
 \subsection{Weak solutions and Rankine-Hugoniot conditions}
 
@@ -145,7 +165,7 @@ develop discontinuities in finite amount of time even if the initial
 data $U(x,0)$ is smooth. In this case we must deal with \emph{weak
   solutions}, i.e. in the sense of distributions. For every smooth
 test function $\phi(x,t)$ with compact support in
-$\mathbb{R}^m\times[0,T)$ the weak solution satifies
+$\mathbb{R}^m\times[0,T)$ the weak solution satisfies
 \begin{align}
   \int_0^T\int_{\mathbb{R}^m}
   \left[
@@ -213,6 +233,24 @@ schemes it is important to use a scheme that provably preserves
 invariant domains. This is specially true if the expected solutions
 are know to lie close to invariant domains boundaries, for example, in
 fluid flow with vacuum regions.
+
+\subsection{Non-uniqueness of weak solutions and entropy/entropy-flux pairs}
+
+Uniqueness of weak solutions of hyperbolic balance laws breaks down in
+many situation. Intuitively, one can imagine this happens when
+characteristics of a nonlinear equation (which carry constant states
+with them) intersect: what is the solution at the intersection point?
+Hence, we need to construct a admissibility criteria on weak solutions
+to restore uniqueness.
+
+One way to do this is to introduce the concept of entropy/entropy-flux
+pairs. A scalar function $\eta(U)$ is a \emph{entropy} if there are
+associated other scalar functions $\left(q_1(U), \ldots,
+  q_m(U)\right)$, called the \emph{entropy fluxes}, such that for any
+$U$ we have
+\begin{align}
+  Dq_\alpha(U) = D\eta(U) DF_\alpha(U)
+\end{align}
 
 \end{document}
 
