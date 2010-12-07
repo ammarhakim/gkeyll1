@@ -3,6 +3,7 @@
 * Personal notes
 ** DONE Get first draft of website on server
 
+
    Just make something for now and worry about fixing it later.
 
    I have now created a website on
@@ -10,6 +11,17 @@
    http://www.ammar-hakim.org
 
    This has papers and will have technical notes.
+
+
+** December 3rd
+  Rewarding mediocrity and squeezing the outstanding onto the average
+  line.
+
+  Must seriously apply for several jobs and have multiple offers in
+  place. Need to do something different.
+
+  Create CV and cover letters by morning of Monday 6th. Update
+  website.
 
 * High-order moment paper
 
