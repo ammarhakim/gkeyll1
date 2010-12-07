@@ -1,0 +1,145 @@
+\documentclass[11pt, reqno]{amsart}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Provably correct algorithms]{A proposal to construct provably
+  correct computational physics algorithms}%
+\author{Ammar H. Hakim}%
+\date{}
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1006}
+\maketitle
+
+Black box testing can only uncover bugs but never prove that there are
+none. To ensure that bugs do not exist one needs to examine the
+structure of the algorithm and prove, mathematically, that it is
+correct, i.e. does what it promises.
+
+How do we create computational physics algorithms that can be trusted
+by construction?
+
+In brief the essential idea is: if you select the correct mathematical
+model and create a provably correct algorithm, then the steps of
+verification and validation are not needed, or just a pleasant
+conformation of what you already built into the system. Or, even more
+briefly, lets get it right in the first place.
+
+How can such a proof-based method be applied to computational physics?
+There are several challenges. First, we need to ensure that the chosen
+mathematical equations describe the physical system to be modelled
+with sufficient detail. This is impossible in general and
+approximations always need to be made. The degree to which these
+approximations affect the physical realism of the model is hard to
+determine and, ultimately, direct comparisons with experimental
+observations must be made. [Scientific Conception of the World]
+Second, once the mathematical equations are selected, a method to
+solve them needs to be developed.
+
+To select an accurate mathematical model an a priori approach is
+needed. The tradition "validation" step of comparing computational
+results afterwards to experiments, no matter how many, is not
+sufficient to prove that the mathematical model chosen is
+correct. What is needed is a clear understanding of the approximations
+made and if those are appropriate for representing the physical system
+being modeled. For example, often, if a system of equations is
+complex, simplifying assumptions of length and time-scales are
+made. However, although these approximations may be valid on a global
+scale, they are not valid locally, specially in regions where spatial
+and/or temporal gradients of solutions can be of the same order as the
+ignored scales.
+
+As a first step we can ignore the complexities of selecting an
+accurate mathematical model and focus on developing a provably correct
+algorithm.
+
+Remark 1: Is this not just the standard "verification" analysis? At
+first sight it seems like it, however, the distinction made in the
+first paragraph holds between verification and what is being proposed
+here. I.e. verification, as it is a post-algorithm and implementation
+step, can only uncover bugs but not prove they do not exist. Here, an
+analysis is being made on what it takes to construct a provably
+correct algorithm. It need not even be implemented [End remark]
+
+Remark 2: Is this not what all numerical scheme developers do?
+I.e. do they not show that their scheme converges, has so-and-so
+order? I submit that this process is only the first step. Even if the
+scheme converges with some order, it is not clear if it actually
+preserves the mathematical properties of the equation system. [End
+remark]
+
+What is being proposed here is the following. A scheme must solve the
+mathematical equations accurately, i.e. the scheme must provably
+converge to the correct solution in the appropriate limit. However,
+this is not enough. If the mathematical equations have certain
+properties, it must be proved that the scheme satisfies those
+properties. The larger the set of properties the scheme can be proved
+to satisfy, the greater the confidence in having developed a correct
+scheme. Note that this step does not actually require the
+implementation of the scheme in executable code, but only a sufficient
+knowledge of the mathematical properties of the system being solved
+and certain dexterity in manipulating the formulas involved in the
+scheme.
+
+What about actual implementation? For the scheme to be useful an
+implementation must be constructed. This step is fraught with
+difficulties. First, although our scheme may satisfy a broad variety
+of properties, its implementation is not guaranteed to automatically
+inherit this. This is due to the gap between a programming language
+and the language in which mathematical manipulations are done. A
+reason for the gap is the lack of formalization of the manipulations
+needed in the proofs. [Descartes calculating machine]. This gap will
+not close anytime soon. What is required is a new approach in which
+the scheme can be expressed directly, proofs performed (manually would
+be good enough) and transformed into executable code.
+
+Remark: The construction of a scheme is not unique: i.e. several
+schemes can be constructed for the same mathematical model. If each of
+these schemes is proved to be correct, then the one with the most
+efficient implementation can be selected. [End remark]
+
+So the question comes up: given the state of art, what programming
+techniques to adopt to ensure, as far as possible that the
+implementation is faithful to the scheme?
+
+\end{document}
