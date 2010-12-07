@@ -5,9 +5,16 @@
   Black box testing can only uncover bugs but never prove that there
   are none. To ensure that bugs do not exist one needs to examine the
   structure of the algorithm and prove, mathematically, that it is
-  correct, i.e. does what it promises. Such verification may not be
-  possible to automate and that could explain the extreme labor
-  required to produce correct software.
+  correct, i.e. does what it promises.
+
+  How do we create computational physics algorithms that can be
+  trusted by construction?
+
+  In brief the essential idea is: if you select the correct
+  mathematical model and create a provably correct algorithm, then the
+  steps of verification and validation are not needed, or just a
+  pleasant conformation of what you already built into the system. Or,
+  even more briefly, lets get it right in the first place.
 
   How can such a proof-based method be applied to computational
   physics? There are several challenges. First, we need to ensure that
@@ -19,6 +26,19 @@
   observations must be made. [Scientific Conception of the World]
   Second, once the mathematical equations are selected, a method to
   solve them needs to be developed.
+
+  To select an accurate mathematical model an a priori approach is
+  needed. The tradition "validation" step of comparing computational
+  results afterwards to experiments, no matter how many, is not
+  sufficient to prove that the mathematical model chosen is
+  correct. What is needed is a clear understanding of the
+  approximations made and if those are appropriate for representing
+  the physical system being modeled. For example, often, if a system
+  of equations is complex, simplifying assumptions of length and
+  time-scales are made. However, although these approximations may be
+  valid on a global scale, they are not valid locally, specially in
+  regions where spatial and/or temporal gradients of solutions can be
+  of the same order as the ignored scales.
 
   As a first step we can ignore the complexities of selecting an
   accurate mathematical model and focus on developing a provably
