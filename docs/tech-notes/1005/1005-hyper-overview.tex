@@ -3,12 +3,12 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amsthm}
-\usepackage[dvips]{graphicx}
-\usepackage[usenames,dvipsnames]{color}
 \usepackage{setspace}
 \usepackage{fancyhdr}
 %\pagestyle{fancyplain}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
 
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
@@ -165,9 +165,9 @@ develop discontinuities in finite amount of time even if the initial
 data $U(x,0)$ is smooth. In this case we must deal with \emph{weak
   solutions}, i.e. in the sense of distributions. For every smooth
 test function $\phi(x,t)$ with compact support in
-$\mathbb{R}^m\times[0,T)$ the weak solution satisfies
+$\mathbb{R}^N\times[0,T)$ the weak solution satisfies
 \begin{align}
-  \int_0^T\int_{\mathbb{R}^m}
+  \int_0^T\int_{\mathbb{R}^N}
   \left[
     U\spfrac{t}{\phi}
     +
@@ -175,11 +175,11 @@ $\mathbb{R}^m\times[0,T)$ the weak solution satisfies
   \right]
   dx dt
   &+
-  \int_{\mathbb{R}^m}
+  \int_{\mathbb{R}^N}
   \phi(x,0)U(x,0) dx
   = \notag \\
   &-
-  \int_0^T\int_{\mathbb{R}^m}
+  \int_0^T\int_{\mathbb{R}^N}
   S(U,x,t)\phi(x,t)
   dx dt  
 \end{align}
@@ -239,18 +239,62 @@ fluid flow with vacuum regions.
 Uniqueness of weak solutions of hyperbolic balance laws breaks down in
 many situation. Intuitively, one can imagine this happens when
 characteristics of a nonlinear equation (which carry constant states
-with them) intersect: what is the solution at the intersection point?
-Hence, we need to construct a admissibility criteria on weak solutions
-to restore uniqueness.
+with them) intersect: which state is the solution at the intersection
+point?  To restore uniqueness we need to impose an admissibility
+criteria to select a class of weak solutions.
 
 One way to do this is to introduce the concept of entropy/entropy-flux
-pairs. A scalar function $\eta(U)$ is a \emph{entropy} if there are
-associated other scalar functions $\left(q_1(U), \ldots,
-  q_m(U)\right)$, called the \emph{entropy fluxes}, such that for any
+pairs. A scalar function $\eta(U)$ is a \emph{entropy} if with it
+there are associated scalar functions $\left(q_1(U), \ldots,
+  q_N(U)\right)$, called the \emph{entropy fluxes}, such that for any
 $U$ we have
 \begin{align}
-  Dq_\alpha(U) = D\eta(U) DF_\alpha(U)
+  Dq_i(U) = D\eta(U) DF_i(U) \label{eq:entropy}
 \end{align}
+for $i=1,\ldots,N$. Multiplying the balance law
+\eqr{\ref{eq:hypbalance}} by $D\eta(U)$ and using
+\eqr{\ref{eq:entropy}} we see that for smooth solutions the entropy
+satisfies the companion balance law
+\begin{align}
+  \spfrac{t}{\eta(U)} 
+  +
+  \sum_{i=1}^N \spfrac{i}{g_i(U)} 
+  =
+  D\eta(U) S(U,x,t) 
+  \label{eq:entropy-balance}
+\end{align}
+However, for weak solution we must impose instead
+\begin{align}
+  \spfrac{t}{\eta(U)} 
+  +
+  \sum_{i=1}^N \spfrac{i}{g_i(U)} 
+  \le
+  D\eta(U) S(U,x,t)   
+  \label{eq:entropy-balance-weak}
+\end{align}
+in the sense of distributions, i.e. for every test smooth function
+$\psi(x,t)$ with compact support in $\mathbb{R}^N\times[0,T)$ we have
+\begin{align}
+  \int_0^T\int_{\mathbb{R}^N}
+  \left[
+    \eta(U)\spfrac{t}{\psi}
+    +
+    \sum_{i=1}^N g_i(U)\spfrac{i}{\psi}
+  \right]
+  dx dt
+  &+
+  \int_{\mathbb{R}^N}
+  \psi(x,0)\eta(U(x,0)) dx
+  \ge \notag \\
+  &-
+  \int_0^T\int_{\mathbb{R}^N}
+  S(U,x,t)\psi(x,t)
+  dx dt  
+\end{align}
+
+A weak-solution of \eqr{\ref{eq:hypbalance}} is said to be
+\emph{entropy satisfying} if \eqr{\ref{eq:entropy-balance-weak}}
+holds.
 
 \end{document}
 
