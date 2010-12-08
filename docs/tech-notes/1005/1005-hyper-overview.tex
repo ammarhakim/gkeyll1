@@ -96,7 +96,8 @@ where $x = [x_1,\ldots,x_N] \in \mathbb{R}^N$, $U(x,t) \in
 \mathbb{R}^m$, the smooth function $F_i(U)$ is the flux in the $i$-th
 direction and $S(U,x,t) \in \mathbb{R}^m$ are source terms. In this
 and the following we denote $\partial_i \equiv \partial/\partial x_i$
-and $D \equiv \partial/\partial U$.
+and $D \equiv \partial/\partial U$. When applied to a scalar $\phi(U)$
+$Dphi(U)$ is assumed to be a row vector.
 
 \begin{dfn}[Hyperbolic Equations]
   The system of balance laws \eqr{\ref{eq:hypbalance}} are said to be
@@ -194,6 +195,7 @@ homogeneous equations
 \end{align}
 Then the following Lemma holds.
 \begin{lem}
+  \label{lem:rg-condition}
   Let $\script{C}$ be a smooth curve defined by $x=\xi(t)$. Then
   $U(x,t)$ is a \emph{weak} solution to \eqr{\ref{eq:hypbalance-1d}}
   if it a smooth solution in $x<\xi(t)$ and $x>\xi(t)$ and satisfies
@@ -220,7 +222,7 @@ The solution vector $U(x,t)$, in general, can take values only in a
 open subset of $\mathbb{R}^m$. For example, for fluid equations the
 density and pressure must remain non-negative. This leads to the
 concept of \emph{invariant domains}, defined below
-\begin{dfn}[Invariant Domains]
+\begin{dfn}[Invariant Domain]
   The convex set $\script{U} \subset \mathbb{R}^m$ is said to be an
   invariant domain of \eqr{\ref{eq:hypbalance}} if it has the property
   that if $U(x,0) \in \script{U}$ then $U(x,t) \in \script{U}$ for all
@@ -229,10 +231,10 @@ concept of \emph{invariant domains}, defined below
 
 Essentially, an invariant domain is the set in solution space that is
 preserved on evolution by the balance law. When constructing numerical
-schemes it is important to use a scheme that provably preserves
-invariant domains. This is specially true if the expected solutions
-are know to lie close to invariant domains boundaries, for example, in
-fluid flow with vacuum regions.
+schemes it is important to show that the scheme preserves invariant
+domains. This is specially true if the expected solutions are known to
+lie close to invariant domains boundaries, for example, in fluid flow
+with vacuum regions.
 
 \subsection{Non-uniqueness of weak solutions and entropy/entropy-flux pairs}
 
@@ -244,17 +246,24 @@ point?  To restore uniqueness we need to impose an admissibility
 criteria to select a class of weak solutions.
 
 One way to do this is to introduce the concept of entropy/entropy-flux
-pairs. A scalar function $\eta(U)$ is a \emph{entropy} if with it
-there are associated scalar functions $\left(q_1(U), \ldots,
-  q_N(U)\right)$, called the \emph{entropy fluxes}, such that for any
-$U$ we have
-\begin{align}
-  Dq_i(U) = D\eta(U) DF_i(U) \label{eq:entropy}
-\end{align}
-for $i=1,\ldots,N$. Multiplying the balance law
-\eqr{\ref{eq:hypbalance}} by $D\eta(U)$ and using
-\eqr{\ref{eq:entropy}} we see that for smooth solutions the entropy
-satisfies the companion balance law
+pairs.
+\begin{dfn}[Entropy/Entropy-flux pairs]
+  A scalar function $\eta(U)$ is a \emph{entropy} if with it there are
+  associated scalar functions $\left(q_1(U), \ldots, q_N(U)\right)$,
+  called the \emph{entropy fluxes}, such that for any $U$ we have
+  \begin{align}
+    Dq_i(U) = D\eta(U) DF_i(U) \label{eq:entropy}
+  \end{align}
+  for $i=1,\ldots,N$.
+\end{dfn}
+Not all balance laws have non-trivial entropies. However, in most
+physical systems an entropy comes about naturally as a direct or
+indirect expression of the second law of thermodynamics. 
+
+The importance of entropy comes from the existence of \emph{companion
+  balance} laws. Multiplying the balance law \eqr{\ref{eq:hypbalance}}
+by $D\eta(U)$ and using \eqr{\ref{eq:entropy}} we see that for smooth
+solutions the entropy satisfies the companion balance law
 \begin{align}
   \spfrac{t}{\eta(U)} 
   +
@@ -294,7 +303,13 @@ $\psi(x,t)$ with compact support in $\mathbb{R}^N\times[0,T)$ we have
 
 A weak-solution of \eqr{\ref{eq:hypbalance}} is said to be
 \emph{entropy satisfying} if \eqr{\ref{eq:entropy-balance-weak}}
-holds.
+holds. Demanding that weak solutions be entropy satisfying restores
+uniqueness. Across a discontinuity (as defined in
+Lemma\thinspace\ref{lem:rg-condition}) we can show that
+\begin{align}
+  \sum_{i=1}^N 
+  n_i[g_i(U_+) - g_i(U_-)] \le s\left(\eta(U_+) - \eta(U_-)\right)
+\end{align}
 
 \end{document}
 
