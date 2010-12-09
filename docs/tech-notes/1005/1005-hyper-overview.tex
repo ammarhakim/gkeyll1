@@ -97,7 +97,7 @@ where $x = [x_1,\ldots,x_N] \in \mathbb{R}^N$, $U(x,t) \in
 direction and $S(U,x,t) \in \mathbb{R}^m$ are source terms. In this
 and the following we denote $\partial_i \equiv \partial/\partial x_i$
 and $D \equiv \partial/\partial U$. When applied to a scalar $\phi(U)$
-$Dphi(U)$ is assumed to be a row vector.
+$D\phi(U)$ is assumed to be a row vector.
 
 \begin{dfn}[Hyperbolic Equations]
   The system of balance laws \eqr{\ref{eq:hypbalance}} are said to be
@@ -310,6 +310,72 @@ Lemma\thinspace\ref{lem:rg-condition}) we can show that
   \sum_{i=1}^N 
   n_i[g_i(U_+) - g_i(U_-)] \le s\left(\eta(U_+) - \eta(U_-)\right)
 \end{align}
+
+\subsection{Symmetric form of conservation laws with entropy}
+
+In this section, for simplicity, we will set the source terms to
+zero. In this case the balance law is called a \emph{conservation
+  law}.
+\begin{dfn}[Symmetric Equation]
+  An equation of the form
+  \begin{align}
+    P(V)\spfrac{t}{V} + \sum_{i=1}^N B_i(V)\spfrac{i}{V} = 0
+    \label{eq:sym-eqn}
+  \end{align}
+  where $V(x,t) \in \mathbb{R}^m$ is called \emph{symmetric} if the
+  matrices $B_i(V)$, $i=1,\ldots,N$ are symmetric and $P(V)$ is
+  positive definite.
+\end{dfn}
+We will examine under what change of variables the conservation law
+\eqr{\ref{eq:hypbalance}} can be transformed into a symmetric form
+\eqr{\ref{eq:sym-eqn}}. For this, consider a transform $U =
+U(V)$. Let $\tilde{F}_i(V) \equiv
+F_i\left(U(V)\right)$. Then \eqr{\ref{eq:hypbalance}} transforms
+to
+\begin{align}
+  U'(V) \spfrac{t}{V} + \sum_{i=1}^N 
+  \tilde{F}_i'(V)
+  \spfrac{i}{V}
+  = 
+  0
+\end{align}
+where primes denote differentiation with $V$. For $U'(V)$ and
+$\tilde{F}_i'(V)$ we need $U(V)$ and $\tilde{F}_i(V)$ to be gradients
+of scalar functions, i.e. there exist scalar functions $q(V)$ and
+$r_i(V)$ such that
+\begin{align}
+  U(V) &= q'(V)^T  \label{eq:u_q} \\
+  \tilde{F}_i(V) &= r_i'(V)^T \label{eq:fi_ri}
+\end{align}
+for $i=1,\ldots,N$. Further, to ensure that $U'(V)$ is positive
+definite $q(V)$ must be strictly convex.  Also, convexity of $q(V)$
+ensures that \eqr{\ref{eq:u_q}} can be inverted to get a one-to-one
+map $V=V(U)$.
+\begin{thm}
+  Suppose \eqr{\ref{eq:hypbalance}} can be symmetrized by introducing
+  a transform $U=U(V)$, i.e. there exist $q(V)$ and $r_i(V)$ such that
+  \eqr{\ref{eq:u_q}} and \eqr{\ref{eq:fi_ri}} hold. Then
+  \eqr{\ref{eq:hypbalance}} has a convex entropy function given by
+  \begin{align}
+    \eta(U) = U^TV - q(V)
+  \end{align}
+  with corresponding entropy-flux given by
+  \begin{align}
+    g_i(U) = F_i^TV - r_i(V)
+  \end{align}
+  where $V=V(U)$ is determined by inverting \eqr{\ref{eq:u_q}}.
+\end{thm}
+That is, if a hyperbolic balance law can be transformed to a symmetrix
+form, it possesses a convex entropy function. Conversely we cal also
+show
+\begin{thm}
+  Suppose $\eta(U)$ is a convex entropy function for
+  \eqr{\ref{eq:hypbalance}}. Then
+  \begin{align}
+    V^T = D\eta(U)
+  \end{align}
+  symmetrizes \eqr{\ref{eq:hypbalance}}.
+\end{thm} 
 
 \end{document}
 
