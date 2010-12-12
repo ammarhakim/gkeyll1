@@ -87,9 +87,6 @@ add_test(lccolmajorindexer unit/lccolmajorindexer)
 # lcrowmajorindexer
 add_test(lcrowmajorindexer unit/lcrowmajorindexer)
 
-# lcdirsequencer
-add_test(lcdirsequencer unit/lcrowmajorindexer)
-
 # lcfixedvector
 add_test(lcfixedvector unit/lcfixedvector)
 
@@ -113,6 +110,9 @@ add_test(lcrowmajorsequencer unit/lcrowmajorsequencer)
 
 # lccolmajorsequencer
 add_test(lccolmajorsequencer unit/lccolmajorsequencer)
+
+# lcdirsequencer
+add_test(lcdirsequencer unit/lcdirsequencer)
 
 # lcluatable
 add_test(lcluatable unit/lcluatable)
