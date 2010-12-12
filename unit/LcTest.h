@@ -47,6 +47,7 @@ class LcTestCounter
     int passed;
     int failed;
     std::ofstream msgFile;
+    std::ofstream msgFileFail;
 
     std::vector<std::string> failedTests;
 
@@ -59,8 +60,8 @@ class LcTestCounter
     void showFailedTests() {
       std::vector<std::string>::iterator i;
       for (i=failedTests.begin(); i!=failedTests.end(); ++i) {
-        std::cout << "FAILED TEST: " << *i << std::endl;
-        msgFile   << "FAILED TEST: " << *i << std::endl;
+        //std::cout << "FAILED TEST: " << *i << std::endl;
+        msgFileFail   << "FAILED TEST: " << *i << std::endl;
       }
     }
     
@@ -84,10 +85,12 @@ static LcTestCounter __tc;
       __tc.passed = 0;                                                  \
       __tc.failed = 0;                                                  \
       int myrank;                                                       \
-      std::ostringstream fname;                                         \
+      std::ostringstream fname, fnameF;                                 \
       MPI_Comm_rank(MPI_COMM_WORLD, &myrank);                           \
       fname << file << "-" << myrank << ".log";                         \
       __tc.msgFile.open(fname.str().c_str(), std::fstream::out);        \
+      fnameF << file << "-failed-" << myrank << ".log";                     \
+      __tc.msgFileFail.open(fnameF.str().c_str(), std::fstream::out);        \
     } while (0)
 
 #define LC_MPI_END_TESTS                                                \
@@ -115,9 +118,11 @@ static LcTestCounter __tc;
     do {                                                                \
       __tc.passed = 0;                                                  \
       __tc.failed = 0;                                                  \
-      std::ostringstream fname;                                         \
+      std::ostringstream fname, fnameF;                                 \
       fname << file << "-" << "0" << ".log";                            \
       __tc.msgFile.open(fname.str().c_str(), std::fstream::out);        \
+      fnameF << file << "-failed-" << "0" << ".log";                     \
+      __tc.msgFileFail.open(fnameF.str().c_str(), std::fstream::out);     \
     } while (0)
 
 #define LC_END_TESTS                                                    \
