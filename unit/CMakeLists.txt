@@ -37,6 +37,10 @@ target_link_libraries(lccolmajorindexer lclib lcloki lclua)
 add_executable(lcrowmajorindexer lcrowmajorindexer.cxx)
 target_link_libraries(lcrowmajorindexer lclib lcloki lclua)
 
+# lcdirsequencer
+add_executable(lcdirsequencer lcdirsequencer.cxx)
+target_link_libraries(lcdirsequencer lclib lcloki lclua)
+
 # lcfixedvector
 add_executable(lcfixedvector lcfixedvector.cxx)
 target_link_libraries(lcfixedvector lclib lcloki lclua)

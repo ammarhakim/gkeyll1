@@ -87,6 +87,9 @@ add_test(lccolmajorindexer unit/lccolmajorindexer)
 # lcrowmajorindexer
 add_test(lcrowmajorindexer unit/lcrowmajorindexer)
 
+# lcdirsequencer
+add_test(lcdirsequencer unit/lcrowmajorindexer)
+
 # lcfixedvector
 add_test(lcfixedvector unit/lcfixedvector)
 
