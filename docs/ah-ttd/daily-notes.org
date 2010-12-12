@@ -1,5 +1,22 @@
 # -*- org -*-
 
+* December 11th
+
+  - Added directional sequencer. This does two things: first, it
+    allows sweeping a region in a specified direction. Second, it
+    allows getting indices from a stencil. For example, consider a 2D
+    region. We can perform X-sweeps or Y-sweeps. DirSequencer allows
+    this.
+
+  - Now error messages from tests are being put into a different
+    file. This means only PASSED/FAILED message is printed from a unit
+    test and it there are FAILED tests they go into a different file.
+
+   Do I need to add directions back to flux/waves etc methods in
+   hyperbolic equations? For example: in wave3D how to do transvere
+   corrections? One needs to split X direction fluctuations into Y and
+   Z direction fluctuations.
+
 * December 2nd
 
   Black box testing can only uncover bugs but never prove that there
