@@ -133,6 +133,28 @@ namespace Lucee
  */
       virtual bool isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const;
 
+/**
+ * Compute fluctuations using q-waves from waves and speeds.
+ *
+ * @param waves Waves. This matrix has shape (meqn X mwave).
+ * @param s Wave speeds.
+ * @param amdq On output, fluctuations in the negative direction.
+ * @param apdq On output, fluctuations in the positive direction.
+ */
+      void qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+        Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
+
+/**
+ * Compute fluctuations using f-waves from waves and speeds.
+ *
+ * @param waves Waves. This matrix has shape (meqn X mwave).
+ * @param s Wave speeds.
+ * @param amdq On output, fluctuations in the negative direction.
+ * @param apdq On output, fluctuations in the positive direction.
+ */
+      void fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+        Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
+
     protected:
 
     private:

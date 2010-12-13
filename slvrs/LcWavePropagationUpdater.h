@@ -64,6 +64,10 @@ namespace Lucee
       unsigned limiter;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
+/** CFL number to use */
+      double cfl;
+/** Maximum CFL number */
+      double cflm;
   };
 }
 
