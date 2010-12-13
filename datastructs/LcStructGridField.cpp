@@ -139,6 +139,7 @@ namespace Lucee
 // now append local methods
     lfm.appendFunc("set", luaSet);
     lfm.appendFunc("alias", luaAlias);
+    lfm.appendFunc("duplicate", luaDuplicate);
     lfm.appendFunc("div", luaDivergence);
   }
 
@@ -188,6 +189,14 @@ namespace Lucee
     luaL_getmetatable(L, typeid(StructGridField<NDIM, T>).name());
     lua_setmetatable(L, -2);
 
+    return 1;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaDuplicate(lua_State *L)
+  {
+// THIS IS BASICALLY SIMILAR TO ALIAS
     return 1;
   }
 

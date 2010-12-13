@@ -111,6 +111,14 @@ namespace Lucee
       static int luaAlias(lua_State *L);
 
 /**
+ * Lua callable method to return duplicate of this field.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaDuplicate(lua_State *L);
+
+/**
  * Lua callable method to compute divergence of this field.
  *
  * @param L Lua state to use.

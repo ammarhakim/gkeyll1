@@ -2,19 +2,31 @@
 
 * December 12th
 
-  Need to modify the directional sequencer. This should work something
-  like the following.
+  - Need to modify the directional sequencer. This should work something
+    like the following.
 #+BEGIN_EXAMPLE
-    DirSequencer<2> seq(rgn, dir);
-    while (seq.step())
-    {
-      while (seq.sweep())
+      DirSequencer<2> seq(rgn, dir);
+      while (seq.step())
       {
-        seq.fillWithIndex(idx);
-	// do something at idx
+        while (seq.sweep())
+	{
+          seq.fillWithIndex(idx);
+	  // do something at idx
+	}
       }
-    }
 #+END_EXAMPLE
+
+  - Added WavePropagationUpdater. This is templated over
+    dimension. Still not complete, but should be easy. DirSequencer
+    needs to be modified as described above.
+
+  - How to create a field of matrices? Perhaps create a matrix by
+    reusing the memory in a FieldPtr? Once this is done, then Fields
+    can be created in the WavePropagationUpdater to store the various
+    needed quantities.
+
+  - For allowing for adaptive time-stepping, duplicate() method needs
+    to be added to the derived classed of Array.
 
 * December 11th
 
