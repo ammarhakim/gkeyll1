@@ -587,7 +587,6 @@ namespace Lucee
       shp[i] = shape[i];
   }
 
-
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   void 
   Array<NDIM, T, INDEXER>::fillWithStart(int strt[NDIM]) const
@@ -777,7 +776,7 @@ namespace Lucee
       start[i] = rgn.getLower(i);
       len = len*shape[i];
     }
-    LC_CLEAR_CONTIGUOUS(traits);
+    LC_SET_CONTIGUOUS(traits);
     LC_CLEAR_ALLOC(traits);
   }
 

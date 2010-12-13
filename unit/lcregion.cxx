@@ -10,6 +10,7 @@
 
 // lucee includes
 #include <LcRegion.h>
+#include <LcRowMajorSequencer.h>
 #include <LcTest.h>
 
 void
@@ -231,6 +232,42 @@ test_8()
   LC_ASSERT("Checking volume of intersection", ibox34.getVolume() == 25);
 }
 
+void
+test_9()
+{
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox(lower, upper);
+
+// deflate region
+  for (unsigned dir=0; dir<2; ++dir)
+  {
+    int lowerDef[2], upperDef[2];
+    for (unsigned i=0; i<2; ++i)
+    {
+      lowerDef[i] = lower[i];
+      upperDef[i] = upper[i];
+    }
+    lowerDef[dir] = lower[dir];
+    upperDef[dir] = lower[dir]+1;
+    Lucee::Region<2, int> defBox(lowerDef, upperDef);
+
+// create sequencer
+    Lucee::RowMajorSequencer<2> seq(defBox);
+    while (seq.step())
+    {
+      int idx[2];
+      seq.fillWithIndex(idx);
+// now loop over one slice
+      for (int ix=lower[dir]; ix<upper[dir]; ++ix)
+      {
+        idx[dir] = ix;
+        
+      }
+    }
+  }
+}
+
 int
 main(void) 
 {
@@ -243,5 +280,6 @@ main(void)
   test_6();
   test_7();
   test_8();
+  test_9();
   LC_END_TESTS;
 }

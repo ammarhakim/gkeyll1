@@ -401,6 +401,57 @@ test_13()
       LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
 }
 
+void
+test_14()
+{
+  double data[10*10];
+  Lucee::Matrix<double> A(10, 10, data);
+  A = 2.0;
+
+  LC_ASSERT("Testing if it is contiguous", A.isContiguous() == true);
+
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing non-allocated matrix", A(i,j) == 2);
+
+  for (unsigned i=0; i<100; ++i)
+    LC_ASSERT("Testing raw vector", data[i] == 2);
+
+// get view
+  Lucee::Matrix<double> view = A.getView(0, 5, 0, 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(0) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(0) == 5);
+
+  LC_ASSERT("Testing view bounds", view.getLower(1) == 0);
+  LC_ASSERT("Testing view bounds", view.getUpper(1) == 5);
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      view(i,j) = (10*i+j)*0.5;
+
+  for (int i=view.getLower(0); i<view.getUpper(0); ++i)
+    for (int j=view.getLower(1); j<view.getUpper(1); ++j)
+      LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
+
+// get view
+  Lucee::Matrix<double> view2 = A.getView(5, 10, 0, 5);
+
+  LC_ASSERT("Testing view bounds", view2.getLower(0) == 5);
+  LC_ASSERT("Testing view bounds", view2.getUpper(0) == 10);
+
+  LC_ASSERT("Testing view bounds", view2.getLower(1) == 0);
+  LC_ASSERT("Testing view bounds", view2.getUpper(1) == 5);
+
+  for (int i=view2.getLower(0); i<view2.getUpper(0); ++i)
+    for (int j=view2.getLower(1); j<view2.getUpper(1); ++j)
+      view2(i,j) = (10*i+j)*0.5;
+
+  for (int i=view2.getLower(0); i<view2.getUpper(0); ++i)
+    for (int j=view2.getLower(1); j<view2.getUpper(1); ++j)
+      LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
+}
+
 int
 main(void) 
 {
@@ -418,5 +469,6 @@ main(void)
   test_11();
   test_12();
   test_13();
+  test_14();
   LC_END_TESTS;
 }
