@@ -17,6 +17,12 @@
    corrections? One needs to split X direction fluctuations into Y and
    Z direction fluctuations.
 
+   What to do about rotations?
+
+   A note on FieldPtrs: FieldPtrs can be sent to const
+   ConstFieldPtr. Std::vector can be converted to FieldPtr or
+   ConstFieldPtr. FieldPtr of given size can be created.
+
 * December 2nd
 
   Black box testing can only uncover bugs but never prove that there

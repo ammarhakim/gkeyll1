@@ -11,7 +11,6 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lcslvrs
-  LcDivergenceUpdater.cpp
   LcEulerEquation.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
@@ -19,7 +18,7 @@ add_library(lcslvrs
   LcMaxwellTM2DUpdater.cpp
   LcSolverAssembly.cpp
   LcSolverRegistry.cpp
-  LcTXYZFieldSetter.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
+  LcWavePropagationUpdater.cpp
 )
