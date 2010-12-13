@@ -14,12 +14,12 @@
 #endif
 
 // lucee includes
-#include <LcDivergenceUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcSolverAssembly.h>
 #include <LcSolverRegistry.h>
 #include <LcTXYZFieldSetter.h>
+#include <LcWavePropagationUpdater.h>
 
 namespace Lucee
 {
@@ -34,14 +34,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<3> >;
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::TXYZFieldSetter<3> >;
-
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DivergenceUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DivergenceUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DivergenceUpdater<3> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<3> >;
   }
 }

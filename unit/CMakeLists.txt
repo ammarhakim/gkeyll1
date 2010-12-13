@@ -107,11 +107,6 @@ add_executable(lclincombiner lclincombiner.cxx)
 target_link_libraries(lclincombiner lcslvrs lcdatastructs 
   lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
 
-# lctxyzfieldsetter
-add_executable(lctxyzfieldsetter lctxyzfieldsetter.cxx)
-target_link_libraries(lctxyzfieldsetter lcslvrs lcdatastructs 
-  lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
-
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)
 target_link_libraries(lcluacobj lclib lcloki lclua)
