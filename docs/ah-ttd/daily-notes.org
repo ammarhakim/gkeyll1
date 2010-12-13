@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* December 12th
+
+  Need to modify the directional sequencer. This should work something
+  like the following.
+#+BEGIN_EXAMPLE
+    DirSequencer<2> seq(rgn, dir);
+    while (seq.step())
+    {
+      while (seq.sweep())
+      {
+        seq.fillWithIndex(idx);
+	// do something at idx
+      }
+    }
+#+END_EXAMPLE
+
 * December 11th
 
   - Added directional sequencer. This does two things: first, it

@@ -105,4 +105,56 @@ namespace Lucee
   {
     throw Lucee::Except("HyperEquation::isInvariantDomain: Method not implemented");
   }
+
+  void
+  HyperEquation::qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+    Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
+  {
+    for (unsigned m=0; m<meqn; ++m)
+    {
+      amdq[m] = 0.0; apdq[m] = 0.0;
+      for (unsigned mw=0; mw<mwave; ++mw)
+      {
+        if (s[mw] < 0.0)
+        {
+// left going wave
+          amdq[m] += s[mw]*waves(m,mw);
+        }
+        else
+        {
+// right going waves
+          apdq[m] += s[mw]*waves(m,mw);
+        }
+      }
+    }
+  }
+
+  void
+  HyperEquation::fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+    Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
+  {
+    for (unsigned m=0; m<meqn; ++m)
+    {
+      amdq[m] = 0.0; apdq[m] = 0.0;
+      for (unsigned mw=0; mw<mwave; ++mw)
+      {
+        if (s[mw] < 0.0)
+        {
+// left going wave
+          amdq[m] += waves(m,mw);
+        }
+        else if (s[mw] > 0.0)
+        {
+// right going waves
+          apdq[m] += waves(m,mw);
+        }
+        else
+        {
+// zero wave: add contribution to apdq and amdq
+          amdq[m] += 0.5*waves(m, mw);
+          apdq[m] += 0.5*waves(m, mw);
+        }
+      }
+    }
+  }
 }

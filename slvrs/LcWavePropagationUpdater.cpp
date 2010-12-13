@@ -47,6 +47,9 @@ namespace Lucee
       Lucee::Except lce("WavePropagationUpdater::readInput: Must specify an equation to solve!");
       throw lce;
     }
+
+    cfl = tbl.getNumber("cfl"); // CFL number
+    cflm = tbl.getNumber("cfl"); // maximum CFL number
     
 // limiter to use
     limiter = NO_LIMITER; // by default no limiter
@@ -85,6 +88,9 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& q = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& qNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
+// qnew <- qold
+    qNew.copy(q);
+
 // cell spacing
     double dx[NDIM];
     for (unsigned n=0; n<NDIM; ++n) dx[n] = grid.getDx(n);
@@ -109,6 +115,8 @@ namespace Lucee
     Lucee::FieldPtr<double> s(mwave);
 // waves
     Lucee::Matrix<double> waves(meqn, mwave);
+// fluctuations
+    Lucee::FieldPtr<double> apdq(meqn), amdq(meqn);
 
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
@@ -134,8 +142,7 @@ namespace Lucee
 // calculate waves and speeds
         equation->waves(jump, qPtrl, qPtr, waves, s);
 // compute fluctuations
-
-
+        equation->qFluctuations(waves, s, apdq, amdq);
       }
     }
 
