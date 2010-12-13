@@ -92,16 +92,28 @@ namespace Lucee
     double dt = t-this->getCurrTime();
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+
+    unsigned meqn = equation->getNumEqns();
+    unsigned mwave = equation->getNumWaves();
+
 // indices
     int idx[NDIM], idxl[NDIM];
 // pointers to data
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
+    Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
+    Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
+// jumps
+    Lucee::FieldPtr<double> jump(meqn);
+// speeds
+    Lucee::FieldPtr<double> s(mwave);
+// waves
+    Lucee::Matrix<double> waves(meqn, mwave);
 
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
-// create sequence for looping over slices in 'dir' direction. Also
+// create sequencer for looping over slices in 'dir' direction. Also
 // make stencil with one cell on each side
       Lucee::DirSequencer<NDIM> seq(localRgn, dir, 1, 1);
       
@@ -113,7 +125,17 @@ namespace Lucee
         seq.fillWithIndex(-1, idxl);
 
 // get hold of solution in these cells
-        
+        q.setPtr(qPtr, idx);
+        q.setPtr(qPtrl, idxl);
+// compute jump
+        for (unsigned m=0; m<meqn; ++m)
+          jump[m] = qPtr[m] - qPtrl[m];
+
+// calculate waves and speeds
+        equation->waves(jump, qPtrl, qPtr, waves, s);
+// compute fluctuations
+
+
       }
     }
 
