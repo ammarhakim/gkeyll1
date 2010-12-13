@@ -61,6 +61,17 @@ namespace Lucee
       Matrix(const Matrix<T>& mat);
 
 /**
+ * Creat a new matrix reusing supplied memory. This constructor can
+ * not check if the data provided is sufficient to create the matrix
+ * and hence it is the user's reposibility to ensure this.
+ *
+ * @param row Rows in matrix.
+ * @param col Columns in matrix.
+ * @param data Memory to reuse. This should be atleast row X col X sizeof(T).
+ */
+      Matrix(unsigned row, unsigned col, T *data);
+
+/**
  * Copy input matrix.
  *
  * @param mat Matrix to copy.

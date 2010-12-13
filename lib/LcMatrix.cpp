@@ -61,6 +61,15 @@ namespace Lucee
   }
 
   template <typename T>
+  Matrix<T>::Matrix(unsigned row, unsigned col, T *data)
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(
+      Lucee::Region<2, int>(&Lucee::FixedVector<2, int>(row, col)[0]),
+      data)
+  {
+    LC_CLEAR_TRANSPOSE(traits);
+  }
+
+  template <typename T>
   Matrix<T>&
   Matrix<T>::operator=(const Matrix<T>& mat)
   {
