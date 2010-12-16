@@ -776,7 +776,7 @@ namespace Lucee
       start[i] = rgn.getLower(i);
       len = len*shape[i];
     }
-    LC_SET_CONTIGUOUS(traits);
+    LC_CLEAR_CONTIGUOUS(traits);
     LC_CLEAR_ALLOC(traits);
   }
 

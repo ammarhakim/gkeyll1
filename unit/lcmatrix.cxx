@@ -408,8 +408,6 @@ test_14()
   Lucee::Matrix<double> A(10, 10, data);
   A = 2.0;
 
-  LC_ASSERT("Testing if it is contiguous", A.isContiguous() == true);
-
   for (int i=A.getLower(0); i<A.getUpper(0); ++i)
     for (int j=A.getLower(1); j<A.getUpper(1); ++j)
       LC_ASSERT("Testing non-allocated matrix", A(i,j) == 2);
