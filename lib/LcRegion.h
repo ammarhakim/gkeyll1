@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcFixedVector.h>
 
 #include <iostream>
@@ -147,8 +148,19 @@ namespace Lucee
  *
  * @param lo Lower bound for new dimension.
  * @param up Upper bound for new dimension.
+ * @return inflated region.
  */
       Region<NDIM+1, T> inflate(T lo, T up) const;
+
+/**
+ * Creates a new regions that is same as this one, except that
+ * getUpper(dir) = getLower(dir)+1. In essence, the shape along 'dir'
+ * is reduced to 1.
+ *
+ * @param dir Direction to deflate.
+ * @return deflated region.
+ */
+      Region<NDIM, T> deflate(unsigned dir) const;
 
     private:
 /**
@@ -258,7 +270,7 @@ namespace Lucee
   Region<NDIM+1, T>
   Region<NDIM, T>::inflate(T lo, T up) const
   {
-    int newLo[NDIM+1], newUp[NDIM+1];
+    T newLo[NDIM+1], newUp[NDIM+1];
     for (unsigned i=0; i<NDIM; ++i)
     {
       newLo[i] = lower[i];
@@ -267,6 +279,27 @@ namespace Lucee
     newLo[NDIM] = lo;
     newUp[NDIM] = up;
     return Region<NDIM+1, T>(newLo, newUp);
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>
+  Region<NDIM, T>::deflate(unsigned dir) const
+  {
+    if (dir >= NDIM)
+    {
+      Lucee::Except lce("Region::deflate: Deflate direction should be less than '");
+      lce << NDIM << "'";
+      throw lce;
+    }
+
+    T newLo[NDIM], newUp[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      newLo[i] = lower[i];
+      newUp[i] = upper[i];
+    }
+    newUp[dir] = newLo[dir]+1;
+    return Region<NDIM, T>(newLo, newUp);
   }
 
   template <unsigned NDIM, typename T>

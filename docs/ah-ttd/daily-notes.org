@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* December 16th
+
+  Now can create a matrix from a raw pointer.
+
+  PPPL may actually happen! In this case I need to start sprucing up
+  lucee by documenting it in detail, specially its input file
+  scripting format.
+
+   There is no need for the modifications to the directional
+   sequencer. Added a new function deflate() to the Region class to
+   allow creation of a box with shape 1 in a specified direction.
+
 * December 12th
 
   - Need to modify the directional sequencer. This should work something
