@@ -17,8 +17,12 @@
 #endif
 
 // lucee includes
-#include <LcUpdaterIfc.h>
+#include <LcField.h>
 #include <LcHyperEquation.h>
+#include <LcUpdaterIfc.h>
+
+// std includes
+#include <vector>
 
 namespace Lucee
 {
@@ -39,6 +43,12 @@ namespace Lucee
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
+ * Initialize solver, i.e. setup initial conditions. At the end of
+ * this call, the solver should be ready for evolving the solution.
+ */
+      virtual void initialize();
 
 /**
  * Advance the solution to specified time. Updaters that do not have a
@@ -68,6 +78,14 @@ namespace Lucee
       double cfl;
 /** Maximum CFL number */
       double cflm;
+/** Fields to store positive fluctuations */
+      std::vector<Lucee::Field<1, double> > apdq;
+/** Fields to store negative fluctuations */
+      std::vector<Lucee::Field<1, double> > amdq;
+/** Fields to store speeds */
+      std::vector<Lucee::Field<1, double> > speeds;
+/** Fields to store waves */
+      std::vector<Lucee::Field<1, double> > waves;
   };
 }
 

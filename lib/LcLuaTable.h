@@ -41,9 +41,10 @@
     } while (0);
 */
 
+/** Debug macro for tracking Lua stack */
 #define SHOW_LUA_STACK_SIZE(nm, L) \
     do {} while (0);
-
+/** Debug macro for tracking Lua stack */
 #define SHOW_LUA_STACK_SIZE2(L) \
     do {} while (0);
 

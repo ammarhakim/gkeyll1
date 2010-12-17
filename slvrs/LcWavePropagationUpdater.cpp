@@ -78,6 +78,34 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  WavePropagationUpdater<NDIM>::initialize()
+  {
+// call base class method
+    UpdaterIfc::initialize();
+// get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+// local region to index
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+// determine number of equations and waves
+    unsigned meqn = equation->getNumEqns();
+    unsigned mwave = equation->getNumWaves();
+
+// allocate data
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      int lower[1], upper[1];
+      lower[0] = localRgn.getLower(0); upper[0] = localRgn.getUpper(0);
+      Lucee::Region<1, int> slice(lower, upper);
+      apdq.push_back(Lucee::Field<1, double>(slice, meqn));
+      amdq.push_back(Lucee::Field<1, double>(slice, meqn));
+      speeds.push_back(Lucee::Field<1, double>(slice, mwave));
+      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave));
+    }
+  }
+
+  template <unsigned NDIM>
   Lucee::UpdaterStatus
   WavePropagationUpdater<NDIM>::update(double t)
   {
@@ -93,7 +121,8 @@ namespace Lucee
 
 // cell spacing
     double dx[NDIM];
-    for (unsigned n=0; n<NDIM; ++n) dx[n] = grid.getDx(n);
+    for (unsigned n=0; n<NDIM; ++n) 
+      dx[n] = grid.getDx(n);
 // time-step
     double dt = t-this->getCurrTime();
 // local region to index
@@ -109,43 +138,55 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
-// jumps
+
+// to store jump across interface
     Lucee::FieldPtr<double> jump(meqn);
-// speeds
-    Lucee::FieldPtr<double> s(mwave);
-// waves
-    Lucee::Matrix<double> waves(meqn, mwave);
-// fluctuations
-    Lucee::FieldPtr<double> apdq(meqn), amdq(meqn);
 
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
-// create sequencer for looping over slices in 'dir' direction. Also
-// make stencil with one cell on each side
-      Lucee::DirSequencer<NDIM> seq(localRgn, dir, 1, 1);
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+
+// pointers to data
+      Lucee::FieldPtr<double> apdqPtr = apdq[dir].createPtr();
+      Lucee::FieldPtr<double> amdqPtr = amdq[dir].createPtr();
+      Lucee::FieldPtr<double> speedsPtr = speeds[dir].createPtr();
+      Lucee::FieldPtr<double> wavesPtr = waves[dir].createPtr();
       
+// loop over each 1D slice
       while (seq.step())
       {
-// get index of this cell
-        seq.fillWithIndex(0, idx);
-// get index of left cell
-        seq.fillWithIndex(-1, idxl);
-
+        int idx[NDIM], idxl[NDIM];
+        seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxl);
+// loop over slice
+        for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
+        {
+          idx[dir] = i; // cell right of edge
+          idxl[dir] = i-1; // cell left of edge
 // get hold of solution in these cells
-        q.setPtr(qPtr, idx);
-        q.setPtr(qPtrl, idxl);
-// compute jump
-        for (unsigned m=0; m<meqn; ++m)
-          jump[m] = qPtr[m] - qPtrl[m];
+          q.setPtr(qPtr, idx);
+          q.setPtr(qPtrl, idxl);
+// attach pointers to fluctuations, speeds, waves
+          apdq[dir].setPtr(apdqPtr, idx);
+          amdq[dir].setPtr(amdqPtr, idx);
+          speeds[dir].setPtr(speedsPtr, idx);
+          waves[dir].setPtr(wavesPtr, idx);
+// create matrix to store waves
+          Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
+
+// compute jump across edge
+          for (unsigned m=0; m<meqn; ++m)
+            jump[m] = qPtr[m] - qPtrl[m];
 
 // calculate waves and speeds
-        equation->waves(jump, qPtrl, qPtr, waves, s);
+          equation->waves(jump, qPtrl, qPtr, wavesMat, speedsPtr);
 // compute fluctuations
-        equation->qFluctuations(waves, s, apdq, amdq);
+          equation->qFluctuations(wavesMat, speedsPtr, apdqPtr, amdqPtr);
+        }
       }
     }
-
     return Lucee::UpdaterStatus();
   }
 

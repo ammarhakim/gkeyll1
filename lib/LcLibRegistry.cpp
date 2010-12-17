@@ -25,6 +25,5 @@ namespace Lucee
   {
 // registry functions
     new Lucee::ObjRegistry<Lucee::FunctionIfc, Lucee::LuaTXYZFunction>;
-
   }
 }

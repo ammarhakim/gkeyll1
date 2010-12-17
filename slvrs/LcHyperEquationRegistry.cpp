@@ -1,5 +1,5 @@
 /**
- * @file	LcHyperEquationsRegistry.cpp
+ * @file	LcHyperEquationRegistry.cpp
  *
  * @brief	Method for registering hyperbolic equations.
  *
