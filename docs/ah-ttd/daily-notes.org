@@ -8,9 +8,12 @@
   lucee by documenting it in detail, specially its input file
   scripting format.
 
-   There is no need for the modifications to the directional
-   sequencer. Added a new function deflate() to the Region class to
-   allow creation of a box with shape 1 in a specified direction.
+  There is no need for the modifications to the directional
+  sequencer. Added a new function deflate() to the Region class to
+  allow creation of a box with shape 1 in a specified direction.
+
+   The class Updater should be renamed to something else. Perhaps
+   Algorithm?
 
 * December 12th
 

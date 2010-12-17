@@ -28,6 +28,9 @@ namespace Lucee
 // forward declare Field
   template <unsigned NDIM, typename T> class Field;
 
+/**
+ * Factory class to create fields.
+ */
   template <unsigned NDIM, typename T>
   class FieldFactory
   {

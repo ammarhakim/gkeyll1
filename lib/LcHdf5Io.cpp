@@ -158,13 +158,13 @@ namespace Lucee
     return dataNode;
   }
 
-  void Hdf5Io::closeFile(Lucee::IoNodeTypev *fileNode) 
+  void Hdf5Io::closeFile(Lucee::IoNodeType fileNode) 
   {
     removeOpenFile(fileNode); // Remove reference in base class
     delete fileNode;
   }
 
-  void Hdf5Io::closeDataSet(Lucee::IoNodeTypev *node) const 
+  void Hdf5Io::closeDataSet(Lucee::IoNodeType node) const 
   {
     delete node;
   }

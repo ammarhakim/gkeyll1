@@ -13,7 +13,7 @@ add_library(lcdatastructs
   LcConstFieldPtr.cpp
   LcDataStructRegistry.cpp
   LcField.cpp
-  LcFieldFactory.cpp
   LcFieldPtr.cpp
+  LcFieldFactory.cpp
   LcStructGridField.cpp
 )

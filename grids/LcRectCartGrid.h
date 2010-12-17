@@ -21,6 +21,9 @@
 
 namespace Lucee
 {
+/**
+ * Represents a rectangular cartesian grid of arbitrary dimensions.
+ */
   template <unsigned NDIM>
   class RectCartGrid : public Lucee::StructuredGridBase<NDIM>
   {

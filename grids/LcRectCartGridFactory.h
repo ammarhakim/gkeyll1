@@ -27,6 +27,9 @@ namespace Lucee
 // forward declare RectCartGrid
   template <unsigned NDIM> class RectCartGrid;
 
+/**
+ * Factory to create rectangular cartesian grids.
+ */
   template <unsigned NDIM>
   class RectCartGridFactory
   {
