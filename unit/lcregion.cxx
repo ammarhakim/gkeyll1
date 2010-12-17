@@ -239,32 +239,38 @@ test_9()
   int upper[2] = {13, 14};
   Lucee::Region<2, int> ibox(lower, upper);
 
-// deflate region
-  for (unsigned dir=0; dir<2; ++dir)
-  {
-    int lowerDef[2], upperDef[2];
-    for (unsigned i=0; i<2; ++i)
-    {
-      lowerDef[i] = lower[i];
-      upperDef[i] = upper[i];
-    }
-    lowerDef[dir] = lower[dir];
-    upperDef[dir] = lower[dir]+1;
-    Lucee::Region<2, int> defBox(lowerDef, upperDef);
+  Lucee::Region<2, int> ibox0 = ibox.deflate(0);
+  Lucee::Region<2, int> ibox1 = ibox.deflate(1);
+  LC_ASSERT("Testing volume of deflated boxes", ibox0.getVolume() == 10);
+  LC_ASSERT("Testing volume of deflated boxes", ibox1.getVolume() == 10);
 
-// create sequencer
-    Lucee::RowMajorSequencer<2> seq(defBox);
-    while (seq.step())
+  Lucee::RowMajorSequencer<2> seq0(ibox0);
+  Lucee::RowMajorSequencer<2> seq1(ibox1);
+
+  int j=ibox.getLower(1);
+  while (seq0.step())
+  {
+    int idx[2];
+    seq0.fillWithIndex(idx);
+    for (int i=ibox.getLower(0); i<ibox.getUpper(0); ++i)
     {
-      int idx[2];
-      seq.fillWithIndex(idx);
-// now loop over one slice
-      for (int ix=lower[dir]; ix<upper[dir]; ++ix)
-      {
-        idx[dir] = ix;
-        
-      }
+      idx[0] = i;
+      LC_ASSERT("Testing deflated box indices", idx[0]==i && idx[1]==j);
     }
+    j++;
+  }
+  
+  int i=ibox.getLower(0);
+  while (seq1.step())
+  {
+    int idx[2];
+    seq1.fillWithIndex(idx);
+    for (int j=ibox.getLower(1); j<ibox.getUpper(1); ++j)
+    {
+      idx[1] = j;
+      LC_ASSERT("Testing deflated box indices", idx[0]==i && idx[1]==j);
+    }
+    i++;
   }
 }
 
