@@ -145,6 +145,8 @@ namespace Lucee
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
+      double dtdx = dt/dx[dir];
+
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
@@ -184,7 +186,20 @@ namespace Lucee
           equation->waves(jump, qPtrl, qPtr, wavesMat, speedsPtr);
 // compute fluctuations
           equation->qFluctuations(wavesMat, speedsPtr, apdqPtr, amdqPtr);
+
+// compute first-order Gudonov update
+          qNew.setPtr(qNewPtr, idx);
+          qNew.setPtr(qNewPtrl, idxl);
+          for (unsigned m=0; m<meqn; ++m)
+          {
+            qNewPtr[m] += -dtdx*apdqPtr[m];
+            qNewPtrl[m] += -dtdx*amdqPtr[m];
+          }
         }
+// apply limiters
+
+// compute second order updates
+
       }
     }
     return Lucee::UpdaterStatus();
