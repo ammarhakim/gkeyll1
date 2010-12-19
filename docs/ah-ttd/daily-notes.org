@@ -1,5 +1,9 @@
 # -*- org -*-
 
+* December 18th
+
+  Added and tested duplicate() method to Field class.
+
 * December 16th
 
   Now can create a matrix from a raw pointer.

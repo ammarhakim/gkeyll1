@@ -212,6 +212,16 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>
+  Field<NDIM, T>::duplicate()
+  {
+    Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer> arr 
+      = Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::duplicate();
+    Lucee::Field<NDIM, T> fld(rgn, 0, numComponents, lowerGhost, upperGhost, arr);
+    return fld;
+  }
+
+  template <unsigned NDIM, typename T>
   Field<NDIM, T>&
   Field<NDIM, T>::accumulate(double coeff, const Field<NDIM, T>& fld)
   {

@@ -196,7 +196,23 @@ namespace Lucee
   int
   StructGridField<NDIM, T>::luaDuplicate(lua_State *L)
   {
-// THIS IS BASICALLY SIMILAR TO ALIAS
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
+    Lucee::StructGridField<NDIM, T>* aliasSgf = 
+      new Lucee::StructGridField<NDIM, T>(
+        sgf->duplicate(), *sgf->grid);
+
+    size_t nbytes = sizeof(Lucee::PointerHolder<StructGridField<NDIM, T> >);
+    Lucee::PointerHolder<StructGridField<NDIM, T> > *ph =
+      (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_newuserdata(L, nbytes);
+    ph->pointer = aliasSgf;
+    ph->pointer->template setBaseType<Lucee::DataStructIfc>();
+    ph->pointer->template setDerivedType<StructGridField<NDIM, T> >();
+
+    luaL_getmetatable(L, typeid(StructGridField<NDIM, T>).name());
+    lua_setmetatable(L, -2);
+
     return 1;
   }
 
