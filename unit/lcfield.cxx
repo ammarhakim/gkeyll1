@@ -625,6 +625,46 @@ test_14()
        LC_ASSERT("Testing accumulated", elcField(i,j,2) == 110.5);
 }
 
+void
+test_15()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcField(rgn, 3, 10.0);
+
+// duplicate it
+  Lucee::Field<2, double> dupField = elcField.duplicate();
+
+  LC_ASSERT("Testing if number of components is correct", 
+    dupField.getNumComponents() == 3);
+ 
+  Lucee::Region<2, int> idxRgn = dupField.getRegion();
+  for (unsigned i=0; i<2; ++i)
+  {
+    LC_ASSERT("Testing if index region is correct",
+      idxRgn.getLower(i) == rgn.getLower(i));
+    LC_ASSERT("Testing if index region is correct",
+      idxRgn.getUpper(i) == rgn.getUpper(i));
+  }
+
+  for (int i=dupField.getLower(0); i<dupField.getUpper(0); ++i)
+    for (int j=dupField.getLower(1); j<dupField.getUpper(1); ++j)
+    {
+      for (unsigned k=0; k<dupField.getNumComponents(); ++k)
+        LC_ASSERT("Testing default values", dupField(i,j,k) == 10.0);
+    }
+
+  elcField = 3.0;
+
+  for (int i=dupField.getLower(0); i<dupField.getUpper(0); ++i)
+    for (int j=dupField.getLower(1); j<dupField.getUpper(1); ++j)
+    {
+      for (unsigned k=0; k<dupField.getNumComponents(); ++k)
+        LC_ASSERT("Testing if default values changed", dupField(i,j,k) == 10.0);
+    }
+}
+
 int
 main(void)
 {
@@ -643,5 +683,6 @@ main(void)
   test_12();
   test_13();
   test_14();
+  test_15();
   LC_END_TESTS;
 }

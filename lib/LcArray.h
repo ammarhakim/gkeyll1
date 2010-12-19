@@ -180,7 +180,7 @@ namespace Lucee
  *
  * @return copy of the array.
  */
-      Lucee::Array<NDIM, T> duplicate();
+      Lucee::Array<NDIM, T, INDEXER> duplicate();
 
 /**
  * Return reference to the first element in array.
@@ -617,7 +617,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
-  Lucee::Array<NDIM, T>
+  Lucee::Array<NDIM, T, INDEXER>
   Array<NDIM, T, INDEXER>::duplicate()
   {
     Lucee::Region<NDIM, int> rgn

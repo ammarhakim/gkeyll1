@@ -294,6 +294,13 @@ namespace Lucee
       Field<NDIM, T>& copy(const Field<NDIM, T>& fld);
 
 /**
+ * Make a duplicate copy of the field.
+ *
+ * @return Duplicate field.
+ */
+      Field<NDIM, T> duplicate();
+
+/**
  * Accumulate field into this one after weighing it with
  * coefficient. I.e. coeff*fld is added to this field. The input field
  * must have the exact same shape as this field.
