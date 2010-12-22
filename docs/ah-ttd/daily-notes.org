@@ -1,8 +1,18 @@
 # -*- org -*-
 
+* December 19th
+
+  Add a rotation class to Lucee. This will allow doing 2D and 3D
+  problems. Also, add a vector to WavePropagationUpdater to indicate
+  which directions to update. This will allow doing time-split
+  algorithms from the input file by carefully combining them in the
+  Lua script.
+
 * December 18th
 
-  Added and tested duplicate() method to Field class.
+  Added and tested duplicate() method to Field class. Now duplicates
+  can be created from Lua script. Should open up the way to adpative
+  time-stepping.
 
 * December 16th
 
