@@ -1,0 +1,34 @@
+/** Reconstruction from DG polynomial expansion */
+
+load(orthopoly);
+y : 1/2*x-1/2;
+z : 1/2*x+1/2;
+
+Amn : zeromatrix(4, 4);
+
+Amn[1][1] : integrate(legendre_p(0, x), x, -1, 1);
+Amn[1][2] : integrate(legendre_p(0, x)*y, x, -1, 1);
+Amn[1][3] : integrate(legendre_p(0, x)*y^2, x, -1, 1);
+Amn[1][4] : integrate(legendre_p(0, x)*y^3, x, -1, 1);
+
+Amn[2][1] : integrate(legendre_p(1, x), x, -1, 1);
+Amn[2][2] : integrate(legendre_p(1, x)*y, x, -1, 1);
+Amn[2][3] : integrate(legendre_p(1, x)*y^2, x, -1, 1);
+Amn[2][4] : integrate(legendre_p(1, x)*y^3, x, -1, 1);
+
+Amn[3][1] : integrate(legendre_p(0, x), x, -1, 1);
+Amn[3][2] : integrate(legendre_p(0, x)*z, x, -1, 1);
+Amn[3][3] : integrate(legendre_p(0, x)*z^2, x, -1, 1);
+Amn[3][4] : integrate(legendre_p(0, x)*z^3, x, -1, 1);
+
+Amn[4][1] : integrate(legendre_p(1, x), x, -1, 1);
+Amn[4][2] : integrate(legendre_p(1, x)*z, x, -1, 1);
+Amn[4][3] : integrate(legendre_p(1, x)*z^2, x, -1, 1);
+Amn[4][4] : integrate(legendre_p(1, x)*z^3, x, -1, 1);
+
+Ainv : invert(1/2*Amn);
+rhs : matrix([fL0], [1/3*fL1], [fR0], [1/3*fR1]);
+rhs0 : matrix([fL0], [0], [fR0], [0]);
+
+res : Ainv . rhs;
+res0 : Ainv . rhs0;
