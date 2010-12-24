@@ -8,6 +8,10 @@
   algorithms from the input file by carefully combining them in the
   Lua script.
 
+  How to do transverse terms in the correct way?
+
+  Move the test updaters to new 'proto' directory.
+
 * December 18th
 
   Added and tested duplicate() method to Field class. Now duplicates

@@ -11,10 +11,12 @@
 // lucee includes
 #include <LcDirSequencer.h>
 #include <LcField.h>
+#include <LcMathLib.h>
 #include <LcStructuredGridBase.h>
 #include <LcWavePropagationUpdater.h>
 
 // std includes
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -92,16 +94,20 @@ namespace Lucee
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
 
+// ghost cells along slice
+    int lg[1], ug[1];
+    lg[0] = 2; ug[0] = 2;
+
 // allocate data
     for (unsigned i=0; i<NDIM; ++i)
     {
       int lower[1], upper[1];
       lower[0] = localRgn.getLower(0); upper[0] = localRgn.getUpper(0);
       Lucee::Region<1, int> slice(lower, upper);
-      apdq.push_back(Lucee::Field<1, double>(slice, meqn));
-      amdq.push_back(Lucee::Field<1, double>(slice, meqn));
-      speeds.push_back(Lucee::Field<1, double>(slice, mwave));
-      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave));
+      apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
+      amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
+      speeds.push_back(Lucee::Field<1, double>(slice, mwave, lg, ug));
+      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
     }
   }
 
@@ -131,8 +137,6 @@ namespace Lucee
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
 
-// indices
-    int idx[NDIM], idxl[NDIM];
 // pointers to data
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
@@ -141,6 +145,9 @@ namespace Lucee
 
 // to store jump across interface
     Lucee::FieldPtr<double> jump(meqn);
+
+// maximum CFL number used
+    double cfla = 0.0;
 
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
@@ -155,6 +162,12 @@ namespace Lucee
       Lucee::FieldPtr<double> amdqPtr = amdq[dir].createPtr();
       Lucee::FieldPtr<double> speedsPtr = speeds[dir].createPtr();
       Lucee::FieldPtr<double> wavesPtr = waves[dir].createPtr();
+
+// lower and upper bounds of 1D slice. (We need to make sure that the
+// Riemann problem is computed for one edge outside the domain
+// interior. This is needed to limit the waves on the domain boundary)
+      int sliceLower = localRgn.getLower(dir)-1;
+      int sliceUpper = localRgn.getUpper(dir)+2;
       
 // loop over each 1D slice
       while (seq.step())
@@ -163,7 +176,7 @@ namespace Lucee
         seq.fillWithIndex(idx);
         seq.fillWithIndex(idxl);
 // loop over slice
-        for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
+        for (int i=sliceLower; i<sliceUpper; ++i)
         {
           idx[dir] = i; // cell right of edge
           idxl[dir] = i-1; // cell left of edge
@@ -195,14 +208,23 @@ namespace Lucee
             qNewPtr[m] += -dtdx*apdqPtr[m];
             qNewPtrl[m] += -dtdx*amdqPtr[m];
           }
+
+// compute CFL number used in this step
+          for (unsigned mw=0; mw<mwave; ++mw)
+            cfla = std::max(cfla, dtdx*std::abs(speedsPtr[mw]));
         }
+// check if time-step was too large
+        if (cfla > cflm)
+          return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+
 // apply limiters
+        applyLimiters(waves[dir], speeds[dir]);
 
 // compute second order updates
 
       }
     }
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   template <unsigned NDIM>
@@ -211,6 +233,85 @@ namespace Lucee
   {
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
+  }
+
+  template <unsigned NDIM>
+  void
+  WavePropagationUpdater<NDIM>::applyLimiters(
+    Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds)
+  {
+    double c, r, dotr, dotl, wnorm2, wlimitr;
+
+    unsigned meqn = equation->getNumEqns();
+    unsigned mwave = equation->getNumWaves();
+// create indexer to access waves
+    int start[2] = {0, 0};
+    unsigned shape[2] = {meqn, mwave};
+    Lucee::ColMajorIndexer<2> idx(shape, start);
+
+    Lucee::ConstFieldPtr<double> speedsPtr = speeds.createConstPtr();
+
+    int sliceLower = speeds.getLower(0);
+    int sliceUpper = speeds.getUpper(0) + 1;
+    for (unsigned mw=0; mw<mwave; ++mw)
+    {
+      dotr = 0.0;
+// compute initial dotr value (this will become dotl in the loop)
+      for (unsigned m=0; m<meqn; ++m)
+        dotr += waves(sliceLower-1, idx.getIndex(m, mw))*waves(sliceLower, idx.getIndex(m, mw));
+
+      for (int i=sliceLower; i<sliceUpper; ++i)
+      {
+        speeds.setPtr(speedsPtr, i);
+        wnorm2 = 0.0;
+        dotl = dotr;
+        dotr = 0.0;
+        for (unsigned m=0; m<meqn; ++m)
+        { // compute wave normal and dotl
+          wnorm2 += waves(i, idx.getIndex(m, mw))*waves(i, idx.getIndex(m, mw));
+          dotr += waves(i, idx.getIndex(m, mw))*waves(i+1, idx.getIndex(m, mw));
+        }
+        if (wnorm2 > 0.0)
+        {
+          if (speedsPtr[mw] > 0)
+            r = dotl/wnorm2;
+          else
+            r = dotr/wnorm2;
+
+          switch (limiter)
+          {
+            case NO_LIMITER:
+                break;
+                
+            case MINMOD_LIMITER:
+                wlimitr = std::max(0.0, std::min(1.0, r));
+                break;
+
+            case SUPERBEE_LIMITER:
+                wlimitr = Lucee::max3(0.0, std::min(1.0, 2*r), std::min(2.0, r));
+                break;
+
+            case VAN_LEER_LIMITER:
+                wlimitr = (r+std::abs(r))/(1+std::abs(r));
+                break;
+
+            case MONOTONIZED_CENTERED_LIMITER:
+                c = (1.+r)/2.;
+                wlimitr = std::max(0.0, Lucee::min3(c, 2., 2.*r));
+                break;
+
+            case BEAM_WARMING_LIMITER:
+                wlimitr = r;
+
+            default:
+                ;
+          }
+// apply limiter
+          for (unsigned m=0; m<meqn; ++m)
+            waves(i, idx.getIndex(m, mw)) = wlimitr*waves(i, idx.getIndex(m, mw));
+        }
+      }
+    }
   }
 
 // instantiations
