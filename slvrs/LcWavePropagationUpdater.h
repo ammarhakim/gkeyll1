@@ -86,6 +86,14 @@ namespace Lucee
       std::vector<Lucee::Field<1, double> > speeds;
 /** Fields to store waves */
       std::vector<Lucee::Field<1, double> > waves;
+
+/**
+ * Apply limiters to waves.
+ *
+ * @param waves [in/out] On input, waves to be limited. On output, limited waves.
+ * @param speeds Wave speeds.
+ */
+      void applyLimiters(Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds);
   };
 }
 

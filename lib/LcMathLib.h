@@ -19,6 +19,9 @@
 // lucee includes
 #include <LcVector.h>
 
+// std includes
+#include <algorithm>
+
 namespace Lucee
 {
 /**
@@ -57,6 +60,34 @@ namespace Lucee
  * @return plm P_l^m(x).
  */
   double legendre(int l, int m, double x);
+
+/**
+ * Compute minimum of three numbers.
+ *
+ * @param a First of three numbers.
+ * @param b Second of three numbers.
+ * @param c Third of three numbers.
+ * @return minimum of three numbers.
+ */
+  template <typename T>
+  const T& min3(const T& a, const T& b, const T& c)
+  {
+    return std::min<T>(a, std::min<T>(b, c));
+  }
+
+/**
+ * Compute maximum of three numbers.
+ *
+ * @param a First of three numbers.
+ * @param b Second of three numbers.
+ * @param c Third of three numbers.
+ * @return maximum of three numbers.
+ */
+  template <typename T>
+  const T& max3(const T& a, const T& b, const T& c)
+  {
+    return std::max<T>(a, std::max<T>(b, c));
+  }
 }
 
 #endif // LC_MATH_LIB_H
