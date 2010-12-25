@@ -102,12 +102,14 @@ namespace Lucee
     for (unsigned i=0; i<NDIM; ++i)
     {
       int lower[1], upper[1];
-      lower[0] = localRgn.getLower(0); upper[0] = localRgn.getUpper(0);
+      lower[0] = localRgn.getLower(0); 
+      upper[0] = localRgn.getUpper(0);
       Lucee::Region<1, int> slice(lower, upper);
       apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       speeds.push_back(Lucee::Field<1, double>(slice, mwave, lg, ug));
       waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
+      fs.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
     }
   }
 
@@ -162,13 +164,15 @@ namespace Lucee
       Lucee::FieldPtr<double> amdqPtr = amdq[dir].createPtr();
       Lucee::FieldPtr<double> speedsPtr = speeds[dir].createPtr();
       Lucee::FieldPtr<double> wavesPtr = waves[dir].createPtr();
+      Lucee::FieldPtr<double> fsPtr = fs[dir].createPtr();
+      Lucee::FieldPtr<double> fsPtr1 = fs[dir].createPtr();
 
 // lower and upper bounds of 1D slice. (We need to make sure that the
 // Riemann problem is computed for one edge outside the domain
 // interior. This is needed to limit the waves on the domain boundary)
       int sliceLower = localRgn.getLower(dir)-1;
       int sliceUpper = localRgn.getUpper(dir)+2;
-      
+
 // loop over each 1D slice
       while (seq.step())
       {
@@ -220,8 +224,41 @@ namespace Lucee
 // apply limiters
         applyLimiters(waves[dir], speeds[dir]);
 
-// compute second order updates
+// compute second order corrections to flux (we need to go one cell
+// beyond the last cell to ensure the right most edge flux is
+// computed)
+        for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
+        {
+          idx[dir] = i;
+          fs[dir].setPtr(fsPtr, idx);
+          speeds[dir].setPtr(speedsPtr, idx);
+          waves[dir].setPtr(wavesPtr, idx);
 
+// create matrix to store waves
+          Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
+
+          for (unsigned m=0; m<meqn; ++m)
+          { // compute correction
+            fsPtr[m] = 0.0;
+            for (unsigned mw=0; mw<mwave; ++mw)
+              fsPtr[m] += 0.5*std::abs(speedsPtr[mw])*(1.0 -
+                std::abs(speedsPtr[mw])*dtdx)*wavesMat(m, mw);
+          }
+        }
+
+// accumulate second order corrections
+        for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
+        {
+          idx[dir] = i; // left edge of cell
+          idxl[dir] = i+1; // right edge of cell
+// set pointers to proper locations
+          qNew.setPtr(qNewPtr, idx);
+          fs[dir].setPtr(fsPtr, idx);
+          fs[dir].setPtr(fsPtr1, idxl);
+
+          for (unsigned m=0; m<meqn; ++m)
+            qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
+        }
       }
     }
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);

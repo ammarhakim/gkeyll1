@@ -86,6 +86,8 @@ namespace Lucee
       std::vector<Lucee::Field<1, double> > speeds;
 /** Fields to store waves */
       std::vector<Lucee::Field<1, double> > waves;
+/** Fields to store second order corrections */
+      std::vector<Lucee::Field<1, double> > fs;
 
 /**
  * Apply limiters to waves.
