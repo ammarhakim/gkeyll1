@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* December 24th
+
+  More work on WavePropagationUpdater. Nearly completed. Once
+  transverse terms are added the localRgn box may need to be extended
+  to give effects of corner cells on the first row of cells.
+
+  Should add a numerical flux function to each equation system. Then,
+  let the equation system decide which flux to use.
+
 * December 19th
 
   Add a rotation class to Lucee. This will allow doing 2D and 3D
