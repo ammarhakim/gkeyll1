@@ -14,8 +14,9 @@
 #endif
 
 // lucee includes
-#include <LcHyperEquationRegistry.h>
+#include <LcAdvectionEquation.h>
 #include <LcEulerEquation.h>
+#include <LcHyperEquationRegistry.h>
 
 namespace Lucee
 {
@@ -24,5 +25,7 @@ namespace Lucee
   {
 // register Euler equations
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::EulerEquation>;
+// register advection equation
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AdvectionEquation>;
   }
 }
