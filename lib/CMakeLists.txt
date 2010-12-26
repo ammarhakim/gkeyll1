@@ -7,6 +7,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lclib 
+  LcAlignedRectCoordSys.cpp
   LcBasicObj.cpp
   LcCmdLineArgs.cpp
   LcDataStructIfc.cpp
@@ -29,6 +30,7 @@ add_library(lclib
   LcLuaTable.cpp
   LcMathLib.cpp
   LcMatrix.cpp
+  LcRectCoordSys.cpp
   LcSolverIfc.cpp
   LcStreamHandler.cpp
   LcVec3.cpp

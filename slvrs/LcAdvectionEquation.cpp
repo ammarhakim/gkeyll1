@@ -48,11 +48,13 @@ namespace Lucee
   void
   AdvectionEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
+    f[0] = u[0]*q[0];
   }
 
   void
   AdvectionEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
   {
+    s[0] = u[0];
   }
 
   void
@@ -60,6 +62,8 @@ namespace Lucee
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
+    waves(0,0) = jump[0];
+    s[0] = u[0];
   }
 
   void

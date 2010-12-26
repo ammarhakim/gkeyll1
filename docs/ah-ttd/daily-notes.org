@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* December 25th
+
+  Added RectCoordSys class. Derived classes will provide rotation for
+  vectors, tensors, etc.
+
 * December 24th
 
   More work on WavePropagationUpdater. Nearly completed. Once
@@ -8,6 +13,12 @@
 
   Should add a numerical flux function to each equation system. Then,
   let the equation system decide which flux to use.
+
+  Perhaps it is important to introduce direction in the HyperEquation
+  class. Otherwise non-isotropic systems can not be simulated. One
+  option would be to introduce a RectCoordSys class that represents a
+  coordinate system as three ortogonal unit vectors. This could be
+  then passed to HyperEquation class to represent direction.
 
 * December 19th
 
