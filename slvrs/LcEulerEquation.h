@@ -44,18 +44,23 @@ namespace Lucee
 /**
  * Compute flux for this equation system.
  *
+ * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
 /**
- * Compute the wave speeds in the system.
+ * Compute the minimum and maximum wave speeds in the system. s[0] is
+ * the minimum wave speed and s[1] is the maximum wave speed.
  *
+ * @param c Coordinate system in which to compute speeds.
  * @param q Conserved variables for which to compute speeds.
- * @param s On output, this constains the speeds.
+ * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
+      virtual void speeds(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, double s[2]);
 
 /**
  * Compute primitive variables given conserved variables.

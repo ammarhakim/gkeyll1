@@ -32,13 +32,15 @@ namespace Lucee
   }
 
   void
-  HyperEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  HyperEquation::flux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
     throw Lucee::Except("HyperEquation::flux: Method not implemented");
   }
 
   void
-  HyperEquation::speeds(const Lucee::ConstFieldPtr<double>& q, double s[2])
+  HyperEquation::speeds(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
     throw Lucee::Except("HyperEquation::speeds: Method not implemented");
   }
@@ -56,7 +58,8 @@ namespace Lucee
   }
 
   void
-  HyperEquation::waves(const Lucee::ConstFieldPtr<double>& jump, 
+  HyperEquation::waves(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump, 
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
@@ -75,7 +78,7 @@ namespace Lucee
 // compute eigensystem
     Lucee::Vector<double> ev(meqn);
     Lucee::Matrix<double> rev(meqn, meqn), lev(meqn, meqn);
-    eigensystem(qavg, ev, rev, lev);
+    eigensystem(c, qavg, ev, rev, lev);
 // split jump using left eigenvectors
     Lucee::Vector<double> alpha(meqn);
     for (unsigned p=0; p<meqn; ++p)
@@ -94,7 +97,8 @@ namespace Lucee
   }
 
   void
-  HyperEquation::eigensystem(const Lucee::ConstFieldPtr<double>& q,
+  HyperEquation::eigensystem(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q,
     Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev)
   {
     throw Lucee::Except("HyperEquation::eigensystem: Method not implemented");

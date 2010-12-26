@@ -2,8 +2,14 @@
 
 * December 25th
 
-  Added RectCoordSys class. Derived classes will provide rotation for
-  vectors, tensors, etc.
+  Added RectCoordSys class. Added derived class AlignedRectCoordSys
+  that represents rectangular coordinate system obtained from a
+  90-degree rotation. The RectCoordSys has two methods,
+  rotateVecToLocal() and rotateVecToGlobal() that rotate vectors from
+  and to global frame.
+
+  Make the methods in HyperEquation be pure virtual. Otherwise missing
+  functions are not caught at compile time.
 
 * December 24th
 

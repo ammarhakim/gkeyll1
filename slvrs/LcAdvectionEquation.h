@@ -44,29 +44,36 @@ namespace Lucee
 /**
  * Compute flux for this equation system.
  *
+ * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
 /**
- * Compute the wave speeds in the system.
+ * Compute the minimum and maximum wave speeds in the system. s[0] is
+ * the minimum wave speed and s[1] is the maximum wave speed.
  *
+ * @param c Coordinate system in which to compute speeds.
  * @param q Conserved variables for which to compute speeds.
- * @param s On output, this constains the speeds.
+ * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      void speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s);
+      virtual void speeds(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, double s[2]);
 
 /**
  * Decompose jump into waves and wave-speeds using right and left states.
  *
+ * @param c Coordinate system in which to compute waves.
  * @param jump Jump to decompose.
  * @param ql Left state conserved variables.
  * @param qr Right state conserved variables.
  * @param waves On output, waves. This matrix has shape (meqn X mwave).
  * @param s On output, wave speeds.
  */
-      virtual void waves(const Lucee::ConstFieldPtr<double>& jump,
+      virtual void waves(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
