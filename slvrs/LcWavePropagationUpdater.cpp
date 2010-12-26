@@ -9,6 +9,7 @@
  */
 
 // lucee includes
+#include <LcAlignedRectCoordSys.h>
 #include <LcDirSequencer.h>
 #include <LcField.h>
 #include <LcMathLib.h>
@@ -155,6 +156,8 @@ namespace Lucee
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
       double dtdx = dt/dx[dir];
+// create coordinate system along this direction
+      Lucee::AlignedRectCoordSys coordSys(dir);
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
@@ -200,7 +203,7 @@ namespace Lucee
             jump[m] = qPtr[m] - qPtrl[m];
 
 // calculate waves and speeds
-          equation->waves(jump, qPtrl, qPtr, wavesMat, speedsPtr);
+          equation->waves(coordSys, jump, qPtrl, qPtr, wavesMat, speedsPtr);
 // compute fluctuations
           equation->qFluctuations(wavesMat, speedsPtr, apdqPtr, amdqPtr);
 

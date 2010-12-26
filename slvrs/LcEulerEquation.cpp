@@ -40,27 +40,35 @@ namespace Lucee
   }
 
   void
-  EulerEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  EulerEquation::flux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
 // compute pressure
     double pr = pressure(q);
-    f[0] = q[1]; // rho*u
-    f[1] = q[1]*q[1]/q[0] + pr; // rho*u*u + pr
-    f[2] = q[1]*q[2]/q[0]; // rho*u*v
-    f[3] = q[1]*q[3]/q[0]; // rho*u*w
-    f[4] = (q[4]+pr)*q[1]/q[0]; // (E+pr)*u
+// rotate momentum to local coordinate system
+    double mv[3];
+    c.rotateVecToLocal(&q[1], mv);
+// now compute flux
+    f[0] = mv[1]; // rho*u
+    f[1] = mv[1]*mv[1]/q[0] + pr; // rho*u*u + pr
+    f[2] = mv[1]*mv[2]/q[0]; // rho*u*v
+    f[3] = mv[1]*mv[3]/q[0]; // rho*u*w
+    f[4] = (q[4]+pr)*mv[1]/q[0]; // (E+pr)*u
   }
 
   void
-  EulerEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
+  EulerEquation::speeds(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
 // compute pressure
     double pr = pressure(q);
     double cs = std::sqrt(gas_gamma*pr/q[0]); // sound speed
-    double u = q[1]/q[0]; // fluid velocity
+// rotate momentum to local coordinate system
+    double mv[3];
+    c.rotateVecToLocal(&q[1], mv);
+    double u = mv[1]/q[0]; // fluid velocity
     s[0] = u-cs;
-    s[1] = u;
-    s[2] = u+cs;
+    s[1] = u+cs;
   }
 
   void

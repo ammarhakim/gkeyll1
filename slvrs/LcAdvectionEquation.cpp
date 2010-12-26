@@ -46,24 +46,34 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  AdvectionEquation::flux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
-    f[0] = u[0]*q[0];
+    double v[3];
+    c.rotateVecToLocal(u, v);
+    f[0] = v[0]*q[0];
   }
 
   void
-  AdvectionEquation::speeds(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& s)
+  AdvectionEquation::speeds(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
-    s[0] = u[0];
+    double v[3];
+    c.rotateVecToLocal(u, v);
+    s[0] = v[0];
+    s[1] = v[0];
   }
 
   void
-  AdvectionEquation::waves(const Lucee::ConstFieldPtr<double>& jump,
+  AdvectionEquation::waves(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
+    double v[3];
+    c.rotateVecToLocal(u, v);
     waves(0,0) = jump[0];
-    s[0] = u[0];
+    s[0] = v[0];
   }
 
   void

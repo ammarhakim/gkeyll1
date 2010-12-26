@@ -20,6 +20,7 @@
 #include <LcConstFieldPtr.h>
 #include <LcFieldPtr.h>
 #include <LcMatrix.h>
+#include <LcRectCoordSys.h>
 
 namespace Lucee
 {
@@ -69,19 +70,23 @@ namespace Lucee
 /**
  * Compute flux for this equation system.
  *
+ * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
  * the minimum wave speed and s[1] is the maximum wave speed.
  *
+ * @param c Coordinate system in which to compute speeds.
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::ConstFieldPtr<double>& q, double s[2]);
+      virtual void speeds(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, double s[2]);
 
 /**
  * Compute primitive variables given conserved variables.
@@ -102,13 +107,15 @@ namespace Lucee
 /**
  * Decompose jump into waves and wave-speeds using right and left states.
  *
+ * @param c Coordinate system in which to compute waves.
  * @param jump Jump to decompose.
  * @param ql Left state conserved variables.
  * @param qr Right state conserved variables.
  * @param waves On output, waves. This matrix has shape (meqn X mwave).
  * @param s On output, wave speeds.
  */
-      virtual void waves(const Lucee::ConstFieldPtr<double>& jump,
+      virtual void waves(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
@@ -116,12 +123,14 @@ namespace Lucee
  * Compute eigensystem for equations give a state. This method should
  * return all eigenvalues and right and left eigenvectors.
  *
+ * @param c Coordinate system in which to compute eigensystem.
  * @param q State at which to compute eigensystem.
  * @param ev On output, eigenvalues of system.
  * @param rev On output, right eigenvectors of system stored in columns.
  * @param lev On output, left eigenvectors of system stored in columns.
  */
-      virtual void eigensystem(const Lucee::ConstFieldPtr<double>& q,
+      virtual void eigensystem(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q,
         Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev);
 
 /**
