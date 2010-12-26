@@ -52,7 +52,7 @@ namespace Lucee
     }
 
     cfl = tbl.getNumber("cfl"); // CFL number
-    cflm = tbl.getNumber("cfl"); // maximum CFL number
+    cflm = tbl.getNumber("cflm"); // maximum CFL number
     
 // limiter to use
     limiter = NO_LIMITER; // by default no limiter
@@ -182,7 +182,7 @@ namespace Lucee
         int idx[NDIM], idxl[NDIM];
         seq.fillWithIndex(idx);
         seq.fillWithIndex(idxl);
-// loop over slice
+// loop over each edge in slice
         for (int i=sliceLower; i<sliceUpper; ++i)
         {
           idx[dir] = i; // cell right of edge
@@ -205,7 +205,7 @@ namespace Lucee
 // calculate waves and speeds
           equation->waves(coordSys, jump, qPtrl, qPtr, wavesMat, speedsPtr);
 // compute fluctuations
-          equation->qFluctuations(wavesMat, speedsPtr, apdqPtr, amdqPtr);
+          equation->qFluctuations(wavesMat, speedsPtr, amdqPtr, apdqPtr);
 
 // compute first-order Gudonov update
           qNew.setPtr(qNewPtr, idx);
@@ -259,8 +259,8 @@ namespace Lucee
           fs[dir].setPtr(fsPtr, idx);
           fs[dir].setPtr(fsPtr1, idxl);
 
-//           for (unsigned m=0; m<meqn; ++m)
-//             qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
+          for (unsigned m=0; m<meqn; ++m)
+            qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
         }
       }
     }
