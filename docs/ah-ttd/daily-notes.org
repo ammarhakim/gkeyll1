@@ -11,6 +11,8 @@
   Make the methods in HyperEquation be pure virtual. Otherwise missing
   functions are not caught at compile time.
 
+  Completed WavePropagationUpdater. Does not yet work.
+
 * December 24th
 
   More work on WavePropagationUpdater. Nearly completed. Once
