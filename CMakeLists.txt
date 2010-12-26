@@ -143,3 +143,6 @@ add_test(lctxyzfieldsetter unit/lctxyzfieldsetter)
 
 # lcfieldptr
 add_test(lcfieldptr unit/lcfieldptr)
+
+# lcrectcoordsys
+add_test(lcrectcoordsys unit/lcrectcoordsys)
