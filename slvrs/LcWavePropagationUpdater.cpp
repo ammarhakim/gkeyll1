@@ -259,8 +259,8 @@ namespace Lucee
           fs[dir].setPtr(fsPtr, idx);
           fs[dir].setPtr(fsPtr1, idxl);
 
-          for (unsigned m=0; m<meqn; ++m)
-            qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
+//           for (unsigned m=0; m<meqn; ++m)
+//             qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
         }
       }
     }
