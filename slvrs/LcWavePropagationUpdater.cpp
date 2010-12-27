@@ -279,7 +279,7 @@ namespace Lucee
 
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
-// create indexer to access waves
+// create indexer to access waves, stored as a meqn X mwave matrix
     int start[2] = {0, 0};
     unsigned shape[2] = {meqn, mwave};
     Lucee::ColMajorIndexer<2> idx(shape, start);
@@ -302,7 +302,7 @@ namespace Lucee
         dotl = dotr;
         dotr = 0.0;
         for (unsigned m=0; m<meqn; ++m)
-        { // compute wave normal and dotl
+        { // compute wave length and dotr
           wnorm2 += ws(i, idx.getIndex(m, mw))*ws(i, idx.getIndex(m, mw));
           dotr += ws(i, idx.getIndex(m, mw))*ws(i+1, idx.getIndex(m, mw));
         }
