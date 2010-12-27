@@ -7,7 +7,10 @@
   Euler equations.
 
   In 2D the y-direction propagation of a pulse is more diffuse that
-  the x-direction propagation. Very, very strange.
+  the x-direction propagation. Very, very strange. [Later: Found the
+  bug! The issue was that the waves, speeds etc are stored in 1D
+  arrays while a 2D indexer was being used to set the pointers. Fix
+  was to simply use the 1D index to set the pointers].
 
   How to make table for a block self-describing? One way: create Lua
   table describing the input. For example
