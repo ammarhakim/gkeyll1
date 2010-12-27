@@ -1,5 +1,54 @@
 # -*- org -*-
 
+* December 26th
+
+  Found bug in WavePropagationUpdater. Works for 1D advection
+  problem. Need to verify second order convergence and then test with
+  Euler equations.
+
+  In 2D the y-direction propagation of a pulse is more diffuse that
+  the x-direction propagation. Very, very strange.
+
+  How to make table for a block self-describing? One way: create Lua
+  table describing the input. For example
+#+BEGIN_EXAMPLE
+    advDoc = HyperEquation.Advection {
+      help = "Linear advection equation",
+      speeds = NumVec {
+        optional = false,
+	size = 3,
+	help = "Advection speed in each direction."
+      },
+    }
+#+END_EXAMPLE
+  One other option is to do this programmatically.
+#+BEGIN_EXAMPLE
+    void declareTable() 
+    {
+      Base::declareTable();
+      TableDescription& td = this->getTableDescription();
+      td->addNumVec("speeds")
+        .setHelp("List of advection speeds in each direction")
+	.setMinSize(3)
+	.setMaxSize(3);
+    }
+#+END_EXAMPLE
+
+  What are features of a self-describing block? Call them "traits"
+  following Enthought.
+
+  - There are four types of traits: string, number, and vectors of
+    these.
+
+  - Each trait can be optional or required.
+    
+  - Optional traits must have a default values.
+
+  - Each trait can take values in a range: unbound, one from a set, or
+    inside a range (for numbers).
+
+  - Number of entries in a vector trait can be from a range.
+
 * December 25th
 
   Added RectCoordSys class. Added derived class AlignedRectCoordSys
