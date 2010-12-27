@@ -100,11 +100,11 @@ namespace Lucee
     lg[0] = 2; ug[0] = 2;
 
 // allocate data
-    for (unsigned i=0; i<NDIM; ++i)
+    for (unsigned dir=0; dir<NDIM; ++dir)
     {
       int lower[1], upper[1];
-      lower[0] = localRgn.getLower(0); 
-      upper[0] = localRgn.getUpper(0);
+      lower[0] = localRgn.getLower(dir); 
+      upper[0] = localRgn.getUpper(dir);
       Lucee::Region<1, int> slice(lower, upper);
       apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
@@ -128,10 +128,6 @@ namespace Lucee
 // qnew <- qold
     qNew.copy(q);
 
-// cell spacing
-    double dx[NDIM];
-    for (unsigned n=0; n<NDIM; ++n) 
-      dx[n] = grid.getDx(n);
 // time-step
     double dt = t-this->getCurrTime();
 // local region to index
@@ -155,7 +151,7 @@ namespace Lucee
 // loop, updating slices in each dimension
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
-      double dtdx = dt/dx[dir];
+      double dtdx = dt/grid.getDx(dir);
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
 
@@ -191,10 +187,10 @@ namespace Lucee
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
 // attach pointers to fluctuations, speeds, waves
-          apdq[dir].setPtr(apdqPtr, idx);
-          amdq[dir].setPtr(amdqPtr, idx);
-          speeds[dir].setPtr(speedsPtr, idx);
-          waves[dir].setPtr(wavesPtr, idx);
+          apdq[dir].setPtr(apdqPtr, i);
+          amdq[dir].setPtr(amdqPtr, i);
+          speeds[dir].setPtr(speedsPtr, i);
+          waves[dir].setPtr(wavesPtr, i);
 // create matrix to store waves
           Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
 
@@ -219,6 +215,7 @@ namespace Lucee
 // compute CFL number used in this step
           for (unsigned mw=0; mw<mwave; ++mw)
             cfla = Lucee::max3(cfla, dtdx*speedsPtr[mw], -dtdx*speedsPtr[mw]);
+
         }
 // check if time-step was too large
         if (cfla > cflm)
@@ -232,10 +229,9 @@ namespace Lucee
 // computed)
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
         {
-          idx[dir] = i;
-          fs[dir].setPtr(fsPtr, idx);
-          speeds[dir].setPtr(speedsPtr, idx);
-          waves[dir].setPtr(wavesPtr, idx);
+          fs[dir].setPtr(fsPtr, i);
+          speeds[dir].setPtr(speedsPtr, i);
+          waves[dir].setPtr(wavesPtr, i);
 
 // create matrix to store waves
           Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
@@ -253,11 +249,10 @@ namespace Lucee
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
         {
           idx[dir] = i; // left edge of cell
-          idxl[dir] = i+1; // right edge of cell
 // set pointers to proper locations
           qNew.setPtr(qNewPtr, idx);
-          fs[dir].setPtr(fsPtr, idx);
-          fs[dir].setPtr(fsPtr1, idxl);
+          fs[dir].setPtr(fsPtr, i);
+          fs[dir].setPtr(fsPtr1, i+1);
 
           for (unsigned m=0; m<meqn; ++m)
             qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
@@ -278,7 +273,7 @@ namespace Lucee
   template <unsigned NDIM>
   void
   WavePropagationUpdater<NDIM>::applyLimiters(
-    Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds)
+    Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
     double c, r, dotr, dotl, wnorm2, wlimitr;
 
@@ -289,31 +284,31 @@ namespace Lucee
     unsigned shape[2] = {meqn, mwave};
     Lucee::ColMajorIndexer<2> idx(shape, start);
 
-    Lucee::ConstFieldPtr<double> speedsPtr = speeds.createConstPtr();
+    Lucee::ConstFieldPtr<double> spPtr = sp.createConstPtr();
 
-    int sliceLower = speeds.getLower(0);
-    int sliceUpper = speeds.getUpper(0) + 1;
+    int sliceLower = sp.getLower(0);
+    int sliceUpper = sp.getUpper(0) + 1;
     for (unsigned mw=0; mw<mwave; ++mw)
     {
       dotr = 0.0;
 // compute initial dotr value (this will become dotl in the loop)
       for (unsigned m=0; m<meqn; ++m)
-        dotr += waves(sliceLower-1, idx.getIndex(m, mw))*waves(sliceLower, idx.getIndex(m, mw));
+        dotr += ws(sliceLower-1, idx.getIndex(m, mw))*ws(sliceLower, idx.getIndex(m, mw));
 
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
-        speeds.setPtr(speedsPtr, i);
+        sp.setPtr(spPtr, i);
         wnorm2 = 0.0;
         dotl = dotr;
         dotr = 0.0;
         for (unsigned m=0; m<meqn; ++m)
         { // compute wave normal and dotl
-          wnorm2 += waves(i, idx.getIndex(m, mw))*waves(i, idx.getIndex(m, mw));
-          dotr += waves(i, idx.getIndex(m, mw))*waves(i+1, idx.getIndex(m, mw));
+          wnorm2 += ws(i, idx.getIndex(m, mw))*ws(i, idx.getIndex(m, mw));
+          dotr += ws(i, idx.getIndex(m, mw))*ws(i+1, idx.getIndex(m, mw));
         }
         if (wnorm2 > 0.0)
         {
-          if (speedsPtr[mw] > 0)
+          if (spPtr[mw] > 0)
             r = dotl/wnorm2;
           else
             r = dotr/wnorm2;
@@ -343,13 +338,14 @@ namespace Lucee
 
             case BEAM_WARMING_LIMITER:
                 wlimitr = r;
+                break;
 
             default:
                 ;
           }
 // apply limiter
           for (unsigned m=0; m<meqn; ++m)
-            waves(i, idx.getIndex(m, mw)) = wlimitr*waves(i, idx.getIndex(m, mw));
+            ws(i, idx.getIndex(m, mw)) = wlimitr*ws(i, idx.getIndex(m, mw));
         }
       }
     }
