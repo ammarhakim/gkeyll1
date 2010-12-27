@@ -218,7 +218,7 @@ namespace Lucee
 
 // compute CFL number used in this step
           for (unsigned mw=0; mw<mwave; ++mw)
-            cfla = std::max(cfla, dtdx*std::abs(speedsPtr[mw]));
+            cfla = Lucee::max3(cfla, dtdx*speedsPtr[mw], -dtdx*speedsPtr[mw]);
         }
 // check if time-step was too large
         if (cfla > cflm)
@@ -321,6 +321,7 @@ namespace Lucee
           switch (limiter)
           {
             case NO_LIMITER:
+                wlimitr = 1.0;
                 break;
                 
             case MINMOD_LIMITER:
