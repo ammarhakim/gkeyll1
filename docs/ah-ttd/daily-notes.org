@@ -14,6 +14,47 @@
   transverse terms need to be included in 2D/3D to get accurate
   solutions.
 
+  Example of a description
+
+#+BEGIN_EXAMPLE
+  td = this->getTableDescription();
+
+  td.addObject("equation")
+    .setHelp("Equation to solve. Should be a 'HyperEquation' object")
+    .setVar(&eqn);
+
+  std::vector<double> defDirs(NDIM);
+  td.addOptionalVecTrait<double>("updateDirections", defDirs)
+    .setHelp("Directions to update")
+    .addOption(0)
+    .addOption(1)
+    .addOption(2)
+    .setVar(&updateDirs);
+
+  td.addTrait<double>("cfl")
+    .setHelp("CFL number to use")
+    .min(0.0)
+    .max(1.0)
+    .setVar(&cfl);
+
+  td.addTrait<double>("cflm")
+    .setHelp("Maximum CFL number. Should be slightly larger than 'cfl'")
+    .min(0.0)
+    .max(1.0)
+    .setCheck(&checkCflm)
+    .setVar(&cflm);
+
+  td.addOptionalTrait<std::string>("limiter", "no-limiter")
+    .setHelp("Limiter to apply")
+    .addOption("no-limiter")
+    .addOption("min-mod")
+    .addOption("superbee")
+    .addOption("van-leer")
+    .addOption("monotonized-centered")
+    .addOption("beam-warming")
+    .setVar(&limiter);
+#+END_EXAMPLE
+
 * December 26th
 
   Found a bug in WavePropagationUpdater in which apdq and amdq were
@@ -45,12 +86,12 @@
     {
       Base::declareTable();
       TableDescription& td = this->getTableDescription();
-      td->addNumVec("speeds")
+      td.addNumVec("speeds")
         .setHelp("List of advection speeds in each direction")
 	.setMinSize(3)
 	.setMaxSize(3);
         .setVar(&speeds);
-      td->addString("verbosity")
+      td.addString("verbosity")
         .setHelp("Verbosity for console output")
 	.addOption("debug")
 	.addOption("info")
