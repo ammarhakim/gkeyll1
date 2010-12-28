@@ -7,6 +7,13 @@
   terms but just the 2D terms may be good enough for now. Of course,
   this needs to be done in a direction independent manner.
 
+  Turns out that directional splitting is required to get proper
+  advection in 2D. Otherwise the pulse is highly distored. In fact,
+  for unsplit schemes the transverse terms must be included to get the
+  proper un-distored solution. This essentially indicates that all
+  transverse terms need to be included in 2D/3D to get accurate
+  solutions.
+
 * December 26th
 
   Found a bug in WavePropagationUpdater in which apdq and amdq were
