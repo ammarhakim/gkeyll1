@@ -66,9 +66,8 @@ namespace Lucee
     }
     else
     {
-      updateDims.push_back(0);
-      updateDims.push_back(1);
-      updateDims.push_back(2);
+      for (unsigned i=0; i<NDIM; ++i)
+        updateDims.push_back(i);
     }
 
     cfl = tbl.getNumber("cfl"); // CFL number
@@ -168,9 +167,10 @@ namespace Lucee
 // maximum CFL number used
     double cfla = 0.0;
 
-// loop, updating slices in each dimension
-    for (unsigned dir=0; dir<NDIM; ++dir)
+// loop, updating slices in each requested dimension
+    for (unsigned d=0; d<updateDims.size(); ++d)
     {
+      unsigned dir = updateDims[d]; // direction to update
       double dtdx = dt/grid.getDx(dir);
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
