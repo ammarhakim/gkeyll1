@@ -1,16 +1,24 @@
 # -*- org -*-
 
+* December 27th
+
+  Need to figure out the transverse terms for
+  WavePropagationUpdater. This need not be the full 3D transverse
+  terms but just the 2D terms may be good enough for now. Of course,
+  this needs to be done in a direction independent manner.
+
 * December 26th
 
-  Found bug in WavePropagationUpdater. Works for 1D advection
-  problem. Need to verify second order convergence and then test with
-  Euler equations.
+  Found a bug in WavePropagationUpdater in which apdq and amdq were
+  swapped. Works for 1D advection problem. Need to verify second order
+  convergence and then test with Euler equations.
 
   In 2D the y-direction propagation of a pulse is more diffuse that
   the x-direction propagation. Very, very strange. [Later: Found the
   bug! The issue was that the waves, speeds etc are stored in 1D
   arrays while a 2D indexer was being used to set the pointers. Fix
-  was to simply use the 1D index to set the pointers].
+  was to simply use the 1D index to set the pointers. Next to test and
+  verify the order and accuracy.]
 
   How to make table for a block self-describing? One way: create Lua
   table describing the input. For example
@@ -34,11 +42,19 @@
         .setHelp("List of advection speeds in each direction")
 	.setMinSize(3)
 	.setMaxSize(3);
+        .setVar(&speeds);
+      td->addString("verbosity")
+        .setHelp("Verbosity for console output")
+	.addOption("debug")
+	.addOption("info")
+	.addOption("warning")
+	.setVar(&verbosity);
     }
 #+END_EXAMPLE
 
-  What are features of a self-describing block? Call them "traits"
-  following Enthought.
+  What are features of a self-describing table? Each table contains
+  "traits" (following Enthought) and other tables. Hence recursive
+  definition is needed.
 
   - There are four types of traits: string, number, and vectors of
     these.
@@ -47,10 +63,22 @@
     
   - Optional traits must have a default values.
 
-  - Each trait can take values in a range: unbound, one from a set, or
-    inside a range (for numbers).
+  - Each trait (or each element in a vector trait) can take values in
+    a range: unbound, one from a set, or inside a range (for numbers).
 
-  - Number of entries in a vector trait can be from a range.
+  - Number of entries in a vector trait can be fixed or unbound.
+
+  - A trait may be present only if another trait is present and/or has
+    a particular value. This can be handled in a general way or just
+    be restricted to testing for a single one. For example, one can
+    imagine constructing a system that checks for a trait and its
+    value and then combine these using logicals.
+
+  - A table may be present only if a trait is present or has a
+    particular value. Ditto as the previous point.
+
+  A good start would be to code up only the first 4 and leave the
+  if-cases to later.
 
 * December 25th
 
@@ -78,7 +106,7 @@
   class. Otherwise non-isotropic systems can not be simulated. One
   option would be to introduce a RectCoordSys class that represents a
   coordinate system as three ortogonal unit vectors. This could be
-  then passed to HyperEquation class to represent direction.
+  then passed to HyperEquation class to represent direction. [Done]
 
 * December 19th
 

@@ -70,6 +70,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Directions to update */
+      std::vector<unsigned> updateDims;
 /** Limiter to use */
       unsigned limiter;
 /** Equation to solve */
