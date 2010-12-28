@@ -51,6 +51,26 @@ namespace Lucee
       throw lce;
     }
 
+// directions to update
+    if (tbl.hasNumVec("updateDirections"))
+    {
+      std::vector<double> ud = tbl.getNumVec("updateDirections");
+      for (unsigned i=0; i<std::min<unsigned>(3, ud.size()); ++i)
+      {
+        unsigned d = (unsigned) ud[i];
+        if (d<3)
+          updateDims.push_back(d);
+        else
+          throw Lucee::Except("updateDirections must be a table with 0, 1, or 2");
+      }
+    }
+    else
+    {
+      updateDims.push_back(0);
+      updateDims.push_back(1);
+      updateDims.push_back(2);
+    }
+
     cfl = tbl.getNumber("cfl"); // CFL number
     cflm = tbl.getNumber("cflm"); // maximum CFL number
     
@@ -186,7 +206,7 @@ namespace Lucee
 // get hold of solution in these cells
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
-// attach pointers to fluctuations, speeds, waves
+// attach pointers to fluctuations, speeds, waves (note these are 1D arrays)
           apdq[dir].setPtr(apdqPtr, i);
           amdq[dir].setPtr(amdqPtr, i);
           speeds[dir].setPtr(speedsPtr, i);

@@ -40,7 +40,7 @@ namespace Lucee
     mpiInfo = mi;
 
 // Create the templated io objects
-    this->addIo( new Hdf5IoTmpl<char>());
+    this->addIo( new Hdf5IoTmpl<char>() );
     this->addIo( new Hdf5IoTmpl<unsigned char>() );
     this->addIo( new Hdf5IoTmpl<short>() );
     this->addIo( new Hdf5IoTmpl<unsigned short>() );
