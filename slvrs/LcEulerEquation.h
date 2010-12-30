@@ -42,6 +42,26 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Rotate data to local coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      void rotateToLocal(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ);
+
+/**
+ * Rotate data to global coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      void rotateToGlobal(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ);
+
+/**
  * Compute flux for this equation system.
  *
  * @param c Coordinate system in which to compute flux.

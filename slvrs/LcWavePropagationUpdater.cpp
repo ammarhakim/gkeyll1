@@ -38,6 +38,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  WavePropagationUpdater<NDIM>::declareTypes()
+  {
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
+  }
+
+  template <unsigned NDIM>
+  void
   WavePropagationUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
@@ -128,7 +136,7 @@ namespace Lucee
       apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       speeds.push_back(Lucee::Field<1, double>(slice, mwave, lg, ug));
-      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
+      waves.push_back(Lucee::Field<1, double>(slice, mwave*meqn, lg, ug));
       fs.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
     }
   }
@@ -160,6 +168,10 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
+// rotated left/right states
+    Lucee::FieldPtr<double> qLocal(meqn), qLocall(meqn);
+// waves in local coordinate system
+    Lucee::Matrix<double> wavesLocal(mwave, meqn);
 
 // to store jump across interface
     Lucee::FieldPtr<double> jump(meqn);
@@ -206,22 +218,33 @@ namespace Lucee
 // get hold of solution in these cells
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
+// rotate data to local coordinate on cell face
+          equation->rotateToLocal(coordSys, qPtr, qLocal);
+          equation->rotateToLocal(coordSys, qPtrl, qLocall);
+
 // attach pointers to fluctuations, speeds, waves (note these are 1D arrays)
           apdq[dir].setPtr(apdqPtr, i);
           amdq[dir].setPtr(amdqPtr, i);
           speeds[dir].setPtr(speedsPtr, i);
           waves[dir].setPtr(wavesPtr, i);
-// create matrix to store waves
-          Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
 
 // compute jump across edge
           for (unsigned m=0; m<meqn; ++m)
-            jump[m] = qPtr[m] - qPtrl[m];
+            jump[m] = qLocal[m] - qLocall[m];
 
 // calculate waves and speeds
-          equation->waves(coordSys, jump, qPtrl, qPtr, wavesMat, speedsPtr);
+          equation->waves(coordSys, jump, qLocal, qLocall, wavesLocal, speedsPtr);
+// rotate waves back to global frame (stored in waves[dir] array)
+          Lucee::Matrix<double> wavesGlobal(mwave, meqn, wavesPtr);
+          for (unsigned mw=0; mw<mwave; ++mw)
+          {
+            Lucee::FieldPtr<double> wl(wavesLocal.getCol(mw));
+            Lucee::FieldPtr<double> wg(wavesGlobal.getCol(mw));
+            equation->rotateToGlobal(coordSys, wl, wg);
+          }
+
 // compute fluctuations
-          equation->qFluctuations(wavesMat, speedsPtr, amdqPtr, apdqPtr);
+          equation->qFluctuations(wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
 
 // compute first-order Gudonov update
           qNew.setPtr(qNewPtr, idx);
@@ -254,14 +277,14 @@ namespace Lucee
           waves[dir].setPtr(wavesPtr, i);
 
 // create matrix to store waves
-          Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
+          Lucee::Matrix<double> wavesMat(mwave, meqn, wavesPtr);
 
           for (unsigned m=0; m<meqn; ++m)
           { // compute correction
             fsPtr[m] = 0.0;
             for (unsigned mw=0; mw<mwave; ++mw)
               fsPtr[m] += 0.5*std::abs(speedsPtr[mw])*(1.0 -
-                std::abs(speedsPtr[mw])*dtdx)*wavesMat(m, mw);
+                std::abs(speedsPtr[mw])*dtdx)*wavesMat(mw, m);
           }
         }
 
@@ -284,24 +307,16 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  WavePropagationUpdater<NDIM>::declareTypes()
-  {
-    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
-    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
-  }
-
-  template <unsigned NDIM>
-  void
   WavePropagationUpdater<NDIM>::applyLimiters(
     Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
-    double c, r, dotr, dotl, wnorm2, wlimitr;
+    double c, r, dotr, dotl, wnorm2, wlimitr=1;
 
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
 // create indexer to access waves, stored as a meqn X mwave matrix
     int start[2] = {0, 0};
-    unsigned shape[2] = {meqn, mwave};
+    unsigned shape[2] = {mwave, meqn};
     Lucee::ColMajorIndexer<2> idx(shape, start);
 
     Lucee::ConstFieldPtr<double> spPtr = sp.createConstPtr();
@@ -313,7 +328,7 @@ namespace Lucee
       dotr = 0.0;
 // compute initial dotr value (this will become dotl in the loop)
       for (unsigned m=0; m<meqn; ++m)
-        dotr += ws(sliceLower-1, idx.getIndex(m, mw))*ws(sliceLower, idx.getIndex(m, mw));
+        dotr += ws(sliceLower-1, idx.getIndex(mw, m))*ws(sliceLower, idx.getIndex(mw, m));
 
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
@@ -323,8 +338,8 @@ namespace Lucee
         dotr = 0.0;
         for (unsigned m=0; m<meqn; ++m)
         { // compute wave length and dotr
-          wnorm2 += ws(i, idx.getIndex(m, mw))*ws(i, idx.getIndex(m, mw));
-          dotr += ws(i, idx.getIndex(m, mw))*ws(i+1, idx.getIndex(m, mw));
+          wnorm2 += ws(i, idx.getIndex(mw, m))*ws(i, idx.getIndex(mw, m));
+          dotr += ws(i, idx.getIndex(mw, m))*ws(i+1, idx.getIndex(mw, m));
         }
         if (wnorm2 > 0.0)
         {
@@ -365,7 +380,7 @@ namespace Lucee
           }
 // apply limiter
           for (unsigned m=0; m<meqn; ++m)
-            ws(i, idx.getIndex(m, mw)) = wlimitr*ws(i, idx.getIndex(m, mw));
+            ws(i, idx.getIndex(mw, m)) = wlimitr*ws(i, idx.getIndex(mw, m));
         }
       }
     }

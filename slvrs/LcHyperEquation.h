@@ -68,7 +68,27 @@ namespace Lucee
       unsigned getNumWaves() const { return mwave; }
 
 /**
- * Compute flux for this equation system.
+ * Rotate data to local coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      virtual void rotateToLocal(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ) = 0;
+
+/**
+ * Rotate data to global coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      virtual void rotateToGlobal(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ) = 0;
+
+/**
+ * compute flux for this equation system.
  *
  * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
@@ -105,13 +125,16 @@ namespace Lucee
       virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
 
 /**
- * Decompose jump into waves and wave-speeds using right and left states.
+ * Decompose jump into waves and wave-speeds using right and left
+ * states. The states and jump are already in the local coordinate
+ * system specified by 'c'. Hence, in most case (equation system is
+ * isotropic) the coordinate system should be ignored.
  *
  * @param c Coordinate system in which to compute waves.
  * @param jump Jump to decompose.
  * @param ql Left state conserved variables.
  * @param qr Right state conserved variables.
- * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param waves On output, waves. This matrix has shape (mwave X meqn).
  * @param s On output, wave speeds.
  */
       virtual void waves(const Lucee::RectCoordSys& c,

@@ -56,6 +56,15 @@ namespace Lucee
       ConstFieldPtr(const std::vector<T>& vec);
 
 /**
+ * Create from a Lucee::Vector object. The new object shares data with
+ * the supplied vector. Hence, the created object is no longer valid when
+ * the supplied vector goes away.
+ *
+ * @param vec Vector to create from.
+ */
+      ConstFieldPtr(Lucee::Vector<T> vec);
+
+/**
  * Copy from a given field pointer.
  *
  * @param ptr Pointer to copy from.
