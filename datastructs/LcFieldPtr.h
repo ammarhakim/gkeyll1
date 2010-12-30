@@ -16,6 +16,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcVector.h>
+
 // std includes
 #include <vector>
 
@@ -56,6 +59,15 @@ namespace Lucee
  * @param vec Vector to create from.
  */
       FieldPtr(std::vector<T>& vec);
+
+/**
+ * Create from a Lucee::Vector object. The new object shares data with
+ * the supplied vector. Hence, the created object is no longer valid when
+ * the supplied vector goes away.
+ *
+ * @param vec Vector to create from.
+ */
+      FieldPtr(Lucee::Vector<T> vec);
 
 /**
  * Create an empty field pointer that allows storing data.

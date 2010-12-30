@@ -56,7 +56,7 @@ namespace Lucee
   {
     if (checkVecs(xu, yu, zu) == false)
       throw Lucee::Except
-        ("RectCoordSys::RectCoordSys: Suppled vectors must be orthonormal");
+        ("RectCoordSys::RectCoordSys: Supplied vectors must be orthonormal");
     for (unsigned i=0; i<3; ++i)
     {
       xunit[i] = xu[i];
@@ -70,7 +70,7 @@ namespace Lucee
   {
     if (checkVecs(xu, yu, zu) == false)
       throw Lucee::Except
-        ("RectCoordSys::setUnitVecs: Suppled vectors must be orthonormal");
+        ("RectCoordSys::setUnitVecs: Supplied vectors must be orthonormal");
     for (unsigned i=0; i<3; ++i)
     {
       xunit[i] = xu[i];

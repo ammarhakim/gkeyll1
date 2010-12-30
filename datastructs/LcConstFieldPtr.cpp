@@ -32,6 +32,12 @@ namespace Lucee
   }
 
   template <typename T>
+  ConstFieldPtr<T>::ConstFieldPtr(Lucee::Vector<T> vec)
+    : numComponents(vec.size()), data(&vec[0])
+  {
+  }
+
+  template <typename T>
   ConstFieldPtr<T>::ConstFieldPtr(const FieldPtr<T>& ptr)
     : numComponents(ptr.numComponents), data(ptr.data)
   {

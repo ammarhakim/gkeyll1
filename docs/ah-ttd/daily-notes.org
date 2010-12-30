@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* December 29th
+
+  To get closer to a usable system (a) boundary conditions (b)
+  adaptive time-stepping and (c) transverse solvers need to be
+  implemented. The task (b) needs to be done in Lua, of course.
+
 * December 27th
 
   Need to figure out the transverse terms for

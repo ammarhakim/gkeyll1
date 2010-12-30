@@ -40,20 +40,35 @@ namespace Lucee
   }
 
   void
+  EulerEquation::rotateToLocal(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  {
+    outQ[0] = inQ[0]; // density
+    c.rotateVecToLocal(&inQ[1], &outQ[1]); // momentum
+    outQ[4] = inQ[4]; // energy density
+  }
+
+  void
+  EulerEquation::rotateToGlobal(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  {
+    outQ[0] = inQ[0]; // density
+    c.rotateVecToGlobal(&inQ[1], &outQ[1]); // momentum
+    outQ[4] = inQ[4]; // energy density
+  }
+
+  void
   EulerEquation::flux(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
 // compute pressure
     double pr = pressure(q);
-// rotate momentum to local coordinate system
-    double mv[3];
-    c.rotateVecToLocal(&q[1], mv);
 // now compute flux
-    f[0] = mv[1]; // rho*u
-    f[1] = mv[1]*mv[1]/q[0] + pr; // rho*u*u + pr
-    f[2] = mv[1]*mv[2]/q[0]; // rho*u*v
-    f[3] = mv[1]*mv[3]/q[0]; // rho*u*w
-    f[4] = (q[4]+pr)*mv[1]/q[0]; // (E+pr)*u
+    f[0] = q[1]; // rho*u
+    f[1] = q[1]*q[1]/q[0] + pr; // rho*u*u + pr
+    f[2] = q[1]*q[2]/q[0]; // rho*u*v
+    f[3] = q[1]*q[3]/q[0]; // rho*u*w
+    f[4] = (q[4]+pr)*q[1]/q[0]; // (E+pr)*u
   }
 
   void
@@ -63,10 +78,7 @@ namespace Lucee
 // compute pressure
     double pr = pressure(q);
     double cs = std::sqrt(gas_gamma*pr/q[0]); // sound speed
-// rotate momentum to local coordinate system
-    double mv[3];
-    c.rotateVecToLocal(&q[1], mv);
-    double u = mv[1]/q[0]; // fluid velocity
+    double u = q[1]/q[0]; // fluid velocity
     s[0] = u-cs;
     s[1] = u+cs;
   }

@@ -32,6 +32,12 @@ namespace Lucee
   }
 
   template <typename T>
+  FieldPtr<T>::FieldPtr(Lucee::Vector<T> vec)
+    : numComponents(vec.size()), data(&vec[0]), isAlloc(false)
+  {
+  }
+
+  template <typename T>
   FieldPtr<T>::FieldPtr(unsigned num)
     : numComponents(num), data(new T[num]), isAlloc(true)
   {
