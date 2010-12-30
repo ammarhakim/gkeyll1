@@ -19,6 +19,10 @@
 
 namespace Lucee
 {
+  RectCoordSys::~RectCoordSys()
+  {
+  }
+
   void
   RectCoordSys::fillWithUnitVecs(double xu[3], double yu[3], double zu[3]) const
   {

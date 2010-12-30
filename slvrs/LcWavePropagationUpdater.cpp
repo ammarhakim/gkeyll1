@@ -337,7 +337,7 @@ namespace Lucee
         dotl = dotr;
         dotr = 0.0;
         for (unsigned m=0; m<meqn; ++m)
-        { // compute wave length and dotr
+        { // compute norm and dotr
           wnorm2 += ws(i, idx.getIndex(mw, m))*ws(i, idx.getIndex(mw, m));
           dotr += ws(i, idx.getIndex(mw, m))*ws(i+1, idx.getIndex(mw, m));
         }
