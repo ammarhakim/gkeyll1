@@ -6,6 +6,11 @@
   adaptive time-stepping and (c) transverse solvers need to be
   implemented. The task (b) needs to be done in Lua, of course.
 
+  Adding rotations is significantly slowing down the system. In
+  particular the rotation of the waves is horribly slow. One option is
+  to instead copy data back and forth. Probably faster than all the
+  object creation that is happening now.
+
 * December 27th
 
   Need to figure out the transverse terms for
