@@ -40,8 +40,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::rotateToLocal(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  EulerEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     outQ[0] = inQ[0]; // density
     c.rotateVecToLocal(&inQ[1], &outQ[1]); // momentum
@@ -49,8 +48,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::rotateToGlobal(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  EulerEquation::rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     outQ[0] = inQ[0]; // density
     c.rotateVecToGlobal(&inQ[1], &outQ[1]); // momentum

@@ -219,8 +219,8 @@ namespace Lucee
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
 // rotate data to local coordinate on cell face
-          equation->rotateToLocal(coordSys, qPtr, qLocal);
-          equation->rotateToLocal(coordSys, qPtrl, qLocall);
+          equation->rotateToLocal(coordSys, &qPtr[0], &qLocal[0]);
+          equation->rotateToLocal(coordSys, &qPtrl[0], &qLocall[0]);
 
 // attach pointers to fluctuations, speeds, waves (note these are 1D arrays)
           apdq[dir].setPtr(apdqPtr, i);
@@ -237,11 +237,7 @@ namespace Lucee
 // rotate waves back to global frame (stored in waves[dir] array)
           Lucee::Matrix<double> wavesGlobal(mwave, meqn, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)
-          {
-            Lucee::FieldPtr<double> wl(wavesLocal.getCol(mw));
-            Lucee::FieldPtr<double> wg(wavesGlobal.getCol(mw));
-            equation->rotateToGlobal(coordSys, wl, wg);
-          }
+            equation->rotateToGlobal(coordSys, &wavesLocal(mw,0), &wavesGlobal(mw,0));
 
 // compute fluctuations
           equation->qFluctuations(wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
