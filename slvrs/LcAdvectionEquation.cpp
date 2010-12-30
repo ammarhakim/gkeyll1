@@ -46,15 +46,13 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::rotateToLocal(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  AdvectionEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     outQ[0] = inQ[0];
   }
 
   void
-  AdvectionEquation::rotateToGlobal(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& inQ, Lucee::FieldPtr<double>& outQ)
+  AdvectionEquation::rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     outQ[0] = inQ[0];
   }
