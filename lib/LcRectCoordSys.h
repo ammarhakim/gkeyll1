@@ -29,6 +29,11 @@ namespace Lucee
   {
     public:
 /**
+ * Destroy object.
+ */
+      virtual ~RectCoordSys();
+
+/**
  * Get coordinate system defined by this object. The returned vectors
  * are of unit length and form a (xu, yu, zu) forms a right-handed
  * coordinate system.
