@@ -237,6 +237,8 @@ namespace Lucee
 // rotate waves back to global frame (stored in waves[dir] array)
           Lucee::Matrix<double> wavesGlobal(mwave, meqn, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)
+// the calls &wavesGlobal(mw,0) etc works because the columns (waves)
+// are stored contiguously.
             equation->rotateToGlobal(coordSys, &wavesLocal(mw,0), &wavesGlobal(mw,0));
 
 // compute fluctuations
