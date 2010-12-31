@@ -38,3 +38,5 @@ target_link_libraries(lucee
   ${Hdf5_LIBRARIES}
   ${Gsl_LIBRARIES}
   ${EXTRA_LIBS})
+
+install(TARGETS lucee RUNTIME DESTINATION bin)

@@ -32,7 +32,9 @@ if (GSL_FOUND)
 endif (GSL_FOUND)
 
 # Create configure file
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+install(FILES svninfo.txt DESTINATION include)
 
 # Build code in loki
 add_subdirectory(etc/loki/src)
