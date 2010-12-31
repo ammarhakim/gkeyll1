@@ -63,38 +63,37 @@ namespace Lucee
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
-// // calculate left and right primitive variables
-//     Lucee::FieldPtr<double> vl(meqn), vr(meqn);
-//     primitive(ql, vl);
-//     primitive(qr, vr);
-// // average it
-//     Lucee::FieldPtr<double> vavg(meqn);
-//     for (unsigned i=0; i<meqn; ++i)
-//       vavg[i] = 0.5*(vl[i]+vr[i]);
-// // compute conserved variables
-//     Lucee::FieldPtr<double> qavg(meqn);
-//     conserved(vavg, qavg);
+// calculate left and right primitive variables
+    Lucee::FieldPtr<double> vl(meqn), vr(meqn);
+    primitive(ql, vl);
+    primitive(qr, vr);
+// average it
+    Lucee::FieldPtr<double> vavg(meqn);
+    for (unsigned i=0; i<meqn; ++i)
+      vavg[i] = 0.5*(vl[i]+vr[i]);
+// compute conserved variables
+    Lucee::FieldPtr<double> qavg(meqn);
+    conserved(vavg, qavg);
 
-// // compute eigensystem
-//     Lucee::Vector<double> ev(meqn);
-//     Lucee::Matrix<double> rev(meqn, meqn), lev(meqn, meqn);
-//     eigensystem(c, qavg, ev, rev, lev);
-// // split jump using left eigenvectors
-//     Lucee::Vector<double> alpha(meqn);
-//     for (unsigned p=0; p<meqn; ++p)
-//     {
-//       alpha[p] = 0.0;
-//       for (unsigned i=0; i<meqn; ++i)
-//         alpha[p] += lev(i,p)*jump[i];
-//     }
-// // compute waves
-//     for (unsigned p=0; p<meqn; ++p)
-//     {
-//       for (unsigned i=0; i<meqn; ++i)
-//         waves(i,p) = alpha[p]*rev(i,p);
-//       s[p] = ev[p]; // set speeds
-//     }
-    throw Lucee::Except("HyperEquation::waves: Method not implemented");
+// compute eigensystem
+    Lucee::Vector<double> ev(meqn);
+    Lucee::Matrix<double> rev(meqn, meqn), lev(meqn, meqn);
+    eigensystem(c, qavg, ev, rev, lev);
+// split jump using left eigenvectors
+    Lucee::Vector<double> alpha(meqn);
+    for (unsigned p=0; p<meqn; ++p)
+    {
+      alpha[p] = 0.0;
+      for (unsigned i=0; i<meqn; ++i)
+        alpha[p] += lev(i,p)*jump[i];
+    }
+// compute waves
+    for (unsigned p=0; p<meqn; ++p)
+    {
+      for (unsigned i=0; i<meqn; ++i)
+        waves(i,p) = alpha[p]*rev(i,p);
+      s[p] = ev[p]; // set speeds
+    }
   }
 
   void

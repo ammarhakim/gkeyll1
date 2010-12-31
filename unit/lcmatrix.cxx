@@ -450,6 +450,26 @@ test_14()
       LC_ASSERT("Testing view values", A(i,j) == (10*i+j)*0.5);
 }
 
+void modVec(unsigned n, double *vec)
+{
+  for (unsigned i=0; i<n; ++i)
+    vec[i] = (i+0.5)*5.0;
+}
+
+void
+test_15()
+{
+  Lucee::Matrix<double> waves(5, 3);
+  waves = 10.0;
+  modVec(5, &waves(0, 2));
+  for (unsigned i=0; i<5; ++i)
+    LC_ASSERT("Tesitng modVec", waves(i,2) == (i+0.5)*5.0);
+
+  modVec(5, &waves(0, 1));
+  for (unsigned i=0; i<5; ++i)
+    LC_ASSERT("Tesitng modVec", waves(i,1) == (i+0.5)*5.0);
+}
+
 int
 main(void) 
 {
@@ -468,5 +488,6 @@ main(void)
   test_12();
   test_13();
   test_14();
+  test_15();
   LC_END_TESTS;
 }

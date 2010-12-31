@@ -132,7 +132,7 @@ namespace Lucee
  * @param jump Jump to decompose.
  * @param ql Left state conserved variables.
  * @param qr Right state conserved variables.
- * @param waves On output, waves. This matrix has shape (mwave X meqn).
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
  * @param s On output, wave speeds.
  */
       virtual void waves(const Lucee::RectCoordSys& c,
