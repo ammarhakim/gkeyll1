@@ -35,6 +35,6 @@ target_link_libraries(lucee
   lclib
   lcloki
   lclua
-  ${HDF5_LIBRARIES}
-  ${GSL_CONFIG_LIBS}
+  ${Hdf5_LIBRARIES}
+  ${Gsl_LIBRARIES}
   ${EXTRA_LIBS})
