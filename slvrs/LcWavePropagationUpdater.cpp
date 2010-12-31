@@ -136,7 +136,7 @@ namespace Lucee
       apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
       speeds.push_back(Lucee::Field<1, double>(slice, mwave, lg, ug));
-      waves.push_back(Lucee::Field<1, double>(slice, mwave*meqn, lg, ug));
+      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
       fs.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
     }
   }
@@ -171,7 +171,7 @@ namespace Lucee
 // rotated left/right states
     Lucee::FieldPtr<double> qLocal(meqn), qLocall(meqn);
 // waves in local coordinate system
-    Lucee::Matrix<double> wavesLocal(mwave, meqn);
+    Lucee::Matrix<double> wavesLocal(meqn, mwave);
 
 // to store jump across interface
     Lucee::FieldPtr<double> jump(meqn);
@@ -235,11 +235,11 @@ namespace Lucee
 // calculate waves and speeds
           equation->waves(coordSys, jump, qLocal, qLocall, wavesLocal, speedsPtr);
 // rotate waves back to global frame (stored in waves[dir] array)
-          Lucee::Matrix<double> wavesGlobal(mwave, meqn, wavesPtr);
+          Lucee::Matrix<double> wavesGlobal(meqn, mwave, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)
-// the calls &wavesGlobal(mw,0) etc works because the columns (waves)
+// the calls &wavesGlobal(0,mw) etc works because the columns (waves)
 // are stored contiguously.
-            equation->rotateToGlobal(coordSys, &wavesLocal(mw,0), &wavesGlobal(mw,0));
+            equation->rotateToGlobal(coordSys, &wavesLocal(0,mw), &wavesGlobal(0,mw));
 
 // compute fluctuations
           equation->qFluctuations(wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
@@ -275,14 +275,14 @@ namespace Lucee
           waves[dir].setPtr(wavesPtr, i);
 
 // create matrix to store waves
-          Lucee::Matrix<double> wavesMat(mwave, meqn, wavesPtr);
+          Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
 
           for (unsigned m=0; m<meqn; ++m)
           { // compute correction
             fsPtr[m] = 0.0;
             for (unsigned mw=0; mw<mwave; ++mw)
               fsPtr[m] += 0.5*std::abs(speedsPtr[mw])*(1.0 -
-                std::abs(speedsPtr[mw])*dtdx)*wavesMat(mw, m);
+                std::abs(speedsPtr[mw])*dtdx)*wavesMat(m, mw);
           }
         }
 
@@ -314,7 +314,7 @@ namespace Lucee
     unsigned mwave = equation->getNumWaves();
 // create indexer to access waves, stored as a meqn X mwave matrix
     int start[2] = {0, 0};
-    unsigned shape[2] = {mwave, meqn};
+    unsigned shape[2] = {meqn, mwave};
     Lucee::ColMajorIndexer<2> idx(shape, start);
 
     Lucee::ConstFieldPtr<double> spPtr = sp.createConstPtr();
@@ -326,7 +326,7 @@ namespace Lucee
       dotr = 0.0;
 // compute initial dotr value (this will become dotl in the loop)
       for (unsigned m=0; m<meqn; ++m)
-        dotr += ws(sliceLower-1, idx.getIndex(mw, m))*ws(sliceLower, idx.getIndex(mw, m));
+        dotr += ws(sliceLower-1, idx.getIndex(m, mw))*ws(sliceLower, idx.getIndex(m, mw));
 
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
@@ -336,8 +336,8 @@ namespace Lucee
         dotr = 0.0;
         for (unsigned m=0; m<meqn; ++m)
         { // compute norm and dotr
-          wnorm2 += ws(i, idx.getIndex(mw, m))*ws(i, idx.getIndex(mw, m));
-          dotr += ws(i, idx.getIndex(mw, m))*ws(i+1, idx.getIndex(mw, m));
+          wnorm2 += ws(i, idx.getIndex(m, mw))*ws(i, idx.getIndex(m, mw));
+          dotr += ws(i, idx.getIndex(m, mw))*ws(i+1, idx.getIndex(m, mw));
         }
         if (wnorm2 > 0.0)
         {
@@ -378,7 +378,7 @@ namespace Lucee
           }
 // apply limiter
           for (unsigned m=0; m<meqn; ++m)
-            ws(i, idx.getIndex(mw, m)) = wlimitr*ws(i, idx.getIndex(mw, m));
+            ws(i, idx.getIndex(m, mw)) = wlimitr*ws(i, idx.getIndex(m, mw));
         }
       }
     }
