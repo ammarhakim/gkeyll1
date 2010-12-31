@@ -124,9 +124,6 @@ add_test(lcluafunction unit/lcluafunction)
 # lclincombiner
 add_test(lclincombiner unit/lclincombiner)
 
-# lctxyzfieldsetter
-add_test(lctxyzfieldsetter unit/lctxyzfieldsetter)
-
 # lcfieldptr
 add_test(lcfieldptr unit/lcfieldptr)
 
