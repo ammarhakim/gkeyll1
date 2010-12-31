@@ -27,7 +27,7 @@ ENDIF (APPLE)
 
 # lcarray
 add_executable(lcarray lcarray.cxx)
-target_link_libraries(lcarray lclib lcloki lclua ${HDF5_LIBRARIES})
+target_link_libraries(lcarray lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lccolmajorindexer
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
@@ -47,11 +47,11 @@ target_link_libraries(lcfixedvector lclib lcloki lclua)
 
 # lcvector
 add_executable(lcvector lcvector.cxx)
-target_link_libraries(lcvector lclib lcloki lclua ${HDF5_LIBRARIES})
+target_link_libraries(lcvector lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcmatrix
 add_executable(lcmatrix lcmatrix.cxx)
-target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${HDF5_LIBRARIES})
+target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${Hdf5_LIBRARIES})
 
 # lccmdlineargs
 add_executable(lccmdlineargs lccmdlineargs.cxx)
@@ -64,7 +64,7 @@ target_link_libraries(lcregion lclib lcloki lclua)
 # lcfield
 add_executable(lcfield lcfield.cxx)
 target_link_libraries(lcfield
-  lcdatastructs lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
+  lcdatastructs lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
@@ -88,7 +88,7 @@ target_link_libraries(lclogger lclib lcloki lclua)
 
 # lchdf5io
 add_executable(lchdf5io lchdf5io.cxx)
-target_link_libraries(lchdf5io lclib lcloki lclua ${HDF5_LIBRARIES})
+target_link_libraries(lchdf5io lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcvec3
 add_executable(lcvec3 lcvec3.cxx)
@@ -96,7 +96,7 @@ target_link_libraries(lcvec3 lclib)
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
-target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
+target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)
@@ -105,7 +105,7 @@ target_link_libraries(lcluafunction lclib lcloki lclua)
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)
 target_link_libraries(lclincombiner lcslvrs lcdatastructs 
-  lcgrids lclib lcloki lclua ${HDF5_LIBRARIES})
+  lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)
@@ -117,7 +117,7 @@ target_link_libraries(lcfieldptr lcdatastructs lclib lcloki lclua)
 
 # lcgslelliptic
 add_executable(lcgslelliptic lcgslelliptic.cxx)
-target_link_libraries(lcgslelliptic ${GSL_CONFIG_LIBS})
+target_link_libraries(lcgslelliptic ${Gsl_LIBRARIES})
 
 # lcrectcoordsys
 add_executable(lcrectcoordsys lcrectcoordsys.cxx)

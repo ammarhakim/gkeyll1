@@ -1,49 +1,35 @@
 # Project information
 project(lucee)
 
+set(VERSION_MAJOR "0")
+set(VERSION_MINOR "5")
+set(VERSION_PATCH "0")
+set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+
 # Required version
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.8)
 
-# Add path to additional modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules/")
+# initialize build
+INCLUDE(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
 
-# Always build with warnings turned on
-set(CMAKE_C_FLAGS "-Wall -g -DLC_DEBUG")
-set(CMAKE_CXX_FLAGS "-Wall -g -DLC_DEBUG")
+# find packages
+# Prerequisites for finding packages
+include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
 
-# for debug builds use -g
-set(CMAKE_C_FLAGS_DEBUG "-g -DLC_DEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -DLC_DEBUG")
-
-# for optimized builds use
-set(CMAKE_C_FLAGS_RELEASE "-O3 -funroll-loops")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops")
-
-if (WIN32)
-# On Windows we need to shut up security warnings
-   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif (WIN32)
-
-# Check for include files
-add_definitions(-DHAVE_CONFIG_H)
-INCLUDE(CheckIncludeFileCXX)
-CHECK_INCLUDE_FILE_CXX(iostream HAVE_STD_STREAMS)
-CHECK_INCLUDE_FILE_CXX(sstream HAVE_SSTREAM)
-
-# Check for GSL
-find_package(GSL)
-if (GSL_FOUND)
-   add_definitions(-DHAVE_GSL)
-   include_directories(${GSL_INCLUDE_DIR})
-endif (GSL_FOUND)
-
-# Check for HDF5
-find_package(HDF5)
+# find HDF5
+find_package(Hdf5 REQUIRED)
 if (HDF5_FOUND)
    add_definitions(-DHAVE_HDF5)
    add_definitions(-DNEW_H5S_SELECT_HYPERSLAB_IFC)
-   include_directories(${HDF5_INCLUDE_DIR})
+   include_directories(${Hdf5_INCLUDES})
 endif (HDF5_FOUND)
+
+# find GSL
+find_package(Gsl REQUIRED)
+if (GSL_FOUND)
+   add_definitions(-DHAVE_GSL)
+   include_directories(${Gsl_INCLUDES})
+endif (GSL_FOUND)
 
 # Create configure file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
