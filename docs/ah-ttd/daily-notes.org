@@ -1,5 +1,25 @@
 # -*- org -*-
 
+* December 30th
+
+  Fixed slow-down problem with creation of matrices. For this now the
+  rotation function in HyperEquation take double* instead of FieldPtr.
+
+  Created a new branch
+
+  https://lucee.googlecode.com/svn/branches/tx-cmake
+
+  to convert to using TX CMake system. Also created a new project og
+  Google code to hold the packages needed to build Lucee.
+
+  https://lucee-packages.googlecode.com/svn/trunk
+
+  This uses the TX bilder system to build (for now) HDF5 and
+  GSL. Later will add more packages as needed.
+
+  Need to create a lucee-build-all project to hold the script that
+  builds lucee and all needed dependencies.
+
 * December 29th
 
   To get closer to a usable system (a) boundary conditions (b)
