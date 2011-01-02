@@ -1,0 +1,57 @@
+/**
+
+Script to compute the eigensystem of the 10-moment equation
+system. The heat-tensor is set to 0. Load into Maxima using the
+batch("tenmom-eig.mac"); command.
+
+Author: Ammar Hakim.
+First created: 21st October 2009.
+ */
+
+/** Allocate space for matrix */
+Atm : zeromatrix(10, 10);
+
+/** Define constants to make it easy for creating matrix */
+N : 1;
+U1 : 2;
+U2 : 3;
+U3 : 4;
+P11 : 5;
+P12 : 6;
+P13 : 7;
+P22 : 8;
+P23 : 9;
+P33 : 10;
+
+/** n */
+Atm[N,N] : u1; Atm[N,U1] : n;
+
+/** u1 */
+Atm[U1,U1] : u1; Atm[U1,P11] : 1/p0;
+
+/** u2 */
+Atm[U2,U2] : u1; Atm[U2,P12] : 1/p0;
+
+/** u3 */
+Atm[U3,U3] : u1; Atm[U3,P13] : 1/p0;
+
+/** p11 */
+Atm[P11,U1] : 3*p11; Atm[P11,P11] : u1;
+
+/** p12 */
+Atm[P12,U1] : 2*p12; Atm[P12,U2] : p11; Atm[P12,P12] : u1;
+
+/** p13 */
+Atm[P13,U1] : 2*p13; Atm[P13,U3] : p11; Atm[P13,P13] : u1;
+
+/** p22 */
+Atm[P22,U1] : p22; Atm[P22,U2] : 2*p12; Atm[P22,P22] : u1;
+
+/** p23 */
+Atm[P23,U1] : p23; Atm[P23,U2] : p13; Atm[P23,P23] : u1; Atm[P23,U3] : p12;
+
+/** p33 */
+Atm[P33,U1] : p33; Atm[P33,U3] : 2*p13; Atm[P33,P33] : u1;
+
+/** Now compute eigenvalues */
+eigVals : eigenvalues(Atm);

@@ -1,0 +1,110 @@
+/**
+
+Script to compute the explict update formula for Maxwell equations in
+2D. An effort to determine why div(B) is not maintained.
+
+Author: Ammar Hakim.
+First Created: 26th October 2009.
+
+*/
+
+/** i-1, i, i+1 vectors */
+Q : matrix( [Bx, By, Ez] );
+Ql : matrix( [Bxl, Byl, Ezl] );
+Qr : matrix( [Bxr, Byr, Ezr] );
+
+Qt : matrix( [Bxt, Byt, Ezt] );
+Qb : matrix( [Bxb, Byb, Ezb] );
+
+/** Flux jacobian for x-direction */
+Ax : matrix( [0, 0, 0], [0, 0, -1], [0, -c^2, 0] );
+
+/** Compute eigevectors */
+[vals, vects] : eigenvectors(Ax);
+
+/** Right eigenvectors */
+Rev : transpose( matrix(vects[1][1], vects[2][1], vects[3][1]) );
+
+/** Left eigenvectors */
+Lev : invert(Rev);
+
+/** Compute coefficients */
+alpha_l : Lev . (Q - Ql);
+alpha_r : Lev . (Qr - Q);
+
+/** Left and right waves */
+W1_l : alpha_l[1][1]*col(Rev, 1);
+W2_l : alpha_l[2][1]*col(Rev, 2);
+W3_l : alpha_l[3][1]*col(Rev, 3);
+
+W1_r : alpha_r[1][1]*col(Rev, 1);
+W2_r : alpha_r[2][1]*col(Rev, 2);
+W3_r : alpha_r[3][1]*col(Rev, 3);
+
+/** Compute fluctuations */
+Ap_l : c*W2_l;
+Am_l : -c*W1_l;
+
+Ap_r : c*W2_r;
+Am_r : -c*W1_r;
+
+/** 1st order Update formula (no -dt/dx factor) */
+update_x_1st : dtdx*ratsimp(Ap_l + Am_r);
+
+/** Now compute 2nd-order flux on left and right edges */
+f2_l : 1/2*(c*(1-c*dtdx)*W1_l + c*(1-c*dtdx)*W2_l);
+f2_r : 1/2*(c*(1-c*dtdx)*W1_r + c*(1-c*dtdx)*W2_r);
+
+/** Compute second order corrections */
+update_x_2nd : dtdx*ratsimp(f2_r-f2_l);
+
+/** Now compute net update forumala */
+update_x : ratsimp(update_x_1st + update_x_2nd);
+
+/** Flux jacobian for y-direction */
+Ay : matrix( [0, 0, 1], [0, 0, 0], [c^2, 0, 0] );
+
+/** Compute eigevectors */
+[vals, vects] : eigenvectors(Ay);
+
+/** Right eigenvectors */
+Rev : transpose( matrix(vects[1][1], vects[2][1], vects[3][1]) );
+
+/** Left eigenvectors */
+Lev : invert(Rev);
+
+/** Compute coefficients */
+alpha_t : Lev . (Qt - Q);
+alpha_b : Lev . (Q - Qb);
+
+/** Left and right waves */
+W1_t : alpha_t[1][1]*col(Rev, 1);
+W2_t : alpha_t[2][1]*col(Rev, 2);
+W3_t : alpha_t[3][1]*col(Rev, 3);
+
+W1_b : alpha_b[1][1]*col(Rev, 1);
+W2_b : alpha_b[2][1]*col(Rev, 2);
+W3_b : alpha_b[3][1]*col(Rev, 3);
+
+/** Compute fluctuations */
+Ap_t : c*W2_t;
+Am_t : -c*W1_t;
+
+Ap_b : c*W2_b;
+Am_b : -c*W1_b;
+
+/** 1st order Update formula (no -dt/dx factor) */
+update_y_1st : dtdx*ratsimp(Ap_t + Am_b);
+
+/** Now compute 2nd-order flux on left and right edges */
+f2_t : 1/2*(c*(1-c*dtdx)*W1_t + c*(1-c*dtdx)*W2_t);
+f2_b : 1/2*(c*(1-c*dtdx)*W1_b + c*(1-c*dtdx)*W2_b);
+
+/** Compute second order corrections */
+update_y_2nd : dtdx*ratsimp(f2_t-f2_b);
+
+/** Now compute net update forumala */
+update_y : ratsimp(update_y_1st + update_y_2nd);
+
+
+

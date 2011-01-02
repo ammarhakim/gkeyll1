@@ -1,0 +1,34 @@
+/** Load Maxwell RP solver */
+load("/Users/ammar/research/thoughtshop/high-order-moments-paper/scripts/maxwell-rp.mac");
+
+/** Flux jacobian in X and Y directions */
+Ax : matrix( [0, 0, 0, gam], [0, 0, -1, 0], [0, -c^2, 0, 0], [c^2*gam, 0, 0, 0] );
+Ay : matrix( [0, 0, 1, 0], [0, 0, 0, gam], [c^2, 0, 0, 0], [0, c^2*gam, 0, 0] );
+
+/** Values in right, left and top, bottom cells */
+Q : matrix( [Bx, By, Ez, psi] );
+Qr : matrix( [Bxr, Byr, Ezr, psir] );
+Ql : matrix( [Bxl, Byl, Ezl, psil] );
+Qt : matrix( [Bxt, Byt, Ezt, psit] );
+Qb : matrix( [Bxb, Byb, Ezb, psib] );
+
+/** Compute Riemann solution at each interface */
+rpL : evalRp(Ax, Q-Ql);
+rpR : evalRp(Ax, Qr-Q);
+rpT : evalRp(Ay, Qt-Q);
+rpB : evalRp(Ay, Q-Qb);
+
+/** Compute 1st order update formula */
+update_1st : -dtdx*ratsimp(rpL[3] + rpR[4]) - dtdx*ratsimp(rpT[4]+rpB[3]);
+
+/** Compute second order fluxes at each interface */
+f2L : secondOrderFlux(rpL[1], rpL[2], dtdx);
+f2R : secondOrderFlux(rpR[1], rpR[2], dtdx);
+f2T : secondOrderFlux(rpT[1], rpT[2], dtdy);
+f2B : secondOrderFlux(rpB[1], rpB[2], dtdy);
+
+/** Compute 2nd order update */
+update_2nd : -dtdx*ratsimp(f2R-f2L) - dtdy*ratsimp(f2T-f2B);
+
+/** Compute total update */
+update_phm_max : -dtdx*ratsimp(rpL[3] + rpR[4] + f2R-f2L) -dtdy*ratsimp(rpT[4]+rpB[3] + f2T-f2B);
