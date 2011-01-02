@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* January 1st 2011
+
+  Made a new project to hold build script for lucee and
+  dependencies. It now compiles cmake, hdf5 and gsl and then builds
+  lucee. Had to add an install target to lucee to install built binary
+  into install location.
+
+  To compile with release mode do
+
+  cmake -DCMAKE_BUILD_TYPE=Release
+
+  Debug can also appear here to build with debug flags.
+
+  Figured out an error in WarpX transverse solvers. Essentially need
+  to follow 2006 JCP paper carefully, specially Eq 55.
+
 * December 30th
 
   Fixed slow-down problem with creation of matrices. For this now the
