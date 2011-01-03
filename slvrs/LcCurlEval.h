@@ -43,6 +43,7 @@ namespace Lucee
       eval(double delta, const double v[3], const double vr[3], const double cvold[3],
         double cv[3])
       {
+        cv[0] = cvold[0];
         cv[1] = cvold[1] - delta*(vr[2]-v[2]);
         cv[2] = cvold[2] + delta*(vr[1]-v[1]);
       }
@@ -69,6 +70,7 @@ namespace Lucee
         double cv[3])
       {
         cv[0] = cvold[0] + delta*(vr[2]-v[2]);
+        cv[1] = cvold[1];
         cv[2] = cvold[2] - delta*(vr[0]-v[0]);
       }
   };
@@ -95,6 +97,7 @@ namespace Lucee
       {
         cv[0] = cvold[0] - delta*(vr[1]-v[1]);
         cv[1] = cvold[1] + delta*(vr[0]-v[0]);
+        cv[2] = cvold[2];
       }
   };
 }
