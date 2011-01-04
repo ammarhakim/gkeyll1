@@ -44,6 +44,12 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Initialize solver, i.e. setup initial conditions. At the end of
+ * this call, the solver should be ready for evolving the solution.
+ */
+      virtual void initialize();
+
+/**
  * Advance the solution to specified time. Updaters that do not have a
  * concept of time should ignore the time parameter.
  *
