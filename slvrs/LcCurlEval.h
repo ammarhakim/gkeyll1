@@ -29,23 +29,20 @@ namespace Lucee
 /**
  * Compute curl in X-direction. Computes
  *
- * cv[n] = cvold[n] + delta*curl(v) 
+ * cv[n] = cv[n] + delta*curl(v) 
  *
  * where only X derivatives are used. 
  *
  * @param delta spacing factor (generally dt/dx).
  * @param v Vector field.
  * @param vr Vector feild on right of v.
- * @param cvold Vector field to update.
  * @param cv Updated field.
  */
       static void
-      eval(double delta, const double v[3], const double vr[3], const double cvold[3],
-        double cv[3])
+      eval(double delta, const double v[3], const double vr[3], double cv[3])
       {
-        cv[0] = cvold[0];
-        cv[1] = cvold[1] - delta*(vr[2]-v[2]);
-        cv[2] = cvold[2] + delta*(vr[1]-v[1]);
+        cv[1] = cv[1] - delta*(vr[2]-v[2]);
+        cv[2] = cv[2] + delta*(vr[1]-v[1]);
       }
   };
 
@@ -55,23 +52,20 @@ namespace Lucee
 /**
  * Compute curl in Y-direction. Computes
  *
- * cv[n] = cvold[n] + delta*curl(v) 
+ * cv[n] = cv[n] + delta*curl(v) 
  *
  * where only Y derivatives are used. 
  *
  * @param delta spacing factor (generally dt/dy).
  * @param v Vector field.
  * @param vr Vector feild on right of v.
- * @param cvold Vector field to update.
  * @param cv Updated field.
  */
       static void
-      eval(double delta, const double v[3], const double vr[3], const double cvold[3],
-        double cv[3])
+      eval(double delta, const double v[3], const double vr[3], double cv[3])
       {
-        cv[0] = cvold[0] + delta*(vr[2]-v[2]);
-        cv[1] = cvold[1];
-        cv[2] = cvold[2] - delta*(vr[0]-v[0]);
+        cv[0] = cv[0] + delta*(vr[2]-v[2]);
+        cv[2] = cv[2] - delta*(vr[0]-v[0]);
       }
   };
 
@@ -81,23 +75,20 @@ namespace Lucee
 /**
  * Compute curl in Z-direction. Computes
  *
- * cv[n] = cvold[n] + delta*curl(v) 
+ * cv[n] = cv[n] + delta*curl(v) 
  *
  * where only Z derivatives are used. 
  *
  * @param delta spacing factor (generally dt/dz).
  * @param v Vector field.
  * @param vr Vector feild on right of v.
- * @param cvold Vector field to update.
  * @param cv Updated field.
  */
       static void
-      eval(double delta, const double v[3], const double vr[3], const double cvold[3],
-        double cv[3])
+      eval(double delta, const double v[3], const double vr[3], double cv[3])
       {
-        cv[0] = cvold[0] - delta*(vr[1]-v[1]);
-        cv[1] = cvold[1] + delta*(vr[0]-v[0]);
-        cv[2] = cvold[2];
+        cv[0] = cv[0] - delta*(vr[1]-v[1]);
+        cv[1] = cv[1] + delta*(vr[0]-v[0]);
       }
   };
 }
