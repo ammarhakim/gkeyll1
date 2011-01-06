@@ -24,6 +24,7 @@ add_library(lclib
   LcLogStreamStrm.cpp
   LcLogger.cpp
   LcLuaFuncMap.cpp
+  LcLuaMathLib.cpp
   LcLuaObjTypeId.cpp
   LcLuaState.cpp
   LcLuaTXYZFunction.cpp
