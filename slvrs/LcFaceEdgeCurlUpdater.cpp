@@ -35,6 +35,7 @@ namespace Lucee
   void
   FaceEdgeCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+    UpdaterIfc::readInput(tbl);
 // read multiplication factor
     alpha = tbl.getNumber("alpha");
   }
