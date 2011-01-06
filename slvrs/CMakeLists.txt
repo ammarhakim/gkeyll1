@@ -13,11 +13,11 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 add_library(lcslvrs
   LcAdvectionEquation.cpp
   LcEulerEquation.cpp
+  LcFaceEdgeCurlUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
   LcMaxwellTM2DUpdater.cpp
-  LcRectCurlUpdater.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp

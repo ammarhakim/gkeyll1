@@ -1,5 +1,5 @@
 /**
- * @file	LcRectCurlUpdater.cpp
+ * @file	LcFaceEdgeCurlUpdater.cpp
  *
  * @brief	Compute curl on rectangular grids.
  *
@@ -16,24 +16,24 @@
 // lucee includes
 #include <LcCurlEval.h>
 #include <LcField.h>
-#include <LcRectCurlUpdater.h>
+#include <LcFaceEdgeCurlUpdater.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
-  template <> const char *RectCurlUpdater<1>::id = "Curl1D";
-  template <> const char *RectCurlUpdater<2>::id = "Curl2D";
-  template <> const char *RectCurlUpdater<3>::id = "Curl3D";
+  template <> const char *FaceEdgeCurlUpdater<1>::id = "FaceEdgeCurl1D";
+  template <> const char *FaceEdgeCurlUpdater<2>::id = "FaceEdgeCurl2D";
+  template <> const char *FaceEdgeCurlUpdater<3>::id = "FaceEdgeCurl3D";
 
   template <unsigned NDIM>
-  RectCurlUpdater<NDIM>::RectCurlUpdater()
+  FaceEdgeCurlUpdater<NDIM>::FaceEdgeCurlUpdater()
     : UpdaterIfc()
   {
   }
 
   template <unsigned NDIM>
   void
-  RectCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
+  FaceEdgeCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // read multiplication factor
     alpha = tbl.getNumber("alpha");
@@ -41,7 +41,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  RectCurlUpdater<NDIM>::initialize()
+  FaceEdgeCurlUpdater<NDIM>::initialize()
   {
 // call base class method
     UpdaterIfc::initialize();
@@ -49,12 +49,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  RectCurlUpdater<NDIM>::update(double t)
+  FaceEdgeCurlUpdater<NDIM>::update(double t)
   {
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-// get input/output arrays to compute A = B + dt*curl(V)
+// get input/output arrays to compute A = B + dt*alpha*curl(V). A and
+// B must be face-centered and V must be edge centered.
     const Lucee::Field<NDIM, double>& B = this->getInp<Lucee::Field<NDIM, double> >(0);
     const Lucee::Field<NDIM, double>& V = this->getInp<Lucee::Field<NDIM, double> >(1);
     Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(0);
@@ -139,7 +140,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  RectCurlUpdater<NDIM>::declareTypes()
+  FaceEdgeCurlUpdater<NDIM>::declareTypes()
   {
 // two input fields
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
@@ -149,7 +150,7 @@ namespace Lucee
   }
 
 // instantiations
-  template class RectCurlUpdater<1>;
-  template class RectCurlUpdater<2>;
-  template class RectCurlUpdater<3>;
+  template class FaceEdgeCurlUpdater<1>;
+  template class FaceEdgeCurlUpdater<2>;
+  template class FaceEdgeCurlUpdater<3>;
 }
