@@ -88,7 +88,7 @@ namespace Lucee
         int idx[NDIM], idxr[NDIM];
         seq.fillWithIndex(idx);
         seq.fillWithIndex(idxr);
-// (if loop is outside loop over slice to amortize its cost)
+// (if-test is outside loop over slice to amortize its cost)
         if (dir == 0)
         { // X-direction update
           for (int i=sliceLower; i<sliceUpper; ++i)
