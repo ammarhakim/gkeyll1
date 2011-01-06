@@ -1,5 +1,41 @@
 # -*- org -*-
 
+* January 5th
+
+  Completed curl updater. Not tested yet. Used loop over direction
+  combined with deflate() method to perform updates. Perhaps not the
+  most efficient way to do this, but probably good enough for now.
+
+  Need to check for time-step restriction using CFL condition. Perhaps
+  need to put CFL number in input file?
+
+  [Later] This updater is NOT CORRECT. The issue is that the x, y and
+  z components are not indexed in a self-consistent manner. I.e. the
+  mesh and fields looks like
+
+             i-1                      i                      i+1
+  |-----------*-----------|-----------*-----------|-----------*-----------|
+  Bx(i-1)    Ex(i-1)      Bx(i)       Ex(i)       Bx(i+1)     Ex(i+1)
+  Ey(i-1)    By(i-1)      Ey(i)       By(i)       Ey(i+1)     By(i+1)
+  Ez(i-1)    Bz(i-1)      Ez(i)       Bz(i)       Ez(i+1)     Bz(i+1)
+
+  Hence the update formula for By is
+
+  dBy(i)/dt = 1/dx*[Ez(i+1)-Ez(i)]
+
+  while for Ez we have
+
+  dEz(i)/dt = 1/dx*[By(i)-By(i-1)]
+
+
+  Hence, it seems there should be two updaters: EdgeFaceCurlUpdater
+  and FaceEdgeCurlUpdater. The first updates a edge-centered field
+  from curl of a face-centered field (in 3D) while the second updates
+  a face-centered field from curl of a edge-centered field (in 3D).
+
+  Deleted SolverAssembly class from system. This is no longer needed
+  as all simulations will be driven from Lua scripts.
+
 * January 1st 2011
 
   Made a new project to hold build script for lucee and
