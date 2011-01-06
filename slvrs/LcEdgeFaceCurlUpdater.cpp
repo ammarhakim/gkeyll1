@@ -1,5 +1,5 @@
 /**
- * @file	LcFaceEdgeCurlUpdater.cpp
+ * @file	LcEdgeFaceCurlUpdater.cpp
  *
  * @brief	Compute curl on rectangular grids.
  *
@@ -16,24 +16,24 @@
 // lucee includes
 #include <LcCurlEval.h>
 #include <LcField.h>
-#include <LcFaceEdgeCurlUpdater.h>
+#include <LcEdgeFaceCurlUpdater.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
-  template <> const char *FaceEdgeCurlUpdater<1>::id = "FaceEdgeCurl1D";
-  template <> const char *FaceEdgeCurlUpdater<2>::id = "FaceEdgeCurl2D";
-  template <> const char *FaceEdgeCurlUpdater<3>::id = "FaceEdgeCurl3D";
+  template <> const char *EdgeFaceCurlUpdater<1>::id = "EdgeFaceCurl1D";
+  template <> const char *EdgeFaceCurlUpdater<2>::id = "EdgeFaceCurl2D";
+  template <> const char *EdgeFaceCurlUpdater<3>::id = "EdgeFaceCurl3D";
 
   template <unsigned NDIM>
-  FaceEdgeCurlUpdater<NDIM>::FaceEdgeCurlUpdater()
+  EdgeFaceCurlUpdater<NDIM>::EdgeFaceCurlUpdater()
     : UpdaterIfc()
   {
   }
 
   template <unsigned NDIM>
   void
-  FaceEdgeCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
+  EdgeFaceCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // read multiplication factor
     alpha = tbl.getNumber("alpha");
@@ -41,7 +41,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  FaceEdgeCurlUpdater<NDIM>::initialize()
+  EdgeFaceCurlUpdater<NDIM>::initialize()
   {
 // call base class method
     UpdaterIfc::initialize();
@@ -49,33 +49,24 @@ namespace Lucee
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  FaceEdgeCurlUpdater<NDIM>::update(double t)
+  EdgeFaceCurlUpdater<NDIM>::update(double t)
   {
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 // get input/output arrays to compute A = B + dt*alpha*curl(V). A and
-// B must be face-centered and V must be edge centered.
+// B must be edge-centered and V must be face centered.
     const Lucee::Field<NDIM, double>& B = this->getInp<Lucee::Field<NDIM, double> >(0);
     const Lucee::Field<NDIM, double>& V = this->getInp<Lucee::Field<NDIM, double> >(1);
     Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(0);
 
 // create pointers to fields
     Lucee::ConstFieldPtr<double> Vptr = V.createConstPtr();
-    Lucee::ConstFieldPtr<double> Vptrr = V.createConstPtr();
+    Lucee::ConstFieldPtr<double> Vptrl = V.createConstPtr();
     Lucee::FieldPtr<double> Aptr = A.createPtr();
     
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
-// extend by one ghost cell on upper side
-    int lg[NDIM], ug[NDIM];
-    for (unsigned d=0; d<NDIM; ++d)
-    {
-      lg[d] = 0;
-      ug[d] = 1;
-    } 
-    Lucee::Region<NDIM, int> localExtRgn = localRgn.extend(lg, ug);
-
 // time-step
     double dt = t-this->getCurrTime();
 
@@ -86,31 +77,31 @@ namespace Lucee
     {
       double adtdx = alpha*dt/grid.getDx(dir);
 // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localExtRgn.deflate(dir));
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice
       int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir);
+      int sliceUpper = localRgn.getUpper(dir)+1;
 
 // loop over each 1D slice
       while (seq.step())
       {
-        int idx[NDIM], idxr[NDIM];
+        int idx[NDIM], idxl[NDIM];
         seq.fillWithIndex(idx);
-        seq.fillWithIndex(idxr);
+        seq.fillWithIndex(idxl);
 // (if-test is outside loop over slice to amortize its cost)
         if (dir == 0)
         { // X-direction update
           for (int i=sliceLower; i<sliceUpper; ++i)
           {
             idx[dir] = i; // current cell
-            idxr[dir] = i+1; // right cell
+            idxl[dir] = i-1; // left cell
 // set pointers to proper location          
             A.setPtr(Aptr, idx);
             V.setPtr(Vptr, idx);
-            V.setPtr(Vptrr, idxr);
-            Aptr[1] += -adtdx*(Vptrr[2]-Vptr[2]);
-            Aptr[2] += adtdx*(Vptrr[1]-Vptr[1]);
+            V.setPtr(Vptrl, idxl);
+            Aptr[1] += -adtdx*(Vptr[2]-Vptrl[2]);
+            Aptr[2] += adtdx*(Vptr[1]-Vptrl[1]);
           }
         }
         else if (dir == 1)
@@ -118,13 +109,13 @@ namespace Lucee
           for (int i=sliceLower; i<sliceUpper; ++i)
           {
             idx[dir] = i; // current cell
-            idxr[dir] = i+1; // right cell
+            idxl[dir] = i-1; // left cell
 // set pointers to proper location          
             A.setPtr(Aptr, idx);
             V.setPtr(Vptr, idx);
-            V.setPtr(Vptrr, idxr);
-            Aptr[0] += adtdx*(Vptrr[2]-Vptr[2]);
-            Aptr[2] += -adtdx*(Vptrr[0]-Vptr[0]);
+            V.setPtr(Vptrl, idxl);
+            Aptr[0] += adtdx*(Vptr[2]-Vptrl[2]);
+            Aptr[2] += -adtdx*(Vptr[0]-Vptrl[0]);
           }
         }
         else
@@ -132,13 +123,13 @@ namespace Lucee
           for (int i=sliceLower; i<sliceUpper; ++i)
           {
             idx[dir] = i; // current cell
-            idxr[dir] = i+1; // right cell
+            idxl[dir] = i-1; // left cell
 // set pointers to proper location          
             A.setPtr(Aptr, idx);
             V.setPtr(Vptr, idx);
-            V.setPtr(Vptrr, idxr);
-            Aptr[0] += -adtdx*(Vptrr[1]-Vptr[1]);
-            Aptr[1] += adtdx*(Vptrr[0]-Vptr[0]);
+            V.setPtr(Vptrl, idxl);
+            Aptr[0] += -adtdx*(Vptr[1]-Vptrl[1]);
+            Aptr[1] += adtdx*(Vptr[0]-Vptrl[0]);
           }
         }
       }
@@ -149,7 +140,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  FaceEdgeCurlUpdater<NDIM>::declareTypes()
+  EdgeFaceCurlUpdater<NDIM>::declareTypes()
   {
 // two input fields
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
@@ -159,7 +150,7 @@ namespace Lucee
   }
 
 // instantiations
-  template class FaceEdgeCurlUpdater<1>;
-  template class FaceEdgeCurlUpdater<2>;
-  template class FaceEdgeCurlUpdater<3>;
+  template class EdgeFaceCurlUpdater<1>;
+  template class EdgeFaceCurlUpdater<2>;
+  template class EdgeFaceCurlUpdater<3>;
 }

@@ -16,6 +16,7 @@
 // lucee includes
 #include <LcLinCombiner.h>
 #include <LcMaxwellTm2DUpdater.h>
+#include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcTXYZFieldSetter.h>
@@ -40,5 +41,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<3> >;
   }
 }

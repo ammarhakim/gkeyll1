@@ -1,5 +1,5 @@
 /**
- * @file	LcFaceEdgeCurlUpdater.h
+ * @file	LcEdgeFaceCurlUpdater.h
  *
  * @brief	Compute curl on rectangular grids.
  *
@@ -8,8 +8,8 @@
  * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
-#ifndef LC_FACE_EDGE_CURL_UPDATER_H
-#define LC_FACE_EDGE_CURL_UPDATER_H
+#ifndef LC_EDGE_FACE_CURL_UPDATER_H
+#define LC_EDGE_FACE_CURL_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -23,11 +23,12 @@ namespace Lucee
 {
 /**
  * Updater to compute curl of a vector field on a rectangular
- * grid. The output field is assumed to live on cell faces and the
- * input field (to curl) is assumed to love on cell edges.
+ * grid. The output field is assumed to live on cell edges and the
+ * input field (to curl) is assumed to love on cell faces. This
+ * updater is the dual of FaceEdgeCurlUpdater.
  */
   template <unsigned NDIM>
-  class FaceEdgeCurlUpdater : public Lucee::UpdaterIfc
+  class EdgeFaceCurlUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -36,7 +37,7 @@ namespace Lucee
 /**
  * Create new curl updater.
  */
-      FaceEdgeCurlUpdater();
+      EdgeFaceCurlUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -78,4 +79,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_FACE_EDGE_CURL_UPDATER_H
+#endif // LC_EDGE_FACE_CURL_UPDATER_H
