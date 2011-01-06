@@ -16,7 +16,7 @@
 // lucee includes
 #include <LcLinCombiner.h>
 #include <LcMaxwellTm2DUpdater.h>
-#include <LcSolverAssembly.h>
+#include <LcRectCurlUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcTXYZFieldSetter.h>
 #include <LcWavePropagationUpdater.h>
@@ -26,9 +26,6 @@ namespace Lucee
   void
   registerSolverObjects(Lucee::LuaState& L)
   {
-// register solver assembly
-    new Lucee::ObjRegistry<Lucee::SolverIfc, Lucee::SolverAssembly>;
-
 // register updaters
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<2> >;
@@ -39,5 +36,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectCurlUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectCurlUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectCurlUpdater<3> >;
   }
 }

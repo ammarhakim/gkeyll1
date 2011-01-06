@@ -18,7 +18,6 @@ add_library(lcslvrs
   LcLinCombiner.cpp
   LcMaxwellTM2DUpdater.cpp
   LcRectCurlUpdater.cpp
-  LcSolverAssembly.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp

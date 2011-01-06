@@ -15,7 +15,6 @@
 
 // lucee includes
 #include <LcExcept.h>
-#include <LcSolverAssembly.h>
 #include <LcUpdaterIfc.h>
 
 // std includes
