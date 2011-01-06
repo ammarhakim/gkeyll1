@@ -36,6 +36,9 @@
   Deleted SolverAssembly class from system. This is no longer needed
   as all simulations will be driven from Lua scripts.
 
+  Should add a PhysConstants module to Lucee so user can do things
+  like PhysConstants.SpeedOfLight, PhysConstants.ElectronMass, etc.
+
 * January 1st 2011
 
   Made a new project to hold build script for lucee and
