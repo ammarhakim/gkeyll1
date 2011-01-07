@@ -1,5 +1,27 @@
 # -*- org -*-
 
+* January 6th
+
+  Figured out the correct way to do the curl updates. The point is
+  that there are two updaters needed: EdgeFaceCurlUpdater and
+  FaceEdgeCurlUpdater. The first computes the curl of a face-centered
+  field and puts it into an edge centered field, and visa-versa. These
+  two can be used to create a simulation that solves the Maxwell
+  equations using FDTD method.
+
+  The next major work that needs to be done is creation of boundary
+  condition updaters. These need to be thought carefully to create
+  easy and powerful way to apply BCs.
+
+  An automatic method needs to be developed to make the Lua table
+  constructors self-documenting. One way would be for a class to call
+  a checkAndReadTable() method that would be called from readInput()
+  method that would set variables in the class. This way a class may
+  use this facility or may not, depending on how much work the
+  developer wants to put into the table validation. If a class uses
+  this facility, then the documentation for that class could be
+  generated automatically and input safety achieved.
+
 * January 5th
 
   Completed curl updater. Not tested yet. Used loop over direction

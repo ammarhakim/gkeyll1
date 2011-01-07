@@ -14,7 +14,6 @@
 #endif
 
 // lucee includes
-#include <LcCurlEval.h>
 #include <LcField.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcStructuredGridBase.h>
