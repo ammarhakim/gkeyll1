@@ -1,0 +1,146 @@
+\documentclass[11pt, reqno]{amsart}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Euler Eigensystem]{The eigensystem of the Euler equations}%
+\author{Ammar H. Hakim}%
+\date{}
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1007}
+\maketitle
+
+In this document I list the eigensystem of the Euler equations. The
+formulas are taken from\cite{kulikovskii_2001}, Chapter 3, section
+3.1. The Euler equations can be written in conservative form as
+\begin{align}
+  \pfraca{t}
+  \left[
+    \begin{matrix}
+      \rho \\
+      \rho u \\
+      \rho v \\
+      \rho w \\
+      E
+    \end{matrix}
+  \right]
+  +
+  \pfraca{x}
+  \left[
+    \begin{matrix}
+      \rho u \\
+      \rho u^2 + p \\
+      \rho uv \\
+      \rho uw \\
+      (E+p)u
+    \end{matrix}
+  \right]
+  =
+  0
+\end{align}
+where
+\begin{align}
+  E = \rho \varepsilon + \frac{1}{2}\rho q^2
+\end{align}
+is the total energy and $\varepsilon$ is the internal energy of the
+fluid and $q^2=u^2 + v^2 + w^2$. The pressure is given by an equation
+of state (EOS) $p=p(\varepsilon, \rho)$. For an ideal gas the EOS is
+$p = (\gamma-1)\rho \varepsilon$.
+
+The eigenvalues are $\{u-c, u, u, u, u+c\}$. The right
+eigenvectors of the flux Jacobian are given by
+\begin{align}
+  R
+  =
+  \left[
+    \begin{matrix}
+      1 & 0 & 0 & 1 & 1 \\
+      u-c & 0 & 0 & u & u+c \\
+      v & 1 & 0 & v & v \\
+      w & 0 & 1 & w & w \\
+      h-uc & v & w & h-c^2/b & h+uc
+    \end{matrix}
+  \right]
+  \label{eq:rev}
+\end{align}
+here
+\begin{align}
+  h &= (E+p)/\rho \\
+  c &= \sqrt{\pfrac{p}{\rho} + \frac{p}{\rho^2}\pfrac{p}{\varepsilon}}
+\end{align}
+is the enthalpy and the sound speed respectively. Also,
+\begin{align}
+  b &= \frac{1}{\rho}\pfrac{p}{\varepsilon}.
+\end{align}
+Note that for ideal gas EOS we have
+\begin{align}
+  h &= \frac{c^2}{\gamma-1} + \frac{1}{2}q^2 \\
+  c &= \sqrt{\frac{\gamma p}{\rho}}
+\end{align}
+and $b=1/(\gamma-1)$. Hence, in this case the term $h-c^2/b$ in
+\eqr{\ref{eq:rev}} is just $q^2/2$. The left eigenvectors are
+\begin{align}
+  L
+  =
+  \frac{b}{2c^2}
+  \left[
+    \begin{matrix}
+      \theta+uc/b & -u-c/b & -v & -w & 1 \\
+      -2vc^2/b & 0 & 2c^2/b & 0 & 0 \\
+      -2wc^2/b & 0 & 0 & 2c^2/b & 0 \\
+      2h-2q^2 & 2u & 2v & 2w & -2 \\
+      \theta-uc/b & -u+c/b & -v & -w & 1
+    \end{matrix}
+  \right]
+  \label{eq:rev}
+\end{align}
+where
+\begin{align}
+  \theta = q^2 - \frac{E}{\rho} + \rho\frac{\pfracb{p}{\rho}}{\pfracb{p}{\varepsilon}}
+\end{align}
+which, for an ideal gas EOS reduces to $q^2/2$.
+
+\bibliography{../common/lucee}
+\bibliographystyle{plain}
+
+\end{document}
