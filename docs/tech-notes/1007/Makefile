@@ -1,5 +1,9 @@
-1007-euler-eigsys.pdf: 1007-euler-eigsys.tex
-	pdflatex 1007-euler-eigsys.tex
-	bibtex 1007-euler-eigsys
-	pdflatex 1007-euler-eigsys.tex
-	pdflatex 1007-euler-eigsys.tex
+NAME=1007-euler-eigsys
+$(NAME).pdf: $(NAME).tex
+	pdflatex $(NAME).tex
+	bibtex $(NAME)
+	pdflatex $(NAME).tex
+	pdflatex $(NAME).tex
+
+clean:
+	rm -rf $(NAME).pdf *~ $(NAME).aux $(NAME).bbl $(NAME).blg
