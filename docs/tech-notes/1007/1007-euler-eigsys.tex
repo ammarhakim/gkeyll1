@@ -117,7 +117,7 @@ Note that for ideal gas EOS we have
   h &= \frac{c^2}{\gamma-1} + \frac{1}{2}q^2 \\
   c &= \sqrt{\frac{\gamma p}{\rho}}
 \end{align}
-and $b=1/(\gamma-1)$. Hence, in this case the term $h-c^2/b$ in
+and $b=\gamma-1$. Hence, in this case the term $h-c^2/b$ in
 \eqr{\ref{eq:rev}} is just $q^2/2$. The left eigenvectors are
 \begin{align}
   L
@@ -139,6 +139,25 @@ where
   \theta = q^2 - \frac{E}{\rho} + \rho\frac{\pfracb{p}{\rho}}{\pfracb{p}{\varepsilon}}
 \end{align}
 which, for an ideal gas EOS reduces to $q^2/2$.
+
+Now consider the problem of splitting a jump vector $\Delta \equiv
+[\delta_0,\delta_1,\delta_2,\delta_3,\delta_4]^T$ into coefficients
+neeeded in computing the Riemann problem. The coefficients are given
+by $L\Delta$. For an ideal gas law EOS, after some algebra we can show
+that an efficient way to compute these are
+\begin{align}
+  \alpha_3 &= \frac{\gamma-1}{c^2}
+  \left[
+    (h-q^2)\delta_0 + u\delta_1 + v\delta_2 + w\delta_3 -\delta_4
+  \right] \\
+  \alpha_1 &= -v\delta_0 + \delta_2 \\
+  \alpha_2 &= -w\delta_0 + \delta_3 \\
+  \alpha_4 &= \frac{1}{2c}
+  \left[
+    \delta_1 + (c-u)\delta_0 - c\alpha_3
+  \right] \\
+  \alpha_0 &= \delta_0 - \alpha_3 - \alpha_4.
+\end{align}
 
 \bibliography{../common/lucee}
 \bibliographystyle{plain}
