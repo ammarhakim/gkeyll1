@@ -85,7 +85,7 @@ namespace Lucee
     {
       alpha[p] = 0.0;
       for (unsigned i=0; i<meqn; ++i)
-        alpha[p] += lev(i,p)*jump[i];
+        alpha[p] += lev(p,i)*jump[i];
     }
 // compute waves
     for (unsigned p=0; p<meqn; ++p)

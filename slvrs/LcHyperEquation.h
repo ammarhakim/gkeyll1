@@ -147,8 +147,8 @@ namespace Lucee
  * @param c Coordinate system in which to compute eigensystem.
  * @param q State at which to compute eigensystem.
  * @param ev On output, eigenvalues of system.
- * @param rev On output, right eigenvectors of system stored in columns.
- * @param lev On output, left eigenvectors of system stored in columns.
+ * @param rev On output, right eigenvectors of system stored as columns.
+ * @param lev On output, left eigenvectors of system stored as rows.
  */
       virtual void eigensystem(const Lucee::RectCoordSys& c,
         const Lucee::ConstFieldPtr<double>& q,
