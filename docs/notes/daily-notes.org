@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* January 7th
+
+  For EM fields the concept of dual meshes is very important due to
+  the curl appearing in both Maxwell equations. Hence, it may be
+  important to create four spaces: NODAL, CELL-CENTER, EDGE and
+  FACE. These would allow storing of vector fields on these
+  spaces. The NODAL and CELL-CENTER vector fields would be collacated,
+  while the EDGE and FACE vector fields would be staggered. Then, one
+  can imagine developing a series of vector opertors that take a field
+  from one space to another space. These would include div, curl, grad
+  and interpolation operators.
+
 * January 6th
 
   Figured out the correct way to do the curl updates. The point is
