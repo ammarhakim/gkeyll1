@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* January 8th
+
+  Created notes for eigensystem of Euler equations. This is not such a
+  trivial matter and needs careful analysis to make sure the Riemann
+  problem needed in wave propagation scheme actually is correct.
+
+  Next, need to make notes on wave propagation scheme, specially
+  giving a careful treatment of transverse solvers.
+
+  Also, eigensystem for Maxwell equations need to be written up. And
+  the details of the FDTD method. In short, everything that can be a
+  production algorithm needs to be completely documented so someone
+  can understand and cross-check the code.
+
+  How about computing a relaxation system for the 10-moment equations?
+
 * January 7th
 
   For EM fields the concept of dual meshes is very important due to
