@@ -1,0 +1,24 @@
+/** Right/left eigensystem of Euler equations */
+
+q : sqrt(u^2+v^2+w^2);
+h : c^2/b + q^2/2;
+th : q^2/2;
+
+/** Right eigenvectors */
+R : matrix( 
+  [1, 0, 0, 1, 1], 
+  [u-c, 0, 0, u, u+c], 
+  [v, 1, 0, v, v], 
+  [w, 0, 1, w, w], 
+  [h-u*c, v, w, h-c^2/b, h+u*c]);
+
+/** Left eigenvectors */
+L : b/(2*c^2) * matrix (
+  [th+u*c/b, -u-c/b, -v, -w, 1], 
+  [-2*v*c^2/b, 0, 2*c^2/b, 0, 0], 
+  [-2*w*c^2/b, 0, 0, 2*c^2/b, 0],
+  [2*h-2*q^2, 2*u, 2*v, 2*w, -2], 
+  [th-u*c/b, -u+c/b, -v, -w, 1] );
+
+/** Verify correctness */
+II : ratsimp(L . R);
