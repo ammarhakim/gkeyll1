@@ -19,7 +19,9 @@
     over very carefully to ensure that the code is correct.
 
   - Some thought needs to be given on what efficient methods to
-    implemented. Perhaps PPM?
+    implemented. Perhaps PPM? 
+
+  - How to couple something like wave with FDTD Maxwell solver?
 
   - Documentation needs to be started/completed. API documentation
     needs to be expanded (doxygen) and Lua script documentation needs
