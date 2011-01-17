@@ -1,5 +1,27 @@
 # -*- org -*-
 
+* January 17th
+
+  Finally, I think the transverse solvers are worked out in my
+  head. The essential point is that there are two coordinate systems
+  for these: the normal coordinate system and the transverse
+  coordinate system. Call these RN and RT.
+
+  Then, we have ql, qr local to RN and apdq (say) in RT
+  coordinates. So, compute Roe average from local qr and ql. Rotate
+  momentum back to global and then to RT. Then, perform the split in
+  RT. Rotate bpapdq and bmapdq to global from RT. Then compute
+  updates.
+
+  An efficient way to do this is to store the Roe averages in global
+  coordinates in an array. Then, only rotation of Roe average to RT is
+  needed and the complete Roe averaging procedure is not needed. For
+  this, the waves() interface will need to be extended to allow the
+  HyperEquation class to set extra data which the wave updater
+  stores. For example, the HyperEquation could tell the wave updater
+  how much extra data it needs to store per call to wave() and the
+  updater then allocates and stores this.
+
 * January 16th
 
   Need to start work on Lucee again. Need to really ramp up rate at
