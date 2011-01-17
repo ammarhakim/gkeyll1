@@ -1,5 +1,42 @@
 # -*- org -*-
 
+* January 16th
+
+  Need to start work on Lucee again. Need to really ramp up rate at
+  which work is being done to get to a usable system by the time PPPL
+  move happens.
+
+  - Boundary condition updaters needs to be written.
+    
+  - Is onGrid really needed for updaters? Each array needs to carry
+    its own grid and hence this is not needed. In fact, it can cause
+    problems when arrays are being used to update across grids.
+
+  - The WavePropagationUpdater needs to be tested. First Maxwell
+    equations and then Euler equations.
+  
+  - Transverse solvers needs to be completed. This needs to be looked
+    over very carefully to ensure that the code is correct.
+
+  - Some thought needs to be given on what efficient methods to
+    implemented. Perhaps PPM?
+
+  - Documentation needs to be started/completed. API documentation
+    needs to be expanded (doxygen) and Lua script documentation needs
+    to be started.
+
+  - How to automate Lua table documentation? C++ class? Lua tables
+    describing data? XML files?
+
+  - Documentation needs to be thought off also in terms of simulation
+    templates. I.e. consider a template that describes RTE solver or
+    FDTD solver. The script could be complex but only a few inputs
+    need to be changed for a new simulation. How to abstract this to
+    make the usage of the code easier?
+
+  - How to bring in MPI to the code? Same as warpx/facets? Something
+    different?
+
 * January 8th
 
   Created notes for eigensystem of Euler equations. This is not such a
