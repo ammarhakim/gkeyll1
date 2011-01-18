@@ -126,3 +126,7 @@ target_link_libraries(lcrectcoordsys lcdatastructs lclib lcloki lclua ${Gsl_LIBR
 # lccurleval
 add_executable(lccurleval lccurleval.cxx)
 target_link_libraries(lccurleval lcdatastructs lclib)
+
+# lctabledescription
+add_executable(lctabledescription lctabledescription.cxx)
+target_link_libraries(lctabledescription lcdatastructs lclib)
