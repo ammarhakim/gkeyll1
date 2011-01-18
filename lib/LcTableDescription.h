@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcExcept.h>
 #include <LcValueDescription.h>
 
 // etc includes
@@ -55,7 +56,50 @@ namespace Lucee
       Lucee::ValueDescription<T>& addValue(const std::string& nm)
       {
         Lucee::ValueDescription<T> vd(nm);
-        Loki::Field<T>(vvTypeMap).values.insert(std::pair<std::string, 
+        Loki::Field<T>(vvTypeMap).values.insert(
+          std::pair<std::string, Lucee::ValueDescription<T> >(nm, vd));
+        typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr =
+          Loki::Field<T>(vvTypeMap).values.find(nm);
+        return itr->second;
+      }
+
+/**
+ * Add a new optional value to description. Reference to the value is
+ * returned so that it can be specified in more detail if needed.
+ *
+ * @param nm Name of value to add.
+ * @param def Default value.
+ * @return reference to added value.
+ */
+      template <typename T>
+      Lucee::ValueDescription<T>& addValue(const std::string& nm, const T& def)
+      {
+        Lucee::ValueDescription<T> vd(nm, def);
+        Loki::Field<T>(vvTypeMap).values.insert(
+          std::pair<std::string, Lucee::ValueDescription<T> >(nm, vd));
+        typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr =
+          Loki::Field<T>(vvTypeMap).values.find(nm);
+        return itr->second;
+      }
+
+/**
+ * Get value stored in table.
+ *
+ * @param nm Name of value to fetch.
+ * @return value.
+ */
+      template <typename T>
+      const Lucee::ValueDescription<T>& getValue(const std::string& nm) const
+      {
+        typename std::map<std::string, Lucee::ValueDescription<T> >::const_iterator itr =
+          Loki::Field<T>(vvTypeMap).values.find(nm);
+        if (itr == Loki::Field<T>(vvTypeMap).values.end())
+        {
+          Lucee::Except lce("TableDescription::getValue: Unable to find value '");
+          lce << nm << "' in table" << std::endl;
+          throw lce;
+        }
+        return itr->second;
       }
 
     private:

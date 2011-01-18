@@ -70,6 +70,6 @@ namespace Lucee
 
 // instantiations
   template class ValueDescription<int>;
-  template class ValueDescription<float>;
+  template class ValueDescription<double>;
   template class ValueDescription<std::string>;
 }
