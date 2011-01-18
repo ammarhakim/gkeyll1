@@ -49,22 +49,25 @@ namespace Lucee
  * Set help string.
  *
  * @param hlp Help string.
+ * @return reference to this object.
  */
-      void setHelp(const std::string& hlp);
+      ValueDescription<T>& setHelp(const std::string& hlp);
 
 /**
  * Set minimum possible value (inclusive).
  *
  * @param mv Minimum value.
+ * @return reference to this object.
  */
-      void setMinValue(const T& mv);
+      ValueDescription<T>& setMinValue(const T& mv);
 
 /**
  * Set maximum possible value (inclusive).
  *
  * @param mv Maximum value.
+ * @return reference to this object.
  */
-      void setMaxValue(const T& mv);
+      ValueDescription<T>& setMaxValue(const T& mv);
 
 /**
  * Set possible values that this can take. This takes precedence over
@@ -72,8 +75,9 @@ namespace Lucee
  * min/max checkes are skipped.
  *
  * @param onef Value must be one of these.
+ * @return reference to this object.
  */
-      void setOneOf(const std::vector<T>& onef);
+      ValueDescription<T>& setOneOf(const std::vector<T>& onef);
 
     private:
 /** Name of value as it appears in the Lua script */

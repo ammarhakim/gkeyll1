@@ -33,35 +33,39 @@ namespace Lucee
   }
 
   template <typename T>
-  void
+  ValueDescription<T>&
   ValueDescription<T>::setHelp(const std::string& hlp)
   {
     help = hlp;
+    return *this;
   }
 
   template <typename T>
-  void
+  ValueDescription<T>&
   ValueDescription<T>::setMinValue(const T& mv)
   {
     isMinSet = true;
     minVal = mv;
+    return *this;
   }
   
   template <typename T>
-  void
+  ValueDescription<T>&
   ValueDescription<T>::setMaxValue(const T& mv)
   {
     isMaxSet = true;
     maxVal = mv;
+    return *this;
   }
 
   template <typename T>
-  void
+  ValueDescription<T>&
   ValueDescription<T>::setOneOf(const std::vector<T>& onef)
   {
     isOneOf = true;
     oneOf.clear(); // clear in case this is called multiple times
     oneOf = onef;
+    return *this;
   }
 
 // instantiations
