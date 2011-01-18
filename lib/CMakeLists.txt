@@ -34,6 +34,7 @@ add_library(lclib
   LcRectCoordSys.cpp
   LcSolverIfc.cpp
   LcStreamHandler.cpp
+  LcTableDescription.cpp
   LcValueDescription.cpp
   LcVec3.cpp
   LcVector.cpp
