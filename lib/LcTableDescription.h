@@ -55,7 +55,7 @@ namespace Lucee
       template <typename T>
       Lucee::ValueDescription<T>& addValue(const std::string& nm)
       {
-        Lucee::ValueDescription<T> vd(nm);
+        Lucee::ValueDescription<T> vd;
         Loki::Field<T>(vvTypeMap).values.insert(
           std::pair<std::string, Lucee::ValueDescription<T> >(nm, vd));
         typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr =
@@ -74,7 +74,7 @@ namespace Lucee
       template <typename T>
       Lucee::ValueDescription<T>& addValue(const std::string& nm, const T& def)
       {
-        Lucee::ValueDescription<T> vd(nm, def);
+        Lucee::ValueDescription<T> vd(def);
         Loki::Field<T>(vvTypeMap).values.insert(
           std::pair<std::string, Lucee::ValueDescription<T> >(nm, vd));
         typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr =

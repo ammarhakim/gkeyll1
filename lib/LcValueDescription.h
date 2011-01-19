@@ -31,19 +31,17 @@ namespace Lucee
   {
     public:
 /**
- * Create a new value with given name.
- *
- * @param nm Name of value as it should appear in Lua script.
+ * Create a new value description object.
  */
-      ValueDescription(const std::string& nm);
+      ValueDescription();
 
 /**
- * Create a new value with given name. This constructor create a value
- * that is option and hence needs a default value.
+ * Create a new value description object. This constructor creates a
+ * value that is option and hence needs a default value.
  *
- * @param nm Name of value as it should appear in Lua script.
+ * @param dv Default value.
  */
-      ValueDescription(const std::string& nm, const T& dv);
+      ValueDescription(const T& dv);
 
 /**
  * Set help string.
@@ -80,8 +78,6 @@ namespace Lucee
       ValueDescription<T>& setOneOf(const std::vector<T>& onef);
 
     private:
-/** Name of value as it appears in the Lua script */
-      std::string name;
 /** Help string for value */
       std::string help;
 /** Is this value optional? */

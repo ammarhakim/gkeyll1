@@ -36,6 +36,7 @@ add_library(lclib
   LcStreamHandler.cpp
   LcTableDescription.cpp
   LcValueDescription.cpp
+  LcVectorDescription.cpp
   LcVec3.cpp
   LcVector.cpp
 )

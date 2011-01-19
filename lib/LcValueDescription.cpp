@@ -19,15 +19,15 @@
 namespace Lucee
 {
   template <typename T>
-  ValueDescription<T>::ValueDescription(const std::string& nm)
-    : name(nm), isOptional(false), varSpecified(false), var(0),
+  ValueDescription<T>::ValueDescription()
+    : isOptional(false), varSpecified(false), var(0),
       isOneOf(false), isMinSet(false), isMaxSet(false)
   {
   }
 
   template <typename T>
-  ValueDescription<T>::ValueDescription(const std::string& nm, const T& dv)
-    : name(nm), isOptional(true), defValue(dv), varSpecified(false), var(0),
+  ValueDescription<T>::ValueDescription(const T& dv)
+    : isOptional(true), defValue(dv), varSpecified(false), var(0),
       isOneOf(false), isMinSet(false), isMaxSet(false)
   {
   }
