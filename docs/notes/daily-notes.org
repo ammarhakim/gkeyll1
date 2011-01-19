@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* January 18th
+
+  Created first-cut implementation of ValueDescription and
+  VectorDescription classes. These are incorporated into
+  TableDescription class. Each table can have a set of values and
+  vectors (for now). Perhpas more comprehensive feature in the future
+  will be to add additional elements to TableDescription.
+
+  Next step is to set setVar() variables from Lua table. Other
+  elements in the table should be ignored. This can then be chained
+  up-the-derivation tree to setup the complete object.
+
 * January 17th
 
   Finally, I think the transverse solvers are worked out in my

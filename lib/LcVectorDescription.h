@@ -39,12 +39,78 @@ namespace Lucee
  */
       VectorDescription();
 
+/**
+ * Create a new optional vector description object.
+ *
+ * @param dv Default value of vector.
+ */
+      VectorDescription(const std::vector<T>& dv);
+
+/**
+ * Set expected size of vector.
+ *
+ * @param sz Size of vector.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setLength(unsigned sz);
+
+/**
+ * Set help string.
+ *
+ * @param hlp Help string.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setHelp(const std::string& hlp);
+
+/**
+ * Set minimum possible value (inclusive).
+ *
+ * @param mv Minimum value.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setMinValue(const T& mv);
+
+/**
+ * Set maximum possible value (inclusive).
+ *
+ * @param mv Maximum value.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setMaxValue(const T& mv);
+
+/**
+ * Set possible values that this can take. This takes precedence over
+ * min/max values, i.e. if list of possible values is specified, then
+ * min/max checkes are skipped.
+ *
+ * @param onef Value must be one of these.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setOneOf(const std::vector<T>& onef);
+
+/**
+ * Set pointer to variable that will be set.
+ *
+ * @param var pointer to dat that should be set.
+ * @return reference to this object.
+ */
+      VectorDescription<T>& setVar(std::vector<T>* var);
+
     private:
-/** Name of vector */
-      std::string name;
-/** Description of each element in vector */
-      std::vector<Lucee::ValueDescription<T> > valDescr;
-/** Description of final element (in case of variable size vector) */
+/** Is length of vector specified? */
+      bool isLengthSpecified;
+/** Length of vector */
+      unsigned length;
+/** Is this vector optional? */
+      bool isOptional;
+/** Default value if it is optional */
+      std::vector<T> defValue;
+/** Was a settable variable specified? */
+      bool varSpecified;
+/** Pointer to settable variable */
+      std::vector<T> *var;
+/** Description of all elements in vector (for now I am assuming all
+ * elements have same discription) */
       Lucee::ValueDescription<T> lastValDescr;
   };
 }

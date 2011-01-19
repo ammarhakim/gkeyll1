@@ -68,6 +68,14 @@ namespace Lucee
     return *this;
   }
 
+  template <typename T>
+  ValueDescription<T>&
+  ValueDescription<T>::setVar(T* v)
+  {
+    varSpecified = true;
+    var = v;
+  }
+
 // instantiations
   template class ValueDescription<int>;
   template class ValueDescription<double>;
