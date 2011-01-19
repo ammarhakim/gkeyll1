@@ -19,6 +19,7 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcValueDescription.h>
+#include <LcVectorDescription.h>
 
 // etc includes
 #include <loki/HierarchyGenerators.h>
@@ -83,6 +84,43 @@ namespace Lucee
       }
 
 /**
+ * Add a new value to description. Reference to the value is returned
+ * so that it can be specified in more detail if needed.
+ *
+ * @param nm Name of value to add.
+ * @return reference to added value.
+ */
+      template <typename T>
+      Lucee::VectorDescription<T>& addVector(const std::string& nm)
+      {
+        Lucee::VectorDescription<T> vd;
+        Loki::Field<T>(vvTypeMap).vectors.insert(
+          std::pair<std::string, Lucee::VectorDescription<T> >(nm, vd));
+        typename std::map<std::string, Lucee::VectorDescription<T> >::iterator itr =
+          Loki::Field<T>(vvTypeMap).vectors.find(nm);
+        return itr->second;
+      }
+
+/**
+ * Add a new optional vector to description. Reference to the vector is
+ * returned so that it can be specified in more detail if needed.
+ *
+ * @param nm Name of vector to add.
+ * @param def Default vector.
+ * @return reference to added vector.
+ */
+      template <typename T>
+      Lucee::VectorDescription<T>& addVector(const std::string& nm, const T& def)
+      {
+        Lucee::VectorDescription<T> vd(def);
+        Loki::Field<T>(vvTypeMap).vectors.insert(
+          std::pair<std::string, Lucee::VectorDescription<T> >(nm, vd));
+        typename std::map<std::string, Lucee::VectorDescription<T> >::iterator itr =
+          Loki::Field<T>(vvTypeMap).vectors.find(nm);
+        return itr->second;
+      }
+
+/**
  * Get value stored in table.
  *
  * @param nm Name of value to fetch.
@@ -112,6 +150,8 @@ namespace Lucee
       {
 /** Value appearing in table */
           std::map<std::string, Lucee::ValueDescription<T> > values;
+/** Vectors appearing in table */
+          std::map<std::string, Lucee::VectorDescription<T> > vectors;
       };
 /** Typedef to make life easier */
       typedef Loki::GenScatterHierarchy<LOKI_TYPELIST_3(int, double, std::string), ValVecContainer> ValVecTypeMap;

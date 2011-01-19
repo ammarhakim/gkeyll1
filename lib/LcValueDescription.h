@@ -77,6 +77,14 @@ namespace Lucee
  */
       ValueDescription<T>& setOneOf(const std::vector<T>& onef);
 
+/**
+ * Set pointer to variable that will be set.
+ *
+ * @param var pointer to dat that should be set.
+ * @return reference to this object.
+ */
+      ValueDescription<T>& setVar(T* var);
+
     private:
 /** Help string for value */
       std::string help;
