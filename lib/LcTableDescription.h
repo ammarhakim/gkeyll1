@@ -61,6 +61,16 @@ namespace Lucee
       {
         return (int) tbl.getNumber(key);
       }
+
+/**
+ * Return string description of type.
+ *
+ * @return string description of type.
+ */
+      static std::string typeString()
+      {
+        return "integer";
+      }
   };
 
 // struct for checking/getting stuff from Lua table
@@ -89,6 +99,16 @@ namespace Lucee
       {
         return tbl.getNumber(key);
       }
+
+/**
+ * Return string description of type.
+ *
+ * @return string description of type.
+ */
+      static std::string typeString()
+      {
+        return "number";
+      }
   };
 
 // struct for checking/getting stuff from Lua table
@@ -116,6 +136,16 @@ namespace Lucee
       static std::string get(const std::string& key, Lucee::LuaTable& tbl) 
       {
         return tbl.getString(key);
+      }
+
+/**
+ * Return string description of type.
+ *
+ * @return string description of type.
+ */
+      static std::string typeString()
+      {
+        return "string";
       }
   };
 
@@ -260,17 +290,26 @@ namespace Lucee
  * @param tbl Table to set from.
  */
       template <typename T>
-      void checkAndSetValues(Lucee::LuaTable& tbl)
+      bool checkAndSetValues(Lucee::LuaTable& tbl, std::ostringstream& errMsg)
       {
+        bool pass=true;
 // loop over each value
         typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr
           = Loki::Field<T>(vvTypeMap).values.begin();
         for (; itr != Loki::Field<T>(vvTypeMap).values.end(); ++itr)
         {
           if (LuaTableFetcher<T>::has(itr->first, tbl))
-          { // value exists in table, fill it with table value
-            itr->second.fillVarWithValue(
-              LuaTableFetcher<T>::get(itr->first, tbl));
+          { // value exists in table, check and fill it with table value
+            T val = LuaTableFetcher<T>::get(itr->first, tbl);
+            std::pair<bool, std::string> se = itr->second.checkValue(val);
+            if (se.first)
+              itr->second.fillVarWithValue(val);
+            else
+            { // check for value failed, report error
+              pass = false;
+              errMsg << "Validity test for '" << itr->first << "' failed." << std::endl;
+              errMsg << "** ("  << se.second << ")" << std::endl;
+            }
           }
           else
           { // value does not exist in table
@@ -281,10 +320,13 @@ namespace Lucee
             }
             else
             { // error: required value not in table
-
+              pass = false;
+              errMsg << "Required " << LuaTableFetcher<T>::typeString()
+                     << " '" << itr->first << "' not specifed" << std::endl;
             }
           }
         }
+        return pass;
       }
 
 /**
@@ -293,7 +335,7 @@ namespace Lucee
  * @param tbl Table to set from.
  */
       template <typename T>
-      void checkAndSetVectors(Lucee::LuaTable& tbl)
+      bool checkAndSetVectors(Lucee::LuaTable& tbl, std::ostringstream& errMsg)
       {
       }
   };
