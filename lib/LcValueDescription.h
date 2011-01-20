@@ -44,6 +44,27 @@ namespace Lucee
       ValueDescription(const T& dv);
 
 /**
+ * Is this value optional?
+ *
+ * @return true, if value is optional, false otherwise.
+ */
+      bool isOptional() const 
+      { return isOptnl; }
+
+/**
+ * Fill variable with supplied value.
+ *
+ * @param val Value to set.
+ */
+      void fillVarWithValue(const T& val);
+
+/**
+ * Fill variable with optional value.
+ *
+ */
+      void fillVarWithOptional();
+
+/**
  * Set help string.
  *
  * @param hlp Help string.
@@ -89,7 +110,7 @@ namespace Lucee
 /** Help string for value */
       std::string help;
 /** Is this value optional? */
-      bool isOptional;
+      bool isOptnl;
 /** Default value if it is optional */
       T defValue;
 /** Was a settable variable specified? */

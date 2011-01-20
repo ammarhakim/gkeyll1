@@ -15,20 +15,39 @@
 void
 test_1()
 {
-  Lucee::TableDescription tbl("euler");
+  Lucee::TableDescription eulerTbl("euler");
 
   double gamma;
-  tbl.addValue<double>("gas_gamma", 1.4)
+  eulerTbl.addValue<double>("gas_gamma", 1.0)
     .setHelp("Gas adiabatic constant")
     .setMinValue(0.0)
     .setVar(&gamma);
 
   LC_RAISES("Testing if non-existent value can be fetched", 
-    tbl.getValue<double>("XXX"), Lucee::Except);
+    eulerTbl.getValue<double>("XXX"), Lucee::Except);
 
-  const Lucee::ValueDescription<double>& gasGamma
-    = tbl.getValue<double>("gas_gamma");
+// string with table
+  std::string tblStr = 
+    "euler = {"
+    "gas_gamma = 1.4,"
+    "}";
+// evaluate string as Lua code
+  Lucee::LuaState L;
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
 
+// fetch table and put on top of stack
+  lua_getglobal(L, "euler");
+
+// construct LuaTable object
+  Lucee::LuaTable eulerLt(L, "euler");
+  eulerTbl.checkAndSet(eulerLt);
+  LC_ASSERT("Checking if gamma set correctly", gamma==1.4);
+}
+
+void
+test_2()
+{
   Lucee::TableDescription grd("grid");
   std::vector<int> cells;
   grd.addVector<int>("cells")
@@ -55,5 +74,6 @@ main(void)
 {
   LC_BEGIN_TESTS("lctabledescription");
   test_1();
+  test_2();
   LC_END_TESTS;
 }

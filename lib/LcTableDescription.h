@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaTable.h>
 #include <LcValueDescription.h>
 #include <LcVectorDescription.h>
 
@@ -25,11 +26,99 @@
 #include <loki/HierarchyGenerators.h>
 
 // std includes
+#include <iostream>
 #include <map>
 #include <string>
 
 namespace Lucee
 {
+// struct for checking/getting stuff from Lua table
+  template <typename T> struct LuaTableFetcher;
+
+// struct for checking/getting stuff from Lua table
+  template <> struct LuaTableFetcher<int>
+  {
+/**
+ * Check if key exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool has(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.hasNumber(key);
+      }
+
+/**
+ * Get value for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return value in table.
+ */
+      static int get(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return (int) tbl.getNumber(key);
+      }
+  };
+
+// struct for checking/getting stuff from Lua table
+  template <> struct LuaTableFetcher<double>
+  {
+/**
+ * Check if key exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool has(const std::string& key, Lucee::LuaTable& tbl)
+      {
+        return tbl.hasNumber(key);
+      }
+
+/**
+ * Get value for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return value in table.
+ */
+      static double get(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.getNumber(key);
+      }
+  };
+
+// struct for checking/getting stuff from Lua table
+  template <> struct LuaTableFetcher<std::string>
+  {
+/**
+ * Check if key exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool has(const std::string& key, Lucee::LuaTable& tbl)
+      {
+        return tbl.hasString(key);
+      }
+
+/**
+ * Get value for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return value in table.
+ */
+      static std::string get(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.getString(key);
+      }
+  };
+
 /**
  * This class describes a Lua table that can appear in a Lua
  * script. It mainly served as a validation mechanism for the Lua
@@ -45,6 +134,13 @@ namespace Lucee
  * @param nm Name of table.
  */
       TableDescription(const std::string& nm);
+
+/**
+ * Check and set values from supplied Lua table.
+ *
+ * @param tbl Lua table to set from.
+ */
+      void checkAndSet(Lucee::LuaTable& tbl);
 
 /**
  * Add a new value to description. Reference to the value is returned
@@ -157,6 +253,49 @@ namespace Lucee
       typedef Loki::GenScatterHierarchy<LOKI_TYPELIST_3(int, double, std::string), ValVecContainer> ValVecTypeMap;
 /** Container of values and vectors in table */
       ValVecTypeMap vvTypeMap;
+
+/**
+ * Check and set values from Lua table.
+ *
+ * @param tbl Table to set from.
+ */
+      template <typename T>
+      void checkAndSetValues(Lucee::LuaTable& tbl)
+      {
+// loop over each value
+        typename std::map<std::string, Lucee::ValueDescription<T> >::iterator itr
+          = Loki::Field<T>(vvTypeMap).values.begin();
+        for (; itr != Loki::Field<T>(vvTypeMap).values.end(); ++itr)
+        {
+          if (LuaTableFetcher<T>::has(itr->first, tbl))
+          { // value exists in table, fill it with table value
+            itr->second.fillVarWithValue(
+              LuaTableFetcher<T>::get(itr->first, tbl));
+          }
+          else
+          { // value does not exist in table
+
+            if (itr->second.isOptional())
+            { // okay if missing and optional
+              itr->second.fillVarWithOptional();
+            }
+            else
+            { // error: required value not in table
+
+            }
+          }
+        }
+      }
+
+/**
+ * Check and set vector from Lua table.
+ *
+ * @param tbl Table to set from.
+ */
+      template <typename T>
+      void checkAndSetVectors(Lucee::LuaTable& tbl)
+      {
+      }
   };
 }
 
