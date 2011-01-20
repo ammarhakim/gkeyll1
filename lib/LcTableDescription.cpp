@@ -22,4 +22,17 @@ namespace Lucee
     : name(nm)
   {
   }
+
+  void
+  TableDescription::checkAndSet(Lucee::LuaTable& tbl)
+  {
+// check and set values
+    checkAndSetValues<int>(tbl);
+    checkAndSetValues<double>(tbl);
+    checkAndSetValues<std::string>(tbl);
+// check and set vectors
+    checkAndSetVectors<int>(tbl);
+    checkAndSetVectors<double>(tbl);
+    checkAndSetVectors<std::string>(tbl);
+  }
 }

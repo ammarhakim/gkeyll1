@@ -129,4 +129,4 @@ target_link_libraries(lccurleval lcdatastructs lclib)
 
 # lctabledescription
 add_executable(lctabledescription lctabledescription.cxx)
-target_link_libraries(lctabledescription lcdatastructs lclib)
+target_link_libraries(lctabledescription lcdatastructs lclib lclua ${Gsl_LIBRARIES})

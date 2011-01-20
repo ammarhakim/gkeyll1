@@ -20,16 +20,33 @@ namespace Lucee
 {
   template <typename T>
   ValueDescription<T>::ValueDescription()
-    : isOptional(false), varSpecified(false), var(0),
+    : isOptnl(false), varSpecified(false), var(0),
       isOneOf(false), isMinSet(false), isMaxSet(false)
   {
   }
 
   template <typename T>
   ValueDescription<T>::ValueDescription(const T& dv)
-    : isOptional(true), defValue(dv), varSpecified(false), var(0),
+    : isOptnl(true), defValue(dv), varSpecified(false), var(0),
       isOneOf(false), isMinSet(false), isMaxSet(false)
   {
+  }
+
+  template <typename T>
+  void
+  ValueDescription<T>::fillVarWithValue(const T& val)
+  {
+// set if specified
+    if (varSpecified) *var = val;
+  }
+
+  template <typename T>
+  void
+  ValueDescription<T>::fillVarWithOptional()
+  {
+    if (isOptnl)
+// set if specified
+      if (varSpecified) *var = defValue;
   }
 
   template <typename T>
