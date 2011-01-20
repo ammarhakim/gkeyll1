@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* January 19th
+
+  Added validity tests in ValueDescription class. Wrote tests for
+  values in TableDescription class. Works just fine. Next, need to the
+  same for VectorDescription class.
+
+  How to integrate this into the class system to make it work with
+  readInput() method is not yet clear.
+
 * January 18th
 
   Created first-cut implementation of ValueDescription and
