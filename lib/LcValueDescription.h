@@ -17,6 +17,7 @@
 #endif
 
 // std includes
+#include <map>
 #include <string>
 #include <vector>
 
@@ -63,6 +64,12 @@ namespace Lucee
  *
  */
       void fillVarWithOptional();
+
+/**
+ * Check if supplied value is valid. Returns pair indicating succees
+ * and error string if check fails.
+ */
+      std::pair<bool, std::string> checkValue(const T& val);
 
 /**
  * Set help string.

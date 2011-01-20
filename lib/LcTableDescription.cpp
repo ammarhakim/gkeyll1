@@ -16,6 +16,9 @@
 // lucee includes
 #include <LcTableDescription.h>
 
+// std includes
+#include <sstream>
+
 namespace Lucee
 {
   TableDescription::TableDescription(const std::string& nm)
@@ -26,13 +29,18 @@ namespace Lucee
   void
   TableDescription::checkAndSet(Lucee::LuaTable& tbl)
   {
+    bool pass = true;
+    std::ostringstream errMsg;
 // check and set values
-    checkAndSetValues<int>(tbl);
-    checkAndSetValues<double>(tbl);
-    checkAndSetValues<std::string>(tbl);
+    pass &= checkAndSetValues<int>(tbl, errMsg);
+    pass &= checkAndSetValues<double>(tbl, errMsg);
+    pass &= checkAndSetValues<std::string>(tbl, errMsg);
 // check and set vectors
-    checkAndSetVectors<int>(tbl);
-    checkAndSetVectors<double>(tbl);
-    checkAndSetVectors<std::string>(tbl);
+    pass &= checkAndSetVectors<int>(tbl, errMsg);
+    pass &= checkAndSetVectors<double>(tbl, errMsg);
+    pass &= checkAndSetVectors<std::string>(tbl, errMsg);
+
+    if (!pass)
+      throw Lucee::Except(errMsg.str());
   }
 }

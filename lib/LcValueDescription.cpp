@@ -16,6 +16,9 @@
 // lucee includes
 #include <LcValueDescription.h>
 
+// std includes
+#include <sstream>
+
 namespace Lucee
 {
   template <typename T>
@@ -47,6 +50,50 @@ namespace Lucee
     if (isOptnl)
 // set if specified
       if (varSpecified) *var = defValue;
+  }
+
+  template <typename T>
+  std::pair<bool, std::string>
+  ValueDescription<T>::checkValue(const T& val)
+  {
+    bool pass = true;
+    std::ostringstream errMsg;
+    if (isOneOf)
+    { // check if value if one of specified list
+      bool isOneOfPass = false;
+      for (int i=0; i<oneOf.size(); ++i)
+        if (val == oneOf[i])
+          isOneOfPass = true;
+      if (isOneOfPass == false)
+      {
+        pass = false;
+        errMsg << "Value '" << val << "' is not one of [";
+        for (int i=0; i<oneOf.size()-1; ++i)
+          errMsg << oneOf[i] << ", ";
+        errMsg << oneOf[oneOf.size()-1] << "]";
+      }
+    }
+    else
+    {
+      if (isMinSet)
+      {
+        if (val < minVal)
+        {
+          pass = false;
+          errMsg << "Value '" << val << "' is less than " << minVal;
+        }
+      }
+      if (isMaxSet)
+      {
+        if (val > maxVal)
+        {
+          pass = false;
+          errMsg << "Value '" << val << "' is greater than " << maxVal;
+        }
+      }
+    }
+
+    return std::pair<bool, std::string>(pass, errMsg.str());
   }
 
   template <typename T>
