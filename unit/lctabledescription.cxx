@@ -78,19 +78,20 @@ test_2()
 
 // fetch table and put on top of stack
   lua_getglobal(L, "euler");
-
 // construct LuaTable object
   Lucee::LuaTable eulerLt(L, "euler");
+
+// set and check object from Lua table
   LC_RAISES("Testing if correct exception raised", eulerTbl.checkAndSet(eulerLt), Lucee::Except);
 
-  try
-  {
-    eulerTbl.checkAndSet(eulerLt);
-  }
-  catch (Lucee::Except& e)
-  {
-    std::cout << e.what() << std::endl;
-  }
+//   try
+//   {
+//     eulerTbl.checkAndSet(eulerLt);
+//   }
+//   catch (Lucee::Except& e)
+//   {
+//     std::cout << e.what() << std::endl;
+//   }
 }
 
 void
@@ -115,6 +116,42 @@ test_3()
     .setHelp("Coordinates of upper corner of box")
     .setLength(3)
     .setVar(&upper);
+
+// string with table
+  std::string tblStr = 
+    "grid = {"
+    "cells = {15, 10, 5},"
+    "lower = {0.0, 1.0, 2.0},"
+    "upper = {1.0, 2.0, 3.0},"
+    "}";
+// evaluate string as Lua code
+  Lucee::LuaState L;
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "grid");
+  Lucee::LuaTable gridLt(L, "grid");
+
+// set object from Lua table
+  grd.checkAndSet(gridLt);
+
+// check if stuff worked
+  LC_ASSERT("Testing cells", cells.size() == 3);
+  LC_ASSERT("Testing lower", lower.size() == 3);
+  LC_ASSERT("Testing upper", upper.size() == 3);
+
+  LC_ASSERT("Testing cells", cells[0] == 15);
+  LC_ASSERT("Testing cells", cells[1] == 10);
+  LC_ASSERT("Testing cells", cells[2] == 5);
+
+  LC_ASSERT("Testing lower", lower[0] == 0);
+  LC_ASSERT("Testing lower", lower[1] == 1);
+  LC_ASSERT("Testing lower", lower[2] == 2);
+
+  LC_ASSERT("Testing upper", upper[0] == 1);
+  LC_ASSERT("Testing upper", upper[1] == 2);
+  LC_ASSERT("Testing upper", upper[2] == 3);
 }
 
 int

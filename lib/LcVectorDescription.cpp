@@ -16,21 +16,51 @@
 // lucee includes
 #include <LcVectorDescription.h>
 
+// std includes
+#include <sstream>
+
 namespace Lucee
 {
 
   template <typename T>
   VectorDescription<T>::VectorDescription()
-    : isLengthSpecified(false), isOptional(false), 
+    : isLengthSpecified(false), isOptnl(false), 
       varSpecified(false), var(0)
   {
   }
 
   template <typename T>
   VectorDescription<T>::VectorDescription(const std::vector<T>& dv)
-    : isLengthSpecified(false), isOptional(true), defValue(dv), 
+    : isLengthSpecified(false), isOptnl(true), defVector(dv), 
       varSpecified(false), var(0)
   {
+  }
+
+  template <typename T>
+  void
+  VectorDescription<T>::fillVarWithVector(const std::vector<T>& vec)
+  {
+    var->clear(); // clear in case called twice
+    for (unsigned i=0; i<vec.size(); ++i)
+      var->push_back(vec[i]);
+  }
+
+  template <typename T>
+  void
+  VectorDescription<T>::fillVarWithOptional()
+  {
+    var->clear(); // clear in case called twice
+    for (unsigned i=0; i<defVector.size(); ++i)
+      var->push_back(defVector[i]);
+  }
+
+  template <typename T>
+  std::pair<bool, std::string>
+  VectorDescription<T>::checkVector(const std::vector<T>& val)
+  {
+    bool pass = true;
+    std::ostringstream errMsg;
+    return std::pair<bool, std::string>(pass, errMsg.str());
   }
 
   template <typename T>
