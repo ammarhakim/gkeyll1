@@ -66,8 +66,8 @@ namespace Lucee
       if (vec.size() != length)
       {
         pass = false;
-        errMsg << "Vector not of correct size. Should have length "
-               << length << ". Supplied vector is of length " << vec.size();
+        errMsg << "** (Vector not of correct size. Should have length "
+               << length << ". Supplied vector is of length " << vec.size() << ")";
       }
     }
 // check each element in vector
