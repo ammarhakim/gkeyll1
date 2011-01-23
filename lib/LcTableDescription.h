@@ -429,7 +429,7 @@ namespace Lucee
             { // check for value failed, report error
               pass = false;
               errMsg << "Validity test for '" << itr->first << "' failed." << std::endl;
-              errMsg << "** ("  << se.second << ")" << std::endl;
+              errMsg << se.second;
             }
           }
           else

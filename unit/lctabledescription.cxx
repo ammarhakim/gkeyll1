@@ -84,14 +84,14 @@ test_2()
 // set and check object from Lua table
   LC_RAISES("Testing if correct exception raised", eulerTbl.checkAndSet(eulerLt), Lucee::Except);
 
-//   try
-//   {
-//     eulerTbl.checkAndSet(eulerLt);
-//   }
-//   catch (Lucee::Except& e)
-//   {
-//     std::cout << e.what() << std::endl;
-//   }
+  try
+  {
+    eulerTbl.checkAndSet(eulerLt);
+  }
+  catch (Lucee::Except& e)
+  {
+    std::cout << e.what() << std::endl;
+  }
 }
 
 void
@@ -180,8 +180,8 @@ test_4()
 // string with table
   std::string tblStr = 
     "grid = {"
-    "cells = {15, 10},"
-    "lower = {0.0, 1.0, 2.0},"
+    "cells = {0, 10, -3},"
+    "lower = {0.0, 1.0},"
     "upper = {1.0, 2.0, 3.0},"
     "}";
 // evaluate string as Lua code
