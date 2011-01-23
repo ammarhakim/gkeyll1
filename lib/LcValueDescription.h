@@ -61,13 +61,14 @@ namespace Lucee
 
 /**
  * Fill variable with optional value.
- *
  */
       void fillVarWithOptional();
 
 /**
  * Check if supplied value is valid. Returns pair indicating succees
  * and error string if check fails.
+ *
+ * @param pair, first element indicating if value is valid, second error message if not.
  */
       std::pair<bool, std::string> checkValue(const T& val);
 

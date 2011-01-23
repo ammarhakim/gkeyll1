@@ -63,6 +63,34 @@ namespace Lucee
       }
 
 /**
+ * Check if key for table exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool hasVec(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.hasNumVec(key);
+      }
+
+/**
+ * Get vector for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return vector in table.
+ */
+      static std::vector<int> getVec(const std::string& key, Lucee::LuaTable& tbl)
+      {
+        std::vector<int> inv;
+        std::vector<double> nv = tbl.getNumVec(key);
+        for (unsigned i=0; i<nv.size(); ++i)
+          inv.push_back( (int) nv[i] );
+        return inv;
+      }
+
+/**
  * Return string description of type.
  *
  * @return string description of type.
@@ -101,6 +129,30 @@ namespace Lucee
       }
 
 /**
+ * Check if key for table exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool hasVec(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.hasNumVec(key);
+      }
+
+/**
+ * Get vector for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return vector in table.
+ */
+      static std::vector<double> getVec(const std::string& key, Lucee::LuaTable& tbl)
+      {
+        return tbl.getNumVec(key);
+      }
+
+/**
  * Return string description of type.
  *
  * @return string description of type.
@@ -136,6 +188,30 @@ namespace Lucee
       static std::string get(const std::string& key, Lucee::LuaTable& tbl) 
       {
         return tbl.getString(key);
+      }
+
+/**
+ * Check if key for table exists in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return true if key exists, false otherwise.
+ */
+      static bool hasVec(const std::string& key, Lucee::LuaTable& tbl) 
+      {
+        return tbl.hasStrVec(key);
+      }
+
+/**
+ * Get vector for key in Lua table.
+ *
+ * @param key Key to check.
+ * @param tbl Lua table to check.
+ * @return vector in table.
+ */
+      static std::vector<std::string> getVec(const std::string& key, Lucee::LuaTable& tbl)
+      {
+        return tbl.getStrVec(key);
       }
 
 /**
@@ -337,6 +413,41 @@ namespace Lucee
       template <typename T>
       bool checkAndSetVectors(Lucee::LuaTable& tbl, std::ostringstream& errMsg)
       {
+        bool pass=true;
+// loop over each vector
+        typename std::map<std::string, Lucee::VectorDescription<T> >::iterator itr
+          = Loki::Field<T>(vvTypeMap).vectors.begin();
+        for (; itr != Loki::Field<T>(vvTypeMap).vectors.end(); ++itr)
+        {
+          if (LuaTableFetcher<T>::hasVec(itr->first, tbl))
+          { // vector exists in table, check and fill it with table value
+            std::vector<T> vec = LuaTableFetcher<T>::getVec(itr->first, tbl);
+            std::pair<bool, std::string> se = itr->second.checkVector(vec);
+            if (se.first)
+              itr->second.fillVarWithVector(vec);
+            else
+            { // check for value failed, report error
+              pass = false;
+              errMsg << "Validity test for '" << itr->first << "' failed." << std::endl;
+              errMsg << "** ("  << se.second << ")" << std::endl;
+            }
+          }
+          else
+          { // value does not exist in table
+
+            if (itr->second.isOptional())
+            { // okay if missing and optional
+              itr->second.fillVarWithOptional();
+            }
+            else
+            { // error: required value not in table
+              pass = false;
+              errMsg << "Required " << LuaTableFetcher<T>::typeString()
+                     << " '" << itr->first << "' not specifed" << std::endl;
+            }
+          }
+        }
+        return pass;
       }
   };
 }

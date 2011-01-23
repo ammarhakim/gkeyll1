@@ -20,6 +20,7 @@
 #include <LcValueDescription.h>
 
 // std includes
+#include <map>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,34 @@ namespace Lucee
  * @param dv Default value of vector.
  */
       VectorDescription(const std::vector<T>& dv);
+
+/**
+ * Is this value optional?
+ *
+ * @return true, if value is optional, false otherwise.
+ */
+      bool isOptional() const 
+      { return isOptnl; }
+
+/**
+ * Fill variable with supplied vector.
+ *
+ * @param vec Vector to set.
+ */
+      void fillVarWithVector(const std::vector<T>& vec);
+
+/**
+ * Fill variable with optional vector.
+ */
+      void fillVarWithOptional();
+
+/**
+ * Check if supplied value is valid. Returns pair indicating succees
+ * and error string if check fails.
+ *
+ * @param pair, first element indicating if value is valid, second error message if not.
+ */
+      std::pair<bool, std::string> checkVector(const std::vector<T>& val);
 
 /**
  * Set expected size of vector.
@@ -102,9 +131,9 @@ namespace Lucee
 /** Length of vector */
       unsigned length;
 /** Is this vector optional? */
-      bool isOptional;
+      bool isOptnl;
 /** Default value if it is optional */
-      std::vector<T> defValue;
+      std::vector<T> defVector;
 /** Was a settable variable specified? */
       bool varSpecified;
 /** Pointer to settable variable */
