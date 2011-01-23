@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* January 22nd
+
+  Completed VectorDescription class and hooked into TableDescription
+  class. Next step is to hook the whole thing into the Lua table-based
+  creation system.
+
 * January 19th
 
   Added validity tests in ValueDescription class. Wrote tests for
