@@ -60,6 +60,17 @@ namespace Lucee
   {
     bool pass = true;
     std::ostringstream errMsg;
+// check for size of vector
+    if (isLengthSpecified)
+    { // check length
+      if (val.size() != length)
+      {
+        pass = false;
+        errMsg << "Vector not of correct size. Should have length "
+               << length << ". Supplied vector is of length " << val.size();
+      }
+    }
+
     return std::pair<bool, std::string>(pass, errMsg.str());
   }
 
