@@ -56,18 +56,28 @@ namespace Lucee
 
   template <typename T>
   std::pair<bool, std::string>
-  VectorDescription<T>::checkVector(const std::vector<T>& val)
+  VectorDescription<T>::checkVector(const std::vector<T>& vec)
   {
     bool pass = true;
     std::ostringstream errMsg;
 // check for size of vector
     if (isLengthSpecified)
     { // check length
-      if (val.size() != length)
+      if (vec.size() != length)
       {
         pass = false;
         errMsg << "Vector not of correct size. Should have length "
-               << length << ". Supplied vector is of length " << val.size();
+               << length << ". Supplied vector is of length " << vec.size();
+      }
+    }
+// check each element in vector
+    for (unsigned i=0; i<vec.size(); ++i)
+    {
+      std::pair<bool, std::string> ss = lastValDescr.checkValue(vec[i]);
+      if (ss.first == false)
+      {
+        pass = false;
+        errMsg << "** (For element " << i << " " << ss.second << ")" << std::endl;
       }
     }
 
