@@ -14,7 +14,6 @@
 #include <LcLuaModuleRegistry.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
-#include <LcObjCreator.h>
 #include <LcObjRegistry.h>
 #include <LcTest.h>
 
