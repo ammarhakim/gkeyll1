@@ -14,7 +14,6 @@
 #include <LcLogStream.h>
 #include <LcLogger.h>
 #include <LcLuaState.h>
-#include <LcObjCreator.h>
 #include <LcRegisterModules.h>
 #include <LcSolverIfc.h>
 #include <LcStreamHandler.h>

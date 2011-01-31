@@ -19,7 +19,6 @@
 #include <LcHyperEquationRegistry.h>
 #include <LcLibRegistry.h>
 #include <LcLuaModuleRegistry.h>
-#include <LcObjCreator.h>
 #include <LcRegisterModules.h>
 #include <LcRteRegistry.h>
 #include <LcSolverIfc.h>
