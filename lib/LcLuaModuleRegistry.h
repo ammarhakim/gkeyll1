@@ -13,6 +13,7 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLuaHelp.h>
 #include <LcLuaModule.h>
 
 // loki includes
@@ -40,6 +41,11 @@ namespace Lucee
  */
       static void registerModule(lua_State *L)
       {
+// add function that prints help
+        luaL_Reg descrReg = {"describe", Lucee::LuaHelp<B>::luaDescribe};
+        Loki::SingletonHolder<Lucee::LuaModule<B> >
+          ::Instance().regCreateFuncs.push_back(descrReg);
+// set NULL to indicate end of function list
         luaL_Reg reg = {NULL, NULL}; // this is a sentinel
         Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance().regCreateFuncs.push_back(reg);

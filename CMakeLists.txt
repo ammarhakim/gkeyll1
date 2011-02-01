@@ -137,3 +137,6 @@ add_test(lccurleval unit/lccurleval)
 
 # lctabledescription
 add_test(lctabledescription unit/lctabledescription)
+
+# lcluahelp
+add_test(lcluahelp unit/lcluahelp)
