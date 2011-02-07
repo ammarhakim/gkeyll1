@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* February 4th
+
+  Need to get back to this. One of the first things to do is to clean
+  up the documentation and start working on documenting Lua object
+  constructors and methods. Integration of the TableDescription class
+  into the readInput() methods needs to be completed. Not sure how to
+  do this yet, but it is important to get this finished.
+
 * January 22nd
 
   Completed VectorDescription class and hooked into TableDescription
