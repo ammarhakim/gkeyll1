@@ -35,6 +35,12 @@
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
 \title{Transport equations, finite-volume schemes and coupling
   algorithms}%
 \author{Ammar H. Hakim}%
@@ -48,69 +54,85 @@
 \section{Transport Equations and Finite-Volume Schemes}
 
 Transport in the core of a tokamak is approximately described by a
-system of one-dimensional equations for the evolution of density,
-momentum and energy for each species in the plasma. In addition, the
-magnetic field geometry is also evolved. The key challenge in
-one-dimensional transport modelling is determination of accurate flux
-models. Over the years many complex and sophisticated flux models, of
-varying physical fidelity, have been developed. Even though the
-physical realism of core transport calculations has increased over the
-years, ultimately core transport remains an approximate description
-and recourse to more fundamental descriptions must be made to fully
-understand and describe the complex physics in a tokomak.
+system of one-dimensional equations for the evolution of density, and
+energy for each species in the plasma and a net momentum equation. In
+addition, the magnetic field geometry is also evolved. For most
+applications only ion densities, electron and ion energies are
+evolved.
+
+The key challenge in one-dimensional transport modelling is
+determination of accurate flux models. Over the years many complex and
+sophisticated flux models, of varying physical fidelity, have been
+developed. Even though the physical realism of core transport
+calculations has increased over the years, ultimately core transport
+remains an approximate description and recourse to more fundamental
+descriptions must be made to fully understand and describe the complex
+physics in a tokamak.
 
 The system of transport equations can be written in the form
 \begin{align}
   \pfrac{\mvec{Q}}{t} 
   + \frac{1}{V'} \pfraca{x} \left( V' \gvec{\Gamma} \right) = \mvec{S}
+  \label{eq:transport}
 \end{align}
 where $\mvec{Q} = \mvec{Q}(x,t)$ is a $m$-dimensional vector of
 conserved quantities (density, momentum, temperature), $\gvec{\Gamma}
 = \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
 $\mvec{S} = \mvec{S}(\mvec{Q},x,t)$ is a source function. The
 coordinate $x$ is dimensionless and represents normalized distance
-from the magnetic axis, $x=0$, to the separatrix, $x=1$. The function
+from the magnetic axis, $x=0$, to the separatrix, $x=1$. The equation
+is solved on the domain $[0,x_e]$, where $x_e \le 1$. The function
 $V(x)$ represents the volume of plasma (in m$^3$) enclosed between
-$[0,x]$ and encodes the geometry of the tokamak core region. For
-realistic tokamak simulations the geometry changes continuously and
-$V(x)$ is a function of time. For most applications only plasma
-density, electron and ion energies are evolved.
+$[0,x]$ and encodes the geometry of the tokamak core region. Note that
+$V'(x)$ is related to the metric coefficient that appears in a
+divergence operator written in generalized coordinate. 
 
 The point $x=0$ represents a symmetry axis in the tokamak which means
-we must set $\gvec{\Gamma}=0$ at $x=0$. At $x=x_m$ one can either
-specify the flux, $\gvec{\Gamma}(x_m)=\gvec{\Gamma}_m(t)$, or the
-values of the conserved variables $\mvec{Q}(x_m,t)=\mvec{Q}_m(t)$,
-where $\gvec{\Gamma}_m(t)$ and $\mvec{Q}_m(t)$ are specified
+we must set $\gvec{\Gamma}=0$ at $x=0$. At $x=x_e$ one can either
+specify the flux, $\gvec{\Gamma}(x_e)=\gvec{\Gamma}_e(t)$, or the
+values of the conserved variables $\mvec{Q}(x_e,t)=\mvec{Q}_e(t)$,
+where $\gvec{\Gamma}_e(t)$ and $\mvec{Q}_e(t)$ are specified
 functions.
 
 To discretize the system of equations consider a finite-volume grid in
 which a cell is defined as $C_i \equiv [x_i, x_{i+1}]$, with
-$i=1,\ldots,N$. Integrating the transport equation over a
-cell and using a first-order difference for the time derivative we get
-the update formula
+$i=1,\ldots,N$. Multiplying the transport equation by $V'(x)$ and
+integrating over a cell and using finite-differences for the time
+derivative we get the update formula
 \begin{align}
   \mvec{Q}_i^{n+1} = \mvec{Q}^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
   \left (
-    V'(x_{i+1/2}) \mvec{F}_{i+1/2} - 
-    V'(x_{i-1/2}) \mvec{F}_{i-1/2}
+    V'(x_{i+1/2}) \mvec{F}_{i+1/2}^{n+\theta} - 
+    V'(x_{i-1/2}) \mvec{F}_{i-1/2}^{n+\theta}
   \right)
   +
-  \Delta t \mvec{S}_i \label{eqn:update-form}
+  \Delta t \mvec{S}_i^{n+\theta} \label{eqn:update-form}
 \end{align}
-where
+where $0\le\theta\le 1$,
+$\mvec{S}_i^{n+\theta}=\mvec{S}(\mvec{Q}_i^{n+\theta},x,t)$ and
 \begin{align}
-  \mvec{F}_{i-1/2} = 
+  \mvec{F}_{i-1/2}^{n+\theta} = 
   \mvec{H}(
-  \mvec{Q}_{i-1},
-  \mvec{Q}_i
+  \mvec{Q}_{i-1}^{n+\theta},
+  \mvec{Q}_i^{n+\theta}
   ) \label{eqn:flux-func}
 \end{align}
 is a numerical flux function that represents the flux at the cell
 edge. Here, $x_{i+1/2} \equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv
-x_{i+1}-x_i$. The time index on the edge fluxes and sources are
-deliberately omitted: choosing to evaluate these at various points in
-the interval $[t_n,t_{n+1}]$ will give schemes with different
-implicitness. The numerical flux function must satisfy the consistency
+x_{i+1}-x_i$. Using a Taylor series expansion we can show that the
+update formula has $O(\Delta x^2)$ spatial accuracy. Different
+temporal accuracy can be achieved by choosing $\theta$: for example,
+$\theta=0$ or $\theta=1$ will give $O(\Delta t)$ accuracy while
+$\theta=1/2$ will give $O(\Delta t^2)$ accuracy. Values of $\theta>0$
+lead to an implicit scheme as $Q^{n+\theta}$ is then not known. The
+stability properties of the scheme will also depend on $\theta$. To
+compute $Q^{n+\theta}$ one can use, for example, a linear combination
+of old and new values, i.e. $(1-\theta)Q^n + \theta Q^{n+1}$. A
+predictor-corrector method can also be uses, however, this will
+generally involve extra flux evaluations that can be expensive in some
+transport calculations.
+
+The numerical flux function must satisfy the consistency
 condition
 \begin{align}
   \lim_{\epsilon\rightarrow 0} \mvec{H}
@@ -125,17 +147,41 @@ which ensures the convergence of the solution as $\Delta x \rightarrow
 0$ and $\Delta t \rightarrow 0$.
 
 The boundary condition at $x=0$ can be applied by simply setting
-$\mvec{F}_{1/2}=0$. If the flux is specified at $x=x_m$, then this can
-be enforced using $\mvec{F}_{N+1/2}=\mvec{F}_m(t)$. For the second
+$\mvec{F}_{1/2}=0$. If the flux is specified at $x=x_e$, then this can
+be enforced using $\mvec{F}_{N+1/2}=\mvec{F}_e(t)$. For the second
 type of boundary conditions (specified conserved variables) we
 introduce a ``ghost-cell'' the same size as the last cell $C_N$. Then,
-if we set $\mvec{Q}_{N+1} = 2\mvec{Q}_m(t) - \mvec{Q}_N$, we will
-enforce $\mvec{Q}(x_m,t) = \mvec{Q}_m(t)$ to $\textrm{O}(\Delta
+if we set $\mvec{Q}_{N+1} = 2\mvec{Q}_e(t) - \mvec{Q}_N$, we will
+enforce $\mvec{Q}(x_e,t) = \mvec{Q}_e(t)$ to $\textrm{O}(\Delta
 x^2)$. Using this in the definition of the numerical flux, we get the
 flux at the last edge as
 \begin{align}
-  \mvec{F}_{N+1/2} = \mvec{H}(\mvec{Q}_N, 2\mvec{Q}_m(t) - \mvec{Q}_N).
+  \mvec{F}_{N+1/2}^{n+\theta} = \mvec{H}(\mvec{Q}_N^{n+\theta},
+  2\mvec{Q}_e(t+\theta\Delta t) - \mvec{Q}_N^{n+\theta}).
 \end{align}
+
+\section{Coupling schemes}
+
+To explore \emph{coupling schemes} we can imagine solving
+\eqr{\ref{eq:transport}} separately on $x<x_c$ and $x>x_c$ and then
+imposing additional conditions at $x=x_c$. These \emph{coupling
+  conditions} are continuity of the solution and the fluxes as shown
+from the following lemma
+\begin{lem}
+  \label{lem:couple-conditions}
+  Let $0<x_c<x_e$ be some point in $[0,x_e]$. Then $\mvec{Q}(x,t)$ is
+  a solution to \eqr{\ref{eq:transport}} in $[0,x_e]$ if it a smooth
+  solution in $x<x_c$ and $x>x_c$ and satisfies the conditions
+  \begin{align}
+    \mvec{Q}_- &= \mvec{Q}_+ \\
+    \mvec{\Gamma}_- &= \mvec{\Gamma}_+
+  \end{align}
+  where $\mvec{Q}_\pm \equiv \lim_{\epsilon\rightarrow
+    0}\mvec{Q}(x_c\pm\epsilon,t)$ and $\gvec{\Gamma}_\pm \equiv
+  \gvec{\Gamma}(\mvec{Q}_\pm,\pfracb{\mvec{Q}_\pm}{x})$.
+\end{lem}
+
+\end{document}
 
 \section{Nonlinear diffusion with temperature-gradient dependent
   diffusivity}
@@ -162,5 +208,4 @@ is the diffusivity given by
 where $\alpha$, $k$ and $\chi_0$ are constants and $T_c$ is some
 critical gradient.
 
-\end{document}
 
