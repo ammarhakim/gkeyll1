@@ -1,4 +1,5 @@
-\documentclass[11pt, reqno]{amsart}
+%\documentclass[11pt, reqno]{amsart}
+\documentclass[reqno]{amsart}
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -51,6 +52,14 @@
 \lhead{Tech-Note 1003}
 \maketitle
 
+\begin{abstract}
+  In this note I describe one-dimensional plasma transport equations
+  and outline schemes to solve them. I also discuss implicit and
+  explicit algorithms to couple multi-domain problems in which each
+  domain physics is described by a potentially different set of
+  equations.
+\end{abstract}
+
 \section{Transport Equations and Finite-Volume Schemes}
 
 Transport in the core of a tokamak is approximately described by a
@@ -62,7 +71,7 @@ evolved.
 
 The key challenge in one-dimensional transport modelling is
 determination of accurate flux models. Over the years many complex and
-sophisticated flux models, of varying physical fidelity, have been
+sophisticated flux models of varying physical fidelity have been
 developed. Even though the physical realism of core transport
 calculations has increased over the years, ultimately core transport
 remains an approximate description and recourse to more fundamental
@@ -83,9 +92,11 @@ coordinate $x$ is dimensionless and represents normalized distance
 from the magnetic axis, $x=0$, to the separatrix, $x=1$. The equation
 is solved on the domain $[0,x_e]$, where $x_e \le 1$. The function
 $V(x)$ represents the volume of plasma (in m$^3$) enclosed between
-$[0,x]$ and encodes the geometry of the tokamak core region. Note that
-$V'(x)$ is related to the metric coefficient that appears in a
-divergence operator written in generalized coordinate. 
+$[0,x]$ and encodes the geometry of the tokamak core region. The
+function $V'(x)$ is related to the metric coefficient that appears in
+the divergence operator written in generalized coordinate. As $x$ is
+dimensionless, the flux function has units of $[\mvec{Q}]/s$, where
+$[\mvec{Q}]$ are the units of the conserved quantities.
 
 The point $x=0$ represents a symmetry axis in the tokamak which means
 we must set $\gvec{\Gamma}=0$ at $x=0$. At $x=x_e$ one can either
@@ -163,10 +174,10 @@ flux at the last edge as
 \section{Coupling schemes}
 
 To explore \emph{coupling schemes} we can imagine solving
-\eqr{\ref{eq:transport}} separately on $x<x_c$ and $x>x_c$ and then
-imposing additional conditions at $x=x_c$. These \emph{coupling
-  conditions} are continuity of the solution and the fluxes as shown
-from the following lemma
+\eqr{\ref{eq:transport}} separately on $x<x_c$ and $x>x_c$, where
+$0<x_c<x_e$, and then imposing additional conditions at $x=x_c$. These
+\emph{coupling conditions} are continuity of the solution and the
+fluxes as shown from the following lemma
 \begin{lem}
   \label{lem:couple-conditions}
   Let $0<x_c<x_e$ be some point in $[0,x_e]$. Then $\mvec{Q}(x,t)$ is
