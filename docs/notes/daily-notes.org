@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* February 18th
+
+  I really need to get back to productive scientific research. What is
+  this nonsense amount of time spent on meeting and planning for the
+  next one? How can any productive work be done?
+
+  For Lucee, in order of priority: (a) complete hyperbolic solver,
+  test with Euler equations, (b) hook in the documentation sytem, (c)
+  write documentation.
+
+  Work on the 10-moment stuff. How about design of a vacuum algorithm
+  for use in jets? Divergence preserving collocated Maxwell equation
+  solver?
+
 * February 4th
 
   Need to get back to this. One of the first things to do is to clean
