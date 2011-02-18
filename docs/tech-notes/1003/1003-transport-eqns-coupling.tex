@@ -52,11 +52,10 @@
 \lhead{Tech-Note 1003}
 
 \begin{abstract}
-  In this note I describe one-dimensional plasma transport equations
-  and outline schemes to solve them. I also discuss implicit and
-  explicit algorithms to couple multi-domain problems in which each
-  domain physics is described by a potentially different set of
-  equations.
+  In this note I describe one-dimensional transport equations and
+  outline schemes to solve them. I also discuss implicit and explicit
+  algorithms to couple multi-domain problems in which each domain
+  physics is described by a potentially different set of equations.
 \end{abstract}
 
 \maketitle
@@ -65,29 +64,30 @@
 
 Transport in the core of a tokamak is approximately described by a
 system of one-dimensional equations for the evolution of density, and
-energy for each species in the plasma and a net momentum equation. In
-addition, the magnetic field geometry is also evolved. For most
-applications only ion densities, electron and ion energies are
-evolved.
+energy for each ion species in the plasma, electron energy equation,
+and a net momentum equation. In addition, the magnetic field geometry
+may also evolved. For most applications only ion densities, electron
+and ion energies are evolved and the magnetic geometry is kept fixed.
 
 The key challenge in one-dimensional transport modelling is
 determination of accurate flux models. Over the years many complex and
 sophisticated flux models of varying physical fidelity have been
 developed. Even though the physical realism of core transport
-calculations has increased over the years, ultimately core transport
-remains an approximate description and recourse to more fundamental
-descriptions must be made to fully understand and describe the complex
-physics in a tokamak.
+calculations has increased, ultimately core transport remains an
+approximation and recourse to more fundamental descriptions must be
+made to fully understand and describe the complex physics in a
+tokamak.
 
-The system of transport equations can be written in the form
+A simplified system of transport, neglecting time-evolving magentic
+fields, equations can be written in the form
 \begin{align}
   \pfrac{\mvec{Q}}{t} 
-  + \frac{1}{V'} \pfraca{x} \left( V' \gvec{\Gamma} \right) = \mvec{S}
+  + \frac{1}{V'} \pfraca{x} \left( V' \mvec{F} \right) = \mvec{S}
   \label{eq:transport}
 \end{align}
 where $\mvec{Q} = \mvec{Q}(x,t)$ is a $m$-dimensional vector of
-conserved quantities (density, momentum, temperature), $\gvec{\Gamma}
-= \gvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
+conserved quantities (density, momentum, temperature), $\mvec{F}
+= \mvec{F}(\mvec{Q},\pfracb{\mvec{Q}}{x})$ is a flux function,
 $\mvec{S} = \mvec{S}(\mvec{Q},x,t)$ is a source function. The
 coordinate $x$ is dimensionless and represents normalized distance
 from the magnetic axis, $x=0$, to the separatrix, $x=1$. The equation
@@ -100,10 +100,10 @@ dimensionless, the flux function has units of $[\mvec{Q}]/s$, where
 $[\mvec{Q}]$ are the units of the conserved quantities.
 
 The point $x=0$ represents a symmetry axis in the tokamak which means
-we must set $\gvec{\Gamma}=0$ at $x=0$. At $x=x_e$ one can either
-specify the flux, $\gvec{\Gamma}(x_e)=\gvec{\Gamma}_e(t)$, or the
+we must set $\mvec{F}=0$ at $x=0$. At $x=x_e$ one can either
+specify the flux, $\mvec{F}(x_e)=\mvec{F}_e(t)$, or the
 values of the conserved variables $\mvec{Q}(x_e,t)=\mvec{Q}_e(t)$,
-where $\gvec{\Gamma}_e(t)$ and $\mvec{Q}_e(t)$ are specified
+where $\mvec{F}_e(t)$ and $\mvec{Q}_e(t)$ are specified
 functions.
 
 To discretize the system of equations consider a finite-volume grid in
@@ -153,7 +153,7 @@ condition
     \mvec{Q}(x+\epsilon,t)
   \right)
   =
-  \mvec{\Gamma}(\mvec{Q},\pfracb{\mvec{Q}}{x})
+  \mvec{F}(\mvec{Q},\pfracb{\mvec{Q}}{x})
 \end{align}
 which ensures the convergence of the solution as $\Delta x \rightarrow
 0$ and $\Delta t \rightarrow 0$.
@@ -186,11 +186,11 @@ fluxes as shown from the following lemma
   solution in $x<x_c$ and $x>x_c$ and satisfies the conditions
   \begin{align}
     \mvec{Q}_- &= \mvec{Q}_+ \\
-    \mvec{\Gamma}_- &= \mvec{\Gamma}_+
+    \mvec{F}_- &= \mvec{F}_+
   \end{align}
   where $\mvec{Q}_\pm \equiv \lim_{\epsilon\rightarrow
-    0}\mvec{Q}(x_c\pm\epsilon,t)$ and $\gvec{\Gamma}_\pm \equiv
-  \gvec{\Gamma}(\mvec{Q}_\pm,\pfracb{\mvec{Q}_\pm}{x})$.
+    0}\mvec{Q}(x_c\pm\epsilon,t)$ and $\mvec{F}_\pm \equiv
+  \mvec{F}(\mvec{Q}_\pm,\pfracb{\mvec{Q}_\pm}{x})$.
 \end{lem}
 
 \end{document}
