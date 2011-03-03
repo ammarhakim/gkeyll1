@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 2nd
+
+  Move lucee to mercurial on bitbucket. The complete history is moved
+  over. Easy to migrate and now will delete the googlecode version of
+  the code.
+
 * February 18th
 
   I really need to get back to productive scientific research. What is
