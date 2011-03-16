@@ -18,7 +18,6 @@
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcSolverRegistry.h>
-#include <LcTXYZFieldSetter.h>
 #include <LcWavePropagationUpdater.h>
 
 namespace Lucee
