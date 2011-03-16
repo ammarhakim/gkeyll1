@@ -135,9 +135,6 @@ add_test(lcfieldptr unit/lcfieldptr)
 # lcrectcoordsys
 add_test(lcrectcoordsys unit/lcrectcoordsys)
 
-# lccurleval
-add_test(lccurleval unit/lccurleval)
-
 # lctabledescription
 add_test(lctabledescription unit/lctabledescription)
 
