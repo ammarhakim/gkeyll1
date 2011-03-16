@@ -3,6 +3,7 @@ include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/lucee)
 include_directories(${PROJECT_SOURCE_DIR}/rte)
+include_directories(${PROJECT_SOURCE_DIR}/proto)
 include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/grids)
@@ -14,6 +15,7 @@ link_directories(${PROJECT_BINARY_DIR}/lib)
 link_directories(${PROJECT_BINARY_DIR}/datastructs)
 link_directories(${PROJECT_BINARY_DIR}/grids)
 link_directories(${PROJECT_BINARY_DIR}/rte)
+link_directories(${PROJECT_BINARY_DIR}/proto)
 link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
@@ -29,6 +31,7 @@ ENDIF (APPLE)
 add_executable(lucee lucee.cxx LcRegisterModules.cpp)
 target_link_libraries(lucee
   lcrte
+  lcproto
   lcslvrs
   lcdatastructs
   lcgrids
