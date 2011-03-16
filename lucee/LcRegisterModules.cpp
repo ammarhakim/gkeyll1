@@ -19,6 +19,7 @@
 #include <LcHyperEquationRegistry.h>
 #include <LcLibRegistry.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcProtoSolverRegistry.h>
 #include <LcRegisterModules.h>
 #include <LcRteRegistry.h>
 #include <LcSolverIfc.h>
@@ -35,6 +36,7 @@ namespace Lucee
   void registerModules(Lucee::LuaState& L)
   {
 // register objects
+    Lucee::registerProtoSolverObjects(L);
     Lucee::registerSolverObjects(L);
     Lucee::registerHyperEquationsObjects(L);
     Lucee::registerRteObjects(L);

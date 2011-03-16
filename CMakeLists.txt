@@ -54,6 +54,9 @@ add_subdirectory(datastructs)
 # Build code in slvrs
 add_subdirectory(slvrs)
 
+# Build code in proto
+add_subdirectory(proto)
+
 # Build library in rte directory
 add_subdirectory(rte)
 
