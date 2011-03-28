@@ -24,6 +24,7 @@
 #include <string>
 #include <ctime>
 #include <memory>
+#include <cstdlib>
 
 int
 main(int argc, char **argv)

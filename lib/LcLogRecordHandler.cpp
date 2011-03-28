@@ -10,7 +10,7 @@
 
 // lucee includes
 #include <LcLogger.h>
-#include <LcLogRecordhandler.h>
+#include <LcLogRecordHandler.h>
 
 namespace Lucee
 {
