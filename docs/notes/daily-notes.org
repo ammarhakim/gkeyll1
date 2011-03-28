@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* March 28th
+
+  First, Mercurial is giving a lot of trouble. Perhaps the move from
+  svn was not worth it.
+
+  Turns out that the Lucee::Array class design is basically
+  flawed. The problem is with the underlying store of data as T*
+  degrades performace. Seems like I need to move to some sort of
+  valarray as an underlying representation of the data.
+
 * March 2nd
 
   Move lucee to mercurial on bitbucket. The complete history is moved

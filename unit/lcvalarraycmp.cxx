@@ -109,7 +109,7 @@ int main()
   cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
 
 
-  p=vstart.size();
+  vstart.clear(); vstop.clear();
   // ======================= VALARRAY OPERATIONS =======================
   // fill valarray
 
@@ -181,8 +181,6 @@ int main()
   cout << "****** Clock ticks for operations: " << endl;
   istartclock=vstart.begin(); istopclock=vstop.begin();
   
-  istartclock+=p; istopclock+=p;
-  
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++)  << " (random fill)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++)  << " (add.)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++)  << " (mult.)" << endl;
@@ -190,7 +188,7 @@ int main()
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++)  << " (cos)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++)  << " (pow)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock,istopclock)      << " (log)" << endl;
-  cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()+p) << " (total) " << endl;
+  cout << right << fixed << setw(13) << vstop[vstop.size()-1]-vstart[0] << " (total) " << endl;
 
   // ======================= Lucee::Vector OPERATIONS =======================
   // fill array
@@ -246,7 +244,7 @@ int main()
 //   for_each(vfloat.begin(),vfloat.end(),zerocheck);
   for (i=0; i<lvecfloat.getLength(); i++)
     if (lvecfloat[i] < 0.0)
-      lvecfloat[i] += -1;
+      lvecfloat[i] *= -1;
 
   // Expand each element by itself
   cout << "*** Calculate element ^ element "  ;
@@ -280,7 +278,8 @@ int main()
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (cos)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (pow)" << endl;
   cout << right << fixed << setw(13) << duration(istartclock,istopclock) << " (log)" << endl;
-  cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
+  //cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
+  cout << right << fixed << setw(13) << vstop[vstop.size()-1]-vstart[0] << " (total) " << endl;
 
 }
 
