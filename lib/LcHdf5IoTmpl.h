@@ -12,8 +12,8 @@
 #define LC_HDF5_IO_TMPL_H
 
 // lib includes
-#include <lcionodetype.h>
-#include <lciotmpl.h>
+#include <LcIoNodeType.h>
+#include <LcIoTmpl.h>
 
 /** HDF5 includes */
 #define H5_USE_16_API
