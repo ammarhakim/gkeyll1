@@ -130,3 +130,7 @@ target_link_libraries(lctabledescription lcdatastructs lclib lclua ${Gsl_LIBRARI
 # lcluahelp
 add_executable(lcluahelp lcluahelp.cxx)
 target_link_libraries(lcluahelp lcdatastructs lclib lclua)
+
+# lcvalarraycmp
+add_executable(lcvalarraycmp lcvalarraycmp.cxx)
+target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_LIBRARIES})
