@@ -12,7 +12,7 @@
 #define LC_IO_BASE_H
 
 // lib includes
-#include <LcDatatypes.h>
+#include <LcDataTypes.h>
 #include <LcExcept.h>
 #include <LcIoNodeType.h>
 #include <LcIoTmpl.h>

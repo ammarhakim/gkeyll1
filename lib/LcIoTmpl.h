@@ -12,7 +12,7 @@
 #define LC_IO_TMPL_H
 
 // lucee includes
-#include <LcIonodeType.h>
+#include <LcIoNodeType.h>
 
 // std includes
 #include <string>
