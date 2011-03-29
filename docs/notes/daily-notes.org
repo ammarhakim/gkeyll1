@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* March 29th 
+
+  The problem seems with the multiple indirections required to get
+  hold of values in Lucee::Array class. This is not such a big deal if
+  the operations are more expensive than the array fetch. However,
+  more efficient basic operators (+, *, /, etc as found in valarray)
+  are needed.
+
 * March 28th
 
   First, Mercurial is giving a lot of trouble. Perhaps the move from
