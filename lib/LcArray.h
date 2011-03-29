@@ -256,7 +256,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Reference to value at index.
  */
-      inline T& operator()(const int idx[NDIM]);
+      T& operator()(const int idx[NDIM]);
 
 /**
  * Accessor function for array.
@@ -264,7 +264,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Value at index.
  */
-      inline T operator()(const int idx[NDIM]) const;
+      T operator()(const int idx[NDIM]) const;
 
 /**
  * Accessor function for 1D array.
@@ -272,7 +272,7 @@ namespace Lucee
  * @param i Index into array.
  * @return Reference to value at (i).
  */
-      inline T& operator()(int i);
+      T& operator()(int i);
 
 /**
  * Accessor function for 1D array.
@@ -280,7 +280,7 @@ namespace Lucee
  * @param i Index into array.
  * @return Value at (i).
  */
-      inline T operator()(int i) const;
+      T operator()(int i) const;
 
 /**
  * Accessor function for 2D array.
@@ -289,7 +289,7 @@ namespace Lucee
  * @param j Index into array.
  * @return Reference to value at (i,j).
  */
-      inline T& operator()(int i, int j);
+      T& operator()(int i, int j);
 
 /**
  * Accessor function for 2D array.
@@ -298,7 +298,7 @@ namespace Lucee
  * @param j Index into array.
  * @return Value at (i,j).
  */
-      inline T operator()(int i, int j) const;
+      T operator()(int i, int j) const;
 
 /**
  * Accessor function for 3D array.
@@ -308,7 +308,7 @@ namespace Lucee
  * @param k Index into array.
  * @return Reference to value at (i,j,k).
  */
-      inline T& operator()(int i, int j, int k);
+      T& operator()(int i, int j, int k);
 
 /**
  * Accessor function for 3D array.
@@ -318,7 +318,7 @@ namespace Lucee
  * @param k Index into array.
  * @return Value at (i,j,k).
  */
-      inline T operator()(int i, int j, int k) const;
+      T operator()(int i, int j, int k) const;
 
 /**
  * Accessor function for 4D array.
@@ -329,7 +329,7 @@ namespace Lucee
  * @param l Index into array.
  * @return Reference to value at (i,j,k,l).
  */
-      inline T& operator()(int i, int j, int k, int l);
+      T& operator()(int i, int j, int k, int l);
 
 /**
  * Accessor function for 4D array.
@@ -340,7 +340,31 @@ namespace Lucee
  * @param l Index into array.
  * @return Value at (i,j,k,l).
  */
-      inline T operator()(int i, int j, int k, int l) const;
+      T operator()(int i, int j, int k, int l) const;
+
+/**
+ * Add supplied value to all elements in array.
+ *
+ * @param val value to add.
+ * @return reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& operator+=(const T& val);
+
+/**
+ * Multiply supplied value to all elements in array.
+ *
+ * @param val value to multiply.
+ * @return reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& operator*=(const T& val);
+
+/**
+ * Divide supplied value to all elements in array.
+ *
+ * @param val value to divide.
+ * @return reference to this array.
+ */
+      Array<NDIM, T, INDEXER>& operator/=(const T& val);
 
 /**
  * Copy array from supplied one. The input array must have the exact
@@ -667,6 +691,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T&
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM])
   {
@@ -674,6 +699,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T 
   Array<NDIM, T, INDEXER>::operator()(const int idx[NDIM]) const
   {
@@ -681,6 +707,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T&
   Array<NDIM, T, INDEXER>::operator()(int i)
   {
@@ -688,6 +715,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T
   Array<NDIM, T, INDEXER>::operator()(int i) const
   {
@@ -695,6 +723,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T&
   Array<NDIM, T, INDEXER>::operator()(int i, int j)
   {
@@ -702,6 +731,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T
   Array<NDIM, T, INDEXER>::operator()(int i, int j) const
   {
@@ -709,6 +739,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T&
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k)
   {
@@ -716,6 +747,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k) const
   {
@@ -723,6 +755,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T& 
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l)
   {
@@ -730,10 +763,61 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   T 
   Array<NDIM, T, INDEXER>::operator()(int i, int j, int k, int l) const
   {
     return data[indexer.getIndex(i, j, k, l)];
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::operator+=(const T& val)
+  {
+    if (isContiguous())
+// add value directly to data-space
+      for (unsigned i=0; i<getSize(); ++i)
+        data[i] += val;
+    else
+    {
+// create sequencer
+      Lucee::Region<NDIM, int> rgn
+        = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+      typename INDEXER<NDIM>::Sequencer seq(rgn);
+// loop over region
+      while (seq.step())
+        data[indexer.getIndex(seq.getIndex())] += val;
+    }
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::operator*=(const T& val)
+  {
+    if (isContiguous())
+// add value directly to data-space
+      for (unsigned i=0; i<getSize(); ++i)
+        data[i] *= val;
+    else
+    {
+// create sequencer
+      Lucee::Region<NDIM, int> rgn
+        = Lucee::createRegionFromStartAndShape<NDIM, int>(start, shape);
+      typename INDEXER<NDIM>::Sequencer seq(rgn);
+// loop over region
+      while (seq.step())
+        data[indexer.getIndex(seq.getIndex())] *= val;
+    }
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  Array<NDIM, T, INDEXER>&
+  Array<NDIM, T, INDEXER>::operator/=(const T& val)
+  {
+    T val1 = 1/val;
+    return operator*=(val1);
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>

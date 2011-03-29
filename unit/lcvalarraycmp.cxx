@@ -8,6 +8,8 @@
 
 using namespace std;
 
+static unsigned numruns=1;
+
 void rndm(float& a);
 float getRndm();
 void zerocheck(float& a);
@@ -21,34 +23,36 @@ int test_1()
   valarray<float> valfloat(size);
 
   clock_t start = clock();
-  for (unsigned i=0;i<size;i++)
-    rndm(valfloat[i]);
+  for (unsigned n=0; n<numruns; ++n)
+    for (unsigned i=0;i<size;i++)
+      rndm(valfloat[i]);
   clock_t end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (valarray init.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (valarray init.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    valfloat[i] += addVal;
+  for (unsigned n=0; n<numruns; ++n)
+    valfloat += addVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (valarray add.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (valarray add.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    valfloat[i] *= mulVal;
+  for (unsigned n=0; n<numruns; ++n)
+    valfloat *= mulVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (valarray mul.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (valarray mul.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    valfloat[i] /= mulVal;
+  for (unsigned n=0; n<numruns; ++n)
+    valfloat /= mulVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (valarray div.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (valarray div.)" << endl;
 
   start = clock();
-  for (unsigned i=1; i<size-1; i++)
-    valfloat[i] = (valfloat[i+1]-2*valfloat[i]+valfloat[i-1])/2.25;
+  for (unsigned n=0; n<numruns; ++n)
+    for (unsigned i=1; i<size-1; i++)
+      valfloat[i] = (valfloat[i+1]-2*valfloat[i]+valfloat[i-1])/2.25;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (valarray diff.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (valarray diff.)" << endl;
 }
 
 int test_2()
@@ -59,34 +63,36 @@ int test_2()
   Lucee::Vector<float> lvecfloat(size);
 
   clock_t start = clock();
-  for (unsigned i=0;i<size;i++)
-    lvecfloat[i]= getRndm();
+  for (unsigned n=0; n<numruns; ++n)
+    for (unsigned i=0;i<size;i++)
+      lvecfloat[i]= getRndm();
   clock_t end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (Lucee::Vector init.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (Lucee::Vector init.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    lvecfloat[i] += addVal; 
+  for (unsigned n=0; n<numruns; ++n)
+    lvecfloat += addVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (Lucee::Vector add.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (Lucee::Vector add.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    lvecfloat[i] *= mulVal; 
+  for (unsigned n=0; n<numruns; ++n)
+    lvecfloat *= mulVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (Lucee::Vector mul.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (Lucee::Vector mul.)" << endl;
 
   start = clock();
-  for (unsigned i=0; i<size; i++)
-    lvecfloat[i] /= mulVal; 
+  for (unsigned n=0; n<numruns; ++n)
+    lvecfloat /= mulVal;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (Lucee::Vector div.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (Lucee::Vector div.)" << endl;
 
   start = clock();
-  for (unsigned i=1; i<size-1; i++)
-    lvecfloat[i] = (lvecfloat[i+1]-2*lvecfloat[i]+lvecfloat[i-1])/2.25;
+  for (unsigned n=0; n<numruns; ++n)
+    for (unsigned i=1; i<size-1; i++)
+      lvecfloat[i] = (lvecfloat[i+1]-2*lvecfloat[i]+lvecfloat[i-1])/2.25;
   end = clock();
-  cout << right << fixed << setw(13) << difftime(end,start)  << " (Lucee::Vector diff.)" << endl;
+  cout << right << fixed << difftime(end,start)  << " (Lucee::Vector diff.)" << endl;
 }
 
 void rndm(float& a)
@@ -118,7 +124,9 @@ double duration(
 int
 main (void) 
 {
+  std::cout << "Valarray times ..." << std::endl;
   test_1();
+  std::cout << std::endl << "Lucee::Vector times ..." << std::endl;
   test_2();
 
   return 0;
