@@ -573,6 +573,31 @@ test_15()
       LC_ASSERT("Testing if array accumulate worked", arr1(i,j) == arr2(i1,j1));
 }
 
+void
+test_16()
+{
+  unsigned shape[2] = {5, 10};
+  Lucee::Array<2, double> arr(shape);
+
+  arr = 22.5;
+  arr += 5.25;
+  for (int i=arr.getLower(0); i<arr.getUpper(0); ++i)
+    for (int j=arr.getLower(1); j<arr.getUpper(1); ++j)
+      LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5+5.25);
+
+  arr = 22.5;
+  arr *= 5.25;
+  for (int i=arr.getLower(0); i<arr.getUpper(0); ++i)
+    for (int j=arr.getLower(1); j<arr.getUpper(1); ++j)
+      LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5*5.25);
+
+  arr = 22.5;
+  arr /= 5.25;
+  for (int i=arr.getLower(0); i<arr.getUpper(0); ++i)
+    for (int j=arr.getLower(1); j<arr.getUpper(1); ++j)
+      LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5/5.25);
+}
+
 int
 main(void) 
 {
@@ -593,5 +618,6 @@ main(void)
   test_13();
   test_14();
   test_15();
+  test_16();
   LC_END_TESTS;
 }
