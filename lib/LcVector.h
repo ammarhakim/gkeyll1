@@ -80,7 +80,7 @@ namespace Lucee
  * @param i index location.
  * @return value at location.
  */
-      T operator[](int i) const { return this->operator()(i); }
+      inline T operator[](int i) const { return this->operator()(i); }
 
 /**
  * Return value at i-th index.
@@ -88,7 +88,7 @@ namespace Lucee
  * @param i index location.
  * @return value at location.
  */
-      T& operator[](int i) { return this->operator()(i); }
+      inline T& operator[](int i) { return this->operator()(i); }
 
 /**
  * Multiply vector by factor.
