@@ -8,7 +8,7 @@
 
 using namespace std;
 
-static unsigned numruns=1;
+static unsigned numruns=5;
 
 void rndm(float& a);
 float getRndm();
