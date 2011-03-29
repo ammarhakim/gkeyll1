@@ -595,7 +595,7 @@ test_16()
   arr /= 5.25;
   for (int i=arr.getLower(0); i<arr.getUpper(0); ++i)
     for (int j=arr.getLower(1); j<arr.getUpper(1); ++j)
-      LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5/5.25);
+      LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5*5.25);
 }
 
 int
