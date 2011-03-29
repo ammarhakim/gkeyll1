@@ -256,7 +256,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Reference to value at index.
  */
-      T& operator()(const int idx[NDIM]);
+      inline T& operator()(const int idx[NDIM]);
 
 /**
  * Accessor function for array.
@@ -264,7 +264,7 @@ namespace Lucee
  * @param idx Indices into array.
  * @return Value at index.
  */
-      T operator()(const int idx[NDIM]) const;
+      inline T operator()(const int idx[NDIM]) const;
 
 /**
  * Accessor function for 1D array.
@@ -272,7 +272,7 @@ namespace Lucee
  * @param i Index into array.
  * @return Reference to value at (i).
  */
-      T& operator()(int i);
+      inline T& operator()(int i);
 
 /**
  * Accessor function for 1D array.
@@ -280,7 +280,7 @@ namespace Lucee
  * @param i Index into array.
  * @return Value at (i).
  */
-      T operator()(int i) const;
+      inline T operator()(int i) const;
 
 /**
  * Accessor function for 2D array.
@@ -289,7 +289,7 @@ namespace Lucee
  * @param j Index into array.
  * @return Reference to value at (i,j).
  */
-      T& operator()(int i, int j);
+      inline T& operator()(int i, int j);
 
 /**
  * Accessor function for 2D array.
@@ -298,7 +298,7 @@ namespace Lucee
  * @param j Index into array.
  * @return Value at (i,j).
  */
-      T operator()(int i, int j) const;
+      inline T operator()(int i, int j) const;
 
 /**
  * Accessor function for 3D array.
@@ -308,7 +308,7 @@ namespace Lucee
  * @param k Index into array.
  * @return Reference to value at (i,j,k).
  */
-      T& operator()(int i, int j, int k);
+      inline T& operator()(int i, int j, int k);
 
 /**
  * Accessor function for 3D array.
@@ -318,7 +318,7 @@ namespace Lucee
  * @param k Index into array.
  * @return Value at (i,j,k).
  */
-      T operator()(int i, int j, int k) const;
+      inline T operator()(int i, int j, int k) const;
 
 /**
  * Accessor function for 4D array.
@@ -329,7 +329,7 @@ namespace Lucee
  * @param l Index into array.
  * @return Reference to value at (i,j,k,l).
  */
-      T& operator()(int i, int j, int k, int l);
+      inline T& operator()(int i, int j, int k, int l);
 
 /**
  * Accessor function for 4D array.
@@ -340,7 +340,7 @@ namespace Lucee
  * @param l Index into array.
  * @return Value at (i,j,k,l).
  */
-      T operator()(int i, int j, int k, int l) const;
+      inline T operator()(int i, int j, int k, int l) const;
 
 /**
  * Copy array from supplied one. The input array must have the exact
