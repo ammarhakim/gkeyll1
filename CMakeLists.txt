@@ -21,14 +21,14 @@ find_package(Hdf5 REQUIRED)
 if (HDF5_FOUND)
    add_definitions(-DHAVE_HDF5)
    add_definitions(-DNEW_H5S_SELECT_HYPERSLAB_IFC)
-   include_directories(${Hdf5_INCLUDES})
+   include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
 
 # find GSL
 find_package(Gsl REQUIRED)
 if (GSL_FOUND)
    add_definitions(-DHAVE_GSL)
-   include_directories(${Gsl_INCLUDES})
+   include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 
 # Create configure file

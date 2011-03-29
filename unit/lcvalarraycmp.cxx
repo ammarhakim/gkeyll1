@@ -28,6 +28,7 @@ int main()
   vector<float>::iterator ifloat;
   valarray<float> valfloat(size);
   Lucee::Vector<float> lvecfloat(size);
+  float *vecraw = new float[size];
 
   cout << "Filling float array with " << size << " random elements" << endl;
   cout << "(each element needs " << sizeof(float) << " bytes of memory, so " \
@@ -281,6 +282,187 @@ int main()
   //cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
   cout << right << fixed << setw(13) << vstop[vstop.size()-1]-vstart[0] << " (total) " << endl;
 
+  // ======================= raw OPERATIONS =======================
+  // fill array
+
+  vstart.clear(); vstop.clear();
+
+  vstart.push_back(clock());
+  //  vfloat.resize(size);
+  ifloat=vfloat.begin();
+  cout << "****** Phase 3: Math. operations on raw array" << endl;
+  vstart.push_back(clock());
+  for (i=0;i<size;i++)
+  {
+    vecraw[i]= getRndm();
+  }
+  vstop.push_back(clock());
+
+  cout << "****** Phase 1: Math. operations on ordinary array" << endl;  
+
+  // Add k to each element
+  cout << "*** Adding " << k << " to each element " ;
+  cout << "(10th element was: " << vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { vecraw[i]+=k; }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")" << endl;
+
+
+  // Multiply each element with k
+  cout << "*** Multiplying each element with " << k ;
+  cout << " (10th element was: " <<  vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { vecraw[i]*=k; }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")"<< endl;
+
+  // Divide each element by k
+  cout << "*** Dividing each element by " << l ;
+  cout << " (10th element was: " << vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { vecraw[i]/=l; }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")" << endl;
+
+  // Cos of each
+  cout << "*** Calculate cos for each element "  ;
+  cout << " (10th element was: " << vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { vecraw[i]= cosf(vecraw[i]); }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")" << endl;
+
+//   for_each(vfloat.begin(),vfloat.end(),zerocheck);
+  for (i=0; i<size; i++)
+    if (vecraw[i] < 0.0)
+      vecraw[i] *= -1;
+
+  // Expand each element by itself
+  cout << "*** Calculate element ^ element "  ;
+  cout << " (10th element was: " << vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) 
+  { 
+    vecraw[i]= pow(vecraw[i], vecraw[i]); 
+  }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")" << endl;
+
+  // log
+  cout << "*** Calculate log of each element "  ;
+  cout << " (10th element was: " << vecraw[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) 
+  { 
+    vecraw[i]= log(vecraw[i]); 
+  }
+  vstop.push_back(clock());
+  cout << " now is: " << vecraw[10] << ")" << endl;
+
+  // Summary
+  istartclock=vstart.begin(); istopclock=vstop.begin();
+  cout << "****** Clock ticks for operations: " << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (random fill)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (add.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (mult.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (div.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (cos)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (pow)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock,istopclock) << " (log)" << endl;
+  //cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
+  cout << right << fixed << setw(13) << vstop[vstop.size()-1]-vstart[0] << " (total) " << endl;
+
+  // ======================= more valarrary OPERATIONS =======================
+  // fill array
+
+  vstart.clear(); vstop.clear();
+
+  vstart.push_back(clock());
+  //  vfloat.resize(size);
+  ifloat=vfloat.begin();
+  cout << "****** Phase 3: DIRECT Math. operations on Valarray" << endl;
+  vstart.push_back(clock());
+  for (i=0;i<size;i++)
+  {
+    valfloat[i]= getRndm();
+  }
+  vstop.push_back(clock());
+
+  cout << "****** Phase 1: Math. operations on ordinary array" << endl;  
+
+  // Add k to each element
+  cout << "*** Adding " << k << " to each element " ;
+  cout << "(10th element was: " << valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { valfloat[i]+=k; }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")" << endl;
+
+
+  // Multiply each element with k
+  cout << "*** Multiplying each element with " << k ;
+  cout << " (10th element was: " <<  valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { valfloat[i]*=k; }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")"<< endl;
+
+  // Divide each element by k
+  cout << "*** Dividing each element by " << l ;
+  cout << " (10th element was: " << valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { valfloat[i]/=l; }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")" << endl;
+
+  // Cos of each
+  cout << "*** Calculate cos for each element "  ;
+  cout << " (10th element was: " << valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) { valfloat[i]= cosf(valfloat[i]); }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")" << endl;
+
+//   for_each(vfloat.begin(),vfloat.end(),zerocheck);
+  for (i=0; i<size; i++)
+    if (valfloat[i] < 0.0)
+      valfloat[i] *= -1;
+
+  // Expand each element by itself
+  cout << "*** Calculate element ^ element "  ;
+  cout << " (10th element was: " << valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) 
+  { 
+    valfloat[i]= pow(valfloat[i], valfloat[i]); 
+  }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")" << endl;
+
+  // log
+  cout << "*** Calculate log of each element "  ;
+  cout << " (10th element was: " << valfloat[10];
+  vstart.push_back(clock());
+  for (i=0; i<size; i++) 
+  { 
+    valfloat[i]= log(valfloat[i]); 
+  }
+  vstop.push_back(clock());
+  cout << " now is: " << valfloat[10] << ")" << endl;
+
+  // Summary
+  istartclock=vstart.begin(); istopclock=vstop.begin();
+  cout << "****** Clock ticks for operations: " << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (random fill)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (add.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (mult.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (div.)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (cos)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock++,istopclock++) << " (pow)" << endl;
+  cout << right << fixed << setw(13) << duration(istartclock,istopclock) << " (log)" << endl;
+  //cout << right << fixed << setw(13) << *(vstop.rbegin())-*(vstart.begin()) << " (total) " << endl;
+  cout << right << fixed << setw(13) << vstop[vstop.size()-1]-vstart[0] << " (total) " << endl;
 }
 
 void rndm(float& a)
