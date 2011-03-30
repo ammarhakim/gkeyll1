@@ -250,6 +250,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  inline
   int
   LinIndexer<NDIM>::getIndex(int i) const
   {
@@ -257,6 +258,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  inline
   int
   LinIndexer<NDIM>::getIndex(int i, int j) const
   {
@@ -264,6 +266,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  inline
   int
   LinIndexer<NDIM>::getIndex(int i, int j, int k) const
   {
@@ -271,6 +274,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  inline
   int
   LinIndexer<NDIM>::getIndex(int i, int j, int k, int l) const
   {
@@ -278,6 +282,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  inline
   int
   LinIndexer<NDIM>::getIndex(const int idx[NDIM]) const
   {

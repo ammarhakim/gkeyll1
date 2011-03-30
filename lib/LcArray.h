@@ -771,6 +771,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   Array<NDIM, T, INDEXER>&
   Array<NDIM, T, INDEXER>::operator+=(const T& val)
   {
@@ -792,6 +793,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   Array<NDIM, T, INDEXER>&
   Array<NDIM, T, INDEXER>::operator*=(const T& val)
   {
@@ -813,6 +815,7 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
+  inline
   Array<NDIM, T, INDEXER>&
   Array<NDIM, T, INDEXER>::operator/=(const T& val)
   {
