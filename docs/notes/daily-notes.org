@@ -8,6 +8,25 @@
   more efficient basic operators (+, *, /, etc as found in valarray)
   are needed.
 
+  After some work the performance of Lucee::Vector seems a bit
+  better. It seems that the valarray classes are far more efficient on
+  the newer gcc than the one on the home machine (gcc 4.2.1).
+
+  Played around with expression templates from the article
+  "Disambiguated glomable expression templates". I think it will be
+  beneficial to use implement this technique in Lucee. Then, one can
+  imagine a variety of matrix class (symmetric and diagonal are
+  needed) that can make the RTE solvers very compact and succinct: an
+  almost direct transcription from Siewert's papers. Eventually, I
+  want to implement inhomogeneous algorithms for both polarized and
+  non-polarized cases.
+
+  Should run Shark on wave-propagation solvers.
+
+*** TODO Figure out a way to find Lapack/Blas on Linux with CMake
+
+    Then make Lucee work on Linux.
+
 * March 28th
 
   First, Mercurial is giving a lot of trouble. Perhaps the move from
