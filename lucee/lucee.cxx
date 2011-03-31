@@ -19,12 +19,12 @@
 #include <LcStreamHandler.h>
 
 // std includes
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <ctime>
 #include <memory>
-#include <cstdlib>
+#include <string>
 
 int
 main(int argc, char **argv)

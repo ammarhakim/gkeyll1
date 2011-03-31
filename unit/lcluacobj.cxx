@@ -14,6 +14,7 @@
 #include <LcLuaTable.h>
 
 // std includes
+#include <cstdlib>
 #include <iostream>
 
 struct Point
