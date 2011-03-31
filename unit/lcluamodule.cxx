@@ -17,6 +17,9 @@
 #include <LcObjRegistry.h>
 #include <LcTest.h>
 
+// std includes
+#include <cstdlib>
+
 class Solver : public Lucee::BasicObj
 {
   public:
