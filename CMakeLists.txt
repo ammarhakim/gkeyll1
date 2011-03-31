@@ -12,6 +12,11 @@ cmake_minimum_required(VERSION 2.8)
 # initialize build
 INCLUDE(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
 
+# determine Fortran compiler
+include(CMakeDetermineFortranCompiler)
+# now initialize Fortran stuff
+include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
+
 # find packages
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
@@ -30,11 +35,6 @@ if (GSL_FOUND)
    add_definitions(-DHAVE_GSL)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
-
-# determine Fortran compiler
-include(CMakeDetermineFortranCompiler)
-# now initialize Fortran stuff
-include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
 
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
