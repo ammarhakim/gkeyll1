@@ -32,7 +32,6 @@ add_library(lclua
   ldebug.c
   llex.c
   lparser.c
-  lua.c
   ldo.c
   lmathlib.c
   lstate.c
