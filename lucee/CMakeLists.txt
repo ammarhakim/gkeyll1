@@ -20,12 +20,6 @@ link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
 
-# add the Accelerate framework on Mac OS X
-IF(APPLE)
-  FIND_LIBRARY(ACCELERATE_LIB Accelerate)
-  MARK_AS_ADVANCED(ACCELERATE_LIB)
-  SET(EXTRA_LIBS ${ACCELERATE_LIB})
-ENDIF (APPLE)
 
 # Create lucee executable
 add_executable(lucee lucee.cxx LcRegisterModules.cpp)

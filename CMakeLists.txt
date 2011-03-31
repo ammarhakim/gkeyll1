@@ -31,6 +31,25 @@ if (GSL_FOUND)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 
+# determine Fortran compiler
+include(CMakeDetermineFortranCompiler)
+# now initialize Fortran stuff
+include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
+
+IF(APPLE)
+  # add the Accelerate framework on Mac OS X
+  FIND_LIBRARY(ACCELERATE_LIB Accelerate)
+  MARK_AS_ADVANCED(ACCELERATE_LIB)
+  SET(EXTRA_LIBS ${ACCELERATE_LIB})
+else(APPLE)
+  # find LAPACK
+  find_package(LAPACK REQUIRED)
+  if (LAPACK_FOUND)
+    add_definitions(-DHAVE_LAPACK)
+    SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
+  endif (LAPACK_FOUND)
+endif(APPLE)
+
 # Create configure file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
