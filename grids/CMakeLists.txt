@@ -17,4 +17,5 @@ add_library(lcgrids
   LcStructuredGridBase.cpp
   LcUnstructConnectivity.cpp
   LcUnstructGeometry.cpp
+  LcUnstructGridCreator.cpp
 )

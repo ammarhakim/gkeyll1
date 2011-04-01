@@ -25,12 +25,19 @@ namespace Lucee
   template <unsigned NDIM, typename REAL>
   class UnstructGeometry
   {
+    public:
+/**
+ * Create empty geometery object. The 'reset' method must be called to
+ * allocate any memory to store the geometry.
+ */
+      UnstructGeometry();
+
 /** 
- * Create a geometry object with specified number of vertices.
+ * Reset geometry object to contain specified number of vertices.
  *
  * @param nv Number of vertices.
  */
-      UnstructGeometry(unsigned nv);
+      void reset(unsigned nv);
 
     private:
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
