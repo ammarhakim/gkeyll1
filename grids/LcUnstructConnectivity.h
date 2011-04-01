@@ -28,6 +28,15 @@ namespace Lucee
  */
   class UnstructConnectivity
   {
+    public:
+/**
+ * Create a new connectivity object that connects elements of
+ * dimension d to elements of dimension dprime.
+ *
+ * @param nd Number of elements of dimension d.
+ */
+      UnstructConnectivity(unsigned nd);
+
     private:
 /** Source element dimension */
       unsigned d;
@@ -35,8 +44,16 @@ namespace Lucee
       unsigned dprime;
 /** Indices of grid element dprime */
       std::vector<int> indices;
-/** Offsets into 'indices' array: size is numElem(d)+1 */
+/** Offsets into 'indices' array: size is numElem(d)+1. The
+ * connections of element n of dimension d are stored in indices[j],
+ * where offset[n] <= j < offset[n+1].
+ */
       std::vector<unsigned> offsets;
+
+/** No copying allowed */
+      UnstructConnectivity(const UnstructConnectivity&);
+/** No assignment allowed */
+      UnstructConnectivity& operator=(const UnstructConnectivity&);
   };
 }
 
