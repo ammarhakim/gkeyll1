@@ -38,7 +38,7 @@ namespace Lucee
 
   template <typename REAL>
   void
-  UnstructGridCreator<REAL>::appendVertex(double xv[3])
+  UnstructGridCreator<REAL>::setVertex(int iv, double xv[3])
   {
   }
 
