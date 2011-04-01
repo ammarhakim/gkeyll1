@@ -30,6 +30,12 @@ namespace Lucee
   {
     public:
 /**
+ * Create empty connectivity object. The reset method must be called
+ * to allocate memory to store the connectivity.
+ */
+      UnstructConnectivity();
+
+/**
  * Reset connectivity object to connects elements of dimension d to
  * elements of dimension dprime. Calling this method will clear all
  * data in the object.

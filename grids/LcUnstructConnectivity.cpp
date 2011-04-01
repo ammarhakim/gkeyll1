@@ -18,6 +18,10 @@
 
 namespace Lucee
 {
+  UnstructConnectivity::UnstructConnectivity()
+  {
+  }
+
   void UnstructConnectivity::reset(unsigned nd)
   {
 // clear existing arrays

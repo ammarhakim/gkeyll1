@@ -35,11 +35,11 @@ namespace Lucee
     private:
 /** Dimension of grid */
       unsigned ndim;
-/** Geometry information (assume 3D) */
+/** Geometry information (assume 3 nodal coordinates) */
       Lucee::UnstructGeometry<3, REAL> geometry;
 /** Location d+3*dprime indicates where in 'connectivity' d->dprime connection is stored */
-      std::vector<unsigned> ddprime;
-/** Connectivity information (potentally has 9 elements) */
+      std::vector<int> ddprime;
+/** Connectivity information (potentially has 9 elements) */
       std::vector<Lucee::UnstructConnectivity> connectivity;
   };
 }

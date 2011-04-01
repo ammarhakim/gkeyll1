@@ -17,9 +17,16 @@
 namespace Lucee
 {
   template <unsigned NDIM, typename REAL>
-  UnstructGeometry<NDIM, REAL>::UnstructGeometry(unsigned nv)
-    : vcoords(NDIM*nv)
+  UnstructGeometry<NDIM, REAL>::UnstructGeometry()
   {
+  }
+
+  template <unsigned NDIM, typename REAL>
+  void
+  UnstructGeometry<NDIM, REAL>::reset(unsigned nv)
+  {
+    vcoords.clear();
+    vcoords.resize(nv);
   }
 
 // instantiations
