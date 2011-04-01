@@ -61,13 +61,14 @@ namespace Lucee
       void setNumCells(unsigned nc);
 
 /**
- * Append vertex to creator. Vertices are assumed to live in 3D space
- * even for 1D or 2D meshes. Vertices should be added in order that
- * they are numbered.
+ * Set a vertex coordinate. Vertices are assumed to live in 3D space
+ * even for 1D or 2D meshes. Vertices should be numbered from
+ * 0,1,...,nv-1, where nv is the number of vertices in the grid.
  *
+ * @param iv Vertex number.
  * @param xv Coordinates of vertex (x,y,z).
  */
-      void appendVertex(double xv[3]);
+      void setVertex(int iv, double xv[3]);
 
     private:
 /** Dimension of grid */
