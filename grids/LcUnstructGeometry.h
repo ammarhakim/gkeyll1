@@ -30,7 +30,7 @@ namespace Lucee
  *
  * @param nv Number of vertices.
  */
-      UnstructGeometry(unsigned nv);      
+      UnstructGeometry(unsigned nv);
 
     private:
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */

@@ -30,12 +30,13 @@ namespace Lucee
   {
     public:
 /**
- * Create a new connectivity object that connects elements of
- * dimension d to elements of dimension dprime.
+ * Reset connectivity object to connects elements of dimension d to
+ * elements of dimension dprime. Calling this method will clear all
+ * data in the object.
  *
  * @param nd Number of elements of dimension d.
  */
-      UnstructConnectivity(unsigned nd);
+      void reset(unsigned nd);
 
     private:
 /** Source element dimension */
