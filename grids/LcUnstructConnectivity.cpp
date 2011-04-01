@@ -18,8 +18,12 @@
 
 namespace Lucee
 {
-  UnstructConnectivity::UnstructConnectivity(unsigned nd)
-    : offsets(nd+1)
+  void UnstructConnectivity::reset(unsigned nd)
   {
+// clear existing arrays
+    indices.clear();
+    offsets.clear();
+// resize offset
+    offsets.resize(nd+1);
   }
 }
