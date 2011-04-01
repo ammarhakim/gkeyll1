@@ -14,10 +14,15 @@ INCLUDE(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
 
 # determine Fortran compiler
 include(CMakeDetermineFortranCompiler)
-# now initialize Fortran stuff
-include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
+if ("${CMAKE_Fortran_COMPILER}" STREQUAL CMAKE_Fortran_COMPILER-NOTFOUND)
+  message("**** Fortran not found! Might have problems finding LAPACK")
+  set(FORTRAN_FOUND FALSE)
+else ()
+  set(FORTRAN_FOUND TRUE)
+  # now initialize Fortran stuff
+  include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
+endif ()
 
-# find packages
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
 
@@ -42,12 +47,16 @@ IF(APPLE)
   MARK_AS_ADVANCED(ACCELERATE_LIB)
   SET(EXTRA_LIBS ${ACCELERATE_LIB})
 else(APPLE)
-  # find LAPACK
-  find_package(LAPACK REQUIRED)
-  if (LAPACK_FOUND)
-    add_definitions(-DHAVE_LAPACK)
-    SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
-  endif (LAPACK_FOUND)
+  if (FORTRAN_FOUND)
+    # find LAPACK
+    find_package(LAPACK REQUIRED)
+    if (LAPACK_FOUND)
+      add_definitions(-DHAVE_LAPACK)
+      SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
+    endif (LAPACK_FOUND)
+  else()
+    message("**** LAPACK can not be found without a Fortran compiler!")
+  endif()
 endif(APPLE)
 
 # Create configure file
