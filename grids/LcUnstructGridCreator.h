@@ -15,7 +15,6 @@
 #endif
 
 // std includes
-#include <map>
 #include <vector>
 
 // lucee includes
@@ -28,10 +27,17 @@ namespace Lucee
  * Class to create an unstructured grid. This creator can then be
  * passed to UnstructGrid to construct the actual grid. The grid
  * creator needs to be supplied coordinates of each vertex and the
- * cell -> vertex connectivity for each cell. The currently supported
- * cell types are: triangles, quadrilaterals, hexahedrons and
- * tetrahedrons.
+ * cell -> vertex connectivity for each cell. Here, cell is defined as
+ * the element of highest dimension in the mesh. The currently
+ * supported cell types are: triangle, quadrilateral, hexahedron
+ * and tetrahedron. 
  *
+ * Vertices and cells must be numbered starting from 0. To ensure
+ * exeception free use, the setNumVertices() and setNumCells() methods
+ * must be called first before adding any vertices or cells. Once
+ * these methods are called, the vertices can be added in any
+ * order. However, the cells must be added one after the other
+ * sequentially.
  */
   template <typename REAL>
   class UnstructGridCreator
@@ -68,11 +74,46 @@ namespace Lucee
  * @param iv Vertex number.
  * @param xv Coordinates of vertex (x,y,z).
  */
-      void setVertex(int iv, double xv[3]);
+      void setVertex(unsigned iv, double xv[3]);
+
+/**
+ * Add a triangle with vertex numbers (a,b,c). Vertices must be
+ * specified in in clockwise order to ensure correct orientation of
+ * cells.
+ *
+ * @param a Vertex index 
+ * @param b Vertex index 
+ * @param c Vertex index
+ */
+      void addTri(unsigned a, unsigned b, unsigned c);
+
+/**
+ * Add a quad with vertex numbers (a,b,c,d). Vertices must be specified
+ * in in clockwise order to ensure correct orientation of cells.
+ *
+ * @param a Vertex index 
+ * @param b Vertex index 
+ * @param c Vertex index
+ * @param d Vertex index
+ */
+      void addQuad(unsigned a, unsigned b, unsigned c, unsigned d);
+
+/**
+ * Add a tet to the mesh with indices (a,b,c,d). The faces of the tets
+ * are [a,b,c],[a,c,d],[b,c,d],[a,b,d]].
+ *
+ * @param a Vertex index 
+ * @param b Vertex index 
+ * @param c Vertex index
+ * @param d Vertex index
+ */
+      void addTet(unsigned a, unsigned b, unsigned c, unsigned d);
 
     private:
 /** Dimension of grid */
       unsigned ndim;
+/** Current cell number */
+      unsigned currCell;
 /** Vertex coordinates */
       Lucee::UnstructGeometry<3, REAL> vc;
 /** Cell->vertex connectivity */
