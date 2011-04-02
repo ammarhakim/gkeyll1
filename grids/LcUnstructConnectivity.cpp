@@ -29,5 +29,8 @@ namespace Lucee
     offsets.clear();
 // resize offset
     offsets.resize(nd+1);
+// set everything to zero
+    for (unsigned i=0; i<nd+1; ++i)
+      offsets[i] = 0;
   }
 }

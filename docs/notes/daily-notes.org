@@ -1,5 +1,43 @@
 # -*- org -*-
 
+* April 1st
+
+  Started work on unstructured grids. The basic idea here is to store
+  connections in a sparse format and minimum required geometry. In the
+  bare-minimum case only nodal coordinates are stored and cell->node
+  mapping is stored.
+
+  The connectivity (d->dprime) is stored in 2 arrays: an offsets array
+  and an index array. The n-th element of dimension 'd' is connected
+  to the elements index[j], where offset[n]<=j<offset[n+1]. The reason
+  to have the offset array is that allows fast access to the
+  connections in case the mesh is composed of mixed type of cells
+  (tri/quad or tet/hex/pyramids).
+
+  The other connectivies (besides ndim->0) is computed on demand when
+  needed the first time.
+
+  A set of wrapper objects need to be written that put a OO interface
+  on top of these raw data. For example, iterators need to be written
+  to walk over all elements of a specified dimension. Recursive
+  iterators should be constructible, i.e., it should be possible, for
+  example, to iterate over all cells, the faces connected to each cell
+  and the edge connected to each face (in a nested loop, for example)
+
+  The basic data is stored in flat arrays for several reasons. First,
+  the topology is separated from the geometry and second, flat arrays
+  allow straightforward usage on restrictive architectures like GPUs.
+
+** Notes on differential operators on grids
+
+   Two types of differential operators need to be implemented on
+   grids: explicit and implicit. The explicit operators can directly
+   difference the discrete fields. However, the implicit operators
+   need to use some sort of expression templates to delay evaluation
+   till required. When the complete expression is created, the
+   implicit expression template is then used to fill up a matrix
+   (usually) that is then used to perform the implicit update.
+
 * March 29th 
 
   The problem seems with the multiple indirections required to get
