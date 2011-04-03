@@ -33,6 +33,17 @@ namespace Lucee
  * @param gmvStrm An input stream with GMV data.
  */
       GmvGridCreator(unsigned ndim, std::istream& gmvStrm);
+
+    private:
+/** Dimension of grid */
+      unsigned ndim;
+
+/**
+ * Read grid from GMV format file.
+ *
+ * @param gmvStrm An input stream with GMV data.
+ */
+      void readFromGmvFile(std::istream& gmvStrm);
   };
 }
 
