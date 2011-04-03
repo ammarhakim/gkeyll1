@@ -17,6 +17,11 @@
 
 namespace Lucee
 {
+  static short tet_c = 0;
+  static short hex_c = 1;
+  static short tri_c = 2;
+  static short quad_c = 4;
+
   template <typename REAL>
   UnstructGridCreator<REAL>::UnstructGridCreator(unsigned ndim)
     : ndim(ndim), currCell(0)
@@ -39,7 +44,20 @@ namespace Lucee
 
   template <typename REAL>
   void
-  UnstructGridCreator<REAL>::setVertex(unsigned iv, double xv[3])
+  UnstructGridCreator<REAL>::setVertex(unsigned iv, REAL xv[3])
+  {
+// check if there is enough space to add vertex
+    if (vc.vcoords.size() < 3*(iv+1))
+    {
+      Lucee::Except lce("UnstructGridCreator::setVertex: Vertex number ");
+      lce << iv << " can not be added: out of space." << std::endl;
+      throw lce;
+    }
+  }
+
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::setVertexXCoord(unsigned iv, REAL x)
   {
 // check if there is enough space to add vertex
     if (vc.vcoords.size() < 3*(iv+1))
@@ -50,9 +68,42 @@ namespace Lucee
     }
 
 // find correct location and set coordinates
-    unsigned loc = 3*iv;
-    for (unsigned i=0; i<3; ++i)
-      vc.vcoords[loc+i] = xv[i];
+    unsigned loc = 3*iv+0;
+    vc.vcoords[loc] = x;
+  }
+
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::setVertexYCoord(unsigned iv, REAL x)
+  {
+// check if there is enough space to add vertex
+    if (vc.vcoords.size() < 3*(iv+1))
+    {
+      Lucee::Except lce("UnstructGridCreator::setVertex: Vertex number ");
+      lce << iv << " can not be added: out of space." << std::endl;
+      throw lce;
+    }
+
+// find correct location and set coordinates
+    unsigned loc = 3*iv+1;
+    vc.vcoords[loc] = x;
+  }
+
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::setVertexZCoord(unsigned iv, REAL x)
+  {
+// check if there is enough space to add vertex
+    if (vc.vcoords.size() < 3*(iv+1))
+    {
+      Lucee::Except lce("UnstructGridCreator::setVertex: Vertex number ");
+      lce << iv << " can not be added: out of space." << std::endl;
+      throw lce;
+    }
+
+// find correct location and set coordinates
+    unsigned loc = 3*iv+2;
+    vc.vcoords[loc] = x;
   }
 
   template <typename REAL>
@@ -67,6 +118,8 @@ namespace Lucee
     c2v.indices.push_back(c);
 // now set offsets correctly
     c2v.offsets[currCell+1] = c2v.offsets[currCell]+3;
+// set cell type
+    cellType.push_back(tri_c);
     currCell += 1;
   }
 
@@ -83,6 +136,7 @@ namespace Lucee
     c2v.indices.push_back(d);
 // now set offsets correctly
     c2v.offsets[currCell+1] = c2v.offsets[currCell]+4;
+    cellType.push_back(quad_c);
     currCell += 1;
   }
 
@@ -99,6 +153,7 @@ namespace Lucee
     c2v.indices.push_back(d);
 // now set offsets correctly
     c2v.offsets[currCell+1] = c2v.offsets[currCell]+4;
+    cellType.push_back(tet_c);
     currCell += 1;
   }
 

@@ -74,7 +74,37 @@ namespace Lucee
  * @param iv Vertex number.
  * @param xv Coordinates of vertex (x,y,z).
  */
-      void setVertex(unsigned iv, double xv[3]);
+      void setVertex(unsigned iv, REAL xv[3]);
+
+/**
+ * Set a vertex coordinate. Vertices are assumed to live in 3D space
+ * even for 1D or 2D meshes. Vertices should be numbered from
+ * 0,1,...,nv-1, where nv is the number of vertices in the grid.
+ *
+ * @param iv Vertex number.
+ * @param x X-Coordinate of vertex.
+ */
+      void setVertexXCoord(unsigned iv, REAL x);
+
+/**
+ * Set a vertex coordinate. Vertices are assumed to live in 3D space
+ * even for 1D or 2D meshes. Vertices should be numbered from
+ * 0,1,...,nv-1, where nv is the number of vertices in the grid.
+ *
+ * @param iv Vertex number.
+ * @param y Y-Coordinate of vertex.
+ */
+      void setVertexYCoord(unsigned iv, REAL y);
+
+/**
+ * Set a vertex coordinate. Vertices are assumed to live in 3D space
+ * even for 1D or 2D meshes. Vertices should be numbered from
+ * 0,1,...,nv-1, where nv is the number of vertices in the grid.
+ *
+ * @param iv Vertex number.
+ * @param z Z-Coordinate of vertex.
+ */
+      void setVertexZCoord(unsigned iv, REAL z);
 
 /**
  * Add a triangle with vertex numbers (a,b,c). Vertices must be
@@ -118,6 +148,8 @@ namespace Lucee
       Lucee::UnstructGeometry<3, REAL> vc;
 /** Cell->vertex connectivity */
       Lucee::UnstructConnectivity c2v;
+/** Cell type */
+      std::vector<short> cellType;
 /** No copying */
       UnstructGridCreator(const UnstructGridCreator&);
 /** No assignment */
