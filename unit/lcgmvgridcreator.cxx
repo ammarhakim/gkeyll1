@@ -29,7 +29,7 @@ main (int argc, char *argv[])
   cmd.addArg("i", "GMVFILE", "GMV file to read");
 // parse it
   cmd.parse(argc, argv);
-
+// show help if requested
   if (cmd.hasSwitch("h"))
   {
     cmd.showHelp();
@@ -53,6 +53,7 @@ main (int argc, char *argv[])
     std::cerr << "Unable to open GMV file " << gmvFileNm << std::endl;
     exit(1);
   }
+// create from reader
   Lucee::GmvGridCreator<double> gmvRdr(3, gmvFile);
 
   return 0;

@@ -31,7 +31,8 @@ namespace Lucee
   template <unsigned NDIM, typename REAL>
   class UnstructGeometry
   {
-// declare friends
+    public:
+// declare friends so they can touch our privates
       template <typename RT> friend class UnstructGridCreator;
       template <typename RT> friend class UnstructGrid;
 
@@ -41,6 +42,7 @@ namespace Lucee
  */
       UnstructGeometry();
 
+    private:
 /** 
  * Reset geometry object to contain specified number of vertices.
  *
@@ -48,14 +50,8 @@ namespace Lucee
  */
       void reset(unsigned nv);
 
-    private:
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
       std::vector<REAL> vcoords;
-
-/** No copying allowed */
-      UnstructGeometry(const UnstructGeometry<NDIM, REAL>&);
-/** No assignment allowed */
-      UnstructGeometry<NDIM, REAL>& operator=(const UnstructGeometry<NDIM, REAL>&);
   };
 }
 

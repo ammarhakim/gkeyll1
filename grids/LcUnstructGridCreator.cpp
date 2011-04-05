@@ -26,6 +26,23 @@ namespace Lucee
   UnstructGridCreator<REAL>::UnstructGridCreator(unsigned ndim)
     : ndim(ndim), currCell(0)
   {
+// creators need ndim->0 connections to work correctly
+    c2v.d = ndim;
+    c2v.dprime = 0;
+  }
+
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::fillWithGeometry(Lucee::UnstructGeometry<3, REAL>& geo) const
+  {
+    geo = vc;
+  }
+
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::fillWithConnectivity(Lucee::UnstructConnectivity& conn) const
+  {
+    conn = c2v;
   }
 
   template <typename REAL>
