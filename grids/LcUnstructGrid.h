@@ -32,6 +32,9 @@ namespace Lucee
   class UnstructGrid : public Lucee::GridIfc
   {
     public:
+/** Class id: this is used by the registration system */
+      static const char *id;
+
 /**
  * Create an unstructured grid. This grid can not be used unless
  * constructFromCreator() method is called.
@@ -39,11 +42,29 @@ namespace Lucee
       UnstructGrid();
 
 /**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
  * Construct grid from supplied creator.
  *
  * @param ctor Creator to construct grid from.
  */
       void constructFromCreator(const Lucee::UnstructGridCreator<REAL>& ctor);
+
+/**
+ * Write grid to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param nm Name of the grid as it should appear in output.
+ * @return node to which data was written.
+ */
+      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+        const std::string& nm);
 
     private:
 /** Dimension of grid */
