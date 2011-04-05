@@ -52,6 +52,27 @@ namespace Lucee
       UnstructGridCreator(unsigned ndim);
 
 /**
+ * Get grid dimension.
+ *
+ * @return grid dimension.
+ */
+      unsigned getDim() const { return ndim; }
+
+/**
+ * Fill with grid vertex information.
+ *
+ * @param geo Geometry to fill data in.
+ */
+      void fillWithGeometry(Lucee::UnstructGeometry<3, REAL>& geo) const;
+
+/**
+ * Fill with ndim->0 connectivity information.
+ *
+ * @param conn Connectivity data to fill data in.
+ */
+      void fillWithConnectivity(Lucee::UnstructConnectivity& conn) const;
+
+/**
  * Set number of vertices in grid.
  *
  * @param nv Number of vertices.
@@ -150,6 +171,7 @@ namespace Lucee
       Lucee::UnstructConnectivity c2v;
 /** Cell type */
       std::vector<short> cellType;
+
 /** No copying */
       UnstructGridCreator(const UnstructGridCreator&);
 /** No assignment */

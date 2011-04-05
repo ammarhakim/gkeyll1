@@ -34,7 +34,8 @@ namespace Lucee
  */
   class UnstructConnectivity
   {
-// declare friends
+    public:
+// declare friends so they can touch our privates
       template <typename REAL> friend class UnstructGridCreator;
       template <typename REAL> friend class UnstructGrid;
 
@@ -44,6 +45,7 @@ namespace Lucee
  */
       UnstructConnectivity();
 
+    private:
 /**
  * Reset connectivity object to connects elements of dimension d to
  * elements of dimension dprime. Calling this method will clear all
@@ -64,11 +66,6 @@ namespace Lucee
  * where offset[n] <= j < offset[n+1].
  */
       std::vector<unsigned> offsets;
-
-/** No copying allowed */
-      UnstructConnectivity(const UnstructConnectivity&);
-/** No assignment allowed */
-      UnstructConnectivity& operator=(const UnstructConnectivity&);
   };
 }
 
