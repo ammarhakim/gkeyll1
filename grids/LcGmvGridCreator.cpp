@@ -136,18 +136,18 @@ namespace Lucee
 // check cell type
       if (tokens[0] == "tet")
       {
-        this->addTet(ivec[0], ivec[1], ivec[2], ivec[3]);
+        this->addTet(ivec[0]-1, ivec[1]-1, ivec[2]-1, ivec[3]-1);
       }
       else if (tokens[0] == "hex")
       {
       }
       else if (tokens[0] == "tri")
       {
-        this->addTri(ivec[0], ivec[1], ivec[2]);
+        this->addTri(ivec[0]-1, ivec[1]-1, ivec[2]-1);
       }
       else if (tokens[0] == "quad")
       {
-        this->addQuad(ivec[0], ivec[1], ivec[2], ivec[3]);
+        this->addQuad(ivec[0]-1, ivec[1]-1, ivec[2]-1, ivec[3]-1);
       }        
     }
   }

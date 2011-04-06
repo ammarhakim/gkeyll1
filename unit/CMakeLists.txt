@@ -137,4 +137,4 @@ target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_LIBRARIES})
 
 # lcgmvgridcreator
 add_executable(lcgmvgridcreator lcgmvgridcreator.cxx)
-target_link_libraries(lcgmvgridcreator lcgrids lclib ${Hdf5_LIBRARIES})
+target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})

@@ -21,10 +21,14 @@
 // lucee includes
 #include <LcCmdLineArgs.h>
 #include <LcGmvGridCreator.h>
+#include <LcTest.h>
+#include <LcUnstructGrid.h>
 
 int
 main (int argc, char *argv[])
 {
+  LC_BEGIN_TESTS("lcgmvgridcreator");
+
   Lucee::CmdLineArgs cmd("lcgmvgridcreator");
   cmd.addArg("i", "GMVFILE", "GMV file to read");
 // parse it
@@ -55,6 +59,15 @@ main (int argc, char *argv[])
   }
 // create from reader
   Lucee::GmvGridCreator<double> gmvRdr(3, gmvFile);
+// create a new unstructured grid
+  Lucee::UnstructGrid<double> ugrid;
+  ugrid.constructFromCreator(gmvRdr);
+// write grid to HDF5 file
+  ugrid.write("ugrid.h5");
 
-  return 0;
+// ensure correct number of nodes and cells
+  LC_ASSERT("Checking number of nodes", ugrid.getNumVertices() == 7856);
+  LC_ASSERT("Checking number of cells", ugrid.getNumCells() == 39597);
+
+  LC_END_TESTS;
 }
