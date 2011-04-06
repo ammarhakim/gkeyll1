@@ -70,6 +70,9 @@ add_subdirectory(etc/loki/src)
 # Build code in lua
 add_subdirectory(etc/lua/src)
 
+# Build code in libb64
+add_subdirectory(etc/libb64/src)
+
 # Build code in lib
 add_subdirectory(lib)
 
