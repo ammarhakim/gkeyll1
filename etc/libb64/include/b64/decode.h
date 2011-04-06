@@ -9,6 +9,7 @@ For details, see http://sourceforge.net/projects/libb64
 #define BASE64_DECODE_H
 
 #include <iostream>
+#define BUFFERSIZE 16777216
 
 namespace base64
 {
