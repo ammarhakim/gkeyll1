@@ -70,9 +70,6 @@ add_subdirectory(etc/loki/src)
 # Build code in lua
 add_subdirectory(etc/lua/src)
 
-# Build code in libb64
-add_subdirectory(etc/libb64/src)
-
 # Build code in lib
 add_subdirectory(lib)
 
@@ -171,6 +168,3 @@ add_test(lctabledescription unit/lctabledescription)
 
 # lcluahelp
 add_test(lcluahelp unit/lcluahelp)
-
-# lcbase64
-add_test(lcbase64 unit/lcbase64)
