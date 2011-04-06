@@ -6,6 +6,7 @@ include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/datastructs)
 include_directories(${PROJECT_SOURCE_DIR}/grids)
 include_directories(${PROJECT_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/etc/libb64/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
@@ -13,6 +14,7 @@ link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/datastructs)
 link_directories(${PROJECT_BINARY_DIR}/grids)
 link_directories(${PROJECT_BINARY_DIR}/lib)
+link_directories(${PROJECT_BINARY_DIR}/etc/libb64/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
 
@@ -138,3 +140,7 @@ target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_LIBRARIES})
 # lcgmvgridcreator
 add_executable(lcgmvgridcreator lcgmvgridcreator.cxx)
 target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+
+# lcbase64
+add_executable(lcbase64 lcbase64.cxx)
+target_link_libraries(lcbase64 lclib lclibb64)

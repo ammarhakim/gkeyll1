@@ -171,3 +171,6 @@ add_test(lctabledescription unit/lctabledescription)
 
 # lcluahelp
 add_test(lcluahelp unit/lcluahelp)
+
+# lcbase64
+add_test(lcbase64 unit/lcbase64)

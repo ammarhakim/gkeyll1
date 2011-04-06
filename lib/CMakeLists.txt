@@ -3,11 +3,13 @@ include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
+include_directories(${PROJECT_SOURCE_DIR}/etc/libb64/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 # Create the library
 add_library(lclib 
   LcAlignedRectCoordSys.cpp
+  LcBase64.cpp
   LcBasicObj.cpp
   LcCmdLineArgs.cpp
   LcDataStructIfc.cpp
@@ -36,7 +38,7 @@ add_library(lclib
   LcStreamHandler.cpp
   LcTableDescription.cpp
   LcValueDescription.cpp
-  LcVectorDescription.cpp
   LcVec3.cpp
   LcVector.cpp
+  LcVectorDescription.cpp
 )
