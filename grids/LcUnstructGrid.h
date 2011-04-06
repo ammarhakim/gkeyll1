@@ -56,6 +56,22 @@ namespace Lucee
       void constructFromCreator(const Lucee::UnstructGridCreator<REAL>& ctor);
 
 /**
+ * Get number of vertices in grid.
+ *
+ * @return Number of vertices in grid.
+ */
+      unsigned getNumVertices() const;
+
+/**
+ * Get number of cells in grid. A cell is defined as an element with
+ * 'ndim' dimension. I.e. in 3D a cell could be a tetrahedron while in
+ * 2D it could be a triangle.
+ *
+ * @return Number of cells in grid.
+ */
+      unsigned getNumCells() const;
+
+/**
  * Write grid to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
