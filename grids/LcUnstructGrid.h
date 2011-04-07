@@ -19,6 +19,7 @@
 #include <LcUnstructConnectivity.h>
 #include <LcUnstructGeometry.h>
 #include <LcUnstructGridCreator.h>
+#include <LcUnstructGridElems.h>
 
 // std includes
 #include <vector>
@@ -81,6 +82,51 @@ namespace Lucee
  */
       virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
         const std::string& nm);
+
+/**
+ * Iterator class to allow iteration over various grid elements. The
+ * element dimension is specified as a template parameter.
+ */
+      template <unsigned NDIM>
+      class ElemIterator
+      {
+        public:
+/**
+ * Return pointer to current element.
+ *
+ * @return pointer to current element.
+ */
+          const Lucee::GridElem<REAL, NDIM>* operator->() const
+          {
+            return currElem;
+          }
+
+/**
+ * Increment iterator by single location. (Prefix operator)
+ *
+ * @return reference to iterator.
+ */
+          ElemIterator<NDIM>& operator++()
+          {
+            currElem->incr(); // bump internal location of element
+            return *this;
+          }
+
+/**
+ * Increment iterator by single location. (Postfix operator)
+ *
+ * @return reference to iterator.
+ */
+          ElemIterator<NDIM>& operator++(int)
+          {
+            currElem->incr(); // bump internal location of element
+            return *this;
+          }
+          
+        private:
+/** Current grid element pointed to by iterator */
+          Lucee::GridElem<REAL, NDIM> *currElem;
+      };
 
     private:
 /** Dimension of grid */
