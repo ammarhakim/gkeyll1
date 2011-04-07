@@ -19,6 +19,9 @@
 
 namespace Lucee
 {
+// declare grid class
+  template <typename REAL> class UnstructGrid;
+
 /**
  * A class representig a vertex.
  */
@@ -33,7 +36,7 @@ namespace Lucee
  */
       void fillWithCoordinates(REAL xv[3]);
 
-    private:
+    protected:
 /**
  * Create vertex given list of vertex coordinates.
  *
@@ -46,6 +49,7 @@ namespace Lucee
  */
       void incr() const;
 
+    private:
 /** Reference to vertex coordinates */
       std::vector<REAL> vcoords;
 /** Current location in vcoords array */
@@ -63,7 +67,27 @@ namespace Lucee
  */
   template <typename REAL>
   class GridElem<REAL, 0> : public VertexElem<REAL>
-  { // all methods provided by base class
+  {
+// declare grid friend so it can fiddle around with privates
+      template <typename R> friend class UnstructGrid;
+    private:
+/**
+ * Initialize element.
+ *
+ * @param vc List of vertex coordinates.
+ */
+      GridElem(const std::vector<REAL>& vc)
+        : VertexElem<REAL>(vc)
+      {
+      }
+
+/**
+ * Increment vertex pointer by one element.
+ */
+      void incr() const
+      {
+        this->incr();
+      }
   };
 }
 
