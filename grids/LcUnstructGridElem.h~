@@ -1,0 +1,15 @@
+/**
+ * @file	LcUnstructGrid.h
+ *
+ * @brief	Unstructured grid class.
+ *
+ * @version	$Id$
+ */
+
+#ifndef LC_UNSTRUCT_GRID_H
+#define LC_UNSTRUCT_GRID_H
+
+// config stuff
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
