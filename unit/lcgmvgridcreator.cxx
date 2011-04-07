@@ -62,6 +62,18 @@ main (int argc, char *argv[])
 // create a new unstructured grid
   Lucee::UnstructGrid<double> ugrid;
   ugrid.constructFromCreator(gmvRdr);
+// create an iterator over vertices
+
+  double xv[3];
+  Lucee::UnstructGrid<double>::ElemIterator<0> itr(ugrid);
+  for ( ; !itr.atEnd(); ++itr)
+  {
+    itr->fillWithCoordinates(xv);
+    for (unsigned i=0; i<3; ++i)
+      std::cout << xv[i] << " ";
+    std::cout << std::endl;
+  }
+
 // write grid to HDF5 file
   ugrid.write("ugrid.h5");
 

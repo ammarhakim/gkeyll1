@@ -18,7 +18,7 @@ namespace Lucee
 {
   template <typename REAL>
   void
-  VertexElem<REAL>::fillWithCoordinates(REAL xv[3])
+  VertexElem<REAL>::fillWithCoordinates(REAL xv[3]) const
   {
     for (unsigned i=0; i<3; ++i)
       xv[i] = vcoords[currLoc+i];
