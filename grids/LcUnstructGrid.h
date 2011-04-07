@@ -90,7 +90,18 @@ namespace Lucee
       template <unsigned NDIM>
       class ElemIterator
       {
+          template <typename R> friend class UnstructGrid;
         public:
+/**
+ * Create an iterator given grid.
+ *
+ * @param grid Grid to create iterator from.
+ */
+          ElemIterator(const UnstructGrid<REAL>& grid)
+            : currElem(grid.geometry.vcoords)
+          {
+          }
+
 /**
  * Return pointer to current element.
  *
@@ -98,7 +109,7 @@ namespace Lucee
  */
           const Lucee::GridElem<REAL, NDIM>* operator->() const
           {
-            return currElem;
+            return &currElem;
           }
 
 /**
@@ -108,7 +119,7 @@ namespace Lucee
  */
           ElemIterator<NDIM>& operator++()
           {
-            currElem->incr(); // bump internal location of element
+            currElem.incr(); // bump internal location of element
             return *this;
           }
 
@@ -119,13 +130,20 @@ namespace Lucee
  */
           ElemIterator<NDIM>& operator++(int)
           {
-            currElem->incr(); // bump internal location of element
+            currElem.incr(); // bump internal location of element
             return *this;
           }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+          bool atEnd() const { return currElem.atEnd(); }
           
         private:
 /** Current grid element pointed to by iterator */
-          Lucee::GridElem<REAL, NDIM> *currElem;
+          Lucee::GridElem<REAL, NDIM> currElem;
       };
 
     private:

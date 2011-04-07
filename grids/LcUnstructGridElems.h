@@ -34,7 +34,7 @@ namespace Lucee
  *
  * @param xv On output vertex coordinates.
  */
-      void fillWithCoordinates(REAL xv[3]);
+      void fillWithCoordinates(REAL xv[3]) const;
 
     protected:
 /**
@@ -48,6 +48,18 @@ namespace Lucee
  * Increment vertex location by one.
  */
       void incr() const;
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const
+      {
+        if (currLoc<vcoords.size())
+          return false;
+        return true;
+      }
 
     private:
 /** Reference to vertex coordinates */
@@ -84,10 +96,14 @@ namespace Lucee
 /**
  * Increment vertex pointer by one element.
  */
-      void incr() const
-      {
-        this->incr();
-      }
+      void incr() const { VertexElem<REAL>::incr(); }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const { return VertexElem<REAL>::atEnd(); }
   };
 }
 
