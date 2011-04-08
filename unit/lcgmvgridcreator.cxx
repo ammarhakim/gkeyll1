@@ -62,9 +62,9 @@ main (int argc, char *argv[])
 // create a new unstructured grid
   Lucee::UnstructGrid<double> ugrid;
   ugrid.constructFromCreator(gmvRdr);
-// create an iterator over vertices
 
   double xv[3];
+// create an iterator over vertices
   Lucee::UnstructGrid<double>::ElemIterator<0> itr(ugrid);
   for ( ; !itr.atEnd(); ++itr)
   {

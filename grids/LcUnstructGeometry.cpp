@@ -26,7 +26,7 @@ namespace Lucee
   UnstructGeometry<NDIM, REAL>::reset(unsigned nv)
   {
     vcoords.clear();
-    vcoords.resize(3*nv);
+    vcoords.resize(NDIM*nv);
   }
 
 // instantiations

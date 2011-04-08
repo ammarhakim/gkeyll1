@@ -30,13 +30,6 @@ namespace Lucee
   {
   }
 
-  template <typename REAL>
-  void
-  VertexElem<REAL>::incr() const
-  {
-    currLoc += 3; // 3 as (x,y,z) coordinates are stored
-  }
-
 // instantiations
   template class VertexElem<float>;
   template class VertexElem<double>;
