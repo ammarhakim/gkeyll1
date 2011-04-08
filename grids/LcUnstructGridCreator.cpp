@@ -17,10 +17,10 @@
 
 namespace Lucee
 {
-  static short tet_c = 0;
-  static short hex_c = 1;
-  static short tri_c = 2;
-  static short quad_c = 4;
+  static short tet_c = TET_CELL_T;
+  static short hex_c = HEX_CELL_T;
+  static short tri_c = TRI_CELL_T;
+  static short quad_c = QUAD_CELL_T;
 
   template <typename REAL>
   UnstructGridCreator<REAL>::UnstructGridCreator(unsigned ndim)
@@ -29,6 +29,11 @@ namespace Lucee
 // creators need ndim->0 connections to work correctly
     c2v.d = ndim;
     c2v.dprime = 0;
+// initialize cell count
+    cellCount[tet_c] = 0;
+    cellCount[hex_c] = 0;
+    cellCount[tri_c] = 0;
+    cellCount[quad_c] = 0;
   }
 
   template <typename REAL>
@@ -43,6 +48,42 @@ namespace Lucee
   UnstructGridCreator<REAL>::fillWithConnectivity(Lucee::UnstructConnectivity& conn) const
   {
     conn = c2v;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGridCreator<REAL>::getNumTri() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(TRI_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGridCreator<REAL>::getNumQuad() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(QUAD_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGridCreator<REAL>::getNumTet() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(TET_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGridCreator<REAL>::getNumHex() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(HEX_CELL_T);
+    return itr->second;
   }
 
   template <typename REAL>
@@ -138,6 +179,7 @@ namespace Lucee
 // set cell type
     cellType.push_back(tri_c);
     currCell += 1;
+    cellCount[tri_c] += 1;
   }
 
   template <typename REAL>
@@ -155,6 +197,7 @@ namespace Lucee
     c2v.offsets[currCell+1] = c2v.offsets[currCell]+4;
     cellType.push_back(quad_c);
     currCell += 1;
+    cellCount[quad_c] += 1;
   }
 
   template <typename REAL>
@@ -172,6 +215,7 @@ namespace Lucee
     c2v.offsets[currCell+1] = c2v.offsets[currCell]+4;
     cellType.push_back(tet_c);
     currCell += 1;
+    cellCount[tet_c] += 1;
   }
 
 // instantiations

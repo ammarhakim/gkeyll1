@@ -15,6 +15,7 @@
 #endif
 
 // std includes
+#include <map>
 #include <vector>
 
 // lucee includes
@@ -23,6 +24,12 @@
 
 namespace Lucee
 {
+// some definitions for cell types
+  const short TET_CELL_T=0;
+  const short HEX_CELL_T=1;
+  const short TRI_CELL_T=2;
+  const short QUAD_CELL_T=3;
+
 /**
  * Class to create an unstructured grid. This creator can then be
  * passed to UnstructGrid to construct the actual grid. The grid
@@ -71,6 +78,34 @@ namespace Lucee
  * @param conn Connectivity data to fill data in.
  */
       void fillWithConnectivity(Lucee::UnstructConnectivity& conn) const;
+
+/**
+ * Get number of triangles in grid.
+ *
+ * @return number of triangles.
+ */
+      unsigned getNumTri() const;
+
+/**
+ * Get number of quadrilaterals in grid.
+ *
+ * @return number of quadrilaterals.
+ */
+      unsigned getNumQuad() const;
+
+/**
+ * Get number of tetrahedra in grid.
+ *
+ * @return number of tetrahedra.
+ */
+      unsigned getNumTet() const;
+
+/**
+ * Get number of hexahedra in grid.
+ *
+ * @return number of hexahedra.
+ */
+      unsigned getNumHex() const;
 
 /**
  * Set number of vertices in grid.
@@ -165,6 +200,8 @@ namespace Lucee
       unsigned ndim;
 /** Current cell number */
       unsigned currCell;
+/** number of cells of each type */
+      std::map<short, unsigned> cellCount;
 /** Vertex coordinates */
       Lucee::UnstructGeometry<3, REAL> vc;
 /** Cell->vertex connectivity */
