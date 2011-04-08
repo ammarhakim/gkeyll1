@@ -140,6 +140,7 @@ namespace Lucee
       }
       else if (tokens[0] == "hex")
       {
+        throw Lucee::Except("GmvGridCreator::readFromGmvFile: hex not yet implemented");
       }
       else if (tokens[0] == "tri")
       {

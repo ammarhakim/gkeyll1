@@ -54,6 +54,42 @@ namespace Lucee
   }
 
   template <typename REAL>
+  unsigned
+  UnstructGrid<REAL>::getNumTri() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(TRI_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGrid<REAL>::getNumQuad() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(QUAD_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGrid<REAL>::getNumTet() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(TET_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
+  unsigned
+  UnstructGrid<REAL>::getNumHex() const
+  {
+    std::map<short, unsigned>::const_iterator itr
+      = cellCount.find(HEX_CELL_T);
+    return itr->second;
+  }
+
+  template <typename REAL>
   Lucee::IoNodeType
   UnstructGrid<REAL>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
     const std::string& nm)
@@ -107,9 +143,16 @@ namespace Lucee
   UnstructGrid<REAL>::constructFromCreator(const Lucee::UnstructGridCreator<REAL>& ctor)
   {
     ndim = ctor.getDim();
+
     ctor.fillWithGeometry(geometry);
+
     ctor.fillWithConnectivity(connectivity[4*ndim+0]);
     ddprime[4*ndim+0] = true; // set flag as now ndim->0 connectivity is stored
+
+    cellCount[TRI_CELL_T] = ctor.getNumTri();
+    cellCount[QUAD_CELL_T] = ctor.getNumQuad();
+    cellCount[TET_CELL_T] = ctor.getNumTet();
+    cellCount[HEX_CELL_T] = ctor.getNumHex();
   }
 
 // instantiations

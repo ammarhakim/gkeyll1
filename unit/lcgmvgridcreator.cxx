@@ -14,15 +14,32 @@
 #endif
 
 // std includes
-#include <iostream>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
 
 // lucee includes
 #include <LcCmdLineArgs.h>
 #include <LcGmvGridCreator.h>
 #include <LcTest.h>
 #include <LcUnstructGrid.h>
+
+void
+test_1(const Lucee::UnstructGrid<double>& grid)
+{
+  double xv[3];
+// create iterator over nodes
+  Lucee::UnstructGrid<double>::ElemIterator<0> vitr(grid);
+  for ( ; !vitr.atEnd(); ++vitr)
+  {
+// get nodal coordinates
+    vitr->fillWithCoordinates(xv);
+  }
+
+// create iterator over cells
+  //Lucee::UnstructGrid<double>::ElemIterator<3> citr(grid);
+}
 
 int
 main (int argc, char *argv[])
@@ -31,6 +48,7 @@ main (int argc, char *argv[])
 
   Lucee::CmdLineArgs cmd("lcgmvgridcreator");
   cmd.addArg("i", "GMVFILE", "GMV file to read");
+  cmd.addArg("d", "NDIM", "Grid dimension");
 // parse it
   cmd.parse(argc, argv);
 // show help if requested
@@ -49,6 +67,9 @@ main (int argc, char *argv[])
     cmd.showHelp();
     exit(1);
   }
+  unsigned ndim = 3;
+  if (cmd.hasArg("d"))
+    ndim = std::atoi(cmd.getArg("d").c_str());
 
 // open file
   std::ifstream gmvFile(gmvFileNm.c_str());
@@ -58,21 +79,10 @@ main (int argc, char *argv[])
     exit(1);
   }
 // create from reader
-  Lucee::GmvGridCreator<double> gmvRdr(3, gmvFile);
+  Lucee::GmvGridCreator<double> gmvRdr(ndim, gmvFile);
 // create a new unstructured grid
   Lucee::UnstructGrid<double> ugrid;
   ugrid.constructFromCreator(gmvRdr);
-
-  double xv[3];
-// create an iterator over vertices
-  Lucee::UnstructGrid<double>::ElemIterator<0> itr(ugrid);
-  for ( ; !itr.atEnd(); ++itr)
-  {
-    itr->fillWithCoordinates(xv);
-    for (unsigned i=0; i<3; ++i)
-      std::cout << xv[i] << " ";
-    std::cout << std::endl;
-  }
 
 // write grid to HDF5 file
   ugrid.write("ugrid.h5");
@@ -80,6 +90,10 @@ main (int argc, char *argv[])
 // ensure correct number of nodes and cells
   LC_ASSERT("Checking number of nodes", ugrid.getNumVertices() == 7856);
   LC_ASSERT("Checking number of cells", ugrid.getNumCells() == 39597);
+  LC_ASSERT("Checking number of tets", ugrid.getNumTet() == 39597);
+
+// now run other tests
+  test_1(ugrid);
 
   LC_END_TESTS;
 }

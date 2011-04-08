@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* April 8th
+
+  Really good progress on unstructured grids. Now have basic code to
+  read mesh from GMV files, write to HDF5 and also a start on iterator
+  classes. The next step is to write incidence iterators and then
+  construct the incidence lists needed.
+
 * April 1st
 
   Started work on unstructured grids. The basic idea here is to store

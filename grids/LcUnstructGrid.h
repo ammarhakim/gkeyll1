@@ -73,6 +73,34 @@ namespace Lucee
       unsigned getNumCells() const;
 
 /**
+ * Get number of triangles in grid.
+ *
+ * @return number of triangles.
+ */
+      unsigned getNumTri() const;
+
+/**
+ * Get number of quadrilaterals in grid.
+ *
+ * @return number of quadrilaterals.
+ */
+      unsigned getNumQuad() const;
+
+/**
+ * Get number of tetrahedra in grid.
+ *
+ * @return number of tetrahedra.
+ */
+      unsigned getNumTet() const;
+
+/**
+ * Get number of hexahedra in grid.
+ *
+ * @return number of hexahedra.
+ */
+      unsigned getNumHex() const;
+
+/**
  * Write grid to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
@@ -149,12 +177,14 @@ namespace Lucee
     private:
 /** Dimension of grid */
       unsigned ndim;
-/** Geometry information (assume 3 nodal coordinates) */
+/** Geometry information (assume points are in 3d even for 2d mesh) */
       Lucee::UnstructGeometry<3, REAL> geometry;
 /** Location 4*d+dprime indicates connectivity d->dprime is stored */
       std::vector<bool> ddprime;
 /** Location 4*d+dprime stores d->dprime connectivity information */
       std::vector<Lucee::UnstructConnectivity> connectivity;
+/** number of cells of each type */
+      std::map<short, unsigned> cellCount;
   };
 }
 
