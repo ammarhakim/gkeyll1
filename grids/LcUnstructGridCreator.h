@@ -195,6 +195,23 @@ namespace Lucee
  */
       void addTet(unsigned a, unsigned b, unsigned c, unsigned d);
 
+/**
+ * Add a hex to the mesh with indices (a1,b1,c1,d1, a2,b2,c2,d2). One
+ * face is made up of (a1,b1,c1,d1) and the opposite face by
+ * (a2,b2,c2,d2). The node a1 is connected to a2, b1 to b2, etc.
+ *
+ * @param a1 Vertex index 
+ * @param b1 Vertex index 
+ * @param c1 Vertex index
+ * @param d1 Vertex index
+ * @param a2 Vertex index 
+ * @param b2 Vertex index 
+ * @param c2 Vertex index
+ * @param d2 Vertex index
+ */
+      void addHex(unsigned a1, unsigned b1, unsigned c1, unsigned d1,
+        unsigned a2, unsigned b2, unsigned c2, unsigned d2);
+
     private:
 /** Dimension of grid */
       unsigned ndim;
