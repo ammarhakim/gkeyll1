@@ -13,6 +13,8 @@
 
 // std includes
 #include <iostream>
+#include <valarray>
+#include <vector>
 
 // lucee includes
 #include <LcUnstructGrid.h>
@@ -111,20 +113,33 @@ namespace Lucee
     dsLen[1] = dsSize[1] = 3;
     io.writeDataSet(gn, "vertices", dsSize, dsBeg, dsLen, &geometry.vcoords[0]);
 
-    unsigned nn; // for 2D
-// write out connectivity
-    if (ndim == 2)
-      nn = 3+1; // tri
+    unsigned nn;
+// determine maximum node count in a cell
+    if (ndim==1)
+    {
+      throw Lucee::Except("UnstructGrid::writeDataSet: 1D unstructured mesh not currently supported");
+    }
+    else if (ndim==2)
+    { // MUST preserve order of the following ifs (in increasing order of node count)
+      if (getNumTri() > 0) nn = 3;
+      if (getNumQuad() > 0) nn = 4;
+    }
     else
-      nn = 4+1; // tet
-    std::vector<int> conn(getNumCells()*nn);
+    { // MUST preserve order of the following ifs (in increasing order of node count)
+      if (getNumTet() > 0) nn = 4;
+      if (getNumHex() > 0) nn = 8;
+    }
+    nn = nn+1; // one extra to write out number of connected nodes per cell
+// allocate array to writeout cell connectivities
+    std::valarray<int> conn(getNumCells()*nn);
+    conn = 0;
     
 // now fill up connectivities
     std::vector<Lucee::UnstructConnectivity>::const_iterator c2vItr
-      = connectivity.begin()+4*ndim; // iterator to cell->0 connectivity
+      = connectivity.begin()+(4*ndim+0); // set to cell->0 connectivity
     for (unsigned ic=0; ic<getNumCells(); ++ic)
     {
-      conn[nn*ic+0] = nn-1;
+      conn[nn*ic+0] = c2vItr->offsets[ic+1]-c2vItr->offsets[ic];
       unsigned count=1;
       for (unsigned iv=c2vItr->offsets[ic]; iv<c2vItr->offsets[ic+1]; ++iv)
         conn[nn*ic+count++] = c2vItr->indices[iv];
