@@ -218,6 +218,29 @@ namespace Lucee
     cellCount[tet_c] += 1;
   }
 
+  template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::addHex(unsigned a1, unsigned b1, unsigned c1, unsigned d1,
+    unsigned a2, unsigned b2, unsigned c2, unsigned d2)
+  {
+    if (ndim != 3)
+      throw Lucee::Except("UnstructGridCreator::addHex: Can add hex only in 3D grids");
+// append connections to connectivity array
+    c2v.indices.push_back(a1);
+    c2v.indices.push_back(b1);
+    c2v.indices.push_back(c1);
+    c2v.indices.push_back(d1);
+    c2v.indices.push_back(a2);
+    c2v.indices.push_back(b2);
+    c2v.indices.push_back(c2);
+    c2v.indices.push_back(d2);
+// now set offsets correctly
+    c2v.offsets[currCell+1] = c2v.offsets[currCell]+8;
+    cellType.push_back(hex_c);
+    currCell += 1;
+    cellCount[hex_c] += 1;
+  }
+
 // instantiations
   template class UnstructGridCreator<float>;
   template class UnstructGridCreator<double>;

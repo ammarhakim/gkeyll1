@@ -22,6 +22,12 @@
 
 namespace Lucee
 {
+/**
+ * Reader for meshes stored in GMV file. This is a very simple and
+ * limited reader and does not support the full GMV format. It is only
+ * meant for testing the grids classes and should *not* be used for
+ * production use.
+ */
   template <typename REAL>
   class GmvGridCreator : public UnstructGridCreator<REAL>
   {
