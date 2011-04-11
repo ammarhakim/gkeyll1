@@ -50,8 +50,42 @@ namespace Lucee
  */
       void reset(unsigned nv);
 
+/**
+ * Set number of vertices.
+ *
+ * @param nv Number of vertices.
+ */
+      void setNumVertices(unsigned nv);
+
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
       std::vector<REAL> vcoords;
+
+/** Edge center coordinates stored as x,y,z */
+      std::vector<REAL> edgeCenter;
+/** Edge length */
+      std::vector<REAL> edgeLength;
+/** Edge normal (only makes sense in 2D) */
+      std::vector<REAL> edgeNormal;
+/** First edge tangent (only makes sense in 2D) */
+      std::vector<REAL> edgeTangent1;
+/** Second edge tangent (only makes sense in 2D) */
+      std::vector<REAL> edgeTangent2;
+
+/** Face centroid coordinates stored as x,y,z */
+      std::vector<REAL> faceCenter;
+/** Face area */
+      std::vector<REAL> faceArea;
+/** Face normal */
+      std::vector<REAL> faceNormal;
+/** First face tangent */
+      std::vector<REAL> faceTangent1;
+/** Second face tangent */
+      std::vector<REAL> faceTangent2;
+
+/** Cell centroid coordinates stored as x,y,z */
+      std::vector<REAL> cellCentroid;
+/** Cell volume */
+      std::vector<REAL> cellVolume;
   };
 }
 
