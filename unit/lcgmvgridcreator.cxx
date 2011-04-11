@@ -90,7 +90,6 @@ main (int argc, char *argv[])
 // ensure correct number of nodes and cells
   LC_ASSERT("Checking number of nodes", ugrid.getNumVertices() == 7856);
   LC_ASSERT("Checking number of cells", ugrid.getNumCells() == 39597);
-  LC_ASSERT("Checking number of tets", ugrid.getNumTet() == 39597);
 
 // now run other tests
   test_1(ugrid);

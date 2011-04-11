@@ -133,7 +133,8 @@ namespace Lucee
       splitLine(tokens, line, " ");
       convertToIntVec(2, tokens.size(), tokens, ivec);
 
-// check cell type
+// add cell: the -1 is needed Lucee vertice numbering starts at 0
+// while GMV numbering starts at 1
       if (tokens[0] == "tet")
       {
         this->addTet(ivec[0]-1, ivec[1]-1, ivec[2]-1, ivec[3]-1);

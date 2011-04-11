@@ -73,32 +73,34 @@ namespace Lucee
       unsigned getNumCells() const;
 
 /**
- * Get number of triangles in grid.
+ * Get number of triangles in grid. This will return 0 for 3D grids,
+ * i.e. triangular faces in 3D are not counted as cells.
  *
  * @return number of triangles.
  */
-      unsigned getNumTri() const;
+      unsigned getNumTriCells() const;
 
 /**
- * Get number of quadrilaterals in grid.
+ * Get number of quadrilaterals in grid.  This will return 0 for 3D
+ * grids, i.e. quad faces in 3D are not counted as cells.
  *
  * @return number of quadrilaterals.
  */
-      unsigned getNumQuad() const;
+      unsigned getNumQuadCells() const;
 
 /**
  * Get number of tetrahedra in grid.
  *
  * @return number of tetrahedra.
  */
-      unsigned getNumTet() const;
+      unsigned getNumTetCells() const;
 
 /**
  * Get number of hexahedra in grid.
  *
  * @return number of hexahedra.
  */
-      unsigned getNumHex() const;
+      unsigned getNumHexCells() const;
 
 /**
  * Write grid to given node in HDF5 file.
