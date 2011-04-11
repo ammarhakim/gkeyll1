@@ -57,7 +57,7 @@ namespace Lucee
 
   template <typename REAL>
   unsigned
-  UnstructGrid<REAL>::getNumTri() const
+  UnstructGrid<REAL>::getNumTriCells() const
   {
     std::map<short, unsigned>::const_iterator itr
       = cellCount.find(TRI_CELL_T);
@@ -66,7 +66,7 @@ namespace Lucee
 
   template <typename REAL>
   unsigned
-  UnstructGrid<REAL>::getNumQuad() const
+  UnstructGrid<REAL>::getNumQuadCells() const
   {
     std::map<short, unsigned>::const_iterator itr
       = cellCount.find(QUAD_CELL_T);
@@ -75,7 +75,7 @@ namespace Lucee
 
   template <typename REAL>
   unsigned
-  UnstructGrid<REAL>::getNumTet() const
+  UnstructGrid<REAL>::getNumTetCells() const
   {
     std::map<short, unsigned>::const_iterator itr
       = cellCount.find(TET_CELL_T);
@@ -84,7 +84,7 @@ namespace Lucee
 
   template <typename REAL>
   unsigned
-  UnstructGrid<REAL>::getNumHex() const
+  UnstructGrid<REAL>::getNumHexCells() const
   {
     std::map<short, unsigned>::const_iterator itr
       = cellCount.find(HEX_CELL_T);
@@ -114,29 +114,29 @@ namespace Lucee
     io.writeDataSet(gn, "vertices", dsSize, dsBeg, dsLen, &geometry.vcoords[0]);
 
     unsigned nn;
-// determine maximum node count in a cell
+// determine maximum node count in cell
     if (ndim==1)
     {
       throw Lucee::Except("UnstructGrid::writeDataSet: 1D unstructured mesh not currently supported");
     }
     else if (ndim==2)
-    { // MUST preserve order of the following ifs (in increasing order of node count)
-      if (getNumTri() > 0) nn = 3;
-      if (getNumQuad() > 0) nn = 4;
+    { // MUST preserve order of following ifs (in increasing order of node count)
+      if (getNumTriCells() > 0) nn = 3;
+      if (getNumQuadCells() > 0) nn = 4;
     }
     else
-    { // MUST preserve order of the following ifs (in increasing order of node count)
-      if (getNumTet() > 0) nn = 4;
-      if (getNumHex() > 0) nn = 8;
+    { // MUST preserve order of following ifs (in increasing order of node count)
+      if (getNumTetCells() > 0) nn = 4;
+      if (getNumHexCells() > 0) nn = 8;
     }
-    nn = nn+1; // one extra to write out number of connected nodes per cell
-// allocate array to writeout cell connectivities
+    nn = nn+1; // one extra to write number of connected nodes per cell
+// allocate array to write cell connectivities
     std::valarray<int> conn(getNumCells()*nn);
     conn = 0;
     
-// now fill up connectivities
+// fill connectivities
     std::vector<Lucee::UnstructConnectivity>::const_iterator c2vItr
-      = connectivity.begin()+(4*ndim+0); // set to cell->0 connectivity
+      = connectivity.begin()+(4*ndim+0); // set itr to cell->0 connectivity
     for (unsigned ic=0; ic<getNumCells(); ++ic)
     {
       conn[nn*ic+0] = c2vItr->offsets[ic+1]-c2vItr->offsets[ic];
@@ -160,9 +160,8 @@ namespace Lucee
     ndim = ctor.getDim();
 
     ctor.fillWithGeometry(geometry);
-
+    ddprime[4*ndim+0] = true; // set flag as ndim->0 connectivity is always stored
     ctor.fillWithConnectivity(connectivity[4*ndim+0]);
-    ddprime[4*ndim+0] = true; // set flag as now ndim->0 connectivity is stored
 
     cellCount[TRI_CELL_T] = ctor.getNumTri();
     cellCount[QUAD_CELL_T] = ctor.getNumQuad();
