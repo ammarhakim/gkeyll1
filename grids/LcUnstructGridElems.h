@@ -66,7 +66,7 @@ namespace Lucee
 
     private:
 /** Reference to vertex coordinates */
-      std::vector<REAL> vcoords;
+      const std::vector<REAL>& vcoords;
 /** Current location in vcoords array */
       mutable unsigned currLoc;
   };
@@ -228,7 +228,7 @@ namespace Lucee
   template <typename REAL>
   class GridElem<REAL, 1> : public EdgeElem<REAL>
   {
-// declare grid friend so it can fiddle around with privates
+      // declare grid friend so it can fiddle around with privates
       template <typename R> friend class UnstructGrid;
     private:
   };
@@ -239,7 +239,7 @@ namespace Lucee
   template <typename REAL>
   class GridElem<REAL, 2> : public FaceElem<REAL>
   {
-// declare grid friend so it can fiddle around with privates
+      // declare grid friend so it can fiddle around with privates
       template <typename R> friend class UnstructGrid;
     private:
   };
@@ -250,7 +250,7 @@ namespace Lucee
   template <typename REAL>
   class GridElem<REAL, 3> : public CellElem<REAL>
   {
-// declare grid friend so it can fiddle around with privates
+      // declare grid friend so it can fiddle around with privates
       template <typename R> friend class UnstructGrid;
     private:
   };
