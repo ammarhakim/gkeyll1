@@ -26,9 +26,6 @@ namespace Lucee
   UnstructGridCreator<REAL>::UnstructGridCreator(unsigned ndim)
     : ndim(ndim), currCell(0)
   {
-// creators need ndim->0 connections to work correctly
-    c2v.d = ndim;
-    c2v.dprime = 0;
 // initialize cell count
     cellCount[tet_c] = 0;
     cellCount[hex_c] = 0;

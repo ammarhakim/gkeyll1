@@ -55,10 +55,6 @@ namespace Lucee
  */
       void reset(unsigned nd);
 
-/** Source element dimension */
-      unsigned d;
-/** Target element dimension */
-      unsigned dprime;
 /** Indices of grid element dprime */
       std::vector<int> indices;
 /** Offsets into 'indices' array: size is numElem(d)+1. The
