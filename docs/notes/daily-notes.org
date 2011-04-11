@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* April 10th
+
+  Although basic unstructured grid data is stored in flat arrays the
+  wrapper classes to get OO access to the data and incidence lists are
+  becoming complicated. Need to relook at this more carefully to make
+  a cleaner solution. At the least, each of the grid element classes
+  needs to be put into its own file to make the LcUnstructGridElems
+  file less messed up. Then, the iterator classes inside UnstructGrid
+  need to be finished.
+
+  One option is to add methods to the UnstructGeometry class to allow
+  insertion/access of data using methods without direct access to
+  memory. The grid and creator classes would still be friends to allow
+  easier creation of element wrappers.
+
 * April 8th
 
   Really good progress on unstructured grids. Now have basic code to
