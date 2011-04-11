@@ -120,6 +120,7 @@ namespace Lucee
       template <unsigned NDIM>
       class ElemIterator
       {
+// declare unstruct grid as friend so it fiddle with privates
           template <typename R> friend class UnstructGrid;
         public:
 /**
@@ -174,6 +175,30 @@ namespace Lucee
         private:
 /** Current grid element pointed to by iterator */
           Lucee::GridElem<REAL, NDIM> currElem;
+      };
+
+/**
+ * Iterator class to allow iteration over various incidence
+ * relations. The particular incidence relation is specified as
+ * template parameters: Give MDIM and IDIM, this class allows stepping
+ * over MDIM->IDIM incidence.
+ */
+      template <unsigned MDIM, unsigned IDIM>
+      class IncidenceIterator : public ElemIterator<MDIM>
+      {
+// declare unstruct grid as friend so it fiddle with privates
+          template <typename R> friend class UnstructGrid;
+
+        public:
+/**
+ * Create an iterator given grid.
+ *
+ * @param grid Grid to create iterator from.
+ */
+          IncidenceIterator(const UnstructGrid<REAL>& grid)
+            : ElemIterator<MDIM>(grid)
+          {
+          }
       };
 
     private:
