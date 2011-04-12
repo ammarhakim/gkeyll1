@@ -163,6 +163,10 @@ namespace Lucee
     ddprime[4*ndim+0] = true; // set flag as ndim->0 connectivity is always stored
     ctor.fillWithConnectivity(connectivity[4*ndim+0]);
 
+// compute cell volume and centroids
+    geometry.setNumCells(getNumCells());
+// TODO
+
     cellCount[TRI_CELL_T] = ctor.getNumTri();
     cellCount[QUAD_CELL_T] = ctor.getNumQuad();
     cellCount[TET_CELL_T] = ctor.getNumTet();

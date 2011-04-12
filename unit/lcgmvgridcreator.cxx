@@ -38,7 +38,11 @@ test_1(const Lucee::UnstructGrid<double>& grid)
   }
 
 // create iterator over cells
+  unsigned nc=0;
   Lucee::UnstructGrid<double>::ElemIterator<3> citr(grid);
+  for ( ; !citr.atEnd(); ++citr)
+  {
+  }
 
 // create incidence iterator
   Lucee::UnstructGrid<double>::IncidenceIterator<3, 0> c2vItr(grid);
