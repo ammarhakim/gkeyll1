@@ -15,6 +15,7 @@
 #endif
 
 // lucee includes
+#include <LcCellElem.h>
 #include <LcUnstructGeometry.h>
 #include <LcVertexElem.h>
 
@@ -118,28 +119,6 @@ namespace Lucee
   };
 
 /**
- * A class representing a cell.
- */
-  template <typename REAL>
-  class CellElem
-  {
-    public:
-/**
- * Fill with cell centroid coordinates.
- *
- * @param xv On output coordinates of cell centroid.
- */
-      void fillWithCoordinates(REAL xv[3]) const;
-
-/**
- * Get volume of cell.
- *
- * @return volume of cell.
- */
-      REAL getMeasure() const;
-  };
-
-/**
  * A basic template class that allows accessing the grid elements
  * using template parameter.
  */
@@ -205,9 +184,18 @@ namespace Lucee
   template <typename REAL>
   class GridElem<REAL, 3> : public CellElem<REAL>
   {
-      // declare grid friend so it can fiddle around with privates
+// declare grid friend so it can fiddle around with privates
       template <typename R> friend class UnstructGrid;
     private:
+/**
+ * Initialize element.
+ *
+ * @param geom Geometry object.
+ */
+      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+        : CellElem<REAL>(geom.cellCentroid, geom.cellVolume)
+      {
+      }
   };
 }
 
