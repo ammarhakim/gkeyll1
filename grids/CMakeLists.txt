@@ -20,5 +20,5 @@ add_library(lcgrids
   LcUnstructGeometry.cpp
   LcUnstructGrid.cpp
   LcUnstructGridCreator.cpp
-  LcUnstructGridElems.cpp
+  LcVertexElem.cpp
 )

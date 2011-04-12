@@ -23,7 +23,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename REAL>
   void
-  UnstructGeometry<NDIM, REAL>::reset(unsigned nv)
+  UnstructGeometry<NDIM, REAL>::setNumVertices(unsigned nv)
   {
     vcoords.clear();
     vcoords.resize(NDIM*nv);

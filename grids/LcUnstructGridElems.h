@@ -14,6 +14,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcVertexElem.h>
+
 // std includes
 #include <vector>
 
@@ -21,55 +24,6 @@ namespace Lucee
 {
 // declare grid class
   template <typename REAL> class UnstructGrid;
-
-/**
- * A class representing a vertex.
- */
-  template <typename REAL>
-  class VertexElem
-  {
-    public:
-/**
- * Fill with vertex coordinates.
- *
- * @param xv On output vertex coordinates.
- */
-      void fillWithCoordinates(REAL xv[3]) const;
-
-    protected:
-/**
- * Create vertex given list of vertex coordinates.
- *
- * @param vc List of vertex coordinates.
- */
-      VertexElem(const std::vector<REAL>& vc);
-
-/**
- * Increment vertex location by one.
- */
-      void incr() const
-      {
-        currLoc += 3; // 3 as (x,y,z) coordinates are stored
-      }
-
-/**
- * Are we at end of iteration?
- *
- * @return true
- */
-      bool atEnd() const
-      {
-        if (currLoc<vcoords.size())
-          return false;
-        return true;
-      }
-
-    private:
-/** Reference to vertex coordinates */
-      const std::vector<REAL>& vcoords;
-/** Current location in vcoords array */
-      mutable unsigned currLoc;
-  };
 
 /**
  * A class representing a edge.
