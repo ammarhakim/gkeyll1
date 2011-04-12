@@ -40,6 +40,14 @@ namespace Lucee
  */
       void setNumVertices(unsigned nv);
 
+/**
+ * Set number of cells. This needs to be called before cell geometry
+ * information is set.
+ *
+ * @param nc Number of cells.
+ */
+      void setNumCells(unsigned nc);
+
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
       std::vector<REAL> vcoords;
 
@@ -58,11 +66,11 @@ namespace Lucee
       std::vector<REAL> faceCenter;
 /** Face area */
       std::vector<REAL> faceArea;
-/** Face normal */
+/** Face normal (only makes sense in 3D) */
       std::vector<REAL> faceNormal;
-/** First face tangent */
+/** First face tangent (only makes sense in 3D) */
       std::vector<REAL> faceTangent1;
-/** Second face tangent */
+/** Second face tangent (only makes sense in 3D) */
       std::vector<REAL> faceTangent2;
 
 /** Cell centroid coordinates stored as x,y,z */

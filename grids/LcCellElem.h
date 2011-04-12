@@ -49,13 +49,38 @@ namespace Lucee
  */
       CellElem(const std::vector<REAL>& cc, const std::vector<REAL>& cv);
 
+/**
+ * Increment vertex location by one.
+ */
+      void incr() const
+      {
+        currCell += 1;
+      }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const
+      {
+        if (currCell<cv.size())
+          return false;
+        return true;
+      }
+
     private:
 /** Reference to cell centroid coordinates */
       const std::vector<REAL>& cc;
 /** Reference to cell volume */
       const std::vector<REAL>& cv;
 /** Index of current cell */
-      unsigned currCell;
+      mutable unsigned currCell;
+
+/** No copying allowed */
+      CellElem(const CellElem<REAL>&);
+/** No assignment allowed */
+      CellElem<REAL>& operator=(const CellElem<REAL>&);
   };
 }
 

@@ -29,6 +29,16 @@ namespace Lucee
     vcoords.resize(NDIM*nv);
   }
 
+  template <unsigned NDIM, typename REAL>
+  void
+  UnstructGeometry<NDIM, REAL>::setNumCells(unsigned nc)
+  {
+    cellCentroid.clear();
+    cellCentroid.resize(NDIM*nc);
+    cellVolume.clear();
+    cellVolume.resize(nc);
+  }
+
 // instantiations
   template class Lucee::UnstructGeometry<1, float>;
   template class Lucee::UnstructGeometry<2, float>;

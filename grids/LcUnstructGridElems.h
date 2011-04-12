@@ -196,6 +196,18 @@ namespace Lucee
         : CellElem<REAL>(geom.cellCentroid, geom.cellVolume)
       {
       }
+
+/**
+ * Increment vertex pointer by one element.
+ */
+      void incr() const { CellElem<REAL>::incr(); }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const { return CellElem<REAL>::atEnd(); }
   };
 }
 
