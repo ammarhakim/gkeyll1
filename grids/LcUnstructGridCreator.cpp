@@ -87,7 +87,7 @@ namespace Lucee
   void
   UnstructGridCreator<REAL>::setNumVertices(unsigned nv)
   {
-    vc.reset(nv);
+    vc.setNumVertices(nv);
   }
 
   template <typename REAL>

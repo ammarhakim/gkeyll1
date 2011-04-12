@@ -19,39 +19,22 @@
 
 namespace Lucee
 {
-// forward declare creator class
-  template <typename REAL> class UnstructGridCreator;
-// forward declare grid class
-  template <typename REAL> class UnstructGrid;
-
 /**
- * Class to hold unstructured grid geometry information. This class is
- * private and hence can not be accessed directly.
+ * Class to hold unstructured grid geometry information.
  */
   template <unsigned NDIM, typename REAL>
   class UnstructGeometry
   {
     public:
-// declare friends so they can touch our privates
-      template <typename RT> friend class UnstructGridCreator;
-      template <typename RT> friend class UnstructGrid;
-
 /**
  * Create empty geometery object. The 'reset' method must be called to
  * allocate any memory to store the geometry.
  */
       UnstructGeometry();
 
-    private:
-/** 
- * Reset geometry object to contain specified number of vertices.
- *
- * @param nv Number of vertices.
- */
-      void reset(unsigned nv);
-
 /**
- * Set number of vertices.
+ * Set number of vertices. This needs to be called before vertex
+ * geometry information is set.
  *
  * @param nv Number of vertices.
  */

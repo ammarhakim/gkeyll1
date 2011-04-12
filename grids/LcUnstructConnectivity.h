@@ -21,31 +21,20 @@
 
 namespace Lucee
 {
-// forward declare creator class
-  template <typename REAL> class UnstructGridCreator;
-// forward declare grid class
-  template <typename REAL> class UnstructGrid;
-
 /**
  * Class to hold unstructured grid connectivity. This class holds
  * connectivity from elements of dimension d to those of dimension
- * dprime. This class is private and hence can not be accessed
- * directly.
+ * dprime.
  */
   class UnstructConnectivity
   {
     public:
-// declare friends so they can touch our privates
-      template <typename REAL> friend class UnstructGridCreator;
-      template <typename REAL> friend class UnstructGrid;
-
 /**
  * Create empty connectivity object. The reset method must be called
  * to allocate memory to store the connectivity.
  */
       UnstructConnectivity();
 
-    private:
 /**
  * Reset connectivity object to connects elements of dimension d to
  * elements of dimension dprime. Calling this method will clear all
