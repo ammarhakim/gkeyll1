@@ -10,6 +10,8 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 # Create the library
 add_library(lcgrids
   LcCellElem.cpp
+  LcEdgeElem.cpp
+  LcFaceElem.cpp
   LcGmvGridCreator.cpp
   LcGridFactory.cpp
   LcGridIfc.cpp

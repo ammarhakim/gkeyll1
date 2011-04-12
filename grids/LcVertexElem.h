@@ -66,11 +66,6 @@ namespace Lucee
       const std::vector<REAL>& vcoords;
 /** Current location in vcoords array */
       mutable unsigned currLoc;
-
-/** No copying allowed */
-      VertexElem(const VertexElem<REAL>&);
-/** No assignment allowed */
-      VertexElem<REAL>& operator=(const VertexElem<REAL>&);
   };
 }
 
