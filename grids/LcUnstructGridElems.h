@@ -17,6 +17,7 @@
 // lucee includes
 #include <LcCellElem.h>
 #include <LcEdgeElem.h>
+#include <LcFaceElem.h>
 #include <LcUnstructGeometry.h>
 #include <LcVertexElem.h>
 
@@ -27,50 +28,6 @@ namespace Lucee
 {
 // declare grid class
   template <typename REAL> class UnstructGrid;
-
-/**
- * A class representing a face.
- */
-  template <typename REAL>
-  class FaceElem
-  {
-    public:
-/**
- * Fill with face centroid coordinates.
- *
- * @param xv On output coordinates of face centroid.
- */
-      void fillWithCoordinates(REAL xv[3]) const;
-
-/**
- * Get area of face.
- *
- * @return area of face.
- */
-      REAL getMeasure() const;
-
-/**
- * Fill with normal (unit vector) to face.
- *
- * @param norm On output normal to face.
- */
-      void fillWithNormal(REAL norm[3]) const;
-
-/**
- * Fill with a tangent (unit) to face.
- *
- * @param tng On output tangent to face.
- */
-      void fillWithTangent1(REAL tng[3]) const;
-
-/**
- * Fill with a tangent (unit) to face. Note that the relation norm =
- * tangent1 X tangent 2 holds.
- *
- * @param tng On output tangent to face.
- */
-      void fillWithTangent2(REAL tng[3]) const;
-  };
 
 /**
  * A basic template class that allows accessing the grid elements
