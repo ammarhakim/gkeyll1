@@ -144,6 +144,16 @@ namespace Lucee
           }
 
 /**
+ * Return current grid element.
+ *
+ * @return Current element.
+ */
+          Lucee::GridElem<REAL, NDIM> operator*() const
+          {
+            return currElem;
+          }
+
+/**
  * Increment iterator by single location. (Prefix operator)
  *
  * @return reference to iterator.
@@ -198,6 +208,28 @@ namespace Lucee
           IncidenceIterator(const UnstructGrid<REAL>& grid)
             : ElemIterator<MDIM>(grid)
           {
+          }
+
+/**
+ * Increment iterator by single location. (Prefix operator)
+ *
+ * @return reference to iterator.
+ */
+          IncidenceIterator<MDIM, IDIM>& operator++()
+          {
+            ElemIterator<MDIM>::operator++();
+            return *this;
+          }
+
+/**
+ * Increment iterator by single location. (Postfix operator)
+ *
+ * @return reference to iterator.
+ */
+          IncidenceIterator<MDIM, IDIM>& operator++(int)
+          {
+            ElemIterator<MDIM>::operator++(0);
+            return *this;
           }
       };
 

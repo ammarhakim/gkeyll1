@@ -33,19 +33,19 @@ test_1(const Lucee::UnstructGrid<double>& grid)
   Lucee::UnstructGrid<double>::ElemIterator<0> vitr(grid);
   for ( ; !vitr.atEnd(); ++vitr)
   {
+    Lucee::VertexElem<double> v = *vitr;
 // get nodal coordinates
-    vitr->fillWithCoordinates(xv);
+    v.fillWithCoordinates(xv);
   }
 
-// create iterator over cells
   unsigned nc=0;
-  Lucee::UnstructGrid<double>::ElemIterator<3> citr(grid);
-  for ( ; !citr.atEnd(); ++citr)
-  {
-  }
-
 // create incidence iterator
   Lucee::UnstructGrid<double>::IncidenceIterator<3, 0> c2vItr(grid);
+  for ( ; !c2vItr.atEnd(); ++c2vItr)
+  {
+    nc += 1;
+  }
+  std::cout << nc << std::endl;
 }
 
 int
