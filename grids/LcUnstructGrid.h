@@ -180,8 +180,8 @@ namespace Lucee
 /**
  * Iterator class to allow iteration over various incidence
  * relations. The particular incidence relation is specified as
- * template parameters: Give MDIM and IDIM, this class allows stepping
- * over MDIM->IDIM incidence.
+ * template parameters: Given MDIM and IDIM, this class allows
+ * stepping over MDIM->IDIM incidence.
  */
       template <unsigned MDIM, unsigned IDIM>
       class IncidenceIterator : public ElemIterator<MDIM>
