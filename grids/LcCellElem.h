@@ -76,11 +76,6 @@ namespace Lucee
       const std::vector<REAL>& cv;
 /** Index of current cell */
       mutable unsigned currCell;
-
-/** No copying allowed */
-      CellElem(const CellElem<REAL>&);
-/** No assignment allowed */
-      CellElem<REAL>& operator=(const CellElem<REAL>&);
   };
 }
 
