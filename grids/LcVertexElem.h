@@ -37,7 +37,7 @@ namespace Lucee
 /**
  * Create vertex given list of vertex coordinates.
  *
- * @param vc List of vertex coordinates.
+ * @param vc Vertex coordinates.
  */
       VertexElem(const std::vector<REAL>& vc);
 

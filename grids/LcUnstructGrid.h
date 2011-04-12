@@ -129,7 +129,7 @@ namespace Lucee
  * @param grid Grid to create iterator from.
  */
           ElemIterator(const UnstructGrid<REAL>& grid)
-            : currElem(grid.geometry.vcoords)
+            : currElem(grid.geometry)
           {
           }
 
