@@ -15,6 +15,7 @@
 #endif
 
 // lucee includes
+#include <LcUnstructGeometry.h>
 #include <LcVertexElem.h>
 
 // std includes
@@ -156,10 +157,10 @@ namespace Lucee
 /**
  * Initialize element.
  *
- * @param vc List of vertex coordinates.
+ * @param geom Geometry object.
  */
-      GridElem(const std::vector<REAL>& vc)
-        : VertexElem<REAL>(vc)
+      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+        : VertexElem<REAL>(geom.vcoords)
       {
       }
 
