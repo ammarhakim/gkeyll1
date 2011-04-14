@@ -120,8 +120,6 @@ namespace Lucee
       template <unsigned NDIM>
       class ElemIterator
       {
-// declare unstruct grid as friend so it fiddle with privates
-          template <typename R> friend class UnstructGrid;
         public:
 /**
  * Create an iterator given grid.
@@ -196,9 +194,6 @@ namespace Lucee
       template <unsigned MDIM, unsigned IDIM>
       class IncidenceIterator : public ElemIterator<MDIM>
       {
-// declare unstruct grid as friend so it fiddle with privates
-          template <typename R> friend class UnstructGrid;
-
         public:
 /**
  * Create an iterator given grid.
@@ -206,7 +201,7 @@ namespace Lucee
  * @param grid Grid to create iterator from.
  */
           IncidenceIterator(const UnstructGrid<REAL>& grid)
-            : ElemIterator<MDIM>(grid), conn(grid.connectivity[4*MDIM+IDIM]), curr(0)
+            : ElemIterator<MDIM>(grid), conn(grid.getConnectivity(MDIM,IDIM)), curr(0)
           {
             currIndices = &conn.indices[conn.offsets[curr]];
           }
@@ -275,9 +270,20 @@ namespace Lucee
 /** Location 4*d+dprime indicates connectivity d->dprime is stored */
       std::vector<bool> ddprime;
 /** Location 4*d+dprime stores d->dprime connectivity information */
-      std::vector<Lucee::UnstructConnectivity> connectivity;
+      mutable std::vector<Lucee::UnstructConnectivity> connectivity;
 /** number of cells of each type */
       std::map<short, unsigned> cellCount;
+
+/**
+ * Method to return reference to specified connectivity,
+ * d->dprime. This method will compute the connectivity if not done
+ * already.
+ *
+ * @param d Dimension to connect (d->dprime).
+ * @param dprime Dimension to connect to (d->dprime).
+ * @return reference to connectivity.
+ */
+      const Lucee::UnstructConnectivity& getConnectivity(unsigned d, unsigned dprime) const;
   };
 }
 

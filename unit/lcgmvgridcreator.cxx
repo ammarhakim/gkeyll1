@@ -39,13 +39,13 @@ test_1(const Lucee::UnstructGrid<double>& grid)
 
   unsigned nc=0;
 // create incidence iterator
-  Lucee::UnstructGrid<double>::IncidenceIterator<3, 0> c2vItr(grid);
-  for ( ; !c2vItr.atEnd(); ++c2vItr)
-  {
-    for (unsigned c=0; c<c2vItr.getNumConnections(); ++c)
-      std::cout << c2vItr.getIndex(c) << " ";
-    std::cout << std::endl;
-  }
+//   Lucee::UnstructGrid<double>::IncidenceIterator<3, 0> c2vItr(grid);
+//   for ( ; !c2vItr.atEnd(); ++c2vItr)
+//   {
+//     for (unsigned c=0; c<c2vItr.getNumConnections(); ++c)
+//       std::cout << c2vItr.getIndex(c) << " ";
+//     std::cout << std::endl;
+//   }
 }
 
 int
