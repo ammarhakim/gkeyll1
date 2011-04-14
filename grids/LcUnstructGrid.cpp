@@ -24,6 +24,19 @@ namespace Lucee
 // set ids for grid creators
   template <> const char *UnstructGrid<double>::id = "Unstruct";
 
+/**
+ * Convenient method to map connectivity indices to linear index.
+ *
+ * @param d Dimension to connect (d->dprime).
+ * @param dprime Dimension to connect to (d->dprime).
+ * @return linear index.
+ */
+  inline static unsigned
+  getConnIndex(unsigned d, unsigned dprime)
+  {
+    return 4*d+dprime;
+  }
+
   template <typename REAL>
   UnstructGrid<REAL>::UnstructGrid()
     : ndim(3), ddprime(4*4), connectivity(4*4)
@@ -136,7 +149,7 @@ namespace Lucee
     
 // fill connectivities
     std::vector<Lucee::UnstructConnectivity>::const_iterator c2vItr
-      = connectivity.begin()+(4*ndim+0); // set itr to cell->0 connectivity
+      = connectivity.begin()+getConnIndex(ndim,0); // set itr to cell->0 connectivity
     for (unsigned ic=0; ic<getNumCells(); ++ic)
     {
       conn[nn*ic+0] = c2vItr->offsets[ic+1]-c2vItr->offsets[ic];
@@ -160,17 +173,26 @@ namespace Lucee
     ndim = ctor.getDim();
 
     ctor.fillWithGeometry(geometry);
-    ddprime[4*ndim+0] = true; // set flag as ndim->0 connectivity is always stored
-    ctor.fillWithConnectivity(connectivity[4*ndim+0]);
+    ddprime[getConnIndex(ndim, 0)] = true; // set flag as ndim->0 connectivity is always stored
+    ctor.fillWithConnectivity(connectivity[getConnIndex(ndim, 0)]);
 
-// compute cell volume and centroids
+// compute cell volume and centroids (TODO)
     geometry.setNumCells(getNumCells());
-// TODO
 
     cellCount[TRI_CELL_T] = ctor.getNumTri();
     cellCount[QUAD_CELL_T] = ctor.getNumQuad();
     cellCount[TET_CELL_T] = ctor.getNumTet();
     cellCount[HEX_CELL_T] = ctor.getNumHex();
+  }
+
+  template <typename REAL>
+  const Lucee::UnstructConnectivity&
+  UnstructGrid<REAL>::getConnectivity(unsigned d, unsigned dprime) const
+  {
+// check if connectivity exists
+    if (ddprime[getConnIndex(d, dprime)])
+      return connectivity[getConnIndex(d, dprime)];
+    throw Lucee::Except("UnstructGrid::getConnectivity: Connectivity not computed!");
   }
 
 // instantiations
