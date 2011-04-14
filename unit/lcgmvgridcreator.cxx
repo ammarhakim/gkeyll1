@@ -33,9 +33,8 @@ test_1(const Lucee::UnstructGrid<double>& grid)
   Lucee::UnstructGrid<double>::ElemIterator<0> vitr(grid);
   for ( ; !vitr.atEnd(); ++vitr)
   {
-    Lucee::VertexElem<double> v = *vitr;
 // get nodal coordinates
-    v.fillWithCoordinates(xv);
+    vitr->fillWithCoordinates(xv);
   }
 
   unsigned nc=0;
@@ -43,9 +42,10 @@ test_1(const Lucee::UnstructGrid<double>& grid)
   Lucee::UnstructGrid<double>::IncidenceIterator<3, 0> c2vItr(grid);
   for ( ; !c2vItr.atEnd(); ++c2vItr)
   {
-    nc += 1;
+    for (unsigned c=0; c<c2vItr.getNumConnections(); ++c)
+      std::cout << c2vItr.getIndex(c) << " ";
+    std::cout << std::endl;
   }
-  std::cout << nc << std::endl;
 }
 
 int
