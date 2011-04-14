@@ -30,19 +30,34 @@ namespace Lucee
   {
     public:
 /**
- * Construct new fixed-size vector with specified initial values.
+ * Construct new fixed-size vector with specified initial
+ * values. Extra values are ignored and missing data is set to last
+ * supplied value.
  *
- * @param init Initial value to apply to all elements.
+ * @param v1 Value of first element.
  */
-      FixedVector(const T& init);
+      FixedVector(T v1);
 
 /**
- * Construct new fixed-size vector with specified initial values.
+ * Construct new fixed-size vector with specified initial
+ * values. Extra values are ignored and missing data is set to last
+ * supplied value.
  *
  * @param v1 Value of first element.
  * @param v2 Value of second element.
  */
-      FixedVector(T v1, T v2, ...);
+      FixedVector(T v1, T v2);
+
+/**
+ * Construct new fixed-size vector with specified initial
+ * values. Extra values are ignored and missing data is set to last
+ * supplied value.
+ *
+ * @param v1 Value of first element.
+ * @param v2 Value of second element.
+ * @param v2 Value of thrid element.
+ */
+      FixedVector(T v1, T v2, T v3);
 
 /**
  * Construct new fixed-size vector with specified initial values.
@@ -136,23 +151,53 @@ namespace Lucee
   };
 
   template <unsigned NELEM, typename T>
-  FixedVector<NELEM, T>::FixedVector(const T& init)
+  FixedVector<NELEM, T>::FixedVector(T v1)
   {
     for (unsigned i=0; i<NELEM; ++i)
-      data[i] = init;
+      data[i] = v1;
   }
 
   template <unsigned NELEM, typename T>
-  FixedVector<NELEM, T>::FixedVector(T v1, T v2, ...)
+  FixedVector<NELEM, T>::FixedVector(T v1, T v2)
   {
-    va_list elems;
-    va_start(elems, v2);
-    data[0] = v1;
-    data[1] = v2;
-    for (unsigned i=2; i<NELEM; ++i)
-      data[i] = va_arg(elems, T);
+      switch (NELEM)
+      {
+          case 0:
+            break;
+          case 1:
+            data[0] = v1;
+            break;
+          default:
+            data[0] = v1;
+            data[1] = v2;
+            break;
+      }
+      for (unsigned i=2; i<NELEM; ++i)
+        data[i] = v2;
+  }
 
-    va_end(elems);
+  template <unsigned NELEM, typename T>
+  FixedVector<NELEM, T>::FixedVector(T v1, T v2, T v3)
+  {
+      switch (NELEM)
+      {
+          case 0:
+            break;
+          case 1:
+            data[0] = v1;
+            break;
+          case 2:
+            data[0] = v1;
+            data[1] = v2;
+            break;
+          default:
+            data[0] = v1;
+            data[1] = v2;
+            data[2] = v3;
+            break;
+      }
+      for (unsigned i=3; i<NELEM; ++i)
+        data[i] = v2;
   }
 
   template <unsigned NELEM, typename T>

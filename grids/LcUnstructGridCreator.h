@@ -80,6 +80,13 @@ namespace Lucee
       void fillWithConnectivity(Lucee::UnstructConnectivity& conn) const;
 
 /**
+ * Fill with cell type.
+ *
+ * @param ctype On output, cell type. Cleared on entry.
+ */
+      void fillWithCellType(std::vector<short>& ctype) const;
+
+/**
  * Get number of triangles in grid.
  *
  * @return number of triangles.

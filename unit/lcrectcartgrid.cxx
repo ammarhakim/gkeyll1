@@ -68,7 +68,7 @@ test_1()
   }
 
   double norm[3], tan1[3], tan2[3];
-  Lucee::Vec3 ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
+  Lucee::Vec3<double> ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
 
   seq.reset();
   while (seq.step())
@@ -77,7 +77,7 @@ test_1()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(0, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", ux.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -92,7 +92,7 @@ test_1()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(1, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uy.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -107,7 +107,7 @@ test_1()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(2, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uz.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -168,7 +168,7 @@ test_2()
   }
 
   double norm[3], tan1[3], tan2[3];
-  Lucee::Vec3 ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
+  Lucee::Vec3<double> ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
 
   seq.reset();
   while (seq.step())
@@ -177,7 +177,7 @@ test_2()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(0, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", ux.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -192,7 +192,7 @@ test_2()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(1, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uy.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -207,7 +207,7 @@ test_2()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(2, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uz.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -265,7 +265,7 @@ test_3()
   }
 
   double norm[3], tan1[3], tan2[3];
-  Lucee::Vec3 ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
+  Lucee::Vec3<double> ux(1, 0, 0), uy(0, 1, 0), uz(0, 0, 1);
 
   seq.reset();
   while (seq.step())
@@ -274,7 +274,7 @@ test_3()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(0, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", ux.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -289,7 +289,7 @@ test_3()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(1, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uy.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);
@@ -304,7 +304,7 @@ test_3()
     grid3.setIndex(idx);
 
     grid3.getSurfCoordSys(2, norm, tan1, tan2);
-    Lucee::Vec3 lx(tan1), ly(tan2), lz(norm), t1t2;
+    Lucee::Vec3<double> lx(tan1), ly(tan2), lz(norm), t1t2;
     
     LC_ASSERT("Testing normal", uz.dot(lz) == 1.0);
     t1t2 = lx.cross(ly);

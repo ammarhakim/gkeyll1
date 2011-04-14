@@ -48,6 +48,16 @@ namespace Lucee
  */
       void setNumCells(unsigned nc);
 
+/**
+ * Set number of faces. This needs to be called before face geometry
+ * information is set.
+ *
+ * @param nf Number of cells.
+ * @param storeNormal True if normal should be stored.
+ * @param storeTangents True if tangents should be stored.
+ */
+      void setNumFaces(unsigned nf, bool storeNormal, bool storeTangents);
+
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
       std::vector<REAL> vcoords;
 

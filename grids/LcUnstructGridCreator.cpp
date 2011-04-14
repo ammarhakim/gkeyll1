@@ -48,6 +48,13 @@ namespace Lucee
   }
 
   template <typename REAL>
+  void
+  UnstructGridCreator<REAL>::fillWithCellType(std::vector<short>& ctype) const
+  {
+    ctype = cellType;
+  }
+
+  template <typename REAL>
   unsigned
   UnstructGridCreator<REAL>::getNumTri() const
   {

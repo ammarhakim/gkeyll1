@@ -168,3 +168,6 @@ add_test(lctabledescription unit/lctabledescription)
 
 # lcluahelp
 add_test(lcluahelp unit/lcluahelp)
+
+# lcgeomprim
+add_test(lcgeomprim unit/lcgeomprim)

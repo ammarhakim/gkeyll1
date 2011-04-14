@@ -114,6 +114,18 @@ namespace Lucee
         const std::string& nm);
 
 /**
+ * Get specified grid element.
+ *
+ * @param idx Index of requested grid element.
+ * @return grid element.
+ */
+      template <unsigned NDIM>
+      Lucee::GridElem<REAL, NDIM> getElement(unsigned idx) const
+      {
+        return Lucee::GridElem<REAL, NDIM>(this->geometry);
+      }
+
+/**
  * Iterator class to allow iteration over various grid elements. The
  * element dimension is specified as a template parameter.
  */
@@ -233,6 +245,13 @@ namespace Lucee
           }
 
 /**
+ * Get current element number.
+ *
+ * @return current element number.
+ */
+          unsigned getCurrIndex() const { return curr; }
+
+/**
  * Get number of connections for current element.
  *
  * @return number of connections for current element.
@@ -273,6 +292,8 @@ namespace Lucee
       mutable std::vector<Lucee::UnstructConnectivity> connectivity;
 /** number of cells of each type */
       std::map<short, unsigned> cellCount;
+/** Cell type */
+      std::vector<short> cellType;
 
 /**
  * Method to return reference to specified connectivity,
@@ -284,6 +305,12 @@ namespace Lucee
  * @return reference to connectivity.
  */
       const Lucee::UnstructConnectivity& getConnectivity(unsigned d, unsigned dprime) const;
+
+/**
+ * Compute geometry of cells. This computes area and centroid of each
+ * cell in a 2D grid.
+ */
+      void calcCellGeometry2d();
   };
 }
 
