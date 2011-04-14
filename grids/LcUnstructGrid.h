@@ -206,8 +206,9 @@ namespace Lucee
  * @param grid Grid to create iterator from.
  */
           IncidenceIterator(const UnstructGrid<REAL>& grid)
-            : ElemIterator<MDIM>(grid)
+            : ElemIterator<MDIM>(grid), conn(grid.connectivity[4*MDIM+IDIM]), curr(0)
           {
+            currIndices = &conn.indices[conn.offsets[curr]];
           }
 
 /**
@@ -218,6 +219,8 @@ namespace Lucee
           IncidenceIterator<MDIM, IDIM>& operator++()
           {
             ElemIterator<MDIM>::operator++();
+            curr++;
+            currIndices = &conn.indices[conn.offsets[curr]];
             return *this;
           }
 
@@ -229,8 +232,39 @@ namespace Lucee
           IncidenceIterator<MDIM, IDIM>& operator++(int)
           {
             ElemIterator<MDIM>::operator++(0);
+            curr++;
+            currIndices = &conn.indices[conn.offsets[curr]];
             return *this;
           }
+
+/**
+ * Get number of connections for current element.
+ *
+ * @return number of connections for current element.
+ */
+          unsigned getNumConnections() const
+          {
+            return conn.offsets[curr+1]-conn.offsets[curr];
+          }
+
+/**
+ * Get index for 'idx' connection of current element.
+ *
+ * @param idx Index of connection number.
+ * @return Index of connected elemented.
+ */
+          int getIndex(unsigned idx) const
+          {
+            return currIndices[idx];
+          }
+
+        private:
+/** Reference to connectivity information */
+          const Lucee::UnstructConnectivity& conn;
+/** Current element being indexed */
+          unsigned curr;
+/** Pointer to connectivities for current element */
+          const int *currIndices;
       };
 
     private:
