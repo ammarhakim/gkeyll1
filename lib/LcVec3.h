@@ -25,7 +25,8 @@ namespace Lucee
  * Vector of doubles in 3D space. Provides special methods for dot,
  * cross products, creation of unit vectors etc.
  */
-  class Vec3 : public Lucee::FixedVector<3, double>
+  template <typename T>
+  class Vec3 : public Lucee::FixedVector<3, T>
   {
     public:
 /**
@@ -33,7 +34,7 @@ namespace Lucee
  *
  * @param val Value of all components. 
  */
-      Vec3(const double& val=0.0);
+      Vec3(const T& val=0.0);
 
 /**
  * Create new 3D vector from specified values.
@@ -42,14 +43,14 @@ namespace Lucee
  * @param y Y-component of vector.
  * @param z Z-component of vector.
  */
-      Vec3(double x, double y, double z);
+      Vec3(T x, T y, T z);
 
 /**
  * Construct new 3D vector from specified values.
  *
  * @param xyz Values of vector elements.
  */
-      Vec3(const double xyz[3]);
+      Vec3(const T xyz[3]);
 
 /**
  * Compute the dot product of this vector with the supplied one.
@@ -57,7 +58,7 @@ namespace Lucee
  * @param vec Vector to dot with.
  * @return dot product.
  */
-      double dot(const Vec3& vec) const;
+      T dot(const Vec3<T>& vec) const;
 
 /**
  * Compute the cross product of this vector with the supplied
@@ -66,7 +67,7 @@ namespace Lucee
  * @param vec Vector to cross with.
  * @return cross product.
  */
-      Vec3 cross(const Vec3& vec) const;
+      Vec3<T> cross(const Vec3<T>& vec) const;
 
 /**
  * Normalize the vector so its lenght it 1.0.
@@ -79,7 +80,7 @@ namespace Lucee
  * @param vec Vector to add.
  * @return added vector.
  */
-      Vec3 operator+(const Vec3& vec) const;
+      Vec3<T> operator+(const Vec3<T>& vec) const;
 
 /**
  * Subtract supplied vector from this one.
@@ -87,14 +88,14 @@ namespace Lucee
  * @param vec Vector to add.
  * @return subtracted vector.
  */
-      Vec3 operator-(const Vec3& vec) const;
+      Vec3<T> operator-(const Vec3<T>& vec) const;
 
 /**
  * Scale all elements with supplied factor.
  *
  * @param fact Factor to scale by.
  */
-      void scale(double fact);
+      void scale(T fact);
   };
 }
 

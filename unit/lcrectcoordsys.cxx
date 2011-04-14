@@ -15,7 +15,7 @@
 void
 test_1()
 {
-  Lucee::Vec3 xu, yu, zu;
+  Lucee::Vec3<double> xu, yu, zu;
   Lucee::AlignedRectCoordSys tx(0);
   tx.fillWithUnitVecs(xu, yu, zu);
 
@@ -24,7 +24,7 @@ test_1()
   LC_ASSERT("Testing if yu is a unit vector", epsCmp(yu.getNorm(), 1.0));
   LC_ASSERT("Testing if zu is a unit vector", epsCmp(zu.getNorm(), 1.0));
 
-  Lucee::Vec3 yuxzu = yu.cross(zu);
+  Lucee::Vec3<double> yuxzu = yu.cross(zu);
   for (unsigned i=0; i<3; ++i)
     LC_ASSERT("Testing righthanded-ness", yuxzu[i] == xu[i]);
 

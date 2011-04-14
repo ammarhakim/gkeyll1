@@ -84,9 +84,30 @@ namespace Lucee
   template <typename REAL>
   class GridElem<REAL, 2> : public FaceElem<REAL>
   {
-      // declare grid friend so it can fiddle around with privates
+// declare grid friend so it can fiddle around with privates
       template <typename R> friend class UnstructGrid;
     private:
+/**
+ * Initialize element.
+ *
+ * @param geom Geometry object.
+ */
+      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+        : FaceElem<REAL>(geom.faceCenter, geom.faceArea)
+      {
+      }
+
+/**
+ * Increment vertex pointer by one element.
+ */
+      void incr() const { FaceElem<REAL>::incr(); }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const { return FaceElem<REAL>::atEnd(); }
   };
 
 /**

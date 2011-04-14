@@ -61,6 +61,43 @@ namespace Lucee
  * @param tng On output tangent to face.
  */
       void fillWithTangent2(REAL tng[3]) const;
+
+    protected:
+/**
+ * Create cell given list of cell center coordinates and cell volumes.
+ *
+ * @param fc Face center coordinates.
+ * @param fa Face area.
+ */
+      FaceElem(const std::vector<REAL>& fc, const std::vector<REAL>& fa);
+
+/**
+ * Increment vertex location by one.
+ */
+      void incr() const
+      {
+        curr += 1;
+      }
+
+/**
+ * Are we at end of iteration?
+ *
+ * @return true
+ */
+      bool atEnd() const
+      {
+        if (curr<fa.size())
+          return false;
+        return true;
+      }
+
+    private:
+/** Reference to face centroid coordinates */
+      const std::vector<REAL>& fc;
+/** Reference to face area */
+      const std::vector<REAL>& fa;
+/** Index of current element */
+      mutable unsigned curr;
   };
 }
 

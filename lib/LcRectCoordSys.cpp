@@ -35,7 +35,7 @@ namespace Lucee
   }
 
   void
-  RectCoordSys::fillWithUnitVecs(Lucee::Vec3& xu, Lucee::Vec3& yu, Lucee::Vec3& zu) const
+  RectCoordSys::fillWithUnitVecs(Lucee::Vec3<double>& xu, Lucee::Vec3<double>& yu, Lucee::Vec3<double>& zu) const
   {
     for (unsigned i=0; i<3; ++i)
     {

@@ -17,7 +17,9 @@
 #include <vector>
 
 // lucee includes
+#include <LcMathLib.h>
 #include <LcUnstructGrid.h>
+#include <LcVec3.h>
 
 namespace Lucee
 {
@@ -25,7 +27,7 @@ namespace Lucee
   template <> const char *UnstructGrid<double>::id = "Unstruct";
 
 /**
- * Convenient method to map connectivity indices to linear index.
+ * Map connectivity indices (d->dprime) to linear index.
  *
  * @param d Dimension to connect (d->dprime).
  * @param dprime Dimension to connect to (d->dprime).
@@ -175,9 +177,17 @@ namespace Lucee
     ctor.fillWithGeometry(geometry);
     ddprime[getConnIndex(ndim, 0)] = true; // set flag as ndim->0 connectivity is always stored
     ctor.fillWithConnectivity(connectivity[getConnIndex(ndim, 0)]);
+    ctor.fillWithCellType(cellType);
 
-// compute cell volume and centroids (TODO)
-    geometry.setNumCells(getNumCells());
+    if (ndim == 3)
+    {
+// TODO
+    }
+    else if (ndim == 2)
+    {
+// compute cell volume and centroids
+      calcCellGeometry2d();
+    }
 
     cellCount[TRI_CELL_T] = ctor.getNumTri();
     cellCount[QUAD_CELL_T] = ctor.getNumQuad();
@@ -193,6 +203,35 @@ namespace Lucee
     if (ddprime[getConnIndex(d, dprime)])
       return connectivity[getConnIndex(d, dprime)];
     throw Lucee::Except("UnstructGrid::getConnectivity: Connectivity not computed!");
+  }
+
+  template <typename REAL>
+  void
+  UnstructGrid<REAL>::calcCellGeometry2d()
+  {
+// allocate memory to store centroids and areas
+    geometry.setNumFaces(getNumCells(), false, false); // in 2D cells are faces
+
+// create iterator for cell->0 incidence
+    typename UnstructGrid<REAL>::template IncidenceIterator<2, 0> c2vItr(*this);
+// loop over each cell, computing area and centroid
+    for ( ; !c2vItr.atEnd(); ++c2vItr)
+    {
+      if (cellType[c2vItr.getCurrIndex()] == TRI_CELL_T)
+      { // this is probably slow but is okay as this is done only once
+        Lucee::Vec3<REAL> a(&geometry.vcoords[3*c2vItr.getIndex(0)]);
+        Lucee::Vec3<REAL> b(&geometry.vcoords[3*c2vItr.getIndex(1)]);
+        Lucee::Vec3<REAL> c(&geometry.vcoords[3*c2vItr.getIndex(2)]);
+        geometry.faceArea[c2vItr.getCurrIndex()] = Lucee::calcTriArea(a, b, c);
+      }
+      else if (cellType[c2vItr.getCurrIndex()] == QUAD_CELL_T)
+      {
+      }
+      else
+      {
+        throw Lucee::Except("UnstructGrid::calcCellGeometry2d: Unsupported 2D cell type");
+      }
+    }
   }
 
 // instantiations

@@ -21,62 +21,75 @@
 
 namespace Lucee
 {
-  Vec3::Vec3(const double& val)
-    : Lucee::FixedVector<3, double>(val) 
+  template <typename T>
+  Vec3<T>::Vec3(const T& val)
+    : Lucee::FixedVector<3, T>(val) 
   {
   }
 
-  Vec3::Vec3(double x, double y, double z)
-    : Lucee::FixedVector<3, double>(x, y, z) 
+  template <typename T>
+  Vec3<T>::Vec3(T x, T y, T z)
+    : Lucee::FixedVector<3, T>(x, y, z)
   {
   }
 
-  Vec3::Vec3(const double xyz[3])
-    : Lucee::FixedVector<3, double>(xyz)
+  template <typename T>
+  Vec3<T>::Vec3(const T xyz[3])
+    : Lucee::FixedVector<3, T>(xyz)
   {
   }
 
-  double
-  Vec3::dot(const Vec3& vec) const
+  template <typename T>
+  T
+  Vec3<T>::dot(const Vec3<T>& vec) const
   {
-    return vec[0]*getVal(0) + vec[1]*getVal(1) + vec[2]*getVal(2);
+    return vec[0]*this->getVal(0) + vec[1]*this->getVal(1) + vec[2]*this->getVal(2);
   }
 
-  Vec3
-  Vec3::cross(const Vec3& vec) const
+  template <typename T>
+  Vec3<T>
+  Vec3<T>::cross(const Vec3<T>& vec) const
   {
-    return Vec3(
-      getVal(1)*vec[2]-getVal(2)*vec[1],
-      getVal(2)*vec[0]-getVal(0)*vec[2],
-      getVal(0)*vec[1]-getVal(1)*vec[0]);
+    return Vec3<T>(
+      this->getVal(1)*vec[2]-this->getVal(2)*vec[1],
+      this->getVal(2)*vec[0]-this->getVal(0)*vec[2],
+      this->getVal(0)*vec[1]-this->getVal(1)*vec[0]);
   }
 
+  template <typename T>
   void
-  Vec3::normalize()
+  Vec3<T>::normalize()
   {
-    double len = ::sqrt(dot(*this));
+    T len = ::sqrt(dot(*this));
     for (int i=0; i<3; ++i)
-      setVal(i, getVal(i)/len);
+      setVal(i, this->getVal(i)/len);
   }
 
-  Vec3
-  Vec3::operator+(const Vec3& vec) const
+  template <typename T>
+  Vec3<T>
+  Vec3<T>::operator+(const Vec3<T>& vec) const
   {
-    return Vec3(
-      vec[0]+getVal(0), vec[1]+getVal(1), vec[2]+getVal(2));
+    return Vec3<T>(
+      vec[0]+this->getVal(0), vec[1]+this->getVal(1), vec[2]+this->getVal(2));
   }
 
-  Vec3
-  Vec3::operator-(const Vec3& vec) const
+  template <typename T>
+  Vec3<T>
+  Vec3<T>::operator-(const Vec3<T>& vec) const
   {
-    return Vec3(
-      getVal(0)-vec[0], getVal(1)-vec[1], getVal(2)-vec[2]);
+    return Vec3<T>(
+      this->getVal(0)-vec[0], this->getVal(1)-vec[1], this->getVal(2)-vec[2]);
   }
 
+  template <typename T>
   void
-  Vec3::scale(double fact)
+  Vec3<T>::scale(T fact)
   {
     for (unsigned i=0; i<3; ++i)
-      setVal(i, getVal(i)*fact);
+      setVal(i, this->getVal(i)*fact);
   }
+
+// instantiations
+  template class Vec3<float>;
+  template class Vec3<double>;
 }

@@ -53,7 +53,7 @@ namespace Lucee
  * @param yu On output, unit vector in Y-direction.
  * @param zu On output, unit vector in Z-direction.
  */
-      void fillWithUnitVecs(Lucee::Vec3& xu, Lucee::Vec3& yu, Lucee::Vec3& zu) const;
+      void fillWithUnitVecs(Lucee::Vec3<double>& xu, Lucee::Vec3<double>& yu, Lucee::Vec3<double>& zu) const;
 
 /**
  * Rotate vector to local coordinate system (defined by this object)

@@ -18,7 +18,7 @@
 void
 test_1()
 {
-  Lucee::Vec3 x(1,0,0), y(0,1,0), z(0,0,1);
+  Lucee::Vec3<double> x(1,0,0), y(0,1,0), z(0,0,1);
 
   LC_ASSERT("Testing dot products", x.dot(x) == 1);
   LC_ASSERT("Testing dot products", x.dot(y) == 0);
@@ -27,22 +27,22 @@ test_1()
   LC_ASSERT("Testing dot products", y.dot(z) == 0);
   LC_ASSERT("Testing dot products", z.dot(z) == 1);
 
-  Lucee::Vec3 xy = x+y;
+  Lucee::Vec3<double> xy = x+y;
   LC_ASSERT("Testing sum of vectors", xy[0] == 1);
   LC_ASSERT("Testing sum of vectors", xy[1] == 1);
   LC_ASSERT("Testing sum of vectors", xy[2] == 0);
 
-  Lucee::Vec3 xyz = x+y+z;
+  Lucee::Vec3<double> xyz = x+y+z;
   LC_ASSERT("Testing sum of vectors", xyz[0] == 1);
   LC_ASSERT("Testing sum of vectors", xyz[1] == 1);
   LC_ASSERT("Testing sum of vectors", xyz[2] == 1);
 
-  Lucee::Vec3 xy1 = x-y;
+  Lucee::Vec3<double> xy1 = x-y;
   LC_ASSERT("Testing sum of vectors", xy1[0] == 1);
   LC_ASSERT("Testing sum of vectors", xy1[1] == -1);
   LC_ASSERT("Testing sum of vectors", xy1[2] == 0);
 
-  Lucee::Vec3 xyz1 = x-y-z;
+  Lucee::Vec3<double> xyz1 = x-y-z;
   LC_ASSERT("Testing sum of vectors", xyz1[0] == 1);
   LC_ASSERT("Testing sum of vectors", xyz1[1] == -1);
   LC_ASSERT("Testing sum of vectors", xyz1[2] == -1);
@@ -53,17 +53,17 @@ test_1()
   LC_ASSERT("Testing if normalization worked", xyz[1] == 1/std::sqrt(3));
   LC_ASSERT("Testing if normalization worked", xyz[2] == 1/std::sqrt(3));
 
-  Lucee::Vec3 xy3 = x.cross(y);
+  Lucee::Vec3<double> xy3 = x.cross(y);
   LC_ASSERT("Testing if cross product", xy3[0] == 0);
   LC_ASSERT("Testing if cross product", xy3[1] == 0);
   LC_ASSERT("Testing if cross product", xy3[2] == 1);
 
-  Lucee::Vec3 yz3 = y.cross(z);
+  Lucee::Vec3<double> yz3 = y.cross(z);
   LC_ASSERT("Testing if cross product", yz3[0] == 1);
   LC_ASSERT("Testing if cross product", yz3[1] == 0);
   LC_ASSERT("Testing if cross product", yz3[2] == 0);
 
-  Lucee::Vec3 zx3 = z.cross(x);
+  Lucee::Vec3<double> zx3 = z.cross(x);
   LC_ASSERT("Testing if cross product", zx3[0] == 0);
   LC_ASSERT("Testing if cross product", zx3[1] == 1);
   LC_ASSERT("Testing if cross product", zx3[2] == 0);

@@ -20,13 +20,15 @@ namespace Lucee
   void
   FaceElem<REAL>::fillWithCoordinates(REAL xv[3]) const
   {
+    for (unsigned i=0; i<3; ++i)
+      xv[i] = fc[3*curr+i];
   }
 
   template <typename REAL>
   REAL
   FaceElem<REAL>::getMeasure() const
   {
-    return 0;
+    return fa[curr];
   }
 
   template <typename REAL>
@@ -44,6 +46,13 @@ namespace Lucee
   template <typename REAL>
   void
   FaceElem<REAL>::fillWithTangent2(REAL tng[3]) const
+  {
+  }
+
+  
+  template <typename REAL>
+  FaceElem<REAL>::FaceElem(const std::vector<REAL>& fc, const std::vector<REAL>& fa)
+    : fc(fc), fa(fa), curr(0)
   {
   }
 

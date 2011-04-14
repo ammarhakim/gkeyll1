@@ -18,6 +18,7 @@
 
 // lucee includes
 #include <LcVector.h>
+#include <LcVec3.h>
 
 // std includes
 #include <algorithm>
@@ -87,6 +88,21 @@ namespace Lucee
   const T& max3(const T& a, const T& b, const T& c)
   {
     return std::max<T>(a, std::max<T>(b, c));
+  }
+
+/**
+ * Compute area of a triangle.
+ *
+ * @param a Vertex of triangle.
+ * @param b Vertex of triangle.
+ * @param c Vertex of triangle.
+ */
+  template <typename T>
+  T calcTriArea(const Lucee::Vec3<T>& a, const Lucee::Vec3<T>& b, const Lucee::Vec3<T>& c)
+  {
+    Lucee::Vec3<T> s1 = b-a;
+    Lucee::Vec3<T> s2 = c-a;
+    return 0.5*s1.cross(s2).getNorm();
   }
 }
 
