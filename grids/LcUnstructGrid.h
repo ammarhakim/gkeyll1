@@ -307,10 +307,14 @@ namespace Lucee
       const Lucee::UnstructConnectivity& getConnectivity(unsigned d, unsigned dprime) const;
 
 /**
- * Compute geometry of cells. This computes area and centroid of each
- * cell in a 2D grid.
+ * Compute geometry in a 2D grid.
  */
-      void calcCellGeometry2d();
+      void calcGeometry2d();
+
+/**
+ * Compute geometry in a 3D grid.
+ */
+      void calcGeometry3d();
   };
 }
 

@@ -30,11 +30,13 @@ test_1(const Lucee::UnstructGrid<double>& grid)
 {
   double xv[3];
 // create iterator over nodes
-  Lucee::UnstructGrid<double>::ElemIterator<0> vitr(grid);
+  Lucee::UnstructGrid<double>::ElemIterator<2> vitr(grid);
   for ( ; !vitr.atEnd(); ++vitr)
   {
 // get nodal coordinates
+    //std::cout << vitr->getMeasure() << std::endl;
     vitr->fillWithCoordinates(xv);
+    std::cout << xv[0] << " " << xv[1] << " " << xv[2] << std::endl;
   }
 
   unsigned nc=0;
