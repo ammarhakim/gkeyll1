@@ -104,6 +104,25 @@ namespace Lucee
     Lucee::Vec3<T> s2 = c-a;
     return 0.5*s1.cross(s2).getNorm();
   }
+
+/**
+ * Compute area of a quadrilateral (a,b,c,d), with sides (a,b), (b,c),
+ * (c,d) and (d,a).
+ *
+ * @param a Vertex of quadrilateral.
+ * @param b Vertex of quadrilateral.
+ * @param c Vertex of quadrilateral.
+ * @param d Vertex of quadrilateral.
+ */
+  template <typename T>
+  T calcQuadArea(const Lucee::Vec3<T>& a, const Lucee::Vec3<T>& b, 
+    const Lucee::Vec3<T>& c, const Lucee::Vec3<T>& d)
+  {
+    Lucee::Vec3<T> s1 = b-a;
+    Lucee::Vec3<T> d1 = c-a;
+    Lucee::Vec3<T> s2 = d-a;
+    return 0.5*(s1.cross(d1).getNorm() + d1.cross(s2).getNorm());
+  }
 }
 
 #endif // LC_MATH_LIB_H
