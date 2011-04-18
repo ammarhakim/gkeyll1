@@ -228,7 +228,7 @@ Note the identity $\gvec{\Phi}_+(-\nu_j) =
 
 
 \subsection{Compute eigensystem normalization coefficients}
-These are given by\footnote{See RteHomogeneousSlab::get\_norms()}
+These are given by\footnote{See {\tt RteHomogeneousSlab::get\_norms()}}
 \begin{align}
   N(\nu_j) = \sum_{\alpha=1}^N
   w_\alpha \mu_\alpha
@@ -269,7 +269,7 @@ L(\tau,\pm\mu_N)]^T$. The coefficients $A_j$ and $B_j$ are unknown.
 
 \subsection{Particular solution can now be determined}
 The particular solutions can be written as\footnote{See
-  RteHomogeneousSlab::particular\_solution()}
+  {\tt RteHomogeneousSlab::particular\_solution()}}
 \begin{align}
   \mvec{L}^p_+(\tau) = \sum_{j=1}^N
   \left[
@@ -307,8 +307,8 @@ and
 \end{align}
 
 
-For uniform illumination we can compute explicitly\footnote{See
-  RteHomogeneousSlab::scriptAB()}
+For uniform illumination we can compute explicitly\footnote{See {\tt
+    RteHomogeneousSlab::scriptAB()}}
 \begin{align}
   \script{A}_j(\tau) = \frac{\mu_0 \nu_j}{N(\nu_j)}
   C(\tau ; \nu_j, \mu_0)
