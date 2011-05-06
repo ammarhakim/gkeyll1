@@ -54,16 +54,12 @@ elseif(WIN32)
   find_package(CLapackCMake REQUIRED)
   set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
 else(APPLE)
-  if (FORTRAN_FOUND)
-    # find LAPACK
-    find_package(LAPACK REQUIRED)
-    if (LAPACK_FOUND)
-      add_definitions(-DHAVE_LAPACK)
-      SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
-    endif (LAPACK_FOUND)
-  else()
-    message("**** LAPACK can not be found without a Fortran compiler!")
-  endif()
+  # find LAPACK
+  find_package(LAPACK REQUIRED)
+  if (LAPACK_FOUND)
+    add_definitions(-DHAVE_LAPACK)
+    SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
+  endif (LAPACK_FOUND)
 endif(APPLE)
 
 # Create configure file
