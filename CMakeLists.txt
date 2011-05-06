@@ -11,17 +11,20 @@ cmake_minimum_required(VERSION 2.8)
 
 # initialize build
 INCLUDE(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
-
-# determine Fortran compiler
-include(CMakeDetermineFortranCompiler)
-if ("${CMAKE_Fortran_COMPILER}" STREQUAL CMAKE_Fortran_COMPILER-NOTFOUND)
-  message("**** Fortran not found! Might have problems finding LAPACK")
-  set(FORTRAN_FOUND FALSE)
-else ()
-  set(FORTRAN_FOUND TRUE)
+if (WIN32)
+  # do nothing to find Fortran
+else (WIN32)
+  # determine Fortran compiler
+  include(CMakeDetermineFortranCompiler)
   # now initialize Fortran stuff
   include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
-endif ()
+endif (WIN32)
+
+######################################################################
+#
+# Find packages
+#
+######################################################################
 
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
@@ -46,6 +49,10 @@ IF(APPLE)
   FIND_LIBRARY(ACCELERATE_LIB Accelerate)
   MARK_AS_ADVANCED(ACCELERATE_LIB)
   SET(EXTRA_LIBS ${ACCELERATE_LIB})
+elseif(WIN32)
+  # CLapack is used on Windows
+  find_package(CLapackCMake REQUIRED)
+  set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
 else(APPLE)
   if (FORTRAN_FOUND)
     # find LAPACK
@@ -60,7 +67,8 @@ else(APPLE)
 endif(APPLE)
 
 # Create configure file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in
+   ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 install(FILES svninfo.txt DESTINATION include)
 
