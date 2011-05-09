@@ -76,17 +76,18 @@ In each layer we need to solve the RTE
   \label{eqn:layer_rte}
 \end{align}
 for $\tau_{k-1} < \tau < \tau_k$ and
-$k=1,\ldots,N_A,N_A+1,\ldots,N_A+N_O$, where $N_A$ is the number of
-layers in the atmosphere and $N_O$ is the number of layers in the
-ocean. Further, $L_k(\tau,\mu,\phi)$ is the radiance in units of Watt
-m$^{-2}$ sr$^{-1}$ nm$^{-1}$, $\tau$ is the optical depth, $\varpi_k$
-is the albedo of single scattering, $\mu$ is the cosine of the polar
-angle measured with the positive $Z$-axis and $\phi$ is the azimuthal
-angle, $p_k(\cos\Theta) = \sum_{l=0}^L\beta^k_lP_l(\cos\Theta)$ is the
-phase function, where $\Theta$ is the scattering angle and
-$\beta^k_0=1$. Note that $\tau_0=0$ is the optical depth of the top of
-the atmosphere and $\tau_{N_A+N_O+1}=\tau_b$ is the optical depth of
-the bottom of the ocean.
+$k=1,\ldots,N_A,N_A+1,\ldots,N_A+N_O$ labeling the layers, where $N_A$
+is the number of layers in the atmosphere and $N_O$ is the number of
+layers in the ocean. Further, $L_k(\tau,\mu,\phi)$ is the radiance in
+units of Watt m$^{-2}$ sr$^{-1}$ nm$^{-1}$, $\tau$ is the optical
+depth, $\varpi_k$ is the albedo of single scattering, $\mu$ is the
+cosine of the polar angle measured with the positive $Z$-axis and
+$\phi$ is the azimuthal angle, $p_k(\cos\Theta) =
+\sum_{l=0}^L\beta^k_lP_l(\cos\Theta)$ is the phase function, where
+$\Theta$ is the scattering angle and $\beta^k_0=1$. Note that
+$\tau_0=0$ is the optical depth of the top of the atmosphere and
+$\tau_{N_A+N_O}=\tau_b$ is the optical depth of the bottom of the
+ocean.
 
 An incident beam illuminates the top of the atmosphere, while the
 ocean bottom is assumed to be black. The boundary conditions to solve
