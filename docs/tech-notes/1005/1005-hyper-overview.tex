@@ -43,7 +43,7 @@
 \newtheorem{dfn}{Definition}
 
 \title[Hyperbolic balance laws]{An overview of hyperbolic balance laws
-  and numerical schemes with application to plasma fluid equations}%
+  and numerical schemes with application to plasma physics}%
 \author{Ammar H. Hakim}%
 \date{}
 
@@ -55,16 +55,18 @@
 Hyperbolic balance laws are a broad class of equations that describe
 phenomena propagating with finite wave speeds. Coupled with source
 terms they can model a diverse set of physical systems in continuum
-mechanics including neutral (relativistic and non-relativistic) fluids,
-electromagnetism, a variety of magnetohydrodynamics (MHD) equations,
-linear and nonlinear elasticity and even equations of general
-relativity. This note is an overview of hyperbolic balance laws and
-numerical schemes to solve them. The intended applications are to
-plasma fluid equations. Plasmas introduce unique challenges from their
-inherently multiphysics nature and from the disparate time/space
-scales involved. No claim to originality of the material is made, but
-useful results are collected in one place for use of students and
-researchers not familiar with this important class of equations.
+mechanics including neutral (relativistic and non-relativistic)
+fluids, electromagnetism, a variety of magnetohydrodynamics (MHD)
+equations, linear and nonlinear elasticity and even equations of
+general relativity. This note is an overview of hyperbolic balance
+laws and numerical schemes to solve them. The emphasis is on gaining a
+conceptual understanding of hyperbolic balance laws and numerical
+schemes to solve them. The intended applications are to plasma
+physics. Plasmas introduce unique challenges from their inherently
+multiphysics nature and from the disparate time/space scales
+involved. No claim to originality of the material is made, but useful
+results are collected in one place for use of students and researchers
+not familiar with this important class of equations.
 
 The rest of this note is organized as follows. First, the basic
 properties of hyperbolic balance laws are given, specially those
@@ -84,6 +86,14 @@ cell using a set of basis functions. Example applications of these
 each of these schemes are then given.
 
 \section{Basic properties of hyperbolic balance laws}
+
+Intuitively, hyperbolic equations describe the propagation of waves,
+the wave speeds given by the characteristic speeds and the local
+propagation direction by the right eigenvectors. The curves traced out
+by the waves are called the \emph{characteristics}. If the system is
+nonlinear the wave speeds will vary and complex phenomena can
+result. This is specially true in presence of sources, in which case
+the waves can undergo dispersion and diffusion.
 
 \subsection{Definition of hyperbolic balance laws}
 
@@ -124,6 +134,8 @@ by the waves are called the \emph{characteristics}. If the system is
 nonlinear the wave speeds will vary and complex phenomena can
 result. This is specially true in presence of sources, in which case
 the waves can undergo dispersion and diffusion.
+
+\end{document}
 
 Consider a change of variables defined by $U=\varphi(V)$, where
 $V(x,t) \in \mathbb{R}^m$. Such a change of variables occurs
