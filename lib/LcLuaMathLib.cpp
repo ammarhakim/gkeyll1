@@ -43,13 +43,16 @@ namespace Lucee
     lua_pushnumber(L, Lucee::E);
     lua_setfield(L, -2, "E");
 
+    lua_pushnumber(L, Lucee::EULER);
+    lua_setfield(L, -2, "Euler");
+
     lua_pushnumber(L, Lucee::SPEED_OF_LIGHT);
     lua_setfield(L, -2, "SpeedOfLight");
 
-    lua_pushnumber(L, Lucee::ELECTRON_MASS);
-    lua_setfield(L, -2, "ElectronMass");
-
     lua_pushnumber(L, Lucee::PLANCKS_CONSTANT_H);
     lua_setfield(L, -2, "PlancksConstant");
+
+    lua_pushnumber(L, Lucee::ELECTRON_MASS);
+    lua_setfield(L, -2, "ElectronMass");
   }
 }
