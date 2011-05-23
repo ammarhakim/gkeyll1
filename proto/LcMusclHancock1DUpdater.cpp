@@ -85,9 +85,9 @@ namespace Lucee
     upper[0] = localRgn.getUpper(0);
     Lucee::Region<1, int> slice(lower, upper);
 // allocate memory (number of equations is 3)
-    slopes = Lucee::Field<1, double>(slice, 3, lg, ug);
-    predict = Lucee::Field<1, double>(slice, 3, lg, ug);
-
+    slopes = Lucee::Field<1, double>(slice, 3, lg, ug); // slopes
+    predict = Lucee::Field<1, double>(slice, 3, lg, ug); // predicted solution
+    prim = Lucee::Field<1, double>(slice, 3, lg, ug); // primitive variables
   }
 
   Lucee::UpdaterStatus
@@ -105,42 +105,35 @@ namespace Lucee
 // local region to index
     Lucee::Region<1, int> localRgn = grid.getLocalBox();
 
+// compute primitive variables from conserved variables
+    calcPrimVars(q, prim);
+
 // pointers to data
-    Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
-    Lucee::ConstFieldPtr<double> qlPtr = q.createConstPtr();
-    Lucee::ConstFieldPtr<double> qrPtr = q.createConstPtr();
+    Lucee::ConstFieldPtr<double> pPtr = prim.createConstPtr();
+    Lucee::ConstFieldPtr<double> plPtr = prim.createConstPtr();
+    Lucee::ConstFieldPtr<double> prPtr = prim.createConstPtr();
     Lucee::FieldPtr<double> slpPtr = slopes.createPtr();
 
 // indices of region to update
     int lower = localRgn.getLower(0);
     int upper = localRgn.getUpper(0);
 
-// arrays to store primitive variables
-    std::vector<double> pvl(3), pv(3), pvr(3);
-
 // compute slopes for linear reconstruction in each cell
     for (unsigned i=lower; i<upper; ++i)
     {
-// attach pointers to left, current and right cells (could be done
-// more efficiently as the primitive variables in this implementation
-// are being computed too many times)
-      q.setPtr(qlPtr, i-1);
-      q.setPtr(qPtr, i);
-      q.setPtr(qrPtr, i+1);
-
-// compute primitive variables in each cell
-      calcPrimVars(&qlPtr[0], &pvl[0]);
-      calcPrimVars(&qPtr[0], &pv[0]);
-      calcPrimVars(&qrPtr[0], &pvr[0]);
+// attach pointers to left, current and right cells
+      prim.setPtr(plPtr, i-1);
+      prim.setPtr(pPtr, i);
+      prim.setPtr(prPtr, i+1);
 
 // calculate slope (these do not have the 1/dx term as it is taken
 // into account in predictor step)
       slopes.setPtr(slpPtr, i);
-      for (unsigned i=0; i<3; ++i)
-        slpPtr[i] = limaverage(pv[i]-pvl[i], pvr[i]-pv[i]);
+      for (unsigned k=0; k<3; ++k)
+        slpPtr[k] = limaverage(pPtr[k]-plPtr[k], prPtr[k]-pPtr[k]);
     }
 
-// attach pointers for use in predictor stop
+// attach pointers for use in predictor step
     Lucee::ConstFieldPtr<double> cslpPtr = slopes.createConstPtr();
     Lucee::FieldPtr<double> prdPtr = predict.createPtr();
 
@@ -149,25 +142,39 @@ namespace Lucee
 // compute predicted values of solution
     for (unsigned i=lower; i<upper; ++i)
     {
-      q.setPtr(qPtr, i);
+      prim.setPtr(pPtr, i);
       slopes.setPtr(cslpPtr, i);
       predict.setPtr(prdPtr, i);
 
-// compute primitive variables first
-      calcPrimVars(&qPtr[0], &pv[0]);
-
 // compute predicted primitive variables at dt/2
-      prdPtr[0] = pv[0] - dtdx2*(pv[0]*cslpPtr[1] + pv[1]*cslpPtr[0]); // density
-      prdPtr[1] = pv[1] - dtdx2*(pv[1]*cslpPtr[1] + 1/pv[0]*cslpPtr[2]); // velocity
-      prdPtr[2] = pv[2] - dtdx2*(pv[1]*cslpPtr[2] + gas_gamma*pv[2]*cslpPtr[1]); // pressure
+      prdPtr[0] = pPtr[0] - dtdx2*(pPtr[0]*cslpPtr[1] + pPtr[1]*cslpPtr[0]); // density
+      prdPtr[1] = pPtr[1] - dtdx2*(pPtr[1]*cslpPtr[1] + 1/pPtr[0]*cslpPtr[2]); // velocity
+      prdPtr[2] = pPtr[2] - dtdx2*(pPtr[1]*cslpPtr[2] + gas_gamma*pPtr[2]*cslpPtr[1]); // pressure
     }
 
 // attach pointers for use in corrector step
+    Lucee::ConstFieldPtr<double> cslplPtr = slopes.createConstPtr();
+    Lucee::ConstFieldPtr<double> cslprPtr = slopes.createConstPtr();
+
+    std::vector<double> ledge(3), redge(3); // primitive variables at left/right of edge
+    std::vector<double> numFlux(3); // numerical flux
 
 // compute corrected solution (this loop is over edges, hence we need
 // one extra upper index)
     for (unsigned i=lower; i<upper+1; ++i)
     {
+      prim.setPtr(plPtr, i-1); // cell left of edge
+      prim.setPtr(prPtr, i); // cell right of edge
+
+      slopes.setPtr(cslplPtr, i-1); // cell left of edge
+      slopes.setPtr(cslprPtr, i); // cell right of edge
+
+// compute predicted solution at dt/2 at left/right of edge
+      for (unsigned k=0; k<3; ++k)
+      {
+        ledge[k] = plPtr[k] + 0.5*cslplPtr[k]; // prim vars on left of edge
+        redge[k] = prPtr[k] - 0.5*cslprPtr[k]; // prim vars on right of edge
+      }
     }
 
     return Lucee::UpdaterStatus();
@@ -207,10 +214,19 @@ namespace Lucee
   }
 
   void
-  MusclHancock1DUpdater::calcPrimVars(const double *cv, double *pv)
+  MusclHancock1DUpdater::calcPrimVars(const Lucee::Field<1, double>& cv, Lucee::Field<1, double> &pv)
   {
-    pv[0] = cv[0]; // density
-    pv[1] = cv[1]/cv[0]; // velocity
-    pv[2] = (cv[2] - 0.5*cv[1]*cv[1]/cv[0])*(gas_gamma-1);
+    Lucee::ConstFieldPtr<double> cvPtr = cv.createConstPtr();
+    Lucee::FieldPtr<double> pvPtr = pv.createPtr();
+
+    for (unsigned i=cv.getLower(0); i<cv.getUpper(0); ++i)
+    {
+      cv.setPtr(cvPtr, i);
+      pv.setPtr(pvPtr, i);
+
+      pvPtr[0] = cvPtr[0]; // density
+      pvPtr[1] = cvPtr[1]/cvPtr[0]; // velocity
+      pvPtr[2] = (cvPtr[2] - 0.5*cvPtr[1]*cvPtr[1]/cvPtr[0])*(gas_gamma-1); // pressure
+    }
   }
 }
