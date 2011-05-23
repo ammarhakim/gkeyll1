@@ -79,6 +79,8 @@ namespace Lucee
       Lucee::Field<1, double> slopes;
 /** Field to store predicted variables */
       Lucee::Field<1, double> predict;
+/** Field to store primitive variables */
+      Lucee::Field<1, double> prim;
 
 /**
  * Averaging function. This returns a "limited" average that may
@@ -97,7 +99,7 @@ namespace Lucee
  * @param cv Conserved variables.
  * @param pv (out) Primitive variables.
  */
-      void calcPrimVars(const double *cv, double *pv);
+      void calcPrimVars(const Lucee::Field<1, double>& cv, Lucee::Field<1, double> &pv);
       
   };
 }
