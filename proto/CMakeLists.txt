@@ -13,5 +13,6 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 # Create the library
 add_library(lcproto
   LcMaxwellTm2DUpdater.cpp
+  LcMusclHancock1DUpdater.cpp
   LcProtoSolverRegistry.cpp
 )

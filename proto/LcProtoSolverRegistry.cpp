@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcMaxwellTm2DUpdater.h>
+#include <LcMusclHancock1DUpdater.h>
 #include <LcProtoSolverRegistry.h>
 
 namespace Lucee
@@ -24,5 +25,6 @@ namespace Lucee
   {
 // register updaters
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MusclHancock1DUpdater>;
   }
 }
