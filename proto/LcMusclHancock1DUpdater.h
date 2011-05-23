@@ -17,6 +17,7 @@
 #endif
 
 // lucee includes
+#include <LcField.h>
 #include <LcUpdaterIfc.h>
 
 namespace Lucee
@@ -43,6 +44,12 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Initialize solver, i.e. setup initial conditions. At the end of
+ * this call, the solver should be ready for evolving the solution.
+ */
+      virtual void initialize();
+
+/**
  * Advance the solution to specified time. Updaters that do not have a
  * concept of time should ignore the time parameter.
  *
@@ -66,13 +73,32 @@ namespace Lucee
       unsigned limiter;
 /** Gas adibatic constant */
       double gas_gamma;
+/** CFL number */
+      double cfl;
+/** Field to store slopes */
+      Lucee::Field<1, double> slopes;
+/** Field to store predicted variables */
+      Lucee::Field<1, double> predict;
 
 /**
  * Averaging function. This returns a "limited" average that may
  * prevent non-physical oscillations depending on the specified
  * limiter to use.
+ *
+ * @param a First value in average.
+ * @param b Second value in average.
+ * @return average, possibly limited.
  */
-      double limave(double a, double b);
+      double limaverage(double a, double b);
+
+/**
+ * Compute primitive variables from conserved variables.
+ *
+ * @param cv Conserved variables.
+ * @param pv (out) Primitive variables.
+ */
+      void calcPrimVars(const double *cv, double *pv);
+      
   };
 }
 
