@@ -20,6 +20,9 @@
 #include <LcField.h>
 #include <LcUpdaterIfc.h>
 
+// std includes
+#include <vector>
+
 namespace Lucee
 {
 /**
@@ -100,7 +103,33 @@ namespace Lucee
  * @param pv (out) Primitive variables.
  */
       void calcPrimVars(const Lucee::Field<1, double>& cv, Lucee::Field<1, double> &pv);
-      
+
+/**
+ * Calculate numerical fluxes given primitive variables on left and
+ * right of edge.
+ *
+ * @param pvl Primitive variables on left of edge.
+ * @param pvr Primitive variables on right of edge.
+ * @param nf (out) Numerical flux.
+ */
+      void calcNumericalFlux(const std::vector<double>& pvl, const std::vector<double> &pvr,
+        std::vector<double>& nf);
+
+/**
+ * Compute fluxes given primitive variables.
+ *
+ * @param pv Primitive variables.
+ * @param flux (out) Flux.
+ */
+      void calcFlux(const std::vector<double>& pv, std::vector<double>& flux);
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param pv Primitive variables.
+ * @param cv (out) Conserved variables.
+ */
+      void calcConsVars(const std::vector<double>& pv, std::vector<double>& cv);
   };
 }
 
