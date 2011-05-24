@@ -24,15 +24,18 @@
 
 namespace Lucee
 {
+// limiter tags
   static const unsigned AVERAGE_LIMITER = 0;
   static const unsigned MINMOD_LIMITER = 1;
   static const unsigned SUPERBEE_LIMITER = 2;
   static const unsigned ZERO_LIMITER = 3;
 
+// indices into primitive variables array
   static const unsigned RHO = 0;
   static const unsigned UX = 1;
   static const unsigned PR = 2;
 
+// indicies into conserved variables array
   static const unsigned MX = 1;
   static const unsigned ER = 2;
 
@@ -84,7 +87,7 @@ namespace Lucee
       std::string lim = tbl.getString("limiter");
       if (lim == "average")
         limiter = AVERAGE_LIMITER;
-      else if (lim == "min-mod")
+      else if (lim == "minmod")
         limiter = MINMOD_LIMITER;
       else if (lim == "superbee")
         limiter = SUPERBEE_LIMITER;
@@ -153,6 +156,10 @@ namespace Lucee
     int lower = localRgn.getLower(0);
     int upper = localRgn.getUpper(0);
 
+    std::vector<double> ldiff(3), rdiff(3); // for jump in averages
+    std::vector<double> ldelta(3), rdelta(3); // for projected jumps
+    std::vector<double> projSlopes(3);
+
 // compute slopes for linear reconstruction in each cell
     for (int i=lower; i<upper; ++i)
     {
@@ -161,11 +168,26 @@ namespace Lucee
       prim.setPtr(pPtr, i);
       prim.setPtr(prPtr, i+1);
 
-// calculate slope (these do not have the 1/dx term as it is taken
-// into account in predictor step)
-      slopes.setPtr(slpPtr, i);
+// compute jump in averages
       for (unsigned k=0; k<3; ++k)
-        slpPtr[k] = limaverage(pPtr[k]-plPtr[k], prPtr[k]-pPtr[k]);
+      {
+        ldiff[k] = pPtr[k]-plPtr[k];
+        rdiff[k] = prPtr[k]-pPtr[k];
+      }
+// project these jumps onto left eigenvectors
+      projectOnLeftEigenvectors(&pPtr[0], &ldiff[0], &ldelta[0]);
+      projectOnLeftEigenvectors(&pPtr[0], &rdiff[0], &rdelta[0]);
+
+// calculate slopes (these do not have the 1/dx term as it is taken
+// into account in predictor step)
+      for (unsigned k=0; k<3; ++k)
+      {
+        //slpPtr[k] = limaverage(pPtr[k]-plPtr[k], prPtr[k]-pPtr[k]);
+        projSlopes[k] = limaverage(ldelta[k], rdelta[k]);
+      }
+// reconstruct slopes
+      slopes.setPtr(slpPtr, i);
+      reconWihRightEigenvectors(&pPtr[0], &projSlopes[0], &slpPtr[0]);
     }
 
 // attach pointers for use in predictor step
@@ -256,7 +278,7 @@ namespace Lucee
 
       case MINMOD_LIMITER:
           if (a*b > 0)
-            av = minmod(0.5*(a+b), 2*a, 2*b);
+            av = 0.5*(a+b); //minmod(0.5*(a+b), 2*a, 2*b);
           else
             av = 0.0;
           break;
@@ -307,7 +329,7 @@ namespace Lucee
 // calculate fluxes and conserved variables on left/right of edge
     calcFlux(pvl, fl); // left flux
     calcFlux(pvr, fr); // right flux
-// (THIS IS NOT NEEDED AS WE KNOW CONSERVED VARS)
+// (THIS IS NOT NEEDED AS WE KNOW CONSERVED VARS. SO PASS IN CONSERVED VARS AS PARAMETERS TO FUNCTION)
     calcConsVars(pvl, cvl); // left conserved variables
     calcConsVars(pvr, cvr); // right conserved variables
 
@@ -331,5 +353,43 @@ namespace Lucee
     cv[0] = pv[RHO]; // density
     cv[1] = pv[RHO]*pv[UX]; // momentum
     cv[2] = pv[PR]/(gas_gamma-1) + 0.5*pv[RHO]*pv[UX]*pv[UX]; // energy
+  }
+
+  void
+  MusclHancock1DUpdater::projectOnLeftEigenvectors(const double *pv, const double *vec, double *coeff)
+  {
+// compute some needed quantities first
+    double b = gas_gamma-1;
+    double c = std::sqrt(gas_gamma*pv[PR]/pv[RHO]); // sound speed
+    double u = pv[UX];
+    double q2 = u*u;
+    double th = 0.5*q2;
+    double h = c*c/(gas_gamma-1) + 0.5*q2; // specific enthalpy
+    double b2c2 = b/(2*c*c);
+
+    coeff[0] = (th+u*c/b)*vec[0] + (-u-c/b)*vec[1] + vec[2];
+    coeff[1] = (2*h-2*q2)*vec[0] + 2*u*vec[1] - 2*vec[2];
+    coeff[2] = (th-u*c/b)*vec[0] + (-u+c/b)*vec[1] + vec[2];
+
+// scale all of these
+    for (unsigned i=0; i<3; ++i)
+      coeff[i] = b2c2*coeff[i];
+  }
+
+  void
+  MusclHancock1DUpdater::reconWihRightEigenvectors(const double *pv, const double *coeff, double *vec)
+  {
+// compute some needed quantities first
+    double b = gas_gamma-1;
+    double c = std::sqrt(gas_gamma*pv[PR]/pv[RHO]); // sound speed
+    double u = pv[UX];
+    double q2 = u*u;
+    double th = 0.5*q2;
+    double h = c*c/(gas_gamma-1) + 0.5*q2; // specific enthalpy
+    double b2c2 = b/(2*c*c);
+
+    vec[0] = coeff[0] + coeff[1] + coeff[2];
+    vec[1] = (u-c)*coeff[0] + u*coeff[1] + (u+c)*coeff[2];
+    vec[2] = (h-u*c)*coeff[0] + 0.5*q2*coeff[1] + (h+u*c)*coeff[2];
   }
 }
