@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcMathLib.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcStructuredGridBase.h>
 
@@ -34,7 +35,30 @@ namespace Lucee
 
   static const unsigned MX = 1;
   static const unsigned ER = 2;
-  
+
+/**
+ * Minmod function for two parameters.
+ */
+  double minmod(double a1, double a2)
+  {
+    if (a1>0 && a2>0)
+      return std::min(a1, a2);
+    if (a1<0 && a2<0)
+      return std::max(a1, a2);
+    return 0.0;
+  }
+
+/**
+ * Minmod function for two parameters.
+ */
+  double minmod(double a1, double a2, double a3)
+  {
+    if (a1>0 && a2>0 && a3>0)
+      return Lucee::min3(a1, a2, a3);
+    if (a1<0 && a2<0 && a3<0)
+      return Lucee::max3(a1, a2, a3);
+    return 0.0;
+  }
 
 /** Class id: this is used by registration system */
   const char *MusclHancock1DUpdater::id = "MusclHancock1D";
@@ -232,7 +256,11 @@ namespace Lucee
           break;
 
       case MINMOD_LIMITER:
-          av = 0.0;
+// this is actually a double min-mod limiter
+          if (a*b > 0)
+            av = minmod(0.5*(a+b), 2*a, 2*b);
+          else
+            av = 0.0;
           break;
           
       case SUPERBEE_LIMITER:
