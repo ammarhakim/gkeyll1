@@ -130,6 +130,24 @@ namespace Lucee
  * @param cv (out) Conserved variables.
  */
       void calcConsVars(const std::vector<double>& pv, std::vector<double>& cv);
+
+/**
+ * Project vector on left eigenvectors of flux Jacobian.
+ *
+ * @param pv Primitive variables with which to compute flux Jacobian.
+ * @param vec Vector to project.
+ * @param coeff (out) Vector of coefficients.
+ */
+      void projectOnLeftEigenvectors(const double *pv, const double *vec, double *coeff);
+
+/**
+ * Reconstruct vector by weighted sum of right eigenvectors.
+ *
+ * @param pv Primitive variables with which to compute flux Jacobian.
+ * @param coeff Vector of coefficients.
+ * @param vec (out) Output vector.
+ */
+      void reconWihRightEigenvectors(const double *pv, const double *coeff, double *vec);
   };
 }
 
