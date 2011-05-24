@@ -31,6 +31,9 @@ namespace Lucee
   static const unsigned RHO = 0;
   static const unsigned UX = 1;
   static const unsigned PR = 2;
+
+  static const unsigned MX = 1;
+  static const unsigned ER = 2;
   
 
 /** Class id: this is used by registration system */
@@ -202,6 +205,12 @@ namespace Lucee
       }
     }
 
+    for (unsigned k=0; k<3; ++k)
+    { // THIS IS A HACK TO APPLY COPY BCs (PLEASE IMPLEMENT BCs!!!!!)
+      qNew(-1, k) = qNew(0, k);
+      qNew(100, k) = qNew(99, k);
+    }
+
     return Lucee::UpdaterStatus();
   }
 
@@ -242,7 +251,7 @@ namespace Lucee
   }
 
   void
-  MusclHancock1DUpdater::calcPrimVars(const Lucee::Field<1, double>& cv, Lucee::Field<1, double> &pv)
+  MusclHancock1DUpdater::calcPrimVars(const Lucee::Field<1, double>& cv, Lucee::Field<1, double>& pv)
   {
     Lucee::ConstFieldPtr<double> cvPtr = cv.createConstPtr();
     Lucee::FieldPtr<double> pvPtr = pv.createPtr();
@@ -252,9 +261,9 @@ namespace Lucee
       cv.setPtr(cvPtr, i);
       pv.setPtr(pvPtr, i);
 
-      pvPtr[0] = cvPtr[0]; // density
-      pvPtr[1] = cvPtr[1]/cvPtr[0]; // velocity
-      pvPtr[2] = (cvPtr[2] - 0.5*cvPtr[1]*cvPtr[1]/cvPtr[0])*(gas_gamma-1); // pressure
+      pvPtr[RHO] = cvPtr[RHO]; // density
+      pvPtr[UX] = cvPtr[MX]/cvPtr[RHO]; // velocity
+      pvPtr[PR] = (cvPtr[ER] - 0.5*pvPtr[RHO]*pvPtr[UX]*pvPtr[UX])*(gas_gamma-1); // pressure
     }
   }
 
@@ -277,7 +286,7 @@ namespace Lucee
 
 // compute Lax fluxes
     for (unsigned i=0; i<3; ++i)
-      nf[i] = 0.5*(fl[i] + fr[i]) + 0.5*c*(cvr[i]-cvl[i]);
+      nf[i] = 0.5*(fl[i] + fr[i]) - 0.5*c*(cvr[i]-cvl[i]);
   }
 
   void
