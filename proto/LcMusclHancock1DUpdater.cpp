@@ -182,9 +182,9 @@ namespace Lucee
       predict.setPtr(prdPtr, i);
 
 // compute predicted primitive variables at dt/2
-      prdPtr[0] = pPtr[0] - dtdx2*(pPtr[0]*cslpPtr[1] + pPtr[1]*cslpPtr[0]); // density
-      prdPtr[1] = pPtr[1] - dtdx2*(pPtr[1]*cslpPtr[1] + 1/pPtr[0]*cslpPtr[2]); // velocity
-      prdPtr[2] = pPtr[2] - dtdx2*(pPtr[1]*cslpPtr[2] + gas_gamma*pPtr[2]*cslpPtr[1]); // pressure
+      prdPtr[RHO] = pPtr[RHO] - dtdx2*(pPtr[RHO]*cslpPtr[UX] + pPtr[UX]*cslpPtr[RHO]); // density
+      prdPtr[UX] = pPtr[UX] - dtdx2*(pPtr[UX]*cslpPtr[UX] + 1/pPtr[RHO]*cslpPtr[PR]); // velocity
+      prdPtr[PR] = pPtr[PR] - dtdx2*(pPtr[UX]*cslpPtr[PR] + gas_gamma*pPtr[PR]*cslpPtr[UX]); // pressure
     }
 
 // attach pointers for use in corrector step
@@ -218,10 +218,9 @@ namespace Lucee
 // evaluate numerical flux function using left/right states
       calcNumericalFlux(ledge, redge, numFlux);
 
-// update solution in each cell connected to edge
       qNew.setPtr(qNewlPtr, i-1); // cell left of edge
       qNew.setPtr(qNewrPtr, i); // cell right of edge
-
+// update solution in each cell connected to edge
       for (unsigned k=0; k<3; ++k)
       {
         qNewlPtr[k] += -dtdx*numFlux[k];
@@ -256,7 +255,6 @@ namespace Lucee
           break;
 
       case MINMOD_LIMITER:
-// this is actually a double min-mod limiter
           if (a*b > 0)
             av = minmod(0.5*(a+b), 2*a, 2*b);
           else
@@ -309,6 +307,7 @@ namespace Lucee
 // calculate fluxes and conserved variables on left/right of edge
     calcFlux(pvl, fl); // left flux
     calcFlux(pvr, fr); // right flux
+// (THIS IS NOT NEEDED AS WE KNOW CONSERVED VARS)
     calcConsVars(pvl, cvl); // left conserved variables
     calcConsVars(pvr, cvr); // right conserved variables
 
