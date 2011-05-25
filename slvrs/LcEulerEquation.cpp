@@ -98,7 +98,7 @@ namespace Lucee
     q[1] = v[0]*v[1]; // rho*u
     q[2] = v[0]*v[2]; // rho*v
     q[3] = v[0]*v[3]; // rho*w
-    q[4] = v[4]/(gas_gamma-1) + 0.5*v[0]*(v[1]*v[1] + v[2]*v[2] + v[3]*v[3]); // pressure
+    q[4] = v[4]/(gas_gamma-1) + 0.5*v[0]*(v[1]*v[1] + v[2]*v[2] + v[3]*v[3]); // energy
   }
 
   void
