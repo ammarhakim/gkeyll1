@@ -87,6 +87,14 @@ namespace Lucee
          const std::string& nm);
 
 /**
+ * Write dataStruct to specified text file. The data is written as
+ * plain text.
+ *
+ * @param txtFl Text file handle for output.
+ */
+      virtual void writeToTxtFile(std::ofstream& txtFl);
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.

@@ -18,6 +18,10 @@
 #include <LcHdf5Io.h>
 #include <LcPointerHolder.h>
 
+// std includes
+#include <fstream>
+#include <iostream>
+
 namespace Lucee
 {
 // set madule name
@@ -40,15 +44,41 @@ namespace Lucee
   void
   DataStructIfc::write(const std::string& nm)
   {
+    bool isH5 = true;
+// check file extention to determine if hdf5 or plain text should be written
+    std::string snm = nm;
+    unsigned trunc = nm.find_last_of(".", snm.size());
+    if (trunc > 0)
+      snm.erase(0, trunc);
+    if (snm == ".txt")
+      isH5 = false; // write out text file
+
+    if (isH5)
+    {
 #ifdef HAVE_MPI
-    Lucee::Hdf5Io io(MPI_COMM_WORLD, MPI_INFO_NULL);
+      Lucee::Hdf5Io io(MPI_COMM_WORLD, MPI_INFO_NULL);
 #else
-    Lucee::Hdf5Io io(0, 0);
+      Lucee::Hdf5Io io(0, 0);
 #endif
 // open file to write in
-    Lucee::IoNodeType fn = io.createFile(nm);
+      Lucee::IoNodeType fn = io.createFile(nm);
 // write data
-    this->writeToFile(io, fn, this->getName());
+      this->writeToFile(io, fn, this->getName());
+    }
+    else
+    {
+// open text file to write in
+      std::ofstream outFl(nm.c_str(), std::fstream::out);
+// write out data
+      this->writeToTxtFile(outFl);
+    }
+  }
+
+  void
+  DataStructIfc::writeToTxtFile(std::ofstream& txtFl)
+  {
+// throw exception if we come here
+    throw Lucee::Except("DataStructIfc::writeToTxtFile: Not implemented!");
   }
 
   void
