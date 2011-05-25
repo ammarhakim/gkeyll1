@@ -29,6 +29,7 @@ namespace Lucee
   static const unsigned MINMOD_LIMITER = 1;
   static const unsigned SUPERBEE_LIMITER = 2;
   static const unsigned ZERO_LIMITER = 3;
+  static const unsigned EPSILON_LIMITER = 4;
 
 // indices into primitive variables array
   static const unsigned RHO = 0;
@@ -100,6 +101,8 @@ namespace Lucee
         limiter = SUPERBEE_LIMITER;
       else if (lim == "zero")
         limiter = ZERO_LIMITER;
+      else if (lim == "epsilon")
+        limiter = EPSILON_LIMITER;
       else
       {
         Lucee::Except lce("MusclHancock1DUpdater::readInput: Do not recognize limiter type '");
@@ -288,23 +291,30 @@ namespace Lucee
     switch (limiter)
     {
       case AVERAGE_LIMITER:
-          av = 0.5*(a+b);
-          break;
-
+        av = 0.5*(a+b);
+        break;
+        
       case MINMOD_LIMITER:
-          if (a*b > 0)
-            av = minmod(0.5*(a+b), 2*a, 2*b);
-          else
-            av = 0.0;
-          break;
+        if (a*b > 0)
+          av = minmod(0.5*(a+b), 2*a, 2*b);
+        else
+          av = 0.0;
+        break;
           
       case SUPERBEE_LIMITER:
-          av = 0.0;
-          break;
+        av = 0.0;
+        break;
 
       case ZERO_LIMITER:
-          av = 0.0;
-          break;
+        av = 0.0;
+        break;
+
+        case EPSILON_LIMITER:
+        {
+          double a2 = a*a, b2 = b*b, e2 = 0.008;
+          av = ((b2+e2)*a + (a2+e2)*b)/(a2+b2+2*e2);
+        }
+        break;
           
         default:
 // this can not happen
