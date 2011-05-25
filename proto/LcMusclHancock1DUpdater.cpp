@@ -158,10 +158,12 @@ namespace Lucee
 
     std::vector<double> ldiff(3), rdiff(3); // for jump in averages
     std::vector<double> ldelta(3), rdelta(3); // for projected jumps
-    std::vector<double> projSlopes(3);
+    std::vector<double> projSlopes(3), testRecon(3);
 
-// compute slopes for linear reconstruction in each cell
-    for (int i=lower; i<upper; ++i)
+// compute slopes for linear reconstruction in each cell (we need to
+// compute slopes in one extra cell on either side so they can be used
+// to update the first and last cell in the domain)
+    for (int i=lower-1; i<upper+1; ++i)
     {
 // attach pointers to left, current and right cells
       prim.setPtr(plPtr, i-1);
@@ -181,10 +183,7 @@ namespace Lucee
 // calculate slopes (these do not have the 1/dx term as it is taken
 // into account in predictor step)
       for (unsigned k=0; k<3; ++k)
-      {
-        //slpPtr[k] = limaverage(pPtr[k]-plPtr[k], prPtr[k]-pPtr[k]);
         projSlopes[k] = limaverage(ldelta[k], rdelta[k]);
-      }
 // reconstruct slopes
       slopes.setPtr(slpPtr, i);
       reconWihRightEigenvectors(&pPtr[0], &projSlopes[0], &slpPtr[0]);
@@ -197,7 +196,7 @@ namespace Lucee
     double dtdx = dt/grid.getDx(0);
     double dtdx2 = 0.5*dtdx;
 // compute predicted values of solution
-    for (int i=lower; i<upper; ++i)
+    for (int i=lower-1; i<upper+1; ++i)
     {
       prim.setPtr(pPtr, i);
       slopes.setPtr(cslpPtr, i);
@@ -224,8 +223,8 @@ namespace Lucee
 // one extra upper index)
     for (int i=lower; i<upper+1; ++i)
     {
-      prim.setPtr(plPtr, i-1); // cell left of edge
-      prim.setPtr(prPtr, i); // cell right of edge
+      predict.setPtr(plPtr, i-1); // cell left of edge
+      predict.setPtr(prPtr, i); // cell right of edge
 
       slopes.setPtr(cslplPtr, i-1); // cell left of edge
       slopes.setPtr(cslprPtr, i); // cell right of edge
@@ -252,8 +251,10 @@ namespace Lucee
 
     for (unsigned k=0; k<3; ++k)
     { // THIS IS A HACK TO APPLY COPY BCs (PLEASE IMPLEMENT BCs!!!!!)
+      qNew(-2, k) = qNew(0, k);
       qNew(-1, k) = qNew(0, k);
       qNew(100, k) = qNew(99, k);
+      qNew(101, k) = qNew(99, k);
     }
 
     return Lucee::UpdaterStatus();
