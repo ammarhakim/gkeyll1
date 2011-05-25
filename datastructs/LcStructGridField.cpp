@@ -18,6 +18,9 @@
 #include <LcPointerHolder.h>
 #include <LcStructGridField.h>
 
+// std includes
+#include <fstream>
+
 namespace Lucee
 {
 // names used in registration system
@@ -128,6 +131,35 @@ namespace Lucee
     grid->writeToFile(io, node, "StructGrid");
 
     return node;
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::writeToTxtFile(std::ofstream& txtFl)
+  {
+// create sequencer to loop over complete region
+    Lucee::RowMajorSequencer<NDIM> seq(this->getRegion());
+    
+    double xc[3]; // for cell-center coordinates
+    int idx[NDIM]; // for indexing
+    Lucee::ConstFieldPtr<T> rPtr = this->createConstPtr(); // pointer to data location
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+// set pointers in data array and grid
+      this->setPtr(rPtr, idx);
+      grid->setIndex(idx);
+// get cell-center coordinates
+      grid->getCentriod(xc);
+
+// write coordinates of cell-center
+      for (unsigned i=0; i<NDIM; ++i)
+        txtFl << xc[i] << " ";
+// now write out actual data at this location
+      for (unsigned i=0; i<this->getNumComponents(); ++i)
+        txtFl << rPtr[i] << " ";
+      txtFl << std::endl;
+    }
   }
 
   template <unsigned NDIM, typename T>

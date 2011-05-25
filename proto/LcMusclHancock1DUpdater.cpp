@@ -278,7 +278,7 @@ namespace Lucee
 
       case MINMOD_LIMITER:
           if (a*b > 0)
-            av = 0.5*(a+b); //minmod(0.5*(a+b), 2*a, 2*b);
+            av = minmod(0.5*(a+b), 2*a, 2*b);
           else
             av = 0.0;
           break;
