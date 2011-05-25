@@ -96,6 +96,24 @@ namespace Lucee
  */
       virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
 
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states. The states and jump are already in the local coordinate
+ * system specified by 'c'. Hence, in most case (equation system is
+ * isotropic) the coordinate system should be ignored.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      virtual void waves(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
+
     protected:
 
     private:
