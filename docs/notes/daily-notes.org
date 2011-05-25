@@ -3,10 +3,19 @@
 * May 24th
 
   Added a method writeToTxt that allows writing data-structs to a
-  plain text file. This allows easy reading into Matplotlib.
+  plain text file. This allows easy reading into Matplotlib. The data
+  in each cell is written on one line. The first NDIM entries are the
+  coordinates and the next numComponent entries are the values stored
+  in the field at that location.
 
   Implemented characteristic limiters to MUSCL/Hancock algorithm. The
-  results still look very crappy.
+  results still look very crappy. FIXED!!
+
+  Turns out that the problem was that I was not using the estimated
+  values at the edge but using the previous time-step solution. Also,
+  the other problem was with the incorrect indexing. The first layer
+  of ghost cells need slopes and predicted values computed to ensure
+  that the first and last cell in the domain are updated correctly.
 
 * May 23rd
 
