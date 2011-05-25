@@ -72,6 +72,13 @@ namespace Lucee
   }
 
   void
+  MusclHancock1DUpdater::declareTypes() 
+  {
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendOutVarType(typeid(Lucee::Field<1, double>));
+  }
+
+  void
   MusclHancock1DUpdater::readInput(Lucee::LuaTable& tbl) 
   {
 // call base class method
@@ -272,13 +279,6 @@ namespace Lucee
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
-  }
-
-  void
-  MusclHancock1DUpdater::declareTypes() 
-  {
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
   double
