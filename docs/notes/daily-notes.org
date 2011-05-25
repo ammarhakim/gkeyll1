@@ -1,5 +1,22 @@
 # -*- org -*-
 
+* May 25th
+
+  Implemented waves() method in the EulerEquation class. Tested in 1D
+  by comparing to Sod-shock problem. Results compare well with exact
+  solution. However, still need to compare with previous results from
+  miniwarpx to ensure that the results are not too diffuse.
+
+  Also compared with Muscl-Hancock scheme. The MH scheme compares well
+  with Wave. However, small oscillations are seen in MH that are not
+  present in the Wave scheme. However, it is impressive how a simple
+  numerical flux (Lax) can give such good results. Hence, it seems
+  that MH could be a good scheme to implement and make available as a
+  production scheme.
+
+  Also need to document the Roe averages for the Euler equations in
+  Tech-Note 1007.
+
 * May 24th
 
   Added a method writeToTxt that allows writing data-structs to a
