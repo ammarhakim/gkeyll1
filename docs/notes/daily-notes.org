@@ -1,5 +1,21 @@
 # -*- org -*-
 
+* May 24th
+
+  Added a method writeToTxt that allows writing data-structs to a
+  plain text file. This allows easy reading into Matplotlib.
+
+  Implemented characteristic limiters to MUSCL/Hancock algorithm. The
+  results still look very crappy.
+
+* May 23rd
+
+  Implemented Hancock-MUSCL algorithm as described by van
+  Leer. Boundary conditions really, really need to be implemented now.
+
+  Characteristic limiters are required. Add a method to project a
+  vector on left eigenvectors and back to right eigenvectors.
+
 * April 10th
 
   Although basic unstructured grid data is stored in flat arrays the
