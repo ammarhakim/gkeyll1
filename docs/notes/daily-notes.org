@@ -16,6 +16,11 @@
   the other problem was with the incorrect indexing. The first layer
   of ghost cells need slopes and predicted values computed to ensure
   that the first and last cell in the domain are updated correctly.
+  
+** TODO Fix the muscl-hancock script to adjust dt properly
+
+   As implemented now the muscl-hancock scheme will not take a larger
+   time-step even if allowed. This needs to be fixed.
 
 * May 23rd
 
