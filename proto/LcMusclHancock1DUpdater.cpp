@@ -140,11 +140,9 @@ namespace Lucee
 
 // time-step
     double dt = t-this->getCurrTime();
+    double dtdx = dt/grid.getDx(0);
 // local region to index
     Lucee::Region<1, int> localRgn = grid.getLocalBox();
-
-// compute primitive variables from conserved variables
-    calcPrimVars(q, prim);
 
 // pointers to data
     Lucee::ConstFieldPtr<double> pPtr = prim.createConstPtr();
@@ -159,6 +157,23 @@ namespace Lucee
     std::vector<double> ldiff(3), rdiff(3); // for jump in averages
     std::vector<double> ldelta(3), rdelta(3); // for projected jumps
     std::vector<double> projSlopes(3), testRecon(3);
+
+// compute primitive variables from conserved variables
+    calcPrimVars(q, prim);
+
+    double emax = 0.0;
+// compute maximum eigenvalue to check CFL condition
+    for (int i=lower; i<upper; ++i)
+    {
+// attach pointer to primitive variables
+      prim.setPtr(pPtr, i);
+// compute maximum eigenvalue
+      emax = std::max(emax, std::fabs(pPtr[UX]) + std::sqrt(gas_gamma*pPtr[PR]/pPtr[RHO]));
+    }
+// check if CFL condition is satisfied
+    double cfla = dtdx*emax;
+    if (cfla > 1.01*cfl) // the 1.01 fudge is required to avoid grinding away with same dt
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
 // compute slopes for linear reconstruction in each cell (we need to
 // compute slopes in one extra cell on either side so they can be used
@@ -193,7 +208,6 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> cslpPtr = slopes.createConstPtr();
     Lucee::FieldPtr<double> prdPtr = predict.createPtr();
 
-    double dtdx = dt/grid.getDx(0);
     double dtdx2 = 0.5*dtdx;
 // compute predicted values of solution
     for (int i=lower-1; i<upper+1; ++i)
@@ -257,7 +271,7 @@ namespace Lucee
       qNew(101, k) = qNew(99, k);
     }
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   void
