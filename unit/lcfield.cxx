@@ -665,6 +665,57 @@ test_15()
     }
 }
 
+void
+test_16()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> fld(rgn, 3, lg, ug, 10.0);
+
+// initialize first layer of cells in X-direction
+  for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        fld(i,j,k) = i+1000*k;
+
+// apply periodic BCs in X
+  fld.applyPeriodicBc(0);
+
+// check if it worked
+  for (int i=fld.getUpper(0); i<fld.getUpperExt(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if X-upper periodic BC worked", fld(i,j,k) == fld(i-10,j,k));
+
+  for (int i=fld.getLowerExt(0); i<fld.getLower(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if X-lower periodic BC worked", fld(i,j,k) == fld(i+10,j,k));
+
+// initialize first layer of cells in Y-direction
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+        for (unsigned k=0; k<3; ++k)
+          fld(i,j,k) = j+1000*k;
+
+// apply periodic BCs in y
+  fld.applyPeriodicBc(1);
+
+// check if it worked
+  for (int j=fld.getUpper(1); j<fld.getUpperExt(1); ++j)
+    for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if Y-upper periodic BC worked", fld(i,j,k) == fld(i,j-12,k));
+
+  for (int j=fld.getLowerExt(1); j<fld.getLower(1); ++j)
+    for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if Y-lower periodic BC worked", fld(i,j,k) == fld(i,j+12,k));
+}
+
 int
 main(void)
 {
@@ -684,5 +735,6 @@ main(void)
   test_13();
   test_14();
   test_15();
+  test_16();
   LC_END_TESTS;
 }
