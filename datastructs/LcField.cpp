@@ -230,12 +230,78 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::applyPeriodicBc(unsigned dir)
+  {
+    int lo[NDIM], up[NDIM];
+
+// create a region to represent lower interior layer of cells
+    for (unsigned i=0; i<NDIM; ++i)
+    { // whole interior region
+      lo[i] = rgn.getLower(i);
+      up[i] = rgn.getUpper(i);
+    }
+// adjust cells along 'dir' direction so it represents region to be copied
+    up[dir] = lo[dir]+upperGhost[dir];
+    Lucee::Region<NDIM, int> lowerRgn(lo, up);
+
+    unsigned stride = rgn.getShape(dir); // no of cells in interior in specified direction
+
+    Lucee::ConstFieldPtr<T> ptr = this->createConstPtr(); // interior pointer
+    Lucee::FieldPtr<T> gPtr = this->createPtr(); // ghost pointer
+
+    int idx[NDIM];
+// loop over region and copy to ghost layer of cells
+    Lucee::RowMajorSequencer<NDIM> loSeq(lowerRgn);
+    while (loSeq.step())
+    {
+      loSeq.fillWithIndex(idx);
+      this->setPtr(ptr, idx); // location to copy from
+// bump index in 'dir' to get to correction location to copy into
+      idx[dir] += stride;
+      this->setPtr(gPtr, idx);
+
+// copy data
+      for (unsigned k=0; k<numComponents; ++k)
+        gPtr[k] = ptr[k];
+    }
+
+// create a region to represent upper interior layer of cells
+    for (unsigned i=0; i<NDIM; ++i)
+    { // whole interior region
+      lo[i] = rgn.getLower(i);
+      up[i] = rgn.getUpper(i);
+    }
+// adjust cells along 'dir' direction so it represents region to be copied
+    lo[dir] = up[dir]-lowerGhost[dir];
+    Lucee::Region<NDIM, int> upperRgn(lo, up);
+
+// loop over region and copy to ghost layer of cells
+    Lucee::RowMajorSequencer<NDIM> upSeq(upperRgn);
+    while (upSeq.step())
+    {
+      upSeq.fillWithIndex(idx);
+      this->setPtr(ptr, idx); // location to copy from
+// bump index in 'dir' to get to correction location to copy into
+      idx[dir] -= stride;
+      this->setPtr(gPtr, idx);
+
+// copy data
+      for (unsigned k=0; k<numComponents; ++k)
+        gPtr[k] = ptr[k];
+    }
+
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
+    lfm.appendFunc("applyPeriodicBc", luaApplyPeriodicBc);
   }
 
   template <unsigned NDIM, typename T>
@@ -280,18 +346,44 @@ namespace Lucee
       = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
     if (! lua_isnumber(L, 2))
     {
-      Lucee::Except lce("Field::luaAccumulate: Must provide a number to 'accumulatr' method");
+      Lucee::Except lce("Field::luaAccumulate: Must provide a number to 'accumulate' method");
       throw lce;
     }
-    T coeff = (T) lua_tonumber(L, 2);
+    T coeff = (T) lua_tonumber(L, 2); // coeff for accumulation
     if (lua_type(L, 3) != LUA_TUSERDATA)
     {
       Lucee::Except lce("Field::luaAccumulate: Must provide a field to 'accumulate' method");
       throw lce;
     }
     Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =
-      (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 3);
+      (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 3); // field to accumulate
     fld->accumulate(coeff, *fldPtr->pointer);
+
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaApplyPeriodicBc(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+    if (! lua_isnumber(L, 2))
+    {
+      Lucee::Except lce("Field::luaApplyPeriodicBc: Must provide a number to 'applyPeriodicBc' method");
+      throw lce;
+    }
+// determine direction in which to apply periodic BCs
+    int dir = (int) lua_tonumber(L, 2);
+    if (dir<0 || dir >= NDIM)
+    { // incorrect direction specified
+      Lucee::Except lce("Field::luaApplyPeriodicBc: Direction must be one of ");
+      for (unsigned i=0; i<NDIM-1; ++i)
+        lce << i << ", ";
+      lce << NDIM-1 << ".";
+      lce << " '" << dir << "' specified instead" << std::endl;
+      throw lce;      
+    }
 
     return 0;
   }
