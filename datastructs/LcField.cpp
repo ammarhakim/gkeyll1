@@ -233,6 +233,8 @@ namespace Lucee
   Field<NDIM, T>&
   Field<NDIM, T>::applyPeriodicBc(unsigned dir)
   {
+// DOES NOT APPLY PERIODIC BCS TO CORNER CELLS
+
     int lo[NDIM], up[NDIM];
 
 // create a region to represent lower interior layer of cells
