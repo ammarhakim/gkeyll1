@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* May 26th
+
+  Implemented periodic boundary conditions. Not yet added the corner
+  ghost cells. This needs to be done.
+
 * May 25th
 
   Implemented waves() method in the EulerEquation class. Tested in 1D
