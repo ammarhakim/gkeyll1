@@ -17,6 +17,12 @@
   Also need to document the Roe averages for the Euler equations in
   Tech-Note 1007.
 
+  Turns out that the 2nd order Muscl-Hancock scheme as implemented
+  does not preserve positivity. However, the 1st order Muscl-Hancock
+  scheme does (limiter = "zero"). The internal energy looks really
+  bad. In fact, turns out that the exact solution with even tiny
+  background density and pressure has a spike in it.
+
 * May 24th
 
   Added a method writeToTxt that allows writing data-structs to a
@@ -36,7 +42,7 @@
   
   One issue in implementing a general MUSCL/Hancock algorithm is how
   to do the predictor step for a general system of equations. Perhaps
-  just conserved updates are enough?
+  just conserved updates are enough?g
   
 ** TODO Fix the muscl-hancock script to adjust dt properly
 
