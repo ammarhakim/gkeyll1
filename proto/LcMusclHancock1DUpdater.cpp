@@ -121,6 +121,10 @@ namespace Lucee
 // get hold of grid
     const Lucee::StructuredGridBase<1>& grid 
       = this->getGrid<Lucee::StructuredGridBase<1> >();
+// compute factor for use in EPSILON limiter
+    double dx = grid.getDx(0);
+    epsFac = dx*dx*dx;
+
 // local region to index
     Lucee::Region<1, int> localRgn = grid.getLocalBox();
 
@@ -311,7 +315,7 @@ namespace Lucee
 
         case EPSILON_LIMITER:
         {
-          double a2 = a*a, b2 = b*b, e2 = 0.008;
+          double a2 = a*a, b2 = b*b, e2 = epsFac;
           av = ((b2+e2)*a + (a2+e2)*b)/(a2+b2+2*e2);
         }
         break;

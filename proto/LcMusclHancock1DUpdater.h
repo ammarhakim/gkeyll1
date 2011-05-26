@@ -78,6 +78,8 @@ namespace Lucee
       double gas_gamma;
 /** CFL number */
       double cfl;
+/** Factor for use in EPSILON limiter */
+      double epsFac;
 /** Field to store slopes */
       Lucee::Field<1, double> slopes;
 /** Field to store predicted variables */

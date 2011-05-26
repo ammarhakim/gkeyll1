@@ -34,6 +34,10 @@
   of ghost cells need slopes and predicted values computed to ensure
   that the first and last cell in the domain are updated correctly.
   
+  One issue in implementing a general MUSCL/Hancock algorithm is how
+  to do the predictor step for a general system of equations. Perhaps
+  just conserved updates are enough?
+  
 ** TODO Fix the muscl-hancock script to adjust dt properly
 
    As implemented now the muscl-hancock scheme will not take a larger
