@@ -312,6 +312,14 @@ namespace Lucee
       Field<NDIM, T>& accumulate(double coeff, const Field<NDIM, T>& fld);
 
 /**
+ * Apply periodic boundary conditions along specified direction.
+ *
+ * @param dir Direction to apply periodic BCs
+ * @return reference to this field.
+ */
+      Field<NDIM, T>& applyPeriodicBc(unsigned dir);
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
@@ -342,6 +350,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaAccumulate(lua_State *L);
+
+/**
+ * Lua callable method for applying periodic boundary conditions.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaApplyPeriodicBc(lua_State *L);
 
     private:
 /**
