@@ -26,6 +26,7 @@ namespace Lucee
       scIdx(0), numComponents(1), rgn(&Lucee::FixedVector<NDIM, int>(1)[0]),
       rgnIdx(rgn.inflate(0, 1))
   {
+    globalRgn = rgn; // for now global region = local region
   }
 
   template <unsigned NDIM, typename T>
@@ -33,6 +34,7 @@ namespace Lucee
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
       scIdx(0), numComponents(nc), rgn(rgn), rgnIdx(rgn.inflate(0, nc))
   {
+    globalRgn = rgn;  // for now global region = local region
     for (unsigned i=0; i<NDIM; ++i)
     {
       lowerGhost[i] = 0;
@@ -47,6 +49,7 @@ namespace Lucee
       rgn.extend(lg, ug).inflate(0, nc), init),
       scIdx(0), numComponents(nc), rgn(rgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
   {
+    globalRgn = rgn;  // for now global region = local region
     for (unsigned i=0; i<NDIM; ++i)
     {
       lowerGhost[i] = lg[i];
@@ -60,7 +63,8 @@ namespace Lucee
       scIdx(fld.scIdx),
       numComponents(fld.numComponents),
       rgn(fld.rgn),
-      rgnIdx(fld.rgnIdx)
+      rgnIdx(fld.rgnIdx),
+      globalRgn(fld.globalRgn)
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -82,6 +86,7 @@ namespace Lucee
     numComponents = fld.numComponents;
     rgn = fld.rgn;
     rgnIdx = fld.rgnIdx;
+    globalRgn = fld.globalRgn;
     for (unsigned i=0; i<NDIM; ++i)
     {
       lowerGhost[i] = fld.lowerGhost[i];
@@ -233,15 +238,15 @@ namespace Lucee
   Field<NDIM, T>&
   Field<NDIM, T>::applyPeriodicBc(unsigned dir)
   {
-// DOES NOT APPLY PERIODIC BCS TO CORNER CELLS
+// DOES NOT APPLY PERIODIC BCS TO CORNER CELLS. ALSO NEED TO DO FUNKY STUFF FOR PARALLEL
 
     int lo[NDIM], up[NDIM];
 
 // create a region to represent lower interior layer of cells
     for (unsigned i=0; i<NDIM; ++i)
     { // whole interior region
-      lo[i] = rgn.getLower(i);
-      up[i] = rgn.getUpper(i);
+      lo[i] = getLower(i);
+      up[i] = getUpper(i);
     }
 // adjust cells along 'dir' direction so it represents region to be copied
     up[dir] = lo[dir]+upperGhost[dir];
@@ -271,8 +276,8 @@ namespace Lucee
 // create a region to represent upper interior layer of cells
     for (unsigned i=0; i<NDIM; ++i)
     { // whole interior region
-      lo[i] = rgn.getLower(i);
-      up[i] = rgn.getUpper(i);
+      lo[i] = getLower(i);
+      up[i] = getUpper(i);
     }
 // adjust cells along 'dir' direction so it represents region to be copied
     lo[dir] = up[dir]-lowerGhost[dir];
@@ -300,6 +305,18 @@ namespace Lucee
   Field<NDIM, T>&
   Field<NDIM, T>::applyCopyBc(unsigned dir, unsigned side)
   {
+    int lo[NDIM], up[NDIM];
+
+// create a region to represent lower interior layer of cells
+    for (unsigned i=0; i<NDIM; ++i)
+    { // whole region, including extended region
+      lo[i] = getGlobalLowerExt(i);
+      up[i] = getGlobalUpperExt(i);
+    }
+// adjust cells along 'dir' direction so it represents region to be copied
+    up[dir] = lo[dir]+upperGhost[dir];
+    Lucee::Region<NDIM, int> lowerRgn(lo, up);
+
     return *this;
   }
 

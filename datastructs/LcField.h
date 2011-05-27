@@ -161,6 +161,65 @@ namespace Lucee
       Lucee::Region<NDIM, int> getExtRegion() const 
       { return rgn.extend(lowerGhost, upperGhost); }
 
+// GLOBAL
+
+/**
+ * Get global start index in the specified direction.
+ *
+ * @return start index in specified direction.
+ */
+      int getGlobalLower(unsigned dir) const
+      { return globalRgn.inflate(0, numComponents).getLower(dir); }
+
+/**
+ * Get one past the global end index in the specified direction.
+ *
+ * @return One past the end index in specified direction.
+ */
+      int getGlobalUpper(unsigned dir) const
+      { return globalRgn.inflate(0, numComponents).getUpper(dir); }
+
+/**
+ * Get start index of the global extended region (including ghost
+ * indices) in the specified direction.
+ *
+ * @return start index in specified direction.
+ */
+      int getGobalLowerExt(unsigned dir) const
+      { 
+        return globalRgn.extend(lowerGhost, upperGhost)
+          .inflate(0, numComponents).getLower(dir); 
+      }
+
+/**
+ * Get one past the end index of the global extended region (including
+ * ghost indices) in the specified direction.
+ *
+ * @return One past the end index in specified direction.
+ */
+      int getGlobalUpperExt(unsigned dir) const
+      { 
+        return globalRgn.extend(lowerGhost, upperGhost)
+          .inflate(0, numComponents).getUpper(dir);
+      }
+
+/**
+ * Global region indexed by field.
+ *
+ * @return region indexed by field.
+ */
+      Lucee::Region<NDIM, int> getGlobalRegion() const 
+      { return globalRgn; }
+
+/**
+ * Global region extended region (including ghost indices) indexed by
+ * field.
+ *
+ * @return extended region indexed by field.
+ */
+      Lucee::Region<NDIM, int> getGlobalExtRegion() const 
+      { return globalRgn.extend(lowerGhost, upperGhost); }
+
 /**
  * Get indexer into field.
  *
@@ -398,6 +457,8 @@ namespace Lucee
       unsigned numComponents;
 /** Region indexed by field */
       Lucee::Region<NDIM, int> rgn;
+/** Global region indexed by field */
+      Lucee::Region<NDIM, int> globalRgn;
 /** Indexer over region over which field is valid */
       Lucee::RowMajorIndexer<NDIM+1> rgnIdx;
 /** Lower ghost indices */
