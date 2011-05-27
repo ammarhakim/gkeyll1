@@ -2,8 +2,12 @@
 
 * May 26th
 
-  Implemented periodic boundary conditions. Not yet added the corner
-  ghost cells. This needs to be done.
+  Implemented periodic boundary conditions. One issue is what to do
+  with the corner cells. For example, when applying periodic BCs in
+  direction 0 the corner cells do not get updated. Not sure how to
+  handle this yet. (The issue is that periodic in X might actually
+  just mean that. Periodic in *both* X and Y means all corners need to
+  be updated in a periodic manner too.)
 
 * May 25th
 

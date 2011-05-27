@@ -297,6 +297,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>&
+  Field<NDIM, T>::applyCopyBc(unsigned dir, unsigned side)
+  {
+    return *this;
+  }
+
+  template <unsigned NDIM, typename T>
   void
   Field<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
@@ -304,6 +311,7 @@ namespace Lucee
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
     lfm.appendFunc("applyPeriodicBc", luaApplyPeriodicBc);
+    lfm.appendFunc("applyCopyBc", luaApplyCopyBc);
   }
 
   template <unsigned NDIM, typename T>
@@ -386,6 +394,52 @@ namespace Lucee
       lce << " '" << dir << "' specified instead" << std::endl;
       throw lce;      
     }
+// apply boundary conditions
+    fld->applyPeriodicBc(dir);
+
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaApplyCopyBc(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+    if (! lua_isnumber(L, 2))
+    {
+      Lucee::Except lce("Field::luaApplyCopyBc: Must provide a number to 'applyCopyBc' method");
+      throw lce;
+    }
+// determine direction in which to apply periodic BCs
+    int dir = (int) lua_tonumber(L, 2);
+    if (dir<0 || dir >= NDIM)
+    { // incorrect direction specified
+      Lucee::Except lce("Field::luaApplyCopyBc: Direction must be one of ");
+      for (unsigned i=0; i<NDIM-1; ++i)
+        lce << i << ", ";
+      lce << NDIM-1 << ".";
+      lce << " '" << dir << "' specified instead" << std::endl;
+      throw lce;      
+    }
+
+    if (! lua_isstring(L, 3))
+    {
+      Lucee::Except lce("Field::luaApplyCopyBc: Must provide a side to 'applyCopyBc' method.");
+      lce << " Should be one of 'lower' or 'upper'." << std::endl;
+      throw lce;
+    }
+// determine side in which to apply periodic BCs
+    std::string ss = lua_tostring(L, 3);
+    unsigned side = 1;
+    if (ss == "lower")
+      side = 0;
+    else if (ss == "upper")
+      side = 1;
+    else
+      throw Lucee::Except("Field::luaApplyCopyBc: side should be one of \"lower\" or \"upper\".");
+// apply boundary conditions
+    fld->applyCopyBc(dir, side);
 
     return 0;
   }
