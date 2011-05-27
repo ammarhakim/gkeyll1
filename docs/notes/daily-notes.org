@@ -9,6 +9,29 @@
   just mean that. Periodic in *both* X and Y means all corners need to
   be updated in a periodic manner too.)
 
+  Added a skeleton for copy BCs. These need to be completed. Then need
+  to add a function BC to the StructGridField class (as it knows the
+  centroid coordinates). Then need to add general "copy" BC function
+  that takes an array of coefficients to multiply before copy.
+
+  Should either clean up the lucee-studies repo or create a new one
+  for examples.
+
+  Need to clean out the code documentation. Code should be documented
+  using doxygen. However, the usage in Lua should be documented using
+  Sphinx. Need to start on the latter. Also, add more detailed
+  documentation to the respective header files.
+
+  For Lua documentation create one page for Grids, one for Fields and
+  one for Updaters. Describe each in detail with examples. Also try
+  and give full working examples.
+
+  Allow text output from slab RTE solver. Then make HDF5 optional and
+  conditional shield all the HDF5 code both in CMake and code.
+
+  Complete the white-paper on Lucee as product. Perhaps need to play
+  around with WPF as a possible UX library.
+
 * May 25th
 
   Implemented waves() method in the EulerEquation class. Tested in 1D
