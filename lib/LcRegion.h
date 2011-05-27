@@ -35,6 +35,12 @@ namespace Lucee
   {
     public:
 /**
+ * Creates an empty box, i.e. with 0 volume and same lower and upper
+ * bounds.
+ */
+      Region();
+
+/**
  * Create a region object with given shape. Lower limits are assumed
  * to be zero.
  *
@@ -163,12 +169,6 @@ namespace Lucee
       Region<NDIM, T> deflate(unsigned dir) const;
 
     private:
-/**
- * Creates an empty box, i.e. with 0 volume and same lower and upper
- * bounds.
- */
-      Region();
-
 /** Lower coordinates of region */
       Lucee::FixedVector<NDIM, T> lower;
 /** Upper coordinates of region */
