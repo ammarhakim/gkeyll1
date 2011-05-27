@@ -46,8 +46,15 @@
   that MH could be a good scheme to implement and make available as a
   production scheme.
 
+  The "epsilon" limiter in van Leer's paper gets rid of the
+  oscillations seen with the minmod limiter. Need to test on smooth
+  problems.
+
+  Should start thinking on how to do MUSCL as general updater on
+  rectangular meshes.
+
   Also need to document the Roe averages for the Euler equations in
-  Tech-Note 1007.
+  Tech-Note 1007. (This is so simple, no need)
 
   Turns out that the 2nd order Muscl-Hancock scheme as implemented
   does not preserve positivity. However, the 1st order Muscl-Hancock
