@@ -320,6 +320,16 @@ namespace Lucee
       Field<NDIM, T>& applyPeriodicBc(unsigned dir);
 
 /**
+ * Apply copy boundary conditions along specified direction and on
+ * specified side of field.
+ *
+ * @param dir Direction to apply copy BCs.
+ * @param side Side to apply copy BC (should be 0 for lower and 1 for upper).
+ * @return reference to this field.
+ */
+      Field<NDIM, T>& applyCopyBc(unsigned dir, unsigned side);
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
@@ -358,6 +368,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaApplyPeriodicBc(lua_State *L);
+
+/**
+ * Lua callable method for applying copy boundary conditions.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaApplyCopyBc(lua_State *L);
 
     private:
 /**

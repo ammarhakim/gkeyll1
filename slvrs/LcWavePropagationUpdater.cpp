@@ -30,6 +30,7 @@ namespace Lucee
   static const unsigned VAN_LEER_LIMITER = 3;
   static const unsigned MONOTONIZED_CENTERED_LIMITER = 4;
   static const unsigned BEAM_WARMING_LIMITER = 5;
+  static const unsigned ZERO_LIMITER = 6;
 
 // set ids for module system
   template <> const char *WavePropagationUpdater<1>::id = "WavePropagation1D";
@@ -88,7 +89,7 @@ namespace Lucee
       std::string lim = tbl.getString("limiter");
       if (lim == "no-limiter")
         limiter = NO_LIMITER;
-      else if (lim == "min-mod")
+      else if (lim == "minmod")
         limiter = MINMOD_LIMITER;
       else if (lim == "superbee")
         limiter = SUPERBEE_LIMITER;
@@ -98,6 +99,8 @@ namespace Lucee
         limiter = MONOTONIZED_CENTERED_LIMITER;
       else if (lim == "beam-warming")
         limiter = BEAM_WARMING_LIMITER;
+      else if (lim == "zero")
+        limiter = ZERO_LIMITER;
       else
       {
         Lucee::Except lce("WavePropagationUpdater::readInput: Do not recognize limiter type '");
@@ -371,6 +374,10 @@ namespace Lucee
 
             case BEAM_WARMING_LIMITER:
                 wlimitr = r;
+                break;
+
+            case ZERO_LIMITER:
+                wlimitr = 0;
                 break;
 
             default:
