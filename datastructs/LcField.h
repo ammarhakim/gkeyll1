@@ -25,6 +25,9 @@
 
 namespace Lucee
 {
+/** Constants for sides of the field */
+  enum {LOWER_SIDE = 0, UPPER_SIDE = 1};
+
 /**
  * A field represents an array that can hold multiple values per index
  * location. Fields can be indexed directly using (i,j,k,..,c)

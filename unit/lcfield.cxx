@@ -716,6 +716,63 @@ test_16()
         LC_ASSERT("Testing if Y-lower periodic BC worked", fld(i,j,k) == fld(i,j+12,k));
 }
 
+void
+test_17()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 12};
+  int lg[2] = {1, 3};
+  int ug[2] = {2, 5};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> fld(rgn, 3, lg, ug, 10.0);
+
+// initialize first layer of cells in X-direction
+  for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        fld(i,j,k) = i+1000*k;
+
+// apply copy BC to lower edge
+  fld.applyCopyBc(0, Lucee::LOWER_SIDE);
+
+  int ilo = fld.getLower(0);
+// check if it worked
+  for (int i=fld.getLowerExt(0); i<fld.getLower(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if copy BC on lower side worked", fld(i,j,k) == fld(ilo,j,k) );
+
+// apply copy BC to upper edge
+  fld.applyCopyBc(0, Lucee::UPPER_SIDE);
+
+  int iup = fld.getUpper(0)-1;
+// check if it worked
+  for (int i=fld.getUpper(0); i<fld.getUpperExt(0); ++i)
+    for (int j=fld.getLower(1); j<fld.getUpper(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if copy BC on upper side worked", fld(i,j,k) == fld(iup,j,k) );
+
+// apply copy BC to lower edge
+  fld.applyCopyBc(1, Lucee::LOWER_SIDE);
+
+  ilo = fld.getLower(1);
+// check if it worked
+  for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+    for (int j=fld.getLowerExt(1); j<fld.getLower(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if copy BC on lower side worked", fld(i,j,k) == fld(i,ilo,k) );
+
+// apply copy BC to upper edge
+  fld.applyCopyBc(1, Lucee::UPPER_SIDE);
+
+  iup = fld.getUpper(1)-1;
+// check if it worked
+  for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+    for (int j=fld.getUpper(1); j<fld.getUpperExt(1); ++j)
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing if copy BC on upper side worked", fld(i,j,k) == fld(i,iup,k) );
+}
+
 int
 main(void)
 {
@@ -736,5 +793,6 @@ main(void)
   test_14();
   test_15();
   test_16();
+  test_17();
   LC_END_TESTS;
 }
