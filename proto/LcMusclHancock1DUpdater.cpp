@@ -277,14 +277,6 @@ namespace Lucee
       }
     }
 
-    for (unsigned k=0; k<3; ++k)
-    { // THIS IS A HACK TO APPLY COPY BCs (PLEASE IMPLEMENT BCs!!!!!)
-      qNew(-2, k) = qNew(0, k);
-      qNew(-1, k) = qNew(0, k);
-      qNew(100, k) = qNew(99, k);
-      qNew(101, k) = qNew(99, k);
-    }
-
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
