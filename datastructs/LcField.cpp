@@ -307,15 +307,47 @@ namespace Lucee
   {
     int lo[NDIM], up[NDIM];
 
-// create a region to represent lower interior layer of cells
+// create a region to represent the ghost layer
     for (unsigned i=0; i<NDIM; ++i)
     { // whole region, including extended region
       lo[i] = getGlobalLowerExt(i);
-      up[i] = getGlobalUpperExt(i);
+      up[i] = getGlobalUpperExt (i);
     }
-// adjust cells along 'dir' direction so it represents region to be copied
-    up[dir] = lo[dir]+upperGhost[dir];
-    Lucee::Region<NDIM, int> lowerRgn(lo, up);
+// adjust region so it only indexes the ghost cells
+    if (side == 0)
+    { // lower side
+      up[dir] = getLower(dir);
+    }
+    else
+    { // upper side
+      lo[dir] = getUpper(dir);
+    }
+// region must be local to processor
+    Lucee::Region<NDIM, int> gstRgn = getExtRegion().intersect(
+      Lucee::Region<NDIM, int>(lo, up));
+
+    Lucee::ConstFieldPtr<T> ptr = this->createConstPtr(); // interior pointer
+    Lucee::FieldPtr<T> gPtr = this->createPtr(); // ghost pointer
+
+    int idx[NDIM];
+// loop over region and from first layer of cells
+    Lucee::RowMajorSequencer<NDIM> seq(gstRgn);
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      this->setPtr(gPtr, idx); // index into ghost cell
+      if (side == 0)
+      { // lower
+        idx[dir] = getLower(dir); // first location in domain
+      }
+      else
+      { // upper
+        idx[dir] = getUpper(dir)-1; // last location in domain
+      }
+      this->setPtr(ptr, idx);
+      for (unsigned k=0; k<numComponents; ++k)
+        gPtr[k] = ptr[k];
+    }
 
     return *this;
   }
