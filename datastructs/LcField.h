@@ -185,7 +185,7 @@ namespace Lucee
  *
  * @return start index in specified direction.
  */
-      int getGobalLowerExt(unsigned dir) const
+      int getGlobalLowerExt(unsigned dir) const
       { 
         return globalRgn.extend(lowerGhost, upperGhost)
           .inflate(0, numComponents).getLower(dir); 
@@ -455,7 +455,7 @@ namespace Lucee
       unsigned scIdx;
 /** Number of components */
       unsigned numComponents;
-/** Region indexed by field */
+/** Region indexed by field (local region) */
       Lucee::Region<NDIM, int> rgn;
 /** Global region indexed by field */
       Lucee::Region<NDIM, int> globalRgn;
