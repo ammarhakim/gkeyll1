@@ -9,10 +9,14 @@
   just mean that. Periodic in *both* X and Y means all corners need to
   be updated in a periodic manner too.)
 
-  Added a skeleton for copy BCs. These need to be completed. Then need
-  to add a function BC to the StructGridField class (as it knows the
-  centroid coordinates). Then need to add general "copy" BC function
-  that takes an array of coefficients to multiply before copy.
+  Added a skeleton for copy BCs. These need to be
+  completed. [DONE. May 27th]
+
+  Then need to add general "copy" BC function that takes an array of
+  coefficients to multiply before copy.
+
+  Then need to add a function BC to the StructGridField class (as it
+  knows the centroid coordinates). 
 
   Should either clean up the lucee-studies repo or create a new one
   for examples.

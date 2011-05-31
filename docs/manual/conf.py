@@ -22,7 +22,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.jsmath']
+extensions = ['sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -207,4 +207,4 @@ latex_preamble = r'''
 #latex_use_modindex = True
 
 # path to jsMath package
-jsmath_path = 'easy/load.js'
+mathjax_path = 'http://mathjax.connectmv.com/MathJax.js'
