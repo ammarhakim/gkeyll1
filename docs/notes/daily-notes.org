@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* May 31st
+
+  Create empty user-manual type documentation RST file. Need to start
+  working on this.
+
+  Need to greatly improve code documentation using doxygen. To make
+  this more systematic should start off with one class (say Array or
+  LuaTable) and document it thoroughly to get a feel of how to do the
+  rest. The documentation should be detailed and as complete as
+  possible.
+
 * May 26th
 
   Implemented periodic boundary conditions. One issue is what to do
