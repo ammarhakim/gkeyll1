@@ -306,6 +306,65 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::setGhostFromLuaFunction(lua_State *L, int ref,
+    unsigned dir, unsigned side)
+  {
+    Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
+    int lo[NDIM], up[NDIM];
+
+// create a region to represent ghost layer
+    for (unsigned i=0; i<NDIM; ++i)
+    { // whole region, including extended region
+      lo[i] = this->getGlobalLowerExt(i);
+      up[i] = this->getGlobalUpperExt (i);
+    }
+// adjust region so it only indexes ghost cells
+    if (side == 0)
+    { // lower side
+      up[dir] = this->getGlobalLower(dir);
+    }
+    else
+    { // upper side
+      lo[dir] = this->getGlobalUpper(dir);
+    }
+// region must be local to processor
+    Lucee::Region<NDIM, int> gstRgn = this->getExtRegion().intersect(
+      Lucee::Region<NDIM, int>(lo, up));
+
+    Lucee::RowMajorSequencer<NDIM> seq(gstRgn);
+    int idx[NDIM];
+    double xc[3];
+    unsigned numOut = this->getNumComponents();
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      this->setPtr(ptr, idx);
+      grid->setIndex(idx);
+      grid->getCentriod(xc); // cell center coordinate
+// push function object on stack
+      lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push variables on stack
+      for (unsigned i=0; i<3; ++i)
+        lua_pushnumber(L, xc[i]);
+      if (lua_pcall(L, 3, numOut, 0) != 0)
+      {
+        Lucee::Except lce("StructGridField::setGhostFromLuaFunction: ");
+        lce << "Problem evaluating function supplied to 'set' method";
+        throw lce;
+      }
+// fetch results
+      for (int i=-numOut; i<0; ++i)
+      {
+        if (!lua_isnumber(L, i))
+          throw Lucee::Except("StructGridField::setGhostFromLuaFunction: Return value not a number");
+        ptr[numOut+i] = lua_tonumber(L, i);
+      }
+      lua_pop(L, 1);
+    }
+  }
+
+  template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField(const Field<NDIM, T>& fld, Lucee::StructuredGridBase<NDIM>& grd)
     : Lucee::Field<NDIM, T>(fld), grid(&grd)
   {

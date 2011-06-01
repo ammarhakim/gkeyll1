@@ -143,6 +143,18 @@ namespace Lucee
  */
       void setFromLuaFunction(lua_State *L, int ref);
 
+/**
+ * Set values in the ghost region of the field from Lua function. The
+ * function itself is specified using a reference to the Lua function
+ * on stack.
+ *
+ * @param L Lua state to use.
+ * @param ref Reference to Lua function.
+ * @param dir Direction to apply function.
+ * @param side Side to apply function (0 - lower, 1 - upper).
+ */
+      void setGhostFromLuaFunction(lua_State *L, int ref, unsigned dir, unsigned side);
+
     private:
 /** Pointer to grid */
       Lucee::StructuredGridBase<NDIM> *grid;
