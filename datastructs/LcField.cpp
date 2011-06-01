@@ -460,7 +460,7 @@ namespace Lucee
       Lucee::Except lce("Field::luaApplyCopyBc: Must provide a number to 'applyCopyBc' method");
       throw lce;
     }
-// determine direction in which to apply periodic BCs
+// determine direction in which to apply copy BCs
     int dir = (int) lua_tonumber(L, 2);
     if (dir<0 || dir >= NDIM)
     { // incorrect direction specified

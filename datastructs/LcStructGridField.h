@@ -39,6 +39,18 @@ namespace Lucee
       StructGridField();
 
 /**
+ * Create a new field indexing given region. This constructor creates
+ * an empty set of ghost indices.
+ *
+ * @param grid Global grid on which field lives.
+ * @param nc Number of components at each index location.
+ * @param lg Ghost indexes along lower index range in each dimension.
+ * @param ug Ghost indexes along upper index range in each dimension.
+ */      
+      StructGridField(Lucee::StructuredGridBase<NDIM>* grid, unsigned nc,
+        int lg[NDIM], int ug[NDIM]);
+
+/**
  * Create a field from supplied one (shallow copy).
  *
  * @param fld StructGridField to copy from.
@@ -109,6 +121,15 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaSet(lua_State *L);
+
+/**
+ * Lua callable method for initializing ghost region of field from Lua
+ * supplied function.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetGhost(lua_State *L);
 
 /**
  * Lua callable method to return an alias to this field.

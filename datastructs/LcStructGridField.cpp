@@ -39,6 +39,14 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  StructGridField<NDIM, T>::StructGridField(Lucee::StructuredGridBase<NDIM>* grid, unsigned nc,
+        int lg[NDIM], int ug[NDIM])
+    : Lucee::Field<NDIM, T>(grid->getLocalBox(), nc, lg, ug, (T) 0),
+      grid(grid)
+  {
+  }
+
+  template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField(const StructGridField<NDIM, T>& fld)
     : Lucee::Field<NDIM, T>(fld), grid(fld.grid)
   {
@@ -173,6 +181,7 @@ namespace Lucee
     lfm.appendFunc("alias", luaAlias);
     lfm.appendFunc("duplicate", luaDuplicate);
     lfm.appendFunc("div", luaDivergence);
+    lfm.appendFunc("applyFuncBc", luaSetGhost);
   }
 
   template <unsigned NDIM, typename T>
@@ -190,6 +199,60 @@ namespace Lucee
     lua_pop(L, 1);
 
     sgf->setFromLuaFunction(L, fnRef);
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaSetGhost(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+    if (! lua_isfunction(L, 2))
+    {
+      Lucee::Except lce(
+        "StructGridField::luaSetGhost: Must provide a Lua function to 'applyFuncBc' method");
+      throw lce;
+    }
+    int fnRef = luaL_ref(L, LUA_REGISTRYINDEX);
+    lua_pop(L, 1);
+
+    if (! lua_isnumber(L, 3))
+    {
+      Lucee::Except lce(
+        "StructGridField::luaSetGhost: Must provide a number to 'applyFuncBc' method");
+      throw lce;
+    }
+// determine direction in which to apply copy BCs
+    int dir = (int) lua_tonumber(L, 3);
+    if (dir<0 || dir >= NDIM)
+    { // incorrect direction specified
+      Lucee::Except lce(
+        "StructGridField::luaSetGhost: Direction must be one of ");
+      for (unsigned i=0; i<NDIM-1; ++i)
+        lce << i << ", ";
+      lce << NDIM-1 << ".";
+      lce << " '" << dir << "' specified instead" << std::endl;
+      throw lce;      
+    }
+
+    if (! lua_isstring(L, 4))
+    {
+      Lucee::Except lce("StructGridField::luaFuncBc: Must provide a side to 'applyFuncBc' method.");
+      lce << " Should be one of 'lower' or 'upper'." << std::endl;
+      throw lce;
+    }
+// determine side in which to apply periodic BCs
+    std::string ss = lua_tostring(L, 3);
+    unsigned side = 1;
+    if (ss == "lower")
+      side = 0;
+    else if (ss == "upper")
+      side = 1;
+    else
+      throw Lucee::Except("StructGridField::luaFuncBc: side should be one of \"lower\" or \"upper\".");
+
+    sgf->setGhostFromLuaFunction(L, fnRef, dir, side);
     return 0;
   }
 

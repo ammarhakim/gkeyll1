@@ -175,3 +175,6 @@ add_test(lcluahelp unit/lcluahelp)
 
 # lcgeomprim
 add_test(lcgeomprim unit/lcgeomprim)
+
+# lcstructgridfield
+add_test(lcstructgridfield unit/lcstructgridfield)

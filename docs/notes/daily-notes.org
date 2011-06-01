@@ -11,6 +11,17 @@
   rest. The documentation should be detailed and as complete as
   possible.
 
+  Added a method to apply boundary conditions using a function. The
+  SructGridField class does not have any unit tests. Need to add
+  these.
+
+  Next major assault will be to make the code run in parallel. To
+  simplify the coding create a base decomp class for structured grids
+  and make on of the derived classes a simple NxM decomp. The
+  automatic decomposition can be added later.
+
+*** TODO Consider using smart pointers to pass Grid pointer to StructGridField class.
+
 * May 26th
 
   Implemented periodic boundary conditions. One issue is what to do
