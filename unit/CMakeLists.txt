@@ -142,3 +142,8 @@ target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_LIBRARI
 # lcgeoprim
 add_executable(lcgeomprim lcgeomprim.cxx)
 target_link_libraries(lcgeomprim lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+
+# lcstructgridfield
+add_executable(lcstructgridfield lcstructgridfield.cxx)
+target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki lclua 
+  ${Hdf5_LIBRARIES} ${Gsl_LIBRARIES})
