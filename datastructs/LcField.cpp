@@ -316,11 +316,11 @@ namespace Lucee
 // adjust region so it only indexes the ghost cells
     if (side == 0)
     { // lower side
-      up[dir] = getLower(dir);
+      up[dir] = getGlobalLower(dir);
     }
     else
     { // upper side
-      lo[dir] = getUpper(dir);
+      lo[dir] = getGlobalUpper(dir);
     }
 // region must be local to processor
     Lucee::Region<NDIM, int> gstRgn = getExtRegion().intersect(
