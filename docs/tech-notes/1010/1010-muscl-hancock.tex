@@ -51,6 +51,7 @@
 \begin{document}
 % header text
 \lhead{Tech-Note 1010}
+
 \maketitle
 
 In this document I outline the MUSCl-Hancock scheme for the solution
@@ -61,15 +62,128 @@ and time. We start from the sysem of hyperbolic equations
   \pfrac{Q}{t} + \pfrac{F}{x} = 0 \label{eq:cons_form}
 \end{align}
 where $Q(x,t)$ is a vector of $m$ conserved quantities and $F=F(Q)$
-are fluxes. We will also assume (though this is not required) that the
-system can be put into the non-conservative (``primitive'')
-quasi-linear form
+are fluxes. In the following we denote the flux Jacobian as
+$A\equiv\pfracb{F}{Q}$ and the eigenvalues as $\lambda^p$ and the
+right- and left-eigenvectors as $r^p$ (column vector) and $l^p$ (row
+vector), for $p=1,\ldots,m$, respectively.
+
+We will also assume (though this is not required) that the system can
+be put into the non-conservative (``primitive'') quasi-linear form
 \begin{align}
-  \pfrac{V}{t} + A\pfrac{V}{x} = 0 \label{eq:prim_form}
+  \pfrac{V}{t} + A_p\pfrac{V}{x} = 0 \label{eq:prim_form}
 \end{align}
-where $V(x,t)$ are a vector of $m$ primitive quantities and $A(V)$ is
-a $m\times m$ matrix. Note that any transform $Q=\varphi(V)$ will
-transform \eqr{\ref{eq:cons_form}} into \eqr{\ref{eq:prim_form}}. 
+where $V(x,t)$ are a vector of $m$ primitive quantities and $A_p(V)$
+is a $m\times m$ matrix. Note that any invertible transform
+$Q=\varphi(V)$ will transform \eqr{\ref{eq:cons_form}} into
+\eqr{\ref{eq:prim_form}}.
+
+\section{The basic algorithm}
+
+The essential idea of the MUSCL-Hancock scheme is to use cell averages
+to predict the values of the conserved (or primitive) quantities at
+cell edges at $t+\Delta t/2$ and then use these predicted values to
+update the solution to $t+\Delta t$. The steps in the algorithm are as
+follows.
+\begin{enumerate}
+
+\item Given cell averages reconstruct a (possibly limited) linear
+  representation of the variables inside each cell. This can be done
+  for either the conserved variables or the primitive
+  variables. Hence, in each cell we represent the solution as
+  \begin{align}
+    W(x,t) = W_i + \frac{x-x_i}{\Delta x}\delta W_i \label{eq:lin_recon}
+  \end{align}
+  for $x_{i-1/2}<x<x_{i+1/2}$ and where $x_i \equiv
+  (x_{i+1/2}+x_{i-1/2})/2$, $\Delta x \equiv x_{i+1/2}-x_{i-1/2}$ and
+  $\delta W_i$ are the reconstructed \emph{slopes}. In
+  \eqr{\ref{eq:lin_recon}} $W(x,t)$ stands for the variables we are
+  reconstructing (either primitive or conserved variables). To
+  determine the slopes we can use an averaging procedure
+  \begin{align}
+    \delta W_i = \mathrm{ave}(W_i-W_{i-1}, W_{i+1}-W_i) \label{eqn:slope_recon}
+  \end{align}
+  where $\mathrm{ave}(a, b)$ is a suitable ``averaging''
+  function. Note that using the standard average $\mathrm{ave}(a, b) =
+  (a+b)/2$ leads to a central-difference computed slope, while
+  $\mathrm{ave}(a, b) = 0$ leads to a zero slope or a first-order
+  representation in each cell. Other forms of the average function can
+  be used to avoid spurious oscillations around discontinuities and
+  prevent the formation of unphysical states. See the next section for
+  more details on the reconstruction and averaging steps.
+  
+\item Use the slopes to predict the solution at half time-step,
+  $\Delta t/2$. If the primitive variable slopes have been determined
+  then use the update formula
+  \begin{align}
+    \tilde{V}_j = V_j -\frac{\Delta t}{2 \Delta x} A_p(V_i) \delta V_i
+  \end{align}
+  If the conserved variable slopes have been determined then use the
+  update formula
+  \begin{align}
+    \tilde{Q}_j = Q_j -\frac{\Delta t}{2 \Delta x} A(Q_i) \delta Q_i
+  \end{align}
+  In these formulas $\tilde{V}_j$ and $\tilde{Q}_j$ denote the
+  predicted values in cell $\script{C}_i$.
+
+\item Use the predicted solution to compute the predicted values at
+  cell edges. As the solution is assumed to be linear, the edge values
+  are
+  \begin{align}
+    W_{i-1/2}^+ &= \tilde{W}_i - \delta W_i/2 \\
+    W_{i+1/2}^- &= \tilde{W}_i + \delta W_i/2
+  \end{align}
+  Note that we are using the predicted solution at $t+\Delta t/2$ but
+  the slopes at $t$ to compute the edge values. This gives the edge
+  values at $t+\Delta t/2$ to $O(\Delta t^2)$.
+
+\item Use the edge values in a Reimann solver (a numerical flux) to
+  update the conserved variables to time $t$
+  \begin{align}
+    Q^{n+1}_i = Q_i^n - \frac{\Delta t}{\Delta x}(F_{i+1/2}-F_{i+1/2})
+  \end{align}
+  where $F_{i\pm 1/2}$ are the numerical fluxes computed from the
+  predicted edge values:
+  \begin{align}
+    F_{i-1/2} \equiv F(W_{i-1/2}^-, W_{i-1/2}^+).
+  \end{align}
+  See the next section for details on numerical fluxes that can be used.
+
+\end{enumerate}
+
+\section{Reconstruction and limiting}
+
+The simplest method is to reconstruct each of the conserved variables
+or the primitive variables directly. This procedure is called
+\emph{component} reconstruction and limiting. However, a better
+approach is to limit the \emph{characteristic} variables instead. In
+this case the limiting is done after projecting the differences on
+left eigenvectors of the flux Jacobian. Let $L(Q)$ be the matrix of
+left eigenvectors arranged as rows and let $R(Q)$ be the matrix of
+right eigenvectors arranged as columns. Note that $L=R^{-1}$. Then the
+reconstruction becomes, instead of \eqr{\ref{eqn:slope_recon}},
+\begin{align}
+  \delta W_i = R(Q_i) \mathrm{ave}(\Delta^i_{i-1}, \Delta^i_i)
+\end{align}
+where $\Delta^j_i = L(Q_j)(W_{i+1}-W_i)$. If the averaging function is
+non-linear then even for a linear system of the equations the
+characteristic limiting and component limiting do not coincide.
+
+There are several possible averaging function one can use (besides the
+zero and simple-averages). For example, the following choices are all
+designed to avoid unphysical oscillations around discontinuities
+\begin{itemize}
+  \item Minmod limiting
+    \begin{align}
+      \mathrm{ave}(a,b) &= \mathrm{minmod}((a+b)/2, 2a, 2b) \quad &ab>0 \\
+      &= 0 &ab \le 0.
+    \end{align}
+\end{itemize}
+
+\end{document}
+
+In other words, for each cell $\script{C}_i$ compute $L(Q_i)$, project
+the differences on this matrix and then use the averaging
+procedure. Finally, compute $R(Q_i)$ and reconstruct the slopes.
 
 In this note I will use the 1D Euler equations as an example. The
 conservative form of these equations are
@@ -106,41 +220,3 @@ these equations are
   &\pfrac{p}{t} + u\pfrac{p}{x} + \gamma p \pfrac{u}{x} = 0 \\
 \end{align}
 
-The essential idea of the MUSCL-Hancock scheme is to use cell averages
-to predict the values of the conserved (or primitive) quantities at
-cell edges and then use these predicted values to update the solution
-at the next time-step. The steps in the algorithm are as follows.
-\begin{enumerate}
-\item Given cell averages reconstruct a linear representation of the
-  variables inside each cell. This can be done for either the
-  conserved variables or the primitive variables. Hence, in each cell
-  we represent the solution as
-  \begin{align}
-    W(x,t) = W_i + \frac{x-x_i}{\Delta x}\delta W_i \label{eq:lin_recon}
-  \end{align}
-  for $x_{i-1/2}<x<x_{i+1/2}$ and where $x_i \equiv
-  (x_{i+1/2}+x_{i-1/2})/2$, $\Delta x \equiv x_{i+1/2}-x_{i-1/2}$ and
-  $\delta W_i$ are the reconstructed \emph{slopes}. In
-  \eqr{\ref{eq:lin_recon}} $W(x,t)$ stands for the variables we are
-  reconstructing (either primitive or conserved variables). To
-  determine the slopes we can use an averaging procedure
-  \begin{align}
-    \delta W_i = \mathrm{ave}(W_i-W_{i-1}, W_{i+1}-W_i)
-  \end{align}
-  where $\mathrm{ave}(a, b)$ is a suitable ``averaging''
-  function. Note that using the standard average $\mathrm{ave}(a, b) =
-  (a+b)/2$ leads to a central-difference computed slope, while
-  $\mathrm{ave}(a, b) = 0$ leads to a zero slope or a first-order
-  representation in each cell. See the next section for more details
-  on the reconstruction and averaging steps.
-  
-\item Use the slopes to predict the solution at half time-step,
-  $\Delta t/2$. If the primitive variable slope have been determined
-  then use the update formula
-  \begin{align}
-    \tilde{V}_j = V_j -\frac{\Delta t}{2 \Delta x} A(V_i) \delta V_i
-  \end{align}
-
-\end{enumerate}
-
-\end{document}
