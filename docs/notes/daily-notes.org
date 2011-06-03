@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* June 1st
+
+    Should play around with the cold relativistic fluid
+    equations. Could use FDTD Maxwell solver or a collocated
+    solver. Try out MUSCL, Wave and perhaps DG schemes.
+
 * May 31st
 
   Create empty user-manual type documentation RST file. Need to start
@@ -13,7 +19,9 @@
 
   Added a method to apply boundary conditions using a function. The
   SructGridField class does not have any unit tests. Need to add
-  these.
+  these. [Done, also added tests. For now tests for rect-grid are also
+  bundled with the structuredg grid class. Need to disentangle this
+  stuff.]
 
   Next major assault will be to make the code run in parallel. To
   simplify the coding create a base decomp class for structured grids
