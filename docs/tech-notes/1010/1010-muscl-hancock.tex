@@ -197,7 +197,7 @@ designed to avoid unphysical oscillations around discontinuities
 
   \item Epsilon limiting
     \begin{align}
-      \mathrm{ave}(a,b) = \frac{(b^2+\epsilon^2)c + (a^2+\epsilon^2)b}{a^2+b^2+2\epsilon^2}
+      \mathrm{ave}(a,b) = \frac{(b^2+\epsilon^2)a + (a^2+\epsilon^2)b}{a^2+b^2+2\epsilon^2}
     \end{align}
     where $\epsilon^2 \sim \Delta x^3$ is a parameter.
 \end{itemize}
@@ -206,8 +206,8 @@ is defined as
 \begin{align}
   \mathrm{minmod}(a_0,a_1,\ldots) =
   \begin{cases}
-    \min(a_0,a_1,\ldots)& \text{if $a_i>0$, $i=0,1,\ldots$} \\
-    \max(a_0,a_1,\ldots)& \text{if $a_i<0$, $i=0,1,\ldots$} \\
+    \min(a_0,a_1,\ldots)& \text{if $a_i>0$, for all $i=0,1,\ldots$} \\
+    \max(a_0,a_1,\ldots)& \text{if $a_i<0$, for all $i=0,1,\ldots$} \\
     0& \text{otherwise}
   \end{cases}
 \end{align}
@@ -220,8 +220,11 @@ predicted edge values of density and pressure may become negative,
 leading to unphysical states. A simple but crude way to fix this is to
 set slopes of \emph{all} quantities in a cell to zero if any of the
 values at either cell edge becomes negative. More nuanced methods can
-also be develop by self-consistently adjusting the slopes just enough
-to ensure invariant domains are preserved.
+also be develop by self-consistently\footnote{What this means is that
+  if the slopes of density and pressure are adjusted, the complete
+  predicted solution (and hence the edge values) must be recomputed
+  with the new slopes.} adjusting the slopes just enough to ensure
+invariant domains are preserved.
 
 \section{Numerical fluxes}
 
@@ -241,14 +244,14 @@ Here $c>0$ is a parameter given by
   c = \sup_{Q=Q^-,Q^+} \sup_p | \lambda^p |. \label{eqn:lax_c}
 \end{align}
 In other words, the parameter $c$ is the maximum of the absolute
-eigenvalues compute from the left and right state. The Lax flux is the
-simplest, however most diffusive, in the sense that it requires the
-minimum amount of information about the equation system being solved:
-all one needs (besides the flux function) is an \emph{estimate} of the
-maximum eigenvalue. Note that any $c$ greater than the one computed by
+eigenvalues computed from the left and right state. Though diffusive,
+the Lax flux is the simplest in the sense that it requires the minimum
+amount of information about the equation system being solved: all one
+needs (besides the flux function) is an \emph{estimate} of the maximum
+eigenvalue. Note that any $c$ greater than the one computed by
 \eqr{\ref{eqn:lax_c}} can be used. More complex numerical flux
 functions that incorporate more information about the equation system
-can also be used. These flux functions can reduced diffusion as the
+can also be used. These flux functions can reduce diffusion as the
 cost of greater complexity.
 
 \end{document}
