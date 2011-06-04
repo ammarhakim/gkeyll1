@@ -54,10 +54,10 @@
 
 \maketitle
 
-In this document I outline the MUSCl-Hancock scheme for the solution
+In this document I outline the MUSCL-Hancock scheme for the solution
 of 1D hyperbolic partial differential equations. This scheme is a
 predictor-corrector scheme and is second order accurate in both space
-and time. We start from the sysem of hyperbolic equations
+and time. We start from the system of hyperbolic equations
 \begin{align}
   \pfrac{Q}{t} + \pfrac{F}{x} = 0 \label{eq:cons_form}
 \end{align}
@@ -102,14 +102,15 @@ follows.
   \begin{align}
     \delta W_i = \mathrm{ave}(W_i-W_{i-1}, W_{i+1}-W_i) \label{eqn:slope_recon}
   \end{align}
-  where $\mathrm{ave}(a, b)$ is a suitable ``averaging''
-  function. Note that using the standard average $\mathrm{ave}(a, b) =
-  (a+b)/2$ leads to a central-difference computed slope, while
-  $\mathrm{ave}(a, b) = 0$ leads to a zero slope or a first-order
-  representation in each cell. Other forms of the average function can
-  be used to avoid spurious oscillations around discontinuities and
-  prevent the formation of unphysical states. See the next section for
-  more details on the reconstruction and averaging steps.
+  where $\mathrm{ave}(a, b)$ is a suitable ``averaging'' function,
+  applied to each component of the vector. Note that using the
+  standard average $\mathrm{ave}(a, b) = (a+b)/2$ leads to a
+  central-difference computed slope, while $\mathrm{ave}(a, b) = 0$
+  leads to a zero slope or a first-order representation in each
+  cell. Other forms of the average function can be used to avoid
+  spurious oscillations around discontinuities and prevent the
+  formation of unphysical states. See the next section for more
+  details on the reconstruction and averaging steps.
   
 \item Use the slopes to predict the solution at half time-step,
   $\Delta t/2$. If the primitive variable slopes have been determined
@@ -139,30 +140,32 @@ follows.
 \item Use the edge values in a Reimann solver (a numerical flux) to
   update the conserved variables to time $t$
   \begin{align}
-    Q^{n+1}_i = Q_i^n - \frac{\Delta t}{\Delta x}(F_{i+1/2}-F_{i+1/2})
+    Q^{n+1}_i = Q_i^n - \frac{\Delta t}{\Delta x}(F_{i+1/2}-F_{i+1/2}) \label{eqn:corrector_step}
   \end{align}
   where $F_{i\pm 1/2}$ are the numerical fluxes computed from the
   predicted edge values:
   \begin{align}
     F_{i-1/2} \equiv F(W_{i-1/2}^-, W_{i-1/2}^+).
   \end{align}
-  See the next section for details on numerical fluxes that can be used.
+  See the last section for details on numerical fluxes that can be
+  used in \eqr{\ref{eqn:corrector_step}}.
 
 \end{enumerate}
 
 \section{Reconstruction and limiting}
 
-The simplest method is to reconstruct each of the conserved variables
-or the primitive variables directly. This procedure is called
+It is simplest to reconstruct each of the conserved variables or the
+primitive variables directly. This procedure is called
 \emph{component} reconstruction and limiting. However, a better
-approach is to limit the \emph{characteristic} variables instead. In
-this case the limiting is done after projecting the differences on
-left eigenvectors of the flux Jacobian. Let $L(Q)$ be the matrix of
-left eigenvectors arranged as rows and let $R(Q)$ be the matrix of
-right eigenvectors arranged as columns. Note that $L=R^{-1}$. Then the
-reconstruction becomes, instead of \eqr{\ref{eqn:slope_recon}},
+approach that results in smoother solutions is to limit the
+\emph{characteristic} variables instead. In this case the limiting is
+done after projecting the differences on left eigenvectors of the flux
+Jacobian. Let $L(Q)$ be the matrix of left eigenvectors arranged as
+rows and let $R(Q)$ be the matrix of right eigenvectors arranged as
+columns. Note that $L=R^{-1}$. Then the reconstruction becomes,
+instead of \eqr{\ref{eqn:slope_recon}},
 \begin{align}
-  \delta W_i = R(Q_i) \mathrm{ave}(\Delta^i_{i-1}, \Delta^i_i)
+  \delta W_i = R(Q_i)\ \mathrm{ave}(\Delta^i_{i-1}, \Delta^i_i)
 \end{align}
 where $\Delta^j_i = L(Q_j)(W_{i+1}-W_i)$. If the averaging function is
 non-linear then even for a linear system of the equations the
@@ -174,10 +177,79 @@ designed to avoid unphysical oscillations around discontinuities
 \begin{itemize}
   \item Minmod limiting
     \begin{align}
-      \mathrm{ave}(a,b) &= \mathrm{minmod}((a+b)/2, 2a, 2b) \quad &ab>0 \\
-      &= 0 &ab \le 0.
+      \mathrm{ave}(a,b) = 
+      \begin{cases}
+        \mathrm{minmod}((a+b)/2, 2a, 2b)& \text{if $ab>0$} \\
+        0& \text{if $ab\le 0$}
+      \end{cases}
     \end{align}
+
+  \item Supebee limiting
+    \begin{align}
+      \mathrm{ave}(a,b) = 
+      \begin{cases}
+        \mathrm{minmod}\left(
+          \mathrm{maxmod}(a,b), \mathrm{minmod}(2a,2b)
+          \right)& \text{if $ab>0$} \\
+        0& \text{if $ab\le 0$}
+      \end{cases}
+    \end{align}
+
+  \item Epsilon limiting
+    \begin{align}
+      \mathrm{ave}(a,b) = \frac{(b^2+\epsilon^2)c + (a^2+\epsilon^2)b}{a^2+b^2+2\epsilon^2}
+    \end{align}
+    where $\epsilon^2 \sim \Delta x^3$ is a parameter.
 \end{itemize}
+In the above expressions the $\mathrm{mimod}(a_0,a_1,\ldots)$ function
+is defined as
+\begin{align}
+  \mathrm{minmod}(a_0,a_1,\ldots) =
+  \begin{cases}
+    \min(a_0,a_1,\ldots)& \text{if $a_i>0$, $i=0,1,\ldots$} \\
+    \max(a_0,a_1,\ldots)& \text{if $a_i<0$, $i=0,1,\ldots$} \\
+    0& \text{otherwise}
+  \end{cases}
+\end{align}
+
+None of the above reconstructions (except the zero-average) ensures
+that invariant domains are preserved. Another way to put it is that
+unless something special is done the scheme may not be positivity
+preserving. For example, while solving the Euler equations the
+predicted edge values of density and pressure may become negative,
+leading to unphysical states. A simple but crude way to fix this is to
+set slopes of \emph{all} quantities in a cell to zero if any of the
+values at either cell edge becomes negative. More nuanced methods can
+also be develop by self-consistently adjusting the slopes just enough
+to ensure invariant domains are preserved.
+
+\section{Numerical fluxes}
+
+A wide variety of numerical fluxes can be used to compute the edge
+fluxes needed in \eqr{\ref{eqn:corrector_step}}. It is important to
+use a numerical flux that preserves positivity. This combined with a
+positivity preserving reconstruction will ensure, under a suitable CFL
+condition, the positivity of the complete scheme.
+
+The simplest numerical flux to use is the local Lax flux (also called
+the Rusanov flux). This is given by
+\begin{align}
+  F(Q^-,Q^+) = \frac{F(Q^-) + F(Q^+)}{2} - c\frac{Q^+- Q^-}{2}
+\end{align}
+Here $c>0$ is a parameter given by
+\begin{align}
+  c = \sup_{Q=Q^-,Q^+} \sup_p | \lambda^p |. \label{eqn:lax_c}
+\end{align}
+In other words, the parameter $c$ is the maximum of the absolute
+eigenvalues compute from the left and right state. The Lax flux is the
+simplest, however most diffusive, in the sense that it requires the
+minimum amount of information about the equation system being solved:
+all one needs (besides the flux function) is an \emph{estimate} of the
+maximum eigenvalue. Note that any $c$ greater than the one computed by
+\eqr{\ref{eqn:lax_c}} can be used. More complex numerical flux
+functions that incorporate more information about the equation system
+can also be used. These flux functions can reduced diffusion as the
+cost of greater complexity.
 
 \end{document}
 
