@@ -175,7 +175,17 @@ There are several possible averaging function one can use (besides the
 zero and simple-averages). For example, the following choices are all
 designed to avoid unphysical oscillations around discontinuities
 \begin{itemize}
-  \item Minmod limiting
+  \item Minmod limiting\footnote{A more general expression is
+      \begin{align}
+        \mathrm{ave}(a,b) = 
+        \begin{cases}
+          \mathrm{minmod}((a+b)/2, \theta a, \theta b)& \text{if $ab>0$} \\
+          0& \text{if $ab\le 0$}
+        \end{cases}
+      \end{align}
+      Where $1\le \theta \le 2$. Picking a smaller value of $\theta$
+      leads to a more diffusive limiting.
+    }
     \begin{align}
       \mathrm{ave}(a,b) = 
       \begin{cases}
@@ -195,7 +205,7 @@ designed to avoid unphysical oscillations around discontinuities
       \end{cases}
     \end{align}
 
-  \item Epsilon limiting
+  \item Epsilon limiting (van Albada limiter)
     \begin{align}
       \mathrm{ave}(a,b) = \frac{(b^2+\epsilon^2)a + (a^2+\epsilon^2)b}{a^2+b^2+2\epsilon^2}
     \end{align}
