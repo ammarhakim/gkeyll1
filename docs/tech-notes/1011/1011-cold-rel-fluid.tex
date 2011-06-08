@@ -54,11 +54,34 @@
 
 \maketitle
 
-In this note I list the charged cold relativistic fluid equations and
-describe a solver for use in simulations of ultra-intense laser
-propagation in an under-dense plasma. The cold fluid equations
-describe the evolution of the electrons while the ion density is held
-fixed and the electromagnetic fields are evolved using Maxwell
-equations of electromagnetism.
+In this note I list the charged cold relativistic fluid (CRF)
+equations and describe a solver for use in simulations of
+ultra-intense laser propagation in an under-dense plasma. The cold
+fluid equations describe the evolution of the electrons while the ion
+density is held fixed. The electromagnetic fields are evolved using
+Maxwell equations of electromagnetism.
+
+\section{Cold neutral relativistic fluid equations}
+
+In this section the mathematical structure of the cold neutral
+relativistic fluid equations is examined. The coupling to the
+electromagnetic fields is through electric and magnetic fields and is
+ignored. The conservative form of CRF are
+\begin{align}
+  \pfrac{n}{t} + \nabla\cdot(n\mvec{u}) &= 0 \\
+  \pfraca{t}(n\mvec{p}) + \nabla\cdot (n\mvec{p}\mvec{u}) &= 0
+\end{align}
+where $n(\mvec{x},t)$ is the fluid number density,
+$\mvec{u}(\mvec{x},t)$ is the velocity and $\mvec{p}(\mvec{x},t)$ is
+the momentum. The momentum and velocity are related by the
+relativistic identity
+\begin{align}
+  \mvec{p} = m\gamma \mvec{v}
+\end{align}
+where $m$ is the species mass and where
+\begin{align}
+  \gamma &= \left(1+\frac{|\mvec{p}|^2}{m^2c^2}\right)^{1/2} \\
+  &= \left(1-|\mvec{v}|^2/c^2\right)^{-1/2}.
+\end{align}
 
 \end{document}
