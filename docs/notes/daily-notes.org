@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* June 2nd-8th
+ 
+  Completed and uploaded notes on MUSCL/Hancock scheme. Now have the
+  general geometry MUSCL interpolation figured out. Basically will use
+  the one from the "Red" book.
+
+  Started working on a note on cold relativistic fluid equations for
+  use in laser-plasma applications. Turns out that Randy's work on
+  pressureless fluids can be rather easily extended to the
+  relativistic case. However, do not have a way of computing the
+  intermediate velocity yet. Perhaps should look at a relativistic Roe
+  solver and take limits as pressure vanishes. (This looks rather
+  simple. So why does it not appear in my derivation?)
+
 * June 1st
 
     Should play around with the cold relativistic fluid
