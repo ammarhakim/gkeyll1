@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* June 9th
+
+  Before moving to PPPL need to add MPI and finish general geometries,
+  perhaps even the triangular meshes. Also implement the DG (PmPn)
+  schemes on these meshes.
+
+  Need to go over the derivation of the cold relativistic fluid
+  Riemann problem very carefully. Perhaps I am missing something as
+  the Roe average speed does not match the root of the one computed
+  from the conservation equations.
+
 * June 2nd-8th
  
   Completed and uploaded notes on MUSCL/Hancock scheme. Now have the
