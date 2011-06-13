@@ -13,9 +13,8 @@
 
 * June 9th
 
-  Before moving to PPPL need to add MPI and finish general geometries,
-  perhaps even the triangular meshes. Also implement the DG (PmPn)
-  schemes on these meshes.
+  Add MPI and finish general geometries, perhaps even the triangular
+  meshes. Also implement the DG (PmPn) schemes on these meshes.
 
   Need to go over the derivation of the cold relativistic fluid
   Riemann problem very carefully. Perhaps I am missing something as
