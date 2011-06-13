@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* June 12th
+  
+  Tried to move the HDF5 I/O to TxBase provided I/O. Unfortunately
+  this does not work. There are some bizzare problems with resolving
+  the calls to templated member functions. For now, I am abandoning
+  this effort. Will focus on using the TxMsg system instead. Wasted
+  the whole weekend figuring this out.
+
+  The next major step is to integrate MPI into lucee. This might not
+  be so hard but needs to be carefully thought out.
+
 * June 9th
 
   Before moving to PPPL need to add MPI and finish general geometries,
