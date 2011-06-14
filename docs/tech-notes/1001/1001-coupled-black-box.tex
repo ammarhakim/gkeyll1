@@ -88,7 +88,7 @@ conditions $\mvec{U}_1(t=0)$ and $\mvec{U}_2(t=0)$ evolve the system
 \eqr{\ref{eq:sys_1}} and \eqr{\ref{eq:sys_2}} subject to the coupling
 condition \eqr{\ref{eq:cpl_1}} and \eqr{\ref{eq:cpl_2}}.
 
-\section{Explict and implicit coupling}
+\section{Explicit and implicit coupling}
 
 To solve the coupled problem we will use the following scheme
 \begin{align}
@@ -99,8 +99,8 @@ To solve the coupled problem we will use the following scheme
 \end{align}
 where
 \begin{align}
-  \mvec{c}_1^{n+k} &= \script{C}_1(\mvec{U}_1^{n+k}) \\
-  \mvec{c}_2^{n+k} &= \script{C}_2(\mvec{U}_2^{n+k})
+  \mvec{c}_1^{n+k} &= \script{C}_1(\mvec{U}_1^{n+k}) \label{eq:n_cpl_1} \\
+  \mvec{c}_2^{n+k} &= \script{C}_2(\mvec{U}_2^{n+k}) \label{eq:n_cpl_2}
 \end{align}
 where $0 \le k \le 1$ and $\mvec{U}_i^k \equiv
 (1-k)\mvec{U}_i^n+k\mvec{U}_i^{n+1}$. The coupling is \emph{explicit}
@@ -108,36 +108,83 @@ if $k=0$ and \emph{implicit} if $k>0$, in particular, if $k=1$. Here,
 we are assuming that each individual system can be solved with an
 implicit algorithm with a backward Euler time-discretization.
 
-\section{A closer look at the implicit coupling problem}
+\section{Coupling as a coupling-variable consistency}
 
-For now we will assume that we are interested in the implicit coupling
-problem with $k=1$. Also, we will assume that there are available
-solvers that given the solution at some time $t_n$ are able to compute
-the solution at $t_{n+1} = t_n+\Delta t$
+We will assume that there are available solvers that given the
+solution at some time $t_n$ are able to compute the solution at
+$t_{n+1} = t_n+\Delta t$
 \begin{align}
-  \mvec{U}_1^{n+1} &= \script{H}_1(\mvec{U}_1^n, \mvec{c}_2) \\
-  \mvec{U}_2^{n+1} &= \script{H}_2(\mvec{U}_2^n, \mvec{c}_1)
+  \mvec{U}_1^{n+1} &= \script{H}_1(\mvec{U}_1^n; \mvec{c}_2) \label{eq:bb_1} \\
+  \mvec{U}_2^{n+1} &= \script{H}_2(\mvec{U}_2^n; \mvec{c}_1) \label{eq:bb_2}
 \end{align}
 Note that the solvers $\script{H}_i$, $i=1,2$ are for the
 \emph{uncoupled problem with given} $\mvec{c}_i$. We can regard these
 as ``black box'' functions that evolve the individual physics in the
 absence of the coupling.
 
+We can further abstract out the individual solvers by using
+\eqr{\ref{eq:bb_1}} and \eqr{\ref{eq:bb_2}} to eliminate $\mvec{U}_i^{n+1}$
+in \eqr{\ref{eq:n_cpl_1}} and \eqr{\ref{eq:n_cpl_2}}. This gives the
+system, for $k=1$,
+\begin{align}
+  \mvec{c}_1^{n+1} &= 
+  \script{C}_1\left(\script{H}_1(\mvec{U}_1^n;
+    \mvec{c}_2^{n+1})\right)
+  \equiv \script{K}_1(\mvec{c}_2^{n+1})
+  \\
+  \mvec{c}_2^{n+1} &= 
+  \script{C}_2\left(\script{H}_2(\mvec{U}_2^n;
+    \mvec{c}_1^{n+1})\right)
+  \equiv \script{K}_2(\mvec{c}_1^{n+1}).
+\end{align}
+We call a set of coupling variables \emph{consistent} if they satisfy
+this system. Hence, we can now restate problem of coupling the
+original system of equations as a \emph{consistency problem for the
+  coupling variables}.
+
+Note that it seems that the coupling problem has been \emph{reduced}
+in size from solving a system of $m_1+n_1+m_2+n_2$ equations to
+solving a \emph{smaller} system of $n_1+n_2$ equations for just the
+coupling variables. This reduction in size of the problem is, however,
+misleading, as the uncoupled solvers $\script{H}_i$ are still needed
+to solve the ``reduced'' consistency problem.
+
+\section{Coupling algorithms}
+
+Each algorithm produces $\mvec{U}_i^{n+1}$ given $\mvec{U}_i^{n}$ and
+the functions $\script{H}_i$, for $i=1,2$. The $\mvec{c}_i$ are
+computed using \eqr{\ref{eq:cpl_1}} and \eqr{\ref{eq:cpl_2}} and
+$\epsilon$ is a convergence parameter.
+
+\subsection{The explicit algorithm}
+
+To contrast with the implicit coupling algorithm we can first look at
+the explicit coupling algorithm.
+\begin{algorithm}
+\caption{Explicit Coupling}
+\begin{algorithmic}
+%\STATE $\mvec{c}_1^n \leftarrow \script{C}_1(\mvec{U}_1^n)$
+%\STATE $\mvec{c}_2^n \leftarrow \script{C}_2(\mvec{U}_2^n)$
+\STATE $\mvec{U}_1^{n+1} \leftarrow \script{H}_1(\mvec{U}_1^n; \mvec{c}_2^n)$
+\STATE $\mvec{U}_2^{n+1} \leftarrow \script{H}_2(\mvec{U}_2^n; \mvec{c}_1^n)$
+\end{algorithmic}
+\end{algorithm}
+In the explicit algorithm we use the \emph{old} values of the solution
+to compute the coupling variables and use these to advance the
+solution to the new time.
+
+\subsection{Picard iteration and its variants}
+
 The simplest implicit algorithm is essentially a fixed-point iteration
-or \emph{Picard iteration} scheme defined as follows. This algorithm
-produces $\mvec{U}_i^{n+1}$ given $\mvec{U}_i^{n}$ and the functions
-$\script{H}_i$, for $i=1,2$. The $\mvec{c}_i$ are computed using
-\eqr{\ref{eq:cpl_1}} and \eqr{\ref{eq:cpl_2}} and $\epsilon$ is a
-small parameter.
+or \emph{Picard iteration} scheme defined as follows.
 \begin{algorithm}
 \caption{Coupling with Picard Iteration}
 \begin{algorithmic}
-%\caption{Coupling with Picard Iteration}
 \STATE $\mvec{c}_1^0 \leftarrow \script{C}_1(\mvec{U}_1^n)$
 \STATE $\mvec{c}_2^0 \leftarrow \script{C}_2(\mvec{U}_2^n)$
 \WHILE{$|\mvec{c}_1^{m+1}-\mvec{c}_1^m| > \epsilon$ and $|\mvec{c}_2^{m+1}-\mvec{c}_2^m| > \epsilon$}
-\STATE $\mvec{U}_1^{m+1} = \script{H}_1(\mvec{U}_1^n, \mvec{c}_2^m)$
-\STATE $\mvec{U}_2^{m+1} = \script{H}_2(\mvec{U}_2^n, \mvec{c}_1^m)$
+\STATE $\mvec{U}_1^{m+1} \leftarrow \script{H}_1(\mvec{U}_1^n; \mvec{c}_2^m)$
+\STATE $\mvec{U}_2^{m+1} \leftarrow \script{H}_2(\mvec{U}_2^n; \mvec{c}_1^m)$
 \STATE $m \leftarrow m+1$
 \ENDWHILE
 \end{algorithmic}
@@ -149,12 +196,11 @@ $\mvec{U}_1$ to compute the solution $\mvec{U}_2$.
 \begin{algorithm}
 \caption{Modified Picard Iteration}
 \begin{algorithmic}
-%\caption{Coupling with Picard Iteration}
 \STATE $\mvec{c}_1^0 \leftarrow \script{C}_1(\mvec{U}_1^n)$
 \STATE $\mvec{c}_2^0 \leftarrow \script{C}_2(\mvec{U}_2^n)$
 \WHILE{$|\mvec{c}_1^{m+1}-\mvec{c}_1^m| > \epsilon$ and $|\mvec{c}_2^{m+1}-\mvec{c}_2^m| > \epsilon$}
-\STATE $\mvec{U}_1^{m+1} = \script{H}_1(\mvec{U}_1^n, \mvec{c}_2^m)$
-\STATE $\mvec{U}_2^{m+1} = \script{H}_2(\mvec{U}_2^n, \mvec{c}_1^{m+1})$
+\STATE $\mvec{U}_1^{m+1} \leftarrow \script{H}_1(\mvec{U}_1^n; \mvec{c}_2^m)$
+\STATE $\mvec{U}_2^{m+1} \leftarrow \script{H}_2(\mvec{U}_2^n; \mvec{c}_1^{m+1})$
 \STATE $m \leftarrow m+1$
 \ENDWHILE
 \end{algorithmic}
@@ -165,174 +211,3 @@ $\mvec{U}_1^{m+1}$ before $\mvec{U}_2^{m+1}$ can be computed.
 
 \end{document}
 
-For multi-physics, multi-domain simulations one needs to couple
-solvers implicitly. Each solver provides the other with a set of
-coupling variables which need be made consistent at each
-time-step. The problem can be treated as coupling two ``black box''
-solvers, i.e. without concern to how the coupling variables are
-produced.
-
-In the first section we first treat the problem of coupling
-multi-physics, multi-domain solvers using coupling variables. In the
-second section we treat the solution of transport equations as a
-coupling problem. In this the finite-difference updater is treated as
-one solver while the flux calculator is treaed as the second solver.
-
-\section{Coupling multi-physics, multi-domain solvers}
-
-Consider a solver denoted schematically as $\script{C}$ which takes as
-input a vector of $N$ variables, $\mvec{c}$, and produces as output a
-vector of $M$ variables, $\mvec{e}$, i.e. $\script{C} : R^{N} \mapsto
-R^{M}$ and
-\begin{align}
-  \mvec{e} = \script{C}(\mvec{c}).
-\end{align}
-Now consider another solver denoted by $\script{E}$ such that
-$\script{E} : R^{M} \mapsto R^{N}$ and
-\begin{align}
-  \mvec{c} = \script{E}(\mvec{e}).
-\end{align}
-The problem of coupling now can be abstractly stated as determining
-the state vector $\mvec{V} \equiv [\mvec{e}, \mvec{c}]^T$ such that
-the relation
-\begin{align}
-  \mvec{e} &= \script{C}(\mvec{c}) \\
-  \mvec{c} &= \script{E}(\mvec{e})
-\end{align}
-holds. This problem can be restated as solving the non-linear system
-of algebraic equations 
-\begin{align}
-  \mvec{G}(\mvec{V}) = \mvec{0}
-\end{align}
-where $G_i \equiv e_i - \script{C}_i(\mvec{c})$ for $i=1,\ldots,M$ and
-$G_{i+M} \equiv c_i - \script{E}_i(\mvec{e})$ for $i=1,\ldots,N$.
-
-
-\section{One-dimensional Transport Solver as a Coupling Problem}
-
-Consider the one-dimensional transport equation written in the form
-\begin{align}
-  \pfrac{Q}{t} + \frac{1}{V'} \pfraca{x} \left( V' \Gamma \right) = S
-\end{align}
-where $Q = Q(x,t)$ is an unknown quantity, $\Gamma(x) =
-\Gamma(Q,\pfracb{Q}{x})$ is a flux function, $S(x,t) = S(Q,x,t)$ is a
-source function and $V' = V'(x)$ is a given function. To descritize
-this equation consider a finite-volume grid in which a cell is defined
-as $C_i \equiv [x_i, x_{i+1}]$, with $i=1,\ldots,N$ and the unknown
-quantities are located at cell-centers $Q_i^n = Q(x_{i+1/2},t_n)$,
-fluxes are located at cell-edges $\Gamma_i = \Gamma(x_i)$ and sources
-are located at cell-centers $S_i = S(x_{i+1/2},t)$. Here, $x_{i+1/2}
-\equiv (x_i+x_{i+1})/2$ and $\Delta x_i \equiv (x_{i+1}-x_i)$. Using a
-second order central difference for the spatial operator and
-first-order implicit difference for the time derivate we get an update
-formula
-\begin{align}
-  Q_i^{n+1} = Q^n_i - \frac{\Delta t}{V'(x_i) \Delta x_i}
-  \left (
-    V'(x_{i+1/2}) F_{i+1} - V'(x_{i-1/2}) F_i
-  \right)
-  +
-  \Delta t S_i \equiv D(F_{i+1}, F_{i}) \label{eqn:update-form}
-\end{align}
-where
-\begin{align}
-  F_i = H(Q_i^{n+1}, Q_{i-1}^{n+1}) \label{eqn:flux-func}
-\end{align}
-is the numerical flux function defined such that $H(Q,Q) =
-\Gamma(Q,\pfracb{Q}{x})$.
-
-A standard implicit method would solve the system of equations arising
-from inserting the definition of the numerical flux into the update
-formula, resulting a system of non-linear algebraic equations for the
-$N$ unknowns $Q_i^{n+1}$. However, in this note we consider the
-possibility of instread solving the system of coupled $2N$ algebraic
-equations (dropping the superscripts)
-\begin{align}
-  Q_i - D(F_{i+1}, F_i) &= 0  \label{eqn:q-eqn} \\
-  F_i - H(Q_i, Q_{i-1}) &= 0. \label{eqn:f-eqn}
-\end{align}
-for the $2N$ unknowns $[Q_1, \ldots, Q_N, F_1, \ldots F_N
-]^T$. Letting $\mvec{V} \equiv [\mvec{Q}, \mvec{F}]^T$, where
-$\mvec{Q} \equiv [Q_1, \ldots, Q_N]^T$ and $\mvec{F} \equiv [F_1,
-\ldots, F_N]^T$ we can write the problem schematically as finding the
-roots of the non-linear system of algebraic equations
-\begin{align}
-  \mvec{G}(\mvec{V}) = \mvec{0} \label{eqn:g-eqn}
-\end{align}
-where $G_i \equiv Q_i - D(F_{i+1}, F_i)$, and $G_{i+N} \equiv F_i -
-F(Q_i, Q_{i-1})$ for $i=1,\ldots,N$. In the following also let
-$\mvec{D} \equiv [D_1,\ldots,D_N]^T$ and $\gvec{H} \equiv
-[H_1,\ldots,H_N]^T$.
-
-To use a Newton method for solving the non-linear system we need to
-compute, at least approximately, the inverse of the Jacobian matrix
-$\mvec{J} \equiv \mvec{G}'(\mvec{V})$. The Jacobian itself can be
-computed using \eqr{\ref{eqn:g-eqn}} and Eqns.\thinspace
-(\ref{eqn:q-eqn}) and (\ref{eqn:f-eqn}) as
-\begin{align}
-  \mvec{J} =
-  \left[
-    \begin{array}{cc}
-      \mvec{I} & -\pfracb{\mvec{D}}{\mvec{F}} \\
-      -\pfracb{\mvec{H}}{\mvec{Q}} & \mvec{I}
-    \end{array}
-  \right]
-\end{align}
-Here $\mvec{I}$ is a $N\times N$ unit matrix. Also, it is clear from
-Eqns.\thinspace (\ref{eqn:update-form}) and (\ref{eqn:flux-func}),
-$\mvec{J}_{12} \equiv -\pfracb{\mvec{D}}{\mvec{F}}$ and $
-\mvec{J}_{21} \equiv -\pfracb{\mvec{H}}{\mvec{Q}}$ are bi-diagonal
-matrices, the former with a super-diagonal and the latter with a
-sub-diagonal. Further, due to the assumed functional form of
-$\mvec{S}$, the matrix $\mvec{J}_{12}$ is linear, i.e. does not depend
-on either $\mvec{Q}$ or $\mvec{F}$.
-
-Let $\mvec{K} = \mvec{J}^{-1}$, and
-\begin{align}
-  \mvec{K} = 
-  \left[
-    \begin{array}{cc}
-      \mvec{K}_{11} & \mvec{K}_{12} \\
-      \mvec{K}_{21} & \mvec{K}_{22}
-    \end{array}
-  \right]
-\end{align}
-Then, using $\mvec{J}\mvec{K} = \mvec{I}$, we can show that
-\begin{align}
-  \mvec{K}_{11} &= (\mvec{I} - \mvec{J}_{12}\mvec{J}_{21})^{-1} \\
-  \mvec{K}_{22} &= (\mvec{I} - \mvec{J}_{21}\mvec{J}_{12})^{-1} \\
-  \mvec{K}_{12} &= -\mvec{J}_{12} \mvec{K}_{22} \\
-  \mvec{K}_{21} &= -\mvec{J}_{21} \mvec{K}_{11}.
-\end{align}
-As $\mvec{J}_{12}$ and $\mvec{J}_{21}$ are bidiagonal matrices one
-with a sub-diagonal and the other with a super-diagonal, the matrices
-$\mvec{I} - \mvec{J}_{12}\mvec{J}_{21}$ and $\mvec{I} -
-\mvec{J}_{21}\mvec{J}_{12}$ are tri-diagonal. Hence, to compute the
-Newton iteration increments in a naive brute-force algorithm requires
-two matrix-matrix multiplications of bi-diagonal matrices, two
-tri-diagonal inversions and two matrix-vector products with a
-bi-diagonal matrix.
-
-\subsection{Boundary conditions}
-
-In typical transport problems the boundary conditions are $\Gamma(0) =
-0$ and $Q(x_R,t) = Q_0(t)$, where $Q_0(t)$ is a specified function and
-$0<x<x_R$ is the domain. A possible discretization is to select a grid
-such that the $N$th cell-center lies at $x_R$. i.e.  for a uniform
-grid we have $\Delta x (N-1) + \Delta x/2 = x_R$ which implies that
-$\Delta x = 2x_R/(2N-1)$. Then, to impose the boundary conditions we
-can simply set $H_1 = 0$ and $D_N = Q_0(x_R,t)$, thus completing the
-problem description.
-
-\subsection{Extension to a system of transport equations}
-
-For most applications the transport of more than one quantity needs to
-be evolved. In this case the system of equations is generally coupled,
-i.e. the fluxes of one quantity depend on the values and gradients of
-all the other quantities. In this case the blocks of the $\mvec{J}$
-matrix become block bi-diagonal and the blocks of $\mvec{K}$ become
-inverses of block tri-diagonal matrices. In general, each $M\times M$
-sub-block, where $M$ is the number of transport equations being
-solved, of $\pfracb{\mvec{H}}{\mvec{Q}}$ is dense. However, each
-$M\times M$ sub-block of $\pfracb{\mvec{D}}{\mvec{Q}}$ is diagonal as
-the update formulas for each quantity are uncoupled.
