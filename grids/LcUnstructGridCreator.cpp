@@ -115,6 +115,10 @@ namespace Lucee
       lce << iv << " can not be added: out of space." << std::endl;
       throw lce;
     }
+    unsigned loc = 3*iv;
+// set vertex coordinates
+    for (unsigned i=0; i<3; ++i)
+      vc.vcoords[loc+i] = xv[i];
   }
 
   template <typename REAL>
