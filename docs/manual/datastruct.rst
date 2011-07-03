@@ -1,0 +1,92 @@
+*************************************
+Datastructures: Module ``DataStruct``
+*************************************
+
+Datastructures are fundamental object required to perform
+simulations. Most datastructures live on grid objects and allow the
+storage of multiple values per location in the grid.
+
+.. contents::
+
+Fields: ``DataStruct.Field1D``, ``DataStruct.Field2D`` and ``DataStruct.Field3D``
+=================================================================================
+
+The blocks ``DataStruct.Field1D``, ``DataStruct.Field2D`` and
+``DataStruct.Field3D`` can be used to create 1D, 2D and 3D
+fields. Fields are fundamental datastructures that allow attaching
+data to a grid. A field element corresponds to a location in the grid
+and allows the storage of ``numComponents`` number of elements at that
+location.
+
+Constructor Parameters
+----------------------
+
+In the following table parameters for only 3D table constructor are
+listed. The parameters for 1D and 2D fields are identical.
+
+.. list-table:: ``DataStruct.Field3D``
+  :header-rows: 1
+  :widths: 30,10,60
+
+  * - Variable [Units]
+    - Default
+    - Description
+  * - onGrid
+    - None
+    - Name of grid object on which this field lives
+  * - numComponents
+    - 1
+    - Number of elements to store at each field location
+  * - ghost
+    - {0, 0}
+    - Number of ghost cells along each side of field (see notes for details)
+
+**Notes** The parameter ``ghost`` is a 2 element table (irrespective
+of field dimension) that indicates the number of ghost cells to
+create. For example the table ``{1, 2}`` will create 1 ghost cell on
+the *lower* edge in each direction and 2 ghost cells on the *upper*
+edge in each direction.
+
+Methods
+-------
+
+The 1D, 2D and 3D field object support the following methods.
+
+.. py:function:: write(flNm)
+
+  Write out data in the field to file named *flNm*. The file is
+  created if it does not exist and overwritten if it does. Depending
+  on the file extension, the data can be written as either HDF5 or
+  plain-text.
+
+.. py:function:: clear(val)
+
+  Set all field values to *val*.
+
+.. py:function:: copy(fld)
+
+  Copy from supplied field, *fld*. The field to copy from must live on
+  the same grid and have the same number of components as the target
+  field.
+
+.. py:function:: accumulate(coeff, fld)
+
+  Add :math:`coeff*fld` to the values in this field. Here *coeff* is a
+  number and *fld* is a field that lives on the same grid and has the
+  same number of components as the target field.
+
+.. py:function:: set(luaFunc)
+
+  This method takes a Lua function to initialize the field. The
+  function *luaFunc* must take in the :math:`(x,y,z)` coordinates
+  (irrespective of field dimension) and return ``numComponents``
+  values, one for each component of the field.
+
+Examples
+--------
+
+.. code-block:: lua
+
+  eulerEqn = HyperEquation.Euler {
+   gasGamma = 1.4,
+  }
