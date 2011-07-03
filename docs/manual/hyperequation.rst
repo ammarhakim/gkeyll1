@@ -13,10 +13,22 @@ from conserved variables.
 Euler equations: ``HyperEquation.Euler``
 ========================================
 
-The ``HyperEquation.Euler`` block create an ideal Euler equation block
-that represents a gas with a constant adiabatic index
+The ``HyperEquation.Euler`` block create an ideal Euler equation
+object that represents a gas with a constant adiabatic index
 :math:`\gamma`. I.e, the internal energy of the gas is computed from
 :math:`\varepsilon(p,\rho) = p/\rho(\gamma-1)`.
+
+The object assumes that the conserved variables are stored in the
+order :math:`[\rho, \rho u, \rho v, \rho w, E]`, where :math:`\rho` is
+the fluid density, :math:`(u,v,w)` are the components of the fluid
+velocity and :math:`E` is the fluid total energy given by
+
+.. math::
+
+  E = \rho \varepsilon + \frac{1}{2}\rho (u^2+v^2+w^2)
+
+Note that all three components of the momentum (or velocity) are
+stored even for 1D and 2D simulations.
 
 The object created with this block can be used in
 updaters that solve hyperbolic equations.
