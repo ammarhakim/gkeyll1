@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* July 2nd
+
+  No work on Lucee for a while. Focused on Nautilus unstructured
+  meshes.
+
+  One can imagine adding lua methods to HyperEquation class to compute
+  primitive variables, fluxes and speeds. This will allow computing
+  say pressure for output, for example.
+
 * June 12th
   
   Tried to move the HDF5 I/O to TxBase provided I/O. Unfortunately
