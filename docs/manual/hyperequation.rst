@@ -61,7 +61,19 @@ of negative density or pressure.
 Methods
 -------
 
-This object does not support any methods.
+The Euler equation object supports the following methods.
+
+.. py:function:: primitive(cons, prim)
+
+  Given conserved variables stored in the *cons* field, computes and
+  stores the primitive variables in the *prim* field. The primitive
+  variables are stored in the order :math:`[\rho, u, v, w, p]`, where
+  :math:`p` is the fluid pressure.
+
+.. py:function:: conserved(prim, cons)
+
+  Given primitive variables stored in the *prim* field, computes and
+  stores the conserved variables in the *cons* field.
 
 Examples
 --------

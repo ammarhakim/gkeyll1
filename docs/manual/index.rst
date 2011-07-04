@@ -15,7 +15,8 @@ In this manual the Lucee specific Lua objects and methods are
 described. A Lucee simulation is created by writing a Lua program that
 uses these Lucee-specific objects along with standard Lua control
 structures and functions. This gives great flexibility as a powerful
-general-purpose language is available to you to create a simulation.
+general-purpose language is available to you for creating a
+simulation.
 
 Contents
 --------
@@ -29,4 +30,6 @@ Contents
 .. [#lua-except] Importing external modules is not presently
    supported. The reason for this is that most supercomputers do not
    allow loading shared libraries, a required feature for external Lua
-   modules to work.
+   modules to work. Also, allowing use of arbitrary libraries reduces
+   reproducibility. If you really want a module you will need to add
+   to in the source code and recompile Lucee.

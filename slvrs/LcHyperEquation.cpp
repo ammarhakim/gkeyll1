@@ -161,4 +161,16 @@ namespace Lucee
       }
     }
   }
+
+  void
+  HyperEquation::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("primitive", luaPrimitive);
+  }
+
+  int
+  HyperEquation::luaPrimitive(lua_State *L)
+  {
+    return 0;
+  }
 }
