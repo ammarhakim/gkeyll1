@@ -185,6 +185,13 @@ namespace Lucee
       void fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     protected:
 
     private:
@@ -192,6 +199,15 @@ namespace Lucee
       unsigned meqn;
 /** Number of waves */
       unsigned mwave;
+
+/**
+ * Lua callable method to compute primitive variables from conserved
+ * variables.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaPrimitive(lua_State *L);
   };
 }
 

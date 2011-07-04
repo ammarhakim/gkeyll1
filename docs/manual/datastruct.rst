@@ -69,6 +69,18 @@ The 1D, 2D and 3D field object support the following methods.
   the same grid and have the same number of components as the target
   field.
 
+.. py:function:: duplicate()
+
+  Creates and returns a duplicate of this field.
+
+.. py:function:: alias(s, e)
+
+  Creates and returns an alias of this field. The alias field points
+  to :math:`[s,e)` components of the original field. I.e, the first
+  component of the alias refers to the s-th component of the original
+  field. No new memory is allocated: the alias and the original share
+  memory, and hence modifying one will change the other.
+
 .. py:function:: accumulate(coeff, fld)
 
   Add :math:`coeff*fld` to the values in this field. Here *coeff* is a
