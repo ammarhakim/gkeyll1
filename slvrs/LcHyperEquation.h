@@ -21,6 +21,7 @@
 #include <LcFieldPtr.h>
 #include <LcMatrix.h>
 #include <LcRectCoordSys.h>
+#include <LcStructGridField.h>
 
 namespace Lucee
 {
@@ -112,7 +113,7 @@ namespace Lucee
  * @param q Conserved variables for which to primitive variables.
  * @param v On output, primitive variables.
  */
-      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
 
 /**
  * Compute conserved variables given primitive variables.
@@ -120,7 +121,7 @@ namespace Lucee
  * @param v Primitive variables for which to conserved variables.
  * @param q On output, conserved variables.
  */
-      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
+      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
 
 /**
  * Decompose jump into waves and wave-speeds using right and left
@@ -208,6 +209,67 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaPrimitive(lua_State *L);
+
+/**
+ * Lua callable method to compute conserved variables from primitive
+ * variables.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaConserved(lua_State *L);
+
+/**
+ * Compute primitive variables given conserved variables.
+ *
+ * @param cons Conserved variables to use.
+ * @param prim On ouput this contains primitive variables.
+ */
+      template <unsigned NDIM>
+      void
+      calcPrimVars(const Lucee::StructGridField<NDIM, double>& cons, Lucee::StructGridField<NDIM, double>& prim) const 
+      {
+        Lucee::FieldPtr<double> pPtr = prim.createPtr();
+        Lucee::ConstFieldPtr<double> cPtr = cons.createConstPtr();
+
+        int idx[NDIM];
+// loop over extended region and compute primitive variables
+        Lucee::RowMajorSequencer<NDIM> seq(prim.getExtRegion());
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+          cons.setPtr(cPtr, idx);
+          prim.setPtr(pPtr, idx);
+// compute primitive variables
+          this->primitive(cPtr, pPtr);
+        }
+      }
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param prim Primitive variables to use.
+ * @param cons On ouput this contains conserved variables.
+ */
+      template <unsigned NDIM>
+      void
+      calcConsVars(const Lucee::StructGridField<NDIM, double>& prim, Lucee::StructGridField<NDIM, double>& cons) const 
+      {
+        Lucee::ConstFieldPtr<double> pPtr = prim.createConstPtr();
+        Lucee::FieldPtr<double> cPtr = cons.createPtr();
+
+        int idx[NDIM];
+// loop over extended region and compute primitive variables
+        Lucee::RowMajorSequencer<NDIM> seq(cons.getExtRegion());
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+          cons.setPtr(cPtr, idx);
+          prim.setPtr(pPtr, idx);
+// compute primitive variables
+          this->conserved(pPtr, cPtr);
+        }
+      }
   };
 }
 

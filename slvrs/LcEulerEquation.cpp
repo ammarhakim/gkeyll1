@@ -82,7 +82,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v)
+  EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
     v[0] = q[0]; // rho
     v[1] = q[1]/q[0]; // u
@@ -92,7 +92,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q)
+  EulerEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
   {
     q[0] = v[0]; // rho
     q[1] = v[0]*v[1]; // rho*u

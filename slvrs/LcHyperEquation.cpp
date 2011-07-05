@@ -15,6 +15,8 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcHyperEquation.h>
+#include <LcPointerHolder.h>
+
 
 namespace Lucee
 {
@@ -46,13 +48,13 @@ namespace Lucee
   }
 
   void
-  HyperEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v)
+  HyperEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
     throw Lucee::Except("HyperEquation::primitive: Method not implemented");
   }
 
   void
-  HyperEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q)
+  HyperEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
   {
     throw Lucee::Except("HyperEquation::conserved: Method not implemented");
   }
@@ -166,11 +168,106 @@ namespace Lucee
   HyperEquation::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("primitive", luaPrimitive);
+    lfm.appendFunc("conserved", luaConserved);
   }
 
   int
   HyperEquation::luaPrimitive(lua_State *L)
   {
+    HyperEquation *hyp
+      = Lucee::PointerHolder<HyperEquation>::getObjAsBase(L);
+
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce(
+        "HyperEquation::luaPrimitive: Must provide a conserved variables field to 'primitive' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Lucee::BasicObj> *cv =
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 2);
+
+    if (lua_type(L, 3) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce(
+        "HyperEquation::luaPrimitive: Must provide a primitive variables field to 'primitive' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Lucee::BasicObj> *pv =
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 3);
+
+// call proper method based on type of object supplied
+    if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
+      hyp->calcPrimVars<1>(*(Lucee::StructGridField<1, double>*) cv->pointer, *(Lucee::StructGridField<1, double>*)pv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
+      hyp->calcPrimVars<2>(*(Lucee::StructGridField<2, double>*) cv->pointer, *(Lucee::StructGridField<2, double>*)pv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
+      hyp->calcPrimVars<3>(*(Lucee::StructGridField<3, double>*) cv->pointer, *(Lucee::StructGridField<3, double>*)pv->pointer);
+    }
+    else {
+      throw Lucee::Except("HyperEquation::luaPrimitive: Incorrect object in method 'primitive'");
+    }
+
+    return 0;
+  }
+
+  int
+  HyperEquation::luaConserved(lua_State *L)
+  {
+    HyperEquation *hyp
+      = Lucee::PointerHolder<HyperEquation>::getObjAsBase(L);
+
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce(
+        "HyperEquation::luaConserved: Must provide a conserved variables field to 'conserved' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Lucee::BasicObj> *pv =
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 2);
+
+    if (lua_type(L, 3) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce(
+        "HyperEquation::luaConserved: Must provide a conserved variables field to 'conserved' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Lucee::BasicObj> *cv =
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 3);
+
+// call proper method based on type of object supplied
+    if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
+      hyp->calcConsVars<1>(*(Lucee::StructGridField<1, double>*) pv->pointer, *(Lucee::StructGridField<1, double>*) cv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
+      hyp->calcConsVars<2>(*(Lucee::StructGridField<2, double>*) pv->pointer, *(Lucee::StructGridField<2, double>*) cv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) {
+      if (pv->pointer->getType() != cv->pointer->getType())
+        throw Lucee::Except(
+          "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
+      hyp->calcConsVars<3>(*(Lucee::StructGridField<3, double>*) pv->pointer, *(Lucee::StructGridField<3, double>*) cv->pointer);
+    }
+    else {
+      throw Lucee::Except("HyperEquation::luaConserved: Incorrect object in method 'conserved'");
+    }
+
     return 0;
   }
 }

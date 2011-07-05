@@ -101,7 +101,7 @@ namespace Lucee
  * @param q Conserved variables for which to primitive variables.
  * @param v On output, primitive variables.
  */
-      void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+      void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
 
 /**
  * Compute conserved variables given primitive variables.
@@ -109,7 +109,7 @@ namespace Lucee
  * @param v Primitive variables for which to conserved variables.
  * @param q On output, conserved variables.
  */
-      void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
+      void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
 
     private:
 /** advection speeds */

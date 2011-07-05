@@ -8,7 +8,7 @@ valid Lucee programs [#lua-except]_. The Lua programming language is
 described in the book `Programming in Lua, Second Edition
 <http://www.inf.puc-rio.br/~roberto/pil2>`_. You need not buy this
 book: the first edition of the book is available for free `here
-<http://www.lua.org/pil>`_. The firt edition is sufficient for almost
+<http://www.lua.org/pil>`_. The first edition is sufficient for almost
 all Lucee simulations.
 
 In this manual the Lucee specific Lua objects and methods are

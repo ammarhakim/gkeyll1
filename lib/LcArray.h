@@ -5,7 +5,7 @@
  *
  * @version	$Id$
  *
- * Copyright &copy; 2008-2010, Ammar Hakim.
+ * Copyright &copy; 2008-2011, Ammar Hakim.
  */
 
 #ifndef LC_ARRAY_H

@@ -36,6 +36,7 @@ namespace Lucee
   StructGridField<NDIM, T>::StructGridField()
     : Lucee::Field<NDIM, T>(), grid(0)
   {
+    this->setName(StructGridField<NDIM, double>::id);
   }
 
   template <unsigned NDIM, typename T>
@@ -44,12 +45,14 @@ namespace Lucee
     : Lucee::Field<NDIM, T>(grid->getLocalBox(), nc, lg, ug, (T) 0),
       grid(grid)
   {
+    this->setName(StructGridField<NDIM, double>::id);
   }
 
   template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField(const StructGridField<NDIM, T>& fld)
     : Lucee::Field<NDIM, T>(fld), grid(fld.grid)
   {
+    this->setName(StructGridField<NDIM, double>::id);
   }
 
   template <unsigned NDIM, typename T>
@@ -431,6 +434,7 @@ namespace Lucee
   StructGridField<NDIM, T>::StructGridField(const Field<NDIM, T>& fld, Lucee::StructuredGridBase<NDIM>& grd)
     : Lucee::Field<NDIM, T>(fld), grid(&grd)
   {
+    this->setName(StructGridField<NDIM, double>::id);
   }
 
 // instantiations
