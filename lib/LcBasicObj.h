@@ -53,9 +53,9 @@ namespace Lucee
       virtual ~BasicObj();
 
 /**
- * Get name of solver.
+ * Get name of object.
  *
- * @return Name of solver.
+ * @return Name of object.
  */
       std::string getName() const;
 
@@ -65,6 +65,15 @@ namespace Lucee
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl) = 0;
+
+/**
+ * Get type of object.
+ *
+ * @return Type of object.
+ */
+      std::string getType() const {
+        return typeid(*this).name();
+      }
 
 /**
  * Set the type of the base class for object.

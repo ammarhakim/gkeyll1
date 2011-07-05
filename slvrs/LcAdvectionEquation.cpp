@@ -89,13 +89,13 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v)
+  AdvectionEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
     v[0] = q[0];
   }
 
   void
-  AdvectionEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q)
+  AdvectionEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
   {
     q[0] = v[0];
   }

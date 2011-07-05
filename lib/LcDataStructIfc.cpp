@@ -15,8 +15,12 @@
 
 // lucee includes
 #include <LcDataStructIfc.h>
+#include <LcGlobals.h>
 #include <LcHdf5Io.h>
 #include <LcPointerHolder.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // std includes
 #include <fstream>
@@ -45,6 +49,8 @@ namespace Lucee
   DataStructIfc::write(const std::string& nm)
   {
     bool isH5 = true;
+// output prefix
+    std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
 // check file extention to determine if hdf5 or plain text should be written
     std::string snm = nm;
     unsigned trunc = nm.find_last_of(".", snm.size());
@@ -52,6 +58,9 @@ namespace Lucee
       snm.erase(0, trunc);
     if (snm == ".txt")
       isH5 = false; // write out text file
+
+// output name
+    std::string outNm = outPrefix + "_" + nm;
 
     if (isH5)
     {
@@ -61,14 +70,14 @@ namespace Lucee
       Lucee::Hdf5Io io(0, 0);
 #endif
 // open file to write in
-      Lucee::IoNodeType fn = io.createFile(nm);
+      Lucee::IoNodeType fn = io.createFile(outNm);
 // write data
       this->writeToFile(io, fn, this->getName());
     }
     else
     {
 // open text file to write in
-      std::ofstream outFl(nm.c_str(), std::fstream::out);
+      std::ofstream outFl(outNm.c_str(), std::fstream::out);
 // write out data
       this->writeToTxtFile(outFl);
     }

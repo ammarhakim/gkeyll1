@@ -86,7 +86,7 @@ namespace Lucee
  * @param q Conserved variables for which to primitive variables.
  * @param v On output, primitive variables.
  */
-      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v);
+      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
 
 /**
  * Compute conserved variables given primitive variables.
@@ -94,7 +94,7 @@ namespace Lucee
  * @param v Primitive variables for which to conserved variables.
  * @param q On output, conserved variables.
  */
-      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q);
+      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
 
 /**
  * Decompose jump into waves and wave-speeds using right and left

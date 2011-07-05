@@ -68,6 +68,9 @@ test_1()
 // create field
   int lg[2] = {2, 3}, ug[2] = {3, 2};
   Lucee::StructGridField<2, double> fld(&grid, 3, lg, ug);
+// check name
+  LC_ASSERT("Testing name of field", fld.getName() == "Field2D");
+
 // initialize field
   fld = 10.5;
 
@@ -130,6 +133,9 @@ test_2()
 // create field
   int lg[2] = {2, 3}, ug[2] = {3, 2};
   Lucee::StructGridField<2, double> fld(&grid, 3, lg, ug);
+// check name
+  LC_ASSERT("Testing name of field", fld.getName() == "Field2D");
+
 // initialize field
   fld = 10.5;
 

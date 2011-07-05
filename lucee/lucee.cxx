@@ -11,12 +11,16 @@
 // lucee includes
 #include <LcCmdLineArgs.h>
 #include <LcFileHandler.h>
+#include <LcGlobals.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
 #include <LcLuaState.h>
 #include <LcRegisterModules.h>
 #include <LcSolverIfc.h>
 #include <LcStreamHandler.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // std includes
 #include <cstdlib>
@@ -78,6 +82,9 @@ main(int argc, char **argv)
       snm.erase(trunc, snm.size());
     outPrefix = snm;
   }
+// store output prefix in globals
+  Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().outPrefix = outPrefix;
 
 // create top-level logger
   Lucee::Logger& logger = Lucee::Logger::create("lucee");
