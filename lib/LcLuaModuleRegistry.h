@@ -53,6 +53,7 @@ namespace Lucee
         Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance();
         luaL_register(L, B::id, &lm.regCreateFuncs[0]);
+        lua_pop(L, 1);
 
 // now create a meta-table for each derived class methods and register
 // them so that they become available using Lua OO notation.
@@ -73,6 +74,7 @@ namespace Lucee
           funcLst.push_back(fin);
 // now register it
           luaL_register(L, NULL, &funcLst[0]);
+          lua_pop(L, 1); // must remove what is pushed to avoid stack growth
         }
       }
 

@@ -239,6 +239,7 @@ namespace Lucee
         Lucee::Vec3<REAL> d(&geometry.vcoords[3*c2vItr.getIndex(3)]);
 // compute area of quadrilateral
         geometry.faceArea[cn] = Lucee::calcQuadArea(a, b, c, d);
+// TODO CENTROID
       }
       else
         throw Lucee::Except("UnstructGrid::calcCellGeometry2d: Unsupported 2D cell type");

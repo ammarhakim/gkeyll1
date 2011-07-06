@@ -1,0 +1,100 @@
+/**
+ * @file	LcBcUpdater.cpp
+ *
+ * @brief	Apply boundary conditions.
+ */
+
+// config stuff
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+// lucee includes
+#include <LcBcUpdater.h>
+#include <LcField.h>
+#include <LcStructuredGridBase.h>
+
+namespace Lucee
+{
+  static const unsigned LC_LOWER_EDGE = 0;
+  static const unsigned LC_UPPER_EDGE = 1;
+
+  template <> const char *BcUpdater<1>::id = "Bc1D";
+  template <> const char *BcUpdater<2>::id = "Bc2D";
+  template <> const char *BcUpdater<3>::id = "Bc3D";
+
+  template <unsigned NDIM>
+  BcUpdater<NDIM>::BcUpdater() 
+    : Lucee::UpdaterIfc() {
+  }
+
+  template <unsigned NDIM>
+  void
+  BcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl) {
+    UpdaterIfc::readInput(tbl);
+// read direction to apply
+    dir = tbl.getNumber("dir");
+    std::string edgeStr = tbl.getString("edge");
+    if (edgeStr == "lower")
+      edge = LC_LOWER_EDGE;
+    else
+      edge = LC_UPPER_EDGE;
+  }
+
+  template <unsigned NDIM>
+  void
+  BcUpdater<NDIM>::initialize() {
+// call base class method
+    UpdaterIfc::initialize();
+  }
+
+  template <unsigned NDIM>
+  Lucee::UpdaterStatus
+  BcUpdater<NDIM>::update(double t) {
+    int lo[NDIM], up[NDIM];
+
+// get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+// loop over each array and apply boundary conditions
+    for (unsigned n=0; n<this->getNumOutVars(); ++n) {
+// get array
+      Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(n);
+
+// create a region to represent ghost layer
+      for (unsigned i=0; i<NDIM; ++i)
+      { // whole region, including extended region
+        lo[i] = A.getGlobalLowerExt(i);
+        up[i] = A.getGlobalUpperExt(i);
+      }
+// adjust region so it only indexes ghost cells
+      if (edge == LC_LOWER_EDGE)
+      { // lower side
+        up[dir] = A.getGlobalLower(dir);
+      }
+      else
+      { // upper side
+        lo[dir] = A.getGlobalUpper(dir);
+      }
+// region must be local to processor
+      Lucee::Region<NDIM, int> gstRgn = A.getExtRegion().intersect(
+        Lucee::Region<NDIM, int>(lo, up));
+
+    }
+
+    return Lucee::UpdaterStatus();
+  }
+
+  template <unsigned NDIM>
+  void
+  BcUpdater<NDIM>::declareTypes() {
+// any number of output fields
+    this->setLastInpVarType(typeid(Lucee::Field<NDIM, double>));
+  }
+
+// instantiations
+  template class BcUpdater<1>;
+  template class BcUpdater<2>;
+  template class BcUpdater<3>;
+}

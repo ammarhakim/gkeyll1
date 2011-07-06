@@ -35,8 +35,11 @@ namespace Lucee
   FaceEdgeCurlUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
-// read multiplication factor
+// read stuff needed to run updater
     alpha = tbl.getNumber("alpha");
+    speed = tbl.getNumber("speed");
+    speed = speed > 0 ? speed : -speed;
+    cfl = tbl.getNumber("cfl");
   }
 
   template <unsigned NDIM>
@@ -54,6 +57,20 @@ namespace Lucee
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+// time-step
+    double dt = t-this->getCurrTime();
+
+    double cfla = 0.0;
+// first ensure that CFL condition is met
+    for (unsigned d=0; d<NDIM; ++d)
+      cfla = std::max(cfla, speed*dt/grid.getDx(d));
+
+    if (cfla > 1.01*cfl) { // time-step too large (the 1.01 is used to avoid thrashing around dt)
+      double newDt = dt*cfl/cfla;
+      return UpdaterStatus(false, newDt);
+    }
+
 // get input/output arrays to compute A = B + dt*alpha*curl(V). A and
 // B must be face-centered and V must be edge centered.
     const Lucee::Field<NDIM, double>& B = this->getInp<Lucee::Field<NDIM, double> >(0);
@@ -67,9 +84,6 @@ namespace Lucee
     
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
-
-// time-step
-    double dt = t-this->getCurrTime();
 
 // A <- B
     A.copy(B);
@@ -136,7 +150,7 @@ namespace Lucee
       }
     }
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   template <unsigned NDIM>

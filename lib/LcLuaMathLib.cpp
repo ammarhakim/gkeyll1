@@ -54,5 +54,7 @@ namespace Lucee
 
     lua_pushnumber(L, Lucee::ELECTRON_MASS);
     lua_setfield(L, -2, "ElectronMass");
+
+    lua_pop(L, 1); // pop what was pushed
   }
 }

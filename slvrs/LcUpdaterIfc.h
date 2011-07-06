@@ -2,10 +2,6 @@
  * @file	LcUpdaterIfc.h
  *
  * @brief	Base class for updaters in Lucee.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_UPDATER_IFC_H

@@ -112,7 +112,6 @@ main(int argc, char **argv)
   Lucee::registerModules(L);
 
   infoStrm << "** Welcome to Lucee!" << std::endl;
-
   time_t start = time(0); // time at start of main loop
   struct tm * timeinfo;
   timeinfo = localtime ( &start );

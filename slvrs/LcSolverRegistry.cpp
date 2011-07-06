@@ -14,9 +14,12 @@
 #endif
 
 // lucee includes
-#include <LcLinCombiner.h>
+#include <LcBcUpdater.h>
+#include <LcCopyBoundaryCondition.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
+#include <LcLinCombiner.h>
+#include <LcLuaModuleRegistry.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 
@@ -41,5 +44,17 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<3> >;
+
+// register boundary conditions
+    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
+
+// register boundary condition library into Lucee (this needs to be
+// done once here as boundary conditions are local to the slvr
+// directory. Perhaps could have also done in lucee directory)
+    Lucee::LuaModuleRegistry<Lucee::BoundaryCondition>::registerModule(L);
   }
 }

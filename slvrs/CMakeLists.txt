@@ -12,6 +12,9 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 # Create the library
 add_library(lcslvrs
   LcAdvectionEquation.cpp
+  LcBcUpdater.cpp
+  LcBoundaryCondition.cpp
+  LcCopyBoundaryCondition.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
   LcFaceEdgeCurlUpdater.cpp
