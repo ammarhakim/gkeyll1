@@ -31,7 +31,7 @@ namespace Lucee
  *
  * @param c Coordinate system to use.
  * @param qin Data in skin cell.
- * @param qout Data in ghost cell.
+ * @param qbc Data in ghost cell.
  */
       void applyBc(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
   };

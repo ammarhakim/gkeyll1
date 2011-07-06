@@ -22,7 +22,7 @@ namespace Lucee
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // just copy data over
-    for (unsigned i=0; i<qin.getNumComponents(); ++i)
-      qbc[i] = qin[i];
+    for (unsigned i=0; i<components.size(); ++i)
+      qbc[components[i]] = qin[components[i]];
   }
 }

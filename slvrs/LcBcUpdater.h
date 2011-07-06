@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcBoundaryCondition.h>
 #include <LcUpdaterIfc.h>
 
 namespace Lucee
@@ -30,9 +31,14 @@ namespace Lucee
       static const char *id;
 
 /**
- * Create new curl updater.
+ * Create new updater.
  */
       BcUpdater();
+
+/**
+ * Delete updater.
+ */
+      virtual ~BcUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -71,6 +77,8 @@ namespace Lucee
       unsigned dir;
 /** Edge to apply boundary condition */
       unsigned edge;
+/** Boundary conditions to apply */
+      Lucee::BoundaryCondition* bc;
   };
 }
 
