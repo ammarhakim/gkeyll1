@@ -17,6 +17,9 @@
 #include <LcFieldPtr.h>
 #include <LcRectCoordSys.h>
 
+// std includes
+#include <vector>
+
 namespace Lucee
 {
 /** Interface class for applying boundary conditions */
@@ -43,9 +46,13 @@ namespace Lucee
  *
  * @param c Coordinate system to use.
  * @param qin Data in skin cell.
- * @param qout Data in ghost cell.
+ * @param qbc Data in ghost cell.
  */
       virtual void applyBc(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
+
+    protected:
+/** Components to apply to */
+      std::vector<unsigned> components;
   };
 }
 

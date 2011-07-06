@@ -201,7 +201,7 @@ namespace Lucee
         if (lua_type(L, -1) != LUA_TUSERDATA)
         {
           lua_pop(L, 2);
-          Lucee::Except lce("LuaTable::getObject: ");
+          Lucee::Except lce("LuaTable::getObjectAsBase: ");
           lce << key << " is not a Lucee object";
           throw lce;
         }
@@ -232,7 +232,7 @@ namespace Lucee
         if (lua_type(L, -1) != LUA_TUSERDATA)
         {
           lua_pop(L, 2);
-          Lucee::Except lce("LuaTable::getObject: ");
+          Lucee::Except lce("LuaTable::getObjectAsDerived: ");
           lce << key << " is not a Lucee object";
           throw lce;
         }

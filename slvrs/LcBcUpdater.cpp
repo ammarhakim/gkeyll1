@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcAlignedRectCoordSys.h>
 #include <LcBcUpdater.h>
 #include <LcField.h>
 #include <LcStructuredGridBase.h>
@@ -25,12 +26,19 @@ namespace Lucee
 
   template <unsigned NDIM>
   BcUpdater<NDIM>::BcUpdater() 
-    : Lucee::UpdaterIfc() {
+    : Lucee::UpdaterIfc() 
+  {
+  }
+
+  template <unsigned NDIM>
+  BcUpdater<NDIM>::~BcUpdater() 
+  {
   }
 
   template <unsigned NDIM>
   void
-  BcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl) {
+  BcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl) 
+  {
     UpdaterIfc::readInput(tbl);
 // read direction to apply
     dir = tbl.getNumber("dir");
@@ -39,28 +47,45 @@ namespace Lucee
       edge = LC_LOWER_EDGE;
     else
       edge = LC_UPPER_EDGE;
+// get boundary conditions to apply
+    if (tbl.template hasObject<Lucee::BoundaryCondition>("boundaryCondition"))
+      bc = &tbl.template getObjectAsBase<Lucee::BoundaryCondition>("boundaryCondition");
+    else
+    {
+      Lucee::Except lce("BcUpdater::readInput: Must specify a boundary condition to apply!");
+      throw lce;
+    }
   }
 
   template <unsigned NDIM>
   void
-  BcUpdater<NDIM>::initialize() {
+  BcUpdater<NDIM>::initialize() 
+  {
 // call base class method
     UpdaterIfc::initialize();
   }
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  BcUpdater<NDIM>::update(double t) {
+  BcUpdater<NDIM>::update(double t) 
+  {
     int lo[NDIM], up[NDIM];
 
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
+// create coordinate system along this direction
+    Lucee::AlignedRectCoordSys coordSys(dir);
+
+    int idx[NDIM];
 // loop over each array and apply boundary conditions
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
 // get array
       Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(n);
+// create pointers to copy data
+      Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr();
+      Lucee::FieldPtr<double> gPtr = A.createPtr();
 
 // create a region to represent ghost layer
       for (unsigned i=0; i<NDIM; ++i)
@@ -81,6 +106,20 @@ namespace Lucee
       Lucee::Region<NDIM, int> gstRgn = A.getExtRegion().intersect(
         Lucee::Region<NDIM, int>(lo, up));
 
+      Lucee::RowMajorSequencer<NDIM> seq(gstRgn);
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        A.setPtr(gPtr, idx);
+// set pointer to skin cell
+        if (edge == LC_LOWER_EDGE)
+          idx[dir] = A.getLower(dir);
+        else
+          idx[dir] = A.getUpper(dir)-1;
+        A.setPtr(iPtr, idx);
+// apply boundary condition
+        bc->applyBc(coordSys, iPtr, gPtr);
+      }
     }
 
     return Lucee::UpdaterStatus();
