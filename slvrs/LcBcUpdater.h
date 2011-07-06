@@ -1,15 +1,11 @@
 /**
- * @file	LcEdgeFaceCurlUpdater.h
+ * @file	LcBcUpdater.h
  *
- * @brief	Compute curl on rectangular grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
+ * @brief	Apply boundary conditions.
  */
 
-#ifndef LC_EDGE_FACE_CURL_UPDATER_H
-#define LC_EDGE_FACE_CURL_UPDATER_H
+#ifndef LC_BC_UPDATER_H
+#define LC_BC_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -22,13 +18,12 @@
 namespace Lucee
 {
 /**
- * Updater to compute curl of a vector field on a rectangular
- * grid. The output field is assumed to live on cell edges and the
- * input field (to curl) is assumed to love on cell faces. This
- * updater is the dual of FaceEdgeCurlUpdater.
+ * Updater to apply boundary conditions on structured grids. This
+ * updater takes a list of BCs to apply and applies them to the
+ * supplied vectors.
  */
   template <unsigned NDIM>
-  class EdgeFaceCurlUpdater : public Lucee::UpdaterIfc
+  class BcUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -37,7 +32,7 @@ namespace Lucee
 /**
  * Create new curl updater.
  */
-      EdgeFaceCurlUpdater();
+      BcUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,13 +67,11 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Factor that multiplies curl */
-      double alpha;
-/** Speed for use in CFL computation */
-      double speed;
-/** CFL number */
-      double cfl;
+/** Direction to apply boundary condtion */
+      unsigned dir;
+/** Edge to apply boundary condition */
+      unsigned edge;
   };
 }
 
-#endif // LC_EDGE_FACE_CURL_UPDATER_H
+#endif // LC_BC_UPDATER_H

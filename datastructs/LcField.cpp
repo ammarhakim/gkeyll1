@@ -311,10 +311,10 @@ namespace Lucee
     for (unsigned i=0; i<NDIM; ++i)
     { // whole region, including extended region
       lo[i] = getGlobalLowerExt(i);
-      up[i] = getGlobalUpperExt (i);
+      up[i] = getGlobalUpperExt(i);
     }
 // adjust region so it only indexes the ghost cells
-    if (side == 0)
+    if (side == Lucee::LOWER_SIDE)
     { // lower side
       up[dir] = getGlobalLower(dir);
     }
@@ -482,9 +482,9 @@ namespace Lucee
     std::string ss = lua_tostring(L, 3);
     unsigned side = 1;
     if (ss == "lower")
-      side = 0;
+      side = Lucee::LOWER_SIDE;
     else if (ss == "upper")
-      side = 1;
+      side = Lucee::UPPER_SIDE;
     else
       throw Lucee::Except("Field::luaApplyCopyBc: side should be one of \"lower\" or \"upper\".");
 // apply boundary conditions

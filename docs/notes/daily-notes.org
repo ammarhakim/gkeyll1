@@ -1,5 +1,43 @@
 # -*- org -*-
 
+* July 6th
+
+  Thoughts on wall boundary conditions. Wall boundary conditions are
+  applied, say to fluids, by setting normal component to 0 and not
+  changing the tangential component. How to specify this in Lucee?
+
+  One way would be to create a BC object which gives the type of BC to
+  apply. Something like
+
+#+BEGIN_EXAMPLE
+  rhoBc = BoundaryCondition.Copy { components = {0} }
+  velBc = BoundaryCondition.Wall { type = "zero-normal", components = {1,2,3} }
+  funcBc = BoundaryCondition.Function { components = {0}, func = bcFunc }
+#+END_EXAMPLE
+
+  Then can then be used in a BC updater.
+#+BEGIN_EXAMPLE
+  bcUpdater = Updater.BcUpdater {
+    # stuff
+    dir = 0,
+    edge = "lower",
+    boundaryCondtions = {rhoPrBc, velBc, funcBc}
+  }
+#+END_EXAMPLE
+
+  So what should be the interface for the BoundaryCondition class?
+#+BEGIN_EXAMPLE
+  void applyBc(const 
+#+END_EXAMPLE
+
+** Bug due to unlimited Lua stack growth
+
+   It seems that there was a unlimited stack size growth in Lua. The
+   call luaL_register pushes something on the stack but does not
+   remove it. Hence, an explicit pop needs to be called to avoid stack
+   overflow.
+
+
 * July 4th
 
   Updates to manual. Added method to compute primitive from conserved

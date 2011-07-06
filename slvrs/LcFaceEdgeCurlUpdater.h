@@ -24,7 +24,7 @@ namespace Lucee
 /**
  * Updater to compute curl of a vector field on a rectangular
  * grid. The output field is assumed to live on cell faces and the
- * input field (to curl) is assumed to love on cell edges.
+ * input field (to curl) is assumed to live on cell edges.
  */
   template <unsigned NDIM>
   class FaceEdgeCurlUpdater : public Lucee::UpdaterIfc
@@ -75,6 +75,8 @@ namespace Lucee
       double alpha;
 /** Speed for use in CFL computation */
       double speed;
+/** CFL number */
+      double cfl;
   };
 }
 
