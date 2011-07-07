@@ -2,10 +2,6 @@
  * @file	LcEulerEquation.cpp
  *
  * @brief	Euler equations for gas-dynamics.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 // config stuff
 #ifdef HAVE_CONFIG_H

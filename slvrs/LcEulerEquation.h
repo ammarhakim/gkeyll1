@@ -2,10 +2,6 @@
  * @file	LcEulerEquation.h
  *
  * @brief	Euler equations for gas-dynamics.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 #ifndef LC_EULER_EQUATION_H
 #define LC_EULER_EQUATION_H
