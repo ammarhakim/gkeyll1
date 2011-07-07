@@ -574,10 +574,11 @@ namespace Lucee
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::~Array()
   {
-    if ((--*useCount == 0) && LC_IS_ALLOC(traits)) 
+    if (--*useCount == 0)
     {
-      delete [] data;
       delete useCount;
+      if (LC_IS_ALLOC(traits))
+        delete [] data;
     }
   }
 
