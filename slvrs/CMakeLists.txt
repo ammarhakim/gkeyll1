@@ -25,4 +25,5 @@ add_library(lcslvrs
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcWavePropagationUpdater.cpp
+  LcZeroNormalBoundaryCondition.cpp
 )
