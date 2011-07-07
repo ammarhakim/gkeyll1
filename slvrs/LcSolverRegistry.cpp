@@ -2,10 +2,6 @@
  * @file	LcSolverRegistry.cpp
  *
  * @brief	Method for registering basic solver object.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff
@@ -22,6 +18,7 @@
 #include <LcLuaModuleRegistry.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
+#include <LcZeroNormalBoundaryCondition.h>
 
 namespace Lucee
 {
@@ -51,6 +48,7 @@ namespace Lucee
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
+    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
