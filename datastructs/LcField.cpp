@@ -15,6 +15,7 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcMathLib.h>
 #include <LcPointerHolder.h>
 
 namespace Lucee
@@ -359,6 +360,7 @@ namespace Lucee
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
+    lfm.appendFunc("hasNan", luaHasNan);
     lfm.appendFunc("applyPeriodicBc", luaApplyPeriodicBc);
     lfm.appendFunc("applyCopyBc", luaApplyCopyBc);
   }
@@ -419,6 +421,33 @@ namespace Lucee
     fld->accumulate(coeff, *fldPtr->pointer);
 
     return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaHasNan(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+
+// loop over field, checking for nans
+    Lucee::ConstFieldPtr<T> ptr = fld->createConstPtr();
+    Lucee::RowMajorSequencer<NDIM> seq(fld->getExtRegion());
+    while (seq.step())
+    {
+      fld->setPtr(ptr, seq.getIndex());
+      for (unsigned k=0; k<ptr.getNumComponents(); ++k)
+      {
+        if (Lucee::isNan(ptr[k])) 
+        {
+          lua_pushboolean(L, 1);
+          return 1; // no need to search further
+        }
+      }
+    }
+// no nan found
+    lua_pushboolean(L, 0);
+    return 1;
   }
 
   template <unsigned NDIM, typename T>

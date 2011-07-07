@@ -424,6 +424,14 @@ namespace Lucee
       static int luaAccumulate(lua_State *L);
 
 /**
+ * Lua callable method for checking if there is a nan in the field.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaHasNan(lua_State *L);
+
+/**
  * Lua callable method for applying periodic boundary conditions.
  *
  * @param L Lua state to use.
