@@ -22,6 +22,7 @@
 
 // std includes
 #include <algorithm>
+#include <cmath>
 
 namespace Lucee
 {
@@ -122,6 +123,17 @@ namespace Lucee
     Lucee::Vec3<T> d1 = c-a;
     Lucee::Vec3<T> s2 = d-a;
     return 0.5*(s1.cross(d1).getNorm() + d1.cross(s2).getNorm());
+  }
+
+/**
+ * Check if number is nan.
+ *
+ * @param x number to check.
+ */
+  template <typename FLT>
+  bool isNan(const FLT& x)
+  { // This might need to be rewritten for Windows as it does not support C99 standard
+    return std::isnan(x);
   }
 }
 
