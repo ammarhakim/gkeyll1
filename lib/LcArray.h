@@ -546,11 +546,9 @@ namespace Lucee
 // pointing to us
     if (--*useCount == 0)
     {
+      delete useCount;
       if (LC_IS_ALLOC(traits))
-      {
         delete [] data;
-        delete useCount;
-      }
     }
 
 // copy stuff over
