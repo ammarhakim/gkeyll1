@@ -47,14 +47,13 @@ namespace Lucee
       edge = LC_LOWER_EDGE;
     else
       edge = LC_UPPER_EDGE;
-// get boundary conditions to apply
-    if (tbl.template hasObject<Lucee::BoundaryCondition>("boundaryCondition"))
-      bc = &tbl.template getObjectAsBase<Lucee::BoundaryCondition>("boundaryCondition");
-    else
-    {
-      Lucee::Except lce("BcUpdater::readInput: Must specify a boundary condition to apply!");
-      throw lce;
-    }
+
+// get list of boundary conditions to apply
+    if ( !tbl.hasTable("boundaryConditions") )
+      Lucee::Except lce("BcUpdater::readInput: Must specify boundary conditions to apply!");
+
+    Lucee::LuaTable bcTbl = tbl.getTable("boundaryConditions");
+    bcList = bcTbl.template getAllObjects<Lucee::BoundaryCondition>();
   }
 
   template <unsigned NDIM>
@@ -117,8 +116,10 @@ namespace Lucee
         else
           idx[dir] = A.getUpper(dir)-1;
         A.setPtr(iPtr, idx);
-// apply boundary condition
-        bc->applyBc(coordSys, iPtr, gPtr);
+// apply boundary conditions
+        for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
+             bcItr != bcList.end(); ++bcItr)
+          (*bcItr)->applyBc(coordSys, iPtr, gPtr);
       }
     }
 

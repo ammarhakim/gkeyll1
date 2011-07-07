@@ -78,7 +78,7 @@ namespace Lucee
 /** Edge to apply boundary condition */
       unsigned edge;
 /** Boundary conditions to apply */
-      Lucee::BoundaryCondition* bc;
+      std::vector<Lucee::BoundaryCondition*> bcList;
   };
 }
 
