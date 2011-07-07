@@ -123,8 +123,10 @@ namespace Lucee
     Lucee::FieldFactory<NDIM, T> ff;
     ff.readInput(tbl);
 // re-rest ourself from factory produced grid
-    Field<NDIM, T>::operator=(*ff.create());
-    grid = ff.getGridPtr(); // set out grid pointer
+    Field<NDIM, T>* nf = ff.create();
+    Field<NDIM, T>::operator=(*nf);
+    grid = ff.getGridPtr(); // set our grid pointer
+    delete nf; // is this really needed?
   }
 
   template <unsigned NDIM, typename T>
