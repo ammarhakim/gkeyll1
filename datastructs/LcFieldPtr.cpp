@@ -47,7 +47,7 @@ namespace Lucee
   FieldPtr<T>::~FieldPtr()
   {
     if (isAlloc)
-      delete data;
+      delete [] data;
   }
 
   template <typename T>
