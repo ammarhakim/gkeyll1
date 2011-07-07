@@ -2,10 +2,6 @@
  * @file	LcHyperEquation.h
  *
  * @brief	Interface to hyperbolic equations.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 #ifndef LC_HYPER_EQUATION_H
 #define LC_HYPER_EQUATION_H
