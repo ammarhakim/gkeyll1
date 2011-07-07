@@ -38,6 +38,16 @@ namespace Lucee
   template <> const char *WavePropagationUpdater<3>::id = "WavePropagation3D";
 
   template <unsigned NDIM>
+  WavePropagationUpdater<NDIM>::~WavePropagationUpdater()
+  {
+    apdq.clear();
+    amdq.clear();
+    speeds.clear();
+    waves.clear();
+    fs.clear();
+  }
+
+  template <unsigned NDIM>
   void
   WavePropagationUpdater<NDIM>::declareTypes()
   {

@@ -37,6 +37,9 @@ namespace Lucee
 /** Class id: this is used by registration system */
       static const char *id;
 
+/** Delete allocated memory */
+      ~WavePropagationUpdater();
+
 /**
  * Bootstrap method: Read input from specified table.
  *
