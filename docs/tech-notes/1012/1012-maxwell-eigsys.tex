@@ -1,0 +1,136 @@
+\documentclass[11pt, reqno]{amsart}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Maxwell Eigensystem]{The eigensystem of the Maxwell equations}%
+\author{Ammar H. Hakim}%
+\date{}
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1012}
+\maketitle
+
+In this document I list the eigensystem of the Maxwell
+equations. Maxwell's equations consist of the curl equations
+\begin{align}
+  \frac{\partial \mvec{B}}{\partial t} + \nabla\times\mvec{E} &= 0 \\
+  \epsilon_0\mu_0\frac{\partial \mvec{E}}{\partial t} -
+  \nabla\times\mvec{B} &= -\mu_0\mvec{J} \\
+\end{align}
+along with the divergence relations
+\begin{align}
+  \nabla\cdot\mvec{E} &= \frac{\varrho_c}{\epsilon_0} \\
+  \nabla\cdot\mvec{B} &= 0.
+\end{align}
+Here, $\mvec{E}$ is the electric field, $\mvec{B}$ is the magnetic
+flux density, $\epsilon_0$, $\mu_0$ are permittivity and permeability
+of free space, and $\mvec{J}$ and $\varrho$ are specified currents and
+charges respectively. The speed of light is determined from
+$c=1/(\mu_0\epsilon_0)^{1/2}$.
+
+These are linear equations and hence the eigensytem is independent of
+the value of the electromagnetic fields. In 1D Maxwell equations can
+be written as, ignoring sources,
+\begin{align}
+  \pfraca{t}
+  \left[
+    \begin{matrix}
+      E_x \\
+      E_y \\
+      E_z \\
+      B_x \\
+      B_y \\
+      B_z
+    \end{matrix}
+  \right]
+  +
+  \pfraca{x}
+  \left[
+    \begin{matrix}
+      0 \\
+      c^2B_z \\
+      -c^2B_y \\
+      0 \\
+      -E_z \\
+      E_y
+    \end{matrix}
+  \right]
+  =
+  0.
+\end{align}
+The eigenvalues of this system are $\{0,0,c,c,-c,-c\}$. The right
+eigenvectors of the flux Jacobian are given by the columns of the
+matrix
+\begin{align}
+  R
+  =
+  \left[
+    \begin{matrix}
+      0 & 1 & 0 & 0 & 0 & 0 \\
+      0 & 0 & c & 0 & -c & 0 \\
+      0 & 0 & 0 & -c & 0 & c \\
+      1 & 0 & 0 & 0 & 0 & 0 \\
+      0 & 0 & 0 & 1 & 0 & 1 \\
+      0 & 0 & 1 & 0 & 1 & 0
+    \end{matrix}
+  \right].
+  \label{eq:rev}
+\end{align}
+The left eigenvectors are the rows of the matrix
+\begin{align}
+  L
+  =
+  \left[
+    \begin{matrix}
+      0 & 0 & 0 & 1 & 0 & 0 \\
+      1 & 0 & 0 & 0 & 0 & 0 \\
+      0 & \frac{1}{2c} & 0 & 0 & 0 & \frac{1}{2} \\
+      0 & 0 & -\frac{1}{2c} & 0 & \frac{1}{2} & 0 \\
+      0 & -\frac{1}{2c} & 0 & 0 & 0 & \frac{1}{2} \\
+      0 & 0 & \frac{1}{2c} & 0 & \frac{1}{2} & 0
+    \end{matrix}
+  \right].
+  \label{eq:lev}
+\end{align}
+
+\end{document}
