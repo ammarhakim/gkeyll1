@@ -21,9 +21,11 @@ add_library(lcslvrs
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
+  LcMaxwellEquation.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
+  LcZeroTangentBoundaryCondition.cpp
 )

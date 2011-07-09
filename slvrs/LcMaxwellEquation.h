@@ -1,10 +1,10 @@
 /**
- * @file	LcAdvectionEquation.h
+ * @file	LcMaxwellEquation.h
  *
- * @brief	Advection equation
+ * @brief	Maxwell equations for electromagnetism.
  */
-#ifndef LC_ADVECTION_EQUATION_H
-#define LC_ADVECTION_EQUATION_H
+#ifndef LC_MAXWELL_EQUATION_H
+#define LC_MAXWELL_EQUATION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -17,9 +17,9 @@
 namespace Lucee
 {
 /**
- * Represents an Advection equation.
+ * Represents Maxwell equations electromagnetism.
  */
-  class AdvectionEquation : public Lucee::HyperEquation
+  class MaxwellEquation : public Lucee::HyperEquation
   {
     public:
 /** Class id: this is used by registration system */
@@ -28,7 +28,7 @@ namespace Lucee
 /**
  * Create a new hyperbolic equation system.
  */
-      AdvectionEquation();
+      MaxwellEquation();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -77,7 +77,26 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& q, double s[2]);
 
 /**
- * Decompose jump into waves and wave-speeds using right and left states.
+ * Compute primitive variables given conserved variables.
+ *
+ * @param q Conserved variables for which to primitive variables.
+ * @param v On output, primitive variables.
+ */
+      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param v Primitive variables for which to conserved variables.
+ * @param q On output, conserved variables.
+ */
+      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states. The states and jump are already in the local coordinate
+ * system specified by 'c'. Hence, in most case (equation system is
+ * isotropic) the coordinate system should be ignored.
  *
  * @param c Coordinate system in which to compute waves.
  * @param jump Jump to decompose.
@@ -91,26 +110,14 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
-/**
- * Compute primitive variables given conserved variables.
- *
- * @param q Conserved variables for which to primitive variables.
- * @param v On output, primitive variables.
- */
-      void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
-
-/**
- * Compute conserved variables given primitive variables.
- *
- * @param v Primitive variables for which to conserved variables.
- * @param q On output, conserved variables.
- */
-      void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
+    protected:
 
     private:
-/** advection speeds */
-      double u[3];
+/** Speed of light */
+      double lightSpeed;
+/** Speed of light squared */
+      double lightSpeed2;
   };
 }
 
-#endif //  LC_ADVECTION_EQUATION_H
+#endif //  LC_MAXWELL_EQUATION_H

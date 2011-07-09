@@ -1,13 +1,11 @@
-
-
 /**
- * @file	LcZeroNormalBoundaryCondition.h
+ * @file	LcZeroTangentBoundaryCondition.h
  *
- * @brief	Class for applying zero-normal BCs.
+ * @brief	Class for applying zero-tangent BCs.
  */
 
-#ifndef LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
-#define LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
+#ifndef LC_ZERO_TANGENT_BOUNDARY_CONDITION_H
+#define LC_ZERO_TANGENT_BOUNDARY_CONDITION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -19,8 +17,8 @@
 
 namespace Lucee
 {
-/** Class to apply a zero-normal boundary condition to vectors */
-  class ZeroNormalBoundaryCondition : public Lucee::BoundaryCondition
+/** Class to apply a zero-tangent boundary condition to vectors */
+  class ZeroTangentBoundaryCondition : public Lucee::BoundaryCondition
   {
     public:
 /** Class id: this is used by registration system */
@@ -46,4 +44,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
+#endif // LC_ZERO_TANGENT_BOUNDARY_CONDITION_H
