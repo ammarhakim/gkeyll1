@@ -29,10 +29,10 @@ namespace Lucee
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
-    if (tbl.hasNumber("gas_gamma"))
-      gas_gamma = tbl.getNumber("gas_gamma");
+    if (tbl.hasNumber("gasGamma"))
+      gas_gamma = tbl.getNumber("gasGamma");
     else
-      throw Lucee::Except("EulerEquation::readInput: Must specify gas_gamma (gas constant)");
+      throw Lucee::Except("EulerEquation::readInput: Must specify gasGamma (gas constant)");
   }
 
   void

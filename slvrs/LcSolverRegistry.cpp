@@ -19,6 +19,7 @@
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
+#include <LcZeroTangentBoundaryCondition.h>
 
 namespace Lucee
 {
@@ -49,6 +50,7 @@ namespace Lucee
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
+    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroTangentBoundaryCondition>;
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
