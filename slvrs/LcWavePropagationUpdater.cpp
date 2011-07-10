@@ -321,6 +321,9 @@ namespace Lucee
   WavePropagationUpdater<NDIM>::applyLimiters(
     Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
+// return immediately if no limiters need to be applied
+    if (limiter == NO_LIMITER) return;
+
     double c, r, dotr, dotl, wnorm2, wlimitr=1;
 
     unsigned meqn = equation->getNumEqns();

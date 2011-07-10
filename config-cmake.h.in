@@ -1,2 +1,95 @@
-#cmakedefine HAVE_SSTREAM
-#cmakedefine HAVE_STD_STREAMS
+/* All variables */
+
+/* "SVN Project REV for the cmak subdir" */
+#cmakedefine CMAKEDIR_REV "${CMAKEDIR_REV}"
+
+/* Version number of package */
+#cmakedefine LUCEE_VERSION "${LUCEE_VERSION}"
+
+/* "SVN Project REV for the subdir ." */
+#cmakedefine LUCEE_REV "${LUCEE_REV}"
+
+/* Whether using cmake */
+#cmakedefine HAVE_CMAKE
+
+/* The host name */
+#cmakedefine HOSTNAME "${HOSTNAME}"
+
+/* The host type */
+#cmakedefine HOSTTYPE "${HOSTTYPE}"
+
+/* "C++ Compiler to use" */
+#cmakedefine CXX "${CXX}"
+
+/* "C++ flags" */
+#cmakedefine CXXFLAGS "${CXXFLAGS}"
+
+/* "C++ Optimization flags" */
+#cmakedefine CXX_OPTIFLAGS "${CXX_OPTIFLAGS}"
+
+/* "C++ Compiler version" */
+#cmakedefine CXX_VERSION "${CXX_VERSION}"
+
+/* "Whether the C++ compiler allows generally declared templated static variables" */
+#cmakedefine HAVE_GENERALLY_DECLARED_STATICS
+
+/* Define when the C++ compiler does not understand std::abs with double arg */
+#cmakedefine NOT_HAVE_STD_ABS_DOUBLE
+
+/* "The Source Directory" */
+#cmakedefine ABS_TOP_SRCDIR "${ABS_TOP_SRCDIR}"
+
+/* Define to 1 if you have the <sstream> header file. */
+#cmakedefine01 HAVE_SSTREAM
+
+/* Define if your C++ compiler has streams in the namespace std */
+#cmakedefine01 HAVE_STD_STREAMS
+
+/* Define if compiling for MPI */
+#cmakedefine HAVE_MPI
+
+/* whether Boost is present */
+#cmakedefine HAVE_BOOST
+
+/* whether the HDF5 library is present */
+#cmakedefine HAVE_HDF5
+
+/* Whether to use the HDF5-1.6 interfaces */
+#cmakedefine H5_USE_16_API
+
+/* whether the new 1.6.4 H5Sselect_hyperslab interface is in use */
+#cmakedefine NEW_H5S_SELECT_HYPERSLAB_IFC
+
+/* whether BoosGsl is present */
+#cmakedefine HAVE_GSL
+
+/* Whether Petsc was found */
+#cmakedefine HAVE_PETSC
+
+/* "config subdir subversion revision" */
+#cmakedefine CONFIG_REV "${CONFIG_REV}"
+
+/* "top src dir" */
+#cmakedefine TOP_SRCDIR "${TOP_SRCDIR}"
+
+/* Define whether INT_IS_SSIZE_T is true */
+#cmakedefine INT_IS_SSIZE_T
+
+/* Whether time and sys/time are compatible */
+#cmakedefine TIME_WITH_SYS_TIME
+
+/* Whether struct tm is in sys/time */
+#cmakedefine TM_IN_SYS_TIME
+
+/* Define whether system has timeval (for Windows) */
+#cmakedefine _TIMEVAL_DEFINED
+
+/* Define whether to use math defines (for Windows) */
+#cmakedefine _USE_MATH_DEFINES
+
+/* Fortran-C macros */
+#define @FC_FC_FUNC@
+#define @FC_FC_FUNC_@
+#define @FC_FUNC@
+#define @FC_FUNC_@
+

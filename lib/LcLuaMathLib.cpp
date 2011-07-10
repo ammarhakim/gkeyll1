@@ -9,6 +9,8 @@
  */
 
 // lucee includes
+#include <LcLogStream.h>
+#include <LcLogger.h>
 #include <LcLuaMathLib.h>
 #include <LcMathLib.h>
 #include <LcMathPhysConstants.h>
@@ -24,8 +26,68 @@ lua_lengendre(lua_State *L)
   return 1;
 }
 
+static
+int
+lua_log_debug(lua_State *L)
+{
+  const char *str = luaL_checkstring(L, 1);
+  Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+  Lucee::LogStream strm = l.getDebugStream();
+  strm << str << std::endl;
+  return 0;
+}
+
+static
+int
+lua_log_info(lua_State *L)
+{
+  const char *str = luaL_checkstring(L, 1);
+  Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+  Lucee::LogStream strm = l.getInfoStream();
+  strm << str << std::endl;
+  return 0;
+}
+
+static
+int
+lua_log_warning(lua_State *L)
+{
+  const char *str = luaL_checkstring(L, 1);
+  Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+  Lucee::LogStream strm = l.getWarningStream();
+  strm << str << std::endl;
+  return 0;
+}
+
+static
+int
+lua_log_error(lua_State *L)
+{
+  const char *str = luaL_checkstring(L, 1);
+  Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+  Lucee::LogStream strm = l.getErrorStream();
+  strm << str << std::endl;
+  return 0;
+}
+
+static
+int
+lua_log_critical(lua_State *L)
+{
+  const char *str = luaL_checkstring(L, 1);
+  Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+  Lucee::LogStream strm = l.getCriticalStream();
+  strm << str << std::endl;
+  return 0;
+}
+
 static const luaL_Reg lcLuaMathLib[] = {
     {"legendre", lua_lengendre},
+    {"logDebug", lua_log_debug},
+    {"logInfo", lua_log_info},
+    {"logWarning", lua_log_warning},
+    {"logError", lua_log_error},
+    {"logCritical", lua_log_critical},
     {NULL, NULL}
 };
 
