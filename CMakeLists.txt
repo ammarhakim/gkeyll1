@@ -4,7 +4,7 @@ project(lucee)
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "5")
 set(VERSION_PATCH "0")
-set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+set(LUCEE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 # Required version
 cmake_minimum_required(VERSION 2.8)
@@ -22,6 +22,24 @@ endif (WIN32)
 
 ######################################################################
 #
+# Set for inclusion in config.h
+#
+######################################################################
+
+set(LUCEE_REV ${PROJECT_REV})
+set(CXX ${CMAKE_CXX_COMPILER})
+# MESSAGE("CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
+set(BUILD_FLAGS_VAR  CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE})
+# MESSAGE("BUILD_FLAGS_VAR = ${BUILD_FLAGS_VAR}")
+set(BUILD_FLAGS_VAL "${${BUILD_FLAGS_VAR}}")
+# MESSAGE("BUILD_FLAGS_VAL = ${BUILD_FLAGS_VAL}")
+set(CXXFLAGS "${BUILD_FLAGS_VAL} ${CMAKE_CXX_FLAGS}")
+# MESSAGE("CXXFLAGS = ${CXXFLAGS}")
+# SET(HAVE_CMAKE CACHE STRING "Whether built with CMake")
+set(HAVE_CMAKE 1 CACHE STRING "Whether built with CMake")
+
+######################################################################
+#
 # Find packages
 #
 ######################################################################
@@ -29,18 +47,21 @@ endif (WIN32)
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
 
+# find txbase
+find_package(TxBase REQUIRED)
+if (TXBASE_FOUND)
+   include_directories(${TxBase_INCLUDE_DIRS})
+endif (TXBASE_FOUND)
+
 # find HDF5
 find_package(Hdf5 REQUIRED)
 if (HDF5_FOUND)
-   add_definitions(-DHAVE_HDF5)
-   add_definitions(-DNEW_H5S_SELECT_HYPERSLAB_IFC)
    include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
 
 # find GSL
 find_package(Gsl REQUIRED)
 if (GSL_FOUND)
-   add_definitions(-DHAVE_GSL)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 

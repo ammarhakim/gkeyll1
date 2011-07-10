@@ -113,6 +113,7 @@ main(int argc, char **argv)
 
   infoStrm << "** Welcome to Lucee!" << std::endl;
   time_t start = time(0); // time at start of main loop
+  clock_t start_t = clock();
   struct tm * timeinfo;
   timeinfo = localtime ( &start );
   infoStrm << "Simulation started at time " << asctime(timeinfo) << std::endl;
@@ -134,8 +135,9 @@ main(int argc, char **argv)
   }
 
   time_t end = time(0); // time at end of main loop
+  clock_t end_t = clock();
   timeinfo = localtime ( &end );
-  infoStrm << "Simulation finished at time " << asctime(timeinfo) << std::endl;
-
+  infoStrm << "Simulation took " << (double) (end_t-start_t)/CLOCKS_PER_SEC
+           << " seconds and finished at time " << asctime(timeinfo) << std::endl;
   return 0;
 }

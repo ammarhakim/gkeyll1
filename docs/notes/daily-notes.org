@@ -1,5 +1,26 @@
 # -*- org -*-
 
+* July 7th-9th
+
+  Completed wall BCs for zero-normal and zero-tangent vector
+  fields. Also implemented Maxwell equation class. Tested with 2D
+  pulse in metal-box problem. Need to compare with FDTD solver.
+
+  Next, need to implement PHM equations and the correction equation
+  classes. Then test using some current and charge source problems.
+
+  For FDTD need to implement the PEC wall BCs.
+
+  Need to write a OdeIntegrator base class that integrates ODEs on a
+  grid. A derived class from this could be used to create an updater
+  to do source updates using an operator split-scheme.
+
+  Real important to make Lucee work in parallel. This needs bringing
+  in the txbase MSG library into Lucee and creating
+  decompositions. Also, the loggers need to be exposed to Lua.
+
+  Navier-Stokes via compact Pade schemes.
+
 * July 6th
 
   Thoughts on wall boundary conditions. Wall boundary conditions are
@@ -25,10 +46,7 @@
   }
 #+END_EXAMPLE
 
-  So what should be the interface for the BoundaryCondition class?
-#+BEGIN_EXAMPLE
-  void applyBc(const 
-#+END_EXAMPLE
+*** July 9th updated: BC implemented.
 
 ** Bug due to unlimited Lua stack growth
 
@@ -42,7 +60,6 @@
    There was a major bug in the Lucee:Array dtro. The code was
    decrementing the useCount but not deleting it when done. This lead
    to a huge consumption of memory in the WavePropagationUpdater.
-
 
 * July 4th
 

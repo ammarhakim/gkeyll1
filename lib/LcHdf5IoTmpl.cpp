@@ -68,10 +68,10 @@ namespace Lucee
     }
 
     // Create the data region to be written
-#ifdef NEW_H5S_SELECT_HYPERSLAB_IFC
-    hsize_t* dataStart = new hsize_t[dataSetSize.size()];
-#else
+#ifdef OLD_H5S_SELECT_HYPERSLAB_IFC
     hssize_t* dataStart = new hssize_t[dataSetSize.size()];
+#else
+    hsize_t* dataStart = new hsize_t[dataSetSize.size()];
 #endif
     for (size_t i=0; i<dataSetBeg.size(); ++i) dataStart[i] = dataSetBeg[i];
     for (size_t i=dataSetBeg.size(); i<dataSetSize.size(); ++i) dataStart[i] = 0;
@@ -141,10 +141,10 @@ namespace Lucee
         static_cast<Hdf5NodeTypev*>(node));
 
     // Create the data space and memory space for reading
-#ifdef NEW_H5S_SELECT_HYPERSLAB_IFC
-    hsize_t* dataStart = new hsize_t[dataSetBeg.size()];
-#else
+#ifdef OLD_H5S_SELECT_HYPERSLAB_IFC
     hssize_t* dataStart = new hssize_t[dataSetBeg.size()];
+#else
+    hsize_t* dataStart = new hsize_t[dataSetBeg.size()];
 #endif
     for (size_t i=0; i<dataSetBeg.size(); ++i) dataStart[i] = dataSetBeg[i];
     hsize_t* dataExtent = new hsize_t[dataSetBeg.size()];
