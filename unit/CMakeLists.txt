@@ -25,9 +25,15 @@ ENDIF (APPLE)
 
 # Create test executables
 
+if (ENABLE_PARALLEL)
+  set (Hdf5_Mpi_LIBRARIES ${Hdf5_LIBRARIES} ${TXMPI_LIBS} ${Z_LIBRARIES})
+else ()
+  set (Hdf5_Mpi_LIBRARIES ${Hdf5_LIBRARIES})
+endif ()
+
 # lcarray
 add_executable(lcarray lcarray.cxx)
-target_link_libraries(lcarray lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcarray lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lccolmajorindexer
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
@@ -47,11 +53,11 @@ target_link_libraries(lcfixedvector lclib lcloki lclua ${Gsl_LIBRARIES})
 
 # lcvector
 add_executable(lcvector lcvector.cxx)
-target_link_libraries(lcvector lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcvector lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcmatrix
 add_executable(lcmatrix lcmatrix.cxx)
-target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${Hdf5_LIBRARIES})
+target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${Hdf5_Mpi_LIBRARIES})
 
 # lccmdlineargs
 add_executable(lccmdlineargs lccmdlineargs.cxx)
@@ -64,7 +70,7 @@ target_link_libraries(lcregion lclib lcloki lclua ${Gsl_LIBRARIES})
 # lcfield
 add_executable(lcfield lcfield.cxx)
 target_link_libraries(lcfield
-  lcdatastructs lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+  lcdatastructs lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
@@ -88,7 +94,7 @@ target_link_libraries(lclogger lclib lcloki lclua ${Gsl_LIBRARIES})
 
 # lchdf5io
 add_executable(lchdf5io lchdf5io.cxx)
-target_link_libraries(lchdf5io lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lchdf5io lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcvec3
 add_executable(lcvec3 lcvec3.cxx)
@@ -96,7 +102,7 @@ target_link_libraries(lcvec3 lclib)
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
-target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)
@@ -105,7 +111,7 @@ target_link_libraries(lcluafunction lclib lcloki lclua ${Gsl_LIBRARIES})
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)
 target_link_libraries(lclincombiner lcslvrs lcdatastructs 
-  lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES} ${Gsl_LIBRARIES})
+  lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
 
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)
@@ -133,17 +139,17 @@ target_link_libraries(lcluahelp lcdatastructs lclib lclua)
 
 # lcvalarraycmp
 add_executable(lcvalarraycmp lcvalarraycmp.cxx)
-target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcgmvgridcreator
 add_executable(lcgmvgridcreator lcgmvgridcreator.cxx)
-target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcgeoprim
 add_executable(lcgeomprim lcgeomprim.cxx)
-target_link_libraries(lcgeomprim lcgrids lclib lcloki lclua ${Hdf5_LIBRARIES})
+target_link_libraries(lcgeomprim lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcstructgridfield
 add_executable(lcstructgridfield lcstructgridfield.cxx)
 target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki lclua 
-  ${Hdf5_LIBRARIES} ${Gsl_LIBRARIES})
+  ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
