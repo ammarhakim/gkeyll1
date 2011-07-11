@@ -42,7 +42,7 @@ target_link_libraries(lucee
   ${Fortran_IMPLICIT_LIBFLAGS})
 
 if (ENABLE_PARALLEL)
-  target_link_libraries(lucee ${TXMPI_LIBS} ${Fortran_IMPLICIT_LIBFLAGS})
+  target_link_libraries(lucee ${TXMPI_LIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBFLAGS})
 endif (ENABLE_PARALLEL)
 
 install(TARGETS lucee RUNTIME DESTINATION bin)
