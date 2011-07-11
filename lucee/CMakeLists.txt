@@ -20,6 +20,9 @@ link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
 link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
 
+if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
+  include_directories("${MPI_INCLUDE_PATH}")
+endif ()
 
 # Create lucee executable
 add_executable(lucee lucee.cxx LcRegisterModules.cpp)
@@ -34,6 +37,11 @@ target_link_libraries(lucee
   lclua
   ${Hdf5_LIBRARIES}
   ${Gsl_LIBRARIES}
-  ${EXTRA_LIBS})
+  ${EXTRA_LIBS}
+  ${Fortran_IMPLICIT_LIBFLAGS})
+
+if (ENABLE_PARALLEL)
+  target_link_libraries(lucee ${TXMPI_LIBS} ${Fortran_IMPLICIT_LIBFLAGS})
+endif (ENABLE_PARALLEL)
 
 install(TARGETS lucee RUNTIME DESTINATION bin)

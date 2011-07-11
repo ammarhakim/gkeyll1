@@ -22,6 +22,13 @@
 // loki includes
 #include <loki/Singleton.h>
 
+// txbase includes
+#ifdef HAVE_MPI
+# include <TxMpiBase.h>
+#else
+# include <TxSelfBase.h>
+#endif
+
 // std includes
 #include <cstdlib>
 #include <ctime>
@@ -33,6 +40,11 @@
 int
 main(int argc, char **argv)
 {
+// initialize MPI if building in parallel
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+#endif
+
   Lucee::CmdLineArgs cmdParser("lucee");
 // add command line options
   cmdParser.addArg("i", "INPUT", "Input file");
@@ -139,5 +151,9 @@ main(int argc, char **argv)
   timeinfo = localtime ( &end );
   infoStrm << "Simulation took " << (double) (end_t-start_t)/CLOCKS_PER_SEC
            << " seconds and finished at time " << asctime(timeinfo) << std::endl;
+
+#ifdef HAVE_MPI
+  MPI_Finalize();
+#endif
   return 0;
 }

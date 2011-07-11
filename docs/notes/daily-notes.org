@@ -6,6 +6,9 @@
   fields. Also implemented Maxwell equation class. Tested with 2D
   pulse in metal-box problem. Need to compare with FDTD solver.
 
+  Hooked in txbase into Lucee to allow use of MPI stuff. Added a comm
+  pointer to the globals object.
+
   Next, need to implement PHM equations and the correction equation
   classes. Then test using some current and charge source problems.
 
@@ -20,6 +23,17 @@
   decompositions. Also, the loggers need to be exposed to Lua.
 
   Navier-Stokes via compact Pade schemes.
+
+** Work on manual
+
+   This is coming along well. Need to get basic stuff documented
+   before the system gets too large and documentation becomes hard.
+
+** A system to label simulations
+
+   Label them sequentially with a four digit number. Then use two
+   letters for name of person and finally a short name for the
+   simulation. For example, 1034-ah-eulershock.
 
 * July 6th
 
