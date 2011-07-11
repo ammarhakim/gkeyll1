@@ -83,6 +83,10 @@ else(APPLE)
   endif (LAPACK_FOUND)
 endif(APPLE)
 
+if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
+  include_directories("${MPI_INCLUDE_PATH}")
+endif ()
+
 # Create configure file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in
    ${CMAKE_CURRENT_BINARY_DIR}/config.h)
