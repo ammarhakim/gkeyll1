@@ -26,9 +26,9 @@ ENDIF (APPLE)
 # Create test executables
 
 if (ENABLE_PARALLEL)
-  set (Hdf5_Mpi_LIBRARIES ${Hdf5_LIBRARIES} ${TXMPI_LIBS} ${Z_LIBRARIES})
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${TXMPI_LIBS} ${Z_LIBRARIES})
 else ()
-  set (Hdf5_Mpi_LIBRARIES ${Hdf5_LIBRARIES})
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES})
 endif ()
 
 # lcarray
