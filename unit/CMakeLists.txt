@@ -37,19 +37,19 @@ target_link_libraries(lcarray lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lccolmajorindexer
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
-target_link_libraries(lccolmajorindexer lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lccolmajorindexer lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcrowmajorindexer
 add_executable(lcrowmajorindexer lcrowmajorindexer.cxx)
-target_link_libraries(lcrowmajorindexer lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcrowmajorindexer lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcdirsequencer
 add_executable(lcdirsequencer lcdirsequencer.cxx)
-target_link_libraries(lcdirsequencer lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcdirsequencer lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcfixedvector
 add_executable(lcfixedvector lcfixedvector.cxx)
-target_link_libraries(lcfixedvector lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcfixedvector lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcvector
 add_executable(lcvector lcvector.cxx)
@@ -61,11 +61,11 @@ target_link_libraries(lcmatrix lclib lcloki lclua ${EXTRA_LIBS} ${Hdf5_Mpi_LIBRA
 
 # lccmdlineargs
 add_executable(lccmdlineargs lccmdlineargs.cxx)
-target_link_libraries(lccmdlineargs lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lccmdlineargs lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcregion
 add_executable(lcregion lcregion.cxx)
-target_link_libraries(lcregion lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcfield
 add_executable(lcfield lcfield.cxx)
@@ -74,23 +74,23 @@ target_link_libraries(lcfield
 
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
-target_link_libraries(lcrowmajorsequencer lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcrowmajorsequencer lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lccolmajorsequencer
 add_executable(lccolmajorsequencer lccolmajorsequencer.cxx)
-target_link_libraries(lccolmajorsequencer lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lccolmajorsequencer lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcluatable
 add_executable(lcluatable lcluatable.cxx)
-target_link_libraries(lcluatable lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcluatable lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcluamodule
 add_executable(lcluamodule lcluamodule.cxx)
-target_link_libraries(lcluamodule lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcluamodule lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lclogger
 add_executable(lclogger lclogger.cxx)
-target_link_libraries(lclogger lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lclogger lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lchdf5io
 add_executable(lchdf5io lchdf5io.cxx)
@@ -98,7 +98,7 @@ target_link_libraries(lchdf5io lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcvec3
 add_executable(lcvec3 lcvec3.cxx)
-target_link_libraries(lcvec3 lclib)
+target_link_libraries(lcvec3 lclib ${Hdf5_Mpi_LIBRARIES})
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
@@ -106,7 +106,7 @@ target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRA
 
 # lcluafunction
 add_executable(lcluafunction lcluafunction.cxx)
-target_link_libraries(lcluafunction lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcluafunction lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)
@@ -115,27 +115,27 @@ target_link_libraries(lclincombiner lcslvrs lcdatastructs
 
 # lcluaobj
 add_executable(lcluacobj lcluacobj.cxx)
-target_link_libraries(lcluacobj lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcluacobj lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcfieldptr
 add_executable(lcfieldptr lcfieldptr.cxx)
-target_link_libraries(lcfieldptr lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcfieldptr lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcgslelliptic
 add_executable(lcgslelliptic lcgslelliptic.cxx)
-target_link_libraries(lcgslelliptic ${Gsl_LIBRARIES})
+target_link_libraries(lcgslelliptic ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcrectcoordsys
 add_executable(lcrectcoordsys lcrectcoordsys.cxx)
-target_link_libraries(lcrectcoordsys lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES})
+target_link_libraries(lcrectcoordsys lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lctabledescription
 add_executable(lctabledescription lctabledescription.cxx)
-target_link_libraries(lctabledescription lcdatastructs lclib lclua ${Gsl_LIBRARIES})
+target_link_libraries(lctabledescription lcdatastructs lclib lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcluahelp
 add_executable(lcluahelp lcluahelp.cxx)
-target_link_libraries(lcluahelp lcdatastructs lclib lclua)
+target_link_libraries(lcluahelp lcdatastructs lclib lclua ${Hdf5_Mpi_LIBRARIES})
 
 # lcvalarraycmp
 add_executable(lcvalarraycmp lcvalarraycmp.cxx)
