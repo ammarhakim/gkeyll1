@@ -58,6 +58,9 @@ find_package(Hdf5 REQUIRED)
 if (HDF5_FOUND)
    include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
+if (NOT WIN32)
+  find_package(Z REQUIRED)
+endif ()
 
 # find GSL
 find_package(Gsl REQUIRED)
