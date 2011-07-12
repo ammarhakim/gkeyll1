@@ -2,10 +2,6 @@
  * @file	LcCmdLineArgs.cpp
  *
  * @brief	Class to parse command line arguments.
- *
- * @version	$Id: LcCmdLineArgs.cpp 222 2009-11-17 04:46:22Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // std includes

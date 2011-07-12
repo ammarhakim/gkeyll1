@@ -2,10 +2,6 @@
  * @file	LcHdf5Io.h
  *
  * @brief	Class for I/O using HDF5.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_HDF5_IO_H

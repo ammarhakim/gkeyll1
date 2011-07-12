@@ -2,10 +2,6 @@
  * @file	LcPointerHolder.h
  *
  * @brief	Simple class to hold pointer
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_POINTER_HOLDER_H

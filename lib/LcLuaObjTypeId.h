@@ -2,10 +2,6 @@
  * @file	LcLuaObjTypeId.h
  *
  * @brief       Class that identifies an object derived from BasicObj.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_OBJ_TYPE_ID_H

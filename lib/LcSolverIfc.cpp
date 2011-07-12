@@ -2,10 +2,6 @@
  * @file	LcSolverIfc.cpp
  *
  * @brief	Interface class for Lucee solvers.
- *
- * @version	$Id: LcSolverIfc.cpp 312 2010-03-02 18:37:24Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

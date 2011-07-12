@@ -2,10 +2,6 @@
  * @file	LcDataStructIfc.h
  *
  * @brief	Base class for all data in Lucee.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_DATA_STRUCT_IFC_H

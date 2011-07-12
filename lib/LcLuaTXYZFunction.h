@@ -2,10 +2,6 @@
  * @file	LcLuaTXYZFunction.h
  *
  * @brief	Class to represent Lua function.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_FUNCTION_H

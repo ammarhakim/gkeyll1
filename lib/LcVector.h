@@ -2,10 +2,6 @@
  * @file	LcVector.h
  *
  * @brief	Vector class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_VECTOR_H

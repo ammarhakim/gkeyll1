@@ -2,11 +2,6 @@
  * @file	LcIoNode.cpp
  *
  * @brief	Class representing I/O node for HDF5 file
- *
- * @version	$Id: LcIoNode.cpp 128 2009-08-20 17:15:56Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
- * Licence version 1.0.
  */
 
 // lucee includes

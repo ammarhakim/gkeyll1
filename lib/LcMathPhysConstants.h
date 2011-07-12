@@ -2,10 +2,6 @@
  * @file	LcMathPhysConstants.h
  *
  * @brief	Mathematical and physical constants.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_MATH_PHYS_CONSTANTS_H

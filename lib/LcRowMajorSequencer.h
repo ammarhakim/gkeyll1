@@ -2,10 +2,6 @@
  * @file	LcRowMajorSequencer.h
  *
  * @brief	Sequence over region using row-major order.
- *
- * @version	$Id: LcRowMajorSequencer.h 278 2010-02-22 17:15:09Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_ROW_MAJOR_SEQUENCER_H

@@ -2,10 +2,6 @@
  * @file	LcLapackDeclarations.h
  *
  * @brief	Declarations for pulling in LAPACK symbols into Lucee.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LAPACK_DECLARATIONS_H

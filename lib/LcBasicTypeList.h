@@ -2,10 +2,6 @@
  * @file	LcBasicTypeList.h
  *
  * @brief	Typelist for basic Lucee types.
- *
- * @version	$Id: LcBasicTypeList.h 195 2009-09-27 00:00:03Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_BASIC_TYPE_LIST_H

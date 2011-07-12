@@ -2,10 +2,6 @@
  * @file	LcLogger.cpp
  *
  * @brief	Class for loggers.
- *
- * @version	$Id: LcLogger.cpp 55 2008-12-26 19:32:52Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

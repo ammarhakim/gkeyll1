@@ -2,10 +2,6 @@
  * @file	LcLinIndexer.h
  *
  * @brief	Base class mapping an N-dimensional index into a linear index.
- *
- * @version	$Id: LcLinIndexer.h 280 2010-02-22 23:44:44Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_LIN_INDEXER_H

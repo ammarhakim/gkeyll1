@@ -2,10 +2,6 @@
  * @file	LcDataTypes.h
  *
  * @brief	Class of supported types in I/O and messaging classes.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_DATA_TYPES_H

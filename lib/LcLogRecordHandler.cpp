@@ -2,10 +2,6 @@
  * @file	LcLogRecordHandler.cpp
  *
  * @brief	Class for loggers.
- *
- * @version	$Id: LcLogRecordHandler.cpp 69 2008-12-30 07:35:17Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

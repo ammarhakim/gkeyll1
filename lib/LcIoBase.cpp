@@ -2,10 +2,6 @@
  * @file	LcIoBase.cpp
  *
  * @brief	Base class for I/O using hierachical file system.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lib includes

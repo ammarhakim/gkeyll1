@@ -2,11 +2,7 @@
  * @file	LcLuaMathLib.cpp
  *
  * @brief	Lua callable math functions and physical constants.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
- */
+*/
 
 // lucee includes
 #include <LcLogStream.h>

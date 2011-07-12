@@ -2,10 +2,6 @@
  * @file	LcMathLib.cpp
  *
  * @brief	Math library for use in Lucee.
- *
- * @version	$Id: LcMathLib.cpp 312 2010-03-02 18:37:24Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

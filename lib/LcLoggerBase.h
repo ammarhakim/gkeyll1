@@ -2,10 +2,6 @@
  * @file	LcLoggerBase.h
  *
  * @brief	Base class for loggers.
- *
- * @version	$Id: LcLoggerBase.h 69 2008-12-30 07:35:17Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LOGGER_BASE_H

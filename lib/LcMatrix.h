@@ -2,10 +2,6 @@
  * @file	LcMatrix.h
  *
  * @brief	Matrix class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_MATRIX_H

@@ -2,10 +2,6 @@
  * @file	LcLuaModule.h
  *
  * @brief	Class to store functions in a LUA module.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_MODULE_H

@@ -2,10 +2,6 @@
  * @file	LcHdf5IoTmpl.h
  *
  * @brief	HDF5 I/O class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_HDF5_IO_TMPL_H

@@ -2,10 +2,6 @@
  * @file	LcLinAlgebra.cpp
  *
  * @brief	Linear algebra functions. Mainly wrappers around LAPACK.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

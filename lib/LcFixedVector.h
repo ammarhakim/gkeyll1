@@ -2,10 +2,6 @@
  * @file	LcFixedVector.h
  *
  * @brief	A fixed-sized Vector class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_FIXED_VECTOR_H

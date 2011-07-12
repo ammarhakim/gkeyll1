@@ -2,10 +2,6 @@
  * @file	LcHdf5IoTmpl.cpp
  *
  * @brief	HDF5 I/O class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifdef HAVE_CONFIG_H

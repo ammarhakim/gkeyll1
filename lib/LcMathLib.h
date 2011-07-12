@@ -2,10 +2,6 @@
  * @file	LcMathLib.h
  *
  * @brief	Math library for use in Lucee.
- *
- * @version	$Id: LcMathLib.h 312 2010-03-02 18:37:24Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_MATH_LIB_H

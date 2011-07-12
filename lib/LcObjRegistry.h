@@ -2,10 +2,6 @@
  * @file	LcObjRegistry.h
  *
  * @brief	Class for handling object registration
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_OBJ_REGISTRY_H

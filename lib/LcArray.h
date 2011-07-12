@@ -2,10 +2,6 @@
  * @file	LcArray.h
  *
  * @brief	Serial array class.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2011, Ammar Hakim.
  */
 
 #ifndef LC_ARRAY_H
