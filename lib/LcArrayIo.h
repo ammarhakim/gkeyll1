@@ -2,10 +2,6 @@
  * @file	LcArrayIo.h
  *
  * @brief	Functions for I/O for various Lucee arrays.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_ARRAY_IO_H

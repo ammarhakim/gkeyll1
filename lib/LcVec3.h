@@ -2,10 +2,6 @@
  * @file	LcVec3.h
  *
  * @brief	A vector in 3D space.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_VEC_3_H

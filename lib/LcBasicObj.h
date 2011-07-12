@@ -2,10 +2,6 @@
  * @file	LcBasicObj.h
  *
  * @brief	Interface class for basic Lucee objects.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_BASIC_OBJ_H

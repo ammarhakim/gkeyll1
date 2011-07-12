@@ -2,10 +2,6 @@
  * @file	LcLuaHelp.h
  *
  * @brief	Class to store functions in a LUA help.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_HELP_H

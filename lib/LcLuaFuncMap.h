@@ -2,10 +2,6 @@
  * @file	LcLuaFuncMap.h
  *
  * @brief	Class to store map of callable Lua functions.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_FUNC_MAP_H

@@ -2,10 +2,6 @@
  * @file	LcFunctionIfc.h
  *
  * @brief	Interface class for function objects.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_FUNCTION_IFC_H

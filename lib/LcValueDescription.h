@@ -2,10 +2,6 @@
  * @file	LcValueDescription.h
  *
  * @brief	Description of a single value in a Lua table.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_VALUE_DESCRIPTION_H

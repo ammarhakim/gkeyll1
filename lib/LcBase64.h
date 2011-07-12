@@ -2,10 +2,6 @@
  * @file	LcBase64.h
  *
  * @brief	Class to provide encoding/decoding from base64 format.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_BASE64_H

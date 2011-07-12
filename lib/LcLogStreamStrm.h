@@ -2,10 +2,6 @@
  * @file	LcLogStreamStrm.h
  *
  * @brief	Class for log streams.
- *
- * @version	$Id: LcLogStreamStrm.h 34 2008-12-20 23:58:04Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LOG_STREAM_STRM_H

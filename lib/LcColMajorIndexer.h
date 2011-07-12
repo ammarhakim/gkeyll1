@@ -2,10 +2,6 @@
  * @file	LcColMajorIndexer.h
  *
  * @brief	Class mapping an N-dimensional index into a linear index.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_COL_MAJOR_INDEXER_H

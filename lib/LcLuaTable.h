@@ -2,10 +2,6 @@
  * @file	LcLuaTable.h
  *
  * @brief	Class to represent Lua table.
- *
- * @version	$Id: LcLuaTable.h 157 2009-08-26 17:27:55Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_TABLE_H

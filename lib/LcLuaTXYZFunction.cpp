@@ -2,10 +2,6 @@
  * @file	LcLuaTXYZFunction.cpp
  *
  * @brief	Class to represent Lua function.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

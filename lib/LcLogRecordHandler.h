@@ -2,10 +2,6 @@
  * @file	LcLogRecordHandler.cpp
  *
  * @brief	Class for loggers.
- *
- * @version	$Id: LcLogRecordHandler.h 56 2008-12-26 19:34:29Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_LOG_RECORD_HANDLER_H

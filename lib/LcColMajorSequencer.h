@@ -2,10 +2,6 @@
  * @file	LcColMajorSequencer.h
  *
  * @brief	Sequence over region using column-major order.
- *
- * @version	$Id: LcColMajorSequencer.h 278 2010-02-22 17:15:09Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 #ifndef LC_COL_MAJOR_SEQUENCER_H

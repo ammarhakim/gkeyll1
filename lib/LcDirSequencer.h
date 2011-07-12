@@ -2,10 +2,6 @@
  * @file	LcDirSequencer.h
  *
  * @brief	Sequence over region using row-major order.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_DIR_SEQUENCER_H

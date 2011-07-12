@@ -2,10 +2,6 @@
  * @file	LcIoNodeType.h
  *
  * @brief	Base class for I/O nodes.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_IO_NODE_TYPE_H

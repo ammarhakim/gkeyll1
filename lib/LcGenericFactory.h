@@ -2,11 +2,6 @@
  * @file	LcGenericFactory.h
  *
  * @brief	Templated class to serve as base class as a object 
- *                 factory.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_GENERIC_FACTORY_H

@@ -2,10 +2,6 @@
  * @file	LcHdf5Traits.h
  *
  * @brief	Class to define traits for types supported by HDF5.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_HDF5_TRAITS_H

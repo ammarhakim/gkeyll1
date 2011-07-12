@@ -2,10 +2,6 @@
  * @file	LcLuaModuleRegistry.h
  *
  * @brief	Class for handling object creation.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LUA_MODULE_REGISTRY_H

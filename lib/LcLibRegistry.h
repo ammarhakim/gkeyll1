@@ -2,10 +2,6 @@
  * @file	LcLibRegistry.h
  *
  * @brief	Method for registering basic library object.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LIB_REGISTRY_H

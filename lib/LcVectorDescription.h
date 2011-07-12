@@ -2,10 +2,6 @@
  * @file	LcVectorDescription.h
  *
  * @brief	Description of a single vector in a Lua table.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_VECTOR_DESCRIPTION_H
