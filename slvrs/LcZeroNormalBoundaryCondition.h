@@ -1,5 +1,3 @@
-
-
 /**
  * @file	LcZeroNormalBoundaryCondition.h
  *

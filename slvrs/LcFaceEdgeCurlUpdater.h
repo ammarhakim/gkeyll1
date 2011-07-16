@@ -2,10 +2,6 @@
  * @file	LcFaceEdgeCurlUpdater.h
  *
  * @brief	Compute curl on rectangular grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_FACE_EDGE_CURL_UPDATER_H
