@@ -2,10 +2,6 @@
  * @file	LcHyperEquationRegistry.cpp
  *
  * @brief	Method for registering hyperbolic equations.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

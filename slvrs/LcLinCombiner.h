@@ -2,10 +2,6 @@
  * @file	LcLinCombiner.h
  *
  * @brief	Linear combiner updater.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_LIN_COMBINER_H

@@ -2,10 +2,6 @@
  * @file	LcEdgeFaceCurlUpdater.cpp
  *
  * @brief	Compute curl on rectangular grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

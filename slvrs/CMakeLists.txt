@@ -18,6 +18,7 @@ add_library(lcslvrs
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
   LcFaceEdgeCurlUpdater.cpp
+  LcGridOdeIntegrator.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp

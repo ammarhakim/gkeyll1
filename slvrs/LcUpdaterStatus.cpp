@@ -2,10 +2,6 @@
  * @file	LcUpdaterStatus.cpp
  *
  * @brief	Class indicating updater status.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

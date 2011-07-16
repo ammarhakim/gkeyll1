@@ -2,10 +2,6 @@
  * @file	LcUpdaterStatus.h
  *
  * @brief	Class indicating updater status.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_UPDATER_STATUS_H
