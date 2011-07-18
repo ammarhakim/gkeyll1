@@ -67,11 +67,11 @@
    It seems that there was a unlimited stack size growth in Lua. The
    call luaL_register pushes something on the stack but does not
    remove it. Hence, an explicit pop needs to be called to avoid stack
-   overflow.
+   overflow. It seems one needs to be very careful with Lua calls.
 
 ** Bug in array destructor
 
-   There was a major bug in the Lucee:Array dtro. The code was
+   There was a major bug in the Lucee:Array dtor. The code was
    decrementing the useCount but not deleting it when done. This lead
    to a huge consumption of memory in the WavePropagationUpdater.
 
