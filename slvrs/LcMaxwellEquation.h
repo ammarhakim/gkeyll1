@@ -17,7 +17,7 @@
 namespace Lucee
 {
 /**
- * Represents Maxwell equations electromagnetism.
+ * Represents Maxwell equations of electromagnetism.
  */
   class MaxwellEquation : public Lucee::HyperEquation
   {
@@ -79,7 +79,7 @@ namespace Lucee
 /**
  * Compute primitive variables given conserved variables.
  *
- * @param q Conserved variables for which to primitive variables.
+ * @param q Conserved variables for which to compute primitive variables.
  * @param v On output, primitive variables.
  */
       virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
@@ -87,7 +87,7 @@ namespace Lucee
 /**
  * Compute conserved variables given primitive variables.
  *
- * @param v Primitive variables for which to conserved variables.
+ * @param v Primitive variables for which to compute conserved variables.
  * @param q On output, conserved variables.
  */
       virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;

@@ -1,10 +1,10 @@
 /**
- * @file	LcMaxwellEquation.h
+ * @file	LcPhMaxwellEquation.h
  *
- * @brief	Maxwell equations for electromagnetism.
+ * @brief	Perfectly-Hyperbolic Maxwell equations for electromagnetism.
  */
-#ifndef LC_MAXWELL_EQUATION_H
-#define LC_MAXWELL_EQUATION_H
+#ifndef LC_PH_MAXWELL_EQUATION_H
+#define LC_PH_MAXWELL_EQUATION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -17,9 +17,11 @@
 namespace Lucee
 {
 /**
- * Represents Maxwell equations electromagnetism.
+ * Represents Perfectly-Hyperbolic Maxwell equations of
+ * electromagnetism. This system explicity takes into account the
+ * divergence relations.
  */
-  class MaxwellEquation : public Lucee::HyperEquation
+  class PhMaxwellEquation : public Lucee::HyperEquation
   {
     public:
 /** Class id: this is used by registration system */
@@ -28,7 +30,7 @@ namespace Lucee
 /**
  * Create a new hyperbolic equation system.
  */
-      MaxwellEquation();
+      PhMaxwellEquation();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -79,7 +81,7 @@ namespace Lucee
 /**
  * Compute primitive variables given conserved variables.
  *
- * @param q Conserved variables for which to primitive variables.
+ * @param q Conserved variables for which to compute primitive variables.
  * @param v On output, primitive variables.
  */
       virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
@@ -87,7 +89,7 @@ namespace Lucee
 /**
  * Compute conserved variables given primitive variables.
  *
- * @param v Primitive variables for which to conserved variables.
+ * @param v Primitive variables for which to compute conserved variables.
  * @param q On output, conserved variables.
  */
       virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
@@ -117,7 +119,13 @@ namespace Lucee
       double lightSpeed;
 /** Speed of light squared */
       double lightSpeed2;
+/** Propagation speed factor for electric field error potential. This
+ * is dimensionless and the actual speed is chi_e*c. */
+      double chi_e;
+/** Propagation speed factor for magnetic field error potential. This
+ * is dimensionless and the actual speed is chi_m*c. */
+      double chi_m;
   };
 }
 
-#endif //  LC_MAXWELL_EQUATION_H
+#endif //  LC_PH_MAXWELL_EQUATION_H
