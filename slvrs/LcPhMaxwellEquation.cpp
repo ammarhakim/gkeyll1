@@ -1,7 +1,7 @@
 /**
- * @file	LcMaxwellEquation.cpp
+ * @file	LcPhMaxwellEquation.cpp
  *
- * @brief	Maxwell equations for electromagnetism.
+ * @brief	Perfectly-Hyperbolic Maxwell equations for electromagnetism.
  */
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -9,12 +9,12 @@
 #endif
 
 // lucee includes
-#include <LcMaxwellEquation.h>
+#include <LcPhMaxwellEquation.h>
 
 namespace Lucee
 {
 /** Class id: this is used by registration system */
-  const char *MaxwellEquation::id = "Maxwell";
+  const char *PhMaxwellEquation::id = "PhMaxwell";
 
 // constants to make indexing conserved variables easier
   static const unsigned EX = 0;
@@ -23,84 +23,119 @@ namespace Lucee
   static const unsigned BX = 3;
   static const unsigned BY = 4;
   static const unsigned BZ = 5;
+  static const unsigned PHI = 6; // electric field correction
+  static const unsigned PSI = 7; // magnetic field correction
 
-  MaxwellEquation::MaxwellEquation()
-    : Lucee::HyperEquation(6, 3)
-  { // 6 eqns and 3 waves: 0, c, -c
+  PhMaxwellEquation::PhMaxwellEquation()
+    : Lucee::HyperEquation(8, 6)
+  { // 8 eqns and 6 waves: -c*chi_m, c*chi_m, -c*chi_e, c*chi_e, -c, -c, c, c
   }
 
   void
-  MaxwellEquation::readInput(Lucee::LuaTable& tbl)
+  PhMaxwellEquation::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::HyperEquation::readInput(tbl);
+
     if (tbl.hasNumber("lightSpeed"))
       lightSpeed = tbl.getNumber("lightSpeed");
     else
-      throw Lucee::Except("MaxwellEquation::readInput: Must specify speed of light, 'lightSpeed'");
+      throw Lucee::Except("PhMaxwellEquation::readInput: Must specify speed of light, 'lightSpeed'");
     lightSpeed2 = lightSpeed*lightSpeed;
+
+    if (tbl.hasNumber("elcErrorSpeedFactor"))
+      chi_e = tbl.getNumber("elcErrorSpeedFactor");
+    else
+      chi_e = 0.0;
+
+    if (tbl.hasNumber("mgnErrorSpeedFactor"))
+      chi_m = tbl.getNumber("mgnErrorSpeedFactor");
+    else
+      chi_m = 0.0;
   }
 
   void
-  MaxwellEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
+  PhMaxwellEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     c.rotateVecToLocal(&inQ[0], &outQ[0]); // electric field
     c.rotateVecToLocal(&inQ[3], &outQ[3]); // magnetic field
+    outQ[6] = inQ[6]; // electric correction potential
+    outQ[7] = inQ[7]; // magnetic correction potential
   }
 
   void
-  MaxwellEquation::rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
+  PhMaxwellEquation::rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ)
   {
     c.rotateVecToGlobal(&inQ[0], &outQ[0]); // electric field
     c.rotateVecToGlobal(&inQ[3], &outQ[3]); // magnetic field
+    outQ[6] = inQ[6]; // electric correction potential
+    outQ[7] = inQ[7]; // magnetic correction potential
   }
 
   void
-  MaxwellEquation::flux(const Lucee::RectCoordSys& c,
+  PhMaxwellEquation::flux(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
-    f[0] = 0.0;
+    f[0] = chi_e*lightSpeed2*q[PHI];
     f[1] = lightSpeed2*q[BZ];
     f[2] = -lightSpeed2*q[BY];
-    f[3] = 0.0;
+    f[3] = chi_m*q[PHI];
     f[4] = -q[EZ];
     f[5] = q[EY];
+    f[6] = chi_m*q[EX];
+    f[7] = chi_e*lightSpeed2*q[BX];
   }
 
   void
-  MaxwellEquation::speeds(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q, double s[2])
+  PhMaxwellEquation::speeds(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
-    s[0] = -lightSpeed;
-    s[1] = lightSpeed;
+    if (chi_m<1.0 && chi_e<1.0)
+    {
+      s[0] = -lightSpeed;
+      s[1] = lightSpeed;
+    }
+    else if (chi_m > chi_e)
+    {
+      s[0] = -chi_m*lightSpeed;
+      s[1] = chi_m*lightSpeed;
+    }
+    else
+    {
+      s[0] = -chi_e*lightSpeed;
+      s[1] = chi_e*lightSpeed;
+    }
   }
 
   void
-  MaxwellEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  PhMaxwellEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
-    for (unsigned i=0; i<6; ++i)
+    for (unsigned i=0; i<8; ++i)
       v[i] = q[i];
   }
 
   void
-  MaxwellEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  PhMaxwellEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
   {
-    for (unsigned i=0; i<6; ++i)
+    for (unsigned i=0; i<8; ++i)
       q[i] = v[i];
   }
 
   void
-  MaxwellEquation::waves(const Lucee::RectCoordSys& c,
+  PhMaxwellEquation::waves(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
     double c1 = 1/lightSpeed;
 // project jump onto left eigenvectors (see Tech Note 1012)
-    double a0 = jump[3];
-    double a1 = jump[0];
-    double a2 = 0.5*(c1*jump[1] + jump[5]);
-    double a3 = 0.5*(-c1*jump[2] + jump[4]);
-    double a4 = 0.5*(-c1*jump[1] + jump[5]);
-    double a5 = 0.5*(c1*jump[2] + jump[4]);
+    double a0 = 0.5*(jump[3] - c1*jump[7]);
+    double a1 = 0.5*(jump[3] + c1*jump[7]);
+    double a2 = 0.5*(jump[0] - lightSpeed*jump[6]);
+    double a3 = 0.5*(jump[0] + lightSpeed*jump[6]);
+// STILL TO DO
+    double a4 = 0.5*(c1*jump[1] + jump[5]);
+    double a5 = 0.5*(-c1*jump[2] + jump[4]);
+    double a6 = 0.5*(-c1*jump[1] + jump[5]);
+    double a7 = 0.5*(c1*jump[2] + jump[4]);
 
 // compute waves (see Tech Note 1012)
 
