@@ -15,8 +15,7 @@ In this manual the Lucee specific Lua objects and methods are
 described. A Lucee simulation is created by writing a Lua program that
 uses these Lucee-specific objects along with standard Lua control
 structures and functions. This gives great flexibility as a powerful
-general-purpose language is available to you for creating a
-simulation.
+general-purpose language is available for creating a simulation.
 
 Contents
 --------
@@ -26,6 +25,21 @@ Contents
 
   datastruct
   hyperequation
+
+Technical Notes
+---------------
+
+Technical Notes give details, mainly mathematical, about algorithms
+and physical models implemented in Lucee. Various parts of the code
+refer to these notes which should be considered as references for the
+implemented equations and schemes.
+
+.. toctree::
+  :maxdepth: 1
+
+  maxwell-eigensystem
+  euler-eigensystem
+  hancock-muscl
 
 .. [#lua-except] Importing external modules is not presently
    supported. The reason for this is that most supercomputers do not
