@@ -41,7 +41,8 @@
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
 
-\title[Maxwell Eigensystem]{The eigensystem of the Maxwell equations}%
+\title[Maxwell Eigensystem]{The eigensystem of the Maxwell equations
+  with extension to perfectly hyperbolic Maxwell equations.}%
 \author{Ammar H. Hakim}%
 \date{}
 
@@ -49,6 +50,8 @@
 % header text
 \lhead{Tech-Note 1012}
 \maketitle
+
+\section{Eigensystem of Maxwell equations}
 
 In this document I list the eigensystem of the Maxwell
 equations. Maxwell's equations consist of the curl equations
@@ -59,8 +62,8 @@ equations. Maxwell's equations consist of the curl equations
 \end{align}
 along with the divergence relations
 \begin{align}
-  \nabla\cdot\mvec{E} &= \frac{\varrho_c}{\epsilon_0} \\
-  \nabla\cdot\mvec{B} &= 0.
+  \nabla\cdot\mvec{E} &= \frac{\varrho_c}{\epsilon_0} \label{eq:divE} \\
+  \nabla\cdot\mvec{B} &= 0. \label{eq:divB}
 \end{align}
 Here, $\mvec{E}$ is the electric field, $\mvec{B}$ is the magnetic
 flux density, $\epsilon_0$, $\mu_0$ are permittivity and permeability
@@ -131,6 +134,97 @@ The left eigenvectors are the rows of the matrix
     \end{matrix}
   \right].
   \label{eq:lev}
+\end{align}
+
+\section{Eigensystem of Perfectly Hyperbolic Maxwell equations}
+
+The perfectly hyperbolic Maxwell equations are a modification of the
+Maxwell equations that take into account the divergence relations
+\eqr{\ref{eq:divE}} and \eqr{\ref{eq:divB}}.
+\begin{align}
+  \frac{\partial \mvec{B}}{\partial t} + \nabla\times\mvec{E} +
+  \gamma \nabla\psi
+  &= 0 \\
+  \epsilon_0\mu_0\frac{\partial \mvec{E}}{\partial t} -
+  \nabla\times\mvec{B} +     \chi \nabla \phi
+  &= -\mu_0\mvec{J} \\
+  \frac{1}{\chi}\pfrac{\phi}{t} + \nabla\cdot\mvec{E} 
+  &= \frac{\varrho_c}{\epsilon_0} \\
+  \frac{\epsilon_0\mu_0}{\gamma}\pfrac{\psi}{t} + \nabla\cdot\mvec{B} 
+  &= 0.
+\end{align}
+Here, $\psi$ and $\psi$ are correction potentials for the electric and
+magnetic field respectively and $\chi$ and $\gamma$ are dimensionless
+factors that control the speed at which the errors are
+propagated.
+
+In 1D these equations can be written as, ignoring sources,
+\begin{align}
+  \pfraca{t}
+  \left[
+    \begin{matrix}
+      E_x \\
+      E_y \\
+      E_z \\
+      B_x \\
+      B_y \\
+      B_z \\
+      \phi \\
+      \psi
+    \end{matrix}
+  \right]
+  +
+  \pfraca{x}
+  \left[
+    \begin{matrix}
+      \chi c^2 \phi \\
+      c^2B_z \\
+      -c^2B_y \\
+      \gamma \psi \\
+      -E_z \\
+      E_y \\
+      \chi E_x \\
+      \gamma c^2B_x
+    \end{matrix}
+  \right]
+  =
+  0.
+\end{align}
+The eigenvalues of this system are $\{-c\gamma, c\gamma, -c\chi,
+c\chi, c, c, -c, -c\}$. The right eigenvectors of the flux Jacobian
+are given by the columns of the matrix
+\begin{align}
+  R
+  =
+  \left[
+    \begin{matrix}
+      0  & 0 & 1 & 1 & 0 &  0 &  0 & 0 \\
+      0  & 0 & 0 & 0 & c &  0 & -c & 0 \\
+      0  & 0 & 0 & 0 & 0 & -c &  0 & c \\
+      1  & 1 & 0 & 0 & 0 &  0 &  0 & 0 \\
+      0  & 0 & 0 & 0 & 0 &  1 &  0 & 1 \\
+      0  & 0 & 0 & 0 & 1 &  0 &  1 & 0 \\
+      0  & 0 & -\frac{1}{c} & \frac{1}{c} & 0 &  0 &  0 & 0 \\
+     -c  & c & 0 & 0 & 0 &  0 &  0 & 0
+    \end{matrix}
+  \right].
+  \label{eq:ph_rev}
+\end{align}
+The left eigenvectors are the rows of the matrix
+\begin{align}
+  L
+  =
+  \left[
+    \begin{matrix}
+      0 & 0 & 0 & 1 & 0 & 0 \\
+      1 & 0 & 0 & 0 & 0 & 0 \\
+      0 & \frac{1}{2c} & 0 & 0 & 0 & \frac{1}{2} \\
+      0 & 0 & -\frac{1}{2c} & 0 & \frac{1}{2} & 0 \\
+      0 & -\frac{1}{2c} & 0 & 0 & 0 & \frac{1}{2} \\
+      0 & 0 & \frac{1}{2c} & 0 & \frac{1}{2} & 0
+    \end{matrix}
+  \right].
+  \label{eq:ph_lev}
 \end{align}
 
 \end{document}
