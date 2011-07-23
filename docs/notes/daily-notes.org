@@ -1,5 +1,28 @@
 # -*- org -*-
 
+* July 22nd
+
+  Completed PH Maxwell equations. Also wrote up the eigensystem and
+  put it in the manual as well as my website.
+
+  Tested PH Maxwell against Maxwell for 2D pulse-in-box problem. Seems
+  to work fin, though more careful testing is needed.
+
+  Also, one thing is to look the BCs for PHM carefully. These seem a
+  bit non-obvious and should be looked into.
+
+  Added the RST form of the technical notes to the manual. This now
+  puts the Lua program documentaion as well as detailed techincal
+  notes in one place.
+
+** Testing and verification study
+
+   Need to create a verification repo in which all Lua programs used
+   in verification of equations and solvers in Lucee is
+   performed. This should study convergence of each scheme and a large
+   number of problems to give confidence that the equations and
+   solvers are implemented correctly.
+
 * July 7th-9th
 
   Completed wall BCs for zero-normal and zero-tangent vector
