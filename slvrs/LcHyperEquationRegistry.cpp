@@ -14,6 +14,7 @@
 #include <LcEulerEquation.h>
 #include <LcHyperEquationRegistry.h>
 #include <LcMaxwellEquation.h>
+#include <LcPhMaxwellEquation.h>
 
 namespace Lucee
 {
@@ -23,5 +24,6 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AdvectionEquation>;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::EulerEquation>;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::MaxwellEquation>;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::PhMaxwellEquation>;
   }
 }

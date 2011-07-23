@@ -24,6 +24,13 @@ namespace Lucee
 /** Class id: this is used by registration system */
       static const char *id;
 
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
 /** 
  * Apply boundary conditions. The variable 'qin' represents data in
  * the skin cell (first/last interior cell) while 'qbc' represents
@@ -34,6 +41,10 @@ namespace Lucee
  * @param qbc Data in ghost cell.
  */
       void applyBc(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
+
+    private:
+/** factor to multiply while copying */
+      std::vector<double> fact;
   };
 }
 
