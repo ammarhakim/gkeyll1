@@ -23,6 +23,7 @@ add_library(lcslvrs
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
   LcMaxwellEquation.cpp
+  LcPhMaxwellEquation.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
