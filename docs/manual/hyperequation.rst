@@ -16,18 +16,50 @@ Euler equations: ``HyperEquation.Euler``
 The ``HyperEquation.Euler`` block create an ideal Euler equation
 object that represents a gas with a constant adiabatic index
 :math:`\gamma`. I.e, the internal energy of the gas is computed from
-:math:`\varepsilon(p,\rho) = p/\rho(\gamma-1)`.
+:math:`\varepsilon(p,\rho) = p/\rho(\gamma-1)`, where :math:`p` is the
+gas pressure and :math:`\rho` is the density.
 
 The object assumes that the conserved variables are stored in the
-order :math:`[\rho, \rho u, \rho v, \rho w, E]`, where :math:`\rho` is
-the fluid density, :math:`(u,v,w)` are the components of the fluid
-velocity and :math:`E` is the fluid total energy given by
+order :math:`[\rho, \rho u, \rho v, \rho w, E]`. The
+``HyperEquation.Euler`` object decribes the 3D Euler equation written
+in the form
+
+.. math::
+  :label: eq:euler-eqn
+
+  \frac{\partial}{\partial{t}}
+  \left[
+    \begin{matrix}
+      \rho \\
+      \rho u \\
+      \rho v \\
+      \rho w \\
+      E
+    \end{matrix}
+  \right]
+  +
+  \frac{\partial}{\partial{x}}
+  \left[
+    \begin{matrix}
+      \rho u \\
+      \rho u^2 + p \\
+      \rho uv \\
+      \rho uw \\
+      (E+p)u
+    \end{matrix}
+  \right]
+  =
+  0
+
+Here only the X-direction fluxes are show. Here, :math:`(u,v,w)` are
+the components of the fluid velocity and :math:`E` is the fluid total
+energy given by
 
 .. math::
 
   E = \rho \varepsilon + \frac{1}{2}\rho (u^2+v^2+w^2)
 
-Note that all three components of the momentum (or velocity) are
+Note that all three components of the momentum (and velocity) are
 stored even for 1D and 2D simulations.
 
 The object created with this block can be used in
@@ -46,17 +78,6 @@ Constructor Parameters
   * - gasGamma
     - None
     - Gas adiabatic index :math:`\gamma`
-  * - minPressure [Pa]
-    - 0.0
-    - Minimum allowable pressure (see text for details)
-  * - minDensity [Kg/m :math:`^3`]
-    - 0.0
-    - Minimum allowable density (see text for details)
-
-**Notes** The optional variables ``minDensity`` and ``minPressure``
-represent the minimum pressure and density computed by the Euler
-equation object. These parameters are useful to prevent the formation
-of negative density or pressure.
 
 Methods
 -------
@@ -78,15 +99,10 @@ The Euler equation object supports the following methods.
 Examples
 --------
 
+To create an Euler equation object with :math:`\gamma = 1.4` you can do
+
 .. code-block:: lua
 
   eulerEqn = HyperEquation.Euler {
    gasGamma = 1.4,
   }
-
-Implementation notes
---------------------
-
-The ``HyperEquation.Euler`` object represents the Euler equation
-written in the conservative form. It pro **give link to doxygen**
-

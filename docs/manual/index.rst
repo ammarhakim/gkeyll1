@@ -18,7 +18,7 @@ structures and functions. This gives great flexibility as a powerful
 general-purpose language is available for creating a simulation.
 
 Lua accessible object documentation
-----------------------------------
+-----------------------------------
 
 .. toctree::
   :maxdepth: 2
