@@ -2,5 +2,8 @@ syntax: glob
 *~
 docs/api/*
 docs/manual/_build
+docs/tech-notes/*/*.pdf
+docs/tech-notes/*/*.aux
+docs/tech-notes/*/*.log
 BROWSE
 doxyerrors

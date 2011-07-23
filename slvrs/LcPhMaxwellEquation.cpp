@@ -28,7 +28,7 @@ namespace Lucee
 
   PhMaxwellEquation::PhMaxwellEquation()
     : Lucee::HyperEquation(8, 6)
-  { // 8 eqns and 6 waves: -c*chi_m, c*chi_m, -c*chi_e, c*chi_e, -c, -c, c, c
+  { // 8 eqns and 6 waves: -c*chi_m, c*chi_m, -c*chi_e, c*chi_e, c, c, -c, -c
   }
 
   void
@@ -81,8 +81,8 @@ namespace Lucee
     f[3] = chi_m*q[PHI];
     f[4] = -q[EZ];
     f[5] = q[EY];
-    f[6] = chi_m*q[EX];
-    f[7] = chi_e*lightSpeed2*q[BX];
+    f[6] = chi_e*q[EX];
+    f[7] = chi_m*lightSpeed2*q[BX];
   }
 
   void
@@ -131,7 +131,6 @@ namespace Lucee
     double a1 = 0.5*(jump[3] + c1*jump[7]);
     double a2 = 0.5*(jump[0] - lightSpeed*jump[6]);
     double a3 = 0.5*(jump[0] + lightSpeed*jump[6]);
-// STILL TO DO
     double a4 = 0.5*(c1*jump[1] + jump[5]);
     double a5 = 0.5*(-c1*jump[2] + jump[4]);
     double a6 = 0.5*(-c1*jump[1] + jump[5]);
@@ -139,32 +138,70 @@ namespace Lucee
 
 // compute waves (see Tech Note 1012)
 
-// wave 1: eigenvalue is 0 (multiplicity 2). We store the zero wave as
-// this is needed when splitting jump in flux rather than in fields.
-    waves(0,0) = a1;
+// wave 1: eigenvalue is -c*chi_m
+    waves(0,0) = 0.0;
     waves(1,0) = 0.0;
     waves(2,0) = 0.0;
     waves(3,0) = a0;
     waves(4,0) = 0.0;
     waves(5,0) = 0.0;
-    s[0] = 0.0;
+    waves(6,0) = 0.0;
+    waves(7,0) = -a0*lightSpeed;
+    s[0] = -lightSpeed*chi_m;
 
-// wave 2: eigenvalue is c (multiplicity 2)
+// wave 2: eigenvalue is c*chi_m
     waves(0,1) = 0.0;
-    waves(1,1) = a2*lightSpeed;
-    waves(2,1) = -a3*lightSpeed;
-    waves(3,1) = 0.0;
-    waves(4,1) = a3;
-    waves(5,1) = a2;
-    s[1] = lightSpeed;
+    waves(1,1) = 0.0;
+    waves(2,1) = 0.0;
+    waves(3,1) = a1;
+    waves(4,1) = 0.0;
+    waves(5,1) = 0.0;
+    waves(6,1) = 0.0;
+    waves(7,1) = a1*lightSpeed;
+    s[1] = lightSpeed*chi_m;
 
-// wave 2: eigenvalue is c (multiplicity 2)
-    waves(0,2) = 0.0;
-    waves(1,2) = -a4*lightSpeed;
-    waves(2,2) = a5*lightSpeed;
+// wave 3: eigenvalue is -c*chi_e
+    waves(0,2) = a2;
+    waves(1,2) = 0.0;
+    waves(2,2) = 0.0;
     waves(3,2) = 0.0;
-    waves(4,2) = a5;
-    waves(5,2) = a4;
-    s[2] = -lightSpeed;
+    waves(4,2) = 0.0;
+    waves(5,2) = 0.0;
+    waves(6,2) = -a2*c1;
+    waves(7,2) = 0.0;
+    s[2] = -lightSpeed*chi_e;
+
+// wave 4: eigenvalue is c*chi_e
+    waves(0,3) = a3;
+    waves(1,3) = 0.0;
+    waves(2,3) = 0.0;
+    waves(3,3) = 0.0;
+    waves(4,3) = 0.0;
+    waves(5,3) = 0.0;
+    waves(6,3) = a3*c1;
+    waves(7,3) = 0.0;
+    s[3] = lightSpeed*chi_e;
+
+// wave 5: eigenvalue is c (multiplicity 2)
+    waves(0,4) = 0.0;
+    waves(1,4) = a4*lightSpeed;
+    waves(2,4) = -a5*lightSpeed;
+    waves(3,4) = 0.0;
+    waves(4,4) = a5;
+    waves(5,4) = a4;
+    waves(6,4) = 0.0;
+    waves(7,4) = 0.0;
+    s[4] = lightSpeed;
+
+// wave 6: eigenvalue is -c (multiplicity 2)
+    waves(0,5) = 0.0;
+    waves(1,5) = -a6*lightSpeed;
+    waves(2,5) = a7*lightSpeed;
+    waves(3,5) = 0.0;
+    waves(4,5) = a7;
+    waves(5,5) = a6;
+    waves(6,5) = 0.0;
+    waves(7,5) = 0.0;
+    s[5] = -lightSpeed;
   }
 }
