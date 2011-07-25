@@ -12,11 +12,11 @@ Fields: ``DataStruct.Field1D``, ``DataStruct.Field2D`` and ``DataStruct.Field3D`
 =================================================================================
 
 The blocks ``DataStruct.Field1D``, ``DataStruct.Field2D`` and
-``DataStruct.Field3D`` can be used to create 1D, 2D and 3D
-fields. Fields are fundamental datastructures that allow attaching
-data to a grid. A field element corresponds to a location in the grid
-and allows the storage of ``numComponents`` number of elements at that
-location.
+``DataStruct.Field3D`` can be used to create 1D, 2D and 3D fields
+[#seven-field]_. Fields are fundamental datastructures that allow
+attaching data to a grid. A field element corresponds to a location in
+the grid and allows the storage of ``numComponents`` number of
+elements at that location.
 
 Constructor Parameters
 ----------------------
@@ -102,3 +102,7 @@ Examples
   eulerEqn = HyperEquation.Euler {
    gasGamma = 1.4,
   }
+
+.. [#seven-field] Lucee supports the creation of upto seven
+   dimensional fields. However, not all implemented algorithms work
+   with fields with dimensionality higher than three.
