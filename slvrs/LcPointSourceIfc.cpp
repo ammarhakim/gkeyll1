@@ -50,7 +50,8 @@ namespace Lucee
       else
       {
 // resize and set input variable list from one specified in Lua
-        inpComponents.resize(inpListDbl.size());
+        nInp = inpListDbl.size();
+        inpComponents.resize(nInp);
         for (unsigned i=0; i<nInp; ++i)
           inpComponents[i] = (unsigned) inpListDbl[i];
       }
@@ -77,7 +78,8 @@ namespace Lucee
       else
       {
 // resize and set output variable list from one specified in Lua
-        outComponents.resize(outListDbl.size());
+        nOut = outListDbl.size();
+        outComponents.resize(nOut);
         for (unsigned i=0; i<nOut; ++i)
           outComponents[i] = (unsigned) outListDbl[i];
       }

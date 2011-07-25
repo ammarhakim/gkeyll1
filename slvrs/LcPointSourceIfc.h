@@ -42,6 +42,20 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Get number of input variables.
+ *
+ * @param number of input variables.
+ */
+      unsigned getNumInput() const { return nInp; }
+
+/**
+ * Get number of output variables.
+ *
+ * @param number of output variables.
+ */
+      unsigned getNumOutput() const { return nOut; }
+
+/**
  * Compute sources and store them in supplied output vector.
  *
  * @param loc Coordinate at which source is requested.
