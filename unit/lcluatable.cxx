@@ -269,6 +269,57 @@ test_7(Lucee::LuaState& L)
   LC_ASSERT("Tesitng list of strings", strs[2] == "c");
 }
 
+void
+test_8(Lucee::LuaState& L)
+{
+// string with table
+  std::string tblStr = 
+    "funcTbl = {"
+    "  source = function (x, y, z)"
+    "    return x, y, z"
+    "  end,"
+    "  gas_gamma = 1.4,"
+    "}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "funcTbl");
+
+// construct LuaTable object
+  Lucee::LuaTable tbl(L, "funcTbl");
+
+  LC_ASSERT("Checking gas gamma", tbl.getNumber("gas_gamma") == 1.4);
+  LC_ASSERT("Checking for function to set source", tbl.hasFunction("source"));
+
+  double xc[3] = {1.5, 2.5, 3.5};
+  double out[3] = {0.0, 0.0, 0.0};
+  int fRef = tbl.getFunctionRef("source");
+// push function object on stack
+  lua_rawgeti(L, LUA_REGISTRYINDEX, fRef);
+// push variables on stack
+  for (unsigned i=0; i<3; ++i)
+    lua_pushnumber(L, xc[i]);
+  if (lua_pcall(L, 3, 3, 0) != 0)
+  {
+    Lucee::Except lce("lcluatable: ");
+    lce << "Problem evaluating function supplied to 'set' method";
+    throw lce;
+  }
+// fetch results
+  for (int i=-3; i<0; ++i)
+  {
+    if (!lua_isnumber(L, i))
+      throw Lucee::Except("lcluatable: Return value not a number");
+    out[3+i] = lua_tonumber(L, i);
+  }
+  lua_pop(L, 1);
+  LC_ASSERT("Testing function call", out[0] == 1.5);
+  LC_ASSERT("Testing function call", out[1] == 2.5);
+  LC_ASSERT("Testing function call", out[2] == 3.5);
+}
+
 int
 main(void)
 {
@@ -281,6 +332,7 @@ main(void)
   test_5(L);
   test_6(L);
   test_7(L);
+  test_8(L);
 
   LC_END_TESTS;
 }
