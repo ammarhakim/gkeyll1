@@ -24,6 +24,7 @@
 
 #+BEGIN_EXAMPLE
   sourceIntegrator = Updater.GridPointOdeIntegrator {
+    scheme = "rk2",
     rhs = {elcLorentzForce, ionLorentzForce},
   }
   sourceIntegrator:initialize()
@@ -45,9 +46,9 @@
   algSource = Source.LuaFunction {
     inpComponents = {2},
     outComponents = {2, 4},
-    function source (x, y, z, rhov)
+    source = function (x, y, z, rhov)
       return -gravity*rhov, 0.0
-    end
+    end,
   }
 #+END_EXAMPLE
 
