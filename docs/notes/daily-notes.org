@@ -40,6 +40,32 @@
   Wrote PointSourceIfc class to provide base class for computing
   sources that depend on values in a single cell.
 
+  A general algebraic source can be written as follows.
+#+BEGIN_EXAMPLE
+  algSource = Source.LuaFunction {
+    inpComponents = {2},
+    outComponents = {2, 4},
+    function source (x, y, z, rhov)
+      return -gravity*rhov, 0.0
+    end
+  }
+#+END_EXAMPLE
+
+** Notes on LuaTable::getFunctionRef
+
+   Added test for this method. Seems to work just fine. Calling a Lua
+   function from C code is simple but can be tedious. A wrapper class
+   or method is needed. This method can then be passed the lua_State
+   pointer and the function reference along with the input
+   variables. It should return the output variables returned by the
+   Lua function.
+
+   It would be interesting to test what performance hit this
+   entails. Perhaps quite significant if done in an inner
+   loop. However, the ability to call a Lua function is very valuable
+   for initialization as well as for quickly testing ideas. Lua
+   functions can be replaced by hard-coded C++ if needed.
+
 * July 22nd
 
   Completed PH Maxwell equations. Also wrote up the eigensystem and
