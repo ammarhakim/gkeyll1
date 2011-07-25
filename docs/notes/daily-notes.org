@@ -1,5 +1,42 @@
 # -*- org -*-
 
+* July 24th
+
+  Trying to figure out how to incorporate sources in the system. For
+  this added a class GridOdeIntegrator that takes a grid and an
+  arbitrary number of input variables and a grid. It has a pure
+  virtual method integrate() that evolves the ODE to a specified time.
+
+  What should be the Lua API? Something like
+
+#+BEGIN_EXAMPLE
+  elcLorentzForce = Source.LorentzForce {
+    inpComponents = {0, 1, 2, 3, 4}, -- takes rho, rho*u, rho*v, rho*w, Er
+    outComponents = {1, 2, 3}, -- computes rho*u, rho*v, rho*w and Er sources
+
+    -- lorentz force specific inputs
+    charge = elcCharge,
+    mass = elcMass
+  }
+#+END_EXAMPLE
+
+  Then the GridOdeIntegrator can be used like follows
+
+#+BEGIN_EXAMPLE
+  sourceIntegrator = Updater.GridPointOdeIntegrator {
+    rhs = {elcLorentzForce, ionLorentzForce},
+  }
+  sourceIntegrator:initialize()
+  sourceIntegrator:setIn( {q} )
+  sourceIntegrator:setOut( {qNew} )
+#+END_EXAMPLE
+  
+  The GridPointOdeIntegrator derives from GridOdeIntegrator and uses
+  values only in the current cell to solve the ODE. I.e. creation of
+  ODEs from FD stencils is not possible in this particular
+  integrator. However, other derived classes can use stencils to do
+  this.
+
 * July 22nd
 
   Completed PH Maxwell equations. Also wrote up the eigensystem and

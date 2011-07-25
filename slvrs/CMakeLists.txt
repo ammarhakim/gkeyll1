@@ -24,6 +24,7 @@ add_library(lcslvrs
   LcLinCombiner.cpp
   LcMaxwellEquation.cpp
   LcPhMaxwellEquation.cpp
+  LcPointSourceIfc.cpp
   LcSolverRegistry.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
