@@ -26,9 +26,13 @@ namespace Lucee
   {
     public:
 /** 
- * Create 
+ * Create new point source object that takes specified number of
+ * inputs and computes specified number of outputs. If the flag
+ * "allowArb" is set the number of input and output specified in the
+ * constructor are discarded and set from the size of the
+ * 'inpComponents' and 'outComponents' lists.
  */
-      PointSourceIfc(unsigned nInp, unsigned nOut);
+      PointSourceIfc(unsigned nInp, unsigned nOut, bool allowArb = false);
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -73,6 +77,8 @@ namespace Lucee
       unsigned nInp;
 /** Number of output variables */
       unsigned nOut;
+/** Are arbitrary number of input/output allowed? */
+      bool allowArb;
 /** Pointer to data */
       const double *data;
 /** List of input components */

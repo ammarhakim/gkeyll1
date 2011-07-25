@@ -37,6 +37,9 @@
   integrator. However, other derived classes can use stencils to do
   this.
 
+  Wrote PointSourceIfc class to provide base class for computing
+  sources that depend on values in a single cell.
+
 * July 22nd
 
   Completed PH Maxwell equations. Also wrote up the eigensystem and
