@@ -14,8 +14,8 @@
 
 namespace Lucee
 {
-  PointSourceIfc::PointSourceIfc(unsigned nInp, unsigned nOut)
-    : Lucee::BasicObj("PointSource"), nInp(nInp), nOut(nOut), 
+  PointSourceIfc::PointSourceIfc(unsigned nInp, unsigned nOut, bool allowArb)
+    : Lucee::BasicObj("PointSource"), nInp(nInp), nOut(nOut), allowArb(allowArb),
       inpComponents(nInp), outComponents(nOut)
   {
     for (unsigned i=0; i<nInp; ++i)
@@ -33,14 +33,24 @@ namespace Lucee
     {
 // get input component list
       std::vector<double> inpListDbl = tbl.getNumVec("inpComponents");
-      if (inpListDbl.size() != nInp)
+      if (allowArb == false)
       {
-        Lucee::Except lce("PointSourceIfc::readInput: The table 'inpComponents' must have ");
-        lce << nInp << " entries. Instead provided " << inpListDbl.size();
-        throw lce;
+        if (inpListDbl.size() != nInp)
+        {
+          Lucee::Except lce("PointSourceIfc::readInput: The table 'inpComponents' must have ");
+          lce << nInp << " entries. Instead provided " << inpListDbl.size();
+          throw lce;
+        }
+        else
+        {
+          for (unsigned i=0; i<nInp; ++i)
+            inpComponents[i] = (unsigned) inpListDbl[i];
+        }
       }
       else
       {
+// resize and set input variable list from one specified in Lua
+        inpComponents.resize(inpListDbl.size());
         for (unsigned i=0; i<nInp; ++i)
           inpComponents[i] = (unsigned) inpListDbl[i];
       }
@@ -50,14 +60,24 @@ namespace Lucee
     {
 // get output component list
       std::vector<double> outListDbl = tbl.getNumVec("outComponents");
-      if (outListDbl.size() != nOut)
+      if (allowArb == false)
       {
-        Lucee::Except lce("PointSourceIfc::readInput: The table 'outComponents' must have ");
-        lce << nOut << " entries. Instead provided " << outListDbl.size();
-        throw lce;
+        if (outListDbl.size() != nOut)
+        {
+          Lucee::Except lce("PointSourceIfc::readInput: The table 'outComponents' must have ");
+          lce << nOut << " entries. Instead provided " << outListDbl.size();
+          throw lce;
+        }
+        else
+        {
+          for (unsigned i=0; i<nOut; ++i)
+            outComponents[i] = (unsigned) outListDbl[i];
+        }
       }
       else
       {
+// resize and set output variable list from one specified in Lua
+        outComponents.resize(outListDbl.size());
         for (unsigned i=0; i<nOut; ++i)
           outComponents[i] = (unsigned) outListDbl[i];
       }
