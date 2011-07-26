@@ -50,7 +50,7 @@ namespace Lucee
  * @param t Time to integrate ODEs to.
  * @param sol On output, solution of ODEs.
  */
-      virtual void integrate(double t, const Lucee::Field<NDIM, double>& sol) = 0;
+      virtual void integrate(double t, Lucee::Field<NDIM, double>& sol) = 0;
 
 /**
  * Get reference to 'loc' input field needed in ODE integration.
@@ -69,6 +69,22 @@ namespace Lucee
       void setIn(unsigned loc, const Lucee::Field<NDIM, double>& in);
 
 /**
+ * Set the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @param tm Current time.
+ */
+      void setCurrTime(double tm) { currTime = tm; }
+
+/**
+ * Get the current time for solver. This is the time at which the
+ * present state of the solver is valid.
+ *
+ * @return Current time.
+ */
+      double getCurrTime() const { return currTime; }
+
+/**
  * Get reference to grid on which ODEs need to be solved.
  *
  * @return reference to grid.
@@ -85,6 +101,8 @@ namespace Lucee
       const Lucee::StructuredGridBase<NDIM> *gridPtr;
 /** List of input fields */
       std::vector<const Lucee::Field<NDIM, double>* > inpFlds;
+/** Current time */
+      double currTime;
   };
 }
 

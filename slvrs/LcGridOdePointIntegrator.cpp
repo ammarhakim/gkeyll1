@@ -1,0 +1,135 @@
+/**
+ * @file   LcGridOdePointIntegrator.cpp
+ *
+ * @brief   ODE integrator over complete grid.
+ */
+
+// config stuff
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+// lucee includes
+#include <LcConstFieldPtr.h>
+#include <LcFieldPtr.h>
+#include <LcGridOdePointIntegrator.h>
+
+namespace Lucee
+{
+  template <unsigned NDIM>
+  GridOdePointIntegrator<NDIM>::GridOdePointIntegrator(const Lucee::StructuredGridBase<NDIM>& grid)
+    : GridOdeIntegrator<NDIM>(grid, 1)
+  {
+  }
+
+  template <unsigned NDIM>
+  GridOdePointIntegrator<NDIM>::~GridOdePointIntegrator()
+  {
+    std::vector<Lucee::PointSourceIfc*>::iterator itr = rhs.begin();
+    while (itr != rhs.end())
+    {
+      delete *itr;
+      ++itr;
+    }
+    rhs.clear();
+  }
+
+  template <unsigned NDIM>
+  void
+  GridOdePointIntegrator<NDIM>::readInput(Lucee::LuaTable& tbl)
+  {
+  }
+
+  template <unsigned NDIM>
+  void
+  GridOdePointIntegrator<NDIM>::integrate(double t, Lucee::Field<NDIM, double>& sol)
+  {
+// fetch input field
+    const Lucee::Field<NDIM, double>& inp = this->getIn(0);
+// time-step to use
+    double dt = t-this->getCurrTime();
+// update using RK4 scheme
+    rk4(dt, inp, sol);
+  }
+
+  template <unsigned NDIM>
+  void
+  GridOdePointIntegrator<NDIM>::rk4(double dt, const Lucee::Field<NDIM, double>& inp,
+    Lucee::Field<NDIM, double>& sol)
+  {
+// number of components to update
+    unsigned n = sol.getNumComponents();
+
+    std::vector<double> ql(n), src(n), srct(n), srcm(n);
+// get reference to grid
+    const Lucee::StructuredGridBase<NDIM>& grid = this->getGrid();
+
+// create pointers to fields
+    Lucee::FieldPtr<double> solPtr = sol.createPtr();
+    Lucee::ConstFieldPtr<double> inpPtr = inp.createConstPtr();
+
+    double hh = dt/2.0;
+    double h6 = dt/6.0;
+
+    int idx[NDIM];
+    double xc[3];
+    Lucee::RowMajorSequencer<NDIM> seq(sol.getRegion());
+// loop over field, updating solution in each cell
+    while (seq.step())
+    {
+// get index and get centroid coordinate
+      seq.fillWithIndex(idx);
+      grid.getCentriod(xc);
+// set pointers
+      inp.setPtr(inpPtr, idx);
+      sol.setPtr(solPtr, idx);
+
+// RK stage 1
+      calcSource(xc, &inpPtr[0], src);
+      for (unsigned i=0; i<n; ++i)
+        ql[i] = inpPtr[i] + hh*src[i];
+
+// RK stage 2
+      calcSource(xc, &ql[0], srct);
+      for (unsigned i=0; i<n; ++i)
+        ql[i] = inpPtr[i] + hh*srct[i];
+
+// RK stage 3
+      calcSource(xc, &ql[0], srcm);
+      for (unsigned i=0; i<n; ++i)
+      {
+        ql[i] = inpPtr[i] + dt*srct[i];
+        srcm[i] = srct[i] + srcm[i];
+      }
+
+// RK stage 4
+      calcSource(xc, &ql[0], srct);
+// perform final update
+      for (unsigned i=0; i<n; ++i)
+        solPtr[i] = inpPtr[i] + h6*(src[i] + srct[i] + 2*srcm[i]);
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  GridOdePointIntegrator<NDIM>::calcSource(const double xc[3], const double *inp, std::vector<double>& src)
+  {
+    unsigned n = src.size();
+// zap sources first
+    for (unsigned k=0; k<n; ++k)
+      src[k] = 0.0;
+// compute each source, accumulating it
+    for (unsigned i=0; i<rhs.size(); ++i)
+    {
+      std::vector<double> ts(n, 0.0);
+      rhs[i]->calcSource(xc, inp, &ts[0]);
+      for (unsigned k=0; k<n; ++k)
+        src[k] += ts[k];
+    }
+  }
+
+// instantiations
+  template class GridOdePointIntegrator<1>;
+  template class GridOdePointIntegrator<2>;
+  template class GridOdePointIntegrator<3>;
+}
