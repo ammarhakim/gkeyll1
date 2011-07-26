@@ -46,7 +46,7 @@
 #+BEGIN_EXAMPLE
   sourceIntegrator = Updater.GridPointOdeIntegrator {
     scheme = "rk2",
-    rhs = {elcLorentzForce, ionLorentzForce},
+    terms = {elcLorentzForce, ionLorentzForce},
   }
   sourceIntegrator:initialize()
   sourceIntegrator:setIn( {q} )

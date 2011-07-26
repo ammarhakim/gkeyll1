@@ -5,11 +5,15 @@
  */
 
 // lucee includes
+#include <LcGridOdePointIntegrator.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
+#include <LcMathPhysConstants.h>
 #include <LcObjRegistry.h>
 #include <LcPointSourceIfc.h>
+#include <LcRectCartGrid.h>
+#include <LcStructGridField.h>
 #include <LcTest.h>
 
 class HarmonicOde : public Lucee::PointSourceIfc
@@ -52,7 +56,8 @@ main(void)
 
 // create Lua table for source
   std::string tblStr = "top = {"
-    "harmonic = PointSource.Harmonic { inpComponents = {0, 1}, outComponents = {0, 1} }"
+    "harmonic = PointSource.Harmonic { inpComponents = {0, 1}, outComponents = {0, 1} },"
+    "terms = { harmonic }"
     "}";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
@@ -74,6 +79,48 @@ main(void)
 // test it
   LC_ASSERT("Testing source", src[0] == inp[1]);
   LC_ASSERT("Testing source", src[1] == -5*inp[0]);
+
+// create grid
+  int lo[2] = {0};
+  int up[2] = {5};
+  Lucee::Region<1, int> localBox(lo, up);
+
+  double plo[2] = {0.0};
+  double pup[2] = {1.0};
+  Lucee::Region<1, double> physBox(plo, pup);
+  Lucee::RectCartGrid<1> grid(localBox, localBox, physBox);
+
+// create field
+  int lg[1] = {0}, ug[1] = {0};
+  Lucee::StructGridField<1, double> fld(&grid, 2, lg, ug);
+  Lucee::StructGridField<1, double> sol(&grid, 2, lg, ug);
+  sol = 0.0;
+
+// set field at t=0 for initial condition
+  for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
+  {
+    fld(i,0) = 0.0;
+    fld(i,1) = 10.0;
+  }
+
+// now create a point-integrator class
+  Lucee::GridOdePointIntegrator<1> integrator(grid);
+  integrator.readInput(top);
+  integrator.setIn(0, fld);
+
+  double tend = 2*Lucee::PI;
+// integrate with this time-step
+  double dt = tend/100, tcurr = 0.0;
+  for (unsigned i=0; i<0; ++i)
+  {
+    integrator.setCurrTime(tcurr);
+    integrator.integrate(tcurr+dt, sol);
+    std::cout << sol(0,0) << std::endl;
+    // copy solution over
+    fld(0,0) = sol(0,0);
+    fld(0,1) = sol(0,1);
+    tcurr = tcurr+dt;
+  }
 
   LC_END_TESTS;
 }
