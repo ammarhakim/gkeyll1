@@ -25,12 +25,6 @@ namespace Lucee
   template <unsigned NDIM>
   GridOdePointIntegrator<NDIM>::~GridOdePointIntegrator()
   {
-//     std::vector<Lucee::PointSourceIfc*>::iterator itr = rhs.begin();
-//     while (itr != rhs.end())
-//     {
-//       delete *itr;
-//       ++itr;
-//     }
     rhs.clear();
   }
 
@@ -40,6 +34,13 @@ namespace Lucee
   {
 // call base class method first
     Lucee::GridOdeIntegrator<NDIM>::readInput(tbl);
+
+// get list of  terms to use on RHS
+    if ( !tbl.hasTable("terms") )
+      Lucee::Except lce("GridOdePointIntegrator::readInput: Must specify terms to to use!");
+
+    Lucee::LuaTable trmTbl = tbl.getTable("terms");
+    rhs = trmTbl.template getAllObjects<Lucee::PointSourceIfc>();
   }
 
   template <unsigned NDIM>
