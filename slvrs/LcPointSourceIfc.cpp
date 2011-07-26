@@ -96,6 +96,6 @@ namespace Lucee
     this->getSource(loc, out);
 // copy source over into proper location
     for (unsigned i=0; i<nOut; ++i)
-      src[outComponents[i]] = src[i];
+      src[outComponents[i]] = out[i];
   }
 }
