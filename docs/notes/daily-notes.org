@@ -1,5 +1,26 @@
 # -*- org -*-
 
+* July 25th
+
+** Timing Lucee
+
+   The Lucee 2D Wave solver is as fast as the one in Nautilus. This
+   was tested on a 2D Riemann problem on a 400x400 grid. First, this
+   is not surprising as both solvers work almost exactly the same way
+   and hence in a way prove that the Lua programming adds no
+   measurable overhead. However, the question remains: how to make the
+   Lucee wave solver *faster*?
+
+   There are two aspects to this: make the Euler waves() method faster
+   and also make the wave scheme itself perform better.
+
+   First step here is to profile the code. For some strange reason the
+   Shark profiler on the new Mac is unable to figure out the function
+   names. Perhaps Tau?
+
+   Wasting time on optimization at present is probably not a good idea
+   but needs to be kept in mind for future work.
+
 * July 24th
 
   Trying to figure out how to incorporate sources in the system. For
