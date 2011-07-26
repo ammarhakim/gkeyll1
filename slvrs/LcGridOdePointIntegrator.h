@@ -75,7 +75,9 @@ namespace Lucee
 /**
  * Compute sources, summing up contributions from each RHS term.
  *
- * @param 
+ * @param xc Coordinates at which source is needed
+ * @param inp Inputs for which source is needed
+ * @param src On output, sources.
  */
       void calcSource(const double xc[3], const double *inp, std::vector<double>& src);
   };

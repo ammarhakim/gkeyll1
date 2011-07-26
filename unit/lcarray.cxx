@@ -2,10 +2,6 @@
  * @file	lcarray.cxx
  *
  * @brief	Unit tests for Lucee::Array class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

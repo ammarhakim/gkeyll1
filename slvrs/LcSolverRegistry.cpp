@@ -16,6 +16,7 @@
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcPointSourceIfc.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -56,5 +57,8 @@ namespace Lucee
 // done once here as boundary conditions are local to the slvr
 // directory. Perhaps could have also done in lucee directory)
     Lucee::LuaModuleRegistry<Lucee::BoundaryCondition>::registerModule(L);
+
+// register point source library into Lucee
+    Lucee::LuaModuleRegistry<Lucee::PointSourceIfc>::registerModule(L);
   }
 }

@@ -2,10 +2,6 @@
  * @file	lcstructgridfield.cxx
  *
  * @brief	Unit tests for Lucee::StructGridFields class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

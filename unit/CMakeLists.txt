@@ -153,3 +153,8 @@ target_link_libraries(lcgeomprim lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES
 add_executable(lcstructgridfield lcstructgridfield.cxx)
 target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki lclua 
   ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
+
+# lcgridode
+add_executable(lcgridode lcgridode.cxx)
+target_link_libraries(lcgridode lcslvrs lcdatastructs lcgrids lclib lcloki lclua
+  ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})

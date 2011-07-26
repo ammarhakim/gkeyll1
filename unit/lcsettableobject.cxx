@@ -2,10 +2,6 @@
  * @file	lcsettableobject.cxx
  *
  * @brief	Unit tests for Lucee::SettableObject class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

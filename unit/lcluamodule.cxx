@@ -2,10 +2,6 @@
  * @file	lcluamodule.cxx
  *
  * @brief	Unit tests for using LUA into Lucee
- *
- * @version	$Id: lcluamodule.cxx 331 2010-03-10 03:55:02Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

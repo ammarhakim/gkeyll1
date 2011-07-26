@@ -2,10 +2,6 @@
  * @file	lcgslelliptic.cxx
  *
  * @brief	Test for elliptic functions as computed from GSL
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

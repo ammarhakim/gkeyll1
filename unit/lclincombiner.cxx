@@ -2,10 +2,6 @@
  * @file	lclincombiner.cxx
  *
  * @brief	Unit tests for LinCombiner updater
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes
