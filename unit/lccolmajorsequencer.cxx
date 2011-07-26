@@ -2,10 +2,6 @@
  * @file	lccolmajorsequencer.cxx
  *
  * @brief	Unit tests for Lucee::ColMajorSequencer class
- *
- * @version	$Id: lccolmajorsequencer.cxx 142 2009-08-23 16:32:29Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

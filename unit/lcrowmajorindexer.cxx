@@ -2,10 +2,6 @@
  * @file	lcrowmajorindexer.cxx
  *
  * @brief	Unit tests for Lucee::RowMajorIndexer class
- *
- * @version	$Id: lcrowmajorindexer.cxx 142 2009-08-23 16:32:29Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

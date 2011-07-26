@@ -25,6 +25,9 @@ namespace Lucee
   class PointSourceIfc : public Lucee::BasicObj
   {
     public:
+/** Class id: this is used by registration system */
+      static const char *id;
+
 /** 
  * Create new point source object that takes specified number of
  * inputs and computes specified number of outputs. If the flag

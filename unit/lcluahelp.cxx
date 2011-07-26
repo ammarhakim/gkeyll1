@@ -2,10 +2,6 @@
  * @file	lcluahelp.cxx
  *
  * @brief	Unit tests for Luahelp and ConstLuahelp classes
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

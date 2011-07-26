@@ -2,10 +2,6 @@
  * @file	lccmdlineargs.cxx
  *
  * @brief	Unit tests parsing command lines.
- *
- * @version	$Id: lccmdlineargs.cxx 162 2009-08-28 20:07:10Z a.hakim777 $
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

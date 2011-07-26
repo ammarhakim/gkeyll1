@@ -2,10 +2,6 @@
  * @file	lchdf5io.cxx
  *
  * @brief	Unit tests for Lucee::Hdf5Io class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

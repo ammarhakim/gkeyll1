@@ -2,10 +2,6 @@
  * @file	lcrowmajorsequencer.cxx
  *
  * @brief	Unit tests for Lucee::RowMajorSequencer class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

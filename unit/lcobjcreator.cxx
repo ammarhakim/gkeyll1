@@ -2,10 +2,6 @@
  * @file	lccreator.cxx
  *
  * @brief	Unit tests for Lucee::ObjCreator and related classes
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lib includes

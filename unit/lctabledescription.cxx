@@ -2,10 +2,6 @@
  * @file	lctabledescripton.cxx
  *
  * @brief	Unit tests table description object.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

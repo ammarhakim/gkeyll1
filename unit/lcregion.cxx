@@ -2,10 +2,6 @@
  * @file	lcregion.cxx
  *
  * @brief	Unit tests for Lucee::Region class
- *
- * @version	$Id: lcregion.cxx 162 2009-08-28 20:07:10Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

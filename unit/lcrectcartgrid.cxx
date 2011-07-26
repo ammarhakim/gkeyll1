@@ -2,10 +2,6 @@
  * @file	lcrectcartgrid.cxx
  *
  * @brief	Unit tests for Lucee::RectCartGrid class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

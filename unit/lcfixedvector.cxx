@@ -2,10 +2,6 @@
  * @file	lcfixedvector.cxx
  *
  * @brief	Unit tests for Lucee::FixedVector class
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2009, Ammar Hakim.
  */
 
 // lucee includes

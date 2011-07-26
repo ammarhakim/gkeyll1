@@ -2,8 +2,6 @@
  * @file	lcgeomprim.cxx
  *
  * @brief	Unit tests for geometry primitives.
- *
- * @version	$Id$
  */
 
 // lucee includes

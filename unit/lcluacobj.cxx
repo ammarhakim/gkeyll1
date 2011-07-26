@@ -2,10 +2,6 @@
  * @file	lcluaobj.cxx
  *
  * @brief	Unit tests for using LUA into Lucee
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes

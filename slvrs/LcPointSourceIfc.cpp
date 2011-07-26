@@ -14,6 +14,9 @@
 
 namespace Lucee
 {
+// set module name
+  const char *PointSourceIfc::id = "PointSource";
+
   PointSourceIfc::PointSourceIfc(unsigned nInp, unsigned nOut, bool allowArb)
     : Lucee::BasicObj("PointSource"), nInp(nInp), nOut(nOut), allowArb(allowArb),
       inpComponents(nInp), outComponents(nOut)
@@ -27,8 +30,6 @@ namespace Lucee
   void
   PointSourceIfc::readInput(Lucee::LuaTable& tbl)
   {
-    Lucee::BasicObj::readInput(tbl);
-
     if (tbl.hasNumVec("inpComponents"))
     {
 // get input component list
