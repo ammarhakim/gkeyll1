@@ -14,6 +14,10 @@
 
 // lucee includes
 #include <LcGridOdeIntegrator.h>
+#include <LcPointSourceIfc.h>
+
+// std include
+#include <vector>
 
 namespace Lucee
 {
@@ -33,6 +37,11 @@ namespace Lucee
       GridOdePointIntegrator(const Lucee::StructuredGridBase<NDIM>& grid);
 
 /**
+ * Delete object.
+ */
+      virtual ~GridOdePointIntegrator();
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
@@ -50,6 +59,8 @@ namespace Lucee
     private:
 /** Integration scheme to use */
       unsigned odeScheme;
+/** Point sources to use as RHS in integrator */
+      std::vector<Lucee::PointSourceIfc*> rhs;
 
 /**
  * Integrate ODEs to time "t".
@@ -58,8 +69,15 @@ namespace Lucee
  * @param inp Input field.
  * @param sol On output, solution of ODEs.
  */
-      virtual void rk4(double dt, const Lucee::Field<NDIM, double>& inp,
+      void rk4(double dt, const Lucee::Field<NDIM, double>& inp,
         Lucee::Field<NDIM, double>& sol);
+
+/**
+ * Compute sources, summing up contributions from each RHS term.
+ *
+ * @param 
+ */
+      void calcSource(const double xc[3], const double *inp, std::vector<double>& src);
   };
 }
 
