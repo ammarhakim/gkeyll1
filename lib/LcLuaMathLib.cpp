@@ -113,6 +113,21 @@ namespace Lucee
     lua_pushnumber(L, Lucee::ELECTRON_MASS);
     lua_setfield(L, -2, "ElectronMass");
 
+    lua_pushnumber(L, Lucee::PROTON_MASS);
+    lua_setfield(L, -2, "ProtonMass");
+
+    lua_pushnumber(L, Lucee::ELEMENTARY_CHARGE);
+    lua_setfield(L, -2, "ElementaryCharge");
+
+    lua_pushnumber(L, Lucee::BOLTZMANN_CONSTANT);
+    lua_setfield(L, -2, "BoltzmannConstant");
+
+    lua_pushnumber(L, Lucee::EPSILON0);
+    lua_setfield(L, -2, "Epsilon0");
+
+    lua_pushnumber(L, Lucee::MU0);
+    lua_setfield(L, -2, "Mu0");
+
     lua_pop(L, 1); // pop what was pushed
   }
 }

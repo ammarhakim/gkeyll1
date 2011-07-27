@@ -23,6 +23,7 @@ Lua accessible object documentation
 .. toctree::
   :maxdepth: 2
 
+  mathphys
   datastruct
   hyperequation
 
