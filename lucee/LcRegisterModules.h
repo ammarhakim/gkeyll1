@@ -2,10 +2,6 @@
  * @file	LcRegisterModules.h
  *
  * @brief	Class for registering all modules.
- *
- * @version	$Id: LcRegisterModules.h 321 2010-03-04 23:13:16Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_REGISTER_MODULES_H

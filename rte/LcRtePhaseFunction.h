@@ -2,10 +2,6 @@
  * @file	LcRtePhaseFunction.h
  *
  * @brief	Phase function for use in RTE solver.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_RTE_PHASE_FUNCTION_H

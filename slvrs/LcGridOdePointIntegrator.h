@@ -51,10 +51,11 @@ namespace Lucee
 /**
  * Integrate ODEs to time "t".
  *
- * @param t Time to integrate ODEs to.
- * @param sol On output, solution of ODEs.
+ * @param t0 Initial time
+ * @param t1 Final time at which solution is required.
+ * @param sol On input, initial solution at t0. On output, solution at t1.
  */
-      void integrate(double t, Lucee::Field<NDIM, double>& sol);
+      void integrate(double t0, double t1, Lucee::Field<NDIM, double>& sol);
 
     private:
 /** Integration scheme to use */
@@ -66,11 +67,9 @@ namespace Lucee
  * Integrate ODEs to time "t".
  *
  * @param t Time to integrate ODEs to.
- * @param inp Input field.
  * @param sol On output, solution of ODEs.
  */
-      void rk4(double dt, const Lucee::Field<NDIM, double>& inp,
-        Lucee::Field<NDIM, double>& sol);
+      void rk4(double dt, Lucee::Field<NDIM, double>& sol);
 
 /**
  * Compute sources, summing up contributions from each RHS term.

@@ -2,10 +2,6 @@
  * @file	LcRteHomogeneousSlab.h
  *
  * @brief	Radiative transfer equation in homogeneous slab.
- *
- * @version	$Id: LcRteHomogeneousSlab.h 331 2010-03-10 03:55:02Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_RTE_HOMOGENEOUS_SLAB_H

@@ -36,7 +36,7 @@ class HarmonicOde : public Lucee::PointSourceIfc
     getSource(const double loc[3], std::vector<double>& src)
     {
       src[0] = this->getData(1);
-      src[1] = -gamma*this->getData(0);
+      src[1] = -gamma*gamma*this->getData(0);
     }
 
   private:
@@ -57,8 +57,8 @@ main(void)
 // create Lua table for source
   std::string tblStr = "top = {"
     "harmonic = PointSource.Harmonic { inpComponents = {0, 1}, outComponents = {0, 1} },"
-    "terms = { harmonic }"
-    "}";
+    "}"
+    "gridOde = { terms = { top.harmonic } }";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
     throw Lucee::Except("Unable to parse Lua string");
@@ -67,6 +67,11 @@ main(void)
   lua_getglobal(L, "top");
 // construct LuaTable object
   Lucee::LuaTable top(L, "top");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "gridOde");
+// construct LuaTable object
+  Lucee::LuaTable gridOde(L, "gridOde");
 
 // get hold of harmonic object
   Lucee::PointSourceIfc& point = top.getObjectAsBase<Lucee::PointSourceIfc>("harmonic");
@@ -78,7 +83,7 @@ main(void)
   point.calcSource(loc, inp, src);
 // test it
   LC_ASSERT("Testing source", src[0] == inp[1]);
-  LC_ASSERT("Testing source", src[1] == -5*inp[0]);
+  LC_ASSERT("Testing source", src[1] == -25*inp[0]);
 
 // create grid
   int lo[2] = {0};
@@ -93,32 +98,26 @@ main(void)
 // create field
   int lg[1] = {0}, ug[1] = {0};
   Lucee::StructGridField<1, double> fld(&grid, 2, lg, ug);
-  Lucee::StructGridField<1, double> sol(&grid, 2, lg, ug);
-  sol = 0.0;
 
 // set field at t=0 for initial condition
   for (int i=fld.getLower(0); i<fld.getUpper(0); ++i)
   {
-    fld(i,0) = 0.0;
-    fld(i,1) = 10.0;
+    fld(i,0) = 10.0;
+    fld(i,1) = 0.0;
   }
 
 // now create a point-integrator class
   Lucee::GridOdePointIntegrator<1> integrator(grid);
-  integrator.readInput(top);
-  integrator.setIn(0, fld);
+  integrator.readInput(gridOde);
 
+  unsigned nstep = 100;
   double tend = 2*Lucee::PI;
 // integrate with this time-step
-  double dt = tend/100, tcurr = 0.0;
-  for (unsigned i=0; i<0; ++i)
+  double dt = tend/nstep, tcurr = 0.0;
+  for (unsigned i=0; i<nstep; ++i)
   {
-    integrator.setCurrTime(tcurr);
-    integrator.integrate(tcurr+dt, sol);
-    std::cout << sol(0,0) << std::endl;
-    // copy solution over
-    fld(0,0) = sol(0,0);
-    fld(0,1) = sol(0,1);
+    integrator.integrate(tcurr, tcurr+dt, fld);
+    std::cout << tcurr+dt << " " << fld(0,0) << std::endl;
     tcurr = tcurr+dt;
   }
 

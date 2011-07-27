@@ -2,10 +2,6 @@
  * @file	LcRteRegistry.h
  *
  * @brief	Class for registering RTE solver object.
- *
- * @version	$Id: LcRteRegistry.h 321 2010-03-04 23:13:16Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_RTE_REGISTRY_H

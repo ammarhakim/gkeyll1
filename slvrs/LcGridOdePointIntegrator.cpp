@@ -18,7 +18,7 @@ namespace Lucee
 {
   template <unsigned NDIM>
   GridOdePointIntegrator<NDIM>::GridOdePointIntegrator(const Lucee::StructuredGridBase<NDIM>& grid)
-    : GridOdeIntegrator<NDIM>(grid, 1)
+    : GridOdeIntegrator<NDIM>(grid, 0)
   {
   }
 
@@ -45,20 +45,17 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  GridOdePointIntegrator<NDIM>::integrate(double t, Lucee::Field<NDIM, double>& sol)
+  GridOdePointIntegrator<NDIM>::integrate(double t0, double t1, Lucee::Field<NDIM, double>& sol)
   {
-// fetch input field
-    const Lucee::Field<NDIM, double>& inp = this->getIn(0);
 // time-step to use
-    double dt = t-this->getCurrTime();
+    double dt = t1-t0;
 // update using RK4 scheme
-    rk4(dt, inp, sol);
+    rk4(dt, sol);
   }
 
   template <unsigned NDIM>
   void
-  GridOdePointIntegrator<NDIM>::rk4(double dt, const Lucee::Field<NDIM, double>& inp,
-    Lucee::Field<NDIM, double>& sol)
+  GridOdePointIntegrator<NDIM>::rk4(double dt, Lucee::Field<NDIM, double>& sol)
   {
 // number of components to update
     unsigned n = sol.getNumComponents();
@@ -69,7 +66,7 @@ namespace Lucee
 
 // create pointers to fields
     Lucee::FieldPtr<double> solPtr = sol.createPtr();
-    Lucee::ConstFieldPtr<double> inpPtr = inp.createConstPtr();
+    Lucee::ConstFieldPtr<double> inpPtr = sol.createConstPtr();
 
     double hh = dt/2.0;
     double h6 = dt/6.0;
@@ -84,8 +81,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       grid.getCentriod(xc);
 // set pointers
-      inp.setPtr(inpPtr, idx);
-      sol.setPtr(solPtr, idx);
+      sol.setPtr(inpPtr, idx);
 
 // RK stage 1
       calcSource(xc, &inpPtr[0], src);
@@ -108,8 +104,9 @@ namespace Lucee
 // RK stage 4
       calcSource(xc, &ql[0], srct);
 // perform final update
+      sol.setPtr(solPtr, idx);
       for (unsigned i=0; i<n; ++i)
-        solPtr[i] = inpPtr[i] + h6*(src[i] + srct[i] + 2*srcm[i]);
+        solPtr[i] += h6*(src[i] + srct[i] + 2*srcm[i]);
     }
   }
 

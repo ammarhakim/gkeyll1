@@ -2,10 +2,6 @@
  * @file	LcRteHomogeneousSlab.cpp
  *
  * @brief	Radiative transfer equation in homogeneous slab.
- *
- * @version	$Id: LcRteHomogeneousSlab.cpp 331 2010-03-10 03:55:02Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes
