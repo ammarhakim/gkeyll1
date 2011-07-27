@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* July 26th
+
+  Completed and tested RK4 ODE integrator. Next need to write an
+  updater that uses this to integrate sources.
+
 * July 25th
 
 ** Timing Lucee
