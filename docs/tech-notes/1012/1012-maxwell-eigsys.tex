@@ -139,7 +139,13 @@ The left eigenvectors are the rows of the matrix
 \section{Eigensystem of Perfectly Hyperbolic Maxwell equations}
 
 The perfectly hyperbolic Maxwell equations are a modification of the
-Maxwell equations that take into account the divergence relations
+Maxwell equations that take into account the divergence relations. The
+modified equations explicitly ``clean'' divergence errors and are a
+hyperbolic generalization of the Hodge project method commonly used in
+electromagnetism to correct for charge conservation
+errors\cite{munz_2000, munz_2000b, munz_2000c}.
+
+These equations are written as
 \eqr{\ref{eq:divE}} and \eqr{\ref{eq:divB}}.
 \begin{align}
   \frac{\partial \mvec{B}}{\partial t} + \nabla\times\mvec{E} +
@@ -155,8 +161,7 @@ Maxwell equations that take into account the divergence relations
 \end{align}
 Here, $\psi$ and $\psi$ are correction potentials for the electric and
 magnetic field respectively and $\chi$ and $\gamma$ are dimensionless
-factors that control the speed at which the errors are
-propagated.
+factors that control the speed at which the errors are propagated.
 
 In 1D these equations can be written as, ignoring sources,
 \begin{align}
@@ -228,5 +233,8 @@ The left eigenvectors are the rows of the matrix
   \right].
   \label{eq:ph_lev}
 \end{align}
+
+\bibliography{../common/lucee}
+\bibliographystyle{plain}
 
 \end{document}

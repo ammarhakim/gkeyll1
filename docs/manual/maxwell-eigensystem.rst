@@ -101,7 +101,13 @@ Eigensystem of Perfectly Hyperbolic Maxwell equations
 -----------------------------------------------------
 
 The perfectly hyperbolic Maxwell equations are a modification of the
-Maxwell equations that take into account the divergence relations.
+Maxwell equations that take into account the divergence relations. The
+modified equations explicitly "clean" divergence errors and are a
+hyperbolic generalization of the Hodge project method commonly used in
+electromagnetism to correct for charge conservation errors. See
+[munz_2000]_, [munz_2000b]_, [munz_2000c]_ for details.
+
+These equations are written as
 
 .. math::
 
@@ -192,3 +198,17 @@ The left eigenvectors are the rows of the matrix
       0 & 0 & \frac{1}{2c} & 0 & \frac{1}{2} & 0 & 0 & 0
     \end{matrix}
   \right].
+
+.. [munz_2000] C.-D Munz, P. Omnes, R. Schneider and E. Sonnendruer
+   and U. Voss, "Divergence Correction Techniques for Maxwell Solvers
+   Based n a Hyperbolic Model", *Journal of Computational Physics*,
+   **161**, 484-511, 2000.
+
+.. [munz_2000b] C.-D Munz, P. Omnes, and R. Schneider, "A
+   three-dimensional finite-volume solver for the Maxwell equations
+   with divergence cleaning on unstructured meshes", *Computer Physics
+   Communications*, **130**, 83-117, 2000.
+
+.. [munz_2000c] C.-D Munz and U. Voss, "A Finite-Volume Method for the
+   Maxwell Equations in the Time Domain", *SIAM Journal of Scientific
+   Computing*, **22**, 449-475, 2000.

@@ -1,6 +1,7 @@
 NAME=1012-maxwell-eigsys
 $(NAME).pdf: $(NAME).tex
 	pdflatex $(NAME).tex
+	bibtex $(NAME)
 	pdflatex $(NAME).tex
 	pdflatex $(NAME).tex
 
