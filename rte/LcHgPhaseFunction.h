@@ -2,10 +2,6 @@
  * @file	LcHgPhaseFunction.h
  *
  * @brief	Henyey-Greenstien phase function.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_HG_PHASE_FUNCTION_H

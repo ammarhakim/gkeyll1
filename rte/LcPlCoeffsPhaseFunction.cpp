@@ -2,10 +2,6 @@
  * @file	LcPlCoeffsPhaseFunction.cpp
  *
  * @brief	Henyey-Greenstien phase function.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // lucee includes
