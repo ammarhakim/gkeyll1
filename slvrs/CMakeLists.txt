@@ -15,11 +15,13 @@ add_library(lcslvrs
   LcBcUpdater.cpp
   LcBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
+  LcCurrentSource.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
   LcFaceEdgeCurlUpdater.cpp
   LcGridOdeIntegrator.cpp
   LcGridOdePointIntegrator.cpp
+  LcGridOdePointIntegratorUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp

@@ -1,5 +1,10 @@
 # -*- org -*-
 
+* July 27th
+
+  Added LorentzForceSource and CurrentSource classes. These should
+  allow simulating two-fluid equations.
+
 * July 26th
 
   Completed and tested RK4 ODE integrator. Next need to write an
