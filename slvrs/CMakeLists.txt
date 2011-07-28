@@ -23,6 +23,7 @@ add_library(lcslvrs
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
+  LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
