@@ -15,6 +15,7 @@
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcLinCombiner.h>
+#include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcPointSourceIfc.h>
 #include <LcSolverRegistry.h>
@@ -53,12 +54,16 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroTangentBoundaryCondition>;
 
+// register point sources
+    new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::LorentzForceSource>;
+
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
 // directory. Perhaps could have also done in lucee directory)
     Lucee::LuaModuleRegistry<Lucee::BoundaryCondition>::registerModule(L);
 
-// register point source library into Lucee
+// register point source library into Lucee. Ditto comment as for
+// boundary condition. See above.
     Lucee::LuaModuleRegistry<Lucee::PointSourceIfc>::registerModule(L);
   }
 }
