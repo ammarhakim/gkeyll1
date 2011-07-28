@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* July 28th
+
+  Completed first two-fluid Lua program. Needed some work to get
+  indexing and initializing correct, but now it works! Got a first
+  two-fluid simulation of 1D shock.
+  
+  Compared with wave in Nautilus. Exactly matched Nautilus
+  results. The solver in lucee is marginally slower. Need to figure
+  out why.
+
 * July 27th
 
   Added LorentzForceSource and CurrentSource classes. These should
