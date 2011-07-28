@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcGridOdePointIntegratorUpdater.h>
+#include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
@@ -30,21 +31,33 @@ namespace Lucee
   {
 // call base class method first
     Lucee::UpdaterIfc::readInput(tbl);
+// create integrator object
+    const Lucee::StructuredGridBase<NDIM>& grd 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+    integrator = new Lucee::GridOdePointIntegrator<NDIM>(grd);
+// setup integrator
+    integrator->readInput(tbl);
   }
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
   GridOdePointIntegratorUpdater<NDIM>::update(double t)
   {
-    double dt = t-this->getCurrTime();
 
-    return Lucee::UpdaterStatus(true, dt);
+// fetch field to update
+    Lucee::Field<NDIM, double>& fld = this->getOut<Lucee::Field<NDIM, double> >(0);
+// integrate ODEs
+    integrator->integrate(this->getCurrTime(), t, fld);
+
+    return Lucee::UpdaterStatus(true, t-this->getCurrTime());
   }
 
   template <unsigned NDIM>
   void
   GridOdePointIntegratorUpdater<NDIM>::declareTypes()
   {
+// expect one output field
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
 // instantiations
