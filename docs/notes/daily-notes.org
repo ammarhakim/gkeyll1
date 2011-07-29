@@ -6,9 +6,16 @@
   indexing and initializing correct, but now it works! Got a first
   two-fluid simulation of 1D shock.
   
-  Compared with wave in Nautilus. Exactly matched Nautilus
-  results. The solver in lucee is marginally slower. Need to figure
-  out why.
+
+** Timing notes
+
+   Compared with wave in Nautilus. Exactly matched Nautilus
+   results. The solver in lucee is marginally slower. Need to figure
+   out why.
+
+   Shark shows significant time spent in the rk4() method. The timing
+   is very sensitive to memory allocation/deallocation. These should
+   not be done in inner loopes.
 
 * July 27th
 

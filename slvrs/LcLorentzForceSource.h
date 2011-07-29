@@ -45,7 +45,7 @@ namespace Lucee
  * @param loc Coordinate at which source is requested.
  * @param src On output, source.
  */
-      void getSource(const double loc[3], std::vector<double>& src);
+      inline void getSource(const double loc[3], std::vector<double>& src);
 
     private:
 /** Charge to mass ratio of fluid species */
