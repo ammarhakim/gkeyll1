@@ -102,6 +102,8 @@ namespace Lucee
       std::vector<unsigned> inpComponents;
 /** List of output components */
       std::vector<unsigned> outComponents;
+/** Vector needed in computing source */
+      std::vector<double> out;
   };
 }
 
