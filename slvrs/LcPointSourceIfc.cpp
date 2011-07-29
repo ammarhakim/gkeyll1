@@ -85,6 +85,8 @@ namespace Lucee
           outComponents[i] = (unsigned) outListDbl[i];
       }
     }
+// allocate space needed for computing source
+    out.resize(nOut);
   }
 
   void
@@ -92,8 +94,8 @@ namespace Lucee
   {
 // set data pointer so derived classes can get needed variables
     data = inp;
+    for (unsigned i=0; i<nOut; ++i) out[i] = 0.0;
 // call derived class method to compute source
-    std::vector<double> out(nOut, 0.0);
     this->getSource(loc, out);
 // copy source over into proper location
     for (unsigned i=0; i<nOut; ++i)
