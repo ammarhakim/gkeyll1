@@ -115,13 +115,15 @@ namespace Lucee
   GridOdePointIntegrator<NDIM>::calcSource(const double xc[3], const double *inp, std::vector<double>& src)
   {
     unsigned n = src.size();
+    std::vector<double> ts(n);
 // zap sources first
     for (unsigned k=0; k<n; ++k)
       src[k] = 0.0;
 // compute each source, accumulating it
     for (unsigned i=0; i<rhs.size(); ++i)
     {
-      std::vector<double> ts(n, 0.0);
+      for (unsigned k=0; k<n; ++k) 
+        ts[k] = 0.0;
       rhs[i]->calcSource(xc, inp, &ts[0]);
       for (unsigned k=0; k<n; ++k)
         src[k] += ts[k];
