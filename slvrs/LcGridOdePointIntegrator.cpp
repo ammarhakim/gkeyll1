@@ -47,6 +47,7 @@ namespace Lucee
   void
   GridOdePointIntegrator<NDIM>::integrate(double t0, double t1, Lucee::Field<NDIM, double>& sol)
   {
+    ts.resize(sol.getNumComponents());
 // time-step to use
     double dt = t1-t0;
 // update using RK4 scheme
@@ -115,7 +116,6 @@ namespace Lucee
   GridOdePointIntegrator<NDIM>::calcSource(const double xc[3], const double *inp, std::vector<double>& src)
   {
     unsigned n = src.size();
-    std::vector<double> ts(n);
 // zap sources first
     for (unsigned k=0; k<n; ++k)
       src[k] = 0.0;

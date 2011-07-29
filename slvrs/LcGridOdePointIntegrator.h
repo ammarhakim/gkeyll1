@@ -62,6 +62,8 @@ namespace Lucee
       unsigned odeScheme;
 /** Point sources to use as RHS in integrator */
       std::vector<Lucee::PointSourceIfc*> rhs;
+/** Vector for use in computing sources */
+      std::vector<double> ts;
 
 /**
  * Integrate ODEs to time "t".
