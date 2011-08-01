@@ -1,5 +1,13 @@
 # -*- org -*-
 
+* July 31st
+
+  How to handle axisymmetric simulations? In the past we have expanded
+  the d/dr term and moved the algebraic term on the RHS and treated
+  these as sources. Perhaps this is what I should also do in
+  Lucee. However, a better approach would be to incorporate the
+  axi-source term in the d/dr flux evaluation using the f-wave method.
+
 * July 28th
 
   Completed first two-fluid Lua program. Needed some work to get
@@ -15,7 +23,7 @@
 
    Shark shows significant time spent in the rk4() method. The timing
    is very sensitive to memory allocation/deallocation. These should
-   not be done in inner loopes.
+   not be done in inner loops.
 
 * July 27th
 

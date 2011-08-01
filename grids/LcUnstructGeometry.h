@@ -41,12 +41,14 @@ namespace Lucee
       void setNumVertices(unsigned nv);
 
 /**
- * Set number of cells. This needs to be called before cell geometry
+ * Set number of edge. This needs to be called before edge geometry
  * information is set.
  *
- * @param nc Number of cells.
+ * @param nf Number of edged.
+ * @param storeNormal True if normal should be stored.
+ * @param storeTangents True if tangents should be stored.
  */
-      void setNumCells(unsigned nc);
+    void setNumEdges(unsigned nf, bool storeNormal, bool storeTangents);
 
 /**
  * Set number of faces. This needs to be called before face geometry
@@ -57,6 +59,14 @@ namespace Lucee
  * @param storeTangents True if tangents should be stored.
  */
       void setNumFaces(unsigned nf, bool storeNormal, bool storeTangents);
+
+/**
+ * Set number of cells. This needs to be called before cell geometry
+ * information is set.
+ *
+ * @param nc Number of cells.
+ */
+      void setNumCells(unsigned nc);
 
 /** Vertex coordinates NDIM*numVertices stored as x,y,z */
       std::vector<REAL> vcoords;
