@@ -47,6 +47,42 @@ namespace Lucee
     faceCenter.resize(NDIM*nf);
     faceArea.clear();
     faceArea.resize(nf);
+// allocate normal and tangents if requested
+    if (storeNormal) 
+    {
+      faceNormal.clear();
+      faceNormal.resize(NDIM*nf);
+    }
+    if (storeTangents) 
+    {
+      faceTangent1.clear();
+      faceTangent1.resize(NDIM*nf);
+      faceTangent2.clear();
+      faceTangent2.resize(NDIM*nf);
+    }
+  }
+
+  template <unsigned NDIM, typename REAL>
+  void
+  UnstructGeometry<NDIM, REAL>::setNumEdges(unsigned nf, bool storeNormal, bool storeTangents)
+  {
+    edgeCenter.clear();
+    edgeCenter.resize(NDIM*nf);
+    edgeLength.clear();
+    edgeLength.resize(nf);
+// allocate normal and tangents if requested
+    if (storeNormal) 
+    {
+      edgeNormal.clear();
+      edgeNormal.resize(NDIM*nf);
+    }
+    if (storeTangents) 
+    {
+      edgeTangent1.clear();
+      edgeTangent1.resize(NDIM*nf);
+      edgeTangent2.clear();
+      edgeTangent2.resize(NDIM*nf);
+    }
   }
 
 // instantiations
