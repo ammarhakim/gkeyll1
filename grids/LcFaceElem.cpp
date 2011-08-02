@@ -2,8 +2,6 @@
  * @file	LcFaceElem.cpp
  *
  * @brief       Face elements in unstructured grids.
- *
- * @version	$Id$
  */
 
 // config stuff

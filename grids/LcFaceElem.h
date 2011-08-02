@@ -2,8 +2,6 @@
  * @file	LcFaceElem.h
  *
  * @brief       Face elements in unstructured grids.
- *
- * @version	$Id$
  */
 
 #ifndef LC_FACE_ELEM_H

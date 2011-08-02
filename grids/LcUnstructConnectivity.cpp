@@ -2,10 +2,6 @@
  * @file	LcUnstructConnectivity.cpp
  *
  * @brief	Class holding connectivity information.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

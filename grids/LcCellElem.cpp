@@ -2,8 +2,6 @@
  * @file	LcCellElem.cpp
  *
  * @brief       Cell element class.
- *
- * @version	$Id$
  */
 
 // config stuff

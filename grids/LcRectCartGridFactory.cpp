@@ -2,10 +2,6 @@
  * @file	LcRectCartGridFactory.cpp
  *
  * @brief	A facotry to make rectangular cartesian grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

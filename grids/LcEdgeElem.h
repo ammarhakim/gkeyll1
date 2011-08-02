@@ -2,8 +2,6 @@
  * @file	LcEdgeElem.h
  *
  * @brief       Edge elements in unstructured grids.
- *
- * @version	$Id$
  */
 
 #ifndef LC_EDGE_ELEM_H

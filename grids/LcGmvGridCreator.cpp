@@ -2,8 +2,6 @@
  * @file	LcGmvGridCreator.cpp
  *
  * @brief	Creator for grids defined in GMV format.
- *
- * @version	$Id$
  */
 
 // config stuff

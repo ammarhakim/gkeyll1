@@ -2,8 +2,6 @@
  * @file	LcEdgeElem.cpp
  *
  * @brief       Edge elements in unstructured grids.
- *
- * @version	$Id$
  */
 
 // config stuff

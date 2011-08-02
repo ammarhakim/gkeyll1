@@ -2,8 +2,6 @@
  * @file	LcGridGeometry.h
  *
  * @brief	Class holding geometry of unstructured grids.
- *
- * @version	$Id$
  */
 
 #ifndef LC_UNSTRUCT_GEOMETRY_H

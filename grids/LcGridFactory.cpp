@@ -2,10 +2,6 @@
  * @file	LcGridFactory.cpp
  *
  * @brief	Base class for factories to create grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

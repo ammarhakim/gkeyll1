@@ -2,8 +2,6 @@
  * @file	LcVertexElem.h
  *
  * @brief       Vertex element in unstructured grid.
- *
- * @version	$Id$
  */
 
 #ifndef LC_VERTEX_ELEMS_H

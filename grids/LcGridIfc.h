@@ -2,10 +2,6 @@
  * @file	LcGridIfc.h
  *
  * @brief	Base class for all grids in Lucee.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_GRID_IFC_H

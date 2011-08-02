@@ -2,8 +2,6 @@
  * @file	LcGridGeometry.cpp
  *
  * @brief	Class holding geometry of unstructured grids.
- *
- * @version	$Id$
  */
 
 // config stuff

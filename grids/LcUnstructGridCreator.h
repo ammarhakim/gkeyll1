@@ -2,8 +2,6 @@
  * @file	LcUnstructGridCreator.h
  *
  * @brief	Unstructured grid creator class.
- *
- * @version	$Id$
  */
 
 #ifndef LC_UNSTRUCT_GRID_CREATOR_H

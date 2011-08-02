@@ -2,10 +2,6 @@
  * @file	LcStructuredGridBase.h
  *
  * @brief	Base class for body fitted grid in arbitrary dimensions.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_STRUCTURED_GRID_BASE_H
