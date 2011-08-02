@@ -20,7 +20,7 @@
 
 // lucee includes
 #include <LcUnstructConnectivity.h>
-#include <LcUnstructGeometry.h>
+#include <LcGridGeometry.h>
 
 namespace Lucee
 {
@@ -70,7 +70,7 @@ namespace Lucee
  *
  * @param geo Geometry to fill data in.
  */
-      void fillWithGeometry(Lucee::UnstructGeometry<3, REAL>& geo) const;
+      void fillWithGeometry(Lucee::GridGeometry<3, REAL>& geo) const;
 
 /**
  * Fill with ndim->0 connectivity information.
@@ -227,7 +227,7 @@ namespace Lucee
 /** number of cells of each type */
       std::map<short, unsigned> cellCount;
 /** Vertex coordinates */
-      Lucee::UnstructGeometry<3, REAL> vc;
+      Lucee::GridGeometry<3, REAL> vc;
 /** Cell->vertex connectivity */
       Lucee::UnstructConnectivity c2v;
 /** Cell type */

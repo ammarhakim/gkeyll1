@@ -35,7 +35,7 @@ namespace Lucee
 
   template <typename REAL>
   void
-  UnstructGridCreator<REAL>::fillWithGeometry(Lucee::UnstructGeometry<3, REAL>& geo) const
+  UnstructGridCreator<REAL>::fillWithGeometry(Lucee::GridGeometry<3, REAL>& geo) const
   {
     geo = vc;
   }

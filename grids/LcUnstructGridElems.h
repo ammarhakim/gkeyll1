@@ -18,7 +18,7 @@
 #include <LcCellElem.h>
 #include <LcEdgeElem.h>
 #include <LcFaceElem.h>
-#include <LcUnstructGeometry.h>
+#include <LcGridGeometry.h>
 #include <LcVertexElem.h>
 
 // std includes
@@ -49,7 +49,7 @@ namespace Lucee
  *
  * @param geom Geometry object.
  */
-      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+      GridElem(const Lucee::GridGeometry<3, REAL>& geom)
         : VertexElem<REAL>(geom.vcoords)
       {
       }
@@ -92,7 +92,7 @@ namespace Lucee
  *
  * @param geom Geometry object.
  */
-      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+      GridElem(const Lucee::GridGeometry<3, REAL>& geom)
         : FaceElem<REAL>(geom.faceCenter, geom.faceArea)
       {
       }
@@ -124,7 +124,7 @@ namespace Lucee
  *
  * @param geom Geometry object.
  */
-      GridElem(const Lucee::UnstructGeometry<3, REAL>& geom)
+      GridElem(const Lucee::GridGeometry<3, REAL>& geom)
         : CellElem<REAL>(geom.cellCentroid, geom.cellVolume)
       {
       }

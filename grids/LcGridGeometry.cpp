@@ -1,5 +1,5 @@
 /**
- * @file	LcUnstructGeometry.cpp
+ * @file	LcGridGeometry.cpp
  *
  * @brief	Class holding geometry of unstructured grids.
  *
@@ -12,18 +12,18 @@
 #endif
 
 // lucee includes
-#include <LcUnstructGeometry.h>
+#include <LcGridGeometry.h>
 
 namespace Lucee
 {
   template <unsigned NDIM, typename REAL>
-  UnstructGeometry<NDIM, REAL>::UnstructGeometry()
+  GridGeometry<NDIM, REAL>::GridGeometry()
   {
   }
 
   template <unsigned NDIM, typename REAL>
   void
-  UnstructGeometry<NDIM, REAL>::setNumVertices(unsigned nv)
+  GridGeometry<NDIM, REAL>::setNumVertices(unsigned nv)
   {
     vcoords.clear();
     vcoords.resize(NDIM*nv);
@@ -31,7 +31,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename REAL>
   void
-  UnstructGeometry<NDIM, REAL>::setNumCells(unsigned nc)
+  GridGeometry<NDIM, REAL>::setNumCells(unsigned nc)
   {
     cellCentroid.clear();
     cellCentroid.resize(NDIM*nc);
@@ -41,7 +41,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename REAL>
   void
-  UnstructGeometry<NDIM, REAL>::setNumFaces(unsigned nf, bool storeNormal, bool storeTangents)
+  GridGeometry<NDIM, REAL>::setNumFaces(unsigned nf, bool storeNormal, bool storeTangents)
   {
     faceCenter.clear();
     faceCenter.resize(NDIM*nf);
@@ -64,7 +64,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename REAL>
   void
-  UnstructGeometry<NDIM, REAL>::setNumEdges(unsigned nf, bool storeNormal, bool storeTangents)
+  GridGeometry<NDIM, REAL>::setNumEdges(unsigned nf, bool storeNormal, bool storeTangents)
   {
     edgeCenter.clear();
     edgeCenter.resize(NDIM*nf);
@@ -86,11 +86,11 @@ namespace Lucee
   }
 
 // instantiations
-  template class Lucee::UnstructGeometry<1, float>;
-  template class Lucee::UnstructGeometry<2, float>;
-  template class Lucee::UnstructGeometry<3, float>;
+  template class Lucee::GridGeometry<1, float>;
+  template class Lucee::GridGeometry<2, float>;
+  template class Lucee::GridGeometry<3, float>;
 
-  template class Lucee::UnstructGeometry<1, double>;
-  template class Lucee::UnstructGeometry<2, double>;
-  template class Lucee::UnstructGeometry<3, double>;
+  template class Lucee::GridGeometry<1, double>;
+  template class Lucee::GridGeometry<2, double>;
+  template class Lucee::GridGeometry<3, double>;
 }
