@@ -2,8 +2,6 @@
  * @file	LcVertexElem.cpp
  *
  * @brief       Vertex element in unstructured grid.
- *
- * @version	$Id$
  */
 
 // lucee includes

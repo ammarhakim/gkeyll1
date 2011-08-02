@@ -2,10 +2,6 @@
  * @file	LcRectCartGrid.h
  *
  * @brief	A rectangular cartesian grid.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_RECT_CART_GRID_H

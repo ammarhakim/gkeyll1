@@ -2,8 +2,6 @@
  * @file	LcGmvGridCreator.h
  *
  * @brief	Creator for grids defined in GMV format.
- *
- * @version	$Id$
  */
 
 #ifndef LC_GMV_GRID_CREATOR_H

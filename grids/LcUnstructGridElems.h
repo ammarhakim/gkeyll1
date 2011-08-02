@@ -2,8 +2,6 @@
  * @file	LcUnstructGridElems.h
  *
  * @brief File to define basic elements in unstructured meshes.
- *
- * @version	$Id$
  */
 
 #ifndef LC_UNSTRUCT_GRID_ELEMS_H

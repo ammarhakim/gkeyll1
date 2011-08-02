@@ -2,10 +2,6 @@
  * @file	LcRectCartGridFactory.h
  *
  * @brief	A factory to make rectangular cartesian grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_RECT_CART_GRID_FACTORY_H

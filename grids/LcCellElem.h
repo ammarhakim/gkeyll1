@@ -2,8 +2,6 @@
  * @file	LcCellElem.h
  *
  * @brief       Cell element class.
- *
- * @version	$Id$
  */
 
 #ifndef LC_CELL_ELEM_H

@@ -2,8 +2,6 @@
  * @file	LcUnstructGrid.h
  *
  * @brief	Unstructured grid class.
- *
- * @version	$Id$
  */
 #ifndef LC_UNSTRUCT_CELL_ENUM_H
 #define LC_UNSTRUCT_CELL_ENUM_H

@@ -2,10 +2,6 @@
  * @file	LcRectCartGrid.cpp
  *
  * @brief	A rectangular cartesian grid.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

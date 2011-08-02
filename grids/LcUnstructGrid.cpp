@@ -2,8 +2,6 @@
  * @file	LcUnstructGrid.cpp
  *
  * @brief	Unstructured grid class.
- *
- * @version	$Id$
  */
 
 // config stuff
