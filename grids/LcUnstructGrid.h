@@ -17,7 +17,7 @@
 // lucee includes
 #include <LcGridIfc.h>
 #include <LcUnstructConnectivity.h>
-#include <LcUnstructGeometry.h>
+#include <LcGridGeometry.h>
 #include <LcUnstructGridCreator.h>
 #include <LcUnstructGridElems.h>
 
@@ -285,7 +285,7 @@ namespace Lucee
 /** Dimension of grid */
       unsigned ndim;
 /** Geometry information (assume points are in 3d even for 2d mesh) */
-      Lucee::UnstructGeometry<3, REAL> geometry;
+      Lucee::GridGeometry<3, REAL> geometry;
 /** Location 4*d+dprime indicates connectivity d->dprime is stored */
       std::vector<bool> ddprime;
 /** Location 4*d+dprime stores d->dprime connectivity information */

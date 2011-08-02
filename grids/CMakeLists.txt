@@ -14,13 +14,13 @@ add_library(lcgrids
   LcFaceElem.cpp
   LcGmvGridCreator.cpp
   LcGridFactory.cpp
+  LcGridGeometry.cpp
   LcGridIfc.cpp
   LcGridRegistry.cpp
   LcRectCartGrid.cpp
   LcRectCartGridFactory.cpp
   LcStructuredGridBase.cpp
   LcUnstructConnectivity.cpp
-  LcUnstructGeometry.cpp
   LcUnstructGrid.cpp
   LcUnstructGridCreator.cpp
   LcVertexElem.cpp
