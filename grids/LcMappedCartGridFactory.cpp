@@ -61,7 +61,15 @@ namespace Lucee
     Lucee::Region<NDIM, int> lrgn(ilo, iup);
     Lucee::Region<NDIM, int> grgn(ilo, iup);
     Lucee::Region<NDIM, double> dom(xlo, xup);
-    return new Lucee::MappedCartGrid<NDIM>(lrgn, grgn, dom); 
+// ghost cells required to store geometry in extended region
+    int lg[NDIM], ug[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lg[i] = 1;
+      ug[i] = 2;
+    }
+    return new Lucee::MappedCartGrid<NDIM>(lrgn, lrgn.extend(lg, ug),
+      grgn, dom); 
   }
 
 // instantiations
