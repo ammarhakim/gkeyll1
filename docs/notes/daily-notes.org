@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* August 3rd
+
+  The mapped grid class skeleton is written. This needs to store the
+  extended local region so that a linear index is computed from the
+  (i,j,k) index into the grid.
+
+  This will allow a derived class that stores the data using a
+  space-filling curve.
+
 * July 31st
 
   How to handle axisymmetric simulations? In the past we have expanded
