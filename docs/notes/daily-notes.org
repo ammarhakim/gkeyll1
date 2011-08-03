@@ -9,6 +9,13 @@
   This will allow a derived class that stores the data using a
   space-filling curve.
 
+  There is an issue with the way factories work. Seems like the
+  geometery would have to be built in the factory. One way around this
+  would be for the MappedCartGrid to take a field with the vertex
+  coordinates and then build the geometry in MappedCartGrid. So the
+  factory will build the vertex coordinates and the MappedCartGrid
+  does the actually geometry calculations.
+
 * July 31st
 
   How to handle axisymmetric simulations? In the past we have expanded
