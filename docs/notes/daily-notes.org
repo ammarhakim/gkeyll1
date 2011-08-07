@@ -17,6 +17,44 @@
   Lucee. However, a better approach would be to incorporate the
   axi-source term in the d/dr flux evaluation using the f-wave method.
 
+** Better way to do source
+
+   Should extend the getData() to the following
+
+#+BEGIN_EXAMPLE
+   double getData(unsigned nfld, unsigned ncomp);
+#+END_EXAMPLE
+
+   where nfld represents the field number and ncomp the component
+   inside the field. Hence, a Lorentz force calculator could expect
+   three fields: the fluid conserved quantities, the electric field
+   and the magnetic field. It could do
+
+#+BEGIN_EXAMPLE
+   void getSource(...)
+   {
+     // fluid is 0th location
+     rho = this->getData(0, 0);
+     rhou = this->getData(0, 1);
+     rhov = this->getData(0, 2);
+     rhow = this->getData(0, 2);
+
+     // Electric field is 1st location
+     ex = this->getData(1, 0);
+     ey = this->getData(1, 1);
+     ez = this->getData(1, 2);
+
+     // Magnetic field is 2nd location
+     bx = this->getData(2, 0);
+     by = this->getData(2, 1);
+     bz = this->getData(2, 2);
+   }
+#+END_EXAMPLE
+
+   The base class would have map the two indices to fetch data. The
+   advantage of this scheme is that it allows arbitrary number of
+   inputs and eliminates the need for auxillary variables completely.
+
 * July 28th
 
   Completed first two-fluid Lua program. Needed some work to get
