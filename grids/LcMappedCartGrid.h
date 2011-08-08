@@ -47,10 +47,12 @@ namespace Lucee
  * left corner of each cell is also labelled by the cell index.
  *
  * @param localBox Local index region for this grid.
+ * @param localExtBox Local extended index region for this grid.
  * @param globalBox Global index region for this grid.
  * @param compSpace Rectangular region in computational space.
  */
       MappedCartGrid(const Lucee::Region<NDIM, int>& localBox,
+        const Lucee::Region<NDIM, int>& localExtBox,
         const Lucee::Region<NDIM, int>& globalBox,
         const Lucee::Region<NDIM, double>& compSpace);
 
