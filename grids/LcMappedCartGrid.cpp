@@ -27,9 +27,11 @@ namespace Lucee
 
   template <unsigned NDIM>
   MappedCartGrid<NDIM>::MappedCartGrid(const Lucee::Region<NDIM, int>& localBox,
+    const Lucee::Region<NDIM, int>& localExtBox,
     const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& compSpace) 
-    : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, compSpace)
+    : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, compSpace),
+      localExtBox(localExtBox)
   {
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;
@@ -38,15 +40,6 @@ namespace Lucee
     cellVolume = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
       cellVolume = cellVolume*dx[i];
-// ghost cells required to store geometry in extended region
-    int lg[NDIM], ug[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      lg[i] = 1;
-      ug[i] = 2;
-    }
-// just extend local box
-    localExtBox = this->getLocalBox().extend(lg, ug);
   }
 
   template <unsigned NDIM>
@@ -197,6 +190,8 @@ namespace Lucee
     for (unsigned i=0; i<3; ++i)
       dx[i] = rg.dx[i];
     cellVolume = rg.cellVolume;
+    localExtBox = rg.localExtBox;
+    geometry = rg.geometry;
 
     return *this;
   }

@@ -1,5 +1,29 @@
 # -*- org -*-
 
+* August 5th
+
+  Added a new repo called ammar-simjournal to store simulation notes,
+  input files, etc. See the index.rst and linked files for motivation
+  and what will go into this repo.
+
+  Each journal entry needs to be labeled. For example, je1, je2,
+  etc. Each simulation needs to be labeled. For example, sm1, sm2,
+  etc. In general, a single journal entry will describe several
+  simulations. Hence, there will be fewer journal entries than
+  simulations.
+
+  Each simulation should have directory for itself, for which the Lua
+  input, post-processing scripts, data etc are stored. This will make
+  it easy to look up a journal entry and from there navigate to the
+  simulation directory.
+
+  If followed consistently, this will be a good way to do reproducible
+  research. The scheme is simple and needs to be for it to be
+  reliable. A complex scheme is less likely to succeed. No need for a
+  database. The version control itself, combined with the search
+  capability of Sphinx, is a good almost-permanent, globally
+  accessible and persistent "database".
+
 * August 3rd
 
   The mapped grid class skeleton is written. This needs to store the
@@ -8,6 +32,13 @@
 
   This will allow a derived class that stores the data using a
   space-filling curve.
+
+  There is an issue with the way factories work. Seems like the
+  geometery would have to be built in the factory. One way around this
+  would be for the MappedCartGrid to take a field with the vertex
+  coordinates and then build the geometry in MappedCartGrid. So the
+  factory will build the vertex coordinates and the MappedCartGrid
+  does the actually geometry calculations.
 
 * July 31st
 
