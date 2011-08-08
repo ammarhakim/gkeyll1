@@ -70,6 +70,7 @@ namespace Lucee
     }
     return new Lucee::MappedCartGrid<NDIM>(lrgn, lrgn.extend(lg, ug),
       grgn, dom); 
+// THE NODAL COORDINATES NEED TO BE COMPUTED HERE AND SENT TO CONSTRUCTOR
   }
 
 // instantiations
