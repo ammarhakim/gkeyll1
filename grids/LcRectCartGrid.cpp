@@ -46,7 +46,9 @@ namespace Lucee
   {
     Lucee::RectCartGridFactory<NDIM> rgf;
     rgf.readInput(tbl);
-    *this = *rgf.create();
+    RectCartGrid<NDIM> *c = rgf.create();
+    *this = *c;
+    delete c;
   }
 
   template <unsigned NDIM>
@@ -181,6 +183,7 @@ namespace Lucee
   RectCartGrid<NDIM>&
   RectCartGrid<NDIM>::operator=(const RectCartGrid<NDIM>& rg)
   {
+    std::cout << "INSDIE RECTCARTGRID OPERTOR==" << std::endl;
     if (&rg == this)
       return *this;
 

@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* August 8th
+
+  The concept of factories seems very flawed. Need to get rid of both
+  the datastructure and grid factories. Does not make any sense to go
+  through all the indirection of making factories. Perhaps it is
+  easiest to just do all the work in the object rather than the
+  factories. In fact, presently, a factory object is created, its
+  create() method is called immediately and then copied over using the
+  operator=(). This seems very wasteful and indirect and not needed.
+
 * August 5th
 
   Added a new repo called ammar-simjournal to store simulation notes,
