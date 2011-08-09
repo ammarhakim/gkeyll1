@@ -14,7 +14,6 @@
 #endif
 
 // lucee includes
-#include <LcFieldFactory.h>
 #include <LcPointerHolder.h>
 #include <LcStructGridField.h>
 
@@ -120,13 +119,41 @@ namespace Lucee
   void
   StructGridField<NDIM, T>::readInput(Lucee::LuaTable& tbl)
   {
-    Lucee::FieldFactory<NDIM, T> ff;
-    ff.readInput(tbl);
-// re-rest ourself from factory produced grid
-    Field<NDIM, T>* nf = ff.create();
-    Field<NDIM, T>::operator=(*nf);
-    grid = ff.getGridPtr(); // set our grid pointer
-    delete nf; // is this really needed?
+// get name of grid on which field lives
+    if (tbl.template hasObject<Lucee::StructuredGridBase<NDIM> >("onGrid"))
+      grid = &tbl.template
+        getObject<Lucee::StructuredGridBase<NDIM> > ("onGrid");
+    else
+      throw Lucee::Except("StructGridField::readInput: must specify 'onGrid', the grid on which field lives");
+
+    unsigned numComponents = 1;
+// get number of components in field
+    if (tbl.hasNumber("numComponents"))
+      numComponents = tbl.getNumber("numComponents");
+
+    int lowerGhost[NDIM], upperGhost[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = 0;
+      upperGhost[i] = 0;
+    }
+// read number of ghost cells
+    if (tbl.hasNumVec("ghost"))
+    {
+      std::vector<double> gstDbl = tbl.getNumVec("ghost");
+      if (gstDbl.size() != 2)
+        throw Lucee::Except("StructGridField::readInput: must specify exactly two entries in 'ghost' table");
+      for (unsigned i=0; i<NDIM; ++i)
+      {
+        lowerGhost[i] = gstDbl[0];
+        upperGhost[i] = gstDbl[1];
+      }
+    }
+// local region for field
+    typename Lucee::Region<NDIM, int> localRgn = grid->getLocalBox();
+// create new field and data to self
+    Field<NDIM, T>::operator=(
+      Field<NDIM, T>(localRgn, numComponents, lowerGhost, upperGhost));
   }
 
   template <unsigned NDIM, typename T>
