@@ -14,6 +14,5 @@ add_library(lcdatastructs
   LcDataStructRegistry.cpp
   LcField.cpp
   LcFieldPtr.cpp
-  LcFieldFactory.cpp
   LcStructGridField.cpp
 )
