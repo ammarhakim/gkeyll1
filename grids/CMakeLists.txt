@@ -20,7 +20,6 @@ add_library(lcgrids
   LcMappedCartGrid.cpp
   LcMappedCartGridFactory.cpp
   LcRectCartGrid.cpp
-  LcRectCartGridFactory.cpp
   LcStructuredGridBase.cpp
   LcUnstructConnectivity.cpp
   LcUnstructGrid.cpp
