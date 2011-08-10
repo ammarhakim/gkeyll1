@@ -11,7 +11,6 @@
 
 // lucee includes
 #include <LcMappedCartGrid.h>
-#include <LcMappedCartGridFactory.h>
 
 namespace Lucee
 {
@@ -46,9 +45,9 @@ namespace Lucee
   void
   MappedCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-    Lucee::MappedCartGridFactory<NDIM> rgf;
-    rgf.readInput(tbl);
-    *this = *rgf.create();
+//     Lucee::MappedCartGridFactory<NDIM> rgf;
+//     rgf.readInput(tbl);
+//     *this = *rgf.create();
   }
 
   template <unsigned NDIM>

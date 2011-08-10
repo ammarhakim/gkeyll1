@@ -13,12 +13,10 @@ add_library(lcgrids
   LcEdgeElem.cpp
   LcFaceElem.cpp
   LcGmvGridCreator.cpp
-  LcGridFactory.cpp
   LcGridGeometry.cpp
   LcGridIfc.cpp
   LcGridRegistry.cpp
   LcMappedCartGrid.cpp
-  LcMappedCartGridFactory.cpp
   LcRectCartGrid.cpp
   LcStructuredGridBase.cpp
   LcUnstructConnectivity.cpp
