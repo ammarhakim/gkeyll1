@@ -11,7 +11,6 @@
 
 // lucee includes
 #include <LcRectCartGrid.h>
-#include <LcRectCartGridFactory.h>
 
 namespace Lucee
 {
@@ -44,11 +43,44 @@ namespace Lucee
   void
   RectCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-    Lucee::RectCartGridFactory<NDIM> rgf;
-    rgf.readInput(tbl);
-    RectCartGrid<NDIM> *c = rgf.create();
-    *this = *c;
-    delete c;
+    cells = tbl.getNumVec("cells");
+    if (cells.size() != NDIM)
+    {
+      Lucee::Except lce("RectCartGrid::readInput: 'cells' should have exactly ");
+      lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
+      throw lce;
+    }
+
+    lower = tbl.getNumVec("lower");
+    if (lower.size() != NDIM)
+    {
+      Lucee::Except lce("RectCartGrid::readInput: 'lower' should have exactly ");
+      lce << NDIM << " elements. Instead has " << lower.size() << std::endl;
+      throw lce;
+    }
+
+    upper = tbl.getNumVec("upper");
+    if (upper.size() != NDIM)
+    {
+      Lucee::Except lce("RectCartGrid::readInput: 'upper' should have exactly ");
+      lce << NDIM << " elements. Instead has " << upper.size() << std::endl;
+      throw lce;
+    }
+
+    int ilo[NDIM], iup[NDIM];
+    double xlo[NDIM], xup[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      ilo[i] = 0;
+      iup[i] = cells[i];
+      xlo[i] = lower[i];
+      xup[i] = upper[i];
+    }
+    Lucee::Region<NDIM, int> lrgn(ilo, iup);
+    Lucee::Region<NDIM, int> grgn(ilo, iup);
+    Lucee::Region<NDIM, double> dom(xlo, xup);
+// copy by creating new object
+    *this = Lucee::RectCartGrid<NDIM>(lrgn, grgn, dom);
   }
 
   template <unsigned NDIM>
@@ -183,7 +215,6 @@ namespace Lucee
   RectCartGrid<NDIM>&
   RectCartGrid<NDIM>::operator=(const RectCartGrid<NDIM>& rg)
   {
-    std::cout << "INSDIE RECTCARTGRID OPERTOR==" << std::endl;
     if (&rg == this)
       return *this;
 

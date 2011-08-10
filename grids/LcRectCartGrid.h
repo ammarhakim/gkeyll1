@@ -144,6 +144,12 @@ namespace Lucee
       double dx[3];
 /** Volume of each cell */
       double cellVolume;
+/** Number of cells in domain */
+      std::vector<double> cells;
+/** Lower coordinates of space */
+      std::vector<double> lower;
+/** Upper coordinates of space */
+      std::vector<double> upper;
   };
 }
 
