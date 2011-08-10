@@ -10,6 +10,10 @@
   create() method is called immediately and then copied over using the
   operator=(). This seems very wasteful and indirect and not needed.
 
+** Got rid of factories
+
+   All factories for datastructures and grid are now gone.
+
 * August 5th
 
   Added a new repo called ammar-simjournal to store simulation notes,
