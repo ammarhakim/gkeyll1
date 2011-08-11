@@ -15,6 +15,33 @@
   get around is to let the MappedGrid class to compute the ghost
   cell vertices.
 
+  For example, one would have
+#+BEGIN_EXAMPLE
+  compGrid = Grid.RectCart2D {
+    lower = {0.5, 0.0},
+    upper = {1.0, 2*Lucee.Pi},
+    cells = {10, 10},
+  }
+
+  vertices = DataStruct.Field2D {
+    onGrid = compGrid,
+    -- [x, y] coordinates of each vertices
+    numComponents = 2,
+    ghost = {1, 2},
+    location = "vertex",
+  }
+
+  function calcVertices(xc, yc, zc)
+    -- compute coordinates
+    return xc*math.cos(yc), xc*math.sin(yc)
+  end
+  vertices:set(calcVertices)
+
+  grid = Grid.MappedGrid2D {
+    vertices = vertices,
+  }
+#+END_EXAMPLE
+
 * August 8th
 
   The concept of factories seems very flawed. Need to get rid of both
@@ -27,7 +54,7 @@
 
 ** Got rid of factories
 
-   All factories for datastructures and grid are now gone.
+   All factories for datastructures and grids are now gone.
 
 * August 5th
 
