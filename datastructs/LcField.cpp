@@ -2,10 +2,6 @@
  * @file	LcField.cpp
  *
  * @brief	Fields hold multiple values per index location.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

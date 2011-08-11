@@ -2,10 +2,6 @@
  * @file	LcField.h
  *
  * @brief	Fields hold multiple values per index location.
- *
- * @version	$Id: LcField.h 222 2009-11-17 04:46:22Z a.hakim777 $
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_FIELD_H

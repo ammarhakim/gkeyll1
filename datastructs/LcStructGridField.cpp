@@ -2,10 +2,6 @@
  * @file	LcStructGridField.cpp
  *
  * @brief	StructGridFields are fields that live on structured grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff
@@ -22,6 +18,10 @@
 
 namespace Lucee
 {
+// flags for data location
+  static const unsigned CELL_CENTER_LOC = 0;
+  static const unsigned VERTEX_LOC = 1;
+
 // names used in registration system
   template <> const char *StructGridField<1, double>::id = "Field1D";
   template <> const char *StructGridField<2, double>::id = "Field2D";
@@ -125,6 +125,23 @@ namespace Lucee
         getObject<Lucee::StructuredGridBase<NDIM> > ("onGrid");
     else
       throw Lucee::Except("StructGridField::readInput: must specify 'onGrid', the grid on which field lives");
+
+// check where data should be located
+    dataLoc = CELL_CENTER_LOC;
+    if (tbl.hasString("location"))
+    {
+      if (tbl.getString("location") == "vertex")
+        dataLoc = VERTEX_LOC;
+      else if (tbl.getString("location") == "center")
+        dataLoc = CELL_CENTER_LOC;
+      else
+      {
+        Lucee::Except lce(
+          "StructGridField::readInput: 'location' must be one of 'vertex' or 'center'. Provided ");
+        lce << tbl.getString("location") << " instead" << std::endl;
+        throw lce;
+      }
+    }
 
     unsigned numComponents = 1;
 // get number of components in field
@@ -377,7 +394,10 @@ namespace Lucee
       seq.fillWithIndex(idx);
       this->setPtr(ptr, idx);
       grid->setIndex(idx);
-      grid->getCentriod(xc); // cell center coordinate
+      if (dataLoc == VERTEX_LOC)
+        grid->getVertex(xc); // vertex coordinate
+      else
+        grid->getCentriod(xc); // cell center coordinate
 // push function object on stack
       lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 // push variables on stack
