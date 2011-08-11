@@ -2,10 +2,6 @@
  * @file	LcDataStructRegistry.cpp
  *
  * @brief	Class for registering data-struct objects.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

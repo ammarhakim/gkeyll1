@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* August 10th
+
+  How to create mapped grids? The key to these meshes is that the
+  vertex coordinates must be provided by the user. What this means is
+  that the constructor for mapped grids must take in a field storing
+  the vertices. These vertices could be computed in the usual way,
+  i.e. using Lua functions or read from HDF5 files.
+
+  The advantage of this scheme is that it decoupled the calculation of
+  the vertices from the creation of the mapped grid. The disadvantage
+  is that it forces the user to be careful in computing the vertices
+  as the ghost cell vertices need to be also computed. One option to
+  get around is to let the MappedGrid class to compute the ghost
+  cell vertices.
+
 * August 8th
 
   The concept of factories seems very flawed. Need to get rid of both

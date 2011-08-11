@@ -2,10 +2,6 @@
  * @file	LcDataStructRegistry.h
  *
  * @brief	Class for registering data-struct objects.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_DATA_STRUCT_REGISTRY_H

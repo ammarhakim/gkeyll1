@@ -39,13 +39,21 @@ listed. The parameters for 1D and 2D fields are identical.
     - Number of elements to store at each field location
   * - ghost
     - {0, 0}
-    - Number of ghost cells along each side of field (see notes for details)
+    - Number of ghost cells along each side of field.
+  * - location
+    - "center"
+    - Location of data. Should be one of "vertex" or "center".
 
 **Notes** The parameter ``ghost`` is a 2 element table (irrespective
 of field dimension) that indicates the number of ghost cells to
 create. For example the table ``{1, 2}`` will create 1 ghost cell on
 the *lower* edge in each direction and 2 ghost cells on the *upper*
 edge in each direction.
+
+The parameter ``location`` specifies the location inside the cell at
+which data is assumed to be stored. The data can be stored at the cell
+centroid or the lower vertex. This is used only in initializing the
+field.
 
 Methods
 -------

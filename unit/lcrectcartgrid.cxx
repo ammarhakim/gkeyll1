@@ -18,8 +18,8 @@ test_1()
 {
   int cells[3] = {1, 2, 4};
   Lucee::Region<3, int> localBox(cells);
-  double lower[3] = {0.0, 0.0, 0.0};
-  double upper[3] = {1.0, 2.0, 4.0};
+  double lower[3] = {0.5, 0.5, 0.5};
+  double upper[3] = {1.5, 2.5, 4.5};
   Lucee::Region<3, double> physBox(lower, upper);
   Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
 
@@ -60,7 +60,11 @@ test_1()
 
     grid3.getCentriod(xc);
     for (unsigned i=0; i<3; ++i)
-      LC_ASSERT("Testing centroid coordinates", xc[i] == 1.0*(idx[i]+0.5));
+      LC_ASSERT("Testing centroid coordinates", xc[i] == 0.5+1.0*(idx[i]+0.5));
+
+    grid3.getVertex(xc);
+    for (unsigned i=0; i<3; ++i)
+      LC_ASSERT("Testing vertex coordinates", xc[i] == 0.5+1.0*idx[i]);
   }
 
   double norm[3], tan1[3], tan2[3];

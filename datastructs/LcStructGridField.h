@@ -2,10 +2,6 @@
  * @file	LcStructGridField.h
  *
  * @brief	StructGridFields are fields that live on structured grids.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_STRUCT_GRID_FIELD_H
@@ -179,6 +175,8 @@ namespace Lucee
     private:
 /** Pointer to grid */
       Lucee::StructuredGridBase<NDIM> *grid;
+/** Flag to indicate location of data in field */
+      int dataLoc;
 
 /**
  * Create a field from supplied one (shallow copy).
