@@ -81,6 +81,10 @@ namespace Lucee
     Lucee::Region<NDIM, double> physBox(xlo, xup);
 // set grid data
     this->setGridData(localBox, globalBox, physBox);
+
+// SHOULD ALL OF THE BELOW GO INTO A INIT ROUTINE? SEEMS LIKE IT IS
+// VERY DANGEROUS TO HAVE A CTOR AND THIS FUNCTION DO THE SAME THING.
+
 // compute stuff we need
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;

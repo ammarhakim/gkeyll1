@@ -88,7 +88,6 @@ namespace Lucee
       vertices.setPtr(vPtr, idx);
 
       int linIdx = idxr.getIndex(idx);
-// note: we are storing x,y,z even if NDIM<3
       for (unsigned k=0; k<NDIM; ++k)
         geometry.vcoords[NDIM*linIdx+k] = vPtr[k];
     }
