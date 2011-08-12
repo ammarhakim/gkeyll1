@@ -10,9 +10,13 @@
 #endif
 
 // lucee includes
+#include <LcGlobals.h>
 #include <LcGridIfc.h>
 #include <LcHdf5Io.h>
 #include <LcPointerHolder.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -54,14 +58,35 @@ namespace Lucee
   void
   GridIfc::write(const std::string& nm)
   {
+    bool isH5 = true;
+// output prefix
+    std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
+// check file extention to determine if hdf5 or plain text should be written
+    std::string snm = nm;
+    unsigned trunc = nm.find_last_of(".", snm.size());
+    if (trunc > 0)
+      snm.erase(0, trunc);
+    if (snm == ".txt")
+      isH5 = false; // write out text file
+
+// output name
+    std::string outNm = outPrefix + "_" + nm;
+
+    if (isH5)
+    {
 #ifdef HAVE_MPI
-    Lucee::Hdf5Io io(MPI_COMM_WORLD, MPI_INFO_NULL);
+      Lucee::Hdf5Io io(MPI_COMM_WORLD, MPI_INFO_NULL);
 #else
-    Lucee::Hdf5Io io(0, 0);
+      Lucee::Hdf5Io io(0, 0);
 #endif
 // open file to write in
-    Lucee::IoNodeType fn = io.createFile(nm);
+      Lucee::IoNodeType fn = io.createFile(outNm);
 // write data
-    this->writeToFile(io, fn, this->getName());
+      this->writeToFile(io, fn, this->getName());
+    }
+    else
+    {
+      throw Lucee::Except("Lucee::GridIfc: Text output of grid not supported yet.");
+    }
   }
 }
