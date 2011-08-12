@@ -209,6 +209,16 @@ namespace Lucee
     return *this;
   }
 
+  template <unsigned NDIM>
+  void
+  StructuredGridBase<NDIM>::setGridData(const Lucee::Region<NDIM, int>& lb,
+    const Lucee::Region<NDIM, int>& gb, const Lucee::Region<NDIM, double>& cs)
+  {
+    localBox = lb;
+    globalBox = gb;
+    compSpace = cs;
+  }
+
 // instantiations
   template class StructuredGridBase<1>;
   template class StructuredGridBase<2>;

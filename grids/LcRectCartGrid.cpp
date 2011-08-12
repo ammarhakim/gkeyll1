@@ -76,11 +76,19 @@ namespace Lucee
       xlo[i] = lower[i];
       xup[i] = upper[i];
     }
-    Lucee::Region<NDIM, int> lrgn(ilo, iup);
-    Lucee::Region<NDIM, int> grgn(ilo, iup);
-    Lucee::Region<NDIM, double> dom(xlo, xup);
-// copy by creating new object
-    *this = Lucee::RectCartGrid<NDIM>(lrgn, grgn, dom);
+    Lucee::Region<NDIM, int> localBox(ilo, iup);
+    Lucee::Region<NDIM, int> globalBox(ilo, iup);
+    Lucee::Region<NDIM, double> physBox(xlo, xup);
+// set grid data
+    this->setGridData(localBox, globalBox, physBox);
+// compute stuff we need
+    for (unsigned i=0; i<3; ++i)
+      dx[i] = 1.0;
+    for (unsigned i=0; i<NDIM; ++i)
+      dx[i] = physBox.getShape(i)/globalBox.getShape(i);
+    cellVolume = 1.0;
+    for (unsigned i=0; i<NDIM; ++i)
+      cellVolume = cellVolume*dx[i];    
   }
 
   template <unsigned NDIM>

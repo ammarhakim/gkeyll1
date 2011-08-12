@@ -242,6 +242,16 @@ namespace Lucee
  */
       StructuredGridBase<NDIM>& operator=(const StructuredGridBase<NDIM>& sg);
 
+/**
+ * Set data required to build grid.
+ *
+ * @param localBox Local index region for this grid.
+ * @param globalBox Global index region for this grid.
+ * @param compSpace Region in computation space.
+ */
+      void setGridData(const Lucee::Region<NDIM, int>& localBox,
+        const Lucee::Region<NDIM, int>& globalBox, const Lucee::Region<NDIM, double>& compSpace);
+
 /** Index into current cell */
       mutable int currIdx[NDIM];
 /** Local region indexed by grid */
