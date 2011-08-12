@@ -136,19 +136,6 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     private:
-/**
- * Copy from supplied rectangular grid.
- *
- * @param rg Rectangular grid to copy from.
- * @return reference to this object.
- */
-      MappedCartGrid<NDIM>& operator=(const MappedCartGrid<NDIM>& rg);
-
-/** Computational grid spacing in each direction */
-      double dx[3];
-/** Volume of computational cell (constant as cells are
- * rectangular) */
-      double cellVolume;
 /** Extended local region indexed by grid (needed to index the ghost
  * region geometry) */
       Lucee::Region<NDIM, int> localExtBox;
