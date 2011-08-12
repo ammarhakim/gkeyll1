@@ -38,7 +38,20 @@
   vertices:set(calcVertices)
 
   grid = Grid.MappedGrid2D {
+    cells = {10, 10},
     vertices = vertices,
+  }
+#+END_EXAMPLE
+  
+  The *cells* table is required (although redundant) as it allows
+  Lucee to check the shape of the *vertices* field and compute if it
+  should create the ghost cells. Otherwise, perhaps it is best to
+  explicity tell Lucee to create the ghost cells, as follows
+#+BEGIN_EXAMPLE
+  grid = Grid.MappedGrid2D {
+    cells = {10, 10},
+    vertices = vertices,
+    createGhost = true
   }
 #+END_EXAMPLE
 
