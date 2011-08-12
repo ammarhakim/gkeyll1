@@ -1,5 +1,30 @@
 # -*- org -*-
 
+* August 12th
+
+  Now mapped grid can take in a field containing vertex coordinates
+  and initialize itself. One disadvantage of this scheme is that the
+  user needs to specify too many ghost cells (vertices) to support the
+  wave propagation scheme. For DG the number of ghost cells would be
+  more. This is usually not a problem if the vertices are being
+  computed from functions, but can be a significant issue if they are
+  being read in from a file.
+
+  For the file reader this will pose a challenge. First, the file will
+  need to have one extra layer of vertex data than cells in the grid
+  as this is needed to initialize the grid correctly. Then, a flag
+  could be passed to the MappedGrid class to itself construct the
+  ghost vertices by extension on edges outside the domain.
+  
+  One option is for lucee to compute the ghost cell vertex
+  coordinates. This is in general easy, but could be a significant
+  problem for corner cells.
+
+  This will also not work when trying to make multi-block mapped
+  grids.
+
+** BTW: What is happening to making Lucee parallel?
+
 * August 10th
 
   How to create mapped grids? The key to these meshes is that the
@@ -27,7 +52,7 @@
     onGrid = compGrid,
     -- [x, y] coordinates of each vertices
     numComponents = 2,
-    ghost = {1, 2},
+    ghost = {2, 3},
     location = "vertex",
   }
 
