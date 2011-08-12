@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcGridGeometry.h>
+#include <LcRowMajorIndexer.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
@@ -136,11 +137,15 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     private:
+/** Number of cells in domain */
+      std::vector<double> cells;
 /** Extended local region indexed by grid (needed to index the ghost
  * region geometry) */
       Lucee::Region<NDIM, int> localExtBox;
 /** Geometry object to store grid geometry */
       Lucee::GridGeometry<NDIM, double> geometry;
+/** Indexer for converting (i,j,k) to linear index */
+      Lucee::RowMajorIndexer<NDIM> idxr;
   };
 }
 

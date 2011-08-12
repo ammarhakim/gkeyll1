@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcMappedCartGrid.h>
+#include <LcStructGridField.h>
 
 namespace Lucee
 {
@@ -21,6 +22,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   MappedCartGrid<NDIM>::MappedCartGrid()
+    : idxr(&Lucee::FixedVector<NDIM, unsigned>(1)[0], &Lucee::FixedVector<NDIM, int>(1)[0])
   {
   }
 
@@ -30,7 +32,7 @@ namespace Lucee
     const Lucee::Region<NDIM, int>& globalBox,
     const Lucee::Region<NDIM, double>& compSpace) 
     : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, compSpace),
-      localExtBox(localExtBox)
+      localExtBox(localExtBox), idxr(localExtBox)
   {
   }
 
@@ -38,6 +40,62 @@ namespace Lucee
   void
   MappedCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+// get cells in domain
+    cells = tbl.getNumVec("cells");
+    if (cells.size() != NDIM)
+    {
+      Lucee::Except lce("MappedCartGrid::readInput: 'cells' should have exactly ");
+      lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
+      throw lce;
+    }
+// get vertices array
+    Lucee::StructGridField<NDIM, double>& vertices =
+      tbl.template getObjectAsDerived<Lucee::StructGridField<NDIM, double> >("vertices");
+// get local extended region and indexer
+    localExtBox = vertices.getExtRegion();
+
+// SHOULD ALL OF THE BELOW GO INTO A INIT ROUTINE? SEEMS LIKE IT IS
+// VERY DANGEROUS TO HAVE A CTOR AND THIS FUNCTION DO THE SAME THING.
+
+    int ilo[NDIM], iup[NDIM];
+    double xlo[NDIM], xup[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      ilo[i] = 0;
+      iup[i] = cells[i];
+      xlo[i] = 0.0; // assumes computation region is a unit box
+      xup[i] = 1.0;
+    }
+    Lucee::Region<NDIM, int> localBox(ilo, iup);
+    Lucee::Region<NDIM, int> globalBox(ilo, iup);
+    Lucee::Region<NDIM, double> physBox(xlo, xup);
+// set grid data
+    this->setGridData(localBox, globalBox, physBox);
+
+    idxr = Lucee::RowMajorIndexer<NDIM>(localExtBox);
+
+// allocate vertex data
+    unsigned vol = localExtBox.getVolume();
+    geometry.setNumVertices(vol);
+
+// copy over data into indexer
+    int idx[NDIM];
+    Lucee::ConstFieldPtr<double> vPtr = vertices.createConstPtr();
+    Lucee::RowMajorSequencer<NDIM> seq(localExtBox);
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      vertices.setPtr(vPtr, idx);
+
+      int linIdx = idxr.getIndex(idx);
+// note: we are storing x,y,z even if NDIM<3
+      for (unsigned k=0; k<NDIM; ++k)
+        geometry.vcoords[NDIM*linIdx+k] = vPtr[k];
+    }
+
+// compute cell geometry
+
+// compute face geometry
   }
 
   template <unsigned NDIM>
@@ -78,7 +136,47 @@ namespace Lucee
   MappedCartGrid<NDIM>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
     const std::string& nm)
   {
-    return node;
+// create local and global regions
+    Lucee::FixedVector<NDIM, int> zeros(0), ones(1);
+    Lucee::Region<NDIM, int> localWriteBox(this->localBox.extend(&zeros[0], &ones[0]));
+    Lucee::Region<NDIM, int> globalWriteBox(this->globalBox.extend(&zeros[0], &ones[0]));
+
+// create memory space to write data and copy vertex coordinates (this
+// copy is needed (rather than just geometry.vcoords) as
+// geometry.vcoords vector has vertex coordinates also for ghost
+// cells, which we do not want to write out).
+    std::vector<double> buff(NDIM*localWriteBox.getVolume());
+    Lucee::RowMajorSequencer<NDIM> seq(localWriteBox);
+    unsigned count = 0;
+    int idx[NDIM];
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      int linIdx = idxr.getIndex(idx);
+      for (unsigned k=0; k<NDIM; ++k)
+        buff[count++] = geometry.vcoords[NDIM*linIdx+k];
+    }
+
+    std::vector<size_t> dataSetSize, dataSetBeg, dataSetLen;
+// construct sizes and shapes to write stuff out
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      dataSetSize.push_back( globalWriteBox.getShape(i) );
+      dataSetBeg.push_back( localWriteBox.getLower(i) - globalWriteBox.getLower(i) );
+      dataSetLen.push_back( localWriteBox.getShape(i) );
+    }
+    dataSetSize.push_back(NDIM);
+    dataSetBeg.push_back(0);
+    dataSetLen.push_back(NDIM);
+
+// write it out
+    Lucee::IoNodeType dn =
+      io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
+
+    io.writeStrAttribute(dn, "vsType", "mesh");
+    io.writeStrAttribute(dn, "vsKind", "structured");
+
+    return dn;
   }
 
   template <unsigned NDIM>
