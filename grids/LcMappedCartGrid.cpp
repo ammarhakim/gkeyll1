@@ -38,11 +38,6 @@ namespace Lucee
       lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
       throw lce;
     }
-// get vertices array
-    Lucee::StructGridField<NDIM, double>& vertices =
-      tbl.template getObjectAsDerived<Lucee::StructGridField<NDIM, double> >("vertices");
-// get local extended region and indexer
-    localExtBox = vertices.getExtRegion();
 
     int ilo[NDIM], iup[NDIM];
     double xlo[NDIM], xup[NDIM];
@@ -58,6 +53,12 @@ namespace Lucee
     Lucee::Region<NDIM, double> physBox(xlo, xup);
 // set grid data
     this->setGridData(localBox, globalBox, physBox);
+
+// get vertices array
+    Lucee::StructGridField<NDIM, double>& vertices =
+      tbl.template getObjectAsDerived<Lucee::StructGridField<NDIM, double> >("vertices");
+// get local extended region and indexer
+    localExtBox = vertices.getExtRegion();
 
     idxr = Lucee::RowMajorIndexer<NDIM>(localExtBox);
 
@@ -79,9 +80,31 @@ namespace Lucee
         geometry.vcoords[NDIM*linIdx+k] = vPtr[k];
     }
 
+    Lucee::FixedVector<NDIM, int> zeros(0), minusOnes(-1);
+// this actually reduces the size of region by shaving off one layer on upper edges
+    Lucee::Region<NDIM, int> geomRegion = localExtBox.extend(&zeros[0], &minusOnes[0]);
+    Lucee::RowMajorSequencer<NDIM> geomSeq(geomRegion);
+
 // compute cell geometry
+    geometry.setNumCells(vol);
+    while (geomSeq.step())
+    {
+      geomSeq.fillWithIndex(idx);
+      int linIdx = idxr.getIndex(idx);
+// compute cell geometry based on grid dimension
+      if (NDIM == 1)
+      {
+      }
+      else if (NDIM == 2)
+      {
+      }
+      else if (NDIM == 3)
+      {
+      }
+    }
 
 // compute face geometry
+    geometry.setNumFaces(vol, true, true);
   }
 
   template <unsigned NDIM>

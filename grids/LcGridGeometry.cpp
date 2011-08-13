@@ -49,14 +49,14 @@ namespace Lucee
     if (storeNormal) 
     {
       faceNormal.clear();
-      faceNormal.resize(NDIM*nf);
+      faceNormal.resize(3*nf); // store all 3 components even if NDIM<3
     }
     if (storeTangents) 
     {
       faceTangent1.clear();
-      faceTangent1.resize(NDIM*nf);
+      faceTangent1.resize(3*nf);  // store all 3 components even if NDIM<3
       faceTangent2.clear();
-      faceTangent2.resize(NDIM*nf);
+      faceTangent2.resize(3*nf);  // store all 3 components even if NDIM<3
     }
   }
 
