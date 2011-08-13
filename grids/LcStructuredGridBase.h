@@ -76,7 +76,7 @@ namespace Lucee
  *
  * @param i Index location into grid.
  */
-      virtual void setIndex(int i) const;
+      void setIndex(int i) const;
 
 /**
  * Set the current cell location in grid to (i, j).
@@ -84,7 +84,7 @@ namespace Lucee
  * @param i Index location into grid.
  * @param j Index location into grid.
  */
-      virtual void setIndex(int i, int j) const;
+      void setIndex(int i, int j) const;
 
 /**
  * Set the current cell location in grid to (i, j, k).
@@ -93,14 +93,14 @@ namespace Lucee
  * @param j Index location into grid.
  * @param k Index location into grid.
  */
-      virtual void setIndex(int i, int j, int k) const;
+      void setIndex(int i, int j, int k) const;
 
 /**
  * Set the current cell location in grid to specified index.
  *
  * @param idx Index location into grid.
  */
-      virtual void setIndex(const int idx[NDIM]) const;
+      void setIndex(const int idx[NDIM]) const;
 
 /**
  * Return coordinates in physical space of cell centroid.
