@@ -27,16 +27,6 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  MappedCartGrid<NDIM>::MappedCartGrid(const Lucee::Region<NDIM, int>& localBox,
-    const Lucee::Region<NDIM, int>& localExtBox,
-    const Lucee::Region<NDIM, int>& globalBox,
-    const Lucee::Region<NDIM, double>& compSpace) 
-    : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, compSpace),
-      localExtBox(localExtBox), idxr(localExtBox)
-  {
-  }
-
-  template <unsigned NDIM>
   void
   MappedCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
@@ -53,9 +43,6 @@ namespace Lucee
       tbl.template getObjectAsDerived<Lucee::StructGridField<NDIM, double> >("vertices");
 // get local extended region and indexer
     localExtBox = vertices.getExtRegion();
-
-// SHOULD ALL OF THE BELOW GO INTO A INIT ROUTINE? SEEMS LIKE IT IS
-// VERY DANGEROUS TO HAVE A CTOR AND THIS FUNCTION DO THE SAME THING.
 
     int ilo[NDIM], iup[NDIM];
     double xlo[NDIM], xup[NDIM];
