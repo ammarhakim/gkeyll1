@@ -3,7 +3,6 @@
  *
  * @brief A logically rectangular grid, but non-rectangular in physical space.
  */
-
 // config stuff
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -11,6 +10,7 @@
 
 // lucee includes
 #include <LcMappedCartGrid.h>
+#include <LcMathLib.h>
 #include <LcStructGridField.h>
 
 namespace Lucee
@@ -59,6 +59,17 @@ namespace Lucee
       tbl.template getObjectAsDerived<Lucee::StructGridField<NDIM, double> >("vertices");
 // get local extended region and indexer
     localExtBox = vertices.getExtRegion();
+    Lucee::Region<NDIM, int> localVBox = vertices.getRegion();
+// ensure there are correct number of vertices (i.e. vertiex
+// coordinates of ghost cells have been specified)
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      if ((localExtBox.getUpper(i)-localVBox.getUpper(i) != 3) ||
+        (localVBox.getLower(i)-localExtBox.getLower(i) != 2))
+      {
+        throw Lucee::Except("Lucee::MappedCartGrid: 'vertices' field should have {2, 3} ghost cells");
+      }
+    }
 
     idxr = Lucee::RowMajorIndexer<NDIM>(localExtBox);
 
@@ -66,7 +77,7 @@ namespace Lucee
     unsigned vol = localExtBox.getVolume();
     geometry.setNumVertices(vol);
 
-// copy over data into indexer
+// copy over data into geometry structure
     int idx[NDIM];
     Lucee::ConstFieldPtr<double> vPtr = vertices.createConstPtr();
     Lucee::RowMajorSequencer<NDIM> seq(localExtBox);
@@ -81,12 +92,15 @@ namespace Lucee
     }
 
     Lucee::FixedVector<NDIM, int> zeros(0), minusOnes(-1);
-// this actually reduces the size of region by shaving off one layer on upper edges
+// this reduces size of region by shaving off one layer on upper edges
     Lucee::Region<NDIM, int> geomRegion = localExtBox.extend(&zeros[0], &minusOnes[0]);
     Lucee::RowMajorSequencer<NDIM> geomSeq(geomRegion);
 
-// compute cell geometry
+// compute grid geometry information
     geometry.setNumCells(vol);
+    geometry.setNumFaces(vol, true, true); // always store tangents and normals
+
+    int idx1[NDIM], idx2[NDIM], idx3[NDIM];
     while (geomSeq.step())
     {
       geomSeq.fillWithIndex(idx);
@@ -94,6 +108,9 @@ namespace Lucee
 // compute cell geometry based on grid dimension
       if (NDIM == 1)
       {
+        Lucee::Vec3<double> a(geometry.vcoords[1*linIdx], 0.0, 0.0);
+        Lucee::Vec3<double> b(geometry.vcoords[1*linIdx], 0.0, 0.0);
+        calc1dGeom(a, b);
       }
       else if (NDIM == 2)
       {
@@ -103,8 +120,6 @@ namespace Lucee
       }
     }
 
-// compute face geometry
-    geometry.setNumFaces(vol, true, true);
   }
 
   template <unsigned NDIM>
@@ -194,6 +209,19 @@ namespace Lucee
   {
 // call base class to register its methods
     Lucee::StructuredGridBase<NDIM>::appendLuaCallableMethods(lfm);
+  }
+
+  template <unsigned NDIM>
+  void
+  MappedCartGrid<NDIM>::calc1dGeom(const Lucee::Vec3<double>& a, const Lucee::Vec3<double>& b) const
+  {
+  }
+
+  template <unsigned NDIM>
+  void
+  MappedCartGrid<NDIM>::calc2dGeom(const Lucee::Vec3<double>& a, const Lucee::Vec3<double>& b,
+    const Lucee::Vec3<double>& c, const Lucee::Vec3<double>& d) const
+  {
   }
 
 // instantiations

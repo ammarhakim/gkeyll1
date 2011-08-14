@@ -93,6 +93,7 @@ namespace Lucee
  * @param a Vertex of triangle.
  * @param b Vertex of triangle.
  * @param c Vertex of triangle.
+ * @return area of triangle.
  */
   template <typename T>
   T calcTriArea(const Lucee::Vec3<T>& a, const Lucee::Vec3<T>& b, const Lucee::Vec3<T>& c)
@@ -110,6 +111,7 @@ namespace Lucee
  * @param b Vertex of quadrilateral.
  * @param c Vertex of quadrilateral.
  * @param d Vertex of quadrilateral.
+ * @return area of quadrilateral.
  */
   template <typename T>
   T calcQuadArea(const Lucee::Vec3<T>& a, const Lucee::Vec3<T>& b, 
@@ -125,6 +127,7 @@ namespace Lucee
  * Check if number is nan.
  *
  * @param x number to check.
+ * @return true if is nan, false otherwise.
  */
   template <typename FLT>
   bool isNan(const FLT& x)

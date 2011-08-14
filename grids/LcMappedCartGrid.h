@@ -16,6 +16,7 @@
 #include <LcGridGeometry.h>
 #include <LcRowMajorIndexer.h>
 #include <LcStructuredGridBase.h>
+#include <LcVec3.h>
 
 namespace Lucee
 {
@@ -124,6 +125,25 @@ namespace Lucee
       Lucee::GridGeometry<NDIM, double> geometry;
 /** Indexer for converting (i,j,k) to linear index */
       Lucee::RowMajorIndexer<NDIM> idxr;
+
+/**
+ * Compute geometry for a 1D line segment (a,b).
+ *
+ * @param a One end of segment.
+ * @param b Second end of segment.
+ */
+      void calc1dGeom(const Lucee::Vec3<double>& a, const Lucee::Vec3<double>& b) const;
+
+/**
+ * Compute geometry for a quad with edges (a,b), (b,c), (c,d) and (d,a).
+ *
+ * @param a Vertex of quadrilateral.
+ * @param b Vertex of quadrilateral.
+ * @param c Vertex of quadrilateral.
+ * @param d Vertex of quadrilateral.
+ */
+      void calc2dGeom(const Lucee::Vec3<double>& a, const Lucee::Vec3<double>& b,
+        const Lucee::Vec3<double>& c, const Lucee::Vec3<double>& d) const;
   };
 }
 
