@@ -2,10 +2,6 @@
  * @file	LcMaxwellTm2DUpdater.cpp
  *
  * @brief	Solver for transverse-magnetic Maxwell equations in 2D.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 // config stuff

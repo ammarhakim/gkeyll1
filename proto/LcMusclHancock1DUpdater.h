@@ -2,10 +2,6 @@
  * @file	LcMusclHancock1DUpdater.h
  *
  * @brief	Solver for 1D Euler equations using MUSCl-Hancock scheme.
- *
- * @version	$Id$
- *
- * Copyright &copy; 2008-2010, Ammar Hakim.
  */
 
 #ifndef LC_MUSCL_HANCOCK_1D_UPDATER_H
