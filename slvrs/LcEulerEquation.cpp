@@ -136,7 +136,7 @@ namespace Lucee
 
 // compute waves (see Tech Note 1007)
 
-// wave 1: eigenvalues is u-c
+// wave 1: eigenvalue is u-c
     waves(0,0) = a0;
     waves(1,0) = a0*(u-a);
     waves(2,0) = a0*v;

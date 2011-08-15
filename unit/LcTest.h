@@ -3,10 +3,6 @@
  *
  * @brief	Macros for unit testing
  *
- * @version	$Id$ *
- *
- * Copyright &copy; 2008-2009, Ammar Hakim. Released under Eclipse
- * Licence version 1.0.
  */
 
 #ifndef LC_TEST_H
