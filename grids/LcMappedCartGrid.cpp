@@ -124,7 +124,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  MappedCartGrid<NDIM>::getCentriod(double xc[3]) const
+  MappedCartGrid<NDIM>::getCentroid(double xc[3]) const
   {
   }
 

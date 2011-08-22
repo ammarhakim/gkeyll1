@@ -41,7 +41,7 @@ test_0()
 // check cell volume
     LC_ASSERT("Checking cell volume", grid.getVolume() == grid.getDx(0)*grid.getDx(1));
 // check cell centroid
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     LC_ASSERT("Checking cell centroid", xc[0] == (idx[0]+0.5)*grid.getDx(0));
     LC_ASSERT("Checking cell centroid", xc[1] == (idx[1]+0.5)*grid.getDx(1));
     LC_ASSERT("Checking cell centroid", xc[2] == 0.0);
@@ -106,7 +106,7 @@ test_1()
   {
     seq.fillWithIndex(idx);
     grid.setIndex(idx);
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 0) == xc[0]+10*xc[1]);
     LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 1) == xc[0]+20*xc[1]);
     LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 2) == xc[0]+30*xc[1]);
@@ -171,7 +171,7 @@ test_2()
   {
     seq.fillWithIndex(idx);
     grid.setIndex(idx);
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     if (idx[0] < fld.getLower(0))
     {
       LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 0) == xc[0]+10*xc[1]);
@@ -192,7 +192,7 @@ test_2()
   {
     seq.fillWithIndex(idx);
     grid.setIndex(idx);
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     if (idx[0] >= fld.getUpper(0))
     {
       LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 0) == xc[0]+10*xc[1]);
@@ -213,7 +213,7 @@ test_2()
   {
     seq.fillWithIndex(idx);
     grid.setIndex(idx);
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     if (idx[1] < fld.getLower(1))
     {
       LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 0) == xc[0]+10*xc[1]);
@@ -234,7 +234,7 @@ test_2()
   {
     seq.fillWithIndex(idx);
     grid.setIndex(idx);
-    grid.getCentriod(xc);
+    grid.getCentroid(xc);
     if (idx[1] >= fld.getUpper(1))
     {
       LC_ASSERT("Testing setting from Lua function", fld(idx[0], idx[1], 0) == xc[0]+10*xc[1]);
