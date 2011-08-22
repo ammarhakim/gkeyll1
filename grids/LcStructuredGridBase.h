@@ -107,7 +107,7 @@ namespace Lucee
  *
  * @param xc On output, centroid of cell.
  */
-      virtual void getCentriod(double xc[3]) const = 0;
+      virtual void getCentroid(double xc[3]) const = 0;
 
 /**
  * Return coordinates in physical space of bottom left node.

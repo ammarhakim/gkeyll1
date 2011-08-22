@@ -207,7 +207,7 @@ namespace Lucee
       this->setPtr(rPtr, idx);
       grid->setIndex(idx);
 // get cell-center coordinates
-      grid->getCentriod(xc);
+      grid->getCentroid(xc);
 
 // write coordinates of cell-center
       for (unsigned i=0; i<NDIM; ++i)
@@ -397,7 +397,7 @@ namespace Lucee
       if (dataLoc == VERTEX_LOC)
         grid->getVertex(xc); // vertex coordinate
       else
-        grid->getCentriod(xc); // cell center coordinate
+        grid->getCentroid(xc); // cell center coordinate
 // push function object on stack
       lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 // push variables on stack
@@ -456,7 +456,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       this->setPtr(ptr, idx);
       grid->setIndex(idx);
-      grid->getCentriod(xc); // cell center coordinate
+      grid->getCentroid(xc); // cell center coordinate
 // push function object on stack
       lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 // push variables on stack

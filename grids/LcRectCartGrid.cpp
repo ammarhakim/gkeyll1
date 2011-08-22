@@ -97,7 +97,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  RectCartGrid<NDIM>::getCentriod(double xc[3]) const
+  RectCartGrid<NDIM>::getCentroid(double xc[3]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       xc[i] = this->compSpace.getLower(i) +

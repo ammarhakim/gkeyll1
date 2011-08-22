@@ -58,7 +58,7 @@ test_1()
     seq.fillWithIndex(idx);
     grid3.setIndex(idx);
 
-    grid3.getCentriod(xc);
+    grid3.getCentroid(xc);
     for (unsigned i=0; i<3; ++i)
       LC_ASSERT("Testing centroid coordinates", xc[i] == 0.5+1.0*(idx[i]+0.5));
 
@@ -161,7 +161,7 @@ test_2()
     seq.fillWithIndex(idx);
     grid3.setIndex(idx);
 
-    grid3.getCentriod(xc);
+    grid3.getCentroid(xc);
     LC_ASSERT("Testing centroid coordinates", xc[0] == 1.0*(idx[0]+0.5));
     LC_ASSERT("Testing centroid coordinates", xc[1] == 0.5*(idx[1]+0.5));
     LC_ASSERT("Testing centroid coordinates", xc[2] == 0.25*(idx[2]+0.5));
@@ -258,7 +258,7 @@ test_3()
     seq.fillWithIndex(idx);
     grid3.setIndex(idx);
 
-    grid3.getCentriod(xc);
+    grid3.getCentroid(xc);
     LC_ASSERT("Testing centroid coordinates", xc[0] == -1.0 + 1.0*(idx[0]+0.5));
     LC_ASSERT("Testing centroid coordinates", xc[1] == -2.0 + 0.5*(idx[1]+0.5));
     LC_ASSERT("Testing centroid coordinates", xc[2] == -4.0 + 0.25*(idx[2]+0.5));

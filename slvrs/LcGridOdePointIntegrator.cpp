@@ -80,7 +80,7 @@ namespace Lucee
     {
 // get index and get centroid coordinate
       seq.fillWithIndex(idx);
-      grid.getCentriod(xc);
+      grid.getCentroid(xc);
 // set pointers
       sol.setPtr(inpPtr, idx);
 

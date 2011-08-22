@@ -10,6 +10,11 @@
   computed from functions, but can be a significant issue if they are
   being read in from a file.
 
+  Even with functions this can be a problem: consider the case when
+  the function uses square roots. If the ghost cell computational
+  region has negative coordinates this can cause the code to core
+  dump.
+
   For the file reader this will pose a challenge. First, the file will
   need to have one extra layer of vertex data than cells in the grid
   as this is needed to initialize the grid correctly. Then, a flag
