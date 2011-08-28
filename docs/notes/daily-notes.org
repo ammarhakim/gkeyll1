@@ -1,5 +1,49 @@
 # -*- org -*-
 
+* August 22nd
+
+  Seems that I forget what I think.
+
+** Notes in pre of PPPL move
+
+   First, I need to finish the mapped grid code. For this the geometry
+   calculation code needs to be completed. Then, a method that returns
+   a const reference to the coordinate system object needs to be added
+   to the LcStructuredGridBase class. Then the wave propagation
+   updater needs to be modified to use this instead of the coordinate
+   aligned coordinate system.
+
+   I also need to work on the 2D incompressible flow solver with DG
+   and DG/FV hybrid. This needs to be done soon.
+
+   Move to MPI needs to be done. This should not be too hard but also
+   need to provide access to the MPI object from Lua script to figure
+   out rank, number of processors and other basic things.
+
+   Update the documentation with description of all implemented major
+   updaters, grids and fields. This is not hard at this stage when the
+   amount of code is relatively small, but can turn into a nightmare
+   later. So DO IT NOW.
+
+** Papers notes
+
+   Need to write up the text of a 10-moment paper. This has been
+   delayed for long enough and will be delayed indefinitely if it does
+   not happen before the PPPL move.
+
+   Need to write the text for a PoP paper on jets. JLo can be the
+   first author. This should also be submitted before January.
+
+   Need to explore the charge and divergence preserving two-fluid
+   algorithm. Will this really work? How would one apply BCs? How
+   would it be generalized to general geometries?
+
+** Tomato timer
+
+   Need to get one of these so I can work in 25 minute chunks. Could
+   help focus on task at hand rather than switch between multiple
+   things at the same time.
+
 * August 12th
 
   Now mapped grid can take in a field containing vertex coordinates

@@ -30,10 +30,10 @@ Lua accessible object documentation
 Technical notes
 ---------------
 
-These technical notes give details, mainly mathematical, about
-algorithms and physical models implemented in Lucee. Various parts of
-the code refer to these notes which should be considered as references
-for the implemented equations and schemes.
+These technical notes give details about algorithms and physical
+models implemented in Lucee. Various parts of the code refer to these
+notes which should be considered as references for the implemented
+equations and schemes.
 
 .. toctree::
   :maxdepth: 2
