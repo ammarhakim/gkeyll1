@@ -68,6 +68,12 @@ if (GSL_FOUND)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 
+# find FFTW
+find_package(Fftw)
+if (FFTW_FOUND)
+   include_directories(${Fftw_INCLUDE_DIRS})
+endif (FFTW_FOUND)
+
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
   FIND_LIBRARY(ACCELERATE_LIB Accelerate)
