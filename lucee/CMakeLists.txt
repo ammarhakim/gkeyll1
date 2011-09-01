@@ -37,6 +37,7 @@ target_link_libraries(lucee
   lclua
   ${Hdf5_LIBRARIES}
   ${Gsl_LIBRARIES}
+  ${Fftw_LIBRARIES}
   ${TxBase_LIBRARIES}
   ${EXTRA_LIBS}
   ${Fortran_IMPLICIT_LIBFLAGS})

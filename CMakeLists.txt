@@ -70,9 +70,6 @@ endif (GSL_FOUND)
 
 # find FFTW
 find_package(Fftw)
-if (FFTW_FOUND)
-   include_directories(${Fftw_INCLUDE_DIRS})
-endif (FFTW_FOUND)
 
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
