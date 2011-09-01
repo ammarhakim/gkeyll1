@@ -60,8 +60,11 @@
 /* whether the new 1.6.4 H5Sselect_hyperslab interface is in use */
 #cmakedefine NEW_H5S_SELECT_HYPERSLAB_IFC
 
-/* whether BoosGsl is present */
+/* whether Gsl is present */
 #cmakedefine HAVE_GSL
+
+/* whether FFtw is present */
+#cmakedefine HAVE_FFTW
 
 /* Whether Petsc was found */
 #cmakedefine HAVE_PETSC

@@ -9,6 +9,10 @@ include_directories(${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
+if (FFTW_FOUND)
+   include_directories(${Fftw_INCLUDE_DIRS})
+endif (FFTW_FOUND)
+
 link_directories(${PROJECT_BINARY_DIR}/slvrs)
 link_directories(${PROJECT_BINARY_DIR}/datastructs)
 link_directories(${PROJECT_BINARY_DIR}/grids)
@@ -158,3 +162,8 @@ target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki lclua
 add_executable(lcgridode lcgridode.cxx)
 target_link_libraries(lcgridode lcslvrs lcdatastructs lcgrids lclib lcloki lclua
   ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
+
+if (FFTW_FOUND)
+  add_executable(lcfftwtest lcfftwtest.cxx)
+  target_link_libraries(lcfftwtest ${Fftw_LIBRARIES})
+endif (FFTW_FOUND)
