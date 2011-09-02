@@ -11,6 +11,7 @@
 #include <loki/TypelistMacros.h>
 
 // std includes
+#include <complex>
 #include <string>
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace Lucee
  * NOTE: If adding more types change typelist length. Also ensure no
  * duplicates exist in the list.
  */
-  typedef LOKI_TYPELIST_18(
+  typedef LOKI_TYPELIST_20(
     bool,
     char,
     unsigned char,
@@ -37,7 +38,9 @@ namespace Lucee
     double,
     long double,
     long long int,
-    std::string, 
+    std::string,
+    std::complex<float>,
+    std::complex<double>,
     std::vector<int>,
     std::vector<float>,
     std::vector<double>,

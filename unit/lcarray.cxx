@@ -9,6 +9,9 @@
 #include <LcRowMajorSequencer.h>
 #include <LcTest.h>
 
+// std includes
+#include <complex>
+
 void
 test_1()
 {
@@ -594,6 +597,13 @@ test_16()
       LC_ASSERT("Testing if += worked correctly", arr(i,j) == 22.5/5.25);
 }
 
+void
+test_17()
+{
+  unsigned shape[2] = {5, 10};
+  Lucee::Array<2, std::complex<double> > arr(shape);
+}
+
 int
 main(void) 
 {
@@ -615,5 +625,6 @@ main(void)
   test_14();
   test_15();
   test_16();
+  test_17();
   LC_END_TESTS;
 }
