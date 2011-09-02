@@ -7,6 +7,9 @@
   be divided by number of elements in the array. Otherwise does not
   see like very difficult to use.
 
+  Next step is to write a PeriodicPoisson2D updater that solves
+  Poisson equation for use in the incompressible solver.
+
 * September 1st
 
   Getting back to Lucee after a while. Need to implement the Arakawa
