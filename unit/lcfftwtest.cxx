@@ -7,10 +7,8 @@
 // lucee includes
 #include <LcTest.h>
 
-// include FFTW library stuff
-#ifdef HAVE_FFTW3
+// FFTW includes
 # include <fftw3.h>
-#endif
 
 // std includes
 #include <complex>
@@ -31,7 +29,9 @@ main(void)
 // compute plan
   p = fftw_plan_dft_1d(N, f_in, f_out, FFTW_FORWARD, FFTW_ESTIMATE);
 
-  fftw_destroy_plan(p);
+  double L = 20.0; // domain is [-L/2, L/2]
 
+
+  fftw_destroy_plan(p);
   LC_END_TESTS;
 }
