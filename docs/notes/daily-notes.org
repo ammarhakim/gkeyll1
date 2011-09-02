@@ -1,5 +1,15 @@
 # -*- org -*-
 
+* September 1st
+
+  Getting back to Lucee after a while. Need to implement the Arakawa
+  and perhaps Suresh-Huen algorithms from Peterson and Hammett
+  paper. Then, need to implement a DG scheme and compare.
+
+  For the Poisson solver I have integrated FFTW into lucee. Also, I
+  have extended Arrays to allow templating over std::complex types. In
+  fact, I never knew this type existed.
+
 * August 22nd
 
   Seems that I forget what I think.
