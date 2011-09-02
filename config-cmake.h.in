@@ -64,7 +64,7 @@
 #cmakedefine HAVE_GSL
 
 /* whether FFtw is present */
-#cmakedefine HAVE_FFTW
+#cmakedefine HAVE_FFTW3
 
 /* Whether Petsc was found */
 #cmakedefine HAVE_PETSC
