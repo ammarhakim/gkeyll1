@@ -249,9 +249,22 @@ bool arraycmp(const std::vector<T>& a, const std::vector<T>& b)
  * @param fact Factor of floating-point epsilon.
  */
 template <typename T>
-bool epsCmp(T a, T b, int fact=5)
+bool epsCmp(T a, T b, double fact=5)
 {
   return fabs(1-b/a) <= fact*std::numeric_limits<T>::epsilon();
+}
+
+/**
+ * Compares two floating point numbers to floating-point precision.
+ *
+ * @param a first value to compare.
+ * @param b second value to compare.
+ * @param eps Precision to compare
+ */
+template <typename T>
+bool diffCmp(T a, T b, double eps)
+{
+  return fabs(a-b) <= eps;
 }
 
 #endif // LC_TEST_H
