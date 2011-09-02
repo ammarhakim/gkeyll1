@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* September 2nd
+
+  Completed a unit-test for using FFTW. The only "trick" to this is
+  that the FFT is not normalized and so the inverse transform needs to
+  be divided by number of elements in the array. Otherwise does not
+  see like very difficult to use.
+
 * September 1st
 
   Getting back to Lucee after a while. Need to implement the Arakawa
