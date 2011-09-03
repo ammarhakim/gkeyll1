@@ -9,10 +9,21 @@ include_directories(${PROJECT_SOURCE_DIR}/proto)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
+if (FFTW3_FOUND)
+   include_directories(${Fftw3_INCLUDE_DIRS})
+endif (FFTW3_FOUND)
 
-# Create the library
-add_library(lcproto
+set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcProtoSolverRegistry.cpp
 )
+
+if (FFTW3_FOUND)
+  set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp)
+endif (FFTW3_FOUND)
+
+# Create the library
+add_library(lcproto ${proto_SOURCES})
+
+
