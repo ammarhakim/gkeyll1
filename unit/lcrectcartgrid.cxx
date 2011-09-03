@@ -28,6 +28,18 @@ test_1()
   LC_ASSERT("Testing spacing in y-direction", grid3.getDx(1) == 1.0);
   LC_ASSERT("Testing spacing in z-direction", grid3.getDx(2) == 1.0);
 
+// check shape of physical space
+  Lucee::Region<3, double> pbox = grid3.getComputationalSpace();
+  for (unsigned i=0; i<3; ++i)
+  {
+    LC_ASSERT("Testing computational box lower coordinate", 
+      pbox.getLower(i) == physBox.getLower(i));
+    LC_ASSERT("Testing computational box upper coordinate", 
+      pbox.getUpper(i) == physBox.getUpper(i));
+    LC_ASSERT("Testing computational shape", 
+      pbox.getShape(i) == physBox.getShape(i));
+  }
+
 // cell volume
   int idx[3];
   Lucee::RowMajorSequencer<3> seq(localBox);

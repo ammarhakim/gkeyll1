@@ -14,6 +14,10 @@
 #include <LcMusclHancock1DUpdater.h>
 #include <LcProtoSolverRegistry.h>
 
+#ifdef HAVE_FFTW3
+# include <LcPeriodicPoisson2DUpdater.h>
+#endif
+
 namespace Lucee
 {
   void
@@ -22,5 +26,10 @@ namespace Lucee
 // register updaters
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MusclHancock1DUpdater>;
+
+#ifdef HAVE_FFTW3
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
+#endif
+
   }
 }
