@@ -42,6 +42,10 @@ target_link_libraries(lucee
   ${EXTRA_LIBS}
   ${Fortran_IMPLICIT_LIBFLAGS})
 
+if (HAVE_FFTW3)
+  target_link_libraries(lucee ${Fftw3_LIBRARIES})
+endif (HAVE_FFTW3)
+
 if (ENABLE_PARALLEL)
   target_link_libraries(lucee ${TXMPI_LIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBFLAGS})
 endif (ENABLE_PARALLEL)
