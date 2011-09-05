@@ -17,6 +17,7 @@ set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcProtoSolverRegistry.cpp
+  LcRectSecondOrderCentralDiffUpdater.cpp
 )
 
 if (FFTW3_FOUND)
