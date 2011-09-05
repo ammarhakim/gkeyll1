@@ -1,5 +1,42 @@
 # -*- org -*-
 
+* September 3rd
+
+  Tested Poisson solver on periodic domain. Seems to work fine. Need
+  to write a Journal Entry for this.
+
+  One useful updater to have is one that can compute
+  finite-differences on a rectangular mesh. This could be then used in
+  many different places. What could a potential syntax look like? The
+  first step is to specify the stencil. For this one can use something
+  like
+#+BEGIN_EXAMPLE
+  centralDiff = Stencil.Linear {
+    dir = 0,
+    indices = {-1, 0, 1},
+    coefficients = {1.0, 2.0, 1.0},
+    dxFactor = 1.0,
+    dxPower = 2.0,
+  }
+#+END_EXAMPLE
+
+  This specifies a second derivative using a central difference
+  stencil. This stencil can then be used in a
+  Updater.RectFiniteDifference object to compute the specified stencil
+  on a rectangular grid.
+
+  It would be more difficult to specify a 2D/3D stencil. One simple
+  option might be allow the stencil to be isotropic. I.e. the same
+  linear stencil would be applied in each direction.
+
+  For more complex multiple dimensional stencils a more complex system
+  will be needed. However, the Stencil.Isotropic and Stencil.Linear
+  will do for now.
+
+  The Lucee::RectStencil will need to be templated over NDIM and take
+  the grid and field as input. The same stencil is applied to each
+  component of the field.
+
 * September 2nd
 
   Completed a unit-test for using FFTW. The only "trick" to this is
@@ -10,13 +47,17 @@
   Next step is to write a PeriodicPoisson2D updater that solves
   Poisson equation for use in the incompressible solver.
 
-** Completed Poisson solver. Some concerns
+** DONE Completed Poisson solver. Some concerns
 
    Completed the PeriodicPoisson2D. The solution "look" correct, but
    there is something funky. The results do not match the Python
    computed solutions. This could be okay as the solution is only
    determined to a constant. However, the *shape* of the solution is
    not the same. Need to investigate this before moving on.
+
+   [September 3rd] This worked correctly the first time! The problem
+   was the Python script that I was using to compare. Lesson: test the
+   test code first.
 
 * September 1st
 
