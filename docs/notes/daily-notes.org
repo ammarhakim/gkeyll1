@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* September 5th
+
+  Completed a Journal Entry for testing the PeriodicPoisson2D
+  updater. Verified that it works. Writing up an entry takes
+  work. Developing the disciple to maintain the journal will be hard,
+  but will be very useful.
+
 * September 3rd
 
   Tested Poisson solver on periodic domain. Seems to work fine. Need
