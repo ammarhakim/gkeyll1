@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcField.h>
 #include <LcUpdaterIfc.h>
 
 namespace Lucee
@@ -60,6 +61,35 @@ namespace Lucee
       void declareTypes();
 
     private:
+/**
+ * Compute central difference of field.
+ *
+ * @param inFld Field to compute CD of.
+ * @param cdFld Difference output.
+ */
+      void computeCentralDifference1D(const Lucee::Field<NDIM, double>& inFld, 
+        Lucee::Field<NDIM, double>& cdFld);
+
+/**
+ * Compute central difference of field.
+ *
+ * @param inFld Field to compute CD of.
+ * @param cdFld Difference output.
+ */
+      void computeCentralDifference2D(const Lucee::Field<NDIM, double>& inFld, 
+        Lucee::Field<NDIM, double>& cdFld);
+
+/**
+ * Compute central difference of field.
+ *
+ * @param inFld Field to compute CD of.
+ * @param cdFld Difference output.
+ */
+      void computeCentralDifference3D(const Lucee::Field<NDIM, double>& inFld, 
+        Lucee::Field<NDIM, double>& cdFld);
+
+/** Cell spacing */
+      double dx[NDIM];
   };
 }
 
