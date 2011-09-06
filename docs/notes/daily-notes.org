@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* September 6th
+
+  Verification and documenting the test cases and the solution plots
+  is a tedious and time-consuming job. It is obvious why the barrier
+  to make research reproducible is so high: it takes too much
+  work. One might be tempted to think that the time is better spent in
+  adding new features, adding new algorithms etc.
+
+  However, I firmly believe that such an effort will pay off in the
+  long run.
+
 * September 5th
 
   Completed a Journal Entry for testing the PeriodicPoisson2D
