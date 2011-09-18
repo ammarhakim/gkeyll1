@@ -6,6 +6,7 @@
 
 // lucee includes
 #include <LcArrayIo.h>
+#include <LcGlobals.h>
 #include <LcHdf5Io.h>
 #include <LcLinAlgebra.h>
 #include <LcLogStream.h>
@@ -14,6 +15,9 @@
 #include <LcMatrix.h>
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // gsl includes
 #include <gsl/gsl_math.h>
@@ -237,9 +241,13 @@ namespace Lucee
     if (d == 0)
 // don't write anything at start
       return;
+
+// output prefix
+    std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
+
 // create HDF5 for storing data
     Lucee::Hdf5Io io(0, 0);
-    std::string fn = baseName + ".h5";
+    std::string fn = outPrefix + "_" + baseName + ".h5";
     Lucee::IoNodeType fNode = io.createFile(fn);
 
     Lucee::IoNodeType vn;
@@ -257,6 +265,15 @@ namespace Lucee
     vn = Lucee::writeToFile(io, fNode, "tauIrrad", tauIrradOut_v);
     io.writeStrAttribute(vn, "description", 
       "optical depths at which irradiances are output");
+
+// save depths at which radiances are computed
+    Lucee::Vector<double> tauRadOut_v(tauRadOut.size());
+    for (unsigned i=0; i<tauRadOut_v.getLength(); ++i)
+      tauRadOut_v[i] = tauRadOut[i];
+
+    vn = Lucee::writeToFile(io, fNode, "tauRad", tauRadOut_v);
+    io.writeStrAttribute(vn, "description", 
+      "optical depths at which radiances are output");
 
 // write irradiances to file
     vn = Lucee::writeToFile(io, fNode, "downward_irradiance", irradp);
