@@ -14,6 +14,7 @@ add_library(lcslvrs
   LcAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoundaryCondition.cpp
+  LcConstBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
   LcCurrentSource.cpp
   LcEdgeFaceCurlUpdater.cpp
