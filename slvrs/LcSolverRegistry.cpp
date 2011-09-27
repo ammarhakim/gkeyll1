@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcBcUpdater.h>
 #include <LcCopyBoundaryCondition.h>
+#include <LcConstBoundaryCondition.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
@@ -57,6 +58,7 @@ namespace Lucee
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
+    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ConstBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroTangentBoundaryCondition>;
 
