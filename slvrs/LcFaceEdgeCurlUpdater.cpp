@@ -62,7 +62,8 @@ namespace Lucee
     for (unsigned d=0; d<NDIM; ++d)
       cfla = std::max(cfla, speed*dt/grid.getDx(d));
 
-    if (cfla > 1.01*cfl) { // time-step too large (the 1.01 is used to avoid thrashing around dt)
+    if (cfla > 1.01*cfl) 
+    { // time-step too large (the 1.01 is used to avoid thrashing around dt)
       double newDt = dt*cfl/cfla;
       return UpdaterStatus(false, newDt);
     }
