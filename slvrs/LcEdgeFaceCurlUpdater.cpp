@@ -93,7 +93,7 @@ namespace Lucee
 
 // lower and upper bounds of 1D slice
       int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir)+1;
+      int sliceUpper = localRgn.getUpper(dir);
 
 // loop over each 1D slice
       while (seq.step())
