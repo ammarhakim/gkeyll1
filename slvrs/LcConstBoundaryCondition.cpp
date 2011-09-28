@@ -27,12 +27,11 @@ namespace Lucee
       values = tbl.getNumVec("values");
       if (values.size() != components.size())
         throw Lucee::Except(
-          "ConstBoundaryCondition::readInput: If 'values' table is specified it must have same size as 'components' table");
+          "ConstBoundaryCondition::readInput: 'values' table must have same size as 'components' table");
     }
     else
     {
-      values.resize(components.size());
-      for (unsigned i=0; i<values.size(); ++i) values[i] = 0.0;
+      throw Lucee::Except("ConstBoundaryCondition::readInput: 'values' table must be specified");
     }
   }
 
