@@ -74,6 +74,8 @@ namespace Lucee
       double speed;
 /** CFL number */
       double cfl;
+/** Extra cells to update outside of interior */
+      unsigned ghostUpdates[2];
   };
 }
 
