@@ -1,5 +1,40 @@
 # -*- org -*-
 
+* October 6th
+
+  The dual Yee scheme is a bit tricky to implement. One needs to first
+  update the magnetic field and then the electric field. The magnetic
+  field solve needs to extend to the ghost cell on the upper edges of
+  each side. This will mean that the upper edge magnetic fields will
+  have the correct values when updating the upper skin electric field.
+
+  Note that the magentic field BCs need not be applied at all. This is
+  because the x-derivative of Bx or y-derivative of By does not show
+  up in the Maxwell equations.
+
+  Added a new variable to the curl updaters to allow specifying ghost
+  cells to update. With this and the careful application of BCs the
+  conducting wall BC problem with dual Yee mesh seem to work. Need to
+  test and document.
+  
+  A final trick (not yet implemented) is to compute the magnetic field
+  at -dt/2. This is needed to allow storing the electric field at
+  integer time-steps and magnetic field at half time-steps.
+
+* October 5th
+
+  Have not updated notes for a while as I have not done much
+  development of Lucee. However, I have written a lot of journal
+  entries in the last few weeks, testing Euler solvers and Maxwell
+  solver. Also did some 1D two-fluid solver.
+
+  It seems that it would be relatively easy to make Lucee
+  interactive. The line-editing library libtecla can be used to give a
+  pretty good command line interface to Lucee. A class needs to be
+  added to the system that allows calling the Lua interpreter from a
+  program. This will allow interactive use as well allowing attaching
+  Lucee to say a GUI or a web interface.
+
 * September 6th
 
   Verification and documenting the test cases and the solution plots

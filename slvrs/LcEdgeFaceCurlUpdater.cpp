@@ -36,6 +36,20 @@ namespace Lucee
     speed = tbl.getNumber("speed");
     speed = speed > 0 ? speed : -speed;
     cfl = tbl.getNumber("cfl");
+    if (tbl.hasNumVec("ghostUpdate"))
+    {
+      std::vector<double> gup = tbl.getNumVec("ghostUpdate");
+      if (gup.size() != 2)
+        throw Lucee::Except(
+          "EdgeFaceCurlUpdater:readInput: The 'ghostUpdate' table should have exactly two numbers");
+      ghostUpdates[0] = (unsigned) gup[0];
+      ghostUpdates[1] = (unsigned) gup[1];
+    }
+    else
+    {
+// by default do not update any ghost region
+      ghostUpdates[0] = ghostUpdates[1] = 0; 
+    }
   }
 
   template <unsigned NDIM>
@@ -92,8 +106,8 @@ namespace Lucee
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice
-      int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir);
+      int sliceLower = localRgn.getLower(dir) + ghostUpdates[0];
+      int sliceUpper = localRgn.getUpper(dir) + ghostUpdates[1];
 
 // loop over each 1D slice
       while (seq.step())
