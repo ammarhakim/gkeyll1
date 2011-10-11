@@ -74,7 +74,7 @@ namespace Lucee
     double cfla = 0.0;
 // first ensure that CFL condition is met
     for (unsigned d=0; d<NDIM; ++d)
-      cfla = std::max(cfla, speed*dt/grid.getDx(d));
+      cfla = std::max(cfla, speed*std::abs(dt)/grid.getDx(d));
 
     if (cfla > 1.01*cfl) 
     { // time-step too large (the 1.01 is used to avoid thrashing around dt)
