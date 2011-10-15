@@ -23,7 +23,13 @@
 namespace Lucee
 {
 /**
- * Class to perform object registration.
+ * @brief Class to perform object registration.
+ *
+ * This class assists in registering a specific Lua-callable derived
+ * class. It registers a constructor for that base class that can be
+ * used in a Lua script to create an object of that class. It also
+ * registers the specific methods exposed by the derived class, making
+ * them available ot the Lua script.
  */
   template<class B, class D>
   class ObjRegistry
@@ -34,24 +40,31 @@ namespace Lucee
  */
       ObjRegistry()
       {
+// We first need to fetch the global singleton that holds all the
+// derived class constructors and functions
         Lucee::LuaModule<B>& lm = Loki::SingletonHolder<Lucee::LuaModule<B> >
           ::Instance();
 // add a function to make Lua object from table constructor
         luaL_Reg reg = {D::id, makeLuaObj};
         lm.regCreateFuncs.push_back(reg);
 
-// add an empty map to using derived class ID as key
+// add an empty map using derived class ID as key: this map stores
+// functions specific to the derived class.
         lm.funcMaps.insert(std::pair<std::string, Lucee::LuaFuncMap>(
             typeid(D).name(), Lucee::LuaFuncMap()));
         std::map<std::string, Lucee::LuaFuncMap>::iterator itr
           = lm.funcMaps.find(typeid(D).name()); // fetch just-added map entry
 // set its base class name
         itr->second.setBaseName(typeid(B).name());
-// add Lua callable functions for base class
+// add Lua callable functions for base class (this is end up being
+// added multiple times, but it does not really matter as the old
+// entries are just overwritten).
         B::appendLuaCallableMethods(itr->second);
 // add Lua callable functions for derived class
         D::appendLuaCallableMethods(itr->second);
-// set deletion function for derived class
+// set deletion function for derived class: this is used by Lua
+// garbage collector to clean up the resources allocated by the object
+// when the object goes out of scope.
         itr->second.setDelFunc(Lucee::PointerHolder<D>::deleteObject);
       }
 

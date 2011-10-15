@@ -1,5 +1,27 @@
 # -*- org -*-
 
+* October 14th
+
+  Need to implement a mechanism that would allow the creation of
+  objects (not derived from LcBasicObj) from Lua scripts. This would
+  then allow getting of field pointer objects (write and read) that
+  can be used from Lua to access the field components.
+
+  This should not be too hard, but will need addition of classes like
+  LcObjRegistry and LcLuaModuleRegistry that do not rely on existence
+  of a base class.
+
+  One can then imagine doing (assume q is 2D field)
+#+BEGIN_EXAMPLE
+  ptr = q:getPtr(i,j)
+  for k in 0, ptr:getNumComponents() do
+    ptr.set(k, 10.0)
+  end
+#+END_EXAMPLE
+
+  Another use could be in updaters that take in multiple pointers and
+  compute some quantity.
+
 * October 6th
 
   The dual Yee scheme is a bit tricky to implement. One needs to first

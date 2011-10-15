@@ -15,6 +15,7 @@
 #include <LcHyperEquationRegistry.h>
 #include <LcLibRegistry.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcLuceeObj.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRegisterModules.h>
 #include <LcRteRegistry.h>
@@ -47,5 +48,6 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::FunctionIfc>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::LuceeObj>::registerModule(L);
   }
 }
