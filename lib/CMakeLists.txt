@@ -30,7 +30,7 @@ add_library(lclib
   LcLuaState.cpp
   LcLuaTXYZFunction.cpp
   LcLuaTable.cpp
-  LcLuceeObj.cpp
+  LcLuceeMod.cpp
   LcMathLib.cpp
   LcMatrix.cpp
   LcRectCoordSys.cpp
