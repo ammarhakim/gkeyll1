@@ -1,5 +1,38 @@
 # -*- org -*-
 
+* October 15th
+
+  In terms of work before getting to Princeton, I need to do the
+  following.
+
+** TODO Complete the Facets PoP paper    
+   SCHEDULED: <2011-10-19 Wed>
+
+   Complete the draft and then let Alexei and Scott complete. 
+
+** TODO Implement 2 schemes from Peterson and Hammett paper    
+   SCHEDULED: <2011-11-12 Sat>
+    
+   The Poisson solver is already written. Next step is to create an
+   updater to use the Poisson solution and compute the edge
+   velocities.
+
+   Then implement the SuHu and Arakawa schemes. Also compare with
+   multi-dimensional wave-propagation scheme.
+
+** TODO Implement a first-cut hybrid FV/DG scheme
+
+   This task might be harder to complete before APS. However, getting
+   it done is important.
+
+** TODO Divergence preserving scheme for two-fluid equations
+
+   This is needed to get the 10-moment paper completed.
+
+** TODO Complete a 10-moment paper for PoP
+
+   For this the cold-plasma dielectric is required.
+
 * October 14th
 
   Need to implement a mechanism that would allow the creation of
@@ -13,14 +46,28 @@
 
   One can then imagine doing (assume q is 2D field)
 #+BEGIN_EXAMPLE
-  ptr = q:getPtr(i,j)
+  ptr = q:creatPtr()
+  q:setPtr(ptr, i,j)
   for k in 0, ptr:getNumComponents() do
-    ptr.set(k, 10.0)
+    ptr:set(k, 10.0)
   end
 #+END_EXAMPLE
 
   Another use could be in updaters that take in multiple pointers and
   compute some quantity.
+
+** Updates on this
+
+   There is no need to do this. The current system will work just by
+   providing a class LuceeMod as a base class for objects that can be
+   made from Lua.
+
+** Notes on documentation
+
+   Now that some experience has been gained writing the simulation
+   journal, it is time to document all the updaters, BCs etc
+   used. Some usage hints on how to do this from Lua will also need to
+   be given.
 
 * October 6th
 

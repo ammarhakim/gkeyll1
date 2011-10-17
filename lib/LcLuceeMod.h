@@ -1,11 +1,11 @@
 /**
- * @file	LcLuceeObj.h
+ * @file	LcLuceeMod.h
  *
  * @brief	Base class for generic Lua-callable objects in Lucee.
  */
 
-#ifndef LC_LUCEE_OBJ_H
-#define LC_LUCEE_OBJ_H
+#ifndef LC_LUCEE_MOD_H
+#define LC_LUCEE_MOD_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -19,10 +19,10 @@ namespace Lucee
 {
 /**
  * Base class for generic Lua-callable objects in Lucee. This class
- * essentially provides the module "Lucee" and allows namespacing Lua
+ * just provides the module "Lucee" and allows namespacing Lua
  * creatable objects.
  */
-  class LuceeObj : Lucee::BasicObj
+  class LuceeMod : Lucee::BasicObj
   {
     public:
 /** Class id: this is used by registration system */
@@ -30,4 +30,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_LUCEE_OBJ_H
+#endif // LC_LUCEE_MOD_H
