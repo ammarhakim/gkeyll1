@@ -1,10 +1,10 @@
 /**
- * @file	LcCurrentSource.h
+ * @file	LcFunctionSource.h
  *
- * @brief	Source for computing current sources from a fluid
+ * @brief	Source for computing source from Lua function.
  */
-#ifndef LC_CURRENT_SOURCE_H
-#define LC_CURRENT_SOURCE_H
+#ifndef LC_FUNCTION_SOURCE_H
+#define LC_FUNCTION_SOURCE_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -17,18 +17,18 @@
 namespace Lucee
 {
 /**
- * Source for computing current from charged fluid motion
+ * Source for computing source from Lua function.
  */
-  class CurrentSource : public Lucee::PointSourceIfc
+  class FunctionSource : public Lucee::PointSourceIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** 
- * Create new current evaluator.
+ * Create new function source evaluator.
  */
-      CurrentSource();
+      FunctionSource();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -49,9 +49,9 @@ namespace Lucee
       inline void getSource(double tm, const double loc[3], std::vector<double>& src);
 
     private:
-/** Charge to mass ratio of fluid species */
-      double qbym;
+/** Reference to Lua function */
+      int fnRef;
   };
 }
 
-#endif // LC_CURRENT_SOURCE_H
+#endif // LC_FUNCTION_SOURCE_H
