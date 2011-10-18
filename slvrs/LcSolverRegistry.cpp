@@ -11,11 +11,12 @@
 
 // lucee includes
 #include <LcBcUpdater.h>
-#include <LcCopyBoundaryCondition.h>
 #include <LcConstBoundaryCondition.h>
+#include <LcCopyBoundaryCondition.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
+#include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLorentzForceSource.h>
@@ -65,6 +66,7 @@ namespace Lucee
 // register point sources
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::LorentzForceSource>;
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::CurrentSource>;
+    new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::FunctionSource>;
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr

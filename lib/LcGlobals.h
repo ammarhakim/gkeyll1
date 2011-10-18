@@ -12,6 +12,9 @@
 # include <config.h>
 #endif
 
+// lucee includes
+#include <LcLuaState.h>
+
 // txbase includes
 #include <TxCommBase.h>
 
@@ -51,6 +54,8 @@ namespace Lucee
       std::string outPrefix;
 /** Pointer to communicator object */
       TxCommBase *comm;
+/** Pointer to lua state */
+      Lucee::LuaState *L;
   };
 }
 

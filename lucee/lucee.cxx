@@ -116,6 +116,10 @@ main(int argc, char **argv)
 
 // load input file using Lua
   Lucee::LuaState L;
+// set global state
+  Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().L = &L;
+
 // load lua library: this must be done before loading input file
   Lucee::registerModules(L);
 

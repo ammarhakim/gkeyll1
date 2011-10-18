@@ -20,6 +20,7 @@ add_library(lcslvrs
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
   LcFaceEdgeCurlUpdater.cpp
+  LcFunctionSource.cpp
   LcGridOdeIntegrator.cpp
   LcGridOdePointIntegrator.cpp
   LcGridOdePointIntegratorUpdater.cpp
