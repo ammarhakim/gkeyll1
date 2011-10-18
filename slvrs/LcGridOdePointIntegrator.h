@@ -68,19 +68,21 @@ namespace Lucee
 /**
  * Integrate ODEs to time "t".
  *
- * @param t Time to integrate ODEs to.
+ * @param t0 Initial time
+ * @param dt Time-step to use
  * @param sol On output, solution of ODEs.
  */
-      void rk4(double dt, Lucee::Field<NDIM, double>& sol);
+      void rk4(double t0, double dt, Lucee::Field<NDIM, double>& sol);
 
 /**
  * Compute sources, summing up contributions from each RHS term.
  *
+ * @param tm Time at which source is requested.
  * @param xc Coordinates at which source is needed
  * @param inp Inputs for which source is needed
  * @param src On output, sources.
  */
-      void calcSource(const double xc[3], const double *inp, std::vector<double>& src);
+      void calcSource(double tm, const double xc[3], const double *inp, std::vector<double>& src);
   };
 }
 

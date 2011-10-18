@@ -33,6 +33,9 @@ namespace Lucee
  */
       GridOdePointIntegratorUpdater();
 
+/** Dtor */
+      ~GridOdePointIntegratorUpdater();
+
 /**
  * Bootstrap method: Read input from specified table.
  *

@@ -48,15 +48,13 @@ namespace Lucee
   GridOdePointIntegrator<NDIM>::integrate(double t0, double t1, Lucee::Field<NDIM, double>& sol)
   {
     ts.resize(sol.getNumComponents());
-// time-step to use
-    double dt = t1-t0;
 // update using RK4 scheme
-    rk4(dt, sol);
+    rk4(t0, t1-t0, sol);
   }
 
   template <unsigned NDIM>
   void
-  GridOdePointIntegrator<NDIM>::rk4(double dt, Lucee::Field<NDIM, double>& sol)
+  GridOdePointIntegrator<NDIM>::rk4(double t0, double dt, Lucee::Field<NDIM, double>& sol)
   {
 // number of components to update
     unsigned n = sol.getNumComponents();
@@ -85,17 +83,17 @@ namespace Lucee
       sol.setPtr(inpPtr, idx);
 
 // RK stage 1
-      calcSource(xc, &inpPtr[0], src);
+      calcSource(t0, xc, &inpPtr[0], src);
       for (unsigned i=0; i<n; ++i)
         ql[i] = inpPtr[i] + hh*src[i];
 
 // RK stage 2
-      calcSource(xc, &ql[0], srct);
+      calcSource(t0+hh, xc, &ql[0], srct);
       for (unsigned i=0; i<n; ++i)
         ql[i] = inpPtr[i] + hh*srct[i];
 
 // RK stage 3
-      calcSource(xc, &ql[0], srcm);
+      calcSource(t0+hh, xc, &ql[0], srcm);
       for (unsigned i=0; i<n; ++i)
       {
         ql[i] = inpPtr[i] + dt*srct[i];
@@ -103,7 +101,7 @@ namespace Lucee
       }
 
 // RK stage 4
-      calcSource(xc, &ql[0], srct);
+      calcSource(t0+dt, xc, &ql[0], srct);
 // perform final update
       sol.setPtr(solPtr, idx);
       for (unsigned i=0; i<n; ++i)
@@ -113,7 +111,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  GridOdePointIntegrator<NDIM>::calcSource(const double xc[3], const double *inp, std::vector<double>& src)
+  GridOdePointIntegrator<NDIM>::calcSource(double tm, const double xc[3], const double *inp, std::vector<double>& src)
   {
     unsigned n = src.size();
 // zap sources first
@@ -124,7 +122,7 @@ namespace Lucee
     {
       for (unsigned k=0; k<n; ++k) 
         ts[k] = 0.0;
-      rhs[i]->calcSource(xc, inp, &ts[0]);
+      rhs[i]->calcSource(tm, xc, inp, &ts[0]);
       for (unsigned k=0; k<n; ++k)
         src[k] += ts[k];
     }

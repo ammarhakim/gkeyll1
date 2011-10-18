@@ -61,11 +61,12 @@ namespace Lucee
 /**
  * Compute sources and store them in supplied output vector.
  *
+ * @param tm Time at which source is requested.
  * @param loc Coordinate at which source is requested.
  * @param inp Input values at which source is requested.
  * @param src On output, source.
  */
-      void calcSource(const double loc[3], const double *inp, double *src);
+      void calcSource(double tm, const double loc[3], const double *inp, double *src);
 
     protected:
 /**
@@ -73,10 +74,11 @@ namespace Lucee
  * vector 'src' is pre-allocated. Derived class method should use the
  * getData() method to get data it needs in computing the sources.
  *
+ * @param tm Time at which source is requested.
  * @param loc Coordinate at which source is requested.
  * @param src On output, source.
  */
-      virtual void getSource(const double loc[3], std::vector<double>& src) = 0;
+      virtual void getSource(double tm, const double loc[3], std::vector<double>& src) = 0;
 
 /**
  * Get data at i-th input component. This function takes care of

@@ -33,7 +33,7 @@ class HarmonicOde : public Lucee::PointSourceIfc
     }
 
     void
-    getSource(const double loc[3], std::vector<double>& src)
+    getSource(double tm, const double loc[3], std::vector<double>& src)
     {
       src[0] = this->getData(1);
       src[1] = -gamma*gamma*this->getData(0);
@@ -80,7 +80,7 @@ main(void)
   double inp[2] = {1.0, 2.0};
   double src[2];
 // compute source
-  point.calcSource(loc, inp, src);
+  point.calcSource(0.0, loc, inp, src);
 // test it
   LC_ASSERT("Testing source", src[0] == inp[1]);
   LC_ASSERT("Testing source", src[1] == -25*inp[0]);
