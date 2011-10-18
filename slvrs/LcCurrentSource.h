@@ -42,10 +42,11 @@ namespace Lucee
  * vector 'src' is pre-allocated. Derived class method should use the
  * getData() method to get data it needs in computing the sources.
  *
+ * @param tm Time at which source is requested.
  * @param loc Coordinate at which source is requested.
  * @param src On output, source.
  */
-      inline void getSource(const double loc[3], std::vector<double>& src);
+      inline void getSource(double tm, const double loc[3], std::vector<double>& src);
 
     private:
 /** Charge to mass ratio of fluid species */

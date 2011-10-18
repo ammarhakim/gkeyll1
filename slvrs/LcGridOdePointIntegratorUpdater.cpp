@@ -26,6 +26,12 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  GridOdePointIntegratorUpdater<NDIM>::~GridOdePointIntegratorUpdater()
+  {
+    delete integrator;
+  }
+
+  template <unsigned NDIM>
   void
   GridOdePointIntegratorUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
@@ -43,7 +49,6 @@ namespace Lucee
   Lucee::UpdaterStatus
   GridOdePointIntegratorUpdater<NDIM>::update(double t)
   {
-
 // fetch field to update
     Lucee::Field<NDIM, double>& fld = this->getOut<Lucee::Field<NDIM, double> >(0);
 // integrate ODEs

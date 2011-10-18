@@ -90,13 +90,13 @@ namespace Lucee
   }
 
   void
-  PointSourceIfc::calcSource(const double loc[3], const double *inp, double *src)
+  PointSourceIfc::calcSource(double tm, const double loc[3], const double *inp, double *src)
   {
 // set data pointer so derived classes can get needed variables
     data = inp;
     for (unsigned i=0; i<nOut; ++i) out[i] = 0.0;
 // call derived class method to compute source
-    this->getSource(loc, out);
+    this->getSource(tm, loc, out);
 // copy source over into proper location
     for (unsigned i=0; i<nOut; ++i)
       src[outComponents[i]] = out[i];

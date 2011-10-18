@@ -36,7 +36,7 @@ namespace Lucee
   }
 
   void
-  CurrentSource::getSource(const double loc[3], std::vector<double>& src)
+  CurrentSource::getSource(double tm, const double loc[3], std::vector<double>& src)
   {
 // computes sources for [Ex, Ey, Ez]
     src[0] = -qbym*this->getData(0); // Ex

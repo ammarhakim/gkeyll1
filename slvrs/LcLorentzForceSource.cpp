@@ -35,7 +35,7 @@ namespace Lucee
   }
 
   void
-  LorentzForceSource::getSource(const double loc[3], std::vector<double>& src)
+  LorentzForceSource::getSource(double tm, const double loc[3], std::vector<double>& src)
   {
 // takes in [rho, rho*u, rho*v, rho*w, Ex, Ey, Ez, Bx, By, Bz]
     double rho = this->getData(0);
