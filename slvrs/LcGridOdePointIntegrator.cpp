@@ -76,8 +76,9 @@ namespace Lucee
 // loop over field, updating solution in each cell
     while (seq.step())
     {
-// get index and get centroid coordinate
       seq.fillWithIndex(idx);
+// get centroid coordinate
+      grid.setIndex(idx);
       grid.getCentroid(xc);
 // set pointers
       sol.setPtr(inpPtr, idx);
