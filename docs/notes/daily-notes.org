@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* October 19th
+
+** VERY bizarre behaviour
+
+   Turns out that the solution of wave-propagation updater with and
+   without limiters are very different for different CFL numbers! This
+   is unbelievable!!
+
+   RESOLUTION: This is really not a bug. The issue here is that when a
+   discontinuity is initialized too close to a boundary and limiters
+   are not applied, the solution in the ghost cell can get
+   contaminated with oscillations. Then, this completely changes the
+   interior solution as it propagates in the interior, completely
+   screwing up the solution.
+
 * October 15th
 
   In terms of work before getting to Princeton, I need to do the
