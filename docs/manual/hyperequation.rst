@@ -78,6 +78,15 @@ Constructor Parameters
   * - gasGamma
     - None
     - Gas adiabatic index :math:`\gamma`
+  * - correct
+    - false
+    - Apply pressure and density fixes to maintain positivity
+  * - minPressure
+    - 0.0
+    - If ``correct`` is set to ``true``, the pressure is not allowed to fall below this value
+  * - minDensity
+    - 0.0
+    - If ``correct`` is set to ``true``, the density is not allowed to fall below this value
 
 Methods
 -------
@@ -167,7 +176,7 @@ Constructor Parameters
 Methods
 -------
 
-The Maxwell equation object does not support and special methods.
+The Maxwell equation object does not support any special methods.
 
 Examples
 --------
@@ -241,7 +250,7 @@ Constructor Parameters
 Methods
 -------
 
-The Maxwell equation object does not support and special methods.
+The Maxwell equation object does not support any special methods.
 
 Examples
 --------

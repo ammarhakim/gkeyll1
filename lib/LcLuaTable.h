@@ -148,6 +148,14 @@ namespace Lucee
       double getNumber(const std::string& key);
 
 /**
+ * Get a boolean from table.
+ *
+ * @param key Key in table.
+ * @return true or false
+ */
+      bool getBool(const std::string& key);
+
+/**
  * Get user data (i.e. pointer to Lucee object) from table. The object
  * type must be specified as the template parameter.
  *
@@ -286,6 +294,14 @@ namespace Lucee
  * @return true if exists, false otherwise.
  */
       bool hasNumber(const std::string& key);
+
+/**
+ * Check if boolean is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasBool(const std::string& key);
 
 /**
  * Check if vector of strings is in table.
