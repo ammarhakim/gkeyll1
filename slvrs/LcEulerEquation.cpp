@@ -33,6 +33,18 @@ namespace Lucee
       gas_gamma = tbl.getNumber("gasGamma");
     else
       throw Lucee::Except("EulerEquation::readInput: Must specify gasGamma (gas constant)");
+
+    correct = false; // by default do not correct
+    if (tbl.hasBool("correct"))
+      correct = tbl.getBool("correct");
+
+    minDensity = 0.0;
+    if (tbl.hasNumber("minDensity"))
+      minDensity = tbl.getNumber("minDensity");
+
+    minPressure = 0.0;
+    if (tbl.hasNumber("minPressure"))
+      minPressure = tbl.getNumber("minPressure");
   }
 
   void
@@ -55,24 +67,26 @@ namespace Lucee
   EulerEquation::flux(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
+    double rho = getSafeRho(q[0]);
 // compute pressure
     double pr = pressure(q);
 // now compute flux
     f[0] = q[1]; // rho*u
-    f[1] = q[1]*q[1]/q[0] + pr; // rho*u*u + pr
-    f[2] = q[1]*q[2]/q[0]; // rho*u*v
-    f[3] = q[1]*q[3]/q[0]; // rho*u*w
-    f[4] = (q[4]+pr)*q[1]/q[0]; // (E+pr)*u
+    f[1] = q[1]*q[1]/rho + pr; // rho*u*u + pr
+    f[2] = q[1]*q[2]/rho; // rho*u*v
+    f[3] = q[1]*q[3]/rho; // rho*u*w
+    f[4] = (q[4]+pr)*q[1]/rho; // (E+pr)*u
   }
 
   void
   EulerEquation::speeds(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q, double s[2])
   {
+    double rho = getSafeRho(q[0]);
 // compute pressure
     double pr = pressure(q);
-    double cs = std::sqrt(gas_gamma*pr/q[0]); // sound speed
-    double u = q[1]/q[0]; // fluid velocity
+    double cs = std::sqrt(gas_gamma*pr/rho); // sound speed
+    double u = q[1]/rho; // fluid velocity
     s[0] = u-cs;
     s[1] = u+cs;
   }
@@ -80,10 +94,11 @@ namespace Lucee
   void
   EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
-    v[0] = q[0]; // rho
-    v[1] = q[1]/q[0]; // u
-    v[2] = q[2]/q[0]; // v
-    v[3] = q[3]/q[0]; // w
+    double rho = getSafeRho(q[0]);
+    v[0] = rho; // rho
+    v[1] = q[1]/rho; // u
+    v[2] = q[2]/rho; // v
+    v[3] = q[3]/rho; // w
     v[4] = pressure(q); // pressure
   }
 
@@ -105,9 +120,10 @@ namespace Lucee
   {
     double gas_gamma1 = gas_gamma-1;
 
+    double rhol = getSafeRho(ql[0]), rhor = getSafeRho(qr[0]);
 // compute Roe averages for use in Riemann solver
-    double rhsqrtl = std::sqrt(ql[0]); // left sqrt(rho)
-    double rhsqrtr = std::sqrt(qr[0]); // right sqrt(rho)
+    double rhsqrtl = std::sqrt(rhol); // left sqrt(rho)
+    double rhsqrtr = std::sqrt(rhor); // right sqrt(rho)
     double pl = pressure(ql); // left pressure
     double pr = pressure(qr); // right pressure
 
@@ -165,6 +181,18 @@ namespace Lucee
   double
   EulerEquation::pressure(const Lucee::ConstFieldPtr<double>& q) const
   {
-    return (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/q[0]);
+    double rho = getSafeRho(q[0]);
+    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/rho);
+    if (correct && (pr < minPressure))
+      return minPressure;
+    return pr;
+  }
+
+  double
+  EulerEquation::getSafeRho(double rho) const
+  {
+    if (correct && (rho<minDensity))
+      return minDensity;
+    return rho;
   }
 }

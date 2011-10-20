@@ -15,7 +15,7 @@ In this manual the Lucee specific Lua objects and methods are
 described. A Lucee simulation is created by writing a Lua program that
 uses these Lucee-specific objects along with standard Lua control
 structures and functions. This gives great flexibility as a powerful
-general-purpose language is available for creating a simulation.
+general-purpose language is available for creating simulations.
 
 Lua accessible object documentation
 -----------------------------------

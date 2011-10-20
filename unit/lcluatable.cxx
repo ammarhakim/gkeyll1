@@ -24,6 +24,8 @@ test_1(Lucee::LuaState& L)
     "cells = {100, 50},"
     "address = {\"hello\", \"world\"},"
     "subcolors = {a=1.0, b=2.0, c=3.0},"
+    "correct = true,"
+    "screw = false,"
     "}";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
@@ -44,11 +46,16 @@ test_1(Lucee::LuaState& L)
   LC_ASSERT("Testing Lua table", back.hasNumber("g"));
   LC_ASSERT("Testing Lua table", back.hasString("name"));
   LC_ASSERT("Testing Lua table", back.hasNumber("zzz") == false);
+  LC_ASSERT("Testing Lua table", back.hasBool("correct"));
+  LC_ASSERT("Testing Lua table", back.hasBool("screw"));
+  LC_ASSERT("Testing Lua table", back.hasBool("drew") == false);
 
   LC_ASSERT("Testing Lua table", back.getNumber("r") == 0.3);
   LC_ASSERT("Testing Lua table", back.getNumber("b") == 0.1);
   LC_ASSERT("Testing Lua table", back.getNumber("g") == 0.0);
   LC_ASSERT("Testing Lua table", back.getString("name") == "blue_green");
+  LC_ASSERT("Testing Lua table", back.getBool("correct") == true);
+  LC_ASSERT("Testing Lua table", back.getBool("screw") == false);
 
 // get subtable
   LC_ASSERT("Testing Lua table", back.hasTable("subcolors"));

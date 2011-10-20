@@ -15,18 +15,23 @@
    interior solution as it propagates in the interior, completely
    screwing up the solution.
 
+** Minimum density and pressure in Euler equation
+
+   Need to add a flag with additional input variables that allow
+   setting a lower bound on the density and pressure in the Euler
+   equation class. This is something I dislike, but otherwise it can
+   be difficult to do real problems.
+   
 * October 15th
 
   In terms of work before getting to Princeton, I need to do the
   following.
 
 ** TODO Complete the Facets PoP paper    
-   SCHEDULED: <2011-10-19 Wed>
 
    Complete the draft and then let Alexei and Scott complete. 
 
 ** TODO Implement 2 schemes from Peterson and Hammett paper    
-   SCHEDULED: <2011-11-12 Sat>
     
    The Poisson solver is already written. Next step is to create an
    updater to use the Poisson solution and compute the edge
@@ -46,7 +51,9 @@
 
 ** TODO Complete a 10-moment paper for PoP
 
-   For this the cold-plasma dielectric is required.
+   For this the cold-plasma dielectric is required. NOT REALLY. Seems
+   like using a low-temperature Euler fluid for the electrons will
+   also do.
 
 * October 14th
 

@@ -115,6 +115,13 @@ namespace Lucee
     private:
 /** Gas gamma */
       double gas_gamma;
+/** Should we enforce positivity? */
+      bool correct;
+/** Minium pressure in case correct=true */
+      double minPressure;
+/** Minium density in case correct=true */
+      double minDensity;
+
 /**
  * Compute pressure from conserved variables.
  *
@@ -122,6 +129,14 @@ namespace Lucee
  * @return pressure
  */
       double pressure(const Lucee::ConstFieldPtr<double>& q) const;
+
+/**
+ * Get density with basement fix.
+ *
+ * @param rho Density to correct.
+ * @param correct density
+ */
+      double getSafeRho(double rho) const;
   };
 }
 

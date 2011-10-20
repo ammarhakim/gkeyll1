@@ -65,7 +65,7 @@ The 1D, 2D and 3D field object support the following methods.
   Write out data in the field to file named *flNm*. The file is
   created if it does not exist and overwritten if it does. Depending
   on the file extension, the data can be written as either HDF5 or
-  plain-text.
+  plain-text [#plain-txt]_.
 
 .. py:function:: clear(val)
 
@@ -114,3 +114,7 @@ Examples
 .. [#seven-field] Lucee supports the creation of upto seven
    dimensional fields. However, not all implemented algorithms work
    with fields with dimensionality higher than three.
+
+.. [#plain-txt] Writing to plain text is not a good idea execept for
+   quick debugging. The writes are very slow and do not work in
+   parallel.

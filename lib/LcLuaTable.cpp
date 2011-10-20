@@ -147,6 +147,29 @@ namespace Lucee
     return res;
   }
 
+  bool
+  LuaTable::getBool(const std::string& key)
+  {
+    SHOW_LUA_STACK_SIZE("getBool", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TBOOLEAN)
+    {
+      lua_pop(L, 2);
+      Lucee::Except lce("LuaTable::getNumber: ");
+      lce << key << " is not a number";
+      throw lce;
+    }
+    int res = lua_toboolean(L, -1);
+
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return res == 1 ? true : false;
+  }
+
   std::vector<std::string>
   LuaTable::getStrVec(const std::string& key)
   {
@@ -272,6 +295,26 @@ namespace Lucee
 // get data from table
     lua_gettable(L, -2);
     if (lua_type(L, -1) != LUA_TNUMBER)
+    {
+      lua_pop(L, 2);
+      SHOW_LUA_STACK_SIZE2(L);
+      return false;
+    }
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return true;
+  }
+
+  bool
+  LuaTable::hasBool(const std::string& key)
+  {
+    SHOW_LUA_STACK_SIZE("hasBool", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TBOOLEAN)
     {
       lua_pop(L, 2);
       SHOW_LUA_STACK_SIZE2(L);
