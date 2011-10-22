@@ -138,6 +138,8 @@ namespace Lucee
     double enth = ((ql[4]+pl)/rhsqrtl + (qr[4]+pr)/rhsqrtr)/rhsq2;
 // speed of sound
     double aa2 = gas_gamma1*(enth - 0.5*q2);
+    if (correct && (aa2 < 0))
+      aa2 = gas_gamma*minPressure/minDensity;
     double a = std::sqrt(aa2);
 // other quantities
     double g1a2 = gas_gamma1/aa2;

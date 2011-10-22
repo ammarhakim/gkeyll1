@@ -97,7 +97,7 @@ namespace Lucee
       calcSource(t0+hh, xc, &ql[0], srcm);
       for (unsigned i=0; i<n; ++i)
       {
-        ql[i] = inpPtr[i] + dt*srct[i];
+        ql[i] = inpPtr[i] + dt*srcm[i];
         srcm[i] = srct[i] + srcm[i];
       }
 
