@@ -51,7 +51,7 @@ in the form
   =
   0
 
-Here only the X-direction fluxes are show. Here, :math:`(u,v,w)` are
+Where only the X-direction fluxes are show, and :math:`(u,v,w)` are
 the components of the fluid velocity and :math:`E` is the fluid total
 energy given by
 
@@ -116,7 +116,10 @@ To create an Euler equation object with :math:`\gamma = 1.4` you can do
    gasGamma = 1.4,
   }
 
-The following code block uses the euler equation block and conserved
+This object will not apply any positivity fixes to the pressure and
+density of the fluid.
+
+The following code block uses the euler equation object and conserved
 variables field ``qCons`` to compute the primitive variables ``qPrim``
 and then write out the pressure to an HDF5 file
 
@@ -182,7 +185,7 @@ Examples
 --------
 
 To create an Maxwell equation object with speed of light taken from
-Lucee defined values
+:doc:`Lucee defined values <mathphys>`
 
 .. code-block:: lua
 
@@ -195,9 +198,15 @@ Lucee defined values
 Perfectly Hyperbolic Maxwell equations: ``HyperEquation.PhMaxwell``
 ===================================================================
 
-The ``HyperEquation.PhMaxwell`` block creates a Perfectly Hyperbolic
-Maxwell equation object that represents the Maxwell equations of
-electromagnetism in free space.
+The Perfectly Hyperbolic (PH) Maxwell equations have additional terms
+and equations that allow hyperbolic divergence cleaning. Such a
+cleaning is needed while using co-located field algorithms like the
+wave-propagation scheme to evolve the electromagnetic fields. See
+[munz_2000]_, [munz_2000b]_, [munz_2000c]_ for details.
+
+The ``HyperEquation.PhMaxwell`` block creates a PH Maxwell equation
+object that represents the Maxwell equations of electromagnetism in
+free space.
 
 .. math::
 
@@ -218,7 +227,7 @@ permittivity and permeability of free space. Also, :math:`\psi` and
 :math:`\psi` are correction potentials for the electric and magnetic
 field respectively and :math:`\chi` and :math:`\gamma` are
 dimensionless factors that control the speed at which the errors are
-propagated.
+propagated. 
 
 The object assumes that the fields are stored in the order
 :math:`[E_x, E_y, E_z, B_x, B_y, B_z, \phi, \psi]`. Note that all
@@ -256,7 +265,8 @@ Examples
 --------
 
 To create an Perfectly Hyperbolic Maxwell equation object with speed
-of light taken from Lucee defined values
+of light taken from Lucee defined values. The errors in electric field
+and magnetic field divergence are propagated with the speed of light.
 
 .. code-block:: lua
 
@@ -265,3 +275,20 @@ of light taken from Lucee defined values
    elcErrorSpeedFactor = 1.0,
    mgnErrorSpeedFactor = 1.0
   }
+
+References
+==========
+
+.. [munz_2000] C.-D Munz, P. Omnes, R. Schneider and E. Sonnendruer
+   and U. Voss, "Divergence Correction Techniques for Maxwell Solvers
+   Based n a Hyperbolic Model", *Journal of Computational Physics*,
+   **161**, 484-511, 2000.
+
+.. [munz_2000b] C.-D Munz, P. Omnes, and R. Schneider, "A
+   three-dimensional finite-volume solver for the Maxwell equations
+   with divergence cleaning on unstructured meshes", *Computer Physics
+   Communications*, **130**, 83-117, 2000.
+
+.. [munz_2000c] C.-D Munz and U. Voss, "A Finite-Volume Method for the
+   Maxwell Equations in the Time Domain", *SIAM Journal of Scientific
+   Computing*, **22**, 449-475, 2000.

@@ -128,6 +128,9 @@ namespace Lucee
     lua_pushnumber(L, Lucee::MU0);
     lua_setfield(L, -2, "Mu0");
 
+    lua_pushnumber(L, Lucee::EV2KELVIN);
+    lua_setfield(L, -2, "Ev2Kelvin");
+
     lua_pop(L, 1); // pop what was pushed
   }
 }

@@ -10,7 +10,7 @@ constants.
 
 .. list-table:: Mathematical and Physical Constants
   :header-rows: 1
-  :widths: 40,40,10,10
+  :widths: 30,50,10,10
 
   * - Lua Variable
     - Quantity
@@ -56,3 +56,7 @@ constants.
     - Boltzmann's constant
     - :math:`k`
     - J/K
+  * - ``Lucee.Ev2Kelvin``
+    - Convert temperature in electron volts to Kelvin
+    - 
+    - K/eV
