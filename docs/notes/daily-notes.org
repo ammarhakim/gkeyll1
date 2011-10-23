@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* October 21st
+
+  Fixed a nasty bug in the Rk4 integrator in the
+  GridOdePointIntegrator class. Turns out this was causing the
+  plasmabeach problem to fail. What is surprising is that other
+  twofluid problems with sources worked at all.
+
+** Rerun all problems with sources in the journal
+
+   Need to rerun all the problems that use wave-propagation scheme and
+   have sources in them. SUCKS.
+
 * October 19th
 
 ** VERY bizarre behaviour
