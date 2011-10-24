@@ -48,6 +48,17 @@ namespace Lucee
  */
       inline void getSource(double tm, const double loc[3], std::vector<double>& src);
 
+/**
+ * Compute source Jacobian and store it in supplied output
+ * matrix. Derived class method should use the getData() method to get
+ * data it needs in computing the sources.
+ *
+ * @param tm Time at which source is requested.
+ * @param loc Coordinate at which source is requested.
+ * @param jac On output, source jacobian.
+ */
+      void getSourceJac(double tm, const double loc[3], Lucee::Matrix<double>& jac);
+
     private:
 /** Charge to mass ratio of fluid species */
       double qbym;
