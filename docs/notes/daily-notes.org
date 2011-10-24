@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* October 23rd
+
+** Redoing the two-fluid shock simulations
+
+   These need to be redone after the fix to RK4. I already redid the
+   dispersive Euler simulations and the results do look very
+   different in some cases.
+
+** Regression testing
+
+   Need to start adding regression tests. It is really important to
+   establish confidence when existing code is modified. Can use txtest
+   from Tech-X or the one I wrote for WarpX.
+
 * October 21st
 
   Fixed a nasty bug in the Rk4 integrator in the

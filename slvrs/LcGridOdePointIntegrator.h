@@ -64,15 +64,26 @@ namespace Lucee
       std::vector<Lucee::PointSourceIfc*> rhs;
 /** Vector for use in computing sources */
       std::vector<double> ts;
+/** Switch to indicate integration method */
+      unsigned intMethod;
 
 /**
- * Integrate ODEs to time "t".
+ * Integrate ODEs to time "t" using Runge-Kutta 4th order method.
  *
  * @param t0 Initial time
  * @param dt Time-step to use
  * @param sol On output, solution of ODEs.
  */
       void rk4(double t0, double dt, Lucee::Field<NDIM, double>& sol);
+
+/**
+ * Integrate ODEs to time "t" using semi-implicit method.
+ *
+ * @param t0 Initial time
+ * @param dt Time-step to use
+ * @param sol On output, solution of ODEs.
+ */
+      void semiImplicit(double t0, double dt, Lucee::Field<NDIM, double>& sol);
 
 /**
  * Compute sources, summing up contributions from each RHS term.
@@ -83,6 +94,17 @@ namespace Lucee
  * @param src On output, sources.
  */
       void calcSource(double tm, const double xc[3], const double *inp, std::vector<double>& src);
+
+/**
+ * Compute source jacobian, summing up contributions from each RHS term.
+ *
+ * @param tm Time at which source is requested.
+ * @param xc Coordinates at which source is needed
+ * @param inp Inputs for which source is needed
+ * @param srcJac On output, source Jacobian
+ */
+      void calcSourceJac(double tm, const double xc[3], const double *inp, 
+        Lucee::Matrix<double>& srcJac);
   };
 }
 

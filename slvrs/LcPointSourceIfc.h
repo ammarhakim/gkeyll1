@@ -13,6 +13,7 @@
 
 // lucee includes
 #include <LcBasicObj.h>
+#include <LcMatrix.h>
 
 // std includes
 #include <vector>
@@ -66,7 +67,19 @@ namespace Lucee
  * @param inp Input values at which source is requested.
  * @param src On output, source.
  */
-      void calcSource(double tm, const double loc[3], const double *inp, double *src);
+      void calcSource(double tm, const double loc[3], const double *inp, 
+        double *src);
+
+/**
+ * Compute source Jacobian and store it in supplied output matrix.
+ *
+ * @param tm Time at which source is requested.
+ * @param loc Coordinate at which source is requested.
+ * @param inp Input values at which source is requested.
+ * @param jac On output, source jacobian.
+ */
+      void calcSourceJac(double tm, const double loc[3], const double *inp, 
+        Lucee::Matrix<double>& jac);
 
     protected:
 /**
@@ -78,7 +91,20 @@ namespace Lucee
  * @param loc Coordinate at which source is requested.
  * @param src On output, source.
  */
-      virtual void getSource(double tm, const double loc[3], std::vector<double>& src) = 0;
+      virtual void getSource(double tm, const double loc[3], 
+        std::vector<double>& src) = 0;
+
+/**
+ * Compute source Jacobian and store it in supplied output
+ * matrix. Derived class method should use the getData() method to get
+ * data it needs in computing the sources.
+ *
+ * @param tm Time at which source is requested.
+ * @param loc Coordinate at which source is requested.
+ * @param jac On output, source jacobian.
+ */
+      virtual void getSourceJac(double tm, const double loc[3], 
+        Lucee::Matrix<double>& jac);
 
 /**
  * Get data at i-th input component. This function takes care of
@@ -106,6 +132,8 @@ namespace Lucee
       std::vector<unsigned> outComponents;
 /** Vector needed in computing source */
       std::vector<double> out;
+/** Source jacobian for this source */
+      Lucee::Matrix<double> srcJac;
   };
 }
 
