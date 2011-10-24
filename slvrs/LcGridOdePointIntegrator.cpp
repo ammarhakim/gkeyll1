@@ -156,7 +156,7 @@ namespace Lucee
 
 // initialize unit matrix
     unit = 0.0;
-    for (unsigned i=n; i<n; ++i)
+    for (unsigned i=0; i<n; ++i)
       unit(i,i) = 1.0;
 
 // get reference to grid
@@ -197,7 +197,7 @@ namespace Lucee
 // perform final update
       sol.setPtr(solPtr, idx);
       for (unsigned i=0; i<n; ++i)
-        solPtr[i] += dt*rhs(i,1);
+        solPtr[i] += dt*rhs(i,0);
     }
 
   }
