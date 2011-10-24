@@ -19,7 +19,7 @@ namespace Lucee
 
   PointSourceIfc::PointSourceIfc(unsigned nInp, unsigned nOut, bool allowArb)
     : Lucee::BasicObj("PointSource"), nInp(nInp), nOut(nOut), allowArb(allowArb),
-      inpComponents(nInp), outComponents(nOut)
+      inpComponents(nInp), outComponents(nOut), srcJac(nOut, nOut)
   {
     for (unsigned i=0; i<nInp; ++i)
       inpComponents[i] = i;
@@ -87,6 +87,8 @@ namespace Lucee
     }
 // allocate space needed for computing source
     out.resize(nOut);
+// allocate space needed for computing source jacobian
+    srcJac = Lucee::Matrix<double>(nOut, nOut);
   }
 
   void
@@ -100,5 +102,28 @@ namespace Lucee
 // copy source over into proper location
     for (unsigned i=0; i<nOut; ++i)
       src[outComponents[i]] = out[i];
+  }
+
+  void
+  PointSourceIfc::calcSourceJac(double tm, const double loc[3], const double *inp, 
+    Lucee::Matrix<double>& jac)
+  {
+// set data pointer so derived classes can get needed variables
+    data = inp;
+// clear contents of jacobian before getting it from derived class
+    srcJac = 0.0;
+// call derived class method to compute jacobian
+    this->getSourceJac(tm, loc, srcJac);
+// copy over into proper location
+    for (unsigned i=0; i<nOut; ++i)
+      for (unsigned j=0; j<nOut; ++j)
+        jac(outComponents[i], outComponents[j]) = srcJac(i,j);
+  }
+
+  void
+  PointSourceIfc::getSourceJac(double tm, const double loc[3], 
+    Lucee::Matrix<double>& jac)
+  {
+    throw Lucee::Except("PointSourceIfc::getSourceJac: Not implemented!");
   }
 }

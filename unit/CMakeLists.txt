@@ -161,7 +161,7 @@ target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki lclua
 # lcgridode
 add_executable(lcgridode lcgridode.cxx)
 target_link_libraries(lcgridode lcslvrs lcdatastructs lcgrids lclib lcloki lclua
-  ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
+  ${EXTRA_LIBS} ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
 
 if (FFTW3_FOUND)
   add_executable(lcfftwtest lcfftwtest.cxx)
