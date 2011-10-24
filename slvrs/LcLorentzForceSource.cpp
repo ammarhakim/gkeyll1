@@ -17,6 +17,12 @@ namespace Lucee
 // set id for creators
   const char *LorentzForceSource::id = "LorentzForce";
 
+// indices into the source vector
+  const static unsigned RHOU = 0;
+  const static unsigned RHOV = 1;
+  const static unsigned RHOW = 2;
+  const static unsigned ER = 3;
+
   LorentzForceSource::LorentzForceSource()
     : Lucee::PointSourceIfc(10, 4)
   { 
@@ -71,6 +77,18 @@ namespace Lucee
     double by = this->getData(8);
     double bz = this->getData(9);
 
-    throw Lucee::Except("NOT COMPLETE");
+// row RHOU
+    jac(RHOU, RHOV) = bz;
+    jac(RHOU, RHOW) = -by;
+// row RHOV
+    jac(RHOV, RHOU) = -bz;
+    jac(RHOV, RHOW) = bx;
+// rho RHOW
+    jac(RHOW, RHOU) = by;
+    jac(RHOW, RHOV) = -bx;
+// rho ER
+    jac(ER, RHOU) = ex;
+    jac(ER, RHOV) = ey;
+    jac(ER, RHOW) = ez;
   }
 }
