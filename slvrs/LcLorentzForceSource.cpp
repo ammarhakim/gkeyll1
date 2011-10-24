@@ -55,4 +55,22 @@ namespace Lucee
     src[2] = qbym*(rho*ez+rhou*by-rhov*bx); // z-momentum
     src[3] = qbym*(rhou*ex+rhov*ey+rhow*ez); // energy
   }
+
+  void
+  LorentzForceSource::getSourceJac(double tm, const double loc[3], Lucee::Matrix<double>& jac)
+  {
+// takes in [rho, rho*u, rho*v, rho*w, Ex, Ey, Ez, Bx, By, Bz]
+    double rho = this->getData(0);
+    double rhou = this->getData(1);
+    double rhov = this->getData(2);
+    double rhow = this->getData(3);
+    double ex = this->getData(4);
+    double ey = this->getData(5);
+    double ez = this->getData(6);
+    double bx = this->getData(7);
+    double by = this->getData(8);
+    double bz = this->getData(9);
+
+    throw Lucee::Except("NOT COMPLETE");
+  }
 }
