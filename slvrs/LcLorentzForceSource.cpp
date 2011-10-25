@@ -78,17 +78,17 @@ namespace Lucee
     double bz = this->getData(9);
 
 // row RHOU
-    jac(RHOU, RHOV) = bz;
-    jac(RHOU, RHOW) = -by;
+    jac(RHOU, RHOV) = qbym*bz;
+    jac(RHOU, RHOW) = -qbym*by;
 // row RHOV
-    jac(RHOV, RHOU) = -bz;
-    jac(RHOV, RHOW) = bx;
+    jac(RHOV, RHOU) = -qbym*bz;
+    jac(RHOV, RHOW) = qbym*bx;
 // rho RHOW
-    jac(RHOW, RHOU) = by;
-    jac(RHOW, RHOV) = -bx;
+    jac(RHOW, RHOU) = qbym*by;
+    jac(RHOW, RHOV) = -qbym*bx;
 // rho ER
-    jac(ER, RHOU) = ex;
-    jac(ER, RHOV) = ey;
-    jac(ER, RHOW) = ez;
+    jac(ER, RHOU) = qbym*ex;
+    jac(ER, RHOV) = qbym*ey;
+    jac(ER, RHOW) = qbym*ez;
   }
 }
