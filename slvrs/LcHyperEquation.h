@@ -152,6 +152,16 @@ namespace Lucee
         Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev);
 
 /**
+ * Compute the quasi-Linear matrix given the primitive state.
+ *
+ * @param c Coordinate system in which to compute eigensystem.
+ * @param v Primitive variables (state) at which quasi-Linear matrix.
+ * @param qlMat Quasi-Linear matrix computed at 'v'.
+ */
+      virtual void quasiLinearMatrix(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& v, Lucee::Matrix<double>& qlMat);
+
+/**
  * Check if conserved variables satisfies invariant domains of the
  * system. Return true if it does, false otherwise.
  *

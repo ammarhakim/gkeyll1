@@ -102,6 +102,13 @@ namespace Lucee
     throw Lucee::Except("HyperEquation::eigensystem: Method not implemented");
   }
 
+  void
+  HyperEquation::quasiLinearMatrix(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& v, Lucee::Matrix<double>& qlMat)
+  {
+    throw Lucee::Except("HyperEquation::quasiLinearMatrix: Method not implemented");
+  }
+
   bool
   HyperEquation::isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const
   {
