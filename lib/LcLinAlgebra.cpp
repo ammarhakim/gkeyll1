@@ -383,7 +383,7 @@ namespace Lucee
 // make call
     dgetrs_(&TRANS, &N, &NRHS, &A.first(), &LDA, IPIV, &B.first(), &LDB, &INFO);
 // check if solution obtained okay
-    if(INFO != 0)
+    if (INFO != 0)
       throw Lucee::Except("Lucee::solve: Failure in LAPACK linear solver");
 
     free(IPIV);

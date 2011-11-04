@@ -1,5 +1,30 @@
 # -*- org -*-
 
+* October 24th
+
+  Completed implementation of semi-implicit integration scheme. Tested
+  with dispersive Euler, although much more extensive tests are
+  needed. Turns out that the dispersive Euler problem with
+  semi-implicit takes 5X longer to run than with RK4. This seems a bit
+  excessive, but not surprising. The Rk4 scheme needs 4 evaluations of
+  the source terms. The semi-implicit scheme needs 1 evaluation of the
+  source, 1 evaluation of the source Jacobian and 1 linear solve. The
+  linear solve probably makes the scheme very expensive. Also, there
+  is too much copying of matrices being performed. For now I am not so
+  worried about this but will need to improve soon.
+
+** Two-fluid source terms need to reformulated
+
+   The two-fluid source terms need to be reformulated in the following
+   way: the current and the Lorentz sources from/for each fluid need
+   to be put into a single class. The reason for this it allows the
+   correct computation of the source Jacobian which oterwise misses
+   the coupling terms in the Jacobian between the electric field and
+   the fluids. This should generally not be a problem as the source
+   Jacobian needs to be known only approximately, but might turn out
+   be to be important when trying to take dt large than allowed by
+   plasma frequency.
+
 * October 23rd
 
 ** Redoing the two-fluid shock simulations
