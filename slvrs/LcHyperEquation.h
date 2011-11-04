@@ -24,10 +24,10 @@ namespace Lucee
 /**
  * Represents a system of hyperbolic equations. This class provides a
  * rich interface to compute various quantities (fluxes, speeds,
- * waves, eigensystem) for use in various numercial schemes. Not all
- * methods are required for every scheme and the documentation for a
- * particular scheme should be consulted to determine which methods
- * are actually used.
+ * waves, eigensystem, flux Jacobians, ...) for use in various
+ * numercial schemes. Not all methods are required for every scheme
+ * and the documentation for a particular scheme should be consulted
+ * to determine which methods are actually used.
  */
   class HyperEquation : public Lucee::BasicObj
   {
