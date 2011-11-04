@@ -94,8 +94,6 @@ namespace Lucee
   PeriodicPoisson2DUpdater::update(double t)
   {
 // get hold of grid
-
-// get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 // get input/output fields
