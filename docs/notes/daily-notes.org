@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* November 8th
+  
+  For 10-moment system the primitive eigensystem needs to be computed
+  using Maxima. Then this should be converted to the conserved
+  eigensystem. One option is to auto-generate the C code from Maxima
+  for the eigensystem calculation.
+
 * October 24th
 
   Completed implementation of semi-implicit integration scheme. Tested
