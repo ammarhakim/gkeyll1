@@ -57,15 +57,15 @@ Boltzmann equation and truncating the resulting infinite series of
 equations by assuming the heat flux tensor vanishes. In
 non-conservative form these equations are
 \begin{align}
-  \partial_t{n} + n \partial_j{u_j} + u_j \partial_j{n} &= 0\\
+  \partial_t{n} + n \partial_j{u_j} + u_j \partial_j{n} &= 0 \label{eq:n} \\
   \partial_t{u_i}
   + \frac{1}{mn}\partial_j{P_{ij}}
   + u_j \partial_j{u_i} &=
-  \frac{q}{m}\left(E_i + \epsilon_{kmi}u_kB_m\right) \\
-  \partial_i{P_{ij}} + P_{ij}\partial_k{u_k}
+  \frac{q}{m}\left(E_i + \epsilon_{kmi}u_kB_m\right) \label{eq:ui} \\
+  \partial_t{P_{ij}} + P_{ij}\partial_k{u_k}
   + \partial_k{u_{[i}}P_{j]k}
   + u_k\partial_k{P_{ij}}
-  &= \frac{q}{m}B_m \epsilon_{km[i}P_{jk]}
+  &= \frac{q}{m}B_m \epsilon_{km[i}P_{jk]} \label{eq:Pij}
 \end{align}
 In these equations square brackets around indices represent the
 minimal sum over permutations of free indices within the bracket
@@ -77,10 +77,50 @@ $\mathbf{E}$ and $\mathbf{B}$ are the electric and magnetic field
 respectively. Also $\partial_t \equiv \partial /\partial t$ and
 $\partial_i \equiv \partial /\partial x_i$.
 
-For use in numerical schemes the eigensystem of flux Jacobian written
-in conservation form is needed. However, it is easier to work with the
-primitive form of the equations shown above. The eigensystems of the
-quasilinear matrix and flux Jacobian are related and once we determine
-one of them the other can be computed by a matrix multiplication.
+To determine the eigensystem of the homogeneous part of this system we
+first write the left-hand side of
+Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) in the schematic form
+\begin{align}
+  \pfrac{\mvec{v}}{t} + \mvec{A}\pfrac{\mvec{v}}{x} = 0
+\end{align}
+where $\mvec{v}$ is the vector of primitive variables and $\mvec{A}$
+is the quasi-linear coefficient matrix\footnote{There is no standard
+  name for this matrix. I choose to call it the \emph{quasi-linear
+    coefficient matrix} instead of the incorrect term ``primitive flux
+  Jacobian''.}. For the ten-moment system we have
+\begin{align}
+  \mvec{v} = 
+    \left[
+    \begin{matrix}
+      \rho,
+      u_1,
+      u_2,
+      u_3,
+      P_{11},
+      P_{12},
+      P_{13},
+      P_{22},
+      P_{23},
+      P_{33}
+    \end{matrix}
+  \right]^T
+\end{align}
+where $\rho \equiv mn$ and 
 
 \end{document}
+
+In computing the eigensystem we need to look only at the homogeous
+system.
+
+For use in numerical schemes the eigensystem of flux Jacobian is
+needed. To compute this eigensystem it is easiest to work with the
+primitive form of the equations shown above. The eigensystem of the
+quasilinear matrix $\mvec{A}$ that appears in the non-conservative
+form of the equations , and flux Jacobian $\partial \mvec{f}
+/ \partial \mvec{q}$ (see the next equations) are related. Once we
+determine one of them the other can be computed using matrix
+multiplications. To see this we write the conservation law in the form
+\begin{align}
+  \pfrac{\mvec{q}}{t} + \pfrac{\mvec{q}}{x} = 0
+\end{align}
+
