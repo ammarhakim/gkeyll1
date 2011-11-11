@@ -1,6 +1,7 @@
 NAME=1013-tenmom-eigsys
 $(NAME).pdf: $(NAME).tex
 	pdflatex $(NAME).tex
+	bibtex $(NAME)
 	pdflatex $(NAME).tex
 	pdflatex $(NAME).tex
 

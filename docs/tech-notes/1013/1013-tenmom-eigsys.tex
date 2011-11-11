@@ -78,10 +78,10 @@ respectively. Also $\partial_t \equiv \partial /\partial t$ and
 $\partial_i \equiv \partial /\partial x_i$.
 
 To determine the eigensystem of the homogeneous part of this system we
-first write the left-hand side of
-Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) in the schematic form
+first write, in one-dimension, the left-hand side of
+Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) in the form
 \begin{align}
-  \pfrac{\mvec{v}}{t} + \mvec{A}\pfrac{\mvec{v}}{x} = 0
+  \partial_t{\mvec{v}} + \mvec{A}\partial_{1}{\mvec{v}} = 0
 \end{align}
 where $\mvec{v}$ is the vector of primitive variables and $\mvec{A}$
 is the quasi-linear coefficient matrix\footnote{There is no standard
@@ -106,10 +106,255 @@ is the quasi-linear coefficient matrix\footnote{There is no standard
   \right]^T
 \end{align}
 where $\rho \equiv mn$ and 
+\begin{align}
+  \mvec{A} = 
+    \left[
+    \begin{matrix}
+      u_1  & \rho   & 0      & 0     & 0     & 0     & 0      & 0    & 0    & 0 \\
+      0    & u_1    & 0      & 0     & 1/\rho & 0     & 0     & 0    & 0    & 0 \\
+      0    & 0      & u_1    & 0     & 0     & 1/\rho & 0     & 0    & 0    & 0 \\
+      0    & 0      & 0      & u_1   & 0     & 0     & 1/\rho & 0    & 0    & 0 \\
+      0    & 3P_{11} & 0      & 0     & u_1   & 0     & 0      & 0    & 0    & 0 \\
+      0    & 2P_{12} & P_{11} & 0     & 0    & u_1    & 0      & 0    & 0    & 0 \\
+      0    & 2P_{13} & 0      & P_{11} & 0    & 0      & u_1    & 0    & 0    & 0 \\
+      0    & P_{22}  & 2P_{12} & 0     & 0    & 0      & 0     & u_1   & 0    & 0 \\
+      0    & P_{23}  & P_{13}  & P_{12} & 0    & 0      & 0     & 0     & u_1  & 0 \\
+      0    & P_{33}  & 0      & 2P_{13} & 0   & 0      & 0     & 0     & 0    & u_1
+    \end{matrix}
+  \right]
+\end{align}
+The eigensystem of this matrix needs to be determined. It is easiest
+to use a computer algebra system for this. I prefer the open source
+package Maxima for this. My Maxima script can be studied here. The
+right-eigenvectors returned by Maxima need to massaged a little bit to
+bring them into a clean form. The results are described below.
+
+The eigenvalues of the system are given by
+\begin{align}
+  \lambda^{1,2} &= u_1-\sqrt{P_{11}/\rho} \\
+  \lambda^{3,4} &= u_1+\sqrt{P_{11}/\rho} \\
+  \lambda^{5}   &= u_1-\sqrt{3P_{11}/\rho} \\
+  \lambda^{6}   &= u_1+\sqrt{3P_{11}/\rho} \\
+  \lambda^{7,8,9,10}    &= u_1
+\end{align}
+To maintain hyperbolicity we must hence have $\rho>0$ and
+$P_{11}>0$. In multiple dimensions, in general, the diagonal elements
+of the pressure tensor must be positive. When $P_{11}=0$ the system
+reduces to the cold fluid equations which is known to be rank
+deficient and hence not hyperbolic as usually understood\footnote{For
+  hyperbolicity the quasi-linear matrix must posses real eigenvalues
+  and a complete set of linearly independent right eigenvectors. For
+  the cold fluid system we only have a single eigenvalue (the fluid
+  velocity) and a single eigenvector. This can lead to generalized
+  solutions like delta shocks.}. Also notice that the eigevalues do
+not include the usual fluid sound-speed $c_s=\sqrt{5p/3\rho}$ but
+instead have two different propagation speeds $c_1=\sqrt{P_{11}/\rho}$
+and $c_2=\sqrt{3P_{11}/\rho}$. This is because the (neutral)
+ten-moment system does not go to the correct limit of Euler equations
+in the absence of collisions. In fact, it is collisions that drive the
+pressure tensor to isotropy. These collision terms should also be
+included in the charge ten-moment system. In this case, however, the
+situation is complicated due to the presence of multiple species of
+very different masses which leads to inter-species collision terms
+that need to be computed carefully. For a two-species plasma, for
+example, see the paper by Green\cite{Green1973} in which the relations
+for relaxation of momentum and energy are used to derive a simplified
+collision integral for use in the Boltzmann equation.
+
+The right eigenvectors (column vectors) are given below.
+\begin{align}
+  \mvec{r}^{1,3}
+  =
+  \left[
+    \begin{matrix}
+      0 \\
+      0 \\
+      \mp c_1 \\
+      0 \\
+      0 \\
+      P_{11} \\
+      0 \\
+      2P_{12} \\
+      P_{13} \\
+      0
+    \end{matrix}
+  \right]
+  \quad
+  \mvec{r}^{2,4}
+  =
+  \left[
+    \begin{matrix}
+      0 \\
+      0 \\
+      0 \\
+      \mp c_1 \\
+      0 \\
+      0 \\
+      P_{11} \\
+      0 \\
+      P_{12} \\
+      2P_{13}
+    \end{matrix}
+  \right]
+\end{align}
+and
+\begin{align}
+  \mvec{r}^{5,6}
+  =
+  \left[
+    \begin{matrix}
+      \rho P_{11} \\
+      \mp c_2 P_{11} \\
+      \mp c_2 P_{12} \\
+      \mp c_2 P_{13} \\
+      3 P_{11}^2 \\
+      3 P_{11}P_{12} \\
+      3 P_{11}P_{13} \\
+      P_{11}P_{22} + 2 P_{12}^2 \\
+      P_{11}P_{23} + 2P_{12}P_{13} \\
+      P_{11}P_{33} + 2P_{13}^2
+    \end{matrix}
+  \right]
+\end{align}
+and
+\begin{align}
+  \mvec{r}^{7}
+  =
+  \left[
+    \begin{matrix}
+      1 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0
+    \end{matrix}
+  \right]
+  \quad
+  \mvec{r}^{8}
+  =
+  \left[
+    \begin{matrix}
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      1 \\
+      0 \\
+      0
+    \end{matrix}
+  \right]
+  \quad
+  \mvec{r}^{9}
+  =
+  \left[
+    \begin{matrix}
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      1 \\
+      0
+    \end{matrix}
+  \right]
+  \quad
+  \mvec{r}^{10}
+  =
+  \left[
+    \begin{matrix}
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      0 \\
+      1
+    \end{matrix}
+  \right]
+\end{align}
+
+We can now compute the left eigenvectors (row vectors) by inverting
+the matrix with right eigenvectors stored as columns. This ensures the
+normalization $\mvec{l}^p \mvec{r}^k = \delta^{pk}$, where the
+$\mvec{l}^p$ are the left eigenvectors. On performing the inversion we
+have
+\begin{align}
+  \mvec{l}^{1,3} &= 
+  \left[
+    \begin{matrix}
+      0 & \pm\dfrac{P_{12}}{2c_1P_{11}} & \mp\dfrac{1}{2c_1} & 
+      0 & -\dfrac{P_{12}}{2P_{11}^2} & \dfrac{1}{2P_{11}} & 0 & 0 & 0 & 0
+    \end{matrix}
+  \right] \\
+  \mvec{l}^{2,4} &= 
+  \left[
+    \begin{matrix}
+      0 & \pm\dfrac{P_{13}}{2c_1P_{11}} & 0 & \mp\dfrac{1}{2c_1}
+      & -\dfrac{P_{13}}{2P_{11}^2} & 0 & \dfrac{1}{2P_{11}} & 0 & 0 & 0
+    \end{matrix}
+  \right]
+\end{align}
+and
+\begin{align}
+  \mvec{l}^{5,6} = 
+  \left[
+    \begin{matrix}
+      0 & \mp\dfrac{1}{2c_2P_{11}} & 0 & 0 & \dfrac{1}{6P_{11}^2}
+      & 0 & 0 & 0 & 0 & 0
+    \end{matrix}
+    \right]
+\end{align}
+and
+\begin{align}
+  \mvec{l}^{7} &= 
+  \left[
+    \begin{matrix}
+      1 & 0 & 0 & 0 & -\dfrac{1}{3c_1^2} & 0 & 0 & 0 & 0 & 0
+    \end{matrix}
+    \right] \\
+  \mvec{l}^{8} &= 
+  \left[
+    \begin{matrix}
+      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{22}-4P_{12}^2}{3P_{11}^2} 
+      & -\dfrac{2P_{12}}{P_{11}} & 0 & 1 & 0 & 0
+    \end{matrix}
+    \right] \\
+  \mvec{l}^{9} &= 
+  \left[
+    \begin{matrix}
+      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{23}-4P_{12}P_{13}}{3P_{11}^2} 
+      & -\dfrac{P_{13}}{P_{11}} & -\dfrac{P_{12}}{P_{11}} & 0 & 1 & 0
+    \end{matrix}
+    \right] \\
+  \mvec{l}^{10} &= 
+  \left[
+    \begin{matrix}
+      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{33}-4P_{13}^2}{3P_{11}^2} & 0
+      & -\dfrac{2P_{13}}{P_{11}} & 0 & 0 & 1
+    \end{matrix}
+    \right]
+\end{align}
+
+\bibliography{../common/lucee}
+\bibliographystyle{plain}
 
 \end{document}
 
-In computing the eigensystem we need to look only at the homogeous
+In computing the eigensystem we need to look only at the homogeneous
 system.
 
 For use in numerical schemes the eigensystem of flux Jacobian is
@@ -123,4 +368,11 @@ multiplications. To see this we write the conservation law in the form
 \begin{align}
   \pfrac{\mvec{q}}{t} + \pfrac{\mvec{q}}{x} = 0
 \end{align}
+
+  \mvec{l}^{1,3} = \left[
+    \begin{matrix}
+      0 & {1}/{2c_1P_{11}} & -{1}/{2c_1} & 
+      0 & -{P_{12}}/{2P_{11}^2} & {1}/{2P_{11}} & 0 & 0 & 0 & 0
+    \end{matrix}
+    \right]
 
