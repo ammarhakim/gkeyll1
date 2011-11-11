@@ -93,3 +93,40 @@ Revm : addcol( Revm, col(Rev,10) );
 Levm : fullratsimp( invert(Revm) ); /** Reduce as best you can */
 /** Compute check: this should be an identiy matrix */
 id : fullratsimp( Levm . Revm );
+
+/** Now create the Jacobian of the transformation */
+phiprime : zeromatrix(10, 10);
+
+/** n */
+phiprime[N,N] : 1;
+
+/** u1 */
+phiprime[U1,N] : u1; phiprime[U1,U1] : n;
+
+/** u2 */
+phiprime[U2,N] : u2; phiprime[U2,U2] : n;
+
+/** u3 */
+phiprime[U3,N] : u3; phiprime[U3,U3] : n;
+
+/** p11 */
+phiprime[P11,N] : u1*u1; phiprime[P11,U1] : 2*n*u1; phiprime[P11,P11] : 1;
+
+/** p12 */
+phiprime[P12,N] : u1*u2; phiprime[P12,U1] : n*u2; phiprime[P12,U2] : n*u1; phiprime[P12,P12] : 1; 
+
+/** p13 */
+phiprime[P13,N] : u1*u3; phiprime[P13,U1] : n*u3; phiprime[P13,U3] : n*u1; phiprime[P13,P13] : 1;
+
+/** p22 */
+phiprime[P22,N] : u2*u2; phiprime[P22,U2] : 2*n*u2; phiprime[P22,P22] : 1;
+
+/** p23 */
+phiprime[P23,N] : u2*u3; phiprime[P23,U2] : n*u3; phiprime[P23,U3] : n*u2; phiprime[P23,P23] : 1;
+
+/** p33 */
+phiprime[P33,N] : u3*u3; phiprime[P33,U3] : 2*n*u3; phiprime[P33,P33] : 1;
+
+/** Now compute inverse transform */
+phiprimeInv : fullratsimp(invert(phiprime));
+
