@@ -51,6 +51,8 @@
 \lhead{Tech-Note 1013}
 \maketitle
 
+\section{The eigensystem of the equations written in quasilinear form}
+
 In this document I list the eigensystem of the ten-moment
 equations. These equations are derived by taking moments of the
 Boltzmann equation and truncating the resulting infinite series of
@@ -81,11 +83,11 @@ To determine the eigensystem of the homogeneous part of this system we
 first write, in one-dimension, the left-hand side of
 Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) in the form
 \begin{align}
-  \partial_t{\mvec{v}} + \mvec{A}\partial_{1}{\mvec{v}} = 0
+  \partial_t{\mvec{v}} + \mvec{A}\partial_{1}{\mvec{v}} = 0 \label{eq:qlForm}
 \end{align}
 where $\mvec{v}$ is the vector of primitive variables and $\mvec{A}$
-is the quasi-linear coefficient matrix\footnote{There is no standard
-  name for this matrix. I choose to call it the \emph{quasi-linear
+is the quasilinear coefficient matrix\footnote{There is no standard
+  name for this matrix. I choose to call it the \emph{quasilinear
     coefficient matrix} instead of the incorrect term ``primitive flux
   Jacobian''.}. For the ten-moment system we have
 \begin{align}
@@ -125,9 +127,9 @@ where $\rho \equiv mn$ and
 \end{align}
 The eigensystem of this matrix needs to be determined. It is easiest
 to use a computer algebra system for this. I prefer the open source
-package Maxima for this. My Maxima script can be studied here. The
-right-eigenvectors returned by Maxima need to massaged a little bit to
-bring them into a clean form. The results are described below.
+package Maxima for this. The right-eigenvectors returned by Maxima
+need to massaged a little bit to bring them into a clean form. The
+results are described below.
 
 The eigenvalues of the system are given by
 \begin{align}
@@ -142,18 +144,18 @@ $P_{11}>0$. In multiple dimensions, in general, the diagonal elements
 of the pressure tensor must be positive. When $P_{11}=0$ the system
 reduces to the cold fluid equations which is known to be rank
 deficient and hence not hyperbolic as usually understood\footnote{For
-  hyperbolicity the quasi-linear matrix must posses real eigenvalues
+  hyperbolicity the quasilinear matrix must posses real eigenvalues
   and a complete set of linearly independent right eigenvectors. For
   the cold fluid system we only have a single eigenvalue (the fluid
   velocity) and a single eigenvector. This can lead to generalized
-  solutions like delta shocks.}. Also notice that the eigevalues do
+  solutions like delta shocks.}. Also notice that the eigenvalues do
 not include the usual fluid sound-speed $c_s=\sqrt{5p/3\rho}$ but
 instead have two different propagation speeds $c_1=\sqrt{P_{11}/\rho}$
 and $c_2=\sqrt{3P_{11}/\rho}$. This is because the (neutral)
 ten-moment system does not go to the correct limit of Euler equations
 in the absence of collisions. In fact, it is collisions that drive the
 pressure tensor to isotropy. These collision terms should also be
-included in the charge ten-moment system. In this case, however, the
+included in the plasma ten-moment system. In this case, however, the
 situation is complicated due to the presence of multiple species of
 very different masses which leads to inter-species collision terms
 that need to be computed carefully. For a two-species plasma, for
@@ -329,50 +331,118 @@ and
   \mvec{l}^{8} &= 
   \left[
     \begin{matrix}
-      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{22}-4P_{12}^2}{3P_{11}^2} 
+      0 & 0 & 0 & 0 & \dfrac{4P_{12}^2-P_{11}P_{22}}{3P_{11}^2} 
       & -\dfrac{2P_{12}}{P_{11}} & 0 & 1 & 0 & 0
     \end{matrix}
     \right] \\
   \mvec{l}^{9} &= 
   \left[
     \begin{matrix}
-      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{23}-4P_{12}P_{13}}{3P_{11}^2} 
+      0 & 0 & 0 & 0 & \dfrac{4P_{12}P_{13}-P_{11}P_{23}}{3P_{11}^2} 
       & -\dfrac{P_{13}}{P_{11}} & -\dfrac{P_{12}}{P_{11}} & 0 & 1 & 0
     \end{matrix}
     \right] \\
   \mvec{l}^{10} &= 
   \left[
     \begin{matrix}
-      0 & 0 & 0 & 0 & -\dfrac{P_{11}P_{33}-4P_{13}^2}{3P_{11}^2} & 0
+      0 & 0 & 0 & 0 & \dfrac{4P_{13}^2-P_{11}P_{33}}{3P_{11}^2} & 0
       & -\dfrac{2P_{13}}{P_{11}} & 0 & 0 & 1
     \end{matrix}
     \right]
+\end{align}
+
+\section{The eigensystem of the equations written in conservative form}
+
+In the wave-propagation scheme the quasilinear equations can be
+updated. However, the resulting solution will not be
+conservative. This actually might not be a problem for the ten-moment
+system as the system (as written) can not be put into a homogeneous
+conservation law form anyway. However, most often for numerical
+simulations the eigensystem of the conservation form of the homogeneous
+system is needed. This eigensystem is related to the eigensystem of
+the quasilinear form derived above. To see this consider a
+conservation law
+\begin{align}
+  \partial_t \mvec{q} + \partial_1 \mvec{f} = 0
+\end{align}
+where $\mvec{f} = \mvec{f}(\mvec{q})$ is a flux function. Now consider
+an invertible transformation $\mvec{q} = \varphi(\mvec{v})$. This
+transforms the conservation law to
+\begin{align}
+  \partial_t \mvec{v} 
+  + (\varphi')^{-1}\ D\mvec{f}\ \varphi' \partial_1 \mvec{v} = 0
+\end{align}
+where $\varphi'$ is the Jacobian matrix of the transformation and $D\mvec{f}
+\equiv \partial \mvec{f}/\partial \mvec{q}$ is the flux
+Jacobian. Comparing this to \eqr{\ref{eq:qlForm}} we see that the
+quasilinear matrix is related to the flux Jacobian by
+\begin{align}
+  \mvec{A} = (\varphi')^{-1}\ D\mvec{f}\ \varphi'
+\end{align}
+This clearly shows that the eigenvalues of the flux Jacobian are the
+same as those of the quasilinear matrix while the right and left
+eigenvectors can be computed using $\varphi' \mvec{r}^p$ and
+$\mvec{l}^p(\varphi')^{-1} $ respectively.
+
+For the ten-moment system as written in
+Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) the required transformation
+is
+\begin{align}
+  \mvec{q} = \varphi(\mvec{v})
+  =
+  \left[
+    \begin{matrix}
+      \rho \\
+      \rho u_1 \\
+      \rho u_2 \\
+      \rho u_3 \\
+      \rho u_1u_1 + P_{11} \\
+      \rho u_1u_2 + P_{12} \\
+      \rho u_1u_3 + P_{13} \\
+      \rho u_2u_2 + P_{22} \\
+      \rho u_2u_3 + P_{23} \\
+      \rho u_3u_3 + P_{33}
+    \end{matrix}
+  \right]
+\end{align}
+For this transformation we have
+\begin{align}
+  \varphi'(\mvec{v}) = 
+    \left[
+    \begin{matrix}
+      1         & 0          & 0         & 0         & 0 & 0 & 0 & 0 & 0 & 0 \\
+      u_1       & \rho       & 0         & 0         & 0 & 0 & 0 & 0 & 0 & 0 \\
+      u_2       & 0          & \rho      & 0         & 0 & 0 & 0 & 0 & 0 & 0 \\
+      u_3       & 0          & 0         & \rho      & 0 & 0 & 0 & 0 & 0 & 0 \\
+      u_1u_1    & 2\rho u_1  & 0         & 0         & 1 & 0 & 0 & 0 & 0 & 0 \\
+      u_1u_2    & \rho u_2   & \rho u_1  & 0         & 0 & 1 & 0 & 0 & 0 & 0 \\
+      u_1u_3    & \rho u_3   & 0         & \rho u_1  & 0 & 0 & 1 & 0 & 0 & 0 \\
+      u_2u_2    & 0          & 2\rho u_2 & 0         & 0 & 0 & 0 & 1 & 0 & 0 \\
+      u_2u_3    & 0          & \rho u_3  & \rho u_2  & 0 & 0 & 0 & 0 & 1 & 0\\
+      u_3u_3    & 0          & 0         & 2\rho u_3 & 0 & 0 & 0 & 0 & 0 & 1
+    \end{matrix}
+  \right]
+\end{align}
+The inverse of the transformation Jacobian is
+\begin{align}
+  (\varphi')^{-1} = 
+    \left[
+    \begin{matrix}
+      1         & 0          & 0         & 0      & 0 & 0 & 0 & 0 & 0 & 0 \\
+      -u_1/\rho & 1/\rho     & 0         & 0      & 0 & 0 & 0 & 0 & 0 & 0 \\
+      -u_2/\rho & 0          & 1/\rho    & 0      & 0 & 0 & 0 & 0 & 0 & 0 \\
+      -u_3/\rho & 0          & 0         & 1/\rho & 0 & 0 & 0 & 0 & 0 & 0 \\
+      u_1u_1    & -2u_1      & 0         & 0      & 1 & 0 & 0 & 0 & 0 & 0 \\
+      u_1u_2    & -u_2       & -u_1      & 0      & 0 & 1 & 0 & 0 & 0 & 0 \\
+      u_1u_3    & -u_3       & 0         & -u_1   & 0 & 0 & 1 & 0 & 0 & 0 \\
+      u_2u_2    & 0          & -2 u_2    & 0      & 0 & 0 & 0 & 1 & 0 & 0 \\
+      u_2u_3    & 0          & -u_3      & -u_2   & 0 & 0 & 0 & 0 & 1 & 0\\
+      u_3u_3    & 0          & 0         & -2u_3  & 0 & 0 & 0 & 0 & 0 & 1
+    \end{matrix}
+  \right]
 \end{align}
 
 \bibliography{../common/lucee}
 \bibliographystyle{plain}
 
 \end{document}
-
-In computing the eigensystem we need to look only at the homogeneous
-system.
-
-For use in numerical schemes the eigensystem of flux Jacobian is
-needed. To compute this eigensystem it is easiest to work with the
-primitive form of the equations shown above. The eigensystem of the
-quasilinear matrix $\mvec{A}$ that appears in the non-conservative
-form of the equations , and flux Jacobian $\partial \mvec{f}
-/ \partial \mvec{q}$ (see the next equations) are related. Once we
-determine one of them the other can be computed using matrix
-multiplications. To see this we write the conservation law in the form
-\begin{align}
-  \pfrac{\mvec{q}}{t} + \pfrac{\mvec{q}}{x} = 0
-\end{align}
-
-  \mvec{l}^{1,3} = \left[
-    \begin{matrix}
-      0 & {1}/{2c_1P_{11}} & -{1}/{2c_1} & 
-      0 & -{P_{12}}/{2P_{11}^2} & {1}/{2P_{11}} & 0 & 0 & 0 & 0
-    \end{matrix}
-    \right]
-
