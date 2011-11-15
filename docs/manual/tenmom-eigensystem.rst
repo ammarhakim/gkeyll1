@@ -1,64 +1,16 @@
-\documentclass[11pt, reqno]{amsart}
-%% AMS packages and font files
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amsthm}
-\usepackage[dvips]{graphicx}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage{setspace}
-\usepackage{fancyhdr}
-% \pagestyle{fancyplain}
+The eigensystem of the ten-moment equations
+===========================================
 
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
-
-%% Set page size properly
-% \oddsidemargin  0.0in
-% \evensidemargin 0.0in
-% \textwidth      6.5in
-% \textheight     9.0in
-% \leftmargin     1.0in
-% \rightmargin    1.0in
-
-%% Autoscaled figures
-\newcommand{\incfig}{\centering\includegraphics}
-\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
-
-%% Commonly used macros
-\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
-\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
-\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
-\newcommand{\pfracb}[2]{\partial #1/\partial #2}
-\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
-\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
-\newcommand{\mvec}[1]{\mathbf{#1}}
-\newcommand{\gvec}[1]{\boldsymbol{#1}}
-\newcommand{\script}[1]{\mathpzc{#1}}
-
-\newtheorem{thm}{Theorem}
-\newtheorem{lem}{Lemma}
-
-\theoremstyle{definition}
-\newtheorem{dfn}{Definition}
-
-\title[Tenmoment Eigensystem]{The eigensystem of the ten-moment
-  equations}%
-\author{Ammar H. Hakim}%
-\date{}
-
-\begin{document}
-% header text
-\lhead{Tech-Note 1013}
-\maketitle
-
-\section{The eigensystem of the equations written in quasilinear form}
+`PDF of note <./_static/files/1013-tenmom-eigsys.pdf>`_
 
 In this document I list the eigensystem of the ten-moment
 equations. These equations are derived by taking moments of the
 Boltzmann equation and truncating the resulting infinite series of
 equations by assuming the heat flux tensor vanishes. In
 non-conservative form these equations are
-\begin{align}
+
+.. math::
+
   \partial_t{n} + n \partial_j{u_j} + u_j \partial_j{n} &= 0 \label{eq:n} \\
   \partial_t{u_i}
   + \frac{1}{mn}\partial_j{P_{ij}}
@@ -68,30 +20,33 @@ non-conservative form these equations are
   + \partial_k{u_{[i}}P_{j]k}
   + u_k\partial_k{P_{ij}}
   &= \frac{q}{m}B_m \epsilon_{km[i}P_{jk]} \label{eq:Pij}
-\end{align}
+
 In these equations square brackets around indices represent the
 minimal sum over permutations of free indices within the bracket
 needed to yield completely symmetric tensors. Note that there is one
-such system of equations for \emph{each} species in the plasma. Here,
-$q$ is the species charge, $m$ is the species mass, $n$ is the number
-density, $u_j$ is the velocity, $P_{ij}$ the pressure tensor and
-$\mathbf{E}$ and $\mathbf{B}$ are the electric and magnetic field
-respectively. Also $\partial_t \equiv \partial /\partial t$ and
-$\partial_i \equiv \partial /\partial x_i$.
+such system of equations for *each* species in the plasma. Here,
+:math:`q` is the species charge, :math:`m` is the species mass,
+:math:`n` is the number density, :math:`u_j` is the velocity,
+:math:`P_{ij}` the pressure tensor and :math:`\mathbf{E}` and
+:math:`\mathbf{B}` are the electric and magnetic field
+respectively. Also :math:`\partial_t \equiv \partial /\partial t` and
+:math:`\partial_i \equiv \partial /\partial x_i`.
 
 To determine the eigensystem of the homogeneous part of this system we
-first write, in one-dimension, the left-hand side of
-Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) in the form
-\begin{align}
-  \partial_t{\mvec{v}} + \mvec{A}\partial_{1}{\mvec{v}} = 0 \label{eq:qlForm}
-\end{align}
-where $\mvec{v}$ is the vector of primitive variables and $\mvec{A}$
-is the quasilinear coefficient matrix\footnote{There is no standard
-  name for this matrix. I choose to call it the \emph{quasilinear
-    coefficient matrix} instead of the incorrect term ``primitive flux
-  Jacobian''.}. For the ten-moment system we have
-\begin{align}
-  \mvec{v} = 
+first write, in one-dimension, the left-hand side of of these
+equations in the form
+
+.. math::
+
+  \partial_t{\mathbf{v}} + \mathbf{A}\partial_{1}{\mathbf{v}} = 0 \label{eq:qlForm}
+
+where :math:`\mathbf{v}` is the vector of primitive variables and
+:math:`\mathbf{A}` is the quasilinear coefficient matrix
+[#quasilinear]_. For the ten-moment system we have
+
+.. math::
+
+  \mathbf{v} = 
     \left[
     \begin{matrix}
       \rho,
@@ -106,10 +61,12 @@ is the quasilinear coefficient matrix\footnote{There is no standard
       P_{33}
     \end{matrix}
   \right]^T
-\end{align}
-where $\rho \equiv mn$ and 
-\begin{align}
-  \mvec{A} = 
+
+where :math:`\rho \equiv mn` and 
+
+.. math::
+
+  \mathbf{A} = 
     \left[
     \begin{matrix}
       u_1  & \rho   & 0      & 0     & 0     & 0     & 0      & 0    & 0    & 0 \\
@@ -124,34 +81,34 @@ where $\rho \equiv mn$ and
       0    & P_{33}  & 0      & 2P_{13} & 0   & 0      & 0     & 0     & 0    & u_1
     \end{matrix}
   \right]
-\end{align}
-The eigensystem of this matrix needs to be determined. Although it is
-not too difficult to do it by hand it is easiest to use a computer
-algebra system like Maxima for this. The right-eigenvectors returned
-by Maxima need to massaged a little bit to bring them into a clean
-form. The results are described below.
 
-The eigenvalues of the system are given by
-\begin{align}
+The eigensystem of this matrix needs to be determined. It is easiest
+to use a computer algebra system for this. I prefer the open source
+package `Maxima <http://maxima.sourceforge.net>`_ for this. My script
+can be viewed `here <./_static/files/tenmom-eig.txt>`_.  The
+right-eigenvectors returned by Maxima need to massaged a little bit to
+bring them into a clean form. The results are described below.
+
+The eigenvalues of the system are given by 
+
+.. math::
+
   \lambda^{1,2} &= u_1-\sqrt{P_{11}/\rho} \\
   \lambda^{3,4} &= u_1+\sqrt{P_{11}/\rho} \\
   \lambda^{5}   &= u_1-\sqrt{3P_{11}/\rho} \\
   \lambda^{6}   &= u_1+\sqrt{3P_{11}/\rho} \\
   \lambda^{7,8,9,10}    &= u_1
-\end{align}
-To maintain hyperbolicity we must hence have $\rho>0$ and
-$P_{11}>0$. In multiple dimensions, in general, the diagonal elements
-of the pressure tensor must be positive. When $P_{11}=0$ the system
-reduces to the cold fluid equations which is known to be rank
-deficient and hence not hyperbolic as usually understood\footnote{For
-  hyperbolicity the quasilinear matrix must posses real eigenvalues
-  and a complete set of linearly independent right eigenvectors. For
-  the cold fluid system we only have a single eigenvalue (the fluid
-  velocity) and a single eigenvector. This can lead to generalized
-  solutions like delta shocks.}. Also notice that the eigenvalues do
-not include the usual fluid sound-speed $c_s=\sqrt{5p/3\rho}$ but
-instead have two different propagation speeds $c_1=\sqrt{P_{11}/\rho}$
-and $c_2=\sqrt{3P_{11}/\rho}$. This is because the (neutral)
+
+To maintain hyperbolicity we must hence have :math:`\rho>0` and
+:math:`P_{11}>0`. In multiple dimensions, in general, the diagonal
+elements of the pressure tensor must be positive. When
+:math:`P_{11}=0` the system reduces to the cold fluid equations which
+is known to be rank deficient and hence not hyperbolic as usually
+understood [#cold-fluid]_. Also notice that the eigenvalues do not
+include the usual fluid sound-speed :math:`c_s=\sqrt{5p/3\rho}` but
+instead have two different propagation speeds
+:math:`c_1=\sqrt{P_{11}/\rho}` and
+:math:`c_2=\sqrt{3P_{11}/\rho}`. This is because the (neutral)
 ten-moment system does not go to the correct limit of Euler equations
 in the absence of collisions. In fact, it is collisions that drive the
 pressure tensor to isotropy. These collision terms should also be
@@ -159,13 +116,15 @@ included in the plasma ten-moment system. In this case, however, the
 situation is complicated due to the presence of multiple species of
 very different masses which leads to inter-species collision terms
 that need to be computed carefully. For a two-species plasma, for
-example, see the paper by Green\cite{Green1973} in which the relations
+example, see the paper by Green [Green1973]_ in which the relations
 for relaxation of momentum and energy are used to derive a simplified
 collision integral for use in the Boltzmann equation.
 
 The right eigenvectors (column vectors) are given below.
-\begin{align}
-  \mvec{r}^{1,3}
+
+.. math::
+
+  \mathbf{r}^{1,3}
   =
   \left[
     \begin{matrix}
@@ -182,7 +141,7 @@ The right eigenvectors (column vectors) are given below.
     \end{matrix}
   \right]
   \quad
-  \mvec{r}^{2,4}
+  \mathbf{r}^{2,4}
   =
   \left[
     \begin{matrix}
@@ -198,10 +157,12 @@ The right eigenvectors (column vectors) are given below.
       2P_{13}
     \end{matrix}
   \right]
-\end{align}
+
 and
-\begin{align}
-  \mvec{r}^{5,6}
+
+.. math::
+
+  \mathbf{r}^{5,6}
   =
   \left[
     \begin{matrix}
@@ -217,10 +178,12 @@ and
       P_{11}P_{33} + 2P_{13}^2
     \end{matrix}
   \right]
-\end{align}
+
 and
-\begin{align}
-  \mvec{r}^{7}
+
+.. math::
+
+  \mathbf{r}^{7}
   =
   \left[
     \begin{matrix}
@@ -237,7 +200,7 @@ and
     \end{matrix}
   \right]
   \quad
-  \mvec{r}^{8}
+  \mathbf{r}^{8}
   =
   \left[
     \begin{matrix}
@@ -254,7 +217,7 @@ and
     \end{matrix}
   \right]
   \quad
-  \mvec{r}^{9}
+  \mathbf{r}^{9}
   =
   \left[
     \begin{matrix}
@@ -271,7 +234,7 @@ and
     \end{matrix}
   \right]
   \quad
-  \mvec{r}^{10}
+  \mathbf{r}^{10}
   =
   \left[
     \begin{matrix}
@@ -287,108 +250,119 @@ and
       1
     \end{matrix}
   \right]
-\end{align}
 
 We can now compute the left eigenvectors (row vectors) by inverting
 the matrix with right eigenvectors stored as columns. This ensures the
-normalization $\mvec{l}^p \mvec{r}^k = \delta^{pk}$, where the
-$\mvec{l}^p$ are the left eigenvectors. On performing the inversion we
-have
-\begin{align}
-  \mvec{l}^{1,3} &= 
+normalization :math:`\mathbf{l}^p \mathbf{r}^k = \delta^{pk}`, where
+the :math:`\mathbf{l}^p` are the left eigenvectors. On performing the
+inversion we have
+
+.. math::
+
+  \mathbf{l}^{1,3} &= 
   \left[
     \begin{matrix}
       0 & \pm\dfrac{P_{12}}{2c_1P_{11}} & \mp\dfrac{1}{2c_1} & 
       0 & -\dfrac{P_{12}}{2P_{11}^2} & \dfrac{1}{2P_{11}} & 0 & 0 & 0 & 0
     \end{matrix}
   \right] \\
-  \mvec{l}^{2,4} &= 
+  \mathbf{l}^{2,4} &= 
   \left[
     \begin{matrix}
       0 & \pm\dfrac{P_{13}}{2c_1P_{11}} & 0 & \mp\dfrac{1}{2c_1}
       & -\dfrac{P_{13}}{2P_{11}^2} & 0 & \dfrac{1}{2P_{11}} & 0 & 0 & 0
     \end{matrix}
   \right]
-\end{align}
+
 and
-\begin{align}
-  \mvec{l}^{5,6} = 
+
+.. math::
+
+  \mathbf{l}^{5,6} = 
   \left[
     \begin{matrix}
       0 & \mp\dfrac{1}{2c_2P_{11}} & 0 & 0 & \dfrac{1}{6P_{11}^2}
       & 0 & 0 & 0 & 0 & 0
     \end{matrix}
     \right]
-\end{align}
+
 and
-\begin{align}
-  \mvec{l}^{7} &= 
+
+.. math::
+
+  \mathbf{l}^{7} &= 
   \left[
     \begin{matrix}
       1 & 0 & 0 & 0 & -\dfrac{1}{3c_1^2} & 0 & 0 & 0 & 0 & 0
     \end{matrix}
     \right] \\
-  \mvec{l}^{8} &= 
+  \mathbf{l}^{8} &= 
   \left[
     \begin{matrix}
       0 & 0 & 0 & 0 & \dfrac{4P_{12}^2-P_{11}P_{22}}{3P_{11}^2} 
       & -\dfrac{2P_{12}}{P_{11}} & 0 & 1 & 0 & 0
     \end{matrix}
     \right] \\
-  \mvec{l}^{9} &= 
+  \mathbf{l}^{9} &= 
   \left[
     \begin{matrix}
       0 & 0 & 0 & 0 & \dfrac{4P_{12}P_{13}-P_{11}P_{23}}{3P_{11}^2} 
       & -\dfrac{P_{13}}{P_{11}} & -\dfrac{P_{12}}{P_{11}} & 0 & 1 & 0
     \end{matrix}
     \right] \\
-  \mvec{l}^{10} &= 
+  \mathbf{l}^{10} &= 
   \left[
     \begin{matrix}
       0 & 0 & 0 & 0 & \dfrac{4P_{13}^2-P_{11}P_{33}}{3P_{11}^2} & 0
       & -\dfrac{2P_{13}}{P_{11}} & 0 & 0 & 1
     \end{matrix}
     \right]
-\end{align}
 
-\section{The eigensystem of the equations written in conservative form}
+The eigensystem of the equations written in conservative form
+-------------------------------------------------------------
 
 In the wave-propagation scheme the quasilinear equations can be
 updated. However, the resulting solution will not be
 conservative. This actually might not be a problem for the ten-moment
 system as the system (as written) can not be put into a homogeneous
 conservation law form anyway. However, most often for numerical
-simulations the eigensystem of the conservation form of the homogeneous
-system is needed. This eigensystem is related to the eigensystem of
-the quasilinear form derived above. To see this consider a
-conservation law
-\begin{align}
-  \partial_t \mvec{q} + \partial_1 \mvec{f} = 0
-\end{align}
-where $\mvec{f} = \mvec{f}(\mvec{q})$ is a flux function. Now consider
-an invertible transformation $\mvec{q} = \varphi(\mvec{v})$. This
-transforms the conservation law to
-\begin{align}
-  \partial_t \mvec{v} 
-  + (\varphi')^{-1}\ D\mvec{f}\ \varphi' \partial_1 \mvec{v} = 0
-\end{align}
-where $\varphi'$ is the Jacobian matrix of the transformation and
-$D\mvec{f} \equiv \partial \mvec{f}/\partial \mvec{q}$ is the flux
-Jacobian. Comparing this to \eqr{\ref{eq:qlForm}} we see that the
-quasilinear matrix is related to the flux Jacobian by
-\begin{align}
-  \mvec{A} = (\varphi')^{-1}\ D\mvec{f}\ \varphi'
-\end{align}
+simulations the eigensystem of the conservation form of the
+homogeneous system is needed. This eigensystem is related to the
+eigensystem of the quasilinear form derived above. To see this
+consider a conservation law
+
+.. math::
+
+  \partial_t \mathbf{q} + \partial_1 \mathbf{f} = 0
+
+where :math:`\mathbf{f} = \mathbf{f}(\mathbf{q})` is a flux
+function. Now consider an invertible transformation :math:`\mathbf{q}
+= \varphi(\mathbf{v})`. This transforms the conservation law to
+
+.. math::
+
+  \partial_t \mathbf{v} 
+  + (\varphi')^{-1}\ D\mathbf{f}\ \varphi' \partial_1 \mathbf{v} = 0
+
+where :math:`\varphi'` is the Jacobian matrix of the transformation
+and :math:`D\mathbf{f} \equiv \partial \mathbf{f}/\partial \mathbf{q}`
+is the flux Jacobian. Comparing this to the quasilinear form we see
+that the quasilinear matrix is related to the flux Jacobian by
+
+.. math::
+
+  \mathbf{A} = (\varphi')^{-1}\ D\mathbf{f}\ \varphi'
+
 This clearly shows that the eigenvalues of the flux Jacobian are the
 same as those of the quasilinear matrix while the right and left
-eigenvectors can be computed using $\varphi' \mvec{r}^p$ and
-$\mvec{l}^p(\varphi')^{-1} $ respectively.
+eigenvectors can be computed using :math:`\varphi' \mathbf{r}^p` and
+:math:`\mathbf{l}^p(\varphi')^{-1}` respectively.
 
-For the ten-moment system as written in
-Eqns.\thinspace(\ref{eq:n})-(\ref{eq:Pij}) the required transformation
-is
-\begin{align}
-  \mvec{q} = \varphi(\mvec{v})
+For the ten-moment system the required transformation is
+
+.. math::
+
+  \mathbf{q} = \varphi(\mathbf{v})
   =
   \left[
     \begin{matrix}
@@ -404,10 +378,12 @@ is
       \rho u_3u_3 + P_{33}
     \end{matrix}
   \right]
-\end{align}
+
 For this transformation we have
-\begin{align}
-  \varphi'(\mvec{v}) = 
+
+.. math::
+
+  \varphi'(\mathbf{v}) = 
     \left[
     \begin{matrix}
       1         & 0          & 0         & 0         & 0 & 0 & 0 & 0 & 0 & 0 \\
@@ -422,9 +398,11 @@ For this transformation we have
       u_3u_3    & 0          & 0         & 2\rho u_3 & 0 & 0 & 0 & 0 & 0 & 1
     \end{matrix}
   \right]
-\end{align}
+
 The inverse of the transformation Jacobian is
-\begin{align}
+
+.. math::
+
   (\varphi')^{-1} = 
     \left[
     \begin{matrix}
@@ -440,9 +418,24 @@ The inverse of the transformation Jacobian is
       u_3u_3    & 0          & 0         & -2u_3  & 0 & 0 & 0 & 0 & 0 & 1
     \end{matrix}
   \right]
-\end{align}
 
-\bibliography{../common/lucee}
-\bibliographystyle{plain}
 
-\end{document}
+References
+----------
+
+.. [Green1973] John M. Greene. Improved Bhatnagar-Gross-Krook model of
+   electron-ion collisions. *The Physics of Fluids*,
+   16(11):2022-2023, 1973.
+
+-----------
+
+.. [#quasilinear] There is no standard name for this matrix. I choose
+   to call it the *quasilinear coefficient matrix* instead of the
+   incorrect term "primitive flux Jacobian".
+
+.. [#cold-fluid] For hyperbolicity the quasilinear matrix must posses
+   real eigenvalues and a complete set of linearly independent right
+   eigenvectors. For the cold fluid system we only have a single
+   eigenvalue (the fluid velocity) and a single eigenvector. This can
+   lead to generalized solutions like delta shocks.
+
