@@ -126,10 +126,9 @@ where $\rho \equiv mn$ and
   \right]
 \end{align}
 The eigensystem of this matrix needs to be determined. It is easiest
-to use a computer algebra system for this. I prefer the open source
-package Maxima for this. The right-eigenvectors returned by Maxima
-need to massaged a little bit to bring them into a clean form. The
-results are described below.
+to use a computer algebra system, for example Maxima, for this. The
+right-eigenvectors returned by Maxima need to massaged a little bit to
+bring them into a clean form. The results are described below.
 
 The eigenvalues of the system are given by
 \begin{align}
@@ -372,8 +371,8 @@ transforms the conservation law to
   \partial_t \mvec{v} 
   + (\varphi')^{-1}\ D\mvec{f}\ \varphi' \partial_1 \mvec{v} = 0
 \end{align}
-where $\varphi'$ is the Jacobian matrix of the transformation and $D\mvec{f}
-\equiv \partial \mvec{f}/\partial \mvec{q}$ is the flux
+where $\varphi'$ is the Jacobian matrix of the transformation and
+$D\mvec{f} \equiv \partial \mvec{f}/\partial \mvec{q}$ is the flux
 Jacobian. Comparing this to \eqr{\ref{eq:qlForm}} we see that the
 quasilinear matrix is related to the flux Jacobian by
 \begin{align}
