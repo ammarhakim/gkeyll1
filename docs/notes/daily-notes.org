@@ -1,11 +1,24 @@
 # -*- org -*-
 
+* November 12th
+
+  Need to implement the 10m system in Lucee based on the eigensystem
+  computed in Tech-Note 1013.
+
+  To test the 10m solver I need to implement an exact Reimann
+  solver. This should not be much harder than the Euler Reimann
+  solver. One never knows till one does it, though.
+
 * November 8th
   
   For 10-moment system the primitive eigensystem needs to be computed
   using Maxima. Then this should be converted to the conserved
   eigensystem. One option is to auto-generate the C code from Maxima
   for the eigensystem calculation.
+
+** Done on Nov 11th
+
+   Written up, checked in and online.
 
 * October 24th
 
