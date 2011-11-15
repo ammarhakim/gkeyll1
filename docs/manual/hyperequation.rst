@@ -62,8 +62,8 @@ energy given by
 Note that all three components of the momentum (and velocity) are
 stored even for 1D and 2D simulations.
 
-The object created with this block can be used in
-updaters that solve hyperbolic equations.
+The object created with this block can be used in updaters that solve
+hyperbolic equations.
 
 Constructor Parameters
 ----------------------
@@ -277,7 +277,7 @@ and magnetic field divergence are propagated with the speed of light.
   }
 
 References
-==========
+----------
 
 .. [munz_2000] C.-D Munz, P. Omnes, R. Schneider and E. Sonnendruer
    and U. Voss, "Divergence Correction Techniques for Maxwell Solvers
@@ -292,3 +292,65 @@ References
 .. [munz_2000c] C.-D Munz and U. Voss, "A Finite-Volume Method for the
    Maxwell Equations in the Time Domain", *SIAM Journal of Scientific
    Computing*, **22**, 449-475, 2000.
+
+---------
+
+Ten-Moment Equations: ``HyperEquation.TenMoment``
+=================================================
+
+The ``HyperEquation.TenMoment`` block creates a ten-moment equation
+object that represents a low-density gas in which all six components
+of the pressure tensor are evolved. The ten-moment equation in
+one-dimensional conservative form can be written as
+
+.. math::
+
+   \frac{\partial }{\partial t} 
+   \left[
+    \begin{matrix}
+      \rho \\
+      \rho u_1 \\
+      \rho u_2 \\
+      \rho u_3 \\
+      \rho u_1u_1 + P_{11} \\
+      \rho u_1u_2 + P_{12} \\
+      \rho u_1u_3 + P_{13} \\
+      \rho u_2u_2 + P_{22} \\
+      \rho u_2u_3 + P_{23} \\
+      \rho u_3u_3 + P_{33}
+    \end{matrix}
+  \right]
+  +
+  \frac{\partial }{\partial x_1}
+   \left[
+    \begin{matrix}
+      \rho u_1 \\
+      \rho u_1^2 + P_{11} \\
+      \rho u_1 u_2 + P_{12} \\
+      \rho u_1 u_3 + P_{13} \\
+      \rho u_1^3 + 3u_1P_{11} \\
+      \rho u_1^2u_2 + 2u_1P_{12} + u_2 P_{11} \\
+      \rho u_1^2u_3 + 2u_1P_{13} + u_3P_{11} \\
+      \rho u_1u_2^2 + u_1P_{22} + 2u_2P_{12}\\
+      \rho u_1u_2u_3 + u_1P_{23} + u_2P_{13} + u_3P_{12}\\
+      \rho u_1u_3^2 + u_1P_{33} + 2u_3P_{13}
+    \end{matrix}
+  \right]
+  =
+  0
+  
+
+where :math:`\rho` is the mass density, :math:`(u_1,u_2,u_3)` are the
+X-, Y- and Z-components of the fluid velocity and :math:`P_{ij}` are
+the components of the (symmetric) pressure tensor. The fluxes in the
+other directions can be obtained by rotation of the momentum and
+pressure tensor in those directions. This system of equations is not
+consistent in the sense that without collisions it does not lead to
+the correct limit of Euler equations. For most applications this
+equation system needs to be used with relaxation type collisional
+source terms.
+
+Constructor Parameters
+----------------------
+
+The ten-moment equation does not take any constructor parameters.

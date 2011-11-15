@@ -41,6 +41,7 @@ equations and schemes.
   maxwell-eigensystem
   euler-eigensystem
   hancock-muscl
+  tenmom-eigensystem
 
 .. [#lua-except] Importing external modules is not presently
    supported. The reason for this is that most supercomputers do not
