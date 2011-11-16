@@ -51,6 +51,26 @@ namespace Lucee
  */
       void rotateVecToGlobal(const double inVec[3], double outVec[3]) const;
 
+/**
+ * Rotate symmetric 3x3 matrix to local coordinate system (defined by
+ * this object) from global coordinate system. The matrix is stored as
+ * an array of 6 components [A11, A12, A13, A22, A23, A33].
+ *
+ * @param inVec Symmetric matrix to rotate.
+ * @param outVec Rotated matrix.
+ */
+      void rotateSymMatrixToLocal(const double inSM[6], double outSM[6]) const;
+
+/**
+ * Rotate symmetric 3x3 matrix from local coordinate system (defined
+ * by this object) to global coordinate system.  The matrix is stored
+ * as an array of 6 components [A11, A12, A13, A22, A23, A33].
+ *
+ * @param inVec Symmetric matrix to rotate.
+ * @param outVec Rotated matrix.
+ */
+      void rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const;
+
     private:
 /** Alignment direction */
       unsigned dir;
