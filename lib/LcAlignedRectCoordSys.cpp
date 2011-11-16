@@ -92,4 +92,32 @@ namespace Lucee
       outVec[2] = inVec[0];
     }
   }
+
+  void
+  AlignedRectCoordSys::rotateSymMatrixToLocal(const double inSM[6], double outSM[6]) const
+  {
+    if (dir==0)
+    {
+      for (unsigned i=0; i<6; ++i)
+        outSM[i] = inSM[i];
+    }
+    else
+    {
+      throw Lucee::Except("AlignedRectCoordSys::rotateSymMatrixToLocal: Not implemented");
+    }
+  }
+
+  void
+  AlignedRectCoordSys::rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const
+  {
+    if (dir==0)
+    {
+      for (unsigned i=0; i<6; ++i)
+        outSM[i] = inSM[i];
+    }
+    else
+    {
+      throw Lucee::Except("AlignedRectCoordSys::rotateSymMatrixToGlobal: Not implemented");
+    }
+  }
 }

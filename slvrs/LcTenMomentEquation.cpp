@@ -49,7 +49,7 @@ namespace Lucee
   {
     outQ[0] = inQ[0]; // density
     c.rotateVecToLocal(&inQ[1], &outQ[1]); // momentum
-// TODO PRESSURE TENSOR
+    c.rotateSymMatrixToLocal(&inQ[4], &outQ[4]); // pressure tensor
   }
 
   void
@@ -57,7 +57,7 @@ namespace Lucee
   {
     outQ[0] = inQ[0]; // density
     c.rotateVecToGlobal(&inQ[1], &outQ[1]); // momentum
-// TODO PRESSURE TENSOR
+    c.rotateSymMatrixToGlobal(&inQ[4], &outQ[4]); // pressure tensor
   }
 
   void
