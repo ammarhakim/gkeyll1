@@ -1,5 +1,71 @@
 # -*- org -*-
 
+* December 7th
+
+  Downloaded and installed gsl-shell. This is a wrapper around the GSL
+  library. It also includes simple plotting via the AGG 2.0
+  library. The cool think about this is that the standard Lua
+  implementation is not used. Instead, the LuaJIT 2.0 just-in-time
+  compiler is used. LuaJIT creates on-the-fly compiled code from Lua
+  with performace (as claimed on the LuaJIT website) close to
+  optimized C. This opens up the possibility of using LuaJIT instead
+  of standard Lua in Lucee. Something like can speed up thw the parts
+  of Lucee that are written in pure Lua, in particular sources or
+  fields initialized with lua function. Further, this opens up the
+  possibility of implementing complete updaters in Lua itself.
+
+  LuaJIT also provides a FFI to C code compiled into shared
+  libraries. This is similar to ctypes in Python. The possibilities
+  here are endless: one can imagine creating a plug-in architecture
+  for Lucee that would allow calling code written by someone else not
+  having direct access to the Lua source code.
+
+  It should also be possible to use GSL shell code from Lucee
+  itself. The problem here, of course, is the GPL licence under which
+  both GSL and GSL-shell are shipped. However, I am currently already
+  using GSL in the radiation transport solver. Perhaps in the future I
+  should add a flag to the CMake build that disables all the GPL code
+  when so requested.
+
+* December 3rd
+
+  Need to rethink the manner in which the grids and array classes
+  work. The observation that structured grids are a special case of
+  unstructured grids should lead to a better design of the Lucee grids
+  and fields. The method of looping over the grids should be using
+  element, incidence and entity iterators. These iterator classes
+  should stand outside the grids themselves and take the grid as a
+  constructor parameter. This allows creating the proper iterator
+  based on the grid type: for cartesian grids there would be no need
+  to maintain explicity connectivities while for the unstructured
+  grids the connectivity list would be used. In this case it would
+  become easy to use a cartesian grid where a unstructured grid is
+  expected.
+
+  The second important change is to allow for multiple nodes in a
+  field. This is essential for the nodal DG method I need to implement
+  for solving the GKE. Here the idea is to create another class called
+  NodalField that allows for storage of nodes.
+
+  In the next three years I want to create a FusionHub analogous to
+  NanoHub. In this each "component" should be available as an "App"
+  perhaps driven by either a Qt UX or a HTML5 UX. The best would be to
+  have a HTML5 type UX for ease of coding.
+
+** Need to now work on this seriously
+
+   I have been working on Lucee in a lackadaisical manner. The code is
+   of course very clean but progress has been slow. This is because
+   this is not a full-time endevour for me but a "burn the midnight
+   oil" type of thing. Now that I am moving to PPPL I need to work on
+   this much faster and create a powerful system that will do a lot of
+   plasma physics problems.
+
+   There are certain classes which I wrote but never use. These need
+   to be removed from the system. A basic cleanup is needed before
+   going to Princeton. Also, it is important to get rid of my own Hdf5
+   I/O so I can use the one provided in txbase.
+
 * November 12th
 
   Need to implement the 10m system in Lucee based on the eigensystem
