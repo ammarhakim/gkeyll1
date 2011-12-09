@@ -1,5 +1,18 @@
 # -*- org -*-
 
+* December 8th
+
+  The gyrokinetic edge code will be based on Lucee but will not
+  include all the fluid solvers, at least initially. The idea is to
+  keep the GK work separate from the fluids work and also possibly
+  make the GK solve code more application-specific that the general
+  purpose Lucee code. This can be achieved in a number of ways: one
+  way would be to provide a class derived from SolverIfc which
+  implements the gkeyll algorithms.
+
+  The name of the GK code will be gkeyll, pronounced as "Jekyll" as in
+  Dr. Jekyll and Mr. Hyde.
+
 * December 7th
 
   Downloaded and installed gsl-shell. This is a wrapper around the GSL
