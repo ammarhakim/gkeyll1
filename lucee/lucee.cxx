@@ -47,7 +47,6 @@ main(int argc, char **argv)
   cmdParser.addArg("o", "OUTPUT-PREFIX", "Prefix for all output files");
   cmdParser.addArg("verbosity", "VERBOSITY", "Verbosity of log messages."
     " Should be one of disabled,\n   debug, info, error. Defaults to info.");
-  cmdParser.addSwitch("r", "Restart simulation");
 
 // parse command line
   cmdParser.parse(argc, argv);
