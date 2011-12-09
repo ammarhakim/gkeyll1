@@ -7,7 +7,6 @@
 // lucee includes
 #include <LcDataStructIfc.h>
 #include <LcDataStructRegistry.h>
-#include <LcFunctionIfc.h>
 #include <LcGenericFactory.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
@@ -47,7 +46,6 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
-    Lucee::LuaModuleRegistry<Lucee::FunctionIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::LuceeMod>::registerModule(L);
   }
 }
