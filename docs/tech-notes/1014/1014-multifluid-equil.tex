@@ -1,0 +1,237 @@
+\documentclass[11pt, reqno]{amsart}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Multifluid Equilibrium]{Multi-fluid flowing equilibrium equations}%
+\author{Ammar H. Hakim}%
+\date{}
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1014}
+\maketitle
+
+\section{Governing Equations}
+
+In this document I derive and list equations governing axisymmetric
+multi-fluid equilibria. This derivation is largely based on the paper
+by Steinhauer and Ishida\cite{Steinhauer:2006p526} except that I do
+not normalize the equations. Also, I do not pursue the ``nearby
+fluids'' concept introduced in that paper. 
+
+% Multi-fluid equations describing equilibrium of compact toroids like
+% the field-reversed configurations (FRC) are significantly more
+% complicated that static ideal-MHD equilibrium equations.
+% In fact, retaining flow terms even in the ideal-MHD case makes the
+% derivation and analysis of the equations more complicated.
+
+The basic governing equations are the steady-state two-fluid equations
+in which the electron mass is set to zero. For each fluid the
+continuity and pressure equations are
+\begin{align}
+  \nabla\cdot(n_\alpha\mvec{u}_\alpha) &= 0 \label{eq:divNU} \\
+  \mvec{u}_\alpha\cdot\nabla p_\alpha &= -\gamma p_\alpha \nabla\cdot\mvec{u}_\alpha
+\end{align}
+For each ion species the momentum equation is
+\begin{align}
+  \mvec{u}_\alpha\cdot\nabla \mvec{u}_\alpha &= -\frac{\nabla
+    p_\alpha}{m_\alpha n_\alpha} 
+  + \frac{q_\alpha}{m_\alpha}(\mvec{E} + \mvec{u}_\alpha\times
+  \mvec{B})
+\end{align}
+while for the electrons, the momentum equation reduces to
+\begin{align}
+  0 &= -\nabla p_e - en_e(\mvec{E} + \mvec{u}_e\times\mvec{B}).
+\end{align}
+In these equations $m_\alpha$ and $q_\alpha$ are the species charge
+and mass respectively, $n_\alpha$ is the number density,
+$\mvec{u}_\alpha$ the velocity and $p_\alpha$ the pressure. For smooth
+flows the pressure equation can be replaced by an advection equation
+for the entropy that is obtained by setting $p_\alpha =
+n_\alpha^\gamma e^{(\gamma-1)s_\alpha}$ to give
+\begin{align}
+  \mvec{u}_\alpha\cdot\nabla s_\alpha = 0.
+\end{align}
+The electromagnetic field is determined from the steady-state Maxwell
+equations
+\begin{align}
+  \nabla\times \mvec{B} &= \mu_0 \mvec{J} \label{eq:curlB} \\
+  \nabla\times \mvec{E} &= \mvec{0} \\
+  \nabla\cdot\mvec{B} &= 0 \label{eq:divB}
+\end{align}
+where $\mvec{J}=\sum_\alpha q_\alpha n_\alpha\mvec{u}_\alpha$ is the
+total plasma current.
+
+\section{Axisymmetric Multi-Fluid Equilibria}
+
+As the divergence of the fluid momentum and magnetic field vanishes
+(see \eqr{\ref{eq:divNU}} and \eqr{\ref{eq:divB}}), in axisymmetric
+geometry we can write, using identities (\ref{id:divA}) and
+(\ref{id:divAF}),
+\begin{align}
+  \mvec{u}_\alpha &= u_{\alpha \phi} \eep +
+  \frac{1}{r n_\alpha}\nabla\psi_\alpha \times \eep \label{eq:uform} \\
+  \mvec{B} &= B_{\phi} \eep +
+  \frac{1}{r}\nabla\psi \times \eep \label{eq:bform}
+\end{align}
+where $u_{\alpha \phi}$ and $B_{\phi}$ are the toroidal fluid velocity
+and magnetic field respectively and $\psi_\alpha(r,z)$ and $\psi(r,z)$
+are scalar flux functions that determine the poloidal fluid velocity
+and magnetic fields. The total plasma current can be hence expressed
+as
+\begin{align}
+  \mvec{J} = \sum_\alpha q_\alpha n_\alpha u_{\alpha \phi}
+  + \frac{1}{r}\sum_\alpha q_\alpha \nabla \psi_\alpha \times \eep
+\end{align}
+where the summation is over the electrons all ion species in the
+plasma. Using \eqr{\ref{eq:curlB}} and the identity (\ref{eq:curla})
+in this equation for the current we get
+\begin{align}
+  rB_\phi &= \mu_0\sum_\alpha q_\alpha \psi_\alpha \\
+  -\frac{\triangle^*\psi}{r} &=
+  \mu_0 \sum_\alpha q_\alpha n_\alpha u_{\alpha \phi}.
+\end{align}
+These first of these equations relates the toroidal magnetic field to
+the ion flux functions while the second one relates the magnetic field
+flux function to the total toroidal current. Alternately, the second
+equation can be thought of as an equation for the toroidal electron
+current in terms of the ion toroidal currents and the magnetic field
+flux function.
+
+To simplify the fluid momentum equations we introduce the canonical
+momentum defined by
+\begin{align}
+  \mvec{P}_\alpha = m_\alpha\mvec{u}_\alpha + q_\alpha \mvec{A}
+\end{align}
+where $\mvec{A}$ is the vector potential in terms of which $\mvec{B} =
+\nabla\times \mvec{A}$. We also define the canonical vorticity as
+$\mvec{\Omega}_\alpha = \nabla\times \mvec{P}_\alpha =
+m_\alpha\gvec{\omega}_\alpha + q_\alpha \mvec{B}$ where
+$\gvec{\omega}_\alpha=\nabla\times \mvec{u}_\alpha$ is the fluid
+vorticity. As $\nabla\cdot\mvec{\Omega}_\alpha = 0$ we can write
+\begin{align}
+  \mvec{\Omega}_\alpha = \Omega_{\alpha \phi} \eep + \frac{1}{r}\nabla
+  Y_{\alpha}\times \eep
+\end{align}
+
+
+\appendix
+
+\section{Useful Identities}
+\label{apdx:identities}
+
+Let $\mvec{a}$ be an axisymmetric vector field satisfying
+$\nabla\cdot\mvec{a} = 0$. Then, in cylindrical coordinates, it can be
+written as
+\begin{align}
+  \mvec{a} = a_\phi \eep + \frac{1}{r}\nabla\psi \times \eep, \label{id:divA}
+\end{align}
+where $\eep$ are unit vectors and $\psi = \psi(r,z)$ is an arbitrary
+function. In component form
+\begin{align}
+  a_r = -\frac{1}{r} \pfrac{\psi}{z}, \quad 
+  a_z = \frac{1}{r} \pfrac{\psi}{r}.
+\end{align}
+The curl of $\mvec{a}$ is given by
+\begin{align}
+  \nabla\times\mvec{a} = -\frac{\triangle^*\psi}{r}\eep
+  + \frac{1}{r} \nabla(ra_\phi)\times\eep, \label{eq:curla}
+\end{align}
+where $\triangle^*$ is the \emph{Grad-Shafranov} operator defined by
+\begin{align}
+  \triangle^*\psi \equiv \frac{\partial^2 \psi}{\partial z^2}
+  + r \frac{\partial}{\partial r}\left(\frac{1}{r} \pfrac{\psi}{r}\right).
+\end{align}
+
+If $\mvec{a}$ is a axisymmetric vector field and $f(r,z)$ is a
+scalar function and $\nabla \cdot (f\mvec{a}) = 0$, then
+\begin{align}
+  \mvec{a} = a_\phi \eep + \frac{1}{rf}\nabla\psi \times \eep. \label{id:divAF}
+\end{align}
+The curl of $\mvec{a}$ is given by
+\begin{align}
+  \nabla\times\mvec{a} = -\frac{\triangle^*_f\psi}{r}\eep
+  + \frac{1}{r} \nabla(ra_\phi)\times\eep, \label{eq:curlaf}
+\end{align}
+where $\triangle^*_f$ is a \emph{f-weighted Grad-Shafranov} operator
+defined by
+\begin{align}
+  \triangle^*_f\psi \equiv 
+  \frac{\partial}{\partial z}\left(\frac{1}{f} \pfrac{\psi}{z}\right)
+  + r \frac{\partial}{\partial r}\left(\frac{1}{rf} \pfrac{\psi}{r}\right).
+\end{align}
+Let $\mvec{a}=a_\phi\eep + \nabla\psi_a \times \eep/f_ar$ and
+$\mvec{b}=b_\phi\eep + \nabla\psi_b \times \eep/f_br$ where
+$f_a=f_a(r,z)$ and $f_b=f_b(r,z)$ are scalar fields. Then
+\begin{align}
+  \mvec{a}\times\mvec{b} &=
+  \frac{a_\phi}{rf_b}\nabla\psi_b
+  -
+  \frac{b_\phi}{rf_a}\nabla\psi_a
+  -\frac{1}{r^2f_af_b}(\nabla\psi_a \times \eep \cdot \nabla\psi_b)\eep \\
+  &= \frac{a_\phi}{rf_b}\nabla\psi_b
+  -
+  \frac{b_\phi}{rf_a}\nabla\psi_a
+  +\frac{1}{r^2f_af_b}\nabla\psi_a \times \nabla\psi_b.
+\end{align}
+Let $\mvec{a}=a_\phi\eep + \nabla\psi \times \eep/r$ and $f=f(r,z)$ is
+a scalar field. Then
+\begin{align}
+  \mvec{a}\cdot\nabla f = \frac{1}{r} \nabla f \times \nabla{\psi}.
+\end{align}
+Let $\nabla \psi(r,z) = K(r,z) \nabla \phi(r,z)$ where $\psi$, $\phi$
+and $K$ are scalar functions. Then we have
+\begin{align}
+  \psi(r,z) = \overline{\psi}(\phi)
+\end{align}
+i.e., the function $\psi$ is now a \emph{surface} function of a single
+scalar field $\phi$ instead of $(r,z)$. This also implies that $\nabla
+\psi = \overline{\psi}' \nabla\phi$, where the prime denotes
+differentiation with respect to $\phi$.
+
+\bibliography{../common/lucee}
+\bibliographystyle{plain}
+
+\end{document}
