@@ -14,7 +14,6 @@ add_library(lclib
   LcDataStructIfc.cpp
   LcExcept.cpp 
   LcFileHandler.cpp
-  LcFunctionIfc.cpp
   LcHdf5Io.cpp
   LcHdf5IoTmpl.cpp
   LcIoBase.cpp
@@ -28,7 +27,6 @@ add_library(lclib
   LcLuaMathLib.cpp
   LcLuaObjTypeId.cpp
   LcLuaState.cpp
-  LcLuaTXYZFunction.cpp
   LcLuaTable.cpp
   LcLuceeMod.cpp
   LcMathLib.cpp

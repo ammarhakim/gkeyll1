@@ -10,8 +10,6 @@
 #endif
 
 // lucee includes
-#include <LcFunctionIfc.h>
-#include <LcLuaTXYZFunction.h>
 #include <LcObjRegistry.h>
 
 namespace Lucee
@@ -19,7 +17,5 @@ namespace Lucee
   void
   registerLibObjects(Lucee::LuaState& L)
   {
-// registry functions
-    new Lucee::ObjRegistry<Lucee::FunctionIfc, Lucee::LuaTXYZFunction>;
   }
 }
