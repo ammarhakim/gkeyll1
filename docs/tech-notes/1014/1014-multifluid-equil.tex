@@ -261,7 +261,8 @@ electron poloidal flows are not, in general, parallel to each other.
 We can show that the fluid entropy are surface functions by using
 identity ({\ref{id:aAotGradF}}) in \eqr{\ref{eq:entropy}} to get
 \begin{align}
-   \frac{1}{r n_\alpha} \nabla s_\alpha \times \nabla \psi_\alpha = 0
+   \frac{1}{r n_\alpha} 
+   (\nabla s_\alpha \times \nabla \psi_\alpha)\cdot\eep = 0
 \end{align}
 which allows us to write $s_\alpha = \overline{s}_\alpha(Y_\alpha)$
 for the ions and $s_e = \overline{s}_e(\psi)$ for the electrons.
@@ -314,7 +315,18 @@ equation
   \overline{H}_\alpha' - T_\alpha \overline{s}_\alpha'
   \big)
 \end{align}
-For electrons taking the dot product with $\nabla \psi$ we get
+Here, we have rewritten the density-weighted Grad-Shafranov operator
+as
+\begin{align}
+  r^2\nabla\cdot\left(\frac{1}{r^2 n_\alpha}\nabla\psi_\alpha\right)
+  =
+  r^2\nabla\cdot
+  \left(
+    \frac{\overline{\psi}_\alpha'}{r^2 n_\alpha}\nabla Y_\alpha
+  \right)
+\end{align}
+to make the ion flux function $Y_\alpha$ the independent variable. For
+electrons taking the dot product with $\nabla \psi$ we get
 \begin{align}
   \overline{H}_e' \nabla \psi \cdot \nabla \psi
   = T_e \overline{s}_e' \nabla \psi \cdot \nabla \psi
@@ -326,7 +338,7 @@ simplified using the identity (\ref{id:acrossb}) to get, after some
 rearrangements, the equation
 \begin{align}
   r en_e u_{e\phi} = r J_{e\phi} =
-  reB_\phi\overline{\psi}'
+  reB_\phi\overline{\psi}_e'
   -
   n_e r^2
   \big(
@@ -336,18 +348,38 @@ rearrangements, the equation
 Note that the left hand side of this equation involves $J_{e\phi}$,
 i.e., the toroidal component of the electron current. This can be
 eliminated from \eqr{\ref{eq:rBphi}} to get a differential equation
-for the magnetic field flux function $\psi(r,z)$.
+for the magnetic field flux function $\psi(r,z)$
+\begin{align}
+  \triangle^*\psi
+  =
+  \mu_0 r 
+  \big(
+  e B_\phi \overline{\psi}_e' - J_{i\phi}
+  \big)
+  -
+  \mu_0 n_e r^2
+  \big(
+  \overline{H}_e' - T_e \overline{s}_e'
+  \big)
+\end{align}
+where $J_{i\phi} \equiv \sum_\alpha q_\alpha n_\alpha u_{\alpha\phi}$
+and the sum is taken over all ion species\footnote{Comparing the ion
+  and electron equation we see a diffence: the total ion
+  \emph{current} appears in the electron equation while the ion
+  \emph{velocity} appears in the ion equation. The reason for this is
+  that the units of $\psi$ and $\psi_\alpha$ are not the same.}.
 
 \section{Summary}
 
-% We have derived a set of equations that describes multifluid
-% equilibrium configurations. The electron surface functions are
-% $\overline{\psi}_e(\psi)$, $\overline{s}_e(\psi)$ and
-% $\overline{H}_e(\psi)$.
-{\bf There is something funcky about these equations. It seems that
-  the PDEs are for surface functions which are supposed to be
-  arbitrary. This is strange and needs to be thought out more
-  carefully.}
+We have derived a set of equations that describes multifluid
+equilibrium configurations. The electron surface functions are
+$\overline{\psi}_e(\psi)$, $\overline{s}_e(\psi)$ and
+$\overline{H}_e(\psi)$. For each ion species we have the same set of
+surface functions but these are now functions of a \emph{different}
+flux function, $Y_\alpha$: $\overline{\psi}_\alpha(Y_\alpha)$,
+$\overline{s}_\alpha(Y_\alpha)$ and
+$\overline{H}_\alpha(Y_\alpha)$. These functions are \emph{arbitrary}
+and need to be specified before the equations can be solved.
 
 \appendix
 
@@ -396,9 +428,9 @@ defined by
   \triangle^*_f\psi \equiv 
   \frac{\partial}{\partial z}\left(\frac{1}{f} \pfrac{\psi}{z}\right)
   + r \frac{\partial}{\partial r}
-  \left(\frac{1}{r^2f}\pfrac{\psi}{r}\right)
+  \left(\frac{1}{rf}\pfrac{\psi}{r}\right)
   =
-  r^2\nabla\cdot\left(\frac{1}{rf}\nabla\psi\right)
+  r^2\nabla\cdot\left(\frac{1}{r^2f}\nabla\psi\right)
 \end{align}
 Let $\mvec{a}=a_\phi\eep + \nabla\psi_a \times \eep/f_ar$ and
 $\mvec{b}=b_\phi\eep + \nabla\psi_b \times \eep/f_br$ where
@@ -417,12 +449,10 @@ $f_a=f_a(r,z)$ and $f_b=f_b(r,z)$ are scalar fields. Then
 Let $\mvec{a}=a_\phi\eep + \nabla\psi \times \eep/r$ and $f=f(r,z)$ is
 a scalar field. Then
 \begin{align}
-  \mvec{a}\cdot\nabla f = \frac{1}{r} \nabla f \times \nabla{\psi}.
+  \mvec{a}\cdot\nabla f = \frac{1}{r} 
+  (\nabla f \times \nabla{\psi})\cdot\eep.
   \label{id:aAotGradF}
 \end{align}
-%% THIS LAST IDENTITY DOES NOT LOOK CORRECT. THE LHS SHOULD BE A
-%% SCALAR BUT LOOKS LIKE A VECTOR. PERHAPS IT NEEDS TO BE DOTTED WITH
-%% EPP.
 
 \bibliography{../common/lucee}
 \bibliographystyle{plain}
