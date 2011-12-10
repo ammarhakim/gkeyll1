@@ -9,9 +9,18 @@
   purpose Lucee code. This can be achieved in a number of ways: one
   way would be to provide a class derived from SolverIfc which
   implements the gkeyll algorithms.
-
+  
   The name of the GK code will be gkeyll, pronounced as "Jekyll" as in
   Dr. Jekyll and Mr. Hyde.
+
+** What to do with the TableDescription class?
+
+   Will this ever be used? I do not think so, at least not in this
+   programmatic way I have it now. Perhaps it is best to remove it
+   from the repo and think of another way to interactively document
+   the code. This does not make much sense in the situation in which
+   lucee itself is not interactive. When it does become interactive,
+   however, this interactive help might be very useful.
 
 * December 7th
 
