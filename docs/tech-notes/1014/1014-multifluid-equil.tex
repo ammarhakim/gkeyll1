@@ -1,4 +1,5 @@
 \documentclass[11pt, reqno]{amsart}
+\usepackage{hyperref}
 %% AMS packages and font files
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -44,7 +45,8 @@
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
 
-\title[Multifluid Equilibrium]{Multi-fluid flowing equilibrium equations}%
+\title[Multifluid Equilibrium]{Multifluid flowing equilibrium
+  equations}%
 \author{Ammar H. Hakim}%
 \date{}
 
@@ -56,16 +58,10 @@
 \section{Governing Equations}
 
 In this document I derive and list equations governing axisymmetric
-multi-fluid equilibria. This derivation is largely based on the paper
+multifluid equilibria. This derivation is largely based on the paper
 by Steinhauer and Ishida\cite{Steinhauer:2006p526} except that I do
 not normalize the equations. Also, I do not pursue the ``nearby
 fluids'' concept introduced in that paper. 
-
-% Multi-fluid equations describing equilibrium of compact toroids like
-% the field-reversed configurations (FRC) are significantly more
-% complicated that static ideal-MHD equilibrium equations.
-% In fact, retaining flow terms even in the ideal-MHD case makes the
-% derivation and analysis of the equations more complicated.
 
 The basic governing equations are the steady-state two-fluid equations
 in which the electron mass is set to zero. For each fluid the
@@ -92,7 +88,7 @@ flows the pressure equation can be replaced by an advection equation
 for the entropy that is obtained by setting $p_\alpha =
 n_\alpha^\gamma e^{(\gamma-1)s_\alpha}$ to give
 \begin{align}
-  \mvec{u}_\alpha\cdot\nabla s_\alpha = 0.
+  \mvec{u}_\alpha\cdot\nabla s_\alpha = 0. \label{eq:entropy}
 \end{align}
 The electromagnetic field is determined from the steady-state Maxwell
 equations
@@ -102,9 +98,10 @@ equations
   \nabla\cdot\mvec{B} &= 0 \label{eq:divB}
 \end{align}
 where $\mvec{J}=\sum_\alpha q_\alpha n_\alpha\mvec{u}_\alpha$ is the
-total plasma current.
+total plasma current. Finally, the condition of quasi-neutrality is
+used to compute the electron density.
 
-\section{Axisymmetric Multi-Fluid Equilibria}
+\section{Flux Functions}
 
 As the divergence of the fluid momentum and magnetic field vanishes
 (see \eqr{\ref{eq:divNU}} and \eqr{\ref{eq:divB}}), in axisymmetric
@@ -125,18 +122,19 @@ as
   \mvec{J} = \sum_\alpha q_\alpha n_\alpha u_{\alpha \phi}
   + \frac{1}{r}\sum_\alpha q_\alpha \nabla \psi_\alpha \times \eep
 \end{align}
-where the summation is over the electrons all ion species in the
+where the summation is over the electrons and all ion species in the
 plasma. Using \eqr{\ref{eq:curlB}} and the identity (\ref{eq:curla})
 in this equation for the current we get
 \begin{align}
   rB_\phi &= \mu_0\sum_\alpha q_\alpha \psi_\alpha \\
   -\frac{\triangle^*\psi}{r} &=
   \mu_0 \sum_\alpha q_\alpha n_\alpha u_{\alpha \phi}.
+  \label{eq:rBphi}
 \end{align}
 These first of these equations relates the toroidal magnetic field to
 the ion flux functions while the second one relates the magnetic field
 flux function to the total toroidal current. Alternately, the second
-equation can be thought of as an equation for the toroidal electron
+equation can be rewritten as an equation for the toroidal electron
 current in terms of the ion toroidal currents and the magnetic field
 flux function.
 
@@ -153,9 +151,203 @@ $\gvec{\omega}_\alpha=\nabla\times \mvec{u}_\alpha$ is the fluid
 vorticity. As $\nabla\cdot\mvec{\Omega}_\alpha = 0$ we can write
 \begin{align}
   \mvec{\Omega}_\alpha = \Omega_{\alpha \phi} \eep + \frac{1}{r}\nabla
-  Y_{\alpha}\times \eep
+  Y_{\alpha}\times \eep \label{eq:Omega}
+\end{align}
+where $Y_\alpha(r,z)$ is a canonical vorticity flux function. Using
+the definition of canonical vorticity and the identity
+(\ref{eq:curlaf}) to express $\gvec{\omega}_\alpha$ and using
+\eqr{\ref{eq:bform}} to express the magnetic field we get, comparing
+to \eqr{\ref{eq:Omega}},
+\begin{align}
+  \Omega_{\alpha\phi} &=
+  -\frac{m_\alpha}{r}\triangle^*_{n_\alpha}\psi_\alpha
+  + q_\alpha B_\phi \\
+  Y_\alpha &=
+  m_\alpha r u_{\alpha\phi} + q_\alpha \psi.
 \end{align}
 
+We next use the identity
+\begin{align}
+  \mvec{u}_\alpha\cdot\nabla\mvec{u_\alpha} 
+  + \mvec{u}_\alpha\times\nabla\times\mvec{u}_\alpha
+  = \nabla(\mvec{u}_\alpha^2/2)
+\end{align}
+and the thermodynamic relation
+\begin{align}
+  \frac{\nabla p_\alpha}{n_\alpha} = \nabla h_\alpha - T_\alpha\nabla s_\alpha
+\end{align}
+where $h_\alpha = \gamma T/(\gamma-1)$ is the fluid
+enthalpy\footnote{The usual definition of enthalpy for an ideal fluid
+  is $h = \gamma T/(\gamma-1) + m\mvec{u}^2/2$. In the definition
+  adopted here the kinetic energy contribution is left out but taken
+  into account (for the ions) in the momentum equation.} and
+$T_\alpha$ is the fluid temperature (defined as $p_\alpha = n_\alpha
+T_\alpha$) in the momentum equation we get
+\begin{align}
+  \nabla\left(
+    h_\alpha
+    +
+    m_\alpha \mvec{u}_\alpha^2/2 + q_\alpha\phi
+    \right)
+    =
+    T_\alpha \nabla s_\alpha + 
+    \mvec{u}_\alpha\times \mvec{\Omega}_\alpha.
+    \label{eq:ionMom}
+\end{align}
+This equation is only valid for the ions. For the electrons we need to
+set $m_e=0$ and $q_e = -e$ to get the simplified electron momentum
+equation as
+\begin{align}
+  \nabla\left(
+    h_e - e\phi
+    \right)
+    =
+    T_e \nabla s_e - e \mvec{u}_e\times \mvec{B}
+    \label{eq:elcMom}
+\end{align}
+where we have use the fact that for electrons the canonical vorticity
+is simply $\mvec{\Omega}_e = -e\mvec{B}$.
+
+\section{Surface Functions. Components of Momentum Equations}
+
+To derive the final set of equations governing the multifluid
+equilibrium we need to look at the components of the ion and electron
+momentum equations. First, we look at the toroidal component by taking
+the dot product with $\eep$. As the toroidal component (in
+axisymmetric geometry) of the gradient of a scalar vanishes, we get
+the conditions
+\begin{align}
+  0 &= (\mvec{u}_\alpha\times \mvec{\Omega}_\alpha)\cdot\eep \\
+  0 &= (\mvec{u}_e\times \mvec{B})\cdot\eep.
+\end{align}
+Using the identity (\ref{id:acrossb}) we can show that these reduce to
+\begin{align}
+  0 &= (\nabla \psi_\alpha \times \nabla Y_\alpha)\cdot\eep \\
+  0 &= (\nabla \psi_e \times \nabla \psi)\cdot\eep.
+\end{align}
+This shows\footnote{Whenever we have scalar functions that are related
+  by $\nabla \psi(r,z) = K(r,z) \nabla \phi(r,z)$ we can show
+  $\psi(r,z) = \overline{\psi}(\phi(r,z))$ i.e., the function $\psi$
+  is can be written as a \emph{surface} function of the scalar field
+  $\phi$ instead of $(r,z)$. This also implies that $\nabla \psi =
+  \overline{\psi}' \nabla\phi$, where the prime denotes
+  differentiation with respect to $\phi$.} that the flux functions
+$\psi_\alpha$ and $\psi_e$ are \emph{surface} functions, i.e.
+\begin{align}
+  \psi_\alpha &= \overline{\psi}_\alpha(Y_\alpha) \\
+  \psi_e &= \overline{\psi}_e(\psi).
+\end{align}
+
+With these expressions we can write the poloidal component of the ion
+velocity (see \eqr{\ref{eq:uform}}) as
+\begin{align}
+  \mvec{u}_{\alpha p} 
+  = \frac{1}{r n_\alpha}\nabla\psi_\alpha \times\eep
+  = \frac{\overline{\psi}_\alpha'}{r n_\alpha}\nabla Y_\alpha \times\eep
+  = \frac{\overline{\psi}_\alpha'}{n_\alpha}\mvec{\Omega}_{\alpha p}
+\end{align}
+where $\mvec{\Omega}_{\alpha p}$ is the poloidal component of the
+canonical vorticity. Similarly, the poloidal component of the electron
+velocity is
+\begin{align}
+  \mvec{u}_{e p} 
+  = \frac{1}{r n_e}\nabla\psi_e \times\eep
+  = \frac{\overline{\psi}_e'}{r n_e}\nabla \psi \times\eep
+  = \frac{\overline{\psi}_e'}{n_e}\mvec{B}_{p}
+\end{align}
+where $\mvec{B}_{p}$ is poloidal magnetic field. Hence, the ion and
+electron poloidal flows are not, in general, parallel to each other.
+
+We can show that the fluid entropy are surface functions by using
+identity ({\ref{id:aAotGradF}}) in \eqr{\ref{eq:entropy}} to get
+\begin{align}
+   \frac{1}{r n_\alpha} \nabla s_\alpha \times \nabla \psi_\alpha = 0
+\end{align}
+which allows us to write $s_\alpha = \overline{s}_\alpha(Y_\alpha)$
+for the ions and $s_e = \overline{s}_e(\psi)$ for the electrons.
+
+We now take the component of the ion and electron momentum equations
+along $\mvec{u}_\alpha$. The right hand side vanishes (see
+\eqr{\ref{eq:entropy}}) which yields, upon using identity
+({\ref{id:aAotGradF}})
+\begin{align}
+  h_\alpha + \frac{1}{2}m_\alpha \mvec{u}_\alpha^2 + q_\alpha\phi
+  =
+  \overline{H}_\alpha(Y_\alpha)
+\end{align}
+for the ions and
+\begin{align}
+  h_e - e\phi
+  =
+  \overline{H}_e(\psi)
+\end{align}
+for the electrons. These equations are a form of Bernoulli's equations
+and state that the total enthalpy (including the electrostatic
+potential energy) of each fluid is constant on a flux surface.
+
+Finally, we take the component of the ion and electron momentum
+equations along $\nabla Y_\alpha$ and $\nabla \psi$
+respectively. These directions are perpendicular to the poloidal
+components of the ion and electron velocities and hence will yield
+independent set of equations. For ions taking the dot product with
+$\nabla Y_\alpha$ we get
+\begin{align}
+  \overline{H}_\alpha' \nabla Y_\alpha \cdot \nabla Y_\alpha
+  = T_\alpha \overline{s}_\alpha' \nabla Y_\alpha \cdot \nabla Y_\alpha
+  +
+  \nabla Y_\alpha \cdot (\mvec{u}_\alpha\times\mvec{\Omega}_\alpha).
+\end{align}
+The last term in this equation can be simplified using the identity
+(\ref{id:acrossb}) to get, after some rearrangements, the differential
+equation
+\begin{align}
+  m_\alpha\overline{\psi}_\alpha' 
+  r^2\nabla\cdot
+  \left(
+    \frac{\overline{\psi}_\alpha'}{r^2 n_\alpha}\nabla Y_\alpha
+  \right)
+  =
+  r\big(
+  \overline{\psi}_\alpha' q_\alpha  B_\phi - n_\alpha u_{\alpha\phi}
+  \big)
+  + n_\alpha r^2 \big(
+  \overline{H}_\alpha' - T_\alpha \overline{s}_\alpha'
+  \big)
+\end{align}
+For electrons taking the dot product with $\nabla \psi$ we get
+\begin{align}
+  \overline{H}_e' \nabla \psi \cdot \nabla \psi
+  = T_e \overline{s}_e' \nabla \psi \cdot \nabla \psi
+  -
+  \nabla \psi \cdot ( e \mvec{u}_e\times\mvec{B}).
+\end{align}
+As we did for the ions, the last term in this equation can be
+simplified using the identity (\ref{id:acrossb}) to get, after some
+rearrangements, the equation
+\begin{align}
+  r en_e u_{e\phi} = r J_{e\phi} =
+  reB_\phi\overline{\psi}'
+  -
+  n_e r^2
+  \big(
+  \overline{H}_e' - T_e \overline{s}_e'  
+  \big)
+\end{align}
+Note that the left hand side of this equation involves $J_{e\phi}$,
+i.e., the toroidal component of the electron current. This can be
+eliminated from \eqr{\ref{eq:rBphi}} to get a differential equation
+for the magnetic field flux function $\psi(r,z)$.
+
+\section{Summary}
+
+% We have derived a set of equations that describes multifluid
+% equilibrium configurations. The electron surface functions are
+% $\overline{\psi}_e(\psi)$, $\overline{s}_e(\psi)$ and
+% $\overline{H}_e(\psi)$.
+{\bf There is something funcky about these equations. It seems that
+  the PDEs are for surface functions which are supposed to be
+  arbitrary. This is strange and needs to be thought out more
+  carefully.}
 
 \appendix
 
@@ -182,7 +374,10 @@ The curl of $\mvec{a}$ is given by
 where $\triangle^*$ is the \emph{Grad-Shafranov} operator defined by
 \begin{align}
   \triangle^*\psi \equiv \frac{\partial^2 \psi}{\partial z^2}
-  + r \frac{\partial}{\partial r}\left(\frac{1}{r} \pfrac{\psi}{r}\right).
+  + r \frac{\partial}{\partial r}
+  \left(\frac{1}{r} \pfrac{\psi}{r}\right)
+    =
+  r^2\nabla\cdot\left(\frac{1}{r^2}\nabla\psi\right)
 \end{align}
 
 If $\mvec{a}$ is a axisymmetric vector field and $f(r,z)$ is a
@@ -200,7 +395,10 @@ defined by
 \begin{align}
   \triangle^*_f\psi \equiv 
   \frac{\partial}{\partial z}\left(\frac{1}{f} \pfrac{\psi}{z}\right)
-  + r \frac{\partial}{\partial r}\left(\frac{1}{rf} \pfrac{\psi}{r}\right).
+  + r \frac{\partial}{\partial r}
+  \left(\frac{1}{r^2f}\pfrac{\psi}{r}\right)
+  =
+  r^2\nabla\cdot\left(\frac{1}{rf}\nabla\psi\right)
 \end{align}
 Let $\mvec{a}=a_\phi\eep + \nabla\psi_a \times \eep/f_ar$ and
 $\mvec{b}=b_\phi\eep + \nabla\psi_b \times \eep/f_br$ where
@@ -214,22 +412,17 @@ $f_a=f_a(r,z)$ and $f_b=f_b(r,z)$ are scalar fields. Then
   &= \frac{a_\phi}{rf_b}\nabla\psi_b
   -
   \frac{b_\phi}{rf_a}\nabla\psi_a
-  +\frac{1}{r^2f_af_b}\nabla\psi_a \times \nabla\psi_b.
+  +\frac{1}{r^2f_af_b}\nabla\psi_a \times \nabla\psi_b. \label{id:acrossb}
 \end{align}
 Let $\mvec{a}=a_\phi\eep + \nabla\psi \times \eep/r$ and $f=f(r,z)$ is
 a scalar field. Then
 \begin{align}
   \mvec{a}\cdot\nabla f = \frac{1}{r} \nabla f \times \nabla{\psi}.
+  \label{id:aAotGradF}
 \end{align}
-Let $\nabla \psi(r,z) = K(r,z) \nabla \phi(r,z)$ where $\psi$, $\phi$
-and $K$ are scalar functions. Then we have
-\begin{align}
-  \psi(r,z) = \overline{\psi}(\phi)
-\end{align}
-i.e., the function $\psi$ is now a \emph{surface} function of a single
-scalar field $\phi$ instead of $(r,z)$. This also implies that $\nabla
-\psi = \overline{\psi}' \nabla\phi$, where the prime denotes
-differentiation with respect to $\phi$.
+%% THIS LAST IDENTITY DOES NOT LOOK CORRECT. THE LHS SHOULD BE A
+%% SCALAR BUT LOOKS LIKE A VECTOR. PERHAPS IT NEEDS TO BE DOTTED WITH
+%% EPP.
 
 \bibliography{../common/lucee}
 \bibliographystyle{plain}
