@@ -1,5 +1,16 @@
 # -*- org -*-
 
+* December 13th
+
+  The first step is to remove the HDF5 implementation from Lucee and
+  use the one provided in txbase. The reason for this: no need to
+  rethink the whole hdf5 I/O as it works well already for Facets,
+  Nautilus and VORPAL.
+
+  The longer term goal is to replace the use of Loki with Boost. Also,
+  in general it is best to start using the Boost libraries as soon as
+  possible.
+
 * December 8th
 
   The gyrokinetic edge code will be based on Lucee but will not
@@ -51,6 +62,8 @@
 
 * December 3rd
 
+** On unstructured grids
+
   Need to rethink the manner in which the grids and array classes
   work. The observation that structured grids are a special case of
   unstructured grids should lead to a better design of the Lucee grids
@@ -63,6 +76,15 @@
   grids the connectivity list would be used. In this case it would
   become easy to use a cartesian grid where a unstructured grid is
   expected.
+
+  The current GridElement classes need to be split into two pieces:
+  first, the interface to access the data (volumes, normals etc) and
+  the second, to be used by the iterators for iterating over the
+  elements themselves.
+
+  The other change is that both the incidence and element iterators
+  should allow attaching an "entity" to them. This is the correct way,
+  I think.
 
   The second important change is to allow for multiple nodes in a
   field. This is essential for the nodal DG method I need to implement
