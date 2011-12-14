@@ -54,22 +54,22 @@ if (TXBASE_FOUND)
 endif (TXBASE_FOUND)
 
 # find HDF5
-find_package(Hdf5 REQUIRED)
+find_package(TxHdf5 REQUIRED)
 if (HDF5_FOUND)
    include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
 if (NOT WIN32)
-  find_package(Z REQUIRED)
+  find_package(TxZ REQUIRED)
 endif ()
 
 # find GSL
-find_package(Gsl REQUIRED)
+find_package(TxGsl REQUIRED)
 if (GSL_FOUND)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 
 # find FFTW3
-find_package(Fftw3)
+find_package(TxFftw3)
 
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
@@ -78,7 +78,7 @@ IF(APPLE)
   SET(EXTRA_LIBS ${ACCELERATE_LIB})
 elseif(WIN32)
   # CLapack is used on Windows
-  find_package(CLapackCMake REQUIRED)
+  find_package(TxCLapackCMake REQUIRED)
   set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
 else(APPLE)
   # find LAPACK

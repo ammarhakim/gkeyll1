@@ -1,7 +1,7 @@
 /**
  * @file	lchdf5io.cxx
  *
- * @brief	Unit tests for Lucee::Hdf5Io class
+ * @brief	Unit tests for Hdf5 txbase I/O classes.
  */
 
 // config stuff
@@ -10,8 +10,16 @@
 #endif
 
 // lucee includes
-#include <LcHdf5Io.h>
 #include <LcTest.h>
+
+// txbase includes
+#include <TxHdf5Base.h>
+#include <TxIoBase.h>
+#ifdef HAVE_MPI
+# include <TxMpiBase.h>
+#else
+# include <TxSelfBase.h>
+#endif
 
 // HDF5 includes
 #include <hdf5.h>
@@ -41,14 +49,16 @@ test_1()
 
   // create io object
 #ifdef HAVE_MPI
-  Lucee::IoBase* io = new Lucee::Hdf5Io(MPI_COMM_WORLD, MPI_INFO_NULL);
+  TxCommBase* comm = new TxMpiBase();
 #else
-  Lucee::IoBase* io = new Lucee::Hdf5Io(0, 0);
+  TxCommBase* comm = new TxSelfBase();
 #endif
+  TxIoBase* io = new TxHdf5Base(comm);
+
   // open a file
-  Lucee::IoNodeType fn = io->createFile("hdf5io_test.h5");
+  TxIoNodeType fn = io->createFile("hdf5io_test.h5");
   // write data to file
-  Lucee::IoNodeType dn = io->writeDataSet<double>(
+  TxIoNodeType dn = io->writeDataSet<double>(
     fn, "testdata", dataSetSize, dataSetBeg, dataSetLen, data);
   // write some attributes to this datanode
   io->writeAttribute(dn, "Time", 1.56);
@@ -59,25 +69,21 @@ test_1()
   intVec.push_back(10);
   intVec.push_back(20);
   intVec.push_back(30);
-  io->writeVecAttribute(dn, "Int Vect", intVec);
+  io->writeAttribute(dn, "Int Vect", intVec);
 
   std::vector<double> floatVec;
   floatVec.push_back(1.0);
   floatVec.push_back(2.0);
   floatVec.push_back(3.0);
-  io->writeVecAttribute(dn, "Float Vect", floatVec);
+  io->writeAttribute(dn, "Float Vect", floatVec);
 
   delete io;
 
   // now read it back in
-#ifdef HAVE_MPI
-  Lucee::IoBase* ior = new Lucee::Hdf5Io(MPI_COMM_WORLD, MPI_INFO_NULL);
-#else
-  Lucee::IoBase* ior = new Lucee::Hdf5Io(0, 0);
-#endif
-  Lucee::IoNodeType fnr = ior->openFile("hdf5io_test.h5", "r");
+  TxIoBase* ior = new TxHdf5Base(comm);
+  TxIoNodeType fnr = ior->openFile("hdf5io_test.h5", "r");
   double *datar = new double[50];
-  Lucee::IoNodeType dnr = ior->readDataSet<double>(
+  TxIoNodeType dnr = ior->readDataSet<double>(
     fnr, "testdata", dataSetBeg, dataSetLen, datar);
   // check if we read it in properly
   for (int j=0; j<50; ++j)
@@ -94,18 +100,18 @@ test_1()
 
   // read a vector attribute
   std::vector<int> intVecR;
-  //io->readVecAttribute(dnr, "Int Vect", intVecR);
+  io->readAttribute(dnr, "Int Vect", intVecR);
 
   std::vector<double> floatVecR;
-  //io->readVecAttribute(dnr, "Float Vect", floatVecR);
+  io->readAttribute(dnr, "Float Vect", floatVecR);
 
-//   for (unsigned i=0; i<3; ++i)
-//   {
-//     LC_ASSERT("Checking for vector int attribute",
-//       intVecR[i]==intVec[i]);
-//     LC_ASSERT("Checking for vector float attribute",
-//       floatVecR[i]==floatVec[i]);
-//   }
+  for (unsigned i=0; i<3; ++i)
+  {
+    LC_ASSERT("Checking for vector int attribute",
+      intVecR[i]==intVec[i]);
+    LC_ASSERT("Checking for vector float attribute",
+      floatVecR[i]==floatVec[i]);
+  }
 
   delete [] data;
   delete [] datar;
