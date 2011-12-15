@@ -141,10 +141,6 @@ target_link_libraries(lcluahelp lcdatastructs lclib lclua ${Hdf5_Mpi_LIBRARIES})
 add_executable(lcvalarraycmp lcvalarraycmp.cxx)
 target_link_libraries(lcvalarraycmp lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
 
-# lcgmvgridcreator
-add_executable(lcgmvgridcreator lcgmvgridcreator.cxx)
-target_link_libraries(lcgmvgridcreator lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
-
 # lcgeoprim
 add_executable(lcgeomprim lcgeomprim.cxx)
 target_link_libraries(lcgeomprim lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
