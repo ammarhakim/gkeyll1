@@ -13,7 +13,6 @@
 #include <LcGridRegistry.h>
 #include <LcMappedCartGrid.h>
 #include <LcRectCartGrid.h>
-#include <LcUnstructGrid.h>
 
 namespace Lucee
 {
@@ -28,7 +27,5 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<1> >;
     new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<2> >;
     new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<3> >;
-
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::UnstructGrid<double> >;
   }
 }
