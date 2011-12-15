@@ -1,5 +1,29 @@
 # -*- org -*-
 
+* December 15th
+
+  Removed the HDF5 from Lucee and instead now using the implementation
+  from txbase. 
+
+  Next step is to remove the unstructured grids from Lucee to avoid
+  any issues with Nautilus.
+  
+  Loki replacement by Boost can wait. For now it is more important to
+  look at the Boost library and see it can be used for anything in
+  Lucee. It has some good stuff that might be useful.
+
+  More important is to get the fields working with MPI. With this
+  Lucee will be parallel and ready for prime-time. Also, should look
+  at OpenCL kernels for the core algorithms. This is good anyway as it
+  allows to focus even more on achieving a clean separation between
+  the framework and the alogrithms.
+
+  The key lesson is to make the underlying datastructures as simple as
+  possible while proving a good access layer on top of them for use
+  from C++. For example: unstructured grids are stored in a set of
+  flat contiguous memory chunks but a complete STL-type access layer
+  should exist.
+  
 * December 13th
 
   The first step is to remove the HDF5 implementation from Lucee and
