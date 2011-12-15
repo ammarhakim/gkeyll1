@@ -12,8 +12,13 @@
 // lucee includes
 #include <LcDataStructIfc.h>
 #include <LcGlobals.h>
-#include <LcHdf5Io.h>
 #include <LcPointerHolder.h>
+
+// txbase includes
+#include <TxIoBase.h>
+#ifdef HAVE_HDF5
+#include <TxHdf5Base.h>
+#endif
 
 // loki includes
 #include <loki/Singleton.h>
@@ -61,14 +66,17 @@ namespace Lucee
     if (isH5)
     {
 #ifdef HAVE_MPI
-      Lucee::Hdf5Io io(MPI_COMM_WORLD, MPI_INFO_NULL);
+      TxMpiBase commBase;
 #else
-      Lucee::Hdf5Io io(0, 0);
+      TxSelfBase commBase;
 #endif
+      TxIoBase *io = new TxHdf5Base(&commBase);
 // open file to write in
-      Lucee::IoNodeType fn = io.createFile(outNm);
+      TxIoNodeType fn = io->createFile(outNm);
 // write data
-      this->writeToFile(io, fn, this->getName());
+      this->writeToFile(*io, fn, this->getName());
+// delete I/O pointer
+      delete io;
     }
     else
     {

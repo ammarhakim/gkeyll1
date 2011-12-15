@@ -14,9 +14,6 @@ add_library(lclib
   LcDataStructIfc.cpp
   LcExcept.cpp 
   LcFileHandler.cpp
-  LcHdf5Io.cpp
-  LcHdf5IoTmpl.cpp
-  LcIoBase.cpp
   LcLibRegistry.cpp
   LcLinAlgebra.cpp
   LcLogRecordHandler.cpp

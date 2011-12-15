@@ -187,12 +187,12 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  Lucee::IoNodeType
-  RectCartGrid<NDIM>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+  TxIoNodeType
+  RectCartGrid<NDIM>::writeToFile(TxIoBase& io, TxIoNodeType& node,
     const std::string& nm)
   {
 // create a group to write out grid data
-    Lucee::IoNodeType grdGrp = io.createGroup(node, nm);
+    TxIoNodeType grdGrp = io.createGroup(node, nm);
     std::vector<double> lower(NDIM), upper(NDIM);
     std::vector<unsigned> numPhysCells(NDIM), start(NDIM);
     for (unsigned i=0; i<NDIM; ++i)
@@ -202,16 +202,16 @@ namespace Lucee
       start[i] = this->globalBox.getLower(i);
       numPhysCells[i] = this->globalBox.getShape(i);
     }
-    io.writeStrAttribute(grdGrp, "vsType", "mesh");
-    io.writeStrAttribute(grdGrp, "vsKind", "uniform");
+    io.writeAttribute(grdGrp, "vsType", "mesh");
+    io.writeAttribute(grdGrp, "vsKind", "uniform");
     io.template 
-      writeVecAttribute<unsigned>(grdGrp, "vsStartCell", start);
+      writeAttribute<unsigned>(grdGrp, "vsStartCell", start);
     io.template 
-      writeVecAttribute<unsigned>(grdGrp, "vsNumCells", numPhysCells);
+      writeAttribute<unsigned>(grdGrp, "vsNumCells", numPhysCells);
     io.template
-      writeVecAttribute<double>(grdGrp, "vsLowerBounds", lower);
+      writeAttribute<double>(grdGrp, "vsLowerBounds", lower);
     io.template
-      writeVecAttribute<double>(grdGrp, "vsUpperBounds", upper);
+      writeAttribute<double>(grdGrp, "vsUpperBounds", upper);
 
     return grdGrp;
   }
