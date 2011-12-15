@@ -601,7 +601,7 @@ void
 test_17()
 {
   unsigned shape[2] = {5, 10};
-  Lucee::Array<2, std::complex<double> > arr(shape);
+  //Lucee::Array<2, std::complex<double> > arr(shape);
 }
 
 int

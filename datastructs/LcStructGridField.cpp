@@ -174,16 +174,16 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
-  Lucee::IoNodeType
-  StructGridField<NDIM, T>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node, const std::string& nm)
+  TxIoNodeType
+  StructGridField<NDIM, T>::writeToFile(TxIoBase& io, TxIoNodeType& node, const std::string& nm)
   {
 // first write the field data to file
-    Lucee::IoNodeType dn 
+    TxIoNodeType dn 
       = Lucee::Field<NDIM, T>::writeToFile(io, node, "StructGridField");
 // annotate with viz-schema marks
-    io.writeStrAttribute(dn, "vsType", "variable");
-    io.writeStrAttribute(dn, "vsMesh", "StructGrid");
-    io.writeStrAttribute(dn, "vsCentering", "zonal");
+    io.writeAttribute(dn, "vsType", "variable");
+    io.writeAttribute(dn, "vsMesh", "StructGrid");
+    io.writeAttribute(dn, "vsCentering", "zonal");
 // now write out grid
     grid->writeToFile(io, node, "StructGrid");
 

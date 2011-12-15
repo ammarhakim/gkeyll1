@@ -175,8 +175,8 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
-  Lucee::IoNodeType
-  Field<NDIM, T>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node, const std::string& nm)
+  TxIoNodeType
+  Field<NDIM, T>::writeToFile(TxIoBase& io, TxIoNodeType& node, const std::string& nm)
   {
     std::vector<size_t> dataSetSize(NDIM+1), dataSetBeg(NDIM+1), dataSetLen(NDIM+1);
 // construct sizes and shapes to write stuff out
@@ -199,7 +199,7 @@ namespace Lucee
     while (seq.step())
       buff[count++] = this->operator()(seq.getIndex());
 // write it out
-    Lucee::IoNodeType dn =
+    TxIoNodeType dn =
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
 
     return dn;

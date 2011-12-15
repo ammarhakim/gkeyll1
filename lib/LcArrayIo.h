@@ -14,9 +14,11 @@
 
 // lucee includes
 #include <LcArray.h>
-#include <LcIoBase.h>
 #include <LcRowMajorSequencer.h>
 #include <LcVector.h>
+
+// txbase includes
+#include <TxIoBase.h>
 
 // std includes
 #include <string>
@@ -34,7 +36,7 @@ namespace Lucee
  * @return node to which data was written.
  */
   template <typename T>
-  Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node, 
+  TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node, 
     const std::string& nm, Lucee::Vector<T>& vec)
   {
 // construct sizes and shapes to write stuff out
@@ -62,7 +64,7 @@ namespace Lucee
  * @return node to which data was written.
  */
   template <unsigned NDIM, typename T>
-  Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+  TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
     const std::string& nm, Lucee::Array<NDIM, T>& arr)
   {
     std::vector<size_t> dataSetSize(NDIM), dataSetBeg(NDIM), dataSetLen(NDIM);

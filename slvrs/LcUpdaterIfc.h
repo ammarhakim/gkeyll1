@@ -16,7 +16,6 @@
 #include <LcBasicObj.h>
 #include <LcDataStructIfc.h>
 #include <LcGridIfc.h>
-#include <LcHdf5Io.h>
 #include <LcUpdaterStatus.h>
 
 // std includes

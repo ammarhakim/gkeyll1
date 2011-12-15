@@ -105,17 +105,17 @@ namespace Lucee
   }
 
   template <typename REAL>
-  Lucee::IoNodeType
-  UnstructGrid<REAL>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+  TxIoNodeType
+  UnstructGrid<REAL>::writeToFile(TxIoBase& io, TxIoNodeType& node,
     const std::string& nm)
   {
 // create a group to write grid data
-    Lucee::IoNodeType gn = io.createGroup(node, nm);
+    TxIoNodeType gn = io.createGroup(node, nm);
 // add VizSchema markup
-    io.writeStrAttribute(gn, "vsType", "mesh");
-    io.writeStrAttribute(gn, "vsKind", "unstructured");
-    io.writeStrAttribute(gn, "vsPoints", "vertices");
-    io.writeStrAttribute(gn, "vsPolygons", "cells");
+    io.writeAttribute(gn, "vsType", "mesh");
+    io.writeAttribute(gn, "vsKind", "unstructured");
+    io.writeAttribute(gn, "vsPoints", "vertices");
+    io.writeAttribute(gn, "vsPolygons", "cells");
 
     std::vector<size_t> dsSize(2);
     std::vector<size_t> dsBeg(2);

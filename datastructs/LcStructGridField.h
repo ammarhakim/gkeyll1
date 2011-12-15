@@ -91,7 +91,7 @@ namespace Lucee
  * @param nm Name of the array as it should appear in output.
  * @return node to which data was written.
  */
-      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+      virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
          const std::string& nm);
 
 /**

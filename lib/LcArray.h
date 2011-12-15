@@ -390,7 +390,7 @@ namespace Lucee
  * @param nm Name of the array as it should appear in output.
  * @return node to which data was written.
  */
-      virtual Lucee::IoNodeType writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+      virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
         const std::string& nm);
 
     protected:
@@ -863,9 +863,9 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
-  Lucee::IoNodeType
-  Array<NDIM, T, INDEXER>::writeToFile(Lucee::IoBase& io, 
-    Lucee::IoNodeType& node, const std::string& nm)
+  TxIoNodeType
+  Array<NDIM, T, INDEXER>::writeToFile(TxIoBase& io, 
+    TxIoNodeType& node, const std::string& nm)
   {
     std::vector<size_t> dataSetSize(NDIM), dataSetBeg(NDIM), dataSetLen(NDIM);
 // construct sizes and shapes to write stuff out
@@ -884,7 +884,7 @@ namespace Lucee
     while (seq.step())
       buff[count++] = this->operator()(seq.getIndex());
 // write it out
-    Lucee::IoNodeType dn =
+    TxIoNodeType dn =
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
 
     return dn;

@@ -7,7 +7,6 @@
 // lucee includes
 #include <LcArrayIo.h>
 #include <LcGlobals.h>
-#include <LcHdf5Io.h>
 #include <LcLinAlgebra.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
@@ -16,6 +15,9 @@
 #include <LcRteHomogeneousSlab.h>
 #include <LcRtePhaseFunction.h>
 
+// txbase includes
+#include <TxHdf5Base.h>
+
 // loki includes
 #include <loki/Singleton.h>
 
@@ -23,9 +25,10 @@
 #include <gsl/gsl_math.h>
 
 // std includes
-#include <iostream>
-#include <sstream>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <sstream>
 
 namespace Lucee
 {
@@ -246,24 +249,24 @@ namespace Lucee
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
 
 // create HDF5 for storing data
-    Lucee::Hdf5Io io(0, 0);
+    std::auto_ptr<TxIoBase> io(new TxHdf5Base(0));
     std::string fn = outPrefix + "_" + baseName + ".h5";
-    Lucee::IoNodeType fNode = io.createFile(fn);
+    TxIoNodeType fNode = io->createFile(fn);
 
-    Lucee::IoNodeType vn;
+    TxIoNodeType vn;
 // write ordinates and weights
-    vn = Lucee::writeToFile(io, fNode, "mu", mu);
-    io.writeStrAttribute(vn, "description", "ordinates in [0,1]");
-    vn = Lucee::writeToFile(io, fNode, "w", w);
-    io.writeStrAttribute(vn, "description", "weights in [0,1]");
+    vn = Lucee::writeToFile(*io, fNode, "mu", mu);
+    io->writeAttribute(vn, "description", "ordinates in [0,1]");
+    vn = Lucee::writeToFile(*io, fNode, "w", w);
+    io->writeAttribute(vn, "description", "weights in [0,1]");
 
 // save depths at which irradiances are computed
     Lucee::Vector<double> tauIrradOut_v(tauIrradOut.size());
     for (unsigned i=0; i<tauIrradOut_v.getLength(); ++i)
       tauIrradOut_v[i] = tauIrradOut[i];
 
-    vn = Lucee::writeToFile(io, fNode, "tauIrrad", tauIrradOut_v);
-    io.writeStrAttribute(vn, "description", 
+    vn = Lucee::writeToFile(*io, fNode, "tauIrrad", tauIrradOut_v);
+    io->writeAttribute(vn, "description", 
       "optical depths at which irradiances are output");
 
 // save depths at which radiances are computed
@@ -271,16 +274,16 @@ namespace Lucee
     for (unsigned i=0; i<tauRadOut_v.getLength(); ++i)
       tauRadOut_v[i] = tauRadOut[i];
 
-    vn = Lucee::writeToFile(io, fNode, "tauRad", tauRadOut_v);
-    io.writeStrAttribute(vn, "description", 
+    vn = Lucee::writeToFile(*io, fNode, "tauRad", tauRadOut_v);
+    io->writeAttribute(vn, "description", 
       "optical depths at which radiances are output");
 
 // write irradiances to file
-    vn = Lucee::writeToFile(io, fNode, "downward_irradiance", irradp);
-    io.writeStrAttribute(vn, "units", "W/m^2");
+    vn = Lucee::writeToFile(*io, fNode, "downward_irradiance", irradp);
+    io->writeAttribute(vn, "units", "W/m^2");
 
-    vn = Lucee::writeToFile(io, fNode, "upward_irradiance", irradm);
-    io.writeStrAttribute(vn, "units", "W/m^2");
+    vn = Lucee::writeToFile(*io, fNode, "upward_irradiance", irradm);
+    io->writeAttribute(vn, "units", "W/m^2");
 
 // arrays to store radiance
     int start[2] = {0, 0};
@@ -311,13 +314,13 @@ namespace Lucee
         }
       }
 // write radiances
-      vn = Lucee::writeToFile(io, fNode, fnp.str(), radmi_p);
-      io.writeAttribute(vn, "opticalDepth", tauRadOut[k]);
-      io.writeStrAttribute(vn, "units", "W/m^2/sr");
+      vn = Lucee::writeToFile(*io, fNode, fnp.str(), radmi_p);
+      io->writeAttribute(vn, "opticalDepth", tauRadOut[k]);
+      io->writeAttribute(vn, "units", "W/m^2/sr");
 
-      vn = Lucee::writeToFile(io, fNode, fnm.str(), radmi_m);
-      io.writeAttribute(vn, "opticalDepth", tauRadOut[k]);
-      io.writeStrAttribute(vn, "units", "W/m^2/sr");
+      vn = Lucee::writeToFile(*io, fNode, fnm.str(), radmi_m);
+      io->writeAttribute<double>(vn, "opticalDepth", tauRadOut[k]);
+      io->writeAttribute(vn, "units", "W/m^2/sr");
     }
   }
 

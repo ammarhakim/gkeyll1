@@ -156,8 +156,8 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  Lucee::IoNodeType
-  MappedCartGrid<NDIM>::writeToFile(Lucee::IoBase& io, Lucee::IoNodeType& node,
+  TxIoNodeType
+  MappedCartGrid<NDIM>::writeToFile(TxIoBase& io, TxIoNodeType& node,
     const std::string& nm)
   {
 // create local and global regions
@@ -194,11 +194,11 @@ namespace Lucee
     dataSetLen.push_back(NDIM);
 
 // write it out
-    Lucee::IoNodeType dn =
+    TxIoNodeType dn =
       io.writeDataSet(node, nm, dataSetSize, dataSetBeg, dataSetLen, &buff[0]);
 
-    io.writeStrAttribute(dn, "vsType", "mesh");
-    io.writeStrAttribute(dn, "vsKind", "structured");
+    io.writeAttribute(dn, "vsType", "mesh");
+    io.writeAttribute(dn, "vsKind", "structured");
 
     return dn;
   }
