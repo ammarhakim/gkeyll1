@@ -1,5 +1,39 @@
 # -*- org -*-
 
+* December 18th
+
+** On doing things correctly
+
+   In the next 3 or 4 years I want to create my own comprehensive
+   plasma simulation system for tokamaks and other fusion devices. The
+   organised efforts in this area are too restrictive and conservative
+   and do not have the courage to throw out the old and adopt modern
+   standards based software systems. It is time that an individual or
+   a small group takes on this task in parallel with the current large
+   efforts and attempts a radically different and innovative
+   solution. Components like FMCFM can be used. However, any component
+   that does not meet software quality standards will be rejected and
+   rewritten.
+
+   Failure is highly possible but success can have major payoff.
+
+   A part of this project will be to develop a class on "Software
+   Design for Computational Physics". This should teach good software
+   practices keeping in mind special requirements for computational
+   physics. Standards (XML, XSD, SQL, C++, etc etc) should be used
+   with the understanding that these change over a period of time
+   which should be thought out early in a project.
+
+   A clean seperation of software components should be made based on
+   careful analysis of the specific problem. The analysis of grids is
+   a good but complex example of this. Other simpler examples (finite
+   difference, finite volume and finite element schemes) should be
+   worked out also. The emphasis in this part should be the careful
+   seperation of code based on the underlying mathematical structures
+   and not easy of implementation in a particular language.
+
+   Bourbaki of computational plasma physics.
+
 * December 15th
 
   Removed the HDF5 from Lucee and instead now using the implementation
