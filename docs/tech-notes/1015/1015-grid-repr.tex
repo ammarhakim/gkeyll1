@@ -54,5 +54,53 @@
 \lhead{Tech-Note 1015}
 \maketitle
 
+In this document I analyze the mathematical and computational
+requirements for implementing a general purpose unstructured grid
+library. Although restricted grid representations can be implemented
+in a straightforward manner, significant work is required in
+developing a library that can support the needs of different
+algorithms. 
+
+% Some algorithms need topological information while others need
+% detailed geometrical information of each grid element. Various
+% incidence and adjacency access might be required by different
+% agorithms.
+
+For developing production quality computational software it is
+important to analyze both the mathematical structures as well as the
+computational requirements of the domain under study. Using correct
+mathematical structures not only ensure logical consistency but also
+provides terminology that can be used in the code. However, the
+mathematical structures do not themselves indicate, at least not
+clearly, the means of implementing them in computer code. In fact, the
+question of representation or its efficiency is not addressed in the
+abstract mathematical structures themselves\footnote{This does not
+  mean that mathematics can not be used to analyze the computer
+  representation or its efficiency. It simply means that the abstract
+  mathematical structures and their possible representations in code
+  need to be studied separately. This is specially true as the code
+  depends on the abstraction provided by the selected programming
+  language.}. For example, we can define the concept of incidence or
+adjacency precisely using the language of topology, but this does not
+indicate \emph{how} such incidence and adjacency information can be
+represented or accessed in code.
 
 \end{document}
+
+For example: consider the solution of partial differential equations
+using finite-difference methods. The simplest representation appears
+to be finite differences applied to data stored on a rectangular
+Cartesian grid. However, a more general mathematical structure is
+provided by discrete exterior calculus. This yields so called mimetic
+schemes that are not only a generalization of the finite-difference
+scheme but also ensures that the discretization of the differential
+operators satisfies the discrete form of differential identities. Such
+an analysis is quite complicated and perhaps explains why it is not
+adopted in introductory exposition of the subject.
+
+Another example: the use of Newton-Krylov-Schwarz methods as a
+unifying concept for the implicit solution of PDEs. One more: the use
+of Riemann solvers as a unifying framework for the solution of
+hyperbolic PDEs.
+
+
