@@ -15,7 +15,7 @@
    that does not meet software quality standards will be rejected and
    rewritten.
 
-   Failure is highly possible but success can have major payoff.
+   Failure is highly likely but success can have major payoff.
 
    A part of this project will be to develop a class on "Software
    Design for Computational Physics". This should teach good software
@@ -30,7 +30,10 @@
    difference, finite volume and finite element schemes) should be
    worked out also. The emphasis in this part should be the careful
    seperation of code based on the underlying mathematical structures
-   and not easy of implementation in a particular language.
+   and not ease of implementation in a particular language.
+
+   Other examples: discrete exterior calculus, Newton-Krylov-Schwarz
+   schemes and Riemann solver based schemes for hyperbolic equations.
 
    Bourbaki of computational plasma physics.
 
