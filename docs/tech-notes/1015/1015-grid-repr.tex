@@ -59,25 +59,25 @@
 % topology and differential geometery will pay off even in the short
 % run.
 
-\section{Introduction}
+% \section{Introduction}
 
-To effectively develop production quality computational software it is
-important to analyze both the mathematical structures as well as the
-computational requirements of the domain under study. Selecting a
-sufficiently general mathematical structure leads to logical
-consistency and provides terminology that can be used in the
-code. However, the mathematical analysis might not clearly indicate an
-implementation. In fact, the question of representation or its
-efficiency is not addressed in the abstract mathematical structure
-\footnote{This does not mean that mathematics can not be used to
-  analyze the computer representation or its efficiency. It simply
-  means that the abstract mathematical structures and their possible
-  representations in code need to be studied separately. This is
-  specially true as the code depends on the features provided by the
-  selected programming language.}. For example, for cell complexes we
-can define the concept of incidence or adjacency precisely, but this
-does not indicate \emph{how} such incidence and adjacency information
-can be represented or accessed in code.
+% To effectively develop production quality computational software it is
+% important to analyze both the mathematical structures as well as the
+% computational requirements of the domain under study. Selecting a
+% sufficiently general mathematical structure leads to logical
+% consistency and provides terminology that can be used in the
+% code. However, the mathematical analysis might not clearly indicate an
+% implementation. In fact, the question of representation or its
+% efficiency is not addressed in the abstract mathematical structure
+% \footnote{This does not mean that mathematics can not be used to
+%   analyze the computer representation or its efficiency. It simply
+%   means that the abstract mathematical structures and their possible
+%   representations in code need to be studied separately. This is
+%   specially true as the code depends on the features provided by the
+%   selected programming language.}. For example, for cell complexes we
+% can define the concept of incidence or adjacency precisely, but this
+% does not indicate \emph{how} such incidence and adjacency information
+% can be represented or accessed in code.
 
 In this document I analyze the mathematical and computational
 requirements for implementing a general purpose unstructured grid
@@ -99,12 +99,12 @@ efficient library that can support the needs of diverse algorithms.
 A general mathematical framework for the analysis of grids is provided
 by a type of topological space called a \emph{CW-complex}. A
 CW-complex is a mathematical structure that is obtained by recursively
-``connecting together'' 0-cells (vertices) to form 1-cells (edges),
-1-cells to form 2-cells, 2-cells to form 3-cells etc. If the process
-is stopped after a finite number of steps and there are finite number
-of n-cells the resulting complex is termed \emph{finite}\footnote{A
-  CW-complex allows a countably infinite number of n-cells for all or
-  any $n$. Of course, such a structure is not useful for most
+``connecting together'' simple shapes to form a larger structure:
+0-cells (vertices) are connected to form 1-cells (edges), 1-cells are
+connected to form 2-cells, 2-cells are connected to form 3-cells
+etc. If there are a finite number of cells the resulting complex is
+termed \emph{finite}\footnote{A CW-complex allows a countably infinite
+  number of cells. Of course, such a structure is not useful for most
   computational physics applications and hence we restrict our
   attention to the case when the number of all n-cells is
   finite.}. The rather mysterious letters ``CW'' in front of the word
@@ -113,7 +113,10 @@ of n-cells the resulting complex is termed \emph{finite}\footnote{A
 all possible connections are permitted in a CW-complex: all n-cells in
 the complex must be topologically equivalent to the interior of a ball
 in $\mathbb{R}^n$. This eliminates objects with ``holes'' or
-``tunnels'' or, for example, shaped like doughnuts.
+``tunnels'' or, for example, shaped like doughnuts. Further, the
+\emph{sides} of a n-cell consists of cells of lower dimensions whose
+union is topologically equivalent to the surface of a $(n-1)$
+dimensional sphere.
 
 Although, as shown below, a CW-complex provides a general framework
 for several data-structures commonly used in computer science it does
@@ -123,8 +126,8 @@ allow representing the concept of a spatial domain which, with the
 division provided by the cell complex, leads to a natural discrete
 lattice on which the PDE is to be solved. This additional structure is
 provided by assuming that the underlying topological space is a
-\emph{manifold}, i.e., a space made up of patches that can be mapped
-to a subset of Euclidean space. In many instances the manifold has a
+\emph{manifold}, a space made up of patches that can be mapped to
+subsets of Euclidean space. In many instances the manifold has a
 boundary which itself is a manifold with one lower dimension.
 
 % The difference between CW-complex and the underlying manifold is an
@@ -153,6 +156,23 @@ boundary which itself is a manifold with one lower dimension.
 % and much more additional structure needs to be imposed. In
 % particular, the underlying space on which the complex lives needs to
 % be a manifold or a manifold with boundary.
+
+\section{Cell Complex and Fiber Bundle}
+
+We start with the definition of a topological space on which rest of
+the algebraic structures are built.
+\begin{dfn}[Topological Space]
+  A topological space is a set $X$ along with a collection
+  $\script{T}$ of subsets of $X$, called \emph{open sets}, such that
+  \begin{itemize}
+  \item $\phi \in \script{T}$ and $X \in \script{T}$
+  \item $\script{T}$ is closed under finite intersection
+  \item $\script{T}$ is closed under arbitrary union.
+  \end{itemize}
+\end{dfn}
+The set $X$ is called a \emph{space} the elements of which are called
+\emph{points} of the space. The collection $\script{T}$ is called a
+topology for $X$.
 
 \end{document}
 
