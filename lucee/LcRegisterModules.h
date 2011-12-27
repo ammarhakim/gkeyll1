@@ -1,7 +1,7 @@
 /**
  * @file	LcRegisterModules.h
  *
- * @brief	Class for registering all modules.
+ * @brief	Function for registering all modules.
  */
 
 #ifndef LC_REGISTER_MODULES_H

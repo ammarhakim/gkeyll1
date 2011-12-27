@@ -1,7 +1,7 @@
 /**
  * @file	LcRegisterModules.cpp
  *
- * @brief	Class for registering all modules.
+ * @brief	Function for registering all modules.
  */
 
 // lucee includes
