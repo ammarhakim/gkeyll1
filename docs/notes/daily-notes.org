@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* December 27th
+
+** Lucee cleanup
+
+  Need to remove or rething the GridGeometry class. There is
+  significant confusion by the hard coded names ("cell", "face",
+  "edge") and this needs to be rethought.
+
+  CmdLineArgs can be replaced with Boost.
+
+  Should Except class be replaced?
+
+  Should the loggers be eliminated?
+
 * December 18th
 
 ** On doing things correctly
@@ -98,7 +112,7 @@
 
   Downloaded and installed gsl-shell. This is a wrapper around the GSL
   library. It also includes simple plotting via the AGG 2.0
-  library. The cool think about this is that the standard Lua
+  library. The cool thing about this is that the standard Lua
   implementation is not used. Instead, the LuaJIT 2.0 just-in-time
   compiler is used. LuaJIT creates on-the-fly compiled code from Lua
   with performace (as claimed on the LuaJIT website) close to
