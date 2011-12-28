@@ -71,6 +71,9 @@ endif (GSL_FOUND)
 # find FFTW3
 find_package(TxFftw3)
 
+# find Boost
+find_package(TxBoost REQUIRED program_options)
+
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
   FIND_LIBRARY(ACCELERATE_LIB Accelerate)
