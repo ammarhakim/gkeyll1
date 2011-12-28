@@ -7,7 +7,6 @@
 // lucee includes
 #include <LcDataStructIfc.h>
 #include <LcDataStructRegistry.h>
-#include <LcGenericFactory.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
 #include <LcHyperEquation.h>
