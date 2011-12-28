@@ -12,7 +12,9 @@
 
   Should Except class be replaced?
 
-  Should the loggers be eliminated?
+  Should the custom Lucee loggers be eliminated? One could think of
+  using http://www.pantheios.org/. However, it appears to be not worth
+  the time for now.
 
 * December 18th
 
