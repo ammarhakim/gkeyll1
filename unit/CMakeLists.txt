@@ -129,10 +129,6 @@ target_link_libraries(lcgslelliptic ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 add_executable(lcrectcoordsys lcrectcoordsys.cxx)
 target_link_libraries(lcrectcoordsys lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
-# lctabledescription
-add_executable(lctabledescription lctabledescription.cxx)
-target_link_libraries(lctabledescription lcdatastructs lclib lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
-
 # lcluahelp
 add_executable(lcluahelp lcluahelp.cxx)
 target_link_libraries(lcluahelp lcdatastructs lclib lclua ${Hdf5_Mpi_LIBRARIES})
