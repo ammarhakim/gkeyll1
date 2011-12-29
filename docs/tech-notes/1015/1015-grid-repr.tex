@@ -59,6 +59,9 @@
 % topology and differential geometery will pay off even in the short
 % run.
 
+% NOTE: For now this looks like a "brain dump". I need to organize
+% this further to make it look like more systematic notes.
+
 % \section{Introduction}
 
 % To effectively develop production quality computational software it is
@@ -80,11 +83,11 @@
 % can be represented or accessed in code.
 
 In this document I analyze the mathematical and computational
-requirements for implementing a general purpose unstructured grid
-library. Although restricted grid representations for specific
-applications can be implemented in a relatively straightforward
-manner, significant work is required to develop a flexible and
-efficient library that can support the needs of diverse algorithms.
+requirements for implementing a general purpose grid library.
+Although restricted grid representations for specific applications can
+be implemented in a relatively straightforward manner, significant
+work is required to develop a flexible and efficient library that can
+support the needs of diverse algorithms.
 
 % Some algorithms need topological information while others need
 % detailed geometrical information of each grid element. Various
@@ -98,25 +101,24 @@ efficient library that can support the needs of diverse algorithms.
 
 A general mathematical framework for the analysis of grids is provided
 by a type of topological space called a \emph{CW-complex}. A
-CW-complex is a mathematical structure that is obtained by recursively
-``connecting together'' simple shapes to form a larger structure:
-0-cells (vertices) are connected to form 1-cells (edges), 1-cells are
-connected to form 2-cells, 2-cells are connected to form 3-cells
-etc. If there are a finite number of cells the resulting complex is
-termed \emph{finite}\footnote{A CW-complex allows a countably infinite
-  number of cells. Of course, such a structure is not useful for most
+CW-complex is obtained by recursively ``connecting together'' simple
+shapes to form a larger structure: 0-cells (vertices) are connected to
+form 1-cells (edges), 1-cells are connected to form 2-cells, 2-cells
+are connected to form 3-cells etc.  Not all connections are permitted
+in a CW-complex: all n-cells in the complex must be topologically
+equivalent to the interior of a ball in $\mathbb{R}^n$. This
+eliminates objects with ``holes'' or ``tunnels'' or, for example,
+shaped like doughnuts. Further, the \emph{sides} of a n-cell consists
+of cells of lower dimensions whose union is topologically equivalent
+to the surface of a $(n-1)$ dimensional sphere. If there are a finite
+number of cells the resulting complex is termed
+\emph{finite}\footnote{A CW-complex allows a countably infinite number
+  of cells. Of course, such a structure is not useful for most
   computational physics applications and hence we restrict our
   attention to the case when the number of all n-cells is
   finite.}. The rather mysterious letters ``CW'' in front of the word
 ``complex'' in this case can then be dropped. We will use \emph{cell
-  complex} or even just \emph{complex} for a finite CW-complex. Not
-all possible connections are permitted in a CW-complex: all n-cells in
-the complex must be topologically equivalent to the interior of a ball
-in $\mathbb{R}^n$. This eliminates objects with ``holes'' or
-``tunnels'' or, for example, shaped like doughnuts. Further, the
-\emph{sides} of a n-cell consists of cells of lower dimensions whose
-union is topologically equivalent to the surface of a $(n-1)$
-dimensional sphere.
+  complex} or even just \emph{complex} for a finite CW-complex.
 
 Although, as shown below, a CW-complex provides a general framework
 for several data-structures commonly used in computer science it does
@@ -157,7 +159,7 @@ boundary which itself is a manifold with one lower dimension.
 % particular, the underlying space on which the complex lives needs to
 % be a manifold or a manifold with boundary.
 
-\section{Cell Complex and Fiber Bundle}
+\section{Cell Complex and Vector Bundle}
 
 We start with the definition of a topological space on which rest of
 the algebraic structures are built.
@@ -172,7 +174,16 @@ the algebraic structures are built.
 \end{dfn}
 The set $X$ is called a \emph{space} the elements of which are called
 \emph{points} of the space. The collection $\script{T}$ is called a
-topology for $X$.
+topology for $X$. The subsets of $\script{T}$ are also known as
+\emph{neighborhoods}. In particular, for $x\in X$, $\script{T}_x \in
+\script{T}$ is a neighborhood of $x$ if $x\in \script{T}_x$.
+
+A crucial concept is that of \emph{nearness}. It allows the definition
+of continuity which in turn allows performing calculus on the space.
+\begin{dfn}[Nearness]
+  A point $x\in X$ is said to be \emph{near} a set $A \subset X$ if
+  all neighborhoods of $x$ contain a point in $A$.
+\end{dfn}
 
 \end{document}
 
