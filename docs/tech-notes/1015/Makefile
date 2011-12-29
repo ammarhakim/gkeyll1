@@ -1,4 +1,5 @@
-NAME=1015-grid-repr
+#NAME=1015-grid-repr
+NAME=1015-reading-notes
 $(NAME).pdf: $(NAME).tex
 	pdflatex $(NAME).tex
 
