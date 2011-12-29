@@ -8,13 +8,18 @@
   significant confusion by the hard coded names ("cell", "face",
   "edge") and this needs to be rethought.
 
-  CmdLineArgs can be replaced with Boost.
+  CmdLineArgs can be replaced with Boost. [No need: Cmd line usage is
+  minor in lucee]
 
   Should Except class be replaced?
 
   Should the custom Lucee loggers be eliminated? One could think of
   using http://www.pantheios.org/. However, it appears to be not worth
   the time for now.
+
+  Should we replace LcTest.h with Boost unit testing framework?
+
+  Fix all doxygen errors.
 
 * December 18th
 
