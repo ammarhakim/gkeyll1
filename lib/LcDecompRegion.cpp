@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcArray.h>
 #include <LcDecompRegion.h>
 
 namespace Lucee
@@ -18,6 +19,7 @@ namespace Lucee
   DecompRegion<NDIM>::DecompRegion(const Lucee::Region<NDIM, int>& globalRgn)
     : globalRgn(globalRgn)
   {
+    rgns.push_back(globalRgn); // by default global region is not decomposed
   }
 
   template <unsigned NDIM> 
@@ -45,6 +47,40 @@ namespace Lucee
   DecompRegion<NDIM>::getGlobalRegion() const
   {
     return globalRgn;
+  }
+
+  template <unsigned NDIM> 
+  void
+  DecompRegion<NDIM>::clearDecomp()
+  {
+    rgns.clear();
+  }
+
+  template <unsigned NDIM> 
+  bool
+  DecompRegion<NDIM>::checkCovering() const
+  {
+// create array over global region
+    Lucee::Array<NDIM, int> check(globalRgn, 0);
+// loop over each sub-region
+    typename std::vector<Lucee::Region<NDIM, int> >::const_iterator itr
+      = rgns.begin();
+    for ( ; itr != rgns.end(); ++itr)
+    {
+      Lucee::ColMajorSequencer<NDIM> seq(*itr);
+// loop over region, incrementing count in 'check' array
+      while (seq.step())
+        check(seq.getIndex()) += 1;
+    }
+// if any location is visited more than once (or not at all) it will
+// have a number other than 1 in it.
+    Lucee::ColMajorSequencer<NDIM> seq(globalRgn);
+    while (seq.step())
+    {
+      if (check(seq.getIndex()) != 1)
+        return false;
+    }
+    return true;
   }
 
 // instantiations

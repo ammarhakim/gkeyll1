@@ -155,3 +155,7 @@ if (FFTW3_FOUND)
   add_executable(lcfftwtest lcfftwtest.cxx)
   target_link_libraries(lcfftwtest ${Fftw3_LIBRARIES})
 endif (FFTW3_FOUND)
+
+# lcdecompregion
+add_executable(lcdecompregion lcdecompregion.cxx)
+target_link_libraries(lcdecompregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
