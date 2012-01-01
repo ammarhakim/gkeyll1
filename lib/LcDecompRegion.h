@@ -21,6 +21,12 @@
 
 namespace Lucee
 {
+/**
+ * A decomposed region is an abstraction that holds a decomposition of
+ * a given global region as (potentially) smaller non-overlapping
+ * regions. The union of all the regions in the decomposition covers
+ * the global region.
+ */
   template <unsigned NDIM> 
   class DecompRegion
   {
@@ -59,11 +65,50 @@ namespace Lucee
  */
       Lucee::Region<NDIM, int> getGlobalRegion() const;
 
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> getNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors do not include corner
+ * neigbors but only face neigbors.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> getFaceNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Check if the decomposition covers global region. Returns true if it
+ * does, false otherwise.
+ *
+ * @return return true if decomposition covers global region.
+ */
+      bool checkCovering() const;
+
     private:
 /** Global region */
       Lucee::Region<NDIM, int> globalRgn;
 /** Regions making up decomposition */
       std::vector<Lucee::Region<NDIM, int> > rgns;
+
+/**
+ * Clear decomposition to create new decomposition.
+ */
+      void clearDecomp();
   };
 }
 

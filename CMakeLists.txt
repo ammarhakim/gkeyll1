@@ -206,3 +206,6 @@ add_test(lcgeomprim unit/lcgeomprim)
 
 # lcstructgridfield
 add_test(lcstructgridfield unit/lcstructgridfield)
+
+# lcdecompregion
+add_test(lcdecompregion unit/lcdecompregion)
