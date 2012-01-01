@@ -16,8 +16,6 @@
 #include <LcExcept.h>
 #include <LcFixedVector.h>
 
-#include <iostream>
-
 namespace Lucee
 {
 /**

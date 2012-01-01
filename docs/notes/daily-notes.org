@@ -1,5 +1,23 @@
 # -*- org -*-
 
+* December 31st
+
+  Added a new directory in docs called ldevp which will contain Lucee
+  development proposals. For now onwards I want to write a LDEVP
+  before doing the implementation.
+
+  Working on DecompRegion class. Added a LDEVP on a proposed
+  implementation.
+
+  Need to next add a multi-region class that will allow representing a
+  multi-block grid.
+
+  Need to add a general tree structure that allows storing
+  hierarchical data in key-value pairs. The supported values should be
+  int, double, string, vectors of these and 1, 2 and 3d
+  arrays. Potentially, this could also store parallel arrays, i.e
+  arrays that live on different processors.
+
 * December 27th
 
 ** Lucee cleanup

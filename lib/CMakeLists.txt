@@ -12,6 +12,7 @@ add_library(lclib
   LcBasicObj.cpp
   LcCmdLineArgs.cpp
   LcDataStructIfc.cpp
+  LcDecompRegion.cpp
   LcExcept.cpp 
   LcFileHandler.cpp
   LcLibRegistry.cpp

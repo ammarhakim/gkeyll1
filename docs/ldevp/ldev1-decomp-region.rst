@@ -17,6 +17,9 @@ interface for different decomposition algorithms is also proposed.
 Proposed Implementation
 -----------------------
 
+Decomposed Region
++++++++++++++++++
+
 A *decomposed region* is an abstraction that holds a decomposition of
 a given *parent* n-box [#n-box]_ as (potentially) smaller
 non-overlapping n-boxes. The union of all the n-boxes in the
@@ -57,6 +60,9 @@ those boxes that share a common face with the target box::
   std::vector<unsigned> getFaceNeigbors(unsigned target, 
     const int lowerExt[NDIM], const int upperExt[NDIM]);
 
+Computing the Decomposition
++++++++++++++++++++++++++++
+
 Different algorithms can be used to compute the decomposition. These
 algorithms are implemented a separate set of classes and take the
 parent region and the number of sub-boxes as input and compute the
@@ -66,8 +72,8 @@ needed decomposition. The base class interface is::
   {
     public:
   /** Compute decomposition, adding subboxes into  decompRgn object */
-      virtual void computeDecomp(unsigned nrgns,
-        DecompRegion<NDIM>& decompRgn) = 0;
+      virtual void computeDecomp(unsigned nrgns, 
+        const DecompRegion<NDIM>& rgn, DecompRegion<NDIM>& decompRgn) = 0;
   };
 
 ---------------
