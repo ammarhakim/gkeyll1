@@ -39,9 +39,9 @@ namespace Lucee
     protected:
 
 /**
- * Method used to compute the actual decomposition. Derived classes
- * should provide this method and use the `addRegion` method to add
- * the computed regions.
+ * Method used to compute actual decomposition. Derived classes should
+ * provide this method and use `addRegion` method to add computed
+ * regions.
  *
  * @param nrgns Number of regions to create.
  * @param globalRgn Global region to decompose.
@@ -50,14 +50,14 @@ namespace Lucee
         const Lucee::Region<NDIM, int>& globalRgn) = 0;
 
 /**
- * Append sub-region to decomposition. This method should
+ * Append sub-region to decomposition. This method should be called by
+ * derived classes to add sub-regions.
  *
  * @param subRgn Region to add.
  */
       void addRegion(const Lucee::Region<NDIM, int>& subRgn);
 
     private:
-
 /** Pointer to decomp region box: this is so addRegion can access it */
       Lucee::DecompRegion<NDIM> *decompRgnPtr;
   };

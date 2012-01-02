@@ -18,7 +18,7 @@ namespace Lucee
   void
   DecompRegionCalcIfc<NDIM>::calcDecomp(unsigned nrgns, Lucee::DecompRegion<NDIM>& decompRgn)
   {
-    decompRgnPtr = &decompRgn; // set so addRegion can access
+    decompRgnPtr = &decompRgn; // so addRegion can access
 // clear existing decomposition
     decompRgn.clearDecomp();
 // call derived class to compute decomposition
