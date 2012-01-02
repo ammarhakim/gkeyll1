@@ -83,6 +83,13 @@ namespace Lucee
     return true;
   }
 
+  template <unsigned NDIM> 
+  void
+  DecompRegion<NDIM>::addRegion(const Lucee::Region<NDIM, int>& subRgn)
+  {
+    rgns.push_back(subRgn);
+  }
+
 // instantiations
   template class DecompRegion<1>;
   template class DecompRegion<2>;

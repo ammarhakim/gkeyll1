@@ -31,6 +31,9 @@ namespace Lucee
   class DecompRegion
   {
     public:
+// forward declare algorithm calculation class so it can access our privates
+      template <unsigned NNDIM> friend class DecompRegionCalcIfc;
+
 /**
  * Create a new decompRegion object which decomposes the supplied
  * global region. The object created by this ctor creates a unitary
@@ -106,9 +109,18 @@ namespace Lucee
       std::vector<Lucee::Region<NDIM, int> > rgns;
 
 /**
- * Clear decomposition to create new decomposition.
+ * Clear current decomposition to create new decomposition.
  */
       void clearDecomp();
+
+/**
+ * Append sub-region to decomposition. (This method is private but
+ * DecompRegionCalcIfc class which is a friend can use it while
+ * creating the decomposition).
+ *
+ * @param subRgn Region to add.
+ */
+      void addRegion(const Lucee::Region<NDIM, int>& subRgn);
   };
 }
 
