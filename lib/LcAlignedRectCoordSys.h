@@ -56,8 +56,8 @@ namespace Lucee
  * this object) from global coordinate system. The matrix is stored as
  * an array of 6 components [A11, A12, A13, A22, A23, A33].
  *
- * @param inVec Symmetric matrix to rotate.
- * @param outVec Rotated matrix.
+ * @param inSM Symmetric matrix to rotate.
+ * @param outSM Rotated matrix.
  */
       void rotateSymMatrixToLocal(const double inSM[6], double outSM[6]) const;
 
@@ -66,8 +66,8 @@ namespace Lucee
  * by this object) to global coordinate system.  The matrix is stored
  * as an array of 6 components [A11, A12, A13, A22, A23, A33].
  *
- * @param inVec Symmetric matrix to rotate.
- * @param outVec Rotated matrix.
+ * @param inSM Symmetric matrix to rotate.
+ * @param outSM Rotated matrix.
  */
       void rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const;
 

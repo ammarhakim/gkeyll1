@@ -10,6 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 add_library(lclib 
   LcAlignedRectCoordSys.cpp
   LcBasicObj.cpp
+  LcCartProdDecompRegionCalc.cpp
   LcCmdLineArgs.cpp
   LcDataStructIfc.cpp
   LcDecompRegion.cpp

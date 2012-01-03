@@ -23,7 +23,7 @@ namespace Lucee
  * Class to represent matrices.
  */
   template <typename T>
-  class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer >
+  class Matrix : public Lucee::Array<2, T, Lucee::ColMajorIndexer>
   {
     public:
 /**
@@ -50,7 +50,7 @@ namespace Lucee
       Matrix(unsigned shape[2], int start[2]);
 
 /**
- * Creat a new matrix from input matrix.
+ * Create a new matrix from input matrix.
  *
  * @param mat Matrix to copy from
  */
