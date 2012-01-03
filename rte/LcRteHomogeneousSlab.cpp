@@ -77,7 +77,7 @@ namespace Lucee
       if (isHalfSpace == false)
       {
         tau0 = tbl.getNumber("tau0");
-// ensure that data is not requested deeper tau0
+// ensure that data is not requested deeper than tau0
         for (unsigned k=0; k<tauRadOut.size(); ++k)
           if (tauRadOut[k] > tau0)
           {

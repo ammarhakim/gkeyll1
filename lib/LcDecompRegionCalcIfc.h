@@ -18,21 +18,20 @@
 namespace Lucee
 {
 /**
- * This class defines the interface for different decomposition
- * algorithms. These algorithms are implemented by derived classes and
- * take the global region and the number of sub-regions as input and
- * compute the needed decomposition.
+ * This class defines interface for different decomposition
+ * algorithms. The actual algorithms are implemented by derived
+ * classes and take the global region and the number of sub-regions as
+ * input and compute the needed decomposition.
  */
   template <unsigned NDIM>
   class DecompRegionCalcIfc
   {
     public:
 /**
- * Calculate decomposition adding subregions into the decompRgn
- * object.
+ * Calculate decomposition adding subregions into decompRgn object.
  *
  * @param nrgns Number of regions to create.
- * @param decompRgn On output this contains the decomposition.
+ * @param decompRgn On output this contains decomposition.
  */
       void calcDecomp(unsigned nrgns, Lucee::DecompRegion<NDIM>& decompRgn);
 
