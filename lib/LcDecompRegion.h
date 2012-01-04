@@ -102,6 +102,13 @@ namespace Lucee
  */
       bool checkCovering() const;
 
+/**
+ * Calculate ratio of minimum volume region to maximum volume region
+ *
+ * @return ratio of minimum volume to maximum volume region.
+ */
+      double calcMinMaxVolRatio() const;
+
     private:
 /** Global region */
       Lucee::Region<NDIM, int> globalRgn;
