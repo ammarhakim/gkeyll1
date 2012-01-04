@@ -198,9 +198,6 @@ add_test(lcfieldptr unit/lcfieldptr)
 # lcrectcoordsys
 add_test(lcrectcoordsys unit/lcrectcoordsys)
 
-# lcluahelp
-add_test(lcluahelp unit/lcluahelp)
-
 # lcgeomprim
 add_test(lcgeomprim unit/lcgeomprim)
 
