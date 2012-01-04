@@ -4,6 +4,8 @@ Decomposed Regions
 
 .. highlight:: c++
 
+.. contents::
+
 Motivation and Overview
 -----------------------
 
@@ -102,6 +104,32 @@ method::
 The base class ensures that the current decomposition in
 ``decompRegion`` is cleared out and that the decomposition provided by
 the derived classes covers ``globalRgn``.
+
+Cartesian Product Decomposition
+*******************************
+
+A simple decomposition algorithm is provided by the
+``CartProdDecompRegionCalc`` class::
+
+  template <unsigned NDIM>
+  class CartProdDecompRegionCalc : public DecompRegionCalcIfc<NDIM> 
+  {
+  // cuts[n] is number of divisions along n-th direction.
+      CartProdDecompRegionCalc(const unsigned cuts[NDIM]);
+  }
+
+This class takes the number of divisions (``cuts``) along each
+direction. For example, if in 2D the cuts are :math:`4 \times 8`, it
+indicates that the number of sub-regions is 32 with the number of
+cells in the X-direction divided into 4 sub-division and number of
+cells in the Y-direction divided into 8 sub-divisions. Let :math:`N_i`
+be the number of cells in the :math:`i`-th direction in the global
+region. Let :math:`C_i` be the cut in the :math:`i`-th direction. If
+:math:`N_i \% C_i \ne 0` the sub-regions will not have the same
+volume. To avoid narrow sub-regions, potentially a single cell wide in
+some directions, the sub-regions are all adjusted so that the size in
+each direction varies at most by one. This ensures the sub-regions are
+approximately the same volume.
 
 ---------------
 

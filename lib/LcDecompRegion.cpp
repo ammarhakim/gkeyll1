@@ -13,6 +13,9 @@
 #include <LcArray.h>
 #include <LcDecompRegion.h>
 
+// std includes
+#include <limits>
+
 namespace Lucee
 {
   template <unsigned NDIM> 
@@ -81,6 +84,24 @@ namespace Lucee
         return false;
     }
     return true;
+  }
+
+  template <unsigned NDIM> 
+  double
+  DecompRegion<NDIM>::calcMinMaxVolRatio() const
+  {
+    int minVol = std::numeric_limits<int>::max();
+    int maxVol = 0;
+// loop over each sub-region
+    typename std::vector<Lucee::Region<NDIM, int> >::const_iterator itr
+      = rgns.begin();
+    for ( ; itr != rgns.end(); ++itr)
+    {
+      int vol = itr->getVolume();
+      minVol = vol < minVol ? vol : minVol;
+      maxVol = vol > maxVol ? vol : maxVol;
+    }
+    return (double) minVol / (double) maxVol;
   }
 
   template <unsigned NDIM> 

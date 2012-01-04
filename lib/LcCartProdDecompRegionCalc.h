@@ -34,6 +34,15 @@ namespace Lucee
  */
       CartProdDecompRegionCalc(const unsigned cuts[NDIM]);
 
+/**
+ * Create a new decomp calculator with specified number of cuts in
+ * each direction. The value cut[n] is the number of divisions in the
+ * n-th direction.
+ *
+ * @param cuts Value cuts[n] is number of divisions along n-th direction.
+ */
+      CartProdDecompRegionCalc(const int cuts[NDIM]);
+
     protected:
 
 /**
@@ -46,7 +55,7 @@ namespace Lucee
 
     private:
 /** Number of cuts in each direction */
-      unsigned cuts[NDIM];
+      int cuts[NDIM];
 /** Number of total sub-regions */
       unsigned nsub;
   };
