@@ -111,8 +111,16 @@ namespace Lucee
  * Check if point is inside region.
  *
  * @param point Point to check.
+ * @return true if point is inside region.
  */
       bool isInside(const T point[NDIM]) const;
+
+/**
+ * Return true if region is empty (zero or negative volume).
+ *
+ * @return True if region is empty.
+ */
+      bool isEmpty() const;
 
 /**
  * Return intersection of supplied region with this one.
@@ -215,6 +223,16 @@ namespace Lucee
       if ((point[i] < lower[i]) || (point[i] >= upper[i]))
         return false;
     return true;
+  }
+
+  template <unsigned NDIM, typename T>
+  bool
+  Region<NDIM, T>::isEmpty() const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      if (upper[i] <= lower[i])
+        return true;
+    return false;
   }
 
   template <unsigned NDIM, typename T>

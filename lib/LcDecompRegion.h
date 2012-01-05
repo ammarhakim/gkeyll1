@@ -14,10 +14,13 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcFixedVector.h>
 #include <LcRegion.h>
 
 // std includes
+#include <functional>
 #include <vector>
+#include <map>
 
 namespace Lucee
 {
@@ -116,6 +119,54 @@ namespace Lucee
       std::vector<Lucee::Region<NDIM, int> > rgns;
 
 /**
+ * A private class to define a comparison operator that allows using
+ * ghost cell distributions as keys in a map. This is needed to cache
+ * neighbor calculations that would otherwise be very expensive.
+ */
+      template <unsigned CDIM>
+      struct FixedVecCmp : public std::binary_function<Lucee::FixedVector<CDIM, int>,
+        Lucee::FixedVector<CDIM, int>, bool>
+      {
+/**
+ * Function that compares two fixed vectors lexicographically.
+ *
+ * @param lhs Vector on left of < operator.
+ * @param rhs Vector on right of < operator.
+ * @return true is lhs < rhs, false otherwise
+ */
+          bool
+          operator() (const Lucee::FixedVector<CDIM, int>& lhs,
+            const Lucee::FixedVector<CDIM, int>& rhs) const
+          {
+            for (unsigned i=0; i<CDIM; ++i)
+            {
+              if (lhs[i] < rhs[i])
+                return true;
+              else if (lhs[i] > rhs[i])
+                return false;
+            }
+            return false; // lhs == rhs hence lhs < rhs is false
+          }
+      };
+
+/** Typedef map from ghost cell distributions -> neighbor list */
+      typedef std::map<Lucee::FixedVector<2*NDIM, int>, std::vector<unsigned>, FixedVecCmp<2*NDIM> > NeighborMap_t;
+/** Typedef pair of ghost cell distributions & neighbor list */
+      typedef std::pair<Lucee::FixedVector<2*NDIM, int>, std::vector<unsigned> > NeighborPair_t;
+
+/**
+ * Private class to hold all neighbor information for each sub-region.
+ */
+      struct NeighborData
+      {
+/** Map to store ghost cell distribution -> neighbor list */
+          NeighborMap_t neighborMap;
+      };
+
+/** Map of sub-region number -> neighbor information */
+      mutable std::map<unsigned, NeighborData> rgnNeighborMap;
+
+/**
  * Clear current decomposition to create new decomposition.
  */
       void clearDecomp();
@@ -128,6 +179,17 @@ namespace Lucee
  * @param subRgn Region to add.
  */
       void addRegion(const Lucee::Region<NDIM, int>& subRgn);
+
+/**
+ * Calculate neighbor information given ghost cell distribution.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> calcNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
   };
 }
 
