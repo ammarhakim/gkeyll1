@@ -270,6 +270,19 @@ test_9()
   }
 }
 
+void
+test_10()
+{  
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox(lower, upper);
+
+  LC_ASSERT("Checking if box is empty", ibox.isEmpty() == false);
+
+  Lucee::Region<2, int> ebox;
+  LC_ASSERT("Checking if box is empty", ebox.isEmpty() == true);
+}
+
 int
 main(void) 
 {
@@ -283,5 +296,6 @@ main(void)
   test_7();
   test_8();
   test_9();
+  test_10();
   LC_END_TESTS;
 }

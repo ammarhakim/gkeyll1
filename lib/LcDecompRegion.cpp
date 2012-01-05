@@ -53,6 +53,35 @@ namespace Lucee
   }
 
   template <unsigned NDIM> 
+  std::vector<unsigned>
+  DecompRegion<NDIM>::getNeighbors(unsigned rn,
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+// create vector to identify ghost cell distribution
+    Lucee::FixedVector<2*NDIM, int> gcd(0);
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      gcd[i] = lowerExt[i];
+      gcd[NDIM+i] = upperExt[i];
+    }
+
+// first check if any data exists for this region number
+    typename std::map<unsigned, NeighborData>::const_iterator rgnItr
+      = rgnNeighborMap.find(rn);
+    if (rgnItr != rgnNeighborMap.end())
+    {
+// check if this ghost cell distribution is computed
+      typename NeighborMap_t::const_iterator gstItr
+        = rgnItr->second.neighborMap.find(gcd);
+      if (gstItr != rgnItr->second.neighborMap.end())
+        return gstItr->second;
+    }
+// at this point we need to compute neighbors
+    std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+// ADD THIS
+  }
+  
+  template <unsigned NDIM> 
   void
   DecompRegion<NDIM>::clearDecomp()
   {
@@ -109,6 +138,26 @@ namespace Lucee
   DecompRegion<NDIM>::addRegion(const Lucee::Region<NDIM, int>& subRgn)
   {
     rgns.push_back(subRgn);
+  }
+
+  template <unsigned NDIM> 
+  std::vector<unsigned> 
+  DecompRegion<NDIM>::calcNeighbors(unsigned rn,
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+    std::vector<unsigned> nl;
+// get current region 
+    Lucee::Region<NDIM, int> currRgn = getRegion(rn);
+// intersect it with all other regions
+    for (unsigned i=0; i<getNumRegions(); ++i)
+    {
+      if (rn == i) 
+        continue; // no need to intersect with ourself
+// check intersection
+      if ( ! currRgn.intersect( getRegion(i) ).isEmpty() )
+        nl.push_back(i);
+    }
+    return nl;
   }
 
 // instantiations
