@@ -52,8 +52,8 @@ namespace Lucee
 // struct to hold shapes along each direction
     struct { std::vector<unsigned> shape, start; } dimShapes[NDIM];
 
-// The basic idea is to first set shape[dim] to be the nearest smaller
-// integer number of cells. Then, the remainder cells from the
+// NOTE: The basic idea is to first set shape[dim] to be the nearest
+// smaller integer number of cells. Then, the remainder cells from the
 // division are added one by one to each of the cuts. This ensures
 // that each cut differs only by a single cell in each dim.
 
