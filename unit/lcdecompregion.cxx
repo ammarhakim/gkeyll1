@@ -78,6 +78,51 @@ test_2()
 }
 
 void
+test_2_2()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+  int cuts[2] = {4, 2};
+
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+
+// first try to decompose with incorrect number of regions
+  LC_RAISES("Testing if incorrect decomposition can be done", 
+    cartDecomp.calcDecomp(10, dcomp), Lucee::Except);
+
+// now decompose domain
+  cartDecomp.calcDecomp(8, dcomp);
+// check decomp
+  int xlower[4] = {0, 8, 16, 24};
+  int ylower[2] = {0, 32};
+
+  LC_ASSERT("Testing decomposition", dcomp.getNumRegions() == 8);
+
+  Lucee::Region<2, int> cutRgn(cuts);
+  Lucee::ColMajorSequencer<2> seq(cutRgn);
+  unsigned r = 0;
+  int idx[2];
+  while (seq.step())
+  {
+    seq.fillWithIndex(idx);
+    Lucee::Region<2, int> subRgn = dcomp.getRegion(r);
+    LC_ASSERT("Testing decomposition", subRgn.getLower(0) == xlower[idx[0]]);
+    LC_ASSERT("Testing decomposition", subRgn.getLower(1) == ylower[idx[1]]);
+
+    LC_ASSERT("Testing decomposition", subRgn.getShape(0) == 8);
+    LC_ASSERT("Testing decomposition", subRgn.getShape(1) == 32);
+
+    r++;
+  }
+
+  LC_ASSERT("Tesing decomposition", dcomp.calcMinMaxVolRatio() == 1.0);
+}
+
+void
 test_3()
 {
   int lower[2] = {0, 0};
@@ -267,6 +312,8 @@ test_7()
 // now decompose domain
   cartDecomp.calcDecomp(8, dcomp);
 
+  unsigned numNeigh[8] = {3, 3, 5, 5, 5, 5, 3, 3};
+
   int lowerExt[2] = {1, 1};
   int upperExt[2] = {1, 1};
 // loop over each region, getting neighbors
@@ -274,13 +321,14 @@ test_7()
   {
     std::vector<unsigned> neigh = dcomp.getNeighbors(rn, lowerExt, upperExt);
 
+    LC_ASSERT("Testing number of neighbors", neigh.size() == numNeigh[rn]);
     Lucee::Region<2, int> rgn = dcomp.getRegion(rn);
 // now check if these are really neighbors
     std::vector<unsigned>::const_iterator itr = neigh.begin();
     for ( ; itr!=neigh.end(); ++itr)
     {
       Lucee::Region<2, int> neighRgn = dcomp.getRegion(*itr);
-      LC_ASSERT("Testing neighbors are correct",
+      LC_ASSERT("Testing if neighbors are correct",
         rgn.extend(lowerExt, upperExt).intersect(neighRgn).isEmpty() == false);
     }
   }
@@ -292,6 +340,7 @@ main(void)
   LC_BEGIN_TESTS("lcdecomregion");
   test_1();
   test_2();
+  test_2_2();
   test_3();
   test_4();
   test_5();
