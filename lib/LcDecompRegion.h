@@ -160,7 +160,7 @@ namespace Lucee
       struct NeighborData
       {
 /** Map to store ghost cell distribution -> neighbor list */
-          NeighborMap_t neighborMap;
+          mutable NeighborMap_t neighborMap;
       };
 
 /** Map of sub-region number -> neighbor information */
