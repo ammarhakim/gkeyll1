@@ -63,7 +63,10 @@ namespace Lucee
 // computes the neighbors, stores them in the appropriate map and
 // returns the newly computed neighbors. The neighbor calculation is
 // quite expensive, specially in 2D and 3D so the caching can improve
-// performance.
+// performance. The code below is complicated by the fact that for
+// each sub-region neighbor information for different ghost
+// distribution might be requested. This requires the use of a
+// "two-layer" map.
 
 // create vector to identify ghost cell distribution
     Lucee::FixedVector<2*NDIM, int> gcd(0);

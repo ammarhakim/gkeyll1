@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* January 5th 2012
+
+  Now in Princeton temp housing. Apartment is old but okay. Needs a
+  through cleaning.
+
+  Completed the decomposition neighbor calculation code. Code seems to
+  work. A general issue is how to test methods and data-structures
+  that are internal to a class. Most unit tests are "black-box" and
+  can only work with the public interface of a class. Then the
+  question: how to test internals of a class?
+
+  Need to write an LDEVP on parallel field messaging, multi-region
+  data-structures and a tree-like data-structure for storing arbitrary
+  hierarchical data.
+
 * December 31st
 
   Added a new directory in docs called ldevp which will contain Lucee
