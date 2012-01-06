@@ -251,6 +251,41 @@ test_6()
   LC_ASSERT("Tesing decomposition", dcomp.calcMinMaxVolRatio() == 1.0);
 }
 
+void
+test_7()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+  int cuts[2] = {2, 4};
+
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+
+// now decompose domain
+  cartDecomp.calcDecomp(8, dcomp);
+
+  int lowerExt[2] = {1, 1};
+  int upperExt[2] = {1, 1};
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getNeighbors(rn, lowerExt, upperExt);
+
+    Lucee::Region<2, int> rgn = dcomp.getRegion(rn);
+// now check if these are really neighbors
+    std::vector<unsigned>::const_iterator itr = neigh.begin();
+    for ( ; itr!=neigh.end(); ++itr)
+    {
+      Lucee::Region<2, int> neighRgn = dcomp.getRegion(*itr);
+      LC_ASSERT("Testing neighbors are correct",
+        rgn.extend(lowerExt, upperExt).intersect(neighRgn).isEmpty() == false);
+    }
+  }
+}
+
 int
 main(void) 
 {
@@ -261,5 +296,6 @@ main(void)
   test_4();
   test_5();
   test_6();
+  test_7();
   LC_END_TESTS;
 }

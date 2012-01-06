@@ -57,6 +57,14 @@ namespace Lucee
   DecompRegion<NDIM>::getNeighbors(unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
+// NOTE: This method checks if the neighbor calculation for this
+// sub-region and ghost cell distribution was requested before. If so
+// it just returns the previously computed value. Otherwise, it
+// computes the neighbors, stores them in the appropriate map and
+// returns the newly computed neighbors. The neighbor calculation is
+// quite expensive, specially in 2D and 3D so the caching can improve
+// performance.
+
 // create vector to identify ghost cell distribution
     Lucee::FixedVector<2*NDIM, int> gcd(0);
     for (unsigned i=0; i<NDIM; ++i)
@@ -69,16 +77,35 @@ namespace Lucee
     typename std::map<unsigned, NeighborData>::const_iterator rgnItr
       = rgnNeighborMap.find(rn);
     if (rgnItr != rgnNeighborMap.end())
-    {
+    { // region exists
 // check if this ghost cell distribution is computed
       typename NeighborMap_t::const_iterator gstItr
         = rgnItr->second.neighborMap.find(gcd);
       if (gstItr != rgnItr->second.neighborMap.end())
+      { // ghost cell distribution exists
         return gstItr->second;
+      }
+      else
+      { // ghost cell distribution does not exist
+// compute neighbors
+        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+// insert into map so next time we need not compute neighbors all over again
+        rgnItr->second.neighborMap.insert(NeighborPair_t(gcd, ninfo));
+        return ninfo;
+      }
     }
-// at this point we need to compute neighbors
-    std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
-// ADD THIS
+    else
+    { // region does not exist
+// compute neighbors
+        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+// create new neighbor data object
+        NeighborData ndat;
+        ndat.neighborMap.insert(NeighborPair_t(gcd, ninfo));
+// now insert this into region map
+        rgnNeighborMap.insert(
+          std::pair<unsigned, NeighborData>(rn, ndat));
+        return ninfo;
+    }
   }
   
   template <unsigned NDIM> 
@@ -154,7 +181,7 @@ namespace Lucee
       if (rn == i) 
         continue; // no need to intersect with ourself
 // check intersection
-      if ( ! currRgn.intersect( getRegion(i) ).isEmpty() )
+      if ( ! currRgn.extend(lowerExt, upperExt).intersect( getRegion(i) ).isEmpty() )
         nl.push_back(i);
     }
     return nl;
