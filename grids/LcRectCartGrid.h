@@ -132,14 +132,6 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     private:
-/**
- * Copy from supplied rectangular grid.
- *
- * @param rg Rectangular grid to copy from.
- * @return reference to this object.
- */
-      RectCartGrid<NDIM>& operator=(const RectCartGrid<NDIM>& rg);
-
 /** Grid spacing in each direction */
       double dx[3];
 /** Volume of each cell */
@@ -150,6 +142,19 @@ namespace Lucee
       std::vector<double> lower;
 /** Upper coordinates of space */
       std::vector<double> upper;
+
+/**
+ * Copy from supplied rectangular grid.
+ *
+ * @param rg Rectangular grid to copy from.
+ * @return reference to this object.
+ */
+      RectCartGrid<NDIM>& operator=(const RectCartGrid<NDIM>& rg);
+
+/**
+ * Compute basic geometric information needed by grid.
+ */
+      void calcGeometry();
   };
 }
 

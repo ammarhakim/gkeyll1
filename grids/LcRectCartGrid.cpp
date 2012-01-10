@@ -30,19 +30,16 @@ namespace Lucee
     const Lucee::Region<NDIM, double>& physBox) 
     : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, physBox)
   {
-    for (unsigned i=0; i<3; ++i)
-      dx[i] = 1.0;
-    for (unsigned i=0; i<NDIM; ++i)
-      dx[i] = physBox.getShape(i)/globalBox.getShape(i);
-    cellVolume = 1.0;
-    for (unsigned i=0; i<NDIM; ++i)
-      cellVolume = cellVolume*dx[i];
+    calcGeometry();
   }
 
   template <unsigned NDIM>
   void
   RectCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+// call base class method
+    StructuredGridBase<NDIM>::readInput(tbl);
+
     cells = tbl.getNumVec("cells");
     if (cells.size() != NDIM)
     {
@@ -82,17 +79,8 @@ namespace Lucee
 // set grid data
     this->setGridData(localBox, globalBox, physBox);
 
-// SHOULD ALL OF THE BELOW GO INTO A INIT ROUTINE? SEEMS LIKE IT IS
-// VERY DANGEROUS TO HAVE A CTOR AND THIS FUNCTION DO THE SAME THING.
-
 // compute stuff we need
-    for (unsigned i=0; i<3; ++i)
-      dx[i] = 1.0;
-    for (unsigned i=0; i<NDIM; ++i)
-      dx[i] = physBox.getShape(i)/globalBox.getShape(i);
-    cellVolume = 1.0;
-    for (unsigned i=0; i<NDIM; ++i)
-      cellVolume = cellVolume*dx[i];    
+    calcGeometry();
   }
 
   template <unsigned NDIM>
@@ -237,6 +225,19 @@ namespace Lucee
     cellVolume = rg.cellVolume;
 
     return *this;
+  }
+
+  template <unsigned NDIM>
+  void
+  RectCartGrid<NDIM>::calcGeometry()
+  {
+    for (unsigned i=0; i<3; ++i)
+      dx[i] = 1.0;
+    for (unsigned i=0; i<NDIM; ++i)
+      dx[i] = this->compSpace.getShape(i)/this->globalBox.getShape(i);
+    cellVolume = 1.0;
+    for (unsigned i=0; i<NDIM; ++i)
+      cellVolume = cellVolume*dx[i];
   }
 
 // instantiations

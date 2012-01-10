@@ -7,6 +7,8 @@
 // lucee includes
 #include <LcDataStructIfc.h>
 #include <LcDataStructRegistry.h>
+#include <LcDecompRegionCalcIfc.h>
+#include <LcDecompRegionCalcRegistry.h>
 #include <LcGridIfc.h>
 #include <LcGridRegistry.h>
 #include <LcHyperEquation.h>
@@ -38,6 +40,7 @@ namespace Lucee
     Lucee::registerGridObjects(L);
     Lucee::registerDataStructObjects(L);
     Lucee::registerLibObjects(L);
+    Lucee::registerDecompRegionCalc(L);
 
 // register modules into Lua
     Lucee::LuaModuleRegistry<Lucee::SolverIfc>::registerModule(L);
@@ -46,5 +49,13 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::LuceeMod>::registerModule(L);
+
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<1> >::registerModule(L);    
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<2> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<3> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<4> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<5> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<6> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<7> >::registerModule(L);
   }
 }

@@ -73,6 +73,9 @@ find_package(TxFftw3)
 
 # find Boost
 find_package(TxBoost REQUIRED program_options)
+if (BOOST_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif (BOOST_FOUND)
 
 IF(APPLE)
   # add the Accelerate framework on Mac OS X

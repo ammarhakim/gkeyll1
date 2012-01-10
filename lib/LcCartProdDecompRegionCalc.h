@@ -25,6 +25,14 @@ namespace Lucee
   class CartProdDecompRegionCalc : public Lucee::DecompRegionCalcIfc<NDIM>
   {
     public:
+/** Class id: this is used by registration system */
+      static const char *id;
+
+/**
+ * Default constructor: needed to allow creation from Lua.
+ */
+      CartProdDecompRegionCalc();
+
 /**
  * Create a new decomp calculator with specified number of cuts in
  * each direction. The value cut[n] is the number of divisions in the
@@ -43,6 +51,13 @@ namespace Lucee
  */
       CartProdDecompRegionCalc(const int cuts[NDIM]);
 
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
     protected:
 
 /**
@@ -58,6 +73,13 @@ namespace Lucee
       int cuts[NDIM];
 /** Number of total sub-regions */
       unsigned nsub;
+
+/**
+ * Set number cuts for use in decomposition.
+ *
+ * @param cuts Value cuts[n] is number of divisions along n-th direction.
+ */
+      void setCuts(const unsigned cuts[NDIM]);
   };
 }
 

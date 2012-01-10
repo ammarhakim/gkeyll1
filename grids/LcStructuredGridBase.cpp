@@ -21,6 +21,20 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  StructuredGridBase<NDIM>::readInput(Lucee::LuaTable& tbl)
+  {
+// get pointer to decomposition object
+    if (tbl.template hasObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition"))
+      decompCalc = &tbl.template
+        getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
+    else
+    {
+// create a default decomposition
+    }
+  }
+
+  template <unsigned NDIM>
   unsigned
   StructuredGridBase<NDIM>::getNumCells(unsigned dir) const
   {

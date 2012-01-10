@@ -14,6 +14,21 @@
 
 namespace Lucee
 {
+// set module name
+  template <> const char *DecompRegionCalcIfc<1>::id = "DecompRegionCalc1D";
+  template <> const char *DecompRegionCalcIfc<2>::id = "DecompRegionCalc2D";
+  template <> const char *DecompRegionCalcIfc<3>::id = "DecompRegionCalc3D";
+  template <> const char *DecompRegionCalcIfc<4>::id = "DecompRegionCalc4D";
+  template <> const char *DecompRegionCalcIfc<5>::id = "DecompRegionCalc5D";
+  template <> const char *DecompRegionCalcIfc<6>::id = "DecompRegionCalc6D";
+  template <> const char *DecompRegionCalcIfc<7>::id = "DecompRegionCalc7D";
+
+  template <unsigned NDIM> 
+  void
+  DecompRegionCalcIfc<NDIM>::readInput(Lucee::LuaTable& tbl)
+  { // does nothing
+  }
+
   template <unsigned NDIM>
   void
   DecompRegionCalcIfc<NDIM>::calcDecomp(unsigned nrgns, Lucee::DecompRegion<NDIM>& decompRgn)

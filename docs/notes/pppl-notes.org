@@ -1,0 +1,25 @@
+# -*- org -*-
+
+* January 10th 2012
+
+  Creating a new org file for work done at PPPL. Completed a brief
+  LDEVP on the parallel field implementation. Registered the
+  decomposition objects so they can now be created from Lua. Next step
+  is to hook these up the grid and field classes, implement sync() and
+  test. Easier said than done.
+
+  A significant unresolved issue: how to deal with periodic domains?
+  The neighbor calculation code needs to change for that. Essentially
+  on each perodic side of the global region (including corners) we
+  need to make copies of the global region. This will then give the
+  proper neighbors, including self-intersections. Some ambiguity
+  exists in the case in which the only one direction is
+  periodic. Question: should the periodic conditions include corners
+  in this case? I do not know, yet.
+
+** TODO Create a new repo with regression tests.
+
+   Just use TX's txtest system. It is good enough for our needs and
+   will be one less thing to maintain.
+  
+  

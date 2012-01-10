@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcBasicObj.h>
 #include <LcDecompRegion.h>
 
 namespace Lucee
@@ -24,9 +25,19 @@ namespace Lucee
  * input and compute the needed decomposition.
  */
   template <unsigned NDIM>
-  class DecompRegionCalcIfc
+  class DecompRegionCalcIfc : public Lucee::BasicObj
   {
     public:
+/** Class id: this is used by registration system */
+      static const char *id;
+
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
 /**
  * Calculate decomposition adding subregions into decompRgn object.
  *
