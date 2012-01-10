@@ -13,17 +13,33 @@
 #include <LcCartProdDecompRegionCalc.h>
 #include <LcMatrix.h>
 
+// std includes
+#include <cmath>
+
 namespace Lucee
 {
+// set constructor name
+  template <> const char *CartProdDecompRegionCalc<1>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<2>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<3>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<4>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<5>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<6>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<7>::id = "CartProd";
+
+  template <unsigned NDIM>
+  CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc()
+  {
+// set some reasonable defaults
+    for (unsigned i=0; i<NDIM; ++i)
+      cuts[i] = 1; // just decompose into a single block
+    nsub = 1; // total number of regions
+  }
+
   template <unsigned NDIM>
   CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc(const unsigned c[NDIM])
   {
-    nsub = 1;
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      cuts[i] = c[i];
-      nsub *= cuts[i];
-    }
+    setCuts(c);
   }
 
   template <unsigned NDIM>
@@ -34,6 +50,33 @@ namespace Lucee
     {
       cuts[i] = c[i];
       nsub *= cuts[i];
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  CartProdDecompRegionCalc<NDIM>::readInput(Lucee::LuaTable& tbl)
+  {
+// call base class method first
+    DecompRegionCalcIfc<NDIM>::readInput(tbl);
+// now read in number of cuts
+    if (tbl.hasNumVec("cuts"))
+    {
+      std::vector<double> dblCuts = tbl.getNumVec("cuts");
+      if (dblCuts.size() != NDIM)
+      {
+        Lucee::Except lce("CartProdDecompRegionCalc::readInput: 'cuts' table must have ");
+        lce << NDIM << " entries. Only " << dblCuts.size() << " provided";
+        throw lce;
+      }
+      unsigned myCuts[NDIM];
+      for (unsigned i=0; i<NDIM; ++i)
+        myCuts[i] = (unsigned) dblCuts[i];
+      setCuts(myCuts); // set cuts
+    }
+    else
+    {
+      throw Lucee::Except("CartProdDecompRegionCalc::readInput: Must provide 'cuts' table.");
     }
   }
 
@@ -103,6 +146,18 @@ namespace Lucee
         upper[d] = lower[d] + dimShapes[d].shape[idx[d]];
       }
       this->addRegion(Lucee::Region<NDIM, int>(lower, upper));
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  CartProdDecompRegionCalc<NDIM>::setCuts(const unsigned c[NDIM])
+  {
+    nsub = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      cuts[i] = c[i];
+      nsub *= cuts[i];
     }
   }
 

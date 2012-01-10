@@ -334,6 +334,23 @@ test_7()
   }
 }
 
+void
+test_8()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+  int lowerExt[2] = {1, 1};
+  int upperExt[2] = {1, 1};
+// check default decomp neighbors
+  std::vector<unsigned> neigh = dcomp.getNeighbors(0, lowerExt, upperExt);
+
+  LC_ASSERT("Testing default decomp neighbors", neigh.size() == 0);
+}
+
 int
 main(void) 
 {
@@ -346,5 +363,6 @@ main(void)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }

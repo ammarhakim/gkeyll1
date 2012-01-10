@@ -15,6 +15,7 @@ add_library(lclib
   LcDataStructIfc.cpp
   LcDecompRegion.cpp
   LcDecompRegionCalcIfc.cpp
+  LcDecompRegionCalcRegistry.cpp
   LcExcept.cpp 
   LcFileHandler.cpp
   LcLibRegistry.cpp

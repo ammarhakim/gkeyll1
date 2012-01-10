@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcDecompRegionCalcIfc.h>
 #include <LcGridIfc.h>
 #include <LcRegion.h>
 
@@ -33,6 +34,13 @@ namespace Lucee
  * Destroy object.
  */
       virtual ~StructuredGridBase();
+
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Get number of cells in given direction.
@@ -260,6 +268,12 @@ namespace Lucee
       Lucee::Region<NDIM, int> globalBox;
 /** Global region spanned by grid in computational space */
       Lucee::Region<NDIM, double> compSpace;
+
+    private:
+/** Pointer to decomposition object */
+      Lucee::DecompRegionCalcIfc<NDIM> *decompCalc; // DO WE NEED THIS or JUST THE DECOMPREGION?
+/** Flag to indicate if we own decompCal pointer */
+      bool ownDecompCalc;
   };
 }
 
