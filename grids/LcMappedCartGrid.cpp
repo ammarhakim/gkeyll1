@@ -48,11 +48,11 @@ namespace Lucee
       xlo[i] = 0.0; // assumes computation region is a unit box
       xup[i] = 1.0;
     }
-    Lucee::Region<NDIM, int> localBox(ilo, iup);
-    Lucee::Region<NDIM, int> globalBox(ilo, iup);
+    Lucee::Region<NDIM, int> localRgn(ilo, iup);
+    Lucee::Region<NDIM, int> globalRgn(ilo, iup);
     Lucee::Region<NDIM, double> physBox(xlo, xup);
 // set grid data
-    this->setGridData(localBox, globalBox, physBox);
+    this->setGridData(localRgn, globalRgn, physBox);
 
 // get vertices array
     Lucee::StructGridField<NDIM, double>& vertices =
@@ -162,8 +162,8 @@ namespace Lucee
   {
 // create local and global regions
     Lucee::FixedVector<NDIM, int> zeros(0), ones(1);
-    Lucee::Region<NDIM, int> localWriteBox(this->localBox.extend(&zeros[0], &ones[0]));
-    Lucee::Region<NDIM, int> globalWriteBox(this->globalBox.extend(&zeros[0], &ones[0]));
+    Lucee::Region<NDIM, int> localWriteBox(this->localRgn.extend(&zeros[0], &ones[0]));
+    Lucee::Region<NDIM, int> globalWriteBox(this->globalRgn.extend(&zeros[0], &ones[0]));
 
 // create memory space to write data and copy vertex coordinates (this
 // copy is needed (rather than just geometry.vcoords) as
