@@ -1,0 +1,53 @@
+# Includes for this level
+include_directories(${PROJECT_BINARY_DIR})
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/lucee)
+include_directories(${PROJECT_SOURCE_DIR}/rte)
+include_directories(${PROJECT_SOURCE_DIR}/proto)
+include_directories(${PROJECT_SOURCE_DIR}/slvrs)
+include_directories(${PROJECT_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/grids)
+include_directories(${PROJECT_SOURCE_DIR}/datastructs)
+include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
+include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
+
+link_directories(${PROJECT_BINARY_DIR}/lib)
+link_directories(${PROJECT_BINARY_DIR}/datastructs)
+link_directories(${PROJECT_BINARY_DIR}/grids)
+link_directories(${PROJECT_BINARY_DIR}/rte)
+link_directories(${PROJECT_BINARY_DIR}/proto)
+link_directories(${PROJECT_BINARY_DIR}/slvrs)
+link_directories(${PROJECT_BINARY_DIR}/etc/loki/src)
+link_directories(${PROJECT_BINARY_DIR}/etc/lua/src)
+
+if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
+  include_directories("${MPI_INCLUDE_PATH}")
+endif ()
+
+# Create lucee executable
+add_executable(lucee lucee.cxx LcRegisterModules.cpp)
+target_link_libraries(lucee
+  lcrte
+  lcproto
+  lcslvrs
+  lcdatastructs
+  lcgrids
+  lclib
+  lcloki
+  lclua
+  ${Hdf5_LIBRARIES}
+  ${Gsl_LIBRARIES}
+  ${TxBase_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${EXTRA_LIBS}
+  ${Fortran_IMPLICIT_LIBFLAGS})
+
+if (HAVE_FFTW3)
+  target_link_libraries(lucee ${Fftw3_LIBRARIES})
+endif (HAVE_FFTW3)
+
+if (ENABLE_PARALLEL)
+  target_link_libraries(lucee ${TXMPI_LIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBFLAGS})
+endif (ENABLE_PARALLEL)
+
+install(TARGETS lucee RUNTIME DESTINATION bin)
