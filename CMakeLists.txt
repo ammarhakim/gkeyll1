@@ -7,18 +7,19 @@ set(VERSION_PATCH "0")
 set(LUCEE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 # Required version
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.6)
 
-# initialize build
-INCLUDE(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
+######################################################################
+#
+# Usual initialization stuff
+#
+######################################################################
+
 if (WIN32)
-  # do nothing to find Fortran
-else (WIN32)
-  # determine Fortran compiler
-  include(CMakeDetermineFortranCompiler)
-  # now initialize Fortran stuff
-  include (${CMAKE_SOURCE_DIR}/CMake/TxFortranChecks.cmake)
-endif (WIN32)
+  set(NOFORTRAN TRUE)
+endif ()
+include(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
+set(NAUTILUS_REV "${PROJECT_REV}")
 
 ######################################################################
 #
@@ -26,17 +27,36 @@ endif (WIN32)
 #
 ######################################################################
 
-set(LUCEE_REV ${PROJECT_REV})
 set(CXX ${CMAKE_CXX_COMPILER})
-# MESSAGE("CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 set(BUILD_FLAGS_VAR  CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE})
-# MESSAGE("BUILD_FLAGS_VAR = ${BUILD_FLAGS_VAR}")
 set(BUILD_FLAGS_VAL "${${BUILD_FLAGS_VAR}}")
-# MESSAGE("BUILD_FLAGS_VAL = ${BUILD_FLAGS_VAL}")
 set(CXXFLAGS "${BUILD_FLAGS_VAL} ${CMAKE_CXX_FLAGS}")
-# MESSAGE("CXXFLAGS = ${CXXFLAGS}")
-# SET(HAVE_CMAKE CACHE STRING "Whether built with CMake")
 set(HAVE_CMAKE 1 CACHE STRING "Whether built with CMake")
+
+######################################################################
+#
+# Always use rpath to greatest extent.
+# See: http://www.itk.org/Wiki/CMake_RPATH_handling
+# Add -DCMAKE_SKIP_RPATH:BOOL=TRUE to prevent any rpath handling
+#
+######################################################################
+
+# SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+# Use, i.e. don't skip the full RPATH for the build tree
+# Not needed since we build static libs
+
+# SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+# When building, don't link with the install RPATH at build,
+# but add later on when installing.
+# Not needed since we build static libs
+
+# SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# The RPATH to be used when installing
+# Not needed since we build static libs
+
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# Add the automatically determined parts of the RPATH that
+# point to directories outside the build tree to the install RPATH
 
 ######################################################################
 #
@@ -47,20 +67,27 @@ set(HAVE_CMAKE 1 CACHE STRING "Whether built with CMake")
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
 
+# Math packages
+if (WIN32)
+  find_package(TxBlasLapack REQUIRED)
+endif ()
+
 # find txbase
 find_package(TxBase REQUIRED)
 if (TXBASE_FOUND)
    include_directories(${TxBase_INCLUDE_DIRS})
 endif (TXBASE_FOUND)
 
+# z-lib only on windows
+if (NOT WIN32)
+  find_package(TxZ REQUIRED)
+endif ()
+
 # find HDF5
 find_package(TxHdf5 REQUIRED)
 if (HDF5_FOUND)
    include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
-if (NOT WIN32)
-  find_package(TxZ REQUIRED)
-endif ()
 
 # find GSL
 find_package(TxGsl REQUIRED)
@@ -103,109 +130,66 @@ endif ()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in
    ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
+######################################################################
+#
+# Set permissions before adding subdirectories
+#
+######################################################################
+
+set(TX_GROUP_WRITE GROUP_WRITE)
+set(TX_WORLD_FILE_PERMS WORLD_WRITE)
+set(TX_WORLD_PROGRAM_PERMS WORLD_WRITE WORLD_EXECUTE)
+
 install(FILES svninfo.txt DESTINATION include)
 
-# Build code in loki
+# add subdirectories
 add_subdirectory(etc/loki/src)
-
-# Build code in lua
 add_subdirectory(etc/lua/src)
-
-# Build code in lib
 add_subdirectory(lib)
-
-# Build code in grids
 add_subdirectory(grids)
-
-# Build code in datastructs
 add_subdirectory(datastructs)
-
-# Build code in slvrs
 add_subdirectory(slvrs)
-
-# Build code in proto
 add_subdirectory(proto)
-
-# Build library in rte directory
 add_subdirectory(rte)
-
-# Build Lucee executable
 add_subdirectory(lucee)
-
-# Build all unit tests
 add_subdirectory(unit)
 
 # Add individual tests
 ENABLE_TESTING()
 
-# lcarray
+# add tests
 add_test(lcarray unit/lcarray)
-
-# lccolmajorindexer
 add_test(lccolmajorindexer unit/lccolmajorindexer)
-
-# lcrowmajorindexer
 add_test(lcrowmajorindexer unit/lcrowmajorindexer)
-
-# lcfixedvector
 add_test(lcfixedvector unit/lcfixedvector)
-
-# lcvector
 add_test(lcvector unit/lcvector)
-
-# lcmatrix
 add_test(lcmatrix unit/lcmatrix)
-
-# lccmdlineargs
 add_test(lccmdlineargs unit/lccmdlineargs)
-
-# lcregion
 add_test(lcregion unit/lcregion)
-
-# lcfield
 add_test(lcfield unit/lcfield)
-
-# lcrowmajorsequencer
 add_test(lcrowmajorsequencer unit/lcrowmajorsequencer)
-
-# lccolmajorsequencer
 add_test(lccolmajorsequencer unit/lccolmajorsequencer)
-
-# lcdirsequencer
 add_test(lcdirsequencer unit/lcdirsequencer)
-
-# lcluatable
 add_test(lcluatable unit/lcluatable)
-
-# lcluamodule
 add_test(lcluamodule unit/lcluamodule)
-
-# lclogger
 add_test(lclogger unit/lclogger)
-
-# lchdf5io
 add_test(lchdf5io unit/lchdf5io)
-
-# lcvec3
 add_test(lcvec3 unit/lcvec3)
-
-# lcrectcartgrid
 add_test(lcrectcartgrid unit/lcrectcartgrid)
-
-# lclincombiner
 add_test(lclincombiner unit/lclincombiner)
-
-# lcfieldptr
 add_test(lcfieldptr unit/lcfieldptr)
-
-# lcrectcoordsys
 add_test(lcrectcoordsys unit/lcrectcoordsys)
-
-# lcgeomprim
 add_test(lcgeomprim unit/lcgeomprim)
-
-# lcstructgridfield
 add_test(lcstructgridfield unit/lcstructgridfield)
-
-# lcdecompregion
 add_test(lcdecompregion unit/lcdecompregion)
+
+######################################################################
+#
+# Finalize
+#
+######################################################################
+
+set(COMMON_INSTALL TRUE)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "LUCEE")
+set(CONFIG_FILES)  # Clear out
+include(${CMAKE_SOURCE_DIR}/CMake/TxFinalize.cmake)
