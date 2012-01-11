@@ -31,10 +31,63 @@ namespace Lucee
   void
   StructuredGridBase<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+// read number of cells in global region
+    std::vector<double> cells = tbl.getNumVec("cells");
+    if (cells.size() != NDIM)
+    {
+      Lucee::Except lce("StructuredGridBase::readInput: 'cells' should have exactly");
+      lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
+      throw lce;
+    }
+
+// create global region
+    int zeros[NDIM], icells[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      zeros[i] = 0;
+      icells[i] = (int) cells[i];
+    }
+    globalRgn = Lucee::Region<NDIM, int>(zeros, icells);
+
+    std::vector<double> lower, upper;
+// read lower limits of computational space
+    if (tbl.hasNumVec("lower"))
+    {
+      lower = tbl.getNumVec("lower");
+      if (lower.size() != NDIM)
+      {
+        Lucee::Except lce("StructuredGridBase::readInput: 'lower' should have exactly ");
+        lce << NDIM << " elements. Instead has " << lower.size() << std::endl;
+        throw lce;
+      }
+    }
+    else
+    {
+      for (unsigned i=0; i<NDIM; ++i) lower[i] = 0.0;
+    }
+
+// read upper limits of computational space
+    if (tbl.hasNumVec("upper"))
+    {
+      upper = tbl.getNumVec("upper");
+      if (upper.size() != NDIM)
+      {
+        Lucee::Except lce("StructuredGridBase::readInput: 'upper' should have exactly ");
+        lce << NDIM << " elements. Instead has " << upper.size() << std::endl;
+        throw lce;
+      }
+    }
+    else
+    {
+      for (unsigned i=0; i<NDIM; ++i) upper[i] = 1.0;
+    }
+    compSpace = Lucee::Region<NDIM, double>(&lower[0], &upper[0]);
+
 // get comm pointer
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
 
+// create decomposed region
     decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
 // get pointer to decomposition object
     if (tbl.template hasObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition"))
@@ -44,6 +97,8 @@ namespace Lucee
 // compute decomposition
       decompCalc.calcDecomp(comm->getNumProcs(), *decompRgn);
     }
+// compute local region
+    localRgn = decompRgn->getRegion(comm->getRank());
   }
 
   template <unsigned NDIM>

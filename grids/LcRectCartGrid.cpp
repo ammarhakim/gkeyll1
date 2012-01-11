@@ -39,46 +39,6 @@ namespace Lucee
   {
 // call base class method
     StructuredGridBase<NDIM>::readInput(tbl);
-
-    cells = tbl.getNumVec("cells");
-    if (cells.size() != NDIM)
-    {
-      Lucee::Except lce("RectCartGrid::readInput: 'cells' should have exactly ");
-      lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
-      throw lce;
-    }
-
-    lower = tbl.getNumVec("lower");
-    if (lower.size() != NDIM)
-    {
-      Lucee::Except lce("RectCartGrid::readInput: 'lower' should have exactly ");
-      lce << NDIM << " elements. Instead has " << lower.size() << std::endl;
-      throw lce;
-    }
-
-    upper = tbl.getNumVec("upper");
-    if (upper.size() != NDIM)
-    {
-      Lucee::Except lce("RectCartGrid::readInput: 'upper' should have exactly ");
-      lce << NDIM << " elements. Instead has " << upper.size() << std::endl;
-      throw lce;
-    }
-
-    int ilo[NDIM], iup[NDIM];
-    double xlo[NDIM], xup[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      ilo[i] = 0;
-      iup[i] = cells[i];
-      xlo[i] = lower[i];
-      xup[i] = upper[i];
-    }
-    Lucee::Region<NDIM, int> localRgn(ilo, iup);
-    Lucee::Region<NDIM, int> globalRgn(ilo, iup);
-    Lucee::Region<NDIM, double> physBox(xlo, xup);
-// set grid data
-    this->setGridData(localRgn, globalRgn, physBox);
-
 // compute stuff we need
     calcGeometry();
   }
