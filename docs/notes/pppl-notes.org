@@ -26,6 +26,10 @@
   due to a bad MPI build. I need to reactivate my Facetsall
   permissions and rebuild the complete tool chain. Grr ...
 
+  FIXED parallel build problem. I am not sure if this is the correct
+  way to do things. But builds for now. Next need to test the
+  structured grid in parallel. <2012-01-10 Tue 23:16>
+
 ** TODO Create a new repo with regression tests.
 
    Just use TX's txtest system. It is good enough for our needs and
