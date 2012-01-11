@@ -10,16 +10,24 @@
 
   A significant unresolved issue: how to deal with periodic domains?
   The neighbor calculation code needs to change for that. Essentially
-  on each perodic side of the global region (including corners) we
+  on each periodic side of the global region (including corners) we
   need to make copies of the global region. This will then give the
   proper neighbors, including self-intersections. Some ambiguity
   exists in the case in which the only one direction is
   periodic. Question: should the periodic conditions include corners
   in this case? I do not know, yet.
 
+  Now StructuredGridBase gets the decomposition object and uses it to
+  compute the decomposition. Local and global regions are set
+  correctly, at least in serial. Need to add tests for this.
+
+  I am having some problems compiling the code in parallel: a bunch of
+  undefined-symbol errors are showing up at link line. This probably
+  due to a bad MPI build. I need to reactivate my Facetsall
+  permissions and rebuild the complete tool chain. Grr ...
+
 ** TODO Create a new repo with regression tests.
 
    Just use TX's txtest system. It is good enough for our needs and
    will be one less thing to maintain.
-  
   

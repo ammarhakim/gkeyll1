@@ -30,29 +30,8 @@ namespace Lucee
   void
   MappedCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// get cells in domain
-    cells = tbl.getNumVec("cells");
-    if (cells.size() != NDIM)
-    {
-      Lucee::Except lce("MappedCartGrid::readInput: 'cells' should have exactly ");
-      lce << NDIM << " elements. Instead has " << cells.size() << std::endl;
-      throw lce;
-    }
-
-    int ilo[NDIM], iup[NDIM];
-    double xlo[NDIM], xup[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      ilo[i] = 0;
-      iup[i] = cells[i];
-      xlo[i] = 0.0; // assumes computation region is a unit box
-      xup[i] = 1.0;
-    }
-    Lucee::Region<NDIM, int> localRgn(ilo, iup);
-    Lucee::Region<NDIM, int> globalRgn(ilo, iup);
-    Lucee::Region<NDIM, double> physBox(xlo, xup);
-// set grid data
-    this->setGridData(localRgn, globalRgn, physBox);
+// call base class method
+    StructuredGridBase<NDIM>::readInput(tbl);
 
 // get vertices array
     Lucee::StructGridField<NDIM, double>& vertices =
