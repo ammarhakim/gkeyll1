@@ -340,7 +340,6 @@ main(int argc, char **argv)
   test_3();
 #ifdef HAVE_MPI
   LC_MPI_END_TESTS;
-  MPI_Finalize();
 #else
   LC_END_TESTS;
 #endif

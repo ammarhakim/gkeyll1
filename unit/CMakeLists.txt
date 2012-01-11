@@ -30,7 +30,7 @@ ENDIF (APPLE)
 # Create test executables
 
 if (ENABLE_PARALLEL)
-  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${TXMPI_LIBS} ${Z_LIBRARIES})
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${MPI_STLIBS} ${Z_LIBRARIES})
 else ()
   set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES})
 endif ()
@@ -149,7 +149,7 @@ target_link_libraries(lcgridode lcslvrs lcdatastructs lcgrids lclib lcloki lclua
 
 if (FFTW3_FOUND)
   add_executable(lcfftwtest lcfftwtest.cxx)
-  target_link_libraries(lcfftwtest ${Fftw3_LIBRARIES})
+  target_link_libraries(lcfftwtest ${Fftw3_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 endif (FFTW3_FOUND)
 
 # lcdecompregion
