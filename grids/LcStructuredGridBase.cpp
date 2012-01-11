@@ -10,8 +10,15 @@
 #endif
 
 // lucee includes
+#include <LcGlobals.h>
 #include <LcPointerHolder.h>
 #include <LcStructuredGridBase.h>
+
+// txbase includes
+#include <TxCommBase.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -24,13 +31,18 @@ namespace Lucee
   void
   StructuredGridBase<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
+// get comm pointer
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+
+    decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
 // get pointer to decomposition object
     if (tbl.template hasObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition"))
-      decompCalc = &tbl.template
-        getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
-    else
     {
-// create a default decomposition
+      Lucee::DecompRegionCalcIfc<NDIM>& decompCalc
+        = tbl.template getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
+// compute decomposition
+      decompCalc.calcDecomp(comm->getNumProcs(), *decompRgn);
     }
   }
 
@@ -38,21 +50,21 @@ namespace Lucee
   unsigned
   StructuredGridBase<NDIM>::getNumCells(unsigned dir) const
   {
-    return globalBox.getShape(dir);
+    return globalRgn.getShape(dir);
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
   StructuredGridBase<NDIM>::getGlobalBox() const 
   { 
-    return globalBox; 
+    return globalRgn; 
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
   StructuredGridBase<NDIM>::getLocalBox() const 
   { 
-    return localBox; 
+    return localRgn; 
   }
 
   template <unsigned NDIM>
@@ -66,7 +78,7 @@ namespace Lucee
   double
   StructuredGridBase<NDIM>::getDx(unsigned dir) const
   { 
-    return compSpace.getShape(dir)/globalBox.getShape(dir);
+    return compSpace.getShape(dir)/globalRgn.getShape(dir);
   }
 
   template <unsigned NDIM>
@@ -193,17 +205,19 @@ namespace Lucee
 
   template <unsigned NDIM>
   StructuredGridBase<NDIM>::StructuredGridBase()
-    : localBox(&Lucee::FixedVector<NDIM, int>(1)[0]),
-      globalBox(&Lucee::FixedVector<NDIM, int>(1)[0]),
-      compSpace(&Lucee::FixedVector<NDIM, double>(1.0)[0])
+    : localRgn(&Lucee::FixedVector<NDIM, int>(1)[0]),
+      globalRgn(&Lucee::FixedVector<NDIM, int>(1)[0]),
+      compSpace(&Lucee::FixedVector<NDIM, double>(1.0)[0]),
+      decompRgn( new Lucee::DecompRegion<NDIM>(globalRgn) )
   {
   }
 
   template <unsigned NDIM>
-  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
-    const Lucee::Region<NDIM, int>& globalBox,
+  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localRgn,
+    const Lucee::Region<NDIM, int>& globalRgn,
     const Lucee::Region<NDIM, double>& compSpace)
-    : localBox(localBox), globalBox(globalBox), compSpace(compSpace)
+    : localRgn(localRgn), globalRgn(globalRgn), compSpace(compSpace),
+      decompRgn( new Lucee::DecompRegion<NDIM>(globalRgn) )
   {
   }
 
@@ -216,9 +230,10 @@ namespace Lucee
 
     for (unsigned i=0; i<NDIM; ++i)
       currIdx[i] = sg.currIdx[i];
-    localBox = sg.localBox;
-    globalBox = sg.globalBox;
+    localRgn = sg.localRgn;
+    globalRgn = sg.globalRgn;
     compSpace = sg.compSpace;
+    decompRgn = sg.decompRgn;
     
     return *this;
   }
@@ -228,9 +243,10 @@ namespace Lucee
   StructuredGridBase<NDIM>::setGridData(const Lucee::Region<NDIM, int>& lb,
     const Lucee::Region<NDIM, int>& gb, const Lucee::Region<NDIM, double>& cs)
   {
-    localBox = lb;
-    globalBox = gb;
+    localRgn = lb;
+    globalRgn = gb;
     compSpace = cs;
+    decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
   }
 
 // instantiations

@@ -17,6 +17,9 @@
 #include <LcGridIfc.h>
 #include <LcRegion.h>
 
+// boost includes
+#include <boost/shared_ptr.hpp>
+
 namespace Lucee
 {
 /**
@@ -222,8 +225,8 @@ namespace Lucee
 
 /**
  * Create a new body-fitted grid on specified region. In serial the
- * local and global boxes coincide. In parallel, the globalBox
- * represents the full grid, while the localBox represents the portion
+ * local and global boxes coincide. In parallel, the globalRgn
+ * represents the full grid, while the localRgn represents the portion
  * of the grid handled by the rank the grid lives on. The full
  * computational domain (i.e. indexed by the global region) is
  * specified using the Region object compSpace.
@@ -234,12 +237,12 @@ namespace Lucee
  * bottom, back) are labeled by the cell index. Further, the lower
  * left corner of each cell is also labelled by the cell index.
  *
- * @param localBox Local index region for this grid.
- * @param globalBox Global index region for this grid.
+ * @param localRgn Local index region for this grid.
+ * @param globalRgn Global index region for this grid.
  * @param compSpace Region in computation space.
  */
-      StructuredGridBase(const Lucee::Region<NDIM, int>& localBox,
-        const Lucee::Region<NDIM, int>& globalBox,
+      StructuredGridBase(const Lucee::Region<NDIM, int>& localRgn,
+        const Lucee::Region<NDIM, int>& globalRgn,
         const Lucee::Region<NDIM, double>& compSpace);
 
 /**
@@ -253,27 +256,25 @@ namespace Lucee
 /**
  * Set data required to build grid.
  *
- * @param localBox Local index region for this grid.
- * @param globalBox Global index region for this grid.
+ * @param localRgn Local index region for this grid.
+ * @param globalRgn Global index region for this grid.
  * @param compSpace Region in computation space.
  */
-      void setGridData(const Lucee::Region<NDIM, int>& localBox,
-        const Lucee::Region<NDIM, int>& globalBox, const Lucee::Region<NDIM, double>& compSpace);
+      void setGridData(const Lucee::Region<NDIM, int>& localRgn,
+        const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, double>& compSpace);
 
 /** Index into current cell */
       mutable int currIdx[NDIM];
 /** Local region indexed by grid */
-      Lucee::Region<NDIM, int> localBox;
+      Lucee::Region<NDIM, int> localRgn;
 /** Global region indexed by grid */
-      Lucee::Region<NDIM, int> globalBox;
+      Lucee::Region<NDIM, int> globalRgn;
 /** Global region spanned by grid in computational space */
       Lucee::Region<NDIM, double> compSpace;
 
     private:
-/** Pointer to decomposition object */
-      Lucee::DecompRegionCalcIfc<NDIM> *decompCalc; // DO WE NEED THIS or JUST THE DECOMPREGION?
-/** Flag to indicate if we own decompCal pointer */
-      bool ownDecompCalc;
+/** Decomposed region */
+      boost::shared_ptr<Lucee::DecompRegion<NDIM> > decompRgn;
   };
 }
 

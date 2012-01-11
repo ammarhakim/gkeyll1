@@ -25,10 +25,10 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localBox,
-    const Lucee::Region<NDIM, int>& globalBox,
+  RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localRgn,
+    const Lucee::Region<NDIM, int>& globalRgn,
     const Lucee::Region<NDIM, double>& physBox) 
-    : Lucee::StructuredGridBase<NDIM>(localBox, globalBox, physBox)
+    : Lucee::StructuredGridBase<NDIM>(localRgn, globalRgn, physBox)
   {
     calcGeometry();
   }
@@ -73,11 +73,11 @@ namespace Lucee
       xlo[i] = lower[i];
       xup[i] = upper[i];
     }
-    Lucee::Region<NDIM, int> localBox(ilo, iup);
-    Lucee::Region<NDIM, int> globalBox(ilo, iup);
+    Lucee::Region<NDIM, int> localRgn(ilo, iup);
+    Lucee::Region<NDIM, int> globalRgn(ilo, iup);
     Lucee::Region<NDIM, double> physBox(xlo, xup);
 // set grid data
-    this->setGridData(localBox, globalBox, physBox);
+    this->setGridData(localRgn, globalRgn, physBox);
 
 // compute stuff we need
     calcGeometry();
@@ -89,7 +89,7 @@ namespace Lucee
   {
     for (unsigned i=0; i<NDIM; ++i)
       xc[i] = this->compSpace.getLower(i) +
-        (this->currIdx[i]-this->globalBox.getLower(i) + 0.5)*dx[i];
+        (this->currIdx[i]-this->globalRgn.getLower(i) + 0.5)*dx[i];
     for (unsigned i=NDIM; i<3; ++i)
       xc[i] = 0.0;
   }
@@ -100,7 +100,7 @@ namespace Lucee
   {
     for (unsigned i=0; i<NDIM; ++i)
       xc[i] = this->compSpace.getLower(i) +
-        (this->currIdx[i]-this->globalBox.getLower(i))*dx[i];
+        (this->currIdx[i]-this->globalRgn.getLower(i))*dx[i];
     for (unsigned i=NDIM; i<3; ++i)
       xc[i] = 0.0;
   }
@@ -187,8 +187,8 @@ namespace Lucee
     {
       lower[i] = this->compSpace.getLower(i);
       upper[i] = this->compSpace.getUpper(i);
-      start[i] = this->globalBox.getLower(i);
-      numPhysCells[i] = this->globalBox.getShape(i);
+      start[i] = this->globalRgn.getLower(i);
+      numPhysCells[i] = this->globalRgn.getShape(i);
     }
     io.writeAttribute(grdGrp, "vsType", "mesh");
     io.writeAttribute(grdGrp, "vsKind", "uniform");
@@ -234,7 +234,7 @@ namespace Lucee
     for (unsigned i=0; i<3; ++i)
       dx[i] = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
-      dx[i] = this->compSpace.getShape(i)/this->globalBox.getShape(i);
+      dx[i] = this->compSpace.getShape(i)/this->globalRgn.getShape(i);
     cellVolume = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
       cellVolume = cellVolume*dx[i];
