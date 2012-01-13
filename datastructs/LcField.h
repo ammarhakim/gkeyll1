@@ -52,7 +52,7 @@ namespace Lucee
 
 /**
  * Create a new field indexing given region. This constructor creates
- * an empty set of ghost indices.
+ * an empty set of ghost indices. Global and local regions are the same.
  *
  * @param rgn Region indexed by array.
  * @param nc Number of components at each index location.
@@ -62,7 +62,7 @@ namespace Lucee
 
 /**
  * Create a new field indexing given region. This constructor set
- * ghost region from specified array.
+ * ghost region from specified array. Global and local regions are the same.
  * 
  *
  * @param rgn Region indexed by array.
@@ -73,6 +73,33 @@ namespace Lucee
  */      
       Field(const Lucee::Region<NDIM, int>& rgn, unsigned nc, 
         int lg[NDIM], int ug[NDIM], const T& init=(T)0);
+
+/**
+ * Create a new field indexing given region. This constructor creates
+ * an empty set of ghost indices. Global and local regions are the same.
+ *
+ * @param globalRgn Global region indexed by array.
+ * @param localRgn Local region indexed by array.
+ * @param nc Number of components at each index location.
+ * @param init Inital value to assigned to all components.
+ */      
+      Field(const Lucee::Region<NDIM, int>& globalRgn, 
+        const Lucee::Region<NDIM, int>& localRgn, unsigned nc, const T& init=(T)0);
+
+/**
+ * Create a new field indexing given region. This constructor set
+ * ghost region from specified array. Global and local regions are the same.
+ * 
+ * @param globalRgn Global region indexed by array.
+ * @param localRgn Local region indexed by array.
+ * @param nc Number of components at each index location.
+ * @param lg Ghost indexes along lower index range in each dimension.
+ * @param ug Ghost indexes along upper index range in each dimension.
+ * @param init Inital value to assigned to all components.
+ */      
+      Field(const Lucee::Region<NDIM, int>& globalRgn, 
+        const Lucee::Region<NDIM, int>& localRgn, unsigned nc, int lg[NDIM], int ug[NDIM], 
+        const T& init=(T)0);
 
 /**
  * Create a field from supplied one (shallow copy).
@@ -340,7 +367,7 @@ namespace Lucee
  * @return node to which data was written.
  */
       virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
-         const std::string& nm);
+        const std::string& nm);
 
 /**
  * Copy field from supplied one. The input field must have the exact
@@ -447,7 +474,8 @@ namespace Lucee
 /**
  * Create a field attached to a given data space.
  *
- * @param rgn Region for field.
+ * @param globalRgn Region for field.
+ * @param localRgn Region for field.
  * @param sc Start index into component.
  * @param ec End index into component.
  * @param nc Number of components in field.
@@ -455,7 +483,8 @@ namespace Lucee
  * @param ug Ghost indexes along upper index range in each dimension.
  * @param subArr Array space to reuse.
  */
-      Field(const Lucee::Region<NDIM, int>& rgn, unsigned sc, unsigned ec,
+      Field(const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, int>& localRgn,
+        unsigned sc, unsigned ec,
         int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr);
 
 /** Start index into components */

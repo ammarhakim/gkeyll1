@@ -94,7 +94,7 @@ namespace Lucee
     Lucee::FieldPtr<double> Aptr = A.createPtr();
     
 // local region to index
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
 // A <- B
     A.copy(B);

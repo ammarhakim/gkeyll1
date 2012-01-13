@@ -122,7 +122,7 @@ namespace Lucee
     epsFac = dx*dx*dx;
 
 // local region to index
-    Lucee::Region<1, int> localRgn = grid.getLocalBox();
+    Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
 // ghost cells along slice
     int lg[1], ug[1];
@@ -152,7 +152,7 @@ namespace Lucee
     double dt = t-this->getCurrTime();
     double dtdx = dt/grid.getDx(0);
 // local region to index
-    Lucee::Region<1, int> localRgn = grid.getLocalBox();
+    Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
 // pointers to data
     Lucee::ConstFieldPtr<double> pPtr = prim.createConstPtr();

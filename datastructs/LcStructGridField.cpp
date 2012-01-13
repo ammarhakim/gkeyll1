@@ -41,7 +41,7 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField(Lucee::StructuredGridBase<NDIM>* grid, unsigned nc,
         int lg[NDIM], int ug[NDIM])
-    : Lucee::Field<NDIM, T>(grid->getLocalBox(), nc, lg, ug, (T) 0),
+    : Lucee::Field<NDIM, T>(grid->getLocalRegion(), nc, lg, ug, (T) 0),
       grid(grid)
   {
     this->setName(StructGridField<NDIM, double>::id);
@@ -166,11 +166,13 @@ namespace Lucee
         upperGhost[i] = gstDbl[1];
       }
     }
+// global region for field
+    typename Lucee::Region<NDIM, int> globalRgn = grid->getGlobalRegion();
 // local region for field
-    typename Lucee::Region<NDIM, int> localRgn = grid->getLocalBox();
-// create new field and data to self
+    typename Lucee::Region<NDIM, int> localRgn = grid->getLocalRegion();
+// create new field and copy data to self
     Field<NDIM, T>::operator=(
-      Field<NDIM, T>(localRgn, numComponents, lowerGhost, upperGhost));
+      Field<NDIM, T>(globalRgn, localRgn, numComponents, lowerGhost, upperGhost));
   }
 
   template <unsigned NDIM, typename T>

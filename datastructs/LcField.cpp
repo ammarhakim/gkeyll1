@@ -55,6 +55,34 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, int>& rgn,
+    unsigned nc, const T& init)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(rgn.inflate(0, nc), init),
+      scIdx(0), numComponents(nc), rgn(rgn), globalRgn(globalRgn), rgnIdx(rgn.inflate(0, nc))
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = 0;
+      upperGhost[i] = 0;
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, int>& rgn,
+    unsigned nc, 
+    int lg[NDIM], int ug[NDIM], const T& init)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
+      rgn.extend(lg, ug).inflate(0, nc), init),
+      scIdx(0), numComponents(nc), rgn(rgn), globalRgn(globalRgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = lg[i];
+      upperGhost[i] = ug[i];
+    }
+  }
+
+  template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Field<NDIM, T>& fld)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(fld),
       scIdx(fld.scIdx),
@@ -108,7 +136,7 @@ namespace Lucee
     Array<NDIM+1, T, Lucee::RowMajorIndexer> subArr
       = this->getSlice(
         vrgn.extend(lowerGhost, upperGhost).inflate(scIdx, numComponents+scIdx));
-    Field<NDIM, T> fld(vrgn, scIdx, scIdx+numComponents, lowerGhost, upperGhost, subArr);
+    Field<NDIM, T> fld(globalRgn, vrgn, scIdx, scIdx+numComponents, lowerGhost, upperGhost, subArr);
     fld.rgnIdx = this->rgnIdx;
     return fld;
   }
@@ -126,7 +154,7 @@ namespace Lucee
       newLower[i] = rgnIdx.getLower(i);
     newLower[NDIM] = -sc; // returned field's 0th component should be sc
 
-    Field<NDIM, T> fld(rgn, sc, ec, lowerGhost, upperGhost, subArr);
+    Field<NDIM, T> fld(globalRgn, rgn, sc, ec, lowerGhost, upperGhost, subArr);
     fld.resetLowerForIndexer(newLower); // reset the Array indexer
     fld.rgnIdx = this->rgnIdx;
     fld.rgnIdx.resetLower(newLower);
@@ -162,10 +190,11 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
-  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& rgn, unsigned sc, unsigned ec,
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& globalRgn, 
+    const Lucee::Region<NDIM, int>& rgn, unsigned sc, unsigned ec,
     int lg[NDIM], int ug[NDIM], Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>& subArr)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(subArr),
-      scIdx(sc), numComponents(ec-sc), rgn(rgn), rgnIdx(rgn.inflate(sc, ec))
+      scIdx(sc), numComponents(ec-sc), rgn(rgn), globalRgn(globalRgn), rgnIdx(rgn.inflate(sc, ec))
   {
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -182,10 +211,9 @@ namespace Lucee
 // construct sizes and shapes to write stuff out
     for (unsigned i=0; i<NDIM; ++i)
     {
-      unsigned dirShape = getUpper(i)-getLower(i);
-      dataSetSize[i] = dirShape;
-      dataSetBeg[i] = 0;
-      dataSetLen[i] = dirShape;
+      dataSetSize[i] = globalRgn.getShape(i);
+      dataSetBeg[i] = rgn.getLower(i);
+      dataSetLen[i] = rgn.getShape(i);
     }
     dataSetSize[NDIM] = numComponents;
     dataSetBeg[NDIM] = 0;
@@ -219,7 +247,7 @@ namespace Lucee
   {
     Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer> arr 
       = Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::duplicate();
-    Lucee::Field<NDIM, T> fld(rgn, 0, numComponents, lowerGhost, upperGhost, arr);
+    Lucee::Field<NDIM, T> fld(globalRgn, rgn, 0, numComponents, lowerGhost, upperGhost, arr);
     return fld;
   }
 

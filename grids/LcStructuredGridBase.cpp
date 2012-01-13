@@ -110,14 +110,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
-  StructuredGridBase<NDIM>::getGlobalBox() const 
+  StructuredGridBase<NDIM>::getGlobalRegion() const 
   { 
     return globalRgn; 
   }
 
   template <unsigned NDIM>
   Lucee::Region<NDIM, int>
-  StructuredGridBase<NDIM>::getLocalBox() const 
+  StructuredGridBase<NDIM>::getLocalRegion() const 
   { 
     return localRgn; 
   }
@@ -188,7 +188,7 @@ namespace Lucee
       = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
-    Lucee::Region<NDIM, int> lb = g->getLocalBox();
+    Lucee::Region<NDIM, int> lb = g->getLocalRegion();
     lua_pushnumber(L, lb.getLower(dir));
     return 1;
   }
@@ -201,7 +201,7 @@ namespace Lucee
       = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
-    Lucee::Region<NDIM, int> lb = g->getLocalBox();
+    Lucee::Region<NDIM, int> lb = g->getLocalRegion();
     lua_pushnumber(L, lb.getUpper(dir));
     return 1;
   }
@@ -214,7 +214,7 @@ namespace Lucee
       = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
-    Lucee::Region<NDIM, int> gb = g->getGlobalBox();
+    Lucee::Region<NDIM, int> gb = g->getGlobalRegion();
     lua_pushnumber(L, gb.getLower(dir));
     return 1;
   }
@@ -227,7 +227,7 @@ namespace Lucee
       = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
 
     int dir = lua_tonumber(L, 2);
-    Lucee::Region<NDIM, int> gb = g->getGlobalBox();
+    Lucee::Region<NDIM, int> gb = g->getGlobalRegion();
     lua_pushnumber(L, gb.getUpper(dir));
     return 1;
   }

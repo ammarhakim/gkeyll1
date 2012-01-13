@@ -106,7 +106,7 @@ target_link_libraries(lcvec3 lclib ${Hdf5_Mpi_LIBRARIES})
 
 # lcrectcartgrid
 add_executable(lcrectcartgrid lcrectcartgrid.cxx)
-target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
+target_link_libraries(lcrectcartgrid lcgrids lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lclincombiner
 add_executable(lclincombiner lclincombiner.cxx)

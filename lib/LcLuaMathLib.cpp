@@ -5,11 +5,15 @@
 */
 
 // lucee includes
+#include <LcGlobals.h>
 #include <LcLogStream.h>
 #include <LcLogger.h>
 #include <LcLuaMathLib.h>
 #include <LcMathLib.h>
 #include <LcMathPhysConstants.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 static
 int
@@ -77,6 +81,26 @@ lua_log_critical(lua_State *L)
   return 0;
 }
 
+static
+int
+lua_get_rank(lua_State *L)
+{
+  int rank = Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().comm->getRank();
+  lua_pushnumber(L, rank);
+  return 1;
+}
+
+static
+int
+lua_get_num_procs(lua_State *L)
+{
+  int nproc = Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().comm->getNumProcs();
+  lua_pushnumber(L, nproc);
+  return 1;
+}
+
 static const luaL_Reg lcLuaMathLib[] = {
     {"legendre", lua_lengendre},
     {"logDebug", lua_log_debug},
@@ -84,6 +108,8 @@ static const luaL_Reg lcLuaMathLib[] = {
     {"logWarning", lua_log_warning},
     {"logError", lua_log_error},
     {"logCritical", lua_log_critical},
+    {"getRank", lua_get_rank},
+    {"getNumProcs", lua_get_num_procs},
     {NULL, NULL}
 };
 

@@ -33,7 +33,7 @@ test_0()
 
   double xc[3];
   int idx[2];
-  Lucee::RowMajorSequencer<2> seq(grid.getLocalBox());
+  Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
   while (seq.step())
   {
     seq.fillWithIndex(idx);
@@ -101,7 +101,7 @@ test_1()
 // test it
   double xc[3];
   int idx[2];
-  Lucee::RowMajorSequencer<2> seq(grid.getLocalBox());
+  Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
   while (seq.step())
   {
     seq.fillWithIndex(idx);

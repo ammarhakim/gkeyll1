@@ -1,5 +1,32 @@
 # -*- org -*-
 
+* January 13th 2012
+
+  Extended the Field::writeToFile method to work in parallel. This was
+  trickier than I thought as in some constructors the global region
+  was not being set correctly. Fixed all this.
+
+  There are no unit tests for this stuff yet. However, I wrote a lua
+  script to create a CartGrid in parallel and made sure that the lower
+  and upper bound on each rank was correct. This brings up a more
+  general question: how to incorporate unit tests run from Lua using
+  the main Lucee executable into the ctest system?
+  
+  Also, to allow unit testing I add methods Lucee.getRank() and
+  Lucee.getNumProcs() to the top-level "Lucee" module so this
+  information can be queried from Lua.
+
+  I need to test the parallel Field from a unit test. This can be done
+  by creating a field in parallel in which each local region is
+  computed from a decomp while the same global region is used. This
+  should create a field that behaves like a parallel field.
+
+  Minor fixup: renamed globalBox -> globalRegion and localBox ->
+  localRegion. This makes the code more consistent.
+
+  Now that my facetsall access is enabled again I should be able to
+  setup a regression test repo and see how it can be cron-ed at PPPL.
+
 * January 12th 2012
 
   More reading up on Krommes 02. Made plans with Greg on how to move

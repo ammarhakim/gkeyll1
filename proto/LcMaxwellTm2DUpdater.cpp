@@ -73,7 +73,7 @@ namespace Lucee
     Lucee::Field<2, double>& qNew = this->getOut<Lucee::Field<2, double> >(0);
 
 // loop, updating solution
-    Lucee::Region<2, int> localBox = grid.getLocalBox();
+    Lucee::Region<2, int> localBox = grid.getLocalRegion();
     for (int i=localBox.getLower(0); i<localBox.getUpper(0); ++i)
     {
       for (int j=localBox.getLower(1); j<localBox.getUpper(1); ++j)

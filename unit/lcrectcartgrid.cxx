@@ -5,9 +5,9 @@
  */
 
 // lucee includes
-#include <LcTest.h>
 #include <LcRectCartGrid.h>
 #include <LcRowMajorSequencer.h>
+#include <LcTest.h>
 #include <LcVec3.h>
 
 // std includes
@@ -326,6 +326,12 @@ test_3()
 
 }
 
+void
+test_4()
+{
+// test grid in parallel
+}
+
 int
 main(int argc, char **argv)
 {
@@ -338,6 +344,7 @@ main(int argc, char **argv)
   test_1();
   test_2();
   test_3();
+  test_4();
 #ifdef HAVE_MPI
   LC_MPI_END_TESTS;
 #else
