@@ -65,12 +65,8 @@ namespace Lucee
 
     if (isH5)
     {
-#ifdef HAVE_MPI
-      TxMpiBase commBase;
-#else
-      TxSelfBase commBase;
-#endif
-      TxIoBase *io = new TxHdf5Base(&commBase);
+      TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
+      TxIoBase *io = new TxHdf5Base(comm);
 // open file to write in
       TxIoNodeType fn = io->createFile(outNm);
 // write data

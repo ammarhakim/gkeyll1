@@ -126,7 +126,7 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 // local region to index
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 // determine number of equations and waves
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
@@ -167,7 +167,7 @@ namespace Lucee
 // time-step
     double dt = t-this->getCurrTime();
 // local region to index
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalBox();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();

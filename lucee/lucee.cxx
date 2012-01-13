@@ -41,6 +41,10 @@ main(int argc, char **argv)
   MPI_Init(&argc, &argv);
 #endif
 
+// get hold of global communicator
+  TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().comm;
+
   Lucee::CmdLineArgs cmdParser("lucee");
 // add command line options
   cmdParser.addArg("i", "INPUT", "Input file");
@@ -63,8 +67,11 @@ main(int argc, char **argv)
     inpFile = cmdParser.getArg("i");
   else
   {
-    std::cerr << "** Input file not specified" << std::endl;
-    cmdParser.showHelp();
+    if (comm->getRank() == 0)
+    {
+      std::cerr << "** Input file not specified" << std::endl;
+      cmdParser.showHelp();
+    }
     exit(1);
   }
 
@@ -108,7 +115,9 @@ main(int argc, char **argv)
     conLogger.setLevel("info");
 // create console stream
   Lucee::StreamHandler conStrm(std::cout);
-  conStrm.attachToLogger("lucee.console");
+  if (comm->getRank() == 0)
+// write messages to console only on rank 0
+    conStrm.attachToLogger("lucee.console");
 
 // get stream for logging
   Lucee::LogStream infoStrm = conLogger.getInfoStream();

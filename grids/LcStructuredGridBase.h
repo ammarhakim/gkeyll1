@@ -58,14 +58,14 @@ namespace Lucee
  *
  * @return global region indexed by grid.
  */
-      Lucee::Region<NDIM, int> getGlobalBox() const;
+      Lucee::Region<NDIM, int> getGlobalRegion() const;
 
 /**
  * Return local region indexed by grid.
  *
  * @return  local region indexed by grid.
  */
-      Lucee::Region<NDIM, int> getLocalBox() const;
+      Lucee::Region<NDIM, int> getLocalRegion() const;
 
 /**
  * Return region in computational space

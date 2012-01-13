@@ -43,7 +43,7 @@ namespace Lucee
     const Lucee::RectCartGrid<2>& grid 
       = this->getGrid<Lucee::RectCartGrid<2> >();
 // local region to index
-    Lucee::Region<2, int> localRgn = grid.getLocalBox();
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
     int vol = localRgn.getVolume();
 
 // computational space
@@ -101,7 +101,7 @@ namespace Lucee
     Lucee::Field<2, double>& sol = this->getOut<Lucee::Field<2, double> >(0);
 
 // local indexing region
-    Lucee::Region<2, int> localRgn = grid.getLocalBox();
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
     int vol = localRgn.getVolume();
 
 // compute integrated source to remove from source. This is needed to
