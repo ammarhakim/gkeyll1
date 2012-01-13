@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* January 12th 2012
+
+  More reading up on Krommes 02. Made plans with Greg on how to move
+  forward with the project. Will implement couple of schemes from
+  Peterson & Hammett paper and then flux-reconstruction DG and Shu-DG
+  for 2D incompressible flow problem.
+
+* January 11th 2012
+
+  Spent most of the day working on reviewing basic stuff on
+  turbulence, reading Krommes's notes and other references. No work on
+  Lucee. Eventually need to understand field-theory approach to
+  deriving the GKE.
+
 * January 10th 2012
 
   Creating a new org file for work done at PPPL. Completed a brief
@@ -28,7 +42,7 @@
 
   FIXED parallel build problem. I am not sure if this is the correct
   way to do things. But builds for now. Next need to test the
-  structured grid in parallel. <2012-01-10 Tue 23:16>
+  structured grid in parallel.
 
 ** TODO Create a new repo with regression tests.
 

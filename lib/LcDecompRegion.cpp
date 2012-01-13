@@ -64,7 +64,7 @@ namespace Lucee
 // returns the newly computed neighbors. The neighbor calculation is
 // quite expensive, specially in 2D and 3D so the caching can improve
 // performance. The code below is complicated by the fact that for
-// each sub-region neighbor information for different ghost
+// each sub-region, neighbor information for different ghost
 // distribution might be requested. This requires the use of a
 // "two-layer" map.
 
