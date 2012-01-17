@@ -12,7 +12,11 @@
 #include <LcVector.h>
 
 // txbase includes
-#include <TxMpiBase.h>
+#ifdef HAVE_MPI
+# include <TxMpiBase.h>
+#else
+# include <TxSelfBase.h>
+#endif
 
 // std includes
 #include <memory>
@@ -781,7 +785,11 @@ void
 test_18()
 {
 // create communicator object
+#ifdef HAVE_MPI
   std::auto_ptr<TxCommBase> comm( new TxMpiBase() );
+#else
+  std::auto_ptr<TxCommBase> comm( new TxSelfBase() );
+#endif
 
   int lower[2] = {0, 0};
   int upper[2] = {32, 64};

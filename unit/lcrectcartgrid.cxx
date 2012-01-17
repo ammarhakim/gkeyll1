@@ -21,7 +21,7 @@ test_1()
   double lower[3] = {0.5, 0.5, 0.5};
   double upper[3] = {1.5, 2.5, 4.5};
   Lucee::Region<3, double> physBox(lower, upper);
-  Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
+  Lucee::RectCartGrid<3> grid3(localBox, physBox);
 
 // cell spacing
   LC_ASSERT("Testing spacing in x-direction", grid3.getDx(0) == 1.0);
@@ -140,7 +140,7 @@ test_2()
   double lower[3] = {0.0, 0.0, 0.0};
   double upper[3] = {1.0, 2.0, 4.0};
   Lucee::Region<3, double> physBox(lower, upper);
-  Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
+  Lucee::RectCartGrid<3> grid3(localBox, physBox);
 
 // cell volume
   int idx[3];
@@ -237,7 +237,7 @@ test_3()
   double lower[3] = {-1.0, -2.0, -4.0};
   double upper[3] = {0.0, 0.0, 0.0};
   Lucee::Region<3, double> physBox(lower, upper);
-  Lucee::RectCartGrid<3> grid3(localBox, localBox, physBox);
+  Lucee::RectCartGrid<3> grid3(localBox, physBox);
 
 // cell volume
   int idx[3];

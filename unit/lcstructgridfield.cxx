@@ -22,7 +22,7 @@ test_0()
   double pup[2] = {1.0, 1.5};
   Lucee::Region<2, double> physBox(plo, pup);
 
-  Lucee::RectCartGrid<2> grid(localBox, localBox, physBox);
+  Lucee::RectCartGrid<2> grid(localBox, physBox);
 
 // run some basic tests on grid
   LC_ASSERT("Testing grid", grid.getNumCells(0) == 10);
@@ -60,7 +60,7 @@ test_1()
   double pup[2] = {1.0, 1.5};
   Lucee::Region<2, double> physBox(plo, pup);
 
-  Lucee::RectCartGrid<2> grid(localBox, localBox, physBox);
+  Lucee::RectCartGrid<2> grid(localBox, physBox);
 // create field
   int lg[2] = {2, 3}, ug[2] = {3, 2};
   Lucee::StructGridField<2, double> fld(&grid, 3, lg, ug);
@@ -125,7 +125,7 @@ test_2()
   double pup[2] = {1.0, 1.5};
   Lucee::Region<2, double> physBox(plo, pup);
 
-  Lucee::RectCartGrid<2> grid(localBox, localBox, physBox);
+  Lucee::RectCartGrid<2> grid(localBox, physBox);
 // create field
   int lg[2] = {2, 3}, ug[2] = {3, 2};
   Lucee::StructGridField<2, double> fld(&grid, 3, lg, ug);

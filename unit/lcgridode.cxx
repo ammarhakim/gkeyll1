@@ -93,7 +93,7 @@ main(void)
   double plo[2] = {0.0};
   double pup[2] = {1.0};
   Lucee::Region<1, double> physBox(plo, pup);
-  Lucee::RectCartGrid<1> grid(localBox, localBox, physBox);
+  Lucee::RectCartGrid<1> grid(localBox, physBox);
 
 // create field
   int lg[1] = {0}, ug[1] = {0};

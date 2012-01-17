@@ -276,10 +276,9 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& localRgn,
-    const Lucee::Region<NDIM, int>& globalRgn,
+  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::Region<NDIM, int>& globalRgn,
     const Lucee::Region<NDIM, double>& compSpace)
-    : localRgn(localRgn), globalRgn(globalRgn), compSpace(compSpace),
+    : localRgn(globalRgn), globalRgn(globalRgn), compSpace(compSpace),
       decompRgn( new Lucee::DecompRegion<NDIM>(globalRgn) )
   {
   }
