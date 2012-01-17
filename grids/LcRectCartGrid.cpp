@@ -25,10 +25,9 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& localRgn,
-    const Lucee::Region<NDIM, int>& globalRgn,
+  RectCartGrid<NDIM>::RectCartGrid(const Lucee::Region<NDIM, int>& globalRgn,
     const Lucee::Region<NDIM, double>& physBox) 
-    : Lucee::StructuredGridBase<NDIM>(localRgn, globalRgn, physBox)
+    : Lucee::StructuredGridBase<NDIM>(globalRgn, physBox)
   {
     calcGeometry();
   }

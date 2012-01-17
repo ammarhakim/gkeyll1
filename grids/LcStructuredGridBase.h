@@ -250,12 +250,7 @@ namespace Lucee
       StructuredGridBase();
 
 /**
- * Create a new body-fitted grid on specified region. In serial the
- * local and global boxes coincide. In parallel, the globalRgn
- * represents the full grid, while the localRgn represents the portion
- * of the grid handled by the rank the grid lives on. The full
- * computational domain (i.e. indexed by the global region) is
- * specified using the Region object compSpace.
+ * Create a new body-fitted grid on specified region.
  *
  * To get data from the grid, first set the index into the grid by
  * using the setIndex() method. Then access the needed data for that
@@ -263,12 +258,10 @@ namespace Lucee
  * bottom, back) are labeled by the cell index. Further, the lower
  * left corner of each cell is also labelled by the cell index.
  *
- * @param localRgn Local index region for this grid.
  * @param globalRgn Global index region for this grid.
  * @param compSpace Region in computation space.
  */
-      StructuredGridBase(const Lucee::Region<NDIM, int>& localRgn,
-        const Lucee::Region<NDIM, int>& globalRgn,
+      StructuredGridBase(const Lucee::Region<NDIM, int>& globalRgn,
         const Lucee::Region<NDIM, double>& compSpace);
 
 /**
