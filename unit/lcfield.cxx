@@ -5,9 +5,17 @@
  */
 
 // lucee includes
+#include <LcCartProdDecompRegionCalc.h>
+#include <LcDecompRegion.h>
 #include <LcField.h>
 #include <LcTest.h>
 #include <LcVector.h>
+
+// txbase includes
+#include <TxMpiBase.h>
+
+// std includes
+#include <memory>
 
 void
 test_1()
@@ -769,10 +777,39 @@ test_17()
         LC_ASSERT("Testing if copy BC on upper side worked", fld(i,j,k) == fld(i,iup,k) );
 }
 
-int
-main(void)
+void
+test_18()
 {
+// create communicator object
+  std::auto_ptr<TxCommBase> comm( new TxMpiBase() );
+
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+  int cuts[2] = {2, 2};
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+
+  if (comm->getNumProcs() == 4)
+  {
+    cartDecomp.calcDecomp(comm->getNumProcs(), dcomp); // decompose
+// now create field on this decomposition
+    Lucee::Field<2, double> parFld(dcomp.getRegion(comm->getRank()), 1);
+  }
+}
+
+int
+main(int argc, char **argv)
+{
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+  LC_MPI_BEGIN_TESTS("lcfield");
+#else
   LC_BEGIN_TESTS("lcfield");
+#endif
   test_1();
   test_2();
   test_3();
@@ -790,5 +827,14 @@ main(void)
   test_15();
   test_16();
   test_17();
+#ifdef HAVE_MPI
+  test_18();
+#endif
+
+#ifdef HAVE_MPI
+  LC_MPI_END_TESTS;
+  MPI_Finalize();
+#else
   LC_END_TESTS;
+#endif
 }

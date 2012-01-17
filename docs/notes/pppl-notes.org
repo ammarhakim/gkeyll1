@@ -1,31 +1,48 @@
 # -*- org -*-
 
+* January 16th 2012
+
+  Need to add other decomposition methods to allow arbitrary number of
+  regions. Also, perhaps a pure Lua decomposition should also be
+  allowed?
+
+  If a field is created with `decompose=false` which processor should
+  write the data? Currently all procs do this which can cause
+  problems. One option is to not to "fix" this. From Lua one can do
+  this by checking the rank and write the array if the rank is the
+  correct one.
+
 * January 13th 2012
 
   Extended the Field::writeToFile method to work in parallel. This was
   trickier than I thought as in some constructors the global region
   was not being set correctly. Fixed all this.
 
-  There are no unit tests for this stuff yet. However, I wrote a lua
-  script to create a CartGrid in parallel and made sure that the lower
-  and upper bound on each rank was correct. This brings up a more
-  general question: how to incorporate unit tests run from Lua using
-  the main Lucee executable into the ctest system?
-  
-  Also, to allow unit testing I add methods Lucee.getRank() and
-  Lucee.getNumProcs() to the top-level "Lucee" module so this
-  information can be queried from Lua.
-
-  I need to test the parallel Field from a unit test. This can be done
-  by creating a field in parallel in which each local region is
-  computed from a decomp while the same global region is used. This
-  should create a field that behaves like a parallel field.
-
   Minor fixup: renamed globalBox -> globalRegion and localBox ->
   localRegion. This makes the code more consistent.
 
   Now that my facetsall access is enabled again I should be able to
   setup a regression test repo and see how it can be cron-ed at PPPL.
+
+  Also, to allow unit testing I add methods Lucee.getRank() and
+  Lucee.getNumProcs() to the top-level "Lucee" module so this
+  information can be queried from Lua.
+
+** TODO Add comprehensive unit test for parallel fields
+
+   There are no unit tests for this stuff yet. However, I wrote a lua
+   script to create a CartGrid in parallel and made sure that the
+   lower and upper bound on each rank was correct. This brings up a
+   more general question: how to incorporate unit tests run from Lua
+   using the main Lucee executable into the ctest system?
+
+   The ``DataStruct.Field`` block allows both serial and parallel
+   fields. Both need to be tested.
+  
+   I need to test the parallel Field from a unit test. This can be
+   done by creating a field in parallel in which each local region is
+   computed from a decomp while the same global region is used. This
+   should create a field that behaves like a parallel field.
 
 * January 12th 2012
 
@@ -49,14 +66,6 @@
   is to hook these up the grid and field classes, implement sync() and
   test. Easier said than done.
 
-  A significant unresolved issue: how to deal with periodic domains?
-  The neighbor calculation code needs to change for that. Essentially
-  on each periodic side of the global region (including corners) we
-  need to make copies of the global region. This will then give the
-  proper neighbors, including self-intersections. Some ambiguity
-  exists in the case in which the only one direction is
-  periodic. Question: should the periodic conditions include corners
-  in this case? I do not know, yet.
 
   Now StructuredGridBase gets the decomposition object and uses it to
   compute the decomposition. Local and global regions are set
@@ -75,4 +84,14 @@
 
    Just use TX's txtest system. It is good enough for our needs and
    will be one less thing to maintain.
-  
+
+** TODO Make neighbor calculations for periodic boundaries.
+
+   A significant unresolved issue: how to deal with periodic domains?
+   The neighbor calculation code needs to change for that. Essentially
+   on each periodic side of the global region (including corners) we
+   need to make copies of the global region. This will then give the
+   proper neighbors, including self-intersections. Some ambiguity
+   exists in the case in which the only one direction is
+   periodic. Question: should the periodic conditions include corners
+   in this case? I do not know, yet.

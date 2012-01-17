@@ -166,10 +166,18 @@ namespace Lucee
         upperGhost[i] = gstDbl[1];
       }
     }
+
+// check if this field lives in parallel
+    bool isPar = true; // by default alway parallel
+    if (tbl.hasBool("decompose"))
+      isPar = tbl.getBool("decompose");
+
 // global region for field
     typename Lucee::Region<NDIM, int> globalRgn = grid->getGlobalRegion();
 // local region for field
-    typename Lucee::Region<NDIM, int> localRgn = grid->getLocalRegion();
+    typename Lucee::Region<NDIM, int> localRgn = globalRgn;
+    if (isPar)
+      localRgn = grid->getLocalRegion();
 // create new field and copy data to self
     Field<NDIM, T>::operator=(
       Field<NDIM, T>(globalRgn, localRgn, numComponents, lowerGhost, upperGhost));
@@ -219,6 +227,12 @@ namespace Lucee
         txtFl << rPtr[i] << " ";
       txtFl << std::endl;
     }
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::sync()
+  {
   }
 
   template <unsigned NDIM, typename T>

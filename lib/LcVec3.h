@@ -66,7 +66,7 @@ namespace Lucee
       Vec3<T> cross(const Vec3<T>& vec) const;
 
 /**
- * Normalize the vector so its lenght it 1.0.
+ * Normalize the vector so its length it 1.0.
  */
       void normalize();
 

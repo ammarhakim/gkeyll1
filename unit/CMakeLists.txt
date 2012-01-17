@@ -74,7 +74,7 @@ target_link_libraries(lcregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LI
 # lcfield
 add_executable(lcfield lcfield.cxx)
 target_link_libraries(lcfield
-  lcdatastructs lcgrids lclib lcloki lclua ${Hdf5_Mpi_LIBRARIES})
+  lcdatastructs lcgrids lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 # lcrowmajorsequencer
 add_executable(lcrowmajorsequencer lcrowmajorsequencer.cxx)
