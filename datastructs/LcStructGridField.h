@@ -16,6 +16,9 @@
 #include <LcField.h>
 #include <LcStructuredGridBase.h>
 
+// txbase includes
+#include <TxCommBase.h>
+
 namespace Lucee
 {
 /**
@@ -183,6 +186,31 @@ namespace Lucee
       Lucee::StructuredGridBase<NDIM> *grid;
 /** Flag to indicate location of data in field */
       int dataLoc;
+/** Flag to indicate if we are in recieve mode */
+      mutable bool isReceiving;
+/** Map of a rank -> pending recieves */
+      mutable std::map<int, TxMsgStatus> msgStatus;
+
+/**
+ * Start a non-blocking operation to receive data from skin region.
+ *
+ * @param lowerExt Length of extension along lower end in each direction.
+ * @param upperExt Length of extension along upper end in each direction.
+ */
+      void startRecv(unsigned rank, int lowerGhost[NDIM], int upperGhost[NDIM]);
+
+/**
+ * Complete the non-blocking operation to receive data from skin region.
+ */
+    void finishRecv();
+
+/**
+ * Do a blocking operation to send data to our neighbors.
+ *
+ * @param lowerExt Length of extension along lower end in each direction.
+ * @param upperExt Length of extension along upper end in each direction.
+ */
+    void send(unsigned rank, int lowerGhost[NDIM], int upperGhost[NDIM]);
 
 /**
  * Create a field from supplied one (shallow copy).

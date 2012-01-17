@@ -161,6 +161,32 @@ namespace Lucee
         double tan1[3], double tan2[3]) const = 0;
 
 /**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells.
+ *
+ * @param rn Target region number
+ * @param lowerExt Length of extension along lower end in each direction.
+ * @param upperExt Length of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> getNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      Lucee::Region<NDIM, int> getNeighborRgn(unsigned rn) const
+      { return decompRgn->getRegion(rn); }
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.

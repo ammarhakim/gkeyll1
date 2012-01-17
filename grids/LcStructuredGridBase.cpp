@@ -169,6 +169,14 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  std::vector<unsigned> 
+  StructuredGridBase<NDIM>::getNeighbors(unsigned rn, 
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+    return decompRgn->getNeighbors(rn, lowerExt, upperExt);
+  }
+
+  template <unsigned NDIM>
   void
   StructuredGridBase<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
