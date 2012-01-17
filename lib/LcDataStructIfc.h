@@ -77,6 +77,12 @@ namespace Lucee
       virtual void writeToTxtFile(std::ofstream& txtFl);
 
 /**
+ * Synchronise data in ghost cells, copying skin data into neighbor
+ * ghost cells.
+ */
+      virtual void sync();
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
@@ -90,6 +96,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaWrite(lua_State *L);
+
+/**
+ * Lua callable method for synchronizing ghost cell data.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSync(lua_State *L);
 
     protected:
 /**

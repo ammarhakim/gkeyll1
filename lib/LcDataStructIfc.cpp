@@ -91,19 +91,33 @@ namespace Lucee
   }
 
   void
+  DataStructIfc::sync()
+  {
+// throw exception if we come here
+    throw Lucee::Except("DataStructIfc::sync: Not implemented!");
+  }
+
+  void
   DataStructIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("write", luaWrite);
+    lfm.appendFunc("sync", luaSync);
   }
 
   int
   DataStructIfc::luaWrite(lua_State *L)
   {
-    DataStructIfc *d
-      = Lucee::PointerHolder<DataStructIfc>::getObj(L);
+    DataStructIfc *d = Lucee::PointerHolder<DataStructIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
     d->write(nm);
+    return 0;
+  }
 
+  int
+  DataStructIfc::luaSync(lua_State *L)
+  {
+    DataStructIfc *d = Lucee::PointerHolder<DataStructIfc>::getObj(L);
+    d->sync();
     return 0;
   }
 
