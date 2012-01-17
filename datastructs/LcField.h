@@ -247,6 +247,21 @@ namespace Lucee
       { return globalRgn.extend(lowerGhost, upperGhost); }
 
 /**
+ * Return lower and upper ghost cells along each dimension.
+ *
+ * @param lowerGhst On output, this is filled with number of lower ghost cells.
+ * @param upperGhst On output, this is filled with number of upper ghost cells.
+ */
+      void fillWithGhosts(int lowerGhst[NDIM], int upperGhst[NDIM]) const
+      {
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          lowerGhst[i] = lowerGhost[i];
+          upperGhst[i] = upperGhost[i];
+        }
+      }
+
+/**
  * Get indexer into field.
  *
  * @return Indexer into field.

@@ -10,8 +10,15 @@
 #endif
 
 // lucee includes
+#include <LcGlobals.h>
 #include <LcPointerHolder.h>
 #include <LcStructGridField.h>
+
+// loki includes
+#include <loki/Singleton.h>
+
+// boost includes
+#include <boost/shared_array.hpp>
 
 // std includes
 #include <fstream>
@@ -233,6 +240,127 @@ namespace Lucee
   void
   StructGridField<NDIM, T>::sync()
   {
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+    int rank = comm->getRank(); // current rank
+    int lg[NDIM], ug[NDIM];
+    this->fillWithGhosts(lg, ug); // ghost cells
+
+// initiate (non-blocking) receive of data from our neighbors
+    startRecv(rank, lg, ug);
+// send data over
+    send(rank, lg, ug);
+// finish receiving data as recieve was non-blocking
+    finishRecv();
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::startRecv(unsigned rank, int lg[NDIM], int ug[NDIM])
+  {
+// THIS PRESENTLY (1-17-2012) DOES NOT WORK WITH PERIODIC BCs
+
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+
+// get neighbor information
+    std::vector<unsigned> neigh = grid->getNeighbors(rank, lg, ug);
+// receive data from our neighbors
+    for (unsigned i=0; i<neigh.size(); ++i)
+    {
+      int tag = 1000; // tag for message
+      unsigned srcRank = neigh[i]; // rank to receive data from
+      Lucee::Region<NDIM, int> srcBox = grid->getNeighborRgn(srcRank); // region to receive from
+// initiate communication
+      Lucee::Region<NDIM, int> rgn = srcBox.intersect( this->getExtRegion() );
+      if (rgn.getVolume() == 0)
+        continue; // nothing to do if no intersection
+      TxMsgStatus ms = comm->template
+        startRecv<T>(this->getNumComponents()*rgn.getVolume(), srcRank, tag);
+      msgStatus[i] = ms;
+    }
+    isReceiving = true;
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::send(unsigned rank, int lg[NDIM], int ug[NDIM])
+  {
+// THIS PRESENTLY (1-17-2012) DOES NOT WORK WITH PERIODIC BCs
+
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+
+// get neighbor information (THIS ASSUMES THAT SEND AND RECEIVE
+// NEIGHBORS ARE SAME. THIS WILL NOT WORK OTHERWISE AND WILL REQUIRE A
+// CHANGE TO HOW NEIGHBOR CALCULATIONS ARE PERFORMED. THIS CAN HAPPEN
+// IN SOME EXTREME SITUATIONS AND HENCE NEEDS TO BE DETECTED AND
+// EVENTUALLY TAKEN CARE OF. [A. Hakim 1-17-2012])
+    std::vector<unsigned> neigh = grid->getNeighbors(rank, lg, ug);
+// send data to each of our neighbors
+    for (unsigned i=0; i<neigh.size(); ++i)
+    {
+      int tag = 1000; // tag for message
+      unsigned destRank = neigh[i]; // rank to send data to
+      Lucee::Region<NDIM, int> destRgn = grid->getNeighborRgn(destRank); // region to send to
+// region to send is our local region intersected with destination's extended region
+      Lucee::Region<NDIM, int> sendRgn = this->getRegion().intersect(
+        destRgn.extend(lg, ug));
+      if (sendRgn.getVolume() == 0)
+        continue; // nothing to send
+// buffer to store data to send
+      std::vector<T> sendVec( this->getNumComponents()*sendRgn.getVolume() );
+// copy data over: this works because startRecv() function uses same
+// ordering of data as we use below.
+      Lucee::RowMajorSequencer<NDIM> seq(sendRgn);
+      Lucee::FieldPtr<T> ptr = this->createPtr();
+      unsigned loc = 0;
+      while ( seq.step() )
+      {
+        this->setPtr(ptr, seq.getIndex());
+        for (unsigned k=0; k<this->getNumComponents(); ++k)
+          sendVec[loc++] = ptr[k];
+      }
+      comm->template
+        send<T>(this->getNumComponents()*sendRgn.getVolume(), &sendVec[0], destRank, tag);
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::finishRecv()
+  {
+    if (!isReceiving) return; // nothing to receive
+
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+
+// complete receives and copy data into ghost cells
+    std::map<int, TxMsgStatus>::iterator i = msgStatus.begin();
+    for ( ; i != msgStatus.end(); ++i)
+    {
+      Lucee::Region<NDIM, int> recvRgn = this->getExtRegion().intersect(
+        grid->getNeighborRgn(i->first)); // ghost cell region
+// get data and store in shared array so it gets collected when this loop exits
+      boost::shared_array<T> recvData ( (T*) comm->finishRecv(i->second) );
+// copy data over: this works because send() function uses same
+// ordering of data as we use below.
+      Lucee::RowMajorSequencer<NDIM> seq(recvRgn);
+      Lucee::FieldPtr<T> ptr = this->createPtr();
+      unsigned loc = 0;
+      while ( seq.step() )
+      {
+        this->setPtr(ptr, seq.getIndex());
+        for (unsigned k=0; k<this->getNumComponents(); ++k)
+          ptr[k] = recvData[loc++];
+      }
+    }
+    msgStatus.erase(msgStatus.begin(), msgStatus.end());
+    isReceiving = false; // we are done
   }
 
   template <unsigned NDIM, typename T>
