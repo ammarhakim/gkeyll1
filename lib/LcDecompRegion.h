@@ -49,6 +49,13 @@ namespace Lucee
       DecompRegion(const Lucee::Region<NDIM, int>& globalRgn);
 
 /**
+ * Create a new decompRegion object from supplied one.
+ *
+ * @param decompRgn Decomposed region.
+ */
+      DecompRegion(const DecompRegion<NDIM>& decompRgn);
+
+/**
  * Return bumber of sub-regions in decomposition.
  *
  * @return number of sub-regions.
@@ -111,6 +118,14 @@ namespace Lucee
  * @return ratio of minimum volume to maximum volume region.
  */
       double calcMinMaxVolRatio() const;
+
+/**
+ * Compare if the supplied decomposed region is identical to this one.
+ *
+ * @param decompRgn Decomposed region to compare to.
+ * @return true it regions are identical, false if not.
+ */
+      bool compareDecomp(const Lucee::DecompRegion<NDIM>& decompRgn) const;
 
     private:
 /** Global region */

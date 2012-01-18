@@ -284,6 +284,19 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  StructuredGridBase<NDIM>::StructuredGridBase(const Lucee::DecompRegion<NDIM>& dcmpRgn,
+    const Lucee::Region<NDIM, double>& compSpace)
+    : localRgn(dcmpRgn.getRegion(
+        Loki::SingletonHolder<Lucee::Globals>
+        ::Instance().comm->getRank()
+                                 )
+               ),
+      globalRgn(dcmpRgn.getGlobalRegion()), compSpace(compSpace),
+      decompRgn( new Lucee::DecompRegion<NDIM>(dcmpRgn) )
+  {
+  }
+
+  template <unsigned NDIM>
   StructuredGridBase<NDIM>&
   StructuredGridBase<NDIM>::operator=(const StructuredGridBase<NDIM>& sg)
   {

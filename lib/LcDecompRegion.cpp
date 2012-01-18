@@ -26,6 +26,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM> 
+  DecompRegion<NDIM>::DecompRegion(const DecompRegion<NDIM>& decompRgn)
+    : globalRgn(decompRgn.globalRgn), rgns(decompRgn.rgns),
+      rgnNeighborMap(decompRgn.rgnNeighborMap)
+  {
+  }
+
+  template <unsigned NDIM> 
   unsigned
   DecompRegion<NDIM>::getNumRegions() const
   {
@@ -161,6 +168,55 @@ namespace Lucee
       maxVol = vol > maxVol ? vol : maxVol;
     }
     return (double) minVol / (double) maxVol;
+  }
+
+  template <unsigned NDIM>
+  bool
+  DecompRegion<NDIM>::compareDecomp(const Lucee::DecompRegion<NDIM>& decompRgn) const
+  {
+    if (globalRgn != decompRgn.globalRgn)
+      return false;
+
+    if (rgns.size() != decompRgn.rgns.size()) 
+      return false;
+    for (unsigned i=0; i<rgns.size(); ++i)
+      if (rgns[i] != decompRgn.rgns[i])
+        return false;
+
+    if (rgnNeighborMap.size() != decompRgn.rgnNeighborMap.size())
+      return false;
+
+    typename std::map<unsigned, NeighborData>::const_iterator rnmItr
+      = rgnNeighborMap.begin();
+    for ( ; rnmItr != rgnNeighborMap.end(); ++rnmItr)
+    {
+      typename std::map<unsigned, NeighborData>::const_iterator d_rnmItr
+        = decompRgn.rgnNeighborMap.find(rnmItr->first);
+      if (d_rnmItr == decompRgn.rgnNeighborMap.end()) 
+        return false;
+
+      if (rnmItr->second.neighborMap.size() != d_rnmItr->second.neighborMap.size())
+        return false;
+
+      typename NeighborMap_t::const_iterator nmItr = 
+        rnmItr->second.neighborMap.begin();
+      for ( ; nmItr != rnmItr->second.neighborMap.end(); ++nmItr)
+      {
+        typename NeighborMap_t::const_iterator d_nmItr
+          = d_rnmItr->second.neighborMap.find(nmItr->first);
+        if (d_nmItr == d_rnmItr->second.neighborMap.end()) 
+          return false;
+
+        if (nmItr->second.size() != d_nmItr->second.size()) 
+          return false;
+
+        for (unsigned k=0; k<nmItr->second.size(); ++k)
+          if (nmItr->second[k] != d_nmItr->second[k])
+            return false;
+      }
+    }
+
+    return true;
   }
 
   template <unsigned NDIM> 

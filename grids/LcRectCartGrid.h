@@ -48,6 +48,15 @@ namespace Lucee
         const Lucee::Region<NDIM, double>& physBox);
 
 /**
+ * Create a new rectangular grid using specified decomposed region.
+ *
+ * @param dcmpRgn Decomposed region to use.
+ * @param physBox Rectangular region in space.
+ */
+      RectCartGrid(const Lucee::DecompRegion<NDIM>& dcmpRgn,
+        const Lucee::Region<NDIM, double>& physSpace);
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.

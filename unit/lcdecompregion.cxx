@@ -332,6 +332,13 @@ test_7()
         rgn.extend(lowerExt, upperExt).intersect(neighRgn).isEmpty() == false);
     }
   }
+
+// create copy and check
+  Lucee::DecompRegion<2> dcompCpy(dcomp);
+  LC_ASSERT("Checking if decompositions are the same", dcomp.compareDecomp(dcompCpy));
+
+  Lucee::DecompRegion<2> dcompCpyFake(globalRgn);
+  LC_ASSERT("Checking if decompositions are the same", dcomp.compareDecomp(dcompCpyFake) == false);
 }
 
 void
