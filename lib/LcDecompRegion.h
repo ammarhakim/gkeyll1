@@ -81,14 +81,29 @@ namespace Lucee
 /**
  * Get neigbors of target region for a given number of ghost cells on
  * each side of the target region. The neigbors also include corner
- * cells.
+ * cells. This method returns those neighbors from which we should
+ * receive data.
  *
  * @param rn Target region number
  * @param lowerExt Lenght of extension along lower end in each direction.
  * @param upperExt Lenght of extension along upper end in each direction.
- * @return list of neigbors region numbers.
+ * @return list of receive neigbors region numbers.
  */
-      std::vector<unsigned> getNeighbors(unsigned rn,
+      std::vector<unsigned> getRecvNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells. This method returns those neighbors to which we should
+ * send data.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of send neigbors region numbers.
+ */
+      std::vector<unsigned> getSendNeighbors(unsigned rn,
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**
@@ -178,8 +193,10 @@ namespace Lucee
           mutable NeighborMap_t neighborMap;
       };
 
-/** Map of sub-region number -> neighbor information */
-      mutable std::map<unsigned, NeighborData> rgnNeighborMap;
+/** Map of sub-region number -> neighbor information for recv neighbors */
+      mutable std::map<unsigned, NeighborData> rgnRecvNeighborMap;
+/** Map of sub-region number -> neighbor information for send neighbors */
+      mutable std::map<unsigned, NeighborData> rgnSendNeighborMap;
 
 /**
  * Clear current decomposition to create new decomposition.
@@ -205,6 +222,30 @@ namespace Lucee
  */
       std::vector<unsigned> calcNeighbors(unsigned rn,
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells.
+ *
+ * @param rgnNeighborMap Map to look for data.
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> getNeighbors(std::map<unsigned, NeighborData>& rgnNeighborMap,
+        unsigned rn, const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Compare if the supplied neighbor maps are identical.
+ *
+ * @param rgnNeighborMap1 First neighbor region map to compare.
+ * @param rgnNeighborMap2 Second neighbor region map to compare.
+ * @return true if identical, false if not.
+ */
+      bool cmpRgnNeighMap(const std::map<unsigned, NeighborData>& rgnNeighborMap,
+        const std::map<unsigned, NeighborData>& rgnNeighborMap) const;
   };
 }
 

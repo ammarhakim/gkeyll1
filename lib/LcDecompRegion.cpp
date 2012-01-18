@@ -28,7 +28,8 @@ namespace Lucee
   template <unsigned NDIM> 
   DecompRegion<NDIM>::DecompRegion(const DecompRegion<NDIM>& decompRgn)
     : globalRgn(decompRgn.globalRgn), rgns(decompRgn.rgns),
-      rgnNeighborMap(decompRgn.rgnNeighborMap)
+      rgnRecvNeighborMap(decompRgn.rgnRecvNeighborMap),
+      rgnSendNeighborMap(decompRgn.rgnSendNeighborMap)
   {
   }
 
@@ -59,64 +60,22 @@ namespace Lucee
     return globalRgn;
   }
 
-  template <unsigned NDIM> 
+  template <unsigned NDIM>
   std::vector<unsigned>
-  DecompRegion<NDIM>::getNeighbors(unsigned rn,
+  DecompRegion<NDIM>::getRecvNeighbors(unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
-// NOTE: This method checks if the neighbor calculation for this
-// sub-region and ghost cell distribution was requested before. If so
-// it just returns the previously computed value. Otherwise, it
-// computes the neighbors, stores them in the appropriate map and
-// returns the newly computed neighbors. The neighbor calculation is
-// quite expensive, specially in 2D and 3D so the caching can improve
-// performance. The code below is complicated by the fact that for
-// each sub-region, neighbor information for different ghost
-// distribution might be requested. This requires the use of a
-// "two-layer" map.
-
-// create vector to identify ghost cell distribution
-    Lucee::FixedVector<2*NDIM, int> gcd(0);
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      gcd[i] = lowerExt[i];
-      gcd[NDIM+i] = upperExt[i];
-    }
-
-// first check if any data exists for this region number
-    typename std::map<unsigned, NeighborData>::const_iterator rgnItr
-      = rgnNeighborMap.find(rn);
-    if (rgnItr != rgnNeighborMap.end())
-    { // region exists
-// check if this ghost cell distribution is computed
-      typename NeighborMap_t::const_iterator gstItr
-        = rgnItr->second.neighborMap.find(gcd);
-      if (gstItr != rgnItr->second.neighborMap.end())
-      { // ghost cell distribution exists
-        return gstItr->second;
-      }
-      else
-      { // ghost cell distribution does not exist
-// compute neighbors
-        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
-// insert into map so next time we need not compute neighbors all over again
-        rgnItr->second.neighborMap.insert(NeighborPair_t(gcd, ninfo));
-        return ninfo;
-      }
-    }
-    else
-    { // region does not exist
-// compute neighbors
-        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
-// create new neighbor data object
-        NeighborData ndat;
-        ndat.neighborMap.insert(NeighborPair_t(gcd, ninfo));
-// now insert this into region map
-        rgnNeighborMap.insert(
-          std::pair<unsigned, NeighborData>(rn, ndat));
-        return ninfo;
-    }
+    return getNeighbors(rgnRecvNeighborMap, rn, lowerExt, upperExt);
   }
+
+  template <unsigned NDIM>
+  std::vector<unsigned>
+  DecompRegion<NDIM>::getSendNeighbors(unsigned rn,
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+    return getNeighbors(rgnSendNeighborMap, rn, lowerExt, upperExt);
+  }
+
   
   template <unsigned NDIM> 
   void
@@ -183,40 +142,8 @@ namespace Lucee
       if (rgns[i] != decompRgn.rgns[i])
         return false;
 
-    if (rgnNeighborMap.size() != decompRgn.rgnNeighborMap.size())
-      return false;
-
-    typename std::map<unsigned, NeighborData>::const_iterator rnmItr
-      = rgnNeighborMap.begin();
-    for ( ; rnmItr != rgnNeighborMap.end(); ++rnmItr)
-    {
-      typename std::map<unsigned, NeighborData>::const_iterator d_rnmItr
-        = decompRgn.rgnNeighborMap.find(rnmItr->first);
-      if (d_rnmItr == decompRgn.rgnNeighborMap.end()) 
-        return false;
-
-      if (rnmItr->second.neighborMap.size() != d_rnmItr->second.neighborMap.size())
-        return false;
-
-      typename NeighborMap_t::const_iterator nmItr = 
-        rnmItr->second.neighborMap.begin();
-      for ( ; nmItr != rnmItr->second.neighborMap.end(); ++nmItr)
-      {
-        typename NeighborMap_t::const_iterator d_nmItr
-          = d_rnmItr->second.neighborMap.find(nmItr->first);
-        if (d_nmItr == d_rnmItr->second.neighborMap.end()) 
-          return false;
-
-        if (nmItr->second.size() != d_nmItr->second.size()) 
-          return false;
-
-        for (unsigned k=0; k<nmItr->second.size(); ++k)
-          if (nmItr->second[k] != d_nmItr->second[k])
-            return false;
-      }
-    }
-
-    return true;
+    return cmpRgnNeighMap(rgnRecvNeighborMap, decompRgn.rgnRecvNeighborMap)
+      && cmpRgnNeighMap(rgnSendNeighborMap, decompRgn.rgnSendNeighborMap);
   }
 
   template <unsigned NDIM> 
@@ -244,6 +171,106 @@ namespace Lucee
         nl.push_back(i);
     }
     return nl;
+  }
+
+  template <unsigned NDIM> 
+  std::vector<unsigned>
+  DecompRegion<NDIM>::getNeighbors(std::map<unsigned, NeighborData>& rgnNeighborMap, unsigned rn,
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+// NOTE: This method checks if the neighbor calculation for this
+// sub-region and ghost cell distribution was requested before. If so
+// it just returns the previously computed value. Otherwise, it
+// computes the neighbors, stores them in the appropriate map and
+// returns the newly computed neighbors. The neighbor calculation is
+// quite expensive, specially in 2D and 3D so the caching can improve
+// performance. The code below is complicated by the fact that for
+// each sub-region, neighbor information for different ghost
+// distribution might be requested. This requires the use of a
+// "two-layer" map.
+
+// create vector to identify ghost cell distribution
+    Lucee::FixedVector<2*NDIM, int> gcd(0);
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      gcd[i] = lowerExt[i];
+      gcd[NDIM+i] = upperExt[i];
+    }
+
+// first check if any data exists for this region number
+    typename std::map<unsigned, NeighborData>::const_iterator rgnItr
+      = rgnNeighborMap.find(rn);
+    if (rgnItr != rgnNeighborMap.end())
+    { // region exists
+// check if this ghost cell distribution is computed
+      typename NeighborMap_t::const_iterator gstItr
+        = rgnItr->second.neighborMap.find(gcd);
+      if (gstItr != rgnItr->second.neighborMap.end())
+      { // ghost cell distribution exists
+        return gstItr->second;
+      }
+      else
+      { // ghost cell distribution does not exist
+// compute neighbors
+        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+// insert into map so next time we need not compute neighbors all over again
+        rgnItr->second.neighborMap.insert(NeighborPair_t(gcd, ninfo));
+        return ninfo;
+      }
+    }
+    else
+    { // region does not exist
+// compute neighbors
+        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+// create new neighbor data object
+        NeighborData ndat;
+        ndat.neighborMap.insert(NeighborPair_t(gcd, ninfo));
+// now insert this into region map
+        rgnNeighborMap.insert(
+          std::pair<unsigned, NeighborData>(rn, ndat));
+        return ninfo;
+    }
+  }
+
+  template <unsigned NDIM>
+  bool
+  DecompRegion<NDIM>::cmpRgnNeighMap(const std::map<unsigned, NeighborData>& rgnNeighborMap1,
+    const std::map<unsigned, NeighborData>& rgnNeighborMap2) const
+  {
+    if (rgnNeighborMap1.size() != rgnNeighborMap2.size())
+      return false;
+
+    typename std::map<unsigned, NeighborData>::const_iterator rnmItr
+      = rgnNeighborMap1.begin();
+    for ( ; rnmItr != rgnNeighborMap1.end(); ++rnmItr)
+    {
+      typename std::map<unsigned, NeighborData>::const_iterator d_rnmItr
+        = rgnNeighborMap2.find(rnmItr->first);
+      if (d_rnmItr == rgnNeighborMap2.end()) 
+        return false;
+
+      if (rnmItr->second.neighborMap.size() != d_rnmItr->second.neighborMap.size())
+        return false;
+
+      typename NeighborMap_t::const_iterator nmItr = 
+        rnmItr->second.neighborMap.begin();
+      for ( ; nmItr != rnmItr->second.neighborMap.end(); ++nmItr)
+      {
+        typename NeighborMap_t::const_iterator d_nmItr
+          = d_rnmItr->second.neighborMap.find(nmItr->first);
+        if (d_nmItr == d_rnmItr->second.neighborMap.end()) 
+          return false;
+
+        if (nmItr->second.size() != d_nmItr->second.size()) 
+          return false;
+
+        for (unsigned k=0; k<nmItr->second.size(); ++k)
+          if (nmItr->second[k] != d_nmItr->second[k])
+            return false;
+      }
+    }
+
+    return true;
   }
 
 // instantiations

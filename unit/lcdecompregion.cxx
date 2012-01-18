@@ -319,7 +319,7 @@ test_7()
 // loop over each region, getting neighbors
   for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
   {
-    std::vector<unsigned> neigh = dcomp.getNeighbors(rn, lowerExt, upperExt);
+    std::vector<unsigned> neigh = dcomp.getRecvNeighbors(rn, lowerExt, upperExt);
 
     LC_ASSERT("Testing number of neighbors", neigh.size() == numNeigh[rn]);
     Lucee::Region<2, int> rgn = dcomp.getRegion(rn);
@@ -353,7 +353,7 @@ test_8()
   int lowerExt[2] = {1, 1};
   int upperExt[2] = {1, 1};
 // check default decomp neighbors
-  std::vector<unsigned> neigh = dcomp.getNeighbors(0, lowerExt, upperExt);
+  std::vector<unsigned> neigh = dcomp.getRecvNeighbors(0, lowerExt, upperExt);
 
   LC_ASSERT("Testing default decomp neighbors", neigh.size() == 0);
 }

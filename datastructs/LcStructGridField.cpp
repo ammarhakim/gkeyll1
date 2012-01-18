@@ -266,7 +266,7 @@ namespace Lucee
       ::Instance().comm;
 
 // get neighbor information
-    std::vector<unsigned> neigh = grid->getNeighbors(rank, lg, ug);
+    std::vector<unsigned> neigh = grid->getRecvNeighbors(rank, lg, ug);
 // receive data from our neighbors
     for (unsigned i=0; i<neigh.size(); ++i)
     {
@@ -297,12 +297,7 @@ namespace Lucee
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
 
-// get neighbor information (THIS ASSUMES THAT SEND AND RECEIVE
-// NEIGHBORS ARE SAME. THIS WILL NOT WORK OTHERWISE AND WILL REQUIRE A
-// CHANGE TO HOW NEIGHBOR CALCULATIONS ARE PERFORMED. THIS CAN HAPPEN
-// IN SOME EXTREME SITUATIONS AND HENCE NEEDS TO BE DETECTED AND
-// EVENTUALLY TAKEN CARE OF. [A. Hakim 1-17-2012])
-    std::vector<unsigned> neigh = grid->getNeighbors(rank, lg, ug);
+    std::vector<unsigned> neigh = grid->getSendNeighbors(rank, lg, ug);
 // send data to each of our neighbors
     for (unsigned i=0; i<neigh.size(); ++i)
     {

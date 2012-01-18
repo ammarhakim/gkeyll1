@@ -163,14 +163,29 @@ namespace Lucee
 /**
  * Get neigbors of target region for a given number of ghost cells on
  * each side of the target region. The neigbors also include corner
- * cells.
+ * cells. This method returns those neighbors from which we should
+ * receive data.
  *
  * @param rn Target region number
  * @param lowerExt Length of extension along lower end in each direction.
  * @param upperExt Length of extension along upper end in each direction.
  * @return list of neigbors region numbers.
  */
-      std::vector<unsigned> getNeighbors(unsigned rn,
+      std::vector<unsigned> getRecvNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Get neigbors of target region for a given number of ghost cells on
+ * each side of the target region. The neigbors also include corner
+ * cells. This method returns those neighbors to which we should send
+ * data.
+ *
+ * @param rn Target region number
+ * @param lowerExt Length of extension along lower end in each direction.
+ * @param upperExt Length of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> getSendNeighbors(unsigned rn,
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**
