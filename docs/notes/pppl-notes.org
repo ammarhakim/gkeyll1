@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* January 17th 2012
+
+  Completed code to sync() structured fields. This does not work with
+  periodic BCs yet.
+
+  To test the sync() code I have had to add a siginificant amount of
+  code in various grids and fields. This now allows creating a
+  parallel field from C++ (rather than just Lua) and hence makes it
+  easier to test.
+
+  One question is: how can more than one region can be handled by a
+  processor? This is a bit tricky as currenly the system implicitly
+  assumes MPI will run one region on one processor. This needs to
+  change.
+
 * January 16th 2012
 
   Need to add other decomposition methods to allow arbitrary number of
