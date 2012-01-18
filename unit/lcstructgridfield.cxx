@@ -358,6 +358,100 @@ test_3()
   }
 }
 
+void
+test_4()
+{
+// get communicator object
+  TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().comm;
+
+// global region of grid
+  int lo[2] = {0, 0};
+  int up[2] = {64, 32};
+  Lucee::Region<2, int> globalRgn(lo, up);
+
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+  int cuts[2] = {2, 1};
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+
+  if (comm->getNumProcs() == 2)
+  {
+    if (comm->getRank() == 0)
+      std::cout << "Testing parallel field" << std::endl;
+    cartDecomp.calcDecomp(comm->getNumProcs(), dcomp); // decompose
+
+    double plo[2] = {0.0, 0.0};
+    double pup[2] = {32, 32};
+    Lucee::Region<2, double> physBox(plo, pup);
+// create grid
+    Lucee::RectCartGrid<2> grid(dcomp, physBox);
+
+// create field
+    int lg[2] = {0, 0}, ug[2] = {3, 2};
+    Lucee::StructGridField<2, double> fld(&grid, 3, lg, ug);
+
+// initialize field
+    fld = 10.5;
+
+// test it
+    int idx[2];
+    Lucee::ConstFieldPtr<double> cnstPtr = fld.createConstPtr();
+    Lucee::RowMajorSequencer<2> seq(fld.getExtRegion());
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      fld.setPtr(cnstPtr, idx);
+      for (unsigned k=0; k<3; ++k)
+        LC_ASSERT("Testing parallel field", cnstPtr[k] == 10.5);
+    }
+
+// now initialize interior of field
+    Lucee::FieldPtr<double> ptr = fld.createPtr();
+    Lucee::RowMajorSequencer<2> seqInt(fld.getRegion());
+    while (seqInt.step())
+    {
+      seqInt.fillWithIndex(idx);
+      fld.setPtr(ptr, idx);
+      for (unsigned k=0; k<3; ++k)
+        ptr[k] = 12.5;
+    }
+
+    Lucee::Region<2, int> rgn = fld.getRegion();
+    seq.reset();
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      fld.setPtr(cnstPtr, idx);
+      if (rgn.isInside(idx))
+        for (unsigned k=0; k<3; ++k)
+// ensure interior id 12.5
+          LC_ASSERT("Testing parallel field interior", cnstPtr[k] == 12.5);
+      else
+        for (unsigned k=0; k<3; ++k)
+// ensure ghosts are still 10.5
+          LC_ASSERT("Testing parallel field ghost", cnstPtr[k] == 10.5);
+    }
+
+// now sync ghost cells values
+    fld.sync();
+
+    Lucee::Region<2, int> globalRegion = fld.getGlobalRegion();
+// check if ghost values were updated correctly
+    seq.reset();
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      fld.setPtr(cnstPtr, idx);
+      if (globalRegion.isInside(idx))
+        for (unsigned k=0; k<3; ++k)
+          LC_ASSERT("Testing parallel after sync", cnstPtr[k] == 12.5);
+    }
+  }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -366,5 +460,6 @@ main(int argc, char **argv)
   test_1();
   test_2();
   test_3();
+  test_4();
   LC_END_TESTS;
 }
