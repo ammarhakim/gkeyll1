@@ -66,6 +66,22 @@ namespace Lucee
       Region<NDIM, T>& operator=(const Region<NDIM, T>& rgn);
 
 /**
+ * Compare supplied region with this region.
+ *
+ * @param rgn Region object to compare.
+ * @return true if regions are identical, false otherwise.
+ */
+      bool operator==(const Region<NDIM, T>& rgn) const;
+
+/**
+ * Compare supplied region with this region.
+ *
+ * @param rgn Region object to compare.
+ * @return false if regions are identical, false otherwise.
+ */
+      bool operator!=(const Region<NDIM, T>& rgn) const;
+
+/**
  * Return lower bound of region in a given direction.
  *
  * @return Lower bound of region.
@@ -213,6 +229,23 @@ namespace Lucee
     upper = rgn.upper;
     volume = rgn.volume;
     return *this;
+  }
+
+  template <unsigned NDIM, typename T>
+  bool
+  Region<NDIM, T>::operator==(const Region<NDIM, T>& rgn) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      if ( (lower[i] != rgn.lower[i]) || (upper[i] != rgn.upper[i]) )
+        return false;
+    return true;
+  }
+
+  template <unsigned NDIM, typename T>
+  bool
+  Region<NDIM, T>::operator!=(const Region<NDIM, T>& rgn) const
+  {
+    return !this->operator==(rgn);
   }
 
   template <unsigned NDIM, typename T>

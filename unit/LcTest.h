@@ -101,9 +101,6 @@ static LcTestCounter __tc;
         std::cout << "PASSED = " << totalPassed <<  ". FAILED = " << totalFailed << std::endl; \
       }                                                                 \
       __tc.showFailedTests();                                           \
-      __tc.passed = 0;                                                  \
-      __tc.failed = 0;                                                  \
-      __tc.clearFailedTests();                                          \
     } while (0)
 #else
 # define LC_MPI_BEGIN_TESTS(file)

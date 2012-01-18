@@ -33,6 +33,14 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  RectCartGrid<NDIM>::RectCartGrid(const Lucee::DecompRegion<NDIM>& dcmpRgn,
+    const Lucee::Region<NDIM, double>& physBox) 
+    : Lucee::StructuredGridBase<NDIM>(dcmpRgn, physBox)
+  {
+    calcGeometry();
+  }
+
+  template <unsigned NDIM>
   void
   RectCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {

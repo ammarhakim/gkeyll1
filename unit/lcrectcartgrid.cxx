@@ -5,13 +5,27 @@
  */
 
 // lucee includes
+#include <LcCartProdDecompRegionCalc.h>
+#include <LcDecompRegion.h>
+#include <LcGlobals.h>
 #include <LcRectCartGrid.h>
 #include <LcRowMajorSequencer.h>
 #include <LcTest.h>
 #include <LcVec3.h>
 
+// loki includes
+#include <loki/Singleton.h>
+
+// txbase includes
+#ifdef HAVE_MPI
+# include <TxMpiBase.h>
+#else
+# include <TxSelfBase.h>
+#endif
+
 // std includes
 #include <cmath>
+#include <memory>
 
 void
 test_1()
@@ -126,10 +140,6 @@ test_1()
     for (unsigned i=0; i<3; ++i)
       LC_ASSERT("Testing right-handedness of coord-sys", t1t2[i] == lz[i]);
   }
-
-// write grid to file
-  grid3.write("lcrectcartgrid-grid3.h5");
-
 }
 
 void
@@ -326,6 +336,41 @@ test_3()
 
 }
 
+void
+test_4()
+{
+// get communicator object
+  TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+    ::Instance().comm;
+
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+  int cuts[2] = {2, 2};
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+
+  if (comm->getNumProcs() == 4)
+  {
+    if (comm->getRank() == 0)
+      std::cout << "Testing parallel cartesian grid" << std::endl;
+    cartDecomp.calcDecomp(comm->getNumProcs(), dcomp); // decompose
+
+    double boxLower[2] = {0.0, 0.0};
+    double boxUpper[2] = {1.0, 1.0};
+    Lucee::Region<2, double> physBox(boxLower, boxUpper);
+// now create grid on this decomposition
+    Lucee::RectCartGrid<2> grid(dcomp, physBox);
+
+// check if grid was created on correct region
+    LC_ASSERT("Testing local regions match", 
+      grid.getLocalRegion() == dcomp.getRegion(comm->getRank()));
+  }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -338,10 +383,11 @@ main(int argc, char **argv)
   test_1();
   test_2();
   test_3();
+  test_4();
 
 #ifdef HAVE_MPI
   LC_MPI_END_TESTS;
-  //MPI_Finalize();
+  MPI_Finalize();
 #else
   LC_END_TESTS;
 #endif

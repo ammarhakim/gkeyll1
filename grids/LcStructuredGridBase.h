@@ -250,7 +250,7 @@ namespace Lucee
       StructuredGridBase();
 
 /**
- * Create a new body-fitted grid on specified region.
+ * Create a structured grid on specified region.
  *
  * To get data from the grid, first set the index into the grid by
  * using the setIndex() method. Then access the needed data for that
@@ -262,6 +262,15 @@ namespace Lucee
  * @param compSpace Region in computation space.
  */
       StructuredGridBase(const Lucee::Region<NDIM, int>& globalRgn,
+        const Lucee::Region<NDIM, double>& compSpace);
+
+/**
+ * Create a structured grid using specified decomposed region.
+ *
+ * @param dcmpRgn Decomposed region to use.
+ * @param compSpace Region in computation space.
+ */
+      StructuredGridBase(const Lucee::DecompRegion<NDIM>& dcmpRgn,
         const Lucee::Region<NDIM, double>& compSpace);
 
 /**

@@ -283,6 +283,22 @@ test_10()
   LC_ASSERT("Checking if box is empty", ebox.isEmpty() == true);
 }
 
+void
+test_11()
+{  
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 14};
+  Lucee::Region<2, int> ibox(lower, upper), ebox(lower, upper);
+  upper[1] = 15;
+  Lucee::Region<2, int> nebox(lower, upper);
+
+  LC_ASSERT("Compare boxes", ibox == ebox);
+  LC_ASSERT("Compare boxes", (ibox == nebox) == false);
+
+  LC_ASSERT("Compare boxes", ibox != nebox);
+  LC_ASSERT("Compare boxes", (ibox != ebox) == false);
+}
+
 int
 main(void) 
 {
@@ -297,5 +313,6 @@ main(void)
   test_8();
   test_9();
   test_10();
+  test_11();
   LC_END_TESTS;
 }
