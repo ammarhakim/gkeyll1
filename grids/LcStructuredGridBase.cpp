@@ -170,10 +170,18 @@ namespace Lucee
 
   template <unsigned NDIM>
   std::vector<unsigned> 
-  StructuredGridBase<NDIM>::getNeighbors(unsigned rn, 
+  StructuredGridBase<NDIM>::getRecvNeighbors(unsigned rn, 
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
-    return decompRgn->getNeighbors(rn, lowerExt, upperExt);
+    return decompRgn->getRecvNeighbors(rn, lowerExt, upperExt);
+  }
+
+  template <unsigned NDIM>
+  std::vector<unsigned> 
+  StructuredGridBase<NDIM>::getSendNeighbors(unsigned rn, 
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+    return decompRgn->getSendNeighbors(rn, lowerExt, upperExt);
   }
 
   template <unsigned NDIM>
