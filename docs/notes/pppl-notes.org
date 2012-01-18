@@ -2,6 +2,27 @@
 
 * January 18th 2012
 
+  Fixed the sync() code and tested it. Seems to work. Will add more
+  unit tests to make sure things are working correctly. Also noticed
+  that the Field ctors were not seeting up global and local regions
+  correctly. Fixed this. Now parallel simulations will be possible
+  with Lucee! [Need to make sync() and decomp region to work with
+  periodic BCs].
+
+** TODO Fix bug when send/recv neighbors are not the same
+
+   Turns out that the case when send/recv neighbors are not the same
+   has already bitten. When there are zero ghost cells on one (or
+   more) edges of each sub-region the send and recv neighbors are
+   different. The current getNeighbors() code only computes RECV
+   neighbors (i.e. neighbors from which we expect to get
+   something). Another call needs to be added for the SEND
+   neighbors. This other call will compute neighbors by extending all
+   other regions and intersecting with ourselves.
+
+   I found this bug doing unit testing on the sync() code. Goes to
+   show the importance of unit tests.
+
 ** Ownership of pointers
 
    In many classes pointers to externally created objects are
