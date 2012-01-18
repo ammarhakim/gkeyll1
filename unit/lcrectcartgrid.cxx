@@ -374,21 +374,10 @@ test_4()
 int
 main(int argc, char **argv)
 {
-#ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
-  LC_MPI_BEGIN_TESTS("lcrectcartgrid");
-#else
   LC_BEGIN_TESTS("lcrectcartgrid");
-#endif
   test_1();
   test_2();
   test_3();
   test_4();
-
-#ifdef HAVE_MPI
-  LC_MPI_END_TESTS;
-  MPI_Finalize();
-#else
   LC_END_TESTS;
-#endif
 }

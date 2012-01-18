@@ -45,7 +45,7 @@ class HarmonicOde : public Lucee::PointSourceIfc
 const char *HarmonicOde::id = "Harmonic";
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcgridode");
 

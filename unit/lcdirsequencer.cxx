@@ -89,7 +89,7 @@ test_3()
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcdirsequencer");
   test_1();

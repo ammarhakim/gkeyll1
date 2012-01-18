@@ -121,19 +121,7 @@ test_1()
 int 
 main(int argc, char *argv[])
 {
-#ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
-  LC_MPI_BEGIN_TESTS("lchdf5io");
-#else
   LC_BEGIN_TESTS("lchdf5io");
-#endif
   test_1();
-
-#ifdef HAVE_MPI
-  LC_MPI_END_TESTS;
-  MPI_Finalize();
-#else
   LC_END_TESTS;
-#endif
-  return 0;
 }

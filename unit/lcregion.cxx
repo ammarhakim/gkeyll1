@@ -300,7 +300,7 @@ test_11()
 }
 
 int
-main(void) 
+main(int argc, char **argv) 
 {
   LC_BEGIN_TESTS("lcregion");
   test_1();
