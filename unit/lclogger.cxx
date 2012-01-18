@@ -44,7 +44,7 @@ test_a()
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lclogger");
   test_a();

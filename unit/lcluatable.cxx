@@ -288,7 +288,7 @@ test_8(Lucee::LuaState& L)
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcluatable");
   Lucee::LuaState L;

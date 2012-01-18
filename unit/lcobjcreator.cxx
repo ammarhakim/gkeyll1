@@ -78,7 +78,7 @@ test_1()
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcobjcreator");
   test_1();

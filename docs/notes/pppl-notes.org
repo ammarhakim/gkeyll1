@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* January 18th 2012
+
+** Ownership of pointers
+
+   In many classes pointers to externally created objects are
+   stored. Should these be stored in boost shared pointers instead?
+   What happens if the original pointer goes away. Also, in case of
+   shared pointer is a consistent use of these needed?
+
 * January 17th 2012
 
   Completed code to sync() structured fields. This does not work with

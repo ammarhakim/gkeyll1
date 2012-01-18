@@ -359,7 +359,7 @@ test_8()
 }
 
 int
-main(void) 
+main(int argc, char **argv) 
 {
   LC_BEGIN_TESTS("lcdecomregion");
   test_1();

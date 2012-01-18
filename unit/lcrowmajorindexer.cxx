@@ -370,7 +370,7 @@ test_10()
 
 
 int
-main(void) 
+main(int argc, char **argv) 
 {
   LC_BEGIN_TESTS("lcrowmajorindexer");
   test_1();

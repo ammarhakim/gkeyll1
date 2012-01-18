@@ -467,7 +467,7 @@ test_15()
 }
 
 int
-main(void) 
+main(int argc, char **argv) 
 {
   LC_BEGIN_TESTS("lcmatrix");
   test_1();

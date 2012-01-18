@@ -48,7 +48,7 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField(Lucee::StructuredGridBase<NDIM>* grid, unsigned nc,
         int lg[NDIM], int ug[NDIM])
-    : Lucee::Field<NDIM, T>(grid->getLocalRegion(), nc, lg, ug, (T) 0),
+    : Lucee::Field<NDIM, T>(grid->getGlobalRegion(), grid->getLocalRegion(), nc, lg, ug, (T) 0),
       grid(grid)
   {
     this->setName(StructGridField<NDIM, double>::id);
@@ -271,15 +271,16 @@ namespace Lucee
     for (unsigned i=0; i<neigh.size(); ++i)
     {
       int tag = 1000; // tag for message
-      unsigned srcRank = neigh[i]; // rank to receive data from
-      Lucee::Region<NDIM, int> srcBox = grid->getNeighborRgn(srcRank); // region to receive from
+      Lucee::Region<NDIM, int> srcBox = grid->getNeighborRgn(neigh[i]); // region to receive from
 // initiate communication
       Lucee::Region<NDIM, int> rgn = srcBox.intersect( this->getExtRegion() );
+
       if (rgn.getVolume() == 0)
         continue; // nothing to do if no intersection
+
       TxMsgStatus ms = comm->template
-        startRecv<T>(this->getNumComponents()*rgn.getVolume(), srcRank, tag);
-      msgStatus[i] = ms;
+        startRecv<T>(this->getNumComponents()*rgn.getVolume(), neigh[i], tag);
+      msgStatus[neigh[i]] = ms; // key in msgStatus map is region we expect receive
     }
     isReceiving = true;
   }
@@ -309,10 +310,13 @@ namespace Lucee
 // region to send is our local region intersected with destination's extended region
       Lucee::Region<NDIM, int> sendRgn = this->getRegion().intersect(
         destRgn.extend(lg, ug));
+
       if (sendRgn.getVolume() == 0)
         continue; // nothing to send
+
 // buffer to store data to send
       std::vector<T> sendVec( this->getNumComponents()*sendRgn.getVolume() );
+
 // copy data over: this works because startRecv() function uses same
 // ordering of data as we use below.
       Lucee::RowMajorSequencer<NDIM> seq(sendRgn);
@@ -324,6 +328,7 @@ namespace Lucee
         for (unsigned k=0; k<this->getNumComponents(); ++k)
           sendVec[loc++] = ptr[k];
       }
+
       comm->template
         send<T>(this->getNumComponents()*sendRgn.getVolume(), &sendVec[0], destRank, tag);
     }
@@ -347,6 +352,7 @@ namespace Lucee
         grid->getNeighborRgn(i->first)); // ghost cell region
 // get data and store in shared array so it gets collected when this loop exits
       boost::shared_array<T> recvData ( (T*) comm->finishRecv(i->second) );
+
 // copy data over: this works because send() function uses same
 // ordering of data as we use below.
       Lucee::RowMajorSequencer<NDIM> seq(recvRgn);

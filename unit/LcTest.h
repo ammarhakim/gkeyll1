@@ -76,7 +76,8 @@ static LcTestCounter __tc;
  */
 #ifdef HAVE_MPI
 
-#define LC_MPI_BEGIN_TESTS(file)                                        \
+#define _LC_MPI_BEGIN_TESTS(file)                                        \
+    MPI_Init(&argc, &argv);                                             \
     do {                                                                \
       __tc.passed = 0;                                                  \
       __tc.failed = 0;                                                  \
@@ -89,7 +90,8 @@ static LcTestCounter __tc;
       __tc.msgFileFail.open(fnameF.str().c_str(), std::fstream::out);        \
     } while (0)
 
-#define LC_MPI_END_TESTS                                                \
+#define _LC_MPI_END_TESTS                                                \
+    int __tflag;                                                        \
     do {                                                                \
       MPI_Barrier(MPI_COMM_WORLD);                                      \
       unsigned totalPassed, totalFailed;                                \
@@ -101,13 +103,17 @@ static LcTestCounter __tc;
         std::cout << "PASSED = " << totalPassed <<  ". FAILED = " << totalFailed << std::endl; \
       }                                                                 \
       __tc.showFailedTests();                                           \
-    } while (0)
+      __tflag = totalFailed > 0 ? 1 : 0;                                \
+    } while (0);                                                        \
+    MPI_Finalize();                                                     \
+    return __tflag;
+
 #else
-# define LC_MPI_BEGIN_TESTS(file)
-# define LC_MPI_END_TESTS
+# define _LC_MPI_BEGIN_TESTS(file)
+# define _LC_MPI_END_TESTS
 #endif // HAVE_MPI
 
-#define LC_BEGIN_TESTS(file)                                            \
+#define _LC_BEGIN_TESTS(file)                                            \
     do {                                                                \
       __tc.passed = 0;                                                  \
       __tc.failed = 0;                                                  \
@@ -118,7 +124,7 @@ static LcTestCounter __tc;
       __tc.msgFileFail.open(fnameF.str().c_str(), std::fstream::out);     \
     } while (0)
 
-#define LC_END_TESTS                                                    \
+#define _LC_END_TESTS                                                    \
     int __tflag;                                                        \
     do {                                                                \
       std::cout << "PASSED = " << __tc.passed <<  ". FAILED = " << __tc.failed << std::endl; \
@@ -129,6 +135,14 @@ static LcTestCounter __tc;
       __tc.clearFailedTests();                                          \
     } while (0);                                                        \
     return __tflag;
+
+#ifdef HAVE_MPI
+# define LC_BEGIN_TESTS _LC_MPI_BEGIN_TESTS
+# define LC_END_TESTS _LC_MPI_END_TESTS  
+#else
+# define LC_BEGIN_TESTS _LC_BEGIN_TESTS
+# define LC_END_TESTS _LC_END_TESTS  
+#endif
 
 /** 
  * The following macro can be used for running test cases. To test

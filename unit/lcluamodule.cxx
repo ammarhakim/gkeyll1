@@ -76,7 +76,7 @@ test_1(Lucee::LuaState& L)
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcluamodule");
   Lucee::LuaState L;
