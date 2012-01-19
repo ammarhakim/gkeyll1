@@ -9,7 +9,20 @@
   with Lucee! [Need to make sync() and decomp region to work with
   periodic BCs].
 
-** TODO Fix bug when send/recv neighbors are not the same
+** TODO Add unit tests for getSendNeighbors() method
+
+   I added the getSendNeighbors() method to compute the regions to
+   which we should send data. This is not tested yet, although when
+   used in the sync() method it seems to work just fine.
+
+** Ctest for regression testing?
+
+   Seems that ctest could be used for regression testing, at least for
+   a simple stuff. Perhaps this should be investigated later but for
+   now just use txtest as it has all the logic for finding queue on
+   different machines.
+
+** DONE Fix bug when send/recv neighbors are not the same
 
    Turns out that the case when send/recv neighbors are not the same
    has already bitten. When there are zero ghost cells on one (or
@@ -73,7 +86,7 @@
   Lucee.getNumProcs() to the top-level "Lucee" module so this
   information can be queried from Lua.
 
-** TODO Add comprehensive unit test for parallel fields
+** DONE Add comprehensive unit test for parallel fields
 
    There are no unit tests for this stuff yet. However, I wrote a lua
    script to create a CartGrid in parallel and made sure that the
