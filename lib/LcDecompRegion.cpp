@@ -65,7 +65,7 @@ namespace Lucee
   DecompRegion<NDIM>::getRecvNeighbors(unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
-    return getNeighbors(rgnRecvNeighborMap, rn, lowerExt, upperExt);
+    return getNeighbors(true, rn, lowerExt, upperExt);
   }
 
   template <unsigned NDIM>
@@ -73,7 +73,7 @@ namespace Lucee
   DecompRegion<NDIM>::getSendNeighbors(unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
-    return getNeighbors(rgnSendNeighborMap, rn, lowerExt, upperExt);
+    return getNeighbors(false, rn, lowerExt, upperExt);
   }
 
   
@@ -155,13 +155,13 @@ namespace Lucee
 
   template <unsigned NDIM> 
   std::vector<unsigned> 
-  DecompRegion<NDIM>::calcNeighbors(unsigned rn,
+  DecompRegion<NDIM>::calcRecvNeighbors(unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
     std::vector<unsigned> nl;
 // get current region 
     Lucee::Region<NDIM, int> currRgn = getRegion(rn);
-// intersect it with all other regions
+// intersect extended region it with all other regions
     for (unsigned i=0; i<getNumRegions(); ++i)
     {
       if (rn == i) 
@@ -174,8 +174,28 @@ namespace Lucee
   }
 
   template <unsigned NDIM> 
+  std::vector<unsigned> 
+  DecompRegion<NDIM>::calcSendNeighbors(unsigned rn,
+    const int lowerExt[NDIM], const int upperExt[NDIM]) const
+  {
+    std::vector<unsigned> nl;
+// get current region 
+    Lucee::Region<NDIM, int> currRgn = getRegion(rn);
+// intersect it with all other regions extended by ghost cells
+    for (unsigned i=0; i<getNumRegions(); ++i)
+    {
+      if (rn == i) 
+        continue; // no need to intersect with ourself
+// check intersection
+      if ( ! currRgn.intersect( getRegion(i).extend(lowerExt, upperExt) ).isEmpty() )
+        nl.push_back(i);
+    }
+    return nl;
+  }
+
+  template <unsigned NDIM> 
   std::vector<unsigned>
-  DecompRegion<NDIM>::getNeighbors(std::map<unsigned, NeighborData>& rgnNeighborMap, unsigned rn,
+  DecompRegion<NDIM>::getNeighbors(bool recvNeigh, unsigned rn,
     const int lowerExt[NDIM], const int upperExt[NDIM]) const
   {
 // NOTE: This method checks if the neighbor calculation for this
@@ -189,6 +209,10 @@ namespace Lucee
 // distribution might be requested. This requires the use of a
 // "two-layer" map.
 
+// set reference to correct map to use
+    std::map<unsigned, NeighborData>& rnm = 
+      recvNeigh ? rgnRecvNeighborMap : rgnSendNeighborMap;
+
 // create vector to identify ghost cell distribution
     Lucee::FixedVector<2*NDIM, int> gcd(0);
     for (unsigned i=0; i<NDIM; ++i)
@@ -199,8 +223,8 @@ namespace Lucee
 
 // first check if any data exists for this region number
     typename std::map<unsigned, NeighborData>::const_iterator rgnItr
-      = rgnNeighborMap.find(rn);
-    if (rgnItr != rgnNeighborMap.end())
+      = rnm.find(rn);
+    if (rgnItr != rnm.end())
     { // region exists
 // check if this ghost cell distribution is computed
       typename NeighborMap_t::const_iterator gstItr
@@ -212,7 +236,8 @@ namespace Lucee
       else
       { // ghost cell distribution does not exist
 // compute neighbors
-        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+        std::vector<unsigned> ninfo = recvNeigh ?
+          calcRecvNeighbors(rn, lowerExt, upperExt) : calcSendNeighbors(rn, lowerExt, upperExt);
 // insert into map so next time we need not compute neighbors all over again
         rgnItr->second.neighborMap.insert(NeighborPair_t(gcd, ninfo));
         return ninfo;
@@ -221,12 +246,13 @@ namespace Lucee
     else
     { // region does not exist
 // compute neighbors
-        std::vector<unsigned> ninfo = calcNeighbors(rn, lowerExt, upperExt);
+        std::vector<unsigned> ninfo = recvNeigh ?
+          calcRecvNeighbors(rn, lowerExt, upperExt) : calcSendNeighbors(rn, lowerExt, upperExt);
 // create new neighbor data object
         NeighborData ndat;
         ndat.neighborMap.insert(NeighborPair_t(gcd, ninfo));
 // now insert this into region map
-        rgnNeighborMap.insert(
+        rnm.insert(
           std::pair<unsigned, NeighborData>(rn, ndat));
         return ninfo;
     }

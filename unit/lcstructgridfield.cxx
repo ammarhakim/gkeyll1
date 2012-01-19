@@ -286,7 +286,7 @@ test_3()
   if (comm->getNumProcs() == 4)
   {
     if (comm->getRank() == 0)
-      std::cout << "Testing parallel field" << std::endl;
+      std::cout << "Testing parallel field with 4 procs" << std::endl;
     cartDecomp.calcDecomp(comm->getNumProcs(), dcomp); // decompose
 
     double plo[2] = {0.0, 0.0};
@@ -380,7 +380,7 @@ test_4()
   if (comm->getNumProcs() == 2)
   {
     if (comm->getRank() == 0)
-      std::cout << "Testing parallel field" << std::endl;
+      std::cout << "Testing parallel field with 2 procs" << std::endl;
     cartDecomp.calcDecomp(comm->getNumProcs(), dcomp); // decompose
 
     double plo[2] = {0.0, 0.0};

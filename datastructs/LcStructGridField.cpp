@@ -278,8 +278,6 @@ namespace Lucee
       if (rgn.getVolume() == 0)
         continue; // nothing to do if no intersection
 
-      std::cout << comm->getRank() << " initiated recv from " << neigh[i] << std::endl;
-
       TxMsgStatus ms = comm->template
         startRecv<T>(this->getNumComponents()*rgn.getVolume(), neigh[i], tag);
       msgStatus[neigh[i]] = ms; // key in msgStatus map is region we expect receive
@@ -308,12 +306,8 @@ namespace Lucee
       Lucee::Region<NDIM, int> sendRgn = this->getRegion().intersect(
         destRgn.extend(lg, ug));
 
-      std::cout << comm->getRank() << " will send to " << neigh[i] << std::endl;
-
       if (sendRgn.getVolume() == 0)
         continue; // nothing to send
-
-      std::cout << comm->getRank() << " will send to " << neigh[i] << std::endl;
 
 // buffer to store data to send
       std::vector<T> sendVec( this->getNumComponents()*sendRgn.getVolume() );
