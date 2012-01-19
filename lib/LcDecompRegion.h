@@ -213,14 +213,27 @@ namespace Lucee
       void addRegion(const Lucee::Region<NDIM, int>& subRgn);
 
 /**
- * Calculate neighbor information given ghost cell distribution.
+ * Calculate neighbor information given ghost cell distribution. This
+ * method returns those neighbors from which we should receive data.
  *
  * @param rn Target region number
  * @param lowerExt Lenght of extension along lower end in each direction.
  * @param upperExt Lenght of extension along upper end in each direction.
  * @return list of neigbors region numbers.
  */
-      std::vector<unsigned> calcNeighbors(unsigned rn,
+      std::vector<unsigned> calcRecvNeighbors(unsigned rn,
+        const int lowerExt[NDIM], const int upperExt[NDIM]) const;
+
+/**
+ * Calculate neighbor information given ghost cell distribution. This
+ * method returns those neighbors to which we should send data.
+ *
+ * @param rn Target region number
+ * @param lowerExt Lenght of extension along lower end in each direction.
+ * @param upperExt Lenght of extension along upper end in each direction.
+ * @return list of neigbors region numbers.
+ */
+      std::vector<unsigned> calcSendNeighbors(unsigned rn,
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**
@@ -228,13 +241,13 @@ namespace Lucee
  * each side of the target region. The neigbors also include corner
  * cells.
  *
- * @param rgnNeighborMap Map to look for data.
+ * @param recvNeigh True to get receive neighbors, false to get send neighbors
  * @param rn Target region number
  * @param lowerExt Lenght of extension along lower end in each direction.
  * @param upperExt Lenght of extension along upper end in each direction.
  * @return list of neigbors region numbers.
  */
-      std::vector<unsigned> getNeighbors(std::map<unsigned, NeighborData>& rgnNeighborMap,
+      std::vector<unsigned> getNeighbors(bool recvNeigh,
         unsigned rn, const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**

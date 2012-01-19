@@ -183,6 +183,12 @@ add_test(lcgeomprim unit/lcgeomprim)
 add_test(lcstructgridfield unit/lcstructgridfield)
 add_test(lcdecompregion unit/lcdecompregion)
 
+# special tests run via executables
+if (ENABLE_PARALLEL)
+  add_test(lcstructgridfield-p4 ${CMAKE_SOURCE_DIR}/unit/parunitexec.sh 4 ./unit/lcstructgridfield)
+  add_test(lcstructgridfield-p2 ${CMAKE_SOURCE_DIR}/unit/parunitexec.sh 2 ./unit/lcstructgridfield)
+endif (ENABLE_PARALLEL)
+
 ######################################################################
 #
 # Finalize
