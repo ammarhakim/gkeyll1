@@ -155,3 +155,7 @@ endif (FFTW3_FOUND)
 # lcdecompregion
 add_executable(lcdecompregion lcdecompregion.cxx)
 target_link_libraries(lcdecompregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+
+# lcmultiregion
+add_executable(lcmultiregion lcmultiregion.cxx)
+target_link_libraries(lcmultiregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
