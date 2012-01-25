@@ -32,6 +32,7 @@ add_library(lclib
   LcLuceeMod.cpp
   LcMathLib.cpp
   LcMatrix.cpp
+  LcMultiRegion.cpp
   LcRectCoordSys.cpp
   LcSolverIfc.cpp
   LcStreamHandler.cpp

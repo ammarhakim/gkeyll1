@@ -182,6 +182,7 @@ add_test(lcrectcoordsys unit/lcrectcoordsys)
 add_test(lcgeomprim unit/lcgeomprim)
 add_test(lcstructgridfield unit/lcstructgridfield)
 add_test(lcdecompregion unit/lcdecompregion)
+add_test(lcmultiregion unit/lcmultiregion)
 
 # special tests run via executables
 if (ENABLE_PARALLEL)
