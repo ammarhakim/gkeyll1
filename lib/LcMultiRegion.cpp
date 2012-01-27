@@ -18,37 +18,40 @@
 namespace Lucee
 {
   MultiRegionConnectivity::MultiRegionConnectivity()
-    : regionIndex(-1), targetDir(0), targetSide(0)
+    : regionIndex(-1), targetDir(0), targetSide(LOWER)
   {
   }
 
   MultiRegionConnectivity::MultiRegionConnectivity(
-    int rgnIdx, unsigned targetDir, unsigned targetSide)
+    int rgnIdx, unsigned targetDir, RegionSide targetSide)
     : regionIndex(rgnIdx), targetDir(targetDir), targetSide(targetSide)
   {
-    if (rgnIdx != -1 && targetSide > 1)
-    {
-      Lucee::Except lce("MultiRegionConnectivity::MultiRegionConnectivity: ");
-      lce << " For connected edge side can be 0 or 1. Specified " << targetSide
-          << " instead";
-      throw lce;
-    }
   }
 
   void
-  MultiRegionConnectivity::reset(int rgnIdx, unsigned tD, unsigned tS)
+  MultiRegionConnectivity::reset(int rgnIdx, unsigned tD, RegionSide tS)
   {
-    if (rgnIdx != -1 && tS > 1)
-    {
-      Lucee::Except lce("MultiRegionConnectivity::reset: ");
-      lce << " For connected edge side can be 0 or 1. Specified " << tS
-          << " instead";
-      throw lce;
-    }
-
     regionIndex = rgnIdx;
     targetDir = tD;
     targetSide = tS;
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  MultiRegion<NDIM, T>::addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn,
+    MultiRegionConnectivity lower[NDIM], MultiRegionConnectivity upper[NDIM])
+  {
+// check if region with this ID already exists
+    typename std::map<int, Lucee::Region<NDIM, T> >::iterator itr =
+      regionMap.find(idx);
+    if (itr == regionMap.end())
+    {
+// add region and connectivity information
+      regionMap.insert(std::pair<int, Lucee::Region<NDIM, T> >(
+          idx, rgn));
+      rgnConnMap.insert(std::pair<int, RegionConn>(
+          idx, RegionConn(lower, upper)));
+    }
   }
 
 // instantiations
