@@ -1,5 +1,58 @@
 # -*- org -*-
 
+* January 27th
+
+  Working on MultiRegion class. This is taking longer than I expected,
+  a classic symptom of a badly designed abstraction. Currently it is
+  quite difficult to create the multi-region object due to the steps
+  needed in the constructor. Need to simplify it. For example, one can
+  imagine instead
+
+#+BEGIN_EXAMPLE
+  MultiRegion<2, int> multiRgn;
+
+  int idx = multiRgn.addRegion( myRgn );
+
+  // add more regions. At this point they are all unconnected
+
+  // add connections (0 -> X, 1 -> Y)
+  multiRgn.setRegionLowerConnection(idx, 0,
+    MultiRegionConnectivity(targetIdx, targetDir, targetSide));
+
+  // add more connections
+#+END_EXAMPLE
+
+  The advantage of this scheme is that unconnected sides do not need
+  to be explictly added. The disadvantage is that creation phase might
+  be longer and the user needs to keep track of the indices returned
+  by the multi-region class. Of course, that could be eliminated by
+  allowing the user to specify the index and then checking in the
+  setRegionLowerConnection etc methods if such an index exists. In
+  this case it would look like
+
+#+BEGIN_EXAMPLE
+  MultiRegion<2, int> multiRgn;
+  multiRgn.addRegion( myIdx, myRgn );
+#+END_EXAMPLE
+  
+
+* January 19-24th
+
+  Read first 3 chapters for Frisch.
+
+  Added a new class MultiRegion that stores regions connected to each
+  other. To avoid ambiguities in the connections the connectivities
+  need to be specified in more detail than I initially thought. This
+  is specially true when the block are connected to themselves in
+  weird ways (branch-cut grids) or there is a direction switch
+  involved at the seams.
+
+  Partially read flux reconstruction paper by Huynh. A really good
+  paper. The key difference between Huynh and Dumbser/Balsara approach
+  is that the latter reconstruct a higher than K order polynomial
+  using more information from the neighboring cells. Huynh only
+  reconstructs enough to get K order continuous flux.
+
 * January 18th 2012
 
   Fixed the sync() code and tested it. Seems to work. Will add more

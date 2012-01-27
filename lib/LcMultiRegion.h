@@ -23,6 +23,9 @@ namespace Lucee
 /** Forward declare multi-region class so we can friend it */
   template <unsigned NDIM, typename T> class MultiRegion;
 
+/** Enum to set lower/upper side */  
+  enum RegionSide { LOWER, UPPER };
+
 /**
  * This structure represents connectivity information for one edge of
  * a region. It is created by specifying the index of the target
@@ -48,9 +51,9 @@ namespace Lucee
  *
  * @param rgnIdx Index of target region. Use -1 to indicate edge is unconnected.
  * @param targetDir Direction of target region to which this edge is connected.
- * @param targetSide Use 0 for lower side and 1 for upper side.
+ * @param targetSide Use LOWER for lower side and UPPER for upper side.
  */
-      MultiRegionConnectivity(int rgnIdx, unsigned targetDir, unsigned targetSide);
+      MultiRegionConnectivity(int rgnIdx, unsigned targetDir, RegionSide targetSide);
 
 /**
  * Reset existing connectivity data. If the edge is not connected to
@@ -59,9 +62,9 @@ namespace Lucee
  *
  * @param rgnIdx Index of target region. Use -1 to indicate edge is unconnected.
  * @param targetDir Direction of target region to which this edge is connected.
- * @param targetSide Use 0 for lower side and 1 for upper side.
+ * @param targetSide Use LOWER for lower side and UPPER for upper side.
  */
-      void reset(int rgnIdx, unsigned targetDir, unsigned targetSide);
+      void reset(int rgnIdx, unsigned targetDir, RegionSide targetSide);
 
     private:
 /** Region index */
@@ -106,7 +109,7 @@ namespace Lucee
  *
  * @return true if regions are consistent, false otherwise.
  */
-      bool isConsitent() const;
+      bool isConsistent() const;
 
  private:
 /**
@@ -114,6 +117,16 @@ namespace Lucee
  */
       struct RegionConn
       {
+          RegionConn(MultiRegionConnectivity l[NDIM], 
+            MultiRegionConnectivity u[NDIM])
+          {
+            for (unsigned i=0; i<NDIM; ++i)
+            {
+              l[i] = lower[i];
+              u[i] = upper[i];
+            }
+          }
+
 /** Connectivity info of region connected to lower side */
           MultiRegionConnectivity lower[NDIM];
 /** Connectivity info of region connected to upper side */
@@ -121,9 +134,9 @@ namespace Lucee
       };
 
 /** Map of region ID -> regions */
-      std::map<int, Lucee::Region<NDIM, T> > regions;
+      std::map<int, Lucee::Region<NDIM, T> > regionMap;
 /** Map of region ID -> connectivities */
-      std::map<int, RegionConn> rgnConn;
+      std::map<int, RegionConn> rgnConnMap;
   };
 }
 
