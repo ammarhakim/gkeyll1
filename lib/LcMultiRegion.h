@@ -72,7 +72,7 @@ namespace Lucee
 /** Target direction */
       unsigned targetDir;
 /** Target side */
-      unsigned targetSide;
+      RegionSide targetSide;
   };
 
 /**
@@ -85,20 +85,75 @@ namespace Lucee
   template <unsigned NDIM, typename T>
   class MultiRegion
   {
-    public:
+    private:
 /**
- * Add a region with specified connectivities. The value lower[N]
- * indicates neighbor of this region along the lower edge in direction
- * 'N'. Similarly, upper[N] indicates neighbor of this region along
- * upper edge in direction 'N'.
+ * Private structure to hold connectivity of a single region.
+ */
+      class RegionConn
+      {
+        public:
+/**
+ * Create new connectivity object. Connectivities are set to
+ * unconnected state.
+ *
+ * @param rgn Region in multi-region object.
+ */
+          RegionConn(const Lucee::Region<NDIM, T>& rgn);
+
+/** Region */
+          Lucee::Region<NDIM, T> region;
+/** Connectivity info of region connected to lower side */
+          MultiRegionConnectivity lower[NDIM];
+/** Connectivity info of region connected to upper side */
+          MultiRegionConnectivity upper[NDIM];
+      };
+
+/**
+ * Iterator to loop over regions and their neighbors.
+ */
+      class MultiRegionIterator
+      {
+        public:
+/**
+ * Create region iterator.
+ *
+ * @param mrPtr Pointer to multi-region object.
+ */
+          MultiRegionIterator(Lucee::MultiRegion<NDIM, T>& mrRef);
+
+/** 
+ * Increment iterator to next region. 
+ */
+          void next() { ++rgnMapItr; }
+
+/**
+ * Check if we are at the end.
+ *
+ * @return true if we are done, false otherwise.
+ */
+          bool atEnd() const { return rgnMapItr == multiRgnPtr->regionMap.end(); }
+
+        private:
+/** Pointer multi-region object */
+          Lucee::MultiRegion<NDIM, T> *multiRgnPtr;
+/** Region map iterator */
+          typename std::map<int, RegionConn>::const_iterator rgnMapItr;
+      };
+
+    public:
+/** Iterator for looping over region and neighbor data */
+      typedef MultiRegionIterator iterator;
+
+/**
+ * Add a region with specified index. This region is assumed to be
+ * unconnected. After all regions have been added, connectivities can
+ * be specified using `setRegionLowerConnection` and
+ * `setRegionUpperConnection` methods.
  *
  * @param idx Index of region.
  * @param rgn Region to add.
- * @param lower lower[N] is connectivity info of region along lower edge in direction 'N'.
- * @param upper upper[N] is connectivity info of region along upper edge in direction 'N'.
  */
-      void addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn,
-        MultiRegionConnectivity lower[NDIM], MultiRegionConnectivity upper[NDIM]);
+      void addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn);
 
 /**
  * Checks consistency of the multi-region. A multi-region is said to
@@ -112,31 +167,8 @@ namespace Lucee
       bool isConsistent() const;
 
  private:
-/**
- * Private structure to hold connectivity of a single region.
- */
-      struct RegionConn
-      {
-          RegionConn(MultiRegionConnectivity l[NDIM], 
-            MultiRegionConnectivity u[NDIM])
-          {
-            for (unsigned i=0; i<NDIM; ++i)
-            {
-              l[i] = lower[i];
-              u[i] = upper[i];
-            }
-          }
-
-/** Connectivity info of region connected to lower side */
-          MultiRegionConnectivity lower[NDIM];
-/** Connectivity info of region connected to upper side */
-          MultiRegionConnectivity upper[NDIM];
-      };
-
 /** Map of region ID -> regions */
-      std::map<int, Lucee::Region<NDIM, T> > regionMap;
-/** Map of region ID -> connectivities */
-      std::map<int, RegionConn> rgnConnMap;
+      std::map<int, RegionConn> regionMap;
   };
 }
 

@@ -28,36 +28,21 @@ test_1()
 //              |             |
 //              +-------------+
 
-// add region 0
+// add regions
   shape[0] = 20; shape[1] = 10;
-  lc[0] = Lucee::MultiRegionConnectivity(); // unconnected
-  lc[1] = Lucee::MultiRegionConnectivity(); // unconnected
+  multiRgn.addRegion(0, Lucee::Region<2, int>(shape));
 
-  uc[0] = Lucee::MultiRegionConnectivity(1, 0, Lucee::LOWER);
-  uc[1] = Lucee::MultiRegionConnectivity(); // unconnected
-
-  multiRgn.addRegion(0, Lucee::Region<2, int>(shape), lc, uc);
-
-// add region 1
   shape[0] = 30; shape[1] = 10;
-  lc[0] = Lucee::MultiRegionConnectivity(0, 0, Lucee::UPPER);
-  lc[1] = Lucee::MultiRegionConnectivity(2, 1, Lucee::UPPER);
+  multiRgn.addRegion(1, Lucee::Region<2, int>(shape));
 
-  uc[0] = Lucee::MultiRegionConnectivity(); // unconnected
-  uc[1] = Lucee::MultiRegionConnectivity(); // unconnected
-
-  multiRgn.addRegion(1, Lucee::Region<2, int>(shape), lc, uc);
-
-// add region 2
   shape[0] = 30; shape[1] = 15;
-  lc[0] = Lucee::MultiRegionConnectivity(); // unconnected
-  lc[1] = Lucee::MultiRegionConnectivity(); // unconnected
+  multiRgn.addRegion(2, Lucee::Region<2, int>(shape));
 
-  uc[0] = Lucee::MultiRegionConnectivity(1, 1, Lucee::LOWER);
-  uc[1] = Lucee::MultiRegionConnectivity(); // unconnected
-
-  multiRgn.addRegion(2, Lucee::Region<2, int>(shape), lc, uc);
-    
+// loop over regions, ensuring that each is unconnected at this point
+  Lucee::MultiRegion<2, int>::iterator itr(multiRgn);
+  for ( ; ! itr.atEnd(); itr.next() )
+  {
+  }
 }
 
 int

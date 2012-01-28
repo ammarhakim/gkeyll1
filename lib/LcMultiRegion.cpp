@@ -37,21 +37,32 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  MultiRegion<NDIM, T>::RegionConn::RegionConn(const Lucee::Region<NDIM, T>& rgn)
+    : region(rgn)
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    { // region is not connected
+      lower[i] = MultiRegionConnectivity();
+      upper[i] = MultiRegionConnectivity();
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  MultiRegion<NDIM, T>::MultiRegionIterator::MultiRegionIterator(Lucee::MultiRegion<NDIM, T>& mrRef)
+    : multiRgnPtr(&mrRef)
+  {
+    rgnMapItr = multiRgnPtr->regionMap.begin();
+  }
+
+  template <unsigned NDIM, typename T>
   void
-  MultiRegion<NDIM, T>::addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn,
-    MultiRegionConnectivity lower[NDIM], MultiRegionConnectivity upper[NDIM])
+  MultiRegion<NDIM, T>::addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn)
   {
 // check if region with this ID already exists
-    typename std::map<int, Lucee::Region<NDIM, T> >::iterator itr =
-      regionMap.find(idx);
+    typename std::map<int, RegionConn>::iterator itr = regionMap.find(idx);
     if (itr == regionMap.end())
-    {
-// add region and connectivity information
-      regionMap.insert(std::pair<int, Lucee::Region<NDIM, T> >(
-          idx, rgn));
-      rgnConnMap.insert(std::pair<int, RegionConn>(
-          idx, RegionConn(lower, upper)));
-    }
+// add region information with unconnected neighbors
+      regionMap.insert(std::pair<int, RegionConn>(idx, RegionConn(rgn)));
   }
 
 // instantiations
