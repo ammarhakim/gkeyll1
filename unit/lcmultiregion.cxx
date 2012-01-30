@@ -11,10 +11,6 @@
 void
 test_1()
 {
-  int shape[2];
-  Lucee::MultiRegionConnectivity lc[2], uc[2];
-
-  Lucee::MultiRegion<2, int> multiRgn;
 // create connections for 3 regions connected together as follows
 //
 //
@@ -28,6 +24,8 @@ test_1()
 //              |             |
 //              +-------------+
 
+  int shape[2];
+  Lucee::MultiRegion<2, int> multiRgn;
 // add regions
   shape[0] = 20; shape[1] = 10;
   multiRgn.addRegion(0, Lucee::Region<2, int>(shape));
@@ -37,6 +35,8 @@ test_1()
 
   shape[0] = 30; shape[1] = 15;
   multiRgn.addRegion(2, Lucee::Region<2, int>(shape));
+
+  LC_ASSERT("Checking number of regions", multiRgn.getNumRegions() == 3);
 
 // loop over regions, ensuring that each is unconnected at this point
   Lucee::MultiRegion<2, int>::iterator itr(multiRgn);

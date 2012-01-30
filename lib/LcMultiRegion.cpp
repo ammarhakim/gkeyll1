@@ -28,14 +28,6 @@ namespace Lucee
   {
   }
 
-  void
-  MultiRegionConnectivity::reset(int rgnIdx, unsigned tD, RegionSide tS)
-  {
-    regionIndex = rgnIdx;
-    targetDir = tD;
-    targetSide = tS;
-  }
-
   template <unsigned NDIM, typename T>
   MultiRegion<NDIM, T>::RegionConn::RegionConn(const Lucee::Region<NDIM, T>& rgn)
     : region(rgn)
