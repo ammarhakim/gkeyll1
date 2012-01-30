@@ -55,17 +55,6 @@ namespace Lucee
  */
       MultiRegionConnectivity(int rgnIdx, unsigned targetDir, RegionSide targetSide);
 
-/**
- * Reset existing connectivity data. If the edge is not connected to
- * any other region use -1 as the 'rgnIdx'. In this case the other two
- * parameters can be arbitrary.
- *
- * @param rgnIdx Index of target region. Use -1 to indicate edge is unconnected.
- * @param targetDir Direction of target region to which this edge is connected.
- * @param targetSide Use LOWER for lower side and UPPER for upper side.
- */
-      void reset(int rgnIdx, unsigned targetDir, RegionSide targetSide);
-
     private:
 /** Region index */
       int regionIndex;
@@ -154,6 +143,13 @@ namespace Lucee
  * @param rgn Region to add.
  */
       void addRegion(unsigned idx, const Lucee::Region<NDIM, T>& rgn);
+
+/**
+ * Number of regions in multi-region.
+ *
+ * @return number of regions in multi-region.
+ */
+      unsigned getNumRegions() const { return regionMap.size(); }
 
 /**
  * Checks consistency of the multi-region. A multi-region is said to
