@@ -1,5 +1,14 @@
 # -*- org -*-
 
+* January 30th
+
+  Need to extend Field class with multiple nodes. Need to take into
+  account the possibility of using continous FEM which requires shared
+  nodes between neighboring elements.
+
+  Question: should we have a new data-structure, perhaps derived from
+  Field or should Field itself be extended?
+
 * January 27th
 
   Working on MultiRegion class. This is taking longer than I expected,
