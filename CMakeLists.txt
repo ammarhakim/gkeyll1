@@ -115,7 +115,7 @@ elseif(WIN32)
   set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
 else(APPLE)
   # find LAPACK
-  find_package(LAPACK REQUIRED)
+  find_package(TxBlasLapack REQUIRED)
   if (LAPACK_FOUND)
     add_definitions(-DHAVE_LAPACK)
     SET(EXTRA_LIBS ${LAPACK_LIBRARIES})

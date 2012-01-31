@@ -9,6 +9,22 @@
   Question: should we have a new data-structure, perhaps derived from
   Field or should Field itself be extended?
 
+  One other option is: do not change Field at all. In fact, field
+  should not know about "nodes" as nodes mean existence of a grid in
+  which the nodes are located. Instead create a new FieldPtr type (or
+  extend the existing one) to allow taking into account the nodes. The
+  problem with this approach is that now somehow the FieldPtr needs to
+  know about nodes. This could be done at construction time for the
+  FieldPtr, for example, or set later on.
+
+  One final option: do nothing. Let the user take care of this in the
+  updater or functions that work on FEM type fields. This can be
+  easily done by the user, but perhaps is not the best way to do it
+  (but involves no work on my part). This is the approach I took in
+  WarpX. Actually, this is the correct approach in the current
+  framework. Introducing nodes does not make any sense as neither
+  field or field-ptr can (or should) know about them.
+
 * January 27th
 
   Working on MultiRegion class. This is taking longer than I expected,
