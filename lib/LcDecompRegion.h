@@ -257,8 +257,8 @@ namespace Lucee
  * @param rgnNeighborMap2 Second neighbor region map to compare.
  * @return true if identical, false if not.
  */
-      bool cmpRgnNeighMap(const std::map<unsigned, NeighborData>& rgnNeighborMap,
-        const std::map<unsigned, NeighborData>& rgnNeighborMap) const;
+      bool cmpRgnNeighMap(const std::map<unsigned, NeighborData>& rgnNeighborMap1,
+        const std::map<unsigned, NeighborData>& rgnNeighborMap2) const;
   };
 }
 

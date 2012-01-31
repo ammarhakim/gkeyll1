@@ -15,12 +15,12 @@ INCLUDE_DIRECTORIES(
 )
 
 set(lucee_LIBRARIES
-  lclib
-  lcdatastructs
-  lcgrids
   lcrte
   lcproto
   lcslvrs
+  lcdatastructs
+  lcgrids
+  lclib
   lcloki
   lclua
 )
