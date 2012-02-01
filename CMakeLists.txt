@@ -67,11 +67,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
 
-# Math packages
-if (WIN32)
-  find_package(TxBlasLapack REQUIRED)
-endif ()
-
 # find txbase
 find_package(TxBase REQUIRED)
 if (TXBASE_FOUND)
@@ -109,17 +104,11 @@ IF(APPLE)
   FIND_LIBRARY(ACCELERATE_LIB Accelerate)
   MARK_AS_ADVANCED(ACCELERATE_LIB)
   SET(EXTRA_LIBS ${ACCELERATE_LIB})
-elseif(WIN32)
-  # CLapack is used on Windows
+else(APPLE)
+  # CLapack is used on Unix and Windows
+  # WARNING: On Unix should use system Lapack
   find_package(TxCLapackCMake REQUIRED)
   set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
-else(APPLE)
-  # find LAPACK
-  find_package(TxBlasLapack REQUIRED)
-  if (LAPACK_FOUND)
-    add_definitions(-DHAVE_LAPACK)
-    SET(EXTRA_LIBS ${LAPACK_LIBRARIES})
-  endif (LAPACK_FOUND)
 endif(APPLE)
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
