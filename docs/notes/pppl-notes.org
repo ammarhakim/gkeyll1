@@ -1,5 +1,28 @@
 # -*- org -*-
 
+* January 31th - February 2nd
+
+  Spent a significant amount of time building Lucee on
+  portal.pppl.gov. This needed installation of new modules by the
+  system admins as well as small tweeks to the code. Also, as usual,
+  Lapack/Blas was an issue. For now I have gotten around it by using
+  CLapack on portal.
+
+  A rather nasty problem came up between CLapack and the fortran
+  Lapack. This is the difference between a pointer to a single char
+  (which is a char *) and a C string which is also char *. Turns out
+  the Fortran version accepts both of these but the CLapack version
+  only accepts the latter (i.e. NULL delimited string). As luck would
+  have had it I was using the former. Switched to the latter to fix
+  the problems.
+
+  Spent a lot of time refereshing my memory with continous FEM. Turns
+  out that the notation and formalism has been really screwed up by
+  mathematicians. Now it is next to impossible to read these papers
+  and texts without a thorough understanding of functional
+  analysis. Apparently, FEM is porn to mathematicians. Better to DG
+  before it gets this same brutal treatment.
+
 * January 30th
 
   Need to extend Field class with multiple nodes. Need to take into
@@ -59,8 +82,12 @@
   MultiRegion<2, int> multiRgn;
   multiRgn.addRegion( myIdx, myRgn );
 #+END_EXAMPLE
-  
 
+** TODO Complete MultiRegion class
+
+   Finish the iterator access (or get rid of it) and complete the
+   code to allow adding connectivity information.
+  
 * January 19-24th
 
   Read first 3 chapters for Frisch.
