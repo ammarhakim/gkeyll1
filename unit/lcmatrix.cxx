@@ -40,90 +40,90 @@ test_1()
   LC_ASSERT("Testing eigenvalues of S", evr[0]==1.0);
   LC_ASSERT("Testing eigenvalues of S", evr[1]==2.0);
 
-  S(0,0) = 1.0; S(0,1) = 8.0;
-  S(1,0) = 8.0; S(1,1) = 1.0;
+//   S(0,0) = 1.0; S(0,1) = 8.0;
+//   S(1,0) = 8.0; S(1,1) = 1.0;
 
-  Lucee::eig(S, evr, evi);
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+//   Lucee::eig(S, evr, evi);
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-// compute eigenvalues and eigenvectors of matrix
-  Lucee::Matrix<double> vecl(2,2), vecr(2,2);
-  Lucee::eig(S, evr, evi, vecl, vecr);
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+// // compute eigenvalues and eigenvectors of matrix
+//   Lucee::Matrix<double> vecl(2,2), vecr(2,2);
+//   Lucee::eig(S, evr, evi, vecl, vecr);
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-// check A*r = lambda*r for all right eigenvectors
-  Lucee::Vector<double> eigVec(2);
-  for (unsigned p=0; p<2; ++p)
-  {
-    eigVec = 0.0;
-    for (unsigned i=0; i<2; ++i)
-    {
-      double sum = 0.0;
-      for (unsigned j=0; j<2; ++j)
-        sum += S(i,j)*vecr(j,p);
-      eigVec[i] = sum;
-    }
-    for (unsigned i=0; i<2; ++i)
-      LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
-  }
+// // check A*r = lambda*r for all right eigenvectors
+//   Lucee::Vector<double> eigVec(2);
+//   for (unsigned p=0; p<2; ++p)
+//   {
+//     eigVec = 0.0;
+//     for (unsigned i=0; i<2; ++i)
+//     {
+//       double sum = 0.0;
+//       for (unsigned j=0; j<2; ++j)
+//         sum += S(i,j)*vecr(j,p);
+//       eigVec[i] = sum;
+//     }
+//     for (unsigned i=0; i<2; ++i)
+//       LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
+//   }
 
-// check l*A = lambda*l for all left eigenvectors
-  for (unsigned p=0; p<2; ++p)
-  {
-    eigVec = 0.0;
-    for (unsigned j=0; j<2; ++j)
-    {
-      double sum = 0.0;
-      for (unsigned i=0; i<2; ++i)
-        sum += vecl(i,p)*S(i,j);
-      eigVec[j] = sum;
-    }
-    for (unsigned i=0; i<2; ++i)
-      LC_ASSERT("Checking l*A=l*lambda", epsCmp(eigVec[i], evr[p]*vecl(i,p)));
-  }
+// // check l*A = lambda*l for all left eigenvectors
+//   for (unsigned p=0; p<2; ++p)
+//   {
+//     eigVec = 0.0;
+//     for (unsigned j=0; j<2; ++j)
+//     {
+//       double sum = 0.0;
+//       for (unsigned i=0; i<2; ++i)
+//         sum += vecl(i,p)*S(i,j);
+//       eigVec[j] = sum;
+//     }
+//     for (unsigned i=0; i<2; ++i)
+//       LC_ASSERT("Checking l*A=l*lambda", epsCmp(eigVec[i], evr[p]*vecl(i,p)));
+//   }
 
-// compute eigenvalues and left-eigenvectors of matrix
-  Lucee::Matrix<double> vec(2,2);
-  Lucee::eigLeft(S, evr, evi, vec);
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+// // compute eigenvalues and left-eigenvectors of matrix
+//   Lucee::Matrix<double> vec(2,2);
+//   Lucee::eigLeft(S, evr, evi, vec);
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-// check l*A = lambda*l for all left eigenvectors
-  for (unsigned p=0; p<2; ++p)
-  {
-    eigVec = 0.0;
-    for (unsigned j=0; j<2; ++j)
-    {
-      double sum = 0.0;
-      for (unsigned i=0; i<2; ++i)
-        sum += vecl(i,p)*S(i,j);
-      eigVec[j] = sum;
-    }
-    for (unsigned i=0; i<2; ++i)
-      LC_ASSERT("Checking l*A=l*lambda", epsCmp(eigVec[i], evr[p]*vecl(i,p)));
-  }
+// // check l*A = lambda*l for all left eigenvectors
+//   for (unsigned p=0; p<2; ++p)
+//   {
+//     eigVec = 0.0;
+//     for (unsigned j=0; j<2; ++j)
+//     {
+//       double sum = 0.0;
+//       for (unsigned i=0; i<2; ++i)
+//         sum += vecl(i,p)*S(i,j);
+//       eigVec[j] = sum;
+//     }
+//     for (unsigned i=0; i<2; ++i)
+//       LC_ASSERT("Checking l*A=l*lambda", epsCmp(eigVec[i], evr[p]*vecl(i,p)));
+//   }
 
-// compute eigenvalues and right-eigenvectors of matrix
-  Lucee::eigRight(S, evr, evi, vec);
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
-  LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
+// // compute eigenvalues and right-eigenvectors of matrix
+//   Lucee::eigRight(S, evr, evi, vec);
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[0], 9.0));
+//   LC_ASSERT("Testing eigenvalues of S", epsCmp(evr[1], -7.0));
 
-// check A*r = lambda*r for all right eigenvectors
-  for (unsigned p=0; p<2; ++p)
-  {
-    eigVec = 0.0;
-    for (unsigned i=0; i<2; ++i)
-    {
-      double sum = 0.0;
-      for (unsigned j=0; j<2; ++j)
-        sum += S(i,j)*vecr(j,p);
-      eigVec[i] = sum;
-    }
-    for (unsigned i=0; i<2; ++i)
-      LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
-  }
+// // check A*r = lambda*r for all right eigenvectors
+//   for (unsigned p=0; p<2; ++p)
+//   {
+//     eigVec = 0.0;
+//     for (unsigned i=0; i<2; ++i)
+//     {
+//       double sum = 0.0;
+//       for (unsigned j=0; j<2; ++j)
+//         sum += S(i,j)*vecr(j,p);
+//       eigVec[i] = sum;
+//     }
+//     for (unsigned i=0; i<2; ++i)
+//       LC_ASSERT("Checking A*r=lambda*r", epsCmp(eigVec[i], evr[p]*vecr(i,p)));
+//   }
 }
 
 void
@@ -471,19 +471,19 @@ main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcmatrix");
   test_1();
-  test_2();
-  test_3();
-  test_4();
-  test_5();
-  test_6();
-  test_7();
-  test_8();
-  test_9();
-  test_10();
-  test_11();
-  test_12();
-  test_13();
-  test_14();
-  test_15();
+//   test_2();
+//   test_3();
+//   test_4();
+//   test_5();
+//   test_6();
+//   test_7();
+//   test_8();
+//   test_9();
+//   test_10();
+//   test_11();
+//   test_12();
+//   test_13();
+//   test_14();
+//   test_15();
   LC_END_TESTS;
 }

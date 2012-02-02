@@ -207,20 +207,18 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char JOBVR, JOBVL;
-    int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char *JOBVR = "N", *JOBVL = "N";
+    long int INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = 1;
     LDVR = 1;
 
     LDA = mat.numRows();
     N = LDA;
-    JOBVR = 'N';
-    JOBVL = 'N';
     LWORK = 5*N;
     std::vector<double> WORK(LWORK);
 
 // call LAPACK routine to compute eigenvalues
-    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+    dgeev_(JOBVL, JOBVR, &N, &A[0], &LDA,
       &evr.first(),
       &evi.first(),
       0, &LDVL,
@@ -247,20 +245,18 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char JOBVR, JOBVL;
-    int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char *JOBVR = "V", *JOBVL = "V";
+    long int INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = vecl.numRows();
     LDVR = vecl.numRows();
 
     LDA = mat.numRows();
     N = LDA;
-    JOBVR = 'V';
-    JOBVL = 'V';
     LWORK = 5*N;
     std::vector<double> WORK(LWORK);
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
-    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+    dgeev_(JOBVL, JOBVR, &N, &A[0], &LDA,
       &evr.first(),
       &evi.first(),
       &vecl(vecl.getLower(0), vecl.getLower(1)), &LDVL,
@@ -288,7 +284,7 @@ namespace Lucee
         A[count++] = mat(i,j);
 
     char JOBVR, JOBVL;
-    int INFO, LWORK, LDA, N, LDVL, LDVR;
+    long int INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = 1;
     LDVR = vec.numRows();
 
@@ -328,7 +324,7 @@ namespace Lucee
         A[count++] = mat(i,j);
 
     char JOBVR, JOBVL;
-    int INFO, LWORK, LDA, N, LDVL, LDVR;
+    long int INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = vec.numRows();
     LDVR = 1;
 
