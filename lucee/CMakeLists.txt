@@ -49,7 +49,8 @@ if (GSL_FOUND)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Gsl_STLIBS})
 endif ()
 
-if (CLAPACKCMAKE_FOUND)
+# clapack only on non-Mac platforms
+if (CLAPACKCMAKE_FOUND AND (NOT APPLE))
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${CLapackCMake_INCLUDE_DIRS})
   set(FC_EXTERNAL_FLAGS "${FC_EXTERNAL_FLAGS} ${CLapackCMake_FLAGS}")
   set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${CLapackCMake_LIBRARIES})

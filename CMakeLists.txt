@@ -108,7 +108,6 @@ else(APPLE)
   # CLapack is used on Unix and Windows
   # WARNING: On Unix should use system Lapack
   find_package(TxCLapackCMake REQUIRED)
-  set(EXTRA_LIBS ${CLapackCMake_LIBRARIES})
 endif(APPLE)
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
