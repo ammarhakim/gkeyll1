@@ -13,8 +13,8 @@
 // potential cause for problems but I do not know how to fix in
 // general. (Ammar Hakim Wed Feb 1 2012).
 #ifdef HAVE_CLAPACKCMAKE
-#include <clapack.h>
 #include <f2c.h>
+#include <clapack.h>
 #else
 typedef int integer;
 #include <LcLapackDeclarations.h>
