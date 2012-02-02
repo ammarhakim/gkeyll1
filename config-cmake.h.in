@@ -90,6 +90,9 @@
 /* Define whether to use math defines (for Windows) */
 #cmakedefine _USE_MATH_DEFINES
 
+/* Define if we are using CLAPACK */
+#cmakedefine HAVE_CLAPACKCMAKE
+
 /* Fortran-C macros */
 #define @FC_FUNC@
 #define @FC_FUNC_@
