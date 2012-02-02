@@ -7,7 +7,18 @@
 // lucee includes
 #include <LcExcept.h>
 #include <LcLinAlgebra.h>
+
+// This wierdness is needed as CLAPACK defines integer as long int but
+// as far I can see LAPACK itself only uses int. This can be a
+// potential cause for problems but I do not know how to fix in
+// general. (Ammar Hakim Wed Feb 1 2012).
+#ifdef HAVE_CLAPACKCMAKE
+#include <clapack.h>
+#include <f2c.h>
+#else
+typedef int integer;
 #include <LcLapackDeclarations.h>
+#endif
 
 // std includes
 #include <vector>
@@ -31,9 +42,8 @@ namespace Lucee
       throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrices");
 
 // stuff needed by BLAS routine
-    int M, N, K, LDA, LDB, LDC;
-    char TRANSA, TRANSB;
-    TRANSA = 'N'; TRANSB = 'N'; // by default do not transpose A and B
+    integer M, N, K, LDA, LDB, LDC;
+    char TRANSA[] = "N", TRANSB[] = "N"; // by default do not transpose A and B
 
     M = arows;
     N = bcols;
@@ -45,12 +55,12 @@ namespace Lucee
 // determine job flags and sizes to pass to BLAS
     if (A.isTranspose())
     {
-      TRANSA = 'T';
+      TRANSA[0] = 'T';
       LDA = acols; // underlying data is not really transposed
     }
     if (B.isTranspose())
     {
-      TRANSB = 'T';
+      TRANSB[0] = 'T';
       LDB = bcols; // underlying data is not really transposed
     }
 
@@ -66,7 +76,7 @@ namespace Lucee
       Bdup = B.duplicate(); // not, so allocate fresh matrix
 
 // call BLAS routine to do the multiplication
-    dgemm_(&TRANSA, &TRANSB, &M, &N, &K,
+    dgemm_(TRANSA, TRANSB, &M, &N, &K,
       &alpha, &Adup.first(), &LDA, &Bdup.first(), &LDB,
       &beta, &Cdup.first(), &LDC);
 
@@ -99,9 +109,8 @@ namespace Lucee
     if ((acols != xlen) || (ylen != arows))
       throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrix and vector.");
 
-    char TRANS;
-    int M, N, LDA, INCX, INCY;
-    TRANS = 'N';
+    char TRANS[] = "N";
+    integer M, N, LDA, INCX, INCY;
 
     M = arows;
     N = acols;
@@ -112,7 +121,7 @@ namespace Lucee
 // determine flag to pass to BLAS
     if (A.isTranspose())
     {
-      TRANS = 'T';
+      TRANS[0] = 'T';
       LDA = acols;
     }
 
@@ -128,7 +137,7 @@ namespace Lucee
       ydup = y.duplicate(); // not, so allocate fresh vector
 
 // call BLAS routine to do the multiplication    
-    dgemv_(&TRANS, &M, &N, &alpha, &Adup.first(), &LDA,
+    dgemv_(TRANS, &M, &N, &alpha, &Adup.first(), &LDA,
       &xdup.first(), &INCX, &beta, &ydup.first(), &INCY);
 
     if (y.isContiguous() == false)
@@ -159,7 +168,7 @@ namespace Lucee
     if ((arows != xlen) || (acols != ylen))
       throw Lucee::Except("Lucee::accumulate: Inconsistent shape of matrices");
 
-    int M, N, INCX, INCY, LDA;
+    integer M, N, INCX, INCY, LDA;
     M = arows;
     N = acols;
     INCX = 1;
@@ -207,8 +216,8 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char *JOBVR = "N", *JOBVL = "N";
-    long int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char JOBVR[] = "N", JOBVL[] = "N";
+    integer INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = 1;
     LDVR = 1;
 
@@ -245,8 +254,8 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char *JOBVR = "V", *JOBVL = "V";
-    long int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char JOBVR[] = "V", JOBVL[] = "V";
+    integer INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = vecl.numRows();
     LDVR = vecl.numRows();
 
@@ -283,20 +292,18 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char JOBVR, JOBVL;
-    long int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char JOBVR[] = "V", JOBVL[] = "N";
+    integer INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = 1;
     LDVR = vec.numRows();
 
     LDA = mat.numRows();
     N = LDA;
-    JOBVR = 'V';
-    JOBVL = 'N';
     LWORK = 5*N;
     std::vector<double> WORK(LWORK);
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
-    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+    dgeev_(JOBVL, JOBVR, &N, &A[0], &LDA,
       &evr.first(),
       &evi.first(),
       0, &LDVL,
@@ -323,20 +330,18 @@ namespace Lucee
       for (int i=mat.getLower(0); i<mat.getUpper(0); ++i)
         A[count++] = mat(i,j);
 
-    char JOBVR, JOBVL;
-    long int INFO, LWORK, LDA, N, LDVL, LDVR;
+    char JOBVR[] = "N", JOBVL[] = "V";
+    integer INFO, LWORK, LDA, N, LDVL, LDVR;
     LDVL = vec.numRows();
     LDVR = 1;
 
     LDA = mat.numRows();
     N = LDA;
-    JOBVR = 'N';
-    JOBVL = 'V';
     LWORK = 5*N;
     std::vector<double> WORK(LWORK);
      
 // call LAPACK routine to compute eigenvalues and eigenvectors
-    dgeev_(&JOBVL, &JOBVR, &N, &A[0], &LDA,
+    dgeev_(JOBVL, JOBVR, &N, &A[0], &LDA,
       &evr.first(),
       &evi.first(),
       &vec(vec.getLower(0), vec.getLower(1)), &LDVL,
@@ -360,13 +365,12 @@ namespace Lucee
     if (B.isContiguous() == false)
       throw Lucee::Except("Lucee::solve: RHS matrix must be contiguous.");
 
-    int INFO, LDA, LDB, M, N, NRHS;
-    int *IPIV;
-    char TRANS;
+    integer INFO, LDA, LDB, M, N, NRHS;
+    integer *IPIV;
 
     M = N = LDA = LDB = A.getShape(0);
 // allocate memory for permutation array
-    IPIV = (int*) malloc( sizeof(int)*M );
+    IPIV = (integer*) malloc( sizeof(integer)*M );
 
 // compute LU factorization
     dgetrf_(&M, &N, &A.first(), &LDA, IPIV, &INFO);
@@ -374,10 +378,10 @@ namespace Lucee
       throw Lucee::Except("Lucee::solve: Unable to compute LU factorization");
 
 // solve systems
-    TRANS = 'N';
+    char TRANS[] = "N";
     NRHS = B.getShape(1);
 // make call
-    dgetrs_(&TRANS, &N, &NRHS, &A.first(), &LDA, IPIV, &B.first(), &LDB, &INFO);
+    dgetrs_(TRANS, &N, &NRHS, &A.first(), &LDA, IPIV, &B.first(), &LDB, &INFO);
 // check if solution obtained okay
     if (INFO != 0)
       throw Lucee::Except("Lucee::solve: Failure in LAPACK linear solver");

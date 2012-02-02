@@ -108,11 +108,11 @@ extern "C"
  *  =====================================================================
  */
     void dgeev_(char *jobvl, char *jobvr,
-      long int *n, double *a, long int *lda,
+      int *n, double *a, int *lda,
       double *wr, double *wi,
-      double *vl, long int *ldvl,
-      double *vr, long int *ldvr,
-      double *work, long int *lwork, long int *info);
+      double *vl, int *ldvl,
+      double *vr, int *ldvr,
+      double *work, int *lwork, int *info);
 
 /**
  *  Purpose
