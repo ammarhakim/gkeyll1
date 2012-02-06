@@ -60,6 +60,25 @@ namespace Lucee
   double legendre(int l, int m, double x);
 
 /**
+ * Compute Legendre polynomial at specified x \in [-1,1].
+ *
+ * @param n Order of Legendre polynomial.
+ * @param x Location to compute Legendre polynomial.
+ * @return Legendre polynomial at x.
+ */
+  double legendrePoly(int n, double x);
+
+/**
+ * Compute derivative of Legendre polynomial at specified x \in
+ * [-1,1].
+ *
+ * @param n Order of Legendre polynomial.
+ * @param x Location to compute derivative of Legendre polynomial.
+ * @return Derivative of Legendre polynomial at x.
+ */
+  double legendrePolyDeriv(int n, double x);
+
+/**
  * Compute minimum of three numbers.
  *
  * @param a First of three numbers.
