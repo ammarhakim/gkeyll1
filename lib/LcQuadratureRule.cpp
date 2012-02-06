@@ -17,12 +17,17 @@ namespace Lucee
 // set module name
   const char *QuadratureRule::id = "QuadratureRule";
 
-  void
-  QuadratureRule::readInput(Lucee::LuaTable& tbl)
+  QuadratureRule::~QuadratureRule()
   {
   }
 
-  QuadratureRule::~QuadratureRule()
+  void
+  QuadratureRule::readInput(Lucee::LuaTable& tbl)
   {
+// get number of nodes
+    if (tbl.hasNumber("numNodes"))
+      numNodes = (unsigned) tbl.getNumber("numNodes");
+    else
+      Lucee::Except("QuadratureRule::readInput: Must provide 'numNodes' specifying number of nodes");
   }
 }

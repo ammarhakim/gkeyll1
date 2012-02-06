@@ -62,20 +62,56 @@ namespace Lucee
   void
   legendre(int l, int m, const Lucee::Vector<double>& x, Lucee::Vector<double>& plm)
   {
+#ifdef HAVE_GSL
     const double PI = M_PI;
     int i, j = plm.getLower(0);
     double fact = 2*sqrt(PI)/sqrt(2.0*l+1);
 // use GSL routine to do actual computation
     for(i = x.getLower(0); i<x.getUpper(0); ++i)
       plm[j++] = fact*gsl_sf_legendre_sphPlm(l, m, x[i]);
+#else
+    throw Lucee::Except("Lucee::legendre requires linking with the GNU Scientific Library!");
+#endif
   }
 
   double
   legendre(int l, int m, double x)
   {
+#ifdef HAVE_GSL
     const double PI = M_PI;
     double fact = 2*sqrt(PI)/sqrt(2.0*l+1);
 // use GSL routine to do actual computation
     return fact*gsl_sf_legendre_sphPlm(l, m, x);
+#else
+    throw Lucee::Except("Lucee::legendre requires linking with the GNU Scientific Library!");
+#endif
+  }
+
+  double
+  legendrePoly(int n, double x)
+  {
+#ifdef HAVE_GSL
+// use GSL to do actual computation
+    return gsl_sf_legendre_Pl(n, x);
+#else
+// should eventually provide an alternative implementation based on
+// recursion relations for Legendre polynomials
+    throw Lucee::Except("Lucee::legendrePoly requires linking with the GNU Scientific Library!");
+#endif
+  }
+
+  double
+  legendrePolyDeriv(int n, double x)
+  {
+    double dp0 = 0;
+    double dp1 = 1;
+    double dpn;
+
+    if (n==0) return dp0;
+    if (n==1) return dp1;
+
+    dpn = ((n+1)*x*legendrePoly(n,x) - (n+1)*legendrePoly(n+1,x))/(1-x*x);
+
+    return dpn;
   }
 }

@@ -18,6 +18,7 @@ add_library(lclib
   LcDecompRegionCalcRegistry.cpp
   LcExcept.cpp 
   LcFileHandler.cpp
+  LcGaussianQuadRule.cpp
   LcLibRegistry.cpp
   LcLinAlgebra.cpp
   LcLogRecordHandler.cpp
@@ -33,10 +34,10 @@ add_library(lclib
   LcMathLib.cpp
   LcMatrix.cpp
   LcMultiRegion.cpp
+  LcQuadratureRule.cpp
   LcRectCoordSys.cpp
   LcSolverIfc.cpp
   LcStreamHandler.cpp
   LcVec3.cpp
   LcVector.cpp
-  LcQuadratureRule.cpp
 )

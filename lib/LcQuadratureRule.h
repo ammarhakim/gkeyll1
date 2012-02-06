@@ -20,7 +20,9 @@ namespace Lucee
 {
 /**
  * Interface class for quadrature rule providing interface to get
- * weights and abscissa.
+ * weights and abscissa. The interval for the quadrature is
+ * [-1,1]. Hence, for proper normalization the returned weights should
+ * sum to 2.0.
  */
   class QuadratureRule : public Lucee::BasicObj
   {
@@ -28,7 +30,7 @@ namespace Lucee
 /** Class id: this is used by the registration system */
       static const char *id;
 
-/** Destroy dataStruct */
+/** Destroy object */
       virtual ~QuadratureRule();
 
 /**
@@ -43,7 +45,8 @@ namespace Lucee
  *
  * @return Number of nodes in quadrature.
  */
-      virtual void getNumNodes() const = 0;
+      unsigned getNumNodes() const 
+      { return numNodes; }
 
 /**
  * Returns weights and ordinates of quadrature rule. The supplied
@@ -54,6 +57,10 @@ namespace Lucee
  */
       virtual void getOrdinatesAndWeights(Lucee::Vector<double>& ord,
         Lucee::Vector<double>& wth) = 0;
+
+    private:
+/** Number of nodes in quadrature */
+      unsigned numNodes;
   };
 }
 
