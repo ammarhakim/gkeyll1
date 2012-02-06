@@ -38,4 +38,5 @@ add_library(lclib
   LcStreamHandler.cpp
   LcVec3.cpp
   LcVector.cpp
+  LcQuadratureRule.cpp
 )
