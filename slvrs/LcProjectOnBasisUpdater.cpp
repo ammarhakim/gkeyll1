@@ -73,25 +73,28 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 // get output array
     Lucee::Field<NDIM, double>& q = this->getOut<Lucee::Field<NDIM, double> >(0);
+    q = 0.0; // set all entries to 0.0
 
 // create region to walk over ordinates
     int shape[NDIM];
     for (unsigned i=0; i<NDIM; ++i) shape[i] = numBasis;
     Lucee::Region<NDIM, int> ordRgn(shape);
-// create sequencer and indexer on this region
-    Lucee::RowMajorSequencer<NDIM> ordSeq(ordRgn);
-    Lucee::RowMajorIndexer<NDIM> ordIdxr(ordRgn);
+// create sequencer on this region
+    Lucee::RowMajorSequencer<NDIM> ordSeq(ordRgn), modeSeq(ordRgn);
+    Lucee::RowMajorIndexer<NDIM> modeIdxr(ordRgn);
 
 // determine number of components in field (THIS IS NOT GOOD PRACTICE
-// AND NEEDS TO CHANGE EVENTUALLY. SOMEHOW NODAL LAYOUT NEEDS TO BE
+// AND NEEDS TO CHANGE EVENTUALLY. SOMEHOW NODAL LAYOUT NEEDS TO BE IN
 // FIELD OR SOMEWHERE BETTER. PRESENTLY THE NODAL LAYOUT IS STORED
 // ONLY IMPLICITLY BY CONTRACT. Ammar Hakim, Feb 7 2012).
     unsigned nc = q.getNumComponents()/ordRgn.getVolume();
 
+    std::vector<double> res(nc); // to store function evaluation result
+
 // indices into grid and ordinate in cell
-    int idx[NDIM], ordIdx[NDIM];
+    int idx[NDIM], ordIdx[NDIM], modeIdx[NDIM];
 // coordinates of cell centroid and ordinate in cell
-    double xc[3], xmu[3];
+    double xc[3], xmu[3] = {0, 0, 0};
 
 // get hold of Lua state object
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
@@ -111,8 +114,51 @@ namespace Lucee
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
+// now loop over each ordinate and accumulate value of function into
+// appropriate mode
+      ordSeq.reset();
+      while (ordSeq.step())
+      {
+        ordSeq.fillWithIndex(ordIdx);
+// compute coordinate of ordinate
+        for (unsigned n=0; n<NDIM; ++n)
+          xmu[n] = 0.5*grid.getDx(n)*mu[ordIdx[n]] + xc[n];
+// evaluate function at ordinate
+        evaluateFunction(*L, t, xmu, res);
 
+// compute weight for quadrature
+        double wt = 1.0;
+        for (unsigned d=0; d<NDIM; ++d)
+          wt *= w[ordIdx[d]];
+
+// loop over each mode
+        modeSeq.reset();
+        while (modeSeq.step())
+        {
+          modeSeq.fillWithIndex(modeIdx);
+          unsigned modeLinIdx = modeIdxr.getIndex(modeIdx); // linear index into mode
+
+// compute basis function at ordinate
+          double Pm = 1.0;
+          for (unsigned d=0; d<NDIM; ++d)
+            Pm *= Pmk(modeIdx[d], ordIdx[d]);
+
+// compute normalization coefficient
+          double normCoeff = 1.0;
+          for (unsigned d=0; d<NDIM; ++d)
+            normCoeff *= 0.5*(2*modeIdx[d]+1);
+
+          unsigned c0 = modeLinIdx*nc; // location of first element
+          for (unsigned cc=0; cc<nc; ++cc)
+          {
+// accumulate contribution from function into mode
+            ptr[c0+cc] += normCoeff*res[cc]*Pm*wt;
+          }
+        }
+      }
     }
+
+    return Lucee::UpdaterStatus();
   }
 
   template <unsigned NDIM>
