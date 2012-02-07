@@ -32,6 +32,11 @@ namespace Lucee
   }
 
   void
+  BasicObj::initialize()
+  {
+  }
+
+  void
   BasicObj::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
   }

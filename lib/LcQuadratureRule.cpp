@@ -17,6 +17,11 @@ namespace Lucee
 // set module name
   const char *QuadratureRule::id = "QuadratureRule";
 
+  QuadratureRule::QuadratureRule(unsigned numNodes)
+    : numNodes(numNodes)
+  {
+  }
+
   QuadratureRule::~QuadratureRule()
   {
   }

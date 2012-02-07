@@ -40,6 +40,9 @@ namespace Lucee
 /** We need to friend ourself to allow accessing private stuff from another dimension */
       template <unsigned RDIM, typename TT> friend class Field;
 
+/** Typedef the indexer type */
+      typedef Lucee::RowMajorIndexer<NDIM> indexer;
+
 /**
  * Create an empty field. This should not be use directly: it is
  * provided for use in creation of fields from Lua scripts.

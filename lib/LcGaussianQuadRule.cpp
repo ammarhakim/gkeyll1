@@ -18,11 +18,18 @@ namespace Lucee
   const char *GaussianQuadRule::id = "Gaussian";
 
   GaussianQuadRule::GaussianQuadRule()
-    : weights(1), ordinates(1)
+    : QuadratureRule(1), weights(1), ordinates(1)
   {
 // set some reasonable defaults
     weights[0] = 2.0;
     ordinates[0] = 0.0;
+  }
+
+  GaussianQuadRule::GaussianQuadRule(unsigned n)
+    : QuadratureRule(n), weights(n), ordinates(n)
+  {
+// compute weights and ordinates
+    Lucee::gauleg(n, -1, 1, ordinates, weights);
   }
 
   void

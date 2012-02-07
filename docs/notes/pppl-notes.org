@@ -1,5 +1,22 @@
 # -*- org -*-
 
+* February 7th
+
+** TODO Add initialize() to BasicObj class
+
+   Add this method and call it immediately after readInput() method in
+   the ObjRegistry::makeLuaObj method (Line 91). This will eliminate
+   the need to explicitly call this method.
+
+   With this change *every* Lua script will need to be changed to
+   remove the explicit call to initialize().
+
+** TODO Why are in/out not present in the UpdaterIfc table? Fix if needed.
+
+   There perhaps was some reason for this which I no longer
+   recall. But it would make life easier if this was a part of the
+   Updater table and did not need an explicit step to do.
+
 * February 6th
 
   Added an interface class for quadrature weights and
@@ -46,9 +63,9 @@
    updater like the following.
 
 #+BEGIN_EXAMPLE
-  initField = Updater.ProjectOnLegendre1D {
+  initField = Updater.ProjectOnBasis1D {
     onGrid = grid,
-    quadrature = QuadratureRule.Gaussian { numNodes = 2 },
+    numBasis = 2,
     project = function (x,y,z,t)
                 -- do something here
               end,

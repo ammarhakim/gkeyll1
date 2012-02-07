@@ -58,6 +58,14 @@ namespace Lucee
       virtual void getOrdinatesAndWeights(Lucee::Vector<double>& ord,
         Lucee::Vector<double>& wth) = 0;
 
+    protected:
+/**
+ * Created a new quadrature rule with specified number of nodes.
+ *
+ * @param numNodes Number of nodes.
+ */
+      QuadratureRule(unsigned numNodes);
+
     private:
 /** Number of nodes in quadrature */
       unsigned numNodes;

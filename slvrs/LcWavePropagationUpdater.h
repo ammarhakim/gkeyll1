@@ -23,8 +23,8 @@
 namespace Lucee
 {
 /**
- * Updater to solve transverse-magnetic Maxwell equations in 2D. This
- * is a test updater and is not meant for production simulations.
+ * Updater to solve hyperbolic equations using the wave-propagation
+ * scheme.
  */
   template <unsigned NDIM>
   class WavePropagationUpdater : public Lucee::UpdaterIfc
