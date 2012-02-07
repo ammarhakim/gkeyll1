@@ -13,15 +13,52 @@
   quad = QuadratureRule.Gaussian { numNodes = 2 }
 
   -- let q be a field and initFunc a Lua function
-  q:setProjection(initFunc, quad)
+  q:project(initFunc, plOrder, quad)
 #+END_EXAMPLE
 
   This will intialize the components of q to the projection of
-  initFunc on Legendre polynomials. Perhaps in the future projection
-  on different basis could also be suppoeted. Note that by using the
-  alias method one can currently set the average (or projection on
-  P_0) rather easily. However, this will lead to less accurate
-  solutions as the higher order coefficients will not be set.
+  initFunc on Legendre polynomials of order plOrder. Perhaps in the
+  future projection on different basis could also be suppoeted. Note
+  that by using the alias method one can currently set the average (or
+  projection on P_0) rather easily. However, this will lead to less
+  accurate solutions as the higher order coefficients will not be set.
+
+** Bizarre behavior of luaL_ref method
+
+   Seems like luaL_ref pops the stack and leaves it in a very unstable
+   situation. This means that after this method is used it is possible
+   that the remaining functional parameters might be totally messed
+   up. So, luaL_ref should be done *last*.
+
+   One of the lessons here is that I need to start testing the Lua
+   scripts so all Lua callable methods are exercised. I am loosing
+   confidence in the code due to lack of regression tests. Time to
+   pull in txtests.
+
+** A wasted day: project method will not work
+
+   I am unable to figure out a clean way to make the project method
+   work. In fact, I now think that it might be too much of a headache
+   to do so as the method is becoming horribly complex.
+
+   It is better to write an updater that does this instead. Will do
+   that tomorrow. A big waste. A possible solution is to create an
+   updater like the following.
+
+#+BEGIN_EXAMPLE
+  initField = Updater.ProjectOnLegendre1D {
+    onGrid = grid,
+    quadrature = QuadratureRule.Gaussian { numNodes = 2 },
+    project = function (x,y,z,t)
+                -- do something here
+              end,
+  }
+  initField:initialize()
+  initField:setOut( {q} )
+
+  -- run initialization updater
+  initField:advance( 0.0 )
+#+END_EXAMPLE
 
 * January 31th - February 2nd
 

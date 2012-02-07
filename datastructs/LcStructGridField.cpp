@@ -11,8 +11,10 @@
 
 // lucee includes
 #include <LcGlobals.h>
+#include <LcMathLib.h>
 #include <LcPointerHolder.h>
 #include <LcStructGridField.h>
+#include <Lcmatrix.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -384,13 +386,14 @@ namespace Lucee
   {
     StructGridField<NDIM, T> *sgf
       = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
     if (! lua_isfunction(L, 2))
     {
       Lucee::Except lce("StructGridField::luaSet: Must provide a Lua function to 'set' method");
       throw lce;
     }
     int fnRef = luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_pop(L, 1);
+    lua_pop(L, 1); // WHY IS THIS NEEDED? THIS LOOKS LIKE A POTENTIAL STACK CORRUPTION
 
     sgf->setFromLuaFunction(L, fnRef);
     return 0;
@@ -402,14 +405,6 @@ namespace Lucee
   {
     StructGridField<NDIM, T> *sgf
       = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
-    if (! lua_isfunction(L, 2))
-    {
-      Lucee::Except lce(
-        "StructGridField::luaSetGhost: Must provide a Lua function to 'applyFuncBc' method");
-      throw lce;
-    }
-    int fnRef = luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_pop(L, 1);
 
     if (! lua_isnumber(L, 3))
     {
@@ -417,7 +412,8 @@ namespace Lucee
         "StructGridField::luaSetGhost: Must provide a number to 'applyFuncBc' method");
       throw lce;
     }
-// determine direction in which to apply copy BCs
+
+// determine direction in which to apply function BCs
     int dir = (int) lua_tonumber(L, 3);
     if (dir<0 || dir >= NDIM)
     { // incorrect direction specified
@@ -445,6 +441,14 @@ namespace Lucee
       side = 1;
     else
       throw Lucee::Except("StructGridField::luaFuncBc: side should be one of \"lower\" or \"upper\".");
+
+    if (! lua_isfunction(L, 2))
+    {
+      Lucee::Except lce(
+        "StructGridField::luaSetGhost: Must provide a Lua function to 'applyFuncBc' method");
+      throw lce;
+    }
+    int fnRef = luaL_ref(L, LUA_REGISTRYINDEX);
 
     sgf->setGhostFromLuaFunction(L, fnRef, dir, side);
     return 0;
@@ -577,7 +581,7 @@ namespace Lucee
     for (unsigned i=0; i<NDIM; ++i)
     { // whole region, including extended region
       lo[i] = this->getGlobalLowerExt(i);
-      up[i] = this->getGlobalUpperExt (i);
+      up[i] = this->getGlobalUpperExt(i);
     }
 // adjust region so it only indexes ghost cells
     if (side == 0)
