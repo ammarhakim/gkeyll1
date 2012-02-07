@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcQuadratureRule.h>
 #include <LcStructuredGridBase.h>
 
 // txbase includes
