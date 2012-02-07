@@ -41,6 +41,7 @@ namespace Lucee
   void
   UpdaterIfc::initialize()
   {
+    Lucee::BasicObj::initialize();
   }
 
   void

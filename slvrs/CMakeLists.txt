@@ -31,6 +31,7 @@ add_library(lcslvrs
   LcMaxwellEquation.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
+  LcProjectOnBasisUpdater.cpp
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
   LcUpdaterIfc.cpp

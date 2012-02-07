@@ -22,6 +22,7 @@
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcPointSourceIfc.h>
+#include <LcProjectOnBasisUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -56,6 +57,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<3> >;
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;

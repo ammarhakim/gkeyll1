@@ -63,6 +63,11 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl) = 0;
 
 /**
+ * Initialize object.
+ */
+      virtual void initialize();
+
+/**
  * Get type of object.
  *
  * @return Type of object.

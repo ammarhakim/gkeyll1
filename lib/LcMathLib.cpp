@@ -17,7 +17,7 @@ namespace Lucee
   void
   gauleg(int n, double x1, double x2, Lucee::Vector<double>& xv, Lucee::Vector<double>& wv)
   {
-    const double EPS = 3.0e-13;
+    const double EPS = 3.0e-15;
 #ifdef HAVE_GSL
     const double PI = M_PI;
 #else

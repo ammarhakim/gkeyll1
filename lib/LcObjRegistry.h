@@ -56,9 +56,9 @@ namespace Lucee
           = lm.funcMaps.find(typeid(D).name()); // fetch just-added map entry
 // set its base class name
         itr->second.setBaseName(typeid(B).name());
-// add Lua callable functions for base class (this is end up being
-// added multiple times, but it does not really matter as the old
-// entries are just overwritten).
+// add Lua callable functions for base class (this ends up being added
+// multiple times, but it does not really matter as the old entries
+// are just overwritten).
         B::appendLuaCallableMethods(itr->second);
 // add Lua callable functions for derived class
         D::appendLuaCallableMethods(itr->second);

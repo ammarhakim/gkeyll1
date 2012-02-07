@@ -32,6 +32,14 @@ namespace Lucee
       GaussianQuadRule();
 
 /**
+ * Create new Gaussian quadrature object with specified number of
+ * nodes.
+ *
+ * @param numNode Number of nodes in quadrature.
+ */
+      GaussianQuadRule(unsigned numNodes);
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
