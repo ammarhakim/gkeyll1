@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcMaxwellTm2DUpdater.h>
+#include <LcModalDg1DUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
@@ -27,9 +28,12 @@ namespace Lucee
 // register updaters
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MusclHancock1DUpdater>;
+
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ModalDg1DUpdater>;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;

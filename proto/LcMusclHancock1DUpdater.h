@@ -145,7 +145,7 @@ namespace Lucee
  * @param coeff Vector of coefficients.
  * @param vec (out) Output vector.
  */
-      void reconWihRightEigenvectors(const double *pv, const double *coeff, double *vec);
+      void reconWithRightEigenvectors(const double *pv, const double *coeff, double *vec);
   };
 }
 

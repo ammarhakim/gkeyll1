@@ -2,6 +2,10 @@
 
 * February 7th
 
+  Completed ProjectOnBasisUpdater to compute projection of a Lua
+  function on Legendre polynomials. The coefficients are stored in
+  row-major order.
+
 ** TODO Add initialize() to BasicObj class
 
    Add this method and call it immediately after readInput() method in

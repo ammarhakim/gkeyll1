@@ -1,11 +1,11 @@
 /**
- * @file	LcProjectOnBasisUpdater.h
+ * @file	LcModalDg1DUpdater.h
  *
- * @brief	Project a function of a basis functions.
+ * @brief	Updater to solver 1D hyperbolic equations using modal DG scheme
  */
 
-#ifndef LC_PROJECT_ON_BASIS_UPDATER_H
-#define LC_PROJECT_ON_BASIS_UPDATER_H
+#ifndef LC_MODAL_DG_1D_UPDATER_H
+#define LC_MODAL_DG_1D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,27 +14,22 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcMatrix.h>
+#include <LcHyperEquation.h>
 #include <LcUpdaterIfc.h>
-#include <LcVector.h>
 
 namespace Lucee
 {
 /**
- * Updater to project a supplied Lua function onto a set of basis
- * functions. The coefficients of the basis function are stored in
- * row-major order.
+ * Updater to solve 1D hyperbolic equations using modal DG scheme.
  */
-  template <unsigned NDIM>
-  class ProjectOnBasisUpdater : public Lucee::UpdaterIfc
+  class ModalDg1DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-
-/** Create new projection updater */
-      ProjectOnBasisUpdater();
+/** Create new modal DG solver in 1D */
+      ModalDg1DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -69,29 +64,25 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Number of basis functions to project on */
-      unsigned numBasis;
-/** Reference to function to project */
-      int fnRef;
+/** Equation to solve */
+      Lucee::HyperEquation *equation;
+/** CFL number to use */
+      double cfl;
+/** Maximum CFL number */
+      double cflm;
+/** Number of basis functions to use */
+      double numBasis;
 /** Values of Legendre polynomials at the ordinates */
       Matrix<double> Pmk; // m <- Polynomial order k <- ordinate index
+/** Values of Legendre polynomials derivate at the ordinates */
+      Matrix<double> DPmk; // m <- Polynomial order k <- ordinate index
+/** Normalization coefficients */
+      Vector<double> normCoeff;
 /** Weights for quadrature */
       Lucee::Vector<double> w;
 /** Ordinates for quadrature */
       Lucee::Vector<double> mu;
-
-/**
- * Evaluate function at specified location and fill output array with
- * result.
- *
- * @param L Lua state object to use.
- * @param tm Time to evaluate function at.
- * @param loc Location at which to evaluate function.
- * @param res On output, result of evaluating function.
- */
-      void evaluateFunction(Lucee::LuaState& L, double tm, 
-        const double loc[3], std::vector<double>& res);
   };
 }
 
-#endif // LC_PROJECT_ON_BASIS_UPDATER_H
+#endif // LC_MODAL_DG_1D_UPDATER_H

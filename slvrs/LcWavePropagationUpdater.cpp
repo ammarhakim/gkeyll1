@@ -86,7 +86,9 @@ namespace Lucee
     }
 
     cfl = tbl.getNumber("cfl"); // CFL number
-    cflm = tbl.getNumber("cflm"); // maximum CFL number
+    cflm = 1.1*cfl; // use slightly large max CFL if not explicitly specified
+    if (tbl.hasNumber("cflm"))
+      cflm = tbl.getNumber("cflm"); // maximum CFL number
     
 // limiter to use
     limiter = NO_LIMITER; // by default no limiter
