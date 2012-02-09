@@ -84,6 +84,22 @@ namespace Lucee
     s[0] = v[0];
   }
 
+  double
+  AdvectionEquation::numericalFlux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::FieldPtr<double>& f)
+  {
+    double v[3];
+    c.rotateVecToLocal(u, v);
+
+    if (v[0] > 0)
+      f[0] = v[0]*ql[0];
+    else
+      f[0] = v[0]*qr[0];
+
+    return v[0];
+  }
+
   void
   AdvectionEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {

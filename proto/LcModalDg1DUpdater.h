@@ -95,14 +95,14 @@ namespace Lucee
       Lucee::Vector<double> mu;
 
 /**
- * Evaluate expansion function at specified location in interval [-1,1].
+ * Evaluate expansion function at specified ordinate index.
  *
  * @param qCoeff Coefficients of expansion in cell.
- * @param x Location i [-1,1] at which expansion is needed.
+ * @param c Ordinate index.
  * @param qOut On output, the expansion at left edge of cell.
  */
       void evalExpansion(const Lucee::ConstFieldPtr<double>& qCoeff,
-        double x, Lucee::FieldPtr<double>& qOut);
+        unsigned c, Lucee::FieldPtr<double>& qOut);
 
 /**
  * Evaluate expansion function at left edge of cell.

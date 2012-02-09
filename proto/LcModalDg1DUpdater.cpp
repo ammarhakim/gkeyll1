@@ -105,8 +105,8 @@ namespace Lucee
 
 // state on left and right of each edge
     Lucee::FieldPtr<double> qL(meqn), qR(meqn);
-// numerical flux
-    Lucee::FieldPtr<double> numFlux(meqn);
+// flux and numerical flux
+    Lucee::FieldPtr<double> flux(meqn), numFlux(meqn);
 
     if ( (q.getNumComponents() != meqn*numBasis) && (dq.getNumComponents() != meqn*numBasis) )
     {
@@ -116,6 +116,7 @@ namespace Lucee
     }
 
 // iterators to cells on left/right of edge
+    Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qlPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qrPtr = q.createConstPtr();
 
@@ -127,7 +128,7 @@ namespace Lucee
     int sliceLower = localRgn.getLower(0);
     int sliceUpper = localRgn.getUpper(0);
 
-    double dxL, dxR, xcL[3], xcR[3];
+    double dxL, dxR, dx, xc[3];
 // maximum CFL number used
     double cfla = 0.0;
 
@@ -136,15 +137,13 @@ namespace Lucee
 // more edge that cells hence the upper limit in the for loop.
     for (int i=sliceLower; i<sliceUpper+1; ++i)
     {
-// cell centroid and spacing in left cell
+// cell spacing in left cell
       grid.setIndex(i-1);
       dxL = grid.getDx(0);
-      grid.getCentroid(xcL);
 
-// cell centroid and spacing in right cell
+// cell spacing in right cell
       grid.setIndex(i);
       dxR = grid.getDx(0);
-      grid.getCentroid(xcR);
 
 // attach iterators to left/right cells of this edge
       q.setPtr(qlPtr, i-1); // left cell
@@ -182,7 +181,35 @@ namespace Lucee
     if (cfla > cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-// TODO: ADD IN CONTRIBUTION FROM INTERIOR QUADRATURE
+// loop over cells adding contribution from volume integrals
+    for (unsigned i=sliceLower; i<sliceUpper; ++i)
+    {
+// cell centroid and spacing in cell
+      grid.setIndex(i);
+      grid.getCentroid(xc);
+
+// attach itertors to cell
+      q.setPtr(qPtr, i);
+      dq.setPtr(dqPtr, i);
+
+// loop over each ordinate computing flux
+      for (unsigned r=0; r<numBasis; ++r)
+      {
+// compute conserved variable at ordinate and store in qL
+        evalExpansion(qPtr, r, qL);
+// compute flux at this location
+        equation->flux(coordSys, qL, flux);
+
+// accumulate contribution of this flux to each mode for each equation
+        for (unsigned m=1; m<numBasis; ++m)
+        { // no contribution to m=0 mode
+          for (unsigned k=0; k<meqn; ++k)
+          {
+            dqPtr[k+m*meqn] += w[r]*flux[k]*DPmk(m,r);
+          }
+        }
+      }
+    }
 
 // normalize increment
     double nc;
@@ -208,6 +235,18 @@ namespace Lucee
   {
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
+  }
+
+  void
+  ModalDg1DUpdater::evalExpansion(const Lucee::ConstFieldPtr<double>& qCoeff,
+    unsigned c, Lucee::FieldPtr<double>& qOut)
+  {
+    for (unsigned k=0; k<meqn; ++k)
+    {
+      qOut[k] = 0.0;
+      for (unsigned m=0; m<numBasis; ++m)
+        qOut[k] += qCoeff[k+m*meqn]*Pmk(m, c);
+    }
   }
 
   void

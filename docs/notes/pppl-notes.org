@@ -6,6 +6,15 @@
   solution. Hence, using its output one can easily do any RK
   time-stepping in the Lua code.
 
+** TODO Extend 'accumulate' method
+
+  Need to extend the luaAccumulate method to take in arbitrary number
+  of fields and coefficients. For example
+#+BEGIN_EXAMPLE
+  qNew:accumulate(1.0, q, 0.5, dq)
+#+END_EXAMPLE
+  will set qNew = qNew + q + 0.5*dq.
+
 * February 7th
 
   Completed ProjectOnBasisUpdater to compute projection of a Lua
