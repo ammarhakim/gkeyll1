@@ -92,6 +92,23 @@ namespace Lucee
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
 /**
+ * Compute numerical flux for this equation system. Numerical flux
+ * depends on left and right states. This method should also return
+ * the maximum wave speed computed from the states. The states are
+ * already in the normal-tangent space and so for isotropic systems
+ * the coordinate systems can be ignored.
+ *
+ * @param c Coordinate system in which to compute flux.
+ * @param ql Left conserved variable state.
+ * @param qr Right conserved variable state.
+ * @param f On output, this contains the numerical flux.
+ * @return Maximum wave speed from left/right state.
+ */
+      virtual double numericalFlux(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::FieldPtr<double>& f);
+
+/**
  * Compute primitive variables given conserved variables.
  *
  * @param q Conserved variables for which to primitive variables.
