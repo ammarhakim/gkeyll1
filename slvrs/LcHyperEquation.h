@@ -83,7 +83,7 @@ namespace Lucee
       virtual void rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ) = 0;
 
 /**
- * compute flux for this equation system.
+ * Compute flux for this equation system.
  *
  * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
@@ -136,6 +136,23 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& jump,
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
+
+/**
+ * Compute numerical flux for this equation system. Numerical flux
+ * depends on left and right states. This method should also return
+ * the maximum wave speed computed from the states. The states are
+ * already in the normal-tangent space and so for isotropic systems
+ * the coordinate systems can be ignored.
+ *
+ * @param c Coordinate system in which to compute flux.
+ * @param ql Left conserved variable state.
+ * @param qr Right conserved variable state.
+ * @param f On output, this contains the numerical flux.
+ * @return Maximum wave speed from left/right state.
+ */
+      virtual double numericalFlux(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::FieldPtr<double>& f);
 
 /**
  * Compute eigensystem for equations give a state. This method should

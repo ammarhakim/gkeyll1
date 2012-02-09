@@ -20,7 +20,16 @@
 namespace Lucee
 {
 /**
- * Updater to solve 1D hyperbolic equations using modal DG scheme.
+ * Updater to solve 1D hyperbolic equations using modal DG
+ * scheme. This updater only computes the "tendencies", i.e. the
+ * increment in the solution given a time-step. Hence, if the input
+ * field is 'q' and out 'dq' then this updater computes:
+ *
+ * dq = dt * L(q)
+ *
+ * where dt is the specified time-step and L(q) the RHS of the
+ * semi-discrete equation. Using the output of this updater any RK
+ * scheme can be easily implemented in Lua itself.
  */
   class ModalDg1DUpdater : public Lucee::UpdaterIfc
   {
@@ -66,6 +75,8 @@ namespace Lucee
     private:
 /** Equation to solve */
       Lucee::HyperEquation *equation;
+/** Number of equations */
+      unsigned meqn;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number */
@@ -82,6 +93,34 @@ namespace Lucee
       Lucee::Vector<double> w;
 /** Ordinates for quadrature */
       Lucee::Vector<double> mu;
+
+/**
+ * Evaluate expansion function at specified location in interval [-1,1].
+ *
+ * @param qCoeff Coefficients of expansion in cell.
+ * @param x Location i [-1,1] at which expansion is needed.
+ * @param qOut On output, the expansion at left edge of cell.
+ */
+      void evalExpansion(const Lucee::ConstFieldPtr<double>& qCoeff,
+        double x, Lucee::FieldPtr<double>& qOut);
+
+/**
+ * Evaluate expansion function at left edge of cell.
+ *
+ * @param qCoeff Coefficients of expansion in cell.
+ * @param qOut On output, the expansion at left edge of cell.
+ */
+      void evalExpansionLeftEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
+        Lucee::FieldPtr<double>& qOut);
+
+/**
+ * Evaluate expansion function at right edge of cell.
+ *
+ * @param qCoeff Coefficients of expansion in cell.
+ * @param qOut On output, the expansion at right edge of cell.
+ */
+      void evalExpansionRightEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
+        Lucee::FieldPtr<double>& qOut);
   };
 }
 
