@@ -64,6 +64,15 @@ namespace Lucee
     throw Lucee::Except("HyperEquation::waves: Method not implemented");
   }
 
+  double
+  HyperEquation::numericalFlux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::FieldPtr<double>& f)
+  {
+    throw Lucee::Except("HyperEquation::numericalFlux: Method not implemented");
+    return 0; // should never come here
+  }
+
   void
   HyperEquation::eigensystem(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q,

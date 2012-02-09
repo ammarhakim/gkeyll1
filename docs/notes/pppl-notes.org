@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* February 9th
+
+  Working on 1D modal DG. This updater returns the increment in the
+  solution. Hence, using its output one can easily do any RK
+  time-stepping in the Lua code.
+
 * February 7th
 
   Completed ProjectOnBasisUpdater to compute projection of a Lua
