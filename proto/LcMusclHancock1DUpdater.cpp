@@ -49,7 +49,7 @@ namespace Lucee
   }
 
 /**
- * Minmod function for two parameters.
+ * Minmod function for three parameters.
  */
   double minmod(double a1, double a2, double a3)
   {
@@ -211,7 +211,7 @@ namespace Lucee
         projSlopes[k] = limaverage(ldelta[k], rdelta[k]);
 // reconstruct slopes
       slopes.setPtr(slpPtr, i);
-      reconWihRightEigenvectors(&pPtr[0], &projSlopes[0], &slpPtr[0]);
+      reconWithRightEigenvectors(&pPtr[0], &projSlopes[0], &slpPtr[0]);
     }
 
 // attach pointers for use in predictor step
@@ -394,7 +394,7 @@ namespace Lucee
   }
 
   void
-  MusclHancock1DUpdater::reconWihRightEigenvectors(const double *pv, const double *coeff, double *vec)
+  MusclHancock1DUpdater::reconWithRightEigenvectors(const double *pv, const double *coeff, double *vec)
   {
 // compute some needed quantities first
     double b = gas_gamma-1;

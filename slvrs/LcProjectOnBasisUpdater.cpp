@@ -1,7 +1,7 @@
 /**
  * @file	LcProjectOnBasisUpdater.cpp
  *
- * @brief	Project a function of a basis functions.
+ * @brief	Project a Lua function on basis functions.
  */
 
 // config stuff

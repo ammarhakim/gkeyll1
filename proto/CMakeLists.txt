@@ -15,6 +15,7 @@ endif (FFTW3_FOUND)
 
 set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
+  LcModalDg1DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
