@@ -1,5 +1,37 @@
 # -*- org -*-
 
+* February 10th
+
+  The algorithm now works! The problem was not with the C++ code but
+  with the Lua program. Turns out that the accumulate function is
+  actually quite confusing to use as the current contents of the
+  fields are not reset before accumulation. Of course, this is the
+  correct behavior. Perhaps the solution is to introduce a new method
+  called "combine" that clears the current content of the field and
+  then does the accumulation. This would be like assigning a field
+  with a linear combination of other fields. Spent too much time on
+  debugging this.
+
+  Compared with miniwarpx solutions. The timing of miniwarpx v/s
+  optimized lucee are comparable. However, I am not sure if miniwarpx
+  was built with full optimization. I need to check in the code
+  somewhere and build it to do a fair comparison.
+
+  The DG efficiency could be improved by careful rearrangement of the
+  loops to make sure the updates happen in cache-correct
+  sequence. Anyway this is not too critical at this stage.
+
+** TODO Add a 'combine' method to Field
+
+   This will combine a set of fields into a single one. Essentially it
+   a call to clear() followed by an accumulate.
+
+** TODO Put miniwarpx into a bitbuket repo
+
+   This is a good code that allows easy comparison for testing. Should
+   check it into bitbuket and make sure it can be built. Perhaps even
+   CMake it.
+
 * February 9th
 
   Working on 1D modal DG. This updater returns the increment in the
