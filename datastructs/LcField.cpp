@@ -383,6 +383,7 @@ namespace Lucee
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
+    lfm.appendFunc("combine", luaCombine);
     lfm.appendFunc("hasNan", luaHasNan);
     lfm.appendFunc("applyPeriodicBc", luaApplyPeriodicBc);
     lfm.appendFunc("applyCopyBc", luaApplyCopyBc);
@@ -432,6 +433,7 @@ namespace Lucee
     Field<NDIM, T> *fld
       = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
 
+// accumulate each field into this one
     for (int nF = 0; nF < (nArgs-1)/2; ++nF)
     {
       if (! lua_isnumber(L, 2*nF+2))
@@ -444,6 +446,42 @@ namespace Lucee
       if (lua_type(L, 2*nF+3) != LUA_TUSERDATA)
       {
         Lucee::Except lce("Field::luaAccumulate: Must provide a field to 'accumulate' method");
+        throw lce;
+      }
+      Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =
+        (Lucee::PointerHolder<Field<NDIM, T> >*) lua_touserdata(L, 2*nF+3); // field to accumulate
+      fld->accumulate(coeff, *fldPtr->pointer);
+    }
+
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaCombine(lua_State *L)
+  {
+// number of arguments in call
+    unsigned nArgs = lua_gettop(L);
+
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+
+// clear out field
+    (*fld) = (T) 0;
+
+// accumulate each field into this one
+    for (int nF = 0; nF < (nArgs-1)/2; ++nF)
+    {
+      if (! lua_isnumber(L, 2*nF+2))
+      {
+        Lucee::Except lce("Field::luaAccumulate: Must provide a number to 'combine' method");
+        throw lce;
+      }
+      T coeff = (T) lua_tonumber(L, 2*nF+2); // coeff for accumulation
+
+      if (lua_type(L, 2*nF+3) != LUA_TUSERDATA)
+      {
+        Lucee::Except lce("Field::luaAccumulate: Must provide a field to 'combine' method");
         throw lce;
       }
       Lucee::PointerHolder<Field<NDIM, T> > *fldPtr =

@@ -89,11 +89,17 @@ The 1D, 2D and 3D field object support the following methods.
   field. No new memory is allocated: the alias and the original share
   memory, and hence modifying one will change the other.
 
-.. py:function:: accumulate(coeff, fld)
+.. py:function:: accumulate(coeff_1, fld_1, coeff_2, fld_2, ...)
 
-  Add :math:`coeff*fld` to the values in this field. Here *coeff* is a
-  number and *fld* is a field that lives on the same grid and has the
-  same number of components as the target field.
+  Add :math:`\sum coeff_i*fld_i` to the values in this field. Here
+  *coeff_i* is a number and *fld_i* is a field that lives on the same
+  grid and has the same number of components as the target field.
+
+.. py:function:: combine(coeff_1, fld_1, coeff_2, fld_2, ...)
+
+  Set field to :math:`\sum coeff_i*fld_i`. Here *coeff_i* is a number
+  and *fld_i* is a field that lives on the same grid and has the same
+  number of components as the target field.
 
 .. py:function:: set(luaFunc)
 
@@ -115,6 +121,6 @@ Examples
    dimensional fields. However, not all implemented algorithms work
    with fields with dimensionality higher than three.
 
-.. [#plain-txt] Writing to plain text is not a good idea execept for
+.. [#plain-txt] Writing to plain text is not a good idea except for
    quick debugging. The writes are very slow and do not work in
    parallel.
