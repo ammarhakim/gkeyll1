@@ -6,7 +6,11 @@
   solution. Hence, using its output one can easily do any RK
   time-stepping in the Lua code.
 
-** TODO Extend 'accumulate' method
+  Completed the code for the 1D modal DG method. The algorithm seems
+  to be basically working but the solution is slowly increasing. Need
+  to investigate why, perhaps there is an error in the normalization.
+
+** DONE Extend 'accumulate' method
 
   Need to extend the luaAccumulate method to take in arbitrary number
   of fields and coefficients. For example
