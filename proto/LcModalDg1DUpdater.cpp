@@ -150,8 +150,8 @@ namespace Lucee
       q.setPtr(qrPtr, i); // right cell
 
 // compute conserved variables at left and right of edge
-      evalExpansionLeftEdge(qlPtr, qL);
-      evalExpansionRightEdge(qrPtr, qR);
+      evalExpansionRightEdge(qlPtr, qL); // qL is right edge of left cell
+      evalExpansionLeftEdge(qrPtr, qR); // qR is left edge of right cell
 
 // compute numerical flux at edge
       double maxs = equation->numericalFlux(coordSys, qL, qR, numFlux);
@@ -184,11 +184,7 @@ namespace Lucee
 // loop over cells adding contribution from volume integrals
     for (unsigned i=sliceLower; i<sliceUpper; ++i)
     {
-// cell centroid and spacing in cell
-      grid.setIndex(i);
-      grid.getCentroid(xc);
-
-// attach itertors to cell
+// attach iterators to cell
       q.setPtr(qPtr, i);
       dq.setPtr(dqPtr, i);
 
