@@ -6,11 +6,11 @@
   with the Lua program. Turns out that the accumulate function is
   actually quite confusing to use as the current contents of the
   fields are not reset before accumulation. Of course, this is the
-  correct behavior. Perhaps the solution is to introduce a new method
-  called "combine" that clears the current content of the field and
-  then does the accumulation. This would be like assigning a field
-  with a linear combination of other fields. Spent too much time on
-  debugging this.
+  correct and intended behavior. Perhaps the solution is to introduce
+  a new method called "combine" that clears the current content of the
+  field and then does the accumulation. This would be like assigning a
+  field with a linear combination of other fields. Spent too much time
+  on debugging this.
 
   Compared with miniwarpx solutions. The timing of miniwarpx v/s
   optimized lucee are comparable. However, I am not sure if miniwarpx
@@ -21,7 +21,7 @@
   loops to make sure the updates happen in cache-correct
   sequence. Anyway this is not too critical at this stage.
 
-** TODO Add a 'combine' method to Field
+** DONE Add a 'combine' method to Field
 
    This will combine a set of fields into a single one. Essentially it
    a call to clear() followed by an accumulate.
