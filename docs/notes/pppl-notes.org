@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* February 12th
+
+  I changed the modal DG to return a first order forward Euler update
+  and not the "tendencies". I am not sure if this is the correct thing
+  to do and perhaps it is a mistake. However, this does allow easy
+  application of limiters after the first-order update is complete.
+
 * February 10th
 
   The algorithm now works! The problem was not with the C++ code but
