@@ -132,6 +132,12 @@ namespace Lucee
 // maximum CFL number used
     double cfla = 0.0;
 
+// The algorithms does the first order forward Euler update. It works
+// in two stages. In the first stages the increment in the solution,
+// i.e. dt*L(q) is computed and stored in qNew. Then, another sweep
+// over the domain updates qNew = q + dt*L(q) to move the solution in
+// time.
+
 // loop over edges computing edge fluxes, accumulating contribution
 // from edge flux in cells connected to that edge. NOTE: There is one
 // more edge that cells hence the upper limit in the for loop.
@@ -177,8 +183,8 @@ namespace Lucee
       cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
     }
 
-// check if time-step was too large
     if (cfla > cflm)
+// time-step was too large: return a suggestion with correct time-step
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
 // loop over cells adding contribution from volume integrals
