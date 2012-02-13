@@ -90,10 +90,10 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 // get input/output arrays
     const Lucee::Field<1, double>& q = this->getInp<Lucee::Field<1, double> >(0);
-    Lucee::Field<1, double>& dq = this->getOut<Lucee::Field<1, double> >(0);
+    Lucee::Field<1, double>& qNew = this->getOut<Lucee::Field<1, double> >(0);
 
-// clear out increments
-    dq = 0.0;
+// clear out output field
+    qNew = 0.0;
 
 // time-step
     double dt = t-this->getCurrTime();
@@ -108,7 +108,7 @@ namespace Lucee
 // flux and numerical flux
     Lucee::FieldPtr<double> flux(meqn), numFlux(meqn);
 
-    if ( (q.getNumComponents() != meqn*numBasis) && (dq.getNumComponents() != meqn*numBasis) )
+    if ( (q.getNumComponents() != meqn*numBasis) && (qNew.getNumComponents() != meqn*numBasis) )
     {
       Lucee::Except lce(
         "ModalDg1DUpdater::update: Number of components in input/output fields should be ");
@@ -120,9 +120,9 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> qlPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qrPtr = q.createConstPtr();
 
-    Lucee::FieldPtr<double> dqPtr = dq.createPtr();
-    Lucee::FieldPtr<double> dqlPtr = dq.createPtr();
-    Lucee::FieldPtr<double> dqrPtr = dq.createPtr();
+    Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
+    Lucee::FieldPtr<double> qNewlPtr = qNew.createPtr();
+    Lucee::FieldPtr<double> qNewrPtr = qNew.createPtr();
 
 // lower and upper bounds of slice.
     int sliceLower = localRgn.getLower(0);
@@ -157,8 +157,8 @@ namespace Lucee
       double maxs = equation->numericalFlux(coordSys, qL, qR, numFlux);
 
 // attach iterators to left and right cells to accumulate increment
-      dq.setPtr(dqlPtr, i-1); // left cell
-      dq.setPtr(dqrPtr, i); // right cell
+      qNew.setPtr(qNewlPtr, i-1); // left cell
+      qNew.setPtr(qNewrPtr, i); // right cell
 
 // accumulate increment to appropriate cells
       for (unsigned k=0; k<meqn; ++k)
@@ -166,8 +166,8 @@ namespace Lucee
         int sgn = 1.0;
         for (unsigned m=0; m<numBasis; ++m)
         {
-          dqlPtr[k+m*meqn] -= numFlux[k];
-          dqrPtr[k+m*meqn] += sgn*numFlux[k];
+          qNewlPtr[k+m*meqn] -= numFlux[k];
+          qNewrPtr[k+m*meqn] += sgn*numFlux[k];
           sgn *= -1;
         }
       }
@@ -186,7 +186,7 @@ namespace Lucee
     {
 // attach iterators to cell
       q.setPtr(qPtr, i);
-      dq.setPtr(dqPtr, i);
+      qNew.setPtr(qNewPtr, i);
 
 // loop over each ordinate computing flux
       for (unsigned r=0; r<numBasis; ++r)
@@ -201,26 +201,33 @@ namespace Lucee
         { // no contribution to m=0 mode
           for (unsigned k=0; k<meqn; ++k)
           {
-            dqPtr[k+m*meqn] += w[r]*flux[k]*DPmk(m,r);
+            qNewPtr[k+m*meqn] += w[r]*flux[k]*DPmk(m,r);
           }
         }
       }
     }
 
-// normalize increment
+// perform final update
     double nc;
     for (unsigned i=sliceLower; i<sliceUpper; ++i)
     {
       grid.setIndex(i);
       double dx = grid.getDx(0);
 
-      dq.setPtr(dqPtr, i);
+      qNew.setPtr(qNewPtr, i);
+// normalize increment
       for (unsigned m=0; m<numBasis; ++m)
       {
         nc = dt/(normCoeff[m]*dx);
         for (unsigned k=0; k<meqn; ++k)
-          dqPtr[k+m*meqn] *= nc;
+          qNewPtr[k+m*meqn] *= nc;
       }
+
+      q.setPtr(qPtr, i);
+// do forward Euler. NOTE: qNew at this point has dt*L(q) and after
+// will have q + dt*L(q).
+      for (unsigned n=0; n<q.getNumComponents(); ++n)
+        qNewPtr[n] += qPtr[n];
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);

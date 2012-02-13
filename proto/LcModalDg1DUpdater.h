@@ -21,11 +21,9 @@ namespace Lucee
 {
 /**
  * Updater to solve 1D hyperbolic equations using modal DG
- * scheme. This updater only computes the "tendencies", i.e. the
- * increment in the solution given a time-step. Hence, if the input
- * field is 'q' and out 'dq' then this updater computes:
+ * scheme. This updater computes a first-order Euler update
  *
- * dq = dt * L(q)
+ * qNew = q + dt * L(q)
  *
  * where dt is the specified time-step and L(q) the RHS of the
  * semi-discrete equation. Using the output of this updater any RK
