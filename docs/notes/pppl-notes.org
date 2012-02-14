@@ -14,6 +14,11 @@
   methods will also allow (in combination with the numericalFlux
   method) the implementation of the MUSCL scheme in Lucee.
 
+  Added an updater to limit solution and/or projection from
+  DG. Implemented characteristic limiter. Should also implement
+  componentwise limiter and then updater Euler equation class with the
+  methods needed to make it work with DG.
+
 * February 12th
 
   I changed the modal DG to return a first order forward Euler update
