@@ -81,7 +81,7 @@ namespace Lucee
   Lucee::UpdaterStatus
   ModalDgLimiter1DUpdater::update(double t)
   {
-    if (numBasis == 1)
+    if (numBasis < 2)
 // no need to apply limiters to first-order scheme
       return Lucee::UpdaterStatus();
 
@@ -119,6 +119,8 @@ namespace Lucee
     Lucee::FieldPtr<double> qPtrP = q.createPtr();
     Lucee::FieldPtr<double> qPtrM = q.createPtr();
 
+    std::vector<bool> changed(meqn); // flags to see if linear term was modified
+
     for (unsigned i=sliceLower; i<sliceUpper; ++i)
     {
       q.setPtr(qPtr, i); // cell i
@@ -148,13 +150,28 @@ namespace Lucee
 
 // now compute limited slopes
       for (unsigned k=0; k<meqn; ++k)
+      {
         limSlopes[k] = modifiedMinMod(linProj[k], fProj[k], bProj[k], dx);
+        if (limSlopes[k] == linProj[k])
+          changed[k] = false;
+        else
+          changed[k] = true;
+      }
 
 // reconstruct slopes
       equation->reconWithRightEigenvectors(coordSys, qPtr, &limSlopes[0], &qPtr[0+meqn]);
 
 // check if slope was modified and if it was, zap high-order
-// coefficients (TODO)
+// coefficients
+      if (numBasis > 2)
+      {
+        for (unsigned k=0; k<meqn; ++k)
+        {
+          if (changed[k])
+            for (unsigned c=2; c<numBasis; ++c)
+              qPtr[meqn*c+k] = 0.0;
+        }
+      }
     }
 
     return Lucee::UpdaterStatus();
