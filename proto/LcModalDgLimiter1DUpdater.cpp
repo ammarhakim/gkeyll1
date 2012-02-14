@@ -20,6 +20,11 @@ namespace Lucee
 /** Class id: this is used by registration system */
   const char *ModalDgLimiter1DUpdater::id = "ModalDgLimiter1D";
 
+// types of limiters
+  static const unsigned NO_LIMITER = 0;
+  static const unsigned CHARACTERISTIC_LIMITER = 1;
+  static const unsigned COMPONENT_LIMITER = 2;
+
 /**
  * Minmod function for three parameters.
  */
@@ -69,6 +74,25 @@ namespace Lucee
     Mfact = 0.0;
     if (tbl.hasNumber("M"))
       Mfact = tbl.getNumber("M");
+
+// limiter to use
+    limiter = CHARACTERISTIC_LIMITER; // by default characteristic
+    if (tbl.hasString("limiter"))
+    {
+      std::string lim = tbl.getString("limiter");
+      if (lim == "no-limiter")
+        limiter = NO_LIMITER;
+      else if (lim == "characteristic")
+        limiter = CHARACTERISTIC_LIMITER;
+      else if (lim == "component")
+        limiter = COMPONENT_LIMITER;
+      else
+      {
+        Lucee::Except lce("ModalDg1DUpdater::readInput: Do not recognize limiter type '");
+        lce << lim << "'" << std::endl;
+        throw lce;
+      }
+    }
   }
 
   void
@@ -78,13 +102,9 @@ namespace Lucee
     Lucee::UpdaterIfc::initialize();
   }
 
-  Lucee::UpdaterStatus
-  ModalDgLimiter1DUpdater::update(double t)
+  void
+  ModalDgLimiter1DUpdater::applyCharacteristicLimiter()
   {
-    if (numBasis < 2)
-// no need to apply limiters to first-order scheme
-      return Lucee::UpdaterStatus();
-
 // get hold of grid
     const Lucee::StructuredGridBase<1>& grid 
       = this->getGrid<Lucee::StructuredGridBase<1> >();
@@ -172,6 +192,35 @@ namespace Lucee
               qPtr[meqn*c+k] = 0.0;
         }
       }
+    }
+  }
+
+  void
+  ModalDgLimiter1DUpdater::applyComponentLimiter()
+  {
+    throw Lucee::Except("ModalDgLimiter1DUpdater::applyComponentLimiter: Not implemented");
+  }
+
+  Lucee::UpdaterStatus
+  ModalDgLimiter1DUpdater::update(double t)
+  {
+    if (numBasis < 2 || limiter==NO_LIMITER)
+// no need to apply limiters to first-order scheme
+      return Lucee::UpdaterStatus();
+
+    switch (limiter)
+    {
+      case CHARACTERISTIC_LIMITER:
+          applyCharacteristicLimiter();
+          break;
+
+      case COMPONENT_LIMITER:
+          applyComponentLimiter();
+          break;
+
+      default:
+// can never happen
+          break;
     }
 
     return Lucee::UpdaterStatus();

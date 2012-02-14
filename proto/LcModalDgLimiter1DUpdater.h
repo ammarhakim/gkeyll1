@@ -73,6 +73,8 @@ namespace Lucee
       double numBasis;
 /** Factor for slope correction */
       double Mfact;
+/** Type of limiter to apply */
+      unsigned limiter;
 
 /**
  * Modified min-mod function of three variables. Usually minmod
@@ -86,6 +88,16 @@ namespace Lucee
  * @param dx Cell spacing
  */
       double modifiedMinMod(double a, double b, double c, double dx) const;
+
+/**
+ * Apply characteristic limiter.
+ */
+      void applyCharacteristicLimiter();
+
+/**
+ * Apply component limiter.
+ */
+      void applyComponentLimiter();
   };
 }
 
