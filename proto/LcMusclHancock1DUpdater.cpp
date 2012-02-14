@@ -39,7 +39,7 @@ namespace Lucee
 /**
  * Minmod function for two parameters.
  */
-  double minmod(double a1, double a2)
+  static double minmod(double a1, double a2)
   {
     if (a1>0 && a2>0)
       return std::min(a1, a2);
@@ -51,7 +51,7 @@ namespace Lucee
 /**
  * Minmod function for three parameters.
  */
-  double minmod(double a1, double a2, double a3)
+  static double minmod(double a1, double a2, double a3)
   {
     if (a1>0 && a2>0 && a3>0)
       return Lucee::min3(a1, a2, a3);
