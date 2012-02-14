@@ -15,6 +15,9 @@
 #include <LcModalDg1DUpdater.h>
 #include <LcStructuredGridBase.h>
 
+// std includes
+#include <vector>
+
 namespace Lucee
 {
 /** Class id: this is used by registration system */
@@ -79,12 +82,17 @@ namespace Lucee
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
-
   }
 
   Lucee::UpdaterStatus
   ModalDg1DUpdater::update(double t)
   {
+// The algorithms does the first order forward Euler update. It works
+// in two stages. In the first stages the increment in the solution,
+// i.e. dt*L(q) is computed and stored in qNew. Then, another sweep
+// over the domain updates qNew to move the solution in time. The
+// limiter is (effectively) applied to q and not qNew.
+
 // get hold of grid
     const Lucee::StructuredGridBase<1>& grid 
       = this->getGrid<Lucee::StructuredGridBase<1> >();
@@ -92,7 +100,7 @@ namespace Lucee
     const Lucee::Field<1, double>& q = this->getInp<Lucee::Field<1, double> >(0);
     Lucee::Field<1, double>& qNew = this->getOut<Lucee::Field<1, double> >(0);
 
-// clear out output field
+// clear out increment
     qNew = 0.0;
 
 // time-step
@@ -115,7 +123,7 @@ namespace Lucee
       lce << meqn*numBasis << ". Instead provided " << q.getNumComponents() << std::endl;
     }
 
-// iterators to cells on left/right of edge
+// iterators
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qlPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qrPtr = q.createConstPtr();
@@ -131,12 +139,6 @@ namespace Lucee
     double dxL, dxR, dx, xc[3];
 // maximum CFL number used
     double cfla = 0.0;
-
-// The algorithms does the first order forward Euler update. It works
-// in two stages. In the first stages the increment in the solution,
-// i.e. dt*L(q) is computed and stored in qNew. Then, another sweep
-// over the domain updates qNew = q + dt*L(q) to move the solution in
-// time.
 
 // loop over edges computing edge fluxes, accumulating contribution
 // from edge flux in cells connected to that edge. NOTE: There is one
@@ -213,7 +215,7 @@ namespace Lucee
       }
     }
 
-// perform final update
+// Perform final update
     double nc;
     for (unsigned i=sliceLower; i<sliceUpper; ++i)
     {
@@ -230,8 +232,7 @@ namespace Lucee
       }
 
       q.setPtr(qPtr, i);
-// do forward Euler. NOTE: qNew at this point has dt*L(q) and after
-// will have q + dt*L(q).
+// do forward Euler step
       for (unsigned n=0; n<q.getNumComponents(); ++n)
         qNewPtr[n] += qPtr[n];
     }

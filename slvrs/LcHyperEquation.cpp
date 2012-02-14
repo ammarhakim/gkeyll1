@@ -74,6 +74,20 @@ namespace Lucee
   }
 
   void
+  HyperEquation::projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff)
+  {
+    throw Lucee::Except("HyperEquation::projectOnLeftEigenvectors: Method not implemented");
+  }
+
+  void
+  HyperEquation::reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec)
+  {
+    throw Lucee::Except("HyperEquation::reconWithRightEigenvectors: Method not implemented");
+  }
+
+  void
   HyperEquation::eigensystem(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q,
     Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev)

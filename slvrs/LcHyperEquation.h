@@ -155,6 +155,34 @@ namespace Lucee
         Lucee::FieldPtr<double>& f);
 
 /**
+ * Project given vector on left-eigenvectors of flux-jacobian. The
+ * conserved variables are already in the local coordinate system and
+ * hence for isotropic equations the coordinate system 'c' can be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute eigensystem.
+ * @param q Conserved variables at which flux Jacobian is to be computed.
+ * @param vec Vector to project.
+ * @param coeff On output, the projection of 'vec' on left-eigenvectors.
+ */
+      virtual void projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff);
+
+/**
+ * Reconstruct vector by weighted sum of right eigenvectors. The
+ * conserved variables are already in the local coordinate system and
+ * hence for isotropic equations the coordinate system 'c' can be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute eigensystem.
+ * @param q Conserved variables at which flux Jacobian is to be computed.
+ * @param coeff Coefficients to multiply corresponding right-eigenvectors.
+ * @param vec On output, the reconstructured vector.
+ */
+      virtual void reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec);
+
+/**
  * Compute eigensystem for equations give a state. This method should
  * return all eigenvalues and right and left eigenvectors.
  *

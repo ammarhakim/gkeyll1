@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* February 13th
+
+  Added new methods to the HyperEquation class to project a vector on
+  left-eigenvectors and reconstruct them with
+  right-eigenvectors. These two operators are inverses of each
+  other. I.e. first projecting on left-eigenvectors and then
+  reconstructing on right-eigenvectors should give the original vector
+  back. These methods were added for use in limiters for DG scheme.
+
+  The HyperEquation class is becoming very "fat". However, this is
+  okay as not all methods are required for all schemes. These two new
+  methods will also allow (in combination with the numericalFlux
+  method) the implementation of the MUSCL scheme in Lucee.
+
 * February 12th
 
   I changed the modal DG to return a first order forward Euler update

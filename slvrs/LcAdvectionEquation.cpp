@@ -101,6 +101,20 @@ namespace Lucee
   }
 
   void
+  AdvectionEquation::projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff)
+  { // left eigenmatrix is unit matrix
+    coeff[0] = vec[0];
+  }
+
+  void
+  AdvectionEquation::reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec)
+  { // right eigenmatrix is unit matrix
+    vec[0] = coeff[0];
+  }
+
+  void
   AdvectionEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
     v[0] = q[0];
