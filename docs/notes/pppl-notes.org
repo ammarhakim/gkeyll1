@@ -1,5 +1,25 @@
 # -*- org -*-
 
+* February 16th
+
+  Explored a possible detector for discontinuities for use in DG
+  scheme. This seems to work okay, but needs some more
+  exploration.
+
+  It also occurs to me that the initial condition needs to be limited
+  in the DG Lua code.
+
+* February 14th
+
+  Need to look carefully at both wave and DG schemes. The efficiency
+  can be probably improved significantly, at least by a few factors if
+  not an order of magnitude.
+
+  The DG limiter is terrible. It completely wipes out the smooth
+  exterma. Need to develop something better. The Suresh and Huynh
+  paper is really dense and hard to understand. Very unlike his flux
+  reconstruction paper which is clear and easy to understand.
+
 * February 13th
 
   Added new methods to the HyperEquation class to project a vector on
