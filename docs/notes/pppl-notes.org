@@ -4,7 +4,14 @@
 
   Explored a possible detector for discontinuities for use in DG
   scheme. This seems to work okay, but needs some more
-  exploration.
+  exploration. When applied to the DG scheme itself it does not
+  improve the solution a whole lot. The problem is that the detector
+  kicks in (I think correctly) even in smooth regions as the slopes
+  get modified by the DG update. It seems that a good limiter is also
+  needed besides a good detector. Otherwise one may save on compute
+  time but improve accuracy.
+
+** DONE Apply limiters to initial conditions
 
   It also occurs to me that the initial condition needs to be limited
   in the DG Lua code.
@@ -72,7 +79,7 @@
    This will combine a set of fields into a single one. Essentially it
    a call to clear() followed by an accumulate.
 
-** TODO Put miniwarpx into a bitbuket repo
+** DONE Put miniwarpx into a bitbuket repo
 
    This is a good code that allows easy comparison for testing. Should
    check it into bitbuket and make sure it can be built. Perhaps even
