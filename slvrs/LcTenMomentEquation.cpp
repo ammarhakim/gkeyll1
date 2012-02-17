@@ -19,7 +19,7 @@ namespace Lucee
 // set ids for creators
   const char *TenMomentEquation::id = "TenMoment";
 
-// makes indexeing easier
+// makes indexing easier
   static const unsigned RHO = 0;
   static const unsigned U1 = 1;
   static const unsigned U2 = 2;
