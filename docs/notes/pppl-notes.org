@@ -1,5 +1,12 @@
 # -*- org -*-
 
+* February 17th
+
+  Turns out that the detector based on Krivodonova et. al. is not so
+  good. It is invariant to addition of a constant to the solution for
+  advection equation, for example. Need to think of this more
+  carefully.
+
 * February 16th
 
   Explored a possible detector for discontinuities for use in DG
