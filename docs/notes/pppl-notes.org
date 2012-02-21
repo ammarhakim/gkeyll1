@@ -1,10 +1,26 @@
 # -*- org -*-
 
+* February 20th
+
+  Formulated FEM scheme for 1D Poisson equations. The key step is the
+  one that goes from the local stiffness matrix to the global
+  stiffness matrix via the connectivity matrix. For 1D Poisson
+  equation the resulting discrete system look like a second-order
+  central difference approximation for the spatial operator with an
+  averge for the source that weights the current note by 2/6 and
+  neighbors by 1/3. Next need to write out the 2D version of this.
+
+* February 18th
+
+  Created a repo to house regression tests. Tried to use txtest but
+  was too complicated to use, at least for now. Switched to WarpX
+  regression system. Needs more work but works fine for now.
+
 * February 17th
 
   Turns out that the detector based on Krivodonova et. al. is not so
-  good. It is invariant to addition of a constant to the solution for
-  advection equation, for example. Need to think of this more
+  good. It is not invariant to addition of a constant to the solution
+  for advection equation, for example. Need to think of this more
   carefully.
 
 * February 16th
