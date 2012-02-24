@@ -1,0 +1,253 @@
+\documentclass[11pt, reqno]{amsart}
+\usepackage{hyperref}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+\newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Incompressible Flow]{Solving two-dimensional incompressible
+  Euler equations}%
+\author{Ammar H. Hakim}%
+\date{}
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1017}
+\maketitle
+
+\section{The Basic Scheme}
+
+We wish to solve the incompressible Euler equations written in
+vorticity-streamfunction form
+\begin{align}
+  \pfrac{\chi}{t} + \nabla\cdot(\mvec{u}\chi) = 0 \label{eq:vort}
+\end{align}
+where $\chi$ is the fluid vorticity and $\mvec{u} =
+\nabla\psi\times\eez$ is the fluid velocity. Here $\psi$ is the
+streamfunction determined from a Poisson equation
+\begin{align}
+  \nabla^2 \psi = -\chi. \label{eq:stream}
+\end{align}
+As the flow is incompressible ($\nabla\cdot\mvec{u}=0$) we can rewrite
+\eqr{\ref{eq:vort}} in the form
+\begin{align}
+  \pfrac{\chi}{t} + \{\chi,\psi\} = 0 \label{eq:vortPoisson}
+\end{align}
+where $\{\chi,\psi\}$ is the Poisson bracket operator defined by
+\begin{align}
+ \{\chi,\psi\} = \pfrac{\chi}{x}\pfrac{\psi}{y} - \pfrac{\chi}{y}\pfrac{\psi}{x}.
+\end{align}
+
+To discretize this equation we will continuous finite-elements (CG) to
+solve the Poisson equation and discontinuous Galerkin finite-elements
+(DG) to solve the vorticity equations. Let the domain be $\Omega$ and
+divide it into cells denoted by $\script{C}_i$, $i=1,\ldots,N$, where
+$N$ is the number of cells. Of course, the cells should be
+non-overlapping, cover the domain and there should be no hanging
+nodes.
+
+We pick two sets of basis functions. For the CG method we denote the
+basis functions as $\varphi_j$. We assume these are continuous and
+defined over the complete domain $\Omega$. For the DG method we denote
+the basis functions as $v_j$ and assume these are defined only in each
+cell $\script{C}_i$. Hence, the solution for the vorticity is allowed
+to be discontinuous across the cell edges, while the continuity for the
+streamfunction is enforced\footnote{All of these definitions can be
+  made more precise at the cost of turning the text into
+  incomprehensible gobbledygook.}. The restriction of the global basis
+function on a cell $\script{C}_i$ will be denoted by
+$\varphi_j^{(i)}$.
+
+We first define two sets of inner-products. Let $\langle f\rangle
+_V$ be the integral
+\begin{align}
+  \langle f\rangle_V \equiv \int_V f d\mvec{x}
+\end{align}
+Here $d\mvec{x}$ is the volume element and $V$ can be either $\Omega$
+or $\script{C}_i$. The second inner-product, $\langle
+f\rangle_{\partial V}$ is the closed integral over the surface of the
+complete domain or a single cell:
+\begin{align}
+  \langle f\rangle_{\partial V} \equiv \oint_{\partial V} f
+  d\mvec{s}
+\end{align}
+where $d\mvec{s}$ is the surface element. 
+
+We can derive the discrete weak-form of the vorticity equation by
+multiplying \eqr{\ref{eq:vort}} by $v_j$ and integrating over a
+\emph{cell} to get
+\begin{align}
+  \iprod{v_j\pfrac{\chi}{t}}{\script{C}_i} 
+  +
+  \iprod{v_j\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
+  -
+  \iprod{\nabla v_j\cdot \mvec{u}\chi}{\script{C}_i}
+  = 0. \label{eq:weak_vort}
+\end{align}
+where $\mvec{n}$ is the outward normal to the surface element
+$d\mvec{s}$. Here we have integrated by parts and defined
+$\widehat{\chi}$ to be the vorticity along the edge of a cell,
+computed using a suitable averaging or upwinding procedure. Similarly,
+we can derive the discrete weak-form of the Poisson equation by
+multiplying \eqr{\ref{eq:stream}} by $\varphi_j$ and integrating over
+the \emph{complete domain} to get
+\begin{align}
+  \iprod{\varphi_j \nabla\psi \cdot \mvec{n}}{\partial \Omega}
+  -
+  \iprod{\nabla \varphi_j\cdot \nabla\psi}{\Omega}
+  =
+  -
+  \iprod{\varphi_j\chi}{\Omega} \label{eq:weak_stream}
+\end{align}
+
+In \eqr{\ref{eq:weak_vort}} there appears a term like
+$\mvec{u}\cdot\mvec{n}$ which needs to be evaluated on the edge of
+each cell. To see that this term is continuous across the cell surface
+we write it as
+\begin{align}
+  \mvec{u}\cdot\mvec{n}
+  = (\nabla\psi\times \eez)\cdot\mvec{n}
+  = \nabla\psi\cdot(\eez\times\mvec{n})
+  = \nabla\psi\cdot\gvec{\tau}
+\end{align}
+where $\gvec{\tau} \equiv \eez\times\mvec{n}$ is a tangent vector
+along the cell edge. As $\psi$ is continuous this means that its
+gradient along the edge ($\nabla\psi\cdot\gvec{\tau}$) is also
+continuous. However, note that $\nabla{\psi}$ itself need not be
+continuous and, in general, will not be unless special basis functions
+are selected. Also note that
+\begin{align}
+  \mvec{u}\cdot\gvec{\tau}
+  = (\nabla\psi\times \eez)\cdot\gvec{\tau}
+  = \nabla\psi\cdot(\eez\times\gvec{\tau})
+  = -\nabla\psi\cdot\mvec{n}
+\end{align}
+Hence, the first term on the left side of \eqr{\ref{eq:weak_stream}}
+is essentially the fluid circulation projected on the continuous basis
+functions.
+
+This completes the formal definition of the numerical scheme. Of
+course, significant work is still needed to bring these equations into
+a form that can be actually implemented.
+
+\section{Conservation of Energy}
+
+The discrete scheme, with the proper choice of basis functions,
+conserves energy. To see this, consider the case of periodic boundary
+conditions in which case the the first term on the left side of
+\eqr{\ref{eq:weak_stream}} vanishes. Take the time-derivative of this
+equation to get
+\begin{align}
+  \iprod{\nabla \varphi_j\cdot \nabla\pfrac{\psi}{t}}{\Omega}
+  =
+  \iprod{\varphi_j\pfrac{\chi}{t}}{\Omega}
+\end{align}
+Now, assume that the streamfunction is expanded as $\psi =
+\sum_j\psi_j\varphi_j$. Then, multiply the above equation by $\psi_j$
+and sum over all $j$ to get
+\begin{align}
+  \frac{dE}{dt}
+  =
+  \sum_j \psi_j \iprod{\varphi_j\pfrac{\chi}{t}}{\Omega}
+\end{align}
+where we have defined\footnote{All these manipulations are possible
+  as the inner-product is a linear operator.}
+\begin{align}
+  \sum_j \psi_j \iprod{\nabla \varphi_j\cdot
+    \nabla\pfrac{\psi}{t}}{\Omega}
+  =
+  \iprod{\nabla \psi\cdot \nabla\pfrac{\psi}{t}}{\Omega}  
+  =
+  \frac{d}{dt} \iprod{\frac{1}{2} |\nabla \psi|^2}{\Omega}
+  \equiv
+  \frac{dE}{dt}
+\end{align}
+
+Now, if in each cell $\script{C}_i$ we have
+\begin{align}
+  \textrm{span}(\varphi_1^{(i)},\varphi_2^{(i)},\ldots)
+  \subseteq
+  \textrm{span}(v_1,v_2,\ldots) \label{eq:span_cond}
+\end{align}
+where recall that $\varphi_j^{(i)}$ is the restriction of $\varphi_j$
+on cell $\script{C}_i$, then we can write \eqr{\ref{eq:weak_vort}}
+as
+\begin{align}
+  \iprod{\varphi_j^{(i)}\pfrac{\chi}{t}}{\script{C}_i} 
+  +
+  \iprod{\varphi_j^{(i)}\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
+  -
+  \iprod{\nabla \varphi_j^{(i)}\cdot \mvec{u}\chi}{\script{C}_i}
+  = 0.
+\end{align}
+Now multiply this by $\psi_j$, sum over all $j$ and over all cells to
+get
+\begin{align}
+  \sum_j \psi_i \iprod{\varphi_j \pfrac{\chi}{t}}{\Omega}
+  =
+  - 
+  \sum_{i,j} \iprod{\varphi_j^{(i)}\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
+  +
+  \iprod{\nabla \psi \cdot \mvec{u}\chi}{\Omega}
+\end{align}
+Both terms on the right side of this equation vanish: the first as the
+contribution from edge integrals have opposite signs for cells
+sharing a common edge and the second as long as, in the discrete
+approximation, $\nabla \psi \cdot \mvec{u} = 0$. Hence, we have proved
+that
+\begin{align}
+  \frac{dE}{dt} = 0
+\end{align}
+which means that the energy is conserved by the numerical scheme. Note
+that for this proof to work we must select basis functions for the CG
+and DG scheme such that \eqr{\ref{eq:span_cond}} is satisfied. This
+can be done by using, in each cell, the \emph{same} basis functions
+for both CG and DG schemes.
+
+\end{document}
+
+For general boundary conditions (in which case the term on the left
+side of \eqr{\ref{eq:weak_stream}} does not vanish) the net change in
+energy from the numerical scheme is simply the integrated flux of
+energy over the domain boundary.

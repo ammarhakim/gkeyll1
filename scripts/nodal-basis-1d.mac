@@ -1,0 +1,73 @@
+/** Nodal basis function in 1D on a reference element */
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Compute integration of Legendre polynomials derivative */
+legDiff : (legDiff : zeromatrix(4,4), for i from 1 thru 4
+            do (for j from 1 thru 4
+	      do (legDiff[i,j] 
+                : integrate(
+                   diff(legendre_p(i-1,x),x)*diff(legendre_p(j-1,x),x),
+		   x, -1, 1))), legDiff);
+
+/** Order 2 */
+ord : [-1, 1];
+/** Construct matrix of coefficients */
+Pmat2 : (Pmat : zeromatrix(2,2), for i from 1 thru 2
+          do (for j from 1 thru 2
+            do ( Pmat[i,j] : legendre_p(j-1, ord[i]) )), Pmat);
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(2);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 2
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Local stiffness matrix */
+Kij2 : (Kij : zeromatrix(2,2), for i from 1 thru 2
+         do (for j from 1 thru 2
+           do (Kij[i][j] : transpose(col(a2,i)) . submatrix(3,4, legDiff, 3,4) . col(a2,j))), Kij);
+
+/** Order 3 */
+ord : [-1, 0, 1];
+/** Construct matrix of coefficients */
+Pmat3 : (Pmat : zeromatrix(3,3), for i from 1 thru 3
+          do (for j from 1 thru 3
+            do ( Pmat[i,j] : legendre_p(j-1, ord[i]) )), Pmat);
+/** Invert it */
+invPmat3 : invert(Pmat3);
+/** Identity matrix for use in coefficient calculation */
+u3 : ident(3);
+
+/** Basis function coefficients */
+a3 : (a3 : matrix([]), for i from 1 thru 3
+       do (a3 : addcol(a3, invPmat3.col(u3,i))), a3);
+
+/** Local stiffness matrix */
+Kij3 : (Kij : zeromatrix(3,3), for i from 1 thru 3
+         do (for j from 1 thru 3
+           do (Kij[i][j] : transpose(col(a3,i)) . submatrix(4, legDiff, 4) . col(a3,j))), Kij);
+
+/** Order 4: ordinates are Legendre-Lobatto points */
+ord : [-1, -sqrt(1/5), sqrt(1/5), 1];
+/**ord : [-1, -1/3, 1/3, 1];*/
+/** Construct matrix of coefficients */
+Pmat4 : (Pmat : zeromatrix(4,4), for i from 1 thru 4
+          do (for j from 1 thru 4
+            do ( Pmat[i,j] : legendre_p(j-1, ord[i]) )), Pmat);
+/** Invert it */
+invPmat4 : invert(Pmat4);
+/** Identity matrix for use in coefficient calculation */
+u4 : ident(4);
+
+/** Basis function coefficients */
+a4 : (a : matrix([]), for i from 1 thru 4
+       do (a : addcol(a, invPmat4.col(u4,i))), a);
+
+/** Local stiffness matrix */
+Kij4 : (Kij : zeromatrix(4,4), for i from 1 thru 4
+         do (for j from 1 thru 4
+           do (Kij[i][j] : transpose(col(a4,i)) . legDiff . col(a4,j))), Kij);
