@@ -224,26 +224,25 @@ as
 Now multiply this by $\psi_j$, sum over all $j$ and over all cells to
 get
 \begin{align}
-  \sum_j \psi_i \iprod{\varphi_j \pfrac{\chi}{t}}{\Omega}
+  \sum_j \psi_j \iprod{\varphi_j \pfrac{\chi}{t}}{\Omega}
   =
   - 
-  \sum_{i,j} \iprod{\varphi_j^{(i)}\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
+  \sum_i \sum_j \psi_j \iprod{\varphi_j^{(i)}\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
   +
   \iprod{\nabla \psi \cdot \mvec{u}\chi}{\Omega}
 \end{align}
-Both terms on the right side of this equation vanish: the first as the
-contribution from edge integrals have opposite signs for cells
-sharing a common edge and the second as long as, in the discrete
-approximation, $\nabla \psi \cdot \mvec{u} = 0$. Hence, we have proved
-that
-\begin{align}
-  \frac{dE}{dt} = 0
-\end{align}
-which means that the energy is conserved by the numerical scheme. Note
-that for this proof to work we must select basis functions for the CG
-and DG scheme such that \eqr{\ref{eq:span_cond}} is satisfied. This
-can be done by using, in each cell, the \emph{same} basis functions
-for both CG and DG schemes.
+The second term on the right side of this equation vanishes as $\nabla
+\psi \cdot \mvec{u} = 0$. As the contribution from edge integrals have
+opposite signs for cells sharing a common edge, the first term reduces
+to an integral over the domain boundary
+$\iprod{\psi\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial\Omega}$,
+which vanishes as the domain is periodic.
+
+Hence, we have proved that $dE/dt = 0$ which means that energy is
+conserved by the numerical scheme. Note that for this proof to work we
+must select basis functions for the CG and DG scheme such that
+\eqr{\ref{eq:span_cond}} is satisfied. This can be done by using, in
+each cell, the \emph{same} basis functions for both CG and DG schemes.
 
 \end{document}
 
