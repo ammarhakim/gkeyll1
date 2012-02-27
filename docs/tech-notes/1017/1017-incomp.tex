@@ -140,6 +140,22 @@ the \emph{complete domain} to get
   -
   \iprod{\varphi_j\chi}{\Omega} \label{eq:weak_stream}
 \end{align}
+Note that this equation can also be obtained by summing over all cells
+the \emph{local} weak-form of the streamfunction equation
+\begin{align}
+  \iprod{\varphi_j^{(i)} \nabla\psi \cdot \mvec{n}}{\partial \script{C}_i}
+  -
+  \iprod{\nabla \varphi_j^{(i)}\cdot \nabla\psi}{\script{C}_i}
+  =
+  -
+  \iprod{\varphi_j^{(i)}\chi}{\script{C}_i} \label{eq:local_weak_stream}
+\end{align}
+This form of the discrete Poisson equation is actually more useful as
+it allows for the systematic construction of the global discrete
+equation by the process of finite-element \emph{assembly}. In this
+assembly process the contribution from the first term of the left side
+of this equation vanishes for all shared edges, leaving us with the
+first term on the left side of \eqr{\ref{eq:weak_stream}}.
 
 In \eqr{\ref{eq:weak_vort}} there appears a term like
 $\mvec{u}\cdot\mvec{n}$ which needs to be evaluated on the edge of
@@ -211,8 +227,8 @@ Now, if in each cell $\script{C}_i$ we have
   \textrm{span}(v_1,v_2,\ldots) \label{eq:span_cond}
 \end{align}
 where recall that $\varphi_j^{(i)}$ is the restriction of $\varphi_j$
-on cell $\script{C}_i$, then we can write \eqr{\ref{eq:weak_vort}}
-as
+on cell $\script{C}_i$, then we can specialize
+\eqr{\ref{eq:weak_vort}} as
 \begin{align}
   \iprod{\varphi_j^{(i)}\pfrac{\chi}{t}}{\script{C}_i} 
   +
@@ -239,10 +255,125 @@ $\iprod{\psi\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial\Omega}$,
 which vanishes as the domain is periodic.
 
 Hence, we have proved that $dE/dt = 0$ which means that energy is
-conserved by the numerical scheme. Note that for this proof to work we
-must select basis functions for the CG and DG scheme such that
+conserved by the semi-discrete scheme\footnote{The fully discrete
+  scheme, for example with Runge-Kutta time-stepping, will still
+  dissipate energy as the time-stepping is not reversible. To get a
+  fully conservative scheme we need to use a centered
+  time-discretization.}. Note that for this proof to work we must
+select basis functions for the CG and DG scheme such that
 \eqr{\ref{eq:span_cond}} is satisfied. This can be done by using, in
 each cell, the \emph{same} basis functions for both CG and DG schemes.
+
+\section{Nodal Basis Functions}
+
+We will use \emph{nodal basis functions}. These are constructed by
+picking a set of nodes $(x_i,y_i)$, $i=1,\ldots,K$, in each cell and
+defining basis functions $N_j(x,y)$, $j=1,\ldots,K$, such that
+\begin{align}
+  N_j(x_i,y_i) = \delta_{ji}
+\end{align}
+Hence, if a function is expanded in a cell as
+\begin{align}
+  f(x,y) = \sum_{i=1}^K f_{i}N_i(x,y)
+\end{align}
+then the expansion coefficients are simply the value of the function
+at the corresponding node. Once a set of nodal basis functions are
+selected they can be used in the discrete weak-form by setting
+$v_j=\varphi_j^{(i)}=N_j(x,y)$ for each cell $\script{C}_i$ in the
+grid. Note that with this choice of basis functions for both the CG
+and DG scheme leads to an energy conserving spatial discretization.
+
+Expanding the vorticity in a cell $\script{C}_i$ as
+\begin{align}
+  \chi(x,y) = \sum_{k=1}^K \chi_k N_k(x,y)
+\end{align}
+and using in \eqr{\ref{eq:weak_vort}} we get
+\begin{align}
+  \sum_{k} \iprod{N_jN_k}{\script{C}_i} \pfrac{\chi_k}{t}
+  +
+  \iprod{N_j\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
+  -
+  \sum_{k}\iprod{\nabla N_jN_k}{\script{C}_i}
+  \cdot\mvec{u} \chi_k
+  = 0. \label{eq:dg_vort}
+\end{align}
+Expanding the streamfunction in a cell $\script{C}_i$ as
+\begin{align}
+  \psi^{(i)}(x,y) = \sum_{k=1}^K \psi_k^{(i)} N_k(x,y)
+\end{align}
+and using in \eqr{\ref{eq:local_weak_stream}} we get\footnote{The
+  surface integral term from each cell is ignored here as it vanishes
+  on assembly. It contribution over the domain boundary needs be to
+  accounted for, however, for non-periodic boundary conditions.}
+\begin{align}
+  \sum_k
+  \iprod{\nabla N_j\cdot \nabla N_k}{\script{C}_i} \psi_k^{(i)}
+  =
+  \iprod{N_j\chi}{\script{C}_i}
+\end{align}
+We can rewrite this in a matrix form by introducing the \emph{local
+  stiffness}  matrix
+\begin{align}
+  \mvec{K}^{(i)}_{j,k} \equiv \iprod{\nabla N_j\cdot \nabla N_k}{\script{C}_i},
+\end{align}
+the column vectors $\gvec{\psi}^{(i)} =
+[\psi^{(i)}_1,\ldots,\psi^{(i)}_K]^T$ and $\gvec{S}^{(i)} =
+[\iprod{N_1\chi}{\script{C}_i},\ldots,\iprod{N_K\chi}{\script{C}_i}]^T$
+to get
+\begin{align}
+  \mvec{K}^{(i)}\gvec{\psi}^{(i)}
+  =
+  \mvec{S}^{(i)} \label{eq:local_cg_form}
+\end{align}
+To assemble the final global stiffness matrix we first introduce a
+connectivity matrix in each cell that maps the local node numbers to
+the global node numbers\footnote{In basic presentations of FEM this
+  connectivity matrix is not used. However, it makes the FE procedure
+  more systematic specially in higher (than one) dimensions and when
+  the grid is unstructured. Without this matrix it is virtually
+  impossible to figure out what the global matrices look like on an
+  unstructured grid.}. The connectivity matrix essentially identifies
+shared nodes and enforces continuity required in the CG scheme.  In a
+cell $\script{C}_i$ this matrix is denoted by $\mvec{C}^{(i)}$ and has
+shape $N_g\times K$, where $N_g$ are the global degrees of freedom and
+is defined such that
+\begin{align}
+  (\mvec{C}^{(i)})^T \gvec{\psi} = \gvec{\psi}^{(i)}
+\end{align}
+where $\gvec{\psi}$ is the column vector (of length $N_g$) of the
+stream function on complete grid. Premultiplying
+\eqr{\ref{eq:local_cg_form}} by $\mvec{C}^{(i)}$ and using the above
+definition and summing over all cells we get
+\begin{align}
+  \sum_i
+  \mvec{C}^{(i)}
+  \mvec{K}^{(i)}
+  (\mvec{C}^{(i)})^T
+  \gvec{\psi}
+  =
+  \sum_i
+  \mvec{C}^{(i)} \mvec{S}^{(i)}.
+\end{align}
+This completes the definition of the final form of the discretized
+spatial operator\footnote{For general boundary conditions there will
+  be an additional term corresponding to the first term on the left
+  side of \eqr{\ref{eq:weak_stream}}. For periodic BCs the
+  connectivity matrix takes care of identifying appropriate nodes on
+  the domain boundary.}. Note that the global stiffness matrix,
+$\mvec{K}$, is hence
+\begin{align}
+  \mvec{K}
+  =
+  \sum_i
+  \mvec{C}^{(i)}
+  \mvec{K}^{(i)}
+  (\mvec{C}^{(i)})^T.
+\end{align}
+Notice that the connectivity matrix automatically puts the
+contribution of each local stiffness matrix in the correct location in
+the global matrix. Of course, the connectivity matrix is very sparse
+and does not need to be explicitly stored and these multiplication can
+be performed trivially during the process of assembly.
 
 \end{document}
 
