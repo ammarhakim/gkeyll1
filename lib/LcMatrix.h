@@ -121,22 +121,6 @@ namespace Lucee
       Lucee::Vector<T> getCol(unsigned col);
 
 /**
- * Set a row of the martrix.
- *
- * @param row Row to set.
- * @return data Data to set
- */
-      void setRow(unsigned row, T *data);
-
-/**
- * Set a column of the martrix.
- *
- * @param col Column to set.
- * @return data Data to set
- */
-      void setCol(unsigned col, T *data);
-
-/**
  * Scale all rows of the matrix with by multipling with elements of
  * supplied vector. I.e. M[i,j] <- M[i,j]*fv[i];
  *

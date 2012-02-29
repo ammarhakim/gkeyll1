@@ -18,7 +18,32 @@
 namespace Lucee
 {
 /**
- * Serenditpity reference element in 2D.
+ * Serendipity reference element in 2D. The reference element is a
+ * square [-1,1] X [-1,1]. The supported elements are shown below with
+ * the corresponding node layout.
+ *
+ * Order 1 element
+ *
+ *             4         3
+ *             o----------o
+ *             |          |
+ *             |          |
+ *             |          |
+ *             |          |
+ *             o----------o
+ *             1          2
+ *
+ * Order 2 element
+ *
+ *             4     7     3
+ *             o-----o-----o
+ *             |           |
+ *             |           |
+ *           8 o           o 6
+ *             |           |
+ *             |           |
+ *             o-----o-----o
+ *             1     5     2
  */
   class SerendipityElement2D : public Lucee::NodalFiniteElementIfc
   {
@@ -58,14 +83,14 @@ namespace Lucee
       Lucee::Matrix<double> refDNjDNk;
 
 /**
- * Create matrices for 2nd order element.
+ * Create matrices for 1st order element.
  */
-      void setupOrder2();
+      void setupOrder1();
 
 /**
  * Create matrices for 2nd order element.
  */
-      void setupOrder3();
+      void setupOrder2();
   };
 }
 
