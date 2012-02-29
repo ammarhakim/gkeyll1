@@ -1,0 +1,24 @@
+/** Serendipity basis functions in 2D */
+kill(all);
+
+/** Basis function of order 2 */
+N2 : 1/4*[(1-x)*(1-y), (1+x)*(1-y), (1-x)*(1-y), (1+x)*(1+y)];
+
+/** Compute mass matrix */
+N2_mass : (mass : zeromatrix(4,4), for i from 1 thru 4
+	    do (for j from 1 thru 4
+	      do (mass[i,j] : integrate(integrate(N2[i]*N2[j], x, -1,1), y, -1, 1))),
+	        mass);
+
+/** Compute stiffness matrix */
+N2_stiff : (stiff : zeromatrix(4,4), for i from 1 thru 4
+	    do (for j from 1 thru 4
+	      do (stiff[i,j] : integrate(integrate(
+                diff(N2[i],x)*diff(N2[j],x) + diff(N2[i],y)*diff(N2[j],y),
+                x, -1,1), y, -1, 1))),
+	        stiff);
+
+/** Solution	       
+matrix([4/9,2/9,4/9,1/9],[2/9,4/9,2/9,2/9],[4/9,2/9,4/9,1/9],[1/9,2/9,1/9,4/9])
+matrix([2/3,-1/6,2/3,-1/3],[-1/6,2/3,-1/6,-1/6],[2/3,-1/6,2/3,-1/3],[-1/3,-1/6,-1/3,2/3])
+**/
