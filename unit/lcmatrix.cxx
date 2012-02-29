@@ -158,6 +158,22 @@ test_3()
 }
 
 void
+test_3_2()
+{
+  unsigned shape[2] = {2, 5};
+  int start[2] = {-1, -5};
+  Lucee::Matrix<double> A(shape, start);
+  A = 10.5;
+ 
+  Lucee::Matrix<double> A2(2,5);
+  A2 = A;
+
+  for (int i=A.getLower(0); i<A.getUpper(0); ++i)
+    for (int j=A.getLower(1); j<A.getUpper(1); ++j)
+      LC_ASSERT("Testing matrix assignment operator (mis-match)", A2(i,j) == 10.5);
+}
+
+void
 test_4()
 {
   unsigned shape[2] = {2, 5};
@@ -473,6 +489,7 @@ main(int argc, char **argv)
   test_1();
   test_2();
   test_3();
+  test_3_2();
   test_4();
   test_5();
   test_6();
