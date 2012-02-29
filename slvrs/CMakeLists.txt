@@ -29,6 +29,7 @@ add_library(lcslvrs
   LcLinCombiner.cpp
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
+  LcNodalFiniteElementIfc.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcProjectOnBasisUpdater.cpp
