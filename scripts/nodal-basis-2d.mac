@@ -1,0 +1,46 @@
+/** Nodal basis function in 2D on a reference element */
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Order 2 */
+lord_x : [0, 0, 1, 1];
+lord_y : [0, 1, 0, 1];
+ord_x : [-1,  1, 1, -1];
+ord_y : [-1, -1, 1,  1];
+
+/** Construct matrix of coefficients */
+Pmat2 : (Pmat : zeromatrix(4,4), for i from 1 thru 4
+	     do (for j from 1 thru 4
+	       do (Pmat[i,j] : legendre_p(lord_x[i], ord_x[j])*legendre_p(lord_y[i], ord_y[j]))),
+	       Pmat);
+
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(4);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 4
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Order 2 */
+lord_x : [0, 0, 0, 1, 1, 1, 2, 2, 2];
+lord_y : [0, 1, 2, 0, 1, 2, 0, 1, 2];
+ord_x : [-1,  1, 1, -1, 0, 1, 0, -1, 0];
+ord_y : [-1, -1, 1,  1, -1, 0, 1, 0, 0];
+
+/** Construct matrix of coefficients */
+Pmat3 : (Pmat : zeromatrix(9,9), for i from 1 thru 9
+	     do (for j from 1 thru 9
+	       do (Pmat[i,j] : legendre_p(lord_x[i], ord_x[j])*legendre_p(lord_y[i], ord_y[j]))),
+	       Pmat);
+
+/** Invert it */
+invPmat3 : invert(Pmat3);
+/** Identity matrix for use in coefficient calculation */
+u3 : ident(9);
+
+/** Basis function coefficients */
+a3 : (a3 : matrix([]), for i from 1 thru 9
+       do (a3 : addcol(a3, invPmat3.col(u3,i))), a3);
