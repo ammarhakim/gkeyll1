@@ -126,6 +126,36 @@ namespace Lucee
 
   template <typename T>
   void
+  Matrix<T>::setRow(unsigned row, T *data)
+  {
+    if (row > numRows()-1)
+    {
+      Lucee::Except lce("Matrix::setRow: Incorrect row ");
+      lce << row << " specified"  << std::endl;
+      throw lce;
+    }
+    unsigned loc = 0;
+    for (int j=this->getLower(1); j<this->getUpper(1); ++j)
+      this->operator()(row,j) = data[loc++];
+  }
+
+  template <typename T>
+  void
+  Matrix<T>::setCol(unsigned col, T *data)
+  {
+    if (col > numColumns()-1)
+    {
+      Lucee::Except lce("Matrix::setCol: Incorrect col ");
+      lce << col << " specified"  << std::endl;
+      throw lce;
+    }
+    unsigned loc = 0;
+    for (int i=this->getLower(0); i<this->getUpper(0); ++i)
+      this->operator()(i,col) = data[loc++];
+  }
+
+  template <typename T>
+  void
   Matrix<T>::scaleRows(const Lucee::Vector<double>& fv)
   {
     if (fv.getLength() != numRows())
