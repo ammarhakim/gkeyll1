@@ -1,5 +1,20 @@
 # -*- org -*-
 
+* February 21-March 1st
+  
+  Working on FEM Poisson solver. To get this correct I need to define
+  nodal basis functions. This has taken longer than I expected because
+  I want to implement this in a way that the basis functions can be
+  used in DG also.
+
+  Hooked in PetSc build into luceeall. The parallel build fails.
+
+  Spent a lot of time working out the various serendipity and
+  cartesian product nodal basis functions. Finally have all of these
+  figured out, at least for rectangular grids. For now this is okay
+  for testing, but eventually will need to be extended to general
+  quadrilateral cells.
+
 * February 20th
 
   Formulated FEM scheme for 1D Poisson equations. The key step is the

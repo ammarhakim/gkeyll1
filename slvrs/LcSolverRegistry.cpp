@@ -21,8 +21,10 @@
 #include <LcLinCombiner.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
+#include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -73,6 +75,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::CurrentSource>;
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::FunctionSource>;
 
+// register nodal basis functions
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc, Lucee::SerendipityElement2D>;
+
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
 // directory. Perhaps could have also done in lucee directory)
@@ -81,5 +86,9 @@ namespace Lucee
 // register point source library into Lucee. Ditto comment as for
 // boundary condition. See above.
     Lucee::LuaModuleRegistry<Lucee::PointSourceIfc>::registerModule(L);
+
+// register nodal basis library into Lucee. Ditto comment as for
+// boundary condition. See above.
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc>::registerModule(L);
   }
 }

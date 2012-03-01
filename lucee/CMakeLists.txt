@@ -58,6 +58,13 @@ if (CLAPACKCMAKE_FOUND AND (NOT APPLE))
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${CLapackCMake_STLIBS})
 endif ()
 
+if (PETSC_FOUND)
+  set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Petsc_INCLUDE_DIRS})
+  set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Petsc_LIBRARY_DIRS})
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Petsc_STLIBS})
+  set(FacetsDl_EXT_LIBS ${FacetsDl_EXT_LIBS} ${Petsc_STLIBS})
+endif ()
+
 # Required base directories
 set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS}
   ${TxBase_INCLUDE_DIRS} ${Hdf5_INCLUDE_DIRS}

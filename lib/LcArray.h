@@ -793,7 +793,7 @@ namespace Lucee
   Array<NDIM, T, INDEXER>::operator*=(const T& val)
   {
     if (isContiguous())
-// add value directly to data-space
+// multiple value directly to data-space
       for (unsigned i=0; i<getSize(); ++i)
         data[i] *= val;
     else
