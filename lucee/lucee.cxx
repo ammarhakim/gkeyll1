@@ -25,6 +25,11 @@
 # include <TxSelfBase.h>
 #endif
 
+//  petsc includes
+#ifdef HAVE_PETSC
+#include <petsc.h>
+#endif
+
 // std includes
 #include <cstdlib>
 #include <ctime>
@@ -39,6 +44,10 @@ main(int argc, char **argv)
 // initialize MPI if building in parallel
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
+#endif
+
+#ifdef HAVE_PETSC
+  PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
 #endif
 
 // get hold of global communicator
