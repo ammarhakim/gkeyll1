@@ -99,6 +99,9 @@ if (BOOST_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif (BOOST_FOUND)
 
+# Math packages
+find_package(TxPetsc REQUIRED)
+
 IF(APPLE)
   # add the Accelerate framework on Mac OS X
   FIND_LIBRARY(ACCELERATE_LIB Accelerate)

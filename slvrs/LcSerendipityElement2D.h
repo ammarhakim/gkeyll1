@@ -52,11 +52,17 @@ namespace Lucee
       static const char *id;
 
 /**
- * Create a new serendipity element.
- *
- * @param order of element.
+ * Create a new serendipity element. This does not create a usable
+ * object which can only be created from Lua.
  */
-      SerendipityElement2D(unsigned order);
+      SerendipityElement2D();
+
+/**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
  * Get mass matrix for this reference element. The output matrix
@@ -75,8 +81,8 @@ namespace Lucee
       void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
 
     private:
-/** Order of element */
-      unsigned elmOrder;
+/** Order of polynomial in element */
+      unsigned polyOrder;
 /** Mass matrix in reference coordinates */
       Lucee::Matrix<double> refNjNk;
 /** Stiffness matrix in reference coordinates */

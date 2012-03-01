@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcBasicObj.h>
+#include <LcGridIfc.h>
 #include <LcMatrix.h>
 
 namespace Lucee
@@ -32,6 +33,13 @@ namespace Lucee
       static const char *id;
 
 /**
+ * Bootstrap method: Read input from specified table.
+ *
+ * @param tbl Table of input values.
+ */
+      virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
  * Get number of nodes in element.
  *
  * @return number of nodes in element.
@@ -40,6 +48,17 @@ namespace Lucee
       {
         return numNodes;
       }
+
+/**
+ * Evaluate 'n'th basis function at location (x,y) in the reference
+ * element.
+ *
+ * @param n Basis at node 'n'
+ * @param x X-location in reference element.
+ * @param y Y-location in reference element.
+ * @return Value of basis function 'n' at (x,y)
+ */
+      virtual double evalBasis(unsigned n, double x, double y) const;
 
 /**
  * Get mass matrix for this reference element. The output matrix
@@ -72,9 +91,25 @@ namespace Lucee
  */
       void setNumNodes(unsigned nN) { numNodes = nN; }
 
+/**
+ * Get grid on which elements should be constructured.
+ *
+ * @return reference to grid.
+ */
+      template <typename G>
+      const G&
+      getGrid() const
+      {
+        if (grid == 0)
+          throw Lucee::Except("NodalFiniteElementIfc::getGrid: grid pointer is not valid");
+        return dynamic_cast<const G&>(*grid);
+      }
+
     private:
 /** Number of nodes */
       unsigned numNodes;
+/** Grid on which updater should be applied */
+      const Lucee::GridIfc *grid;
   };
 }
 

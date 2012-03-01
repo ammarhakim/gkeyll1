@@ -1,5 +1,36 @@
 /** Serendipity basis functions in 2D */
-kill(all);
+
+/** Function to make coefficient matrix */
+makeCoeffMatrix(nord, linCoeff) := block([n, m, ajk],
+                 [n,m] : matrix_size(linCoeff),
+		 ajk : (ajk : zeromatrix(nord, nord), for i from 1 thru nord
+		         do (for j from 1 thru nord
+			   do (ajk[i,j] : linCoeff[nord*(i-1)+j][1])), ajk),
+		 return (ajk)
+);
+
+/** Function to compute mass matrix */
+calcMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(integrate(basis[i]*basis[j], x, -1,1), y, -1, 1))),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute stiffness matrix */
+calcStiffMatrix(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(integrate(
+                             4/dx2*diff(basis[i],x)*diff(basis[j],x) + 
+                             4/dy2*diff(basis[i],y)*diff(basis[j],y),
+                               x, -1,1), y, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
 
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
@@ -11,18 +42,10 @@ N2 : 1/4*[
  (1+ords[4][1]*x)*(1+ords[4][2]*y)];
 
 /** Compute mass matrix */
-N2_mass : (mass : zeromatrix(4,4), for i from 1 thru 4
-	    do (for j from 1 thru 4
-	      do (mass[i,j] : integrate(integrate(N2[i]*N2[j], x, -1,1), y, -1, 1))),
-	        mass);
+N2_mass : calcMassMatrix(N2);
 
 /** Compute stiffness matrix */
-N2_stiff : (stiff : zeromatrix(4,4), for i from 1 thru 4
-	    do (for j from 1 thru 4
-	      do (stiff[i,j] : integrate(integrate(
-                diff(N2[i],x)*diff(N2[j],x) + diff(N2[i],y)*diff(N2[j],y),
-                x, -1,1), y, -1,1))),
-	        stiff);
+N2_stiff : calcStiffMatrix(N2);
 
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
@@ -38,15 +61,7 @@ N3 : [
   1/2*(1-y^2)*(1+ords[8][1]*x)];
 
 /** Compute mass matrix */
-N3_mass : (mass : zeromatrix(8,8), for i from 1 thru 8
-	    do (for j from 1 thru 8
-	      do (mass[i,j] : integrate(integrate(N3[i]*N3[j], x, -1,1), y, -1, 1))),
-	        mass);
+N3_mass : calcMassMatrix(N3);
 
 /** Compute stiffness matrix */
-N3_stiff : (stiff : zeromatrix(8,8), for i from 1 thru 8
-	    do (for j from 1 thru 8
-	      do (stiff[i,j] : integrate(integrate(
-                diff(N3[i],x)*diff(N3[j],x) + diff(N3[i],y)*diff(N3[j],y),
-                x, -1,1), y, -1, 1))),
-	        stiff);
+N3_stiff : calcStiffMatrix(N3);
