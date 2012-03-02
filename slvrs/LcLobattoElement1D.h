@@ -41,6 +41,14 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Get mapping of local node numbers in the current cell to global
+ * node number. The input vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getLocalToGlobal(std::vector<int>& lgMap) const;
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *

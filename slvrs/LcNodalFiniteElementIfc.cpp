@@ -29,11 +29,38 @@ namespace Lucee
       throw Lucee::Except("NodalFiniteElementIfc::readInput: Must specify grid using 'onGrid'");
   }
 
+  void
+  NodalFiniteElementIfc::setIndex(int i) const
+  {
+    currIdx[0] = i;
+  }
+  
+  void
+  NodalFiniteElementIfc::setIndex(int i, int j) const
+  {
+    currIdx[0] = i;
+    currIdx[1] = j;
+  }
+
+  void
+  NodalFiniteElementIfc::setIndex(int i, int j, int k) const
+  {
+    currIdx[0] = i;
+    currIdx[1] = j;
+    currIdx[2] = k;
+  }
+
   double
   NodalFiniteElementIfc::evalBasis(unsigned n, double x, double y) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::evalBasis: Not implemented!");
     return 0;
+  }
+
+  void
+  NodalFiniteElementIfc::getLocalToGlobal(const std::vector<int>& lgMap) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobal: Not implemented!");
   }
 
   void
