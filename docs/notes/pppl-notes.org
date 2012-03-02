@@ -1,5 +1,18 @@
 # -*- org -*-
 
+* March 2nd
+
+  Implemented Euler numericalFlux method. Did a basic test with
+  Sod-shock. The results look "almost" correct, however, there is an
+  error: the shocks do not move at the correct speed and the results
+  do not compare with either exact solution or with miniwarpx
+  results. The problem is most likely in the DG updater for multiple
+  equations, which I need to find and fix.
+
+  The great thing about the DG method is that only the numerical flux
+  method is needed, at least for case in which limiters are not
+  applied: the complete decomposition is only needed for the limiters.
+
 * February 21-March 1st
   
   Working on FEM Poisson solver. To get this correct I need to define
@@ -16,6 +29,10 @@
   for testing, but eventually will need to be extended to general
   quadrilateral cells. In that case the matrices will need to be
   computed numerically (rather than analytically).
+
+  Implemented 1d Lobatto basis function upto polynomial order 3 (4
+  node elements). I did this to get write a 1D Poisson solver to get
+  some experience with FEM.
 
 * February 20th
 

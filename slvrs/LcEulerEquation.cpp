@@ -91,6 +91,17 @@ namespace Lucee
     s[1] = u+cs;
   }
 
+  double
+  EulerEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q)
+  {
+    double rho = getSafeRho(q[0]);
+// compute pressure
+    double pr = pressure(q);
+    double cs = std::sqrt(gas_gamma*pr/rho); // sound speed
+    double u = q[1]/rho; // fluid velocity
+    return std::fabs(u)+cs;
+  }
+
   void
   EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
   {
@@ -178,6 +189,28 @@ namespace Lucee
     waves(3,2) = a4*w;
     waves(4,2) = a4*(enth + u*a);
     s[2] = u+a;
+  }
+
+  double
+  EulerEquation::numericalFlux(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::FieldPtr<double>& f)
+  {
+// NOTE: This numerical flux is using Lax-Fluxes
+
+// compute maximum speed
+    double absMaxs = std::max(maxAbsSpeed(c, ql), maxAbsSpeed(c, qr));
+
+    Lucee::FieldPtr<double> fl(5), fr(5);
+// compute left and right fluxes
+    this->flux(c, ql, fl);
+    this->flux(c, qr, fr);
+
+// compute numerical fluxes
+    for (unsigned i=0; i<5; ++i)
+      f[i] = 0.5*(fr[i]+fl[i]) - absMaxs*0.5*(qr[i]-ql[i]);
+
+    return absMaxs;
   }
 
   double

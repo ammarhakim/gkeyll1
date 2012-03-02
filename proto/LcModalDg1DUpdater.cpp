@@ -90,8 +90,7 @@ namespace Lucee
 // The algorithms does the first order forward Euler update. It works
 // in two stages. In the first stages the increment in the solution,
 // i.e. dt*L(q) is computed and stored in qNew. Then, another sweep
-// over the domain updates qNew to move the solution in time. The
-// limiter is (effectively) applied to q and not qNew.
+// over the domain updates qNew to move the solution in time.
 
 // get hold of grid
     const Lucee::StructuredGridBase<1>& grid 
