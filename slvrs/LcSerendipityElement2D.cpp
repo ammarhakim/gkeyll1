@@ -18,8 +18,8 @@ namespace Lucee
   const char *SerendipityElement2D::id = "Serendipity2D";
 
   SerendipityElement2D::SerendipityElement2D()
-    : Lucee::NodalFiniteElementIfc(4), polyOrder(2), 
-      refNjNk(polyOrder,polyOrder), refDNjDNk(polyOrder,polyOrder)
+    : Lucee::NodalFiniteElementIfc(4), polyOrder(1), 
+      refNjNk(4,4), refDNjDNk(4,4)
   {
   }
 
@@ -45,9 +45,9 @@ namespace Lucee
 
 // initialize matrices
     if (polyOrder == 1)
-      setupOrder1();
+      setupPoly1();
     else if (polyOrder == 2)
-      setupOrder2();
+      setupPoly2();
   }
 
   void
@@ -63,7 +63,7 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::setupOrder1()
+  SerendipityElement2D::setupPoly1()
   {
     unsigned shape[2] = {4,4};
     int start[2] = {1,1};
@@ -122,7 +122,7 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::setupOrder2()
+  SerendipityElement2D::setupPoly2()
   {
     unsigned shape[2] = {8,8};
     int start[2] = {1,1};

@@ -27,6 +27,7 @@ add_library(lcslvrs
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLinCombiner.cpp
+  LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
   LcNodalFiniteElementIfc.cpp
