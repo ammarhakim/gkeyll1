@@ -7,13 +7,15 @@
   I want to implement this in a way that the basis functions can be
   used in DG also.
 
-  Hooked in PetSc build into luceeall. The parallel build fails.
+  Hooked in PetSc build into luceeall. The parallel build fails but
+  the serial code is good enough for now.
 
   Spent a lot of time working out the various serendipity and
   cartesian product nodal basis functions. Finally have all of these
   figured out, at least for rectangular grids. For now this is okay
   for testing, but eventually will need to be extended to general
-  quadrilateral cells.
+  quadrilateral cells. In that case the matrices will need to be
+  computed numerically (rather than analytically).
 
 * February 20th
 

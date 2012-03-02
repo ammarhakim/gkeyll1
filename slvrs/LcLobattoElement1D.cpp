@@ -58,6 +58,30 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getLocalToGlobal(std::vector<int>& lgMap) const
+  {
+    int ix = this->currIdx[0];
+    if (polyOrder == 1)
+    { // two nodes per cell
+      lgMap[0] = ix;
+      lgMap[1] = ix+1;
+    }
+    else if (polyOrder == 2)
+    { // three nodes per cell
+      lgMap[0] = 2*ix;
+      lgMap[1] = 2*ix+1;
+      lgMap[2] = 2*ix+2;
+    }
+    else if (polyOrder == 3)
+    { // four nodes per cell
+      lgMap[0] = 3*ix;
+      lgMap[1] = 3*ix+1;
+      lgMap[2] = 3*ix+2;
+      lgMap[3] = 3*ix+4;
+    }
+  }
+
+  void
   LobattoElement1D::getMassMatrix(Lucee::Matrix<double> NjNk) const
   {
     NjNk = refNjNk;

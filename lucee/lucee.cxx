@@ -46,10 +46,6 @@ main(int argc, char **argv)
   MPI_Init(&argc, &argv);
 #endif
 
-#ifdef HAVE_PETSC
-  PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
-#endif
-
 // get hold of global communicator
   TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
     ::Instance().comm;
@@ -58,6 +54,7 @@ main(int argc, char **argv)
 // add command line options
   cmdParser.addArg("i", "INPUT", "Input file");
   cmdParser.addArg("o", "OUTPUT-PREFIX", "Prefix for all output files");
+  cmdParser.addArg("p", "PETSC-OPTIONS", "Options database file for PetSc");
   cmdParser.addArg("verbosity", "VERBOSITY", "Verbosity of log messages."
     " Should be one of disabled,\n   debug, info, error. Defaults to info.");
 
@@ -83,6 +80,26 @@ main(int argc, char **argv)
     }
     exit(1);
   }
+
+#ifdef HAVE_PETSC
+// initialize PetSc
+  std::string ptscFile;
+  if (cmdParser.hasArg("p"))
+  { // database file specified
+    ptscFile = cmdParser.getArg("p");
+    std::ifstream ptscFl(ptscFile.c_str());
+    if (! ptscFl )
+    {
+      std::cerr << "Unable to open PetSc options file " << ptscFile << std::endl;
+      exit(1);
+    }
+    PetscInitialize(&argc, &argv, ptscFile.c_str(), PETSC_NULL);
+  }
+  else
+  {
+    PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
+  }
+#endif
 
 // check if input file exist
   std::ifstream inp(inpFile.c_str());

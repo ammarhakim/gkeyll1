@@ -17,6 +17,9 @@
 #include <LcGridIfc.h>
 #include <LcMatrix.h>
 
+// std includes
+#include <vector>
+
 namespace Lucee
 {
 /**
@@ -40,6 +43,30 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Set the current cell location in grid to (i).
+ *
+ * @param i Index location into grid.
+ */
+      void setIndex(int i) const;
+
+/**
+ * Set the current cell location in grid to (i, j).
+ *
+ * @param i Index location into grid.
+ * @param j Index location into grid.
+ */
+      void setIndex(int i, int j) const;
+
+/**
+ * Set the current cell location in grid to (i, j, k).
+ *
+ * @param i Index location into grid.
+ * @param j Index location into grid.
+ * @param k Index location into grid.
+ */
+      void setIndex(int i, int j, int k) const;
+
+/**
  * Get number of nodes in element.
  *
  * @return number of nodes in element.
@@ -61,6 +88,14 @@ namespace Lucee
       virtual double evalBasis(unsigned n, double x, double y) const;
 
 /**
+ * Get mapping of local node numbers in the current cell to global
+ * node number. The input vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getLocalToGlobal(const std::vector<int>& lgMap) const;
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *
@@ -77,6 +112,9 @@ namespace Lucee
       virtual void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
 
     protected:
+/** Index into current cell */
+      mutable int currIdx[3];
+
 /**
  * Create new element with specified number of nodes.
  *
