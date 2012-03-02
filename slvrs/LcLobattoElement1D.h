@@ -1,11 +1,11 @@
 /**
- * @file	LcSerendipityElement2D.h
+ * @file	LcLobattoElement1D.h
  *
- * @brief       Reference finite element with serendipity basis
+ * @brief       Reference finite element with Lobatto nodes
  */
 
-#ifndef LC_SERENDEPITY_ELEMENT_2D_H
-#define LC_SERENDEPITY_ELEMENT_2D_H
+#ifndef LC_LOBATTO_ELEMENT_1D_H
+#define LC_LOBATTO_ELEMENT_1D_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -18,34 +18,10 @@
 namespace Lucee
 {
 /**
- * Serendipity element in 2D. The reference element is a square [-1,1]
- * X [-1,1]. The supported elements are shown below with the
- * corresponding node layout.
- *
- * Order 1 element
- *
- *             4         3
- *             o----------o
- *             |          |
- *             |          |
- *             |          |
- *             |          |
- *             o----------o
- *             1          2
- *
- * Order 2 element
- *
- *             4     7     3
- *             o-----o-----o
- *             |           |
- *             |           |
- *           8 o           o 6
- *             |           |
- *             |           |
- *             o-----o-----o
- *             1     5     2
+ * Lobatto element in 2D. The reference element is the interval [-1,1]
+ * X [-1,1].
  */
-  class SerendipityElement2D : public Lucee::NodalFiniteElementIfc
+  class LobattoElement1D : public Lucee::NodalFiniteElementIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -55,7 +31,7 @@ namespace Lucee
  * Create a new serendipity element. This does not create a usable
  * object which can only be created from Lua.
  */
-      SerendipityElement2D();
+      LobattoElement1D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -89,15 +65,20 @@ namespace Lucee
       Lucee::Matrix<double> refDNjDNk;
 
 /**
- * Create matrices for 1st order element.
+ * Create matrices for polyOrder 1.
  */
       void setupPoly1();
 
 /**
- * Create matrices for 2nd order element.
+ * Create matrices for polyOrder 2.
  */
       void setupPoly2();
+
+/**
+ * Create matrices for polyOrder 3.
+ */
+      void setupPoly3();
   };
 }
 
-#endif // LC_SERENDEPITY_ELEMENT_2D_H
+#endif // LC_LOBATTO_ELEMENT_1D_H
