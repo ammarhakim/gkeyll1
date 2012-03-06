@@ -77,7 +77,7 @@ namespace Lucee
       lgMap[0] = 3*ix;
       lgMap[1] = 3*ix+1;
       lgMap[2] = 3*ix+2;
-      lgMap[3] = 3*ix+4;
+      lgMap[3] = 3*ix+3;
     }
   }
 
