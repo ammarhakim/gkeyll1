@@ -41,6 +41,13 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Get number of global nodes in element.
+ *
+ * @return number of nodes in element.
+ */
+      unsigned getNumGlobalNodes() const;
+
+/**
  * Get mapping of local node numbers in the current cell to global
  * node number. The input vector must be pre-allocated.
  *
@@ -71,6 +78,8 @@ namespace Lucee
       Lucee::Matrix<double> refNjNk;
 /** Stiffness matrix in reference coordinates */
       Lucee::Matrix<double> refDNjDNk;
+/** Total global degrees of freedom */
+      unsigned numGlobal;
 
 /**
  * Create matrices for polyOrder 1.

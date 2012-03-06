@@ -55,6 +55,24 @@ namespace Lucee
       setupPoly2();
     else if (polyOrder == 3)
       setupPoly3();
+
+// determine number of global degrees of freedom
+    const Lucee::StructuredGridBase<1>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    unsigned gvol = grid.getGlobalRegion().getVolume();
+
+    if (polyOrder == 1)
+      numGlobal = gvol+1; // 1 *global* node per cell and one extra for right-most node
+    else if (polyOrder == 2)
+      numGlobal = 2*gvol+1; // 2 *global* nodes per cell and one extra for right-mode node
+    else if (polyOrder == 3)
+      numGlobal = 3*gvol+1; // 3 *global* nodes per cell and one extra for right-mode node
+  }
+
+  unsigned
+  LobattoElement1D::getNumGlobalNodes() const
+  {
+    return numGlobal;
   }
 
   void
@@ -84,13 +102,13 @@ namespace Lucee
   void
   LobattoElement1D::getMassMatrix(Lucee::Matrix<double> NjNk) const
   {
-    NjNk = refNjNk;
+    NjNk.copy(refNjNk);
   }
 
   void
   LobattoElement1D::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
   {
-    DNjDNk = refDNjDNk;
+    DNjDNk.copy(refDNjDNk);
   }
 
   void

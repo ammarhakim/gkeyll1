@@ -67,7 +67,7 @@ namespace Lucee
       void setIndex(int i, int j, int k) const;
 
 /**
- * Get number of nodes in element.
+ * Get number of local nodes in element.
  *
  * @return number of nodes in element.
  */
@@ -75,6 +75,13 @@ namespace Lucee
       {
         return numNodes;
       }
+
+/**
+ * Get number of global nodes in element.
+ *
+ * @return number of nodes in element.
+ */
+      virtual unsigned getNumGlobalNodes() const;
 
 /**
  * Evaluate 'n'th basis function at location (x,y) in the reference
@@ -93,7 +100,7 @@ namespace Lucee
  *
  * @param lgMap Local node number to global node number mapping.
  */
-      virtual void getLocalToGlobal(const std::vector<int>& lgMap) const;
+      virtual void getLocalToGlobal(std::vector<int>& lgMap) const;
 
 /**
  * Get mass matrix for this reference element. The output matrix

@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* March 6th
+
+  Working on 1D Poisson solver using FEM method. Setup basic class,
+  brought in Petsc and tested that stiffness matrices are correctly
+  built. Found a bug: one can not use the '=' operator for copying
+  matrix values as this creates a shallow copy of the RHS. Instead,
+  the copy() method needs to be used.
+
+  The 2D Poisson solver should not be that much different, which I
+  will work on next. Once that is completed I will switch to DG, which
+  should be much simpler. Even though DG needs more complicated
+  information (Riemann solves, limiters, ...) it is actually an easier
+  scheme to implement.
+
 * March 2nd
 
   Implemented Euler numericalFlux method. Did a basic test with

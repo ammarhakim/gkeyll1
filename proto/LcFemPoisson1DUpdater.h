@@ -68,8 +68,16 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal finite-element to use */
-      Lucee::NodalFiniteElementIfc *nodalFem;
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc *nodalBasis;
+/** Value of potential on left edge */
+      double leftEdge;
+/** Value of potential on right edge */
+      double rightEdge;
+/** Petsc matrices to store linear operator */
+      Mat stiffMat, lhs;
+/** Petsc vectors for RHS and solution*/
+      Vec phin, rhs;
   };
 }
 
