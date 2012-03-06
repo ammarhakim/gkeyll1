@@ -57,8 +57,15 @@ namespace Lucee
     return 0;
   }
 
+  unsigned
+  NodalFiniteElementIfc::getNumGlobalNodes() const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumGlobalNodes: Not implemented!");
+    return 0;
+  }
+
   void
-  NodalFiniteElementIfc::getLocalToGlobal(const std::vector<int>& lgMap) const
+  NodalFiniteElementIfc::getLocalToGlobal(std::vector<int>& lgMap) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobal: Not implemented!");
   }

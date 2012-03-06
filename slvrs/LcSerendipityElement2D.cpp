@@ -53,13 +53,13 @@ namespace Lucee
   void
   SerendipityElement2D::getMassMatrix(Lucee::Matrix<double> NjNk) const
   {
-    NjNk = refNjNk;
+    NjNk.copy(refNjNk);
   }
 
   void
   SerendipityElement2D::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
   {
-    DNjDNk = refDNjDNk;
+    DNjDNk.copy(refDNjDNk);
   }
 
   void
