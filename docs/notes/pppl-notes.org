@@ -7,7 +7,10 @@
   error: the shocks do not move at the correct speed and the results
   do not compare with either exact solution or with miniwarpx
   results. The problem is most likely in the DG updater for multiple
-  equations, which I need to find and fix.
+  equations, which I need to find and fix. 
+
+  [The error could be in the normalization coefficients when applied
+  to the case of more than one equation].
 
   The great thing about the DG method is that only the numerical flux
   method is needed, at least for case in which limiters are not

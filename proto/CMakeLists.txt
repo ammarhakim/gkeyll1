@@ -13,6 +13,10 @@ if (FFTW3_FOUND)
    include_directories(${Fftw3_INCLUDE_DIRS})
 endif (FFTW3_FOUND)
 
+if (PETSC_FOUND)
+   include_directories(${Petsc_INCLUDE_DIRS})
+endif (PETSC_FOUND)
+
 set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
@@ -25,6 +29,10 @@ set (proto_SOURCES
 if (FFTW3_FOUND)
   set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp)
 endif (FFTW3_FOUND)
+
+if (PETSC_FOUND)
+  set (proto_SOURCES ${proto_SOURCES} LcFemPoisson1DUpdater.cpp)
+endif (PETSC_FOUND)
 
 # Create the library
 add_library(lcproto ${proto_SOURCES})
