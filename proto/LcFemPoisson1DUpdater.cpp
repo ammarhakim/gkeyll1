@@ -61,9 +61,9 @@ namespace Lucee
     MatSetFromOptions(stiffMat);
 
 // create and setup vector
-    VecCreate(MPI_COMM_WORLD, &phin);
-    VecSetSizes(phin, nglobal, PETSC_DECIDE);
-    VecSetFromOptions(phin);
+    VecCreate(MPI_COMM_WORLD, &globalSrc);
+    VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
+    VecSetFromOptions(globalSrc);
 
 // get global region
     const Lucee::StructuredGridBase<1>& grid 
@@ -75,6 +75,9 @@ namespace Lucee
 // map for local indices to global indices
     std::vector<int> lgMap(nlocal);
 
+// storage for passing to petsc
+    std::vector<PetscScalar> vals(nlocal*nlocal);
+
 // loop, creating stiffness matrix
     for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(1); ++i)
     {
@@ -85,24 +88,134 @@ namespace Lucee
 // get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
 
-// insert values into global stiffness matrix
-    }
+// construct arrays for passing into Petsc
+      for (unsigned k=0; k<nlocal; ++k)
+      {
+        for (unsigned m=0; m<nlocal; ++m)
+          vals[nlocal*k+m] = localStiff(k,m);
+      }
 
-//  finalize vector and matrix assembly
-    VecAssemblyBegin(phin);
-    VecAssemblyEnd(phin);
+// insert into global stiffness matrix, adding them to existing value
+      MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0], 
+        &vals[0], ADD_VALUES);
+    }
 
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-    
-// create duplicates
-    VecDuplicate(phin, &rhs);
-    MatDuplicate(stiffMat, MAT_COPY_VALUES, &lhs);
+
+    int zeroRows[2];
+    zeroRows[0] = 0; zeroRows[1] = nglobal-1;
+// zero out first and last rows, inserting a 1.0 in the diagonal
+// locations in those rows: this allows applying Dirichlet BCs
+    MatZeroRows(stiffMat, 2, zeroRows, 1.0);
+
+    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+//  finalize vector and matrix assembly
+    VecAssemblyBegin(globalSrc);
+    VecAssemblyEnd(globalSrc);
+
+// create KSP context
+    KSPCreate(MPI_COMM_WORLD, &ksp);
+    KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
+    KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
+    KSPSetFromOptions(ksp);
+
+// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
+//    MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
+
+// create duplicate to store initial guess
+    VecDuplicate(globalSrc, &initGuess);
   }
 
   Lucee::UpdaterStatus
   FemPoisson1DUpdater::update(double t)
   {
+// get hold of grid
+    const Lucee::StructuredGridBase<1>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+// get input/output fields
+    const Lucee::Field<1, double>& src = this->getInp<Lucee::Field<1, double> >(0);
+    Lucee::Field<1, double>& sol = this->getOut<Lucee::Field<1, double> >(0);
+
+// number of global nodes
+    unsigned nglobal = nodalBasis->getNumGlobalNodes();
+// number of local nodes
+    unsigned nlocal = nodalBasis->getNumNodes();
+
+// global region to index
+    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
+
+// local stiffness matrix
+    Lucee::Matrix<double> localMass(nlocal, nlocal);
+// map for local indices to global indices
+    std::vector<int> lgMap(nlocal);
+
+// storage for computing source contribution
+    std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
+    Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
+    Lucee::ConstFieldPtr<double> srcPtrp = src.createConstPtr();
+
+// loop, creating RHS (source terms)
+    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    {
+      nodalBasis->setIndex(i);
+      src.setPtr(srcPtr, i);
+      src.setPtr(srcPtrp, i+1);
+
+// get local mass matrix
+      nodalBasis->getMassMatrix(localMass);
+// get local to global mapping
+      nodalBasis->getLocalToGlobal(lgMap);
+
+// now compute source at each local node (cell i does not own the right-most node)
+      for (unsigned k=0; k<nlocal-1; ++k)
+        localSrc[k] = srcPtr[k];
+      localSrc[nlocal-1] = srcPtrp[0]; // get right-most data from first node of right cell
+
+// evaluate local mass matrix times local source
+      for (unsigned k=0; k<nlocal; ++k)
+      {
+        localMassSrc[k] = 0.0;
+        for (unsigned m=0; m<nlocal; ++m)
+          localMassSrc[k] += localMass(k,m)*localSrc[m];
+      }
+// accumulate it into Petsc vector
+      VecSetValues(globalSrc, nlocal, &lgMap[0], &localMassSrc[0], ADD_VALUES);
+    }
+
+    int firstLast[2];
+    firstLast[0] = 0; firstLast[1] = nglobal-1;
+    double vals[2];
+    vals[0] = leftEdge; vals[1] = rightEdge;
+// replace first/last values with specified BC values
+    //VecSetValues(globalSrc, 2, firstLast, vals, 
+
+// finish assembly of RHS
+    VecAssemblyBegin(globalSrc);
+    VecAssemblyEnd(globalSrc);
+
+// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
+    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
+
+// now solve linear system (globalSrc will be overwritten by solution)
+    KSPSolve(ksp, globalSrc, globalSrc);
+
+    Lucee::FieldPtr<double> solPtr = sol.createPtr();
+    Lucee::FieldPtr<double> solPtrp = sol.createPtr();
+// copy solution into output 
+    PetscScalar *ptSol;
+    unsigned count = 0;
+
+    VecGetArray(globalSrc, &ptSol);
+    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    {
+      sol.setPtr(solPtr, i);
+      for (unsigned k=0; k<nlocal-1; ++k)
+        solPtr[k] = ptSol[count++];
+    }
+    VecRestoreArray(globalSrc, &ptSol);
 
     return Lucee::UpdaterStatus();
   }

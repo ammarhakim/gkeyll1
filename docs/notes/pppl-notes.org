@@ -14,6 +14,17 @@
   information (Riemann solves, limiters, ...) it is actually an easier
   scheme to implement.
 
+** Flat field for FEM/DG scheme
+
+   It might be valuable to introduce a "flat-field" data structure
+   that stores data essentially in a linear array. This field would be
+   indexed with two indices (always): cell-index and
+   node-index. Additionally, number of components would be
+   specifiable. [This basically is just Field2D.]
+
+   The looping into this field would be achieved by specialized
+   iterators, that also would allow neighbor calculations.
+
 * March 2nd
 
   Implemented Euler numericalFlux method. Did a basic test with
