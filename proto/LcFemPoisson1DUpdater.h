@@ -75,9 +75,11 @@ namespace Lucee
 /** Value of potential on right edge */
       double rightEdge;
 /** Petsc matrices to store linear operator */
-      Mat stiffMat, lhs;
-/** Petsc vectors for RHS and solution*/
-      Vec phin, rhs;
+      Mat stiffMat;
+/** Petsc vectors for source and initial guess */
+      Vec globalSrc, initGuess;
+/** Krylov subspace method context */
+      KSP ksp;
   };
 }
 
