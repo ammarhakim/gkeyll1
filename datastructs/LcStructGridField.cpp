@@ -176,6 +176,24 @@ namespace Lucee
       }
     }
 
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerWriteGhost[i] = 0;
+      upperWriteGhost[i] = 0;
+    }
+// read number of ghost cells to write
+    if (tbl.hasNumVec("writeGhost"))
+    {
+      std::vector<double> gstDbl = tbl.getNumVec("writeGhost");
+      if (gstDbl.size() != 2)
+        throw Lucee::Except("StructGridField::readInput: must specify exactly two entries in 'writeGhost' table");
+      for (unsigned i=0; i<NDIM; ++i)
+      {
+        lowerWriteGhost[i] = gstDbl[0];
+        upperWriteGhost[i] = gstDbl[1];
+      }
+    }
+
 // check if this field lives in parallel
     bool isPar = true; // by default alway parallel
     if (tbl.hasBool("decompose"))
@@ -198,7 +216,8 @@ namespace Lucee
   {
 // first write the field data to file
     TxIoNodeType dn 
-      = Lucee::Field<NDIM, T>::writeToFile(io, node, "StructGridField");
+      = Lucee::Field<NDIM, T>::writeToFileWithGhost(io, node, 
+        lowerWriteGhost, upperWriteGhost, "StructGridField");
 // annotate with viz-schema marks
     io.writeAttribute(dn, "vsType", "variable");
     io.writeAttribute(dn, "vsMesh", "StructGrid");

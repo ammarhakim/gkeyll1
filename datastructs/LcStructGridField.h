@@ -191,6 +191,10 @@ namespace Lucee
       mutable bool isReceiving;
 /** Map of a rank -> pending recieves */
       mutable std::map<int, TxMsgStatus> msgStatus;
+/** Lower ghost cells to write */
+      int lowerWriteGhost[NDIM];
+/** Upper ghost cells to write */
+      int upperWriteGhost[NDIM];
 
 /**
  * Start a non-blocking operation to receive data from skin region.

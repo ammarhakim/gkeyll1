@@ -36,6 +36,11 @@ namespace Lucee
       FemPoisson1DUpdater();
 
 /**
+ * Destroy updater.
+ */
+      ~FemPoisson1DUpdater();
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.

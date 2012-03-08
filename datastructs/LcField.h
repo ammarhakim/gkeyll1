@@ -388,6 +388,20 @@ namespace Lucee
         const std::string& nm);
 
 /**
+ * Write dataStruct to given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to write to.
+ * @param lg Lower ghost cells to write.
+ * @param ug Upper ghost cells to write.
+ * @param nm Name of the array as it should appear in output.
+ * @return node to which data was written.
+ */
+      TxIoNodeType writeToFileWithGhost(
+        TxIoBase& io, TxIoNodeType& node, int lg[NDIM], int ug[NDIM],
+          const std::string& nm);
+
+/**
  * Copy field from supplied one. The input field must have the exact
  * same shape as this field.
  *

@@ -1,5 +1,27 @@
 # -*- org -*-
 
+* March 7th
+
+  Have a "almost" working 1D FEM Poisson solver. Needs a bit of more
+  work to get this robust.
+
+  Extended the field I/O method to allow writing ghost (or part of
+  ghost) cells. This ensures the nodes on the right-most (top-most,
+  ...) get written to Hdf5 and allow correct viz of FEM type solution.
+
+  This is actually not the correct way as the interior nodes in the
+  ghost cells will also be written out. This is not the desired
+  behaviour as only the edge nodes are needed. The correct solution
+  here is to actually have a nodal FE field that properly takes into
+  account shared nodes between cells. This is a much more complex task
+  than I am ready to tackle at present and needs to be done in the
+  future. See March 6th note on "Flat field" below.
+
+** TODO Should one add a "finalize" method to UpdaterIfc?
+
+   This will allow "unloading" an updater data from Lua script if
+   needed. Not really critical for now, but something to keep in mind.
+
 * March 6th
 
   Working on 1D Poisson solver using FEM method. Setup basic class,
