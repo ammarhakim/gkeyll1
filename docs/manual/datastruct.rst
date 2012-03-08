@@ -71,6 +71,10 @@ The 1D, 2D and 3D field object support the following methods.
 
   Set all field values to *val*.
 
+.. py:function:: scale(fact)
+
+  Multiply all field values by *fact*.
+
 .. py:function:: copy(fld)
 
   Copy from supplied field, *fld*. The field to copy from must live on

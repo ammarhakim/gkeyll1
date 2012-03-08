@@ -463,6 +463,14 @@ namespace Lucee
       static int luaClear(lua_State *L);
 
 /**
+ * Lua callable method for scaling the field with supplied scalar.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaScale(lua_State *L);
+
+/**
  * Lua callable method for copying field from supplied one.
  *
  * @param L Lua state to use.

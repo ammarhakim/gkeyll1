@@ -415,6 +415,7 @@ namespace Lucee
   Field<NDIM, T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("clear", luaClear);
+    lfm.appendFunc("scale", luaScale);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
     lfm.appendFunc("combine", luaCombine);
@@ -436,6 +437,22 @@ namespace Lucee
     }
     T num = (T) lua_tonumber(L, 2);
     (*fld) = num;
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaScale(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+    if (! lua_isnumber(L, 2))
+    {
+      Lucee::Except lce("Field::luaScale: Must provide a number to 'scale' method");
+      throw lce;
+    }
+    T num = (T) lua_tonumber(L, 2);
+    (*fld) *= num;
     return 0;
   }
 

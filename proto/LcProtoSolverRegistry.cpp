@@ -23,6 +23,7 @@
 
 #ifdef HAVE_PETSC
 # include <LcFemPoisson1DUpdater.h>
+# include <LcFemPoisson2DUpdater.h>
 #endif
 
 namespace Lucee
@@ -44,6 +45,7 @@ namespace Lucee
 
 #ifdef HAVE_PETSC
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoisson1DUpdater>;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoisson2DUpdater>;
 #endif
 
 #ifdef HAVE_FFTW3

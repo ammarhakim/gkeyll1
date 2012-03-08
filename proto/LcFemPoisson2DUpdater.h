@@ -1,11 +1,11 @@
 /**
- * @file	LcFemPoisson1DUpdater.h
+ * @file	LcFemPoisson2DUpdater.h
  *
  * @brief	Updater to solve Poisson equations with FEM scheme in 1D.
  */
 
-#ifndef LC_FEM_POISSON_1D_UPDATER_H
-#define LC_FEM_POISSON_1D_UPDATER_H
+#ifndef LC_FEM_POISSON_2D_UPDATER_H
+#define LC_FEM_POISSON_2D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -22,9 +22,9 @@
 namespace Lucee
 {
 /**
- * Updater to solve Poisson equations in 1D with FEM
+ * Updater to solve Poisson equations in 2D with FEM
  */
-  class FemPoisson1DUpdater : public Lucee::UpdaterIfc
+  class FemPoisson2DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -33,12 +33,12 @@ namespace Lucee
 /**
  * Create new updater.
  */
-      FemPoisson1DUpdater();
+      FemPoisson2DUpdater();
 
 /**
  * Destroy updater.
  */
-      ~FemPoisson1DUpdater();
+      ~FemPoisson2DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -88,4 +88,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_PERIODIC_POISSON_1D_UPDATER_H
+#endif // LC_PERIODIC_POISSON_2D_UPDATER_H

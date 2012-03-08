@@ -19,8 +19,12 @@ namespace Lucee
 
   SerendipityElement2D::SerendipityElement2D()
     : Lucee::NodalFiniteElementIfc(4), polyOrder(1), 
-      refNjNk(4,4), refDNjDNk(4,4)
+      refNjNk(4,4), refDNjDNk(4,4), idxr(
+        &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
+// notice funcky initialization of indexer: this is just so code
+// compiles as indexers do not have default ctors. It gets reset in
+// the readInput() method anyway.
   }
 
   void
@@ -48,6 +52,58 @@ namespace Lucee
       setupPoly1();
     else if (polyOrder == 2)
       setupPoly2();
+
+// determine number of global degrees of freedom
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    Lucee::Region<2, int> grgn = grid.getGlobalRegion();
+    unsigned nx = grgn.getShape(0), ny = grgn.getShape(1);
+
+    if (polyOrder == 1)
+      numGlobal = (nx+1)*(ny+1);
+    else if (polyOrder ==2)
+      numGlobal = (2*nx+1)*(2*ny+1);
+
+// create indexer for local -> global mapping: we are using a
+// row-major indexing scheme to be consistent with Petsc default
+// matrix layout. This is not strictly needed and even column major
+// will work here.
+    int shape[2];
+    if (polyOrder == 1)
+    {
+      shape[0] = nx+1; shape[1] = ny+1;
+      Lucee::Region<2, int> lgRgn(shape);
+      idxr = RowMajorIndexer<2>(lgRgn);
+    }
+    else if (polyOrder == 2)
+    {
+      shape[0] = 2*nx+1; shape[1] = 2*ny+1;
+      Lucee::Region<2, int> lgRgn(shape);
+      idxr = RowMajorIndexer<2>(lgRgn);
+    }
+  }
+
+  unsigned
+  SerendipityElement2D::getNumGlobalNodes() const
+  {
+    return numGlobal;
+  }
+
+  void
+  SerendipityElement2D::getLocalToGlobal(std::vector<int>& lgMap) const
+  {
+    int ix = this->currIdx[0], iy = this->currIdx[1];
+    if (polyOrder == 1)
+    {
+      lgMap[0] = idxr.getIndex(ix, iy);
+      lgMap[1] = idxr.getIndex(ix+1, iy);
+      lgMap[2] = idxr.getIndex(ix+1, iy+1);
+      lgMap[3] = idxr.getIndex(ix, iy+1);
+    }
+    else if (polyOrder == 2)
+    { // TODO: throw an exception for now
+      throw Lucee::Except("SerendipityElement2D::getLocalToGlobal: Not implemented!");
+    }
   }
 
   void
