@@ -27,6 +27,13 @@ namespace Lucee
   {
   }
 
+  FemPoisson1DUpdater::~FemPoisson1DUpdater()
+  { // get rid of stuff
+    MatDestroy(stiffMat);
+    VecDestroy(globalSrc);
+    VecDestroy(initGuess);
+  }
+
   void
   FemPoisson1DUpdater::readInput(Lucee::LuaTable& tbl)
   {
@@ -79,7 +86,7 @@ namespace Lucee
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
 // loop, creating stiffness matrix
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(1); ++i)
+    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
     {
       nodalBasis->setIndex(i);
 
@@ -109,6 +116,8 @@ namespace Lucee
 // locations in those rows: this allows applying Dirichlet BCs
     MatZeroRows(stiffMat, 2, zeroRows, 1.0);
 
+// NOTE: We need to reassemble otherwise PetSc barfs. THIS PROBABLY IS
+// NOT THE BEST WAY TO DO THIS STUFF, ANYWAY (Ammar, 3/07/2012)
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
@@ -154,9 +163,9 @@ namespace Lucee
 
 // storage for computing source contribution
     std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
+
     Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
     Lucee::ConstFieldPtr<double> srcPtrp = src.createConstPtr();
-
 // loop, creating RHS (source terms)
     for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
     {
@@ -185,37 +194,62 @@ namespace Lucee
       VecSetValues(globalSrc, nlocal, &lgMap[0], &localMassSrc[0], ADD_VALUES);
     }
 
+// finish assembly of RHS
+    VecAssemblyBegin(globalSrc);
+    VecAssemblyEnd(globalSrc);
+
     int firstLast[2];
     firstLast[0] = 0; firstLast[1] = nglobal-1;
     double vals[2];
     vals[0] = leftEdge; vals[1] = rightEdge;
 // replace first/last values with specified BC values
-    //VecSetValues(globalSrc, 2, firstLast, vals, 
+    VecSetValues(globalSrc, 2, firstLast, vals, INSERT_VALUES);
 
-// finish assembly of RHS
+// NOTE: We need to reassemble otherwise PetSc barfs. THIS PROBABLY IS
+// NOT THE BEST WAY TO DO THIS STUFF, ANYWAY (Ammar, 3/07/2012)
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
-    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
+// UNCOMMENT FOLLOWING LINE TO VIEW RHS VECTOR
+//    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
-// now solve linear system (globalSrc will be overwritten by solution)
-    KSPSolve(ksp, globalSrc, globalSrc);
+// copy solution for use as initial guess in KSP solve
+    Lucee::ConstFieldPtr<double> solConstPtr = sol.createConstPtr();
+    PetscScalar *ptGuess;
+    unsigned count = 0;
+    VecGetArray(initGuess, &ptGuess);
+
+    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    {
+      sol.setPtr(solConstPtr, i);
+      for (unsigned k=0; k<nlocal-1; ++k)
+        ptGuess[count++] = solConstPtr[k];
+    }
+// copy solution at last node
+    sol.setPtr(solConstPtr, globalRgn.getUpper(0));
+    ptGuess[count] = solConstPtr[0];
+
+    VecRestoreArray(initGuess, &ptGuess);
+
+// now solve linear system (initGuess will contain solution)
+    KSPSolve(ksp, globalSrc, initGuess);
 
     Lucee::FieldPtr<double> solPtr = sol.createPtr();
-    Lucee::FieldPtr<double> solPtrp = sol.createPtr();
-// copy solution into output 
+    count = 0;
     PetscScalar *ptSol;
-    unsigned count = 0;
+    VecGetArray(initGuess, &ptSol);
 
-    VecGetArray(globalSrc, &ptSol);
     for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
     {
       sol.setPtr(solPtr, i);
       for (unsigned k=0; k<nlocal-1; ++k)
         solPtr[k] = ptSol[count++];
     }
-    VecRestoreArray(globalSrc, &ptSol);
+// copy solution at last node
+    sol.setPtr(solPtr, globalRgn.getUpper(0));
+    solPtr[0] = ptSol[count];
+
+    VecRestoreArray(initGuess, &ptSol);
 
     return Lucee::UpdaterStatus();
   }
