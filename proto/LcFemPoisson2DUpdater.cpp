@@ -1,5 +1,5 @@
 /**
- * @file	LcFemPoisson1DUpdater.cpp
+ * @file	LcFemPoisson2DUpdater.cpp
  *
  * @brief	Updater to solve Poisson equations with FEM scheme in 1D.
  */
@@ -10,7 +10,7 @@
 #endif
 
 // lucee includes
-#include <LcFemPoisson1DUpdater.h>
+#include <LcFemPoisson2DUpdater.h>
 #include <LcMatrix.h>
 #include <LcRectCartGrid.h>
 #include <LcStructGridField.h>
@@ -20,14 +20,14 @@
 
 namespace Lucee
 {
-  const char *FemPoisson1DUpdater::id = "FemPoisson1D";
+  const char *FemPoisson2DUpdater::id = "FemPoisson2D";
 
-  FemPoisson1DUpdater::FemPoisson1DUpdater()
+  FemPoisson2DUpdater::FemPoisson2DUpdater()
     : Lucee::UpdaterIfc()
   {
   }
 
-  FemPoisson1DUpdater::~FemPoisson1DUpdater()
+  FemPoisson2DUpdater::~FemPoisson2DUpdater()
   { // get rid of stuff
     MatDestroy(stiffMat);
     VecDestroy(globalSrc);
@@ -35,7 +35,7 @@ namespace Lucee
   }
 
   void
-  FemPoisson1DUpdater::readInput(Lucee::LuaTable& tbl)
+  FemPoisson2DUpdater::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
@@ -44,15 +44,11 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc>("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc>("basis");
     else
-      throw Lucee::Except("FemPoisson1DUpdater::readInput: Must specify element to use using 'basis'");
-
-// get potentials on left and right edges
-    leftEdge = tbl.getNumber("leftEdge");
-    rightEdge = tbl.getNumber("rightEdge");
+      throw Lucee::Except("FemPoisson2DUpdater::readInput: Must specify element to use using 'basis'");
   }
 
   void
-  FemPoisson1DUpdater::initialize()
+  FemPoisson2DUpdater::initialize()
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
@@ -73,9 +69,9 @@ namespace Lucee
     VecSetFromOptions(globalSrc);
 
 // get global region
-    const Lucee::StructuredGridBase<1>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<1> >();
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
 
 // local stiffness matrix
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
@@ -110,17 +106,6 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-    int zeroRows[2];
-    zeroRows[0] = 0; zeroRows[1] = nglobal-1;
-// zero out first and last rows, inserting a 1.0 in the diagonal
-// locations in those rows: this allows applying Dirichlet BCs
-    MatZeroRows(stiffMat, 2, zeroRows, 1.0);
-
-// NOTE: We need to reassemble otherwise PetSc barfs. THIS PROBABLY IS
-// NOT THE BEST WAY TO DO THIS STUFF, ANYWAY (Ammar, 3/07/2012)
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
 //  finalize vector and matrix assembly
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
@@ -139,14 +124,14 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus
-  FemPoisson1DUpdater::update(double t)
+  FemPoisson2DUpdater::update(double t)
   {
 // get hold of grid
-    const Lucee::StructuredGridBase<1>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
 // get input/output fields
-    const Lucee::Field<1, double>& src = this->getInp<Lucee::Field<1, double> >(0);
-    Lucee::Field<1, double>& sol = this->getOut<Lucee::Field<1, double> >(0);
+    const Lucee::Field<2, double>& src = this->getInp<Lucee::Field<2, double> >(0);
+    Lucee::Field<2, double>& sol = this->getOut<Lucee::Field<2, double> >(0);
 
 // number of global nodes
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
@@ -154,7 +139,7 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // global region to index
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
 
 // local stiffness matrix
     Lucee::Matrix<double> localMass(nlocal, nlocal);
@@ -255,11 +240,11 @@ namespace Lucee
   }
 
   void
-  FemPoisson1DUpdater::declareTypes()
+  FemPoisson2DUpdater::declareTypes()
   {
 // takes one input (source terms)
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::Field<2, double>));
 // returns one output, solution
-    this->appendOutVarType(typeid(Lucee::Field<1, double>));
+    this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
 }

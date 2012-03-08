@@ -1,9 +1,28 @@
 # -*- org -*-
 
+* March 8th
+
+  Compared 1D FEM Poisson solver with exact solution. Found that I had
+  a sign off. Fixed and now FEM solution compare well with exact
+  solution. Still need to do convergence study, etc.
+
+  Also, I need to implement a method to initialize nodal FE/DG
+  fields. The two-node Lobatto elements work fine now as the fields
+  allow "nodal" storage. Of course, this will not work when there are
+  interior nodes to be initialized.
+
+** TODO Convert Poisson solver and related classes (NodalFiniteElementIfc) for parallel
+
+   The Poisson solver and related classes only work in serial. Need to
+   convert these to parallel. Perhaps this is not hard, but will need
+   to look into the complete chain of classes, including
+
 * March 7th
 
-  Have a "almost" working 1D FEM Poisson solver. Needs a bit of more
-  work to get this robust.
+  Have a working 1D FEM Poisson solver. Needs testing to make sure the
+  solutions are correct. I printed out the stiffness matrix and the
+  RHS to ensure that they are correct. So KSP inversion should be
+  correct, one would hope.
 
   Extended the field I/O method to allow writing ghost (or part of
   ghost) cells. This ensures the nodes on the right-most (top-most,

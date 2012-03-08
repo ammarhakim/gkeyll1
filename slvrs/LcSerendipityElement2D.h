@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcNodalFiniteElementIfc.h>
+#include <LcRowMajorIndexer.h>
 
 namespace Lucee
 {
@@ -65,6 +66,21 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
+ * Get number of global nodes in element.
+ *
+ * @return number of nodes in element.
+ */
+      unsigned getNumGlobalNodes() const;
+
+/**
+ * Get mapping of local node numbers in the current cell to global
+ * node number. The input vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      void getLocalToGlobal(std::vector<int>& lgMap) const;
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *
@@ -87,6 +103,10 @@ namespace Lucee
       Lucee::Matrix<double> refNjNk;
 /** Stiffness matrix in reference coordinates */
       Lucee::Matrix<double> refDNjDNk;
+/** Total global degrees of freedom */
+      unsigned numGlobal;
+/** Indexer to map (i,j) into a linear index */
+      Lucee::RowMajorIndexer<2> idxr;
 
 /**
  * Create matrices for 1st order element.
