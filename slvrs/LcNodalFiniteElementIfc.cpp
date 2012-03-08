@@ -17,10 +17,13 @@
 namespace Lucee
 {
 // set module name
-  const char *NodalFiniteElementIfc::id = "NodalFiniteElement";
+  template <> const char *NodalFiniteElementIfc<1>::id = "NodalFiniteElement1D";
+  template <> const char *NodalFiniteElementIfc<2>::id = "NodalFiniteElement2D";
+  template <> const char *NodalFiniteElementIfc<3>::id = "NodalFiniteElement3D";
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::readInput(Lucee::LuaTable& tbl)
+  NodalFiniteElementIfc<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // read in grid
     if (tbl.hasObject<Lucee::GridIfc>("onGrid"))
@@ -29,61 +32,83 @@ namespace Lucee
       throw Lucee::Except("NodalFiniteElementIfc::readInput: Must specify grid using 'onGrid'");
   }
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::setIndex(int i) const
+  NodalFiniteElementIfc<NDIM>::setIndex(int i) const
   {
     currIdx[0] = i;
   }
   
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::setIndex(int i, int j) const
+  NodalFiniteElementIfc<NDIM>::setIndex(int i, int j) const
   {
     currIdx[0] = i;
     currIdx[1] = j;
   }
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::setIndex(int i, int j, int k) const
+  NodalFiniteElementIfc<NDIM>::setIndex(int i, int j, int k) const
   {
     currIdx[0] = i;
     currIdx[1] = j;
     currIdx[2] = k;
   }
 
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::setIndex(const int idx[NDIM]) const
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+      currIdx[i] = idx[i];
+  }
+
+  template <unsigned NDIM>
   double
-  NodalFiniteElementIfc::evalBasis(unsigned n, double x, double y) const
+  NodalFiniteElementIfc<NDIM>::evalBasis(unsigned n, double x, double y) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::evalBasis: Not implemented!");
     return 0;
   }
 
+  template <unsigned NDIM>
   unsigned
-  NodalFiniteElementIfc::getNumGlobalNodes() const
+  NodalFiniteElementIfc<NDIM>::getNumGlobalNodes() const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getNumGlobalNodes: Not implemented!");
     return 0;
   }
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::getLocalToGlobal(std::vector<int>& lgMap) const
+  NodalFiniteElementIfc<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobal: Not implemented!");
   }
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::getMassMatrix(Lucee::Matrix<double> NjNk) const
+  NodalFiniteElementIfc<NDIM>::getMassMatrix(Lucee::Matrix<double> NjNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getMassMatrix: Not implemented!");
   }
 
+  template <unsigned NDIM>
   void
-  NodalFiniteElementIfc::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
+  NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getStiffnessMatrix: Not implemented!");
   }
 
-  NodalFiniteElementIfc::NodalFiniteElementIfc(unsigned numNodes)
+  template <unsigned NDIM>
+  NodalFiniteElementIfc<NDIM>::NodalFiniteElementIfc(unsigned numNodes)
     : numNodes(numNodes)
   {
   }
+
+// instantiations
+  template class NodalFiniteElementIfc<1>;
+  template class NodalFiniteElementIfc<2>;
+  template class NodalFiniteElementIfc<3>;
 }

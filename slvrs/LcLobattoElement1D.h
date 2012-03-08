@@ -21,7 +21,7 @@ namespace Lucee
  * Lobatto element in 2D. The reference element is the interval [-1,1]
  * X [-1,1].
  */
-  class LobattoElement1D : public Lucee::NodalFiniteElementIfc
+  class LobattoElement1D : public Lucee::NodalFiniteElementIfc<1>
   {
     public:
 /** Class id: this is used by registration system */

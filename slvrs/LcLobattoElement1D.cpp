@@ -18,10 +18,10 @@
 
 namespace Lucee
 {
-  const char *LobattoElement1D::id = "Lobatto1D";
+  const char *LobattoElement1D::id = "Lobatto";
 
   LobattoElement1D::LobattoElement1D()
-    : Lucee::NodalFiniteElementIfc(2), polyOrder(1), 
+    : Lucee::NodalFiniteElementIfc<1>(2), polyOrder(1), 
       refNjNk(2,2), refDNjDNk(2,2)
   {
   }
@@ -30,7 +30,7 @@ namespace Lucee
   LobattoElement1D::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
-    Lucee::NodalFiniteElementIfc::readInput(tbl);
+    Lucee::NodalFiniteElementIfc<1>::readInput(tbl);
 
 // read in polynomial order
     polyOrder = tbl.getNumber("polyOrder");

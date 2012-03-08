@@ -41,8 +41,8 @@ namespace Lucee
     Lucee::UpdaterIfc::readInput(tbl);
 
 // get hold of element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc>("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc>("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
       throw Lucee::Except("FemPoisson1DUpdater::readInput: Must specify element to use using 'basis'");
 

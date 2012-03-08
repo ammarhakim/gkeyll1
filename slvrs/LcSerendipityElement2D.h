@@ -46,7 +46,7 @@ namespace Lucee
  *             o-----o-----o
  *             1     5     2
  */
-  class SerendipityElement2D : public Lucee::NodalFiniteElementIfc
+  class SerendipityElement2D : public Lucee::NodalFiniteElementIfc<2>
   {
     public:
 /** Class id: this is used by registration system */

@@ -221,7 +221,10 @@ namespace Lucee
 // annotate with viz-schema marks
     io.writeAttribute(dn, "vsType", "variable");
     io.writeAttribute(dn, "vsMesh", "StructGrid");
-    io.writeAttribute(dn, "vsCentering", "zonal");
+    if (dataLoc == CELL_CENTER_LOC)
+      io.writeAttribute(dn, "vsCentering", "zonal");
+    else
+      io.writeAttribute(dn, "vsCentering", "nodal");
 // now write out grid
     grid->writeToFile(io, node, "StructGrid");
 

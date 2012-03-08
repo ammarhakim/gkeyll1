@@ -77,8 +77,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::FunctionSource>;
 
 // register nodal basis functions
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc, Lucee::SerendipityElement2D>;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc, Lucee::LobattoElement1D>;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LobattoElement1D>;
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
@@ -91,6 +91,7 @@ namespace Lucee
 
 // register nodal basis library into Lucee. Ditto comment as for
 // boundary condition. See above.
-    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<1> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<2> >::registerModule(L);
   }
 }
