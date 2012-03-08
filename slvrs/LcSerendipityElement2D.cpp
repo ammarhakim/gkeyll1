@@ -15,10 +15,10 @@
 
 namespace Lucee
 {
-  const char *SerendipityElement2D::id = "Serendipity2D";
+  const char *SerendipityElement2D::id = "Serendipity";
 
   SerendipityElement2D::SerendipityElement2D()
-    : Lucee::NodalFiniteElementIfc(4), polyOrder(1), 
+    : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
       refNjNk(4,4), refDNjDNk(4,4), idxr(
         &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
@@ -31,7 +31,7 @@ namespace Lucee
   SerendipityElement2D::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
-    Lucee::NodalFiniteElementIfc::readInput(tbl);
+    Lucee::NodalFiniteElementIfc<2>::readInput(tbl);
 
 // read in polynomial order
     polyOrder = tbl.getNumber("polyOrder");

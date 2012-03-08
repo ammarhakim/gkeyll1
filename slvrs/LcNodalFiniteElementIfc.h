@@ -16,8 +16,10 @@
 #include <LcBasicObj.h>
 #include <LcGridIfc.h>
 #include <LcMatrix.h>
+#include <LcStructGridField.h>
 
 // std includes
+#include <cmath>
 #include <vector>
 
 namespace Lucee
@@ -29,6 +31,7 @@ namespace Lucee
  * Galerkin finite element methods.
  *
  */
+  template <unsigned NDIM>
   class NodalFiniteElementIfc : public Lucee::BasicObj
   {
     public:
@@ -65,6 +68,13 @@ namespace Lucee
  * @param k Index location into grid.
  */
       void setIndex(int i, int j, int k) const;
+
+/**
+ * Set the current cell location in grid to specified index.
+ *
+ * @param idx Index location into grid.
+ */
+      void setIndex(const int idx[NDIM]) const;
 
 /**
  * Get number of local nodes in element.
@@ -118,9 +128,16 @@ namespace Lucee
  */
       virtual void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
 
+/**
+ * Extract data from a field consistent with the nodal layout of this
+ * element. Stores output in specified vector.
+ *
+ * @param fld Field to extract data from
+ */
+
     protected:
 /** Index into current cell */
-      mutable int currIdx[3];
+      mutable int currIdx[NDIM];
 
 /**
  * Create new element with specified number of nodes.

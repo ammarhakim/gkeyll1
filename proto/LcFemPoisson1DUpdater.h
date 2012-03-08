@@ -74,7 +74,7 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc *nodalBasis;
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
 /** Value of potential on left edge */
       double leftEdge;
 /** Value of potential on right edge */

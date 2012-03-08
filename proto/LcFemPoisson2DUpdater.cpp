@@ -41,8 +41,8 @@ namespace Lucee
     Lucee::UpdaterIfc::readInput(tbl);
 
 // get hold of element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc>("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc>("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
       throw Lucee::Except("FemPoisson2DUpdater::readInput: Must specify element to use using 'basis'");
   }
@@ -81,10 +81,16 @@ namespace Lucee
 // storage for passing to petsc
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
+// create sequencer for looping over local box
+    Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
+    int idx[2];
+
 // loop, creating stiffness matrix
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    while (seq.step())
     {
-      nodalBasis->setIndex(i);
+// set index into element basis
+      seq.fillWithIndex(idx);
+      nodalBasis->setIndex(idx);
 
 // get local stiffness matrix
       nodalBasis->getStiffnessMatrix(localStiff);
@@ -151,12 +157,19 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
     Lucee::ConstFieldPtr<double> srcPtrp = src.createConstPtr();
+
+// create sequencer for looping over local box
+    Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
+    int idx[2];
 // loop, creating RHS (source terms)
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    while (seq.step())
     {
-      nodalBasis->setIndex(i);
-      src.setPtr(srcPtr, i);
-      src.setPtr(srcPtrp, i+1);
+      seq.fillWithIndex(idx);
+
+      nodalBasis->setIndex(idx);
+
+      src.setPtr(srcPtr, idx);
+      src.setPtr(srcPtrp, idx);
 
 // get local mass matrix
       nodalBasis->getMassMatrix(localMass);

@@ -11,6 +11,10 @@
   allow "nodal" storage. Of course, this will not work when there are
   interior nodes to be initialized.
 
+  Working on a 2D Poisson FEM updater. This seems is very similar to
+  the 1D updater and perhaps a dimension-independent updater can be
+  written. Best would be if it worked also on a mapped grid.
+
 ** TODO Convert Poisson solver and related classes (NodalFiniteElementIfc) for parallel
 
    The Poisson solver and related classes only work in serial. Need to
