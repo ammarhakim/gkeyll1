@@ -128,13 +128,6 @@ namespace Lucee
  */
       virtual void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
 
-/**
- * Extract data from a field consistent with the nodal layout of this
- * element. Stores output in specified vector.
- *
- * @param fld Field to extract data from
- */
-
     protected:
 /** Index into current cell */
       mutable int currIdx[NDIM];

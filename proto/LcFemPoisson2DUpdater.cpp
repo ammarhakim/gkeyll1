@@ -88,8 +88,8 @@ namespace Lucee
 // loop, creating stiffness matrix
     while (seq.step())
     {
-// set index into element basis
       seq.fillWithIndex(idx);
+// set index into element basis
       nodalBasis->setIndex(idx);
 
 // get local stiffness matrix
@@ -165,7 +165,7 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-
+// set index into element basis
       nodalBasis->setIndex(idx);
 
       src.setPtr(srcPtr, idx);
