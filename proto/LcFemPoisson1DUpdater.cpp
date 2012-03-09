@@ -178,7 +178,7 @@ namespace Lucee
 // get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
 
-// now compute source at each local node (cell i does not own the right-most node)
+// now compute source at each local node
       for (unsigned k=0; k<nlocal-1; ++k)
         localSrc[k] = srcPtr[k];
       localSrc[nlocal-1] = srcPtrp[0]; // get right-most data from first node of right cell

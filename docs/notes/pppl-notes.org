@@ -15,6 +15,12 @@
   the 1D updater and perhaps a dimension-independent updater can be
   written. Best would be if it worked also on a mapped grid.
 
+  Somehow need the basis function IFC class to return the manner in
+  which the nodes are laid out. Otherwise I do not see how data can be
+  extracted from a field in a transparent manner in the Poisson (or
+  other) FE updaters. I.e: the updater should really be agnostic of
+  the node layout, the number of nodes, etc.
+
 ** TODO Convert Poisson solver and related classes (NodalFiniteElementIfc) for parallel
 
    The Poisson solver and related classes only work in serial. Need to
