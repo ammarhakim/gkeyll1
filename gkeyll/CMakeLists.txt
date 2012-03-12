@@ -1,8 +1,8 @@
-# Build lucee executable
+# Build gkeyll executable
 
 # Project include directories
 INCLUDE_DIRECTORIES(
-  ${CMAKE_SOURCE_DIR}/lucee
+  ${CMAKE_SOURCE_DIR}/gkeyll
   ${CMAKE_SOURCE_DIR}/rte
   ${CMAKE_SOURCE_DIR}/proto
   ${CMAKE_SOURCE_DIR}/slvrs
