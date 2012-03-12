@@ -143,7 +143,7 @@ add_subdirectory(datastructs)
 add_subdirectory(slvrs)
 add_subdirectory(proto)
 add_subdirectory(rte)
-add_subdirectory(lucee)
+add_subdirectory(gkeyll)
 add_subdirectory(unit)
 
 # Add individual tests
