@@ -156,6 +156,17 @@ namespace Lucee
       bool contains(const Region<NDIM, T>& rgn) const;
 
 /**
+ * Reset the bounds of box in specified direction to range
+ * [nl,nu). This region is not modified but a new region is returned.
+ *
+ * @param dir Direction to reset bounds for.
+ * @param nl New lower bound.
+ * @param nu New upper bound.
+ * @return region with new bounds
+ */
+      Region<NDIM, T> resetBounds(unsigned dir, const T nl, const T nu) const;
+
+/**
  * Extend the region by specified size on lower and upper sides of
  * region. This region is not modified but a new region is returned.
  *
@@ -300,6 +311,21 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>
+  Region<NDIM, T>::resetBounds(unsigned dir, const T nl, const T nu) const
+  {
+    int newLo[NDIM], newUp[NDIM];
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      newLo[i] = lower[i];
+      newUp[i] = upper[i];
+    }
+    newLo[dir] = nl;
+    newUp[dir] = nu;
+    return Region<NDIM, T>(newLo, newUp);
+  }
+
+  template <unsigned NDIM, typename T>
+  Region<NDIM, T>
   Region<NDIM, T>::extend(const T lowerExt[NDIM], const T upperExt[NDIM]) const
   {
     int newLo[NDIM], newUp[NDIM];
@@ -336,15 +362,7 @@ namespace Lucee
       lce << NDIM << "'";
       throw lce;
     }
-
-    T newLo[NDIM], newUp[NDIM];
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      newLo[i] = lower[i];
-      newUp[i] = upper[i];
-    }
-    newUp[dir] = newLo[dir]+1;
-    return Region<NDIM, T>(newLo, newUp);
+    return this->resetBounds(dir, lower[dir], lower[dir]+1);
   }
 
   template <unsigned NDIM, typename T>
