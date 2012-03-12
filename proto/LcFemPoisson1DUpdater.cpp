@@ -99,7 +99,7 @@ namespace Lucee
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -localStiff(k,m);
+          vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
       }
 
 // insert into global stiffness matrix, adding them to existing value
@@ -153,10 +153,7 @@ namespace Lucee
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
-// global region to index
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
-
-// local stiffness matrix
+// local mass matrix
     Lucee::Matrix<double> localMass(nlocal, nlocal);
 // map for local indices to global indices
     std::vector<int> lgMap(nlocal);
@@ -164,14 +161,11 @@ namespace Lucee
 // storage for computing source contribution
     std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
 
-    Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
-    Lucee::ConstFieldPtr<double> srcPtrp = src.createConstPtr();
+    Lucee::Region<1, int> rgn = grid.getLocalRegion();
 // loop, creating RHS (source terms)
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
+    for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
     {
       nodalBasis->setIndex(i);
-      src.setPtr(srcPtr, i);
-      src.setPtr(srcPtrp, i+1);
 
 // get local mass matrix
       nodalBasis->getMassMatrix(localMass);
@@ -179,9 +173,7 @@ namespace Lucee
       nodalBasis->getLocalToGlobal(lgMap);
 
 // now compute source at each local node
-      for (unsigned k=0; k<nlocal-1; ++k)
-        localSrc[k] = srcPtr[k];
-      localSrc[nlocal-1] = srcPtrp[0]; // get right-most data from first node of right cell
+      nodalBasis->extractFromField(src, localSrc);
 
 // evaluate local mass matrix times local source
       for (unsigned k=0; k<nlocal; ++k)
@@ -214,44 +206,27 @@ namespace Lucee
 //    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
 // copy solution for use as initial guess in KSP solve
-    Lucee::ConstFieldPtr<double> solConstPtr = sol.createConstPtr();
     PetscScalar *ptGuess;
     unsigned count = 0;
     VecGetArray(initGuess, &ptGuess);
-
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
-    {
-      sol.setPtr(solConstPtr, i);
-      for (unsigned k=0; k<nlocal-1; ++k)
-        ptGuess[count++] = solConstPtr[k];
-    }
-// copy solution at last node
-    sol.setPtr(solConstPtr, globalRgn.getUpper(0));
-    ptGuess[count] = solConstPtr[0];
-
+    nodalBasis->copyAllDataFromField(sol, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
 // now solve linear system (initGuess will contain solution)
     KSPSolve(ksp, globalSrc, initGuess);
+// check if solver converged
+    KSPConvergedReason reason;
+    KSPGetConvergedReason(ksp, &reason);
+    bool status = true;
+    if (reason < 0) status = false;
 
-    Lucee::FieldPtr<double> solPtr = sol.createPtr();
-    count = 0;
+// copy solution from PetSc array to solution field
     PetscScalar *ptSol;
     VecGetArray(initGuess, &ptSol);
-
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
-    {
-      sol.setPtr(solPtr, i);
-      for (unsigned k=0; k<nlocal-1; ++k)
-        solPtr[k] = ptSol[count++];
-    }
-// copy solution at last node
-    sol.setPtr(solPtr, globalRgn.getUpper(0));
-    solPtr[0] = ptSol[count];
-
+    nodalBasis->copyAllDataToField(ptSol, sol);
     VecRestoreArray(initGuess, &ptSol);
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max());
   }
 
   void

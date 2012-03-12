@@ -79,28 +79,28 @@ namespace Lucee
  *
  * @return type of this table.
  */
-      std::string getType();
+      std::string getType() const;
 
 /**
  * Get the kind of this table. Not all tables will have a kind field.
  *
  * @return kind of this table.
  */
-      std::string getKind();
+      std::string getKind() const;
 
 /**
  * Get all numbers in table.
  *
  * @return numbers in table.
  */
-      std::vector<double> getAllNumbers();
+      std::vector<double> getAllNumbers() const;
 
 /**
  * Get all strings in table.
  *
  * @return strings in table.
  */
-      std::vector<std::string> getAllStrings();
+      std::vector<std::string> getAllStrings() const;
 
 /**
  * Get all objects in table as a vector of pointers.
@@ -108,7 +108,7 @@ namespace Lucee
  * @return objects in table.
  */
       template <typename T>
-      std::vector<T*> getAllObjects()
+      std::vector<T*> getAllObjects() const
       {
         SHOW_LUA_STACK_SIZE("getAllObjects", L);
         std::vector<T*> res;
@@ -137,7 +137,7 @@ namespace Lucee
  * @param key Key in table.
  * @return string corresponding to key.
  */
-      std::string getString(const std::string& key);
+      std::string getString(const std::string& key) const;
 
 /**
  * Get a number from table.
@@ -145,7 +145,7 @@ namespace Lucee
  * @param key Key in table.
  * @return number corresponding to key.
  */
-      double getNumber(const std::string& key);
+      double getNumber(const std::string& key) const;
 
 /**
  * Get a boolean from table.
@@ -153,7 +153,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true or false
  */
-      bool getBool(const std::string& key);
+      bool getBool(const std::string& key) const;
 
 /**
  * Get user data (i.e. pointer to Lucee object) from table. The object
@@ -163,7 +163,7 @@ namespace Lucee
  * @return reference to object.
  */
       template <typename T>
-      T& getObject(const std::string& key)
+      T& getObject(const std::string& key) const
       {
 // push table object on stack
         lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -195,7 +195,7 @@ namespace Lucee
  * @return reference to object.
  */
       template <typename T>
-      T& getObjectAsBase(const std::string& key)
+      T& getObjectAsBase(const std::string& key) const
       {
 // push table object on stack
         lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -226,7 +226,7 @@ namespace Lucee
  * @return reference to object.
  */
       template <typename T>
-      T& getObjectAsDerived(const std::string& key)
+      T& getObjectAsDerived(const std::string& key) const
       {
 // push table object on stack
         lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -253,7 +253,7 @@ namespace Lucee
  * @param key Key in table.
  * @return vector of string corresponding to key.
  */
-      std::vector<std::string> getStrVec(const std::string& key);
+      std::vector<std::string> getStrVec(const std::string& key) const;
 
 /**
  * Get vector of numbers from table.
@@ -261,7 +261,7 @@ namespace Lucee
  * @param key Key in table.
  * @return vector of numbers corresponding to key.
  */
-      std::vector<double> getNumVec(const std::string& key);
+      std::vector<double> getNumVec(const std::string& key) const;
 
 /**
  * Get a table inside this table.
@@ -269,7 +269,7 @@ namespace Lucee
  * @param nm Name of table to fetch.
  * @return table object.
  */
-      LuaTable getTable(const std::string& nm);
+      LuaTable getTable(const std::string& nm) const;
 
 /**
  * Get reference to specified Lua function.
@@ -277,7 +277,7 @@ namespace Lucee
  * @param nm Name of function.
  * @return reference reference to function.
  */
-      int getFunctionRef(const std::string& nm);
+      int getFunctionRef(const std::string& nm) const;
 
 /**
  * Check if string is in table.
@@ -285,7 +285,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true if exists, false otherwise
  */
-      bool hasString(const std::string& key);
+      bool hasString(const std::string& key) const;
 
 /**
  * Check if number is in table.
@@ -293,7 +293,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true if exists, false otherwise.
  */
-      bool hasNumber(const std::string& key);
+      bool hasNumber(const std::string& key) const;
 
 /**
  * Check if boolean is in table.
@@ -301,7 +301,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true if exists, false otherwise.
  */
-      bool hasBool(const std::string& key);
+      bool hasBool(const std::string& key) const;
 
 /**
  * Check if vector of strings is in table.
@@ -309,7 +309,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true if exists, false otherwise.
  */
-      bool hasStrVec(const std::string& key);
+      bool hasStrVec(const std::string& key) const;
 
 /**
  * Check if vector of numbers is in table.
@@ -317,7 +317,7 @@ namespace Lucee
  * @param key Key in table.
  * @return true if exists, false otherwise.
  */
-      bool hasNumVec(const std::string& key);
+      bool hasNumVec(const std::string& key) const;
 
 /**
  * Check if a table is inside this table.
@@ -325,7 +325,7 @@ namespace Lucee
  * @param nm Name of table to fetch.
  * @return true if exists, false otherwise.
  */
-      bool hasTable(const std::string& nm);
+      bool hasTable(const std::string& nm) const;
 
 /**
  * Check if a function is inside this table.
@@ -333,7 +333,7 @@ namespace Lucee
  * @param nm Name of function to check.
  * @return true if exists, false otherwise.
  */
-      bool hasFunction(const std::string& nm);
+      bool hasFunction(const std::string& nm) const;
 
 /**
  * Check if a Lucee object exists in this table. The type of the
@@ -343,7 +343,7 @@ namespace Lucee
  * @return true if exisit, false otherwise.
  */
       template <typename T>
-      bool hasObject(const std::string& key)
+      bool hasObject(const std::string& key) const
       {
 // push table object on stack
         lua_rawgeti(L, LUA_REGISTRYINDEX, ref);

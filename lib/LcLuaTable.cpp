@@ -48,21 +48,21 @@ namespace Lucee
   }
 
   std::string
-  LuaTable::getType()
+  LuaTable::getType() const
   {
     SHOW_LUA_STACK_SIZE("getType", L);
     return getString("__type");
   }
 
   std::string
-  LuaTable::getKind()
+  LuaTable::getKind() const
   {
     SHOW_LUA_STACK_SIZE("getKind", L);
     return getString("__kind");
   }
 
   std::vector<double>
-  LuaTable::getAllNumbers()
+  LuaTable::getAllNumbers() const
   {
     SHOW_LUA_STACK_SIZE("getAllNumbers", L);
     std::vector<double> res;
@@ -82,7 +82,7 @@ namespace Lucee
   }
 
   std::vector<std::string>
-  LuaTable::getAllStrings()
+  LuaTable::getAllStrings() const
   {
     SHOW_LUA_STACK_SIZE("getAllStrings", L);
     std::vector<std::string> res;
@@ -102,7 +102,7 @@ namespace Lucee
   }
 
   std::string
-  LuaTable::getString(const std::string& key)
+  LuaTable::getString(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("getString", L);
 // push table object on stack
@@ -125,7 +125,7 @@ namespace Lucee
   }
 
   double
-  LuaTable::getNumber(const std::string& key)
+  LuaTable::getNumber(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("getNumber", L);
 // push table object on stack
@@ -148,7 +148,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::getBool(const std::string& key)
+  LuaTable::getBool(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("getBool", L);
 // push table object on stack
@@ -171,7 +171,7 @@ namespace Lucee
   }
 
   std::vector<std::string>
-  LuaTable::getStrVec(const std::string& key)
+  LuaTable::getStrVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("getStrVec", L);
     std::vector<std::string> res;
@@ -201,7 +201,7 @@ namespace Lucee
   }
 
   std::vector<double>
-  LuaTable::getNumVec(const std::string& key)
+  LuaTable::getNumVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("getNumVec", L);
     std::vector<double> res;
@@ -231,7 +231,7 @@ namespace Lucee
   }
 
   LuaTable
-  LuaTable::getTable(const std::string& nm)
+  LuaTable::getTable(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("getTable", L);
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -244,7 +244,7 @@ namespace Lucee
   }
 
   int
-  LuaTable::getFunctionRef(const std::string& nm)
+  LuaTable::getFunctionRef(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("getFunctionRef", L);
 // push table object on stack
@@ -266,7 +266,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasString(const std::string& key)
+  LuaTable::hasString(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasString", L);
 // push table object on stack
@@ -286,7 +286,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasNumber(const std::string& key)
+  LuaTable::hasNumber(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasNumber", L);
 // push table object on stack
@@ -306,7 +306,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasBool(const std::string& key)
+  LuaTable::hasBool(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasBool", L);
 // push table object on stack
@@ -326,7 +326,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasStrVec(const std::string& key)
+  LuaTable::hasStrVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasStrVec", L);
 // push table object on stack
@@ -361,7 +361,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasNumVec(const std::string& key)
+  LuaTable::hasNumVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasNumVec", L);
 // push table object on stack
@@ -395,7 +395,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasTable(const std::string& nm)
+  LuaTable::hasTable(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("hasTable", L);
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -413,7 +413,7 @@ namespace Lucee
   }
 
   bool
-  LuaTable::hasFunction(const std::string& nm)
+  LuaTable::hasFunction(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("hasFunction", L);
 // push table object on stack

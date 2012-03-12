@@ -1,5 +1,23 @@
 # -*- org -*-
 
+* March 9th
+
+  Made the Poisson solver completely agnostic of the basis functions
+  used. Now once I figure out how to apply the BCs in 2D the solver
+  can be rewritten to be dimensionally indenpendent as well as work on
+  a mapped grid.
+
+  Added BCs to 2D Poisson FEM updater. Does not completly work yet.
+
+  Make all Lucee::LuaTable methods const-correct. I do not remember
+  why this was not done in the first place. Perhaps laziness or just
+  negligence?
+
+** TODO Extend UpdaterStatus to take a message on why step failed
+
+   This will allow some semblance of debugging, specially with
+   linear and non-linear system solves with FEM.
+
 * March 8th
 
   Compared 1D FEM Poisson solver with exact solution. Found that I had
@@ -26,6 +44,10 @@
    The Poisson solver and related classes only work in serial. Need to
    convert these to parallel. Perhaps this is not hard, but will need
    to look into the complete chain of classes, including
+
+** TODO Add more regression tests
+   
+   Need to add many more regression tests to the system.
 
 * March 7th
 

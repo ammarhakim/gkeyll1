@@ -45,6 +45,33 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
       throw Lucee::Except("FemPoisson2DUpdater::readInput: Must specify element to use using 'basis'");
+
+// get BCs to apply
+    if (tbl.hasTable("bcLeft"))
+    {
+      bcX.push_back( getBcData(tbl.getTable("bcLeft")) );
+    }
+    if (tbl.hasTable("bcRight"))
+    {
+      bcX.push_back( getBcData(tbl.getTable("bcRight")) );
+    }
+    if (tbl.hasTable("bcBottom"))
+    {
+      bcY.push_back( getBcData(tbl.getTable("bcBottom")) );
+    }
+    if (tbl.hasTable("bcTop"))
+    {
+      bcY.push_back( getBcData(tbl.getTable("bcTop")) );
+    }
+
+// some sanity checks: must either specify both BCs along a direction
+// or none. In the latter case the BC is assumed to be periodic.
+    if (bcX.size() > 0 && bcX.size() != 2)
+      throw Lucee::Except(
+        "FemPoisson2DUpdater::readInput: Must specify both bcLeft/bcRight");
+    if (bcY.size() > 0 && bcY.size() != 2)
+      throw Lucee::Except(
+        "FemPoisson2DUpdater::readInput: Must specify both bcBottom/bcTop");
   }
 
   void
@@ -68,11 +95,6 @@ namespace Lucee
     VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
     VecSetFromOptions(globalSrc);
 
-// get global region
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
-    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
-
 // local stiffness matrix
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
 // map for local indices to global indices
@@ -81,6 +103,8 @@ namespace Lucee
 // storage for passing to petsc
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
 // create sequencer for looping over local box
     Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
     int idx[2];
@@ -101,11 +125,11 @@ namespace Lucee
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -localStiff(k,m);
+          vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
       }
 
 // insert into global stiffness matrix, adding them to existing value
-      MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0], 
+      MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0],
         &vals[0], ADD_VALUES);
     }
 
@@ -144,19 +168,13 @@ namespace Lucee
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
-// global region to index
-    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
-
-// local stiffness matrix
+// local mass matrix
     Lucee::Matrix<double> localMass(nlocal, nlocal);
 // map for local indices to global indices
     std::vector<int> lgMap(nlocal);
 
 // storage for computing source contribution
     std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
-
-    Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
-    Lucee::ConstFieldPtr<double> srcPtrp = src.createConstPtr();
 
 // create sequencer for looping over local box
     Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
@@ -168,18 +186,13 @@ namespace Lucee
 // set index into element basis
       nodalBasis->setIndex(idx);
 
-      src.setPtr(srcPtr, idx);
-      src.setPtr(srcPtrp, idx);
-
 // get local mass matrix
       nodalBasis->getMassMatrix(localMass);
 // get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
 
-// now compute source at each local node (cell i does not own the right-most node)
-      for (unsigned k=0; k<nlocal-1; ++k)
-        localSrc[k] = srcPtr[k];
-      localSrc[nlocal-1] = srcPtrp[0]; // get right-most data from first node of right cell
+// now compute source at each local node
+      nodalBasis->extractFromField(src, localSrc);
 
 // evaluate local mass matrix times local source
       for (unsigned k=0; k<nlocal; ++k)
@@ -196,60 +209,31 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-    int firstLast[2];
-    firstLast[0] = 0; firstLast[1] = nglobal-1;
-    double vals[2];
-    vals[0] = leftEdge; vals[1] = rightEdge;
-// replace first/last values with specified BC values
-    VecSetValues(globalSrc, 2, firstLast, vals, INSERT_VALUES);
-
-// NOTE: We need to reassemble otherwise PetSc barfs. THIS PROBABLY IS
-// NOT THE BEST WAY TO DO THIS STUFF, ANYWAY (Ammar, 3/07/2012)
-    VecAssemblyBegin(globalSrc);
-    VecAssemblyEnd(globalSrc);
-
 // UNCOMMENT FOLLOWING LINE TO VIEW RHS VECTOR
 //    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
 // copy solution for use as initial guess in KSP solve
-    Lucee::ConstFieldPtr<double> solConstPtr = sol.createConstPtr();
     PetscScalar *ptGuess;
     unsigned count = 0;
     VecGetArray(initGuess, &ptGuess);
-
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
-    {
-      sol.setPtr(solConstPtr, i);
-      for (unsigned k=0; k<nlocal-1; ++k)
-        ptGuess[count++] = solConstPtr[k];
-    }
-// copy solution at last node
-    sol.setPtr(solConstPtr, globalRgn.getUpper(0));
-    ptGuess[count] = solConstPtr[0];
-
+    nodalBasis->copyAllDataFromField(sol, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
 // now solve linear system (initGuess will contain solution)
     KSPSolve(ksp, globalSrc, initGuess);
+// check if solver converged
+    KSPConvergedReason reason;
+    KSPGetConvergedReason(ksp, &reason);
+    bool status = true;
+    if (reason < 0) status = false;
 
-    Lucee::FieldPtr<double> solPtr = sol.createPtr();
-    count = 0;
+// copy solution from PetSc array to solution field
     PetscScalar *ptSol;
     VecGetArray(initGuess, &ptSol);
-
-    for (int i=globalRgn.getLower(0); i<globalRgn.getUpper(0); ++i)
-    {
-      sol.setPtr(solPtr, i);
-      for (unsigned k=0; k<nlocal-1; ++k)
-        solPtr[k] = ptSol[count++];
-    }
-// copy solution at last node
-    sol.setPtr(solPtr, globalRgn.getUpper(0));
-    solPtr[0] = ptSol[count];
-
+    nodalBasis->copyAllDataToField(ptSol, sol);
     VecRestoreArray(initGuess, &ptSol);
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max());
   }
 
   void
@@ -259,5 +243,23 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
 // returns one output, solution
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
+  }
+
+  FemPoisson2DUpdater::FemPoissonBcData
+  FemPoisson2DUpdater::getBcData(const Lucee::LuaTable& bct) const
+  {
+    FemPoissonBcData bcData;
+    if (bct.getString("T") == "D")
+      bcData.type = 0;
+    else if ((bct.getString("T") == "N"))
+      bcData.type = 1;
+    else
+    {
+      Lucee::Except lce(
+        "FemPoisson2DUpdater::readInput: Must specify one of \"D\" or \"N\". ");
+      lce << "Specified \"" << bct.getString("T") << " instead";
+      throw lce;
+    }
+    return bcData;
   }
 }
