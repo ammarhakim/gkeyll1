@@ -19,6 +19,10 @@
 // petsc includes
 #include <petsc.h>
 
+// std includes
+#include <map>
+#include <vector>
+
 namespace Lucee
 {
 /**
@@ -104,6 +108,9 @@ namespace Lucee
 
 /** Boundary conditions on left/right edges in each direction */
       FemPoissonBcData bc[3][2];
+
+/** Map of rows to Dirichlet BC values */
+      std::map<int, double> rowBcValues;
 
 /**
  * Function to parse out BC.
