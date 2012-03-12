@@ -136,13 +136,13 @@ TxPrintVar(FC_SYS_STLIBS)
 # Executables
 #
 if (ENABLE_PARALLEL)
-  set(LUCEE_STATIC lucee)
+  set(LUCEE_STATIC gkeyll)
 else ()
-  set(LUCEE_STATIC luceeser)
+  set(LUCEE_STATIC gkeyllser)
 endif ()
 
 # Static link
-add_executable(${LUCEE_STATIC} lucee.cxx LcRegisterModules.cpp)
+add_executable(${LUCEE_STATIC} gkeyll.cxx LcRegisterModules.cpp)
 set_target_properties(${LUCEE_STATIC} PROPERTIES
   LINK_FLAGS "${FC_EXTERNAL_FLAGS}"
 )
