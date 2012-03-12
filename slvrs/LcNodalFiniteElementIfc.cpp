@@ -74,6 +74,22 @@ namespace Lucee
 
   template <unsigned NDIM>
   unsigned
+  NodalFiniteElementIfc<NDIM>::getNumSurfLowerNodes(unsigned dir) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumSurfLowerNodes: Not implemented!");
+    return 0;
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  NodalFiniteElementIfc<NDIM>::getNumSurfUpperNodes(unsigned dir) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumSurfUpperNodes: Not implemented!");
+    return 0;
+  }
+
+  template <unsigned NDIM>
+  unsigned
   NodalFiniteElementIfc<NDIM>::getNumGlobalNodes() const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getNumGlobalNodes: Not implemented!");
@@ -85,6 +101,22 @@ namespace Lucee
   NodalFiniteElementIfc<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobal: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getSurfLowerLocalToGlobal(unsigned dim,
+    std::vector<int>& lgMap) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfLowerLocalToGlobal: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getSurfUpperLocalToGlobal(unsigned dim,
+    std::vector<int>& lgMap) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfUpperLocalToGlobal: Not implemented!");
   }
 
   template <unsigned NDIM>

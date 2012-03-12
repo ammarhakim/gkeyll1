@@ -87,6 +87,24 @@ namespace Lucee
       }
 
 /**
+ * Get number of surface nodes along lower face in specified
+ * direction.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @return number of nodes in element.
+ */
+      virtual unsigned getNumSurfLowerNodes(unsigned dir) const;
+
+/**
+ * Get number of surface nodes along upper face in specified
+ * direction.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @return number of nodes in element.
+ */
+      virtual unsigned getNumSurfUpperNodes(unsigned dir) const;
+
+/**
  * Get number of global nodes in element.
  *
  * @return number of nodes in element.
@@ -111,6 +129,27 @@ namespace Lucee
  * @param lgMap Local node number to global node number mapping.
  */
       virtual void getLocalToGlobal(std::vector<int>& lgMap) const;
+
+/**
+ * Get mapping of local node numbers to global node numbers on lower
+ * face of element in direction 'dir' in the current cell . The input
+ * vector must be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getSurfLowerLocalToGlobal(unsigned dir,
+        std::vector<int>& lgMap) const;
+
+/**
+ * Get mapping of local node numbers to global node numbers on upper
+ * face of element in direction 'dim' in the current cell . The input
+ * vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getSurfUpperLocalToGlobal(unsigned dim,
+        std::vector<int>& lgMap) const;
 
 /**
  * Get mass matrix for this reference element. The output matrix

@@ -299,6 +299,22 @@ test_11()
   LC_ASSERT("Compare boxes", (ibox != ebox) == false);
 }
 
+void
+test_12()
+{
+  int lower[2] = {3, 4};
+  int upper[2] = {13, 20};
+  Lucee::Region<2, int> ibox(lower, upper);
+
+  Lucee::Region<2, int> ibox0 = ibox.resetBounds(0, 1, 4);
+  LC_ASSERT("Testing resetBound method", ibox0.getLower(0) == 1);
+  LC_ASSERT("Testing resetBound method", ibox0.getUpper(0) == 4);
+
+  Lucee::Region<2, int> ibox1 = ibox.resetBounds(1, 15, 17);
+  LC_ASSERT("Testing resetBound method", ibox1.getLower(1) == 15);
+  LC_ASSERT("Testing resetBound method", ibox1.getUpper(1) == 17);
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -314,5 +330,6 @@ main(int argc, char **argv)
   test_9();
   test_10();
   test_11();
+  test_12();
   LC_END_TESTS;
 }

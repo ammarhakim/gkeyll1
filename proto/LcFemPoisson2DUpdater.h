@@ -89,16 +89,21 @@ namespace Lucee
 /** Structure to store BC data. */
       struct FemPoissonBcData
       {
+/** Create object to indicate Bc was not set */
+          FemPoissonBcData()
+            : isSet(false)
+          {}
+
+/** Flag to indicate if Bc was set */
+          bool isSet;
 /** Boundary condition type: one of 0 (for Dirichlet), 1 (for Neumann) */
           unsigned type;
 /** Value to apply */
           double value;
       };
 
-/** Boundary conditions on left/right edges */
-      std::vector<FemPoissonBcData> bcX;
-/** Boundary conditions on bottom/top edges */
-      std::vector<FemPoissonBcData> bcY;
+/** Boundary conditions on left/right edges in each direction */
+      FemPoissonBcData bc[3][2];
 
 /**
  * Function to parse out BC.

@@ -20,6 +20,14 @@
 
 namespace Lucee
 {
+  static const unsigned DX = 0;
+  static const unsigned DY = 1;
+  static const unsigned DZ = 2;
+  static const unsigned LO = 0;
+  static const unsigned HI = 1;
+  static const unsigned DIRICHLET_BC = 0;
+  static const unsigned NEUMANN_BC = 1;
+
   const char *FemPoisson2DUpdater::id = "FemPoisson2D";
 
   FemPoisson2DUpdater::FemPoisson2DUpdater()
@@ -49,29 +57,31 @@ namespace Lucee
 // get BCs to apply
     if (tbl.hasTable("bcLeft"))
     {
-      bcX.push_back( getBcData(tbl.getTable("bcLeft")) );
+      bc[DX][LO] = getBcData(tbl.getTable("bcLeft"));
     }
     if (tbl.hasTable("bcRight"))
     {
-      bcX.push_back( getBcData(tbl.getTable("bcRight")) );
+      bc[DX][HI] = getBcData(tbl.getTable("bcRight"));
     }
     if (tbl.hasTable("bcBottom"))
     {
-      bcY.push_back( getBcData(tbl.getTable("bcBottom")) );
+      bc[DY][LO] = getBcData(tbl.getTable("bcBottom"));
     }
     if (tbl.hasTable("bcTop"))
     {
-      bcY.push_back( getBcData(tbl.getTable("bcTop")) );
+      bc[DY][HI] = getBcData(tbl.getTable("bcTop"));
     }
 
+// TODO: NEED TO CORRECT THESE TESTS
 // some sanity checks: must either specify both BCs along a direction
 // or none. In the latter case the BC is assumed to be periodic.
-    if (bcX.size() > 0 && bcX.size() != 2)
-      throw Lucee::Except(
-        "FemPoisson2DUpdater::readInput: Must specify both bcLeft/bcRight");
-    if (bcY.size() > 0 && bcY.size() != 2)
-      throw Lucee::Except(
-        "FemPoisson2DUpdater::readInput: Must specify both bcBottom/bcTop");
+
+//     if (bcX.size() > 0 && bcX.size() != 2)
+//       throw Lucee::Except(
+//         "FemPoisson2DUpdater::readInput: Must specify both bcLeft/bcRight");
+//     if (bcY.size() > 0 && bcY.size() != 2)
+//       throw Lucee::Except(
+//         "FemPoisson2DUpdater::readInput: Must specify both bcBottom/bcTop");
   }
 
   void
@@ -106,7 +116,8 @@ namespace Lucee
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 // create sequencer for looping over local box
-    Lucee::RowMajorSequencer<2> seq(grid.getLocalRegion());
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion(); 
+    Lucee::RowMajorSequencer<2> seq(localRgn);
     int idx[2];
 
 // loop, creating stiffness matrix
@@ -133,6 +144,43 @@ namespace Lucee
         &vals[0], ADD_VALUES);
     }
 
+    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+// now modify values in stiffness matrix based on Dirichlet Bcs
+    for (unsigned d=0; d<2; ++d)
+    { // d ranges over dimension
+      for (unsigned side=0; side<2; ++side)
+      { // side ranges over lower/upper side along d
+        if (bc[d][side].type == NEUMANN_BC)
+          break; // do nothing for Neumann Bcs
+
+// fetch number of nodes on face of element
+        unsigned nsl = side==0 ? 
+          nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
+
+// allocate space for mapping
+        std::vector<int> lgSurfMap(nsl);
+
+        double dv = bc[d][side].value;
+// create region to loop over side
+        Lucee::Region<2, int> defRgn = localRgn.deflate(d);
+        Lucee::RowMajorSequencer<2> seq(defRgn);
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+// set index into element basis
+          nodalBasis->setIndex(idx);
+// get surface nodes -> global mapping
+          if (side == 0)
+            nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
+          else
+            nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+        }
+      }
+    }
+
+// reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
@@ -250,9 +298,9 @@ namespace Lucee
   {
     FemPoissonBcData bcData;
     if (bct.getString("T") == "D")
-      bcData.type = 0;
+      bcData.type = DIRICHLET_BC;
     else if ((bct.getString("T") == "N"))
-      bcData.type = 1;
+      bcData.type = NEUMANN_BC;
     else
     {
       Lucee::Except lce(
