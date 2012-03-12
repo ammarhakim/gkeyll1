@@ -1,5 +1,19 @@
 # -*- org -*-
 
+* March 12th
+
+  No work on weekend.
+
+  Now have the 2D Poisson solver working. This is basis-function
+  agnostic as well as dimension agnostic. So should merge the 1D and
+  2D updaters into one and test each of these carefully.
+
+  Also, renamed the top-level executable to gkeyll to reflect that
+  this software will be used for solution of GKE.
+
+  Added even more functions to the NodalFiniteElementIfc
+  class. Several more will be still needed for the DG scheme.
+
 * March 9th
 
   Made the Poisson solver completely agnostic of the basis functions
