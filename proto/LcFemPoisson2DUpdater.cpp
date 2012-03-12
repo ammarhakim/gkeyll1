@@ -164,7 +164,11 @@ namespace Lucee
 
         double dv = bc[d][side].value;
 // create region to loop over side
-        Lucee::Region<2, int> defRgn = localRgn.deflate(d);
+        Lucee::Region<2, int> defRgn = side==0 ? 
+          localRgn.resetBounds(d, localRgn.getLower(d), localRgn.getLower(d)+1) :
+          localRgn.resetBounds(d, localRgn.getUpper(d)-1, localRgn.getUpper(d)) ;
+
+// loop, modifying stiffness matrix
         Lucee::RowMajorSequencer<2> seq(defRgn);
         while (seq.step())
         {
@@ -176,6 +180,15 @@ namespace Lucee
             nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
           else
             nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+// reset corresponding rows (Note that some rows may be reset more
+// than once. This should not be a problem, though might make the
+// setup phase a bit slower).
+          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
+
+// now insert row numbers with corresponding values into map for use
+// in the update method
+          for (unsigned r=0; r<nsl; ++r)
+            rowBcValues[lgSurfMap[r]] = dv;
         }
       }
     }
@@ -183,6 +196,9 @@ namespace Lucee
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
+//    MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
 
 //  finalize vector and matrix assembly
     VecAssemblyBegin(globalSrc);
@@ -193,9 +209,6 @@ namespace Lucee
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
-
-// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
-//    MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
 
 // create duplicate to store initial guess
     VecDuplicate(globalSrc, &initGuess);
@@ -257,6 +270,22 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
+    int resetRow[1];
+    double resetVal[1];
+// reset source to apply Dirichlet boundary conditions
+    std::map<int, double>::const_iterator rItr
+      = rowBcValues.begin();
+    for ( ; rItr != rowBcValues.end(); ++rItr)
+    {
+      resetRow[0] = rItr->first; // row index
+      resetVal[0] = rItr->second; // Dirichlet value
+      VecSetValues(globalSrc, 1, resetRow, resetVal, INSERT_VALUES);
+    }
+
+// reassemble RHS after application of Dirichlet Bcs
+    VecAssemblyBegin(globalSrc);
+    VecAssemblyEnd(globalSrc);
+
 // UNCOMMENT FOLLOWING LINE TO VIEW RHS VECTOR
 //    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
@@ -308,6 +337,8 @@ namespace Lucee
       lce << "Specified \"" << bct.getString("T") << " instead";
       throw lce;
     }
+    bcData.value = bct.getNumber("V");
+
     return bcData;
   }
 }

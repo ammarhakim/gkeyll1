@@ -84,6 +84,24 @@ namespace Lucee
   }
 
   unsigned
+  SerendipityElement2D::getNumSurfLowerNodes(unsigned dir) const
+  {
+    if (polyOrder == 1)
+      return 2;
+    else if (polyOrder == 2)
+      return 3;
+  }
+
+  unsigned
+  SerendipityElement2D::getNumSurfUpperNodes(unsigned dir) const
+  {
+    if (polyOrder == 1)
+      return 2;
+    else if (polyOrder == 2)
+      return 3;
+  }
+
+  unsigned
   SerendipityElement2D::getNumGlobalNodes() const
   {
     return numGlobal;
@@ -103,6 +121,54 @@ namespace Lucee
     else if (polyOrder == 2)
     { // TODO: throw an exception for now
       throw Lucee::Except("SerendipityElement2D::getLocalToGlobal: Not implemented!");
+    }
+  }
+
+  void
+  SerendipityElement2D::getSurfLowerLocalToGlobal(unsigned dir,
+    std::vector<int>& lgMap) const
+  {
+    int ix = this->currIdx[0], iy = this->currIdx[1];
+    if (polyOrder == 1)
+    {
+      if (dir == 0)
+      {
+        lgMap[0] = idxr.getIndex(ix, iy);
+        lgMap[1] = idxr.getIndex(ix, iy+1);
+      }
+      else if (dir == 1)
+      {
+        lgMap[0] = idxr.getIndex(ix, iy);
+        lgMap[1] = idxr.getIndex(ix+1, iy);
+      }
+    }
+    else if (polyOrder == 2)
+    { // TODO: throw an exception for now
+      throw Lucee::Except("SerendipityElement2D::getSurfLowerLocalToGlobal: Not implemented!");
+    }
+  }
+
+  void
+  SerendipityElement2D::getSurfUpperLocalToGlobal(unsigned dir,
+    std::vector<int>& lgMap) const
+  {
+    int ix = this->currIdx[0], iy = this->currIdx[1];
+    if (polyOrder == 1)
+    {
+      if (dir == 0)
+      {
+        lgMap[0] = idxr.getIndex(ix+1, iy);
+        lgMap[1] = idxr.getIndex(ix+1, iy+1);
+      }
+      else if (dir == 1)
+      {
+        lgMap[0] = idxr.getIndex(ix, iy+1);
+        lgMap[1] = idxr.getIndex(ix+1, iy+1);
+      }
+    }
+    else if (polyOrder == 2)
+    { // TODO: throw an exception for now
+      throw Lucee::Except("SerendipityElement2D::getSurfUpperLocalToGlobal: Not implemented!");
     }
   }
 
