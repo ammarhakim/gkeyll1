@@ -112,6 +112,68 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::extractFromField(const Lucee::Field<1, double>& fld,
+    std::vector<double>& data)
+  {
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtrp = fld.createConstPtr();
+// attach pointers to proper locations
+    fld.setPtr(fldPtr, this->currIdx[0]);
+    fld.setPtr(fldPtrp, this->currIdx[0]+1);
+
+    unsigned nlocal = this->getNumNodes();
+// extract data
+      for (unsigned k=0; k<nlocal-1; ++k)
+        data[k] = fldPtr[k];
+      data[nlocal-1] = fldPtrp[0]; // get right-most data from first node of right cell
+  }
+
+  void
+  LobattoElement1D::copyAllDataFromField(const Lucee::Field<1, double>& fld,
+    double *data)
+  {
+// region to copy
+    Lucee::Region<1, int> rgn =
+      this->getGrid<Lucee::StructuredGridBase<1> >().getLocalRegion();
+
+    unsigned nlocal = this->getNumNodes();
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+// copy data
+    unsigned count = 0;
+    for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+    {
+      fld.setPtr(fldPtr, i);
+      for (unsigned k=0; k<nlocal-1; ++k)
+        data[count++] = fldPtr[k];
+    }
+// copy data at last node
+    fld.setPtr(fldPtr, rgn.getUpper(0));
+    data[count] = fldPtr[0];
+  }
+
+  void
+  LobattoElement1D::copyAllDataToField(const double *data, Lucee::Field<1, double>& fld)
+  {
+// region to copy
+    Lucee::Region<1, int> rgn =
+      this->getGrid<Lucee::StructuredGridBase<1> >().getLocalRegion();
+
+    unsigned nlocal = this->getNumNodes();
+    Lucee::FieldPtr<double> fldPtr = fld.createPtr();
+// copy data
+    unsigned count = 0;
+    for (int i=rgn.getLower(0); i<rgn.getUpper(0); ++i)
+    {
+      fld.setPtr(fldPtr, i);
+      for (unsigned k=0; k<nlocal-1; ++k)
+        fldPtr[k] = data[count++];
+    }
+// copy field at last node
+    fld.setPtr(fldPtr, rgn.getUpper(0));
+    fldPtr[0] = data[count];
+  }
+
+  void
   LobattoElement1D::setupPoly1()
   {
     unsigned shape[2] = {2,2};

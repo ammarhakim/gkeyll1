@@ -96,6 +96,35 @@ namespace Lucee
  */
       void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
 
+/**
+ * Extract nodal data at current grid location from field and copy it
+ * into a vector. This basically "flattens" the nodal data consistent
+ * with the node layout and the stiffness, mass matrices. The output
+ * vector should be pre-allocated.
+ *
+ * @param fld Field to extract nodal data from.
+ * @param data On output, this containts a copy of extracted data.
+ */
+      void extractFromField(const Lucee::Field<2, double>& fld,
+        std::vector<double>& data);
+
+/**
+ * Copy all nodal data from field and put it into the data array. The
+ * data pointer should be pre-allocated.
+ *
+ * @param fld Field to extract data from.
+ * @param data Data space to copy into.
+ */
+      void copyAllDataFromField(const Lucee::Field<2, double>& fld, double *data);
+
+/**
+ * Copy all nodal data to field from a data array.
+ *
+ * @param data Data space to copy from.
+ * @param fld Field to copy data to.
+ */
+      virtual void copyAllDataToField(const double *data, Lucee::Field<2, double>& fld);
+
     private:
 /** Order of polynomial in element */
       unsigned polyOrder;

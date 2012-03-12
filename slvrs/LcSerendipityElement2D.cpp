@@ -119,6 +119,88 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
+    std::vector<double>& data)
+  {
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_r = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_t = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_tr = fld.createConstPtr();
+
+// attach pointers to proper locations
+    fld.setPtr(fldPtr, this->currIdx[0], this->currIdx[1]);
+    fld.setPtr(fldPtr_r, this->currIdx[0]+1, this->currIdx[1]);
+    fld.setPtr(fldPtr_t, this->currIdx[0], this->currIdx[1]+1);
+    fld.setPtr(fldPtr_tr, this->currIdx[0]+1, this->currIdx[1]+1);
+
+// copy data
+    if (polyOrder == 1)
+    {
+      data[0] = fldPtr[0];
+      data[1] = fldPtr_r[0];
+      data[2] = fldPtr_tr[0];
+      data[3] = fldPtr_t[0];
+    }
+    else if (polyOrder == 2)
+    {
+      throw Lucee::Except("SerendipityElement2D::extractFromField: Not implemented!");
+    }
+  }
+
+  void
+  SerendipityElement2D::copyAllDataFromField(const Lucee::Field<2, double>& fld, double *data)
+  {
+// region to copy
+    Lucee::Region<2, int> rgn =
+      this->getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
+
+    unsigned nlocal = this->getNumNodes();
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+
+    if (polyOrder == 1)
+    {
+      unsigned count = 0;
+      for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+        for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+        {
+          fld.setPtr(fldPtr, i, j);
+          data[count++] = fldPtr[0];
+        }
+    }
+    else if (polyOrder == 2)
+    {
+      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented!");
+    }
+
+  }
+
+  void
+  SerendipityElement2D::copyAllDataToField(const double *data, Lucee::Field<2, double>& fld)
+  {
+// region to copy
+    Lucee::Region<2, int> rgn =
+      this->getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
+
+    unsigned nlocal = this->getNumNodes();
+    Lucee::FieldPtr<double> fldPtr = fld.createPtr();
+
+    if (polyOrder == 1)
+    {
+      unsigned count = 0;
+      for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+        for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+        {
+          fld.setPtr(fldPtr, i, j);
+          fldPtr[0] = data[count++];
+        }
+    }
+    else if (polyOrder == 2)
+    {
+      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented!");
+    }
+  }
+
+  void
   SerendipityElement2D::setupPoly1()
   {
     unsigned shape[2] = {4,4};

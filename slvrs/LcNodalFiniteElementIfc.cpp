@@ -102,6 +102,30 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
+    std::vector<double>& data)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::extractFromField: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::copyAllDataFromField(const Lucee::Field<NDIM, double>& fld,
+    double *data)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::copyAllDataFromField: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::copyAllDataToField(const double *data, 
+    Lucee::Field<NDIM, double>& fld)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::copyAllDataToField: Not implemented!");
+  }
+
+  template <unsigned NDIM>
   NodalFiniteElementIfc<NDIM>::NodalFiniteElementIfc(unsigned numNodes)
     : numNodes(numNodes)
   {

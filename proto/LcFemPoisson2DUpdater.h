@@ -85,6 +85,28 @@ namespace Lucee
       Vec globalSrc, initGuess;
 /** Krylov subspace method context */
       KSP ksp;
+
+/** Structure to store BC data. */
+      struct FemPoissonBcData
+      {
+/** Boundary condition type: one of 0 (for Dirichlet), 1 (for Neumann) */
+          unsigned type;
+/** Value to apply */
+          double value;
+      };
+
+/** Boundary conditions on left/right edges */
+      std::vector<FemPoissonBcData> bcX;
+/** Boundary conditions on bottom/top edges */
+      std::vector<FemPoissonBcData> bcY;
+
+/**
+ * Function to parse out BC.
+ *
+ * @param lt Lua table to get BC data from.
+ * @return Boundary condition data.
+ */
+      FemPoissonBcData getBcData(const Lucee::LuaTable& lt) const;
   };
 }
 
