@@ -245,11 +245,12 @@ namespace Lucee
 // don't write anything at start
       return;
 
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
+// create HDF5 for storing data
+    std::auto_ptr<TxIoBase> io(new TxHdf5Base(comm));
+
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
-
-// create HDF5 for storing data
-    std::auto_ptr<TxIoBase> io(new TxHdf5Base(0));
     std::string fn = outPrefix + "_" + baseName + ".h5";
     TxIoNodeType fNode = io->createFile(fn);
 
