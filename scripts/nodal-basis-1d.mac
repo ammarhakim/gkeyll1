@@ -37,6 +37,17 @@ calcStiffMatrix(basis) := block([n, stiff],
 	        return (stiff)
 );
 
+/** Function to compute stiffness matrix */
+calcGradStiffMatrix_x(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] :
+                              integrate(2/dx*diff(basis[i],x)*basis[j], x, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
 /** Order 2 */
 ord : [-1, 1];
 /** Construct matrix of coefficients */

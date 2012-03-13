@@ -8,9 +8,12 @@ include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
+if (PETSC_FOUND)
+   include_directories(${Petsc_INCLUDE_DIRS})
+endif (PETSC_FOUND)
 
 # Create the library
-add_library(lcslvrs
+set(lcslvrs_SOURCES
   LcAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoundaryCondition.cpp
@@ -43,3 +46,12 @@ add_library(lcslvrs
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
 )
+
+if (PETSC_FOUND)
+  set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
+    LcFemPoissonStructUpdater.cpp
+  )
+endif (PETSC_FOUND)
+
+# Create the library
+add_library(lcslvrs ${lcslvrs_SOURCES})

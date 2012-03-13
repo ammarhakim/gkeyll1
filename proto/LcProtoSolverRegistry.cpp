@@ -21,11 +21,6 @@
 # include <LcPeriodicPoisson2DUpdater.h>
 #endif
 
-#ifdef HAVE_PETSC
-# include <LcFemPoisson1DUpdater.h>
-# include <LcFemPoisson2DUpdater.h>
-#endif
-
 namespace Lucee
 {
   void
@@ -42,11 +37,6 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ModalDg1DUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ModalDgLimiter1DUpdater>;
-
-#ifdef HAVE_PETSC
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoisson1DUpdater>;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoisson2DUpdater>;
-#endif
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;

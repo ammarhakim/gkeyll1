@@ -31,6 +31,10 @@
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
 
+#ifdef HAVE_PETSC
+# include <LcFemPoissonStructUpdater.h>
+#endif
+
 namespace Lucee
 {
   void
@@ -65,6 +69,12 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<3> >;
 
+#ifdef HAVE_PETSC
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<3> >;
+#endif
+
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ConstBoundaryCondition>;
@@ -77,8 +87,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::FunctionSource>;
 
 // register nodal basis functions
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LobattoElement1D>;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
+
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
@@ -93,5 +104,6 @@ namespace Lucee
 // boundary condition. See above.
     Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<1> >::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<2> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<3> >::registerModule(L);
   }
 }
