@@ -1,5 +1,17 @@
 # -*- org -*-
 
+* March 13th
+
+  Added more regression tests. Even more are needed as the code is now
+  undergoing major changes and additions and it is important not to
+  regress on existing functionality.
+
+** TODO Fix parallel test
+
+  Turns out that the sodshock test hangs in parallel. Of course this
+  needs to be debugged ASAP. Perhaps later tonight as I need to focus
+  on the Poisson bracket algorithm for now.
+
 * March 12th
 
   No work on weekend.
