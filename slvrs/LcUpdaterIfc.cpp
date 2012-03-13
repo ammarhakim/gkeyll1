@@ -107,18 +107,8 @@ namespace Lucee
   {
     lfm.appendFunc("setCurrTime", luaSetCurrTime);
     lfm.appendFunc("advance", luaAdvance);
-    lfm.appendFunc("initialize", luaInitialize);
     lfm.appendFunc("setIn", luaSetInpVars);
     lfm.appendFunc("setOut", luaSetOutVars);
-  }
-
-  int
-  UpdaterIfc::luaInitialize(lua_State *L)
-  {
-    UpdaterIfc *updater
-      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
-    updater->initialize();
-    return 0;
   }
 
   int
