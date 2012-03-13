@@ -14,6 +14,12 @@
   Added even more functions to the NodalFiniteElementIfc
   class. Several more will be still needed for the DG scheme.
 
+** TODO Make parallel input files work in serial
+
+   There should not be two different input files for serial and
+   parallel. The same file should work with both. Also, ensure that
+   the write method works with ghost cell-write in parallel.
+
 * March 9th
 
   Made the Poisson solver completely agnostic of the basis functions
