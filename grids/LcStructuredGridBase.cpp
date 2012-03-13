@@ -89,6 +89,8 @@ namespace Lucee
 
 // create decomposed region
     decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
+
+#ifdef HAVE_MPI
 // get pointer to decomposition object
     if (tbl.template hasObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition"))
     {
@@ -97,6 +99,7 @@ namespace Lucee
 // compute decomposition
       decompCalc.calcDecomp(comm->getNumProcs(), *decompRgn);
     }
+#endif
 // compute local region
     localRgn = decompRgn->getRegion(comm->getRank());
   }

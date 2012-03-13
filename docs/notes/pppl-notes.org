@@ -14,11 +14,15 @@
   Added even more functions to the NodalFiniteElementIfc
   class. Several more will be still needed for the DG scheme.
 
-** TODO Make parallel input files work in serial
+** DONE Make parallel input files work in serial
 
    There should not be two different input files for serial and
    parallel. The same file should work with both. Also, ensure that
    the write method works with ghost cell-write in parallel.
+
+   One place this can be taken care off is the StructuredGridBase
+   class when the decomposition is created: basically, in serial the
+   decomposition should not be sought out at all.
 
 * March 9th
 
