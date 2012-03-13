@@ -171,14 +171,6 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
 /**
- * Lua callable method to initialize solver to given time.
- *
- * @param L Lua state to use.
- * @return number of output parameters.
- */
-      static int luaInitialize(lua_State *L);
-
-/**
  * Lua callable method to set current time.
  *
  * @param L Lua state to use.

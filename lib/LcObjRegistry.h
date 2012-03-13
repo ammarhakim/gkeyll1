@@ -93,6 +93,9 @@ namespace Lucee
         ph->pointer->template setBaseType<B>();
         ph->pointer->template setDerivedType<D>();
 
+// run initialization function
+        ph->pointer->initialize();
+
 // get a meta-table for this object and set it
         luaL_getmetatable(L, typeid(D).name());
         lua_setmetatable(L, -2);
