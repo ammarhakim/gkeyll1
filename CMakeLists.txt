@@ -103,10 +103,10 @@ endif (BOOST_FOUND)
 find_package(TxPetsc REQUIRED)
 
 IF(APPLE)
-  # add the Accelerate framework on Mac OS X
-  FIND_LIBRARY(ACCELERATE_LIB Accelerate)
-  MARK_AS_ADVANCED(ACCELERATE_LIB)
-  SET(EXTRA_LIBS ${ACCELERATE_LIB})
+   # add the Accelerate framework on Mac OS X
+   FIND_LIBRARY(ACCELERATE_LIB Accelerate)
+   MARK_AS_ADVANCED(ACCELERATE_LIB)
+   SET(EXTRA_LIBS ${ACCELERATE_LIB})
 else(APPLE)
   # CLapack is used on Unix and Windows
   # WARNING: On Unix should use system Lapack
