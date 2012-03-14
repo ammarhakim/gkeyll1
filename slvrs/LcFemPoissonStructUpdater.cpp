@@ -118,6 +118,7 @@ namespace Lucee
 // now create and initialize Petsc matrix to store stiffness matrix (LHS for Poisson equation)
     MatCreate(MPI_COMM_WORLD, &stiffMat);
     MatSetSizes(stiffMat, nglobal, nglobal, PETSC_DECIDE, PETSC_DECIDE);
+    //MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, 5, PETSC_NULL, &stiffMat);
     MatSetFromOptions(stiffMat);
 
 // create and setup vector

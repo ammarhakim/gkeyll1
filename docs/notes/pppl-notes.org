@@ -6,11 +6,32 @@
   undergoing major changes and additions and it is important not to
   regress on existing functionality.
 
+  Converted the Poisson FEM solver into a dimension independent and
+  nodal basis function agnostic updater. Tested by comparing with
+  exact solution and also did a convergence study. Wrote up a
+  Simulation Journal entry on this. The higher than second order basis
+  have not been benchmarked yet. This awaits completion of the
+  initialization updater for nodal FEM fields.
+
+  The construction of the Petsc matrix (stiffMatrix) is taking a very
+  long time. For example, in 2D 64x64 grid the setup takes 50x more
+  than the inversion.
+
+  This is a problem I have dealt with before: the solution is to
+  pre-allocate the matrix with as much information as possible (number
+  of non-zero entries per row is critical, for example). This makes
+  the setup much faster. Also, the solve itself is rather
+  inefficient. Of course, the defaults are used as-is and so there is
+  a lot of room for improvement.
+
 ** TODO Fix parallel test
 
   Turns out that the sodshock test hangs in parallel. Of course this
-  needs to be debugged ASAP. Perhaps later tonight as I need to focus
-  on the Poisson bracket algorithm for now.
+  needs to be debugged ASAP. This is probably a run-away send/recv
+  which might be very nasty to debug. Grr ....
+
+  Perhaps later tonight as I need to focus on the Poisson bracket
+  algorithm for now.
 
 * March 12th
 
@@ -304,7 +325,7 @@
   function on Legendre polynomials. The coefficients are stored in
   row-major order.
 
-** TODO Add initialize() to BasicObj class
+** DONE Add initialize() to BasicObj class
 
    Add this method and call it immediately after readInput() method in
    the ObjRegistry::makeLuaObj method (Line 91). This will eliminate
