@@ -172,43 +172,45 @@ namespace Lucee
     {
       for (unsigned side=0; side<2; ++side)
       {
-        if (bc[d][side].type == NEUMANN_BC)
-          break; // do nothing for Neumann Bcs
+        if (bc[d][side].type == DIRICHLET_BC)
+        { // we do not need to do anything for Neumann BCs
 
 // fetch number of nodes on face of element
-        unsigned nsl = side==0 ? 
-          nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
+          unsigned nsl = side==0 ?
+            nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
 
 // allocate space for mapping
-        std::vector<int> lgSurfMap(nsl);
+          std::vector<int> lgSurfMap(nsl);
 
-        double dv = bc[d][side].value;
+          double dv = bc[d][side].value;
 // create region to loop over side
-        Lucee::Region<NDIM, int> defRgn = side==0 ? 
-          localRgn.resetBounds(d, localRgn.getLower(d), localRgn.getLower(d)+1) :
-          localRgn.resetBounds(d, localRgn.getUpper(d)-1, localRgn.getUpper(d)) ;
+          Lucee::Region<NDIM, int> defRgn = side==0 ?
+            localRgn.resetBounds(d, localRgn.getLower(d), localRgn.getLower(d)+1) :
+            localRgn.resetBounds(d, localRgn.getUpper(d)-1, localRgn.getUpper(d)) ;
 
 // loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
-        while (seq.step())
-        {
-          seq.fillWithIndex(idx);
+          Lucee::RowMajorSequencer<NDIM> seq(defRgn);
+          while (seq.step())
+          {
+            seq.fillWithIndex(idx);
 // set index into element basis
-          nodalBasis->setIndex(idx);
+            nodalBasis->setIndex(idx);
 // get surface nodes -> global mapping
-          if (side == 0)
-            nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
-          else
-            nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+            if (side == 0)
+              nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
+            else
+              nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
 // setup phase a bit slower).
-          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
+            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
 
 // now insert row numbers with corresponding values into map for use
 // in the update method
-          for (unsigned r=0; r<nsl; ++r)
-            rowBcValues[lgSurfMap[r]] = dv;
+            for (unsigned r=0; r<nsl; ++r)
+              rowBcValues[lgSurfMap[r]] = dv;
+          }
         }
       }
     }
