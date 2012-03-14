@@ -65,14 +65,6 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  double
-  NodalFiniteElementIfc<NDIM>::evalBasis(unsigned n, double x, double y) const
-  {
-    throw Lucee::Except("NodalFiniteElementIfc::evalBasis: Not implemented!");
-    return 0;
-  }
-
-  template <unsigned NDIM>
   unsigned
   NodalFiniteElementIfc<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {

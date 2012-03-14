@@ -112,17 +112,6 @@ namespace Lucee
       virtual unsigned getNumGlobalNodes() const;
 
 /**
- * Evaluate 'n'th basis function at location (x,y) in the reference
- * element.
- *
- * @param n Basis at node 'n'
- * @param x X-location in reference element.
- * @param y Y-location in reference element.
- * @return Value of basis function 'n' at (x,y)
- */
-      virtual double evalBasis(unsigned n, double x, double y) const;
-
-/**
  * Get mapping of local node numbers in the current cell to global
  * node number. The input vector must be pre-allocated.
  *

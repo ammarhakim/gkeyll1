@@ -32,13 +32,25 @@ calcStiffMatrix(basis) := block([n, stiff],
 	        return (stiff)
 );
 
-/** Function to compute stiffness matrix */
+/** Function to compute gradient stiffness matrix */
 calcGradStiffMatrix_x(basis) := block([n, stiff],
                 n : length(basis),
 		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
 		          do (for j from 1 thru n
 			    do (stiff[i,j] : integrate(
                               integrate(2/dx*diff(basis[i],x)*basis[j], x, -1,1), 
+                             y, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute gradient stiffness matrix */
+calcGradStiffMatrix_y(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(
+                              integrate(2/dy*diff(basis[i],y)*basis[j], x, -1,1),
                              y, -1,1))),
 	                  stiff),
 	        return (stiff)
@@ -56,8 +68,10 @@ N2 : 1/4*[
 /** Compute mass matrix */
 N2_mass : calcMassMatrix(N2);
 
-/** Compute stiffness matrix */
+/** Compute stiffness matrices */
 N2_stiff : calcStiffMatrix(N2);
+N2_grad_stiff_x : calcGradStiffMatrix_x(N2);
+N2_grad_stiff_y : calcGradStiffMatrix_y(N2);
 
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
@@ -75,5 +89,7 @@ N3 : [
 /** Compute mass matrix */
 N3_mass : calcMassMatrix(N3);
 
-/** Compute stiffness matrix */
+/** Compute stiffness matrices */
 N3_stiff : calcStiffMatrix(N3);
+N3_grad_stiff_x : calcGradStiffMatrix_x(N3);
+N3_grad_stiff_y : calcGradStiffMatrix_y(N3);
