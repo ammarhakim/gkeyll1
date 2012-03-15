@@ -20,10 +20,21 @@ namespace Lucee
   UpdaterStatus::UpdaterStatus()
     : status(true), dt(std::numeric_limits<double>::max())
   {
+    message = "Success";
   }
 
   UpdaterStatus::UpdaterStatus(bool status, double suggestedDt)
     : status(status), dt(suggestedDt)
+  {
+    if (status)
+      message = "Success";
+    else
+      message = "Failure";
+  }
+
+  UpdaterStatus::UpdaterStatus(bool status, double suggestedDt,
+    const std::string& msg)
+    : status(status), dt(suggestedDt), message(msg)
   {
   }
 }

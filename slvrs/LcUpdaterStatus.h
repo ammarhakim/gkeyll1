@@ -12,6 +12,9 @@
 # include <config.h>
 #endif
 
+// std includes
+#include <string>
+
 namespace Lucee
 {
 /**
@@ -39,6 +42,16 @@ namespace Lucee
       UpdaterStatus(bool status, double suggestedDt);
 
 /**
+ * Create a new updater status object.
+ *
+ * @param status Status of update() method.
+ * @param suggestedDt Suggested time-step.
+ * @param msg Message for status.
+ */
+      UpdaterStatus(bool status, double suggestedDt,
+        const std::string& msg);
+
+/**
  * @return Status of update() method.
  */
       bool getStatus() const { return status; }
@@ -52,6 +65,8 @@ namespace Lucee
       bool status;
 /** Suggested time-step */
       double dt;
+/** Message to explicate the status */
+      std::string message;
   };
 }
 

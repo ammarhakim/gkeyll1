@@ -135,8 +135,9 @@ namespace Lucee
     else
       lua_pushboolean(L, 0);
     lua_pushnumber(L, s.dt);
+    lua_pushstring(L, s.message.c_str());
 
-    return 2;
+    return 3;
   }
 
   int

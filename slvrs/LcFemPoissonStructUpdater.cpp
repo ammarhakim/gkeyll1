@@ -16,6 +16,7 @@
 #include <LcStructGridField.h>
 
 // std includes
+#include <sstream>
 #include <vector>
 
 namespace Lucee
@@ -116,12 +117,21 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // now create and initialize Petsc matrix to store stiffness matrix (LHS for Poisson equation)
-    MatCreate(MPI_COMM_WORLD, &stiffMat);
-    MatSetSizes(stiffMat, nglobal, nglobal, PETSC_DECIDE, PETSC_DECIDE);
-    //MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, 5, PETSC_NULL, &stiffMat);
+    //MatCreate(MPI_COMM_WORLD, &stiffMat);
+    //MatSetSizes(stiffMat, nglobal, nglobal, PETSC_DECIDE, PETSC_DECIDE);
+#ifdef HAVE_MPI
+    throw Lucee::Except("FemPoissonStructUpdater does not yet work in parallel!");
+#else
+// Explicit initialization of stiffness matrix speeds up
+// initialization tremendously.
+    int nz = 10; // number of non-zero entries per row (WHAT SHOULD IT REALLY BE?)
+    MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
+#endif
     MatSetFromOptions(stiffMat);
 
-// create and setup vector
+// create and setup vector (NOTE: ACCORDING TO MIKE MCCOURT ONE SHOULD
+// USE MatGetVecs INSTEAD OF VecCreate. THIS ENSURES THAT THE PARALLEL
+// LAYOUT OF THE MATRIX & VECTOR ARE THE SAME)
     VecCreate(MPI_COMM_WORLD, &globalSrc);
     VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
     VecSetFromOptions(globalSrc);
@@ -325,8 +335,22 @@ namespace Lucee
 // check if solver converged
     KSPConvergedReason reason;
     KSPGetConvergedReason(ksp, &reason);
+    int itNum;
+    KSPGetIterationNumber(ksp, &itNum);
+
+// construct message to send back to Lua
+    std::ostringstream msgStrm;
     bool status = true;
-    if (reason < 0) status = false;
+    if (reason < 0) 
+    {
+      status = false;
+      msgStrm << FemPoissonStructUpdater<NDIM>::id << ": KSPSolve failed!";
+    }
+    else
+    {
+      msgStrm << FemPoissonStructUpdater<NDIM>::id << ": KSPSolve converged.";
+    }
+    msgStrm << " Number of iterations " << itNum;
 
 // copy solution from PetSc array to solution field
     PetscScalar *ptSol;
@@ -334,7 +358,8 @@ namespace Lucee
     nodalBasis->copyAllDataToField(ptSol, sol);
     VecRestoreArray(initGuess, &ptSol);
 
-    return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max());
+    return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max(),
+      msgStrm.str());
   }
 
   template <unsigned NDIM>
