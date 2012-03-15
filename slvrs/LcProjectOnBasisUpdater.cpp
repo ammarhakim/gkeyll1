@@ -190,7 +190,7 @@ namespace Lucee
     for (int i=-res.size(); i<0; ++i)
     {
       if (!lua_isnumber(L, i))
-        throw Lucee::Except("ProjectOnBasisUpdater::evaluateFunction::getSource: Return value not a number");
+        throw Lucee::Except("ProjectOnBasisUpdater::evaluateFunction: Return value not a number");
       res[res.size()+i] = lua_tonumber(L, i);
     }
     lua_pop(L, 1);
