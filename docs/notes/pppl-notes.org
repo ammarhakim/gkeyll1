@@ -1,5 +1,11 @@
 # -*- org -*-
 
+* March 14th
+
+  Added more regression tests. Added an optional message to
+  UpdaterStatus class that allows updater to tell Lua what happened,
+  specially in case of failure.
+
 * March 13th
 
   Added more regression tests. Even more are needed as the code is now

@@ -345,6 +345,7 @@ namespace Lucee
     {
       status = false;
       msgStrm << FemPoissonStructUpdater<NDIM>::id << ": KSPSolve failed!";
+      msgStrm << " Petsc reason code was " << reason << ".";
     }
     else
     {
