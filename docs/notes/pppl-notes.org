@@ -7,36 +7,49 @@
 
 * March 15th
 
-  The nodal CG/DG schemes need a special nodal field type. This method
-  of storing the nodal data in extra components of the Field class is
-  not a maintainable model for the long run. So how to do this? One
-  option is to introduce a field type that depends on the
-  NodalFiniteElementIfc derived classes. Essentially, the first step
-  would be to define a grid, then a element basis and then create
-  fields which take these element basis as input. For example:
+  Wrote EvalOnNodesUpdater that initializes a nodal field from a Lua
+  function. Seems to work, although more careful testing is
+  needed. 
+
+  One major issue is how to plot these fields? VizScheme/Visit does
+  not work for such grids, at least now, although plans are afoot at
+  TX to extend Visit and VizSchema to support such meshes. An option
+  for now is to write a Python script that converts the H5 output to
+  VTK which is then used for plotting. Conversion is not such a big
+  deal for 2D fields but can become very painful (slow) in 3D.
+
+** A genuine nodal field type
+
+   The nodal CG/DG schemes need a special nodal field type. This
+   method of storing the nodal data in extra components of the Field
+   class is not a maintainable model for the long run. So how to do
+   this? One option is to introduce a field type that depends on the
+   NodalFiniteElementIfc derived classes. Essentially, the first step
+   would be to define a grid, then a element basis and then create
+   fields which take these element basis as input. For example:
 
 #+BEGIN_EXAMPLE
 
-  -- create grid
-  grid = Grid.RectCart2D { ... }
+   -- create grid
+   grid = Grid.RectCart2D { ... }
 
-  -- create basis
-  lobattoBasis = NodalFiniteElement2D.Serendipity {
-    onGrid = grid,
-  }
+   -- create basis
+   lobattoBasis = NodalFiniteElement2D.Serendipity {
+     onGrid = grid,
+   }
 
-  -- now construct fields
-  phi = DataStruct.NodalField {
-    onBasis = basis,
-    numComponents = 5,
-    shareCommonNodes = true, -- true for CG, false for DG
-    ...
-  }
+   -- now construct fields
+   phi = DataStruct.NodalField {
+     onBasis = basis,
+     numComponents = 5,
+     shareCommonNodes = true, -- true for CG, false for DG
+     ...
+   }
 #+END_EXAMPLE
 
-  The nodal fields object now allocates enough space depending on
-  "shareCommonNodes" flag which tells it if overlapping nodes between
-  cells are shared or not.
+   The nodal fields object now allocates enough space depending on
+   "shareCommonNodes" flag which tells it if overlapping nodes between
+   cells are shared or not.
 
 * March 14th
 
