@@ -87,6 +87,13 @@ namespace Lucee
       }
 
 /**
+ * Get local indices of nodes exclusively owned by each cell.
+ *
+ * @param ndIds On output indices. Vector is cleared and data filled in.
+ */
+      virtual void getExclusiveNodeIndices(std::vector<unsigned>& ndIds);
+
+/**
  * Get number of surface nodes along lower face in specified
  * direction.
  *
@@ -141,12 +148,20 @@ namespace Lucee
         std::vector<int>& lgMap) const;
 
 /**
+ * Get coordinates of all nodes in element. The output matrix
+ * 'nodeCoords' should be pre-allocated have shape numNodes X 3.
+ *
+ * @param nodeCoords Node coordinates. Should be pre-allocated.
+ */
+      virtual void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *
  * @param NjNk On output, mass matrix of element.
  */
-      virtual void getMassMatrix(Lucee::Matrix<double> NjNk) const;
+      virtual void getMassMatrix(Lucee::Matrix<double>& NjNk) const;
 
 /**
  * Get stiffness matrix (grad.Nj \dot grad.Nk) for this reference
@@ -154,7 +169,7 @@ namespace Lucee
  *
  * @param DNjDNk On output, stiffness matrix of element.
  */
-      virtual void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
+      virtual void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
  * Extract nodal data at current grid location from field and copy it

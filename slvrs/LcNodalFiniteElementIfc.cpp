@@ -65,6 +65,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getExclusiveNodeIndices: Not implemented!");
+  }
+
+  template <unsigned NDIM>
   unsigned
   NodalFiniteElementIfc<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {
@@ -113,14 +120,21 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getMassMatrix(Lucee::Matrix<double> NjNk) const
+  NodalFiniteElementIfc<NDIM>::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNodalCoordinates: Not implemented!");    
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getMassMatrix: Not implemented!");
   }
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
+  NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getStiffnessMatrix: Not implemented!");
   }

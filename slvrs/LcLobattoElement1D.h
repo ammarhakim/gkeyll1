@@ -100,7 +100,7 @@ namespace Lucee
  *
  * @param NjNk On output, mass matrix of element.
  */
-      void getMassMatrix(Lucee::Matrix<double> NjNk) const;
+      void getMassMatrix(Lucee::Matrix<double>& NjNk) const;
 
 /**
  * Get stiffness matrix (grad.Nj \dot grad.Nk) for this reference
@@ -108,7 +108,7 @@ namespace Lucee
  *
  * @param DNjDNk On output, stiffness matrix of element.
  */
-      void getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const;
+      void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
  * Extract nodal data at current grid location from field and copy it

@@ -150,13 +150,13 @@ namespace Lucee
   }
 
   void
-  LobattoElement1D::getMassMatrix(Lucee::Matrix<double> NjNk) const
+  LobattoElement1D::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     NjNk.copy(refNjNk);
   }
 
   void
-  LobattoElement1D::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
+  LobattoElement1D::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
     DNjDNk.copy(refDNjDNk);
   }

@@ -15,6 +15,7 @@
 #include <LcCopyBoundaryCondition.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
+#include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
@@ -74,6 +75,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<3> >;
 #endif
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<3> >;
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;

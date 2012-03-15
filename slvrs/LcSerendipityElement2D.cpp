@@ -83,6 +83,24 @@ namespace Lucee
     }
   }
 
+  void
+  SerendipityElement2D::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  {
+    ndIds.clear();
+    if (polyOrder == 1)
+    {
+      ndIds.resize(1);
+      ndIds[0] = 1;
+    }
+    else if (polyOrder == 2)
+    {
+      ndIds.resize(3);
+      ndIds[0] = 1;
+      ndIds[1] = 5;
+      ndIds[2] = 8;
+    }
+  }
+
   unsigned
   SerendipityElement2D::getNumSurfLowerNodes(unsigned dir) const
   {
@@ -173,13 +191,64 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::getMassMatrix(Lucee::Matrix<double> NjNk) const
+  SerendipityElement2D::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
+  {
+// get grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+// set index and get centroid coordinate
+    grid.setIndex(this->currIdx);
+    double xc[3], dx2, dy2;
+    grid.getCentroid(xc);
+    dx2 = 0.5*grid.getDx(0);
+    dy2 = 0.5*grid.getDx(1);
+
+// first 4 nodes are same in polyOrder 1 and 2
+    nodeCoords(0,0) = xc[0]-dx2;
+    nodeCoords(0,1) = xc[1]-dy2;
+    nodeCoords(0,2) = 0.0;
+
+    nodeCoords(1,0) = xc[0]+dx2;
+    nodeCoords(1,1) = xc[1]-dy2;
+    nodeCoords(1,2) = 0.0;
+    
+    nodeCoords(2,0) = xc[0]+dx2;
+    nodeCoords(2,1) = xc[1]+dy2;
+    nodeCoords(2,2) = 0.0;
+
+    nodeCoords(3,0) = xc[0]-dx2;
+    nodeCoords(3,1) = xc[1]+dy2;
+    nodeCoords(3,2) = 0.0;
+
+    if (polyOrder == 2)
+    {
+// edge nodes coordinates
+      nodeCoords(4,0) = xc[0];
+      nodeCoords(4,1) = xc[1]-dy2;
+      nodeCoords(4,2) = 0.0;
+
+      nodeCoords(5,0) = xc[0]+dx2;
+      nodeCoords(5,1) = xc[1];
+      nodeCoords(5,2) = 0.0;
+
+      nodeCoords(6,0) = xc[0];
+      nodeCoords(6,1) = xc[1]+dy2;
+      nodeCoords(6,2) = 0.0;
+
+      nodeCoords(7,0) = xc[0]-dx2;
+      nodeCoords(7,1) = xc[1];
+      nodeCoords(7,2) = 0.0;
+    }
+  }
+
+  void
+  SerendipityElement2D::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     NjNk.copy(refNjNk);
   }
 
   void
-  SerendipityElement2D::getStiffnessMatrix(Lucee::Matrix<double> DNjDNk) const
+  SerendipityElement2D::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
     DNjDNk.copy(refDNjDNk);
   }
