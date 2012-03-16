@@ -95,6 +95,21 @@ namespace Lucee
         std::vector<int>& lgMap) const;
 
 /**
+ * Get local indices of nodes exclusively owned by each cell.
+ *
+ * @param ndIds On output indices. Vector is cleared and data filled in.
+ */
+      void getExclusiveNodeIndices(std::vector<unsigned>& ndIds);
+
+/**
+ * Get coordinates of all nodes in element. The output matrix
+ * 'nodeCoords' should be pre-allocated have shape numNodes X 3.
+ *
+ * @param nodeCoords Node coordinates. Should be pre-allocated.
+ */
+      void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *

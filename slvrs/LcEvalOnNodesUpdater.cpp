@@ -139,7 +139,7 @@ namespace Lucee
   template <unsigned NDIM>
   void
   EvalOnNodesUpdater<NDIM>::evaluateFunction(Lucee::LuaState& L, double tm,
-    const Lucee::Matrix<double> nc, double nn, std::vector<double>& res)
+    const Lucee::Matrix<double> nc, unsigned nn, std::vector<double>& res)
   {
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
@@ -151,7 +151,7 @@ namespace Lucee
     if (lua_pcall(L, 4, res.size(), 0) != 0)
     {
       Lucee::Except lce("EvalOnNodesUpdater::evaluateFunction: ");
-      lce << "Problem evaluating function supplied as 'project' ";
+      lce << "Problem evaluating function supplied as 'evaluate' ";
       throw lce;
     }
 // fetch results
