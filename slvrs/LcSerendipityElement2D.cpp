@@ -628,11 +628,9 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::getGlobalIndices(int i, int j, std::vector<int>& glob,
+  SerendipityElement2D::getGlobalIndices(int ix, int iy, std::vector<int>& glob,
     std::vector<int>& loc)
   {
-    int ix = this->currIdx[0], iy = this->currIdx[1];
-
 // The code below basically is to compute the local -> global mapping
 // for exclusively owned nodes. Note that on the right edge, top edge
 // and top-right corner one needs to be careful due to the ownership
