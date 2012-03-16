@@ -18,6 +18,15 @@
   VTK which is then used for plotting. Conversion is not such a big
   deal for 2D fields but can become very painful (slow) in 3D.
 
+  Turns out that the polyOrder 2 Serendipity elements are nasty: it is
+  not trivial to figure out the number of global nodes or the local ->
+  global mapping. My initial simplistic approach is completely wrong,
+  which I discovered on trying to solve the Poisson equation using
+  these more complicated elements.
+
+  Formulated the nodal DG scheme. At this point I understand how every
+  term works. Next to implement this for the Poisson bracket operator.
+
 ** A genuine nodal field type
 
    The nodal CG/DG schemes need a special nodal field type. This

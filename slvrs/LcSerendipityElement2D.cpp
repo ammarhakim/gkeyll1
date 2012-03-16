@@ -17,6 +17,26 @@ namespace Lucee
 {
   const char *SerendipityElement2D::id = "Serendipity";
 
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 3 nodes (bottom).
+ */
+  static
+  unsigned F_func(unsigned nx, unsigned ny, int ix, int iy)
+  {
+    return (2*nx+1)*iy + (nx+1)*iy + 2*ix;
+  }
+
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 2 nodes (middle).
+ */
+  static
+  unsigned G_func(unsigned nx, unsigned ny, int ix, int iy)
+  {
+    return (2*nx+1)*iy + (nx+1)*iy + (2*nx+1) + ix;
+  }
+
   SerendipityElement2D::SerendipityElement2D()
     : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
       refNjNk(4,4), refDNjDNk(4,4), idxr(
@@ -59,10 +79,15 @@ namespace Lucee
     Lucee::Region<2, int> grgn = grid.getGlobalRegion();
     unsigned nx = grgn.getShape(0), ny = grgn.getShape(1);
 
+    numX = nx; numY = ny;
+
     if (polyOrder == 1)
       numGlobal = (nx+1)*(ny+1);
     else if (polyOrder ==2)
-      numGlobal = (2*nx+1)*(2*ny+1);
+// there are 3 owned nodes per cell, 2*nx and 2*ny edge nodes along
+// the top and right edges and the 1 accounts for the node on the
+// top-right corner.
+      numGlobal = 3*nx*ny + 2*nx + 2*ny + 1;
 
 // create indexer for local -> global mapping: we are using a
 // row-major indexing scheme to be consistent with Petsc default
@@ -71,13 +96,10 @@ namespace Lucee
     int shape[2];
     if (polyOrder == 1)
     {
+// for 4 nodes per element we can use a simple indexer to map local to
+// global. For 8 node element the F_func() and G_func() methods need
+// to be used instead.
       shape[0] = nx+1; shape[1] = ny+1;
-      Lucee::Region<2, int> lgRgn(shape);
-      idxr = RowMajorIndexer<2>(lgRgn);
-    }
-    else if (polyOrder == 2)
-    {
-      shape[0] = 2*nx+1; shape[1] = 2*ny+1;
       Lucee::Region<2, int> lgRgn(shape);
       idxr = RowMajorIndexer<2>(lgRgn);
     }
@@ -137,8 +159,16 @@ namespace Lucee
       lgMap[3] = idxr.getIndex(ix, iy+1);
     }
     else if (polyOrder == 2)
-    { // TODO: throw an exception for now
-      throw Lucee::Except("SerendipityElement2D::getLocalToGlobal: Not implemented!");
+    {
+      lgMap[0] = F_func(numX, numY, ix, iy);
+      lgMap[1] = F_func(numX, numY, ix, iy) + 2;
+      lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
+      lgMap[3] = F_func(numX, numY, ix, iy+1);
+
+      lgMap[4] = F_func(numX, numY, ix, iy) + 1;
+      lgMap[5] = G_func(numX, numY, ix, iy) + 1;
+      lgMap[6] = F_func(numX, numY, ix, iy+1) + 1;
+      lgMap[7] = G_func(numX, numY, ix, iy);
     }
   }
 
@@ -161,8 +191,20 @@ namespace Lucee
       }
     }
     else if (polyOrder == 2)
-    { // TODO: throw an exception for now
-      throw Lucee::Except("SerendipityElement2D::getSurfLowerLocalToGlobal: Not implemented!");
+    {
+      throw Lucee::Except("SerendipityElement2D::getSurfLowerLocalToGlobal: polyOrder 2 not implemented");
+      if (dir == 0)
+      {
+        lgMap[0] = F_func(numX, numY, ix, iy);
+        lgMap[1] = G_func(numX, numY, ix, iy);
+        lgMap[2] = F_func(numX, numY, ix, iy+1);
+      }
+      else if (dir == 1)
+      {
+        lgMap[0] = F_func(numX, numY, ix, iy);
+        lgMap[1] = F_func(numX, numY, ix, iy) + 1;
+        lgMap[2] = F_func(numX, numY, ix, iy) + 2;
+      }
     }
   }
 
@@ -185,8 +227,19 @@ namespace Lucee
       }
     }
     else if (polyOrder == 2)
-    { // TODO: throw an exception for now
-      throw Lucee::Except("SerendipityElement2D::getSurfUpperLocalToGlobal: Not implemented!");
+    {
+      if (dir == 0)
+      {
+        lgMap[0] = F_func(numX, numY, ix, iy) + 2;
+        lgMap[1] = G_func(numX, numY, ix, iy) + 1;
+        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
+      }
+      else if (dir == 1)
+      {
+        lgMap[0] = F_func(numX, numY, ix, iy+1);
+        lgMap[1] = F_func(numX, numY, ix, iy+1) + 1;
+        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
+      }
     }
   }
 
@@ -278,7 +331,15 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::extractFromField: Not implemented!");
+      data[0] = fldPtr[0];
+      data[1] = fldPtr_r[0];
+      data[2] = fldPtr_tr[0];
+      data[3] = fldPtr_t[0];
+
+      data[4] = fldPtr[1];
+      data[5] = fldPtr_r[2];
+      data[6] = fldPtr_t[1];
+      data[7] = fldPtr[2];
     }
   }
 
@@ -289,9 +350,7 @@ namespace Lucee
     Lucee::Region<2, int> rgn =
       this->getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
 
-    unsigned nlocal = this->getNumNodes();
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
-
     if (polyOrder == 1)
     {
       unsigned count = 0;
@@ -304,9 +363,8 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented!");
+      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented for polyOrder 2");
     }
-
   }
 
   void
@@ -316,7 +374,6 @@ namespace Lucee
     Lucee::Region<2, int> rgn =
       this->getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
 
-    unsigned nlocal = this->getNumNodes();
     Lucee::FieldPtr<double> fldPtr = fld.createPtr();
 
     if (polyOrder == 1)
@@ -331,7 +388,7 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented!");
+      throw Lucee::Except("SerendipityElement2D::copyAllDataToField: Not implemented for polyOrder 2");
     }
   }
 

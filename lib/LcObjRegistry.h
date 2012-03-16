@@ -18,6 +18,7 @@
 #include <loki/Singleton.h>
 
 // std includes
+#include <iostream>
 #include <typeinfo>
 
 namespace Lucee
@@ -76,6 +77,7 @@ namespace Lucee
  */
       static int makeLuaObj(lua_State *L)
       {
+        //std::cout << "Setting up object of type " << D::id << std::endl;
         size_t nbytes = sizeof(Lucee::PointerHolder<D>);
         Lucee::PointerHolder<D> *ph =
           (Lucee::PointerHolder<D>*) lua_newuserdata(L, nbytes);

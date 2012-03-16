@@ -20,6 +20,13 @@ namespace Lucee
 {
   const char *LobattoElement1D::id = "Lobatto";
 
+  static
+  double
+  mapUnitToX(double xc, double dx, double eta)
+  {
+    return 0.5*dx*eta + xc;
+  }
+
   LobattoElement1D::LobattoElement1D()
     : Lucee::NodalFiniteElementIfc<1>(2), polyOrder(1), 
       refNjNk(2,2), refDNjDNk(2,2)
@@ -146,6 +153,49 @@ namespace Lucee
     else if (polyOrder == 3)
     { // four nodes per cell
       lgMap[0] = 3*ix+3;
+    }
+  }
+
+  void
+  LobattoElement1D::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  {
+    ndIds.clear();
+    ndIds.resize(this->getNumNodes()-1);
+    for (unsigned n=0; n<this->getNumNodes()-1; ++n)
+      ndIds[n] = n+1;
+  }
+
+  void
+  LobattoElement1D::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
+  {
+// get grid
+    const Lucee::StructuredGridBase<1>& grid
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+// set index and get centroid coordinate
+    grid.setIndex(this->currIdx);
+    double xc[3], dx;
+    grid.getCentroid(xc);
+    dx = grid.getDx(0);
+
+    nodeCoords = 0.0;
+    if (polyOrder == 1)
+    {
+      nodeCoords(0,0) = mapUnitToX(xc[0], dx, -1);
+      nodeCoords(1,0) = mapUnitToX(xc[0], dx, 1);
+    }
+    else if (polyOrder == 2)
+    {
+      nodeCoords(0,0) = mapUnitToX(xc[0], dx, -1);
+      nodeCoords(1,0) = mapUnitToX(xc[0], dx, 0);
+      nodeCoords(2,0) = mapUnitToX(xc[0], dx, 1);
+    }
+    else if (polyOrder == 3)
+    {
+      double s5 = std::sqrt(1.0/5.0);
+      nodeCoords(0,0) = mapUnitToX(xc[0], dx, -1);
+      nodeCoords(1,0) = mapUnitToX(xc[0], dx, -s5);
+      nodeCoords(2,0) = mapUnitToX(xc[0], dx, s5);
+      nodeCoords(3,0) = mapUnitToX(xc[0], dx, 1);
     }
   }
 

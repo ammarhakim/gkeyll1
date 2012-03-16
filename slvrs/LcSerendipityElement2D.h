@@ -190,6 +190,8 @@ namespace Lucee
       unsigned numGlobal;
 /** Indexer to map (i,j) into a linear index */
       Lucee::RowMajorIndexer<2> idxr;
+/** Number of cells in X and Y direction */
+      unsigned numX, numY;
 
 /**
  * Create matrices for 1st order element.
