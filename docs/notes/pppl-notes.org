@@ -5,6 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 16th
+
+  Completed methods needed to have 1D Lobatto elements work with
+  polyOrder > 1. This proved to be easy but turned into a debugging
+  headache due to a "trivial" bug I introduced.
+
+  The methods for 2D Serendipity elements with polyOrder > 2 are
+  considerably tricker to implement. Turns out that the missing nodes
+  in the interior make the local -> global mapping really
+  hairy. However, I think this is now correct.
+
+  On the other hand the methods copyAllDataFromField and
+  copyAllDataToField are turning out to be challenging. The mapping
+  from a field to the flat array needed in PetSc is very confusing and
+  I need to figure this out before the Serendipity elements can be
+  used for polyOrder 2.
+
 * March 15th
 
   Wrote EvalOnNodesUpdater that initializes a nodal field from a Lua

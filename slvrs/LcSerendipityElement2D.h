@@ -202,6 +202,19 @@ namespace Lucee
  * Create matrices for 2nd order element.
  */
       void setupPoly2();
+
+/**
+ * Helper function to copy data from/to a flat array, given a Lucee
+ * field. This method also takes into account the numbering of nodes
+ * in the "ghost" cells.
+ *
+ * @param i I-th index into field.
+ * @param j J-th index into field.
+ * @param glob On output, these are the exclusive global indices in cell (i,j)
+ * @param loc On output, these are the local owned indices (offset 0).
+ */
+      void getGlobalIndices(int i, int j, std::vector<int>& glob, 
+        std::vector<int>& loc);
   };
 }
 
