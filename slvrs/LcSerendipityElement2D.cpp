@@ -192,7 +192,6 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::getSurfLowerLocalToGlobal: polyOrder 2 not implemented");
       if (dir == 0)
       {
         lgMap[0] = F_func(numX, numY, ix, iy);
@@ -363,7 +362,18 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::copyAllDataFromField: Not implemented for polyOrder 2");
+      std::vector<int> glob, loc;
+      for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+        for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+        {
+          fld.setPtr(fldPtr, i, j);
+// determine mapping of exclusively owned nodes
+          getGlobalIndices(i, j, glob, loc);
+          for (unsigned n=0; n<glob.size(); ++n)
+          {
+            data[glob[n]] = fldPtr[loc[n]];
+          }
+        }
     }
   }
 
@@ -388,7 +398,18 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      throw Lucee::Except("SerendipityElement2D::copyAllDataToField: Not implemented for polyOrder 2");
+      std::vector<int> glob, loc;
+      for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+        for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+        {
+          fld.setPtr(fldPtr, i, j);
+// determine mapping of exclusively owned nodes
+          getGlobalIndices(i, j, glob, loc);
+          for (unsigned n=0; n<glob.size(); ++n)
+          {
+            fldPtr[loc[n]] = data[glob[n]];
+          }
+        }
     }
   }
 
@@ -604,5 +625,60 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 0.5*dx*0.5*dy;
+  }
+
+  void
+  SerendipityElement2D::getGlobalIndices(int i, int j, std::vector<int>& glob,
+    std::vector<int>& loc)
+  {
+    int ix = this->currIdx[0], iy = this->currIdx[1];
+
+// The code below basically is to compute the local -> global mapping
+// for exclusively owned nodes. Note that on the right edge, top edge
+// and top-right corner one needs to be careful due to the ownership
+// rules of structured grids. This method should probably be promoted
+// to the top-level LcNodalFiniteElementIfc class and replace the
+// getExclusiveNodeIndices, which returns local node numbers and does
+// not account for the special cases for upper edges and corner.
+
+    glob.clear();
+    loc.clear();
+
+    if ((ix<numX) && (iy<numY))
+    { // nodes inside grid proper
+      glob.resize(3);
+      glob[0] = F_func(numX, numY, ix, iy); // node 1
+      glob[1] = F_func(numX, numY, ix, iy) + 1; // node 5
+      glob[2] = G_func(numX, numY, ix, iy); // node 8
+
+      loc.resize(3);
+      loc[0] = 0; loc[1] = 1; loc[2] = 2;
+    }
+    if ((ix==numX) && (iy<numY))
+    { // right edge nodes
+      glob.resize(2);
+      glob[0] = F_func(numX, numY, ix, iy); // node 1
+      glob[1] = G_func(numX, numY, ix, iy); // node 8
+
+      loc.resize(2);
+      loc[0] = 0; loc[1] = 2;
+    }
+    if ((ix<numX) && (iy==numY))
+    { // top edge nodes
+      glob.resize(2);
+      glob[0] = F_func(numX, numY, ix, iy); // node 1
+      glob[1] = F_func(numX, numY, ix, iy) + 1; // node 5
+
+      loc.resize(2);
+      loc[0] = 0; loc[1] = 1;
+    }
+    if ((ix==numX) && (iy==numY))
+    { // top right corner
+      glob.resize(1);
+      glob[0] = F_func(numX, numY, ix, iy); // node 1
+
+      loc.resize(1);
+      loc[0] = 0;
+    }
   }
 }
