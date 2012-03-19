@@ -208,7 +208,7 @@ namespace Lucee
 
 // compute numerical fluxes
     for (unsigned i=0; i<5; ++i)
-      f[i] = 0.5*(fr[i]+fl[i]) - absMaxs*0.5*(qr[i]-ql[i]);
+      f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);
 
     return absMaxs;
   }
