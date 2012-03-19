@@ -22,6 +22,16 @@
   I need to figure this out before the Serendipity elements can be
   used for polyOrder 2.
 
+  Finally figured on how to do the copyAllDataToField and
+  copyAllDataToField methods correctly. The basic idea is to provide a
+  new method getGlobalIndices() which given the current cell index
+  return the list of owned global indices in that cell and the
+  corresponding local node numbers. With this the methods are simple
+  to implement.
+
+  The Poisson solver now seems to work for polyOrder = 2 (eyeball
+  metric). Not yet fully verified, and that is the next thing to do.
+
 * March 15th
 
   Wrote EvalOnNodesUpdater that initializes a nodal field from a Lua
@@ -724,7 +734,7 @@
   way to do things. But builds for now. Next need to test the
   structured grid in parallel.
 
-** TODO Create a new repo with regression tests.
+** DONE Create a new repo with regression tests.
 
    Just use TX's txtest system. It is good enough for our needs and
    will be one less thing to maintain.
