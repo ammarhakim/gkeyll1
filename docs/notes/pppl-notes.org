@@ -5,6 +5,29 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 19th
+
+  Again, no work on weekend. Or almost none. On Sunday night I played
+  around with comparing DG with WAVE for 1D Maxwell equations. The
+  point here was that in the IBW problem which I did for David S
+  before leaving TX one observes that the RF wave decays very rapidly
+  as it propagates into the plasma. This is a big issue, and so I
+  investigated a 4th order DG scheme for this. Turns out that the 4th
+  order DG is much better: in fact, the decay is eliminated and it
+  also runs faster! Unfortunately, this will not impact David's
+  project at present, but still sent him my findings. Need to write up
+  3 pages with my cold fluid results for him. Need to do this soon as
+  the Phase II due date is 4/4.
+
+  Found a bug that has been driving me nuts for a while: the modal 1D
+  DG was not working when the time-step was being adapted,
+  i.e. rejected and retaken. Turns out that after staring at the C++
+  code for a very long time (all day today) I realized that the
+  problem was really with the Lua script! Basically, when a step is
+  retaken somehow the previous state of the solution is lost. This is
+  an elementary mistake which has cost me a lot misery. Lesson: do not
+  make elementary mistakes.
+
 * March 16th
 
   Completed methods needed to have 1D Lobatto elements work with
@@ -126,6 +149,11 @@
   Perhaps later tonight as I need to focus on the Poisson bracket
   algorithm for now.
 
+*** Note added on 3/19
+
+    Is this a manifestation of the getSendNeighbors and
+    getRecvNeighbors?
+
 * March 12th
 
   No work on weekend.
@@ -163,7 +191,7 @@
   why this was not done in the first place. Perhaps laziness or just
   negligence?
 
-** TODO Extend UpdaterStatus to take a message on why step failed
+** DONE Extend UpdaterStatus to take a message on why step failed
 
    This will allow some semblance of debugging, specially with
    linear and non-linear system solves with FEM.
