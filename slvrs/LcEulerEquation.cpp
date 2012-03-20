@@ -67,15 +67,15 @@ namespace Lucee
   EulerEquation::flux(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
   {
-    double rho = getSafeRho(q[0]);
+    double rho1 = 1/getSafeRho(q[0]);
 // compute pressure
     double pr = pressure(q);
 // now compute flux
     f[0] = q[1]; // rho*u
-    f[1] = q[1]*q[1]/rho + pr; // rho*u*u + pr
-    f[2] = q[1]*q[2]/rho; // rho*u*v
-    f[3] = q[1]*q[3]/rho; // rho*u*w
-    f[4] = (q[4]+pr)*q[1]/rho; // (E+pr)*u
+    f[1] = rho1*q[1]*q[1] + pr; // rho*u*u + pr
+    f[2] = rho1*q[1]*q[2]; // rho*u*v
+    f[3] = rho1*q[1]*q[3]; // rho*u*w
+    f[4] = rho1*(q[4]+pr)*q[1]; // (E+pr)*u
   }
 
   void
@@ -94,11 +94,11 @@ namespace Lucee
   double
   EulerEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q)
   {
-    double rho = getSafeRho(q[0]);
+    double rho1 = 1/getSafeRho(q[0]);
 // compute pressure
     double pr = pressure(q);
-    double cs = std::sqrt(gas_gamma*pr/rho); // sound speed
-    double u = q[1]/rho; // fluid velocity
+    double cs = std::sqrt(gas_gamma*pr*rho1); // sound speed
+    double u = q[1]*rho1; // fluid velocity
     return std::fabs(u)+cs;
   }
 
@@ -216,8 +216,8 @@ namespace Lucee
   double
   EulerEquation::pressure(const Lucee::ConstFieldPtr<double>& q) const
   {
-    double rho = getSafeRho(q[0]);
-    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])/rho);
+    double rho1 = 1/getSafeRho(q[0]);
+    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])*rho1);
     if (correct && (pr < minPressure))
       return minPressure;
     return pr;
