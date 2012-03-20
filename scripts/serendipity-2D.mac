@@ -73,6 +73,15 @@ N2_stiff : calcStiffMatrix(N2);
 N2_grad_stiff_x : calcGradStiffMatrix_x(N2);
 N2_grad_stiff_y : calcGradStiffMatrix_y(N2);
 
+/** Compute differentiation matrices */
+N2_Diff_x : invert(N2_mass) . transpose(N2_grad_stiff_x);
+N2_Diff_y : invert(N2_mass) . transpose(N2_grad_stiff_y);
+
+/** Compute explicit formulas for derivatives */
+N2_phi_c : transpose(matrix([p0, p1, p2, p3]));
+N2_Explicit_Diff_x : N2_Diff_x . N2_phi_c;
+N2_Explicit_Diff_y : N2_Diff_y . N2_phi_c;
+
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
 /** Basis functions of order 3 */
@@ -93,3 +102,12 @@ N3_mass : calcMassMatrix(N3);
 N3_stiff : calcStiffMatrix(N3);
 N3_grad_stiff_x : calcGradStiffMatrix_x(N3);
 N3_grad_stiff_y : calcGradStiffMatrix_y(N3);
+
+/** Compute differentiation matrices */
+N3_Diff_x : invert(N3_mass) . transpose(N3_grad_stiff_x);
+N3_Diff_y : invert(N3_mass) . transpose(N3_grad_stiff_y);
+
+/** Compute explicit formulas for derivatives */
+N3_phi_c : transpose(matrix([p0, p1, p2, p3, p4, p5, p6, p7]));
+N3_Explicit_Diff_x : N3_Diff_x . N3_phi_c;
+N3_Explicit_Diff_y : N3_Diff_y . N3_phi_c;

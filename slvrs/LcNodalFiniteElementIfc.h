@@ -172,6 +172,15 @@ namespace Lucee
       virtual void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
+ * Get partial stiffness matrix (grad.Nj Nk) for this reference
+ * element. The output matrix should be pre-allocated.
+ *
+ * @param dir Direction for gradient.
+ * @param DNjNk On output, partial stiffness matrix of element.
+ */
+      virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output

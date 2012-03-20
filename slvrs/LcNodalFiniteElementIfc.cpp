@@ -141,6 +141,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getGradStiffnessMatrix(
+    unsigned dir, Lucee::Matrix<double>& DNjNk) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getGradStiffnessMatrix: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {

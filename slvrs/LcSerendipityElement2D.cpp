@@ -39,7 +39,7 @@ namespace Lucee
 
   SerendipityElement2D::SerendipityElement2D()
     : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
-      refNjNk(4,4), refDNjDNk(4,4), idxr(
+      refNjNk(4,4), refDNjDNk(4,4), refDNjNk_0(4,4), refDNjNk_1(4,4), idxr(
         &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
 // notice funcky initialization of indexer: this is just so code
@@ -306,6 +306,18 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getGradStiffnessMatrix(unsigned dir, 
+    Lucee::Matrix<double>& DNjNk) const
+  {
+    if (dir == 0)
+      DNjNk.copy(refDNjNk_0);
+    else if (dir == 1)
+      DNjNk.copy(refDNjNk_1);
+    throw Lucee::Except(
+      "SerendipityElement2D::getGradStiffnessMatrix: Can use this basis in 3D!");
+  }
+
+  void
   SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
     std::vector<double>& data)
   {
@@ -470,6 +482,50 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 0.5*dx*0.5*dy;
+
+// grad-stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
+    refDNjNk_0 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_0(1,1) = (-2.0)/(3.0*dx);
+    refDNjNk_0(1,2) = (-2.0)/(3.0*dx);
+    refDNjNk_0(1,3) = -1/dx/3.0;
+    refDNjNk_0(1,4) = -1/dx/3.0;
+    refDNjNk_0(2,1) = 2.0/(3.0*dx);
+    refDNjNk_0(2,2) = 2.0/(3.0*dx);
+    refDNjNk_0(2,3) = 1/dx/3.0;
+    refDNjNk_0(2,4) = 1/dx/3.0;
+    refDNjNk_0(3,1) = 1/dx/3.0;
+    refDNjNk_0(3,2) = 1/dx/3.0;
+    refDNjNk_0(3,3) = 2.0/(3.0*dx);
+    refDNjNk_0(3,4) = 2.0/(3.0*dx);
+    refDNjNk_0(4,1) = -1/dx/3.0;
+    refDNjNk_0(4,2) = -1/dx/3.0;
+    refDNjNk_0(4,3) = (-2.0)/(3.0*dx);
+    refDNjNk_0(4,4) = (-2.0)/(3.0*dx);
+
+// scale to bring this into physical space
+    refDNjNk_0 *= 0.5*dx*0.5*dy;
+
+// grad-stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
+    refDNjNk_1 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_1(1,1) = (-2.0)/(3.0*dy);
+    refDNjNk_1(1,2) = -1/dy/3.0;
+    refDNjNk_1(1,3) = -1/dy/3.0;
+    refDNjNk_1(1,4) = (-2.0)/(3.0*dy);
+    refDNjNk_1(2,1) = -1/dy/3.0;
+    refDNjNk_1(2,2) = (-2.0)/(3.0*dy);
+    refDNjNk_1(2,3) = (-2.0)/(3.0*dy);
+    refDNjNk_1(2,4) = -1/dy/3.0;
+    refDNjNk_1(3,1) = 1/dy/3.0;
+    refDNjNk_1(3,2) = 2.0/(3.0*dy);
+    refDNjNk_1(3,3) = 2.0/(3.0*dy);
+    refDNjNk_1(3,4) = 1/dy/3.0;
+    refDNjNk_1(4,1) = 2.0/(3.0*dy);
+    refDNjNk_1(4,2) = 1/dy/3.0;
+    refDNjNk_1(4,3) = 1/dy/3.0;
+    refDNjNk_1(4,4) = 2.0/(3.0*dy);
+
+// scale to bring this into physical space
+    refDNjNk_1 *= 0.5*dx*0.5*dy;
   }
 
   void
@@ -625,6 +681,146 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 0.5*dx*0.5*dy;
+
+// grad-stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
+    refDNjNk_0 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_0(1,1) = (-4.0)/(15.0*dx);
+    refDNjNk_0(1,2) = 8.0/(45.0*dx);
+    refDNjNk_0(1,3) = 1/dx/15.0;
+    refDNjNk_0(1,4) = 1/dx/15.0;
+    refDNjNk_0(1,5) = (-4.0)/(9.0*dx);
+    refDNjNk_0(1,6) = 14.0/(45.0*dx);
+    refDNjNk_0(1,7) = 0;
+    refDNjNk_0(1,8) = (-26.0)/(45.0*dx);
+    refDNjNk_0(2,1) = (-8.0)/(45.0*dx);
+    refDNjNk_0(2,2) = 4.0/(15.0*dx);
+    refDNjNk_0(2,3) = -1/dx/15.0;
+    refDNjNk_0(2,4) = -1/dx/15.0;
+    refDNjNk_0(2,5) = 4.0/(9.0*dx);
+    refDNjNk_0(2,6) = 26.0/(45.0*dx);
+    refDNjNk_0(2,7) = 0;
+    refDNjNk_0(2,8) = (-14.0)/(45.0*dx);
+    refDNjNk_0(3,1) = -1/dx/15.0;
+    refDNjNk_0(3,2) = -1/dx/15.0;
+    refDNjNk_0(3,3) = 4.0/(15.0*dx);
+    refDNjNk_0(3,4) = (-8.0)/(45.0*dx);
+    refDNjNk_0(3,5) = 0;
+    refDNjNk_0(3,6) = 26.0/(45.0*dx);
+    refDNjNk_0(3,7) = 4.0/(9.0*dx);
+    refDNjNk_0(3,8) = (-14.0)/(45.0*dx);
+    refDNjNk_0(4,1) = 1/dx/15.0;
+    refDNjNk_0(4,2) = 1/dx/15.0;
+    refDNjNk_0(4,3) = 8.0/(45.0*dx);
+    refDNjNk_0(4,4) = (-4.0)/(15.0*dx);
+    refDNjNk_0(4,5) = 0;
+    refDNjNk_0(4,6) = 14.0/(45.0*dx);
+    refDNjNk_0(4,7) = (-4.0)/(9.0*dx);
+    refDNjNk_0(4,8) = (-26.0)/(45.0*dx);
+    refDNjNk_0(5,1) = 4.0/(9.0*dx);
+    refDNjNk_0(5,2) = (-4.0)/(9.0*dx);
+    refDNjNk_0(5,3) = 0;
+    refDNjNk_0(5,4) = 0;
+    refDNjNk_0(5,5) = 0;
+    refDNjNk_0(5,6) = (-8.0)/(9.0*dx);
+    refDNjNk_0(5,7) = 0;
+    refDNjNk_0(5,8) = 8.0/(9.0*dx);
+    refDNjNk_0(6,1) = (-14.0)/(45.0*dx);
+    refDNjNk_0(6,2) = (-14.0)/(45.0*dx);
+    refDNjNk_0(6,3) = (-14.0)/(45.0*dx);
+    refDNjNk_0(6,4) = (-14.0)/(45.0*dx);
+    refDNjNk_0(6,5) = 8.0/(9.0*dx);
+    refDNjNk_0(6,6) = 16.0/(15.0*dx);
+    refDNjNk_0(6,7) = 8.0/(9.0*dx);
+    refDNjNk_0(6,8) = 16.0/(15.0*dx);
+    refDNjNk_0(7,1) = 0;
+    refDNjNk_0(7,2) = 0;
+    refDNjNk_0(7,3) = (-4.0)/(9.0*dx);
+    refDNjNk_0(7,4) = 4.0/(9.0*dx);
+    refDNjNk_0(7,5) = 0;
+    refDNjNk_0(7,6) = (-8.0)/(9.0*dx);
+    refDNjNk_0(7,7) = 0;
+    refDNjNk_0(7,8) = 8.0/(9.0*dx);
+    refDNjNk_0(8,1) = 14.0/(45.0*dx);
+    refDNjNk_0(8,2) = 14.0/(45.0*dx);
+    refDNjNk_0(8,3) = 14.0/(45.0*dx);
+    refDNjNk_0(8,4) = 14.0/(45.0*dx);
+    refDNjNk_0(8,5) = (-8.0)/(9.0*dx);
+    refDNjNk_0(8,6) = (-16.0)/(15.0*dx);
+    refDNjNk_0(8,7) = (-8.0)/(9.0*dx);
+    refDNjNk_0(8,8) = (-16.0)/(15.0*dx);
+
+// scale to bring this into physical space
+    refDNjNk_0 *= 0.5*dx*0.5*dy;
+
+// grad-stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
+    refDNjNk_1 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_1(1,1) = (-4.0)/(15.0*dy);
+    refDNjNk_1(1,2) = 1/dy/15.0;
+    refDNjNk_1(1,3) = 1/dy/15.0;
+    refDNjNk_1(1,4) = 8.0/(45.0*dy);
+    refDNjNk_1(1,5) = (-26.0)/(45.0*dy);
+    refDNjNk_1(1,6) = 0;
+    refDNjNk_1(1,7) = 14.0/(45.0*dy);
+    refDNjNk_1(1,8) = (-4.0)/(9.0*dy);
+    refDNjNk_1(2,1) = 1/dy/15.0;
+    refDNjNk_1(2,2) = (-4.0)/(15.0*dy);
+    refDNjNk_1(2,3) = 8.0/(45.0*dy);
+    refDNjNk_1(2,4) = 1/dy/15.0;
+    refDNjNk_1(2,5) = (-26.0)/(45.0*dy);
+    refDNjNk_1(2,6) = (-4.0)/(9.0*dy);
+    refDNjNk_1(2,7) = 14.0/(45.0*dy);
+    refDNjNk_1(2,8) = 0;
+    refDNjNk_1(3,1) = -1/dy/15.0;
+    refDNjNk_1(3,2) = (-8.0)/(45.0*dy);
+    refDNjNk_1(3,3) = 4.0/(15.0*dy);
+    refDNjNk_1(3,4) = -1/dy/15.0;
+    refDNjNk_1(3,5) = (-14.0)/(45.0*dy);
+    refDNjNk_1(3,6) = 4.0/(9.0*dy);
+    refDNjNk_1(3,7) = 26.0/(45.0*dy);
+    refDNjNk_1(3,8) = 0;
+    refDNjNk_1(4,1) = (-8.0)/(45.0*dy);
+    refDNjNk_1(4,2) = -1/dy/15.0;
+    refDNjNk_1(4,3) = -1/dy/15.0;
+    refDNjNk_1(4,4) = 4.0/(15.0*dy);
+    refDNjNk_1(4,5) = (-14.0)/(45.0*dy);
+    refDNjNk_1(4,6) = 0;
+    refDNjNk_1(4,7) = 26.0/(45.0*dy);
+    refDNjNk_1(4,8) = 4.0/(9.0*dy);
+    refDNjNk_1(5,1) = 14.0/(45.0*dy);
+    refDNjNk_1(5,2) = 14.0/(45.0*dy);
+    refDNjNk_1(5,3) = 14.0/(45.0*dy);
+    refDNjNk_1(5,4) = 14.0/(45.0*dy);
+    refDNjNk_1(5,5) = (-16.0)/(15.0*dy);
+    refDNjNk_1(5,6) = (-8.0)/(9.0*dy);
+    refDNjNk_1(5,7) = (-16.0)/(15.0*dy);
+    refDNjNk_1(5,8) = (-8.0)/(9.0*dy);
+    refDNjNk_1(6,1) = 0;
+    refDNjNk_1(6,2) = 4.0/(9.0*dy);
+    refDNjNk_1(6,3) = (-4.0)/(9.0*dy);
+    refDNjNk_1(6,4) = 0;
+    refDNjNk_1(6,5) = 8.0/(9.0*dy);
+    refDNjNk_1(6,6) = 0;
+    refDNjNk_1(6,7) = (-8.0)/(9.0*dy);
+    refDNjNk_1(6,8) = 0;
+    refDNjNk_1(7,1) = (-14.0)/(45.0*dy);
+    refDNjNk_1(7,2) = (-14.0)/(45.0*dy);
+    refDNjNk_1(7,3) = (-14.0)/(45.0*dy);
+    refDNjNk_1(7,4) = (-14.0)/(45.0*dy);
+    refDNjNk_1(7,5) = 16.0/(15.0*dy);
+    refDNjNk_1(7,6) = 8.0/(9.0*dy);
+    refDNjNk_1(7,7) = 16.0/(15.0*dy);
+    refDNjNk_1(7,8) = 8.0/(9.0*dy);
+    refDNjNk_1(8,1) = 4.0/(9.0*dy);
+    refDNjNk_1(8,2) = 0;
+    refDNjNk_1(8,3) = 0;
+    refDNjNk_1(8,4) = (-4.0)/(9.0*dy);
+    refDNjNk_1(8,5) = 8.0/(9.0*dy);
+    refDNjNk_1(8,6) = 0;
+    refDNjNk_1(8,7) = (-8.0)/(9.0*dy);
+    refDNjNk_1(8,8) = 0;
+
+// scale to bring this into physical space
+    refDNjNk_1 *= 0.5*dx*0.5*dy;
   }
 
   void

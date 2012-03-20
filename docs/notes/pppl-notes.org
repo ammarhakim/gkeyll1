@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 20th
+
+  Added new method getGradStiffnessMatrix to NodalFiniteElementIfc
+  class. This will support the creation of the final needed matrix in
+  the nodal DG scheme. The SerendipityElement2D setup functions are
+  now looking horrendous. However, eventually I will need to replace
+  all of these with numerically (rather than analytically) computed
+  basis functions as the current implementation will not work on
+  general quadrilateral geometries. At that point need to copy the
+  current implementation into the proto directory and rename it so it
+  is available to test the new numerical basis.
+
 * March 19th
 
   Again, no work on weekend. Or almost none. On Sunday night I played
