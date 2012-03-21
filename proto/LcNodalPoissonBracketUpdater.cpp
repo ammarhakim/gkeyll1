@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcLinAlgebra.h>
 #include <LcNodalPoissonBracketUpdater.h>
 
 namespace Lucee
@@ -17,7 +18,8 @@ namespace Lucee
   const char *NodalPoissonBracketUpdater::id = "PoissonBracket";
 
   NodalPoissonBracketUpdater::NodalPoissonBracketUpdater()
-    : UpdaterIfc()
+    : UpdaterIfc(), diffMatrix_x(1,1), diffMatrix_y(1,1),
+      stiffMatrix_x(1,1), stiffMatrix_y(1,1)
   {
   }
   
@@ -39,6 +41,57 @@ namespace Lucee
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
+
+// get hold of grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+
+// local region to update
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+
+// set index to first location in grid (this is okay as in this
+// updater we are assuming grid is uniform)
+    nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
+
+// compute various matrices
+    unsigned nlocal = nodalBasis->getNumNodes();
+
+    stiffMatrix_x = Lucee::Matrix<double>(nlocal, nlocal);
+    stiffMatrix_y = Lucee::Matrix<double>(nlocal, nlocal);
+
+    nodalBasis->getGradStiffnessMatrix(0, stiffMatrix_x);
+    nodalBasis->getGradStiffnessMatrix(1, stiffMatrix_y);
+
+    diffMatrix_x = Lucee::Matrix<double>(nlocal, nlocal);
+    diffMatrix_y = Lucee::Matrix<double>(nlocal, nlocal);
+
+    for (unsigned i=0; i<nlocal; ++i)
+      for (unsigned j=0; j<nlocal; ++j)
+      {
+        diffMatrix_x(i,j) = stiffMatrix_x(j,i);
+        diffMatrix_y(i,j) = stiffMatrix_y(j,i);
+      }
+
+// NOTE: In the following calls, we need to keep getting the mass
+// matrix again and again because the solve() method destroys
+// it. Perhaps a better thing is to add new methods to the LinAlgebra
+// file that computes the LU decomposition and then does the
+// backsubstitution so all these inversions can be avoided.
+
+    Lucee::Matrix<double> massMatrix(nlocal, nlocal);
+
+// multiply all matrices by M^-1
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, stiffMatrix_x);
+
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, stiffMatrix_y);
+
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, diffMatrix_x);
+
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, diffMatrix_y);
   }
 
   Lucee::UpdaterStatus 

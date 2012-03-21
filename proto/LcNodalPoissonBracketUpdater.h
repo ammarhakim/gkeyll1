@@ -75,6 +75,14 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+/** Differentiation matrix in X-direction */
+      Lucee::Matrix<double> diffMatrix_x;
+/** Differentiation matrix in X-direction */
+      Lucee::Matrix<double> diffMatrix_y;
+/** Stiffness in X-direction */
+      Lucee::Matrix<double> stiffMatrix_x;
+/** Stiffness in Y-direction */
+      Lucee::Matrix<double> stiffMatrix_y;
   };
 }
 
