@@ -15,6 +15,7 @@
 // lucee includes
 #include <LcField.h>
 #include <LcHyperEquation.h>
+#include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
 namespace Lucee
@@ -72,6 +73,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
   };
 }
 
