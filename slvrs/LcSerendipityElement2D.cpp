@@ -313,8 +313,9 @@ namespace Lucee
       DNjNk.copy(refDNjNk_0);
     else if (dir == 1)
       DNjNk.copy(refDNjNk_1);
-    throw Lucee::Except(
-      "SerendipityElement2D::getGradStiffnessMatrix: Can use this basis in 3D!");
+    else 
+      throw Lucee::Except(
+        "SerendipityElement2D::getGradStiffnessMatrix: Can't use this basis in 3D!");
   }
 
   void
