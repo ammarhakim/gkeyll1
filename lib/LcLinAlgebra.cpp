@@ -366,14 +366,13 @@ namespace Lucee
       throw Lucee::Except("Lucee::solve: RHS matrix must be contiguous.");
 
     integer INFO, LDA, LDB, M, N, NRHS;
-    integer *IPIV;
 
     M = N = LDA = LDB = A.getShape(0);
 // allocate memory for permutation array
-    IPIV = (integer*) malloc( sizeof(integer)*M );
+    std::vector<integer> IPIV(M);
 
 // compute LU factorization
-    dgetrf_(&M, &N, &A.first(), &LDA, IPIV, &INFO);
+    dgetrf_(&M, &N, &A.first(), &LDA, &IPIV[0], &INFO);
     if(INFO != 0)
       throw Lucee::Except("Lucee::solve: Unable to compute LU factorization");
 
@@ -381,11 +380,9 @@ namespace Lucee
     char TRANS[] = "N";
     NRHS = B.getShape(1);
 // make call
-    dgetrs_(TRANS, &N, &NRHS, &A.first(), &LDA, IPIV, &B.first(), &LDB, &INFO);
+    dgetrs_(TRANS, &N, &NRHS, &A.first(), &LDA, &IPIV[0], &B.first(), &LDB, &INFO);
 // check if solution obtained okay
     if (INFO != 0)
       throw Lucee::Except("Lucee::solve: Failure in LAPACK linear solver");
-
-    free(IPIV);
   }
 }
