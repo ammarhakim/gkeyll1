@@ -18,6 +18,10 @@
   enlightening as he uses too many symbols making the derivation very
   un-transparent.
 
+  Compiled code on portal. Petsc fails to build, so no Poisson
+  solver. Need to spend time on why this is the case. Perhaps on the
+  weekend, after the Poisson bracket operator is complete.
+
 ** DONE Test EvalOnNodesUpdater on polyOrder = 1 and 2 in 2D
 
   Need to test this so we know there are no issues with this. For each
