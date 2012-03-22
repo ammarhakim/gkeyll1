@@ -5,6 +5,25 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 21st
+
+  Computed all matrices needed in the nodal DG solve. Next to hook
+  these into the main loop to compute the various terms.
+
+  Spent some time reading about Hasegawa-Wakatani model. Turns out
+  this will need more than just a Poisson solve and a Poisson bracket
+  operator: extra terms appear which need to be computed. However,
+  they are not hard to do and involve just some more application of
+  the differentiation matrices. Derivation in Balescu is very
+  enlightening as he uses too many symbols making the derivation very
+  un-transparent.
+
+** DONE Test EvalOnNodesUpdater on polyOrder = 1 and 2 in 2D
+
+  Need to test this so we know there are no issues with this. For each
+  polyOrder there needs to be two tests: one for a CG field and the
+  other for DG field.
+
 * March 20th
 
   Added new method getGradStiffnessMatrix to NodalFiniteElementIfc
