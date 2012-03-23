@@ -5,6 +5,21 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 22nd
+
+  Completed all basic loops for Poisson bracket operator. Final step
+  is to hook in the surface integral terms. For this a "face mass
+  matrix" needs to be computed.
+
+  Wrote an input file with constant prescribed streamfunction with
+  evolving vorticity. Will use as a test case to test just the Poisson
+  bracket operator.
+
+** TODO Fix crash on using duplicate()-ed fields in out
+
+   Turns out that the code is crashing when using fields created using
+   the duplicate() Lua method. Need to investigate and fix.
+
 * March 21st
 
   Computed all matrices needed in the nodal DG solve. Next to hook
