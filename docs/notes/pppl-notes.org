@@ -15,7 +15,7 @@
   evolving vorticity. Will use as a test case to test just the Poisson
   bracket operator.
 
-** TODO Fix crash on using duplicate()-ed fields in out
+** DONE Fix crash on using duplicate()-ed fields in out
 
    Turns out that the code is crashing when using fields created using
    the duplicate() Lua method. Need to investigate and fix.
