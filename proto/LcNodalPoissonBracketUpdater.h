@@ -75,6 +75,10 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+/** CFL number to use */
+      double cfl;
+/** Maximum CFL number allowed */
+      double cflm;
 /** Differentiation matrix in X-direction */
       Lucee::Matrix<double> diffMatrix_x;
 /** Differentiation matrix in X-direction */
@@ -83,6 +87,24 @@ namespace Lucee
       Lucee::Matrix<double> stiffMatrix_x;
 /** Stiffness in Y-direction */
       Lucee::Matrix<double> stiffMatrix_y;
+
+/**
+ * Compute gradient in x-direction.
+ *
+ * @param phiK potential at nodes
+ * @param phiPrimeK On output, gradient in x-direction
+ */
+      void calcGradient_x(const std::vector<double>& phiK,
+        std::vector<double>& phiPrimeK);
+
+/**
+ * Compute gradient in y-direction.
+ *
+ * @param phiK potential at nodes
+ * @param phiPrimeK On output, gradient in x-direction
+ */
+      void calcGradient_y(const std::vector<double>& phiK,
+        std::vector<double>& phiPrimeK);
   };
 }
 
