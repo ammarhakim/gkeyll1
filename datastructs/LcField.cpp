@@ -281,6 +281,7 @@ namespace Lucee
     Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer> arr 
       = Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>::duplicate();
     Lucee::Field<NDIM, T> fld(globalRgn, rgn, 0, numComponents, lowerGhost, upperGhost, arr);
+    fld.rgnIdx = this->rgnIdx;
     return fld;
   }
 
