@@ -20,6 +20,11 @@
    Turns out that the code is crashing when using fields created using
    the duplicate() Lua method. Need to investigate and fix.
 
+   PROBLEM: The rgnIdx field in the duplicated field is not
+   correct. This is probably the cause of the crash. Will fix in the
+   morning. Too tired tonight. NEED TO ADD UNIT TEST FOR DUPLICATE
+   METHOD TO ENSURE THIS PROBLEM IS CHECKED FOR.
+
 * March 21st
 
   Computed all matrices needed in the nodal DG solve. Next to hook
