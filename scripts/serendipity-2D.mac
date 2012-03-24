@@ -19,7 +19,7 @@ calcMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
-/** Function to compute mass matrix */
+/** Function to compute "face" mass matrix */
 calcFaceMassMatrix(basis) := block([n, mass],
                 n : length(basis),
 		mass : (mass : zeromatrix(n,n), for i from 1 thru n
@@ -89,6 +89,8 @@ N2 : 1/4*[
 
 /** Compute mass matrix */
 N2_mass : calcMassMatrix(N2);
+N2_face_mass : calcFaceMassMatrix(N2);
+N2_lift : invert(N2_mass) . N2_face_mass;
 
 /** Compute stiffness matrices */
 N2_stiff : calcStiffMatrix(N2);
@@ -119,6 +121,8 @@ N3 : [
 
 /** Compute mass matrix */
 N3_mass : calcMassMatrix(N3);
+N3_face_mass : calcFaceMassMatrix(N3);
+N3_lift : invert(N3_mass) . N3_face_mass;
 
 /** Compute stiffness matrices */
 N3_stiff : calcStiffMatrix(N3);

@@ -20,7 +20,7 @@ namespace Lucee
 
   NodalPoissonBracketUpdater::NodalPoissonBracketUpdater()
     : UpdaterIfc(), diffMatrix_x(1,1), diffMatrix_y(1,1),
-      stiffMatrix_x(1,1), stiffMatrix_y(1,1)
+      stiffMatrix_x(1,1), stiffMatrix_y(1,1), liftMatrix(1,1)
   {
   }
   
@@ -69,6 +69,9 @@ namespace Lucee
     diffMatrix_x = Lucee::Matrix<double>(nlocal, nlocal);
     diffMatrix_y = Lucee::Matrix<double>(nlocal, nlocal);
 
+    liftMatrix = Lucee::Matrix<double>(nlocal, nlocal);
+    nodalBasis->getFaceMassMatrix(liftMatrix);
+
     for (unsigned i=0; i<nlocal; ++i)
       for (unsigned j=0; j<nlocal; ++j)
       { // diff matrices are computed from transposed stiffness matrices
@@ -96,6 +99,9 @@ namespace Lucee
 
     nodalBasis->getMassMatrix(massMatrix);
     Lucee::solve(massMatrix, diffMatrix_y);
+
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, liftMatrix);
   }
 
   Lucee::UpdaterStatus 

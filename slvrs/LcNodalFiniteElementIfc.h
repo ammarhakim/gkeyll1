@@ -164,6 +164,14 @@ namespace Lucee
       virtual void getMassMatrix(Lucee::Matrix<double>& NjNk) const;
 
 /**
+ * Get total face mass matrix for this reference element. The output
+ * matrix should be pre-allocated.
+ *
+ * @param NjNk On output, mass matrix of element.
+ */
+      virtual void getFaceMassMatrix(Lucee::Matrix<double>& NjNk) const;
+
+/**
  * Get stiffness matrix (grad.Nj \dot grad.Nk) for this reference
  * element. The output matrix should be pre-allocated.
  *

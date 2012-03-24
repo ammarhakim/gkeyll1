@@ -134,6 +134,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getFaceMassMatrix(Lucee::Matrix<double>& NjNk) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getFaceMassMatrix: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getStiffnessMatrix: Not implemented!");

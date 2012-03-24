@@ -87,6 +87,8 @@ namespace Lucee
       Lucee::Matrix<double> stiffMatrix_x;
 /** Stiffness in Y-direction */
       Lucee::Matrix<double> stiffMatrix_y;
+/** Lifting matrix */
+      Lucee::Matrix<double> liftMatrix;
 
 /**
  * Compute gradient in x-direction.
