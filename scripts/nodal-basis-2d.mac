@@ -34,6 +34,28 @@ calcMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
+			   +
+			   integrate(
+			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
+			   +
+			   integrate(
+			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
+			   +
+			   integrate(
+			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
 /** Function to compute stiffness matrix */
 calcStiffMatrix(basis) := block([n, stiff],
                 n : length(basis),
@@ -99,6 +121,7 @@ N4 : leg_x . makeCoeffMatrix(2, col(a2, 4)) . leg_y;
 /** Calculate mass and stiffness matrices */
 basis2 : [N1, N2, N3, N4];
 N2_mass : calcMassMatrix(basis2);
+N2_face_mass : calcFaceMassMatrix(basis2);
 N2_stiff : calcStiffMatrix(basis2);
 N2_grad_stiff_x : calcGradStiffMatrix_x(basis2);
 N2_grad_stiff_y : calcGradStiffMatrix_y(basis2);
@@ -134,6 +157,8 @@ N9 : leg_x . makeCoeffMatrix(3, col(a3, 9)) . leg_y;
 
 basis3 : [N1, N2, N3, N4, N5, N6, N7, N8, N9];
 N3_mass : calcMassMatrix(basis3);
+N3_face_mass : calcFaceMassMatrix(basis3);
+N3_lift : invert(N3_mass) . N3_face_mass;
 N3_stiff : calcStiffMatrix(basis3);
 N3_grad_stiff_x : calcGradStiffMatrix_x(basis3);
 N3_grad_stiff_y : calcGradStiffMatrix_y(basis3);
