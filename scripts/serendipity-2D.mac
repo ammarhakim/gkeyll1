@@ -41,6 +41,69 @@ calcFaceMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_xl(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
+			     )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_xu(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_yl(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_yu(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Return a small matrix */
+shaveCols(Abig, cols) := block([nx,ny,nc,Asmall],
+		[nx,ny] : matrix_size(Abig),
+		nc : length(cols),
+		Asmall : (Asmall : matrix([]), for i from 1 thru nc
+		           do (Asmall : addcol(Asmall, col(Abig, cols[i]))),
+			  Asmall),
+	        return (Asmall)
+);
+			   
+
 /** Function to compute stiffness matrix */
 calcStiffMatrix(basis) := block([n, stiff],
                 n : length(basis),
@@ -89,8 +152,15 @@ N2 : 1/4*[
 
 /** Compute mass matrix */
 N2_mass : calcMassMatrix(N2);
+
+/** Compute face matrices */
 N2_face_mass : calcFaceMassMatrix(N2);
 N2_lift : invert(N2_mass) . N2_face_mass;
+
+N2_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(N2), [1,4]);
+N2_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(N2), [2,3]);
+N2_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(N2), [1,2]);
+N2_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(N2), [4,3]);
 
 /** Compute stiffness matrices */
 N2_stiff : calcStiffMatrix(N2);

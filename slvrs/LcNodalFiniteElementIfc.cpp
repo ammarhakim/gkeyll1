@@ -134,9 +134,18 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getFaceMassMatrix(Lucee::Matrix<double>& NjNk) const
+  NodalFiniteElementIfc<NDIM>::getLowerFaceMassMatrix(unsigned dir,
+    Lucee::Matrix<double>& NjNk) const
   {
-    throw Lucee::Except("NodalFiniteElementIfc::getFaceMassMatrix: Not implemented!");
+    throw Lucee::Except("NodalFiniteElementIfc::getLowerFaceMassMatrix: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getUpperFaceMassMatrix(unsigned dir,
+    Lucee::Matrix<double>& NjNk) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getUpperFaceMassMatrix: Not implemented!");
   }
 
   template <unsigned NDIM>

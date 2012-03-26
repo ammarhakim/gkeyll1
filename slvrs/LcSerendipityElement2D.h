@@ -143,12 +143,24 @@ namespace Lucee
       void getMassMatrix(Lucee::Matrix<double>& NjNk) const;
 
 /**
- * Get total face mass matrix for this reference element. The output
- * matrix should be pre-allocated.
+ * Get mass matrix for this reference element. The output matrix
+ * should be pre-allocated.
  *
+ * @param dir Direction of face.
  * @param NjNk On output, mass matrix of element.
  */
-      void getFaceMassMatrix(Lucee::Matrix<double>& NjNk) const;
+      void getLowerFaceMassMatrix(unsigned dir,
+        Lucee::Matrix<double>& NjNk) const;
+
+/**
+ * Get mass matrix for this reference element. The output matrix
+ * should be pre-allocated.
+ *
+ * @param dir Direction of face.
+ * @param NjNk On output, mass matrix of element.
+ */
+      void getUpperFaceMassMatrix(unsigned dir,
+        Lucee::Matrix<double>& NjNk) const;
 
 /**
  * Get stiffness matrix (grad.Nj \dot grad.Nk) for this reference
@@ -202,7 +214,13 @@ namespace Lucee
 /** Mass matrix in reference coordinates */
       Lucee::Matrix<double> refNjNk;
 /** Face-mass matrix in reference coordinates */
-      Lucee::Matrix<double> refFaceNjNk;
+      Lucee::Matrix<double> refFaceNjNk_xl;
+/** Face-mass matrix in reference coordinates */
+      Lucee::Matrix<double> refFaceNjNk_xu;
+/** Face-mass matrix in reference coordinates */
+      Lucee::Matrix<double> refFaceNjNk_yl;
+/** Face-mass matrix in reference coordinates */
+      Lucee::Matrix<double> refFaceNjNk_yu;
 /** Stiffness matrix in reference coordinates */
       Lucee::Matrix<double> refDNjDNk;
 /** Grad-Stiffness (in direction X) matrix in reference coordinates */
