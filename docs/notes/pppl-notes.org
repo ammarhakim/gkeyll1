@@ -5,6 +5,30 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 26th
+
+  Completed the surface integral terms needed in the Poisson bracket
+  updater. This involve some more work to the basis function classes,
+  making them even chubbier. The interface is becoming very large and
+  cumbersome and needs to be looked at again, eventually.
+
+  The Poisson bracket updater is not crashing but also does not seem
+  to produce the correct results. Need to debug.
+
+** TODO Write up notes on nodal basis functions
+
+   The interface is sufficiently complicated that an explanation is
+   required on how to compute the various things needed in the solvers
+   (CG and DG) for a new set of basis. Also, the document should
+   explain the CG/DG algorithms in context of the inviscid Euler/H-W
+   work we are doing now.
+
+** TODO Put gkeyll docs on ammar-hakim.org/gkeyll
+
+   Put the docs and tech-notes for easy reference. We are close to a
+   first-application perhaps in drift-wave turbulence as described by
+   the Hasegawa-Watakani equations.
+
 * March 22nd
 
   Completed all basic loops for Poisson bracket operator. Final step

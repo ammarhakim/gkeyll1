@@ -113,6 +113,16 @@ namespace Lucee
  */
       void calcGradient_y(const std::vector<double>& phiK,
         std::vector<double>& phiPrimeK);
+
+/**
+ * Return upwind flux based given speed and nodal values.
+ *
+ * @param u Speed.
+ * @param chil Vorticity on left node.
+ * @param chir Vorticity on roght node.
+ * @rturn upwind flux.
+ */
+      double getUpwindFlux(double u, double chil, double chir);
   };
 }
 
