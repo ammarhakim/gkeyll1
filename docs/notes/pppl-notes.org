@@ -15,6 +15,15 @@
   The Poisson bracket updater is not crashing but also does not seem
   to produce the correct results. Need to debug.
 
+  Found bug in the Poisson bracket updater! It was not actually a bug,
+  but I had not implemented upwinding which made the solution show
+  oscillations on the trailing edge. Once upwinding was implemented
+  the algorithm seems to work fine.
+
+  For now I am testing on a problem with only variations in
+  X-direction. Next need to clean up the updater and then do more
+  careful tests, including in 2D.
+
 ** TODO Write up notes on nodal basis functions
 
    The interface is sufficiently complicated that an explanation is
