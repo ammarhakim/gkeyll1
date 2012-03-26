@@ -157,6 +157,10 @@ namespace Lucee
 // various iterators
     Lucee::ConstFieldPtr<double> phiPtr = phi.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_t = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_b = aCurr.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
 
 // clear out contents of output field
@@ -169,7 +173,15 @@ namespace Lucee
     {
       for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
       {
+        aCurr.setPtr(aCurrPtr, ix, iy);
+        aCurr.setPtr(aCurrPtr_l, ix-1, iy); // left cell
+        aCurr.setPtr(aCurrPtr_r, ix+1, iy); // right cell
+        aCurr.setPtr(aCurrPtr_t, ix, iy+1); // top cell
+        aCurr.setPtr(aCurrPtr_b, ix, iy-1); // bottom cell
+
+        aNew.setPtr(aNewPtr, ix, iy);
         nodalBasis->setIndex(ix, iy);
+
 // extract potential at this location
         nodalBasis->extractFromField(phi, phiK);
 
@@ -177,7 +189,6 @@ namespace Lucee
         calcGradient_x(phiK, gradPhiK_x);
         calcGradient_y(phiK, gradPhiK_y);
 
-        aCurr.setPtr(aCurrPtr, ix, iy);
 // compute x and y fluxes at each node
         for (unsigned k=0; k<nlocal; ++k)
         {
@@ -185,7 +196,6 @@ namespace Lucee
           flux_y[k] = -gradPhiK_x[k]*aCurrPtr[k];
         }
 
-        aNew.setPtr(aNewPtr, ix, iy);
 // multiply by stiffness matrix to give volume contribution
         for (unsigned i=0; i<nlocal; ++i)
         {
@@ -199,8 +209,8 @@ namespace Lucee
 // compute contribution from edge integrals
 
 // edge X-lower has nodes (1,4)
-        fdotn[0] = -aCurrPtr[0]*gradPhiK_y[0];
-        fdotn[1] = -aCurrPtr[3]*gradPhiK_y[3];
+        fdotn[0] = -getUpwindFlux(gradPhiK_y[0], aCurrPtr_l[1], aCurrPtr[0]);
+        fdotn[1] = -getUpwindFlux(gradPhiK_y[3], aCurrPtr_l[2], aCurrPtr[3]);
 
 // multiply by lifting matrix
         for (unsigned i=0; i<nlocal; ++i)
@@ -212,8 +222,8 @@ namespace Lucee
         }
 
 // edge X-upper has nodes (2,3)
-        fdotn[0] = aCurrPtr[1]*gradPhiK_y[1];
-        fdotn[1] = aCurrPtr[2]*gradPhiK_y[2];
+        fdotn[0] = getUpwindFlux(gradPhiK_y[1], aCurrPtr[1], aCurrPtr_r[0]);
+        fdotn[1] = getUpwindFlux(gradPhiK_y[2], aCurrPtr[2], aCurrPtr_r[3]);
 
 // multiply by lifting matrix
         for (unsigned i=0; i<nlocal; ++i)
@@ -225,8 +235,8 @@ namespace Lucee
         }
 
 // edge Y-lower has nodes (1,2)
-        fdotn[0] = aCurrPtr[0]*gradPhiK_x[0];
-        fdotn[1] = aCurrPtr[1]*gradPhiK_x[1];
+        fdotn[0] = getUpwindFlux(-gradPhiK_x[0], aCurrPtr_b[3], aCurrPtr[0]);
+        fdotn[1] = getUpwindFlux(-gradPhiK_x[1], aCurrPtr_b[2], aCurrPtr[1]);
 
 // multiply by lifting matrix
         for (unsigned i=0; i<nlocal; ++i)
@@ -238,8 +248,8 @@ namespace Lucee
         }
 
 // edge Y-upper has nodes (4,3)
-        fdotn[0] = -aCurrPtr[3]*gradPhiK_x[3];
-        fdotn[1] = -aCurrPtr[2]*gradPhiK_x[2];
+        fdotn[0] = getUpwindFlux(-gradPhiK_x[3], aCurrPtr[3], aCurrPtr_t[0]);
+        fdotn[1] = getUpwindFlux(-gradPhiK_x[2], aCurrPtr[2], aCurrPtr_t[1]);
 
 // multiply by lifting matrix
         for (unsigned i=0; i<nlocal; ++i)
@@ -319,5 +329,14 @@ namespace Lucee
       for (unsigned j=0; j<n; ++j)
         phiPrimeK[i] += diffMatrix_y(i,j)*phiK[j];
     }
+  }
+
+  double
+  NodalPoissonBracketUpdater::getUpwindFlux(double u, double chil, double chir)
+  {
+    if (u > 0.0)
+      return u*chil;
+    else
+      return u*chir;
   }
 }
