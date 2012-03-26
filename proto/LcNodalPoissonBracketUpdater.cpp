@@ -20,7 +20,9 @@ namespace Lucee
 
   NodalPoissonBracketUpdater::NodalPoissonBracketUpdater()
     : UpdaterIfc(), diffMatrix_x(1,1), diffMatrix_y(1,1),
-      stiffMatrix_x(1,1), stiffMatrix_y(1,1), liftMatrix(1,1)
+      stiffMatrix_x(1,1), stiffMatrix_y(1,1),
+      liftMatrix_xl(1,1), liftMatrix_xu(1,1),
+      liftMatrix_yl(1,1), liftMatrix_yu(1,1)
   {
   }
   
@@ -69,9 +71,6 @@ namespace Lucee
     diffMatrix_x = Lucee::Matrix<double>(nlocal, nlocal);
     diffMatrix_y = Lucee::Matrix<double>(nlocal, nlocal);
 
-    liftMatrix = Lucee::Matrix<double>(nlocal, nlocal);
-    nodalBasis->getFaceMassMatrix(liftMatrix);
-
     for (unsigned i=0; i<nlocal; ++i)
       for (unsigned j=0; j<nlocal; ++j)
       { // diff matrices are computed from transposed stiffness matrices
@@ -100,8 +99,28 @@ namespace Lucee
     nodalBasis->getMassMatrix(massMatrix);
     Lucee::solve(massMatrix, diffMatrix_y);
 
+// WARNING: THIS IS NOT CORRECT AND WILL NOT WORK FOR 3RD ORDER BASIS
+// FUNCTIONS. WILL FIX ONCE 2ND ORDER CODE IS WORKING
+    liftMatrix_xl = Lucee::Matrix<double>(nlocal, 2);
+    liftMatrix_xu = Lucee::Matrix<double>(nlocal, 2);
+    liftMatrix_yl = Lucee::Matrix<double>(nlocal, 2);
+    liftMatrix_yu = Lucee::Matrix<double>(nlocal, 2);
+
+    nodalBasis->getLowerFaceMassMatrix(0, liftMatrix_xl);
     nodalBasis->getMassMatrix(massMatrix);
-    Lucee::solve(massMatrix, liftMatrix);
+    Lucee::solve(massMatrix, liftMatrix_xl);
+
+    nodalBasis->getLowerFaceMassMatrix(1, liftMatrix_yl);
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, liftMatrix_yl);
+
+    nodalBasis->getUpperFaceMassMatrix(0, liftMatrix_xu);
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, liftMatrix_xu);
+
+    nodalBasis->getUpperFaceMassMatrix(1, liftMatrix_yu);
+    nodalBasis->getMassMatrix(massMatrix);
+    Lucee::solve(massMatrix, liftMatrix_yu);
   }
 
   Lucee::UpdaterStatus 
@@ -126,10 +145,13 @@ namespace Lucee
 
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
+// number of nodes on each face
+    unsigned nFace = 2;  // NOTE: THIS NEEDS TO BE GOTTEN FROM nodalBasis
 
 // space for potential and derivatives at nodes
     std::vector<double> phiK(nlocal), gradPhiK_x(nlocal), gradPhiK_y(nlocal);
     std::vector<double> flux_x(nlocal), flux_y(nlocal);
+    std::vector<double> fdotn(nFace);
     double tv;
 
 // various iterators
@@ -147,7 +169,6 @@ namespace Lucee
     {
       for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
       {
-        
         nodalBasis->setIndex(ix, iy);
 // extract potential at this location
         nodalBasis->extractFromField(phi, phiK);
@@ -175,6 +196,60 @@ namespace Lucee
           aNewPtr[i] += tv;
         }
 
+// compute contribution from edge integrals
+
+// edge X-lower has nodes (1,4)
+        fdotn[0] = -aCurrPtr[0]*gradPhiK_y[0];
+        fdotn[1] = -aCurrPtr[3]*gradPhiK_y[3];
+
+// multiply by lifting matrix
+        for (unsigned i=0; i<nlocal; ++i)
+        {
+          tv = 0.0;
+          for (unsigned j=0; j<nFace; ++j)
+            tv += liftMatrix_xl(i,j)*fdotn[j];
+          aNewPtr[i] += -tv;
+        }
+
+// edge X-upper has nodes (2,3)
+        fdotn[0] = aCurrPtr[1]*gradPhiK_y[1];
+        fdotn[1] = aCurrPtr[2]*gradPhiK_y[2];
+
+// multiply by lifting matrix
+        for (unsigned i=0; i<nlocal; ++i)
+        {
+          tv = 0.0;
+          for (unsigned j=0; j<nFace; ++j)
+            tv += liftMatrix_xu(i,j)*fdotn[j];
+          aNewPtr[i] += -tv;
+        }
+
+// edge Y-lower has nodes (1,2)
+        fdotn[0] = aCurrPtr[0]*gradPhiK_x[0];
+        fdotn[1] = aCurrPtr[1]*gradPhiK_x[1];
+
+// multiply by lifting matrix
+        for (unsigned i=0; i<nlocal; ++i)
+        {
+          tv = 0.0;
+          for (unsigned j=0; j<nFace; ++j)
+            tv += liftMatrix_yl(i,j)*fdotn[j];
+          aNewPtr[i] += -tv;
+        }
+
+// edge Y-upper has nodes (4,3)
+        fdotn[0] = -aCurrPtr[3]*gradPhiK_x[3];
+        fdotn[1] = -aCurrPtr[2]*gradPhiK_x[2];
+
+// multiply by lifting matrix
+        for (unsigned i=0; i<nlocal; ++i)
+        {
+          tv = 0.0;
+          for (unsigned j=0; j<nFace; ++j)
+            tv += liftMatrix_yu(i,j)*fdotn[j];
+          aNewPtr[i] += -tv;
+        }
+
 // get grid spacing
         grid.setIndex(ix, iy);
         double dtdx = dt/grid.getDx(0);
@@ -189,14 +264,6 @@ namespace Lucee
     if (cfla > cflm)
 // time-step was too large: return a suggestion with correct time-step
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-
-// compute contributions for surface integrals.
-    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
-    {
-      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
-      {
-      }
-    }
 
 // perform final sweep, updating solution with forward Euler step
     for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)

@@ -39,7 +39,9 @@ namespace Lucee
 
   SerendipityElement2D::SerendipityElement2D()
     : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
-      refNjNk(4,4), refFaceNjNk(4,4), refDNjDNk(4,4), refDNjNk_0(4,4), refDNjNk_1(4,4), idxr(
+      refNjNk(4,4), refDNjDNk(4,4), refDNjNk_0(4,4), refDNjNk_1(4,4), 
+      refFaceNjNk_xl(4,2), refFaceNjNk_xu(4,2), refFaceNjNk_yl(4,2), refFaceNjNk_yu(4,2),
+      idxr(
         &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
 // notice funcky initialization of indexer: this is just so code
@@ -153,10 +155,10 @@ namespace Lucee
     int ix = this->currIdx[0], iy = this->currIdx[1];
     if (polyOrder == 1)
     {
-      lgMap[0] = idxr.getIndex(ix, iy);
-      lgMap[1] = idxr.getIndex(ix+1, iy);
-      lgMap[2] = idxr.getIndex(ix+1, iy+1);
-      lgMap[3] = idxr.getIndex(ix, iy+1);
+      lgMap[0] = idxr.getIndex(ix, iy); // 1
+      lgMap[1] = idxr.getIndex(ix+1, iy); // 2
+      lgMap[2] = idxr.getIndex(ix+1, iy+1); // 3
+      lgMap[3] = idxr.getIndex(ix, iy+1); // 4
     }
     else if (polyOrder == 2)
     {
@@ -181,13 +183,13 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        lgMap[0] = idxr.getIndex(ix, iy);
-        lgMap[1] = idxr.getIndex(ix, iy+1);
+        lgMap[0] = idxr.getIndex(ix, iy); // 1
+        lgMap[1] = idxr.getIndex(ix, iy+1); // 4
       }
       else if (dir == 1)
       {
-        lgMap[0] = idxr.getIndex(ix, iy);
-        lgMap[1] = idxr.getIndex(ix+1, iy);
+        lgMap[0] = idxr.getIndex(ix, iy); // 1
+        lgMap[1] = idxr.getIndex(ix+1, iy); // 2
       }
     }
     else if (polyOrder == 2)
@@ -216,13 +218,13 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        lgMap[0] = idxr.getIndex(ix+1, iy);
-        lgMap[1] = idxr.getIndex(ix+1, iy+1);
+        lgMap[0] = idxr.getIndex(ix+1, iy); // 2
+        lgMap[1] = idxr.getIndex(ix+1, iy+1); // 3
       }
       else if (dir == 1)
       {
-        lgMap[0] = idxr.getIndex(ix, iy+1);
-        lgMap[1] = idxr.getIndex(ix+1, iy+1);
+        lgMap[0] = idxr.getIndex(ix, iy+1); // 4
+        lgMap[1] = idxr.getIndex(ix+1, iy+1); // 3
       }
     }
     else if (polyOrder == 2)
@@ -300,9 +302,31 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::getFaceMassMatrix(Lucee::Matrix<double>& NjNk) const
+  SerendipityElement2D::getLowerFaceMassMatrix(unsigned dir,
+    Lucee::Matrix<double>& NjNk) const
   {
-    NjNk.copy(refFaceNjNk);
+// TODO: Fix this
+    if (polyOrder == 2)
+      throw Lucee::Except("SerendipityElement2D::getLowerFaceMassMatrix: polyOrder 2 not implemented!");
+
+    if (dir == 0)
+      NjNk.copy(refFaceNjNk_xl);
+    else if (dir == 1)
+      NjNk.copy(refFaceNjNk_yl);
+  }
+
+  void
+  SerendipityElement2D::getUpperFaceMassMatrix(unsigned dir,
+    Lucee::Matrix<double>& NjNk) const
+  {
+// TODO: Fix this
+    if (polyOrder == 2)
+      throw Lucee::Except("SerendipityElement2D::getLowerFaceMassMatrix: polyOrder 2 not implemented!");
+
+    if (dir == 0)
+      NjNk.copy(refFaceNjNk_xu);
+    else if (dir == 1)
+      NjNk.copy(refFaceNjNk_yu);
   }
 
   void
@@ -438,6 +462,8 @@ namespace Lucee
     unsigned shape[2] = {4,4};
     int start[2] = {1,1};
 
+    unsigned faceShape[2] = {4,2};
+
 // get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
@@ -468,27 +494,61 @@ namespace Lucee
 // scale to bring this into physical space
     refNjNk *= 0.5*dx*0.5*dy;
 
-// face mass matrix
-    refFaceNjNk = Lucee::Matrix<double>(shape, start);
-    refFaceNjNk(1,1) = 4.0/3.0;
-    refFaceNjNk(1,2) = 1.0/3.0;
-    refFaceNjNk(1,3) = 0;
-    refFaceNjNk(1,4) = 1.0/3.0;
-    refFaceNjNk(2,1) = 1.0/3.0;
-    refFaceNjNk(2,2) = 4.0/3.0;
-    refFaceNjNk(2,3) = 1.0/3.0;
-    refFaceNjNk(2,4) = 0;
-    refFaceNjNk(3,1) = 0;
-    refFaceNjNk(3,2) = 1.0/3.0;
-    refFaceNjNk(3,3) = 4.0/3.0;
-    refFaceNjNk(3,4) = 1.0/3.0;
-    refFaceNjNk(4,1) = 1.0/3.0;
-    refFaceNjNk(4,2) = 0;
-    refFaceNjNk(4,3) = 1.0/3.0;
-    refFaceNjNk(4,4) = 4.0/3.0;
+// face mass matrix (x-lower)
+    refFaceNjNk_xl = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_xl(1,1) = 2.0/3.0;
+    refFaceNjNk_xl(1,2) = 1.0/3.0;
+    refFaceNjNk_xl(2,1) = 0;
+    refFaceNjNk_xl(2,2) = 0;
+    refFaceNjNk_xl(3,1) = 0;
+    refFaceNjNk_xl(3,2) = 0;
+    refFaceNjNk_xl(4,1) = 1.0/3.0;
+    refFaceNjNk_xl(4,2) = 2.0/3.0;
 
 // scale to bring this into physical space
-    refFaceNjNk *= 0.5*dx*0.5*dy;
+    refFaceNjNk_xl *= 0.5*dy;
+
+// face mass matrix (x-upper)
+    refFaceNjNk_xu = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_xu(1,1) = 0;
+    refFaceNjNk_xu(1,2) = 0;
+    refFaceNjNk_xu(2,1) = 2.0/3.0;
+    refFaceNjNk_xu(2,2) = 1.0/3.0;
+    refFaceNjNk_xu(3,1) = 1.0/3.0;
+    refFaceNjNk_xu(3,2) = 2.0/3.0;
+    refFaceNjNk_xu(4,1) = 0;
+    refFaceNjNk_xu(4,2) = 0;
+
+// scale to bring this into physical space
+    refFaceNjNk_xu *= 0.5*dy;
+
+// face mass matrix (y-lower)
+    refFaceNjNk_yl = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_yl(1,1) = 2.0/3.0;
+    refFaceNjNk_yl(1,2) = 1.0/3.0;
+    refFaceNjNk_yl(2,1) = 1.0/3.0;
+    refFaceNjNk_yl(2,2) = 2.0/3.0;
+    refFaceNjNk_yl(3,1) = 0;
+    refFaceNjNk_yl(3,2) = 0;
+    refFaceNjNk_yl(4,1) = 0;
+    refFaceNjNk_yl(4,2) = 0;
+
+// scale to bring this into physical space
+    refFaceNjNk_yl *= 0.5*dx;
+
+// face mass matrix (y-upper)
+    refFaceNjNk_yu = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_yu(1,1) = 0;
+    refFaceNjNk_yu(1,2) = 0;
+    refFaceNjNk_yu(2,1) = 0;
+    refFaceNjNk_yu(2,2) = 0;
+    refFaceNjNk_yu(3,1) = 1.0/3.0;
+    refFaceNjNk_yu(3,2) = 2.0/3.0;
+    refFaceNjNk_yu(4,1) = 2.0/3.0;
+    refFaceNjNk_yu(4,2) = 1.0/3.0;
+
+// scale to bring this into physical space
+    refFaceNjNk_yu *= 0.5*dx;
 
 // stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
     refDNjDNk = Lucee::Matrix<double>(shape, start);
@@ -641,75 +701,7 @@ namespace Lucee
 // scale to bring this into physical space
     refNjNk *= 0.5*dx*0.5*dy;
 
-// mass matrix (automatically generated. See scripts/serendipity-2D.mac)
-    refFaceNjNk = Lucee::Matrix<double>(shape, start);
-    refFaceNjNk(1,1) = 8.0/15.0;
-    refFaceNjNk(1,2) = (-1.0)/15.0;
-    refFaceNjNk(1,3) = 0;
-    refFaceNjNk(1,4) = (-1.0)/15.0;
-    refFaceNjNk(1,5) = 2.0/15.0;
-    refFaceNjNk(1,6) = 0;
-    refFaceNjNk(1,7) = 0;
-    refFaceNjNk(1,8) = 2.0/15.0;
-    refFaceNjNk(2,1) = (-1.0)/15.0;
-    refFaceNjNk(2,2) = 8.0/15.0;
-    refFaceNjNk(2,3) = (-1.0)/15.0;
-    refFaceNjNk(2,4) = 0;
-    refFaceNjNk(2,5) = 2.0/15.0;
-    refFaceNjNk(2,6) = 2.0/15.0;
-    refFaceNjNk(2,7) = 0;
-    refFaceNjNk(2,8) = 0;
-    refFaceNjNk(3,1) = 0;
-    refFaceNjNk(3,2) = (-1.0)/15.0;
-    refFaceNjNk(3,3) = 8.0/15.0;
-    refFaceNjNk(3,4) = (-1.0)/15.0;
-    refFaceNjNk(3,5) = 0;
-    refFaceNjNk(3,6) = 2.0/15.0;
-    refFaceNjNk(3,7) = 2.0/15.0;
-    refFaceNjNk(3,8) = 0;
-    refFaceNjNk(4,1) = (-1.0)/15.0;
-    refFaceNjNk(4,2) = 0;
-    refFaceNjNk(4,3) = (-1.0)/15.0;
-    refFaceNjNk(4,4) = 8.0/15.0;
-    refFaceNjNk(4,5) = 0;
-    refFaceNjNk(4,6) = 0;
-    refFaceNjNk(4,7) = 2.0/15.0;
-    refFaceNjNk(4,8) = 2.0/15.0;
-    refFaceNjNk(5,1) = 2.0/15.0;
-    refFaceNjNk(5,2) = 2.0/15.0;
-    refFaceNjNk(5,3) = 0;
-    refFaceNjNk(5,4) = 0;
-    refFaceNjNk(5,5) = 16.0/15.0;
-    refFaceNjNk(5,6) = 0;
-    refFaceNjNk(5,7) = 0;
-    refFaceNjNk(5,8) = 0;
-    refFaceNjNk(6,1) = 0;
-    refFaceNjNk(6,2) = 2.0/15.0;
-    refFaceNjNk(6,3) = 2.0/15.0;
-    refFaceNjNk(6,4) = 0;
-    refFaceNjNk(6,5) = 0;
-    refFaceNjNk(6,6) = 16.0/15.0;
-    refFaceNjNk(6,7) = 0;
-    refFaceNjNk(6,8) = 0;
-    refFaceNjNk(7,1) = 0;
-    refFaceNjNk(7,2) = 0;
-    refFaceNjNk(7,3) = 2.0/15.0;
-    refFaceNjNk(7,4) = 2.0/15.0;
-    refFaceNjNk(7,5) = 0;
-    refFaceNjNk(7,6) = 0;
-    refFaceNjNk(7,7) = 16.0/15.0;
-    refFaceNjNk(7,8) = 0;
-    refFaceNjNk(8,1) = 2.0/15.0;
-    refFaceNjNk(8,2) = 0;
-    refFaceNjNk(8,3) = 0;
-    refFaceNjNk(8,4) = 2.0/15.0;
-    refFaceNjNk(8,5) = 0;
-    refFaceNjNk(8,6) = 0;
-    refFaceNjNk(8,7) = 0;
-    refFaceNjNk(8,8) = 16.0/15.0;
-
-// scale to bring this into physical space
-    refFaceNjNk *= 0.5*dx*0.5*dy;
+// face mass matrix (automatically generated. See scripts/serendipity-2D.mac)
 
 // stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
     refDNjDNk = Lucee::Matrix<double>(shape, start);
