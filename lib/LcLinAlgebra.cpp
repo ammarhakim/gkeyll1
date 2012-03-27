@@ -8,7 +8,7 @@
 #include <LcExcept.h>
 #include <LcLinAlgebra.h>
 
-// This wierdness is needed as CLAPACK defines integer as long int but
+// This weirdness is needed as CLAPACK defines integer as long int but
 // as far I can see LAPACK itself only uses int. This can be a
 // potential cause for problems but I do not know how to fix in
 // general. (Ammar Hakim Wed Feb 1 2012).

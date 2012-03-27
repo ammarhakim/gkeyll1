@@ -79,22 +79,8 @@ namespace Lucee
       double cfl;
 /** Maximum CFL number allowed */
       double cflm;
-/** Differentiation matrix in X-direction */
-      Lucee::Matrix<double> diffMatrix_x;
-/** Differentiation matrix in X-direction */
-      Lucee::Matrix<double> diffMatrix_y;
-/** Stiffness in X-direction */
-      Lucee::Matrix<double> stiffMatrix_x;
-/** Stiffness in Y-direction */
-      Lucee::Matrix<double> stiffMatrix_y;
-/** Lifting matrix (x-lower) */
-      Lucee::Matrix<double> liftMatrix_xl;
-/** Lifting matrix (x-upper) */
-      Lucee::Matrix<double> liftMatrix_xu;
-/** Lifting matrix (y-lower) */
-      Lucee::Matrix<double> liftMatrix_yl;
-/** Lifting matrix (y-upper) */
-      Lucee::Matrix<double> liftMatrix_yu;
+/** Type of interface flux to use */
+      unsigned fluxType;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -137,7 +123,7 @@ namespace Lucee
  * @param phiK potential at nodes
  * @param phiPrimeK On output, gradient in x-direction
  */
-      void calcGradient_x(const std::vector<double>& phiK,
+      void calcGradient_x(std::vector<double>& phiK,
         std::vector<double>& phiPrimeK);
 
 /**
@@ -146,7 +132,7 @@ namespace Lucee
  * @param phiK potential at nodes
  * @param phiPrimeK On output, gradient in x-direction
  */
-      void calcGradient_y(const std::vector<double>& phiK,
+      void calcGradient_y(std::vector<double>& phiK,
         std::vector<double>& phiPrimeK);
 
 /**
@@ -158,6 +144,21 @@ namespace Lucee
  * @rturn upwind flux.
  */
       double getUpwindFlux(double u, double chil, double chir);
+
+/**
+ * Compute matrix-vector multiply. Output vector must be
+ * pre-allocated. Note that the computation performed is
+ *
+ * out = m*mat*vec + v*out
+ *
+ * @param m Factor for accumulation.
+ * @param mat Matrix for multiplication.
+ * @param vec Vector for multiplication.
+ * @param v Factor for accumulation.
+ * @param out On output, holds the product.
+ */
+      void matVec(double m, const Lucee::Matrix<double>& mat,
+        const std::vector<double>& vec, double v, double* out);
   };
 }
 
