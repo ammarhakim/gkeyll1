@@ -120,6 +120,22 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getSurfLowerNodeNums(unsigned dir,
+    std::vector<int>& nodeNum) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfLowerNodeNums: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getSurfUpperNodeNums(unsigned dir,
+    std::vector<int>& nodeNum) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfUpperNodeNums: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
   {
     throw Lucee::Except("NodalFiniteElementIfc::getNodalCoordinates: Not implemented!");    

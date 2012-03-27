@@ -127,6 +127,26 @@ namespace Lucee
         std::vector<int>& lgMap) const;
 
 /**
+ * Get node numbers of the nodes on specified face of element. The
+ * output vector must be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeNum Node numbers on face.
+ */
+      virtual void getSurfLowerNodeNums(unsigned dir,
+        std::vector<int>& nodeNum) const;
+
+/**
+ * Get node numbers of the nodes on specified face of element. The
+ * output vector must be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeNum Node numbers on face.
+ */
+      virtual void getSurfUpperNodeNums(unsigned dir,
+        std::vector<int>& nodeNum) const;
+
+/**
  * Get coordinates of all nodes in element. The output matrix
  * 'nodeCoords' should be pre-allocated have shape numNodes X 3.
  *
