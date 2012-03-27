@@ -59,9 +59,61 @@ namespace Lucee
 // updater we are assuming grid is uniform)
     nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
 
-// compute various matrices
     unsigned nlocal = nodalBasis->getNumNodes();
 
+// get node numbers on each lower and upper edges
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      lowerNodeNums[dir].nums.resize(nodalBasis->getNumSurfLowerNodes(dir));
+      nodalBasis->getSurfLowerNodeNums(dir, lowerNodeNums[dir].nums);
+
+      upperNodeNums[dir].nums.resize(nodalBasis->getNumSurfUpperNodes(dir));
+      nodalBasis->getSurfUpperNodeNums(dir, upperNodeNums[dir].nums);
+    }
+
+// space for mass matrix
+    Lucee::Matrix<double> massMatrix(nlocal, nlocal);
+
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+// get stiffness matrice
+      stiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      nodalBasis->getGradStiffnessMatrix(dir, stiffMatrix[dir].m);
+
+// calculate differentiation matrix
+      diffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      for (unsigned i=0; i<nlocal; ++i)
+        for (unsigned j=0; j<nlocal; ++j)
+// diff matrices are computed from transposed stiffness matrices
+          diffMatrix[dir].m(i,j) = stiffMatrix[dir].m(j,i);
+
+// multiply matrices by inverse of mass matrix
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, stiffMatrix[dir].m);
+
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, diffMatrix[dir].m);
+    }
+
+// compute lift matrices
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      lowerLift[dir].m = Lucee::Matrix<double>(nlocal, 
+        nodalBasis->getNumSurfLowerNodes(dir));
+      nodalBasis->getLowerFaceMassMatrix(dir, lowerLift[dir].m);
+
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, lowerLift[dir].m);
+      
+      upperLift[dir].m = Lucee::Matrix<double>(nlocal, 
+        nodalBasis->getNumSurfUpperNodes(dir));
+      nodalBasis->getUpperFaceMassMatrix(dir, upperLift[dir].m);
+
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, upperLift[dir].m);
+    }
+
+// compute various matrices
     stiffMatrix_x = Lucee::Matrix<double>(nlocal, nlocal);
     stiffMatrix_y = Lucee::Matrix<double>(nlocal, nlocal);
 
@@ -83,8 +135,6 @@ namespace Lucee
 // it. Perhaps a better thing is to add new methods to the LinAlgebra
 // file that computes the LU decomposition and then does the
 // backsubstitution so all these inversions can be avoided.
-
-    Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
 // multiply all matrices by M^-1
     nodalBasis->getMassMatrix(massMatrix);

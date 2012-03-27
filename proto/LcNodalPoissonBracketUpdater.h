@@ -97,6 +97,41 @@ namespace Lucee
       Lucee::Matrix<double> liftMatrix_yu;
 
 /**
+ * Matrix holder: this class is needed as the Matrix class does not
+ * have a default constructor.
+ */
+      struct MatrixHolder
+      {
+/** Ctor */
+          MatrixHolder() : m(1, 1) {}
+/** Differentiation matrix */
+          Lucee::Matrix<double> m;
+      };
+
+/** Differentiation matrices */
+      MatrixHolder diffMatrix[2];
+/** Differentiation matrices */
+      MatrixHolder stiffMatrix[2];
+/** Liftness matrix on lower edges */
+      MatrixHolder lowerLift[2];
+/** Liftness matrix on upper edges */
+      MatrixHolder upperLift[2];
+
+/**
+ * Structure to store node numbers on edges.
+ */
+      struct EdgeNodeNums
+      {
+/** Node numbers */
+          std::vector<int> nums;
+      };
+
+/** Vector to store lower node numbers */
+      EdgeNodeNums lowerNodeNums[2];
+/** Vector to store upper node numbers */
+      EdgeNodeNums upperNodeNums[2];
+
+/**
  * Compute gradient in x-direction.
  *
  * @param phiK potential at nodes
