@@ -162,15 +162,15 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      lgMap[0] = F_func(numX, numY, ix, iy);
-      lgMap[1] = F_func(numX, numY, ix, iy) + 2;
-      lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
-      lgMap[3] = F_func(numX, numY, ix, iy+1);
+      lgMap[0] = F_func(numX, numY, ix, iy); // 1
+      lgMap[1] = F_func(numX, numY, ix, iy) + 2; // 2
+      lgMap[2] = F_func(numX, numY, ix, iy+1) + 2; // 3
+      lgMap[3] = F_func(numX, numY, ix, iy+1); // 4
 
-      lgMap[4] = F_func(numX, numY, ix, iy) + 1;
-      lgMap[5] = G_func(numX, numY, ix, iy) + 1;
-      lgMap[6] = F_func(numX, numY, ix, iy+1) + 1;
-      lgMap[7] = G_func(numX, numY, ix, iy);
+      lgMap[4] = F_func(numX, numY, ix, iy) + 1; // 5
+      lgMap[5] = G_func(numX, numY, ix, iy) + 1; // 6
+      lgMap[6] = F_func(numX, numY, ix, iy+1) + 1; // 7
+      lgMap[7] = G_func(numX, numY, ix, iy); // 8
     }
   }
 
@@ -196,15 +196,15 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        lgMap[0] = F_func(numX, numY, ix, iy);
-        lgMap[1] = G_func(numX, numY, ix, iy);
-        lgMap[2] = F_func(numX, numY, ix, iy+1);
+        lgMap[0] = F_func(numX, numY, ix, iy); // 1
+        lgMap[1] = G_func(numX, numY, ix, iy); // 8
+        lgMap[2] = F_func(numX, numY, ix, iy+1); // 4
       }
       else if (dir == 1)
       {
-        lgMap[0] = F_func(numX, numY, ix, iy);
-        lgMap[1] = F_func(numX, numY, ix, iy) + 1;
-        lgMap[2] = F_func(numX, numY, ix, iy) + 2;
+        lgMap[0] = F_func(numX, numY, ix, iy); // 1
+        lgMap[1] = F_func(numX, numY, ix, iy) + 1; // 5
+        lgMap[2] = F_func(numX, numY, ix, iy) + 2; // 2
       }
     }
   }
@@ -231,15 +231,83 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        lgMap[0] = F_func(numX, numY, ix, iy) + 2;
-        lgMap[1] = G_func(numX, numY, ix, iy) + 1;
-        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
+        lgMap[0] = F_func(numX, numY, ix, iy) + 2; // 2
+        lgMap[1] = G_func(numX, numY, ix, iy) + 1; // 6
+        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2; // 3
       }
       else if (dir == 1)
       {
-        lgMap[0] = F_func(numX, numY, ix, iy+1);
-        lgMap[1] = F_func(numX, numY, ix, iy+1) + 1;
-        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2;
+        lgMap[0] = F_func(numX, numY, ix, iy+1); // 4
+        lgMap[1] = F_func(numX, numY, ix, iy+1) + 1; // 7
+        lgMap[2] = F_func(numX, numY, ix, iy+1) + 2; // 3
+      }
+    }
+  }
+
+  void
+  SerendipityElement2D::getSurfLowerNodeNums(unsigned dir,
+    std::vector<int>& nodeNum) const
+  {
+    if (polyOrder == 1)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 1;
+        nodeNum[1] = 4;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 1;
+        nodeNum[1] = 2;
+      }
+    }
+    else if (polyOrder == 2)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 1;
+        nodeNum[1] = 8;
+        nodeNum[2] = 4;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 1;
+        nodeNum[1] = 5;
+        nodeNum[2] = 2;
+      }
+    }
+  }
+
+  void
+  SerendipityElement2D::getSurfUpperNodeNums(unsigned dir,
+    std::vector<int>& nodeNum) const
+  {
+    if (polyOrder == 1)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 2;
+        nodeNum[1] = 3;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 4;
+        nodeNum[1] = 3;
+      }
+    }
+    else if (polyOrder == 2)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 2;
+        nodeNum[1] = 6;
+        nodeNum[2] = 3;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 4;
+        nodeNum[1] = 7;
+        nodeNum[2] = 3;
       }
     }
   }
