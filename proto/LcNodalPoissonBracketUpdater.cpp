@@ -235,8 +235,8 @@ namespace Lucee
         }
 
 // edge Y-lower has nodes (1,2)
-        fdotn[0] = getUpwindFlux(-gradPhiK_x[0], aCurrPtr_b[3], aCurrPtr[0]);
-        fdotn[1] = getUpwindFlux(-gradPhiK_x[1], aCurrPtr_b[2], aCurrPtr[1]);
+        fdotn[0] = -getUpwindFlux(-gradPhiK_x[0], aCurrPtr_b[3], aCurrPtr[0]);
+        fdotn[1] = -getUpwindFlux(-gradPhiK_x[1], aCurrPtr_b[2], aCurrPtr[1]);
 
 // multiply by lifting matrix
         for (unsigned i=0; i<nlocal; ++i)
@@ -264,10 +264,9 @@ namespace Lucee
         grid.setIndex(ix, iy);
         double dtdx = dt/grid.getDx(0);
         double dtdy = dt/grid.getDx(1);
-// compute CFL number. THIS REALLY IS NOT CORRECT AS THE MAXIMUM SPEED
-// SHOULD BE USED AND NOT JUST SPEED AT THE FIRST NODE. WILL FIX
-// LATER, FOR NOW IT IS OKAY. Ammar, 3/22/2012
-        cfla = Lucee::max3(cfla, dtdx*std::fabs(gradPhiK_y[0]), dtdy*std::fabs(gradPhiK_x[0]));
+// compute CFL number.
+        for (unsigned n=0; n<nlocal; ++n)
+          cfla = Lucee::max3(cfla, dtdx*std::fabs(gradPhiK_y[n]), dtdy*std::fabs(gradPhiK_x[n]));
       }
     }
 
