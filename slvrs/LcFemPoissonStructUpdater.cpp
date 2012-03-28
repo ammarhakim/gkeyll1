@@ -121,9 +121,6 @@ namespace Lucee
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
-// now create and initialize Petsc matrix to store stiffness matrix (LHS for Poisson equation)
-    //MatCreate(MPI_COMM_WORLD, &stiffMat);
-    //MatSetSizes(stiffMat, nglobal, nglobal, PETSC_DECIDE, PETSC_DECIDE);
 #ifdef HAVE_MPI
     throw Lucee::Except("FemPoissonStructUpdater does not yet work in parallel!");
 #else
@@ -235,21 +232,17 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-// UNCOMMENT FOLLOWING LINE TO VIEW STIFFNESS MATRIX
-//    MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
-
 //  finalize vector and matrix assembly
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-// create KSP context
+// create duplicate to store initial guess
+    VecDuplicate(globalSrc, &initGuess);
+
     KSPCreate(MPI_COMM_WORLD, &ksp);
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
-
-// create duplicate to store initial guess
-    VecDuplicate(globalSrc, &initGuess);
   }
 
   template <unsigned NDIM>
@@ -282,6 +275,12 @@ namespace Lucee
 // create sequencer for looping over local box
     Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
     int idx[NDIM];
+
+// clear out existing stuff in source vector: this is required
+// otherwise successive calls to advance() will accumulate into
+// source, which is of course not what we want.
+    VecSet(globalSrc, 0.0);
+
 // loop, creating RHS (source terms)
     while (seq.step())
     {
@@ -301,7 +300,6 @@ namespace Lucee
       }
       else
       {
-        std::cout << "SOURCE NODES NOT SHARED" << std::endl;
         src.setPtr(srcPtr, idx);
 // if nodes are not shared simply copy over data
         for (unsigned k=0; k<nlocal; ++k)
@@ -338,9 +336,6 @@ namespace Lucee
 // reassemble RHS after application of Dirichlet Bcs
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
-
-// UNCOMMENT FOLLOWING LINE TO VIEW RHS VECTOR
-//    VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;

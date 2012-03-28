@@ -48,7 +48,8 @@ namespace Lucee
  * @param qin Data in skin cell.
  * @param qbc Data in ghost cell.
  */
-      virtual void applyBc(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
+      virtual void applyBc(const Lucee::RectCoordSys& c, 
+        const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
 
     protected:
 /** Components to apply to */

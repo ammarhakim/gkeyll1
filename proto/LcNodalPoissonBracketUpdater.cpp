@@ -198,7 +198,6 @@ namespace Lucee
 
 // compute fluxes at each interior node and accumulate contribution to
 // volume integral
-
         for (unsigned dir=0; dir<2; ++dir)
         {
           for (unsigned k=0; k<nlocal; ++k)
@@ -258,8 +257,10 @@ namespace Lucee
         double dtdy = dt/grid.getDx(1);
 // compute CFL number.
         for (unsigned n=0; n<nlocal; ++n)
+        {
           cfla = Lucee::max3(cfla, dtdx*std::fabs(speeds[0].s[n]), 
             dtdy*std::fabs(speeds[1].s[n]));
+        }
       }
     }
 
