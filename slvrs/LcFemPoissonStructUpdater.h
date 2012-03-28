@@ -81,6 +81,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Flag to indicate if nodes in source are shared or not */
+      bool srcNodesShared;
 /** Petsc matrices to store linear operator */
       Mat stiffMat;
 /** Petsc vectors for source and initial guess */

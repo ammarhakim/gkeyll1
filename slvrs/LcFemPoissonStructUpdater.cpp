@@ -60,6 +60,11 @@ namespace Lucee
     else
       throw Lucee::Except("FemPoissonStructUpdater::readInput: Must specify element to use using 'basis'");
 
+// check if source nodes are shared
+    srcNodesShared = true;
+    if (tbl.hasBool("sourceNodesShared"))
+      srcNodesShared = tbl.getBool("sourceNodesShared");
+
 // get BCs to apply
     if (tbl.hasTable("bcLeft"))
     {
@@ -271,6 +276,9 @@ namespace Lucee
 // storage for computing source contribution
     std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
 
+// pointers
+    Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
+
 // create sequencer for looping over local box
     Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
     int idx[NDIM];
@@ -286,8 +294,19 @@ namespace Lucee
 // get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
 
-// now compute source at each local node
-      nodalBasis->extractFromField(src, localSrc);
+      if (srcNodesShared)
+      {
+// extract source at each node from field
+        nodalBasis->extractFromField(src, localSrc);
+      }
+      else
+      {
+        std::cout << "SOURCE NODES NOT SHARED" << std::endl;
+        src.setPtr(srcPtr, idx);
+// if nodes are not shared simply copy over data
+        for (unsigned k=0; k<nlocal; ++k)
+          localSrc[k] = srcPtr[k];
+      }
 
 // evaluate local mass matrix times local source
       for (unsigned k=0; k<nlocal; ++k)

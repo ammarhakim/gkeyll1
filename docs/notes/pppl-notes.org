@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 28th
+
+  Now polyOrder 2 also works. In getting this to work the code had to
+  be rearranged a bit, but now will work with any basis
+  functions. This generalization includes a loop over direction which
+  seems to add a 10% overhead. For some reason the compiler is unable
+  to unroll the loops even though the loop size is explicitly set.
+
+  One lesson here is that even small things can have an impact on the
+  performace and that the code performs no-where close to its optimal
+  levels. This is okay for now but later when real physics problems
+  are being tackled it might be important to carefully optimize the
+  code.
+
 * March 27th
 
   Did more basis tests of the Poisson bracket updater. Converted it to

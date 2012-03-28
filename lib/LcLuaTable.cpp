@@ -159,8 +159,8 @@ namespace Lucee
     if (lua_type(L, -1) != LUA_TBOOLEAN)
     {
       lua_pop(L, 2);
-      Lucee::Except lce("LuaTable::getNumber: ");
-      lce << key << " is not a number";
+      Lucee::Except lce("LuaTable::getBool: ");
+      lce << key << " is not a bool";
       throw lce;
     }
     int res = lua_toboolean(L, -1);

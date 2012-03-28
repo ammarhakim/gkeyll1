@@ -83,8 +83,16 @@ namespace Lucee
       lowerNodeNums[dir].nums.resize(nodalBasis->getNumSurfLowerNodes(dir));
       nodalBasis->getSurfLowerNodeNums(dir, lowerNodeNums[dir].nums);
 
+// reset numbers as element offsets them with 1
+      for (unsigned k=0; k<nodalBasis->getNumSurfLowerNodes(dir); ++k)
+        lowerNodeNums[dir].nums[k] += -1;
+
       upperNodeNums[dir].nums.resize(nodalBasis->getNumSurfUpperNodes(dir));
       nodalBasis->getSurfUpperNodeNums(dir, upperNodeNums[dir].nums);
+
+// reset numbers as element offsets them with 1
+      for (unsigned k=0; k<nodalBasis->getNumSurfUpperNodes(dir); ++k)
+        upperNodeNums[dir].nums[k] += -1;
     }
 
 // space for mass matrix
@@ -149,28 +157,29 @@ namespace Lucee
 
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
-// number of nodes on each face
-    unsigned nFace = 2;  // NOTE: THIS NEEDS TO BE GOTTEN FROM nodalBasis
+// number of nodes on each face (WARNING: assumption here is that all
+// faces have same number of nodes)
+    unsigned nFace = nodalBasis->getNumSurfLowerNodes(0);
 
-// space for potential and derivatives at nodes
-    std::vector<double> phiK(nlocal), gradPhiK_x(nlocal), gradPhiK_y(nlocal);
-    std::vector<double> flux_x(nlocal), flux_y(nlocal);
+// space for various quantities
+    std::vector<double> phiK(nlocal), flux(nlocal);
     std::vector<double> fdotn(nFace);
-    double tv;
+
+    NodalPoissonBracketUpdater::NodeSpeed speeds[2];
+    for (unsigned dir=0; dir<2; ++dir)
+      speeds[dir].s.resize(nlocal);
 
 // various iterators
     Lucee::ConstFieldPtr<double> phiPtr = phi.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_t = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_b = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_n = aCurr.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
 
 // clear out contents of output field
     aNew = 0.0;
 
     double dx[2];
+    int idx[2];
 
 // compute contributions from volume integrals
     for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
@@ -178,61 +187,70 @@ namespace Lucee
       for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
       {
         aCurr.setPtr(aCurrPtr, ix, iy);
-        aCurr.setPtr(aCurrPtr_l, ix-1, iy); // left cell
-        aCurr.setPtr(aCurrPtr_r, ix+1, iy); // right cell
-        aCurr.setPtr(aCurrPtr_t, ix, iy+1); // top cell
-        aCurr.setPtr(aCurrPtr_b, ix, iy-1); // bottom cell
-
         aNew.setPtr(aNewPtr, ix, iy);
         nodalBasis->setIndex(ix, iy);
 
 // extract potential at this location
         nodalBasis->extractFromField(phi, phiK);
 
-// compute gradient in X and Y directions
-        calcGradient_x(phiK, gradPhiK_x);
-        calcGradient_y(phiK, gradPhiK_y);
+// compute speeds
+        calcSpeeds(phiK, speeds);
 
-// compute x and y fluxes at each node
-        for (unsigned k=0; k<nlocal; ++k)
+// compute fluxes at each interior node and accumulate contribution to
+// volume integral
+
+        for (unsigned dir=0; dir<2; ++dir)
         {
-          flux_x[k] = gradPhiK_y[k]*aCurrPtr[k];
-          flux_y[k] = -gradPhiK_x[k]*aCurrPtr[k];
+          for (unsigned k=0; k<nlocal; ++k)
+            flux[k] = speeds[dir].s[k]*aCurrPtr[k];
+          matVec(1.0, stiffMatrix[dir].m, flux, 1.0, &aNewPtr[0]);
         }
 
-// multiply by stiffness matrix to give volume contribution
-        matVec(1.0, stiffMatrix[0].m, flux_x, 1.0, &aNewPtr[0]);
-        matVec(1.0, stiffMatrix[1].m, flux_y, 1.0, &aNewPtr[0]);
+// compute contribution from edge integrals on lower edges
+        for (unsigned dir=0; dir<2; ++dir)
+        {
+          idx[0] = ix; idx[1] = iy;
+          idx[dir] += -1; // lower side
 
-// compute contribution from edge integrals
+// set pointer to cell on lower side in this direction
+          aCurr.setPtr(aCurrPtr_n, idx[0], idx[1]);
 
-// edge X-lower has nodes (1,4)
-        fdotn[0] = -getUpwindFlux(gradPhiK_y[0], aCurrPtr_l[1], aCurrPtr[0]);
-        fdotn[1] = -getUpwindFlux(gradPhiK_y[3], aCurrPtr_l[2], aCurrPtr[3]);
+// contribution from lower edge in direction
+          for (unsigned f=0; f<nFace; ++f)
+          {
+            unsigned fn = lowerNodeNums[dir].nums[f]; // node number in cell on right
+            unsigned fn_n = upperNodeNums[dir].nums[f]; // node number in cell on left
 
-// multiply by lifting matrix
-        matVec(-1.0, lowerLift[0].m, fdotn, 1.0, &aNewPtr[0]);
+// compute upwind flux (lower edges contribution is -ve)
+            fdotn[f] = -getUpwindFlux(speeds[dir].s[fn],
+              aCurrPtr_n[fn_n], aCurrPtr[fn]);
+          }
+// multiply by lifting matrix to compute contribution
+          matVec(-1.0, lowerLift[dir].m, fdotn, 1.0, &aNewPtr[0]);
+        }
 
-// edge X-upper has nodes (2,3)
-        fdotn[0] = getUpwindFlux(gradPhiK_y[1], aCurrPtr[1], aCurrPtr_r[0]);
-        fdotn[1] = getUpwindFlux(gradPhiK_y[2], aCurrPtr[2], aCurrPtr_r[3]);
+// compute contribution from edge integrals on upper edges
+        for (unsigned dir=0; dir<2; ++dir)
+        {
+          idx[0] = ix; idx[1] = iy;
+          idx[dir] += 1; // upper side
 
-// multiply by lifting matrix
-        matVec(-1.0, upperLift[0].m, fdotn, 1.0, &aNewPtr[0]);
+// set pointer to cell on lower side in this direction
+          aCurr.setPtr(aCurrPtr_n, idx[0], idx[1]);
 
-// edge Y-lower has nodes (1,2)
-        fdotn[0] = -getUpwindFlux(-gradPhiK_x[0], aCurrPtr_b[3], aCurrPtr[0]);
-        fdotn[1] = -getUpwindFlux(-gradPhiK_x[1], aCurrPtr_b[2], aCurrPtr[1]);
+// contribution from lower edge in direction
+          for (unsigned f=0; f<nFace; ++f)
+          {
+            unsigned fn = upperNodeNums[dir].nums[f]; // node number in cell on left
+            unsigned fn_n = lowerNodeNums[dir].nums[f]; // node number in cell on right
 
-// multiply by lifting matrix
-        matVec(-1.0, lowerLift[1].m, fdotn, 1.0, &aNewPtr[0]);
-
-// edge Y-upper has nodes (4,3)
-        fdotn[0] = getUpwindFlux(-gradPhiK_x[3], aCurrPtr[3], aCurrPtr_t[0]);
-        fdotn[1] = getUpwindFlux(-gradPhiK_x[2], aCurrPtr[2], aCurrPtr_t[1]);
-
-// multiply by lifting matrix
-        matVec(-1.0, upperLift[1].m, fdotn, 1.0, &aNewPtr[0]);
+// compute upwind flux (upper edges contribution is +ve)
+            fdotn[f] = getUpwindFlux(speeds[dir].s[fn],
+              aCurrPtr[fn], aCurrPtr_n[fn_n]);
+          }
+// multiply by lifting matrix to compute contribution
+          matVec(-1.0, upperLift[dir].m, fdotn, 1.0, &aNewPtr[0]);
+        }
 
 // get grid spacing
         grid.setIndex(ix, iy);
@@ -240,7 +258,8 @@ namespace Lucee
         double dtdy = dt/grid.getDx(1);
 // compute CFL number.
         for (unsigned n=0; n<nlocal; ++n)
-          cfla = Lucee::max3(cfla, dtdx*std::fabs(gradPhiK_y[n]), dtdy*std::fabs(gradPhiK_x[n]));
+          cfla = Lucee::max3(cfla, dtdx*std::fabs(speeds[0].s[n]), 
+            dtdy*std::fabs(speeds[1].s[n]));
       }
     }
 
@@ -284,6 +303,15 @@ namespace Lucee
   NodalPoissonBracketUpdater::calcGradient_y(std::vector<double>& phiK, std::vector<double>& phiPrimeK)
   {
     matVec(1.0, diffMatrix[1].m, phiK, 0.0, &phiPrimeK[0]);
+  }
+
+  void
+  NodalPoissonBracketUpdater::calcSpeeds(std::vector<double>& phiK, NodeSpeed speeds[2])
+  {
+// ux = d phi / dy
+    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &speeds[0].s[0]);
+// uy = - d phi / dx
+    matVec(-1.0, diffMatrix[0].m, phiK, 0.0, &speeds[1].s[0]);
   }
 
   double
