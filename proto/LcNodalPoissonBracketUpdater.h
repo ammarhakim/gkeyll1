@@ -118,6 +118,15 @@ namespace Lucee
       EdgeNodeNums upperNodeNums[2];
 
 /**
+ * Structure to hold speeds at each node.
+ */
+      struct NodeSpeed
+      {
+/** Speeds at each node */
+          std::vector<double> s;
+      };
+
+/**
  * Compute gradient in x-direction.
  *
  * @param phiK potential at nodes
@@ -134,6 +143,16 @@ namespace Lucee
  */
       void calcGradient_y(std::vector<double>& phiK,
         std::vector<double>& phiPrimeK);
+
+/**
+ * Calculate speeds in the X and Y directions. The output structure
+ * must be pre-allocated.
+ * 
+ * @param phiK values of potential at nodes.
+ * @param speeds On output, speeds in X- and Y-directions.
+ */
+      void calcSpeeds(std::vector<double>& phiK,
+        NodeSpeed speeds[2]);
 
 /**
  * Return upwind flux based given speed and nodal values.
