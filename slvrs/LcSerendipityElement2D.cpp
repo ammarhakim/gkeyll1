@@ -373,10 +373,6 @@ namespace Lucee
   SerendipityElement2D::getLowerFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-// TODO: Fix this
-    if (polyOrder == 2)
-      throw Lucee::Except("SerendipityElement2D::getLowerFaceMassMatrix: polyOrder 2 not implemented!");
-
     if (dir == 0)
       NjNk.copy(refFaceNjNk_xl);
     else if (dir == 1)
@@ -387,10 +383,6 @@ namespace Lucee
   SerendipityElement2D::getUpperFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-// TODO: Fix this
-    if (polyOrder == 2)
-      throw Lucee::Except("SerendipityElement2D::getLowerFaceMassMatrix: polyOrder 2 not implemented!");
-
     if (dir == 0)
       NjNk.copy(refFaceNjNk_xu);
     else if (dir == 1)
@@ -691,6 +683,8 @@ namespace Lucee
     unsigned shape[2] = {8,8};
     int start[2] = {1,1};
 
+    unsigned faceShape[2] = {8,3};
+
 // get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
@@ -769,7 +763,125 @@ namespace Lucee
 // scale to bring this into physical space
     refNjNk *= 0.5*dx*0.5*dy;
 
-// face mass matrix (automatically generated. See scripts/serendipity-2D.mac)
+// face mass matrix (x-lower)
+    refFaceNjNk_xl = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_xl(1,1) = 4.0/15.0;
+    refFaceNjNk_xl(1,2) = 2.0/15.0;
+    refFaceNjNk_xl(1,3) = (-1.0)/15.0;
+    refFaceNjNk_xl(2,1) = 0;
+    refFaceNjNk_xl(2,2) = 0;
+    refFaceNjNk_xl(2,3) = 0;
+    refFaceNjNk_xl(3,1) = 0;
+    refFaceNjNk_xl(3,2) = 0;;
+    refFaceNjNk_xl(3,3) = 0;
+    refFaceNjNk_xl(4,1) = (-1.0)/15.0;
+    refFaceNjNk_xl(4,2) = 2.0/15.0;
+    refFaceNjNk_xl(4,3) = 4.0/15.0;;
+    refFaceNjNk_xl(5,1) = 0;
+    refFaceNjNk_xl(5,2) = 0;
+    refFaceNjNk_xl(5,3) = 0;
+    refFaceNjNk_xl(6,1) = 0;
+    refFaceNjNk_xl(6,2) = 0;
+    refFaceNjNk_xl(6,3) = 0;
+    refFaceNjNk_xl(7,1) = 0;
+    refFaceNjNk_xl(7,2) = 0;
+    refFaceNjNk_xl(7,3) = 0;
+    refFaceNjNk_xl(8,1) = 2.0/15.0;
+    refFaceNjNk_xl(8,2) = 16.0/15.0;
+    refFaceNjNk_xl(8,3) = 2.0/15.0;
+
+// scale to bring this into physical space
+    refFaceNjNk_xl *= 0.5*dy;
+
+// face mass matrix (x-upper)
+    refFaceNjNk_xu = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_xu(1,1) = 0;
+    refFaceNjNk_xu(1,2) = 0;
+    refFaceNjNk_xu(1,3) = 0;
+    refFaceNjNk_xu(2,1) = 4.0/15.0;
+    refFaceNjNk_xu(2,2) = 2.0/15.0;
+    refFaceNjNk_xu(2,3) = (-1.0)/15.0;
+    refFaceNjNk_xu(3,1) = (-1.0)/15.0;
+    refFaceNjNk_xu(3,2) = 2.0/15.0;
+    refFaceNjNk_xu(3,3) = 4.0/15.0;
+    refFaceNjNk_xu(4,1) = 0;
+    refFaceNjNk_xu(4,2) = 0;
+    refFaceNjNk_xu(4,3) = 0;
+    refFaceNjNk_xu(5,1) = 0;
+    refFaceNjNk_xu(5,2) = 0;;
+    refFaceNjNk_xu(5,3) = 0;
+    refFaceNjNk_xu(6,1) = 2.0/15.0;
+    refFaceNjNk_xu(6,2) = 16.0/15.0;
+    refFaceNjNk_xu(6,3) = 2.0/15.0;
+    refFaceNjNk_xu(7,1) = 0;
+    refFaceNjNk_xu(7,2) = 0;
+    refFaceNjNk_xu(7,3) = 0;
+    refFaceNjNk_xu(8,1) = 0;
+    refFaceNjNk_xu(8,2) = 0;
+    refFaceNjNk_xu(8,3) = 0;
+
+// scale to bring this into physical space
+    refFaceNjNk_xu *= 0.5*dy;
+
+// face mass matrix (y-lower)
+    refFaceNjNk_yl = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_yl(1,1) = 4.0/15.0;
+    refFaceNjNk_yl(1,2) = 2.0/15.0;
+    refFaceNjNk_yl(1,3) = (-1.0)/15.0;
+    refFaceNjNk_yl(2,1) = (-1.0)/15.0;
+    refFaceNjNk_yl(2,2) = 2.0/15.0;
+    refFaceNjNk_yl(2,3) = 4.0/15.0;
+    refFaceNjNk_yl(3,1) = 0;
+    refFaceNjNk_yl(3,2) = 0;
+    refFaceNjNk_yl(3,3) = 0;
+    refFaceNjNk_yl(4,1) = 0;
+    refFaceNjNk_yl(4,2) = 0;
+    refFaceNjNk_yl(4,3) = 0;
+    refFaceNjNk_yl(5,1) = 2.0/15.0;
+    refFaceNjNk_yl(5,2) = 16.0/15.0;
+    refFaceNjNk_yl(5,3) = 2.0/15.0;
+    refFaceNjNk_yl(6,1) = 0;
+    refFaceNjNk_yl(6,2) = 0;
+    refFaceNjNk_yl(6,3) = 0;
+    refFaceNjNk_yl(7,1) = 0;
+    refFaceNjNk_yl(7,2) = 0;
+    refFaceNjNk_yl(7,3) = 0;
+    refFaceNjNk_yl(8,1) = 0;
+    refFaceNjNk_yl(8,2) = 0;
+    refFaceNjNk_yl(8,3) = 0;
+
+// scale to bring this into physical space
+    refFaceNjNk_yl *= 0.5*dx;
+
+// face mass matrix (y-upper)
+    refFaceNjNk_yu = Lucee::Matrix<double>(faceShape, start);
+    refFaceNjNk_yu(1,1) = 0;
+    refFaceNjNk_yu(1,2) = 0;
+    refFaceNjNk_yu(1,3) = 0;
+    refFaceNjNk_yu(2,1) = 0;;
+    refFaceNjNk_yu(2,2) = 0;
+    refFaceNjNk_yu(2,3) = 0;
+    refFaceNjNk_yu(3,1) = (-1.0)/15.0;
+    refFaceNjNk_yu(3,2) = 2.0/15.0;
+    refFaceNjNk_yu(3,3) = 4.0/15.0;
+    refFaceNjNk_yu(4,1) = 4.0/15.0;
+    refFaceNjNk_yu(4,2) = 2.0/15.0;;
+    refFaceNjNk_yu(4,3) = (-1.0)/15.0;
+    refFaceNjNk_yu(5,1) = 0;
+    refFaceNjNk_yu(5,2) = 0;
+    refFaceNjNk_yu(5,3) = 0;
+    refFaceNjNk_yu(6,1) = 0;
+    refFaceNjNk_yu(6,2) = 0;
+    refFaceNjNk_yu(6,3) = 0;
+    refFaceNjNk_yu(7,1) = 2.0/15.0;
+    refFaceNjNk_yu(7,2) = 16.0/15.0;
+    refFaceNjNk_yu(7,3) = 2.0/15.0;
+    refFaceNjNk_yu(8,1) = 0;
+    refFaceNjNk_yu(8,2) = 0;
+    refFaceNjNk_yu(8,3) = 0;
+
+// scale to bring this into physical space
+    refFaceNjNk_yu *= 0.5*dx;
 
 // stiffness matrix (automatically generated. See scripts/serendipity-2D.mac)
     refDNjDNk = Lucee::Matrix<double>(shape, start);
