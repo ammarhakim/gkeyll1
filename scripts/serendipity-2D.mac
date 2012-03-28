@@ -194,6 +194,11 @@ N3_mass : calcMassMatrix(N3);
 N3_face_mass : calcFaceMassMatrix(N3);
 N3_lift : invert(N3_mass) . N3_face_mass;
 
+N3_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(N3), [1,8,4]);
+N3_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(N3), [2,6,3]);
+N3_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(N3), [1,5,2]);
+N3_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(N3), [4,7,3]);
+
 /** Compute stiffness matrices */
 N3_stiff : calcStiffMatrix(N3);
 N3_grad_stiff_x : calcGradStiffMatrix_x(N3);

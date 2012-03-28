@@ -5,6 +5,24 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 27th
+
+  Did more basis tests of the Poisson bracket updater. Converted it to
+  be more systematic and eventually be used as a proto-type for a
+  dimensionally independent DG solver for other hyperbolic systems.
+
+  Tried to compute the matrix-vector multiplies using BLAS. Makes the
+  code 5X *slower*. I suspect this is because BLAS has no advantage
+  over simple loops when the matrices and vectors are small. Perhaps
+  it would make more sense when the complete updater is
+  "vectorized". However, it seems there is a lot of room for
+  improvement in performance here.
+
+  Added the methods to support polyOrder = 2. However, the Poisson
+  updater still needs more work to make it independent of the number
+  of nodes on the faces. Will do this tomorrow, getting very tired
+  now.
+
 * March 26th
 
   Completed the surface integral terms needed in the Poisson bracket
