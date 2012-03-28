@@ -14,10 +14,13 @@
   to unroll the loops even though the loop size is explicitly set.
 
   One lesson here is that even small things can have an impact on the
-  performace and that the code performs no-where close to its optimal
+  performace and that the code performs no where close to its optimal
   levels. This is okay for now but later when real physics problems
   are being tackled it might be important to carefully optimize the
   code.
+
+  Added a flag to the Poisson solver to allow a DG field as an
+  input. Now we are really ready for the coupled problem.
 
 * March 27th
 
