@@ -143,6 +143,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getWeights(std::vector<double>& w)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getWeights: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getMassMatrix: Not implemented!");

@@ -11,9 +11,16 @@
 
 // lucee includes
 #include <LcFemPoissonStructUpdater.h>
+#include <LcGlobals.h>
 #include <LcMatrix.h>
 #include <LcRectCartGrid.h>
 #include <LcStructGridField.h>
+
+// txbase includes
+#include <TxCommBase.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // std includes
 #include <sstream>
@@ -406,6 +413,59 @@ namespace Lucee
     bcData.value = bct.getNumber("V");
     
     return bcData;
+  }
+
+  template <unsigned NDIM>
+  double
+  FemPoissonStructUpdater<NDIM>::getFieldIntegral(const Lucee::Field<NDIM, double>& fld, 
+    bool shareFlag)
+  {
+    unsigned nlocal = nodalBasis->getNumNodes();
+    std::vector<double> weights(nlocal), localFld(nlocal);
+// get quadrature weights
+    nodalBasis->getWeights(weights);
+
+// get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+// create pointers
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+
+    Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
+    int idx[NDIM];
+    double fldInt = 0.0;
+// loop, accumulating integral in each cell
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+// set index into element basis
+      nodalBasis->setIndex(idx);
+
+      if (shareFlag)
+// extract source at each node from field
+        nodalBasis->extractFromField(fld, localFld);
+      else
+      {
+        fld.setPtr(fldPtr, idx);
+// if nodes are not shared simply copy over data
+        for (unsigned k=0; k<nlocal; ++k)
+          localFld[k] = fldPtr[k];
+      }
+
+// compute contribition from this cell
+      for (unsigned k=0; k<nlocal; +k)
+        fldInt += weights[k]*localFld[k];      
+    }
+
+    double netFldInt;
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+// do all reduce operation to get sum across all processors
+    comm->allreduce(1, &fldInt, &netFldInt, TX_SUM);
+
+    return netFldInt;
   }
 
 // instantiations

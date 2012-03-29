@@ -14,7 +14,7 @@
 #include <LcMathLib.h>
 #include <LcPointerHolder.h>
 #include <LcStructGridField.h>
-#include <Lcmatrix.h>
+#include <LcMatrix.h>
 
 // loki includes
 #include <loki/Singleton.h>

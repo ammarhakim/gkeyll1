@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcNodalFiniteElementIfc.h>
+#include <LcStructGridField.h>
 #include <LcUpdaterIfc.h>
 
 // petsc includes
@@ -119,6 +120,15 @@ namespace Lucee
  * @return Boundary condition data.
  */
       FemPoissonBcData getBcData(const Lucee::LuaTable& lt) const;
+
+/**
+ * Compute integral of field over the complete domain.
+ *
+ * @param fld Field to integrate.
+ * @param shareFlag Flag to indicate if nodes are shared.
+ * @return integral of field over domain.
+ */
+      double getFieldIntegral(const Lucee::Field<NDIM, double>& fld, bool shareFlag);
   };
 }
 
