@@ -5,6 +5,24 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 29th
+
+  False start on getting Poisson solver to work with periodic
+  BCs. Half the day was wasted till I realized what was going on.
+
+  Modified Poisson solver to work with periodic BCs. For some crazy
+  reason the solution looks as if one is applying Dirichlet BCs and
+  not periodic BCs. Not sure what is going on, but more staring at the
+  code is needed.
+
+  FOUND THE BUG: The problem was that Dirichlet BCs were being applied
+  even when periodic BCs were specified. This is just bad programming
+  and wasted another 1/2 day. So day is now over.
+
+  Strangely, the KSP solver has no problem converging to a solution
+  even when BCs are periodic. Not sure why, as the matrix should not
+  posses an inverse in this case.
+
 * March 28th
 
   Now polyOrder 2 also works. In getting this to work the code had to
@@ -21,6 +39,13 @@
 
   Added a flag to the Poisson solver to allow a DG field as an
   input. Now we are really ready for the coupled problem.
+
+  Fixed a very nasty but subtle bug in the Poisson solver that was
+  giving weird results when the Poisson solver was called multiple
+  times. Turns out that the RHS of the poisson equation was not being
+  cleared properly before setting it in a time-dependent problem,
+  causing the solution to be different even if the source did not
+  change between calls.
 
 * March 27th
 

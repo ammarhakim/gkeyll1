@@ -32,6 +32,11 @@ namespace Lucee
   }
 
   void
+  BasicObj::readInput(Lucee::LuaTable& tbl)
+  {
+  }
+
+  void
   BasicObj::initialize()
   {
   }

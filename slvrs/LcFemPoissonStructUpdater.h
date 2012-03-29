@@ -96,7 +96,7 @@ namespace Lucee
       {
 /** Create object to indicate Bc was not set */
           FemPoissonBcData()
-            : isSet(false)
+            : isSet(false), type(0), value(0)
           {}
 
 /** Flag to indicate if Bc was set */
@@ -112,6 +112,11 @@ namespace Lucee
 
 /** Map of rows to Dirichlet BC values */
       std::map<int, double> rowBcValues;
+
+/** Flags to indicated periodic directions */
+      bool periodicFlgs[NDIM];
+/** Flag to indicate if all directions are periodic */
+      bool allPeriodic;
 
 /**
  * Function to parse out BC.
