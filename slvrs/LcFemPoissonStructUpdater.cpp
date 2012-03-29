@@ -33,8 +33,9 @@ namespace Lucee
   static const unsigned DZ = 2;
   static const unsigned LO = 0;
   static const unsigned HI = 1;
-  static const unsigned DIRICHLET_BC = 0;
-  static const unsigned NEUMANN_BC = 1;
+  static const unsigned NO_BC = 0;
+  static const unsigned DIRICHLET_BC = 1;
+  static const unsigned NEUMANN_BC = 2;
 
   template <> const char *FemPoissonStructUpdater<1>::id = "FemPoisson1D";
   template <> const char *FemPoissonStructUpdater<2>::id = "FemPoisson2D";
@@ -72,6 +73,28 @@ namespace Lucee
     if (tbl.hasBool("sourceNodesShared"))
       srcNodesShared = tbl.getBool("sourceNodesShared");
 
+    for (unsigned i=0; i<NDIM; ++i) 
+      periodicFlgs[i] = false;
+
+// check if any direction is periodic
+    if (tbl.hasNumVec("periodicDirs"))
+    {
+      std::vector<double> pd = tbl.getNumVec("periodicDirs");
+      for (unsigned i=0; i<pd.size(); ++i)
+      {
+        if ((pd[i]<0) || (pd[i]>=NDIM))
+        {
+          throw Lucee::Except("FemPoissonStructUpdater:readInput: Incorrect 'periodicDirs'");
+        }
+        periodicFlgs[(unsigned) pd[i]] = true;
+      }
+    }
+
+// check if all directions are periodic
+    allPeriodic = true;
+    for (unsigned i=0; i<NDIM; ++i)
+      allPeriodic = allPeriodic && periodicFlgs[i];
+
 // get BCs to apply
     if (tbl.hasTable("bcLeft"))
     {
@@ -104,16 +127,31 @@ namespace Lucee
       }
     }
 
-// TODO: NEED TO CORRECT THESE TESTS
 // some sanity checks: must either specify both BCs along a direction
 // or none. In the latter case the BC is assumed to be periodic.
 
-//     if (bcX.size() > 0 && bcX.size() != 2)
-//       throw Lucee::Except(
-//         "FemPoissonStructUpdater::readInput: Must specify both bcLeft/bcRight");
-//     if (bcY.size() > 0 && bcY.size() != 2)
-//       throw Lucee::Except(
-//         "FemPoissonStructUpdater::readInput: Must specify both bcBottom/bcTop");
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+      if (periodicFlgs[dir] == false)
+      {
+// ensure both BCs are specified
+        if (!bc[dir][0].isSet || !bc[dir][1].isSet)
+        {
+          Lucee::Except lce("FemPoissonStructUpdater:: Must specify BCs on each side");
+          throw lce;
+        }
+      }
+      else
+      {
+// ensure no BCs are specified
+        if (bc[dir][0].isSet || bc[dir][1].isSet)
+        {
+          Lucee::Except lce("FemPoissonStructUpdater:: Cannot specify BCs");
+          lce << " if a direction is periodic";
+          throw lce;
+        }
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -127,6 +165,9 @@ namespace Lucee
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
+
+// map to hold periodicially identified nodes
+    std::map<int, int> periodicNodeMap;
 
 #ifdef HAVE_MPI
     throw Lucee::Except("FemPoissonStructUpdater does not yet work in parallel!");
@@ -155,6 +196,9 @@ namespace Lucee
 
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+// global region for grid
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
 // create sequencer for looping over local box
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion(); 
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -187,12 +231,12 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-// now modify values in stiffness matrix based on Dirichlet Bcs
+// modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
     {
       for (unsigned side=0; side<2; ++side)
       {
-        if (bc[d][side].type == DIRICHLET_BC)
+        if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
         { // we do not need to do anything for Neumann BCs
 
 // fetch number of nodes on face of element
@@ -204,9 +248,11 @@ namespace Lucee
 
           double dv = bc[d][side].value;
 // create region to loop over side
-          Lucee::Region<NDIM, int> defRgn = side==0 ?
-            localRgn.resetBounds(d, localRgn.getLower(d), localRgn.getLower(d)+1) :
-            localRgn.resetBounds(d, localRgn.getUpper(d)-1, localRgn.getUpper(d)) ;
+          Lucee::Region<NDIM, int> defRgnG = side==0 ?
+            globalRgn.resetBounds(d, globalRgn.getLower(d), globalRgn.getLower(d)+1) :
+            globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
+// only update if we are on the correct ranks
+          Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
 // loop, modifying stiffness matrix
           Lucee::RowMajorSequencer<NDIM> seq(defRgn);
@@ -235,11 +281,88 @@ namespace Lucee
       }
     }
 
+// Next begin process of modification to handle periodic BCs
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (periodicFlgs[d] == true)
+      { // this direction is periodic
+        
+// fetch number of nodes on face of element
+        unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
+
+// allocate space for mapping
+        std::vector<int> lgSurfMap(nsl), lgLowerSurfMap(nsl);
+
+// create region to loop over side
+        Lucee::Region<NDIM, int> defRgnG = 
+          globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
+// only update if we are on the correct ranks
+        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
+
+// loop, modifying stiffness matrix
+        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+
+// set index into element basis
+          nodalBasis->setIndex(idx);
+// get surface nodes -> global mapping
+          nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+
+// reset corresponding rows (Note that some rows may be reset more
+// than once. This should not be a problem, though might make the
+// setup phase a bit slower).
+          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
+
+// now insert row numbers with a 0.0 as corresponding source to ensure
+// this point is identified with its periodic image on the lower
+// boundary.
+          for (unsigned r=0; r<nsl; ++r)
+            rowBcValues[lgSurfMap[r]] = 0.0;
+
+// compute corresponding node numbers on lower edge
+          idx[d] = 0;
+// set index into element basis
+          nodalBasis->setIndex(idx);
+// get surface nodes -> global mapping
+          nodalBasis->getSurfLowerLocalToGlobal(d, lgLowerSurfMap);
+
+// finally insert node numbers into map
+          for (unsigned r=0; r<nsl; ++r)
+            periodicNodeMap[lgSurfMap[r]] = lgLowerSurfMap[r];
+        }
+      }
+    }
+
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-//  finalize vector and matrix assembly
+// list of values to force periodicity
+    double periodicVals[2] = {-1, 1};
+    int resetRow[1]; // row to reset
+    int resetCol[2]; // col to reset
+
+// now make final sweep to ensure periodicity
+    std::map<int, int>::const_iterator rItr
+      = periodicNodeMap.begin();
+    for ( ; rItr != periodicNodeMap.end(); ++rItr)
+    {
+      resetRow[0] = rItr->first;
+      resetCol[0] = rItr->first;
+      resetCol[1] = rItr->second;
+      MatSetValues(stiffMat, 1, resetRow, 2, resetCol,
+        periodicVals, INSERT_VALUES);
+    }
+
+// reassemble matrix after modification
+    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    //MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
+
+//  finalize assembly
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
@@ -263,8 +386,6 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& src = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& sol = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-// number of global nodes
-    unsigned nglobal = nodalBasis->getNumGlobalNodes();
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
@@ -283,9 +404,16 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
     int idx[NDIM];
 
+    double vol = grid.getComputationalSpace().getVolume();
+    double intSrcVol = 0.0;
+// if both directions are periodic, we need to adjust source to ensure
+// solvability of the equations
+    if (allPeriodic)
+      intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;
+
 // clear out existing stuff in source vector: this is required
-// otherwise successive calls to advance() will accumulate into
-// source, which is of course not what we want.
+// otherwise successive calls to advance() will accumulate into source
+// from prevous calls, which is of course not what we want.
     VecSet(globalSrc, 0.0);
 
 // loop, creating RHS (source terms)
@@ -304,13 +432,19 @@ namespace Lucee
       {
 // extract source at each node from field
         nodalBasis->extractFromField(src, localSrc);
+        for (unsigned k=0; k<nlocal; ++k)
+// intSrcVol takes into account periodicity. It is non-zero only if
+// all directions are periodic.
+          localSrc[k] += -intSrcVol;
       }
       else
       {
         src.setPtr(srcPtr, idx);
 // if nodes are not shared simply copy over data
         for (unsigned k=0; k<nlocal; ++k)
-          localSrc[k] = srcPtr[k];
+// intSrcVol takes into account periodicity. It is non-zero only if
+// all directions are periodic.
+          localSrc[k] = srcPtr[k] - intSrcVol;
       }
 
 // evaluate local mass matrix times local source
@@ -343,6 +477,8 @@ namespace Lucee
 // reassemble RHS after application of Dirichlet Bcs
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
+
+    //VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
@@ -411,6 +547,7 @@ namespace Lucee
       throw lce;
     }
     bcData.value = bct.getNumber("V");
+    bcData.isSet = true;
     
     return bcData;
   }
@@ -436,6 +573,7 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
+
 // set index into element basis
       nodalBasis->setIndex(idx);
 
@@ -454,15 +592,15 @@ namespace Lucee
       }
 
 // compute contribition from this cell
-      for (unsigned k=0; k<nlocal; +k)
+      for (unsigned k=0; k<nlocal; ++k)
         fldInt += weights[k]*localFld[k];      
     }
 
-    double netFldInt;
+    double netFldInt = fldInt;
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
-// do all reduce operation to get sum across all processors
+// sum across all processors
     comm->allreduce(1, &fldInt, &netFldInt, TX_SUM);
 
     return netFldInt;
