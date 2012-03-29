@@ -133,7 +133,7 @@ namespace Lucee
  * @param dir Direction to which face is perpendicular.
  * @param nodeNum Node numbers on face.
  */
-      virtual void getSurfLowerNodeNums(unsigned dir,
+      void getSurfLowerNodeNums(unsigned dir,
         std::vector<int>& nodeNum) const;
 
 /**
@@ -143,7 +143,7 @@ namespace Lucee
  * @param dir Direction to which face is perpendicular.
  * @param nodeNum Node numbers on face.
  */
-      virtual void getSurfUpperNodeNums(unsigned dir,
+      void getSurfUpperNodeNums(unsigned dir,
         std::vector<int>& nodeNum) const;
 
 /**
@@ -152,7 +152,15 @@ namespace Lucee
  *
  * @param nodeCoords Node coordinates. Should be pre-allocated.
  */
-      virtual void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
+      void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
+
+/**
+ * Get weights for quadrature. The output vector should be
+ * pre-allocated.
+ *
+ * @param w Weights for quadrature.
+ */
+      void getWeights(std::vector<double>& w);
 
 /**
  * Get mass matrix for this reference element. The output matrix
@@ -253,6 +261,8 @@ namespace Lucee
       Lucee::RowMajorIndexer<2> idxr;
 /** Number of cells in X and Y direction */
       unsigned numX, numY;
+/** Weights for quadrature */
+      std::vector<double> weights;
 
 /**
  * Create matrices for 1st order element.

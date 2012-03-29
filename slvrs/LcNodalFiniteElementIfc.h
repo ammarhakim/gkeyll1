@@ -176,6 +176,14 @@ namespace Lucee
       virtual void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
 
 /**
+ * Get weights for quadrature. The output vector should be
+ * pre-allocated.
+ *
+ * @param w Weights for quadrature.
+ */
+      virtual void getWeights(std::vector<double>& w);
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *

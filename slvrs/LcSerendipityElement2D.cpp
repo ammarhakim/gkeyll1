@@ -364,6 +364,13 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getWeights(std::vector<double>& w)
+  {
+    unsigned nn = this->getNumNodes();
+    for (unsigned k=0; k<nn; ++k) w[k] = weights[k];
+  }
+
+  void
   SerendipityElement2D::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     NjNk.copy(refNjNk);
@@ -532,6 +539,11 @@ namespace Lucee
     double dx = grid.getDx(0), dy = grid.getDx(1);
     double dx2 = dx*dx, dy2 = dy*dy;
 
+// compute weights
+    weights.resize(4);
+    for (unsigned i=0; i<4; ++i)
+      weights[i] = 0.5*dx*0.5*dy*1.0;
+
 // mass matrix (automatically generated. See scripts/serendipity-2D.mac)
     refNjNk = Lucee::Matrix<double>(shape, start);
     refNjNk(1,1) = 4.0/9.0;
@@ -692,6 +704,17 @@ namespace Lucee
 // get grid spacing (this is assumed to be uniform for now)
     double dx = grid.getDx(0), dy = grid.getDx(1);
     double dx2 = dx*dx, dy2 = dy*dy;
+
+// compute weights
+    weights.resize(8);
+    weights[0] = 0.5*dx*0.5*dy*(-1.0)/3.0;
+    weights[1] = 0.5*dx*0.5*dy*(-1.0)/3.0;
+    weights[2] = 0.5*dx*0.5*dy*(-1.0)/3.0;
+    weights[3] = 0.5*dx*0.5*dy*(-1.0)/3.0;
+    weights[4] = 0.5*dx*0.5*dy*4.0/3.0;
+    weights[5] = 0.5*dx*0.5*dy*4.0/3.0;
+    weights[6] = 0.5*dx*0.5*dy*4.0/3.0;
+    weights[7] = 0.5*dx*0.5*dy*4.0/3.0;
 
 // mass matrix (automatically generated. See scripts/serendipity-2D.mac)
     refNjNk = Lucee::Matrix<double>(shape, start);
