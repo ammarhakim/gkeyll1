@@ -422,9 +422,6 @@ namespace Lucee
   {
     unsigned nlocal = nodalBasis->getNumNodes();
     std::vector<double> weights(nlocal), localFld(nlocal);
-// get quadrature weights
-    nodalBasis->getWeights(weights);
-
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -441,6 +438,9 @@ namespace Lucee
       seq.fillWithIndex(idx);
 // set index into element basis
       nodalBasis->setIndex(idx);
+
+// get quadrature weights
+      nodalBasis->getWeights(weights);
 
       if (shareFlag)
 // extract source at each node from field
