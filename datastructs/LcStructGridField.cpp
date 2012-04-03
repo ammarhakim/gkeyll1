@@ -577,7 +577,11 @@ namespace Lucee
       if (lua_pcall(L, 3, numOut, 0) != 0)
       {
         Lucee::Except lce("StructGridField::setFromLuaFunction: ");
-        lce << "Problem evaluating function supplied to 'set' method";
+        lce << "Problem evaluating function supplied to 'set' method"
+            << std::endl;
+        std::string err(lua_tostring(L, -1));
+        lua_pop(L, 1);
+        lce << "[" << err << "]";
         throw lce;
       }
 // fetch results

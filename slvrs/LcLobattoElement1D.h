@@ -110,6 +110,14 @@ namespace Lucee
       void getNodalCoordinates(Lucee::Matrix<double>& nodeCoords);
 
 /**
+ * Get weights for quadrature. The output vector should be
+ * pre-allocated.
+ *
+ * @param w Weights for quadrature.
+ */
+      void getWeights(std::vector<double>& w);
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *
@@ -163,6 +171,8 @@ namespace Lucee
       Lucee::Matrix<double> refDNjDNk;
 /** Total global degrees of freedom */
       unsigned numGlobal;
+/** Weights for quadrature */
+      std::vector<double> weights;
 
 /**
  * Create matrices for polyOrder 1.

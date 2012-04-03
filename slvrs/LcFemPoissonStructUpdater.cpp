@@ -66,7 +66,8 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
-      throw Lucee::Except("FemPoissonStructUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except(
+        "FemPoissonStructUpdater::readInput: Must specify element to use using 'basis'");
 
 // check if source nodes are shared
     srcNodesShared = true;
@@ -285,8 +286,7 @@ namespace Lucee
     for (unsigned d=0; d<NDIM; ++d)
     {
       if (periodicFlgs[d] == true)
-      { // this direction is periodic
-        
+      {
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
@@ -334,7 +334,7 @@ namespace Lucee
         }
       }
     }
-
+    
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
@@ -360,7 +360,27 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-    //MatView(stiffMat, PETSC_VIEWER_STDOUT_SELF);
+// if all directions are periodic, set bottom left to 0.0 to avoid
+// singular matrix
+    if (allPeriodic)
+    {
+// lower-left
+      int zeroRow[1];
+      zeroRow[0] = 0;
+      double zeros[1] = {0.0};
+      MatZeroRows(stiffMat, 1, zeroRow, 1.0);
+// also zero out the source
+      rowBcValues[0] = 0.0;
+    }
+
+// reassemble matrix after modification
+    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+//     MatView(stiffMat, lab);
 
 //  finalize assembly
     VecAssemblyBegin(globalSrc);
@@ -432,20 +452,18 @@ namespace Lucee
       {
 // extract source at each node from field
         nodalBasis->extractFromField(src, localSrc);
-        for (unsigned k=0; k<nlocal; ++k)
-// intSrcVol takes into account periodicity. It is non-zero only if
-// all directions are periodic.
-          localSrc[k] += -intSrcVol;
       }
       else
       {
         src.setPtr(srcPtr, idx);
 // if nodes are not shared simply copy over data
         for (unsigned k=0; k<nlocal; ++k)
-// intSrcVol takes into account periodicity. It is non-zero only if
-// all directions are periodic.
-          localSrc[k] = srcPtr[k] - intSrcVol;
+          localSrc[k] = srcPtr[k];
       }
+
+// adjust for periodic BCs in all directions
+      for (unsigned k=0; k<nlocal; ++k)
+        localSrc[k] += -intSrcVol;
 
 // evaluate local mass matrix times local source
       for (unsigned k=0; k<nlocal; ++k)
@@ -464,13 +482,13 @@ namespace Lucee
 
     int resetRow[1];
     double resetVal[1];
-// reset source to apply Dirichlet boundary conditions
+// reset source to apply boundary conditions
     std::map<int, double>::const_iterator rItr
       = rowBcValues.begin();
     for ( ; rItr != rowBcValues.end(); ++rItr)
     {
       resetRow[0] = rItr->first; // row index
-      resetVal[0] = rItr->second; // Dirichlet value
+      resetVal[0] = rItr->second; // value
       VecSetValues(globalSrc, 1, resetRow, resetVal, INSERT_VALUES);
     }
 
@@ -478,7 +496,10 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-    //VecView(globalSrc, PETSC_VIEWER_STDOUT_SELF);
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
+//     VecView(globalSrc, lab);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
@@ -581,8 +602,10 @@ namespace Lucee
       nodalBasis->getWeights(weights);
 
       if (shareFlag)
+      {
 // extract source at each node from field
         nodalBasis->extractFromField(fld, localFld);
+      }
       else
       {
         fld.setPtr(fldPtr, idx);
@@ -593,7 +616,9 @@ namespace Lucee
 
 // compute contribition from this cell
       for (unsigned k=0; k<nlocal; ++k)
+      {
         fldInt += weights[k]*localFld[k];      
+      }
     }
 
     double netFldInt = fldInt;
