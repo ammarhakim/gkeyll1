@@ -151,7 +151,11 @@ namespace Lucee
     if (lua_pcall(L, 4, res.size(), 0) != 0)
     {
       Lucee::Except lce("EvalOnNodesUpdater::evaluateFunction: ");
-      lce << "Problem evaluating function supplied as 'evaluate' ";
+      lce << "Problem evaluating function supplied as 'evaluate' "
+          << std::endl;
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
+      lce << "[" << err << "]";
       throw lce;
     }
 // fetch results

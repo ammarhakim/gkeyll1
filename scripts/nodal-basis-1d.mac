@@ -70,6 +70,7 @@ basis2 : [N1, N2];
 
 N2_mass : calcMassMatrix(basis2);
 N2_stiff : calcStiffMatrix(basis2);
+N2_weights : integrate(basis2, x, -1, 1);
 
 /** Order 3 */
 ord : [-1, 0, 1];
@@ -94,6 +95,7 @@ basis3 : [N1, N2, N3];
 
 N3_mass : calcMassMatrix(basis3);
 N3_stiff : calcStiffMatrix(basis3);
+N3_weights : integrate(basis3, x, -1, 1);
 
 /** Order 4: ordinates are Legendre-Lobatto points */
 ord : [-1, -sqrt(1/5), sqrt(1/5), 1];
@@ -119,3 +121,4 @@ basis4 : [N1, N2, N3, N4];
 
 N4_mass : calcMassMatrix(basis4);
 N4_stiff : calcStiffMatrix(basis4);
+N4_weights : integrate(basis4, x, -1, 1);

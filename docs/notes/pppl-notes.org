@@ -5,6 +5,25 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 2nd
+
+  Spent all day trying to find bug in periodic BCs. No good. I now
+  suspect that the formulation of the problem in periodic BCs itself
+  might be incorrect. For example: for periodic BCs not only the
+  solution but also the slope should match. However, this does not
+  seem to be happening in the computed solutions, although the
+  solution is periodic. Will spend some more time tomorrow otherwise
+  will move to implementing a small stand-alone solver to test things.
+
+* March 30
+
+  After much investigation I have realized that the periodic BC code
+  is not correct. It seems to work in some situation which led me to
+  believe it was working. However, for the double shear problem the
+  solution looks completely bogus and very simple tests now show a
+  problem in 2D with just 2 cells in the Y-direction (even though
+  there is no variation in Y). Spent time debugging but to no avail.
+
 * March 29th
 
   False start on getting Poisson solver to work with periodic
@@ -21,7 +40,12 @@
 
   Strangely, the KSP solver has no problem converging to a solution
   even when BCs are periodic. Not sure why, as the matrix should not
-  posses an inverse in this case.
+  posses an inverse in this case. NOTE: This actually does not work in
+  general. So had to pin the lower-left corner value to get
+  convergence.
+
+  Setup a double shear problem. This is not working and there seems to
+  be some problem with the boundary condition.
 
 * March 28th
 

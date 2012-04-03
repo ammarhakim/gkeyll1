@@ -200,6 +200,13 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getWeights(std::vector<double>& w)
+  {
+    unsigned nn = this->getNumNodes();
+    for (unsigned k=0; k<nn; ++k) w[k] = weights[k];
+  }
+
+  void
   LobattoElement1D::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     NjNk.copy(refNjNk);
@@ -305,6 +312,14 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
+
+// compute weights
+    weights.resize(2);
+    weights[0] = 1.0;
+    weights[1] = 1.0;
+
+    for (unsigned i=0; i<2; ++i)
+      weights[i] = 0.5*dx*weights[i];
   }
 
   void
@@ -349,6 +364,15 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
+
+// compute weights
+    weights.resize(3);
+    weights[0] = 1.0/3.0;
+    weights[1] = 4.0/3.0;
+    weights[2] = 1.0/3.0;
+
+    for (unsigned i=0; i<2; ++i)
+      weights[i] = 0.5*dx*weights[i];
   }
 
   void
@@ -407,5 +431,17 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
+
+// compute weights
+    weights.resize(4);
+    double c5 = std::pow(5.0, 1.5);
+
+    weights[0] = 1.0/6.0;
+    weights[1] = (3*c5+40)/96.0-(3*c5-40)/96.0;
+    weights[2] = (3*c5+40)/96.0-(3*c5-40)/96.0;
+    weights[3] = 1.0/6.0;
+
+    for (unsigned i=0; i<2; ++i)
+      weights[i] = 0.5*dx*weights[i];
   }
 }
