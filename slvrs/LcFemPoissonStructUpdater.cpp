@@ -365,9 +365,7 @@ namespace Lucee
     if (allPeriodic)
     {
 // lower-left
-      int zeroRow[1];
-      zeroRow[0] = 0;
-      double zeros[1] = {0.0};
+      int zeroRow[1] = {0};
       MatZeroRows(stiffMat, 1, zeroRow, 1.0);
 // also zero out the source
       rowBcValues[0] = 0.0;

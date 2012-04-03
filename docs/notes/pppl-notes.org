@@ -5,6 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 3rd
+
+  Perhaps I have now figured out the problem with my Poisson solver
+  with periodic BCs. The issue is that although the right (and top)
+  edges are set correctly, the periodicity on the left edge is not
+  taken into account correctly. This causes the system to be
+  ill-posed, I think. To fix the effect of the next to last cells on
+  the top and right edges will need to be taken into account when
+  constructing the stiffness matrix and the sourcet terms, specially
+  for the cells on the left and bottom edges. Not done this yet, but
+  need to.
+
+  To get out of this periodic BC debugging madness, I setup and ran a
+  simulation with two vortices in a box. The results look fine which
+  makes me more confident that the basic Poisson bracket and Poisson
+  solver algorithms are working correctly.
+
 * April 2nd
 
   Spent all day trying to find bug in periodic BCs. No good. I now
