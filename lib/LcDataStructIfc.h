@@ -44,7 +44,7 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Write grid to specified HDF5 file.
+ * Write data-structure to specified HDF5 file.
  *
  * @param nm Name of file to write.
  */
@@ -62,7 +62,7 @@ namespace Lucee
  *
  * @param io I/O object for I/O.
  * @param node Node to write to.
- * @param nm Name of the grid as it should appear in output.
+ * @param nm Name of the data-struct as it should appear in output.
  * @return node to which data was written.
  */
       virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,

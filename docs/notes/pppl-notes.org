@@ -5,6 +5,33 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 4th
+
+  Need to now implement a generic diagnostics mechanism. The first
+  step is to add a new DataStruct called (perhaps) DynVec. This is the
+  name I used in Facets and is good enough here. An example to store
+  the total energy would be
+
+#+BEGIN_EXAMPLE
+  energy = DataStruct.DynVec { numComponents = 1 }
+#+END_EXAMPLE
+
+  which would create space to store the total energy in the
+  system. The actual computation of the energy would take place in a
+  special updater. One can imagine doing similar stuff as done for the
+  BCs:
+
+#+BEGIN_EXAMPLE
+  energyDiag = Diagnostic.Energy {}
+  enstrophyDiag = Diagnostic.Enstrophy {}
+
+  diag = Updater.Diagnostics2D {
+    onGrid = grid,
+    diagnostics = {energyDiag, enstrophyDiag},
+  }
+  diag:setIn( {field} )
+#+END_EXAMPLE
+
 * April 3rd
 
   Perhaps I have now figured out the problem with my Poisson solver
