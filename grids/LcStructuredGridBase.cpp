@@ -49,7 +49,7 @@ namespace Lucee
     }
     globalRgn = Lucee::Region<NDIM, int>(zeros, icells);
 
-    std::vector<double> lower, upper;
+    std::vector<double> lower(NDIM), upper(NDIM);
 // read lower limits of computational space
     if (tbl.hasNumVec("lower"))
     {
