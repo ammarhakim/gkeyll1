@@ -157,6 +157,18 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getSurfLowerNodeNums(unsigned dir, std::vector<int>& nodeNum) const
+  {
+    nodeNum[0] = 1;
+  }
+
+  void
+  LobattoElement1D::getSurfUpperNodeNums(unsigned dir, std::vector<int>& nodeNum) const
+  {
+    nodeNum[0] = this->getNumNodes();
+  }
+
+  void
   LobattoElement1D::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
   {
     ndIds.clear();
