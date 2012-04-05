@@ -282,15 +282,80 @@ namespace Lucee
       }
     }
 
-// Begin process of modification to handle periodic BCs. The code
-// basically does the following. It modifies the stiffness matrix so
-// that the nodes on the upper boundary in each periodic direction is
-// identified with the corresponding node on the lower
-// boundary. Further, the stiffness matrix rows corresponding to the
-// nodes on the lower boundary in each periodic direction is also
-// modified to take into account the contribution from the layer of
-// nodes just inside the corresponding upper boundary.
+// Begin process of modification to handle periodic BCs. The code in
+// the following two loops basically does the following. It modifies
+// the stiffness matrix so that the nodes on the upper boundary in
+// each periodic direction is identified with the corresponding node
+// on the lower boundary. Further, the stiffness matrix rows
+// corresponding to the nodes on the lower boundary in each periodic
+// direction is also modified to take into account the contribution
+// from the layer of nodes just inside the corresponding upper
+// boundary.
 
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (periodicFlgs[d] == true)
+      {
+// fetch number of nodes on face of element
+        unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
+
+// space for mappings
+        std::vector<int> lgLowerSurfMap(nsl);
+// space for local node numbers on faces
+        std::vector<int> lgLocalNodeNum(nsl);
+// space for stiffness mods
+        std::vector<int> stiffModRowIdx(nsl);
+        std::vector<double> stiffMod(nsl*nsl);
+
+// create region to loop over side
+        Lucee::Region<NDIM, int> defRgnG = 
+          globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
+// only update if we are on the correct ranks
+        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
+
+// loop, modifying stiffness matrix
+        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+
+// set index into element basis
+          nodalBasis->setIndex(idx);
+// get local node number of upper face
+          nodalBasis->getSurfUpperNodeNums(d, lgLocalNodeNum);
+
+// get stiffness matrix for modification of the terms on the lower boundary
+          nodalBasis->getStiffnessMatrix(localStiff);
+
+// compute corresponding node numbers on lower edge
+          idx[d] = 0;
+// set index into element basis
+          nodalBasis->setIndex(idx);
+// get surface nodes -> global mapping
+          nodalBasis->getSurfLowerLocalToGlobal(d, lgLowerSurfMap);
+
+// construct array for passing into Petsc
+          for (unsigned k=0; k<nsl; ++k)
+            for (unsigned m=0; m<nsl; ++m)
+              stiffMod[nsl*k+m] = -localStiff(lgLocalNodeNum[k]-1, lgLocalNodeNum[m]-1);
+
+// insert into global stiffness matrix
+          MatSetValues(stiffMat, nsl, &lgLowerSurfMap[0], nsl, &lgLowerSurfMap[0],
+            &stiffMod[0], ADD_VALUES);
+        }
+      }
+    }
+    
+// reassemble matrix after modification
+    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+
+// NOTE: This second loop is needed even though it is essentially the
+// same as the previous one as Petsc does not allow to call
+// MatZeroRows and MatSetValues without an intervening calls to
+// MatAssemblyBegin/MatAssemblyEnd. So if Petsc was not so annoying
+// this extra mess would not be needed. (Ammar, April 4 2012).
     for (unsigned d=0; d<NDIM; ++d)
     {
       if (periodicFlgs[d] == true)
@@ -341,72 +406,6 @@ namespace Lucee
 // insert node numbers into map
           for (unsigned r=0; r<nsl; ++r)
             periodicNodeMap[lgSurfMap[r]] = lgLowerSurfMap[r];
-
-        }
-      }
-    }
-    
-// reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
-// NOTE: This second loop is needed even though it is essentially the
-// same as the previous one as Petsc does not allow to call
-// MatZeroRows and MatSetValues without an intervening calls to
-// MatAssemblyBegin/MatAssemblyEnd. So if Petsc was not so annoying
-// this extra mess would not be needed. (Ammar, April 4 2012).
-    for (unsigned d=0; d<NDIM; ++d)
-    {
-      if (periodicFlgs[d] == true)
-      {
-// fetch number of nodes on face of element
-        unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
-
-// space for mappings
-        std::vector<int> lgLowerSurfMap(nsl);
-// space for local node numbers on faces
-        std::vector<int> lgLocalNodeNum(nsl);
-// space for stiffness mods
-        std::vector<int> stiffModRowIdx(nsl);
-        std::vector<double> stiffMod(nsl*nsl);
-
-// create region to loop over side
-        Lucee::Region<NDIM, int> defRgnG = 
-          globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
-// only update if we are on the correct ranks
-        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
-
-// loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
-        while (seq.step())
-        {
-          seq.fillWithIndex(idx);
-
-// set index into element basis
-          nodalBasis->setIndex(idx);
-// get local node number of upper face
-          nodalBasis->getSurfUpperNodeNums(d, lgLocalNodeNum);
-
-// get stiffness matrix for modification of the terms on the lower boundary
-          nodalBasis->getStiffnessMatrix(localStiff);
-
-// compute corresponding node numbers on lower edge
-          idx[d] = 0;
-// set index into element basis
-          nodalBasis->setIndex(idx);
-// get surface nodes -> global mapping
-          nodalBasis->getSurfLowerLocalToGlobal(d, lgLowerSurfMap);
-
-// construct array for passing into Petsc
-          for (unsigned k=0; k<nsl; ++k)
-          {
-            for (unsigned m=0; m<nsl; ++m)
-              stiffMod[nsl*k+m] = -localStiff(lgLocalNodeNum[k]-1, lgLocalNodeNum[m]-1);
-          }
-
-// insert into global stiffness matrix
-          MatSetValues(stiffMat, nsl, &lgLowerSurfMap[0], nsl, &lgLowerSurfMap[0],
-            &stiffMod[0], ADD_VALUES);
         }
       }
     }
@@ -452,10 +451,10 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-    PetscViewer lab;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
-    PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
-    MatView(stiffMat, lab);
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+//     MatView(stiffMat, lab);
 
 //  finalize assembly
     VecAssemblyBegin(globalSrc);
@@ -658,10 +657,10 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-    PetscViewer lab;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
-    PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
-    VecView(globalSrc, lab);
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
+//     VecView(globalSrc, lab);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
