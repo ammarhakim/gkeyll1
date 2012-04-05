@@ -32,6 +32,13 @@
   diag:setIn( {field} )
 #+END_EXAMPLE
 
+  Worked more on the periodic BCs issue. I think the basic idea is now
+  correct and implemented. However, the solution is still
+  incorrect. This could be because I am not taking into account the
+  effect of the top-right node on the bottom left node. It also looks
+  like Dirichlet BCs are being effectively applied. Tomorrow I need to
+  print the code out and pore over it very, very carefully.
+
 * April 3rd
 
   Perhaps I have now figured out the problem with my Poisson solver
