@@ -291,7 +291,6 @@ namespace Lucee
 // direction is also modified to take into account the contribution
 // from the layer of nodes just inside the corresponding upper
 // boundary.
-
     for (unsigned d=0; d<NDIM; ++d)
     {
       if (periodicFlgs[d] == true)
@@ -349,7 +348,6 @@ namespace Lucee
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
@@ -438,14 +436,14 @@ namespace Lucee
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
-    if (allPeriodic)
-    {
-// lower-left
-      int zeroRow[1] = {0};
-      MatZeroRows(stiffMat, 1, zeroRow, 1.0);
-// also zero out the source
-      rowBcValues[0] = 0.0;
-    }
+//     if (allPeriodic)
+//     {
+// // lower-left
+//       int zeroRow[1] = {0};
+//       MatZeroRows(stiffMat, 1, zeroRow, 1.0);
+// // also zero out the source
+//       rowBcValues[0] = 0.0;
+//     }
 
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
