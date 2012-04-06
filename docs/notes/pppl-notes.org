@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 6th
+
+  Finally, have periodic BCs working with the FEM Poisson
+  solver. Next, need to very carefully test it. Turns out that the
+  problem was a very subtle one. The periodicity in FEM means that the
+  periodic nodes needs to be identified carefully otherwise all hell
+  breaks loose. This was probably the worse week of debugging, both
+  the math and the code, in a long time. Now I can sleep.
+
 * April 5th
 
   Why aren't the far away nodes appearing in the stiffness matrix for
