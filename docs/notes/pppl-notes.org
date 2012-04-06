@@ -5,6 +5,11 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 5th
+
+  Why aren't the far away nodes appearing in the stiffness matrix for
+  periodic BCs?
+
 * April 4th
 
   Need to now implement a generic diagnostics mechanism. The first
