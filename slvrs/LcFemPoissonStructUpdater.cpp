@@ -214,15 +214,15 @@ namespace Lucee
 
 // get local stiffness matrix
       nodalBasis->getStiffnessMatrix(localStiff);
-// get local to global mapping
-      nodalBasis->getLocalToGlobal(lgMap);
-
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
           vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
       }
+
+// get local to global mapping
+      nodalBasis->getLocalToGlobal(lgMap);
 
 // insert into global stiffness matrix, adding them to existing value
       MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0],
@@ -299,12 +299,12 @@ namespace Lucee
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
 // space for mappings
-        std::vector<int> lgLowerSurfMap(nsl);
+        std::vector<int> lgUpperSurfMap(nsl), lgLowerSurfMap(nsl);
 // space for local node numbers on faces
-        std::vector<int> lgLocalNodeNum(nsl);
+        std::vector<int> lgLocalNodeNum(nsl), lgMapMod(nlocal);
 // space for stiffness mods
         std::vector<int> stiffModRowIdx(nsl);
-        std::vector<double> stiffMod(nsl*nsl);
+        std::vector<double> modVals(nlocal*nlocal);
 
 // create region to loop over side
         Lucee::Region<NDIM, int> defRgnG = 
@@ -320,27 +320,58 @@ namespace Lucee
 
 // set index into element basis
           nodalBasis->setIndex(idx);
-// get local node number of upper face
-          nodalBasis->getSurfUpperNodeNums(d, lgLocalNodeNum);
 
 // get stiffness matrix for modification of the terms on the lower boundary
           nodalBasis->getStiffnessMatrix(localStiff);
+// construct arrays for passing into Petsc
+          for (unsigned k=0; k<nlocal; ++k)
+          {
+            for (unsigned m=0; m<nlocal; ++m)
+              vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
+          }
 
-// compute corresponding node numbers on lower edge
+// Now compute correct locations in global stiffness matrix to add
+// these values. This code looks very bizarre as the logic for
+// modifying the stiffness matrix is not trivially. Basically, one
+// needs to account for the wrapped node identification for the rows
+// living on the lower edges while not touching the rows corresponding
+// the rows on the upper edges.
+
+// get local node number of upper face (this is on upper edge)
+          nodalBasis->getSurfUpperNodeNums(d, lgLocalNodeNum);
+// get local -> global mapping (this is on upper edge)
+          nodalBasis->getLocalToGlobal(lgMap);
+          nodalBasis->getLocalToGlobal(lgMapMod); // yes, we get this twice
+
+// reset index to point to corresponding cell on lower edge
           idx[d] = 0;
 // set index into element basis
           nodalBasis->setIndex(idx);
-// get surface nodes -> global mapping
+// get local node number of lower face (this is on lower edge)
           nodalBasis->getSurfLowerLocalToGlobal(d, lgLowerSurfMap);
 
-// construct array for passing into Petsc
+// modify appropriate entries and copy over non-zero contributions
           for (unsigned k=0; k<nsl; ++k)
-            for (unsigned m=0; m<nsl; ++m)
-              stiffMod[nsl*k+m] = -localStiff(lgLocalNodeNum[k]-1, lgLocalNodeNum[m]-1);
+            lgMapMod[lgLocalNodeNum[k]-1] = lgLowerSurfMap[k];
+
+// zero out contribution
+          for (unsigned k=0; k<nlocal; ++k) modVals[k] = 0.0;
+// only make contributions to those rows which correspond to those
+// nodes on the lower edge
+          for (unsigned k=0; k<nlocal; ++k)
+          {
+            for (unsigned m=0; m<nlocal; ++m)
+            {
+              if (lgMapMod[k] == lgMap[k])
+                modVals[nlocal*k+m] = 0.0;
+              else
+                modVals[nlocal*k+m] = vals[nlocal*k+m];
+            }
+          }
 
 // insert into global stiffness matrix
-          MatSetValues(stiffMat, nsl, &lgLowerSurfMap[0], nsl, &lgLowerSurfMap[0],
-            &stiffMod[0], ADD_VALUES);
+          MatSetValues(stiffMat, nlocal, &lgMapMod[0], nlocal, &lgMapMod[0],
+            &modVals[0], ADD_VALUES);
         }
       }
     }
@@ -436,14 +467,14 @@ namespace Lucee
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
-//     if (allPeriodic)
-//     {
-// // lower-left
-//       int zeroRow[1] = {0};
-//       MatZeroRows(stiffMat, 1, zeroRow, 1.0);
-// // also zero out the source
-//       rowBcValues[0] = 0.0;
-//     }
+    if (allPeriodic)
+    {
+// lower-left
+      int zeroRow[1] = {0};
+      MatZeroRows(stiffMat, 1, zeroRow, 1.0);
+// also zero out the source
+      rowBcValues[0] = 0.0;
+    }
 
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
