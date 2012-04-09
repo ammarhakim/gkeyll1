@@ -5,6 +5,25 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 7th
+
+  Studied the convergence of the 3rd and 4th order 1D Poisson
+  solver. The schemes actually converge with 4th and 5th order
+  accuracy. Perhaps this is an artifact of trying to measure
+  asymptotic accuracy as even with 2 elements the solution looks
+  rather good.
+
+  Next need to study the 3rd order 2D Poisson solver. After that the
+  periodic BCs solver with 2nd and 3rd order. All of this is very
+  tedious work but essential to get confidence in the code.
+
+  Setup a two-vortex problem. The solution looks really good even with
+  128x128 grid points. Also setup a double shear problem. The solution
+  does not look very good: apparently (I think) when the velocity
+  switches sign the DG scheme does not work well. Need to investigate
+  more as this is a problem with variable coefficient advection
+  problems in general.
+
 * April 6th
 
   Finally, have periodic BCs working with the FEM Poisson
