@@ -12,6 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 add_library(lcdatastructs
   LcConstFieldPtr.cpp
   LcDataStructRegistry.cpp
+  LcDynVector.cpp
   LcField.cpp
   LcFieldPtr.cpp
   LcStructGridField.cpp

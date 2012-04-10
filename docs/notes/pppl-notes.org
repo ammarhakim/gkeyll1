@@ -5,6 +5,19 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 9th
+
+  Did a high-resolution simulation of the two-vortex problem. The
+  results look good. The next step is to plot all the DOFs and not
+  just the lower-left corner. For this I need to use the bi-linear
+  representation to compute the solution on a finer mesh.
+
+  I also need to figure out the problem with the double shear
+  problem. Why is it "blowing up"? Is it really because of zero
+  velocity at a node?
+
+  Need to add the DynVector concept to Gkeyll.
+
 * April 7th
 
   Studied the convergence of the 3rd and 4th order 1D Poisson

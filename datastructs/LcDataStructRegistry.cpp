@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcDataStructRegistry.h>
+#include <LcDynVector.h>
 #include <LcStructGridField.h>
 
 namespace Lucee
@@ -18,7 +19,7 @@ namespace Lucee
   void
   registerDataStructObjects(Lucee::LuaState& L)
   {
-// register grids
+// register data-structures
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<1, double> >;
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<2, double> >;
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<3, double> >;
@@ -26,5 +27,7 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<5, double> >;
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<6, double> >;
     new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<7, double> >;
+
+    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::DynVector<double> >;
   }
 }
