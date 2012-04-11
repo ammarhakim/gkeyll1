@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcEnergyFromStreamFunctionUpdater.h>
+#include <LcEnstrophyUpdater.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
@@ -43,6 +44,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalPoissonBracketUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamFunctionUpdater>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnstrophyUpdater>;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
