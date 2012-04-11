@@ -167,3 +167,8 @@ target_link_libraries(lcmultiregion lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_M
 # lcquadraturerule
 add_executable(lcquadraturerule lcquadraturerule.cxx)
 target_link_libraries(lcquadraturerule lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+
+# lcdynvector
+add_executable(lcdynvector lcdynvector.cxx)
+target_link_libraries(lcdynvector 
+  lcdatastructs lclib lcloki lclua ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})

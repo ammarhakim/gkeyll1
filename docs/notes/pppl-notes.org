@@ -5,6 +5,22 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 10-11
+
+  Completed DynVector class and added some unit tests. Everything
+  works. Now to use it through Lua, but first I need to add an updater
+  to compute something useful.
+
+  Read Holloway paper. Basic point: using asymmetric Hermite
+  polynomials for expanding the velcity dependence is better as it
+  allows exact conservation of both momentum and energy, solves the
+  plasma oscillation problem exactly and also preserves the shape of
+  beams launched with specific velocities. As all non-dissapative
+  discrete schemes it suffers from recurrence problem, i.e. phase
+  mixing is simulated correctly only for a finite time after which the
+  exponential decay turns into a an increase to give back the initial
+  conditions.
+
 * April 9th
 
   Did a high-resolution simulation of the two-vortex problem. The
