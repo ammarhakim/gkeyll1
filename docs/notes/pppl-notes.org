@@ -11,6 +11,13 @@
   works. Now to use it through Lua, but first I need to add an updater
   to compute something useful.
 
+  Completed an updater EnergyFromStreamFunctionUpdater that computes
+  the net energy from the streamfunction. This work, or at least seems
+  to. Put in total energy diagnostic into the 64x64 simulation. Turns
+  out that with rk2() time-stepping the total energy *increases* by
+  0.5%. The increase is not much, however, does indicate the mildly
+  unstable nature of rk2() scheme. Need to implement rk3().
+
   Read Holloway paper. Basic point: using asymmetric Hermite
   polynomials for expanding the velcity dependence is better as it
   allows exact conservation of both momentum and energy, solves the

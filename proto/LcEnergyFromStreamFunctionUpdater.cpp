@@ -48,9 +48,6 @@ namespace Lucee
 // call base class method
     Lucee::UpdaterIfc::initialize();
 
-// call base class method
-    Lucee::UpdaterIfc::initialize();
-
 // get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
