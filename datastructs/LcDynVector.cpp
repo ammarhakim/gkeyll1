@@ -17,6 +17,18 @@ namespace Lucee
   template <> const char *DynVector<double>::id = "DynVector";
 
   template <typename T>
+  DynVector<T>::DynVector()
+    : numComponents(1) 
+  {
+  }
+
+  template <typename T>
+  DynVector<T>::DynVector(unsigned nc)
+    : numComponents(nc) 
+  {
+  }
+
+  template <typename T>
   void
   DynVector<T>::readInput(Lucee::LuaTable& tbl)
   {
@@ -87,9 +99,95 @@ namespace Lucee
 
   template <typename T>
   TxIoNodeType
-  DynVector<T>::writeToFile(TxIoBase& io, TxIoNodeType& node,
-    const std::string& nm)
+  DynVector<T>::writeTimeMesh(const TxIoBase& io,
+    const TxIoNodeType& node) const 
   {
+// space for passing to HDF I/O wrappers
+    std::vector<size_t> dataSetSize;
+    std::vector<size_t> dataSetBeg;
+    std::vector<size_t> dataSetLen;
+
+// create arrays to pass to HDF5
+    dataSetSize.push_back(getSize());
+    dataSetBeg.push_back(0);
+    dataSetLen.push_back(getSize());
+
+    dataSetSize.push_back(1);
+    dataSetBeg.push_back(0);
+    dataSetLen.push_back(1);
+
+// write data
+    TxIoNodeType dn
+      = io.writeDataSet(node, "timeMesh",
+        dataSetSize, dataSetBeg, dataSetLen, &timeMesh[0]);
+
+// following attributes are picked up by the Viz tool
+    io.writeAttribute(dn, "vsType", "mesh");
+    io.writeAttribute(dn, "vsKind", "structured");
+
+    return dn;
+  }
+
+  template <typename T>
+  TxIoNodeType
+  DynVector<T>::writeData(const TxIoBase& io,
+    const TxIoNodeType& node) const 
+  {
+// space for passing to HDF I/O wrappers
+    std::vector<size_t> dataSetSize;
+    std::vector<size_t> dataSetBeg;
+    std::vector<size_t> dataSetLen;
+
+// create arrays to pass to HDF5
+    unsigned vol = getNumComponents()*getSize();
+    std::vector<T> rdata(vol);
+    dataSetSize.push_back(getSize());
+    dataSetBeg.push_back(0);
+    dataSetLen.push_back(getSize());
+
+    dataSetSize.push_back(getNumComponents());
+    dataSetBeg.push_back(0);
+    dataSetLen.push_back(getNumComponents());
+
+// copy data into array
+    unsigned count = 0;
+    typename std::vector<std::vector<T> >::const_iterator itr;
+    for (itr = data.begin(); itr != data.end(); ++itr) {
+      for (unsigned n=0; n<getNumComponents(); ++n) {
+        rdata[count++] = itr->at(n);
+      }
+    }
+// write it
+    TxIoNodeType dn = io.writeDataSet(node, "data",
+      dataSetSize, dataSetBeg, dataSetLen, &rdata[0]);
+
+// following attributes are picked up by the Viz tool
+    io.writeAttribute(dn, "vsType", "variable");
+    io.writeAttribute(dn, "vsMesh", "timeMesh");
+
+    return dn;
+  }
+
+  template <typename T>
+  TxIoNodeType
+  DynVector<T>::writeToFile(TxIoBase& io, TxIoNodeType& node,
+    const std::string& name)
+  {
+// skip writing if nothing to write
+    if (data.size() == 0)
+      return node;
+
+// create a new group to write data
+    TxIoNodeType grp = io.createGroup(node, name);
+
+// now write time-mesh and data to this group
+    writeTimeMesh(io, grp);
+    writeData(io, grp);
+
+// now clear all data before next write
+    clear();
+
+    return node;
   }
 
 // instantiations

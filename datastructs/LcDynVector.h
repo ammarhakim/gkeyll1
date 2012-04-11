@@ -28,6 +28,20 @@ namespace Lucee
       static const char *id;
 
 /**
+ * Create a new vector having supplied number of components
+ *
+ * @param numComponents number of components in array
+ */
+      DynVector();
+
+/**
+ * Create a new vector having supplied number of components
+ *
+ * @param numComponents number of components in array
+ */
+      DynVector(unsigned numComponents);
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
@@ -100,6 +114,24 @@ namespace Lucee
       mutable std::vector<double> timeMesh;
 /** Last stored data */
       std::vector<T> lastData;
+
+/**
+ * Write the time-mesh out to h5 file.
+ *
+ * @param io I/O object for file.
+ * @param node Node to write data to.
+ * @return Node to which data was written.
+ */
+    TxIoNodeType writeTimeMesh(const TxIoBase& io, const TxIoNodeType& node) const;
+
+/**
+ * Write the data out to h5 file.
+ *
+ * @param io I/O object for file.
+ * @param node Node to write data to.
+ * @return Node to which data was written.
+ */
+    TxIoNodeType writeData(const TxIoBase& io, const TxIoNodeType& node) const;
   };
 }
 
