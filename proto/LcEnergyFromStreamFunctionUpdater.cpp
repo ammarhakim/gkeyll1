@@ -11,7 +11,14 @@
 
 // lucee includes
 #include <LcEnergyFromStreamFunctionUpdater.h>
+#include <LcGlobals.h>
 #include <LcLinAlgebra.h>
+
+// loki includes
+#include <loki/Singleton.h>
+
+// std includes
+#include <vector>
 
 namespace Lucee
 {
@@ -82,6 +89,59 @@ namespace Lucee
   Lucee::UpdaterStatus
   EnergyFromStreamFunctionUpdater::update(double t)
   {
+// get hold of grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+// get input arrays
+    const Lucee::Field<2, double>& phi = this->getInp<Lucee::Field<2, double> >(0);
+// get output dynVector
+    Lucee::DynVector<double>& energy = this->getOut<Lucee::DynVector<double> >(0);
+
+// local region to update
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+
+// number of local nodes
+    unsigned nlocal = nodalBasis->getNumNodes();
+
+// space for various quantities
+    std::vector<double> phiK(nlocal), normGradPhi(nlocal);
+    std::vector<double> weights(nlocal);
+
+    double totalEnergy = 0.0;
+// compute total energy
+    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
+    {
+      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
+      {
+        nodalBasis->setIndex(ix, iy);
+
+// extract potential at this location
+        nodalBasis->extractFromField(phi, phiK);
+
+// compute norm of grad(phi)
+        calcNormGrad(phiK, normGradPhi);
+
+// get quadrature weights
+        nodalBasis->getWeights(weights);
+
+// compute contribition to energy from this cell
+        for (unsigned k=0; k<nlocal; ++k)
+          totalEnergy += weights[k]*normGradPhi[k];
+      }
+    }
+
+    double netTotalEnergy = totalEnergy;
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+// sum across all processors
+    comm->allreduce(1, &totalEnergy, &netTotalEnergy, TX_SUM);
+
+    std::vector<double> data(1);
+    data[0] = 0.5*netTotalEnergy;
+// push value into dynVector
+    energy.appendData(t, data);
+
     return Lucee::UpdaterStatus();
   }
 
