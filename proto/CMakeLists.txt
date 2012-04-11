@@ -18,6 +18,7 @@ if (PETSC_FOUND)
 endif (PETSC_FOUND)
 
 set (proto_SOURCES
+  LcEnergyFromStreamFunctionUpdater.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp

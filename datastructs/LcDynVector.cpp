@@ -34,6 +34,11 @@ namespace Lucee
   {
 // call base class method
     DataStructIfc::readInput(tbl);
+
+    numComponents = 1; // by default ass
+// read in number of components
+    if (tbl.hasNumber("numComponents"))
+      numComponents = (unsigned) tbl.getNumber("numComponents");
   }
 
   template <typename T>

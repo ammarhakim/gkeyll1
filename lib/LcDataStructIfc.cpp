@@ -65,8 +65,8 @@ namespace Lucee
 
     if (isH5)
     {
-      TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
-      TxIoBase *io = new TxHdf5Base(comm);
+      TxCommBase& comm = this->getDataComm(); // get communicator for I/O
+      TxIoBase *io = new TxHdf5Base(&comm);
 // open file to write in
       TxIoNodeType fn = io->createFile(outNm);
 // write data
@@ -125,5 +125,11 @@ namespace Lucee
   DataStructIfc::clone() const
   {
     return 0;
+  }
+
+  TxCommBase&
+  DataStructIfc::getDataComm()
+  {
+    return *Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
   }
 }

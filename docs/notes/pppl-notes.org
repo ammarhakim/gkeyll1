@@ -21,6 +21,13 @@
   exponential decay turns into a an increase to give back the initial
   conditions.
 
+** TODO Fix DataStruct::write() method to use sub-communicators
+
+   The DynVector can not be written by all processors for obvious
+   reasons. Hence, the DataStruct::write() method needs to be modified
+   to allow a data-structure to take a sub-communicator so only a
+   sub-set of processors do the I/O.
+
 * April 9th
 
   Did a high-resolution simulation of the two-vortex problem. The
