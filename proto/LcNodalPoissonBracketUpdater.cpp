@@ -280,7 +280,6 @@ namespace Lucee
           aNewPtr[k] = aCurrPtr[k] + dt*aNewPtr[k];
       }
     }
-    
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
   
