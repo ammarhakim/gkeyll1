@@ -5,6 +5,40 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 13 (Friday 13th)
+
+** Scoping rules in Lua and Gkeyll modules
+
+   Turns out that Lua needs explicit use of the "local" keyword for
+   variables to be lexically scoped. This is very different than other
+   languages in which variables are local to a scope by default. This
+   has lead to some miserable problems in Gkeyll.
+
+   The relative complexity of programming up a new Gkeyll simulations
+   leads me to believe that there needs to be a module system. A
+   developer would write a module, say for a particular problem, and
+   provide a list of (simplified) input values that a user needs to
+   specify in order to run the simulation. This means a user need not
+   know all the gory details needed to run a simulation, but only
+   remember a small set of, well documented, variables.
+
+* April 12
+
+  The following is a very bad way to test if a step failed:
+  
+#+BEGIN_EXAMPLE
+  if (dtSuggested < myDt) then
+#+END_EXAMPLE
+
+  The reason is that the inequality can get terribly confused due to
+  floating point percision errors. Instead should check the status
+  flag. All my simulations have this problem, and so need to do a
+  massive search and replace.
+
+  For some reason the RK2 and RK3 results look identical. The
+  differences are tiny. Why, I am not sure, but seems like RK3 behaves
+  just like RK2.
+
 * April 10-11
 
   Completed DynVector class and added some unit tests. Everything
