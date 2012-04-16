@@ -16,6 +16,7 @@
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
+#include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
@@ -46,6 +47,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamFunctionUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnstrophyUpdater>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalGradientUpdater>;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
