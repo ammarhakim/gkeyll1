@@ -24,6 +24,7 @@ set (proto_SOURCES
   LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
+  LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp

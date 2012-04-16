@@ -5,6 +5,27 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 15th
+
+  Almost no work on the weekend.
+
+  The mystery of energy conservation (or lack thereof) continues. I
+  have carefully checked all code to make sure it is
+  correct. Everything looks good. Now it seems to me that the real
+  problem is that the gradient is computed with only first-order
+  accuracy. This means that the gradient is not periodic, even though
+  the solution is. In fact, the gradient even has opposite signs on
+  the opposite boundaries! What this means is there is a term missing
+  from the total energy conservation which is basically <phi
+  n*grad.phi> integrated over the domain boundary. If grad.phi was
+  exactly identical on the boundaries, this term would
+  vanish. However, if the term was not the same it would contribute a
+  non-zero term to the energy. In the solutions, the difference
+  between the gradients on opposite sides is quite large.
+
+  To take this into account I need to add the extra term to the energy
+  updater. What a PITA.
+
 * April 13 (Friday 13th)
 
 ** Scoping rules in Lua and Gkeyll modules
