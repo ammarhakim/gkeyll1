@@ -184,6 +184,26 @@ namespace Lucee
       virtual void getWeights(std::vector<double>& w);
 
 /**
+ * Get weights for quadrature on upper face. The output vector should
+ * be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param w Weights for quadrature.
+ */
+      virtual void getSurfUpperWeights(unsigned dir,
+        std::vector<double>& w);
+
+/**
+ * Get weights for quadrature on upper face. The output vector should
+ * be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param w Weights for quadrature.
+ */
+      virtual void getSurfLowerWeights(unsigned dir,
+        std::vector<double>& w);
+
+/**
  * Get mass matrix for this reference element. The output matrix
  * should be pre-allocated.
  *

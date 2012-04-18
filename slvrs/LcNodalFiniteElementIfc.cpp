@@ -150,6 +150,20 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getSurfUpperWeights(unsigned dir, std::vector<double>& w)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfUpperWeights: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getSurfLowerWeights(unsigned dir, std::vector<double>& w)
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getSurfLowerWeights: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getMassMatrix: Not implemented!");

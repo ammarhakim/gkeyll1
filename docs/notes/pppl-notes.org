@@ -5,7 +5,22 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
-* April 15th
+* April 17th
+
+  The energy conservation issue is driving me nuts. The solution
+  "appears" correct but whatever I do the energy error does not change
+  with dt! I added surface "leakage" terms, computed the energy using
+  chi*phi method, etc, etc but nothing changes.
+
+  Also, there is no difference on going to rk3 and nothing makes the
+  central-flux work. So there is something fundamentally wrong which I
+  am unable to figure out. Back to the drawing board.
+
+  At this point, I should focus on benchmarking the Poisson bracket
+  updater. Perhaps this energy issue will resolve itself in the course
+  of time once I get the double shear problem, for example, to work.
+
+* April 16th
 
   Almost no work on the weekend.
 
