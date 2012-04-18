@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
 #include <LcMaxwellTm2DUpdater.h>
@@ -45,6 +46,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalPoissonBracketUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamFunctionUpdater>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamAndVortUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnstrophyUpdater>;
 

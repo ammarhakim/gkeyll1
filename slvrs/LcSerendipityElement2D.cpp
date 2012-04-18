@@ -371,6 +371,30 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getSurfUpperWeights(unsigned dir, std::vector<double>& w)
+  {
+    unsigned nn = this->getNumSurfUpperNodes(dir);
+    if (dir == 0)
+      for (unsigned k=0; k<nn; ++k) 
+        w[k] = surfWeightsDir0[k];
+    else if (dir == 1)
+      for (unsigned k=0; k<nn; ++k) 
+        w[k] = surfWeightsDir1[k];
+  }
+
+  void
+  SerendipityElement2D::getSurfLowerWeights(unsigned dir, std::vector<double>& w)
+  {
+    unsigned nn = this->getNumSurfLowerNodes(dir);
+    if (dir == 0)
+      for (unsigned k=0; k<nn; ++k) 
+        w[k] = surfWeightsDir0[k];
+    else if (dir == 1)
+      for (unsigned k=0; k<nn; ++k) 
+        w[k] = surfWeightsDir1[k];
+  }
+
+  void
   SerendipityElement2D::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
     NjNk.copy(refNjNk);
@@ -544,6 +568,14 @@ namespace Lucee
     for (unsigned i=0; i<4; ++i)
       weights[i] = 0.5*dx*0.5*dy*1.0;
 
+    surfWeightsDir0.resize(2);
+    surfWeightsDir0[0] = 0.5*dy;
+    surfWeightsDir0[1] = 0.5*dy;
+
+    surfWeightsDir1.resize(2);
+    surfWeightsDir1[0] = 0.5*dx;
+    surfWeightsDir1[1] = 0.5*dx;
+
 // mass matrix (automatically generated. See scripts/serendipity-2D.mac)
     refNjNk = Lucee::Matrix<double>(shape, start);
     refNjNk(1,1) = 4.0/9.0;
@@ -715,6 +747,16 @@ namespace Lucee
     weights[5] = 0.5*dx*0.5*dy*4.0/3.0;
     weights[6] = 0.5*dx*0.5*dy*4.0/3.0;
     weights[7] = 0.5*dx*0.5*dy*4.0/3.0;
+
+    surfWeightsDir0.resize(3);
+    surfWeightsDir0[0] = 0.5*dy/3.0;
+    surfWeightsDir0[1] = 0.5*4*dy/3.0;
+    surfWeightsDir0[2] = 0.5*dy/3.0;
+
+    surfWeightsDir1.resize(3);
+    surfWeightsDir1[0] = 0.5*dx/3.0;
+    surfWeightsDir1[1] = 0.5*4*dx/3.0;
+    surfWeightsDir1[2] = 0.5*dx/3.0;
 
 // mass matrix (automatically generated. See scripts/serendipity-2D.mac)
     refNjNk = Lucee::Matrix<double>(shape, start);
