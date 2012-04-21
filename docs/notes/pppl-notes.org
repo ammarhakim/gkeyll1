@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 18-19th
+
+  Spend a couple of days doing a set of comprehensive benchmark
+  problems, all with exact solutions, for the Poisson bracket
+  updater. The updater seems to work very well.
+
+  This is both good news and bad: good as the updater actually works
+  as expected, but bad as I am no closer to the resolution of the
+  problems I noted in my Arpil 17th notes.
+
+  I now suspect that there could be an aliasing error or perhaps a
+  subtle problem in the manner in which the Poisson solve occurs
+  between the RK stages.
+
 * April 17th
 
   The energy conservation issue is driving me nuts. The solution
