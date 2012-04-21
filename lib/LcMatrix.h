@@ -95,14 +95,14 @@ namespace Lucee
  *
  * @return number of rows.
  */
-      unsigned numRows() const { return this->template getShape(0); }
+      unsigned numRows() const { return this->getShape(0); }
 
 /**
  * Returns number of columns in matrix.
  *
  * @return number of columns.
  */
-      unsigned numColumns() const { return this->template getShape(1); }
+      unsigned numColumns() const { return this->getShape(1); }
 
 /**
  * Return a row of the martrix.
