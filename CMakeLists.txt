@@ -4,7 +4,8 @@ project(lucee)
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "5")
 set(VERSION_PATCH "0")
-set(LUCEE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+set(LUCEE_VERSION "${PROJECT_VERSION}")
 
 # Required version
 cmake_minimum_required(VERSION 2.8.6)
@@ -15,11 +16,8 @@ cmake_minimum_required(VERSION 2.8.6)
 #
 ######################################################################
 
-if (WIN32)
-  set(NOFORTRAN TRUE)
-endif ()
 include(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
-set(NAUTILUS_REV "${PROJECT_REV}")
+set(LUCEE_REV "${PROJECT_REV}")
 
 ######################################################################
 #
