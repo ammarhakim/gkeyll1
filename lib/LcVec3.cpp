@@ -58,7 +58,7 @@ namespace Lucee
   {
     T len = ::sqrt(dot(*this));
     for (int i=0; i<3; ++i)
-      setVal(i, this->getVal(i)/len);
+      this->setVal(i, this->getVal(i)/len);
   }
 
   template <typename T>
@@ -82,7 +82,7 @@ namespace Lucee
   Vec3<T>::scale(T fact)
   {
     for (unsigned i=0; i<3; ++i)
-      setVal(i, this->getVal(i)*fact);
+      this->setVal(i, this->getVal(i)*fact);
   }
 
 // instantiations

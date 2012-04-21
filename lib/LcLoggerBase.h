@@ -87,7 +87,7 @@ namespace Lucee
 
     // find location of '.'
     size_t len = 0;
-    for (size_t i = nm.size(); i >= 0; --i, ++len)
+    for (int i = nm.size(); i >= 0; --i, ++len)
     {
       if ( (nm[i] == '.') || (i == 0) )
       {
