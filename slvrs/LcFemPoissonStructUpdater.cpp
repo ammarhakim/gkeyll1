@@ -707,6 +707,8 @@ namespace Lucee
     KSPGetConvergedReason(ksp, &reason);
     int itNum;
     KSPGetIterationNumber(ksp, &itNum);
+    double resNorm;
+    KSPGetResidualNorm(ksp, &resNorm);
 
 // construct message to send back to Lua
     std::ostringstream msgStrm;
@@ -721,7 +723,8 @@ namespace Lucee
     {
       msgStrm << FemPoissonStructUpdater<NDIM>::id << ": KSPSolve converged.";
     }
-    msgStrm << " Number of iterations " << itNum;
+    msgStrm << " Number of iterations " << itNum
+            << ". Final residual norm was " << resNorm;
 
 // copy solution from PetSc array to solution field
     PetscScalar *ptSol;
