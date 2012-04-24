@@ -294,18 +294,6 @@ namespace Lucee
   }
 
   void
-  NodalPoissonBracketUpdater::calcGradient_x(std::vector<double>& phiK, std::vector<double>& phiPrimeK)
-  {
-    matVec(1.0, diffMatrix[0].m, phiK, 0.0, &phiPrimeK[0]);
-  }
-
-  void
-  NodalPoissonBracketUpdater::calcGradient_y(std::vector<double>& phiK, std::vector<double>& phiPrimeK)
-  {
-    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &phiPrimeK[0]);
-  }
-
-  void
   NodalPoissonBracketUpdater::calcSpeeds(std::vector<double>& phiK, NodeSpeed speeds[2])
   {
 // ux = d phi / dy

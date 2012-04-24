@@ -482,10 +482,10 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-//     PetscViewer lab;
-//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
-//     PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
-//     MatView(stiffMat, lab);
+    PetscViewer lab;
+    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
+    PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+    MatView(stiffMat, lab);
 
 //  finalize assembly
     VecAssemblyBegin(globalSrc);
@@ -539,7 +539,7 @@ namespace Lucee
 // if both directions are periodic, we need to adjust source to ensure
 // solvability of the equations
     if (allPeriodic)
-      intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;
+      intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;    // PetscViewer lab;
 
 // clear out existing stuff in source vector: this is required
 // otherwise successive calls to advance() will accumulate into source
@@ -688,10 +688,10 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-//     PetscViewer lab;
-//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
-//     PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
-//     VecView(globalSrc, lab);
+    PetscViewer lab;
+    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
+    PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
+    VecView(globalSrc, lab);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;

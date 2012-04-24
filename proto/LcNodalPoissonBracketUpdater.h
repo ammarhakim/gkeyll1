@@ -127,24 +127,6 @@ namespace Lucee
       };
 
 /**
- * Compute gradient in x-direction.
- *
- * @param phiK potential at nodes
- * @param phiPrimeK On output, gradient in x-direction
- */
-      void calcGradient_x(std::vector<double>& phiK,
-        std::vector<double>& phiPrimeK);
-
-/**
- * Compute gradient in y-direction.
- *
- * @param phiK potential at nodes
- * @param phiPrimeK On output, gradient in x-direction
- */
-      void calcGradient_y(std::vector<double>& phiK,
-        std::vector<double>& phiPrimeK);
-
-/**
  * Calculate speeds in the X and Y directions. The output structure
  * must be pre-allocated.
  * 
