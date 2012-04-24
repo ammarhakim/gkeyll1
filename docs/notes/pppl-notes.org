@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 24th
+  
+  Spent more time trying to figure out the energy conservation
+  problem. Still no good. Used a single vortex as an example to check
+  if a stationary vortex has issues: it does, energy increases by
+  about the same amount as it does in the double vortex case.
+
 * April 18-19th
 
   Spend a couple of days doing a set of comprehensive benchmark
