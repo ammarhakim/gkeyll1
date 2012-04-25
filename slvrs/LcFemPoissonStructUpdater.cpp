@@ -482,10 +482,10 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-    PetscViewer lab;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
-    PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
-    MatView(stiffMat, lab);
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+//     MatView(stiffMat, lab);
 
 //  finalize assembly
     VecAssemblyBegin(globalSrc);
@@ -688,10 +688,10 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-    PetscViewer lab;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
-    PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
-    VecView(globalSrc, lab);
+//     PetscViewer lab;
+//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
+//     PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
+//     VecView(globalSrc, lab);
 
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
