@@ -228,6 +228,18 @@ namespace Lucee
       void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
 
 /**
+ * Get data needed for Gaussian quadrature of specified order on this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param nord Number of nodes in each direction.
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getGaussQuadData(unsigned norder, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -289,6 +301,55 @@ namespace Lucee
       std::vector<double> surfWeightsDir1;
 
 /**
+ * Struct to hold data for Guassian quadrature.
+ */
+      struct GaussQuadData
+      {
+/**
+ * Create object.
+ * 
+ * @param nord Numer of ordinates in each direction.
+ * @param nlocal Total number of local nodes.
+ */
+          GaussQuadData(unsigned nord, unsigned nlocal)
+            : ords(nord*nord, 3), weights(nord*nord), interpMat(nord*nord, nlocal)
+          {
+          }
+
+/**
+ * Reset object.
+ * 
+ * @param nord Numer of ordinates in each direction.
+ * @param nlocal Total number of local nodes.
+ */
+          void reset(unsigned nord, unsigned nlocal)
+          {
+            ords = Lucee::Matrix<double>(nord*nord, 3);
+            weights.resize(nord*nord);
+
+// interpolation matrix is indexed from (1,1) as they are
+// automatically generated from Maxima code. Unfortunately, Maxima
+// only writes out (1,1) based matrices.
+            int start[2] = {1, 1};
+            unsigned shape[2];
+            shape[0] = nord*nord; shape[1] = nlocal;
+            interpMat = Lucee::Matrix<double>(shape, start);
+          }
+
+/** Matrix of ordinates */
+          Lucee::Matrix<double> ords;
+/** Vector of weights */
+          std::vector<double> weights;
+/** Interpolation matrix */
+          Lucee::Matrix<double> interpMat;
+      };
+
+/** Data for 2-node Gaussian quadrature */
+      GaussQuadData gauss2;
+/** Data for 3-node Gaussian quadrature */
+      GaussQuadData gauss3;
+
+/**
  * Create matrices for 1st order element.
  */
       void setupPoly1();
@@ -297,6 +358,14 @@ namespace Lucee
  * Create matrices for 2nd order element.
  */
       void setupPoly2();
+
+/**
+ * Setup data needed for Gaussian quadrature rules.
+ *
+ * @param nord Number of ordinates in each direction.
+ * @param qData Data to setup.
+ */
+      void setupGaussQuadData(unsigned nord, GaussQuadData& qData);
 
 /**
  * Helper function to copy data from/to a flat array, given a Lucee
