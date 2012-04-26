@@ -5,6 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 25th
+
+  The energy and enstrophy conservation problem is most like an
+  aliasing issue. One needs to use Gaussian quadrature to perform the
+  volume and surface integrals. The code needs to be extended to allow
+  arbitrary specification of integration nodes. For example, one can
+  imagine a call like
+
+#+BEGIN_EXAMPLE
+  nodalBasis->getInterpolationMatrix(unsigned order,
+    Lucee::Matrix<double>& interpMat);
+#+END_EXAMPLE
+
+  that would get the interpolation matrix from a basis function
+  set. Then, using this one can perform the interpolation and hence
+  the quadrature.
+
 * April 24th
   
   Spent more time trying to figure out the energy conservation
