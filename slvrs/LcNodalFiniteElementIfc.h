@@ -249,6 +249,18 @@ namespace Lucee
       virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
 
 /**
+ * Get data needed for Gaussian quadrature of specified order on this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param nord Number of nodes in each direction.
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      virtual void getGaussQuadData(unsigned nord, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output

@@ -141,6 +141,25 @@ calcGradStiffMatrix_y(basis) := block([n, stiff],
 	        return (stiff)
 );
 
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i][1], y=gOrds[i][2]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
+/** Ordinates for 2-node Guassian quadrature */
+gOrds2 : [
+ [-1/sqrt(3), -1/sqrt(3)], 
+ [1/sqrt(3), -1/sqrt(3)], 
+ [-1/sqrt(3), 1/sqrt(3)],
+ [1/sqrt(3), 1/sqrt(3)]];
+
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
 /** Basis function of order 2 */
@@ -178,6 +197,11 @@ N2_Explicit_Diff_y : N2_Diff_y . N2_phi_c;
 
 /** Weights */
 N2_weights : integrate(integrate(N2, x, -1, 1), y, -1, 1);
+
+/** Compute interpolation matrix */
+N2_iMat_2 : calcInterpMatrix(N2, gOrds2);
+
+/******************** Basis 3 ******************/
 
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
