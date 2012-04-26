@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 26th
+
+  Added code to compute Gaussian quadrature nodes, weights and
+  interpolation matrices. For now only the SerendipityElement2D
+  polyOrder=1 is supported. Next to add surface quadrature nodes,
+  etc.
+
 * April 25th
 
   The energy and enstrophy conservation problem is most like an
