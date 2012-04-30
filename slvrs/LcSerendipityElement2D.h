@@ -233,7 +233,7 @@ namespace Lucee
  *
  * @param nord Number of nodes in each direction.
  * @param interpMat On output, interpolation matrix.
- * @param ordinates On output, quadrature ordinates.
+ * @param ordinates On output, quadrature ordinates (numNodes X 3)
  * @param weights On output, quadrature weights.
  */
       void getGaussQuadData(unsigned norder, Lucee::Matrix<double>& interpMat,

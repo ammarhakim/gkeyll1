@@ -5,12 +5,24 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 27th
+
+  Working on the NodalPoissonBracketUpdater with Gaussian
+  integration. Completed the volume integral terms, however, the
+  solution looks funky (but does not blow up). Now to debug this.
+
+  The code is becoming quiet confusing due the different matrices
+  being computed. Need to write this up and also fix the 1017 notes.
+
 * April 26th
 
   Added code to compute Gaussian quadrature nodes, weights and
   interpolation matrices. For now only the SerendipityElement2D
   polyOrder=1 is supported. Next to add surface quadrature nodes,
   etc.
+
+  Computed the interpolation matrices using Maxima. Copied them to C++
+  code.
 
 * April 25th
 

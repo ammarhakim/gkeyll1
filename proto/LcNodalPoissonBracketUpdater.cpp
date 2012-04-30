@@ -97,10 +97,24 @@ namespace Lucee
 
 // space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
+    Lucee::Matrix<double> tempDiffMat(nlocal, nlocal);
+
+// allocate space to get Gaussian quadrature data
+    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
+    weights.resize(nlocal);
+
+// BADNESS: THE POLYORDER NEEDS TO BE FETCHED FROM THE BASIS FUNCTION
+// AND NOT HARD-CODED LIKE THIS. HOWEVER, PRESENTLY (4/27/2012) THE
+// BASIS FUNCTIONS KNOW NOTHING ABOUT POLYORDER.
+    unsigned polyOrder = 2;
+    if (nlocal > 4) polyOrder = 3;
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(polyOrder, interpMat.m, ordinates.m, weights);
 
     for (unsigned dir=0; dir<2; ++dir)
     {
-// get stiffness matrice
+// get stiffness matrix
       stiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
       nodalBasis->getGradStiffnessMatrix(dir, stiffMatrix[dir].m);
 
@@ -133,6 +147,23 @@ namespace Lucee
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, upperLift[dir].m);
     }
+
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+// compute differentiation matrices that compute derivatives at
+// quadrature nodes
+      Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
+
+      mGradPhi[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+// compute gradient of basis functions at quadrature nodes (this is
+// just differentiation matrix at quadrature nodes)
+      mGradPhi[dir].m.copy( pDiffMatrix[dir].m );
+
+// multiply by inverse mass matrix at this point
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, mGradPhi[dir].m);
+    }
   }
 
   Lucee::UpdaterStatus 
@@ -164,10 +195,14 @@ namespace Lucee
 // space for various quantities
     std::vector<double> phiK(nlocal), flux(nlocal);
     std::vector<double> fdotn(nFace);
+    std::vector<double> quadChi(nlocal);
 
-    NodalPoissonBracketUpdater::NodeSpeed speeds[2];
+    NodalPoissonBracketUpdater::NodeSpeed speeds[2], quadSpeeds[2];
     for (unsigned dir=0; dir<2; ++dir)
+    {
       speeds[dir].s.resize(nlocal);
+      quadSpeeds[dir].s.resize(nlocal);
+    }
 
 // various iterators
     Lucee::ConstFieldPtr<double> phiPtr = phi.createConstPtr();
@@ -194,16 +229,25 @@ namespace Lucee
         nodalBasis->extractFromField(phi, phiK);
 
 // compute speeds
-        calcSpeeds(phiK, speeds);
+        calcSpeedsAtQuad(phiK, quadSpeeds);
+
+// interpolate vorticity to quadrature points
+        matVec(1.0, interpMat.m, &aCurrPtr[0], 0.0, &quadChi[0]);
 
 // compute fluxes at each interior node and accumulate contribution to
 // volume integral
         for (unsigned dir=0; dir<2; ++dir)
         {
           for (unsigned k=0; k<nlocal; ++k)
-            flux[k] = speeds[dir].s[k]*aCurrPtr[k];
-          matVec(1.0, stiffMatrix[dir].m, flux, 1.0, &aNewPtr[0]);
+          {
+// loop over quadrature points, accumulating contribution
+            for (unsigned qp=0; qp<nlocal; ++qp)
+              aNewPtr[k] += weights[qp]*mGradPhi[dir].m(qp,k)*quadSpeeds[dir].s[qp]*quadChi[qp];
+          }
         }
+
+// compute speeds
+        calcSpeeds(phiK, speeds);
 
 // compute contribution from edge integrals on lower edges
         for (unsigned dir=0; dir<2; ++dir)
@@ -225,7 +269,7 @@ namespace Lucee
               aCurrPtr_n[fn_n], aCurrPtr[fn]);
           }
 // multiply by lifting matrix to compute contribution
-          matVec(-1.0, lowerLift[dir].m, fdotn, 1.0, &aNewPtr[0]);
+          matVec(-1.0, lowerLift[dir].m, &fdotn[0], 1.0, &aNewPtr[0]);
         }
 
 // compute contribution from edge integrals on upper edges
@@ -248,7 +292,7 @@ namespace Lucee
               aCurrPtr[fn], aCurrPtr_n[fn_n]);
           }
 // multiply by lifting matrix to compute contribution
-          matVec(-1.0, upperLift[dir].m, fdotn, 1.0, &aNewPtr[0]);
+          matVec(-1.0, upperLift[dir].m, &fdotn[0], 1.0, &aNewPtr[0]);
         }
 
 // get grid spacing
@@ -297,9 +341,18 @@ namespace Lucee
   NodalPoissonBracketUpdater::calcSpeeds(std::vector<double>& phiK, NodeSpeed speeds[2])
   {
 // ux = d phi / dy
-    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &speeds[0].s[0]);
+    matVec(1.0, diffMatrix[1].m, &phiK[0], 0.0, &speeds[0].s[0]);
 // uy = - d phi / dx
-    matVec(-1.0, diffMatrix[0].m, phiK, 0.0, &speeds[1].s[0]);
+    matVec(-1.0, diffMatrix[0].m, &phiK[0], 0.0, &speeds[1].s[0]);
+  }
+
+  void
+  NodalPoissonBracketUpdater::calcSpeedsAtQuad(std::vector<double>& phiK, NodeSpeed speeds[2])
+  {
+// ux = d phi / dy
+    matVec(1.0, pDiffMatrix[1].m, &phiK[0], 0.0, &speeds[0].s[0]);
+// uy = - d phi / dx
+    matVec(-1.0, pDiffMatrix[0].m, &phiK[0], 0.0, &speeds[1].s[0]);
   }
 
   double
@@ -320,7 +373,7 @@ namespace Lucee
 
   void 
   NodalPoissonBracketUpdater::matVec(double m, const Lucee::Matrix<double>& mat,
-    const std::vector<double>& vec, double v, double *out)
+    const double* vec, double v, double *out)
   {
     double tv;
     unsigned rows = mat.numRows(), cols = mat.numColumns();

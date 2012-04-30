@@ -1187,6 +1187,13 @@ namespace Lucee
   void
   SerendipityElement2D::setupGaussQuadData(unsigned nord, GaussQuadData& qData)
   {
+// get hold of grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+
+// get grid spacing (this is assumed to be uniform for now)
+    double dx = grid.getDx(0), dy = grid.getDx(1);
+
 // 2-nodes in each direction
     Lucee::GaussianQuadRule gauss(nord);
     Lucee::Vector<double> w(nord), mu(nord);
@@ -1208,7 +1215,7 @@ namespace Lucee
 // set weights
     for (unsigned j=0; j<nord; ++j)
       for (unsigned i=0; i<nord; ++i)
-        qData.weights[i+nord*j] = w[i]*w[j];
+        qData.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
 
     if (polyOrder == 1)
     {

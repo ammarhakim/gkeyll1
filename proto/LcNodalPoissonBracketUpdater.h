@@ -102,6 +102,16 @@ namespace Lucee
       MatrixHolder lowerLift[2];
 /** Liftness matrix on upper edges */
       MatrixHolder upperLift[2];
+/** Interpolation matrix */
+      MatrixHolder interpMat;
+/** Weights for quadrature */
+      std::vector<double> weights;
+/** Ordinates for quadrature */
+      MatrixHolder ordinates;
+/** Differentiation matrices, computing derivatives at quadrature nodes */
+      MatrixHolder pDiffMatrix[2];
+/** Gradients of basis functions at quadrature points */
+      MatrixHolder mGradPhi[2];
 
 /**
  * Structure to store node numbers on edges.
@@ -137,6 +147,16 @@ namespace Lucee
         NodeSpeed speeds[2]);
 
 /**
+ * Calculate speeds in the X and Y directions at quadrature
+ * points. The output structure must be pre-allocated.
+ * 
+ * @param phiK values of potential at nodes.
+ * @param speeds On output, speeds in X- and Y-directions.
+ */
+      void calcSpeedsAtQuad(std::vector<double>& phiK,
+        NodeSpeed speeds[2]);
+
+/**
  * Return upwind flux based given speed and nodal values.
  *
  * @param u Speed.
@@ -159,7 +179,7 @@ namespace Lucee
  * @param out On output, holds the product.
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
-        const std::vector<double>& vec, double v, double* out);
+        const double* vec, double v, double* out);
   };
 }
 
