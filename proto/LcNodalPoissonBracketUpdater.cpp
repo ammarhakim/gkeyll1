@@ -158,7 +158,10 @@ namespace Lucee
       mGradPhi[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
 // compute gradient of basis functions at quadrature nodes (this is
 // just differentiation matrix at quadrature nodes)
-      mGradPhi[dir].m.copy( pDiffMatrix[dir].m );
+      for (unsigned i=0; i<nlocal; ++i)
+        for (unsigned j=0; j<nlocal; ++j)
+// diff matrices are computed from transposed stiffness matrices
+          mGradPhi[dir].m(i,j) = pDiffMatrix[dir].m(j,i);
 
 // multiply by inverse mass matrix at this point
       nodalBasis->getMassMatrix(massMatrix);
@@ -242,7 +245,7 @@ namespace Lucee
           {
 // loop over quadrature points, accumulating contribution
             for (unsigned qp=0; qp<nlocal; ++qp)
-              aNewPtr[k] += weights[qp]*mGradPhi[dir].m(qp,k)*quadSpeeds[dir].s[qp]*quadChi[qp];
+              aNewPtr[k] += weights[qp]*mGradPhi[dir].m(k,qp)*quadSpeeds[dir].s[qp]*quadChi[qp];
           }
         }
 
