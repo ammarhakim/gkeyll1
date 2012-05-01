@@ -47,6 +47,32 @@ namespace Lucee
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
+
+// get hold of grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+
+// local region to update
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+
+// set index to first location in grid (this is okay as in this
+// updater we are assuming grid is uniform)
+    nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
+
+    unsigned nlocal = nodalBasis->getNumNodes();
+
+// allocate space to get Gaussian quadrature data
+    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
+    weights.resize(nlocal);
+
+// BADNESS: THE POLYORDER NEEDS TO BE FETCHED FROM THE BASIS FUNCTION
+// AND NOT HARD-CODED LIKE THIS. HOWEVER, PRESENTLY (4/27/2012) THE
+// BASIS FUNCTIONS KNOW NOTHING ABOUT POLYORDER.
+    unsigned polyOrder = 2;
+    if (nlocal > 4) polyOrder = 3;
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(polyOrder, interpMat.m, ordinates.m, weights);
   }
 
   Lucee::UpdaterStatus
@@ -67,8 +93,9 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
     Lucee::ConstFieldPtr<double> chiPtr = chi.createConstPtr();
+
 // space for various quantities
-    std::vector<double> weights(nlocal);
+    std::vector<double> quadChi(nlocal);
 
     double totalEnstrophy = 0.0;
 // compute total enstrophy
@@ -79,12 +106,12 @@ namespace Lucee
         nodalBasis->setIndex(ix, iy);
         chi.setPtr(chiPtr, ix, iy);
 
-// get quadrature weights
-        nodalBasis->getWeights(weights);
+// compute vorticity at quadrature nodes
+        matVec(1.0, interpMat.m, &chiPtr[0], 0.0, &quadChi[0]);
 
 // compute contribition to enstrophy from this cell
         for (unsigned k=0; k<nlocal; ++k)
-          totalEnstrophy += weights[k]*chiPtr[k]*chiPtr[k];
+          totalEnstrophy += weights[k]*quadChi[k]*quadChi[k];
       }
     }
 
@@ -108,5 +135,20 @@ namespace Lucee
   {
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
+  }
+
+  void 
+  EnstrophyUpdater::matVec(double m, const Lucee::Matrix<double>& mat,
+    const double* vec, double v, double *out)
+  {
+    double tv;
+    unsigned rows = mat.numRows(), cols = mat.numColumns();
+    for (unsigned i=0; i<rows; ++i)
+    {
+      tv = 0.0;
+      for (unsigned j=0; j<cols; ++j)
+        tv += mat(i,j)*vec[j];
+      out[i] = m*tv + v*out[i];
+    }
   }
 }
