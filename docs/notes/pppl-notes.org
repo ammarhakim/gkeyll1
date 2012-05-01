@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* April 28th
+
+  Found the bug in the volume integral term. Turns out that the matrix
+  needed in the volume quadrature was transposed. Fixed and now the
+  volume term seems to work fine. Next, to implement the surface
+  integral quadrature. Also fixed enstrophy calculator to avoid the
+  aliasing error. Now enstrophy converges as it should. Whew!
+
 * April 27th
 
   Working on the NodalPoissonBracketUpdater with Gaussian
