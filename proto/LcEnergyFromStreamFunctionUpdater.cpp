@@ -61,6 +61,19 @@ namespace Lucee
 
     unsigned nlocal = nodalBasis->getNumNodes();
 
+// allocate space to get Gaussian quadrature data
+    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
+    weights.resize(nlocal);
+
+// BADNESS: THE POLYORDER NEEDS TO BE FETCHED FROM THE BASIS FUNCTION
+// AND NOT HARD-CODED LIKE THIS. HOWEVER, PRESENTLY (4/27/2012) THE
+// BASIS FUNCTIONS KNOW NOTHING ABOUT POLYORDER.
+    unsigned polyOrder = 2;
+    if (nlocal > 4) polyOrder = 3;
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(polyOrder, interpMat.m, ordinates.m, weights);
+
 // space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
@@ -80,6 +93,14 @@ namespace Lucee
 // multiply matrices by inverse of mass matrix
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, diffMatrix[dir].m);
+    }
+
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+// compute differentiation matrices that compute derivatives at
+// quadrature nodes
+      Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
     }
   }
 
@@ -102,7 +123,6 @@ namespace Lucee
 
 // space for various quantities
     std::vector<double> phiK(nlocal), normGradPhi(nlocal);
-    std::vector<double> weights(nlocal);
 
     double totalEnergy = 0.0;
 // compute total energy
@@ -117,9 +137,6 @@ namespace Lucee
 
 // compute norm of grad(phi)
         calcNormGrad(phiK, normGradPhi);
-
-// get quadrature weights
-        nodalBasis->getWeights(weights);
 
 // compute contribition to energy from this cell
         for (unsigned k=0; k<nlocal; ++k)
@@ -148,8 +165,8 @@ namespace Lucee
   {
 // compute gradient in X- and Y-directions
     std::vector<double> gradX(normGradPhi.size()), gradY(normGradPhi.size());
-    matVec(1.0, diffMatrix[0].m, phiK, 0.0, &gradX[0]);
-    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &gradY[0]);
+    matVec(1.0, pDiffMatrix[0].m, phiK, 0.0, &gradX[0]);
+    matVec(1.0, pDiffMatrix[1].m, phiK, 0.0, &gradY[0]);
 
 // compute norm of gradient
     for (unsigned i=0; i<normGradPhi.size(); ++i)
