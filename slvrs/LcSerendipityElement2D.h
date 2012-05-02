@@ -231,12 +231,11 @@ namespace Lucee
  * Get data needed for Gaussian quadrature of specified order on this
  * element. All output matrices and vectors must be pre-allocated.
  *
- * @param nord Number of nodes in each direction.
  * @param interpMat On output, interpolation matrix.
  * @param ordinates On output, quadrature ordinates (numNodes X 3)
  * @param weights On output, quadrature weights.
  */
-      void getGaussQuadData(unsigned norder, Lucee::Matrix<double>& interpMat,
+      void getGaussQuadData(Lucee::Matrix<double>& interpMat,
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
@@ -311,7 +310,7 @@ namespace Lucee
  * @param nord Numer of ordinates in each direction.
  * @param nlocal Total number of local nodes.
  */
-          GaussQuadData(unsigned nord, unsigned nlocal)
+          GaussQuadData(unsigned nord = 1, unsigned nlocal = 1)
             : ords(nord*nord, 3), weights(nord*nord), interpMat(nord*nord, nlocal)
           {
           }
@@ -346,8 +345,27 @@ namespace Lucee
 
 /** Data for 2-node Gaussian quadrature */
       GaussQuadData gauss2;
+/** Quadrature, left face*/
+      GaussQuadData gauss2Left;
+/** Quadrature, right face*/
+      GaussQuadData gauss2Right;
+/** Quadrature, bottom face*/
+      GaussQuadData gauss2Bottom;
+/** Quadrature, top face*/
+      GaussQuadData gauss2Top;
+
+
 /** Data for 3-node Gaussian quadrature */
       GaussQuadData gauss3;
+/** Quadrature, left face*/
+      GaussQuadData gauss3Left;
+/** Quadrature, right face*/
+      GaussQuadData gauss3Right;
+/** Quadrature, bottom face*/
+      GaussQuadData gauss3Bottom;
+/** Quadrature, top face*/
+      GaussQuadData gauss3Top;
+
 
 /**
  * Create matrices for 1st order element.
@@ -360,12 +378,16 @@ namespace Lucee
       void setupPoly2();
 
 /**
- * Setup data needed for Gaussian quadrature rules.
- *
- * @param nord Number of ordinates in each direction.
- * @param qData Data to setup.
+ * Setup data needed for Gaussian quadrature rules for polynomial
+ * order 1.
  */
-      void setupGaussQuadData(unsigned nord, GaussQuadData& qData);
+      void setupGaussQuadDataPoly1();
+
+/**
+ * Setup data needed for Gaussian quadrature rules for polynomial
+ * order 2.
+ */
+      void setupGaussQuadDataPoly2();
 
 /**
  * Helper function to copy data from/to a flat array, given a Lucee

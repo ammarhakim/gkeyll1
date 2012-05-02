@@ -39,12 +39,11 @@ namespace Lucee
   }
 
   SerendipityElement2D::SerendipityElement2D()
-    : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
+  : Lucee::NodalFiniteElementIfc<2>(4), polyOrder(1), 
       refNjNk(4,4), refDNjDNk(4,4), refDNjNk_0(4,4), refDNjNk_1(4,4), 
       refFaceNjNk_xl(4,2), refFaceNjNk_xu(4,2), refFaceNjNk_yl(4,2), refFaceNjNk_yu(4,2),
       idxr(
-        &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0]),
-      gauss2(2, 4), gauss3(3, 4)
+        &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
 // notice funcky initialization of indexer: this is just so code
 // compiles as indexers do not have default ctors. It gets reset in
@@ -73,13 +72,15 @@ namespace Lucee
 
 // initialize matrices
     if (polyOrder == 1)
+    {
       setupPoly1();
+      setupGaussQuadDataPoly1();
+    }
     else if (polyOrder == 2)
+    {
       setupPoly2();
-
-// setup data needed for Gaussian quadrature
-    setupGaussQuadData(2, gauss2);
-    setupGaussQuadData(3, gauss3);
+      setupGaussQuadDataPoly2();
+    }
 
 // determine number of global degrees of freedom
     const Lucee::StructuredGridBase<2>& grid 
@@ -446,10 +447,10 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::getGaussQuadData(unsigned nord, Lucee::Matrix<double>& interpMat,
+  SerendipityElement2D::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    if ((polyOrder == 1) && (nord == 2))
+    if (polyOrder == 1)
     {
 // copy over data
       interpMat.copy(gauss2.interpMat);
@@ -457,10 +458,12 @@ namespace Lucee
       for (unsigned i=0; i<gauss2.weights.size(); ++i)
         weights[i] = gauss2.weights[i];
     }
-    else
+    else if (polyOrder == 2)
     {
-      throw Lucee::Except(
-        "SerendipityElement2D::getGaussQuadData: This Guassian integration not implemented");
+      Lucee::Except lce(
+        "SerendipityElement2D::getGaussQuadData: Guassian integration not implemented ");
+      lce << " for polyOrder 2";
+      throw lce;
     }
   }
 
@@ -1185,7 +1188,7 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::setupGaussQuadData(unsigned nord, GaussQuadData& qData)
+  SerendipityElement2D::setupGaussQuadDataPoly1()
   {
 // get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
@@ -1194,6 +1197,8 @@ namespace Lucee
 // get grid spacing (this is assumed to be uniform for now)
     double dx = grid.getDx(0), dy = grid.getDx(1);
 
+    unsigned nord = 2;
+
 // 2-nodes in each direction
     Lucee::GaussianQuadRule gauss(nord);
     Lucee::Vector<double> w(nord), mu(nord);
@@ -1201,46 +1206,80 @@ namespace Lucee
     gauss.getOrdinatesAndWeights(mu, w);
 
 // allocate memory for quadrature
-    qData.reset(nord, this->getNumNodes());
+    gauss2.reset(nord, this->getNumNodes());
 
 // set ordinates
     for (unsigned j=0; j<nord; ++j)
       for (unsigned i=0; i<nord; ++i)
       {
-        qData.ords(i+nord*j,0) = mu[i];
-        qData.ords(i+nord*j,1) = mu[j];
-        qData.ords(i+nord*j,2) = 0.0;
+        gauss2.ords(i+nord*j,0) = mu[i];
+        gauss2.ords(i+nord*j,1) = mu[j];
+        gauss2.ords(i+nord*j,2) = 0.0;
       }
    
 // set weights
     for (unsigned j=0; j<nord; ++j)
       for (unsigned i=0; i<nord; ++i)
-        qData.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
+        gauss2.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
 
-    if (polyOrder == 1)
-    {
 // create interpolation matrix (automatically generated. See scripts/serendipity-2D.mac)
-      qData.interpMat(1,1) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(1,2) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(1,3) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
-      qData.interpMat(1,4) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(2,1) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(2,2) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(2,3) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(2,4) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
-      qData.interpMat(3,1) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(3,2) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
-      qData.interpMat(3,3) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(3,4) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(4,1) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
-      qData.interpMat(4,2) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(4,3) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
-      qData.interpMat(4,4) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
-    }
-    else if (polyOrder == 2)
-    {
-// TODO
-    }
+    gauss2.interpMat(1,1) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(1,2) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(1,3) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
+    gauss2.interpMat(1,4) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(2,1) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(2,2) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(2,3) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(2,4) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
+    gauss2.interpMat(3,1) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(3,2) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
+    gauss2.interpMat(3,3) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(3,4) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(4,1) = (1-1/sqrt(3))*(1-1/sqrt(3))/4.0;
+    gauss2.interpMat(4,2) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(4,3) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
+    gauss2.interpMat(4,4) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+  }
+
+  void
+  SerendipityElement2D::setupGaussQuadDataPoly2()
+  {
+// get hold of grid
+    const Lucee::StructuredGridBase<2>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<2> >();
+
+// get grid spacing (this is assumed to be uniform for now)
+    double dx = grid.getDx(0), dy = grid.getDx(1);
+
+    unsigned nord = 3;
+
+// 2-nodes in each direction
+    Lucee::GaussianQuadRule gauss(nord);
+    Lucee::Vector<double> w(nord), mu(nord);
+// get ordinates and weights in [-1,1]
+    gauss.getOrdinatesAndWeights(mu, w);
+
+// allocate memory for quadrature
+    gauss3.reset(nord, this->getNumNodes());
+
+// set ordinates
+    for (unsigned j=0; j<nord; ++j)
+      for (unsigned i=0; i<nord; ++i)
+      {
+        gauss3.ords(i+nord*j,0) = mu[i];
+        gauss3.ords(i+nord*j,1) = mu[j];
+        gauss3.ords(i+nord*j,2) = 0.0;
+      }
+   
+// set weights
+    for (unsigned j=0; j<nord; ++j)
+      for (unsigned i=0; i<nord; ++i)
+        gauss3.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
+
+    Lucee::Except lce(
+      "SerendipityElement2D::setupGaussQuadDataPoly2: Guassian integration not implemented ");
+    lce << " for polyOrder 2";
+    throw lce;
   }
 
   void

@@ -160,6 +160,22 @@ gOrds2 : [
  [-1/sqrt(3), 1/sqrt(3)],
  [1/sqrt(3), 1/sqrt(3)]];
 
+gOrds2_left : [
+ [-1, -1/sqrt(3)], 
+ [-1, 1/sqrt(3)]];
+
+gOrds2_right : [
+ [1, -1/sqrt(3)], 
+ [1, 1/sqrt(3)]];
+
+gOrds2_bottom : [
+ [-1/sqrt(3), -1], 
+ [ 1/sqrt(3), -1]];
+
+gOrds2_top : [
+ [-1/sqrt(3), 1], 
+ [ 1/sqrt(3), 1]];
+
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
 /** Basis function of order 2 */
@@ -198,8 +214,12 @@ N2_Explicit_Diff_y : N2_Diff_y . N2_phi_c;
 /** Weights */
 N2_weights : integrate(integrate(N2, x, -1, 1), y, -1, 1);
 
-/** Compute interpolation matrix */
+/** Compute interpolation matrices */
 N2_iMat_2 : calcInterpMatrix(N2, gOrds2);
+N2_iMat_left_2 : calcInterpMatrix(N2, gOrds2_left);
+N2_iMat_right_2 : calcInterpMatrix(N2, gOrds2_right);
+N2_iMat_bottom_2 : calcInterpMatrix(N2, gOrds2_bottom);
+N2_iMat_top_2 : calcInterpMatrix(N2, gOrds2_top);
 
 /******************** Basis 3 ******************/
 
