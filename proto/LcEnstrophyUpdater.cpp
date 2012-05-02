@@ -66,13 +66,7 @@ namespace Lucee
     ordinates.m = Lucee::Matrix<double>(nlocal, 3);
     weights.resize(nlocal);
 
-// BADNESS: THE POLYORDER NEEDS TO BE FETCHED FROM THE BASIS FUNCTION
-// AND NOT HARD-CODED LIKE THIS. HOWEVER, PRESENTLY (4/27/2012) THE
-// BASIS FUNCTIONS KNOW NOTHING ABOUT POLYORDER.
-    unsigned polyOrder = 2;
-    if (nlocal > 4) polyOrder = 3;
-// get data needed for Gaussian quadrature
-    nodalBasis->getGaussQuadData(polyOrder, interpMat.m, ordinates.m, weights);
+    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
   }
 
   Lucee::UpdaterStatus

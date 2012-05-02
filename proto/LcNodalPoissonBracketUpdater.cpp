@@ -110,7 +110,7 @@ namespace Lucee
     unsigned polyOrder = 2;
     if (nlocal > 4) polyOrder = 3;
 // get data needed for Gaussian quadrature
-    nodalBasis->getGaussQuadData(polyOrder, interpMat.m, ordinates.m, weights);
+    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
 
     for (unsigned dir=0; dir<2; ++dir)
     {

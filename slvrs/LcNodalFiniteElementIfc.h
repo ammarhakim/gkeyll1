@@ -252,12 +252,22 @@ namespace Lucee
  * Get data needed for Gaussian quadrature of specified order on this
  * element. All output matrices and vectors must be pre-allocated.
  *
- * @param nord Number of nodes in each direction.
  * @param interpMat On output, interpolation matrix.
  * @param ordinates On output, quadrature ordinates.
  * @param weights On output, quadrature weights.
  */
-      virtual void getGaussQuadData(unsigned nord, Lucee::Matrix<double>& interpMat,
+      virtual void getGaussQuadData(Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
+ * Get data needed for Gaussian quadrature of specified order on this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      virtual void getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
