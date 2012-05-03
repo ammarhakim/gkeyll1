@@ -249,8 +249,8 @@ namespace Lucee
       virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
 
 /**
- * Get data needed for Gaussian quadrature of specified order on this
- * element. All output matrices and vectors must be pre-allocated.
+ * Get data needed for Gaussian quadrature for this element. All
+ * output matrices and vectors must be pre-allocated.
  *
  * @param interpMat On output, interpolation matrix.
  * @param ordinates On output, quadrature ordinates.
@@ -260,7 +260,7 @@ namespace Lucee
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
- * Get data needed for Gaussian quadrature of specified order on this
+ * Get data needed for Gaussian quadrature on lower surfaces of this
  * element. All output matrices and vectors must be pre-allocated.
  *
  * @param interpMat On output, interpolation matrix.
@@ -268,6 +268,17 @@ namespace Lucee
  * @param weights On output, quadrature weights.
  */
       virtual void getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
+ * Get data needed for Gaussian quadrature on upper surfaces of this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      virtual void getSurfUpperGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**

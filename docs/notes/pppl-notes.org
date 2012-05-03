@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 3rd
+
+  Spent most of the previous few days debugging the Poisson bracket
+  algorithm. Now also have energy computed with the correct quadrature
+  order. Added interface methods to get quadrature data on lower and
+  upper surfaces of an element. Updated Maxima scripts to compute the
+  needed interpolation matrices.
+
 * April 28th
 
   Found the bug in the volume integral term. Turns out that the matrix

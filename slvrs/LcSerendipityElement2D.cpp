@@ -468,6 +468,48 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getSurfLowerGaussQuadData(unsigned dir,
+    Lucee::Matrix<double>& interpMat, Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+  {
+    if (polyOrder == 1)
+    {
+// copy over data
+      interpMat.copy(gauss2Lower[dir].interpMat);
+      ordinates.copy(gauss2Lower[dir].ords);
+      for (unsigned i=0; i<gauss2Lower[dir].weights.size(); ++i)
+        weights[i] = gauss2Lower[dir].weights[i];
+    }
+    else if (polyOrder == 2)
+    {
+      Lucee::Except lce(
+        "SerendipityElement2D::getSurfLowerGaussQuadData: Guassian integration not implemented ");
+      lce << " for polyOrder 2";
+      throw lce;
+    }
+  }
+
+  void
+  SerendipityElement2D::getSurfUpperGaussQuadData(unsigned dir,
+    Lucee::Matrix<double>& interpMat, Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+  {
+    if (polyOrder == 1)
+    {
+// copy over data
+      interpMat.copy(gauss2Upper[dir].interpMat);
+      ordinates.copy(gauss2Upper[dir].ords);
+      for (unsigned i=0; i<gauss2Upper[dir].weights.size(); ++i)
+        weights[i] = gauss2Upper[dir].weights[i];
+    }
+    else if (polyOrder == 2)
+    {
+      Lucee::Except lce(
+        "SerendipityElement2D::getSurfUpperGaussQuadData: Guassian integration not implemented ");
+      lce << " for polyOrder 2";
+      throw lce;
+    }
+  }
+
+  void
   SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
     std::vector<double>& data)
   {
@@ -1195,9 +1237,12 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 
 // get grid spacing (this is assumed to be uniform for now)
-    double dx = grid.getDx(0), dy = grid.getDx(1);
+    double dx[2];
+    dx[0] = grid.getDx(0);
+    dx[1] = grid.getDx(1);
 
     unsigned nord = 2;
+    unsigned nlocal = this->getNumNodes();
 
 // 2-nodes in each direction
     Lucee::GaussianQuadRule gauss(nord);
@@ -1206,7 +1251,7 @@ namespace Lucee
     gauss.getOrdinatesAndWeights(mu, w);
 
 // allocate memory for quadrature
-    gauss2.reset(nord, this->getNumNodes());
+    gauss2.reset(nord*nord, nlocal);
 
 // set ordinates
     for (unsigned j=0; j<nord; ++j)
@@ -1220,7 +1265,7 @@ namespace Lucee
 // set weights
     for (unsigned j=0; j<nord; ++j)
       for (unsigned i=0; i<nord; ++i)
-        gauss2.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
+        gauss2.weights[i+nord*j] = 0.5*dx[0]*0.5*dx[1]*w[i]*w[j];
 
 // create interpolation matrix (automatically generated. See scripts/serendipity-2D.mac)
     gauss2.interpMat(1,1) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
@@ -1239,6 +1284,84 @@ namespace Lucee
     gauss2.interpMat(4,2) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
     gauss2.interpMat(4,3) = (1/sqrt(3)+1)*(1/sqrt(3)+1)/4.0;
     gauss2.interpMat(4,4) = (1-1/sqrt(3))*(1/sqrt(3)+1)/4.0;
+
+// surface quadrature data lower faces
+    for (unsigned dir=0; dir<2; ++dir)
+// allocate space
+      gauss2Lower[dir].reset(nord, nlocal);
+
+// set quadrature weights (NOTE: The weights should sum to the lenght
+// of the edge normal to direction 'dir'.
+    for (unsigned i=0; i<nord; ++i)
+    {
+      gauss2Lower[0].weights[i] = 0.5*dx[1]*w[i];
+      gauss2Lower[1].weights[i] = 0.5*dx[0]*w[i];
+
+      gauss2Upper[0].weights[i] = 0.5*dx[1]*w[i];
+      gauss2Upper[1].weights[i] = 0.5*dx[0]*w[i];
+    }
+
+// set ordinates
+    for (unsigned i=0; i<nord; ++i)
+    {
+      gauss2Lower[0].ords(i,0) = -1;
+      gauss2Lower[0].ords(i,1) = mu[i];
+      gauss2Lower[0].ords(i,2) = 0.0;
+
+      gauss2Upper[0].ords(i,0) = 1;
+      gauss2Upper[0].ords(i,1) = mu[i];
+      gauss2Upper[0].ords(i,2) = 0.0;
+
+      gauss2Lower[1].ords(i,0) = mu[i];
+      gauss2Lower[1].ords(i,1) = -1;
+      gauss2Lower[1].ords(i,2) = 0.0;
+
+      gauss2Upper[1].ords(i,0) = mu[i];
+      gauss2Upper[1].ords(i,1) = 1;
+      gauss2Upper[1].ords(i,2) = 0.0;
+    }
+
+// set interpolation matrices (automatically generated. See scripts/serendipity-2D.mac)
+
+// left
+    gauss2Lower[0].interpMat(1,1) = (1/sqrt(3)+1)/2.0;
+    gauss2Lower[0].interpMat(1,2) = 0;
+    gauss2Lower[0].interpMat(1,3) = 0;
+    gauss2Lower[0].interpMat(1,4) = (1-1/sqrt(3))/2.0;
+    gauss2Lower[0].interpMat(2,1) = (1-1/sqrt(3))/2.0;
+    gauss2Lower[0].interpMat(2,2) = 0;
+    gauss2Lower[0].interpMat(2,3) = 0;
+    gauss2Lower[0].interpMat(2,4) = (1/sqrt(3)+1)/2.0;
+
+// right
+    gauss2Upper[0].interpMat(1,1) = 0;
+    gauss2Upper[0].interpMat(1,2) = (1/sqrt(3)+1)/2.0;
+    gauss2Upper[0].interpMat(1,3) = (1-1/sqrt(3))/2.0;
+    gauss2Upper[0].interpMat(1,4) = 0;
+    gauss2Upper[0].interpMat(2,1) = 0;
+    gauss2Upper[0].interpMat(2,2) = (1-1/sqrt(3))/2.0;
+    gauss2Upper[0].interpMat(2,3) = (1/sqrt(3)+1)/2.0;
+    gauss2Upper[0].interpMat(2,4) = 0;
+
+// bottom
+    gauss2Lower[1].interpMat(1,1) = (1/sqrt(3)+1)/2.0;
+    gauss2Lower[1].interpMat(1,2) = (1-1/sqrt(3))/2.0;
+    gauss2Lower[1].interpMat(1,3) = 0;
+    gauss2Lower[1].interpMat(1,4) = 0;
+    gauss2Lower[1].interpMat(2,1) = (1-1/sqrt(3))/2.0;
+    gauss2Lower[1].interpMat(2,2) = (1/sqrt(3)+1)/2.0;
+    gauss2Lower[1].interpMat(2,3) = 0;
+    gauss2Lower[1].interpMat(2,4) = 0;
+
+// top
+    gauss2Upper[1].interpMat(1,1) = 0;
+    gauss2Upper[1].interpMat(1,2) = 0;
+    gauss2Upper[1].interpMat(1,3) = (1-1/sqrt(3))/2.0;
+    gauss2Upper[1].interpMat(1,4) = (1/sqrt(3)+1)/2.0;
+    gauss2Upper[1].interpMat(2,1) = 0;
+    gauss2Upper[1].interpMat(2,2) = 0;
+    gauss2Upper[1].interpMat(2,3) = (1/sqrt(3)+1)/2.0;
+    gauss2Upper[1].interpMat(2,4) = (1-1/sqrt(3))/2.0;
   }
 
   void
