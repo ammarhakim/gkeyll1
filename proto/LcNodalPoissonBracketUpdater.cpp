@@ -99,19 +99,6 @@ namespace Lucee
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
     Lucee::Matrix<double> tempDiffMat(nlocal, nlocal);
 
-// allocate space to get Gaussian quadrature data
-    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
-    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
-    weights.resize(nlocal);
-
-// BADNESS: THE POLYORDER NEEDS TO BE FETCHED FROM THE BASIS FUNCTION
-// AND NOT HARD-CODED LIKE THIS. HOWEVER, PRESENTLY (4/27/2012) THE
-// BASIS FUNCTIONS KNOW NOTHING ABOUT POLYORDER.
-    unsigned polyOrder = 2;
-    if (nlocal > 4) polyOrder = 3;
-// get data needed for Gaussian quadrature
-    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
-
     for (unsigned dir=0; dir<2; ++dir)
     {
 // get stiffness matrix
@@ -148,12 +135,16 @@ namespace Lucee
       Lucee::solve(massMatrix, upperLift[dir].m);
     }
 
+// allocate space to get volume Gaussian quadrature data
+    volQuad.reset(nlocal, nlocal);
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(volQuad.interpMat.m, volQuad.ords.m, volQuad.weights);
+
     for (unsigned dir=0; dir<2; ++dir)
     {
-      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
 // compute differentiation matrices that compute derivatives at
 // quadrature nodes
-      Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
+      Lucee::accumulate(volQuad.pDiffMatrix[dir].m, volQuad.interpMat.m, diffMatrix[dir].m);
 
       mGradPhi[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
 // compute gradient of basis functions at quadrature nodes (this is
@@ -161,11 +152,41 @@ namespace Lucee
       for (unsigned i=0; i<nlocal; ++i)
         for (unsigned j=0; j<nlocal; ++j)
 // diff matrices are computed from transposed stiffness matrices
-          mGradPhi[dir].m(i,j) = pDiffMatrix[dir].m(j,i);
+          mGradPhi[dir].m(i,j) = volQuad.pDiffMatrix[dir].m(j,i);
 
 // multiply by inverse mass matrix at this point
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, mGradPhi[dir].m);
+    }
+
+// get data for surface quadrature
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      surfLowerQuad[dir].reset(nodalBasis->getNumSurfLowerNodes(dir), nlocal);
+// lower surface data
+      nodalBasis->getSurfLowerGaussQuadData(dir, surfLowerQuad[dir].interpMat.m,
+        surfLowerQuad[dir].ords.m, surfLowerQuad[dir].weights);
+
+      surfUpperQuad[dir].reset(nodalBasis->getNumSurfUpperNodes(dir), nlocal);
+// upper surface data
+      nodalBasis->getSurfUpperGaussQuadData(dir, surfUpperQuad[dir].interpMat.m,
+        surfUpperQuad[dir].ords.m, surfUpperQuad[dir].weights);
+    }
+
+    for (unsigned dir=0; dir<2; ++dir)
+    { // dir is direction normal to face
+
+// compute differentiation matrices that compute derivatives at
+// surface quadrature nodes
+      for (unsigned d=0; d<2; ++d)
+      { // d direction of derivative
+        Lucee::accumulate(surfLowerQuad[dir].pDiffMatrix[d].m, 
+          surfLowerQuad[dir].interpMat.m, diffMatrix[d].m);
+
+        Lucee::accumulate(surfUpperQuad[dir].pDiffMatrix[d].m, 
+          surfUpperQuad[dir].interpMat.m, diffMatrix[d].m);
+      }
+
     }
   }
 
@@ -235,7 +256,7 @@ namespace Lucee
         calcSpeedsAtQuad(phiK, quadSpeeds);
 
 // interpolate vorticity to quadrature points
-        matVec(1.0, interpMat.m, &aCurrPtr[0], 0.0, &quadChi[0]);
+        matVec(1.0, volQuad.interpMat.m, &aCurrPtr[0], 0.0, &quadChi[0]);
 
 // compute fluxes at each interior node and accumulate contribution to
 // volume integral
@@ -245,7 +266,7 @@ namespace Lucee
           {
 // loop over quadrature points, accumulating contribution
             for (unsigned qp=0; qp<nlocal; ++qp)
-              aNewPtr[k] += weights[qp]*mGradPhi[dir].m(k,qp)*quadSpeeds[dir].s[qp]*quadChi[qp];
+              aNewPtr[k] += volQuad.weights[qp]*mGradPhi[dir].m(k,qp)*quadSpeeds[dir].s[qp]*quadChi[qp];
           }
         }
 
@@ -378,9 +399,9 @@ namespace Lucee
   NodalPoissonBracketUpdater::calcSpeedsAtQuad(std::vector<double>& phiK, NodeSpeed speeds[2])
   {
 // ux = d phi / dy
-    matVec(1.0, pDiffMatrix[1].m, &phiK[0], 0.0, &speeds[0].s[0]);
+    matVec(1.0, volQuad.pDiffMatrix[1].m, &phiK[0], 0.0, &speeds[0].s[0]);
 // uy = - d phi / dx
-    matVec(-1.0, pDiffMatrix[0].m, &phiK[0], 0.0, &speeds[1].s[0]);
+    matVec(-1.0, volQuad.pDiffMatrix[0].m, &phiK[0], 0.0, &speeds[1].s[0]);
   }
 
   double

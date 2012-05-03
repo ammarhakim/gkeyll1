@@ -1287,8 +1287,11 @@ namespace Lucee
 
 // surface quadrature data lower faces
     for (unsigned dir=0; dir<2; ++dir)
+    {
 // allocate space
       gauss2Lower[dir].reset(nord, nlocal);
+      gauss2Upper[dir].reset(nord, nlocal);
+    }
 
 // set quadrature weights (NOTE: The weights should sum to the lenght
 // of the edge normal to direction 'dir'.
