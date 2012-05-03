@@ -239,6 +239,28 @@ namespace Lucee
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
+ * Get data needed for Gaussian quadrature on lower surfaces of this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
+ * Get data needed for Gaussian quadrature on upper surfaces of this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getSurfUpperGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -311,7 +333,7 @@ namespace Lucee
  * @param nlocal Total number of local nodes.
  */
           GaussQuadData(unsigned nord = 1, unsigned nlocal = 1)
-            : ords(nord*nord, 3), weights(nord*nord), interpMat(nord*nord, nlocal)
+            : ords(nord, 3), weights(nord), interpMat(nord, nlocal)
           {
           }
 
@@ -323,15 +345,15 @@ namespace Lucee
  */
           void reset(unsigned nord, unsigned nlocal)
           {
-            ords = Lucee::Matrix<double>(nord*nord, 3);
-            weights.resize(nord*nord);
+            ords = Lucee::Matrix<double>(nord, 3);
+            weights.resize(nord);
 
 // interpolation matrix is indexed from (1,1) as they are
 // automatically generated from Maxima code. Unfortunately, Maxima
 // only writes out (1,1) based matrices.
             int start[2] = {1, 1};
             unsigned shape[2];
-            shape[0] = nord*nord; shape[1] = nlocal;
+            shape[0] = nord; shape[1] = nlocal;
             interpMat = Lucee::Matrix<double>(shape, start);
           }
 
@@ -345,27 +367,13 @@ namespace Lucee
 
 /** Data for 2-node Gaussian quadrature */
       GaussQuadData gauss2;
-/** Quadrature, left face*/
-      GaussQuadData gauss2Left;
-/** Quadrature, right face*/
-      GaussQuadData gauss2Right;
-/** Quadrature, bottom face*/
-      GaussQuadData gauss2Bottom;
-/** Quadrature, top face*/
-      GaussQuadData gauss2Top;
-
+/** Quadrature, lower faces */
+      GaussQuadData gauss2Lower[2];
+/** Quadrature, upper faces */
+      GaussQuadData gauss2Upper[2];
 
 /** Data for 3-node Gaussian quadrature */
       GaussQuadData gauss3;
-/** Quadrature, left face*/
-      GaussQuadData gauss3Left;
-/** Quadrature, right face*/
-      GaussQuadData gauss3Right;
-/** Quadrature, bottom face*/
-      GaussQuadData gauss3Bottom;
-/** Quadrature, top face*/
-      GaussQuadData gauss3Top;
-
 
 /**
  * Create matrices for 1st order element.

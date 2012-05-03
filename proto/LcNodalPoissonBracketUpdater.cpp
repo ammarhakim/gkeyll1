@@ -249,6 +249,31 @@ namespace Lucee
           }
         }
 
+// get grid spacing
+        grid.setIndex(ix, iy);
+        double dtdx = dt/grid.getDx(0);
+        double dtdy = dt/grid.getDx(1);
+// compute CFL number.
+        for (unsigned n=0; n<nlocal; ++n)
+        {
+          cfla = Lucee::max3(cfla, dtdx*std::fabs(quadSpeeds[0].s[n]),
+            dtdy*std::fabs(quadSpeeds[1].s[n]));
+        }
+      }
+    }
+
+// compute contributions from surface integrals
+    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
+    {
+      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
+      {
+        aCurr.setPtr(aCurrPtr, ix, iy);
+        aNew.setPtr(aNewPtr, ix, iy);
+        nodalBasis->setIndex(ix, iy);
+
+// extract potential at this location
+        nodalBasis->extractFromField(phi, phiK);
+
 // compute speeds
         calcSpeeds(phiK, speeds);
 
