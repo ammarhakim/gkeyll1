@@ -94,6 +94,38 @@ namespace Lucee
           Lucee::Matrix<double> m;
       };
 
+/**
+ * Struct to hold data for Guassian quadrature.
+ */
+      struct GaussQuadData
+      {
+/**
+ * Reset object.
+ * 
+ * @param nord Numer of ordinates in each direction.
+ * @param nlocal Total number of local nodes.
+ */
+          void reset(unsigned nord, unsigned nlocal)
+          {
+// allocate memory for various matrices
+            ords.m = Lucee::Matrix<double>(nord, 3);
+            weights.resize(nord);
+            interpMat.m = Lucee::Matrix<double>(nord, nlocal);
+
+            for (unsigned dir=0; dir<2; ++dir)
+              pDiffMatrix[dir].m = Lucee::Matrix<double>(nord, nlocal);
+          }
+
+/** Matrix of ordinates */
+          MatrixHolder ords;
+/** Vector of weights */
+          std::vector<double> weights;
+/** Interpolation matrix */
+          MatrixHolder interpMat;
+/** Differentiation matrices, computing derivatives at quadrature nodes */
+          MatrixHolder pDiffMatrix[2];
+      };
+
 /** Differentiation matrices */
       MatrixHolder diffMatrix[2];
 /** Differentiation matrices */
@@ -102,14 +134,12 @@ namespace Lucee
       MatrixHolder lowerLift[2];
 /** Liftness matrix on upper edges */
       MatrixHolder upperLift[2];
-/** Interpolation matrix */
-      MatrixHolder interpMat;
-/** Weights for quadrature */
-      std::vector<double> weights;
-/** Ordinates for quadrature */
-      MatrixHolder ordinates;
-/** Differentiation matrices, computing derivatives at quadrature nodes */
-      MatrixHolder pDiffMatrix[2];
+/** Data for volume quadrature */
+      GaussQuadData volQuad;
+/** Data for quadrature on each lower face */
+      GaussQuadData surfLowerQuad[2];
+/** Data for quadrature on each upper face */
+      GaussQuadData surfUpperQuad[2];
 /** Gradients of basis functions at quadrature points */
       MatrixHolder mGradPhi[2];
 
