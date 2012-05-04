@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 4th
+
+  Completed the C++ code needed for the surface integration
+  terms. However, the code blows up. This is probably because the
+  interpolated basis functions of the surface are not consistent. Need
+  to use the left-surface interpolations for the right cell and
+  right-surface interpolations for the left cell. Need to make sure
+  this is really the case.
+
 * May 3rd
 
   Spent most of the previous few days debugging the Poisson bracket
