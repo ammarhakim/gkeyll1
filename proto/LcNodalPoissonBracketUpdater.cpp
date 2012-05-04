@@ -173,6 +173,7 @@ namespace Lucee
         surfUpperQuad[dir].ords.m, surfUpperQuad[dir].weights);
     }
 
+    unsigned nord = 0;
     for (unsigned dir=0; dir<2; ++dir)
     { // dir is direction normal to face
 
@@ -187,6 +188,27 @@ namespace Lucee
           surfUpperQuad[dir].interpMat.m, diffMatrix[d].m);
       }
 
+      nord = nodalBasis->getNumSurfLowerNodes(dir);
+      mSurfLowerPhi[dir].m = Lucee::Matrix<double>(nlocal, nord);
+// compute basis functions at surface quadrature nodes
+      for (unsigned i=0; i<nlocal; ++i)
+        for (unsigned j=0; j<nord; ++j)
+          mSurfLowerPhi[dir].m(i,j) = surfLowerQuad[dir].interpMat.m(j,i);
+
+// multiply by inverse mass matrix at this point
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, mSurfLowerPhi[dir].m);
+
+      nord = nodalBasis->getNumSurfUpperNodes(dir);
+      mSurfUpperPhi[dir].m = Lucee::Matrix<double>(nlocal, nord);
+// compute basis functions at surface quadrature nodes
+      for (unsigned i=0; i<nlocal; ++i)
+        for (unsigned j=0; j<nord; ++j)
+          mSurfUpperPhi[dir].m(i,j) = surfUpperQuad[dir].interpMat.m(j,i);
+
+// multiply by inverse mass matrix at this point
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, mSurfUpperPhi[dir].m);
     }
   }
 

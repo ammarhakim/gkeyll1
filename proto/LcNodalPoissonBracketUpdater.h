@@ -142,6 +142,10 @@ namespace Lucee
       GaussQuadData surfUpperQuad[2];
 /** Gradients of basis functions at quadrature points */
       MatrixHolder mGradPhi[2];
+/** Basis fucntions at surface quadrature point */
+      MatrixHolder mSurfLowerPhi[2];
+/** Basis fucntions at surface quadrature point */
+      MatrixHolder mSurfUpperPhi[2];
 
 /**
  * Structure to store node numbers on edges.
