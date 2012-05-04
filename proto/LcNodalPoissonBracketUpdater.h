@@ -130,10 +130,6 @@ namespace Lucee
       MatrixHolder diffMatrix[2];
 /** Differentiation matrices */
       MatrixHolder stiffMatrix[2];
-/** Liftness matrix on lower edges */
-      MatrixHolder lowerLift[2];
-/** Liftness matrix on upper edges */
-      MatrixHolder upperLift[2];
 /** Data for volume quadrature */
       GaussQuadData volQuad;
 /** Data for quadrature on each lower face */

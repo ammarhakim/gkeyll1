@@ -118,21 +118,6 @@ namespace Lucee
 
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, diffMatrix[dir].m);
-
-// compute lift matrices
-      lowerLift[dir].m = Lucee::Matrix<double>(nlocal, 
-        nodalBasis->getNumSurfLowerNodes(dir));
-
-      nodalBasis->getLowerFaceMassMatrix(dir, lowerLift[dir].m);
-      nodalBasis->getMassMatrix(massMatrix);
-      Lucee::solve(massMatrix, lowerLift[dir].m);
-      
-      upperLift[dir].m = Lucee::Matrix<double>(nlocal, 
-        nodalBasis->getNumSurfUpperNodes(dir));
-
-      nodalBasis->getUpperFaceMassMatrix(dir, upperLift[dir].m);
-      nodalBasis->getMassMatrix(massMatrix);
-      Lucee::solve(massMatrix, upperLift[dir].m);
     }
 
 // allocate space to get volume Gaussian quadrature data
@@ -240,7 +225,8 @@ namespace Lucee
 
 // space for various quantities
     std::vector<double> phiK(nlocal), flux(nlocal);
-    std::vector<double> fdotn(nFace);
+    std::vector<double> chiQuad_l(nFace), chiQuad_r(nFace), chiUpwind(nFace);
+    std::vector<double> udotn(nFace), uflux(nFace), fdotn(nlocal);
     std::vector<double> quadChi(nlocal);
 
     NodalPoissonBracketUpdater::NodeSpeed speeds[2], quadSpeeds[2];
@@ -252,9 +238,12 @@ namespace Lucee
 
 // various iterators
     Lucee::ConstFieldPtr<double> phiPtr = phi.createConstPtr();
+    Lucee::ConstFieldPtr<double> phiPtr_l = phi.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_n = aCurr.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
+    Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
 
 // clear out contents of output field
     aNew = 0.0;
@@ -305,83 +294,91 @@ namespace Lucee
       }
     }
 
-// compute contributions from surface integrals
-    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
-    {
-      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
-      {
-        aCurr.setPtr(aCurrPtr, ix, iy);
-        aNew.setPtr(aNewPtr, ix, iy);
-        nodalBasis->setIndex(ix, iy);
-
-// extract potential at this location
-        nodalBasis->extractFromField(phi, phiK);
-
-// compute speeds
-        calcSpeeds(phiK, speeds);
-
-// compute contribution from edge integrals on lower edges
-        for (unsigned dir=0; dir<2; ++dir)
-        {
-          idx[0] = ix; idx[1] = iy;
-          idx[dir] += -1; // lower side
-
-// set pointer to cell on lower side in this direction
-          aCurr.setPtr(aCurrPtr_n, idx[0], idx[1]);
-
-// contribution from lower edge in direction
-          for (unsigned f=0; f<nFace; ++f)
-          {
-            unsigned fn = lowerNodeNums[dir].nums[f]; // node number in cell on right
-            unsigned fn_n = upperNodeNums[dir].nums[f]; // node number in cell on left
-
-// compute upwind flux (lower edges contribution is -ve)
-            fdotn[f] = -getUpwindFlux(speeds[dir].s[fn],
-              aCurrPtr_n[fn_n], aCurrPtr[fn]);
-          }
-// multiply by lifting matrix to compute contribution
-          matVec(-1.0, lowerLift[dir].m, &fdotn[0], 1.0, &aNewPtr[0]);
-        }
-
-// compute contribution from edge integrals on upper edges
-        for (unsigned dir=0; dir<2; ++dir)
-        {
-          idx[0] = ix; idx[1] = iy;
-          idx[dir] += 1; // upper side
-
-// set pointer to cell on lower side in this direction
-          aCurr.setPtr(aCurrPtr_n, idx[0], idx[1]);
-
-// contribution from lower edge in direction
-          for (unsigned f=0; f<nFace; ++f)
-          {
-            unsigned fn = upperNodeNums[dir].nums[f]; // node number in cell on left
-            unsigned fn_n = lowerNodeNums[dir].nums[f]; // node number in cell on right
-
-// compute upwind flux (upper edges contribution is +ve)
-            fdotn[f] = getUpwindFlux(speeds[dir].s[fn],
-              aCurrPtr[fn], aCurrPtr_n[fn_n]);
-          }
-// multiply by lifting matrix to compute contribution
-          matVec(-1.0, upperLift[dir].m, &fdotn[0], 1.0, &aNewPtr[0]);
-        }
-
-// get grid spacing
-        grid.setIndex(ix, iy);
-        double dtdx = dt/grid.getDx(0);
-        double dtdy = dt/grid.getDx(1);
-// compute CFL number.
-        for (unsigned n=0; n<nlocal; ++n)
-        {
-          cfla = Lucee::max3(cfla, dtdx*std::fabs(speeds[0].s[n]), 
-            dtdy*std::fabs(speeds[1].s[n]));
-        }
-      }
-    }
-
     if (cfla > cflm)
 // time-step was too large: return a suggestion with correct time-step
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+
+// these strange arrays hold the direction and signs to compute
+// gradients of phi given the orientation of an edge. In X-direction
+// we need the Y gradients of phi, while in Y-direction we need to
+// compute the X gradients of phi.
+    unsigned gradDir[2] = {1, 0};
+    int signs[2] = {1.0, -1.0};
+
+// perform surface integrals
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<2> seq(localRgn.deflate(dir));
+
+// lower and upper bounds of 1D slice. (We need to make sure that the
+// flux is computed for one edge outside the domain interior)
+      int sliceLower = localRgn.getLower(dir);
+      int sliceUpper = localRgn.getUpper(dir)+1;
+
+      int idx[2], idxl[2];
+      int ix, iy;
+// loop over each 1D slice
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxl);
+
+// loop over each edge in slice
+        for (int i=sliceLower; i<sliceUpper; ++i)
+        {
+          idx[dir] = i; // cell right of edge
+          idxl[dir] = i-1; // cell left of edge
+
+// set iterators to various cells
+          aCurr.setPtr(aCurrPtr, idx);
+          aCurr.setPtr(aCurrPtr_l, idxl);
+
+// NOTE: We extract potential from the cell left of the edge. We can
+// also use the cell right of the edge as u.nhat is
+// continous. However, the right cell on the upper domain boundary
+// does not have complete data due to the strange way in which the
+// nodal data is stored for continous FE fields. This is a very subtle
+// issue and eventually needs to be fixed.
+          nodalBasis->setIndex(idxl);
+          nodalBasis->extractFromField(phi, phiK);
+
+// now compute u.nhat on this edge (it is the upper edge of the cell
+// left of the edge)
+          matVec(signs[dir], surfUpperQuad[dir].pDiffMatrix[gradDir[dir]].m, &phiK[0],
+            0.0, &udotn[0]);
+
+// interpolate vorticity to the quadrature nodes (left side is upper
+// edge of left cell, while right side is lower edge of right cell)
+          matVec(1.0, surfUpperQuad[dir].interpMat.m, &aCurrPtr_l[0], 0.0, &chiQuad_l[0]);
+          matVec(1.0, surfLowerQuad[dir].interpMat.m, &aCurrPtr[0], 0.0, &chiQuad_r[0]);
+
+          for (unsigned qp=0; qp<nFace; ++qp)
+            uflux[qp] = getUpwindFlux(udotn[qp], chiQuad_l[qp], chiQuad_r[qp]);
+
+// perform the surface integration
+          for (unsigned k=0; k<nlocal; ++k)
+          {
+            fdotn[k] = 0.0;
+            for (unsigned qp=0; qp<nFace; ++qp)
+              fdotn[k] += surfLowerQuad[dir].weights[qp]*mSurfLowerPhi[dir].m(k,qp)*uflux[qp];
+          }
+
+// at this point we have the flux at the edge. We need to accumulate
+// its contribution to the cells connected to the edge
+          aNew.setPtr(aNewPtr, idx);
+          aNew.setPtr(aNewPtr_l, idxl);
+
+          for (unsigned k=0; k<nlocal; ++k)
+          {
+// contribution to right cell has a -ve sign
+            aNewPtr[k] +=   -fdotn[k];
+// contribution to left cell has a +ve sign
+            aNewPtr_l[k] += fdotn[k];
+          }
+        }
+      }
+    }
 
 // perform final sweep, updating solution with forward Euler step
     for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
