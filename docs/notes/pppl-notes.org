@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 6th
+
+  On route to LA. Looked more carefully at the code. Printed out all
+  the matrices and they look correct. Now I suspect the problem is in
+  the way the contribution from the surface terms is being accumulated
+  into the solution.
+
+  [1:56 pm PST]: I have found the problem! It was a simple sign error!
+  The thing I forgot was that the integration by parts leads to
+  opposite signs for the contribution from the surface and volume
+  integrals. Now fixed and basic passive advection test works. Whew!
+
 * May 4th
 
   Completed the C++ code needed for the surface integration

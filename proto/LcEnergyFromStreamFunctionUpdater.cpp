@@ -74,7 +74,7 @@ namespace Lucee
 
     for (unsigned dir=0; dir<2; ++dir)
     {
-// get stiffness matrice
+// get stiffness matrix
       Lucee::Matrix<double> stiffMatrix(nlocal, nlocal);
       nodalBasis->getGradStiffnessMatrix(dir, stiffMatrix);
 
