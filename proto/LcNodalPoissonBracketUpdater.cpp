@@ -97,7 +97,6 @@ namespace Lucee
 
 // space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
-    Lucee::Matrix<double> tempDiffMat(nlocal, nlocal);
 
     for (unsigned dir=0; dir<2; ++dir)
     {
@@ -356,31 +355,29 @@ namespace Lucee
           for (unsigned qp=0; qp<nFace; ++qp)
             uflux[qp] = getUpwindFlux(udotn[qp], chiQuad_l[qp], chiQuad_r[qp]);
 
-// perform the surface integration
-          for (unsigned k=0; k<nlocal; ++k)
-          {
-            fdotn[k] = 0.0;
-            for (unsigned qp=0; qp<nFace; ++qp)
-              fdotn[k] += surfLowerQuad[dir].weights[qp]*mSurfLowerPhi[dir].m(k,qp)*uflux[qp];
-          }
-
 // at this point we have the flux at the edge. We need to accumulate
 // its contribution to the cells connected to the edge
           aNew.setPtr(aNewPtr, idx);
           aNew.setPtr(aNewPtr_l, idxl);
 
+// perform the surface integration
           for (unsigned k=0; k<nlocal; ++k)
           {
-// contribution to right cell has a -ve sign
-            aNewPtr[k] +=   -fdotn[k];
-// contribution to left cell has a +ve sign
-            aNewPtr_l[k] += fdotn[k];
+            for (unsigned qp=0; qp<nFace; ++qp)
+              aNewPtr[k] += surfLowerQuad[dir].weights[qp]*mSurfLowerPhi[dir].m(k,qp)*uflux[qp];
+          }
+
+// perform the surface integration
+          for (unsigned k=0; k<nlocal; ++k)
+          {
+            for (unsigned qp=0; qp<nFace; ++qp)
+              aNewPtr_l[k] += -surfUpperQuad[dir].weights[qp]*mSurfUpperPhi[dir].m(k,qp)*uflux[qp];
           }
         }
       }
     }
 
-// perform final sweep, updating solution with forward Euler step
+// Perform final sweep, updating solution with forward Euler step
     for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
     {
       for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
