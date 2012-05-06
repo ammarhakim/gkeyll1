@@ -17,6 +17,15 @@
   opposite signs for the contribution from the surface and volume
   integrals. Now fixed and basic passive advection test works. Whew!
 
+  Did some tests to check energy conservation. Turns out the energy
+  histories still have the same funny behaviour as before I was doing
+  the full integration. I wonder if the energy is still not being
+  computed correctly? One clue: the double shear problem which was
+  previously not working correctly even with upwind fluxes now
+  actually works. So it seems the solution is correct (or close to
+  being correct) but the energy calculations are messed up. Enstrophy
+  conevergence also looks good.
+
 * May 4th
 
   Completed the C++ code needed for the surface integration
