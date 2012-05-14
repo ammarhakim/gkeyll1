@@ -249,6 +249,22 @@ namespace Lucee
       virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
 
 /**
+ * Get number of nodes needed for Gaussian quadrature in the element
+ * interior.
+ *
+ * @return Number of nodes needed for Gaussian quadrature.
+ */
+      virtual unsigned getNumGaussNodes() const;
+
+/**
+ * Get number of nodes needed for Gaussian quadrature on the element
+ * surface.
+ *
+ * @return Number of nodes needed for Gaussian quadrature.
+ */
+      virtual unsigned getNumSurfGaussNodes() const;
+
+/**
  * Get data needed for Gaussian quadrature for this element. All
  * output matrices and vectors must be pre-allocated.
  *

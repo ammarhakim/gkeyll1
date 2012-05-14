@@ -201,6 +201,20 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  unsigned
+  NodalFiniteElementIfc<NDIM>::getNumGaussNodes() const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumGaussNodes: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  NodalFiniteElementIfc<NDIM>::getNumSurfGaussNodes() const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumSurfGaussNodes: Not implemented!");
+  }
+
+  template <unsigned NDIM>
   void
   NodalFiniteElementIfc<NDIM>::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
