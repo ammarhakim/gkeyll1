@@ -374,6 +374,10 @@ namespace Lucee
 
 /** Data for 3-node Gaussian quadrature */
       GaussQuadData gauss3;
+/** Quadrature, lower faces */
+      GaussQuadData gauss3Lower[2];
+/** Quadrature, upper faces */
+      GaussQuadData gauss3Upper[2];
 
 /**
  * Create matrices for 1st order element.
