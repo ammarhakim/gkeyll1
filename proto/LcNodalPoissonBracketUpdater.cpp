@@ -119,8 +119,10 @@ namespace Lucee
       Lucee::solve(massMatrix, diffMatrix[dir].m);
     }
 
-// allocate space to get volume Gaussian quadrature data
-    volQuad.reset(nlocal, nlocal);
+// allocate space for volume quadrature
+    unsigned nVolQuad = nodalBasis->getNumGaussNodes();
+    volQuad.reset(nVolQuad, nlocal);
+
 // get data needed for Gaussian quadrature
     nodalBasis->getGaussQuadData(volQuad.interpMat.m, volQuad.ords.m, volQuad.weights);
 
@@ -130,11 +132,11 @@ namespace Lucee
 // quadrature nodes
       Lucee::accumulate(volQuad.pDiffMatrix[dir].m, volQuad.interpMat.m, diffMatrix[dir].m);
 
-      mGradPhi[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      mGradPhi[dir].m = Lucee::Matrix<double>(nlocal, nVolQuad);
 // compute gradient of basis functions at quadrature nodes (this is
 // just differentiation matrix at quadrature nodes)
       for (unsigned i=0; i<nlocal; ++i)
-        for (unsigned j=0; j<nlocal; ++j)
+        for (unsigned j=0; j<nVolQuad; ++j)
 // diff matrices are computed from transposed stiffness matrices
           mGradPhi[dir].m(i,j) = volQuad.pDiffMatrix[dir].m(j,i);
 
@@ -143,21 +145,21 @@ namespace Lucee
       Lucee::solve(massMatrix, mGradPhi[dir].m);
     }
 
+    unsigned nSurfQuad = nodalBasis->getNumSurfGaussNodes();
 // get data for surface quadrature
     for (unsigned dir=0; dir<2; ++dir)
     {
-      surfLowerQuad[dir].reset(nodalBasis->getNumSurfLowerNodes(dir), nlocal);
+      surfLowerQuad[dir].reset(nSurfQuad, nlocal);
 // lower surface data
       nodalBasis->getSurfLowerGaussQuadData(dir, surfLowerQuad[dir].interpMat.m,
         surfLowerQuad[dir].ords.m, surfLowerQuad[dir].weights);
 
-      surfUpperQuad[dir].reset(nodalBasis->getNumSurfUpperNodes(dir), nlocal);
+      surfUpperQuad[dir].reset(nSurfQuad, nlocal);
 // upper surface data
       nodalBasis->getSurfUpperGaussQuadData(dir, surfUpperQuad[dir].interpMat.m,
         surfUpperQuad[dir].ords.m, surfUpperQuad[dir].weights);
     }
 
-    unsigned nord = 0;
     for (unsigned dir=0; dir<2; ++dir)
     { // dir is direction normal to face
 
@@ -172,22 +174,20 @@ namespace Lucee
           surfUpperQuad[dir].interpMat.m, diffMatrix[d].m);
       }
 
-      nord = nodalBasis->getNumSurfLowerNodes(dir);
-      mSurfLowerPhi[dir].m = Lucee::Matrix<double>(nlocal, nord);
+      mSurfLowerPhi[dir].m = Lucee::Matrix<double>(nlocal, nSurfQuad);
 // compute basis functions at surface quadrature nodes
       for (unsigned i=0; i<nlocal; ++i)
-        for (unsigned j=0; j<nord; ++j)
+        for (unsigned j=0; j<nSurfQuad; ++j)
           mSurfLowerPhi[dir].m(i,j) = surfLowerQuad[dir].interpMat.m(j,i);
 
 // multiply by inverse mass matrix at this point
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, mSurfLowerPhi[dir].m);
 
-      nord = nodalBasis->getNumSurfUpperNodes(dir);
-      mSurfUpperPhi[dir].m = Lucee::Matrix<double>(nlocal, nord);
+      mSurfUpperPhi[dir].m = Lucee::Matrix<double>(nlocal, nSurfQuad);
 // compute basis functions at surface quadrature nodes
       for (unsigned i=0; i<nlocal; ++i)
-        for (unsigned j=0; j<nord; ++j)
+        for (unsigned j=0; j<nSurfQuad; ++j)
           mSurfUpperPhi[dir].m(i,j) = surfUpperQuad[dir].interpMat.m(j,i);
 
 // multiply by inverse mass matrix at this point
@@ -218,21 +218,25 @@ namespace Lucee
 
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
+// number of volume quadrature points
+    unsigned nVolQuad = nodalBasis->getNumGaussNodes();
 // number of nodes on each face (WARNING: assumption here is that all
 // faces have same number of nodes)
     unsigned nFace = nodalBasis->getNumSurfLowerNodes(0);
+// number of surface quadrarture points
+    unsigned nSurfQuad = nodalBasis->getNumSurfGaussNodes();
 
 // space for various quantities
-    std::vector<double> phiK(nlocal), flux(nlocal);
-    std::vector<double> chiQuad_l(nFace), chiQuad_r(nFace), chiUpwind(nFace);
-    std::vector<double> udotn(nFace), uflux(nFace), fdotn(nlocal);
-    std::vector<double> quadChi(nlocal);
+    std::vector<double> phiK(nlocal);
+    std::vector<double> chiQuad_l(nSurfQuad), chiQuad_r(nSurfQuad), chiUpwind(nSurfQuad);
+    std::vector<double> udotn(nSurfQuad), uflux(nSurfQuad), fdotn(nSurfQuad);
+    std::vector<double> quadChi(nVolQuad);
 
     NodalPoissonBracketUpdater::NodeSpeed speeds[2], quadSpeeds[2];
     for (unsigned dir=0; dir<2; ++dir)
     {
-      speeds[dir].s.resize(nlocal);
-      quadSpeeds[dir].s.resize(nlocal);
+      speeds[dir].s.resize(nVolQuad);
+      quadSpeeds[dir].s.resize(nVolQuad);
     }
 
 // various iterators
@@ -275,7 +279,7 @@ namespace Lucee
           for (unsigned k=0; k<nlocal; ++k)
           {
 // loop over quadrature points, accumulating contribution
-            for (unsigned qp=0; qp<nlocal; ++qp)
+            for (unsigned qp=0; qp<nVolQuad; ++qp)
               aNewPtr[k] += volQuad.weights[qp]*mGradPhi[dir].m(k,qp)*quadSpeeds[dir].s[qp]*quadChi[qp];
           }
         }
@@ -352,7 +356,7 @@ namespace Lucee
           matVec(1.0, surfUpperQuad[dir].interpMat.m, &aCurrPtr_l[0], 0.0, &chiQuad_l[0]);
           matVec(1.0, surfLowerQuad[dir].interpMat.m, &aCurrPtr[0], 0.0, &chiQuad_r[0]);
 
-          for (unsigned qp=0; qp<nFace; ++qp)
+          for (unsigned qp=0; qp<nSurfQuad; ++qp)
             uflux[qp] = getUpwindFlux(udotn[qp], chiQuad_l[qp], chiQuad_r[qp]);
 
 // at this point we have the flux at the edge. We need to accumulate
@@ -363,14 +367,14 @@ namespace Lucee
 // perform the surface integration
           for (unsigned k=0; k<nlocal; ++k)
           {
-            for (unsigned qp=0; qp<nFace; ++qp)
+            for (unsigned qp=0; qp<nSurfQuad; ++qp)
               aNewPtr[k] += surfLowerQuad[dir].weights[qp]*mSurfLowerPhi[dir].m(k,qp)*uflux[qp];
           }
 
 // perform the surface integration
           for (unsigned k=0; k<nlocal; ++k)
           {
-            for (unsigned qp=0; qp<nFace; ++qp)
+            for (unsigned qp=0; qp<nSurfQuad; ++qp)
               aNewPtr_l[k] += -surfUpperQuad[dir].weights[qp]*mSurfUpperPhi[dir].m(k,qp)*uflux[qp];
           }
         }

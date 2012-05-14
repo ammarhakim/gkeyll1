@@ -15,3 +15,15 @@ cmake \
   -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
   -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
   ../lucee
+
+For serial debug build do:
+
+cmake \
+  -DCMAKE_BUILD_TYPE:STRING=Debug \
+  -DCMAKE_C_COMPILER:FILEPATH='gcc' \
+  -DCMAKE_CXX_COMPILER:FILEPATH='g++' \
+  -DCMAKE_Fortran_COMPILER:FILEPATH='/usr/local/bin/gfortran' \
+  -DCMAKE_C_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
+  ../lucee

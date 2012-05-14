@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 14th
+
+  Spend all of last week at IPAM workshop on high-energy density
+  physics. Not much work on anything else.
+
+  Implemented qaudratures for the 3rd order basis functions.
+
 * May 6th
 
   On route to LA. Looked more carefully at the code. Printed out all

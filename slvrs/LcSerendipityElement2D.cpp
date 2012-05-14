@@ -446,6 +446,24 @@ namespace Lucee
         "SerendipityElement2D::getGradStiffnessMatrix: Can't use this basis in 3D!");
   }
 
+  unsigned
+  SerendipityElement2D::getNumGaussNodes() const
+  {
+    if (polyOrder == 1)
+      return 4;
+    else if (polyOrder == 2)
+      return 9;
+  }
+
+  unsigned
+  SerendipityElement2D::getNumSurfGaussNodes() const
+  {
+    if (polyOrder == 1)
+      return 2;
+    else if (polyOrder == 2)
+      return 3;
+  }
+
   void
   SerendipityElement2D::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
