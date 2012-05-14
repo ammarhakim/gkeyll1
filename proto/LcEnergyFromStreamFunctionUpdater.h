@@ -101,6 +101,15 @@ namespace Lucee
         std::vector<double>& normGradPhi);
 
 /**
+ * Compute norm of gradient of field at each node.
+ *
+ * @param phiK potential at nodes
+ * @param normGradPhi Norm of gradient phi.
+ */
+      void calcNormGrad_1(std::vector<double>& phiK,
+        std::vector<double>& normGradPhi);
+
+/**
  * Compute matrix-vector multiply. Output vector must be
  * pre-allocated. Note that the computation performed is
  *

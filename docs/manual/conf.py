@@ -207,4 +207,4 @@ latex_preamble = r'''
 #latex_use_modindex = True
 
 # path to jsMath package
-mathjax_path = 'http://mathjax.connectmv.com/MathJax.js'
+mathjax_path="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"

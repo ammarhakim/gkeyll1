@@ -81,6 +81,22 @@ namespace Lucee
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, diffMatrix[dir].m);
     }
+
+// allocate space to get Gaussian quadrature data
+    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
+    weights.resize(nlocal);
+
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
+
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+// compute differentiation matrices that compute derivatives at
+// quadrature nodes
+      Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
+    }
   }
 
   Lucee::UpdaterStatus
@@ -115,8 +131,8 @@ namespace Lucee
 // extract potential at this location
         nodalBasis->extractFromField(phi, phiK);
 // compute gradients in X- and Y-directions
-        matVec(1.0, diffMatrix[0].m, phiK, 0.0, &gradX[0]);
-        matVec(1.0, diffMatrix[1].m, phiK, 0.0, &gradY[0]);
+        matVec(1.0, pDiffMatrix[0].m, phiK, 0.0, &gradX[0]);
+        matVec(1.0, pDiffMatrix[1].m, phiK, 0.0, &gradY[0]);
 
 // copy gradient into output field
         for (unsigned k=0; k<nlocal; ++k)
