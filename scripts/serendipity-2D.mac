@@ -222,6 +222,38 @@ N2_iMat_top_2 : calcInterpMatrix(N2, gOrds2_top);
 
 /******************** Basis 3 ******************/
 
+/** Ordinates for 3-node Guassian quadrature */
+gOrds3 : [
+ [-sqrt(3/5), -sqrt(3/5)],
+ [0, -sqrt(3/5)],
+ [sqrt(3/5), -sqrt(3/5)],
+ [-sqrt(3/5), 0],
+ [0, 0],
+ [sqrt(3/5), 0],
+ [-sqrt(3/5), sqrt(3/5)],
+ [0, sqrt(3/5)],
+ [sqrt(3/5), sqrt(3/5)]];
+
+gOrds3_left : [
+ [-1, -sqrt(3/5)],
+ [-1, 0],
+ [-1, sqrt(3/5)]];
+
+gOrds3_right : [
+ [1, -sqrt(3/5)],
+ [1, 0],
+ [1, sqrt(3/5)]];
+
+gOrds3_bottom : [
+ [-sqrt(3/5), -1],
+ [0, -1],
+ [sqrt(3/5), -1]];
+
+gOrds3_top : [
+ [-sqrt(3/5), 1],
+ [0, 1],
+ [sqrt(3/5), 1]];
+
 /** Ordinates */
 ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
 /** Basis functions of order 3 */
@@ -261,3 +293,10 @@ N3_Explicit_Diff_y : N3_Diff_y . N3_phi_c;
 
 /** Weights */
 N3_weights : integrate(integrate(N3, x, -1, 1), y, -1, 1);
+
+/** Compute interpolation matrices */
+N3_iMat_3 : calcInterpMatrix(N3, gOrds3);
+N3_iMat_left_3 : calcInterpMatrix(N3, gOrds3_left);
+N3_iMat_right_3 : calcInterpMatrix(N3, gOrds3_right);
+N3_iMat_bottom_3 : calcInterpMatrix(N3, gOrds3_bottom);
+N3_iMat_top_3 : calcInterpMatrix(N3, gOrds3_top);

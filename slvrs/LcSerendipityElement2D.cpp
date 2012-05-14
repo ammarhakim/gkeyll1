@@ -460,10 +460,11 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      Lucee::Except lce(
-        "SerendipityElement2D::getGaussQuadData: Guassian integration not implemented ");
-      lce << " for polyOrder 2";
-      throw lce;
+// copy over data
+      interpMat.copy(gauss3.interpMat);
+      ordinates.copy(gauss3.ords);
+      for (unsigned i=0; i<gauss3.weights.size(); ++i)
+        weights[i] = gauss3.weights[i];
     }
   }
 
@@ -481,10 +482,11 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      Lucee::Except lce(
-        "SerendipityElement2D::getSurfLowerGaussQuadData: Guassian integration not implemented ");
-      lce << " for polyOrder 2";
-      throw lce;
+// copy over data
+      interpMat.copy(gauss3Lower[dir].interpMat);
+      ordinates.copy(gauss3Lower[dir].ords);
+      for (unsigned i=0; i<gauss3Lower[dir].weights.size(); ++i)
+        weights[i] = gauss3Lower[dir].weights[i];
     }
   }
 
@@ -502,10 +504,11 @@ namespace Lucee
     }
     else if (polyOrder == 2)
     {
-      Lucee::Except lce(
-        "SerendipityElement2D::getSurfUpperGaussQuadData: Guassian integration not implemented ");
-      lce << " for polyOrder 2";
-      throw lce;
+// copy over data
+      interpMat.copy(gauss3Upper[dir].interpMat);
+      ordinates.copy(gauss3Upper[dir].ords);
+      for (unsigned i=0; i<gauss3Upper[dir].weights.size(); ++i)
+        weights[i] = gauss3Upper[dir].weights[i];
     }
   }
 
@@ -1375,18 +1378,21 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 
 // get grid spacing (this is assumed to be uniform for now)
-    double dx = grid.getDx(0), dy = grid.getDx(1);
+    double dx[2];
+    dx[0] = grid.getDx(0);
+    dx[1] = grid.getDx(1);
 
     unsigned nord = 3;
+    unsigned nlocal = this->getNumNodes();
 
-// 2-nodes in each direction
+// 3-nodes in each direction
     Lucee::GaussianQuadRule gauss(nord);
     Lucee::Vector<double> w(nord), mu(nord);
 // get ordinates and weights in [-1,1]
     gauss.getOrdinatesAndWeights(mu, w);
 
 // allocate memory for quadrature
-    gauss3.reset(nord, this->getNumNodes());
+    gauss3.reset(nord*nord, nlocal);
 
 // set ordinates
     for (unsigned j=0; j<nord; ++j)
@@ -1400,12 +1406,227 @@ namespace Lucee
 // set weights
     for (unsigned j=0; j<nord; ++j)
       for (unsigned i=0; i<nord; ++i)
-        gauss3.weights[i+nord*j] = 0.5*dx*0.5*dy*w[i]*w[j];
+        gauss3.weights[i+nord*j] = 0.5*dx[0]*0.5*dx[1]*w[i]*w[j];
 
-    Lucee::Except lce(
-      "SerendipityElement2D::setupGaussQuadDataPoly2: Guassian integration not implemented ");
-    lce << " for polyOrder 2";
-    throw lce;
+// create interpolation matrix (automatically generated. See
+// scripts/serendipity-2D.mac)
+    gauss3.interpMat(1,1) = (sqrt(3)/sqrt(5)+1)*(sqrt(3)/sqrt(5)+1)*(2*sqrt(3)/sqrt(5)-1)/4.0;
+    gauss3.interpMat(1,2) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(1,3) = (-2*sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(1,4) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(1,5) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(1,6) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(1,7) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(1,8) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(2,1) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(2,2) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(2,3) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(2,4) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(2,5) = (sqrt(3)/sqrt(5)+1)/2.0;
+    gauss3.interpMat(2,6) = 1.0/5.0;
+    gauss3.interpMat(2,7) = (1-sqrt(3)/sqrt(5))/2.0;
+    gauss3.interpMat(2,8) = 1.0/5.0;
+    gauss3.interpMat(3,1) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(3,2) = (sqrt(3)/sqrt(5)+1)*(sqrt(3)/sqrt(5)+1)*(2*sqrt(3)/sqrt(5)-1)/4.0;
+    gauss3.interpMat(3,3) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(3,4) = (-2*sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(3,5) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(3,6) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(3,7) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(3,8) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(4,1) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(4,2) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(4,3) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(4,4) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(4,5) = 1.0/5.0;
+    gauss3.interpMat(4,6) = (1-sqrt(3)/sqrt(5))/2.0;
+    gauss3.interpMat(4,7) = 1.0/5.0;
+    gauss3.interpMat(4,8) = (sqrt(3)/sqrt(5)+1)/2.0;
+    gauss3.interpMat(5,1) = (-1.0)/4.0;
+    gauss3.interpMat(5,2) = (-1.0)/4.0;
+    gauss3.interpMat(5,3) = (-1.0)/4.0;
+    gauss3.interpMat(5,4) = (-1.0)/4.0;
+    gauss3.interpMat(5,5) = 1.0/2.0;
+    gauss3.interpMat(5,6) = 1.0/2.0;
+    gauss3.interpMat(5,7) = 1.0/2.0;
+    gauss3.interpMat(5,8) = 1.0/2.0;
+    gauss3.interpMat(6,1) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(6,2) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(6,3) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(6,4) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(6,5) = 1.0/5.0;
+    gauss3.interpMat(6,6) = (sqrt(3)/sqrt(5)+1)/2.0;
+    gauss3.interpMat(6,7) = 1.0/5.0;
+    gauss3.interpMat(6,8) = (1-sqrt(3)/sqrt(5))/2.0;
+    gauss3.interpMat(7,1) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(7,2) = (-2*sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(7,3) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(7,4) = (sqrt(3)/sqrt(5)+1)*(sqrt(3)/sqrt(5)+1)*(2*sqrt(3)/sqrt(5)-1)/4.0;
+    gauss3.interpMat(7,5) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(7,6) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(7,7) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(7,8) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(8,1) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(8,2) = (-sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(8,3) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(8,4) = (sqrt(3)/sqrt(5)-1)*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(8,5) = (1-sqrt(3)/sqrt(5))/2.0;
+    gauss3.interpMat(8,6) = 1.0/5.0;
+    gauss3.interpMat(8,7) = (sqrt(3)/sqrt(5)+1)/2.0;
+    gauss3.interpMat(8,8) = 1.0/5.0;
+    gauss3.interpMat(9,1) = (-2*sqrt(3)/sqrt(5)-1)*(1-sqrt(3)/sqrt(5))*(1-sqrt(3)/sqrt(5))/4.0;
+    gauss3.interpMat(9,2) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(9,3) = (sqrt(3)/sqrt(5)+1)*(sqrt(3)/sqrt(5)+1)*(2*sqrt(3)/sqrt(5)-1)/4.0;
+    gauss3.interpMat(9,4) = -(1-sqrt(3)/sqrt(5))*(sqrt(3)/sqrt(5)+1)/4.0;
+    gauss3.interpMat(9,5) = (1-sqrt(3)/sqrt(5))/5.0;
+    gauss3.interpMat(9,6) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(9,7) = (sqrt(3)/sqrt(5)+1)/5.0;
+    gauss3.interpMat(9,8) = (1-sqrt(3)/sqrt(5))/5.0;
+
+// surface quadrature data lower faces
+    for (unsigned dir=0; dir<2; ++dir)
+    {
+// allocate space
+      gauss3Lower[dir].reset(nord, nlocal);
+      gauss3Upper[dir].reset(nord, nlocal);
+    }
+
+// set quadrature weights (NOTE: The weights should sum to the length
+// of the edge normal to direction 'dir'.
+    for (unsigned i=0; i<nord; ++i)
+    {
+      gauss3Lower[0].weights[i] = 0.5*dx[1]*w[i];
+      gauss3Lower[1].weights[i] = 0.5*dx[0]*w[i];
+
+      gauss3Upper[0].weights[i] = 0.5*dx[1]*w[i];
+      gauss3Upper[1].weights[i] = 0.5*dx[0]*w[i];
+    }
+
+// set ordinates
+    for (unsigned i=0; i<nord; ++i)
+    {
+      gauss3Lower[0].ords(i,0) = -1;
+      gauss3Lower[0].ords(i,1) = mu[i];
+      gauss3Lower[0].ords(i,2) = 0.0;
+
+      gauss3Upper[0].ords(i,0) = 1;
+      gauss3Upper[0].ords(i,1) = mu[i];
+      gauss3Upper[0].ords(i,2) = 0.0;
+
+      gauss3Lower[1].ords(i,0) = mu[i];
+      gauss3Lower[1].ords(i,1) = -1;
+      gauss3Lower[1].ords(i,2) = 0.0;
+
+      gauss3Upper[1].ords(i,0) = mu[i];
+      gauss3Upper[1].ords(i,1) = 1;
+      gauss3Upper[1].ords(i,2) = 0.0;
+    }
+
+// set interpolation matrices (automatically generated. See scripts/serendipity-2D.mac)
+
+// left
+    gauss3Lower[0].interpMat(1,1) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Lower[0].interpMat(1,2) = 0;
+    gauss3Lower[0].interpMat(1,3) = 0;
+    gauss3Lower[0].interpMat(1,4) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Lower[0].interpMat(1,5) = 0;
+    gauss3Lower[0].interpMat(1,6) = 0;
+    gauss3Lower[0].interpMat(1,7) = 0;
+    gauss3Lower[0].interpMat(1,8) = 2.0/5.0;
+    gauss3Lower[0].interpMat(2,1) = 0;
+    gauss3Lower[0].interpMat(2,2) = 0;
+    gauss3Lower[0].interpMat(2,3) = 0;
+    gauss3Lower[0].interpMat(2,4) = 0;
+    gauss3Lower[0].interpMat(2,5) = 0;
+    gauss3Lower[0].interpMat(2,6) = 0;
+    gauss3Lower[0].interpMat(2,7) = 0;
+    gauss3Lower[0].interpMat(2,8) = 1;
+    gauss3Lower[0].interpMat(3,1) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Lower[0].interpMat(3,2) = 0;
+    gauss3Lower[0].interpMat(3,3) = 0;
+    gauss3Lower[0].interpMat(3,4) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Lower[0].interpMat(3,5) = 0;
+    gauss3Lower[0].interpMat(3,6) = 0;
+    gauss3Lower[0].interpMat(3,7) = 0;
+    gauss3Lower[0].interpMat(3,8) = 2.0/5.0;
+
+// right
+    gauss3Upper[0].interpMat(1,1) = 0;
+    gauss3Upper[0].interpMat(1,2) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Upper[0].interpMat(1,3) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Upper[0].interpMat(1,4) = 0;
+    gauss3Upper[0].interpMat(1,5) = 0;
+    gauss3Upper[0].interpMat(1,6) = 2.0/5.0;
+    gauss3Upper[0].interpMat(1,7) = 0;
+    gauss3Upper[0].interpMat(1,8) = 0;
+    gauss3Upper[0].interpMat(2,1) = 0;
+    gauss3Upper[0].interpMat(2,2) = 0;
+    gauss3Upper[0].interpMat(2,3) = 0;
+    gauss3Upper[0].interpMat(2,4) = 0;
+    gauss3Upper[0].interpMat(2,5) = 0;
+    gauss3Upper[0].interpMat(2,6) = 1;
+    gauss3Upper[0].interpMat(2,7) = 0;
+    gauss3Upper[0].interpMat(2,8) = 0;
+    gauss3Upper[0].interpMat(3,1) = 0;
+    gauss3Upper[0].interpMat(3,2) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Upper[0].interpMat(3,3) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Upper[0].interpMat(3,4) = 0;
+    gauss3Upper[0].interpMat(3,5) = 0;
+    gauss3Upper[0].interpMat(3,6) = 2.0/5.0;
+    gauss3Upper[0].interpMat(3,7) = 0;
+    gauss3Upper[0].interpMat(3,8) = 0;
+
+// bottom
+    gauss3Lower[1].interpMat(1,1) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Lower[1].interpMat(1,2) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Lower[1].interpMat(1,3) = 0;
+    gauss3Lower[1].interpMat(1,4) = 0;
+    gauss3Lower[1].interpMat(1,5) = 2.0/5.0;
+    gauss3Lower[1].interpMat(1,6) = 0;
+    gauss3Lower[1].interpMat(1,7) = 0;
+    gauss3Lower[1].interpMat(1,8) = 0;
+    gauss3Lower[1].interpMat(2,1) = 0;
+    gauss3Lower[1].interpMat(2,2) = 0;
+    gauss3Lower[1].interpMat(2,3) = 0;
+    gauss3Lower[1].interpMat(2,4) = 0;
+    gauss3Lower[1].interpMat(2,5) = 1;
+    gauss3Lower[1].interpMat(2,6) = 0;
+    gauss3Lower[1].interpMat(2,7) = 0;
+    gauss3Lower[1].interpMat(2,8) = 0;
+    gauss3Lower[1].interpMat(3,1) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Lower[1].interpMat(3,2) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Lower[1].interpMat(3,3) = 0;
+    gauss3Lower[1].interpMat(3,4) = 0;
+    gauss3Lower[1].interpMat(3,5) = 2.0/5.0;
+    gauss3Lower[1].interpMat(3,6) = 0;
+    gauss3Lower[1].interpMat(3,7) = 0;
+    gauss3Lower[1].interpMat(3,8) = 0;
+
+// top
+    gauss3Upper[1].interpMat(1,1) = 0;
+    gauss3Upper[1].interpMat(1,2) = 0;
+    gauss3Upper[1].interpMat(1,3) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Upper[1].interpMat(1,4) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Upper[1].interpMat(1,5) = 0;
+    gauss3Upper[1].interpMat(1,6) = 0;
+    gauss3Upper[1].interpMat(1,7) = 2.0/5.0;
+    gauss3Upper[1].interpMat(1,8) = 0;
+    gauss3Upper[1].interpMat(2,1) = 0;
+    gauss3Upper[1].interpMat(2,2) = 0;
+    gauss3Upper[1].interpMat(2,3) = 0;
+    gauss3Upper[1].interpMat(2,4) = 0;
+    gauss3Upper[1].interpMat(2,5) = 0;
+    gauss3Upper[1].interpMat(2,6) = 0;
+    gauss3Upper[1].interpMat(2,7) = 1;
+    gauss3Upper[1].interpMat(2,8) = 0;
+    gauss3Upper[1].interpMat(3,1) = 0;
+    gauss3Upper[1].interpMat(3,2) = 0;
+    gauss3Upper[1].interpMat(3,3) = sqrt(3)*(sqrt(3)/sqrt(5)+1)/sqrt(5)/2.0;
+    gauss3Upper[1].interpMat(3,4) = -sqrt(3)*(1-sqrt(3)/sqrt(5))/sqrt(5)/2.0;
+    gauss3Upper[1].interpMat(3,5) = 0;
+    gauss3Upper[1].interpMat(3,6) = 0;
+    gauss3Upper[1].interpMat(3,7) = 2.0/5.0;
+    gauss3Upper[1].interpMat(3,8) = 0;
   }
 
   void
