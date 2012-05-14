@@ -81,6 +81,14 @@ namespace Lucee
 
 /** Differentiation matrices */
       MatrixHolder diffMatrix[2];
+/** Interpolation matrix */
+      MatrixHolder interpMat;
+/** Weights for quadrature */
+      std::vector<double> weights;
+/** Ordinates for quadrature */
+      MatrixHolder ordinates;
+/** Differentiation matrices, computing derivatives at quadrature nodes */
+      MatrixHolder pDiffMatrix[2];
 
 /**
  * Compute matrix-vector multiply. Output vector must be

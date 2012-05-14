@@ -117,7 +117,7 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // space for various quantities
-    std::vector<double> phiK(nlocal), normGradPhi(nlocal);
+    std::vector<double> phiK(nlocal), normGradPhi(nlocal), normGradPhi_1(nlocal);
 
     double totalEnergy = 0.0;
 // compute total energy
@@ -126,14 +126,17 @@ namespace Lucee
       for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
       {
         nodalBasis->setIndex(ix, iy);
-
 // extract potential at this location
-        nodalBasis->extractFromField(phi, phiK);
-
+        nodalBasis->extractFromField(phi, phiK); 
 // compute norm of grad(phi)
         calcNormGrad(phiK, normGradPhi);
+        calcNormGrad_1(phiK, normGradPhi_1);
 
-// compute contribition to energy from this cell
+//         std::cout << "----" << std::endl;
+//         for (unsigned k=0; k<nlocal; ++k)
+//           std::cout << "k " << normGradPhi[k] << " " <<  normGradPhi_1[k] << std::endl;
+
+// compute contribution to energy from this cell
         for (unsigned k=0; k<nlocal; ++k)
           totalEnergy += weights[k]*normGradPhi[k];
       }
@@ -163,6 +166,21 @@ namespace Lucee
 
     matVec(1.0, pDiffMatrix[0].m, phiK, 0.0, &gradX[0]);
     matVec(1.0, pDiffMatrix[1].m, phiK, 0.0, &gradY[0]);
+
+// compute norm of gradient
+    for (unsigned i=0; i<normGradPhi.size(); ++i)
+      normGradPhi[i] = gradX[i]*gradX[i] + gradY[i]*gradY[i];
+  }
+
+  void
+  EnergyFromStreamFunctionUpdater::calcNormGrad_1(std::vector<double>& phiK,
+    std::vector<double>& normGradPhi)
+  {
+// compute gradient in X- and Y-directions
+    std::vector<double> gradX(normGradPhi.size()), gradY(normGradPhi.size());
+
+    matVec(1.0, diffMatrix[0].m, phiK, 0.0, &gradX[0]);
+    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &gradY[0]);
 
 // compute norm of gradient
     for (unsigned i=0; i<normGradPhi.size(); ++i)
