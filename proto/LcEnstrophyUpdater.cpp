@@ -59,12 +59,13 @@ namespace Lucee
 // updater we are assuming grid is uniform)
     nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
 
+    unsigned nVol = nodalBasis->getNumGaussNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // allocate space to get Gaussian quadrature data
-    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
-    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
-    weights.resize(nlocal);
+    interpMat.m = Lucee::Matrix<double>(nVol, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nVol, 3);
+    weights.resize(nVol);
 
     nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
   }
@@ -83,13 +84,15 @@ namespace Lucee
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
+// number of ordinates for volume integral
+    unsigned nVol = nodalBasis->getNumGaussNodes();
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
     Lucee::ConstFieldPtr<double> chiPtr = chi.createConstPtr();
 
 // space for various quantities
-    std::vector<double> quadChi(nlocal);
+    std::vector<double> quadChi(nVol);
 
     double totalEnstrophy = 0.0;
 // compute total enstrophy
@@ -104,7 +107,7 @@ namespace Lucee
         matVec(1.0, interpMat.m, &chiPtr[0], 0.0, &quadChi[0]);
 
 // compute contribition to enstrophy from this cell
-        for (unsigned k=0; k<nlocal; ++k)
+        for (unsigned k=0; k<nVol; ++k)
           totalEnstrophy += weights[k]*quadChi[k]*quadChi[k];
       }
     }
