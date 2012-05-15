@@ -59,6 +59,7 @@ namespace Lucee
 // updater we are assuming grid is uniform)
     nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
 
+    unsigned nVol = nodalBasis->getNumGaussNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // space for mass matrix
@@ -83,16 +84,16 @@ namespace Lucee
     }
 
 // allocate space to get Gaussian quadrature data
-    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
-    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
-    weights.resize(nlocal);
+    interpMat.m = Lucee::Matrix<double>(nVol, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nVol, 3);
+    weights.resize(nVol);
 
 // get data needed for Gaussian quadrature
     nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
 
     for (unsigned dir=0; dir<2; ++dir)
     {
-      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      pDiffMatrix[dir].m = Lucee::Matrix<double>(nVol, nlocal);
 // compute differentiation matrices that compute derivatives at
 // quadrature nodes
       Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
@@ -113,6 +114,8 @@ namespace Lucee
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
+// number of nodes in quadrature
+    unsigned nVol = nodalBasis->getNumGaussNodes();
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 

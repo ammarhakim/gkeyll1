@@ -61,14 +61,6 @@ namespace Lucee
 
     unsigned nlocal = nodalBasis->getNumNodes();
 
-// allocate space to get Gaussian quadrature data
-    interpMat.m = Lucee::Matrix<double>(nlocal, nlocal);
-    ordinates.m = Lucee::Matrix<double>(nlocal, 3);
-    weights.resize(nlocal);
-
-// get data needed for Gaussian quadrature
-    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
-
 // space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
@@ -90,9 +82,19 @@ namespace Lucee
       Lucee::solve(massMatrix, diffMatrix[dir].m);
     }
 
+    unsigned nVol = nodalBasis->getNumGaussNodes();
+
+// allocate space to get Gaussian quadrature data
+    interpMat.m = Lucee::Matrix<double>(nVol, nlocal);
+    ordinates.m = Lucee::Matrix<double>(nVol, 3);
+    weights.resize(nVol);
+
+// get data needed for Gaussian quadrature
+    nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
+
     for (unsigned dir=0; dir<2; ++dir)
     {
-      pDiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      pDiffMatrix[dir].m = Lucee::Matrix<double>(nVol, nlocal);
 // compute differentiation matrices that compute derivatives at
 // quadrature nodes
       Lucee::accumulate(pDiffMatrix[dir].m, interpMat.m, diffMatrix[dir].m);
@@ -113,11 +115,13 @@ namespace Lucee
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
+// number of nodes in quadrature
+    unsigned nVol = nodalBasis->getNumGaussNodes();
 // number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // space for various quantities
-    std::vector<double> phiK(nlocal), normGradPhi(nlocal), normGradPhi_1(nlocal);
+    std::vector<double> phiK(nlocal), normGradPhi(nVol);
 
     double totalEnergy = 0.0;
 // compute total energy
@@ -128,17 +132,11 @@ namespace Lucee
         nodalBasis->setIndex(ix, iy);
 // extract potential at this location
         nodalBasis->extractFromField(phi, phiK); 
-// compute norm of grad(phi)
+// compute speeds
         calcNormGrad(phiK, normGradPhi);
-        calcNormGrad_1(phiK, normGradPhi_1);
 
-//         std::cout << "----" << std::endl;
-//         for (unsigned k=0; k<nlocal; ++k)
-//           std::cout << "k " << normGradPhi[k] << " " <<  normGradPhi_1[k] << std::endl;
-
-// compute contribution to energy from this cell
-        for (unsigned k=0; k<nlocal; ++k)
-          totalEnergy += weights[k]*normGradPhi[k];
+        for (unsigned qp=0; qp<nVol; ++qp)
+          totalEnergy += weights[qp]*normGradPhi[qp];
       }
     }
 
@@ -164,23 +162,8 @@ namespace Lucee
 // compute gradient in X- and Y-directions
     std::vector<double> gradX(normGradPhi.size()), gradY(normGradPhi.size());
 
-    matVec(1.0, pDiffMatrix[0].m, phiK, 0.0, &gradX[0]);
-    matVec(1.0, pDiffMatrix[1].m, phiK, 0.0, &gradY[0]);
-
-// compute norm of gradient
-    for (unsigned i=0; i<normGradPhi.size(); ++i)
-      normGradPhi[i] = gradX[i]*gradX[i] + gradY[i]*gradY[i];
-  }
-
-  void
-  EnergyFromStreamFunctionUpdater::calcNormGrad_1(std::vector<double>& phiK,
-    std::vector<double>& normGradPhi)
-  {
-// compute gradient in X- and Y-directions
-    std::vector<double> gradX(normGradPhi.size()), gradY(normGradPhi.size());
-
-    matVec(1.0, diffMatrix[0].m, phiK, 0.0, &gradX[0]);
-    matVec(1.0, diffMatrix[1].m, phiK, 0.0, &gradY[0]);
+    matVec(1.0, pDiffMatrix[0].m, &phiK[0], 0.0, &gradX[0]);
+    matVec(1.0, pDiffMatrix[1].m, &phiK[0], 0.0, &gradY[0]);
 
 // compute norm of gradient
     for (unsigned i=0; i<normGradPhi.size(); ++i)
@@ -196,7 +179,7 @@ namespace Lucee
 
   void 
   EnergyFromStreamFunctionUpdater::matVec(double m, const Lucee::Matrix<double>& mat,
-    const std::vector<double>& vec, double v, double *out)
+    const double* vec, double v, double *out)
   {
     double tv;
     unsigned rows = mat.numRows(), cols = mat.numColumns();
