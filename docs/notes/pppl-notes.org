@@ -5,6 +5,24 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 15-16th
+
+  Spent most of the day writing up the notes from the incompressible
+  Euler solver. With the exact solve the energy and enstrophy
+  convergence are as expected.
+
+** TODO Fix small things in notes
+
+   Fix order of the Poisson bracket to make it look like an
+   operator. Add sentence about not using periodic BCs for the
+   potential in the 1D Poisson bracket tests. Fix figure axis and add
+   numbers to the energy and enstrophy plots.
+
+   Add energy and enstrophy figures for the vortex waltz problem.
+
+   The end time on the vortex waltz problem plots is not correct. It
+   reads t=8, while it should really be t=100.
+
 * May 14th
 
   Spend all of last week at IPAM workshop on high-energy density
