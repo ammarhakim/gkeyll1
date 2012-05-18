@@ -293,10 +293,14 @@ and using in \eqr{\ref{eq:weak_vort}} we get
   +
   \iprod{N_j\mvec{u}\cdot\mvec{n} \widehat{\chi}}{\partial \script{C}_i}
   -
-  \sum_{k}\iprod{\nabla N_jN_k}{\script{C}_i}
-  \cdot\mvec{u} \chi_k
+  \iprod{\nabla N_j\cdot\mvec{u} \chi}{\script{C}_i}
   = 0. \label{eq:dg_vort}
 \end{align}
+In the above equations two integrals still need to be performed: the
+first over each face of a cell and the second over the cell
+volume. For this one needs to use Gaussian quadrature of the
+appropriate order to avoid alaising errors from inexact integration.
+
 Expanding the streamfunction in a cell $\script{C}_i$ as
 \begin{align}
   \psi^{(i)}(x,y) = \sum_{k=1}^K \psi_k^{(i)} N_k(x,y)
