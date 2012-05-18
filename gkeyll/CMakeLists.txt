@@ -49,6 +49,13 @@ if (GSL_FOUND)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Gsl_STLIBS})
 endif ()
 
+if (PETSC_FOUND)
+  set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Petsc_INCLUDE_DIRS})
+  set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Petsc_LIBRARY_DIRS})
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Petsc_STLIBS})
+  set(FacetsDl_EXT_LIBS ${FacetsDl_EXT_LIBS} ${Petsc_STLIBS})
+endif ()
+
 # clapack only on non-Mac platforms
 if (CLAPACKCMAKE_FOUND AND (NOT APPLE))
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${CLapackCMake_INCLUDE_DIRS})
@@ -56,13 +63,6 @@ if (CLAPACKCMAKE_FOUND AND (NOT APPLE))
   set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${CLapackCMake_LIBRARIES})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${CLapackCMake_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${CLapackCMake_STLIBS})
-endif ()
-
-if (PETSC_FOUND)
-  set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Petsc_INCLUDE_DIRS})
-  set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Petsc_LIBRARY_DIRS})
-  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Petsc_STLIBS})
-  set(FacetsDl_EXT_LIBS ${FacetsDl_EXT_LIBS} ${Petsc_STLIBS})
 endif ()
 
 # Required base directories
