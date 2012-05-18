@@ -1,0 +1,10 @@
+Path: .
+URL: https://ice.txcorp.com/svnrepos/code/facets/trunk
+Repository Root: https://ice.txcorp.com/svnrepos/code/facets
+Repository UUID: 543c4b23-ef22-0410-9dca-bee1fce52753
+Revision: 3764
+Node Kind: directory
+Schedule: normal
+Last Changed Author: loverich
+Last Changed Rev: 3757
+Last Changed Date: 2012-02-20 14:39:29 -0500 (Mon, 20 Feb 2012)
