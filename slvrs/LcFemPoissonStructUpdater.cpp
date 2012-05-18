@@ -25,6 +25,7 @@
 // std includes
 #include <sstream>
 #include <vector>
+#include <limits>
 
 namespace Lucee
 {
