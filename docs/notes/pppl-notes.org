@@ -5,13 +5,42 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 21st
+
+  Spent last week working on fixing notes and on understanding the
+  simplified "drift-kinetic" equation we wish to solve. Worked out
+  energy conservation for a simple central difference scheme.
+
+** Notes on portal.pppl.gov build
+
+  Spent time building the code on Portal. Turns out the problem is now
+  with Lapack/Blas being built inconsistently between PetSc and
+  Gkeyll. Otherwise things seem to work.
+
+** Gkeyll in parallel
+
+   Need to finish the parallel-ization of Gkeyll. The code hangs at
+   present in the sync() method and I need to figure out why. Also,
+   I need to simplify the input file in parallel so that only minor
+   modifications are needed to run the code in parallel. In
+   particular, only calls to the sync() method should be required. At
+   present the user needs to define an explicit processor
+   decomposition, which is very inconvenient.
+
+** General hyperbolic solver with nodal DG
+
+   Need to write a dimension-independent and geometry-independent
+   hyperbolic solver for Gkeyll. This is not hard now that all the
+   basic infrastructe is worked out and will be very useful for many
+   fluid problems we want to tackle in the future.
+
 * May 15-16th
 
   Spent most of the day writing up the notes from the incompressible
   Euler solver. With the exact solve the energy and enstrophy
   convergence are as expected.
 
-** TODO Fix small things in notes
+** DONE Fix small things in notes
 
    Fix order of the Poisson bracket to make it look like an
    operator. Add sentence about not using periodic BCs for the
