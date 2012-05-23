@@ -5,6 +5,25 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 22nd
+
+  Completed the proof that energy is conserved even with upwinding and
+  irrespective of how the d(phi)/dx term is treated at
+  discontinuities. The proof "looks" correct, but I still need to
+  think about this whole thing very carefully.
+
+  *Evening*. Turns out that the proof as written is actually not
+  correct, and only works when the potential is constrained to be
+  smooth. However, I believe that the proof can be fixed by first
+  integrating in X and then doing the V integral, rather than the V
+  first and leave-X-till-last approach I have taken now.
+
+  *Night* The proof does not work as any method of taking into account
+  the jump in phi in x cancels out on summation in the V-direction. So
+  it seems that this scheme only works when the potential is
+  constrained to be continuous. This is not a good result as a simple
+  (central) finite difference scheme does conserve energy exactly.
+
 * May 21st
 
   Spent last week working on fixing notes and on understanding the
