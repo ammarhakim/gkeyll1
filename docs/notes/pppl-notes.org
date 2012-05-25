@@ -5,6 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* May 23rd
+
+  I want to step back and work on the discretization of just the
+  kinetic equation, without the coupling to the field equation. This
+  will allow some basic tests of the algorithm with fixed (including
+  vanishing) potential giving confidence when coupling to the
+  potential solve.
+
+** More notes of proof
+
+   The proof of energy conservation with discontinous potential still
+   eludes me. Of course, it is possible that energy is not conserved,
+   so the question is: can one design a scheme that does conserve
+   energy. The answer is yes: a simple central difference scheme will
+   do the job. The question then is: can one extend this to DG/FV
+   high-order scheme.
+
 * May 22nd
 
   Completed the proof that energy is conserved even with upwinding and
