@@ -19,6 +19,18 @@ calcMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
+/** Function to compute mass matrix */
+calcCrossMassMatrix(p, b1d, b2d) := block([n1, n2, mass],
+                n1 : length(b1d),
+		n2 : length(b2d),
+		mass : (mass : zeromatrix(n1,n2), for i from 1 thru n1
+		         do (for j from 1 thru n2
+			   do (mass[i,j] : integrate(integrate(y^p*b1d[i]*b2d[j], x, -1,1), y, -1, 1))),
+			   mass),
+	        return (mass)
+);
+
+
 /** Function to compute "face" mass matrix */
 calcFaceMassMatrix(basis) := block([n, mass],
                 n : length(basis),
