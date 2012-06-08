@@ -298,6 +298,17 @@ namespace Lucee
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
+ * Get matrix for projection on a lower-dimensional basis set. This
+ * method returns the moment matrix (in 2D, for example)
+ *
+ * \int y^p \phi(x,y) \psi(x) dx dy
+ *
+ * @param p Required moment.
+ * @param momMatt On output, moment matrix.
+ */
+      virtual void getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
