@@ -1,0 +1,42 @@
+/** Cold plasma dispersion */
+
+/** vect package is funky, so kill current contents of memory */
+kill(all);
+
+I : %i; /** Makes typing easier */
+
+/** Load vector manipulation library */
+load(vect);
+
+/** Declare vector quantities */
+declare([J1, E1, Om0, n1, k], nonscalar);
+
+Jeq : I*w*J1 + eps0*w0^2*E1 + J1~Om0;
+
+/** Assume B field only has Z component (no loss in generality) */
+Om0[x] : 0;
+Om0[y] : 0;
+
+/** Solve for current in terms of electric field */
+Jsol : linsolve(express(Jeq), [J1[x], J1[y], J1[z]]);
+
+/** Extract the RHS of solution */
+Jsol_r : map(rhs, Jsol);
+
+/** Compute conductivity matrix */
+condMat_t : coefmatrix(Jsol_r, [E1[x], E1[y], E1[z]]);
+
+/** Replace to make sum over species easier */
+condMat : subst([Om0[z] = Omz], condMat_t);
+
+ /** Number of species */
+nspecies : 2;
+
+/** Compute total conductivity matrix */
+totalCondMat : sum( subst([w0 = wps[i], Omz = Oms[i] ], condMat), i, 1, nspecies);
+
+/** Electric field equation */
+Eeq : -I*w*E1 - I*k~(k~E1);
+
+/** Compute its coefficient matrix */
+EeqCoeff : coefmatrix(express(Eeq), [E1[x], E1[y], E1[z]]) + totalCondMat;

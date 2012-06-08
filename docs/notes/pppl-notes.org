@@ -5,6 +5,54 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 8th
+
+  Computed matrices needed in moment computation. Put in the
+  corresponding code in Lucee SerendipityElement2D class.
+
+** De-Tech-X-ing
+
+   At this point it might be best to get rid of the dependence on TX
+   software. For this the numpkgs needs to be put somewhere else
+   (googlecode is a good place) and txbase and bilder need to copied
+   into Gkeyll sources.
+
+   This will eliminate the need to have facetsall accounts and also
+   the dependence on rapidly changing bilder codebase.
+
+* General things to do
+
+** TODO Complete fixed-potential Vlasov journal note
+
+   For this, need to implement moment computing updater. Several new
+   matrices are needed to perform the integration.
+
+   Also, a volume intergration updater is needed.
+
+** TODO General nodal-DG updater
+
+   Add an updater to solve general hyperbolic conservation laws using
+   a nodal DG scheme.
+
+** TODO Complete proof of DG energy conservation
+
+   This required some thought on how the discontinuity in d(phi)/dx
+   should be taken into account.
+
+* May 24th-29th
+
+  Energy can be conserved with DG even with upwinding by carefully
+  taking into account the discontinuity in d(phi)/dx. Greg showed this
+  for a piece-wise constant scheme and my proof, I believe, extends
+  this to DG.
+
+  Fixed plotting errors in the 3rd order scheme. Now the solution
+  looks quite smooth. Next need to project it on an even finer grid.
+  
+  Wrote Lua code to solve Vlasov equation with specified
+  potential. The solutions look good, although I need to spend more
+  time in understanding the case in which particle trapping occurs.
+
 * May 23rd
 
   I want to step back and work on the discretization of just the

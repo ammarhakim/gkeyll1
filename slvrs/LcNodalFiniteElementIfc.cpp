@@ -240,6 +240,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getMomentMatrix: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {

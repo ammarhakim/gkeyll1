@@ -531,6 +531,19 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const
+  {
+    if (p>2)
+    { // moments higher than 2 not supported for now
+      Lucee::Except lce("SerendipityElement2D::getMomentMatrix: Moment matrix of order ");
+      lce << p << " not supported";
+      throw lce;
+    }
+// copy over data
+    momMat.copy(momMatrix[p].m);
+  }
+
+  void
   SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
     std::vector<double>& data)
   {
@@ -810,6 +823,45 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_1 *= 0.5*dx*0.5*dy;
+
+    unsigned mShape[2] = {2, 4}; // shape of moment matrix
+// allocate memory for the moment matrices
+    for (unsigned p=0; p<3; ++p)
+      momMatrix[p].m = Lucee::Matrix<double>(mShape, start);
+
+// moment matrix: p=0 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[0].m(1,1) = 2.0/3.0;
+    momMatrix[0].m(1,2) = 1.0/3.0;
+    momMatrix[0].m(1,3) = 1.0/3.0;
+    momMatrix[0].m(1,4) = 2.0/3.0;
+    momMatrix[0].m(2,1) = 1.0/3.0;
+    momMatrix[0].m(2,2) = 2.0/3.0;
+    momMatrix[0].m(2,3) = 2.0/3.0;
+    momMatrix[0].m(2,4) = 1.0/3.0;
+
+// moment matrix: p=1 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[1].m(1,1) = (-2.0)/9.0;
+    momMatrix[1].m(1,2) = (-1.0)/9.0;
+    momMatrix[1].m(1,3) = 1.0/9.0;
+    momMatrix[1].m(1,4) = 2.0/9.0;
+    momMatrix[1].m(2,1) = (-1.0)/9.0;
+    momMatrix[1].m(2,2) = (-2.0)/9.0;
+    momMatrix[1].m(2,3) = 2.0/9.0;
+    momMatrix[1].m(2,4) = 1.0/9.0;
+
+// moment matrix: p=2 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[2].m(1,1) = 2.0/9.0;
+    momMatrix[2].m(1,2) = 1.0/9.0;
+    momMatrix[2].m(1,3) = 1.0/9.0;
+    momMatrix[2].m(1,4) = 2.0/9.0;
+    momMatrix[2].m(2,1) = 1.0/9.0;
+    momMatrix[2].m(2,2) = 2.0/9.0;
+    momMatrix[2].m(2,3) = 2.0/9.0;
+    momMatrix[2].m(2,4) = 1.0/9.0;
+
+// bring moment matrices in physical space
+    for (unsigned p=0; p<3; ++p)
+      momMatrix[p].m *= 0.5*dx*0.5*dy;
   }
 
   void
@@ -1248,6 +1300,93 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_1 *= 0.5*dx*0.5*dy;
+
+    unsigned mShape[2] = {3, 8}; // shape of moment matrix
+// allocate memory for the moment matrices
+    for (unsigned p=0; p<3; ++p)
+      momMatrix[p].m = Lucee::Matrix<double>(mShape, start);
+
+// moment matrix: p=0 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[0].m(1,1) = 2.0/45.0;
+    momMatrix[0].m(1,2) = (-1.0)/15.0;
+    momMatrix[0].m(1,3) = (-1.0)/15.0;
+    momMatrix[0].m(1,4) = 2.0/45.0;
+    momMatrix[0].m(1,5) = 2.0/15.0;
+    momMatrix[0].m(1,6) = 0;
+    momMatrix[0].m(1,7) = 2.0/15.0;
+    momMatrix[0].m(1,8) = 4.0/9.0;
+    momMatrix[0].m(2,1) = (-14.0)/45.0;
+    momMatrix[0].m(2,2) = (-14.0)/45.0;
+    momMatrix[0].m(2,3) = (-14.0)/45.0;
+    momMatrix[0].m(2,4) = (-14.0)/45.0;
+    momMatrix[0].m(2,5) = 16.0/15.0;
+    momMatrix[0].m(2,6) = 8.0/9.0;
+    momMatrix[0].m(2,7) = 16.0/15.0;
+    momMatrix[0].m(2,8) = 8.0/9.0;
+    momMatrix[0].m(3,1) = (-1.0)/15.0;
+    momMatrix[0].m(3,2) = 2.0/45.0;
+    momMatrix[0].m(3,3) = 2.0/45.0;
+    momMatrix[0].m(3,4) = (-1.0)/15.0;
+    momMatrix[0].m(3,5) = 2.0/15.0;
+    momMatrix[0].m(3,6) = 4.0/9.0;
+    momMatrix[0].m(3,7) = 2.0/15.0;
+    momMatrix[0].m(3,8) = 0;
+
+// moment matrix: p=1 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[1].m(1,1) = (-4.0)/45.0;
+    momMatrix[1].m(1,2) = 1.0/45.0;
+    momMatrix[1].m(1,3) = (-1.0)/45.0;
+    momMatrix[1].m(1,4) = 4.0/45.0;
+    momMatrix[1].m(1,5) = (-2.0)/45.0;
+    momMatrix[1].m(1,6) = 0;
+    momMatrix[1].m(1,7) = 2.0/45.0;
+    momMatrix[1].m(1,8) = 0;
+    momMatrix[1].m(2,1) = (-2.0)/45.0;
+    momMatrix[1].m(2,2) = (-2.0)/45.0;
+    momMatrix[1].m(2,3) = 2.0/45.0;
+    momMatrix[1].m(2,4) = 2.0/45.0;
+    momMatrix[1].m(2,5) = (-16.0)/45.0;
+    momMatrix[1].m(2,6) = 0;
+    momMatrix[1].m(2,7) = 16.0/45.0;
+    momMatrix[1].m(2,8) = 0;
+    momMatrix[1].m(3,1) = 1.0/45.0;
+    momMatrix[1].m(3,2) = (-4.0)/45.0;
+    momMatrix[1].m(3,3) = 4.0/45.0;
+    momMatrix[1].m(3,4) = (-1.0)/45.0;
+    momMatrix[1].m(3,5) = (-2.0)/45.0;
+    momMatrix[1].m(3,6) = 0;
+    momMatrix[1].m(3,7) = 2.0/45.0;
+    momMatrix[1].m(3,8) = 0;
+
+// moment matrix: p=2 (automatically generated. See scripts/serendipity-2D.mac)
+    momMatrix[2].m(1,1) = 2.0/45.0;
+    momMatrix[2].m(1,2) = (-1.0)/45.0;
+    momMatrix[2].m(1,3) = (-1.0)/45.0;
+    momMatrix[2].m(1,4) = 2.0/45.0;
+    momMatrix[2].m(1,5) = 2.0/45.0;
+    momMatrix[2].m(1,6) = 0;
+    momMatrix[2].m(1,7) = 2.0/45.0;
+    momMatrix[2].m(1,8) = 4.0/45.0;
+    momMatrix[2].m(2,1) = (-2.0)/45.0;
+    momMatrix[2].m(2,2) = (-2.0)/45.0;
+    momMatrix[2].m(2,3) = (-2.0)/45.0;
+    momMatrix[2].m(2,4) = (-2.0)/45.0;
+    momMatrix[2].m(2,5) = 16.0/45.0;
+    momMatrix[2].m(2,6) = 8.0/45.0;
+    momMatrix[2].m(2,7) = 16.0/45.0;
+    momMatrix[2].m(2,8) = 8.0/45.0;
+    momMatrix[2].m(3,1) = (-1.0)/45.0;
+    momMatrix[2].m(3,2) = 2.0/45.0;
+    momMatrix[2].m(3,3) = 2.0/45.0;
+    momMatrix[2].m(3,4) = (-1.0)/45.0;
+    momMatrix[2].m(3,5) = 2.0/45.0;
+    momMatrix[2].m(3,6) = 4.0/45.0;
+    momMatrix[2].m(3,7) = 2.0/45.0;
+    momMatrix[2].m(3,8) = 0;
+
+// bring moment matrices in physical space
+    for (unsigned p=0; p<3; ++p)
+      momMatrix[p].m *= 0.5*dx*0.5*dy;
   }
 
   void

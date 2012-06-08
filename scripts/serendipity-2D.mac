@@ -19,7 +19,7 @@ calcMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
-/** Function to compute mass matrix */
+/** Function to compute cross-mass matrix */
 calcCrossMassMatrix(p, b1d, b2d) := block([n1, n2, mass],
                 n1 : length(b1d),
 		n2 : length(b2d),
@@ -312,3 +312,89 @@ N3_iMat_left_3 : calcInterpMatrix(N3, gOrds3_left);
 N3_iMat_right_3 : calcInterpMatrix(N3, gOrds3_right);
 N3_iMat_bottom_3 : calcInterpMatrix(N3, gOrds3_bottom);
 N3_iMat_top_3 : calcInterpMatrix(N3, gOrds3_top);
+
+/** List of node coordinates for interpolation */
+interp_3x3 : [[-2/3, -2/3], [0, -2/3], [2/3,-2/3], [-2/3,0], [0,0], [2/3,0], [-2/3,2/3], [0,2/3], [2/3,2/3]];
+/** Compute interpolation to these points */
+interp_3x3_mat : calcInterpMatrix(N3, interp_3x3);
+
+/** List of node coordinates for interpolation */
+interp_2x2 : [[-1/2,-1/2], [1/2,-1/2], [-1/2,1/2], [1/2,1/2]];
+/** Compute interpolation to these points */
+interp_2x2_mat : calcInterpMatrix(N3, interp_2x2);
+
+/** Funciton to create coefficient matrix */
+makePmat(ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(ord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(j-1, ord[i]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Function to compute mass matrix for 1D basis functions */
+calcMassMatrix_1d(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(basis[i]*basis[j], x, -1,1))),
+			   mass),
+	        return (mass)
+);
+
+/** Order 2 */
+ord : [-1, 1];
+/** Construct matrix of coefficients */
+Pmat2 : makePmat(ord);
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(2);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 2
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x)]);
+
+N1_1d : leg_x . col(a2,1);
+N2_1d : leg_x . col(a2,2);
+basis2 : [N1_1d, N2_1d];
+
+N2_mass_1d : calcMassMatrix_1d(basis2);
+
+/** Order 3 */
+ord : [-1, 0, 1];
+/** Construct matrix of coefficients */
+Pmat3 : makePmat(ord);
+/** Invert it */
+invPmat3 : invert(Pmat3);
+/** Identity matrix for use in coefficient calculation */
+u3 : ident(3);
+
+/** Basis function coefficients */
+a3 : (a3 : matrix([]), for i from 1 thru 3
+       do (a3 : addcol(a3, invPmat3.col(u3,i))), a3);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x), legendre_p(2,x)]);
+
+N1_1d : leg_x . col(a3,1);
+N2_1d : leg_x . col(a3,2);
+N3_1d : leg_x . col(a3,3);
+basis3 : [N1_1d, N2_1d, N3_1d];
+
+N3_mass_1d : calcMassMatrix_1d(basis3);
+
+/** Now compute cross-dimension integration matrices */
+N2_1dx2d_p0 : calcCrossMassMatrix(0, basis2, N2);
+N2_1dx2d_p1 : calcCrossMassMatrix(1, basis2, N2);
+N2_1dx2d_p2 : calcCrossMassMatrix(2, basis2, N2);
+
+N3_1dx2d_p0 : calcCrossMassMatrix(0, basis3, N3);
+N3_1dx2d_p1 : calcCrossMassMatrix(1, basis3, N3);
+N3_1dx2d_p2 : calcCrossMassMatrix(2, basis3, N3);

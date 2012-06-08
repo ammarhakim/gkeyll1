@@ -1,0 +1,32 @@
+/** Compute initial conditions for 10m IBW problem */
+
+I : %i; /** Makes typing easier */
+
+/** Linearized Vx equation */
+E1 : -I*w*p0*Vx1 + I*k*Pxx1 - qa*p0*Ex1/ma - Om*p0*Vy1;
+
+/** Linearized Vy equation */
+E2 : -I*w*p0*Vy1 + I*k*Pxy1 - qa*p0*Ey1/ma + Om*p0*Vx1;
+
+/** Linearized Pxx equation */
+E3 : -2*Om*Pxy1 + 3*I*k*Pxx0*Vx1 - I*w*Pxx1;
+
+/** Linearized Pxy equation */
+E4 : Om*(Pxx1-Pyy1) + I*k*Pxx0*Vy1 - I*w*Pxy1;
+
+/** Linearized Pyy equation */
+E5 : 2*Om*Pxy1 + I*k*Pxx0*Vx1 - I*w*Pyy1;
+
+/** Solve for velocities and pressures */
+Q : linsolve([E1, E2, E3, E4, E5], [Vx1, Vy1, Pxx1, Pxy1, Pyy1]);
+
+/** Expand Vx1 and Vy1 in terms of background */
+Vx1_o1_e : taylor(subst([Pxx0 = p0*L*Om^2/k^2], Q[1]), L, 0, 1);
+Vy1_o1_e : taylor(subst([Pxx0 = p0*L*Om^2/k^2], Q[2]), L, 0, 1);
+
+/** At this point these are LHS = RHS type of expressions. Take them apart */
+Vx1_o1 : rhs(Vx1_o1_e);
+Vy1_o1 : rhs(Vy1_o1_e);
+
+/** Ex1 */
+Ex1_o1 : -I/w*sum(subst([qa = qS[i], ma = mS[i], L = LS[i], Om = OmS[i]], qa*p0*Vx1_o1/ep0/ma), i, 1, 3);

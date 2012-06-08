@@ -277,6 +277,17 @@ namespace Lucee
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
 
 /**
+ * Get matrix for projection on a lower-dimensional basis set. This
+ * method returns the moment matrix (in 2D, for example)
+ *
+ * \int y^p \phi(x,y) \psi(x) dx dy
+ *
+ * @param p Required moment.
+ * @param momMatt On output, moment matrix.
+ */
+      void getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -394,6 +405,26 @@ namespace Lucee
       GaussQuadData gauss3Lower[2];
 /** Quadrature, upper faces */
       GaussQuadData gauss3Upper[2];
+
+/**
+ * Struct to hold moment matrices.
+ */
+      struct MomentMatrix
+      {
+/**
+ * Create moment matrix.
+ */
+          MomentMatrix()
+            : m(2,4)
+          {
+          }
+
+/** Moment matrix */
+          Lucee::Matrix<double> m;
+      };
+
+/** List of moment matrices */
+      MomentMatrix momMatrix[3]; // for now 0, 1 and 2nd moments are computed
 
 /**
  * Create matrices for 1st order element.
