@@ -22,6 +22,7 @@ set (proto_SOURCES
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcIntegrateNodalField.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp

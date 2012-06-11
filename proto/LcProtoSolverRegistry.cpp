@@ -14,6 +14,7 @@
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcIntegrateNodalField.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
@@ -55,6 +56,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalGradientUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DistFuncMomentCalc1D>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<3> >;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;

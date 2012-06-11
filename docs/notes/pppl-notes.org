@@ -7,17 +7,22 @@
 
 * June 11th
 
-  In the moment calculation code the 2D element stores the moment
-  matrix, while the 1D element stores the mass matrix (as it
-  should). This is not really the correct way to do it: cross
-  basis-function quantities should really be in their own class.
+  Completed the DistFuncMomentCalc1D class to compute the number
+  density. No other moments are computed yet.
 
-  Actually, the whole basis function class hierarchy will need to be
-  revisted when generalizing the code to general geometries, specially
-  for unstructured grids. It might be best to just work in general
-  geometries for the production code and move the current nodal
-  elements to the proto directory. [Isn't all of life a prototype for
-  something "better"?]
+** A note on nodal basis for moment calculations
+
+   In the moment calculation code the 2D element stores the moment
+   matrix, while the 1D element stores the mass matrix (as it
+   should). This is not really the correct way to do it: cross
+   basis-function quantities should really be in their own class.
+
+   Actually, the whole basis function class hierarchy will need to be
+   revisted when generalizing the code to general geometries,
+   specially for unstructured grids. It might be best to just work in
+   general geometries for the production code and move the current
+   nodal elements to the proto directory. [Isn't all of life a
+   prototype for something "better"?]
 
 
 * June 8th
@@ -55,8 +60,38 @@
 
 ** TODO Complete proof of DG energy conservation
 
-   This required some thought on how the discontinuity in d(phi)/dx
+   This requires some thought on how the discontinuity in d(phi)/dx
    should be taken into account.
+
+** TODO Registration of objects
+
+   Currently the object registration depends on a doing a "new". Need
+   to replace this with a proper function so that cleanup of the
+   registred objects can be done if needed. Also, this adds an
+   additional layer, opening up the possibility for doing more complex
+   things later.
+   
+   One possible solution:
+
+#+BEGIN_EXAMPLE
+   Lucee::registerObject<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>();
+#+END_EXAMPLE
+
+   I.e. the method would be templated over the base and derived class
+   but otherwise would not take any parameters. In the body of the
+   method the ObjRegistry<> object would be created and the object
+   pointer put into a map, using the derived class Id as a key. Then,
+   a set of "unload" methods would be provided that would remove the
+   appropriate objects from the map, or all objects for a specified
+   base class or clear out all registered objects completely.
+
+
+** TODO Some nodal updaters only work for scalar fields
+
+   Fix this. For eample, the new IntegrateNodalField only works with
+   scalar fields. This is not usually a problem as aliases can alway
+   be created, but could cause problems on an unsuspecting user. Fix,
+   or barf.
 
 * May 24th-29th
 

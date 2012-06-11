@@ -103,6 +103,38 @@ namespace Lucee
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 
+// get input field (2d)
+    const Lucee::Field<2, double>& distF = this->getInp<Lucee::Field<2, double> >(0);
+// get output field (1D)
+    Lucee::Field<1, double>& moment = this->getOut<Lucee::Field<1, double> >(0);
+
+// local region to update (This is the 2D region. The 1D region is
+// assumed to have the same cell layout as the X-direction of the 2D region)
+    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+
+// clear out contents of output field
+    moment = 0.0;
+
+// iterators into fields
+    Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
+    Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+
+// loop over all X-direction cells
+    for (int i=localRgn.getLower(0); i<localRgn.getUpper(0); ++i)
+    {
+// set iterator into moment field (it is 1D)
+      moment.setPtr(momentPtr, i);
+
+// sum over all Y-direction cells
+      for (int j=localRgn.getLower(1); j<localRgn.getUpper(1); ++j)
+      {
+// set iterator into distribution function (it is 2D)
+        distF.setPtr(distFPtr, i, j);
+// accumulate contribution to moment from this cell
+        matVec(1.0, mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+      }
+    }
+
     return Lucee::UpdaterStatus();
   }
 
