@@ -5,6 +5,21 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 11th
+
+  In the moment calculation code the 2D element stores the moment
+  matrix, while the 1D element stores the mass matrix (as it
+  should). This is not really the correct way to do it: cross
+  basis-function quantities should really be in their own class.
+
+  Actually, the whole basis function class hierarchy will need to be
+  revisted when generalizing the code to general geometries, specially
+  for unstructured grids. It might be best to just work in general
+  geometries for the production code and move the current nodal
+  elements to the proto directory. [Isn't all of life a prototype for
+  something "better"?]
+
+
 * June 8th
 
   Computed matrices needed in moment computation. Put in the
@@ -14,11 +29,15 @@
 
    At this point it might be best to get rid of the dependence on TX
    software. For this the numpkgs needs to be put somewhere else
-   (googlecode is a good place) and txbase and bilder need to copied
-   into Gkeyll sources.
+   (googlecode is a good place) and txbase and bilder, CMake need to
+   copied into Gkeyll sources.
 
    This will eliminate the need to have facetsall accounts and also
    the dependence on rapidly changing bilder codebase.
+
+   [June 11th] On looking at this some more, it seems not so
+   simple. The whole contents of numpkgs will need to moved to
+   googlecode which might not be so simple.
 
 * General things to do
 

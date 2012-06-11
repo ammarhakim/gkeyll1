@@ -64,8 +64,12 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+/** Pointer to 2D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** Pointer to 1D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
+/** Moment to compute */
+      unsigned moment;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -78,6 +82,9 @@ namespace Lucee
 /** Differentiation matrix */
           Lucee::Matrix<double> m;
       };
+
+/** Moment matrices */
+      MatrixHolder mm[3];
 
 /**
  * Compute matrix-vector multiply. Output vector must be
