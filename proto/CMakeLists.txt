@@ -30,6 +30,7 @@ set (proto_SOURCES
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcProtoSolverRegistry.cpp
+  LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
 )
 
