@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcDistFuncMomentCalc1D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
@@ -52,6 +53,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnstrophyUpdater>;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalGradientUpdater>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DistFuncMomentCalc1D>;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
