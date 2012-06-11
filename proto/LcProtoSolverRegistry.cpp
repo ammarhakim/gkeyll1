@@ -22,6 +22,7 @@
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcProtoSolverRegistry.h>
+#include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 
 #ifdef HAVE_FFTW3
@@ -60,6 +61,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<3> >;
 
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;

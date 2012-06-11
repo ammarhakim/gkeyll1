@@ -10,6 +10,17 @@
   Completed the DistFuncMomentCalc1D class to compute the number
   density. No other moments are computed yet.
 
+  Added updater to integrate field over domain. This is relatively
+  straightforward, but this code will not work for product of fields
+  as aliasing errors will be otherwise introduced. Need to think of
+  how to do this more generally. Of course, this can not be done in
+  the most general fasion as the quadrature scheme for arbitrary order
+  integration would be too hard to compute. (Really?)
+
+  Added updater to record field at a point.
+
+  Test all the above with Vlasov free-streaming operator simulation.
+
 ** A note on nodal basis for moment calculations
 
    In the moment calculation code the 2D element stores the moment
@@ -92,6 +103,20 @@
    scalar fields. This is not usually a problem as aliases can alway
    be created, but could cause problems on an unsuspecting user. Fix,
    or barf.
+
+** TODO DOCUMENTATION!
+
+   This is a perpetually underlooked todo. I need to document each
+   updater, datastructure and grid object. Each should be in its own
+   RST file rather than a single file for all updaters etc. This makes
+   searching and indexing easier.
+
+   Also, need to add an overview of the whole system, explaning how to
+   write a Lua script to drive Gkeyll.
+
+   Finally, need to clean up the C++ API documentation. This is an
+   enormous task and just gets more unmanegable as time goes on, more
+   classes are added, methods are added etc. etc. etc.
 
 * May 24th-29th
 
