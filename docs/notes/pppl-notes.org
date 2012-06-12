@@ -19,7 +19,7 @@
 
   Added updater to record field at a point.
 
-  Test all the above with Vlasov free-streaming operator simulation.
+  Tested all the above with Vlasov free-streaming operator simulation.
 
 ** A note on nodal basis for moment calculations
 

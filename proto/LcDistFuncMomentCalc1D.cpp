@@ -52,10 +52,17 @@ namespace Lucee
 
 // get moment to compute
     if (tbl.hasNumber("moment"))
-    moment = (unsigned) tbl.getNumber("moment");
+    calcMom = (unsigned) tbl.getNumber("moment");
     else
       throw Lucee::Except(
         "DistFuncMomentCalc1D::readInput: Must specify moment using 'moment'");
+
+    if (calcMom > 2)
+    {
+      Lucee::Except lce("DistFuncMomentCalc1D::readInput: Only 'moment' 0,1 or 2 is supported. ");
+      lce << "Supplied " << calcMom << " instead";
+      throw lce;
+    }
   }
 
   void
@@ -119,19 +126,43 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
     Lucee::FieldPtr<double> momentPtr = moment.createPtr();
 
+    double xc[3];
+    double dv = grid.getDx(1);
+    double dv2 = 0.5*dv;
+    double dv22 = dv2*dv2;
+
 // loop over all X-direction cells
     for (int i=localRgn.getLower(0); i<localRgn.getUpper(0); ++i)
     {
-// set iterator into moment field (it is 1D)
-      moment.setPtr(momentPtr, i);
+      moment.setPtr(momentPtr, i); // 1D field
 
 // sum over all Y-direction cells
       for (int j=localRgn.getLower(1); j<localRgn.getUpper(1); ++j)
       {
+        grid.setIndex(i,j);
+        grid.getCentroid(xc);
+
 // set iterator into distribution function (it is 2D)
         distF.setPtr(distFPtr, i, j);
 // accumulate contribution to moment from this cell
-        matVec(1.0, mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+        if (calcMom == 0)
+        {
+// number density
+          matVec(1.0, mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+        }
+        else if (calcMom == 1)
+        {
+// momentum
+          matVec(xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(dv2, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
+        }
+        else if (calcMom == 2)
+        {
+// energy
+          matVec(xc[1]*xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(xc[1]*dv, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(dv22, mm[2].m, &distFPtr[0], 1.0, &momentPtr[0]);
+        }
       }
     }
 

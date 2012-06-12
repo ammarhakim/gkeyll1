@@ -69,7 +69,7 @@ namespace Lucee
 /** Pointer to 1D nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
 /** Moment to compute */
-      unsigned moment;
+      unsigned calcMom;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
