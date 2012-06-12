@@ -5,6 +5,19 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 12th
+
+  Updated the DistFuncMomentCalc1D class to compute first as well as
+  second moments. Tested by comparing with exact solution. Looks okay,
+  but there is significant errors in the integration which I am not
+  sure how to resolve, or even if it is resolvable.
+
+  At this point the note on free-streaming Vlasov solutions (with
+  specified potential) can be completed.
+
+  Also, now the updater for the self-consistent problem with phi=n
+  needs to be written.
+
 * June 11th
 
   Completed the DistFuncMomentCalc1D class to compute the number
@@ -117,6 +130,19 @@
    Finally, need to clean up the C++ API documentation. This is an
    enormous task and just gets more unmanegable as time goes on, more
    classes are added, methods are added etc. etc. etc.
+
+** TODO Improve HDF5 output
+
+   Allow appending data to the same file. Also somehow one needs to
+   use better names for the output groups and dataspaces.
+
+** TODO Enable initializing fields from HDF5 files
+
+   So restart can be enabled.
+
+** TODO Why does Lua script not have access to command line options?
+
+   Please fix this, should be easy (I think).
 
 * May 24th-29th
 
