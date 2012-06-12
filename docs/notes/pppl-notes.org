@@ -16,7 +16,11 @@
   specified potential) can be completed.
 
   Also, now the updater for the self-consistent problem with phi=n
-  needs to be written.
+  needs to be written. DONE: This is a copy of the
+  FemPoissonStructUpdater with small modifications. The reason for
+  doing this is that the code is almost identical and the nasty
+  modifications needed to handle periodic BCs is already handled in
+  the FemPoissonStructUpdater class.
 
 * June 11th
 
@@ -48,7 +52,6 @@
    nodal elements to the proto directory. [Isn't all of life a
    prototype for something "better"?]
 
-
 * June 8th
 
   Computed matrices needed in moment computation. Put in the
@@ -67,6 +70,10 @@
    [June 11th] On looking at this some more, it seems not so
    simple. The whole contents of numpkgs will need to moved to
    googlecode which might not be so simple.
+
+   [June 12th] Scott Kruger tells me that TX is moving bilder and
+   related packaged to sourceforge. I will move Gkeyll to use the
+   sourceforge version once the move is complete.
 
 * General things to do
 

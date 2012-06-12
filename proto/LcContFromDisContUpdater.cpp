@@ -70,6 +70,7 @@ namespace Lucee
     if (tbl.hasBool("sourceNodesShared"))
       srcNodesShared = tbl.getBool("sourceNodesShared");
 
+// force all directions to be periodic
     for (unsigned i=0; i<NDIM; ++i) 
       periodicFlgs[i] = true;
   }
