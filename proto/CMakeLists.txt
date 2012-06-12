@@ -38,6 +38,12 @@ if (FFTW3_FOUND)
   set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp)
 endif (FFTW3_FOUND)
 
+if (PETSC_FOUND)
+  set (proto_SOURCES ${proto_SOURCES}
+    LcContFromDisContUpdater.cpp
+  )
+endif (PETSC_FOUND)
+
 # Create the library
 add_library(lcproto ${proto_SOURCES})
 
