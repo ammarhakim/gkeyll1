@@ -5,6 +5,50 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 14th
+
+  Figured out the issue with the reconstruction. The problem is that
+  the same order is being used for the continuous reconstruction as
+  used in the discontinuous function representation. So, if the
+  discontinuous function is piece-wise constant one can not use a
+  constant continuous function: the result will be a just flat line.
+
+  So the solution is to go to a higher-order continuous
+  reconstruction. So for piece-wise linear representation one should
+  use piece-wise quadratic reconstruction.
+
+  For this I need to write a new updater to put a low-order polynomial
+  on a higher-order basis function, something that can always be
+  done. Then the ContFromDisContUpdater can be used to give the
+  high-order continous reconstruction.
+
+  Actually, this looks very much like the reconstruction proposed by
+  Huynh in his "Flux Reconstruction ..." paper and so this paper needs
+  to be looked at again.
+
+  Using a higher-order reconstruction could be a problem: if the
+  Hamiltonian H in the Poisson bracket {H,f} is not represented by a
+  sub-set of the basis functions used for f then energy is not
+  conserved, as shown by the currently used algorithm. So, for this
+  problem we are in a bind.
+
+** A note on basis function
+
+   I need to redo the basis function calculations to make them more
+   generic, i.e. arbitrary order, specifiable from the Lua
+   program. The use of the Serendipity basis was a big mistake and it
+   is better to just use Lobatto basis.
+
+   The problem with Lobatto is that there are more basis functions
+   than in the Serendipity case. However, this is perhaps okay as it
+   simplifies the algorithm as well as increases solution accuracy.
+
+** Time to re-read Lua book
+
+   Now that I have sufficient experience working with Lua and the
+   Lua/C binding API it is perhaps time to look again and see if
+   things can be improved.
+
 * June 13th
 
   Spent time trying to debug the "problem" with the weak-form
@@ -19,8 +63,8 @@
 
    http://eigen.tuxfamily.org/index.php?title=Main_Page
 
-   This looks like a good package to replace Gkeyll's own matrix
-   and vector classes.
+   This looks like a good package to replace Gkeyll's own matrix and
+   vector classes. [June 14: This is actually a phenomenal package].
 
    Although I think the matrix/vectors from Eigen are a good
    replacement, I am also wondering about replacing the Lucee::Array
@@ -37,7 +81,7 @@
 ** A Frankenstein Monster?
 
    All this dependence on dozen's of libraries makes a software
-   project look like a Frankenstein monster. However, there is not
+   project look like a Frankenstein monster. However, there is no
    other option.
 
 * June 12th
@@ -150,7 +194,6 @@
    a set of "unload" methods would be provided that would remove the
    appropriate objects from the map, or all objects for a specified
    base class or clear out all registered objects completely.
-
 
 ** TODO Some nodal updaters only work for scalar fields
 
