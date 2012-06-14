@@ -39,9 +39,21 @@
    program. The use of the Serendipity basis was a big mistake and it
    is better to just use Lobatto basis.
 
-   The problem with Lobatto is that there are more basis functions
-   than in the Serendipity case. However, this is perhaps okay as it
-   simplifies the algorithm as well as increases solution accuracy.
+   The problem with Lobatto (or Gaussian) is that there are more basis
+   functions than in the Serendipity case. However, this is perhaps
+   okay as it simplifies the algorithm as well as increases solution
+   accuracy.
+
+   The idea is to create a base class that provides a whole set of
+   methods to compute different matrices etc needed in a single
+   cell. Then, the classes that implement the basis functions
+   themselves should uses thes to get the needed data.
+
+   One issue here is that there is significant amount of shared data,
+   perhaps not useful for rectangular grids, but certainly useful for
+   body-fitted or unstructured grids. Instead of each updater storing
+   it for themselves it would be best if the basis functions could do
+   it. [Don't they do it already?]
 
 ** Time to re-read Lua book
 
