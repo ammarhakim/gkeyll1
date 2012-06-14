@@ -5,6 +5,41 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 13th
+
+  Spent time trying to debug the "problem" with the weak-form
+  updater. Not sure if there really is a problem with this updater and
+  it possible that this is the correct behavior. However, it is clear
+  that this is *not* the best continuous reconstructed function from
+  the discontinuous function.
+
+** The Eigen matrix/vector pakage and Blitz++
+
+   Explored the Eigen package:
+
+   http://eigen.tuxfamily.org/index.php?title=Main_Page
+
+   This looks like a good package to replace Gkeyll's own matrix
+   and vector classes.
+
+   Although I think the matrix/vectors from Eigen are a good
+   replacement, I am also wondering about replacing the Lucee::Array
+   class. Blitz++ seems like a good option, but perhaps will prove
+   hard or impossible to compile on supercomputers. For now
+   Lucee::Array can stay.
+
+** Boost graph library
+
+   Boost graph library seems like a good option to look into when
+   developing unstructured meshes. Also BGL might be useful for
+   particles.
+
+** A Frankenstein Monster?
+
+   All this dependence on dozen's of libraries makes a software
+   project look like a Frankenstein monster. However, there is not
+   other option.
+
 * June 12th
 
   Updated the DistFuncMomentCalc1D class to compute first as well as
