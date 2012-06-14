@@ -16,7 +16,7 @@ cmake \
   -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
   ../lucee
 
-For serial debug build do:
+For debug debug build do:
 
 cmake \
   -DCMAKE_BUILD_TYPE:STRING=Debug \
