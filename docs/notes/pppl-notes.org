@@ -5,6 +5,31 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 15th
+
+  Turns out that the problem with the projection might not be a
+  problem after all. On writing a test case that perturbs a continuous
+  function to make a discontinuous function, the projection updater
+  nicely recreates a reasonable continuous curve. So what is going on
+  then? This is giving me a major headache.
+
+** Initializing fields from HDF5
+
+   I need to write a method that allows reading a field from HDF5
+   file. This will allow debugging this horrible problem and also open
+   the possiblility of doing restarts.
+
+** Lua/C++ API
+
+   At present not a lot of the C++ methods are available via the Lua
+   script. Should this interface me made richer? A richer interface
+   means more C++ code, but adds significant flexibility to the
+   script.
+
+   The aim should be to increase the amount of Lua code, reducing the
+   need to write C++. For example, how can an updater be coded in Lua?
+   How can a new datastructure be created?
+
 * June 14th
 
   Figured out the issue with the reconstruction. The problem is that

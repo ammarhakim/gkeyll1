@@ -6,34 +6,40 @@ add_definitions(-DLUA_USE_LINUX)
 # Create the library
 add_library(lclua
   lapi.c
-  ldump.c
-  lmem.c
-  lstring.c
-  lundump.c
   lauxlib.c
-  lfunc.c
-  loadlib.c
-  lstrlib.c
-  lvm.c
   lbaselib.c
-  lgc.c
-  lobject.c
-  ltable.c
-  lzio.c
   lcode.c
-  linit.c
-  lopcodes.c
-  ltablib.c
-  print.c
   ldblib.c
-  liolib.c
-  loslib.c
-  ltm.c
   ldebug.c
-  llex.c
-  lparser.c
   ldo.c
+  ldump.c
+  lfunc.c
+  lgc.c
+  linit.c
+  liolib.c
+  llex.c
   lmathlib.c
+  lmem.c
+  loadlib.c
+  lobject.c
+  lopcodes.c
+  loslib.c
+  lparser.c
   lstate.c
-  luac.c)
+  lstring.c
+  lstrlib.c
+  ltable.c
+  ltablib.c
+  ltm.c
+  lundump.c
+  lvm.c
+  lzio.c
+  print.c)
+
+# Add executables
+#add_executable(lua lua.c)
+#target_link_libraries(lua lclua)
+
+#add_executable(luac luac.c)
+#target_link_libraries(luac lclua)
 
