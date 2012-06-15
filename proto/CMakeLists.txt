@@ -26,6 +26,7 @@ set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
+  LcMoveToHigherBasis1D.cpp
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
