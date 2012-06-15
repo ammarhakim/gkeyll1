@@ -60,6 +60,10 @@ namespace Lucee
     if (snm == ".txt")
       isH5 = false; // write out text file
 
+// text output is no longer supported
+    if (!isH5)
+      throw Lucee::Except("DataStructIfc::write: Output to text files is no longer supported.");
+
 // output name
     std::string outNm = outPrefix + "_" + nm;
 
@@ -81,6 +85,22 @@ namespace Lucee
 // write out data
       this->writeToTxtFile(outFl);
     }
+  }
+
+  void
+  DataStructIfc::read(const std::string& nm, const std::string& grp)
+  {
+    TxCommBase& comm = this->getDataComm(); // get communicator for I/O
+    TxIoBase *io = new TxHdf5Base(&comm);
+// open file to reade in
+    TxIoNodeType fn = io->openFile(nm, "r");
+  }
+
+  TxIoNodeType
+  DataStructIfc::readFromFile(TxIoBase& io, TxIoNodeType& node, const std::string& nm)
+  {
+// throw exception if we come here
+    throw Lucee::Except("DataStructIfc::readFromFile: Not implemented!");
   }
 
   void

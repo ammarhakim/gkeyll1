@@ -19,7 +19,6 @@
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
-#include <LcMoveToHigherBasis1D.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
@@ -70,8 +69,6 @@ namespace Lucee
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ContFromDisContUpdater<1> >;
     
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MoveToHigherBasis1D>;
-
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
 #endif

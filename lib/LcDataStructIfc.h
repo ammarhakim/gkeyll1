@@ -51,6 +51,14 @@ namespace Lucee
       void write(const std::string& nm);
 
 /**
+ * Read data-structure from specified HDF5 file.
+ *
+ * @param nm Name of file to read.
+ * @param grp Name of group (full path) to extract data from.
+ */
+      void read(const std::string& nm, const std::string& grp);
+
+/**
  * Clone data and return pointer to cloned object.
  *
  * @return cloned object.
@@ -74,6 +82,17 @@ namespace Lucee
  */
       virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
         const std::string& nm) = 0;
+
+/**
+ * Read dataStruct from given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to read data from.
+ * @param nm Name of the data-struct as it appears in input.
+ * @return node to which data was written.
+ */
+      virtual TxIoNodeType readFromFile(TxIoBase& io, TxIoNodeType& node,
+        const std::string& nm);
 
 /**
  * Write dataStruct to specified text file. The data is written as
