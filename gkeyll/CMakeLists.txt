@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_SOURCE_DIR}/grids
   ${CMAKE_SOURCE_DIR}/datastructs
   ${CMAKE_SOURCE_DIR}/etc/loki/include
-  ${CMAKE_SOURCE_DIR}/etc/lua/src
   ${CMAKE_BINARY_DIR}
 )
 
@@ -22,7 +21,6 @@ set(lucee_LIBRARIES
   lcgrids
   lclib
   lcloki
-  lclua
 )
 
 #
@@ -72,8 +70,11 @@ set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS}
 set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS}
   ${TxBase_LIBRARY_DIRS} ${Hdf5_LIBRARY_DIRS}
 )
+set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS}
+  ${Lua_LIBRARY_DIRS}
+)
 set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS}
-  ${TxBase_STLIBS} ${Hdf5_STLIBS}
+  ${Lua_STLIBS}
 )
 
 if (DEBUG_CMAKE)
