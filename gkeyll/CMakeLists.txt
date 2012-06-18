@@ -95,12 +95,12 @@ if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPICXX_COMPILER_WRAPPER
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${MPI_STLIBS})
 endif ()
 
-TxPrintString("")
-TxPrintString("-------- FACETS external and system libraries --------")
+SciPrintString("")
+SciPrintString("-------- FACETS external and system libraries --------")
 string(STRIP "${FC_EXTERNAL_LIBFLAGS}" FC_EXTERNAL_LIBFLAGS)
-TxPrintVar(FC_EXTERNAL_LIBFLAGS)
-TxPrintVar(FC_EXTERNAL_LIBDIRS)
-TxPrintVar(FacetsSt_EXT_LIBS)
+SciPrintVar(FC_EXTERNAL_LIBFLAGS)
+SciPrintVar(FC_EXTERNAL_LIBDIRS)
+SciPrintVar(FacetsSt_EXT_LIBS)
 
 # Add in all include directories
 include_directories(${FC_EXTERNAL_INCDIRS})
@@ -128,9 +128,9 @@ else ()
     set(FC_SYS_LIBS ${FC_SYS_LIBS} rt)
   endif ()
 endif ()
-TxPrintVar(FC_SYS_LIBS)
-TxGetStaticLibs("${FC_SYS_LIBS}" FC_SYS_STLIBS)
-TxPrintVar(FC_SYS_STLIBS)
+SciPrintVar(FC_SYS_LIBS)
+SciGetStaticLibs("${FC_SYS_LIBS}" FC_SYS_STLIBS)
+SciPrintVar(FC_SYS_STLIBS)
 
 #
 # Executables
