@@ -84,6 +84,12 @@ if (BOOST_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif (BOOST_FOUND)
 
+# find LUA
+find_package(SciLua REQUIRED)
+if (LUA_FOUND)
+  include_directories(${Lua_INCLUDE_DIRS})
+endif (LUA_FOUND)
+
 # Math packages
 find_package(SciPetsc REQUIRED)
 
@@ -121,7 +127,6 @@ install(FILES svninfo.txt DESTINATION include)
 
 # add subdirectories
 add_subdirectory(etc/loki/src)
-add_subdirectory(etc/lua/src)
 add_subdirectory(lib)
 add_subdirectory(grids)
 add_subdirectory(datastructs)
