@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 2.8.6)
 #
 ######################################################################
 
-include(${CMAKE_SOURCE_DIR}/CMake/TxInit.cmake)
+include(${CMAKE_SOURCE_DIR}/scimake/SciInit.cmake)
 set(LUCEE_REV "${PROJECT_REV}")
 
 ######################################################################
@@ -39,19 +39,6 @@ set(HAVE_CMAKE 1 CACHE STRING "Whether built with CMake")
 #
 ######################################################################
 
-# SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-# Use, i.e. don't skip the full RPATH for the build tree
-# Not needed since we build static libs
-
-# SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-# When building, don't link with the install RPATH at build,
-# but add later on when installing.
-# Not needed since we build static libs
-
-# SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-# The RPATH to be used when installing
-# Not needed since we build static libs
-
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Add the automatically determined parts of the RPATH that
 # point to directories outside the build tree to the install RPATH
@@ -63,42 +50,42 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ######################################################################
 
 # Prerequisites for finding packages
-include(${CMAKE_SOURCE_DIR}/CMake/Modules/TxFindPackage.cmake)
+include(${CMAKE_SOURCE_DIR}/scimake/Modules/SciFindPackage.cmake)
 
 # find txbase
-find_package(TxBase REQUIRED)
+find_package(SciBase REQUIRED)
 if (TXBASE_FOUND)
-   include_directories(${TxBase_INCLUDE_DIRS})
+   include_directories(${SciBase_INCLUDE_DIRS})
 endif (TXBASE_FOUND)
 
 # z-lib only on windows
 if (NOT WIN32)
-  find_package(TxZ REQUIRED)
+  find_package(SciZ REQUIRED)
 endif ()
 
 # find HDF5
-find_package(TxHdf5 REQUIRED)
+find_package(SciHdf5 REQUIRED)
 if (HDF5_FOUND)
    include_directories(${Hdf5_INCLUDE_DIRS})
 endif (HDF5_FOUND)
 
 # find GSL
-find_package(TxGsl REQUIRED)
+find_package(SciGsl REQUIRED)
 if (GSL_FOUND)
    include_directories(${Gsl_INCLUDE_DIRS})
 endif (GSL_FOUND)
 
 # find FFTW3
-find_package(TxFftw3)
+find_package(SciFftw3)
 
 # find Boost
-find_package(TxBoost REQUIRED)
+find_package(SciBoost REQUIRED)
 if (BOOST_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif (BOOST_FOUND)
 
 # Math packages
-find_package(TxPetsc REQUIRED)
+find_package(SciPetsc REQUIRED)
 
 IF(APPLE)
    # add the Accelerate framework on Mac OS X
@@ -108,7 +95,7 @@ IF(APPLE)
 else(APPLE)
   # CLapack is used on Unix and Windows
   # WARNING: On Unix should use system Lapack
-  find_package(TxCLapackCMake REQUIRED)
+  find_package(SciCLapackCMake REQUIRED)
   include_directories(${CLapackCMake_INCLUDE_DIRS})
 endif(APPLE)
 
@@ -191,4 +178,4 @@ endif (ENABLE_PARALLEL)
 set(COMMON_INSTALL TRUE)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "LUCEE")
 set(CONFIG_FILES)  # Clear out
-include(${CMAKE_SOURCE_DIR}/CMake/TxFinalize.cmake)
+include(${CMAKE_SOURCE_DIR}/scimake/SciFinalize.cmake)
