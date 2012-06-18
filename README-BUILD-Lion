@@ -14,7 +14,7 @@ cmake \
   -DCMAKE_C_FLAGS:STRING='-pipe -fPIC' \
   -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
   -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
-  ../lucee
+  ../gkeyll
 
 For debug debug build do:
 
@@ -26,4 +26,4 @@ cmake \
   -DCMAKE_C_FLAGS:STRING='-pipe -fPIC' \
   -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
   -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
-  ../lucee
+  ../gkeyll

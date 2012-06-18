@@ -1,11 +1,11 @@
 # Project information
-project(lucee)
+project(gkeyll)
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "5")
 set(VERSION_PATCH "0")
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-set(LUCEE_VERSION "${PROJECT_VERSION}")
+set(GKEYLL_VERSION "${PROJECT_VERSION}")
 
 # Required version
 cmake_minimum_required(VERSION 2.8.6)
@@ -17,7 +17,9 @@ cmake_minimum_required(VERSION 2.8.6)
 ######################################################################
 
 include(${CMAKE_SOURCE_DIR}/scimake/SciInit.cmake)
-set(LUCEE_REV "${PROJECT_REV}")
+set(GKEYLL_REV "${PROJECT_REV}")
+set(GKEYLL_URL ${PROJECT_URL})
+set(GKEYLL_INSTALLDIR ${GKEYLL_INSTALLDIR})
 
 ######################################################################
 #
@@ -29,7 +31,7 @@ set(CXX ${CMAKE_CXX_COMPILER})
 set(BUILD_FLAGS_VAR  CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE})
 set(BUILD_FLAGS_VAL "${${BUILD_FLAGS_VAR}}")
 set(CXXFLAGS "${BUILD_FLAGS_VAL} ${CMAKE_CXX_FLAGS}")
-set(HAVE_CMAKE 1 CACHE STRING "Whether built with CMake")
+set(HAVE_CMAKE 1 CACHE STRING "Whether built with scimake")
 
 ######################################################################
 #
@@ -53,9 +55,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(${CMAKE_SOURCE_DIR}/scimake/Modules/SciFindPackage.cmake)
 
 # find txbase
-find_package(SciBase REQUIRED)
+find_package(SciTxBase REQUIRED)
 if (TXBASE_FOUND)
-   include_directories(${SciBase_INCLUDE_DIRS})
+   include_directories(${TxBase_INCLUDE_DIRS})
 endif (TXBASE_FOUND)
 
 # z-lib only on windows
@@ -119,11 +121,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-cmake.h.in
 #
 ######################################################################
 
-set(TX_GROUP_WRITE GROUP_WRITE)
-set(TX_WORLD_FILE_PERMS WORLD_WRITE)
-set(TX_WORLD_PROGRAM_PERMS WORLD_WRITE WORLD_EXECUTE)
-
-install(FILES svninfo.txt DESTINATION include)
+set(SCI_GROUP_WRITE GROUP_WRITE)
+set(SCI_WORLD_FILE_PERMS WORLD_READ)
+set(SCI_WORLD_PROGRAM_PERMS WORLD_READ WORLD_EXECUTE)
 
 # add subdirectories
 add_subdirectory(etc/loki/src)
@@ -181,6 +181,6 @@ endif (ENABLE_PARALLEL)
 ######################################################################
 
 set(COMMON_INSTALL TRUE)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "LUCEE")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GKEYLL Solver System")
 set(CONFIG_FILES)  # Clear out
 include(${CMAKE_SOURCE_DIR}/scimake/SciFinalize.cmake)
