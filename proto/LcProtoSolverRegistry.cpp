@@ -67,7 +67,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<3> >;
 
+#ifdef HAVE_PETSC
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ContFromDisContUpdater<1> >;
+#endif
     
 #ifdef HAVE_FFTW3
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
