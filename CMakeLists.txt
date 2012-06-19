@@ -101,10 +101,9 @@ IF(APPLE)
    MARK_AS_ADVANCED(ACCELERATE_LIB)
    SET(EXTRA_LIBS ${ACCELERATE_LIB})
 else(APPLE)
-  # CLapack is used on Unix and Windows
-  # WARNING: On Unix should use system Lapack
-  find_package(SciCLapackCMake REQUIRED)
-  include_directories(${CLapackCMake_INCLUDE_DIRS})
+  # Lapack is used on Unix and Windows
+  find_package(SciLapack REQUIRED)
+  include_directories(${Lapack_INCLUDE_DIRS})
 endif(APPLE)
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPI_COMPILER_WRAPPER)
