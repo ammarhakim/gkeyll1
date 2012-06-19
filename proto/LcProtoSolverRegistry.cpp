@@ -10,7 +10,6 @@
 #endif
 
 // lucee includes
-#include <LcContFromDisContUpdater.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
@@ -25,6 +24,10 @@
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
+
+#ifdef HAVE_PETSC
+# include <LcContFromDisContUpdater.h>
+#endif
 
 #ifdef HAVE_FFTW3
 # include <LcPeriodicPoisson2DUpdater.h>
