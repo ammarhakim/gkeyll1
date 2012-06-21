@@ -34,6 +34,7 @@ set(lcslvrs_SOURCES
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
+  LcNodalDisContHyperUpdater.cpp
   LcNodalFiniteElementIfc.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
