@@ -23,6 +23,7 @@
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcNodalDisContHyperUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
@@ -79,6 +80,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<3> >;
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;

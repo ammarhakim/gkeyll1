@@ -1,0 +1,115 @@
+# -*- org -*-
+
+#+TITLE:     Stuffs
+#+AUTHOR:    Ammar Hakim
+#+EMAIL:     ahakim@pppl.gov
+#+LANGUAGE:  en
+#+STARTUP: overview
+#+TAGS: GKEYLL(g) LUCEE(l) HOME(h) READ(r) WRITE(w) INFRA(i)
+
+This file contains things to be done. The TODO items are sub-bullets
+in a task and are kept till the task is done. Completed tasks are
+archived.
+
+* Gkeyll projects
+
+  Things to do in Gkeyll.
+
+** Test Vlasov fixed-potential code
+*** DONE Implement moment computing updater			     :GKEYLL:
+*** DONE Volume intergration updater is needed			     :GKEYLL:
+*** TODO Write up journal entry					     :GKEYLL:
+
+** Write general hyperbolic equation updater for rectangular meshes
+*** DONE Work out the scheme on paper				      :LUCEE:
+*** TODO Implement a updater to work with advection equations	      :LUCEE:
+*** TODO Design/implement limiters				      :LUCEE:
+
+** Registration of objects					      :INFRA:
+
+   Currently the object registration depends on a doing a "new". Need
+   to replace this with a proper function so that cleanup of the
+   registred objects can be done if needed. Also, this adds an
+   additional layer, opening up the possibility for doing more complex
+   things later.
+   
+   One possible solution:
+
+#+BEGIN_EXAMPLE
+   Lucee::registerObject<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>();
+#+END_EXAMPLE
+
+   I.e. the method would be templated over the base and derived class
+   but otherwise would not take any parameters. In the body of the
+   method the ObjRegistry<> object would be created and the object
+   pointer put into a map, using the derived class Id as a key. Then,
+   a set of "unload" methods would be provided that would remove the
+   appropriate objects from the map, or all objects for a specified
+   base class or clear out all registered objects completely.
+
+** Improve HDF5 output
+
+   Allow appending data to the same file. Also somehow one needs to
+   use better names for the output groups and dataspaces.
+
+** Enable initializing fields from HDF5 files			      :INFRA:
+   
+   So restart can be enabled.
+
+** Why does Lua script not have access to command line options?	      :INFRA:
+** Complete proof of DG energy conservation 			     :GKEYLL:
+
+   This requires some thought on how the discontinuity in d(phi)/dx
+   should be taken into account.
+
+** Split each updater/datastruct docs into its own file 	     :GKEYLL:
+
+   I need to document each updater, datastructure and grid object
+   currently in Gkeyll. Each should be in its own RST file rather than
+   a single file for all updaters etc. This makes searching and
+   indexing easier.
+
+** Figure out the problem with Lua Vlasov program		     :GKEYLL:
+
+   Even though the interpolation works from a stand-alone test it does
+   not from the actual Vlasov solver. Need to figure out why.
+
+** Write arbitrary nodal basis function 			     :GKEYLL:
+   
+   Use tensor product basis. This is so that the polynomial order can
+   be specified in the Lua program to get arbitrary accuracy. Try and
+   make this work for both Gauss and Lobatto nodal layouts.
+
+** Transition to eigen matrix package				      :INFRA:
+
+   Get rid of the Lucee::Matrix, Lucee::Vector and Lucee::Vec3 classes
+   and replace them with the ones provided in the eigen C++
+   package. This might need to be done in a staged manner as a lot of
+   the code depends on the Lucee matrix classes and so this will
+   involve significant refactoring.
+
+** Transition to Luabind					      :INFRA:
+
+   Use the luabind package to wrap the C++ code for use in Lua
+   programs. This might be a non-trivial refactor as the Lua wrapping
+   code in Lucee is deeply embedded into the framework and it will be
+   a major task to change.
+
+   However, a major advantage of luabind is that it will make future
+   bindings much easier to create and allow for a much more
+   fine-grained control from Lua than is possible now.
+
+* Work related
+
+  This is stuff not directly related to Gkeyll.
+
+** Complete self-evaluations					       :WORK:
+** Send Sasha implicit solver slides 				       :WORK:
+
+   Send figure for explicit 1000ms figure and also slide to show
+   advantages of implicity.
+
+
+* Reading/Writing
+
+* Someday/Maybe
