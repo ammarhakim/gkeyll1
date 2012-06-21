@@ -37,7 +37,7 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
-      throw Lucee::Except("NodalFiniteElementIfc::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("NodalPoissonBracketUpdater::readInput: Must specify element to use using 'basis'");
 
     cfl = tbl.getNumber("cfl"); // CFL number
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
