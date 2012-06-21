@@ -5,6 +5,12 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 21st
+
+  Yesterday I finally figured out how to get petsc to find lapack/blas
+  on portal.pppl.gov. This information is now coded up in a script,
+  checked into the gkeyllall repo.
+
 * June 19th
   
   Spent all day building the code on the cluster. The major issues are
@@ -17,19 +23,7 @@
 
   At this point most dependence on TX servers is gone. Did some major
   surgery to the build system to make all of this work. Now, gkeyll
-  builds with bilder and is installed in the usual nice June.
-
-** TODO Complete fixed-potential Vlasov journal note
-
-   For this, need to implement moment computing updater [DONE]. Several new
-   matrices are needed to perform the integration. [DONE]
-
-   Also, a volume intergration updater is needed. [DONE]
-
-   At this point this is the top priority for this week. Need to
-   finish this note as all the needed code is completed and all that
-   needs to be done is pick some good problems and write up the
-   results.
+  builds with bilder and is installed in the usual nice wat.
 
 * June 15th
 
