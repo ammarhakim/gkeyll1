@@ -69,6 +69,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Equation to solve */
+      Lucee::HyperEquation *equation;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number allowed */
