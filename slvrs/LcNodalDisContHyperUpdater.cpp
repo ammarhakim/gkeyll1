@@ -10,9 +10,20 @@
 #endif
 
 // lucee includes
+#include <LcAlignedRectCoordSys.h>
+#include <LcDirSequencer.h>
+#include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
+#include <LcMathLib.h>
 #include <LcNodalDisContHyperUpdater.h>
+#include <LcStructuredGridBase.h>
+
+// std includes
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -39,6 +50,15 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("NodalDisContHyperUpdater::readInput: Must specify element to use using 'basis'");
+
+// equation to solve
+    if (tbl.hasObject<Lucee::HyperEquation>("equation"))
+      equation = &tbl.getObjectAsBase<Lucee::HyperEquation>("equation");
+    else
+    {
+      Lucee::Except lce("NodalDisContHyperUpdater::readInput: Must specify an equation to solve!");
+      throw lce;
+    }
 
     cfl = tbl.getNumber("cfl"); // CFL number
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
@@ -118,8 +138,35 @@ namespace Lucee
   NodalDisContHyperUpdater<NDIM>::update(double t)
   {
 // get hold of grid
-    const Lucee::StructuredGridBase<NDIM>& grid 
+    const Lucee::StructuredGridBase<NDIM>& grid
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+// get input field
+    const Lucee::Field<NDIM, double>& q = this->getInp<Lucee::Field<NDIM, double> >(0);
+// get output field
+    Lucee::Field<NDIM, double>& qNew = this->getOut<Lucee::Field<NDIM, double> >(0);
+
+// time-step
+    double dt = t-this->getCurrTime();
+// local region to update
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+
+// maximum CFL number used
+    double cfla = 0.0;
+
+    unsigned nlocal = nodalBasis->getNumNodes(); // local nodes
+    unsigned meqn = equation->getNumEqns();// num of equations
+
+    qNew = 0.0; // clear out contents
+
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+// compute contribution from volume integrals
+    while (seq.step())
+    {
+    }
+
+// compute contributions from surface integrals
+
     return Lucee::UpdaterStatus();
   }
 
