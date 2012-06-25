@@ -5,6 +5,16 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 24th
+
+**  General philosophical notes
+
+    Once the core algorithm is identified, it should be heavily
+    optimized for production code.
+
+    The aim should be to reduce the C++ code to the minium possible
+    and increase the Lua code via Luabind.
+
 * June 21st
 
   Yesterday I finally figured out how to get petsc to find lapack/blas
