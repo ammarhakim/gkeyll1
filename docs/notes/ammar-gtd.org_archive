@@ -42,5 +42,40 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   :ARCHIVE_CATEGORY: ammar-gtd
   :END:
 
+* Figure out the problem with Lua Vlasov program		     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-06-25 Mon 14:10
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Even though the interpolation works from a stand-alone test it does
+  not from the actual Vlasov solver. Need to figure out why.
+
+  [Found the problem with the Vlasov free-streaming input file. The
+  issue is still unresolved, however, it is "fixed" for now by using
+  0.0 as the initial guess for the solution. Basically, what seems to
+  happen is that the solution from the previous time-step was being
+  used as a initial guess which was giving completely bogus
+  answers. Not sure why, but it does indicate a bug in the
+  ContFromDisContUpdater code. This is very strange as nothing
+  special is done in that code that would cause this problem. But
+  this code must be the problem. What is more bizarre is that this is
+  happening with the direct solve, so the initial guess should be
+  completely ignored.]
+
+* Test Vlasov fixed-potential code
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-06-25 Mon 14:36
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+** DONE Implement moment computing updater			     :GKEYLL:
+** DONE Volume intergration updater is needed			     :GKEYLL:
+
+
+
 
 

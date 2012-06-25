@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 25th
+
+  Found the problem with the Vlasov free-streaming input file. The
+  issue is still unresolved, however, it is "fixed" for now by using
+  0.0 as the initial guess for the solution. Basically, what seems to
+  happen is that the solution from the previous time-step was being
+  used as a initial guess which was giving completely bogus
+  answers. Not sure why, but it does indicate a bug in the
+  ContFromDisContUpdater code. This is very strange as nothing special
+  is done in that code that would cause this problem. But this code
+  must be the problem. What is more bizarre is that this is happening
+  with the direct solve, so the initial guess should be completely
+  ignored.
+
 * June 24th
 
 **  General philosophical notes
