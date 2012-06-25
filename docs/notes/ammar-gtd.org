@@ -15,15 +15,23 @@ archived.
 
   Things to do in Gkeyll.
 
-** Test Vlasov fixed-potential code
-*** DONE Implement moment computing updater			     :GKEYLL:
-*** DONE Volume intergration updater is needed			     :GKEYLL:
-*** TODO Write up journal entry					     :GKEYLL:
+** Write up journal entry for fixed-potential code 		     :GKEYLL:
+
+
+** Complete self-consistent Vlasov code				     :GKEYLL:
+*** TODO Write an updater to compute Hamiltonian		     :GKEYLL:
+
+   This updater should take the continous 1D potential and compute the
+   2D Hamiltonian field needed in the Poisson bracket updater.
+
+*** TODO Write Lua program for ion-acoustic wave problem.	     :GKEYLL:
+
 
 ** Write general hyperbolic equation updater for rectangular meshes
 *** DONE Work out the scheme on paper				      :LUCEE:
 *** TODO Implement a updater to work with advection equations	      :LUCEE:
 *** TODO Design/implement limiters				      :LUCEE:
+
 
 ** Registration of objects					      :INFRA:
 
@@ -47,20 +55,38 @@ archived.
    appropriate objects from the map, or all objects for a specified
    base class or clear out all registered objects completely.
 
+
 ** Improve HDF5 output
 
    Allow appending data to the same file. Also somehow one needs to
    use better names for the output groups and dataspaces.
 
+** Allow writing all data (including ghost) from Lua		      :INFRA:
+
+   This, combined with the ability to write to a single HDF5 file will
+   allow "exact" restarts. The problem with reading from an HDF5 file
+   from the current write() method is that it might not have the ghost
+   cell data and hence could lead to errors on a restart.
+
+   One option for this would be extend the current write() method to
+   take two extra parameters: one, name of the data-structure and
+   second, a boolean flag to indicate if the ghost-cell data should be
+   written. If this flag is set to true then the "writeGhost"
+   parameter in the DataStruct block will be ignored.
+
 ** Enable initializing fields from HDF5 files			      :INFRA:
    
    So restart can be enabled.
 
+
 ** Why does Lua script not have access to command line options?	      :INFRA:
+
+
 ** Complete proof of DG energy conservation 			     :GKEYLL:
 
    This requires some thought on how the discontinuity in d(phi)/dx
    should be taken into account.
+
 
 ** Split each updater/datastruct docs into its own file 	     :GKEYLL:
 
@@ -69,16 +95,13 @@ archived.
    a single file for all updaters etc. This makes searching and
    indexing easier.
 
-** Figure out the problem with Lua Vlasov program		     :GKEYLL:
-
-   Even though the interpolation works from a stand-alone test it does
-   not from the actual Vlasov solver. Need to figure out why.
 
 ** Write arbitrary nodal basis function 			     :GKEYLL:
    
    Use tensor product basis. This is so that the polynomial order can
    be specified in the Lua program to get arbitrary accuracy. Try and
    make this work for both Gauss and Lobatto nodal layouts.
+
 
 ** Transition to eigen matrix package				      :INFRA:
 
@@ -87,6 +110,7 @@ archived.
    package. This might need to be done in a staged manner as a lot of
    the code depends on the Lucee matrix classes and so this will
    involve significant refactoring.
+
 
 ** Transition to Luabind					      :INFRA:
 
@@ -99,13 +123,26 @@ archived.
    bindings much easier to create and allow for a much more
    fine-grained control from Lua than is possible now.
 
+
+** Build everything on work computer.				      :INFRA:
+
+   Do this at night so as not to bring machine to a halt.
+
+
+** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
+
+   At present only direct solves work. Need to fix this.
+
+
 * Work related
 
   This is stuff not directly related to Gkeyll.
+
 ** Send Sasha implicit solver slides 				       :WORK:
 
    Send figure for explicit 1000ms figure and also slide to show
    advantages of implicit.
+
 
 ** Make WarpX find latest petsc					      :WARPX:
 
