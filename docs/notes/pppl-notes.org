@@ -10,10 +10,17 @@
 **  General philosophical notes
 
     Once the core algorithm is identified, it should be heavily
-    optimized for production code.
+    optimized for production code. [Isn't this obvious?]
 
     The aim should be to reduce the C++ code to the minium possible
     and increase the Lua code via Luabind.
+
+    Is C++ the correct language to use? Are there better alternatives
+    out there that are portable to all platforms as well as highly
+    efficient? Are there better programming models? I do not believe
+    this so-called OO model of programming is a good one, and some
+    more exploration is required. Specially: how can multi-core
+    processors be exploited transparently?
 
 * June 21st
 
@@ -34,6 +41,10 @@
   At this point most dependence on TX servers is gone. Did some major
   surgery to the build system to make all of this work. Now, gkeyll
   builds with bilder and is installed in the usual nice wat.
+
+  [NOT REALLY: Turns out the one needs to switch to http URL from http
+  URL for numpkgs. Otherwise ice.txcorp.com still asks for a
+  password.]
 
 * June 15th
 

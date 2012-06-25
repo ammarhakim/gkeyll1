@@ -5,7 +5,7 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 #+STARTUP: overview
-#+TAGS: GKEYLL(g) LUCEE(l) HOME(h) READ(r) WRITE(w) INFRA(i)
+#+TAGS: GKEYLL(g) LUCEE(l) HOME(h) WARPX(w) INFRA(i)
 
 This file contains things to be done. The TODO items are sub-bullets
 in a task and are kept till the task is done. Completed tasks are
@@ -102,12 +102,12 @@ archived.
 * Work related
 
   This is stuff not directly related to Gkeyll.
-
-** Complete self-evaluations					       :WORK:
 ** Send Sasha implicit solver slides 				       :WORK:
 
    Send figure for explicit 1000ms figure and also slide to show
-   advantages of implicity.
+   advantages of implicit.
+
+** Make WarpX find latest petsc					      :WARPX:
 
 
 * Reading/Writing
