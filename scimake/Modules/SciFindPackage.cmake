@@ -29,7 +29,9 @@
 #    package not found
 #(default - not defined, which is treated as false)
 #
-#  ${scipkguc}_ROOT_DIR, ${scipkguc}_DIR - search directory hints
+#  ${scipkgreg}_ROOT_DIR - search directory hints
+#    ${scipkguc}_DIR, ${scipkgreg}_DIR: Deprecated search directory hints 
+#    (to be retired in July 2012)
 #
 #  SUPRA_SEARCH_PATH - used to specify various top-level search directories
 #
@@ -320,20 +322,34 @@ macro(SciFindPackage)
   endif ()
   set(scipath)
 # Command-line define overrides all.
-  if (${scipkg}_ROOT_DIR)
-    SciGetRealDir(${${scipkg}_ROOT_DIR} scipath)
-  elseif (${scipkg}_DIR)
+  if (${scipkgreg}_ROOT_DIR)
+    if (DEBUG_CMAKE)
+      message(STATUS "${scipkgreg}_ROOT_DIR = ${${scipkgreg}_ROOT_DIR}.")
+    endif ()
+    SciGetRealDir(${${scipkgreg}_ROOT_DIR} scipath)
+  elseif (${scipkgreg}_DIR)
 # JRC 20120617: Remove this July 31, 2012.
-    message(WARNING "Use of ${scipkg}_DIR define is deprecated.  Please use ${scipkg}_ROOT_DIR")
-    SciGetRealDir(${${scipkg}_DIR} scipath)
+    message(WARNING "Use of ${scipkgreg}_DIR define is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
+    SciGetRealDir(${${scipkgreg}_DIR} scipath)
+  elseif (${scipkguc}_DIR)
+# The deprecated variable name is commonly ${scipkguc}_DIR, so check for that too
+# MD 20120619: Remove this July 31, 2012.
+    message(WARNING "Use of ${scipkguc}_DIR define is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
+    SciGetRealDir(${${scipkguc}_DIR} scipath)
+  elseif (DEBUG_CMAKE)
+    message(STATUS "Neither ${scipkgreg}_ROOT_DIR, ${scipkgreg}_DIR, nor ${scipkguc}_DIR defined.")
   endif ()
   if (NOT DEFINED ${scipath})
-    if ($ENV{${scipkg}_ROOT_DIR})
-      SciGetRealDir($ENV{${scipkg}_ROOT_DIR} scipath)
-    elseif (${scipkg}_DIR)
+    if ($ENV{${scipkgreg}_ROOT_DIR})
+      SciGetRealDir($ENV{${scipkgreg}_ROOT_DIR} scipath)
+    elseif ($ENV{${scipkgreg}_DIR})
 # JRC 20120617: Remove this July 31, 2012.
-      message(WARNING "Use of ${scipkg}_DIR environment variable is deprecated.  Please use ${scipkg}_ROOT_DIR")
-      SciGetRealDir($ENV{${scipkg}_DIR} scipath)
+      message(WARNING "Use of ${scipkgreg}_DIR environment variable is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
+      SciGetRealDir($ENV{${scipkgreg}_DIR} scipath)
+    elseif ($ENV{${scipkguc}_DIR})
+# MD 20120619: Remove this July 31, 2012.
+      message(WARNING "Use of ${scipkguc}_DIR environment variable is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
+      SciGetRealDir($ENV{${scipkguc}_DIR} scipath)
     endif ()
   endif ()
 # Next try environment variable
@@ -772,7 +788,7 @@ macro(SciFindPackage)
         # CACHE STRING "All include directories for ${scipkgreg}"
       # )
     else ()
-      message(WARNING "None of ${TFP_HEADERS} found.  Define ${scipkguc}_DIR to find them.")
+      message(WARNING "None of ${TFP_HEADERS} found.  Define ${scipkgreg}_ROOT_DIR to the root directory of the installation.")
     endif ()
   endif ()
 
@@ -891,7 +907,7 @@ macro(SciFindPackage)
 # Clean up and commit variables to cache
     list(LENGTH ${scipkgreg}_LIBRARIES sciliblistlen)
     if (NOT ${sciliblistlen})
-      message("WARNING - None of the libraries, ${TFP_LIBRARIES}, found.  Define ${scipkguc}_DIR to find them.")
+      message("WARNING - None of the libraries, ${TFP_LIBRARIES}, found.  Define ${scipkgreg}_ROOT_DIR to find them.")
     else ()
       list(REMOVE_DUPLICATES "${scipkgreg}_LIBRARIES")
       list(REMOVE_DUPLICATES "${scipkgreg}_LIBRARY_DIRS")

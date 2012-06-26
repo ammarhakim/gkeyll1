@@ -56,7 +56,7 @@ if (HDF5_FOUND)
   set(OLD_H5S_SELECT_HYPERSLAB_IFC 0 CACHE BOOL
     "Whether using the old 1.6.3 H5Sselect_hyperslab interface")
 else ()
-  message(STATUS "Did not find Hdf5.  Use -DHDF5_DIR to specify the installation directory.")
+  message(STATUS "Did not find Hdf5.  Use -DHdf5_ROOT_DIR to specify the installation directory.")
   if (SciHdf5_FIND_REQUIRED)
     message(FATAL_ERROR "Failing.")
   endif ()
