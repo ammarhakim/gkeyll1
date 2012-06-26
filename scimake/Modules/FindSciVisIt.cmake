@@ -44,7 +44,7 @@ set(VisIt_VOLUME_LIBS
 set(VisIt_LIBRARY_NAMES_SEARCHED
   ${VisIt_DIFF_LIBS}
   ${VisIt_VOLUME_LIBS}
-  GLEW
+  visitGLEW
   avtdatabase_ser
   avtdbatts
   avtdbin_ser
