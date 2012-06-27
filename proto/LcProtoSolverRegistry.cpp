@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcCopy1DTo2DNodalField.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
@@ -69,6 +70,8 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::Copy1DTo2DNodalField>;
 
 #ifdef HAVE_PETSC
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ContFromDisContUpdater<1> >;
