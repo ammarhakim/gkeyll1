@@ -18,6 +18,7 @@ if (PETSC_FOUND)
 endif (PETSC_FOUND)
 
 set (proto_SOURCES
+  LcCopy1DTo2DNodalField.cpp
   LcDistFuncMomentCalc1D.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
