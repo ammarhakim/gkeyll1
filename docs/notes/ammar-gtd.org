@@ -14,12 +14,12 @@ archived.
 * Gkeyll projects
 
   Things to do in Gkeyll.
-
+  
 ** Write up journal entry for fixed-potential code 		     :GKEYLL:
 
 
 ** Complete self-consistent Vlasov code				     :GKEYLL:
-*** TODO Write an updater to compute Hamiltonian		     :GKEYLL:
+*** DONE Write an updater to compute Hamiltonian		     :GKEYLL:
 
    This updater should take the continous 1D potential and compute the
    2D Hamiltonian field needed in the Poisson bracket updater.
@@ -122,11 +122,6 @@ archived.
    However, a major advantage of luabind is that it will make future
    bindings much easier to create and allow for a much more
    fine-grained control from Lua than is possible now.
-
-
-** Build everything on work computer.				      :INFRA:
-
-   Do this at night so as not to bring machine to a halt.
 
 
 ** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
