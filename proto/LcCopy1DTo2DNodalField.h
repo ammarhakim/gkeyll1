@@ -66,8 +66,6 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
   };
 }
 

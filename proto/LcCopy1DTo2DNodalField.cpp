@@ -26,12 +26,6 @@ namespace Lucee
   {
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
-
-// get hold of element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
-    else
-      throw Lucee::Except("Copy1DTo2DNodalField::readInput: Must specify element to use using 'basis'");
   }
 
   void
@@ -54,14 +48,13 @@ namespace Lucee
     Lucee::Field<2, double>& fld2d = this->getOut<Lucee::Field<2, double> >(0);
 
     unsigned polyOrder = 1;
-    if (nodalBasis->getNumNodes() == 2)
+    if (fld1d.getNumComponents() == 1)
       polyOrder = 1;
-    else if (nodalBasis->getNumNodes() == 3)
+    else if (fld1d.getNumComponents() == 2)
       polyOrder = 2;
     else
     {
-      Lucee::Except lce("Copy1DTo2DNodalField::update: element with nodes ");
-      lce << nodalBasis->getNumNodes() << " not supported";
+      Lucee::Except lce("Copy1DTo2DNodalField::update: element not supported");
       throw lce;
     }
 
@@ -69,27 +62,25 @@ namespace Lucee
 // assumed to have the same cell layout as the X-direction of the 2D region)
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
+    Lucee::ConstFieldPtr<double> fld1dPtr = fld1d.createConstPtr();
     Lucee::FieldPtr<double> fld2dPtr = fld2d.createPtr();
-    std::vector<double> data1d(nodalBasis->getNumNodes());
+
 // loop over all X-direction cells
     for (int i=localRgn.getLower(0)-1; i<localRgn.getUpper(0); ++i)
     {
-      nodalBasis->setIndex(i);
-// extract data from current cell
-      nodalBasis->extractFromField(fld1d, data1d);
-
-// copy this into alll Y-direction cells
+      fld1d.setPtr(fld1dPtr, i);
+// copy this into all Y-direction cells
       for (int j=localRgn.getLower(1); j<localRgn.getUpper(1)+1; ++j)
       {
         fld2d.setPtr(fld2dPtr, i, j);
 // copy data based on polynomial order
         if (polyOrder == 1)
-          fld2dPtr[0] = data1d[0];
+          fld2dPtr[0] = fld1dPtr[0];
         else
         {
-          fld2dPtr[0] = data1d[0];
-          fld2dPtr[1] = data1d[1];
-          fld2dPtr[2] = data1d[0];
+          fld2dPtr[0] = fld1dPtr[0];
+          fld2dPtr[1] = fld1dPtr[1];
+          fld2dPtr[2] = fld1dPtr[0];
         }
       }
     }
