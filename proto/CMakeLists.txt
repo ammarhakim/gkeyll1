@@ -7,7 +7,6 @@ include_directories(${PROJECT_SOURCE_DIR}/datastructs)
 include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/proto)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
-include_directories(${PROJECT_SOURCE_DIR}/etc/lua/src)
 
 if (FFTW3_FOUND)
    include_directories(${Fftw3_INCLUDE_DIRS})
