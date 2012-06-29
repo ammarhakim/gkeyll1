@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 28th
+
+  Played around with Luabind. This seems to be a very good library and
+  will make binding of the C++ objects really simple. Need to think of
+  how to migrate from current binding system to luabind, but appears
+  to be relatively straighforward for most classes/functions.
+
 * June 25th
 
   Found the problem with the Vlasov free-streaming input file. The

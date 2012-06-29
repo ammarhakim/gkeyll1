@@ -92,6 +92,12 @@ if (LUA_FOUND)
   include_directories(${Lua_INCLUDE_DIRS})
 endif (LUA_FOUND)
 
+# find LUABIND
+find_package(SciLuabind REQUIRED)
+if (LUABIND_FOUND)
+  include_directories(${Luabind_INCLUDE_DIRS})
+endif (LUABIND_FOUND)
+
 # Math packages
 find_package(SciPetsc REQUIRED)
 
