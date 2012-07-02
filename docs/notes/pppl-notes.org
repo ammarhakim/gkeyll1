@@ -47,6 +47,16 @@
    the low-level code should be minimized by getting reif of the
    excess syntactic noise.
 
+** Notes on luabind/Lucee
+
+   - It is not documented very well. Never would have figured out how
+     to use the luabind::table<> class.
+
+   - Why is there an initialize() method at all. Why isn't a object
+     initialized completely in a constructor? For special objects that
+     need multi-step initialization, perhaps initialization is needed,
+     but not otherwise.
+
 * June 28th
 
   Played around with Luabind. This seems to be a very good library and
