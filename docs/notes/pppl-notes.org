@@ -47,15 +47,43 @@
    the low-level code should be minimized by getting reif of the
    excess syntactic noise.
 
-** Notes on luabind/Lucee
+** Note on initialize() method
+
+   Why is there an initialize() method at all. Why isn't a object
+   initialized completely in a constructor? For special objects that
+   need multi-step initialization, perhaps initialization is needed,
+   but not otherwise.
+
+   This is a hang over from the Facets/Vorpal world in which the input
+   file is static and not a true programming language. In fact the
+   order of the blocks in F/V does not tell anything about the order
+   in which objects are created. In Gkeyll, OTH, the order is explicit
+   in the Lua program.
+
+
+* June 29th
+
+  Luabind seems almost magical. Not only are objects wrapped, but they
+  can be created and passed around like ordinary lua variables. Seems
+  very cool.
+
+** Some questions for luabind usage
+
+   - How to determine lenght of a table?
+
+   - How to determine if a value is present (other than comparing to
+     NIL)
+
+   - Perhaps Lucee::LuaTable can become a wrapper around
+     luabind::table?
+
+   - Why is a readInput() method needed? Why not simply have a ctor
+     that takes the table as a parameter?
+
+   - What is the correct way to use the luabind::object class?
 
    - It is not documented very well. Never would have figured out how
      to use the luabind::table<> class.
-
-   - Why is there an initialize() method at all. Why isn't a object
-     initialized completely in a constructor? For special objects that
-     need multi-step initialization, perhaps initialization is needed,
-     but not otherwise.
 
 * June 28th
 
