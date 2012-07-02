@@ -121,7 +121,8 @@ target_link_libraries(lcluacobj lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hd
 
 # lcluabind
 add_executable(lcluabind lcluabind.cxx)
-target_link_libraries(lcluabind lclib lcloki ${Luabind_STLIBS} ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+target_link_libraries(lcluabind lclib lcloki 
+  ${Luabind_STLIBS} ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES} ${Blitz_LIBRARIES})
 
 # lcfieldptr
 add_executable(lcfieldptr lcfieldptr.cxx)
@@ -174,3 +175,7 @@ target_link_libraries(lcquadraturerule lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIE
 add_executable(lcdynvector lcdynvector.cxx)
 target_link_libraries(lcdynvector 
   lcdatastructs lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+
+# lcblitz
+add_executable(lcblitz lcblitz.cxx)
+target_link_libraries(lcblitz ${Blitz_LIBRARIES})

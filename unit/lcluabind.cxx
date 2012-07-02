@@ -14,6 +14,10 @@
 #include <luabind/iterator_policy.hpp>
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
+#include <luabind/operator.hpp>
+
+// blitz includes
+#include <blitz/array.h>
 
 // std includes
 #include <cstdlib>
@@ -130,7 +134,16 @@ init(lua_State *L)
       .def_readonly("upper", &RectGrid::upper)
       .def_readonly("cells", &RectGrid::cells)
       .def_readonly("dx", &RectGrid::dx)
-      .property("range", &RectGrid::getRange)
+      .property("range", &RectGrid::getRange),
+// blitz range object
+      class_<blitz::Range>("Range")
+      .def(constructor<int, int>()),
+// blitz 1D array
+      class_<blitz::Array<double, 1> >("Array1D")
+      .def(constructor<blitz::Range>())
+      .def(self(int()))
+      .def("lower", (int (blitz::Array<double, 1>::*)(int) const) &blitz::Array<double, 1>::lbound)
+      .def("upper", (int (blitz::Array<double, 1>::*)(int) const) &blitz::Array<double, 1>::ubound)
     ];
 }
 
