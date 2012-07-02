@@ -5,6 +5,48 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* June 30th
+
+** Bitching about programming languages
+
+   Apparently, it is that time of the year, when my computational soul
+   descends into existential hell, wondering if all this C++ mess is
+   worth anything at all. Is C++ a good programming language? I do not
+   think so, but unfortunately it is a necessary evil. For now. To
+   mimimize the evil in Gkeyll one must use the minimum possible C++
+   and maximum possible Lua.
+
+   Actually, the question is not one of the correct programming
+   language but how to best build a flexible application. The correct
+   way to do that is blur (or remove) the distinction between the
+   implementation and extension language. I.e. the application should
+   have small kernel (written in C++, say) and everything else should
+   be built on top of it in a language which also serves as the
+   extension language. Highly successful example of this the Emacs
+   editor which is mostly written in Lisp which is also the extension
+   language. Once the installation of new modules becomes easy (as in
+   Emacs, just copy code somewhere and load the top-level file) the
+   user becomes a developer, modifying the application to suit his
+   needs. The application then need not be loaded with features, in
+   fact one should strive for the opposite, but provide enough hooks
+   for the user to turn the application into a specialized tool.
+
+** A note on Blitz++ in Gkeyll and Lua wrapping
+
+   Blitz++ seems like a good replacement for the N-dimensional array
+   classes in Gkeyll. Eigen can provide the matrix and vector
+   functions.
+
+   One way to move forward is to have a blitz::Array as a member of
+   the Lucee::Field class. Then, a method should return the array to
+   updater (or other classes) when needed.
+
+   Wrapping into Lua should be done in such a way as to minimize the
+   amount of C/C++ code, but making the low-level code compact and
+   putting a lot of the functionality into Lua. Also, the verbosity of
+   the low-level code should be minimized by getting reif of the
+   excess syntactic noise.
+
 * June 28th
 
   Played around with Luabind. This seems to be a very good library and
@@ -180,8 +222,9 @@
 ** A Frankenstein Monster?
 
    All this dependence on dozen's of libraries makes a software
-   project look like a Frankenstein monster. However, there is no
-   other option.
+   project look like a Frankenstein monster. However, this not a bad
+   thing, as it helps focus the application on the algorithms and
+   physics, while letting others worry about basic infrastructure.
 
 * June 12th
 
