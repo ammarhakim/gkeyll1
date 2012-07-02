@@ -12,6 +12,7 @@
 // luabind
 #include <luabind/iterator_policy.hpp>
 #include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
 
 // std includes
 #include <cstdlib>
@@ -58,6 +59,28 @@ struct ParticleList
     { return p.size(); }
 };
 
+// grid
+struct RectGrid
+{
+    double lower, upper;
+    int cells;
+    double dx;
+
+    RectGrid(double l, double u, int nx)
+      : lower(l), upper(u), cells(nx)
+    {
+      dx = (u-l)/nx;
+    }
+
+    RectGrid(const luabind::table<>& tbl)
+    {
+      lower = luabind::object_cast<double>(tbl["lower"]);
+      upper = luabind::object_cast<double>(tbl["upper"]);
+      cells = luabind::object_cast<int>(tbl["cells"]);
+      dx = (upper-lower)/cells;
+    }
+};
+
 int
 init(lua_State *L)
 {
@@ -86,7 +109,15 @@ init(lua_State *L)
       class_<ParticleList>("ParticleList")
       .def(constructor<unsigned>())
       .def_readwrite("p", &ParticleList::p, return_stl_iterator)
-      .def("numPtcls", &ParticleList::numPtcls)
+      .def("numPtcls", &ParticleList::numPtcls),
+// grid
+      class_<RectGrid>("RectGrid")
+      .def(constructor<double, double, int>())
+      .def(constructor<const luabind::table<>&>())
+      .def_readonly("lower", &RectGrid::lower)
+      .def_readonly("upper", &RectGrid::upper)
+      .def_readonly("cells", &RectGrid::cells)
+      .def_readonly("dx", &RectGrid::dx)
     ];
 }
 
