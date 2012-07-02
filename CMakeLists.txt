@@ -98,6 +98,12 @@ if (LUABIND_FOUND)
   include_directories(${Luabind_INCLUDE_DIRS})
 endif (LUABIND_FOUND)
 
+# find Blitz
+find_package(SciBlitz REQUIRED)
+if (BLITZ_FOUND)
+  include_directories(${Blitz_INCLUDE_DIRS})
+endif (BLITZ_FOUND)
+
 # Math packages
 find_package(SciPetsc REQUIRED)
 
