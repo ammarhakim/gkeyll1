@@ -6,6 +6,7 @@
 
 // lucee includes
 #include <LcCmdLineArgs.h>
+#include <LcFixedVector.h>
 #include <LcLuaState.h>
 #include <LcLuaTable.h>
 
@@ -79,6 +80,14 @@ struct RectGrid
       cells = luabind::object_cast<int>(tbl["cells"]);
       dx = (upper-lower)/cells;
     }
+
+    luabind::object getRange(lua_State *L) const
+    {
+      luabind::object tbl = luabind::newtable(L);
+      tbl[0] = lower;
+      tbl[1] = upper;
+      return tbl;
+    }
 };
 
 int
@@ -105,11 +114,14 @@ init(lua_State *L)
       .def_readwrite("vx", &Particle::vx)
       .def_readwrite("vy", &Particle::vy)
       .def_readwrite("vz", &Particle::vz),
+// fixed vector
+      class_<Lucee::FixedVector<2, double> >("FixedVector")
+      .def(constructor<double, double>()),
 // particle list
       class_<ParticleList>("ParticleList")
       .def(constructor<unsigned>())
       .def_readwrite("p", &ParticleList::p, return_stl_iterator)
-      .def("numPtcls", &ParticleList::numPtcls),
+      .property("size", &ParticleList::numPtcls),
 // grid
       class_<RectGrid>("RectGrid")
       .def(constructor<double, double, int>())
@@ -118,6 +130,7 @@ init(lua_State *L)
       .def_readonly("upper", &RectGrid::upper)
       .def_readonly("cells", &RectGrid::cells)
       .def_readonly("dx", &RectGrid::dx)
+      .property("range", &RectGrid::getRange)
     ];
 }
 
