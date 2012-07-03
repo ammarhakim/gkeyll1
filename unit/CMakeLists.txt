@@ -179,3 +179,7 @@ target_link_libraries(lcdynvector
 # lcblitz
 add_executable(lcblitz lcblitz.cxx)
 target_link_libraries(lcblitz ${Blitz_LIBRARIES})
+
+# lceigen
+add_executable(lceigen lceigen.cxx)
+target_link_libraries(lceigen)
