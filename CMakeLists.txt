@@ -104,6 +104,12 @@ if (BLITZ_FOUND)
   include_directories(${Blitz_INCLUDE_DIRS})
 endif (BLITZ_FOUND)
 
+# find Eigen
+find_package(SciEigen REQUIRED)
+if (EIGEN_FOUND)
+  include_directories(${Eigen_INCLUDE_DIRS})
+endif (EIGEN_FOUND)
+
 # Math packages
 find_package(SciPetsc REQUIRED)
 
