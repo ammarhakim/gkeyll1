@@ -5,6 +5,33 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 2nd
+
+  More fiddling around with Blitz, luabind and Eigen. All look very
+  good for integration into Gkeyll. This integration perhaps can wait
+  for now, but needs to be done soon and in a single shot.
+
+** Updates on Gkeyll and Vlasov solvers
+
+   It seems that for the last 3 weeks or more not much has been
+   acomplished as far as the algorithm development work is
+   concerned. However, a lot of software engineering work had been
+   acomplished, including getting the portal build completed and
+   determination of the correct set of libraries to use. Further, the
+   dependence on facetsall is now removed, and the code can be built
+   without any svn accounts from Tech-X.
+
+   My frustration with C++ and the build process is wearing off and I
+   am now feeling better about the selected tool chain.  The real
+   lesson of all this sould searching ist is that is best to minimize
+   the amount of C++ code, while increasing the amount of stuff that
+   can be done in Lua. For this, as much functionality as possible
+   should be used in pre-existing libraries and Gkeyll itself should
+   only focus on the algorithms.
+
+   At this point the self-consistent Vlasov solver code is complete
+   and test cases needed to be written. Need to get to this ASAP.
+
 * June 30th
 
 ** Bitching about programming languages
@@ -59,7 +86,6 @@
    order of the blocks in F/V does not tell anything about the order
    in which objects are created. In Gkeyll, OTH, the order is explicit
    in the Lua program.
-
 
 * June 29th
 
@@ -333,75 +359,6 @@
    [June 12th] Scott Kruger tells me that TX is moving bilder and
    related packaged to sourceforge. I will move Gkeyll to use the
    sourceforge version once the move is complete.
-
-* General things to do
-
-
-** TODO General nodal-DG updater
-
-   Add an updater to solve general hyperbolic conservation laws using
-   a nodal DG scheme.
-
-** TODO Complete proof of DG energy conservation
-
-   This requires some thought on how the discontinuity in d(phi)/dx
-   should be taken into account.
-
-** TODO Registration of objects
-
-   Currently the object registration depends on a doing a "new". Need
-   to replace this with a proper function so that cleanup of the
-   registred objects can be done if needed. Also, this adds an
-   additional layer, opening up the possibility for doing more complex
-   things later.
-   
-   One possible solution:
-
-#+BEGIN_EXAMPLE
-   Lucee::registerObject<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>();
-#+END_EXAMPLE
-
-   I.e. the method would be templated over the base and derived class
-   but otherwise would not take any parameters. In the body of the
-   method the ObjRegistry<> object would be created and the object
-   pointer put into a map, using the derived class Id as a key. Then,
-   a set of "unload" methods would be provided that would remove the
-   appropriate objects from the map, or all objects for a specified
-   base class or clear out all registered objects completely.
-
-** TODO Some nodal updaters only work for scalar fields
-
-   Fix this. For eample, the new IntegrateNodalField only works with
-   scalar fields. This is not usually a problem as aliases can alway
-   be created, but could cause problems on an unsuspecting user. Fix,
-   or barf.
-
-** TODO DOCUMENTATION!
-
-   This is a perpetually underlooked todo. I need to document each
-   updater, datastructure and grid object. Each should be in its own
-   RST file rather than a single file for all updaters etc. This makes
-   searching and indexing easier.
-
-   Also, need to add an overview of the whole system, explaning how to
-   write a Lua script to drive Gkeyll.
-
-   Finally, need to clean up the C++ API documentation. This is an
-   enormous task and just gets more unmanegable as time goes on, more
-   classes are added, methods are added etc. etc. etc.
-
-** TODO Improve HDF5 output
-
-   Allow appending data to the same file. Also somehow one needs to
-   use better names for the output groups and dataspaces.
-
-** TODO Enable initializing fields from HDF5 files
-
-   So restart can be enabled.
-
-** TODO Why does Lua script not have access to command line options?
-
-   Please fix this, should be easy (I think).
 
 * May 24th-29th
 
