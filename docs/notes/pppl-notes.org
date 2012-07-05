@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 3rd
+
+  Working on fixed potential Vlasov notes. Should finish this today if
+  possible.
+
+** Notes on commenting code
+
+   Please do not comment obvious things. For example, comment like
+   "apply Bcs" before a method called "applyBc" are superfluous. Aim
+   for minimum (but judicously placed) comments. 
+
+   Remember: "Therefore, since brevity is the soul of wit / And
+   tediousness the limbs and outward florishes, / I will be brief."
+
 * July 2nd
 
   More fiddling around with Blitz, luabind and Eigen. All look very
