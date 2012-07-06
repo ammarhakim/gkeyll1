@@ -5,6 +5,19 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 5th
+
+  No work on July 4th on notes. However, did get bilder to build
+  luajit and ran a few test cases. Significant speedup is seen from
+  the JIT compiler.
+
+  Worked on getting GSL shell to build. The dependency on Anti-Grain
+  Geometry library has been taken care off. Only the top-level does
+  not build, due to the lack of readline (I think). This is not
+  strictly needed, at least not for getting GSL shell into
+  Gkeyll. However, it would be good to have the shell build so one can
+  play around with it.
+
 * July 3rd
 
   Working on fixed potential Vlasov notes. Should finish this today if
