@@ -86,6 +86,28 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 
   Do this at night so as not to bring machine to a halt.
 
+* Write up journal entry for fixed-potential code		     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-07-06 Fri 11:49
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Write up the Vlasov fixed-potential notes. All the code development
+  is now complete and the first set of tests needs to be performed
+  and written up.
+
+* Make WarpX find latest petsc					      :WARPX:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-07-06 Fri 11:50
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Work related
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+
+
 
 
 
