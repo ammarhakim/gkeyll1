@@ -132,6 +132,13 @@ archived.
    documented. Also, some code can then be removed based on this
    master list.
 
+** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
+
+   A large number of matrices and other information is needed from FE
+   basis functions for use in different parts of the code. Document
+   these and explain why they are needed. This will also help creation
+   of the general class to do this for general quad/hex/tri/tet cells.
+
 * Work related
 
   This is stuff not directly related to Gkeyll.
