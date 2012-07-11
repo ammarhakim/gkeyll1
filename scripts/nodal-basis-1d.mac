@@ -48,6 +48,18 @@ calcGradStiffMatrix_x(basis) := block([n, stiff],
 	        return (stiff)
 );
 
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
 /** Order 2 */
 ord : [-1, 1];
 /** Construct matrix of coefficients */
@@ -71,6 +83,11 @@ basis2 : [N1, N2];
 N2_mass : calcMassMatrix(basis2);
 N2_stiff : calcStiffMatrix(basis2);
 N2_weights : integrate(basis2, x, -1, 1);
+N2_grad_stiff_x : calcGradStiffMatrix_x(basis2);
+
+/** Ordinates for Gaussian quadrature */
+gOrds2 : [-1/sqrt(3), 1/sqrt(3)];
+N2_interp_mat : calcInterpMatrix(basis2, gOrds2);
 
 /** Order 3 */
 ord : [-1, 0, 1];
@@ -96,6 +113,11 @@ basis3 : [N1, N2, N3];
 N3_mass : calcMassMatrix(basis3);
 N3_stiff : calcStiffMatrix(basis3);
 N3_weights : integrate(basis3, x, -1, 1);
+N3_grad_stiff_x : calcGradStiffMatrix_x(basis3);
+
+/** Ordinates for Gaussian quadrature */
+gOrds3 : [-sqrt(3/5), 0, sqrt(3/5)];
+N3_interp_mat : calcInterpMatrix(basis3, gOrds3);
 
 /** Order 4: ordinates are Legendre-Lobatto points */
 ord : [-1, -sqrt(1/5), sqrt(1/5), 1];
@@ -122,3 +144,7 @@ basis4 : [N1, N2, N3, N4];
 N4_mass : calcMassMatrix(basis4);
 N4_stiff : calcStiffMatrix(basis4);
 N4_weights : integrate(basis4, x, -1, 1);
+N4_grad_stiff_x : calcGradStiffMatrix_x(basis4);
+
+gOrds4 : [-sqrt((3+2*sqrt(6/5))/7), -sqrt((3-2*sqrt(6/5))/7), sqrt((3-2*sqrt(6/5))/7), sqrt((3+2*sqrt(6/5))/7)];
+N4_interp_mat : calcInterpMatrix(basis4, gOrds4);

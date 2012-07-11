@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcGaussianQuadRule.h>
 #include <LcLobattoElement1D.h>
 #include <LcStructuredGridBase.h>
 
@@ -29,7 +30,7 @@ namespace Lucee
 
   LobattoElement1D::LobattoElement1D()
     : Lucee::NodalFiniteElementIfc<1>(2), polyOrder(1), 
-      refNjNk(2,2), refDNjDNk(2,2)
+      refNjNk(2,2), refDNjDNk(2,2), refDNjNk_0(2,2)
   {
   }
 
@@ -231,6 +232,32 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const
+  {
+    if (dir>0)
+      throw Lucee::Except(
+        "getGradStiffnessMatrix::getGradStiffnessMatrix: Can only use this basis in 1D!");
+    DNjNk.copy(refDNjNk_0);
+  }
+
+  unsigned
+  LobattoElement1D::getNumGaussNodes() const
+  {
+    return polyOrder+1;
+  }
+
+  void
+  LobattoElement1D::getGaussQuadData(Lucee::Matrix<double>& interpMat,
+    Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+  {
+// copy over data
+    interpMat.copy(gaussData.interpMat);
+    ordinates.copy(gaussData.ords);
+    for (unsigned i=0; i<gaussData.weights.size(); ++i)
+      weights[i] = gaussData.weights[i];
+  }
+
+  void
   LobattoElement1D::extractFromField(const Lucee::Field<1, double>& fld,
     std::vector<double>& data)
   {
@@ -325,6 +352,16 @@ namespace Lucee
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
 
+// grad-stiffness matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    refDNjNk_0 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_0(1,1) = -1/dx;
+    refDNjNk_0(1,2) = -1/dx;
+    refDNjNk_0(2,1) = 1/dx;
+    refDNjNk_0(2,2) = 1/dx;
+
+// scale to bring this into physical space
+    refDNjNk_0 *= 2/dx;
+
 // compute weights
     weights.resize(2);
     weights[0] = 1.0;
@@ -332,6 +369,15 @@ namespace Lucee
 
     for (unsigned i=0; i<2; ++i)
       weights[i] = 0.5*dx*weights[i];
+
+// Gaussian quadrature data
+    calcGuassData(2);
+
+// interpolation matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    gaussData.interpMat(1,1) = 1/std::sqrt(3)/2.0+1.0/2.0;
+    gaussData.interpMat(1,2) = 1.0/2.0-1/std::sqrt(3)/2.0;
+    gaussData.interpMat(2,1) = 1.0/2.0-1/std::sqrt(3)/2.0;
+    gaussData.interpMat(2,2) = 1/std::sqrt(3)/2.0+1.0/2.0;
   }
 
   void
@@ -377,6 +423,21 @@ namespace Lucee
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
 
+// grad-stiffness matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    refDNjNk_0 = Lucee::Matrix<double>(shape, start);
+    refDNjNk_0(1,1) = -1/dx;
+    refDNjNk_0(1,2) = (-4.0)/(3.0*dx);
+    refDNjNk_0(1,3) = 1/dx/3.0;
+    refDNjNk_0(2,1) = 4.0/(3.0*dx);
+    refDNjNk_0(2,2) = 0;
+    refDNjNk_0(2,3) = (-4.0)/(3.0*dx);
+    refDNjNk_0(3,1) = -1/dx/3.0;
+    refDNjNk_0(3,2) = 4.0/(3.0*dx);
+    refDNjNk_0(3,3) = 1/dx;
+
+// scale to bring this into physical space
+    refDNjNk_0 *= 2/dx;
+
 // compute weights
     weights.resize(3);
     weights[0] = 1.0/3.0;
@@ -385,6 +446,20 @@ namespace Lucee
 
     for (unsigned i=0; i<2; ++i)
       weights[i] = 0.5*dx*weights[i];
+
+// Gaussian quadrature data
+    calcGuassData(3);
+
+// interpolation matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    gaussData.interpMat(1,1) = .6872983346207417;
+    gaussData.interpMat(1,2) = .3999999999999997;
+    gaussData.interpMat(1,3) = -.08729833462074155;
+    gaussData.interpMat(2,1) = 0.0;
+    gaussData.interpMat(2,2) = 1.0;
+    gaussData.interpMat(2,3) = 0.0;
+    gaussData.interpMat(3,1) = -.08729833462074174;
+    gaussData.interpMat(3,2) = .4000000000000001;
+    gaussData.interpMat(3,3) = .6872983346207415;
   }
 
   void
@@ -444,6 +519,29 @@ namespace Lucee
 // scale to bring this into physical space
     refDNjDNk *= 2/dx;
 
+// grad-stiffness matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    refDNjNk_0 = Lucee::Matrix<double>(shape, start);
+
+    refDNjNk_0(1,1) = -1/dx;
+    refDNjNk_0(1,2) = -(std::pow(5, 1.5)+5)/dx/12.0;
+    refDNjNk_0(1,3) = (std::pow(5, 1.5)-5)/dx/12.0;
+    refDNjNk_0(1,4) = -1/dx/6.0;
+    refDNjNk_0(2,1) = (std::pow(5, 1.5)+5)/dx/12.0;
+    refDNjNk_0(2,2) = 0;
+    refDNjNk_0(2,3) = -std::pow(5, 1.5)/dx/6.0;
+    refDNjNk_0(2,4) = (std::pow(5, 1.5)-5)/dx/12.0;
+    refDNjNk_0(3,1) = -(std::pow(5, 1.5)-5)/dx/12.0;
+    refDNjNk_0(3,2) = std::pow(5, 1.5)/dx/6.0;
+    refDNjNk_0(3,3) = 0;
+    refDNjNk_0(3,4) = -(std::pow(5, 1.5)+5)/dx/12.0;
+    refDNjNk_0(4,1) = 1/dx/6.0;
+    refDNjNk_0(4,2) = -(std::pow(5, 1.5)-5)/dx/12.0;
+    refDNjNk_0(4,3) = (std::pow(5, 1.5)+5)/dx/12.0;
+    refDNjNk_0(4,4) = 1/dx;
+
+// scale to bring this into physical space
+    refDNjNk_0 *= 2/dx;
+
 // compute weights
     weights.resize(4);
     double c5 = std::pow(5.0, 1.5);
@@ -455,5 +553,57 @@ namespace Lucee
 
     for (unsigned i=0; i<2; ++i)
       weights[i] = 0.5*dx*weights[i];
+
+// Gaussian quadrature data
+    calcGuassData(4);
+
+// interpolation matrix (automatically generated. See scripts/nodal-basis-1d.mac)
+    gaussData.interpMat(1,1) = .6299431661034449;
+    gaussData.interpMat(1,2) = .4725587471138189;
+    gaussData.interpMat(1,3) = -0.14950343104608;
+    gaussData.interpMat(1,4) = .04700151782881631;
+    gaussData.interpMat(2,1) = -.07069479527385608;
+    gaussData.interpMat(2,2) = .9729761862582639;
+    gaussData.interpMat(2,3) = 0.132539926245426;
+    gaussData.interpMat(2,4) = -.03482131722983343;
+    gaussData.interpMat(3,1) = -.03482131722983417;
+    gaussData.interpMat(3,2) = .1325399262454268;
+    gaussData.interpMat(3,3) = .9729761862582633;
+    gaussData.interpMat(3,4) = -.07069479527385587;
+    gaussData.interpMat(4,1) = 0.0470015178288162;
+    gaussData.interpMat(4,2) = -.1495034310460798;
+    gaussData.interpMat(4,3) = .4725587471138186;
+    gaussData.interpMat(4,4) = .6299431661034451;
+  }
+
+  void
+  LobattoElement1D::calcGuassData(unsigned nord)
+  {
+// get hold of grid
+    const Lucee::StructuredGridBase<1>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+
+// get grid spacing (this is assumed to be uniform for now)
+    double dx[1];
+    dx[0] = grid.getDx(0);
+
+    Lucee::GaussianQuadRule gauss(nord);
+    Lucee::Vector<double> w(nord), mu(nord);
+    gauss.getOrdinatesAndWeights(mu, w);
+
+// allocate memory for quadrature
+    gaussData.reset(nord, nord);
+
+// set ordinates
+    for (unsigned i=0; i<nord; ++i)
+    {
+      gaussData.ords(i,0) = mu[i];
+      gaussData.ords(i,1) = 0.0;
+      gaussData.ords(i,2) = 0.0;
+    }
+   
+// set weights
+    for (unsigned i=0; i<nord; ++i)
+      gaussData.weights[i] = 0.5*dx[0]*w[i];
   }
 }
