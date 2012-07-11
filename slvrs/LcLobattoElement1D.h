@@ -154,6 +154,34 @@ namespace Lucee
       void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
+ * Get partial stiffness matrix (grad.Nj Nk) for this reference
+ * element. The output matrix should be pre-allocated.
+ *
+ * @param dir Direction for gradient.
+ * @param DNjNk On output, partial stiffness matrix of element.
+ */
+      virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
+
+/**
+ * Get number of nodes needed for Gaussian quadrature in the element
+ * interior.
+ *
+ * @return Number of nodes needed for Gaussian quadrature.
+ */
+      virtual unsigned getNumGaussNodes() const;
+
+/**
+ * Get data needed for Gaussian quadrature for this element. All
+ * output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      virtual void getGaussQuadData(Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -189,10 +217,59 @@ namespace Lucee
       Lucee::Matrix<double> refNjNk;
 /** Stiffness matrix in reference coordinates */
       Lucee::Matrix<double> refDNjDNk;
+/** Grad-Stiffness (in direction X) matrix in reference coordinates */
+      Lucee::Matrix<double> refDNjNk_0;
 /** Total global degrees of freedom */
       unsigned numGlobal;
 /** Weights for quadrature */
       std::vector<double> weights;
+
+/**
+ * Struct to hold data for Guassian quadrature.
+ */
+      struct GaussQuadData
+      {
+/**
+ * Create object.
+ * 
+ * @param nord Numer of ordinates in each direction.
+ * @param nlocal Total number of local nodes.
+ */
+          GaussQuadData(unsigned nord = 1, unsigned nlocal = 1)
+            : ords(nord, 3), weights(nord), interpMat(nord, nlocal)
+          {
+          }
+
+/**
+ * Reset object.
+ * 
+ * @param nord Numer of ordinates in each direction.
+ * @param nlocal Total number of local nodes.
+ */
+          void reset(unsigned nord, unsigned nlocal)
+          {
+            ords = Lucee::Matrix<double>(nord, 3);
+            weights.resize(nord);
+
+// interpolation matrix is indexed from (1,1) as they are
+// automatically generated from Maxima code. Unfortunately, Maxima
+// only writes out (1,1) based matrices.
+            int start[2] = {1, 1};
+            unsigned shape[2];
+            shape[0] = nord; shape[1] = nlocal;
+            interpMat = Lucee::Matrix<double>(shape, start);
+          }
+
+/** Matrix of ordinates */
+          Lucee::Matrix<double> ords;
+/** Vector of weights */
+          std::vector<double> weights;
+/** Interpolation matrix */
+          Lucee::Matrix<double> interpMat;
+      };
+
+/** Data for Gaussian quadrature */
+      GaussQuadData gaussData;
 
 /**
  * Create matrices for polyOrder 1.
@@ -208,6 +285,11 @@ namespace Lucee
  * Create matrices for polyOrder 3.
  */
       void setupPoly3();
+
+/**
+ * Create Gauss quadrature data.
+ */
+      void calcGuassData(unsigned nord);
   };
 }
 
