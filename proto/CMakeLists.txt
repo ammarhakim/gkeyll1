@@ -29,6 +29,7 @@ set (proto_SOURCES
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
+  LcNormGradPhiUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
