@@ -5,6 +5,36 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 6th-11th
+
+  Spent sometime building Gkeyll on portal. Eigen was a problem, but
+  now fixed. More work on trying to understand on how to use
+  luabind. This is a very good library and now I think it is best to
+  switch to this as soon as possible.
+
+  Setup a initial Lua program for Landau damping. This needs some more
+  work for the quasi-neutral case, but the full Vlasov-Poisson case is
+  working. Needs more testing with simpler problems, though.
+
+** A note on (not) commenting code
+
+   The most important thing while programming is to keep as much of
+   the code as possible in a single screen. It allows easy
+   understanding of what is going on without too much bouncing around
+   the file.
+
+   For this I need to stop commenting obvious stuff. There is no
+   needed to comment well-written code in which the variable and
+   function names make it abovious what is being done. This is
+   pervasive in Gkeyll (and all the code I write) and I need to break
+   this (bad) habit.
+
+   Remember: "Therefore, since brevity is the soul of wit / And
+   tediousness the limbs and outward florishes, / I will be brief."
+
+   While working on documentation or visiting a file, also cleanup the
+   tedious comments.
+
 * July 5th
 
   No work on July 4th on notes. However, did get bilder to build
@@ -22,15 +52,6 @@
 
   Working on fixed potential Vlasov notes. Should finish this today if
   possible.
-
-** Notes on commenting code
-
-   Please do not comment obvious things. For example, comment like
-   "apply Bcs" before a method called "applyBc" are superfluous. Aim
-   for minimum (but judicously placed) comments. 
-
-   Remember: "Therefore, since brevity is the soul of wit / And
-   tediousness the limbs and outward florishes, / I will be brief."
 
 * July 2nd
 

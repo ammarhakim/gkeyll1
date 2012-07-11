@@ -22,6 +22,7 @@
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
+#include <LcNormGradPhiUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
@@ -72,6 +73,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<3> >;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::Copy1DTo2DNodalField>;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<3> >;
 
 #ifdef HAVE_PETSC
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ContFromDisContUpdater<1> >;

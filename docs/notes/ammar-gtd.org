@@ -120,17 +120,26 @@ archived.
 
    At present only direct solves work. Need to fix this.
 
-** Seems like duplicate() method returns incorrect fields	     :GKEYLL:
+** Seems like duplicate() method creates mucked up fields 	     :GKEYLL:
 
    These fields can not be written out, it seems. This needs to be
    fixed. Perhaps this should wait till the transition to Blitz::Array
    is done?
+
+** Make list of all updaters, datastructs, grids in Lucee.	     :GKEYLL:
+
+   This will give some idea on what exists now and what needs to be
+   documented. Also, some code can then be removed based on this
+   master list.
 
 * Work related
 
   This is stuff not directly related to Gkeyll.
 
 ** Warpx does not build with petsc anymore			      :WARPX:
+
+   I have finally boiled this down to a link problem with
+   Fortran. Needs fixing.
 
 * Reading/Writing
 
