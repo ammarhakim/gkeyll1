@@ -66,11 +66,11 @@ namespace Lucee
     Lucee::FieldPtr<double> fld2dPtr = fld2d.createPtr();
 
 // loop over all X-direction cells
-    for (int i=localRgn.getLower(0)-1; i<localRgn.getUpper(0); ++i)
+    for (int i=localRgn.getLower(0)-1; i<localRgn.getUpper(0)+1; ++i)
     {
       fld1d.setPtr(fld1dPtr, i);
 // copy this into all Y-direction cells
-      for (int j=localRgn.getLower(1); j<localRgn.getUpper(1)+1; ++j)
+      for (int j=localRgn.getLower(1)-1; j<localRgn.getUpper(1)+1; ++j)
       {
         fld2d.setPtr(fld2dPtr, i, j);
 // copy data based on polynomial order

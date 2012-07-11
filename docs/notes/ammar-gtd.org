@@ -19,12 +19,6 @@ archived.
 
    For piecewise constant basis functions this should reduce to an
    explicit central-difference operator 
-
-** Write up journal entry for fixed-potential code 		     :GKEYLL:
-
-   Write up the Vlasov fixed-potential notes. All the code development
-   is now complete and the first set of tests needs to be performed
-   and written up.
    
 ** Complete self-consistent Vlasov code				     :GKEYLL:
 *** DONE Write an updater to compute Hamiltonian		     :GKEYLL:
@@ -126,18 +120,17 @@ archived.
 
    At present only direct solves work. Need to fix this.
 
+** Seems like duplicate() method returns incorrect fields	     :GKEYLL:
+
+   These fields can not be written out, it seems. This needs to be
+   fixed. Perhaps this should wait till the transition to Blitz::Array
+   is done?
 
 * Work related
 
   This is stuff not directly related to Gkeyll.
 
-** Send Sasha implicit solver slides 				       :WORK:
-
-   Send figure for explicit 1000ms figure and also slide to show
-   advantages of implicit.
-
-** Make WarpX find latest petsc					      :WARPX:
-
+** Warpx does not build with petsc anymore			      :WARPX:
 
 * Reading/Writing
 
