@@ -360,7 +360,7 @@ namespace Lucee
     refDNjNk_0(2,2) = 1/dx;
 
 // scale to bring this into physical space
-    refDNjNk_0 *= 2/dx;
+    refDNjNk_0 *= 0.5*dx;
 
 // compute weights
     weights.resize(2);
@@ -436,7 +436,7 @@ namespace Lucee
     refDNjNk_0(3,3) = 1/dx;
 
 // scale to bring this into physical space
-    refDNjNk_0 *= 2/dx;
+    refDNjNk_0 *= 0.5*dx;
 
 // compute weights
     weights.resize(3);
@@ -540,7 +540,7 @@ namespace Lucee
     refDNjNk_0(4,4) = 1/dx;
 
 // scale to bring this into physical space
-    refDNjNk_0 *= 2/dx;
+    refDNjNk_0 *= 0.5*dx;
 
 // compute weights
     weights.resize(4);

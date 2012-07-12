@@ -124,7 +124,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       nodalBasis->setIndex(idx);
 
-      nodalBasis->extractFromField(phi, phiK); 
+      nodalBasis->extractFromField(phi, phiK);
       calcNormGrad(phiK, normGradPhi);
 
       for (unsigned qp=0; qp<nVol; ++qp)
