@@ -5,9 +5,42 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 16-18th
+  
+  Wrote up part of the self-consistent Vlasov-Poisson journal
+  note. Showed Matt aspects of the code, overview of DG and energy
+  conservation with upwind flux etc etc.
+
+* July 12-13th
+
+  Completed a working input file for Landau damping problem. Solutions
+  look correct when compared to published results.
+
+** Transition notes
+
+  The transition to Eigen, Blitz and luabind needs to be done. This
+  will not be easy: the Lucee::Matrix, Lucee::Array and direct lua
+  interfacing is very deeply buried in the code. However, this is the
+  correct thing to do as it allows using features of these libraries
+  in Gkeyll.
+
+  Probably the best thing to do is to fork Lucee and work in the
+  fork. This will allow the algorithm development work to go on in the
+  mainline. Then the two can be merged.
+
+  One option would be to introduce a set of multi-component fields,
+  including scalar, vector (3 components) and matrix (3x3). Generic
+  fields (with arbitrary components) can also be defined as an array
+  with one-larger dimension.
+
+  An issue with this: the code that works with the fixed-component
+  array will be different from the one that works with arbitrary
+  component array. An option would be to hide this behind calls that
+  return the scalar array for a specified component.
+
 * July 6th-11th
 
-  Spent sometime building Gkeyll on portal. Eigen was a problem, but
+  Spent some time building Gkeyll on portal. Eigen was a problem, but
   now fixed. More work on trying to understand on how to use
   luabind. This is a very good library and now I think it is best to
   switch to this as soon as possible.

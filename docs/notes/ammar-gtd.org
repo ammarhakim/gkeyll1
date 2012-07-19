@@ -15,18 +15,27 @@ archived.
 
   Things to do in Gkeyll.
 
+** Generalize PoissonBracket updater				     :GKEYLL:
+
+   Allow this to work in arbitrary dimensions, with updateDirs
+   specified as an input. This will allow doing multiple dimension
+   solves using a splitting scheme.
+
+** Complete note of self-consistent Vlasov-Poisson system results    :GKEYLL:
+
+   This should have both the quasi-neutral as well as the full Poisson
+   solve results.
+
+** Fix third-order scheme for Vlasov-Poisson system 		     :GKEYLL:
+
+   The 3rd order scheme does not seem to be working for the
+   self-consistent problem. First check if it works for the
+   fixed-potential problem.
+
 ** Work out the local DG method for diffusion operator		     :GKEYLL:
 
    For piecewise constant basis functions this should reduce to an
    explicit central-difference operator 
-   
-** Complete self-consistent Vlasov code				     :GKEYLL:
-*** DONE Write an updater to compute Hamiltonian		     :GKEYLL:
-
-   This updater should take the continous 1D potential and compute the
-   2D Hamiltonian field needed in the Poisson bracket updater.
-
-*** TODO Write Lua program for some interesting test. 		     :GKEYLL:
 
 ** Write general hyperbolic equation updater for rectangular meshes
 *** DONE Work out the scheme on paper				      :LUCEE:
@@ -104,6 +113,11 @@ archived.
    package. This might need to be done in a staged manner as a lot of
    the code depends on the Lucee matrix classes and so this will
    involve significant refactoring.
+
+** Transition to Blitz++ package
+
+   Get rid of Lucee::Array in favor of Blitz::Array. This might be a
+   tough task, but it needs to be done sooner than later.
 
 ** Transition to Luabind					      :INFRA:
 
