@@ -105,6 +105,33 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   :ARCHIVE_OLPATH: Work related
   :ARCHIVE_CATEGORY: ammar-gtd
   :END:
+   
+* Complete self-consistent Vlasov code				     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-07-13 Fri 10:56
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+** DONE Write an updater to compute Hamiltonian			     :GKEYLL:
+
+  This updater should take the continous 1D potential and compute the
+  2D Hamiltonian field needed in the Poisson bracket updater.
+
+** DONE Write Lua program for some interesting test.		     :GKEYLL:
+
+* Complete self-consisten quasi-neutral problem input file	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-07-13 Fri 12:55
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  The Landau damping problem with the quasi-neutrality condition is
+  not working.
+
+
 
 
 
