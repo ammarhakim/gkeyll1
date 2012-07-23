@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 19th-22nd
+
+  Figured out that the discrepancy in damping rates is that I am using
+  a periodic domain that is comparable in size to the Debye lenght. To
+  get results that match the roots of the dispersion relation the
+  periodic box needs to be much larger than the Debye lenght. Have not
+  verified this, but will update the Valsov-Poisson notes with this.
+
 * July 16-18th
   
   Wrote up part of the self-consistent Vlasov-Poisson journal
