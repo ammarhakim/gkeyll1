@@ -5,6 +5,16 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 24th
+
+  Completed script to compute roots of dispersion relation. The key
+  was to use the complex argument error function which allows easy and
+  accurate calculation of the plasma dispersion function. With this a
+  simple (and naive) Newton method allows finding the least damped
+  root. However, it appears that the initial guess may not be good
+  enough and the root finder often fails to find the root. In this
+  case picking a better root seems to fix the problem.
+
 * July 23rd
 
   Updated note JE15 with results in the weakly-damped case on a large
