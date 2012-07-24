@@ -1,19 +1,36 @@
 /** Plasma dispersion function */
-plasmaDisp(z) := block([z2, iz, res],
-  z2 : expand(z^2),
-  iz : expand(%i*z),
-  res : %i*sqrt(%pi)*exp(-z2)*(1+erf(iz)),
-  return (expand(res))
-);
+plasmaDisp(z) := expand(%i*sqrt(%pi)*exp(-z^2)*(1+erf(%i*z)));
 
 /** Derivative of plasma dispersion function */
 diffPlasmaDisp(z) := -expand(2*(1+z*plasmaDisp(z)));
 
-/** Langmuir waves */
-eps(z) := 1 + 1/K^2*(1+z*plasmaDisp(z));
-epsPrime(z) := 1/K^2*(z*diffPlasmaDisp(z) + plasmaDisp(z))
+/** Langmuir waves dispersion relation */
+eps(z,K) := 1 + 1/K^2*(1+z*plasmaDisp(z));
+/** ... its derivative */
+epsPrime(z,K) := 1/K^2*(z*diffPlasmaDisp(z) + plasmaDisp(z));
 
-newtIter(z) := block([rz],
-  rz : subst(z, tt, expand(zz-eps(zz)/epsPrime(zz))),
+/** Single Newton iteration */
+newtIter(z,K) := block([rz],
+  rz : subst(z, zz, expand(zz-eps(zz,K)/epsPrime(zz,K))),
   return (float(realpart(rz) + %i*imagpart(rz)))
+);
+
+/** Find roots for K = k*lambda_D for specified precision prec */
+findRoot(K,prec) := block([zcurr, zprev, done],
+    zprev : 1+3*K^2/2, /** Initial guess */
+    done : 0,
+    for stp : 1 while done < 1 do
+      (zcurr : newtIter(zprev,K),
+       done : if abs(zcurr-zprev) < prec then 1 else 0,
+       /**print ("Step ", stp, ": ", abs(zcurr-zprev)),*/
+       zprev : zcurr),
+    return (zcurr*sqrt(2)*K)
+);
+
+writeDampRates(fname, kl,ku,steps) := block([sz, fh],
+  sz : (ku-kl)/steps,
+  fh : openw(fname),
+  for k : kl thru ku step sz do
+   (write_data ([k, float(imagpart(findRoot(k,1e-6)))], fh)),
+  close(fh)
 );
