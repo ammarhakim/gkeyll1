@@ -5,9 +5,9 @@ plasmaDisp(z) := expand(%i*sqrt(%pi)*exp(-z^2)*(1+erf(%i*z)));
 diffPlasmaDisp(z) := -expand(2*(1+z*plasmaDisp(z)));
 
 /** Langmuir waves dispersion relation */
-eps(z,K) := 1 + 1/K^2*(1+z*plasmaDisp(z));
+eps(z,K) := expand(1 + 1/K^2*(1+z*plasmaDisp(z)));
 /** ... its derivative */
-epsPrime(z,K) := 1/K^2*(z*diffPlasmaDisp(z) + plasmaDisp(z));
+epsPrime(z,K) := expand(1/K^2*(z*diffPlasmaDisp(z) + plasmaDisp(z)));
 
 /** Single Newton iteration */
 newtIter(z,K) := block([rz],
@@ -15,22 +15,36 @@ newtIter(z,K) := block([rz],
   return (float(realpart(rz) + %i*imagpart(rz)))
 );
 
+/** Supplies an initial guess that is valid in K<<1 */
+initialGuess(K) := float((1+3*K^2/2)/(sqrt(2)*K));
+
+/** Denormalizes the root */
+denormRoot(K, r) := expand(float(sqrt(2)*K*realpart(r)) + %i*float(sqrt(2)*K*imagpart(r)))
+
 /** Find roots for K = k*lambda_D for specified precision prec */
-findRoot(K,prec) := block([zcurr, zprev, done],
-    zprev : 1+3*K^2/2, /** Initial guess */
+findRoot(K,z0,prec) := block([zcurr, zprev, done, err, nstep],
+    zprev : z0, /** Initial guess */
     done : 0,
+    nstep : 0,
     for stp : 1 while done < 1 do
       (zcurr : newtIter(zprev,K),
        done : if abs(zcurr-zprev) < prec then 1 else 0,
-       /**print ("Step ", stp, ": ", abs(zcurr-zprev)),*/
+       err : abs(zcurr-zprev),
+       nstep : nstep + 1,
        zprev : zcurr),
-    return (zcurr*sqrt(2)*K)
+    print ("Converged with error ", err, " in ", nstep, " steps"),
+    return (rectform(zcurr))
 );
 
-writeDampRates(fname, kl,ku,steps) := block([sz, fh],
+writeDampRates(fname, kl, ku, steps) := block([sz, fh, kcurr, guess, r],
   sz : (ku-kl)/steps,
   fh : openw(fname),
-  for k : kl thru ku step sz do
-   (write_data ([k, float(imagpart(findRoot(k,1e-6)))], fh)),
-  close(fh)
+  kcurr : kl,
+  guess : initialGuess(kl), /** One hopes this converges */
+  for s : 0 thru steps do (
+    r : findRoot(kcurr, guess, 1e-6),
+    write_data([kcurr, float(sqrt(2)*kcurr*imagpart(r))], fh),
+    guess : r, /** Use previous value as a initial for next root */
+    kcurr : kcurr + sz
+  )
 );
