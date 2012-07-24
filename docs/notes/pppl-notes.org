@@ -5,6 +5,11 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 23rd
+
+  Updated note JE15 with results in the weakly-damped case on a large
+  domain. Results agree well with analytical solutions.
+
 * July 19th-22nd
 
   Figured out that the discrepancy in damping rates is that I am using

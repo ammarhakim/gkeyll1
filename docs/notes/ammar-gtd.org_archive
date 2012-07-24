@@ -131,6 +131,18 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   The Landau damping problem with the quasi-neutrality condition is
   not working.
 
+* Complete note of self-consistent Vlasov-Poisson system results     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-07-23 Mon 14:07
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  This should have both the quasi-neutral as well as the full Poisson
+  solve results. [ARCHIVED AFTER ONLY FULL Poisson SYSTEM WAS TESTED]
+
+
 
 
 
