@@ -15,16 +15,19 @@ archived.
 
   Things to do in Gkeyll.
 
+** Write solver for zeros of plasma dispersion function		     :GKEYLL:
+
+   This will allow comparison in the strongly damped case.
+
+** Update note with ion-acoustic wave simulations		     :GKEYLL:
+
+   This will complete JE15.
+
 ** Generalize PoissonBracket updater				     :GKEYLL:
 
    Allow this to work in arbitrary dimensions, with updateDirs
    specified as an input. This will allow doing multiple dimension
    solves using a splitting scheme.
-
-** Complete note of self-consistent Vlasov-Poisson system results    :GKEYLL:
-
-   This should have both the quasi-neutral as well as the full Poisson
-   solve results.
 
 ** Fix third-order scheme for Vlasov-Poisson system 		     :GKEYLL:
 

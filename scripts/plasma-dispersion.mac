@@ -1,0 +1,19 @@
+/** Plasma dispersion function */
+plasmaDisp(z) := block([z2, iz, res],
+  z2 : expand(z^2),
+  iz : expand(%i*z),
+  res : %i*sqrt(%pi)*exp(-z2)*(1+erf(iz)),
+  return (expand(res))
+);
+
+/** Derivative of plasma dispersion function */
+diffPlasmaDisp(z) := -expand(2*(1+z*plasmaDisp(z)));
+
+/** Langmuir waves */
+eps(z) := 1 + 1/K^2*(1+z*plasmaDisp(z));
+epsPrime(z) := 1/K^2*(z*diffPlasmaDisp(z) + plasmaDisp(z))
+
+newtIter(z) := block([rz],
+  rz : subst(z, tt, expand(zz-eps(zz)/epsPrime(zz))),
+  return (float(realpart(rz) + %i*imagpart(rz)))
+);
