@@ -15,11 +15,6 @@ archived.
 
   Things to do in Gkeyll.
 
-** Update JE15 with large k*lambda values			     :GKEYLL:
-** Write up progress report for LDRD project			     :GKEYLL:
-
-   Send to Greg by Wed morning.
-
 ** Update JE15 with ion-acoustic wave simulations 		     :GKEYLL:
 
    This will complete JE15.

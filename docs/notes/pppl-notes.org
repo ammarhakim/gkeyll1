@@ -5,6 +5,11 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* July 26th
+
+  I am going nuts. Too many sqrts of Te, Ti, mass ratios etc etc to
+  keep track up. Haaaaaa.
+
 * July 24th
 
   Completed script to compute roots of dispersion relation. The key

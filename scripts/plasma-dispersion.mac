@@ -19,7 +19,7 @@ newtIter(z,K) := block([rz],
 initialGuess(K) := float((1+3*K^2/2)/(sqrt(2)*K));
 
 /** Denormalizes the root */
-denormRoot(K, r) := expand(float(sqrt(2)*K*realpart(r)) + %i*float(sqrt(2)*K*imagpart(r)))
+denormRoot(K, r) := expand(float(sqrt(2)*K*realpart(r)) + %i*float(sqrt(2)*K*imagpart(r)));
 
 /** Find roots for K = k*lambda_D for specified precision prec */
 findRoot(K,z0,prec) := block([zcurr, zprev, done, err, nstep],
