@@ -1,0 +1,55 @@
+/** Plasma dispersion function */
+plasmaDisp(z) := expand(%i*sqrt(%pi)*exp(-z^2)*(1+erf(%i*z)));
+
+/** Derivative of plasma dispersion function */
+diffPlasmaDisp(z) := -expand(2*(1+z*plasmaDisp(z)));
+
+/** Ion-acoustic waves dispersion relation */
+eps(z,K,T) := expand(K^2 + 1 + 1/T*(1+z*plasmaDisp(z)));
+/** ... its derivative */
+epsPrime(z,K,T) := expand(1/T*(z*diffPlasmaDisp(z) + plasmaDisp(z)));
+
+/** Single Newton iteration */
+newtIter(z,K,T) := block([rz],
+  rz : subst(z, zz, expand(zz-eps(zz,K,T)/epsPrime(zz,K,T))),
+  return (float(realpart(rz) + %i*imagpart(rz)))
+);
+
+/** Supplies an initial guess that is valid in K<<1 */
+initialGuess(T) := float(sqrt(1+3*T)/(sqrt(2*T)));
+
+/** Denormalizes the root */
+denormRoot(T, r) := expand(float(sqrt(2*T)*realpart(r)) + %i*float(sqrt(2*T)*imagpart(r)));
+
+/** Compute K */
+calcK(k, T) := float(k*sqrt(1/T));
+
+/** Find roots for K = k*lambda_D for specified precision prec */
+findRoot(K,T,z0,prec) := block([zcurr, zprev, done, err, nstep],
+    zprev : z0, /** Initial guess */
+    done : 0,
+    nstep : 0,
+    for stp : 1 while done < 1 do
+      (zcurr : newtIter(zprev,K,T),
+       done : if abs(zcurr-zprev) < prec then 1 else 0,
+       err : abs(zcurr-zprev),
+       nstep : nstep + 1,
+       zprev : zcurr),
+    print ("Converged with error ", err, " in ", nstep, " steps"),
+    return (rectform(zcurr))
+);
+
+findRootSimple(T, z0) := findRoot(calcK(0.5, T), T, z0, 1e-6);
+
+writeDampRates(fname, tl, tu, steps) := block([sz, fh, tcurr, guess, r],
+  sz : (tu-tl)/steps,
+  fh : openw(fname),
+  tcurr : tl,
+  guess : initialGuess(tl), /** One hopes this converges */
+  for s : 0 thru steps do (
+    r : findRoot(calcK(0.5, tcurr), tcurr, guess, 1e-6),
+    write_data([tcurr, float(sqrt(2*kcurr)*imagpart(r))], fh),
+    guess : r, /** Use previous value as a initial for next root */
+    tcurr : tcurr + sz
+  )
+);
