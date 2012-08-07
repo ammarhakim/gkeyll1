@@ -5,6 +5,28 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 6th
+
+  Last week I spent two days helping out at the APS/DPP abstract
+  sorter's meeting. Most interesting point from this trip was the talk
+  with John Luginsland on possible topics for AFOSR proposals.
+
+  Read a lot of the papers on local DG for diffusive terms. I have a
+  basic understanding of this now and see the need for careful
+  selection of the interface fluxes to control the effective
+  stencil. Need to write this stuff up.
+
+** Moving to exteral libraries
+
+   Once the diffusion terms are implemented I need to move to doing som
+
+* July 27th
+  
+  Completed the Landau damping notes. This proved to be much more of a
+  chore than I first thought. Even now the comparison with the root
+  finder is not complete. I am giving this a break for now to move on
+  to other things.
+
 * July 26th
 
   I am going nuts. Too many sqrts of Te, Ti, mass ratios etc etc to

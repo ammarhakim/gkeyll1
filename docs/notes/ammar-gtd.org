@@ -15,9 +15,52 @@ archived.
 
   Things to do in Gkeyll.
 
-** Update JE15 with ion-acoustic wave simulations 		     :GKEYLL:
+** Add unit tests for getSendNeighbors() method			      :INFRA:
 
-   This will complete JE15.
+   I added the getSendNeighbors() method to compute the regions to
+   which we should send data. This is not tested yet, although when
+   used in the sync() method it seems to work just fine.
+
+** Complete MultiRegion class 					      :INFRA:
+
+   Finish the iterator access (or get rid of it) and complete the
+   code to allow adding connectivity information.
+
+** Convert Poisson solver and related classes for parallel 	     :GKEYLL:
+
+   The Poisson solver and related classes (NodalFiniteElementIfc) only
+   work in serial. Need to convert these to parallel. Perhaps this is
+   not hard, but will need to look into the complete chain of classes,
+   including
+
+** Fix DataStruct::write() method to use sub-communicators	      :INFRA:
+
+   The DynVector can not be written by all processors for obvious
+   reasons. Hence, the DataStruct::write() method needs to be modified
+   to allow a data-structure to take a sub-communicator so only a
+   sub-set of processors do the I/O.
+
+** Make neighbor calculations for periodic boundaries. 		      :INFRA:
+
+   A significant unresolved issue: how to deal with periodic domains?
+   The neighbor calculation code needs to change for that. Essentially
+   on each periodic side of the global region (including corners) we
+   need to make copies of the global region. This will then give the
+   proper neighbors, including self-intersections. Some ambiguity
+   exists in the case in which the only one direction is
+   periodic. Question: should the periodic conditions include corners
+   in this case? I do not know, yet.
+
+** Fix hang in parallel test					      :INFRA:
+
+   With this Gkeyll will be ready for parallel runs. The problem is in
+   the sync() method.
+
+** Figure out the normalization issue with Maxima root-finder	     :GKEYLL:
+
+   The comparison in JE15 with exact solutions is not complete. Looks
+   like a problem with normalization. Also, the dispersion relation
+   probably needs to be rederived for this case.
 
 ** Generalize PoissonBracket updater				     :GKEYLL:
 
@@ -31,10 +74,10 @@ archived.
    self-consistent problem. First check if it works for the
    fixed-potential problem.
 
-** Work out the local DG method for diffusion operator		     :GKEYLL:
+** Work out local DG method for diffusion operator and write notes   :GKEYLL:
 
    For piecewise constant basis functions this should reduce to an
-   explicit central-difference operator 
+   explicit 5-point central-difference operator.
 
 ** Write general hyperbolic equation updater for rectangular meshes
 *** DONE Work out the scheme on paper				      :LUCEE:
@@ -152,6 +195,7 @@ archived.
    these and explain why they are needed. This will also help creation
    of the general class to do this for general quad/hex/tri/tet cells.
 
+
 * Work related
 
   This is stuff not directly related to Gkeyll.
@@ -161,6 +205,4 @@ archived.
    I have finally boiled this down to a link problem with
    Fortran. Needs fixing.
 
-* Reading/Writing
 
-* Someday/Maybe
