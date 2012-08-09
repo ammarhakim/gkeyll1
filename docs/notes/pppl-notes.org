@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 7th-9th
+
+  Worked on the nodal DG updater. Turns out that the structure of this
+  updater is exactly the same as the diffusion updater with local DG
+  scheme. Hence, it is best to get this to work first. Then once the
+  code is augmented with auxillary variables the diffusion operator
+  will be easy to implement.
+
 * August 6th
 
   Last week I spent two days helping out at the APS/DPP abstract
@@ -18,7 +26,15 @@
 
 ** Moving to exteral libraries
 
-   Once the diffusion terms are implemented I need to move to doing som
+   Once the diffusion terms are implemented I need to move to doing
+   some infrastructure work, specially the transition to external
+   libraries. First step would be to write a new Field class derived from
+   Blitz::Array. Then once this is tested the process of replacing the
+   current Field class can be completed.
+
+   The transition to eigen and luabind can happen on a slower scale as
+   they at present do not bring in any compelling functionality that
+   is needed immediately.
 
 * July 27th
   
