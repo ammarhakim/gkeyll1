@@ -86,9 +86,9 @@ archived.
 ** Write general hyperbolic equation updater for rectangular meshes
 *** DONE Work out the scheme on paper				      :LUCEE:
 *** TODO Implement a updater to work with advection equations	      :LUCEE:
-*** TODO Design/implement limiters				      :LUCEE:
-
-** Registration of objects					      :INFRA:
+    
+** Write limiter for nodal DG					     :GKEYLL:
+** Registration of objects 					      :INFRA:
 
    Currently the object registration depends on a doing a "new". Need
    to replace this with a proper function so that cleanup of the

@@ -164,23 +164,31 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
 
-      nodalBasis->setIndex(idx);
       q.setPtr(qPtr, idx);
       qNew.setPtr(qNewPtr, idx);
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
-// create coordinate system along this direction
         Lucee::AlignedRectCoordSys coordSys(dir);
         for (unsigned n=0; n<nlocal; ++n)
-// compute flux in this direction
           equation->flux(coordSys, &qPtr[meqn*n], &flux[meqn*n]);
-// volume integration contribution
-        matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]);
+        matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]); // stiffness X flux
       }
     }
 
 // compute contributions from surface integrals
+    seq.reset();
+    while (seq.step())
+    {
+      seq.fillWithSeq(idx);
+
+      q.setPtr(qPtr, idx);
+      qNew.setPtr(qNewPtr, idx);
+
+      for (unsigned dir=0; dir<NDIM; ++dir)
+      {
+      }
+    }
 
     return Lucee::UpdaterStatus();
   }
