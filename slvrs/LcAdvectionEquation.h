@@ -62,8 +62,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      void flux(const Lucee::RectCoordSys& c, const double* q, double* f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
@@ -73,8 +72,23 @@ namespace Lucee
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, double s[2]);
+      void speeds(const Lucee::RectCoordSys& c, const double* q, double s[2]);
+
+/**
+ * Compute primitive variables given conserved variables.
+ *
+ * @param q Conserved variables for which to compute primitive variables.
+ * @param v On output, primitive variables.
+ */
+      void primitive(const double* q, double* v) const;
+
+/**
+ * Compute conserved variables given primitive variables.
+ *
+ * @param v Primitive variables for which to compute conserved variables.
+ * @param q On output, conserved variables.
+ */
+      void conserved(const double* v, double* q) const;
 
 /**
  * Decompose jump into waves and wave-speeds using right and left states.
@@ -86,7 +100,7 @@ namespace Lucee
  * @param waves On output, waves. This matrix has shape (meqn X mwave).
  * @param s On output, wave speeds.
  */
-      virtual void waves(const Lucee::RectCoordSys& c,
+      void waves(const Lucee::RectCoordSys& c,
         const Lucee::ConstFieldPtr<double>& jump,
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
@@ -104,9 +118,8 @@ namespace Lucee
  * @param f On output, this contains the numerical flux.
  * @return Maximum wave speed from left/right state.
  */
-      virtual double numericalFlux(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
-        Lucee::FieldPtr<double>& f);
+      double numericalFlux(const Lucee::RectCoordSys& c,
+        const double* ql, const double* qr, double* f);
 
 /**
  * Project given vector on left-eigenvectors of flux-jacobian. The
@@ -119,8 +132,8 @@ namespace Lucee
  * @param vec Vector to project.
  * @param coeff On output, the projection of 'vec' on left-eigenvectors.
  */
-      virtual void projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff);
+      void projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
+        const double* q, const double* vec, double* coeff);
 
 /**
  * Reconstruct vector by weighted sum of right eigenvectors. The
@@ -133,24 +146,8 @@ namespace Lucee
  * @param coeff Coefficients to multiply corresponding right-eigenvectors.
  * @param vec On output, the reconstructured vector.
  */
-      virtual void reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec);
-
-/**
- * Compute primitive variables given conserved variables.
- *
- * @param q Conserved variables for which to primitive variables.
- * @param v On output, primitive variables.
- */
-      void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
-
-/**
- * Compute conserved variables given primitive variables.
- *
- * @param v Primitive variables for which to conserved variables.
- * @param q On output, conserved variables.
- */
-      void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
+      void reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
+        const double* q, const double* coeff, double* vec);
 
     private:
 /** advection speeds */

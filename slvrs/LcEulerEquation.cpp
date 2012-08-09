@@ -64,8 +64,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  EulerEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     double rho1 = 1/getSafeRho(q[0]);
 // compute pressure
@@ -79,8 +78,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::speeds(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, double s[2])
+  EulerEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     double rho = getSafeRho(q[0]);
 // compute pressure
@@ -92,18 +90,18 @@ namespace Lucee
   }
 
   double
-  EulerEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q)
+  EulerEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q)
   {
     double rho1 = 1/getSafeRho(q[0]);
 // compute pressure
-    double pr = pressure(q);
+    double pr = pressure(&q[0]);
     double cs = std::sqrt(gas_gamma*pr*rho1); // sound speed
     double u = q[1]*rho1; // fluid velocity
     return std::fabs(u)+cs;
   }
 
   void
-  EulerEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  EulerEquation::primitive(const double* q, double* v) const
   {
     double rho = getSafeRho(q[0]);
     v[0] = rho; // rho
@@ -114,7 +112,7 @@ namespace Lucee
   }
 
   void
-  EulerEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  EulerEquation::conserved(const double* v, double* q) const
   {
     q[0] = v[0]; // rho
     q[1] = v[0]*v[1]; // rho*u
@@ -135,8 +133,8 @@ namespace Lucee
 // compute Roe averages for use in Riemann solver
     double rhsqrtl = std::sqrt(rhol); // left sqrt(rho)
     double rhsqrtr = std::sqrt(rhor); // right sqrt(rho)
-    double pl = pressure(ql); // left pressure
-    double pr = pressure(qr); // right pressure
+    double pl = pressure(&ql[0]); // left pressure
+    double pr = pressure(&qr[0]); // right pressure
 
     double rhsq2 = rhsqrtl + rhsqrtr;
 // compute Roe averaged velocity components
@@ -193,8 +191,7 @@ namespace Lucee
 
   double
   EulerEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
-    Lucee::FieldPtr<double>& f)
+    const double* ql, const double* qr, double* f)
   {
 // NOTE: This numerical flux is using Lax-Fluxes
 
@@ -214,7 +211,7 @@ namespace Lucee
   }
 
   double
-  EulerEquation::pressure(const Lucee::ConstFieldPtr<double>& q) const
+  EulerEquation::pressure(const double* q) const
   {
     double rho1 = 1/getSafeRho(q[0]);
     double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1] + q[2]*q[2] + q[3]*q[3])*rho1);

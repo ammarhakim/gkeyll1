@@ -72,8 +72,7 @@ namespace Lucee
   }
 
   void
-  PhMaxwellEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  PhMaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     f[0] = chi_e*lightSpeed2*q[PHI];
     f[1] = lightSpeed2*q[BZ];
@@ -86,7 +85,7 @@ namespace Lucee
   }
 
   void
-  PhMaxwellEquation::speeds(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q, double s[2])
+  PhMaxwellEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     if (chi_m<1.0 && chi_e<1.0)
     {
@@ -106,14 +105,14 @@ namespace Lucee
   }
 
   void
-  PhMaxwellEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  PhMaxwellEquation::primitive(const double* q, double* v) const
   {
     for (unsigned i=0; i<8; ++i)
       v[i] = q[i];
   }
 
   void
-  PhMaxwellEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  PhMaxwellEquation::conserved(const double* v, double* q) const
   {
     for (unsigned i=0; i<8; ++i)
       q[i] = v[i];

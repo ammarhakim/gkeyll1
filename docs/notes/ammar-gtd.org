@@ -79,6 +79,10 @@ archived.
    For piecewise constant basis functions this should reduce to an
    explicit 5-point central-difference operator.
 
+** Write updater for diffusion term and test 			     :GKEYLL:
+
+   Use the local DG method for this.
+
 ** Write general hyperbolic equation updater for rectangular meshes
 *** DONE Work out the scheme on paper				      :LUCEE:
 *** TODO Implement a updater to work with advection equations	      :LUCEE:

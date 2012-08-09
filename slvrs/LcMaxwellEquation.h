@@ -62,8 +62,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::RectCoordSys& c, const double* q, double* f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
@@ -73,8 +72,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, double s[2]);
+      virtual void speeds(const Lucee::RectCoordSys& c, const double* q, double s[2]);
 
 /**
  * Compute primitive variables given conserved variables.
@@ -82,7 +80,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute primitive variables.
  * @param v On output, primitive variables.
  */
-      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
+      virtual void primitive(const double* q, double* v) const;
 
 /**
  * Compute conserved variables given primitive variables.
@@ -90,7 +88,7 @@ namespace Lucee
  * @param v Primitive variables for which to compute conserved variables.
  * @param q On output, conserved variables.
  */
-      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
+      virtual void conserved(const double* v, double* q) const;
 
 /**
  * Decompose jump into waves and wave-speeds using right and left

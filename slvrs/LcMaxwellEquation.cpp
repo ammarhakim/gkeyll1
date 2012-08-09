@@ -55,8 +55,7 @@ namespace Lucee
   }
 
   void
-  MaxwellEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  MaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     f[0] = 0.0;
     f[1] = lightSpeed2*q[BZ];
@@ -67,21 +66,21 @@ namespace Lucee
   }
 
   void
-  MaxwellEquation::speeds(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& q, double s[2])
+  MaxwellEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     s[0] = -lightSpeed;
     s[1] = lightSpeed;
   }
 
   void
-  MaxwellEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  MaxwellEquation::primitive(const double* q, double* v) const
   {
     for (unsigned i=0; i<6; ++i)
       v[i] = q[i];
   }
 
   void
-  MaxwellEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  MaxwellEquation::conserved(const double* v, double* q) const
   {
     for (unsigned i=0; i<6; ++i)
       q[i] = v[i];

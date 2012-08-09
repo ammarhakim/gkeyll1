@@ -61,8 +61,7 @@ namespace Lucee
   }
 
   void
-  TenMomentEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  TenMomentEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     Lucee::FieldPtr<double> v(10);
 // compute primitive variables first
@@ -83,14 +82,13 @@ namespace Lucee
   }
 
   void
-  TenMomentEquation::speeds(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, double s[2])
+  TenMomentEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
 // TODO
   }
 
   void
-  TenMomentEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  TenMomentEquation::primitive(const double* q, double* v) const
   {
     double rho = q[RHO];
     v[RHO] = rho; // rho
@@ -108,7 +106,7 @@ namespace Lucee
   }
 
   void
-  TenMomentEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  TenMomentEquation::conserved(const double* v, double* q) const
   {
     double rho = v[RHO];
     q[RHO] = rho; // rho

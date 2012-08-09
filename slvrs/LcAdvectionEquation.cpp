@@ -54,8 +54,7 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  AdvectionEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     double v[3];
     c.rotateVecToLocal(u, v);
@@ -63,13 +62,24 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::speeds(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, double s[2])
+  AdvectionEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     double v[3];
     c.rotateVecToLocal(u, v);
     s[0] = v[0];
     s[1] = v[0];
+  }
+
+  void
+  AdvectionEquation::primitive(const double* q, double* v) const
+  {
+    v[0] = q[0];
+  }
+
+  void
+  AdvectionEquation::conserved(const double* v, double* q) const
+  {
+    q[0] = v[0];
   }
 
   void
@@ -86,8 +96,7 @@ namespace Lucee
 
   double
   AdvectionEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
-    Lucee::FieldPtr<double>& f)
+    const double* ql, const double* qr, double* f)
   {
     double v[3];
     c.rotateVecToLocal(u, v);
@@ -102,27 +111,15 @@ namespace Lucee
 
   void
   AdvectionEquation::projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff)
+    const double* q, const double* vec, double* coeff)
   { // left eigenmatrix is unit matrix
     coeff[0] = vec[0];
   }
 
   void
   AdvectionEquation::reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec)
+    const double* q, const double* coeff, double* vec)
   { // right eigenmatrix is unit matrix
     vec[0] = coeff[0];
-  }
-
-  void
-  AdvectionEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
-  {
-    v[0] = q[0];
-  }
-
-  void
-  AdvectionEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
-  {
-    q[0] = v[0];
   }
 }

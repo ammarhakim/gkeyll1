@@ -15,7 +15,6 @@
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
-#include <LcMathLib.h>
 #include <LcNodalDisContHyperUpdater.h>
 #include <LcStructuredGridBase.h>
 
@@ -137,32 +136,48 @@ namespace Lucee
   Lucee::UpdaterStatus 
   NodalDisContHyperUpdater<NDIM>::update(double t)
   {
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-// get input field
     const Lucee::Field<NDIM, double>& q = this->getInp<Lucee::Field<NDIM, double> >(0);
-// get output field
     Lucee::Field<NDIM, double>& qNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-// time-step
     double dt = t-this->getCurrTime();
-// local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
-// maximum CFL number used
-    double cfla = 0.0;
+    double cfla = 0.0; // maximum CFL number used
+    unsigned nlocal = nodalBasis->getNumNodes();
+    unsigned meqn = equation->getNumEqns();
 
-    unsigned nlocal = nodalBasis->getNumNodes(); // local nodes
-    unsigned meqn = equation->getNumEqns();// num of equations
+// array to hold fluxes
+    std::vector<double> nodalFlux(nlocal*meqn);
 
-    qNew = 0.0; // clear out contents
+    Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
+    Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
+    Lucee::FieldPtr<double> flux(meqn);
 
+    qNew = 0.0;
+    int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 // compute contribution from volume integrals
     while (seq.step())
     {
+      seq.fillWithIndex(idx);
+
+      nodalBasis->setIndex(idx);
+      q.setPtr(qPtr, idx);
+      qNew.setPtr(qNewPtr, idx);
+
+      for (unsigned dir=0; dir<NDIM; ++dir)
+      {
+// create coordinate system along this direction
+        Lucee::AlignedRectCoordSys coordSys(dir);
+        for (unsigned n=0; n<nlocal; ++n)
+// compute flux in this direction
+          equation->flux(coordSys, &qPtr[meqn*n], &flux[meqn*n]);
+// volume integration contribution
+        matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]);
+      }
     }
 
 // compute contributions from surface integrals
@@ -193,6 +208,25 @@ namespace Lucee
       for (unsigned j=0; j<cols; ++j)
         tv += mat(i,j)*vec[j];
       out[i] = m*tv + v*out[i];
+    }
+  }
+
+  template <unsigned NDIM>
+  void 
+  NodalDisContHyperUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
+    unsigned meqn, const double* vec, double v, double *out)
+  {
+    double tv;
+    unsigned nlocal = mat.numRows(); // mat is a square matrix
+    for (unsigned m=0; m<meqn; ++m)
+    {
+      for (unsigned i=0; i<nlocal; ++i)
+      {
+        tv = 0.0;
+        for (unsigned j=0; j<nlocal; ++j)
+          tv += mat(i,j)*vec[meqn*j+m];
+        out[meqn*i+m] = m*tv + v*out[meqn*i+m];
+      }
     }
   }
 
