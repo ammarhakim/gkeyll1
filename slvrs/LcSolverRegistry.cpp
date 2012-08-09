@@ -100,7 +100,6 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LobattoElement1D>;
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
 
-
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
 // directory. Perhaps could have also done in lucee directory)

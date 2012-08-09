@@ -30,27 +30,25 @@ namespace Lucee
   }
 
   void
-  HyperEquation::flux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f)
+  HyperEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
   {
     throw Lucee::Except("HyperEquation::flux: Method not implemented");
   }
 
   void
-  HyperEquation::speeds(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, double s[2])
+  HyperEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     throw Lucee::Except("HyperEquation::speeds: Method not implemented");
   }
 
   void
-  HyperEquation::primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const
+  HyperEquation::primitive(const double* q, double* v) const
   {
     throw Lucee::Except("HyperEquation::primitive: Method not implemented");
   }
 
   void
-  HyperEquation::conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const
+  HyperEquation::conserved(const double* v, double* q) const
   {
     throw Lucee::Except("HyperEquation::conserved: Method not implemented");
   }
@@ -66,8 +64,7 @@ namespace Lucee
 
   double
   HyperEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
-    Lucee::FieldPtr<double>& f)
+    const double* ql, const double* qr, double* f)
   {
     throw Lucee::Except("HyperEquation::numericalFlux: Method not implemented");
     return 0; // should never come here
@@ -75,21 +72,21 @@ namespace Lucee
 
   void
   HyperEquation::projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff)
+    const double* q, const double* vec, double* coeff)
   {
     throw Lucee::Except("HyperEquation::projectOnLeftEigenvectors: Method not implemented");
   }
 
   void
   HyperEquation::reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec)
+    const double* q, const double* coeff, double* vec)
   {
     throw Lucee::Except("HyperEquation::reconWithRightEigenvectors: Method not implemented");
   }
 
   void
   HyperEquation::eigensystem(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& q,
+    const double *q,
     Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev)
   {
     throw Lucee::Except("HyperEquation::eigensystem: Method not implemented");
@@ -97,13 +94,13 @@ namespace Lucee
 
   void
   HyperEquation::quasiLinearMatrix(const Lucee::RectCoordSys& c,
-    const Lucee::ConstFieldPtr<double>& v, Lucee::Matrix<double>& qlMat)
+    const double *v, Lucee::Matrix<double>& qlMat)
   {
     throw Lucee::Except("HyperEquation::quasiLinearMatrix: Method not implemented");
   }
 
   bool
-  HyperEquation::isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const
+  HyperEquation::isInvariantDomain(const double* q) const
   {
     throw Lucee::Except("HyperEquation::isInvariantDomain: Method not implemented");
   }

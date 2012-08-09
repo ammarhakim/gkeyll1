@@ -71,7 +71,7 @@ namespace Lucee
  * @param inQ Input conserved variables.
  * @param outQ Rotated conserved variables. 
  */
-      virtual void rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ) = 0;
+      virtual void rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ) = 0;
 
 /**
  * Rotate data to global coordinate system.
@@ -80,7 +80,7 @@ namespace Lucee
  * @param inQ Input conserved variables.
  * @param outQ Rotated conserved variables. 
  */
-      virtual void rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ) = 0;
+      virtual void rotateToGlobal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ) = 0;
 
 /**
  * Compute flux for this equation system.
@@ -89,8 +89,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& f);
+      virtual void flux(const Lucee::RectCoordSys& c, const double* q, double* f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
@@ -100,8 +99,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute speeds.
  * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
  */
-      virtual void speeds(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, double s[2]);
+      virtual void speeds(const Lucee::RectCoordSys& c, const double* q, double s[2]);
 
 /**
  * Compute primitive variables given conserved variables.
@@ -109,7 +107,7 @@ namespace Lucee
  * @param q Conserved variables for which to compute primitive variables.
  * @param v On output, primitive variables.
  */
-      virtual void primitive(const Lucee::ConstFieldPtr<double>& q, Lucee::FieldPtr<double>& v) const;
+      virtual void primitive(const double* q, double* v) const;
 
 /**
  * Compute conserved variables given primitive variables.
@@ -117,7 +115,7 @@ namespace Lucee
  * @param v Primitive variables for which to compute conserved variables.
  * @param q On output, conserved variables.
  */
-      virtual void conserved(const Lucee::ConstFieldPtr<double>& v, Lucee::FieldPtr<double>& q) const;
+      virtual void conserved(const double* v, double* q) const;
 
 /**
  * Decompose jump into waves and wave-speeds using right and left
@@ -151,8 +149,7 @@ namespace Lucee
  * @return Maximum wave speed from left/right state.
  */
       virtual double numericalFlux(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
-        Lucee::FieldPtr<double>& f);
+        const double* ql, const double* qr, double* f);
 
 /**
  * Project given vector on left-eigenvectors of flux-jacobian. The
@@ -166,7 +163,7 @@ namespace Lucee
  * @param coeff On output, the projection of 'vec' on left-eigenvectors.
  */
       virtual void projectOnLeftEigenvectors(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, const double* vec, double *coeff);
+        const double* q, const double* vec, double* coeff);
 
 /**
  * Reconstruct vector by weighted sum of right eigenvectors. The
@@ -180,7 +177,7 @@ namespace Lucee
  * @param vec On output, the reconstructured vector.
  */
       virtual void reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q, const double* coeff, double *vec);
+        const double* q, const double* coeff, double* vec);
 
 /**
  * Compute eigensystem for equations give a state. This method should
@@ -193,7 +190,7 @@ namespace Lucee
  * @param lev On output, left eigenvectors of system stored as rows.
  */
       virtual void eigensystem(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& q,
+        const double *q,
         Lucee::Vector<double>& ev, Lucee::Matrix<double>& rev, Lucee::Matrix<double>& lev);
 
 /**
@@ -204,7 +201,7 @@ namespace Lucee
  * @param qlMat Quasi-Linear matrix computed at 'v'.
  */
       virtual void quasiLinearMatrix(const Lucee::RectCoordSys& c,
-        const Lucee::ConstFieldPtr<double>& v, Lucee::Matrix<double>& qlMat);
+        const double *v, Lucee::Matrix<double>& qlMat);
 
 /**
  * Check if conserved variables satisfies invariant domains of the
@@ -213,7 +210,7 @@ namespace Lucee
  * @param q Conserved variables.
  * @return true if invariant domains are satisfied, false otherwise.
  */
-      virtual bool isInvariantDomain(const Lucee::ConstFieldPtr<double>& q) const;
+      virtual bool isInvariantDomain(const double* q) const;
 
 /**
  * Compute fluctuations using q-waves from waves and speeds.
@@ -292,7 +289,7 @@ namespace Lucee
           cons.setPtr(cPtr, idx);
           prim.setPtr(pPtr, idx);
 // compute primitive variables
-          this->primitive(cPtr, pPtr);
+          this->primitive(&cPtr[0], &pPtr[0]);
         }
       }
 
@@ -318,7 +315,7 @@ namespace Lucee
           cons.setPtr(cPtr, idx);
           prim.setPtr(pPtr, idx);
 // compute primitive variables
-          this->conserved(pPtr, cPtr);
+          this->conserved(&pPtr[0], &cPtr[0]);
         }
       }
   };
