@@ -1,7 +1,7 @@
 /**
  * @file	LcNodalDisContHyperUpdater.cpp
  *
- * @brief	Updater to solver Poisson bracket operator PDEs.
+ * @brief	Updater to solve hyperbolic equations with nodal DG scheme.
  */
 
 // config stuff
@@ -44,13 +44,11 @@ namespace Lucee
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
-// get hold of element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("NodalDisContHyperUpdater::readInput: Must specify element to use using 'basis'");
 
-// equation to solve
     if (tbl.hasObject<Lucee::HyperEquation>("equation"))
       equation = &tbl.getObjectAsBase<Lucee::HyperEquation>("equation");
     else
@@ -59,7 +57,7 @@ namespace Lucee
       throw lce;
     }
 
-    cfl = tbl.getNumber("cfl"); // CFL number
+    cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
   }
 
@@ -67,7 +65,6 @@ namespace Lucee
   void 
   NodalDisContHyperUpdater<NDIM>::initialize()
   {
-// call base class method
     Lucee::UpdaterIfc::initialize();
 
 // get hold of grid
@@ -79,8 +76,8 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     seq.step(); // just to get to first index
     int idx[NDIM];
-    seq.fillWithIndex(idx); // fetch index of first location
-    nodalBasis->setIndex(idx); // set index into basis function
+    seq.fillWithIndex(idx);
+    nodalBasis->setIndex(idx);
     
     unsigned nlocal = nodalBasis->getNumNodes();
 
@@ -102,7 +99,6 @@ namespace Lucee
         upperNodeNums[dir].nums[k] += -1;
     }
 
-// space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
     for (unsigned dir=0; dir<NDIM; ++dir)
@@ -155,7 +151,8 @@ namespace Lucee
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
     std::vector<double> flux(nlocal*meqn);
 
-    qNew = 0.0;
+    qNew = 0.0; // so that this has increment
+
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 // loop to compute contribution from volume integrals
@@ -208,10 +205,11 @@ namespace Lucee
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
 
-          for (unsigned s=0; s<lowerNodeNums[NDIM].nums.size(); ++s)
+          unsigned nface = lowerNodeNums[dir].nums.size();
+          for (unsigned s=0; s<nface; ++s)
           {
-            unsigned un = upperNodeNums[NDIM].nums[s];
-            unsigned ln = lowerNodeNums[NDIM].nums[s];
+            unsigned un = upperNodeNums[dir].nums[s];
+            unsigned ln = lowerNodeNums[dir].nums[s];
 // compute numerical fluxes at surface nodes
             double maxs = equation->numericalFlux(coordSys,
               &qPtrl[meqn*un], &qPtr[meqn*ln], &flux[meqn*s]);
@@ -264,13 +262,13 @@ namespace Lucee
     unsigned meqn, const double* vec, double v, double *out)
   {
     double tv;
-    unsigned rows = mat.numRows(), col = mat.numColumns();
+    unsigned rows = mat.numRows(), cols = mat.numColumns();
     for (unsigned m=0; m<meqn; ++m)
     {
       for (unsigned i=0; i<rows; ++i)
       {
         tv = 0.0;
-        for (unsigned j=0; j<col; ++j)
+        for (unsigned j=0; j<cols; ++j)
           tv += mat(i,j)*vec[meqn*j+m];
         out[meqn*i+m] = mc*tv + v*out[meqn*i+m];
       }

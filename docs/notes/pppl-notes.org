@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 10th
+
+  The DG updater seems to be working correctly. My initial input file
+  was using a time-step that was too large and so the scheme was
+  unstable.
+
+  I need to start documenting all the updaters and other Lua objects
+  to make it easier to setup a simulation. Without the SimJ it would
+  be presently very hard, even for me, to setup a simulation from
+  scratch. This documentation should also have an example top-level
+  loop which a user can cut-paste-modify into his/her Lua script.
+
 * August 7th-9th
 
   Worked on the nodal DG updater. Turns out that the structure of this
@@ -13,7 +25,8 @@
   code is augmented with auxillary variables the diffusion operator
   will be easy to implement.
 
-  [11:00pm] Completed the code for the updater
+  [11:15 pm] Completed the code for the nodal DG updater. Need to test
+  with advection equation.
 
 * August 6th
 

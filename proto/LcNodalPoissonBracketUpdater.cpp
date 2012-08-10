@@ -33,13 +33,12 @@ namespace Lucee
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
-// get hold of element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
       throw Lucee::Except("NodalPoissonBracketUpdater::readInput: Must specify element to use using 'basis'");
 
-    cfl = tbl.getNumber("cfl"); // CFL number
+    cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
     fluxType = UPWIND;
@@ -213,20 +212,13 @@ namespace Lucee
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
-// maximum CFL number used
-    double cfla = 0.0;
+    double cfla = 0.0; // maximum CFL number used
 
-// number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
-// number of volume quadrature points
     unsigned nVolQuad = nodalBasis->getNumGaussNodes();
-// number of nodes on each face (WARNING: assumption here is that all
-// faces have same number of nodes)
     unsigned nFace = nodalBasis->getNumSurfLowerNodes(0);
-// number of surface quadrarture points
     unsigned nSurfQuad = nodalBasis->getNumSurfGaussNodes();
 
-// space for various quantities
     std::vector<double> phiK(nlocal);
     std::vector<double> chiQuad_l(nSurfQuad), chiQuad_r(nSurfQuad), chiUpwind(nSurfQuad);
     std::vector<double> udotn(nSurfQuad), uflux(nSurfQuad), fdotn(nSurfQuad);
@@ -239,7 +231,6 @@ namespace Lucee
       quadSpeeds[dir].s.resize(nVolQuad);
     }
 
-// various iterators
     Lucee::ConstFieldPtr<double> phiPtr = phi.createConstPtr();
     Lucee::ConstFieldPtr<double> phiPtr_l = phi.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
@@ -248,7 +239,6 @@ namespace Lucee
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
 
-// clear out contents of output field
     aNew = 0.0;
 
     double dx[2];
@@ -284,7 +274,6 @@ namespace Lucee
           }
         }
 
-// get grid spacing
         grid.setIndex(ix, iy);
         double dtdx = dt/grid.getDx(0);
         double dtdy = dt/grid.getDx(1);
@@ -333,7 +322,6 @@ namespace Lucee
           idx[dir] = i; // cell right of edge
           idxl[dir] = i-1; // cell left of edge
 
-// set iterators to various cells
           aCurr.setPtr(aCurrPtr, idx);
           aCurr.setPtr(aCurrPtr_l, idxl);
 
