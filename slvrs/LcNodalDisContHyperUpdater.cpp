@@ -149,17 +149,16 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
     unsigned meqn = equation->getNumEqns();
 
-// array to hold fluxes
-    std::vector<double> nodalFlux(nlocal*meqn);
-
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
+    Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
-    Lucee::FieldPtr<double> flux(meqn);
+    Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
+    std::vector<double> flux(nlocal*meqn);
 
     qNew = 0.0;
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-// compute contribution from volume integrals
+// loop to compute contribution from volume integrals
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -176,21 +175,66 @@ namespace Lucee
       }
     }
 
-// compute contributions from surface integrals
-    seq.reset();
-    while (seq.step())
+// loop tp compute contributions from surface integrals
+    for (unsigned dir=0; dir<NDIM; ++dir)
     {
-      seq.fillWithSeq(idx);
+      Lucee::AlignedRectCoordSys coordSys(dir);
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
-      q.setPtr(qPtr, idx);
-      qNew.setPtr(qNewPtr, idx);
+// lower and upper bounds of 1D slice. (We need to make sure that the
+// flux is computed for one edge outside the domain interior)
+      int sliceLower = localRgn.getLower(dir);
+      int sliceUpper = localRgn.getUpper(dir)+1;
 
-      for (unsigned dir=0; dir<NDIM; ++dir)
+      int idx[NDIM], idxl[NDIM];
+// loop over each 1D slice
+      while (seq.step())
       {
+        seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxl);
+
+        for (int i=sliceLower; i<sliceUpper; ++i)
+        { // loop over each edge
+          idx[dir] = i; // cell right of edge
+          idxl[dir] = i-1; // cell left of edge
+
+          grid.setIndex(idxl);
+          double dxL = grid.getDx(dir);
+          grid.setIndex(idx);
+          double dxR = grid.getDx(dir);
+
+          double dtdx = 2*dt/(dxL+dxR);
+
+          q.setPtr(qPtr, idx);
+          q.setPtr(qPtrl, idxl);
+
+          for (unsigned s=0; s<lowerNodeNums[NDIM].nums.size(); ++s)
+          {
+            unsigned un = upperNodeNums[NDIM].nums[s];
+            unsigned ln = lowerNodeNums[NDIM].nums[s];
+// compute numerical fluxes at surface nodes
+            double maxs = equation->numericalFlux(coordSys,
+              &qPtrl[meqn*un], &qPtr[meqn*ln], &flux[meqn*s]);
+
+            cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs); // for time-step control
+          }
+
+          qNew.setPtr(qNewPtr, idx);
+          qNew.setPtr(qNewPtrl, idxl);
+
+// update left cell connected to edge
+          matVec(-1.0, upperLift[dir].m, meqn, &flux[0], 1.0, &qNewPtrl[0]);
+// update right cell connected to edge
+          matVec(1.0, lowerLift[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]);
+        }
       }
+      if (cfla > cflm)
+// time-step was too large: return a suggestion with correct time-step
+        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   template <unsigned NDIM>  
@@ -205,35 +249,19 @@ namespace Lucee
 
   template <unsigned NDIM>
   void 
-  NodalDisContHyperUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
-    const double* vec, double v, double *out)
-  {
-    double tv;
-    unsigned rows = mat.numRows(), cols = mat.numColumns();
-    for (unsigned i=0; i<rows; ++i)
-    {
-      tv = 0.0;
-      for (unsigned j=0; j<cols; ++j)
-        tv += mat(i,j)*vec[j];
-      out[i] = m*tv + v*out[i];
-    }
-  }
-
-  template <unsigned NDIM>
-  void 
-  NodalDisContHyperUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
+  NodalDisContHyperUpdater<NDIM>::matVec(double mc, const Lucee::Matrix<double>& mat,
     unsigned meqn, const double* vec, double v, double *out)
   {
     double tv;
-    unsigned nlocal = mat.numRows(); // mat is a square matrix
+    unsigned rows = mat.numRows(), col = mat.numColumns();
     for (unsigned m=0; m<meqn; ++m)
     {
-      for (unsigned i=0; i<nlocal; ++i)
+      for (unsigned i=0; i<rows; ++i)
       {
         tv = 0.0;
-        for (unsigned j=0; j<nlocal; ++j)
+        for (unsigned j=0; j<col; ++j)
           tv += mat(i,j)*vec[meqn*j+m];
-        out[meqn*i+m] = m*tv + v*out[meqn*i+m];
+        out[meqn*i+m] = mc*tv + v*out[meqn*i+m];
       }
     }
   }
