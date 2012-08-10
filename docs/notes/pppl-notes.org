@@ -13,6 +13,8 @@
   code is augmented with auxillary variables the diffusion operator
   will be easy to implement.
 
+  [11:00pm] Completed the code for the updater
+
 * August 6th
 
   Last week I spent two days helping out at the APS/DPP abstract

@@ -162,7 +162,6 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-
       q.setPtr(qPtr, idx);
       qNew.setPtr(qNewPtr, idx);
 
@@ -232,6 +231,18 @@ namespace Lucee
       if (cfla > cflm)
 // time-step was too large: return a suggestion with correct time-step
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+    }
+
+    seq = Lucee::RowMajorSequencer<NDIM>(localRgn);
+// final sweep, update solution with forward Euler step
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      qNew.setPtr(qNewPtr, idx);
+      q.setPtr(qPtr, idx);
+
+      for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
+        qNewPtr[k] = qPtr[k] + dt*qNewPtr[k];
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
