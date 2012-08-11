@@ -9,7 +9,13 @@
 
   The DG updater seems to be working correctly. My initial input file
   was using a time-step that was too large and so the scheme was
-  unstable.
+  unstable. Did initial tests for 1D and 2D advection on a 2D
+  grid. The 1D basis function does not have a complete set of
+  functions to support this updater. I am not planning to fix as it is
+  best to just implement the generic arbitrary order nodal basis
+  functions and get this done once and for all.
+
+** Documentation needed now
 
   I need to start documenting all the updaters and other Lua objects
   to make it easier to setup a simulation. Without the SimJ it would
