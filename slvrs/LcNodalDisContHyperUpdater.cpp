@@ -215,7 +215,7 @@ namespace Lucee
             unsigned ln = lowerNodeNums[dir].nums[s];
 
             equation->rotateToLocal(coordSys, &qPtrl[meqn*un], &localQl[0]);
-            equation->rotateToLocal(coordSys, &qPtr[meqn*un], &localQ[0]);
+            equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
 
             double maxs = equation->numericalFlux(coordSys,
               &localQl[0], &localQ[0], &localF[0]); // normal flux
