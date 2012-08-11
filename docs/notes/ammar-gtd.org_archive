@@ -198,6 +198,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 
   This will complete JE15.
 
+* Write general hyperbolic equation updater for rectangular meshes
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-10 Fri 12:54
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll projects
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+** DONE Work out the scheme on paper				      :LUCEE:
+** DONE Implement a updater to work with advection equations	      :LUCEE:
+
+
 
 
 

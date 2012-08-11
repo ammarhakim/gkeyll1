@@ -1,6 +1,6 @@
 # -*- org -*-
 
-#+TITLE:     Stuffs
+#+TITLE:     Things To Be Done
 #+AUTHOR:    Ammar Hakim
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
@@ -11,20 +11,15 @@ This file contains things to be done. The TODO items are sub-bullets
 in a task and are kept till the task is done. Completed tasks are
 archived.
 
-* Gkeyll projects
+* Gkeyll GKE project
 
-  Things to do in Gkeyll.
+  Things to do in Gkeyll for GKE project.
 
-** Add unit tests for getSendNeighbors() method			      :INFRA:
+** Test nodal DG updater with advection and Euler equations	     :GKEYLL:
 
-   I added the getSendNeighbors() method to compute the regions to
-   which we should send data. This is not tested yet, although when
-   used in the sync() method it seems to work just fine.
-
-** Complete MultiRegion class 					      :INFRA:
-
-   Finish the iterator access (or get rid of it) and complete the
-   code to allow adding connectivity information.
+   Check convergence of 2nd and 3rd order method, do 2D problem and
+   also do 1D Euler shock problems. For now there will be no limiters,
+   but this should be okay.
 
 ** Convert Poisson solver and related classes for parallel 	     :GKEYLL:
 
@@ -32,29 +27,6 @@ archived.
    work in serial. Need to convert these to parallel. Perhaps this is
    not hard, but will need to look into the complete chain of classes,
    including
-
-** Fix DataStruct::write() method to use sub-communicators	      :INFRA:
-
-   The DynVector can not be written by all processors for obvious
-   reasons. Hence, the DataStruct::write() method needs to be modified
-   to allow a data-structure to take a sub-communicator so only a
-   sub-set of processors do the I/O.
-
-** Make neighbor calculations for periodic boundaries. 		      :INFRA:
-
-   A significant unresolved issue: how to deal with periodic domains?
-   The neighbor calculation code needs to change for that. Essentially
-   on each periodic side of the global region (including corners) we
-   need to make copies of the global region. This will then give the
-   proper neighbors, including self-intersections. Some ambiguity
-   exists in the case in which the only one direction is
-   periodic. Question: should the periodic conditions include corners
-   in this case? I do not know, yet.
-
-** Fix hang in parallel test					      :INFRA:
-
-   With this Gkeyll will be ready for parallel runs. The problem is in
-   the sync() method.
 
 ** Figure out the normalization issue with Maxima root-finder	     :GKEYLL:
 
@@ -82,12 +54,72 @@ archived.
 ** Write updater for diffusion term and test 			     :GKEYLL:
 
    Use the local DG method for this.
-
-** Write general hyperbolic equation updater for rectangular meshes
-*** DONE Work out the scheme on paper				      :LUCEE:
-*** TODO Implement a updater to work with advection equations	      :LUCEE:
     
 ** Write limiter for nodal DG					     :GKEYLL:
+** Complete proof of DG energy conservation 			     :GKEYLL:
+
+   This requires some thought on how the discontinuity in d(phi)/dx
+   should be taken into account.
+
+** Write arbitrary nodal basis function 			     :GKEYLL:
+   
+   Use tensor product basis. This is so that the polynomial order can
+   be specified in the Lua program to get arbitrary accuracy. Try and
+   make this work for both Gauss and Lobatto nodal layouts.
+
+** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
+
+   At present only direct solves work. Need to fix this.
+
+** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
+
+   A large number of matrices and other information is needed from FE
+   basis functions for use in different parts of the code. Document
+   these and explain why they are needed. This will also help creation
+   of the general class to do this for general quad/hex/tri/tet cells.
+
+
+* Gkeyll infrastructure work
+
+  This is for broader infrastructure work which does not involve any
+  specific solver or physics issue.
+
+** Add unit tests for getSendNeighbors() method			      :INFRA:
+
+   I added the getSendNeighbors() method to compute the regions to
+   which we should send data. This is not tested yet, although when
+   used in the sync() method it seems to work just fine.
+
+** Complete MultiRegion class 					      :INFRA:
+
+   Finish the iterator access (or get rid of it) and complete the
+   code to allow adding connectivity information.
+
+
+** Fix DataStruct::write() method to use sub-communicators	      :INFRA:
+
+   The DynVector can not be written by all processors for obvious
+   reasons. Hence, the DataStruct::write() method needs to be modified
+   to allow a data-structure to take a sub-communicator so only a
+   sub-set of processors do the I/O.
+
+** Make neighbor calculations for periodic boundaries. 		      :INFRA:
+
+   A significant unresolved issue: how to deal with periodic domains?
+   The neighbor calculation code needs to change for that. Essentially
+   on each periodic side of the global region (including corners) we
+   need to make copies of the global region. This will then give the
+   proper neighbors, including self-intersections. Some ambiguity
+   exists in the case in which the only one direction is
+   periodic. Question: should the periodic conditions include corners
+   in this case? I do not know, yet.
+
+** Fix hang in parallel test					      :INFRA:
+
+   With this Gkeyll will be ready for parallel runs. The problem is in
+   the sync() method.
+
+
 ** Registration of objects 					      :INFRA:
 
    Currently the object registration depends on a doing a "new". Need
@@ -134,10 +166,6 @@ archived.
 
 ** Why does Lua script not have access to command line options?	      :INFRA:
 
-** Complete proof of DG energy conservation 			     :GKEYLL:
-
-   This requires some thought on how the discontinuity in d(phi)/dx
-   should be taken into account.
 
 ** Split each updater/datastruct docs into its own file 	     :GKEYLL:
 
@@ -146,11 +174,6 @@ archived.
    a single file for all updaters etc. This makes searching and
    indexing easier.
 
-** Write arbitrary nodal basis function 			     :GKEYLL:
-   
-   Use tensor product basis. This is so that the polynomial order can
-   be specified in the Lua program to get arbitrary accuracy. Try and
-   make this work for both Gauss and Lobatto nodal layouts.
 
 ** Transition to eigen matrix package				      :INFRA:
 
@@ -176,9 +199,6 @@ archived.
    bindings much easier to create and allow for a much more
    fine-grained control from Lua than is possible now.
 
-** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
-
-   At present only direct solves work. Need to fix this.
 
 ** Seems like duplicate() method creates mucked up fields 	     :GKEYLL:
 
@@ -192,12 +212,6 @@ archived.
    documented. Also, some code can then be removed based on this
    master list.
 
-** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
-
-   A large number of matrices and other information is needed from FE
-   basis functions for use in different parts of the code. Document
-   these and explain why they are needed. This will also help creation
-   of the general class to do this for general quad/hex/tri/tet cells.
 
 
 * Work related

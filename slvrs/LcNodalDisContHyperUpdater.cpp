@@ -19,9 +19,6 @@
 #include <LcStructuredGridBase.h>
 
 // std includes
-#include <algorithm>
-#include <iostream>
-#include <string>
 #include <vector>
 
 namespace Lucee
@@ -150,6 +147,7 @@ namespace Lucee
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
     std::vector<double> flux(nlocal*meqn);
+    std::vector<double> localQ(meqn), localQl(meqn), localF(meqn);
 
     qNew = 0.0; // so that this has increment
 
@@ -164,9 +162,14 @@ namespace Lucee
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
+// volume fluxes should always use aligned CS
         Lucee::AlignedRectCoordSys coordSys(dir);
         for (unsigned n=0; n<nlocal; ++n)
-          equation->flux(coordSys, &qPtr[meqn*n], &flux[meqn*n]);
+        {
+          equation->rotateToLocal(coordSys, &qPtr[meqn*n], &localQ[0]);
+          equation->flux(coordSys, &localQ[0], &localF[0]);
+          equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*n]);
+        }
         matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]); // stiffness X flux
       }
     }
@@ -174,7 +177,7 @@ namespace Lucee
 // loop tp compute contributions from surface integrals
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
-      Lucee::AlignedRectCoordSys coordSys(dir);
+      Lucee::AlignedRectCoordSys coordSys(dir); // eventually this needs to be a CS on the face
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
@@ -210,9 +213,14 @@ namespace Lucee
           {
             unsigned un = upperNodeNums[dir].nums[s];
             unsigned ln = lowerNodeNums[dir].nums[s];
-// compute numerical fluxes at surface nodes
+
+            equation->rotateToLocal(coordSys, &qPtrl[meqn*un], &localQl[0]);
+            equation->rotateToLocal(coordSys, &qPtr[meqn*un], &localQ[0]);
+
             double maxs = equation->numericalFlux(coordSys,
-              &qPtrl[meqn*un], &qPtr[meqn*ln], &flux[meqn*s]);
+              &localQl[0], &localQ[0], &localF[0]); // normal flux
+
+            equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*s]);
 
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs); // for time-step control
           }
