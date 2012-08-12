@@ -15,10 +15,6 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Nodal DG updater does not seem to with Euler equations	     :GKEYLL:
-
-   Most likely an issue with the matVec function.
-
 ** Test nodal DG updater with advection and Euler equations	     :GKEYLL:
 
    Check convergence of 2nd and 3rd order method, do 2D problem and
