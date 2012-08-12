@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 11th
+
+  Fixed nodal DG code so that the Euler solver works. There are small
+  machine precision errors in the grad-stiffness and lifting
+  matrices. Not sure if these can be fixed, but could cause problems
+  in situations the solutions are unstable.
+
 * August 10th
 
   The DG updater seems to be working correctly. My initial input file
