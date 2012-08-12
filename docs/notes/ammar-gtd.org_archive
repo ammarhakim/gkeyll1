@@ -208,6 +208,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 ** DONE Work out the scheme on paper				      :LUCEE:
 ** DONE Implement a updater to work with advection equations	      :LUCEE:
 
+* Nodal DG updater does not seem to with Euler equations	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-11 Sat 22:19
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Most likely an issue with the matVec function.
+
+
 
 
 
