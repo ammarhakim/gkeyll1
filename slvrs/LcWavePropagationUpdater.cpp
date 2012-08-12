@@ -156,17 +156,14 @@ namespace Lucee
   Lucee::UpdaterStatus
   WavePropagationUpdater<NDIM>::update(double t)
   {
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-// get input/output arrays
+
     const Lucee::Field<NDIM, double>& q = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& qNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-// qnew <- qold
     qNew.copy(q);
 
-// time-step
     double dt = t-this->getCurrTime();
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -174,21 +171,16 @@ namespace Lucee
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
 
-// pointers to data
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
-// rotated left/right states
     Lucee::FieldPtr<double> qLocal(meqn), qLocall(meqn);
-// waves in local coordinate system
     Lucee::Matrix<double> wavesLocal(meqn, mwave);
 
-// to store jump across interface
     Lucee::FieldPtr<double> jump(meqn);
 
-// maximum CFL number used
-    double cfla = 0.0;
+    double cfla = 0.0; // maximum CFL number used
 
 // loop, updating slices in each requested dimension
     for (unsigned d=0; d<updateDims.size(); ++d)
@@ -201,7 +193,6 @@ namespace Lucee
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
-// pointers to data
       Lucee::FieldPtr<double> apdqPtr = apdq[dir].createPtr();
       Lucee::FieldPtr<double> amdqPtr = amdq[dir].createPtr();
       Lucee::FieldPtr<double> speedsPtr = speeds[dir].createPtr();
@@ -273,7 +264,6 @@ namespace Lucee
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-// apply limiters
         applyLimiters(waves[dir], speeds[dir]);
 
 // compute second order corrections to flux (we need to go one cell
@@ -285,7 +275,6 @@ namespace Lucee
           speeds[dir].setPtr(speedsPtr, i);
           waves[dir].setPtr(wavesPtr, i);
 
-// create matrix to store waves
           Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
 
           for (unsigned m=0; m<meqn; ++m)
@@ -301,7 +290,7 @@ namespace Lucee
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
         {
           idx[dir] = i; // left edge of cell
-// set pointers to proper locations
+
           qNew.setPtr(qNewPtr, idx);
           fs[dir].setPtr(fsPtr, i);
           fs[dir].setPtr(fsPtr1, i+1);
@@ -319,7 +308,6 @@ namespace Lucee
   WavePropagationUpdater<NDIM>::applyLimiters(
     Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
-// return immediately if no limiters need to be applied
     if (limiter == NO_LIMITER) return;
 
     double c, r, dotr, dotl, wnorm2, wlimitr=1;
