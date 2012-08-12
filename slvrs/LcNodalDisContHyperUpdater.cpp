@@ -11,7 +11,6 @@
 
 // lucee includes
 #include <LcAlignedRectCoordSys.h>
-#include <LcDirSequencer.h>
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
