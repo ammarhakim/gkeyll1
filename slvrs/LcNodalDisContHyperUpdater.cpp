@@ -104,9 +104,8 @@ namespace Lucee
       stiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
       nodalBasis->getGradStiffnessMatrix(dir, stiffMatrix[dir].m);
 
-// multiply matrices by inverse of mass matrix
       nodalBasis->getMassMatrix(massMatrix);
-      Lucee::solve(massMatrix, stiffMatrix[dir].m);
+      Lucee::solve(massMatrix, stiffMatrix[dir].m); // pre-multiply by inverse mass matrix
 
 // compute lift matrices
       lowerLift[dir].m = Lucee::Matrix<double>(nlocal, 
@@ -114,14 +113,14 @@ namespace Lucee
 
       nodalBasis->getLowerFaceMassMatrix(dir, lowerLift[dir].m);
       nodalBasis->getMassMatrix(massMatrix);
-      Lucee::solve(massMatrix, lowerLift[dir].m);
-      
+      Lucee::solve(massMatrix, lowerLift[dir].m);  // pre-multiply by inverse mass matrix
+
       upperLift[dir].m = Lucee::Matrix<double>(nlocal, 
         nodalBasis->getNumSurfUpperNodes(dir));
 
       nodalBasis->getUpperFaceMassMatrix(dir, upperLift[dir].m);
       nodalBasis->getMassMatrix(massMatrix);
-      Lucee::solve(massMatrix, upperLift[dir].m);
+      Lucee::solve(massMatrix, upperLift[dir].m);  // pre-multiply by inverse mass matrix
     }
   }
 
@@ -149,7 +148,7 @@ namespace Lucee
     std::vector<double> flux(nlocal*meqn);
     std::vector<double> localQ(meqn), localQl(meqn), localF(meqn);
 
-    qNew = 0.0; // so that this has increment
+    qNew = 0.0; // use qNew to store increment initially
 
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -162,7 +161,7 @@ namespace Lucee
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
-// volume fluxes should always use aligned CS
+// volume fluxes should always use aligned CS, even on non-rectangular geometery
         Lucee::AlignedRectCoordSys coordSys(dir);
         for (unsigned n=0; n<nlocal; ++n)
         {
@@ -174,7 +173,7 @@ namespace Lucee
       }
     }
 
-// loop tp compute contributions from surface integrals
+// contributions from surface integrals
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
       Lucee::AlignedRectCoordSys coordSys(dir); // eventually this needs to be a CS on the face
@@ -218,19 +217,19 @@ namespace Lucee
             equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
 
             double maxs = equation->numericalFlux(coordSys,
-              &localQl[0], &localQ[0], &localF[0]); // normal flux
+              &localQl[0], &localQ[0], &localF[0]);
 
             equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*s]);
 
-            cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs); // for time-step control
+            cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs); // actual CFL number
           }
 
-          qNew.setPtr(qNewPtr, idx);
-          qNew.setPtr(qNewPtrl, idxl);
-
 // update left cell connected to edge
+          qNew.setPtr(qNewPtrl, idxl);
           matVec(-1.0, upperLift[dir].m, meqn, &flux[0], 1.0, &qNewPtrl[0]);
+
 // update right cell connected to edge
+          qNew.setPtr(qNewPtr, idx);
           matVec(1.0, lowerLift[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]);
         }
       }
