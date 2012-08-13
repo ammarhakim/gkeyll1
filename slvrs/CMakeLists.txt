@@ -35,6 +35,7 @@ set(lcslvrs_SOURCES
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
   LcNodalDisContHyperUpdater.cpp
+  LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
