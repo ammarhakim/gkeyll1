@@ -12,6 +12,14 @@
   matrices. Not sure if these can be fixed, but could cause problems
   in situations the solutions are unstable.
 
+** Code documentation: the "obvious stuff"
+
+   I now understand why I document things which are "obvious". The
+   reason is that it helps the thought process that goes into writing
+   the code. This is perfectly fine and something that should be
+   done. However, comments for the sake of comments (an unconscious
+   habit of mine) should be avoided.
+
 * August 10th
 
   The DG updater seems to be working correctly. My initial input file

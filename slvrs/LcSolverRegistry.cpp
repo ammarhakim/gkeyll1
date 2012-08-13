@@ -24,6 +24,7 @@
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcNodalDisContHyperUpdater.h>
+#include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
@@ -66,6 +67,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<3> >;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<2> >;

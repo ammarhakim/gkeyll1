@@ -94,7 +94,6 @@ namespace Lucee
         upperNodeNums[dir].nums[k] += -1;
     }
 
-// space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
     for (unsigned dir=0; dir<2; ++dir)
@@ -118,7 +117,6 @@ namespace Lucee
       Lucee::solve(massMatrix, diffMatrix[dir].m);
     }
 
-// allocate space for volume quadrature
     unsigned nVolQuad = nodalBasis->getNumGaussNodes();
     volQuad.reset(nVolQuad, nlocal);
 
@@ -198,16 +196,14 @@ namespace Lucee
   Lucee::UpdaterStatus 
   NodalPoissonBracketUpdater::update(double t)
   {
-// get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
-// get input arrays
+
     const Lucee::Field<2, double>& aCurr = this->getInp<Lucee::Field<2, double> >(0);
     const Lucee::Field<2, double>& phi = this->getInp<Lucee::Field<2, double> >(1);
-// get output arrays
+
     Lucee::Field<2, double>& aNew = this->getOut<Lucee::Field<2, double> >(0);
 
-// time-step
     double dt = t-this->getCurrTime();
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
@@ -239,7 +235,7 @@ namespace Lucee
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
 
-    aNew = 0.0;
+    aNew = 0.0; // use aNew to store increment initially
 
     double dx[2];
     int idx[2];
@@ -352,14 +348,14 @@ namespace Lucee
           aNew.setPtr(aNewPtr, idx);
           aNew.setPtr(aNewPtr_l, idxl);
 
-// perform the surface integration
+// perform surface integration
           for (unsigned k=0; k<nlocal; ++k)
           {
             for (unsigned qp=0; qp<nSurfQuad; ++qp)
               aNewPtr[k] += surfLowerQuad[dir].weights[qp]*mSurfLowerPhi[dir].m(k,qp)*uflux[qp];
           }
 
-// perform the surface integration
+// perform surface integration
           for (unsigned k=0; k<nlocal; ++k)
           {
             for (unsigned qp=0; qp<nSurfQuad; ++qp)
