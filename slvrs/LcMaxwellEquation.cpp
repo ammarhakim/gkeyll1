@@ -55,7 +55,8 @@ namespace Lucee
   }
 
   void
-  MaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  MaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     f[0] = 0.0;
     f[1] = lightSpeed2*q[BZ];

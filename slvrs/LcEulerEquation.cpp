@@ -64,7 +64,8 @@ namespace Lucee
   }
 
   void
-  EulerEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  EulerEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     double rho1 = 1/getSafeRho(q[0]);
 // compute pressure
@@ -191,7 +192,9 @@ namespace Lucee
 
   double
   EulerEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const double* ql, const double* qr, double* f)
+    const double* ql, const double* qr, 
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+    double* f)
   {
 // NOTE: This numerical flux is using Lax-Fluxes
 
@@ -200,8 +203,8 @@ namespace Lucee
 
     Lucee::FieldPtr<double> fl(5), fr(5);
 // compute left and right fluxes
-    this->flux(c, ql, fl);
-    this->flux(c, qr, fr);
+    this->flux(c, ql, auxVarsl, fl);
+    this->flux(c, qr, auxVarsr, fr);
 
 // compute numerical fluxes
     for (unsigned i=0; i<5; ++i)

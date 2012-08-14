@@ -43,6 +43,7 @@ set(lcslvrs_SOURCES
   LcSerendipityElement2D.cpp
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
+  LcUnitAuxEquation.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcWavePropagationUpdater.cpp

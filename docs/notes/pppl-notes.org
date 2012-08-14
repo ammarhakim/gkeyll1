@@ -5,7 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
-* August 11th
+* August 13th
+
+  Added auxillary variables to hyperbolic equations. Extended nodal DG
+  updater to allow doing increments rather than full forward-Euler
+  updates.
+
+* August 11th-12th
 
   Fixed nodal DG code so that the Euler solver works. There are small
   machine precision errors in the grad-stiffness and lifting

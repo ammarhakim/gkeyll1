@@ -114,6 +114,7 @@ namespace Lucee
     Lucee::FieldPtr<double> qL(meqn), qR(meqn);
 // flux and numerical flux
     Lucee::FieldPtr<double> flux(meqn), numFlux(meqn);
+    std::vector<const double *> auxQ, auxQl, auxQr;
 
     if ( (q.getNumComponents() != meqn*numBasis) && (qNew.getNumComponents() != meqn*numBasis) )
     {
@@ -161,7 +162,8 @@ namespace Lucee
       evalExpansionLeftEdge(qrPtr, qR); // qR is left edge of right cell
 
 // compute numerical flux at edge
-      double maxs = equation->numericalFlux(coordSys, qL, qR, numFlux);
+      double maxs = equation->numericalFlux(coordSys, qL, qR, 
+        auxQl, auxQr, numFlux);
 
 // attach iterators to left and right cells to accumulate increment
       qNew.setPtr(qNewlPtr, i-1); // left cell
@@ -201,7 +203,7 @@ namespace Lucee
 // compute conserved variable at ordinate and store in qL
         evalExpansion(qPtr, r, qL);
 // compute flux at this location
-        equation->flux(coordSys, qL, flux);
+        equation->flux(coordSys, qL, auxQ, flux);
 
 // accumulate contribution of this flux to each mode for each equation
         for (unsigned m=1; m<numBasis; ++m)

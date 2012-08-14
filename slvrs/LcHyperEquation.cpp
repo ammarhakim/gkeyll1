@@ -30,7 +30,8 @@ namespace Lucee
   }
 
   void
-  HyperEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  HyperEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     throw Lucee::Except("HyperEquation::flux: Method not implemented");
   }
@@ -64,7 +65,9 @@ namespace Lucee
 
   double
   HyperEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const double* ql, const double* qr, double* f)
+    const double* ql, const double* qr, 
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+    double* f)
   {
     throw Lucee::Except("HyperEquation::numericalFlux: Method not implemented");
     return 0; // should never come here
