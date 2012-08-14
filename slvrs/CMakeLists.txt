@@ -20,6 +20,7 @@ set(lcslvrs_SOURCES
   LcConstBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
   LcCurrentSource.cpp
+  LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
   LcEvalOnNodesUpdater.cpp
@@ -43,7 +44,6 @@ set(lcslvrs_SOURCES
   LcSerendipityElement2D.cpp
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
-  LcUnitAuxEquation.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcWavePropagationUpdater.cpp
