@@ -1,7 +1,7 @@
 /**
- * @file        LcUnitAuxEquation.h
+ * @file        LcDivEquation.h
  *
- * @brief	Auxilary equations with unit flux.
+ * @brief	Divergence of flux specifed as auxillary variable.
  */
 #ifndef LC_UNIT_AUX_EQUATION_H
 #define LC_UNIT_AUX_EQUATION_H
@@ -17,10 +17,10 @@
 namespace Lucee
 {
 /**
- * Represents an UnitAux equations. THIS IS NOT A GOOD NAME AND NEEDS
- * TO CHANGE.
+ * Represents an hyperbolic equation which is divergence of a flux
+ * specified as an auxillary variable.
  */
-  class UnitAuxEquation : public Lucee::HyperEquation
+  class DivEquation : public Lucee::HyperEquation
   {
     public:
 /** Class id: this is used by registration system */
@@ -29,7 +29,7 @@ namespace Lucee
 /**
  * Create a new hyperbolic equation system.
  */
-      UnitAuxEquation();
+      DivEquation();
 
 /**
  * Bootstrap method: Read input from specified table.

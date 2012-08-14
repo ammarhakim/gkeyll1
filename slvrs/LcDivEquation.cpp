@@ -1,5 +1,5 @@
 /**
- * @file        LcUnitAuxEquation.cpp
+ * @file        LcDivEquation.cpp
  *
  * @brief	Auxilary equations with unit flux.
  */
@@ -9,20 +9,20 @@
 #endif
 
 // lucee includes
-#include <LcUnitAuxEquation.h>
+#include <LcDivEquation.h>
 
 namespace Lucee
 {
 // set id for creators
-  const char *UnitAuxEquation::id = "Auxiliary";
+  const char *DivEquation::id = "DivAuxFlux";
 
-  UnitAuxEquation::UnitAuxEquation()
+  DivEquation::DivEquation()
     : Lucee::HyperEquation(1, 0)
   {
   }
 
   void
-  UnitAuxEquation::readInput(Lucee::LuaTable& tbl)
+  DivEquation::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
@@ -31,7 +31,7 @@ namespace Lucee
     if (tbl.hasNumber("numEquations"))
       this->setNumEqns((unsigned) tbl.getNumber("numEquations"));
     else
-      throw Lucee::Except("UnitAuxEquation::readInput: Must specify number of equations 'numEquations'");
+      throw Lucee::Except("DivEquation::readInput: Must specify number of equations 'numEquations'");
 
     coeffs.resize(6);
     for (unsigned i=0; i<6; ++i)
@@ -46,14 +46,14 @@ namespace Lucee
   }
 
   void
-  UnitAuxEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+  DivEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
     const std::vector<const double*>& auxVars, double* f)
   {
   }
 
 
   double
-  UnitAuxEquation::numericalFlux(const Lucee::RectCoordSys& c,
+  DivEquation::numericalFlux(const Lucee::RectCoordSys& c,
     const double* ql, const double* qr,
     const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
     double* f)
