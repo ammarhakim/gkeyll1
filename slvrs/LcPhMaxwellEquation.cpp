@@ -72,7 +72,8 @@ namespace Lucee
   }
 
   void
-  PhMaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  PhMaxwellEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     f[0] = chi_e*lightSpeed2*q[PHI];
     f[1] = lightSpeed2*q[BZ];

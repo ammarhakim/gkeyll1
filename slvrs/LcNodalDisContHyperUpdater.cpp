@@ -55,6 +55,12 @@ namespace Lucee
 
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
+
+// when onlyIncrement flag is set contribution is not added to the
+// input field, i.e. only increment is computed
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
   }
 
   template <unsigned NDIM>
@@ -133,12 +139,26 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& q = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& qNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
+    unsigned nlocal = nodalBasis->getNumNodes();
+    unsigned meqn = equation->getNumEqns();
+
+// determine number of auxillary variables
+    unsigned numAuxVars = this->getNumInpVars()-1; // first is alway conserved variable
+// store them
+    std::vector<const Lucee::Field<NDIM, double>* > auxVars;
+    for (unsigned i=0; i<numAuxVars; ++i)
+      auxVars.push_back( &this->getInp<Lucee::Field<NDIM, double> >(i+1) );
+// compute number of equations in each auxillary variable
+    std::vector<unsigned> numAuxEqns;
+    for (unsigned i=0; i<numAuxVars; ++i)
+      numAuxEqns.push_back( auxVars[i]->getNumComponents()/nlocal );
+
+    std::vector<const double *> auxQ(numAuxVars), auxQl(numAuxVars), auxQr(numAuxVars);
+
     double dt = t-this->getCurrTime();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     double cfla = 0.0; // maximum CFL number used
-    unsigned nlocal = nodalBasis->getNumNodes();
-    unsigned meqn = equation->getNumEqns();
 
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
@@ -151,12 +171,21 @@ namespace Lucee
 
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+
 // loop to compute contribution from volume integrals
     while (seq.step())
     {
       seq.fillWithIndex(idx);
       q.setPtr(qPtr, idx);
       qNew.setPtr(qNewPtr, idx);
+
+// create input auxiliary variables list
+      for (unsigned a=0; a<numAuxVars; ++a)
+      {
+        Lucee::ConstFieldPtr<double> aPtr = auxVars[a]->createConstPtr();
+        auxVars[a]->setPtr(aPtr, idx);
+        auxQ[a] = &aPtr[0];
+      }
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
@@ -165,8 +194,11 @@ namespace Lucee
         for (unsigned n=0; n<nlocal; ++n)
         {
           equation->rotateToLocal(coordSys, &qPtr[meqn*n], &localQ[0]);
-          equation->flux(coordSys, &localQ[0], &localF[0]);
+          equation->flux(coordSys, &localQ[0], auxQ, &localF[0]);
           equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*n]);
+//  adjust auxilary variable pointers to point to data at next node
+          for (unsigned a=0; a<numAuxVars; ++a)
+            auxQ[a] = auxQ[a] + numAuxEqns[a];
         }
         matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]); // stiffness X flux
       }
@@ -206,6 +238,18 @@ namespace Lucee
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
 
+// create input auxiliary variables list
+          for (unsigned a=0; a<numAuxVars; ++a)
+          {
+            Lucee::ConstFieldPtr<double> aPtr = auxVars[a]->createConstPtr();
+            auxVars[a]->setPtr(aPtr, idxl);
+            auxQl[a] = &aPtr[0];
+
+            auxVars[a]->setPtr(aPtr, idx);
+            auxQr[a] = &aPtr[0];
+          }
+
+// compute numerical fluxes on each face
           unsigned nface = lowerNodeNums[dir].nums.size();
           for (unsigned s=0; s<nface; ++s)
           {
@@ -216,18 +260,25 @@ namespace Lucee
             equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
 
             double maxs = equation->numericalFlux(coordSys,
-              &localQl[0], &localQ[0], &localF[0]);
+              &localQl[0], &localQ[0], auxQl, auxQr, &localF[0]);
 
             equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*s]);
 
-            cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs); // actual CFL number
+//  adjust auxilary variable pointers to point to data at next node
+            for (unsigned a=0; a<numAuxVars; ++a)
+            {
+              auxQl[a] = auxQl[a] + numAuxEqns[a];
+              auxQr[a] = auxQr[a] + numAuxEqns[a];
+            }
+// compute actual CFL number to control time-stepping
+            cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }
 
-// update left cell connected to edge
+// update left cell connected to edge with flux on face
           qNew.setPtr(qNewPtrl, idxl);
           matVec(-1.0, upperLift[dir].m, meqn, &flux[0], 1.0, &qNewPtrl[0]);
 
-// update right cell connected to edge
+// update right cell connected to edge with flux on face
           qNew.setPtr(qNewPtr, idx);
           matVec(1.0, lowerLift[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]);
         }
@@ -245,8 +296,12 @@ namespace Lucee
       qNew.setPtr(qNewPtr, idx);
       q.setPtr(qPtr, idx);
 
-      for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
-        qNewPtr[k] = qPtr[k] + dt*qNewPtr[k];
+      if (onlyIncrement)
+        for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
+          qNewPtr[k] = dt*qNewPtr[k]; // do not add in previous values
+      else
+        for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
+          qNewPtr[k] = qPtr[k] + dt*qNewPtr[k];
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);

@@ -75,8 +75,8 @@ namespace Lucee
       double cfl;
 /** Maximum CFL number allowed */
       double cflm;
-/** Type of interface flux to use */
-      unsigned fluxType;
+/** Flag to indicate if to compute increments only */
+      bool onlyIncrement;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not

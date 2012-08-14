@@ -87,9 +87,11 @@ namespace Lucee
  *
  * @param c Coordinate system in which to compute flux.
  * @param q Conserved variables for which to compute flux.
+ * @param auxVars Auxillary variables needed to compute fluxes.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::RectCoordSys& c, const double* q, double* f);
+      virtual void flux(const Lucee::RectCoordSys& c, const double* q, 
+        const std::vector<const double*>& auxVars, double* f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
@@ -145,11 +147,15 @@ namespace Lucee
  * @param c Coordinate system in which to compute flux.
  * @param ql Left conserved variable state.
  * @param qr Right conserved variable state.
+ * @param auxVarsl Left auxillary variables needed to compute fluxes.
+ * @param auxVarsr Right auxillary variables needed to compute fluxes.
  * @param f On output, this contains the numerical flux.
  * @return Maximum wave speed from left/right state.
  */
       virtual double numericalFlux(const Lucee::RectCoordSys& c,
-        const double* ql, const double* qr, double* f);
+        const double* ql, const double* qr, 
+        const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+        double* f);
 
 /**
  * Project given vector on left-eigenvectors of flux-jacobian. The
@@ -242,6 +248,12 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     protected:
+/**
+ * Reset the number of equations in this system.
+ *
+ * @param m Number of equations in system.
+ */
+      void setNumEqns(unsigned m) { meqn = m; }
 
     private:
 /** Number of equations */

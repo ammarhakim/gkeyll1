@@ -15,11 +15,25 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Extend hyperbolic equation interface for auxillary variables	     :GKEYLL:
+
+   Add auxillary variables to support the diffusion (and Hall, etc)
+   terms.
+
 ** Test nodal DG updater with advection and Euler equations	     :GKEYLL:
 
    Check convergence of 2nd and 3rd order method, do 2D problem and
    also do 1D Euler shock problems. For now there will be no limiters,
    but this should be okay.
+
+** Figure out a way to do sources in a modular manner		     :GKEYLL:
+
+   The current source calculation method is not flexible as it assumes
+   that aliasing can work. Need to find a fix. 
+
+   The correct long-term fix is to introduce a nodal FE
+   field. However, I wonder if that should wait for the integration of
+   Blitz++ into the framework. See notes for March 15th 2012.
 
 ** Convert Poisson solver and related classes for parallel 	     :GKEYLL:
 

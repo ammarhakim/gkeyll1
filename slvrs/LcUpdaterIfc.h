@@ -41,11 +41,6 @@ namespace Lucee
  * 
  * setGrid() to set the grid on which the updater should run.
  *
- * initialize() to setup the updater.
- *
- * Note: if the grid is changed using a setGrid() method the
- * initialize() method must be called again.
- *
  * To advancement sequence is:
  *
  * calls to setInpVars(), setOutVars() to set the input/output data

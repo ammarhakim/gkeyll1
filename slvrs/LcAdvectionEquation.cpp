@@ -54,7 +54,8 @@ namespace Lucee
   }
 
   void
-  AdvectionEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  AdvectionEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     double v[3];
     c.rotateVecToLocal(u, v);
@@ -96,7 +97,9 @@ namespace Lucee
 
   double
   AdvectionEquation::numericalFlux(const Lucee::RectCoordSys& c,
-    const double* ql, const double* qr, double* f)
+    const double* ql, const double* qr, 
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+    double* f)
   {
     double v[3];
     c.rotateVecToLocal(u, v);

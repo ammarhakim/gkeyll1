@@ -61,7 +61,8 @@ namespace Lucee
   }
 
   void
-  TenMomentEquation::flux(const Lucee::RectCoordSys& c, const double* q, double* f)
+  TenMomentEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
+    const std::vector<const double*>& auxVars, double* f)
   {
     Lucee::FieldPtr<double> v(10);
 // compute primitive variables first

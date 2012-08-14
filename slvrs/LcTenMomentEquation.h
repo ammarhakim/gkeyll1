@@ -62,7 +62,8 @@ namespace Lucee
  * @param q Conserved variables for which to compute flux.
  * @param f On output, this contains the flux.
  */
-      virtual void flux(const Lucee::RectCoordSys& c, const double* q, double* f);
+      virtual void flux(const Lucee::RectCoordSys& c, const double* q, 
+        const std::vector<const double*>& auxVars, double* f);
 
 /**
  * Compute the minimum and maximum wave speeds in the system. s[0] is
