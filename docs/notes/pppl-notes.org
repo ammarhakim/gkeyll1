@@ -7,9 +7,14 @@
 
 * August 13th
 
+  Spent time in the afternoon meeting with Tim.
+
   Added auxillary variables to hyperbolic equations. Extended nodal DG
   updater to allow doing increments rather than full forward-Euler
-  updates.
+  updates. Some thought to implementing the classes for the diffusion
+  terms. The only thing not worked out are the rotation terms needed
+  to get these to work in multiple dimensions. Too tired to work on
+  this tonight.
 
 * August 11th-12th
 
