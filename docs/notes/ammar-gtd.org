@@ -15,12 +15,17 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Extend hyperbolic equation interface for auxillary variables	     :GKEYLL:
+** Work out local DG method for diffusion operator and write notes   :GKEYLL:
 
-   Add auxillary variables to support the diffusion (and Hall, etc)
-   terms.
+   For piecewise constant basis functions this should reduce to an
+   explicit 5-point central-difference operator.
 
-** Test nodal DG updater with advection and Euler equations	     :GKEYLL:
+** Write updater for diffusion term and test 			     :GKEYLL:
+
+   Use the local DG method for this.
+    
+
+** Test nodal DG updater with advection and Euler equations 	     :GKEYLL:
 
    Check convergence of 2nd and 3rd order method, do 2D problem and
    also do 1D Euler shock problems. For now there will be no limiters,
@@ -60,15 +65,6 @@ archived.
    self-consistent problem. First check if it works for the
    fixed-potential problem.
 
-** Work out local DG method for diffusion operator and write notes   :GKEYLL:
-
-   For piecewise constant basis functions this should reduce to an
-   explicit 5-point central-difference operator.
-
-** Write updater for diffusion term and test 			     :GKEYLL:
-
-   Use the local DG method for this.
-    
 ** Write limiter for nodal DG					     :GKEYLL:
 ** Complete proof of DG energy conservation 			     :GKEYLL:
 
