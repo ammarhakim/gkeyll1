@@ -259,8 +259,12 @@ namespace Lucee
 
             equation->rotateToLocal(coordSys, &qPtrl[meqn*un], &localQl[0]);
             equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
+// NOTE: we do not rotate auxiliary variables as the equation system
+// should do the rotations if needed. This is perhaps inconsistent,
+// but the HyperEquation class interface need not be cluttered with
+// yet another set of rotation functions.
 
-//  adjust auxilary variable pointers to point to data face node
+// adjust auxilary variable pointers to point to data at face node
             for (unsigned a=0; a<numAuxVars; ++a)
             {
               inAuxQl[a] = auxQl[a] + un*numAuxEqns[a];
@@ -290,20 +294,24 @@ namespace Lucee
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
 
-    seq = Lucee::RowMajorSequencer<NDIM>(localRgn);
-// final sweep, update solution with forward Euler step
-    while (seq.step())
+    if (onlyIncrement == false)
     {
-      seq.fillWithIndex(idx);
-      qNew.setPtr(qNewPtr, idx);
-      q.setPtr(qPtr, idx);
+// NOTE: If only calculation of increments are requested, the final
+// Euler update is not performed. This means that the multiplication
+// of the DG RHS with dt is not done, something to keep in mind if
+// using the increment in time-dependent update.
 
-      if (onlyIncrement)
-        for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
-          qNewPtr[k] = dt*qNewPtr[k]; // do not add in previous values
-      else
+      seq = Lucee::RowMajorSequencer<NDIM>(localRgn);
+// final sweep, update solution with forward Euler step
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        qNew.setPtr(qNewPtr, idx);
+        q.setPtr(qPtr, idx);
+        
         for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
           qNewPtr[k] = qPtr[k] + dt*qNewPtr[k];
+      }
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
