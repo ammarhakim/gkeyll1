@@ -13,6 +13,7 @@
 #include <LcAdvectionEquation.h>
 #include <LcDivEquation.h>
 #include <LcEulerEquation.h>
+#include <LcGradEquation.h>
 #include <LcHyperEquationRegistry.h>
 #include <LcMaxwellEquation.h>
 #include <LcPhMaxwellEquation.h>
@@ -30,5 +31,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<1> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<2> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<3> >;
+
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<1> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<2> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<3> >;
   }
 }

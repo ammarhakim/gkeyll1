@@ -26,6 +26,7 @@ set(lcslvrs_SOURCES
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
   LcFunctionSource.cpp
+  LcGradEquation.cpp
   LcGridOdeIntegrator.cpp
   LcGridOdePointIntegrator.cpp
   LcGridOdePointIntegratorUpdater.cpp

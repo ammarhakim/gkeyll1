@@ -154,7 +154,7 @@ namespace Lucee
       numAuxEqns.push_back( auxVars[i]->getNumComponents()/nlocal );
 
     std::vector<const double *> auxQ(numAuxVars), auxQl(numAuxVars), auxQr(numAuxVars);
-    std::vector<const double *> inAuxQl(numAuxVars), inAuxQr(numAuxVars);
+    std::vector<const double *> inAuxQ(numAuxVars), inAuxQl(numAuxVars), inAuxQr(numAuxVars);
 
     double dt = t-this->getCurrTime();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -194,12 +194,18 @@ namespace Lucee
         Lucee::AlignedRectCoordSys coordSys(dir);
         for (unsigned n=0; n<nlocal; ++n)
         {
-          equation->rotateToLocal(coordSys, &qPtr[meqn*n], &localQ[0]);
-          equation->flux(coordSys, &localQ[0], auxQ, &localF[0]);
-          equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*n]);
-//  adjust auxilary variable pointers to point to data at next node
+//  adjust auxilary variable pointers to point to data at node
           for (unsigned a=0; a<numAuxVars; ++a)
-            auxQ[a] = auxQ[a] + numAuxEqns[a];
+            inAuxQ[a] = auxQ[a] + n*numAuxEqns[a];
+
+// NOTE: we do not rotate auxiliary variables as the equation system
+// should do the rotations if needed. This is perhaps inconsistent,
+// but the HyperEquation class interface need not be cluttered with
+// yet another set of rotation functions.
+
+          equation->rotateToLocal(coordSys, &qPtr[meqn*n], &localQ[0]);
+          equation->flux(coordSys, &localQ[0], inAuxQ, &localF[0]);
+          equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*n]);
         }
         matVec(1.0, stiffMatrix[dir].m, meqn, &flux[0], 1.0, &qNewPtr[0]); // stiffness X flux
       }
