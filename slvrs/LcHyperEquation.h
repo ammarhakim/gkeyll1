@@ -71,7 +71,7 @@ namespace Lucee
  * @param inQ Input conserved variables.
  * @param outQ Rotated conserved variables. 
  */
-      virtual void rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ) = 0;
+      virtual void rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ);
 
 /**
  * Rotate data to global coordinate system.
@@ -80,7 +80,7 @@ namespace Lucee
  * @param inQ Input conserved variables.
  * @param outQ Rotated conserved variables. 
  */
-      virtual void rotateToGlobal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ) = 0;
+      virtual void rotateToGlobal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ);
 
 /**
  * Compute flux for this equation system.
