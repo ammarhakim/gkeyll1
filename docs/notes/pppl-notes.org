@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 14th
+
+  Completed DivEquation class which derives from HyperEquation. This
+  implements divergence of a flux. Discovered a bug in the nodal DG
+  updater in the way the indexes of the auxillary variables were being
+  indexed. Fixed, and now the DivEquation class works with nodal DG
+  updater.
+
 * August 13th
 
   Spent time in the afternoon meeting with Tim.
