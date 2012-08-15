@@ -154,6 +154,7 @@ namespace Lucee
       numAuxEqns.push_back( auxVars[i]->getNumComponents()/nlocal );
 
     std::vector<const double *> auxQ(numAuxVars), auxQl(numAuxVars), auxQr(numAuxVars);
+    std::vector<const double *> inAuxQl(numAuxVars), inAuxQr(numAuxVars);
 
     double dt = t-this->getCurrTime();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -259,17 +260,18 @@ namespace Lucee
             equation->rotateToLocal(coordSys, &qPtrl[meqn*un], &localQl[0]);
             equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
 
+//  adjust auxilary variable pointers to point to data face node
+            for (unsigned a=0; a<numAuxVars; ++a)
+            {
+              inAuxQl[a] = auxQl[a] + un*numAuxEqns[a];
+              inAuxQr[a] = auxQr[a] + ln*numAuxEqns[a];
+            }
+
             double maxs = equation->numericalFlux(coordSys,
-              &localQl[0], &localQ[0], auxQl, auxQr, &localF[0]);
+              &localQl[0], &localQ[0], inAuxQl, inAuxQr, &localF[0]);
 
             equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*s]);
 
-//  adjust auxilary variable pointers to point to data at next node
-            for (unsigned a=0; a<numAuxVars; ++a)
-            {
-              auxQl[a] = auxQl[a] + numAuxEqns[a];
-              auxQr[a] = auxQr[a] + numAuxEqns[a];
-            }
 // compute actual CFL number to control time-stepping
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }

@@ -3,8 +3,8 @@
  *
  * @brief	Divergence of flux specifed as auxillary variable.
  */
-#ifndef LC_UNIT_AUX_EQUATION_H
-#define LC_UNIT_AUX_EQUATION_H
+#ifndef LC_DIV_AUX_EQUATION_H
+#define LC_DIV_AUX_EQUATION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@ namespace Lucee
  * Represents an hyperbolic equation which is divergence of a flux
  * specified as an auxillary variable.
  */
+  template <unsigned NDIM>
   class DivEquation : public Lucee::HyperEquation
   {
     public:
@@ -37,6 +38,24 @@ namespace Lucee
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
+ * Rotate data to local coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      void rotateToLocal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ);
+
+/**
+ * Rotate data to global coordinate system.
+ *
+ * @param c Coordinate system to rotate data to.
+ * @param inQ Input conserved variables.
+ * @param outQ Rotated conserved variables. 
+ */
+      void rotateToGlobal(const Lucee::RectCoordSys& c, const double *inQ, double *outQ);
 
 /**
  * Compute flux for this equation system.
@@ -71,9 +90,7 @@ namespace Lucee
         double* f);
 
     private:
-/** Coefficients for flux calculation */
-      std::vector<double> coeffs;
   };
 }
 
-#endif //  LC_UNIT_AUX_EQUATION_H
+#endif //  LC_DIV_AUX_EQUATION_H

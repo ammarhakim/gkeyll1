@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcAdvectionEquation.h>
+#include <LcDivEquation.h>
 #include <LcEulerEquation.h>
 #include <LcHyperEquationRegistry.h>
 #include <LcMaxwellEquation.h>
@@ -25,5 +26,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::EulerEquation>;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::MaxwellEquation>;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::PhMaxwellEquation>;
+
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<1> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<2> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<3> >;
   }
 }

@@ -30,6 +30,18 @@ namespace Lucee
   }
 
   void
+  HyperEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ)
+  {
+    throw Lucee::Except("HyperEquation::rotateToLocal: Method not implemented");
+  }
+
+  void
+  HyperEquation::rotateToGlobal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ)
+  {
+    throw Lucee::Except("HyperEquation::rotateToGlobal: Method not implemented");
+  }
+
+  void
   HyperEquation::flux(const Lucee::RectCoordSys& c, const double* q, 
     const std::vector<const double*>& auxVars, double* f)
   {
