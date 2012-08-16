@@ -2,6 +2,7 @@
 kill(all);
 
 /** A choice of c12 = c21 = 0 (central fluxes) yields a 5-point stencil */
+/** A choice of c12 = -1/2 c21 = a/2 yields a 3-point stencil */
 c12 : -1/2;
 c21 : a/2;
 w(i) := -( a*(u(i+1)-u(i-1))/2 - c21*(u(i+1)-2*u(i)+u(i-1)) );

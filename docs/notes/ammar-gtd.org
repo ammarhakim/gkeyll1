@@ -25,7 +25,7 @@ archived.
 ** Write JE on using nodal DG to solve auxilary equations	     :GKEYLL:
 
    There are a lot of problems one can do with the ability to include
-   auxilary variables. Do advection in , 1D advection-diffusion and
+   auxiliary variables. Do advection in , 1D advection-diffusion and
    also a advection-diffusion in 2D (transverse propagation,
    solid-body rotation with and without diffusion). This could be
    called "Advection-Diffusion with Nodal DG and Auxiliary Variables".
