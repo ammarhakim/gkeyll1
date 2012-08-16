@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcAdvectionEquation.h>
+#include <LcAuxAdvectionEquation.h>
 #include <LcDivEquation.h>
 #include <LcEulerEquation.h>
 #include <LcGradEquation.h>
@@ -35,5 +36,9 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<1> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<2> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<3> >;
+
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<1> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<2> >;
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<3> >;
   }
 }

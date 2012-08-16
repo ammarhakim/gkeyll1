@@ -15,6 +15,7 @@ endif (PETSC_FOUND)
 # Create the library
 set(lcslvrs_SOURCES
   LcAdvectionEquation.cpp
+  LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoundaryCondition.cpp
   LcConstBoundaryCondition.cpp
