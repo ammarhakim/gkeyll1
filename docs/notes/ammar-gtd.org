@@ -15,6 +15,21 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Extend DG solver to do updates in specified directions	     :GKEYLL:
+
+   Add "updateDirections" like in WavePropagationUpdater class. This
+   will allow updating only in specified directions. This is needed to
+   get the Lenard-Bernstein collision operator implemented
+   efficiently.
+
+** Write JE on using nodal DG to solve auxilary equations	     :GKEYLL:
+
+   There are a lot of problems one can do with the ability to include
+   auxilary variables. Do advection in , 1D advection-diffusion and
+   also a advection-diffusion in 2D (transverse propagation,
+   solid-body rotation with and without diffusion). This could be
+   called "Advection-Diffusion with Nodal DG and Auxiliary Variables".
+
 ** Write JE on nodal DG updater with advection and Euler equations   :GKEYLL:
 
    Check convergence of 2nd and 3rd order method, do 2D problem and
