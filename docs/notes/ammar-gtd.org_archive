@@ -229,6 +229,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   Add auxillary variables to support the diffusion (and Hall, etc)
   terms.
 
+* Write updater for diffusion term and test			     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-15 Wed 15:47
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Use the local DG method for this.
+
+
 
 
 

@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 15th
+
+  Added equation to compute gradient of scalar specified as auxilary
+  variable. Fixed a bug in positioning the pointers for volume
+  integral. Not sure why this was not caught when testing the
+  divergence equation class.
+
+  Set up an advection-diffusion problem and compared results to exact
+  solutions. Everything seems to be working correctly. The Lua script
+  only restricts the time-step to that from the hyperbolic part, hence
+  will not work when the diffusion dominates.
+
 * August 14th
 
   Completed DivEquation class which derives from HyperEquation. This

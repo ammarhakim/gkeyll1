@@ -15,21 +15,14 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Work out local DG method for diffusion operator and write notes   :GKEYLL:
-
-   For piecewise constant basis functions this should reduce to an
-   explicit 5-point central-difference operator.
-
-** Write updater for diffusion term and test 			     :GKEYLL:
-
-   Use the local DG method for this.
-    
-
-** Test nodal DG updater with advection and Euler equations 	     :GKEYLL:
+** Write JE on nodal DG updater with advection and Euler equations   :GKEYLL:
 
    Check convergence of 2nd and 3rd order method, do 2D problem and
    also do 1D Euler shock problems. For now there will be no limiters,
    but this should be okay.
+
+   This should also include the local DG for diffusion terms and an
+   example of advection in a specified velocity field.
 
 ** Figure out a way to do sources in a modular manner		     :GKEYLL:
 

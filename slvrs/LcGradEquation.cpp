@@ -66,7 +66,7 @@ namespace Lucee
   GradEquation<NDIM>::flux(const Lucee::RectCoordSys& c, const double* q, 
     const std::vector<const double*>& auxVars, double* f)
   {
-    f[0] = -alpha*auxVars[0][0];
+    f[0] = alpha*auxVars[0][0];
     for (unsigned i=1; i<NDIM; ++i)
       f[i] = 0.0;
   }
@@ -78,7 +78,7 @@ namespace Lucee
     const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
     double* f)
   {
-    f[0] = -0.5*alpha*(auxVarsl[0][0] + auxVarsr[0][0]);
+    f[0] = 0.5*alpha*(auxVarsl[0][0] + auxVarsr[0][0]);
     for (unsigned i=1; i<NDIM; ++i)
       f[i] = 0.0;
     return 0.0;
