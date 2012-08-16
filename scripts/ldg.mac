@@ -1,0 +1,8 @@
+/** A script to verify properties of local DG discretization */
+kill(all);
+
+/** A choice of c12 = c21 = 0 (central fluxes) yields a 5-point stencil */
+c12 : -1/2;
+c21 : a/2;
+w(i) := -( a*(u(i+1)-u(i-1))/2 - c21*(u(i+1)-2*u(i)+u(i-1)) );
+hdiff : fullratsimp( (w(i+1)-w(i-1))/2 - c12*(w(i+1)-2*w(i)+w(i-1)) );
