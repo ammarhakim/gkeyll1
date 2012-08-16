@@ -5,6 +5,12 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 16th
+
+  Added equation system to advect a scalar quantity in a specified
+  flow field. Did some basic tests, and things seem to work
+  correctly. Need to write all this stuff up before I forget.
+
 * August 15th
 
   Added equation to compute gradient of scalar specified as auxilary
