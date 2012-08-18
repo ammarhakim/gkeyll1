@@ -59,7 +59,7 @@ namespace Lucee
 
     if (calcMom > 2)
     {
-      Lucee::Except lce("DistFuncMomentCalc1D::readInput: Only 'moment' 0,1 or 2 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalc1D::readInput: Only 'moment' 0, 1 or 2 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }

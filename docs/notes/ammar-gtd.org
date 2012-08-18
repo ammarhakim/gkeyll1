@@ -15,6 +15,10 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Prove momentum conservation (if possible) for DG scheme	     :GKEYLL:
+
+   Does the scheme also preserve momentum?
+
 ** Extend DG solver to do updates in specified directions	     :GKEYLL:
 
    Add "updateDirections" like in WavePropagationUpdater class. This
