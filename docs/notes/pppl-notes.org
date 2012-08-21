@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 20th
+
+  Some exploration on the question: is momentum conserved by our DG
+  scheme? The answer is, as far as I can tell, no. The reason is that
+  for momentum conservation we need both phi and phi' to be
+  continuous. However, the error in momentum should decrease rapidly
+  with grid refinment as well as going to higher polynomial
+  order. Need to test this.
+
+  Also, I need to test the code for the calculation of the
+  moments. This can be put into the 
+
 * August 16th
 
   Added equation system to advect a scalar quantity in a specified
