@@ -15,9 +15,9 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Prove momentum conservation (if possible) for DG scheme	     :GKEYLL:
+** Extend JE15 with notes on energy and momentum conservation	     :GKEYLL:
 
-   Does the scheme also preserve momentum?
+   For the Vlasov-Poisson case for now.
 
 ** Extend DG solver to do updates in specified directions	     :GKEYLL:
 

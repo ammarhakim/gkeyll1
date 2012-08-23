@@ -249,6 +249,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 
   Check if moment calculation code works.
 
+* Prove momentum conservation (if possible) for DG scheme	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-21 Tue 13:56
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Does the scheme also preserve momentum? ANS: IT DOES NOT
+
+
 
 
 

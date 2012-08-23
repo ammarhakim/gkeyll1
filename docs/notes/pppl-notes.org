@@ -15,7 +15,7 @@
   order. Need to test this.
 
   Also, I need to test the code for the calculation of the
-  moments. This can be put into the 
+  moments. This can be put into the gkeyll-tests. [DONE].
 
 * August 16th
 
