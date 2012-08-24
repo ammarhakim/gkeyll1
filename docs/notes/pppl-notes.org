@@ -5,6 +5,37 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 24th
+  
+  Wrote up notes on momentum and energy conservation. As expected,
+  energy is conserved while momentum is not. A lot of pencil pushing
+  on trying to figure out why momentum is not conserved, and how it
+  can be fixed. Updated JE15 with this.
+
+  A strange point: I would expect energy to be not conserved in the
+  DG2 case, because the Hamiltonian can be exactly represented with
+  piece-wise linear basis functions. However, energy *is*
+  conserved. The reason for this is not completely clear to me, but
+  could be simply that the all that is needed is continuity of the
+  Hamiltonian. Need to show this.
+
+  Also found that there was no problem with the 3rd order scheme. It
+  was working all this time. Not sure why I thought it was not
+  working. Need to update JE15 with 3rd order results.
+
+** A point about initial conditions
+
+   At first sight it might appear that initializing the problem by
+   evaluating the solution at nodes is correct. However, for Lobatto
+   nodes this is not true. The reason is that this leads to
+   sub-optimal initial condition in which the best possible accuracy
+   obtainable by the number of nodes used is not achieved. The best is
+   to switch to Gaussian nodes. This might not work for the
+   Valsov-Poisson system due to the shared nodes problem, but for the
+   general nodal DG this should be done. This might need an
+   interpolation to the cell faces, but this can be folded into the
+   lifting matrices in the updater.
+
 * August 20th
 
   Some exploration on the question: is momentum conserved by our DG
