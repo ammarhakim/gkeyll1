@@ -15,10 +15,6 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Extend JE15 with notes on energy and momentum conservation	     :GKEYLL:
-
-   For the Vlasov-Poisson case for now.
-
 ** Extend DG solver to do updates in specified directions	     :GKEYLL:
 
    Add "updateDirections" like in WavePropagationUpdater class. This
@@ -71,12 +67,6 @@ archived.
    specified as an input. This will allow doing multiple dimension
    solves using a splitting scheme.
 
-** Fix third-order scheme for Vlasov-Poisson system 		     :GKEYLL:
-
-   The 3rd order scheme does not seem to be working for the
-   self-consistent problem. First check if it works for the
-   fixed-potential problem.
-
 ** Write limiter for nodal DG					     :GKEYLL:
 ** Complete proof of DG energy conservation 			     :GKEYLL:
 
@@ -105,6 +95,11 @@ archived.
 
   This is for broader infrastructure work which does not involve any
   specific solver or physics issue.
+
+** Add more regression tests					      :INFRA:
+
+   There are many updaters, equation systems etc. that have no
+   tests. This needs to change, and more tests added.
 
 ** Add unit tests for getSendNeighbors() method			      :INFRA:
 
