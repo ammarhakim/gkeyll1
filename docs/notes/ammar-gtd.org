@@ -15,6 +15,11 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Update JE15 with 3rd order results				     :GKEYLL:
+
+   Now that 3rd order scheme is shown to work fine, need to compute
+   the errors in momentum and energy using it.
+
 ** Extend DG solver to do updates in specified directions	     :GKEYLL:
 
    Add "updateDirections" like in WavePropagationUpdater class. This
