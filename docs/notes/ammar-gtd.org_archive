@@ -259,6 +259,34 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 
   Does the scheme also preserve momentum? ANS: IT DOES NOT
 
+* Extend JE15 with notes on energy and momentum conservation	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-24 Fri 12:15
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  For the Vlasov-Poisson case for now.
+
+* Fix third-order scheme for Vlasov-Poisson system		     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-24 Fri 15:02
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  The 3rd order scheme does not seem to be working for the
+  self-consistent problem. First check if it works for the
+  fixed-potential problem.
+
+  NOTE: This was not a problem at all. Turns out that polyOrder=2 was
+  always working and so nothing needed fixing beyond just making sure
+  the solutions look okay.
+
+
+
 
 
 
