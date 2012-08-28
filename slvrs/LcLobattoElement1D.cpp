@@ -444,7 +444,7 @@ namespace Lucee
     weights[1] = 4.0/3.0;
     weights[2] = 1.0/3.0;
 
-    for (unsigned i=0; i<2; ++i)
+    for (unsigned i=0; i<3; ++i)
       weights[i] = 0.5*dx*weights[i];
 
 // Gaussian quadrature data

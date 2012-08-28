@@ -5,6 +5,17 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 28th
+
+  Spent a lot of time in the last few days on understanding
+  Hamiltonian and Lagrangian mechanics. Making good progress, but
+  still need some work here.
+
+  Turns out that there is still something wrong with the third-order
+  DG scheme for the Vlasov-Poisson system. The results "look" correct,
+  but there is something funny going on. For example, the conservation
+  is totally off, something which is very bothersome.
+
 * August 24th
   
   Wrote up notes on momentum and energy conservation. As expected,
