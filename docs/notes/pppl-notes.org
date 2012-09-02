@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* August 30th
+
+  Finished notes on 3rd order DG energy and momentum
+  convergence. Added regression tests for nodal DG scheme.
+
+** A note on dimensional dissonance
+
+   Kinetic equations have a peculiarity in that the distribution
+   function lives in a higher-dimensional space than do the potential
+   and moments, for example. This is a form of dimensional dissonance
+   and leads to very akward implementations with wasted memory. For
+   the 1D/1V problem perhaps it is not such a big deal, but will get
+   worse as the code is moved to 4D/5D.
+
 * August 28th
 
   Spent a lot of time in the last few days on understanding

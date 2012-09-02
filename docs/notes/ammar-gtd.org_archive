@@ -285,6 +285,46 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   always working and so nothing needed fixing beyond just making sure
   the solutions look okay.
 
+* Update JE15 with 3rd order results				     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-29 Wed 11:10
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Now that 3rd order scheme is shown to work fine, need to compute
+  the errors in momentum and energy using it.
+
+** Some notes on problem with IntergrateNodalField
+
+   8/28: Actually, the 3rd order scheme seems to have a problem. Need
+   to see what is going on when it seemed to work for the non-linear
+   landau damping problem. It is possible that the integration
+   algorithm is not working with third-order basis functions.
+
+   Looking at this more closely I see that this updater uses Lobatto
+   quadrature. That needs to be fixed also.
+   
+   FOUND A PROBLEM: The weights in the Lobatto basis functions in 1D
+   were not being computed correctly. There was an error in the final
+   index of a for-loop which was causing problems. Fixed
+
+* Extend DG solver to do updates in specified directions	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-08-30 Thu 11:05
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Add "updateDirections" like in WavePropagationUpdater class. This
+  will allow updating only in specified directions. This is needed to
+  get the Lenard-Bernstein collision operator implemented
+  efficiently.
+
+
+
 
 
 
