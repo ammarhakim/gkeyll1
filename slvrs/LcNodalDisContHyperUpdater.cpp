@@ -53,6 +53,25 @@ namespace Lucee
       throw lce;
     }
 
+// directions to update
+    if (tbl.hasNumVec("updateDirections"))
+    {
+      std::vector<double> ud = tbl.getNumVec("updateDirections");
+      for (unsigned i=0; i<std::min<unsigned>(3, ud.size()); ++i)
+      {
+        unsigned d = (unsigned) ud[i];
+        if (d<3)
+          updateDims.push_back(d);
+        else
+          throw Lucee::Except("updateDirections must be a table with 0, 1, or 2");
+      }
+    }
+    else
+    {
+      for (unsigned i=0; i<NDIM; ++i)
+        updateDims.push_back(i);
+    }
+
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
@@ -188,8 +207,9 @@ namespace Lucee
         auxQ[a] = &aPtr[0];
       }
 
-      for (unsigned dir=0; dir<NDIM; ++dir)
+      for (unsigned d=0; d<updateDims.size(); ++d)
       {
+        unsigned dir = updateDims[d]; // direction to update
 // volume fluxes should always use aligned CS, even on non-rectangular geometery
         Lucee::AlignedRectCoordSys coordSys(dir);
         for (unsigned n=0; n<nlocal; ++n)
@@ -212,14 +232,15 @@ namespace Lucee
     }
 
 // contributions from surface integrals
-    for (unsigned dir=0; dir<NDIM; ++dir)
+    for (unsigned d=0; d<updateDims.size(); ++d)
     {
-      Lucee::AlignedRectCoordSys coordSys(dir); // eventually this needs to be a CS on the face
+      unsigned dir = updateDims[d]; // direction to update
+      Lucee::AlignedRectCoordSys coordSys(dir); // eventually this needs to be a CS on face
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
-// lower and upper bounds of 1D slice. (We need to make sure that the
-// flux is computed for one edge outside the domain interior)
+// lower and upper bounds of 1D slice. (We need to make sure that flux
+// is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
       int sliceUpper = localRgn.getUpper(dir)+1;
 

@@ -67,6 +67,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Directions to update */
+      std::vector<unsigned> updateDims;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Equation to solve */
