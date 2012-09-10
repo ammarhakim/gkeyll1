@@ -42,6 +42,7 @@
 
 \newtheorem{thm}{Theorem}
 \newtheorem{lem}{Lemma}
+\newtheorem{example}{Example}
 
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
@@ -56,5 +57,156 @@
 \lhead{Tech-Note 1019}%
 \maketitle
 
+\section{Conservation Laws for the Continuous System}
+
+Consider a scalar field described by a Hamiltonian evolution equation
+\begin{align}
+  \pfrac{f}{t} = \{H,f\} \label{eq:fevolve}
+\end{align}
+for the Hamiltonian $H(x,v)$ and where the canonical Poisson bracket is
+\begin{align}
+  \{g,h\} \equiv \pfrac{g}{x}\pfrac{h}{v} - \pfrac{g}{v}\pfrac{h}{x}.
+\end{align}
+Defining the phase-space velocity vector $\gvec{\alpha} = (\dot{x},
+\dot{v})$, where the characteristic speeds are determined from
+$\dot{x} = -\{H,x\}$ and $\dot{v} = -\{H,v\}$, allows rewriting
+\eqr{\ref{eq:fevolve}} in an explicit conservation law form
+\begin{align}
+  \pfrac{f}{t} + \nabla\cdot\left(\gvec{\alpha}f\right) = 0.
+\end{align}
+Liouville theorem on phase-space incompressibility implies
+$\nabla\cdot\gvec{\alpha} = 0$. Also, for any smooth function $g$,
+$\{H,g\} = \nabla g\cdot\gvec{\alpha}$, hence $\{H,H\}=\nabla H \cdot
+\gvec{\alpha} = 0$.
+
+\begin{example}
+  2D incompressible flow is given by the Hamiltonian $H(x,v)=\phi(x,v)$,
+  where the potential is determined from $\nabla^2 \phi = -f$.
+\end{example}
+
+\begin{example}
+  The Vlasov-Poisson system has the Hamiltonian
+  \begin{align}
+    H(x,v) = \frac{1}{2}v^2 - \frac{|e|}{m}\phi(x)
+  \end{align}
+  where $e$ is the charge on an electron and $m$ is electron mass. The
+  potential is determined from
+  \begin{align}
+    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\varrho_c}{\epsilon_0}
+  \end{align}
+  and where
+  \begin{align}
+    \varrho_c = |e| \left(Zn_{i0}(x) - n(x,t)\right) \label{eq:vp-poisson}
+  \end{align}
+  Here, $n(x,t) \equiv \int_{-\infty}^{\infty} f(x,v,t) dv$ and $Z$ is
+  the ion charge number and $n_{i0}(x)$ is the fixed ion number density
+  profile.
+\end{example}
+
+Multiplying \eqr{\ref{eq:fevolve}} equation by a smooth test function
+$w(x,v)$ and integrating over an arbitrary volume element $K$ gives
+the weak-form
+\begin{align}
+  \int_K w\pfrac{f}{t}d\Omega 
+  + \int_{\partial K}w \gvec{\alpha}\cdot\mvec{n}f dS
+  - \int_K \nabla w \cdot \gvec{\alpha} f d\Omega
+ = 0.
+\end{align}
+The weak-form, although derived from the differential equation
+\eqr{\ref{eq:fevolve}}, allows for a broader class of solutions as the
+requirement on continuity of $f$ are weaker: $f$ need only be
+piecewise continuous. However, the Hamiltonian must be continuous.
+
+\subsection{Particle Conservation}
+
+Various \emph{global} conservation laws can be obtained by
+specializing the test function. In the following the domain is taken
+to be periodic or extending to infinity. In either case the surface
+integral term in the weak-form is assumed to vanish when the
+integration is performed on the whole domain and boundary conditions
+are applied.
+
+The \emph{particle} conservation is obtained by selecting $w=1$. With
+this
+\begin{align}
+  \pfraca{t}\int_K f d\Omega = 0
+\end{align}
+
+\subsection{Generalized Entropy Conservation}
+If the solution is \emph{smooth} it can be used as a test
+function. This gives
+\begin{align}
+  \int_K f\pfrac{f}{t}d\Omega 
+  + \int_{\partial K}f \gvec{\alpha}\cdot\mvec{n}f dS
+  - \int_K \nabla f \cdot \gvec{\alpha} f d\Omega
+ = 0.
+\end{align}
+As $\nabla f \cdot \gvec{\alpha} f = \nabla\cdot (\gvec{\alpha}
+f^2/2)$ the last term reduces to a surface integral, leading to the
+conservation law
+\begin{align}
+  \pfraca{t}\int_K \frac{1}{2}f^2 d\Omega = 0.
+\end{align}
+Note that this results \emph{does not} hold if the solution is not
+smooth.
+
+\subsection{Energy Conservation}
+
+Selecting the Hamiltonian as the test function gives, using the
+identity $\nabla H \cdot \gvec{\alpha} = 0$,
+\begin{align}
+  \int_K H \pfrac{f}{t}d\Omega = 0.
+\end{align}
+
+\begin{example}
+  For the incompressible Euler equations this becomes
+  \begin{align}
+    \int_K \phi \pfrac{f}{t}d\Omega = 0.
+  \end{align}
+  As ${\partial \nabla^2 \phi}/{\partial t} = -\partial f/{\partial
+    t}$ we get, on integrating by parts and applying boundary
+  conditions,
+  \begin{align}
+    \pfraca{t}\int_K \frac{1}{2} |\nabla\phi|^2  d\Omega = 0.
+  \end{align}
+\end{example}
+
+\begin{example}
+  For the Vlasov-Poisson system this becomes
+  \begin{align}
+    \int_K \left(\frac{1}{2}mv^2 - |e|\phi\right) \pfrac{f}{t}d\Omega = 0.
+  \end{align}
+  The second term becomes
+  \begin{align}
+    \int_K |e|\phi \pfrac{f}{t}d\Omega = \int |e|\phi \pfrac{n}{t} dx
+  \end{align}
+  Using the Poisson equation, \eqr{\ref{eq:vp-poisson}}, to eliminate
+  ${\partial n}/{\partial t}$ leads to the energy conservation law
+  \begin{align}
+    \pfraca{t}\int \mathcal{E} +
+    \frac{\epsilon_0}{2}\left(\pfrac{\phi}{x}\right)^2 dx = 0
+  \end{align}
+  where $\mathcal{E}(x,t) \equiv \frac{1}{2}\int_{-\infty}^{\infty} mv^2f dv$.
+\end{example}
+
+\subsection{Momentum Conservation}
+
+For the Vlasov-Poisson system we can select the coordinate $v$ as the
+test function. This leads to
+\begin{align}
+  \int_K v\pfrac{f}{t}d\Omega 
+  + \int_{\partial K}v \gvec{\alpha}\cdot\mvec{n}f dS
+  - \int_K \nabla v \cdot \gvec{\alpha} f d\Omega
+ = 0.
+\end{align}
+As $\nabla v \cdot \gvec{\alpha} f = \dot{v}f$ the last term becomes
+\begin{align}
+  \int_K\dot{v} f d\Omega = \int \frac{|e|}{m} \pfrac{\phi}{x} n\thinspace dx.
+\end{align}
+Using the Poisson equation to eliminate $n(x,t)$, integrating by parts
+and applying boundary condition leads to the momentum conservation law
+\begin{align}
+  \int_K v\pfrac{f}{t}d\Omega = 0.
+\end{align}
 
 \end{document}
