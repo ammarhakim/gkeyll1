@@ -5,6 +5,26 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* September 17th
+
+  Spent time working out the multi-dimensional scheme for a generic
+  scalar hyperbolic equation written in conservation law form. Have
+  now figured out a way to do this, need to implement the actual
+  updater.
+
+  The basic idea is to have the updater take two grids, the spatial
+  grid and the velocity space grid. Then there can be a set of spatial
+  input fields as well as velocity input fields. The distribution
+  always lives on the phase-space grid. This also solves the
+  "dimensional dissonance" problem descibed in the August 30th notes:
+  once the grid is split the inputs are automatically differentiated.
+
+  Need to design the class that computes the characteristic speeds and
+  the Jacobian. This should be then pluggable into the general DG
+  solver to allow solving different kinetic equations.
+
+  Still not figured out a way to make this run in parallel.
+
 * August 30th
 
   Finished notes on 3rd order DG energy and momentum
