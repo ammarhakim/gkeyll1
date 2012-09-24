@@ -5,6 +5,27 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* September 24th
+
+  In the last week finished the notes on noncanonical Hamiltonian
+  mechanics. Now have a good understanding on this. Next need to
+  develop a generic DG updater for kinetic equations.
+
+  At this point top priorities for APS/DPP are listed below. The aim
+  should be to complete a first draft of a paper for 1D
+  Vlasov-Poisson/Quasi-neutral scheme, with collision operator and
+  locally determined potential.
+
+** Complete collision operator and integrate into Vlasov solve
+
+   This needs the LB collision operator completed.
+
+** Write solver that uses local solves to determine potential
+
+   Work out the scheme for arbitrary order DG. Write the updater. This
+   also needs the working out of the general proof for energy
+   conservation in this case.
+
 * September 17th
 
   Spent time working out the multi-dimensional scheme for a generic
@@ -24,6 +45,17 @@
   solver to allow solving different kinetic equations.
 
   Still not figured out a way to make this run in parallel.
+
+** Product grids for use in the kinetic solvers
+
+   It might be better to have a product grid rather than two grids for
+   use in the kinetic solver. The reason for this is that a single
+   grid is needed to allocate the fields. The product grid could then
+   be split up into its smaller grids and used to create fields on
+   each sub-grid. This would allow creation of a grid to store the
+   potential, for example, while using the originial grid to create
+   the distribution function. The two grids would share data to make
+   sure that the geometrical information is not duplicated.
 
 * August 30th
 

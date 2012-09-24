@@ -15,10 +15,16 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
-** Write a HyperEqn for collisions with LB operator		     :GKEYLL:
+** Work out generic kinetic equation updater			     :GKEYLL:
+
+   Formulate the scheme for generic kinetic equations. Use
+   characteristic computed externally.
+
+** Write HyperEqn for collisions with LB operator, write JE 	     :GKEYLL:
 
    Unify the advection and diffusion updates needed in the LB operator
-   into a single equation.
+   into a single equation. Write JE on stand-alone collision operator
+   and coupled to the Vlasov solver.
 
 ** Allow HyperEqn to take coordinates as input			     :GKEYLL:
 
@@ -37,7 +43,7 @@ archived.
 ** Write JE on using nodal DG to solve auxilary equations	     :GKEYLL:
 
    There are a lot of problems one can do with the ability to include
-   auxiliary variables. Do advection in , 1D advection-diffusion and
+   auxiliary variables. Do advection in 1D advection-diffusion and
    also a advection-diffusion in 2D (transverse propagation,
    solid-body rotation with and without diffusion). This could be
    called "Advection-Diffusion with Nodal DG and Auxiliary Variables".
@@ -124,8 +130,7 @@ archived.
    Finish the iterator access (or get rid of it) and complete the
    code to allow adding connectivity information.
 
-
-** Fix DataStruct::write() method to use sub-communicators	      :INFRA:
+** Fix DataStruct::write() method to use sub-communicators 	      :INFRA:
 
    The DynVector can not be written by all processors for obvious
    reasons. Hence, the DataStruct::write() method needs to be modified
@@ -147,7 +152,6 @@ archived.
 
    With this Gkeyll will be ready for parallel runs. The problem is in
    the sync() method.
-
 
 ** Registration of objects 					      :INFRA:
 
@@ -195,14 +199,12 @@ archived.
 
 ** Why does Lua script not have access to command line options?	      :INFRA:
 
-
 ** Split each updater/datastruct docs into its own file 	     :GKEYLL:
 
    I need to document each updater, datastructure and grid object
    currently in Gkeyll. Each should be in its own RST file rather than
    a single file for all updaters etc. This makes searching and
    indexing easier.
-
 
 ** Transition to eigen matrix package				      :INFRA:
 
@@ -227,7 +229,6 @@ archived.
    However, a major advantage of luabind is that it will make future
    bindings much easier to create and allow for a much more
    fine-grained control from Lua than is possible now.
-
 
 ** Seems like duplicate() method creates mucked up fields 	     :GKEYLL:
 
