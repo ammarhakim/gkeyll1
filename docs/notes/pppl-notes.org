@@ -5,22 +5,29 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* September 25th
+
+  Working on ITER Office proposal with Alexei, Kruger, Ronglien and
+  Pigarov.
+
 * September 24th
 
   In the last week finished the notes on noncanonical Hamiltonian
   mechanics. Now have a good understanding on this. Next need to
   develop a generic DG updater for kinetic equations.
 
+** APS/DPP priorities
+
   At this point top priorities for APS/DPP are listed below. The aim
   should be to complete a first draft of a paper for 1D
   Vlasov-Poisson/Quasi-neutral scheme, with collision operator and
   locally determined potential.
 
-** Complete collision operator and integrate into Vlasov solve
+*** Complete collision operator and integrate into Vlasov solve
 
    This needs the LB collision operator completed.
 
-** Write solver that uses local solves to determine potential
+*** Write solver that uses local solves to determine (discontinuous) potential
 
    Work out the scheme for arbitrary order DG. Write the updater. This
    also needs the working out of the general proof for energy
