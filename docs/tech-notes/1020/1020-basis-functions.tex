@@ -72,17 +72,17 @@ hyperbolic partial differential equations
   \pfrac{f}{t} + \nabla\cdot\mvec{g} = 0 \label{eq:cons-law}
 \end{align}
 where $f(\mvec{x},t)$ is a vector of conserved variables and $\mvec{g}
-= \mvec{g}(f(\mvec{x},t))$ are the \emph{flux-functions}. In
-particular, we are interested in the case in which the conserved
-variable is a scalar (the particle distribution function) and the
-fluxes are written as phase-space divergence with characteristics
-computed from a Hamiltonian.
+= \mvec{g}(f(\mvec{x},t),\mvec{x},t)$ are the
+\emph{flux-functions}. In particular, we are interested in the case in
+which the conserved variable is a scalar (the particle distribution
+function) and the fluxes are written as $\mvec{g} = \gvec{\alpha}f$,
+where $\gvec{\alpha}(\mvec{x},t)$ is the vector of the characteristic
+velocities computed from a Hamiltonian.
 
-Instead of the differential form of the balance law it is
-mathematically more appropriate to work with the \emph{weak-form} of
-the equations. To derive the weak-form, multiply
-\eqr{\ref{eq:cons-law}} by a smooth test function $\varphi(\mvec{x})$
-and integrate over an arbitrary region $\Omega$
+Instead of the differential form of the equations it is mathematically
+more appropriate to work with the \emph{weak-form}. To derive the
+weak-form, multiply \eqr{\ref{eq:cons-law}} by a smooth test function
+$\varphi(\mvec{x})$ and integrate over an arbitrary region $\Omega$
 \begin{align}
   \int_\Omega \varphi \pfrac{f}{t}\thinspace d\mvec{x} 
   + \int_{\partial \Omega}\varphi \mvec{n}\cdot\mvec{g}\thinspace d\mvec{s} 
@@ -142,11 +142,11 @@ the surface $\partial\Omega_\mu$, leading to the $\mvec{g}^-$
 term. Also notice that the derivative in the last term has now been
 moved back to the flux-function. This does not impose any additional
 constraints as we have assumed that the solution is continuous inside
-the cell $\Omega_j$, making this derivative well defined\footnote{I am
-  not fully convinced of this. If there is a discontinuity that passes
-  through a cell then the derivative can not be computed. But perhaps
-  I do not understand why Hesthaven and Warburton do the second
-  integration by parts in the first place.}.
+the cell $\Omega_\mu$, making this derivative well defined\footnote{I
+  am not fully convinced of this. If there is a discontinuity that
+  passes through a cell then the derivative can not be computed. But
+  perhaps I do not understand why Hesthaven and Warburton do the
+  second integration by parts in the first place.}.
 
 The next step is to expand the conserved variables in a cell in some
 \emph{basis functions}. Usually, the test functions themselves are
@@ -247,7 +247,7 @@ mapping. This means that the transformations are expressed as
   x^i(\mvec{y}) = \sum_k x^i_{(k)} \psi_k(\mvec{y})
 \end{align}
 where $x^i_{(k)}$ are unknown coefficients. To detemine these we can
-use, for example, for the cell $\Omega_\mu$ the coordinates of each of
+use for the cell $\Omega_\mu$, for example, the coordinates of each of
 its vertices\footnote{I am distinguishing between \emph{vertices}
   which are used to define a cell $\Omega_\mu$ and \emph{nodes} used
   in the nodal DG scheme. It is possible that some DG nodes might
