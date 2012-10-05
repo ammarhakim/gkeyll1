@@ -110,7 +110,7 @@ the weak-form
   \int_K w\pfrac{f}{t}d\Omega 
   + \int_{\partial K}w \gvec{\alpha}\cdot\mvec{n}f dS
   - \int_K \nabla w \cdot \gvec{\alpha} f d\Omega
- = 0.
+ = 0. \label{eq:weak-form}
 \end{align}
 The weak-form, although derived from the differential equation
 \eqr{\ref{eq:fevolve}}, allows for a broader class of solutions as the
@@ -133,8 +133,8 @@ this
 \end{align}
 
 \subsection{Generalized Entropy Conservation}
-If the solution is \emph{smooth} it can be used as a test
-function. This gives
+The solution itself can be used as a test function if it is
+\emph{smooth}. This gives
 \begin{align}
   \int_K f\pfrac{f}{t}d\Omega 
   + \int_{\partial K}f \gvec{\alpha}\cdot\mvec{n}f dS
@@ -207,6 +207,118 @@ Using the Poisson equation to eliminate $n(x,t)$, integrating by parts
 and applying boundary condition leads to the momentum conservation law
 \begin{align}
   \int_K v\pfrac{f}{t}d\Omega = 0.
+\end{align}
+
+\section{Conservation Properties of the Discrete System}
+
+The discontinuous Galerkin scheme discretizes the weak-form
+\eqr{\ref{eq:weak-form}} by introducing a triangulation of the domain
+into cells $K_j$ and a set of test functions $w$ belonging to some
+finite-dimensional space, usually selected such that their restriction
+on $K_j$ are polynomials. The discrete weak-form becomes
+\begin{align}
+  \int_{K_j} w\pfrac{f_h}{t}d\Omega + 
+  \int_{\partial K_j}w^-
+  \mvec{n} \cdot \hat{\mvec{F}}dS 
+  - \int_{K_j}
+  \nabla w \cdot \gvec{\alpha}_h
+  f_h d\Omega = 0. \label{eq:dis-weak-form}
+\end{align}
+where $\hat{\mvec{F}} = \hat{\mvec{F}}(\gvec{\alpha}_h^- f_h^-,
+\gvec{\alpha}_h^+ f_h^+)$ is a numerical flux function. Here the
+subscript $h$ indicates the discrete solution. The notation $w^-$
+($w^+$) indicates that the function is evaluated just inside (outside)
+on the location on the surface $\partial K_j$. In the following we
+will assume periodic boundary conditions and/or that the solution
+vanishes on (one or more) of the boundaries.
+
+\subsection{Particle Conservation}
+
+Selecting $w=1$ as a test function exact particle conservation follows
+immediately.
+\begin{align}
+  \frac{\partial }{\partial t}\sum_j \int_{K_j} f_hd\Omega
+  =
+  0
+\end{align}
+where the sum is performed on all cells in the triangulation.
+
+\subsection{Energy Conservation}
+
+We next \emph{assume} that the discrete Hamiltonian belongs to the
+space of test functions. Using this in the discrete weak-form we get
+\begin{align}
+  \sum_j\int_{K_j} H_h\pfrac{f_h}{t}d\Omega + 
+  \sum_j \int_{\partial K_j}H_h^-
+  \mvec{n} \cdot \hat{\mvec{F}}dS 
+  = 0
+\end{align}
+where we have also assumed that the discrete Hamiltonian and
+characteristics computed from it satisfy $\nabla H_h \cdot
+\gvec{\alpha}_h = 0$. Now if the Hamiltonian is \emph{continuous} the
+second term will vanish as the contribution from surfaces shared by
+two cells will cancel, leaving us with
+\begin{align}
+  \sum_j\int_{K_j} H_h\pfrac{f_h}{t}d\Omega = 0.
+\end{align}
+
+For the Vlasov-Poisson system this can be rewritten as a discrete
+integral over the spatial domain
+\begin{align}
+  \sum_{j}\int_{I_{j}} \pfrac{\mathcal{E}_h}{t}\thinspace dx
+  -
+  \sum_{j}
+  |e|
+  \int_{I_{j}}
+  \phi_h(x)
+  \pfrac{n_h}{t}
+  \thinspace dx
+  \label{eq:dis-energy-1}
+\end{align}
+where $\mathcal{E}_h$ is the discrete kinetic-energy and $n_h$ the
+discrete number-density and $\phi_h$ the discrete potential. The
+summation is now taken over all spatial cells $I_{j}$ where the index
+$j$ now ranges over the spatial cell number.
+
+To determine the potential a weak-form of the Poisson equation is
+derived
+\begin{align}
+  w_x(x^-_{j+1/2})\phi'_{hj+1/2} -  w_x(x^+_{j-1/2})\phi'_{hj-1/2}
+  -
+  \int_{I_j} w_x'\phi_h'\thinspace dx
+  =
+  -\int_{I_j} w_x \frac{\varrho_{c}}{\epsilon_0}\thinspace dx.
+\end{align}
+where primes denote derivatives with respect to $x$ and
+$\phi'_{j+1/2}$ is some approximation to the (possibly) discontinuous
+derivative of the potential at $x_{j+1/2}$. Also, $w_x(x)$ belongs to
+projection of the test function function space to the spatial domain.
+
+Taking the time-derivative of this discrete weak-form and summing over
+all cells $I_j$ leads to
+\begin{align}
+  -\sum_j \int_{I_j} \phi_h'\pfrac{\phi_h'}{t}\thinspace dx
+  =
+  \frac{|e|}{\epsilon_0}
+  \sum_j
+  \int_{I_j}
+  \phi_h
+  \pfrac{n_h}{t}
+  \thinspace dx.
+\end{align}
+Using this in \eqr{\ref{eq:dis-energy-1}} gives the discrete energy
+conservation law
+\begin{align}
+  \frac{\partial }{\partial t}
+  \sum_{j}\int_{I_{j}} 
+  \left(
+  \mathcal{E}_h
+  + \frac{\epsilon_0}{2}\phi_h'^2
+  \right)
+  \thinspace dx
+  =
+  0.
+  \label{eq:dis-energy}
 \end{align}
 
 \end{document}
