@@ -5,7 +5,7 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 #+STARTUP: overview
-#+TAGS: GKEYLL(g) LUCEE(l) HOME(h) WARPX(w) INFRA(i)
+#+TAGS: GKEYLL(g) LUCEE(l) HOME(h) WARPX(w) INFRA(i) PUBS(p)
 
 This file contains things to be done. The TODO items are sub-bullets
 in a task and are kept till the task is done. Completed tasks are
@@ -14,6 +14,35 @@ archived.
 * Gkeyll GKE project
 
   Things to do in Gkeyll for GKE project.
+
+** Write draft of first paper on Gkeyll				       :PUBS:
+
+   Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and
+   show particle and energy conservation and non conservation of
+   momentum. Perhaps implement positivity in the mean.
+
+** Things to do for APS/DPP					       :PUBS:
+
+   To complete the things needed for APS/DPP the following need to be
+   done in the next three weeks (most likely in the two weeks before
+   APS/DPP).
+
+*** Add collisions to the Vlasov-Poisson solver
+*** Figure out the exact dispersion relation for ion-acoustic waves
+*** Do the case of discontinuous potential for ion-acoustic waves
+
+** Write arbitrary nodal basis function in arbitrary dimensions      :GKEYLL:
+   
+   Use tensor product basis. This is so that the polynomial order can
+   be specified in the Lua program to get arbitrary accuracy. Try and
+   make this work for both Gauss and Lobatto nodal layouts.
+
+** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
+
+   A large number of matrices and other information is needed from FE
+   basis functions for use in different parts of the code. Document
+   these and explain why they are needed. This will also help creation
+   of the general class to do this for general quad/hex/tri/tet cells.
 
 ** Work out generic kinetic equation updater			     :GKEYLL:
 
@@ -91,22 +120,9 @@ archived.
    This requires some thought on how the discontinuity in d(phi)/dx
    should be taken into account.
 
-** Write arbitrary nodal basis function 			     :GKEYLL:
-   
-   Use tensor product basis. This is so that the polynomial order can
-   be specified in the Lua program to get arbitrary accuracy. Try and
-   make this work for both Gauss and Lobatto nodal layouts.
-
 ** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
 
    At present only direct solves work. Need to fix this.
-
-** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
-
-   A large number of matrices and other information is needed from FE
-   basis functions for use in different parts of the code. Document
-   these and explain why they are needed. This will also help creation
-   of the general class to do this for general quad/hex/tri/tet cells.
 
 
 * Gkeyll infrastructure work

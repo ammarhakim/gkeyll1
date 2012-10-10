@@ -119,5 +119,7 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<1> >::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<2> >::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<3> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<4> >::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::NodalFiniteElementIfc<5> >::registerModule(L);
   }
 }

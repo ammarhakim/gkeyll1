@@ -20,6 +20,8 @@ namespace Lucee
   template <> const char *NodalFiniteElementIfc<1>::id = "NodalFiniteElement1D";
   template <> const char *NodalFiniteElementIfc<2>::id = "NodalFiniteElement2D";
   template <> const char *NodalFiniteElementIfc<3>::id = "NodalFiniteElement3D";
+  template <> const char *NodalFiniteElementIfc<4>::id = "NodalFiniteElement4D";
+  template <> const char *NodalFiniteElementIfc<5>::id = "NodalFiniteElement5D";
 
   template <unsigned NDIM>
   void
@@ -279,4 +281,6 @@ namespace Lucee
   template class NodalFiniteElementIfc<1>;
   template class NodalFiniteElementIfc<2>;
   template class NodalFiniteElementIfc<3>;
+  template class NodalFiniteElementIfc<4>;
+  template class NodalFiniteElementIfc<5>;
 }
