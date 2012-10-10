@@ -69,14 +69,14 @@ for the Hamiltonian $H(x,v)$ and where the canonical Poisson bracket is
 \end{align}
 Defining the phase-space velocity vector $\gvec{\alpha} = (\dot{x},
 \dot{v})$, where the characteristic speeds are determined from
-$\dot{x} = -\{H,x\}$ and $\dot{v} = -\{H,v\}$, allows rewriting
+$\dot{x} = \{x,H\}$ and $\dot{v} = \{v,H\}$, allows rewriting
 \eqr{\ref{eq:fevolve}} in an explicit conservation law form
 \begin{align}
   \pfrac{f}{t} + \nabla\cdot\left(\gvec{\alpha}f\right) = 0.
 \end{align}
 Liouville theorem on phase-space incompressibility implies
 $\nabla\cdot\gvec{\alpha} = 0$. Also, for any smooth function $g$,
-$\{H,g\} = \nabla g\cdot\gvec{\alpha}$, hence $\{H,H\}=\nabla H \cdot
+$\{g,H\} = \nabla g\cdot\gvec{\alpha}$, hence $\{H,H\}=\nabla H \cdot
 \gvec{\alpha} = 0$.
 
 \begin{example}
@@ -133,6 +133,7 @@ this
 \end{align}
 
 \subsection{Generalized Entropy Conservation}
+
 The solution itself can be used as a test function if it is
 \emph{smooth}. This gives
 \begin{align}
@@ -199,7 +200,8 @@ test function. This leads to
   - \int_K \nabla v \cdot \gvec{\alpha} f d\Omega
  = 0.
 \end{align}
-As $\nabla v \cdot \gvec{\alpha} f = \dot{v}f$ the last term becomes
+As $\nabla v \cdot \gvec{\alpha} = \{v,H\} = \dot{v}f$ the last term
+becomes
 \begin{align}
   \int_K\dot{v} f d\Omega = \int \frac{|e|}{m} \pfrac{\phi}{x} n\thinspace dx.
 \end{align}
@@ -219,18 +221,32 @@ on $K_j$ are polynomials. The discrete weak-form becomes
 \begin{align}
   \int_{K_j} w\pfrac{f_h}{t}d\Omega + 
   \int_{\partial K_j}w^-
-  \mvec{n} \cdot \hat{\mvec{F}}dS 
+  \hat{F}dS 
   - \int_{K_j}
   \nabla w \cdot \gvec{\alpha}_h
   f_h d\Omega = 0. \label{eq:dis-weak-form}
 \end{align}
-where $\hat{\mvec{F}} = \hat{\mvec{F}}(\gvec{\alpha}_h^- f_h^-,
-\gvec{\alpha}_h^+ f_h^+)$ is a numerical flux function. Here the
+where $\hat{F} = \hat{F}(\mvec{n}\cdot\gvec{\alpha}_h^- f_h^-,
+\mvec{n}\cdot\gvec{\alpha}_h^+ f_h^+)$ is a numerical flux
+function\footnote{If the Hamiltonian is continuous the normal
+  component of phase-space velocity $\mvec{n}\cdot\gvec{\alpha}_h$ is
+  also continuous (although the phase-space velocity itself may be
+  discontinuous). In this case we can write $\hat{F} =
+  \hat{F}(\mvec{n}\cdot\gvec{\alpha}_h f_h^-,
+  \mvec{n}\cdot\gvec{\alpha}_h f_h^+)$, i.e., there is no need to
+  distinguish between the normal of the phase-space velocity on either
+  side of a cell interface. {\bf Note of 10/7/2012}: I do not know
+  (yet) how to prove this for a general Hamiltonian system. This is
+  evidently true of the incompressible Euler as well as the
+  Vlasov-Poisson system. The proof is most like accomplished by
+  transforming to local tangent-normal coordinates on the cell face
+  and then showing that $\mvec{n}\cdot\gvec{\alpha}$ only depends on
+  the restriction of the Hamiltonian to the cell surface.}. Here the
 subscript $h$ indicates the discrete solution. The notation $w^-$
 ($w^+$) indicates that the function is evaluated just inside (outside)
 on the location on the surface $\partial K_j$. In the following we
 will assume periodic boundary conditions and/or that the solution
-vanishes on (one or more) of the boundaries.
+vanishes sufficiently rapidly if the boundaries are at infinity.
 
 \subsection{Particle Conservation}
 
@@ -243,6 +259,21 @@ immediately.
 \end{align}
 where the sum is performed on all cells in the triangulation.
 
+% \subsection{Generalized Entropy Conservation}
+
+% Using the solution $f_h$ as a test function on the discrete weak-form
+% we get
+% \begin{align}
+%   \frac{\partial}{\partial t} \frac{1}{2} \int_{K_j} f_h^2 d\Omega + 
+%   \int_{\partial K_j}f_h^-
+%   \mvec{n} \cdot \hat{F}dS 
+%   - \frac{1}{2}\int_{K_j}
+%   \nabla \cdot (\gvec{\alpha}_h f_h^2)
+%   = 0.
+% \end{align}
+% where the incompressibility condition in each cell,
+% $\nabla\cdot\gvec{\alpha}_h = 0$, was used.
+
 \subsection{Energy Conservation}
 
 We next \emph{assume} that the discrete Hamiltonian belongs to the
@@ -250,7 +281,7 @@ space of test functions. Using this in the discrete weak-form we get
 \begin{align}
   \sum_j\int_{K_j} H_h\pfrac{f_h}{t}d\Omega + 
   \sum_j \int_{\partial K_j}H_h^-
-  \mvec{n} \cdot \hat{\mvec{F}}dS 
+  \hat{F}dS 
   = 0
 \end{align}
 where we have also assumed that the discrete Hamiltonian and
@@ -283,19 +314,24 @@ $j$ now ranges over the spatial cell number.
 To determine the potential a weak-form of the Poisson equation is
 derived
 \begin{align}
-  w_x(x^-_{j+1/2})\phi'_{hj+1/2} -  w_x(x^+_{j-1/2})\phi'_{hj-1/2}
+  w_x(x^-_{j+1/2})\hat{\phi}'_{hj+1/2} -  w_x(x^+_{j-1/2})\hat{\phi}'_{hj-1/2}
   -
   \int_{I_j} w_x'\phi_h'\thinspace dx
   =
   -\int_{I_j} w_x \frac{\varrho_{c}}{\epsilon_0}\thinspace dx.
+  \label{eq:weak-poisson}
 \end{align}
 where primes denote derivatives with respect to $x$ and
-$\phi'_{j+1/2}$ is some approximation to the (possibly) discontinuous
-derivative of the potential at $x_{j+1/2}$. Also, $w_x(x)$ belongs to
-projection of the test function function space to the spatial domain.
+$\hat{\phi}'_{hj+1/2}$ is some approximation to the (possibly)
+discontinuous derivative of the potential at $x_{j+1/2}$. Also,
+$w_x(x)$ belongs to projection of the test function function space to
+the spatial domain.\footnote{Incidentally, this equation also shows,
+  on using $w_x=1$ as the test function and summing over the domain,
+  that the total charge in the domain will be exactly zero.}
 
-Taking the time-derivative of this discrete weak-form and summing over
-all cells $I_j$ leads to
+Taking the time-derivative of this discrete weak-form, then using
+$\phi_h$ as the test function, and summing over all cells $I_j$ leads
+to
 \begin{align}
   -\sum_j \int_{I_j} \phi_h'\pfrac{\phi_h'}{t}\thinspace dx
   =
@@ -306,8 +342,10 @@ all cells $I_j$ leads to
   \pfrac{n_h}{t}
   \thinspace dx.
 \end{align}
-Using this in \eqr{\ref{eq:dis-energy-1}} gives the discrete energy
-conservation law
+In deriving this the continuity of $\phi_h$ was used to cancel, on
+summation, the contribution from surface integration terms. Using this
+in \eqr{\ref{eq:dis-energy-1}} gives the discrete energy conservation
+law
 \begin{align}
   \frac{\partial }{\partial t}
   \sum_{j}\int_{I_{j}} 
@@ -320,5 +358,82 @@ conservation law
   0.
   \label{eq:dis-energy}
 \end{align}
+
+\section{Momentum Conservation}
+
+To study if the scheme conserves momentum we use $mv$ as a test
+function in the discrete weak-form to get
+\begin{align}
+  \sum_j \int_{K_j} mv\pfrac{f_h}{t}d\Omega
+  -
+  \sum_j
+  \int_{K_j}
+  m \nabla v \cdot \gvec{\alpha}_h
+  f_h d\Omega = 0. \label{eq:dis-momentum-1}
+\end{align}
+where the continuity of $v$ was used to eliminate the surface terms on
+summation. As $\nabla v \cdot \gvec{\alpha}_h = \{v,H_h\} = \dot{v}_h$
+the last term becomes
+\begin{align}
+  -\sum_j \int_{K_j} m\dot{v}_h f_h d\Omega
+  =
+  \sum_j
+  \int_{K_j} |e| \phi'_h f_h d\Omega
+  =
+  \sum_j
+  \int_{I_j} |e| \phi'_h n_h \thinspace dx.
+\end{align}
+To simplify this we use $\phi_h'$ as a test function in the discrete
+weak-form of the Poisson equation, \eqr{\ref{eq:weak-poisson}}, sum
+over all cells to get
+\begin{align}
+  \sum_j 
+  \left(
+    \phi'_h(x^-_{j+1/2})\hat{\phi}'_{hj+1/2} -  \phi'_h(x^+_{j-1/2})\hat{\phi}'_{hj-1/2}
+  \right)
+  =
+  \sum_j
+  \int_{I_j}
+  \phi'_h
+  \frac{|e|}{\epsilon_0}
+  n_h
+  \thinspace dx.
+\end{align}
+In deriving this we have used the fact that the term $\phi_h''\phi'_h$
+is a perfect derivative and so its integral summed over all cell
+vanishes on application of boundary conditions. Shifting the indices
+leads to
+\begin{align}
+  \sum_j 
+  \hat{\phi}'_{hj+1/2}
+  \left(
+    \phi'_h(x^-_{j+1/2}) -  \phi'_h(x^+_{j+1/2})
+  \right)
+  =
+  \sum_j
+  \int_{I_j}
+  \phi'_h
+  \frac{|e|}{\epsilon_0}
+  n_h
+  \thinspace dx.
+\end{align}
+Using this we finally get the total momentum evolution equation
+\begin{align}
+  \frac{\partial }{\partial t}
+  \sum_j \int_{I_j} \mathcal{M}_h \thinspace dx
+  +
+  \epsilon_0
+  \sum_j 
+  \hat{\phi}'_{hj+1/2}
+  \left(
+    \phi'_h(x^-_{j+1/2}) -  \phi'_h(x^+_{j+1/2})
+  \right)
+  =
+  0
+\end{align}
+where $\mathcal{M}_h \equiv \int mv f_h(x,v,t) dv$ is the particle
+momentum. This result shows that the total momentum \emph{is not
+  conserved} as, in general, the derivative of the potential will not
+be continuous at a cell interface.
 
 \end{document}
