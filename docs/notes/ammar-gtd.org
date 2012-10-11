@@ -37,6 +37,14 @@ archived.
    be specified in the Lua program to get arbitrary accuracy. Try and
    make this work for both Gauss and Lobatto nodal layouts.
 
+** Write source integrator for nodal DG scheme			     :GKEYLL:
+
+   So source terms can be included in DG updates
+
+** Implement BC updaters for nodal DG scheme			     :GKEYLL:
+
+   Wall BCs are probably the ones needed for now.
+
 ** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
 
    A large number of matrices and other information is needed from FE
