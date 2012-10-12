@@ -322,6 +322,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   will allow updating only in specified directions. This is needed to
   get the Lenard-Bernstein collision operator implemented
   efficiently.
+* Complete proof of DG energy conservation			     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-10-11 Thu 19:49
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  This requires some thought on how the discontinuity in d(phi)/dx
+  should be taken into account.
+
 
 
 
