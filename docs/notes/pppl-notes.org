@@ -418,8 +418,8 @@
    Wrapping into Lua should be done in such a way as to minimize the
    amount of C/C++ code, but making the low-level code compact and
    putting a lot of the functionality into Lua. Also, the verbosity of
-   the low-level code should be minimized by getting reif of the
-   excess syntactic noise.
+   the low-level code should be minimized by getting rid of the excess
+   syntactic noise.
 
 ** Note on initialize() method
 

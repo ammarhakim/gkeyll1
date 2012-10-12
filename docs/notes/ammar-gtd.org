@@ -19,7 +19,8 @@ archived.
 
    Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and
    show particle and energy conservation and non conservation of
-   momentum. Perhaps implement positivity in the mean.
+   momentum. Perhaps implement positivity in the mean. Put in
+   Lenard-Bernstein collision operator.
 
 ** Things to do for APS/DPP					       :PUBS:
 
@@ -123,10 +124,6 @@ archived.
    solves using a splitting scheme.
 
 ** Write limiter for nodal DG					     :GKEYLL:
-** Complete proof of DG energy conservation 			     :GKEYLL:
-
-   This requires some thought on how the discontinuity in d(phi)/dx
-   should be taken into account.
 
 ** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
 
