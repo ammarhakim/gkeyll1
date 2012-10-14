@@ -33,6 +33,7 @@ set(lcslvrs_SOURCES
   LcGridOdePointIntegratorUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
+  LcLagrangeTensorBasisCalc.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
