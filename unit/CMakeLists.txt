@@ -183,3 +183,8 @@ target_link_libraries(lcblitz ${Blitz_LIBRARIES})
 # lceigen
 add_executable(lceigen lceigen.cxx)
 target_link_libraries(lceigen)
+
+# lceigen
+add_executable(lclagrangetensorcalc lclagrangetensorcalc.cxx)
+target_link_libraries(lclagrangetensorcalc lcslvrs lcdatastructs 
+  lcgrids lclib lcloki ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})

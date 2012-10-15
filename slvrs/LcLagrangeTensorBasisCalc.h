@@ -22,6 +22,9 @@ namespace Lucee
   class LagrangeTensorBasisCalc
   {
     public:
+/** Enum for location of nodes */
+      enum Node_t { LOBATTO, GAUSSIAN, UNIFORM };
+
 /**
  * Create new tensor basis calculator object.
  *
@@ -29,11 +32,30 @@ namespace Lucee
  */
       LagrangeTensorBasisCalc(unsigned n);
 
+/**
+ *  Calculate the data needed in constructing the basis
+ *  function. Calling this function again will redo the calculation.
+ *
+ * @param type Type of nodal layout.
+ * @param numNodes Number of nodes in each direction. Should have exactly ndim elements.
+ */
+      void calc(Node_t type, const std::vector<unsigned> numNodes);
+
     private:
 /** Dimension of basis functions */
       unsigned ndim;
-/** Number of basis functions in each direction */
-      std::vector<unsigned> numBasis;
+/** Number of nodes in each direction */
+      std::vector<unsigned> numNodes;
+
+/** Structure to store location of nodes */
+      struct NodeLoc
+      {
+/** Location of nodes */
+          std::vector<double> loc;
+      };
+
+/** Location of nodes in each direction */
+      std::vector<NodeLoc> nodeLocs;
   };
 }
 
