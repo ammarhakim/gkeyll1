@@ -16,21 +16,21 @@
 
 namespace Lucee
 {
+/** Enum for location of nodes */
+  enum Node_t { LOBATTO, GAUSSIAN, UNIFORM };
+
 /**
  * Class to calculate data needed for Lagrange tensor basis functions.
  */
+  template <unsigned NDIM>
   class LagrangeTensorBasisCalc
   {
     public:
-/** Enum for location of nodes */
-      enum Node_t { LOBATTO, GAUSSIAN, UNIFORM };
 
 /**
  * Create new tensor basis calculator object.
- *
- * @param n Dimension of space.
  */
-      LagrangeTensorBasisCalc(unsigned n);
+      LagrangeTensorBasisCalc();
 
 /**
  *  Calculate the data needed in constructing the basis
@@ -42,8 +42,6 @@ namespace Lucee
       void calc(Node_t type, const std::vector<unsigned> numNodes);
 
     private:
-/** Dimension of basis functions */
-      unsigned ndim;
 /** Number of nodes in each direction */
       std::vector<unsigned> numNodes;
 
@@ -56,6 +54,21 @@ namespace Lucee
 
 /** Location of nodes in each direction */
       std::vector<NodeLoc> nodeLocs;
+
+/**
+ * Create nodes located at Lobatto quadrature points.
+ */
+      void createLobattoNodes();
+
+/**
+ * Create nodes located at Gaussian quadrature points.
+ */
+      void createGaussianNodes();
+
+/**
+ * Create nodes with uniform spacing.
+ */
+      void createUniformNodes();
   };
 }
 

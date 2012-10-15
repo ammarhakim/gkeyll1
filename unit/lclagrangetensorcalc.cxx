@@ -11,11 +11,11 @@
 void
 test_1()
 {
-  Lucee::LagrangeTensorBasisCalc basis(1);
+  Lucee::LagrangeTensorBasisCalc<1> basis;
   std::vector<unsigned> numNodes(1);
 
   numNodes[0] = 4; // 4-node element
-  basis.calc(Lucee::LagrangeTensorBasisCalc::LOBATTO, numNodes);
+  basis.calc(Lucee::GAUSSIAN, numNodes);
 }
 
 int
