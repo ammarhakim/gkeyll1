@@ -12,6 +12,7 @@
 // gkeyll includes
 #include <LcExcept.h>
 #include <LcLagrangeTensorBasisCalc.h>
+#include <LcLinAlgebra.h>
 #include <LcMathLib.h>
 #include <LcMatrix.h>
 #include <LcRowMajorIndexer.h>
@@ -95,12 +96,26 @@ namespace Lucee
       while (polySeq.step())
       {
         polySeq.fillWithIndex(polyIdx);
+        int col = idx.getIndex(polyIdx);
 
         double entry = 1.0;
         for (unsigned d=0; d<NDIM; ++d)
           entry *= Lucee::legendrePoly(polyIdx[d], xn[d]);
+// insert this into appropriate location in matrix
+        coeffMat(row, col) = entry;
       }
     }
+
+// contruct RHS matrix, which is just a unit matrix as basis functions
+// are such that they evaluate to 1 at one node and are zero at other
+// nodes.
+    expandCoeff = Lucee::Matrix<double>(totalNodes, totalNodes);
+    expandCoeff = 0.0;
+    for (unsigned i=0; i<totalNodes; ++i)
+      expandCoeff(i,i) = 1.0;
+
+// invert system to get expansion coefficients
+    Lucee::solve(coeffMat, expandCoeff);
   }
 
   template <unsigned NDIM>

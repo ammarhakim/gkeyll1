@@ -11,6 +11,9 @@
 # include <config.h>
 #endif
 
+// gkeyll includes
+#include <LcMatrix.h>
+
 // std includes
 #include <vector>
 
@@ -54,6 +57,9 @@ namespace Lucee
 
 /** Location of nodes in each direction */
       std::vector<NodeLoc> nodeLocs;
+
+/** Matrix of expansion coefficients */
+      Lucee::Matrix<double> expandCoeff;
 
 /**
  * Create nodes located at Lobatto quadrature points.

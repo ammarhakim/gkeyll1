@@ -27,6 +27,11 @@ namespace Lucee
   {
     public:
 /**
+ * Construct default matrix of shape 1x1.
+ */      
+      Matrix();
+
+/**
  * Construct matrix with specified number of rows and columns.
  *
  * @param row Rows in matrix.
