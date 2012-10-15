@@ -29,6 +29,14 @@ namespace Lucee
 #define LC_IS_TRANSPOSE(bit) (bit) & LC_TRANSPOSE
 
   template <typename T>
+  Matrix<T>::Matrix()
+    : Lucee::Array<2, T, Lucee::ColMajorIndexer>(
+        &Lucee::FixedVector<2, unsigned>(1, 1)[0])
+  {
+    LC_CLEAR_TRANSPOSE(traits);
+  }
+
+  template <typename T>
   Matrix<T>::Matrix(unsigned row, unsigned col)
     : Lucee::Array<2, T, Lucee::ColMajorIndexer>(
         &Lucee::FixedVector<2, unsigned>(row, col)[0])

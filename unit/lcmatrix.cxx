@@ -482,6 +482,24 @@ test_15()
     LC_ASSERT("Tesitng modVec", waves(i,1) == (i+0.5)*5.0);
 }
 
+void
+test_16()
+{
+  Lucee::Matrix<double> waves;
+  LC_ASSERT("Testing if default matrix has correct shape", waves.numRows() == 1);
+  LC_ASSERT("Testing if default matrix has correct shape", waves.numColumns() == 1);
+
+  waves = Lucee::Matrix<double>(5, 3);
+  waves = 10.0;
+  modVec(5, &waves(0, 2));
+  for (unsigned i=0; i<5; ++i)
+    LC_ASSERT("Tesitng modVec", waves(i,2) == (i+0.5)*5.0);
+
+  modVec(5, &waves(0, 1));
+  for (unsigned i=0; i<5; ++i)
+    LC_ASSERT("Tesitng modVec", waves(i,1) == (i+0.5)*5.0);
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -502,5 +520,6 @@ main(int argc, char **argv)
   test_13();
   test_14();
   test_15();
+  test_16();
   LC_END_TESTS;
 }
