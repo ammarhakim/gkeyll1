@@ -5,6 +5,17 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 15th
+
+  Added new class LagrangeTensorBasisCalc, which computes the nodal
+  basis functions needed in arbitrary dimensions and arbitrary
+  order. The class also allows using different orders in different
+  directions. The crucial code is the one to compute the coefficient
+  matrix representing the linear system to invert. I think this is
+  programmed up correctly. Need to test this by looking at a few cases
+  for which this data can be computed by hand. Seems tedious to test,
+  but must be to build confidence.
+
 * September 25th
 
   Working on ITER Office proposal with Alexei, Kruger, Ronglien and
