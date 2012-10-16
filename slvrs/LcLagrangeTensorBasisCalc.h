@@ -36,17 +36,27 @@ namespace Lucee
       LagrangeTensorBasisCalc();
 
 /**
+ * Get total number of nodes in element.
+ *
+ * @return Total number of nodes in element.
+ */
+      unsigned getNumNodes() const 
+      { return totalNodes; }
+
+/**
  *  Calculate the data needed in constructing the basis
  *  function. Calling this function again will redo the calculation.
  *
  * @param type Type of nodal layout.
  * @param numNodes Number of nodes in each direction. Should have exactly ndim elements.
  */
-      void calc(Node_t type, const std::vector<unsigned> numNodes);
+      void calc(Node_t type, const unsigned numNodes[NDIM]);
 
     private:
 /** Number of nodes in each direction */
-      std::vector<unsigned> numNodes;
+      unsigned numNodes[NDIM];
+/** Total number of nodes */
+      unsigned totalNodes;
 
 /** Structure to store location of nodes */
       struct NodeLoc
@@ -56,7 +66,7 @@ namespace Lucee
       };
 
 /** Location of nodes in each direction */
-      std::vector<NodeLoc> nodeLocs;
+      NodeLoc nodeLocs[NDIM];
 
 /** Matrix of expansion coefficients */
       Lucee::Matrix<double> expandCoeff;

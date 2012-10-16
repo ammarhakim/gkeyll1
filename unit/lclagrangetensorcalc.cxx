@@ -12,10 +12,12 @@ void
 test_1()
 {
   Lucee::LagrangeTensorBasisCalc<1> basis;
-  std::vector<unsigned> numNodes(1);
+  LC_ASSERT("Checking number of nodes", basis.getNumNodes() == 1);
 
-  numNodes[0] = 4; // 4-node element
+  unsigned numNodes[1] = {4}; // 4-node element
   basis.calc(Lucee::GAUSSIAN, numNodes);
+
+  LC_ASSERT("Checking number of nodes", basis.getNumNodes() == 4);
 }
 
 int

@@ -23,26 +23,22 @@ namespace Lucee
   template <unsigned NDIM>
   LagrangeTensorBasisCalc<NDIM>::LagrangeTensorBasisCalc()
   {
-    for (unsigned n=0; n<NDIM; ++n)
-      numNodes.push_back(0);
+    totalNodes = 1;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      numNodes[d] = 1;
+      nodeLocs[d].loc.push_back(0.0); // put node in center of element
+    }
   }
 
   template <unsigned NDIM>
   void
-  LagrangeTensorBasisCalc<NDIM>::calc(Node_t type, const std::vector<unsigned> nn)
+  LagrangeTensorBasisCalc<NDIM>::calc(Node_t type, const unsigned nn[NDIM])
   {
-    if (nn.size() != NDIM)
-    {
-      Lucee::Except lce("LagrangeTensorBasisCalc::calc: Must specify number of nodes in each direction.");
-      lce << " Only " << nn.size() << " directions specified for NDIM " << NDIM << std::endl;
-      throw lce;
-    }
-
     for (unsigned i=0; i<NDIM; ++i) 
       numNodes[i] = nn[i];
 
 // allocate space to store node locations
-    nodeLocs.resize(NDIM);
     for (unsigned i=0; i<NDIM; ++i)
       nodeLocs[i].loc.resize(numNodes[i]);
 
@@ -55,7 +51,7 @@ namespace Lucee
       createUniformNodes();
 
 // total number of nodes in element
-    unsigned totalNodes = 1;
+    totalNodes = 1;
     for (unsigned d=0; d<NDIM; ++d)
       totalNodes *= numNodes[d];
 
