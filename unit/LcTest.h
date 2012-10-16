@@ -49,7 +49,8 @@ class LcTestCounter
 
     void addFailedTest(int line, const char *file, const std::string& s) {
       std::ostringstream lf;
-      lf << s << " In file " << file ;
+      lf << s << " In file " << file;
+      lf << " at line " << line;
       failedTests.push_back(std::string(lf.str()));
     }
 
@@ -260,8 +261,10 @@ bool arraycmp(const std::vector<T>& a, const std::vector<T>& b)
  * @param fact Factor of floating-point epsilon.
  */
 template <typename T>
-bool epsCmp(T a, T b, double fact=5)
+bool epsCmp(const T& a, const T& b, double fact=5)
 {
+  if (fabs(a) <= fact*std::numeric_limits<T>::epsilon())
+    return fabs(a-b) <= fact*std::numeric_limits<T>::epsilon();
   return fabs(1-b/a) <= fact*std::numeric_limits<T>::epsilon();
 }
 
