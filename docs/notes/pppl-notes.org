@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 16th
+
+  The basic code in Lagrange tensor elements is working. Tested in 1D,
+  2D and 3D. Non-isotropic elements not tested yet. The loops are a
+  bit tricky to get correct, but the code now works in arbitrary
+  dimensions and with arbitrary order specificable in each
+  dimension. This allows the possibility of using a different
+  polynomial order in velocity space, for example.
+
 * October 15th
 
   Added new class LagrangeTensorBasisCalc, which computes the nodal
