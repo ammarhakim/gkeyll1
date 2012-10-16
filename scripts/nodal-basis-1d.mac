@@ -120,7 +120,9 @@ gOrds3 : [-sqrt(3/5), 0, sqrt(3/5)];
 N3_interp_mat : calcInterpMatrix(basis3, gOrds3);
 
 /** Order 4: ordinates are Legendre-Lobatto points */
-ord : [-1, -sqrt(1/5), sqrt(1/5), 1];
+/**ord : [-1, -sqrt(1/5), sqrt(1/5), 1];*/
+dx : 2/3;
+ord : [-1, -1+dx, -1+2*dx, 1];
 /** Construct matrix of coefficients */
 Pmat4 : makePmat(ord);
 /** Invert it */

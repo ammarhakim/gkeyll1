@@ -23,12 +23,11 @@ namespace Lucee
   template <unsigned NDIM>
   LagrangeTensorBasisCalc<NDIM>::LagrangeTensorBasisCalc()
   {
-    totalNodes = 1;
+// by default, a single node
+    unsigned nn[NDIM];
     for (unsigned d=0; d<NDIM; ++d)
-    {
-      numNodes[d] = 1;
-      nodeLocs[d].loc.push_back(0.0); // put node in center of element
-    }
+      nn[d] = 1;
+    calc(Lucee::UNIFORM, nn);
   }
 
   template <unsigned NDIM>
@@ -62,12 +61,28 @@ namespace Lucee
       upper[d] = numNodes[d];
     }
     Lucee::Region<NDIM, int> rgn(lower, upper);
+    nodeRgn = rgn;
 // create sequencer for looping over nodes (why RowMajor and not
 // ColumnMajor? It actually does not matter, as long as all other
-// calculations are done consistently.).
+// calculations are done consistently. However, it does matter in
+// interpreting the output from an updater, as the data is arranged
+// with the same layout as used here.).
     Lucee::RowMajorSequencer<NDIM> nodeSeq(rgn), polySeq(rgn);
 // indexer to map to location in matrix
     Lucee::RowMajorIndexer<NDIM> idx(rgn);
+
+    int nodeIdx[NDIM], polyIdx[NDIM];
+
+// store nodal coordinates
+    nodeCoords.resize(totalNodes);
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(nodeIdx);
+      int nn = idx.getIndex(nodeIdx); // node number
+
+      for (unsigned d=0; d<NDIM; ++d)
+        nodeCoords[nn].x[d] = nodeLocs[d].loc[nodeIdx[d]];
+    }
 
     double xn[NDIM];
 // create matrix of linear system coefficients: each node contributes
@@ -75,16 +90,11 @@ namespace Lucee
 // polynomials evaluated at that node.
     Lucee::Matrix<double> coeffMat(totalNodes, totalNodes);
 
-    int nodeIdx[NDIM], polyIdx[NDIM];
+    nodeSeq.reset();
     while (nodeSeq.step())
     {
       nodeSeq.fillWithIndex(nodeIdx);
       int row = idx.getIndex(nodeIdx); // row of coeff matrix
-
-// compute nodal coordinates: this is not strictly needed, but makes
-// following code less confusing.
-      for (unsigned d=0; d<NDIM; ++d)
-        xn[d] = nodeLocs[d].loc[nodeIdx[d]];
 
 // each entry in this row is product of Legendre polynomials evaluate
 // with nodal coordinate components
@@ -94,9 +104,11 @@ namespace Lucee
         polySeq.fillWithIndex(polyIdx);
         int col = idx.getIndex(polyIdx);
 
+// compute product of Legendre polynomials
         double entry = 1.0;
         for (unsigned d=0; d<NDIM; ++d)
-          entry *= Lucee::legendrePoly(polyIdx[d], xn[d]);
+          entry *= Lucee::legendrePoly(polyIdx[d], nodeCoords[row].x[d]);
+
 // insert this into appropriate location in matrix
         coeffMat(row, col) = entry;
       }
@@ -138,13 +150,70 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::createUniformNodes()
   {
+// NOTE: It is perhaps important to ensure exact symmetry of node
+// locations (if applicable) as far as possible. Even small errors
+// might lead to subtle problems down-stream in updaters that use
+// these values. For now, this is a naive implementation, but
+// something to keep in mind for the future.
+
     for (unsigned d=0; d<NDIM; ++d)
     {
-      double dx = 2.0/(numNodes[d]-1);
-      nodeLocs[d].loc[0] = -1.0; // first node on left edge
-      for (unsigned i=1; i<numNodes[d]; ++i)
-        nodeLocs[d].loc[i] += nodeLocs[d].loc[i]+dx; // nodes are evenly spaced
+      if (numNodes[d] == 1)
+        nodeLocs[d].loc[0] = 0.0;
+      else
+      {
+        double dx = 2.0/(numNodes[d]-1);
+        nodeLocs[d].loc[0] = -1.0; // first node on left edge
+        for (unsigned i=1; i<numNodes[d]-1; ++i)
+          nodeLocs[d].loc[i] += nodeLocs[d].loc[i-1]+dx; // nodes are evenly spaced
+        nodeLocs[d].loc[numNodes[d]-1] = 1.0; // last node on right edge
+      }
     }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::getCoeffMat(Lucee::Matrix<double>& coeff) const
+  {
+    coeff.copy(expandCoeff);
+  }
+
+  template <unsigned NDIM>
+  std::vector<double>
+  LagrangeTensorBasisCalc<NDIM>::getNodeLoc(unsigned dir) const
+  {
+    return nodeLocs[dir].loc;
+  }
+
+  template <unsigned NDIM>
+  inline
+  void
+  LagrangeTensorBasisCalc<NDIM>::fillWithNodeCoordinate(unsigned nIdx, double xn[NDIM]) const
+  {
+    for (unsigned d=0; d<NDIM; ++d)
+      xn[d] = nodeCoords[nIdx].x[d];
+  }
+
+  template <unsigned NDIM>
+  double
+  LagrangeTensorBasisCalc<NDIM>::evalBasis(unsigned bIdx, double xc[NDIM]) const
+  {
+    Lucee::RowMajorSequencer<NDIM> seq(nodeRgn);
+    Lucee::RowMajorIndexer<NDIM> idx(nodeRgn);
+    int nodeIdx[NDIM];
+
+    double v = 0;
+    while (seq.step())
+    {
+      seq.fillWithIndex(nodeIdx);
+      int nn = idx.getIndex(nodeIdx); // node number
+
+      double pt = expandCoeff(nn, bIdx); // coefficient of expansion
+      for (unsigned d=0; d<NDIM; ++d)
+        pt *= Lucee::legendrePoly(nodeIdx[d], xc[d]);
+      v += pt; // increment sum
+    }
+    return v;
   }
 
 // instantiations
