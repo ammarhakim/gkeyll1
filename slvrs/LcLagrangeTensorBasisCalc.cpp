@@ -124,6 +124,9 @@ namespace Lucee
 
 // invert system to get expansion coefficients
     Lucee::solve(coeffMat, expandCoeff);
+
+// compute mass matrix
+    calcMassMatrix();
   }
 
   template <unsigned NDIM>
@@ -179,6 +182,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::getMassMatrix(Lucee::Matrix<double>& mMatrix) const
+  {
+    mMatrix.copy(massMatrix);
+  }
+
+  template <unsigned NDIM>
   std::vector<double>
   LagrangeTensorBasisCalc<NDIM>::getNodeLoc(unsigned dir) const
   {
@@ -214,6 +224,42 @@ namespace Lucee
       v += pt; // increment sum
     }
     return v;
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcMassMatrix()
+  {
+    Lucee::RowMajorSequencer<NDIM> seq(nodeRgn);
+    Lucee::RowMajorIndexer<NDIM> idx(nodeRgn);
+    int nodeIdx[NDIM];
+
+// space for mass-matrix
+    massMatrix = Lucee::Matrix<double>(totalNodes, totalNodes);
+
+// compute each entry in matrix
+    for (unsigned k=0; k<totalNodes; ++k)
+    {
+      for (unsigned m=0; m<totalNodes; ++m)
+      {
+        double entry = 0.0;
+// loop over basis function expansion
+        seq.reset();
+        while (seq.step())
+        {
+          seq.fillWithIndex(nodeIdx);
+          int nn = idx.getIndex(nodeIdx); // index of expansion coefficient
+          
+// term resulting from orthogonality of Legendre polynomials
+          double orthoTerm = 1.0;
+          for (unsigned d=0; d<NDIM; ++d)
+            orthoTerm *= 2.0/(2*nodeIdx[d]+1.0);
+// increment entry
+          entry += expandCoeff(nn, k)*expandCoeff(nn, m)*orthoTerm;
+        }
+        massMatrix(k,m) = entry;
+      }
+    }
   }
 
 // instantiations

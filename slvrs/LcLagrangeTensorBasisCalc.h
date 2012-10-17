@@ -72,9 +72,16 @@ namespace Lucee
 /**
  * Fetch coefficient matrix.
  *
- * @param coeff On output, this contains the coefficient matrix.
+ * @param coeff On output, this contains the coefficient matrix. Should be pre-allocated.
  */
       void getCoeffMat(Lucee::Matrix<double>& coeff) const;
+
+/**
+ * Fetch mass-matrix.
+ *
+ * @param mMatrix On output, this contains the mass matrix. Should be pre-allocated.
+ */
+      void getMassMatrix(Lucee::Matrix<double>& mMatrix) const;
 
 /**
  * Evaluate specified basis function at location. This method is very
@@ -120,6 +127,9 @@ namespace Lucee
 /** Matrix of expansion coefficients */
       Lucee::Matrix<double> expandCoeff;
 
+/** Mass matrix for element */
+      Lucee::Matrix<double> massMatrix;
+
 /**
  * Create nodes located at Lobatto quadrature points.
  */
@@ -134,6 +144,11 @@ namespace Lucee
  * Create nodes with uniform spacing.
  */
       void createUniformNodes();
+
+/**
+ * Compute mass matrix.
+ */
+      void calcMassMatrix();
   };
 }
 
