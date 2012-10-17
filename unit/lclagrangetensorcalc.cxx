@@ -24,7 +24,7 @@ test_0()
 
 void
 test_1()
-{
+{ // 1D, 2 nodes
   Lucee::LagrangeTensorBasisCalc<1> basis;
   unsigned nn = 2;
   unsigned numNodes[1];
@@ -62,7 +62,7 @@ test_1()
 
 void
 test_2()
-{
+{  // 1D, 3 nodes
   Lucee::LagrangeTensorBasisCalc<1> basis;
   unsigned nn = 3;
   unsigned numNodes[1];
@@ -108,7 +108,7 @@ test_2()
 
 void
 test_3()
-{
+{  // 1D, 4 nodes
   Lucee::LagrangeTensorBasisCalc<1> basis;
   unsigned nn = 4;
   unsigned numNodes[1];
@@ -163,7 +163,7 @@ test_3()
 
 void
 test_4()
-{
+{  // 1D, 4 nodes
   Lucee::LagrangeTensorBasisCalc<1> basis;
   unsigned nn = 4;
   unsigned numNodes[1];
@@ -202,7 +202,7 @@ test_4()
 
 void
 test_5()
-{
+{ // 2D, 2x2 nodes
   Lucee::LagrangeTensorBasisCalc<2> basis;
   unsigned nn = 2;
   unsigned numNodes[2];
@@ -250,7 +250,7 @@ test_5()
 
 void
 test_6()
-{
+{ // 2D, 4x4 nodes
   Lucee::LagrangeTensorBasisCalc<2> basis;
   unsigned nn = 4;
   unsigned numNodes[2];
@@ -301,7 +301,7 @@ test_6()
 
 void
 test_7()
-{
+{  // 3D, 4x4x4 nodes
   Lucee::LagrangeTensorBasisCalc<3> basis;
   unsigned nn = 4;
   unsigned numNodes[3];
@@ -357,6 +357,66 @@ test_7()
   }
 }
 
+void
+test_8()
+{  // 3D, 4x3x2 nodes
+  Lucee::LagrangeTensorBasisCalc<3> basis;
+  unsigned nx = 4, ny = 3, nz = 2;
+  unsigned numNodes[3];
+  numNodes[0] = nx; numNodes[1] = ny; numNodes[2] = nz;
+  basis.calc(Lucee::GAUSSIAN, numNodes);
+
+  LC_ASSERT("Checking number of nodes", basis.getNumNodes() == nx*ny*nz);
+  
+  double x1 = std::sqrt((3-2*sqrt(6./5.))/7);
+  double x2 = std::sqrt((3+2*sqrt(6./5.))/7);
+
+  double xn[3];
+  double loc1[4] = {-x2, -x1, x1, x2};
+  double loc2[3] = {-sqrt(3.0/5.0), 0, sqrt(3.0/5.0)};
+  double loc3[2] = {-1/sqrt(3), 1/sqrt(3)};
+
+  unsigned nIdx = 0;
+  for (unsigned i=0; i<nx; ++i)
+  {
+    for (unsigned j=0; j<ny; ++j)
+    {
+      for (unsigned k=0; k<nz; ++k)
+      {
+        basis.fillWithNodeCoordinate(nIdx, xn);
+        
+        LC_ASSERT("Testing node coordinate", epsCmp(xn[0], loc1[i]));
+        LC_ASSERT("Testing node coordinate", epsCmp(xn[1], loc2[j]));
+        LC_ASSERT("Testing node coordinate", epsCmp(xn[2], loc3[k]));
+        
+        nIdx += 1;
+      }
+    }
+  }
+
+  nIdx = 0;
+  for (unsigned i=0; i<nx; ++i)
+  {
+    for (unsigned j=0; j<ny; ++j)
+    {
+      for (unsigned k=0; k<nz; ++k)
+      {
+        basis.fillWithNodeCoordinate(nIdx, xn);
+
+        for (unsigned b=0; b<nx*ny*nz; ++b)
+        {
+          if (nIdx == b)
+            LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xn), 1.0));
+          else
+            LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xn), 0.0));
+        }
+
+        nIdx += 1;
+      }
+    }
+  }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -369,5 +429,6 @@ main(int argc, char **argv)
   test_5();
   test_6();
   test_7();
+  test_8();
   LC_END_TESTS;
 }
