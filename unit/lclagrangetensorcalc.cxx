@@ -187,6 +187,11 @@ test_3()
   Lucee::Matrix<double> massMatrix(tn, tn);
   basis.getMassMatrix(massMatrix);
 
+// NOTE of 10/17/2012: It is possible that some tests below fail due
+// to precision level errors. For some reason a few values are
+// slightly off (but with relative error of 1e-13 or so), however this
+// should not be a problem. (Ammar Hakim)
+
   LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,0), 16.0/105.0));
   LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,1), 33.0/280.0));
   LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,2), (-3.0)/70.0, 10));
@@ -290,6 +295,30 @@ test_5()
       nIdx += 1;
     }
   }
+
+  unsigned tn = basis.getNumNodes();
+  Lucee::Matrix<double> massMatrix(tn, tn);
+  basis.getMassMatrix(massMatrix);
+
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(0,0), 4.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(0,1), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(0,2), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(0,3), 1.0/9.0));
+
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(1,0), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(1,1), 4.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(1,2), 1.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(1,3), 2.0/9.0));
+
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(2,0), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(2,1), 1.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(2,2), 4.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(2,3), 2.0/9.0));
+
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,0), 1.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,1), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,2), 2.0/9.0));
+  LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,3), 4.0/9.0));
 }
 
 void
