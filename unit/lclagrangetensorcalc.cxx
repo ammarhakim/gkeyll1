@@ -58,6 +58,15 @@ test_1()
         LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 0.0));
     }
   }
+
+  unsigned tn = basis.getNumNodes();
+  Lucee::Matrix<double> massMatrix(tn, tn);
+  basis.getMassMatrix(massMatrix);
+
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,0), 2.0/3.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,1), 1.0/3.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,0), 1.0/3.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,1), 2.0/3.0));
 }
 
 void
@@ -104,6 +113,20 @@ test_2()
         LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 0.0));
     }
   }
+
+  unsigned tn = basis.getNumNodes();
+  Lucee::Matrix<double> massMatrix(tn, tn);
+  basis.getMassMatrix(massMatrix);
+
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,0), 4.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,1), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,2), (-1.0)/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,0), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,1), 16.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,2), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,0), (-1.0)/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,1), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,2), 4.0/15.0));
 }
 
 void
@@ -159,6 +182,27 @@ test_3()
         LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 0.0));
     }
   }
+
+  unsigned tn = basis.getNumNodes();
+  Lucee::Matrix<double> massMatrix(tn, tn);
+  basis.getMassMatrix(massMatrix);
+
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,0), 16.0/105.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,1), 33.0/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,2), (-3.0)/70.0, 10));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(0,3), 19.0/840.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(1,0), 33.0/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(1,1), 27.0/35.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(1,2), (-27.0)/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(1,3), (-3.0)/70.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(2,0), (-3.0)/70.0, 10));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(2,1), (-27.0)/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(2,2), 27.0/35.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(2,3), 33.0/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(3,0), 19.0/840.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(3,1), (-3.0)/70.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(3,2), 33.0/280.0));
+  LC_ASSERT("Testing mass matrix", epsCmp(massMatrix(3,3), 16.0/105.0));
 }
 
 void

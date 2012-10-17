@@ -38,6 +38,12 @@ archived.
    be specified in the Lua program to get arbitrary accuracy. Try and
    make this work for both Gauss and Lobatto nodal layouts.
 
+** Implement moment based modal limiters in Gkeyll 1D solver	     :GKEYLL:
+
+   Compare with the Nair book notes and figure out why Seth's code is
+   diffusive. Perhaps there is something missing in their description
+   which makes the solution look better.
+
 ** Write source integrator for nodal DG scheme			     :GKEYLL:
 
    So source terms can be included in DG updates

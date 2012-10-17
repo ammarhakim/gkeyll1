@@ -8,11 +8,22 @@
 * October 16th
 
   The basic code in Lagrange tensor elements is working. Tested in 1D,
-  2D and 3D. Non-isotropic elements not tested yet. The loops are a
-  bit tricky to get correct, but the code now works in arbitrary
+  2D and 3D. Non-isotropic elements also tested. The loops are a bit
+  tricky to get correct, but the code now works in arbitrary
   dimensions and with arbitrary order specificable in each
   dimension. This allows the possibility of using a different
   polynomial order in velocity space, for example.
+
+** Things to do finish for LagrangeTensorBasisCalc
+
+  Labotto node locations still not programmed up. Need to do this in a
+  general manner.
+
+  Mass matrix, stiffness, grad-stiffness and differentiation matrices.
+
+  Maps for nodes on surface, exclusively owned nodes etc.
+
+  Interpolation matrices for volume and surface integration.
 
 * October 15th
 
