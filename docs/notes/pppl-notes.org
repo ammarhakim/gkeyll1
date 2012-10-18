@@ -5,6 +5,11 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 17th
+
+  Added code to compute mass-matrix. Tested in 1D and 2D. These tests
+  are very tedious (but straightforward) to do.
+
 * October 16th
 
   The basic code in Lagrange tensor elements is working. Tested in 1D,
