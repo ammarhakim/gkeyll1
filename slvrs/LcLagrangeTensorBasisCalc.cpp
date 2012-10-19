@@ -125,8 +125,11 @@ namespace Lucee
 // invert system to get expansion coefficients
     Lucee::solve(coeffMat, expandCoeff);
 
-// compute mass matrix
+// compute various matrices and quadrature data needed.
+
     calcMassMatrix();
+    for (unsigned d=0; d<NDIM; ++d)
+      calcGradStiff(d);
   }
 
   template <unsigned NDIM>
@@ -186,6 +189,13 @@ namespace Lucee
   LagrangeTensorBasisCalc<NDIM>::getMassMatrix(Lucee::Matrix<double>& mMatrix) const
   {
     mMatrix.copy(massMatrix);
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const
+  {
+    gMatrix.copy(gradStiff[dir]);
   }
 
   template <unsigned NDIM>
@@ -258,6 +268,57 @@ namespace Lucee
           entry += expandCoeff(nn, k)*expandCoeff(nn, m)*orthoTerm;
         }
         massMatrix(k,m) = entry;
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcGradStiff(unsigned dir)
+  {
+    Lucee::RowMajorIndexer<NDIM> idx(nodeRgn);
+    int nodeIdx[NDIM];
+
+// space for matrix
+    gradStiff[dir] = Lucee::Matrix<double>(totalNodes, totalNodes);
+    gradStiff[dir] = 0.0;
+
+// compute each entry in matrix
+    for (unsigned k=0; k<totalNodes; ++k)
+    {
+      for (unsigned m=0; m<totalNodes; ++m)
+      {
+        double entry = 0.0;
+        for (unsigned r=0; (2*r+1)<nodeRgn.getUpper(dir); ++r)
+        {
+// this loop over 'r' is basically evaluating \int P'_n(x) P_m(x) dx
+// where P_n(x) are Legendre polynomials as a sum of shifted delta
+// functions.
+
+// create smaller region
+          Lucee::Region<NDIM, int> smallRgn = nodeRgn.resetBounds(dir, 2*r+1, nodeRgn.getUpper(dir));
+          Lucee::RowMajorSequencer<NDIM> seq(smallRgn);
+
+// loop over basis function expansion
+          while (seq.step())
+          {
+            seq.fillWithIndex(nodeIdx);
+            int nn1 = idx.getIndex(nodeIdx); // index of expansion coefficient into basis k
+            nodeIdx[dir] += -(2*r+1); // delta function is shifted by this much
+            int nn2 = idx.getIndex(nodeIdx); // index of expansion coefficient into basis m
+            
+// term resulting from orthogonality of Legendre polynomials
+            double orthoTerm = 1.0;
+            for (unsigned d=0; d<NDIM; ++d)
+            {
+              if (d != dir)
+                orthoTerm *= 2.0/(2*nodeIdx[d]+1.0);
+            }
+// increment entry
+            entry += 2.0*expandCoeff(nn1, k)*expandCoeff(nn2, m)*orthoTerm;
+          }
+        }
+        gradStiff[dir](k,m) = entry;
       }
     }
   }

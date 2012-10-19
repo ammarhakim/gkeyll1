@@ -84,6 +84,14 @@ namespace Lucee
       void getMassMatrix(Lucee::Matrix<double>& mMatrix) const;
 
 /**
+ * Fetch grad-stiffness matrix in specified direction.
+ *
+ * @param dir Direction in which matrix is required.
+ * @param gMatrix On output, this contains the grad-stiff matrix. Should be pre-allocated.
+ */
+      void getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const;
+
+/**
  * Evaluate specified basis function at location. This method is very
  * slow, and so should not be called inside an inner loop. It is
  * provided to allow initialization of data needed in updaters, so its
@@ -130,6 +138,9 @@ namespace Lucee
 /** Mass matrix for element */
       Lucee::Matrix<double> massMatrix;
 
+/** Grad-stiffness matrix */
+      Lucee::Matrix<double> gradStiff[NDIM];
+
 /**
  * Create nodes located at Lobatto quadrature points.
  */
@@ -149,6 +160,13 @@ namespace Lucee
  * Compute mass matrix.
  */
       void calcMassMatrix();
+
+/**
+ * Compute grad-stiffness matrix in specified direction.
+ *
+ * @param dir Direction to compute grad-stiffness matrix in.
+ */
+      void calcGradStiff(unsigned dir);
   };
 }
 
