@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 18-19th
+  
+  Worked out code to compute grad stiffness matrices. This is tricky,
+  and perhaps this sort of trickiness can be avoided by simply doing
+  the needed calculation numerically. However, now coded up and tested
+  in 1D. 
+
+  Wasted time in debugging: turns out the output from the code was
+  correct but the "exact" solution was not!
+
+  Next need to test in 2D.
+
 * October 17th
 
   Added code to compute mass-matrix. Tested in 1D and 2D. These tests
