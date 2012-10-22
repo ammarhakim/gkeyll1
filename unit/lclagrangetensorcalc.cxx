@@ -360,6 +360,51 @@ test_5()
   LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,1), 2.0/9.0));
   LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,2), 2.0/9.0));
   LC_ASSERT("Testing mass-matrix", epsCmp(massMatrix(3,3), 4.0/9.0));
+
+  Lucee::Matrix<double> gradStiffMatrix(tn, tn);
+
+  basis.getGradStiffMatrix(0, gradStiffMatrix);
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,0), (-1.0)/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,1), (-1.0)/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,2), (-1.0)/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,3), (-1.0)/6.0));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,0), (-1.0)/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,1), (-1.0)/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,2), (-1.0)/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,3), (-1.0)/3.0));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,0), 1.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,1), 1.0/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,2), 1.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,3), 1.0/6.0));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,0), 1.0/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,1), 1.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,2), 1.0/6.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,3), 1.0/3.0));
+
+  basis.getGradStiffMatrix(1, gradStiffMatrix);
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,0), (-2.0)/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,1), (-2.0)/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,2), -1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,3), -1/2.0/3.0));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,0), 2.0/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,1), 2.0/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,2), 1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,3), 1/2.0/3.0));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,0), -1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,1), -1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,2), (-2.0)/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,3), (-2.0)/(3.0*2.0)));
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,0), 1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,1), 1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,2), 2.0/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,3), 2.0/(3.0*2.0)));
+
 }
 
 void
