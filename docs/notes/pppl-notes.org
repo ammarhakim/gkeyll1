@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 22nd
+
+  Tested 2D grad-stiffness matrices for a 2x2 (4 node) element. Seems
+  to work fine. The node layout between this element serendipity
+  elements are not consistent, which caused a lot of confusion when
+  comparing output. Perhaps that can not be helped, but in the long
+  run it might be better to somehow specify the layout in the output
+  hdf5 file so the plotting does not need to know this information.
+
 * October 18-19th
   
   Worked out code to compute grad stiffness matrices. This is tricky,

@@ -34,6 +34,7 @@ set(lcslvrs_SOURCES
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcLagrangeTensorBasisCalc.cpp
+  LcLagrangeTensorElement.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
