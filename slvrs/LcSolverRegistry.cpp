@@ -19,6 +19,7 @@
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
+#include <LcLagrangeTensorElement.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
@@ -104,6 +105,12 @@ namespace Lucee
 // register nodal basis functions
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LobattoElement1D>;
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
+
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LagrangeTensorElement<1> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::LagrangeTensorElement<2> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<3>, Lucee::LagrangeTensorElement<3> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<4>, Lucee::LagrangeTensorElement<4> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<5>, Lucee::LagrangeTensorElement<5> >;
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr

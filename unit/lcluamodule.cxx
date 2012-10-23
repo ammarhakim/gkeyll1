@@ -81,6 +81,12 @@ main(int argc, char **argv)
   LC_BEGIN_TESTS("lcluamodule");
   Lucee::LuaState L;
 
+// create top-level logger
+  Lucee::Logger& logger = Lucee::Logger::create("lucee");
+  logger.setLevel("debug"); // base logger should log everything
+// create console logger
+  Lucee::Logger& conLogger = Lucee::Logger::create("lucee.console");
+
   registerEverything();
   //Lucee::ObjCreator<Solver>::registerModule(L);
   Lucee::LuaModuleRegistry<Solver>::registerModule(L);

@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcLagrangeTensorBasisCalc.h>
 #include <LcLagrangeTensorElement.h>
 
 namespace Lucee
@@ -32,6 +33,56 @@ namespace Lucee
   {
 // call base class method
     Lucee::NodalFiniteElementIfc<NDIM>::readInput(tbl);
+
+    unsigned numNodes[NDIM];
+// get polynomial order to use
+    if (tbl.hasNumber("polyOrder"))
+    {
+      unsigned polyOrder = tbl.getNumber("polyOrder");
+      for (unsigned d=0; d<NDIM; ++d)
+        numNodes[d] = ((unsigned) polyOrder) + 1;
+    }
+    else if (tbl.hasNumVec("polyOrder"))
+    {
+      std::vector<double> po = tbl.getNumVec("polyOrder");
+      if (po.size() != NDIM)
+      {
+        Lucee::Except lce("LagrangeTensorElement::readInput: 'polyOrder' should have ");
+        lce << NDIM << " entries. Provided " << po.size() << " instead.";
+        throw lce;
+      }
+      for (unsigned d=0; d<NDIM; ++d)
+        numNodes[d] = ((unsigned) po[d]) + 1;
+    }
+    else
+    {
+      Lucee::Except lce("LagrangeTensorElement::readInput: Must provide 'polyOrder' ");
+      lce << "as scalar or table with " << NDIM << " entries.";
+      throw lce;
+    }
+
+// get node location
+    Lucee::Node_t nodeLoc = Lucee::UNIFORM; // by default assume uniformly spaced nodes
+    if (tbl.hasString("nodeLocation"))
+    {
+      std::string nl = tbl.getString("nodeLocation");
+      if (nl == "lobatto")
+        nodeLoc = Lucee::LOBATTO;
+      else if (nl == "gaussian")
+        nodeLoc = Lucee::GAUSSIAN;
+      else if (nl == "uniform")
+        nodeLoc = Lucee::UNIFORM;
+      else
+      {
+        Lucee::Except lce("LagrangeTensorElement::readInput: Node location '");
+        lce << nl << "' not recognized.";
+        throw lce;
+      }
+    }
+
+// create calculator object
+    Lucee::LagrangeTensorBasisCalc<NDIM> basisCalc;
+    basisCalc.calc(nodeLoc, numNodes);
   }
 
   template <unsigned NDIM>

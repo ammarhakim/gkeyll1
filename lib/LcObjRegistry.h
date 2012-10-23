@@ -9,6 +9,8 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcLogStream.h>
+#include <LcLogger.h>
 #include <LcLuaModule.h>
 #include <LcLuaTable.h>
 #include <LcPointerHolder.h>
@@ -77,7 +79,13 @@ namespace Lucee
  */
       static int makeLuaObj(lua_State *L)
       {
-        //std::cout << "Setting up object of type " << D::id << std::endl;
+        Lucee::Logger& l = Lucee::Logger::get("lucee.console");
+        Lucee::LogStream dbgStrm = l.getDebugStream();
+
+        dbgStrm << "Setting up object of type " << B::id << "::"
+                << D::id 
+                << " ..."
+                << std::endl;
         size_t nbytes = sizeof(Lucee::PointerHolder<D>);
         Lucee::PointerHolder<D> *ph =
           (Lucee::PointerHolder<D>*) lua_newuserdata(L, nbytes);
