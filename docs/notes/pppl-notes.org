@@ -17,7 +17,11 @@
   and finish this soon. 
 
   Added code to compute all the nodal lists. This stuff is very
-  tedious, but needed.
+  tedious, but needed. Tested in 1D/2D/3D. The nodal layout is
+  systematic (row-major) but very confusing. Need to add figures to
+  explain how the nodes are laid out. Not sure how to explain even
+  higher dimensional layouts. Which reminds me that I need to work on
+  the manual ASAP.
 
 * October 22nd
 
