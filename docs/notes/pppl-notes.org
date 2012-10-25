@@ -5,6 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 23-25th
+
+  Spent a lot of time on momentum (non)conservation. Now have a good
+  idea why momentum is not conserved even with using a smoothed out
+  electric field. No general proof yet, but have shown this by
+  constructing a counter example. (2 cells, piecewise linear).
+
+  More work on LagrangeTensorElement class. This is going slow due to
+  all the distractions from energy/momentum proofs etc. Need to focus
+  and finish this soon. 
+
+  Added code to compute all the nodal lists. This stuff is very
+  tedious, but needed.
+
 * October 22nd
 
   Tested 2D grad-stiffness matrices for a 2x2 (4 node) element. Seems

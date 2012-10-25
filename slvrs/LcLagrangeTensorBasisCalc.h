@@ -59,7 +59,10 @@ namespace Lucee
  * @param dir Direction for node locations.
  * @return vector of node locations.
  */
-      std::vector<double> getNodeLoc(unsigned dir) const;
+      std::vector<double> getNodeLoc(unsigned dir) const
+      {
+        return nodeLocs[dir].loc;
+      }
 
 /**
  * Get coordinate of specified node.
@@ -67,21 +70,31 @@ namespace Lucee
  * @param nIdx Node index (0-based)
  * @param xn On output, coordinate of node.
  */
-      void fillWithNodeCoordinate(unsigned nIdx, double xn[NDIM]) const;
+      void fillWithNodeCoordinate(unsigned nIdx, double xn[NDIM]) const
+      {
+        for (unsigned d=0; d<NDIM; ++d)
+          xn[d] = nodeCoords[nIdx].x[d];
+      }
 
 /**
  * Fetch coefficient matrix.
  *
  * @param coeff On output, this contains the coefficient matrix. Should be pre-allocated.
  */
-      void getCoeffMat(Lucee::Matrix<double>& coeff) const;
+      void getCoeffMat(Lucee::Matrix<double>& coeff) const
+      {
+        coeff.copy(expandCoeff);
+      }
 
 /**
  * Fetch mass-matrix.
  *
  * @param mMatrix On output, this contains the mass matrix. Should be pre-allocated.
  */
-      void getMassMatrix(Lucee::Matrix<double>& mMatrix) const;
+      void getMassMatrix(Lucee::Matrix<double>& mMatrix) const
+      {
+        mMatrix.copy(massMatrix);
+      }
 
 /**
  * Fetch grad-stiffness matrix in specified direction.
@@ -89,7 +102,10 @@ namespace Lucee
  * @param dir Direction in which matrix is required.
  * @param gMatrix On output, this contains the grad-stiff matrix. Should be pre-allocated.
  */
-      void getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const;
+      void getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const
+      {
+        gMatrix.copy(gradStiff[dir]);
+      }
 
 /**
  * Evaluate specified basis function at location. This method is very
@@ -103,7 +119,74 @@ namespace Lucee
  */
       double evalBasis(unsigned bIdx, double xc[NDIM]) const;
 
+/**
+ * Get indexer for use in stepping over nodes in the proper order.
+ *
+ * @return Indexer for stepping over nodes.
+ */
+      Lucee::RowMajorIndexer<NDIM> getIndexer() const;
+
+/**
+ * Get number of surface nodes along lower face in specified
+ * direction.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @return number of nodes in element.
+ */
+      unsigned getNumSurfLowerNodes(unsigned dir) const
+      { 
+        return lowerNodes[dir].nodes.size();
+      }
+
+/**
+ * Get number of surface nodes along upper face in specified
+ * direction.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @return number of nodes in element.
+ */
+      unsigned getNumSurfUpperNodes(unsigned dir) const
+      {
+        return upperNodes[dir].nodes.size();
+      }
+
+/**
+ * Get local indices of nodes exclusively owned by each cell.
+ *
+ * @param ndIds On output indices. Vector is cleared and data filled in.
+ */
+      void getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+      {
+        ndIds = exclNodes;
+      }
+
+/**
+ * Get node numbers of the nodes on specified face of element. The
+ * output vector must be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeNum Node numbers on face.
+ */
+      void getSurfLowerNodeNums(unsigned dir, std::vector<int>& nodeNum) const
+      {
+        nodeNum = lowerNodes[dir].nodes;
+      }
+
+/**
+ * Get node numbers of the nodes on specified face of element. The
+ * output vector must be pre-allocated.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeNum Node numbers on face.
+ */
+      void getSurfUpperNodeNums(unsigned dir, std::vector<int>& nodeNum) const
+      {
+        nodeNum = upperNodes[dir].nodes;
+      }
+
     private:
+/** Node layout */
+      Node_t nodeLayout;
 /** Number of nodes in each direction */
       unsigned numNodes[NDIM];
 /** Total number of nodes */
@@ -134,12 +217,27 @@ namespace Lucee
 
 /** Matrix of expansion coefficients */
       Lucee::Matrix<double> expandCoeff;
-
 /** Mass matrix for element */
       Lucee::Matrix<double> massMatrix;
-
 /** Grad-stiffness matrix */
       Lucee::Matrix<double> gradStiff[NDIM];
+
+/** Number of exclusively owned nodes */
+      unsigned numExclNodes;
+/** Indices of exclusively owned nodes */
+      std::vector<unsigned> exclNodes;
+
+/** Structure to hold node list for surface nodes */
+      struct NodeList
+      {
+/** List of nodes */
+          std::vector<int> nodes;
+      };
+
+/** List of nodes on lower faces */
+      NodeList lowerNodes[NDIM];
+/** List of nodes on upper faces */
+      NodeList upperNodes[NDIM];
 
 /**
  * Create nodes located at Lobatto quadrature points.
