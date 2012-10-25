@@ -1,0 +1,199 @@
+\documentclass[pdf]{beamer}
+\usepackage{biblatex}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+\newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+\newtheorem{proposed}{Proposed Answer}
+\DeclareMathOperator{\spn}{span}
+
+%% autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.7\linewidth,keepaspectratio}
+
+\usepackage{beamerthemesplit}
+% \usepackage{palatino} % use palatino as the default font
+\setbeamercovered{transparent}
+%\usetheme{Berkeley}
+\usetheme{lined}
+% \usetheme{Frankfurt}
+% \usetheme{Copenhagen}
+\usecolortheme{dolphin}
+
+% Setup TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\tikzstyle{block}=[draw opacity=0.7,line width=1.4cm]
+
+\title[Continuum Discontinuous Galerkin Algorithms]{High-Order,
+  Conservative Discontinuous Galerkin Algorithms for (Gyro) Kinetic
+  Simulations of Edge Plasma}%
+\author{A. H. Hakim \and G. W. Hammett}%
+
+\institute[http://www.ammar-hakim.org] % (optional, aber oft nötig)
+{
+  Princeton Plasma Physics Laboratory, Princeton, NJ\\
+  ammar@princeton.edu\\
+  \url{http://www.ammar-hakim.org}
+}
+
+\date[APS/DPP 2012]{American Physical Society, Division of Plasma
+  Physics, 29$^\mathrm{th}$~October- 2$^\mathrm{nd}$~November 2012}
+
+\bibliography{gke}
+%\footfullcite{jones00}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ----------------------------------------------------------------
+\begin{frame}{Long term goal: Accurate and stable continuum schemes
+    for full-F edge gyrokinetics in 3D geometries}
+
+  Question: Can one develop accurate and stable schemes that conserve
+  invariants, maintain positivity and use as few grid points as
+  possible?
+
+  \begin{proposed}
+    Explore high-order hybrid discontinuous/continuous Galerkin
+    finite-element schemes, enhanced with flux-reconstruction and a
+    proper choice of velocity space basis functions.
+  \end{proposed}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Several fluid and kinetic problems are described by a
+    Hamiltonian}%
+
+  \begin{align*}
+    \pfrac{f}{t} = \{H,f\}
+  \end{align*}
+  where $H(z^1,z^2)$ is the Hamiltonian and canonical Poisson bracket
+  is
+  \begin{align*}
+    \{g,h\} \equiv \pfrac{g}{z^1}\pfrac{h}{z^2} -
+    \pfrac{g}{z^2}\pfrac{h}{z^1}.
+  \end{align*}
+  Defining phase-space velocity vector $\gvec{\alpha} = (\dot{z}^1,
+  \dot{z}^2)$, with $\dot{z}^i = \{z^i,H\}$ leads to \emph{phase-space
+    conservation form}
+  \begin{align*}
+    \pfrac{f}{t} + \nabla\cdot\left(\gvec{\alpha}f\right) = 0.
+  \end{align*}
+  Additionally $\nabla\cdot\gvec{\alpha} = 0$ (Liouville theorem).
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Incompressible Euler equations in two
+    dimensions}%
+
+  A basic model problem is the \emph{incompressible} 2D Euler
+  equations written in the stream-function ($\phi$) vorticity ($f$)
+  formulation. Here the Hamiltonian is simply $H(x,y) = \phi(x,y)$.
+
+  \begin{align*}
+    \pfrac{f}{t} + \nabla\cdot(\mvec{u}f) = 0
+  \end{align*}
+  where $u_x = \{x,H\} = \partial\phi/\partial y$ and $u_y = \{y,H\} =
+  -\partial\phi/\partial x$. The potential is determined from
+  \begin{align*}
+    \nabla^2 \phi = -f.
+  \end{align*}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Vlasov equation for electrostatic plasmas}%
+  The Vlasov-Poisson system has the Hamiltonian
+  \begin{align*}
+    H(x,p) = \frac{1}{2m}p^2 + q\phi(x)
+  \end{align*}
+  where $e$ is species charge and $m$ is electron mass and $p=mv$ is
+  momentum. With this $\dot{x} = v$ and $\dot{v} =
+  -q\partial\phi/\partial x$ leading to
+  \begin{align*}
+    \pfrac{f}{t} + v\pfrac{f}{x} -
+    \frac{q}{m}\pfrac{\phi}{x}\pfrac{f}{v} = 0
+  \end{align*}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{For Vlasov equation potential can be determined in two
+    different ways}%
+
+  Ensure quasi-neutrality using either
+  \begin{align*}
+    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\rho_c}{\epsilon_0}
+  \end{align*}
+  where $\rho_c = |e| (n_{io}(x) - n(x,t))$ is total charge
+  density. This is a model for \emph{perpendicular dynamics} in
+  gyrokinetics. For \emph{parallel dynamics} use
+  \begin{align*}
+    n_{i}(x) = n_{eo}\left(1 + \frac{|e|\phi}{T_e}\right)
+  \end{align*}
+  where $n_{eo}$ is the constant electron initial density and $T_e$ is
+  the fixed electron temperature. This determines potential without
+  the need to solve a Poisson equation.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Gyrokinetic equation can also be derived from
+    gyro-center Hamiltonian}
+
+  In the Hamiltonian gyrokinetic theory\footfullcite{Brizard:2007fs}
+  the gyrokinetic equation is derived from the gyrocentre Hamiltonian
+  in gyro-center coordinates $(\mvec{R}, v_{\parallel}, \mu, \alpha)$
+  \begin{align*}
+    H = \frac{1}{2}m_i v_{\parallel}^2 + \mu B + e_i \langle\phi \rangle_\alpha
+  \end{align*}
+  where $v_{\parallel}$ is the parallel velocity, $\mu$ is the
+  magnetic moment, $\alpha$ is gyro-angle and $\phi$ is the
+  electrostatic potential. Poisson bracket is no longer canonical, but
+  gyrokinetic Vlasov equation can still be written as a conservation
+  equation in phase-space.
+\end{frame}
+% ----------------------------------------------------------------
+
+\end{document}
+
+% ----------------------------------------------------------------
+\begin{frame}{}%
+
+\end{frame}
+% ----------------------------------------------------------------
+
+ The potential
+  is determined from
+  \begin{align*}
+    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\varrho_c}{\epsilon_0}
+  \end{align*}
+  and where $\varrho_c$ is total charge density of plasma.

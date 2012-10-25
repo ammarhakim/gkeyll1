@@ -87,14 +87,14 @@ namespace Lucee
   unsigned
   LagrangeTensorElement<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNumSurfLowerNodes(dir);
+    return basisCalc.getNumSurfLowerNodes(dir);
   }
 
   template <unsigned NDIM>
   unsigned
   LagrangeTensorElement<NDIM>::getNumSurfUpperNodes(unsigned dir) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNumSurfUpperNodes(dir);
+    return basisCalc.getNumSurfUpperNodes(dir);
   }
 
   template <unsigned NDIM>
@@ -108,7 +108,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getExclusiveNodeIndices(ndIds);
+    basisCalc.getExclusiveNodeIndices(ndIds);
   }
 
   template <unsigned NDIM>
@@ -136,14 +136,14 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getSurfLowerNodeNums(unsigned dir, std::vector<int>& nodeNum) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfLowerNodeNums(dir, nodeNum);
+    basisCalc.getSurfLowerNodeNums(dir, nodeNum);
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::getSurfUpperNodeNums(unsigned dir, std::vector<int>& nodeNum) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfUpperNodeNums(dir, nodeNum);
+    basisCalc.getSurfUpperNodeNums(dir, nodeNum);
   }
 
   template <unsigned NDIM>

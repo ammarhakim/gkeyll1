@@ -15,6 +15,16 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Remove restriction of nodal coordinates to 3D?		     :GKEYLL:
+
+   At many places it is assumed that the coordinates live in 3D space,
+   even if the grid is 1D or 2D. This is fine for some cases but for
+   the GKE problems in 4D/5D this is a big problem. Need to somehow
+   fix this. One issue is also that the updaters that expect Lua
+   functions are defined to be *always* on (x,y,z) grid. This is not
+   good. Looks like a major change in the C++ as well as the Lua. Best
+   would be do something such that the Lua is untouched.
+
 ** Write draft of first paper on Gkeyll				       :PUBS:
 
    Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and
