@@ -22,6 +22,7 @@ namespace Lucee
 {
   template <unsigned NDIM>
   LagrangeTensorBasisCalc<NDIM>::LagrangeTensorBasisCalc()
+    : nodeLayout(Lucee::UNIFORM)
   {
 // by default, a single node
     unsigned nn[NDIM];
@@ -34,6 +35,8 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::calc(Node_t type, const unsigned nn[NDIM])
   {
+// copy over basic data
+    nodeLayout = type;
     for (unsigned i=0; i<NDIM; ++i) 
       numNodes[i] = nn[i];
 
@@ -125,11 +128,100 @@ namespace Lucee
 // invert system to get expansion coefficients
     Lucee::solve(coeffMat, expandCoeff);
 
-// compute various matrices and quadrature data needed.
-
+// compute various matrices and quadrature data
     calcMassMatrix();
     for (unsigned d=0; d<NDIM; ++d)
       calcGradStiff(d);
+
+// clear out existing data in node lists
+    exclNodes.clear();
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lowerNodes[d].nodes.clear();
+      upperNodes[d].nodes.clear();
+    }
+
+// compute node lists
+    if (type == Lucee::GAUSSIAN)
+    {
+// there are no surface nodes for Gaussian elements
+      numExclNodes = nodeRgn.getVolume();
+
+// compute exclusively owned nodes
+      Lucee::RowMajorSequencer<NDIM> seq(nodeRgn);
+      Lucee::RowMajorIndexer<NDIM> indexer(nodeRgn);
+
+      int idx[NDIM];      
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        exclNodes.push_back(indexer.getIndex(idx));
+      }
+    }
+    else
+    { // LOBATTO and UNIFORM
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+        lower[d] = 0;
+        upper[d] = numNodes[d]-1;
+      }
+      numExclNodes = Lucee::Region<NDIM, int>(lower, upper).getVolume();
+
+// compute exclusively owned nodes
+      Lucee::RowMajorSequencer<NDIM> seq(nodeRgn);
+      Lucee::RowMajorIndexer<NDIM> indexer(nodeRgn);
+
+      int idx[NDIM];
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+// ensure node is not on any of the upper faces
+        bool onUpper = false;
+        for (unsigned d=0; d<NDIM; ++d)
+        {
+          if ((nodeRgn.getUpper(d)-1) == idx[d])
+          {
+            onUpper = true;
+            break;
+          }
+        }
+
+        if (!onUpper)
+          exclNodes.push_back(indexer.getIndex(idx));
+      }
+
+// compute nodes on lower faces
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+// create box only containing face nodes
+        Lucee::Region<NDIM, int> faceRgn = nodeRgn.resetBounds(d, nodeRgn.getLower(d), nodeRgn.getLower(d)+1);
+       
+        seq.reset();
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+// add in appropriate list if node is on face
+          if (faceRgn.isInside(idx))
+            lowerNodes[d].nodes.push_back(indexer.getIndex(idx));
+        }
+      }
+
+// compute nodes on upper faces
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+// create box only containing face nodes
+        Lucee::Region<NDIM, int> faceRgn = nodeRgn.resetBounds(d, nodeRgn.getUpper(d)-1, nodeRgn.getUpper(d));
+       
+        seq.reset();
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+// add in appropriate list if node is on face
+          if (faceRgn.isInside(idx))
+            upperNodes[d].nodes.push_back(indexer.getIndex(idx));
+        }
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -175,43 +267,6 @@ namespace Lucee
         nodeLocs[d].loc[numNodes[d]-1] = 1.0; // last node on right edge
       }
     }
-  }
-
-  template <unsigned NDIM>
-  void
-  LagrangeTensorBasisCalc<NDIM>::getCoeffMat(Lucee::Matrix<double>& coeff) const
-  {
-    coeff.copy(expandCoeff);
-  }
-
-  template <unsigned NDIM>
-  void
-  LagrangeTensorBasisCalc<NDIM>::getMassMatrix(Lucee::Matrix<double>& mMatrix) const
-  {
-    mMatrix.copy(massMatrix);
-  }
-
-  template <unsigned NDIM>
-  void
-  LagrangeTensorBasisCalc<NDIM>::getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const
-  {
-    gMatrix.copy(gradStiff[dir]);
-  }
-
-  template <unsigned NDIM>
-  std::vector<double>
-  LagrangeTensorBasisCalc<NDIM>::getNodeLoc(unsigned dir) const
-  {
-    return nodeLocs[dir].loc;
-  }
-
-  template <unsigned NDIM>
-  inline
-  void
-  LagrangeTensorBasisCalc<NDIM>::fillWithNodeCoordinate(unsigned nIdx, double xn[NDIM]) const
-  {
-    for (unsigned d=0; d<NDIM; ++d)
-      xn[d] = nodeCoords[nIdx].x[d];
   }
 
   template <unsigned NDIM>
@@ -321,6 +376,14 @@ namespace Lucee
         gradStiff[dir](k,m) = entry;
       }
     }
+  }
+
+  template <unsigned NDIM>
+  inline
+  Lucee::RowMajorIndexer<NDIM>
+  LagrangeTensorBasisCalc<NDIM>::getIndexer() const
+  {
+    return Lucee::RowMajorIndexer<NDIM>(nodeRgn);
   }
 
 // instantiations

@@ -10,7 +10,6 @@
 #endif
 
 // lucee includes
-#include <LcLagrangeTensorBasisCalc.h>
 #include <LcLagrangeTensorElement.h>
 
 namespace Lucee
@@ -80,8 +79,7 @@ namespace Lucee
       }
     }
 
-// create calculator object
-    Lucee::LagrangeTensorBasisCalc<NDIM> basisCalc;
+// initialize calculator object
     basisCalc.calc(nodeLoc, numNodes);
   }
 

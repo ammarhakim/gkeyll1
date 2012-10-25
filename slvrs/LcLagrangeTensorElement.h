@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcLagrangeTensorBasisCalc.h>
 #include <LcNodalFiniteElementIfc.h>
 
 namespace Lucee
@@ -292,6 +293,16 @@ namespace Lucee
       void copyAllDataToField(const double *data, Lucee::Field<NDIM, double>& fld);
 
     private:
+/** Basis function calculator */
+      Lucee::LagrangeTensorBasisCalc<NDIM> basisCalc;
+
+/** Mass matrix */
+      Lucee::Matrix<double> mass;
+/** Grad-stiffness matrix */
+      Lucee::Matrix<double> gradStiff[NDIM];
+/** Stiffness matrix */
+      Lucee::Matrix<double> stiff;
+
   };
 }
 
