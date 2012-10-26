@@ -102,7 +102,7 @@ namespace Lucee
  * @param dir Direction in which matrix is required.
  * @param gMatrix On output, this contains the grad-stiff matrix. Should be pre-allocated.
  */
-      void getGradStiffMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const
+      void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& gMatrix) const
       {
         gMatrix.copy(gradStiff[dir]);
       }

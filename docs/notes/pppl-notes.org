@@ -5,6 +5,12 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* October 26th
+
+  For some reason I have been feeling very distracted and so the pace
+  of code development is become slow. Need to get back into the groove
+  after APS/DPP.
+
 * October 23-25th
 
   Spent a lot of time on momentum (non)conservation. Now have a good
