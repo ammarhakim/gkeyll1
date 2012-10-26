@@ -25,6 +25,10 @@ archived.
    good. Looks like a major change in the C++ as well as the Lua. Best
    would be do something such that the Lua is untouched.
 
+   One option would be to send always atleast three coordinates. This
+   way current Lua code need not be changed. Should be easier than
+   fixing all the Lua scripts.
+
 ** Write draft of first paper on Gkeyll				       :PUBS:
 
    Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and

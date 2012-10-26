@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcLagrangeTensorElement.h>
+#include <LcStructuredGridBase.h>
 
 namespace Lucee
 {
@@ -78,9 +79,39 @@ namespace Lucee
         throw lce;
       }
     }
-
 // initialize calculator object
     basisCalc.calc(nodeLoc, numNodes);
+
+// initialize number of local nodes
+    unsigned nlocal = basisCalc.getNumNodes();
+    this->setNumNodes(nlocal);
+
+// get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> gridRgn = grid.getGlobalRegion();
+
+    double dx[NDIM], vol2 = 1.0;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      dx[d] = grid.getDx(d);
+      vol2 *= 0.5*dx[d];
+    }
+
+// mass matrix
+    mass = Matrix<double>(nlocal, nlocal);
+    basisCalc.getMassMatrix(mass);
+    mass *= vol2;
+
+// grad-stiff matrices
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      gradStiff[d] = Matrix<double>(nlocal, nlocal);
+      basisCalc.getGradStiffnessMatrix(d, gradStiff[d]);
+      gradStiff[d] *= 2.0/dx[d]*vol2;
+    }
+
+// TODO: STIFFNESS MATRIX
   }
 
   template <unsigned NDIM>
@@ -178,7 +209,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getMassMatrix(NjNk);
+    NjNk.copy(mass);
   }
 
   template <unsigned NDIM>
@@ -206,7 +237,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getGradStiffnessMatrix(dir, DNjNk);
+    DNjNk.copy(gradStiff[dir]);
   }
 
   template <unsigned NDIM>
