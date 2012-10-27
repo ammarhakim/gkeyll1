@@ -160,13 +160,13 @@ namespace Lucee
   void
   LobattoElement1D::getSurfLowerNodeNums(unsigned dir, std::vector<int>& nodeNum) const
   {
-    nodeNum[0] = 1;
+    nodeNum[0] = 0;
   }
 
   void
   LobattoElement1D::getSurfUpperNodeNums(unsigned dir, std::vector<int>& nodeNum) const
   {
-    nodeNum[0] = this->getNumNodes();
+    nodeNum[0] = this->getNumNodes()-1;
   }
 
   void
@@ -175,7 +175,7 @@ namespace Lucee
     ndIds.clear();
     ndIds.resize(this->getNumNodes()-1);
     for (unsigned n=0; n<this->getNumNodes()-1; ++n)
-      ndIds[n] = n+1;
+      ndIds[n] = n;
   }
 
   void

@@ -224,7 +224,7 @@ namespace Lucee
 
 // modify appropriate entries and copy over non-zero contributions
           for (unsigned k=0; k<nsl; ++k)
-            lgMapMod[lgLocalNodeNum[k]-1] = lgLowerSurfMap[k];
+            lgMapMod[lgLocalNodeNum[k]] = lgLowerSurfMap[k];
 
 // zero out contribution
           for (unsigned k=0; k<nlocal; ++k) modVals[k] = 0.0;
@@ -267,7 +267,7 @@ namespace Lucee
 // space for mappings
         std::vector<int> lgSurfMap(nsl), lgLowerSurfMap(nsl);
 // space for local node numbers on faces
-        std::vector<int> lgLocalNodeNum(nsl), lgLowerLocalNodeNum(nsl);
+        std::vector<int> lgLocalNodeNum(nsl);
 
 // create region to loop over side
         Lucee::Region<NDIM, int> defRgnG = 
@@ -508,7 +508,7 @@ namespace Lucee
 
 // just copy appropriate data over for passing into PetSc
           for (unsigned k=0; k<nsl; ++k)
-            localMassMod[k] = localMassSrc[lgLocalNodeNum[k]-1];
+            localMassMod[k] = localMassSrc[lgLocalNodeNum[k]];
 
 // compute corresponding node numbers on lower edge
           idx[d] = 0;

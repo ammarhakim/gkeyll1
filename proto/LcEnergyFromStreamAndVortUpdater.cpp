@@ -167,7 +167,7 @@ namespace Lucee
 
 // compute contribution to energy
         for (unsigned k=0; k<nsurf; ++k)
-          totalEnergy += surfWeights[k]*phiK[surfNodeNums[k]-1]*grad[surfNodeNums[k]-1];
+          totalEnergy += surfWeights[k]*phiK[surfNodeNums[k]]*grad[surfNodeNums[k]];
       }
     }
 
@@ -208,7 +208,7 @@ namespace Lucee
 // compute contribution to energy (lower surfaces contribute -ve as
 // normal points inwards)
         for (unsigned k=0; k<nsurf; ++k)
-          totalEnergy += -surfWeights[k]*phiK[surfNodeNums[k]-1]*grad[surfNodeNums[k]-1];
+          totalEnergy += -surfWeights[k]*phiK[surfNodeNums[k]]*grad[surfNodeNums[k]];
       }
     }
 
