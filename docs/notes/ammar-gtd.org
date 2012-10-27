@@ -15,6 +15,12 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Offset issue with node numbering				     :GKEYLL:
+
+   Turns out that the NodalFiniteElementIfc interface expects offsets
+   of the node numbers starting from one. This needs to be changed to
+   a zero based indexing to be consistent with C/C++ language.
+
 ** Remove restriction of nodal coordinates to 3D?		     :GKEYLL:
 
    At many places it is assumed that the coordinates live in 3D space,

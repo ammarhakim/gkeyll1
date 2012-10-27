@@ -11,6 +11,25 @@
   of code development is become slow. Need to get back into the groove
   after APS/DPP.
 
+** Offset issue with node numbering
+
+   Turns out that the NodalFiniteElementIfc interface expects offsets
+   of the node numbers starting from one. This needs to be changed to
+   a zero based indexing to be consistent with C/C++ language
+   conventions.
+
+   These sorts of errors (another example: expecting all coordinates
+   to be 3D) should not have been made in the first place. I need to
+   make sure that the program design does not have such flaws in the
+   first place.
+
+** Multi-step class creation
+
+   This should be avoided as far as possible. A class should not be
+   usable unless it is setup. The setup should not be spread into
+   multiple steps as far as possible. In exceptional cases this should
+   be very throughly documented in the class API documentation.
+
 * October 23-25th
 
   Spent a lot of time on momentum (non)conservation. Now have a good
