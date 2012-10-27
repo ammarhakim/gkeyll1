@@ -80,7 +80,7 @@ namespace Lucee
     { // create "unit" mapping
       ndIds.resize(nodalBasis->getNumNodes());
       for (unsigned i = 0; i<ndIds.size(); ++i)
-        ndIds[i] = i+1;
+        ndIds[i] = i;
     }
 
 // number of nodes
@@ -118,8 +118,7 @@ namespace Lucee
 // evalute function at each owned node
       for (unsigned n=0; n<numNodes; ++n)
       {
-// NOTE: the -1 is needed as nodes are indexed starting from 1.
-        evaluateFunction(*L, t, nodeCoords, ndIds[n]-1, res);
+        evaluateFunction(*L, t, nodeCoords, ndIds[n], res);
 // copy result into field
         for (unsigned k=0; k<nc; ++k)
           ptr[nc*n+k] = res[k];
