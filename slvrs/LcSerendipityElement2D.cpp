@@ -121,14 +121,14 @@ namespace Lucee
     if (polyOrder == 1)
     {
       ndIds.resize(1);
-      ndIds[0] = 1;
+      ndIds[0] = 0;
     }
     else if (polyOrder == 2)
     {
       ndIds.resize(3);
-      ndIds[0] = 1;
-      ndIds[1] = 5;
-      ndIds[2] = 8;
+      ndIds[0] = 0;
+      ndIds[1] = 4;
+      ndIds[2] = 7;
     }
   }
 
@@ -259,28 +259,28 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        nodeNum[0] = 1;
-        nodeNum[1] = 4;
+        nodeNum[0] = 0;
+        nodeNum[1] = 3;
       }
       else if (dir == 1)
       {
-        nodeNum[0] = 1;
-        nodeNum[1] = 2;
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
       }
     }
     else if (polyOrder == 2)
     {
       if (dir == 0)
       {
-        nodeNum[0] = 1;
-        nodeNum[1] = 8;
-        nodeNum[2] = 4;
+        nodeNum[0] = 0;
+        nodeNum[1] = 7;
+        nodeNum[2] = 3;
       }
       else if (dir == 1)
       {
-        nodeNum[0] = 1;
-        nodeNum[1] = 5;
-        nodeNum[2] = 2;
+        nodeNum[0] = 0;
+        nodeNum[1] = 4;
+        nodeNum[2] = 1;
       }
     }
   }
@@ -293,28 +293,28 @@ namespace Lucee
     {
       if (dir == 0)
       {
-        nodeNum[0] = 2;
-        nodeNum[1] = 3;
+        nodeNum[0] = 1;
+        nodeNum[1] = 2;
       }
       else if (dir == 1)
       {
-        nodeNum[0] = 4;
-        nodeNum[1] = 3;
+        nodeNum[0] = 3;
+        nodeNum[1] = 2;
       }
     }
     else if (polyOrder == 2)
     {
       if (dir == 0)
       {
-        nodeNum[0] = 2;
-        nodeNum[1] = 6;
-        nodeNum[2] = 3;
+        nodeNum[0] = 1;
+        nodeNum[1] = 5;
+        nodeNum[2] = 2;
       }
       else if (dir == 1)
       {
-        nodeNum[0] = 4;
-        nodeNum[1] = 7;
-        nodeNum[2] = 3;
+        nodeNum[0] = 3;
+        nodeNum[1] = 6;
+        nodeNum[2] = 2;
       }
     }
   }

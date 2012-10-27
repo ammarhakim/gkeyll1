@@ -108,16 +108,8 @@ namespace Lucee
       lowerNodeNums[dir].nums.resize(nodalBasis->getNumSurfLowerNodes(dir));
       nodalBasis->getSurfLowerNodeNums(dir, lowerNodeNums[dir].nums);
 
-// reset numbers as element offsets them with 1
-      for (unsigned k=0; k<nodalBasis->getNumSurfLowerNodes(dir); ++k)
-        lowerNodeNums[dir].nums[k] += -1;
-
       upperNodeNums[dir].nums.resize(nodalBasis->getNumSurfUpperNodes(dir));
       nodalBasis->getSurfUpperNodeNums(dir, upperNodeNums[dir].nums);
-
-// reset numbers as element offsets them with 1
-      for (unsigned k=0; k<nodalBasis->getNumSurfUpperNodes(dir); ++k)
-        upperNodeNums[dir].nums[k] += -1;
     }
 
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);

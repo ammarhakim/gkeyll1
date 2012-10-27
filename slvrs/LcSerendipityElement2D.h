@@ -25,26 +25,26 @@ namespace Lucee
  *
  * Order 1 element
  *
- *             4         3
+ *             3          2
  *             o----------o
  *             |          |
  *             |          |
  *             |          |
  *             |          |
  *             o----------o
- *             1          2
+ *             0          1
  *
  * Order 2 element
  *
- *             4     7     3
+ *             3     6     2
  *             o-----o-----o
  *             |           |
  *             |           |
- *           8 o           o 6
+ *           7 o           o 5
  *             |           |
  *             |           |
  *             o-----o-----o
- *             1     5     2
+ *             0     4     1
  */
   class SerendipityElement2D : public Lucee::NodalFiniteElementIfc<2>
   {
