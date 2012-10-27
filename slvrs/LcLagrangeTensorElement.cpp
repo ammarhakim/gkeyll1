@@ -23,7 +23,8 @@ namespace Lucee
 
   template <unsigned NDIM>
   LagrangeTensorElement<NDIM>::LagrangeTensorElement()
-    : Lucee::NodalFiniteElementIfc<NDIM>(1)
+    : Lucee::NodalFiniteElementIfc<NDIM>(1), nodeSeq(Lucee::Region<NDIM, int>()),
+      local2Global(Lucee::Region<NDIM, int>())
   {
   }
 
@@ -34,7 +35,6 @@ namespace Lucee
 // call base class method
     Lucee::NodalFiniteElementIfc<NDIM>::readInput(tbl);
 
-    unsigned numNodes[NDIM];
 // get polynomial order to use
     if (tbl.hasNumber("polyOrder"))
     {
@@ -62,7 +62,7 @@ namespace Lucee
     }
 
 // get node location
-    Lucee::Node_t nodeLoc = Lucee::UNIFORM; // by default assume uniformly spaced nodes
+    nodeLoc = Lucee::UNIFORM; // by default assume uniformly spaced nodes
     if (tbl.hasString("nodeLocation"))
     {
       std::string nl = tbl.getString("nodeLocation");
@@ -82,6 +82,15 @@ namespace Lucee
 // initialize calculator object
     basisCalc.calc(nodeLoc, numNodes);
 
+// construct sequencer for use in mapping functions
+    int lower[NDIM], upper[NDIM];
+    for (unsigned d=0; d<NDIM; ++d) 
+    {
+      lower[d] = 0;
+      upper[d] = numNodes[d];
+    }
+    nodeSeq = Lucee::RowMajorSequencer<NDIM>(Lucee::Region<NDIM, int>(lower, upper));
+
 // initialize number of local nodes
     unsigned nlocal = basisCalc.getNumNodes();
     this->setNumNodes(nlocal);
@@ -90,6 +99,44 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Region<NDIM, int> gridRgn = grid.getGlobalRegion();
+
+// create indexer for mapping local->global nodes
+    if (nodeLoc == GAUSSIAN)
+    {
+      int lower[NDIM], upper[NDIM];
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+        lower[d] = 0;
+        upper[d] = numNodes[d]*gridRgn.getShape(d);
+      }
+      local2Global = Lucee::RowMajorIndexer<NDIM>(
+        Lucee::Region<NDIM, int>(lower, upper));
+    }
+    else
+    {
+      int lower[NDIM], upper[NDIM];
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+        lower[d] = 0;
+        upper[d] = (numNodes[d]-1)*gridRgn.getShape(d) + 1;
+      }
+      local2Global = Lucee::RowMajorIndexer<NDIM>(
+        Lucee::Region<NDIM, int>(lower, upper));
+    }
+
+    if (nodeLoc == GAUSSIAN)
+    {
+      numGlobalNodes = 1;
+      for (unsigned d=0; d<NDIM; ++d)
+        numGlobalNodes *= numNodes[d]*gridRgn.getShape(d); // no nodes on faces
+    }
+    else
+    {
+// compute total number of global nodes
+      numGlobalNodes = 1;
+      for (unsigned d=0; d<NDIM; ++d)
+        numGlobalNodes *= 1 + (numNodes[d]-1)*gridRgn.getShape(d);
+    }
 
     double dx[NDIM], vol2 = 1.0;
     for (unsigned d=0; d<NDIM; ++d)
@@ -112,6 +159,17 @@ namespace Lucee
     }
 
 // TODO: STIFFNESS MATRIX
+
+    double eta[NDIM];
+// compute coordinates of nodes relative to lower-left vertex
+    localNodeCoords = Lucee::Matrix<double>(nlocal, NDIM);
+    localNodeCoords = 0.0;
+    for (unsigned i=0; i<nlocal; ++i)
+    {
+      basisCalc.fillWithNodeCoordinate(i, eta);
+      for (unsigned d=0; d<NDIM; ++d)
+        localNodeCoords(i,d) = (eta[d]+1)*0.5*dx[d];
+    }
   }
 
   template <unsigned NDIM>
@@ -132,7 +190,7 @@ namespace Lucee
   unsigned
   LagrangeTensorElement<NDIM>::getNumGlobalNodes() const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNumGlobalNodes();
+    return numGlobalNodes;
   }
 
   template <unsigned NDIM>
@@ -146,7 +204,16 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getLocalToGlobal(lgMap);
+    int idx[NDIM];
+    unsigned count = 0;
+    nodeSeq.reset();
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(idx);
+      for (unsigned d=0; d<NDIM; ++d)
+        idx[d] += this->currIdx[d];
+      lgMap[count++] = local2Global.getIndex(idx);
+    }
   }
 
   template <unsigned NDIM>
@@ -181,7 +248,19 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNodalCoordinates(nodeCoords);
+// get grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+// set index and get lower-left vertex coordinates
+    grid.setIndex(this->currIdx);
+    double xn[7]; // THIS HARD-CODING SEEMS BAD, BUT FOR NOW IT IS (10/26/2012)
+    grid.getVertex(xn);
+// compute nodal coordinates
+    for (unsigned i=0; i<this->getNumNodes(); ++i)
+    {
+      for (unsigned d=0; d<NDIM; ++d)
+        nodeCoords(i,d) = xn[d]+localNodeCoords(i,d);
+    }
   }
 
   template <unsigned NDIM>

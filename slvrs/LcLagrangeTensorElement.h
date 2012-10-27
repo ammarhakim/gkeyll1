@@ -296,6 +296,18 @@ namespace Lucee
 /** Basis function calculator */
       Lucee::LagrangeTensorBasisCalc<NDIM> basisCalc;
 
+/** Number of nodes in each direction */
+      unsigned numNodes[NDIM];
+/** Sequencer for looping over nodes */
+      mutable Lucee::RowMajorSequencer<NDIM> nodeSeq;
+/** Indexer for global to local mapping */
+      Lucee::RowMajorIndexer<NDIM> local2Global;
+/** Nodal coordinates relative to lower-left vertex */
+      Lucee::Matrix<double> localNodeCoords;
+/** Nodal layout */
+      Lucee::Node_t nodeLoc;
+/** Number of global nodes */
+      unsigned numGlobalNodes;
 /** Mass matrix */
       Lucee::Matrix<double> mass;
 /** Grad-stiffness matrix */
