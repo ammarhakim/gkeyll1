@@ -259,7 +259,7 @@ namespace Lucee
     for (unsigned i=0; i<this->getNumNodes(); ++i)
     {
       for (unsigned d=0; d<NDIM; ++d)
-        nodeCoords(i,d) = xn[d]+localNodeCoords(i,d);
+        nodeCoords(i,d) = xn[d] + localNodeCoords(i,d);
     }
   }
 
