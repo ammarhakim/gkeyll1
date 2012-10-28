@@ -277,6 +277,38 @@ namespace Lucee
   {
   }
 
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("numExclusiveNodes", luaNumExclusiveNodes);
+    lfm.appendFunc("numNodes", luaNumNodes);
+  }
+
+  template <unsigned NDIM>
+  int
+  NodalFiniteElementIfc<NDIM>::luaNumExclusiveNodes(lua_State *L)
+  {
+    NodalFiniteElementIfc<NDIM> *f
+      = Lucee::PointerHolder<NodalFiniteElementIfc<NDIM> >::getObj(L);
+
+    std::vector<unsigned> ids;
+    f->getExclusiveNodeIndices(ids);
+    lua_pushnumber(L, ids.size());
+    return 1;
+  }
+
+  template <unsigned NDIM>
+  int
+  NodalFiniteElementIfc<NDIM>::luaNumNodes(lua_State *L)
+  {
+    NodalFiniteElementIfc<NDIM> *f
+      = Lucee::PointerHolder<NodalFiniteElementIfc<NDIM> >::getObj(L);
+    std::vector<unsigned> ids;
+    lua_pushnumber(L, f->getNumNodes());
+    return 1;
+  }
+
 // instantiations
   template class NodalFiniteElementIfc<1>;
   template class NodalFiniteElementIfc<2>;

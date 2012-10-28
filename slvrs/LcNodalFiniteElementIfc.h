@@ -338,6 +338,29 @@ namespace Lucee
  */
       virtual void copyAllDataToField(const double *data, Lucee::Field<NDIM, double>& fld);
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to get number of exclusive nodes.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaNumExclusiveNodes(lua_State *L);
+
+/**
+ * Lua callable method to get number nodes.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaNumNodes(lua_State *L);
+
     protected:
 /** Index into current cell */
       mutable int currIdx[NDIM];
