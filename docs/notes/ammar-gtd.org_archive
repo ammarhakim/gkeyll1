@@ -345,6 +345,19 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   be specified in the Lua program to get arbitrary accuracy. Try and
   make this work for both Gauss and Lobatto nodal layouts.
 
+* Offset issue with node numbering				     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-10-27 Sat 18:48
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Turns out that the NodalFiniteElementIfc interface expects offsets
+  of the node numbers starting from one. This needs to be changed to
+  a zero based indexing to be consistent with C/C++ language.
+
+
 
 
 
