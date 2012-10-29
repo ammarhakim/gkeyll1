@@ -25,6 +25,7 @@
 
 \theoremstyle{definition}
 \newtheorem{dfn}{Definition}
+%\newtheorem{thm}{Theorem}
 \newtheorem{proposed}{Proposed Answer}
 \DeclareMathOperator{\spn}{span}
 
@@ -111,7 +112,8 @@
 
 % ----------------------------------------------------------------
 \begin{frame}{Example: Incompressible Euler equations in two
-    dimensions}%
+    dimensions serves as a model for $E\times B$ nonlinearities in
+    gyrokinetics}%
 
   A basic model problem is the \emph{incompressible} 2D Euler
   equations written in the stream-function ($\phi$) vorticity ($f$)
@@ -134,7 +136,7 @@
   \begin{align*}
     H(x,p) = \frac{1}{2m}p^2 + q\phi(x)
   \end{align*}
-  where $q$ is species charge and $m$ is electron mass and $p=mv$ is
+  where $q$ is species charge and $m$ is species mass and $p=mv$ is
   momentum. With this $\dot{x} = v$ and $\dot{v} =
   -q\partial\phi/\partial x$ leading to
   \begin{align*}
@@ -192,7 +194,7 @@
   weak-form
   \begin{align*}
     \int_K w\pfrac{f}{t}d\Omega 
-    + \int_{\partial K}w \gvec{\alpha}\cdot\mvec{n}f dS
+    + \int_{\partial K}w^- \gvec{\alpha}\cdot\mvec{n}f dS
     - \int_K \nabla w \cdot \gvec{\alpha} f d\Omega
     = 0.
   \end{align*}
@@ -236,7 +238,7 @@
   The solution itself can be used as a test function. This gives
   \begin{align*}
     \int_K f\pfrac{f}{t}d\Omega 
-    + \int_{\partial K}f \gvec{\alpha}\cdot\mvec{n}f dS
+    + \int_{\partial K}f^- \gvec{\alpha}\cdot\mvec{n}f dS
     - \int_K \nabla f \cdot \gvec{\alpha} f d\Omega
     = 0.
   \end{align*}
@@ -304,88 +306,109 @@
 \begin{frame}{A continuous finite element scheme is used to discretize
     Poisson equation}
 
+  To discretize the Poisson equation the problem is stated as: find
+  $\phi_h \in \mathcal{V}^r_0$ such that for all smooth $\psi$ we have
+  \begin{align*}
+    \int_K \psi \nabla^2 \phi_h d\Omega = \int_K \psi s d\Omega
+  \end{align*}
+  where $s$ represents the sources. For ion-acoustic waves the number
+  density and potential are related by a \emph{projection} operator:
+  find $\phi_h \in \mathcal{V}^k_0$ given a $n_{ih} \in
+  \mathcal{V}_{-1}^k$ such that for all smooth $w$
+  \begin{align*}
+    \int w n_{ih}\thinspace dx = 
+    n_{eo}\int w \left(1 + \frac{|e|\phi_h}{T_e}\right) dx
+  \end{align*}
+  This leads to a \emph{global} solve for the potential. For
+  relaxation to the case in which potential is allowed to be
+  \emph{discontinuous} and hence a local determination of the
+  potential, see poster by G. Hammett.
 \end{frame}
 % ----------------------------------------------------------------
 
-% 16 -------------------------------------------------------------
-\begin{frame}{Energy conservation table goes here}
+% ----------------------------------------------------------------
+\begin{frame}{Only recently conditions for conservation of discrete
+    energy were discovered}%
 
+  Liu and Shu\footfullcite{liu-shu-2000} have shown that discrete
+  energy is conserved for 2D incompressible flow if
+  \begin{align*}
+    \phi_h \in \mathcal{V}_1^k \subseteq f_h \in \mathcal{V}^k_{-1}
+  \end{align*}
+  We can generalize this to systems describe by a Hamiltonian as
+  \begin{thm}
+    If the basis functions for the Hamiltonian are a continuous subset
+    of the basis functions used for the distribution, then the
+    discrete energy will be conserved.
+  \end{thm}
+  This means that characteristics are discontinuous: $\alpha^i_h \in
+  \mathcal{V}_{-1}^{k-1}$.
 \end{frame}
 % ----------------------------------------------------------------
 
-% 16 -------------------------------------------------------------
-\begin{frame}{Momentum (non)conservation table goes here}
+% ----------------------------------------------------------------
+\begin{frame}{Momentum is \emph{not} conserved with this scheme or
+    simple variations of it}%
 
+  For electrostatic problems the condition for conservation of
+  discrete momentum reduces to a vanishing average force, i.e. we must
+  have
+  \begin{align*}
+    \int n_h E_h dx = 0
+  \end{align*}
+  However, one can show that as $E_h$ is discontinuous, the present
+  scheme \emph{does not} satisfy this condition, and hence momentum is
+  not conserved.
+
+  One can imagine that projecting $E_h \in \mathcal{V}_{-1}^{k-1}$ to
+  a smoother space $\mathcal{V}_0^{k-1}$ to make it continuous would
+  help. However, even with a projection momentum is not
+  conserved. Solving the Poisson equation with higher order continuity
+  ($\phi_h \in \mathcal{V}_1^r$) also does not help as then the energy
+  conservation condition is violated.
 \end{frame}
 % ----------------------------------------------------------------
 
-% 16 -------------------------------------------------------------
-\begin{frame}{Incompressible Euler example: Merging of two vortices (``vortex waltz'')}
+% ----------------------------------------------------------------
+\begin{frame}{Prototype code named Gkeyll has been developed}%
 
-  \begin{figure}
-    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
-    \incfig{two-vortices-128x128_00000.png}
-    \incfig{two-vortices-128x128_00003.png}
-    \caption{Drop in energy is $1.82\times 10^{-4}\ \%$. This is
-      greater than machine precision due to diffusion added from TVD
-      Runge-Kutta time-stepping.}
-  \end{figure}
+  \begin{itemize}
+  \item Gkeyll is written in C++ and is inspired by framework efforts
+    like Facets, VORPAL (Tech-X Corporation) and WarpX
+    (U. Washington). Uses structured grids with arbitrary
+    dimension/order nodal basis functions.
+  \item Linear solvers from
+    Petsc\footnote{http://www.mcs.anl.gov/petsc/} are used for
+    inverting stiffness matrices.
+  \item Games programming language Lua\footnote{http://www.lua.org},
+    used in games like World of Warcraft (10 million users), is used
+    as an embedded scripting language to drive simulations.
+  \item MPI is used for parallelization via the {\tt txbase} library
+    developed at Tech-X Corporation.
+  \item Package management and builds are automated via {\tt scimake}
+    and {\tt bilder}, both developed at Tech-X Corporation.
+  \end{itemize}
+  
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{A simulation journal is
+    maintained\footnote{http://www.ammar-hakim.org/sj} to enable
+    reproducible research}%
+
+  \begin{itemize}
+  \item Each algorithm is carefully tested with known
+    analytical or numerical results.
+  \item Tests are extensively documented and results, notes as
+    well as Lua programs are put online.
+  \item Allows sharing of results as well as enables
+    reproducibility as scripts, figures and notes are all
+    available globally via the internet.
+  \end{itemize}
 
 \end{frame}
-% 16 -------------------------------------------------------------
-
-% 16 -------------------------------------------------------------
-\begin{frame}{Incompressible Euler example: Merging of two vortices (``vortex waltz'')}
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
-    \incfig{two-vortices-128x128_00006.png}
-    \incfig{two-vortices-128x128_00010.png}
-    \caption{Drop in energy is $1.82\times 10^{-4}\ \%$. This is
-      greater than machine precision due to diffusion added from TVD
-      Runge-Kutta time-stepping.}
-  \end{figure}
-
-\end{frame}
-% 16 -------------------------------------------------------------
-
-% 16 -------------------------------------------------------------
-\begin{frame}{Incompressible Euler example: Double shear problem}
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
-    \incfig{double-shear_00000.png}
-    \incfig{double-shear_00003.png}
-    \caption{This problem is harder than ``vortex waltz'' as aliasing
-      errors can cause scheme to go unstable.}
-  \end{figure}
-
-\end{frame}
-% 16 -------------------------------------------------------------
-
-% 16 -------------------------------------------------------------
-\begin{frame}{Incompressible Euler example: Double shear problem}
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
-    \incfig{double-shear_00006.png}
-    \incfig{double-shear_00010.png}
-    \caption{This problem is harder than ``vortex waltz'' as aliasing
-      errors can cause scheme to go unstable.}
-  \end{figure}
-
-\end{frame}
-% 16 -------------------------------------------------------------
-
-% 16 -------------------------------------------------------------
-\begin{frame}{Vlasov-Poisson example: Linear Landau Damping}
-\end{frame}
-% 16 -------------------------------------------------------------
-
-% 16 -------------------------------------------------------------
-\begin{frame}{Vlasov-Poisson example: Nonlinear Landau Damping}
-\end{frame}
-% 16 -------------------------------------------------------------
+% ----------------------------------------------------------------
 
 \end{document}
 
@@ -394,3 +417,23 @@
 
 \end{frame}
 % ----------------------------------------------------------------
+
+
+
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+        \incfig{s149-vlasov-fp_distf_00015.png}
+        \caption{\small{Distribution function at $t=3$ for flow in a
+            potential well. The black lines show contours of constant
+            particle energy. A separatrix forms along the
+            trapped-passing boundary. Simulation run with a DG2 scheme
+            on a 64×128 grid.}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+
+
