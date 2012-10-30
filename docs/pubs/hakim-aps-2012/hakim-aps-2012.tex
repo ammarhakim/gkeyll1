@@ -1,7 +1,13 @@
-\documentclass[pdf]{beamer}
+ \documentclass[pdf]{beamer}
 \usepackage{biblatex}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{tabulary}
+
+\captionsetup{font=scriptsize,labelfont=scriptsize}
 
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
@@ -52,7 +58,7 @@
   Simulations of Edge Plasma}%
 \author{A. H. Hakim \and G. W. Hammett}%
 
-\institute[http://www.ammar-hakim.org] % (optional, aber oft nötig)
+\institute[http://www.ammar-hakim.org/sj] % (optional, aber oft nÃ¶tig)
 {
   Princeton Plasma Physics Laboratory, Princeton, NJ\\
   ammar@princeton.edu\\
@@ -319,36 +325,31 @@
     \int w n_{ih}\thinspace dx = 
     n_{eo}\int w \left(1 + \frac{|e|\phi_h}{T_e}\right) dx
   \end{align*}
-  This leads to a \emph{global} solve for the potential. For
-  relaxation to the case in which potential is allowed to be
-  \emph{discontinuous} and hence a local determination of the
-  potential, see poster by G. Hammett.
+  This leads to a \emph{global} solve for the potential. For the case
+  in which potential is allowed to be \emph{discontinuous} leading
+  hence a local determination of the potential, see poster by
+  G. Hammett.
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
 \begin{frame}{Only recently conditions for conservation of discrete
-    energy were discovered}%
+    energy and enstrophy were discovered}%
 
   Liu and Shu\footfullcite{liu-shu-2000} have shown that discrete
   energy is conserved for 2D incompressible flow if
   \begin{align*}
     \phi_h \in \mathcal{V}_1^k \subseteq f_h \in \mathcal{V}^k_{-1}
   \end{align*}
-  We can generalize this to systems describe by a Hamiltonian as
-  \begin{thm}
-    If the basis functions for the Hamiltonian are a continuous subset
-    of the basis functions used for the distribution, then the
-    discrete energy will be conserved.
-  \end{thm}
-  This means that characteristics are discontinuous: $\alpha^i_h \in
-  \mathcal{V}_{-1}^{k-1}$.
+  Enstrophy (generalized entropy) is conserved if \emph{central
+    fluxes} are used in the DG scheme. With upwind fluxes, enstrophy
+  decays and hence the scheme is \emph{stable} in the $L_2$ norm.
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Momentum is \emph{not} conserved with this scheme or
-    simple variations of it}%
+\begin{frame}{Momentum conservation is not exact but is independent
+    of velocity resolution}%
 
   For electrostatic problems the condition for conservation of
   discrete momentum reduces to a vanishing average force, i.e. we must
@@ -393,18 +394,422 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{A simulation journal is
-    maintained\footnote{http://www.ammar-hakim.org/sj} to enable
-    reproducible research}%
+\begin{frame}{A simulation journal with results is maintained at
+    {http://www.ammar-hakim.org/sj}}
+
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+  \begin{itemize}
+  \item Each algorithm is carefully tested against analytical or
+    numerical results.
+  \item Results are extensively documented and Lua programs are put
+    online.
+  \item Journal allows sharing of results as well as enables
+    reproducibility as scripts, figures and notes are available via
+    the internet.
+  \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s121-snapshots.png}
+        \caption{Swirling flow problem. The initial Gaussian pulses
+          distort strongly but regain their shapes after a period of
+          $1.5$~seconds.}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Accuracy and convergence of schemes was tested with
+    Vlasov equation with specified potential: $\cos(x)$ potential
+    well}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s149-vlasov-fp_distf_00015.png}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s149-vlasov-fp_distf_00100.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \begin{figure}
+    \caption{Distribution function at $t=3$ (left) and $t=20$ (right)
+      for flow in a $\cos(x)$ potential well. A separatrix forms along
+      the trapped-passing boundary. Simulation run with a DG2 scheme
+      on a $64\times 128$ grid.}
+  \end{figure}
+
+  \end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+  \begin{frame}{With quadratic potential $\phi(x)=x^2$ a rigid-body
+      motion of trapped particles in phase-space is seen}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s150-vlasov-fp_distf_00015.png}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s150-vlasov-fp_distf_00100.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \begin{figure}
+    \caption{Distribution function at $t=3$ (left) and $t=20$ (right)
+      for flow in a $x^2$ potential well. Bounce period of all trapped
+      particles is the same, leading to a rigid-body motion inside
+      trapped region.}
+  \end{figure}
+
+  \end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Double shear problem is a good test for resolution of
+    vortex shearing in $E\times B$ driven flows}%
+  \begin{columns}
+    \begin{column}{0.3\textwidth}
+      Vorticity at $t=8$ with different grid resolutions and
+      schemes. Third order DG scheme runs faster and produces better
+      results than DG2 scheme.
+    \end{column}
+    \begin{column}{0.7\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s125to128-double-shear-cmp.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Vortex waltz problem tests resolution of small-scale
+    vortex features and energy and enstrophy conservation}%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s139-vortex-waltz_00010.png}
+        \caption{Vorticity for the vortex waltz problem with the
+          third-order scheme on a $128 \times 128$. \emph{Upwind
+            fluxes} were used for this calculation.}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s140s141s142-vortex-waltz-totalEnergyEnstrophy_cmp.png}
+        \caption{Energy and enstrophy error for vortex waltz
+          problem. \emph{Central fluxes} were used and show $O(\Delta
+          t)^3$ convergence on a fixed $64\times 64$ grid.}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Linear Landau damping simulations were compared with
+    exact solutions of dispersion relations}%
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Field energy (blue) as a function of time for linear Landau
+      damping problem with $k=0.5$ and $Te=1.0$. The red dots
+      represent the maxima in the field energy which are used to
+      compute a linear least-square fit. The slope of the black line
+      gives the damping rate.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s151-field-energy.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Numerically computed damping rates compare accurately
+    with exact results}%
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Damping rate from Landau damping for electron plasma
+      oscillations as a function of normalized Debye length. The
+      damping rates are within 3\% of the exact values, and for large
+      values of $k\lambda_D$ within 1\%.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{ld-damping-rates-elc-osc.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Nonlinear Landau damping simulations show particle
+    trapping and phase-space hole formation}%
+
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Field energy as a function of time for nonlinear Landau damping
+      problem with k=0.5, $Te=1.0$ and $\alpha=0.5$. The initial
+      perturbation decays at a rate of $\gamma=âˆ’0.2916$, after which
+      the damping is halted from particle trapping. The growth rate of
+      this phase is $\gamma=0.0879$.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s162-field-energy.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{DG scheme can efficiently capture fine-scale features in
+    phase-space}%
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.8\linewidth,keepaspectratio}
+    \incfig{s162-landau-damping-vp_distf.png}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Energy is conserved to same order as temporal
+    discretization error of $O(\Delta t)^3$ independent of
+    phase-space discretization}%
+  \begin{figure}
+    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
+    \incfig{dg-o2-o3-energy-conservation-errors.png}
+    \caption{Convergence of energy error with time-step. The red curve
+      shows errors from second order scheme, black from third order
+      scheme.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{To test momentum conservation an asymmetric initial
+    density profile needs to be used}%
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
+    \incfig{s183-initial-numDensity.png}
+    \caption{Initial density profile to drive momentum. Using a
+      symmetric density (net zero initial momentum) profile can
+      lead to misleading conservation results.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Momentum is \emph{not conserved} but is independent of
+    velocity space resolution and converges rapidly with spatial
+    resolution and polynomial order}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{tabulary}{\linewidth}{|L|L|L|}
+        \hline
+        
+          $N_x$
+        & {
+          Error DG2
+        } & {
+          Order
+        }\\\hline
+        8
+        & 
+        $1.3332\times 10^{-3}$
+        &  
+        \\\hline
+        
+        16
+        & 
+        $3.9308\times 10^{-4}$
+        & 
+        1.76
+        \\\hline
+        
+        32
+        & 
+        $8.5969\times 10^{-5}$
+        & 
+        2.19
+        \\\hline
+        
+        64
+        & 
+        $1.5254\times 10^{-5}$
+        & 
+        2.49
+        \\\hline
+        
+        128
+        & 
+        $2.3105\times 10^{-6}$
+        & 
+        2.72
+        \\\hline
+      \end{tabulary}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{tabulary}{\linewidth}{|L|L|L|}
+        \hline
+        $N_x$
+        & {
+          Error DG3
+        } & {
+          Order
+        }\\\hline
+        8
+        & 
+        $1.9399\times 10^{-5}$
+        &  
+        \\\hline
+        
+        16
+        & 
+        $4.0001\times 10^{-7}$
+        & 
+        5.60
+        \\\hline
+        
+        32
+        & 
+        $5.1175\times 10^{-8}$
+        & 
+        2.97
+        \\\hline
+
+        64
+        & 
+        $2.2289\times 10^{-9}$
+        & 
+        4.52
+        \\\hline
+
+        128
+        & 
+        $8.9154\times 10^{-11}$
+        & 
+        4.64
+        \\\hline
+      \end{tabulary}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{A local-DG scheme is used to discretize diffusion terms
+    for use in collision operators}%
+
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Advection-diffusion problem with local DG scheme. The initial
+      condition is $sin(x)$ for which the exact solution at time $t$
+      is $e^{-\alpha t}sin(x-\lambda t)$ where $\alpha$ is the
+      diffusion coefficient and $\lambda$ is advection velocity. Black
+      dots are exact solutions and solid lines numerical results.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{advect-diffuse.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{A particle, momentum and energy conserving
+    Lenard-Bernstein collision operator is implemented using local DG
+    diffusion solver}%
+
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Relaxation of a step-function distribution function to
+      Maxwellian due to collisions. The solid lines show distribution
+      function at different times and the dots the exact Maxwellian
+      distribution with specified temperature and density.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{lb-collisions.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Conclusions: An efficient and accurate discontinuous
+    Galerkin scheme for general Hamiltonian field equations are
+    presented}%
 
   \begin{itemize}
-  \item Each algorithm is carefully tested with known
-    analytical or numerical results.
-  \item Tests are extensively documented and results, notes as
-    well as Lua programs are put online.
-  \item Allows sharing of results as well as enables
-    reproducibility as scripts, figures and notes are all
-    available globally via the internet.
+  \item A discontinuous Galerkin scheme to solve a general class of
+    Hamiltonian field equations are presented.
+  \item The Poisson equation is discretized using continuous basis
+    functions.
+  \item With proper choice of basis functions energy is
+    conserved. 
+  \item With central fluxes enstrophy (generalize entropy) is
+    conserved. With upwind fluxes the scheme is $L_s$ stable.
+  \item Momentum is not conserved but is independent of velocity space
+    resolution and converges rapidly with spatial resolution and
+    polynomial order of the scheme.
+  \end{itemize}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Future work: extend scheme to higher dimensions and
+    general geometries and collision terms}%
+
+  \begin{itemize}
+  \item Higher-order basis functions have been implemented and are
+    being tested.
+  \item The schemes will be extended to take into account complicated
+    edge geometries using a multi-block structured grid.
+  \item Special basis functions for velocity space discretization will
+    be developed to allow coarse resolution simulations with the
+    option of fine scale resolution when needed.
+  \item A collision model has been implemented. It will be extended to
+    higher dimensions.
   \end{itemize}
 
 \end{frame}
@@ -419,21 +824,11 @@
 % ----------------------------------------------------------------
 
 
-
   \begin{columns}
     \begin{column}{0.55\textwidth}
     \end{column}
     \begin{column}{0.5\textwidth}
       \begin{figure}
-        \setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
-        \incfig{s149-vlasov-fp_distf_00015.png}
-        \caption{\small{Distribution function at $t=3$ for flow in a
-            potential well. The black lines show contours of constant
-            particle energy. A separatrix forms along the
-            trapped-passing boundary. Simulation run with a DG2 scheme
-            on a 64×128 grid.}}
-      \end{figure}
     \end{column}
   \end{columns}
-
 
