@@ -5,6 +5,12 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 6th
+
+  Spent last week at APS/DPP. Monday November 5th was spent talking to
+  John Luginsland about possible AFOSR proposal ideas. Very productive
+  meeting.
+
 * October 26th
 
   For some reason I have been feeling very distracted and so the pace

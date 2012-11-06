@@ -36,11 +36,7 @@ archived.
    momentum. Perhaps implement positivity in the mean. Put in
    Lenard-Bernstein collision operator.
 
-** Things to do for APS/DPP					       :PUBS:
-
-   To complete the things needed for APS/DPP the following need to be
-   done in the next three weeks (most likely in the two weeks before
-   APS/DPP).
+   To complete the things needed the paper following need to be done.
 
 *** Add collisions to the Vlasov-Poisson solver
 *** Figure out the exact dispersion relation for ion-acoustic waves

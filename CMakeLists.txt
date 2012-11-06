@@ -144,6 +144,7 @@ set(SCI_WORLD_PROGRAM_PERMS WORLD_READ WORLD_EXECUTE)
 
 # add subdirectories
 add_subdirectory(etc/loki/src)
+add_subdirectory(etc/quadrule)
 add_subdirectory(lib)
 add_subdirectory(grids)
 add_subdirectory(datastructs)
