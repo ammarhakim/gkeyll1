@@ -18,6 +18,9 @@
 #include <LcRowMajorIndexer.h>
 #include <LcRowMajorSequencer.h>
 
+// etc includes
+#include <quadrule.h>
+
 namespace Lucee
 {
   template <unsigned NDIM>
@@ -228,7 +231,13 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::createLobattoNodes()
   {
-    throw Lucee::Except("LagrangeTensorBasisCalc::createLobattoNodes: Not implemented!");
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      std::vector<double> x(numNodes[d]), w(numNodes[d]);
+      lobatto_compute(numNodes[d], &x[0], &w[0]); // nodes at Gaussian quadrature points
+      for (unsigned i=0; i<numNodes[d]; ++i)
+        nodeLocs[d].loc[i] = x[i];
+    }
   }
 
   template <unsigned NDIM>

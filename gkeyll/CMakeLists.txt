@@ -9,6 +9,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_SOURCE_DIR}/lib
   ${CMAKE_SOURCE_DIR}/grids
   ${CMAKE_SOURCE_DIR}/datastructs
+  ${CMAKE_SOURCE_DIR}/etc/quadrule
   ${CMAKE_SOURCE_DIR}/etc/loki/include
   ${CMAKE_BINARY_DIR}
 )
@@ -20,6 +21,7 @@ set(lucee_LIBRARIES
   lcdatastructs
   lcgrids
   lclib
+  lcquadrule
   lcloki
 )
 
