@@ -19,7 +19,7 @@
 #include <LcRowMajorSequencer.h>
 
 // etc includes
-#include <quadrule.h>
+#include <quadrule.hpp>
 
 namespace Lucee
 {

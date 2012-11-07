@@ -187,4 +187,4 @@ target_link_libraries(lceigen)
 # lceigen
 add_executable(lclagrangetensorcalc lclagrangetensorcalc.cxx)
 target_link_libraries(lclagrangetensorcalc lcslvrs lcdatastructs 
-  lcgrids lclib lcloki ${EXTRA_LIBS} ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
+  lcgrids lclib lcquadrule lcloki ${EXTRA_LIBS} ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})

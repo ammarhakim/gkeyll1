@@ -358,6 +358,57 @@ test_4()
 }
 
 void
+test_4_lobatto()
+{  // 1D, 4 nodes
+  Lucee::LagrangeTensorBasisCalc<1> basis;
+  unsigned nn = 4;
+  unsigned numNodes[1];
+  numNodes[0] = nn;
+  basis.calc(Lucee::LOBATTO, numNodes);
+
+  LC_ASSERT("Checking number of nodes", basis.getNumNodes() == nn);
+
+  double x1 = std::sqrt(1.0/5.0);
+  double x2 = 1.0;
+
+  std::vector<double> nloc = basis.getNodeLoc(0);
+  LC_ASSERT("Testing node locations", epsCmp(nloc[0], -x2));
+  LC_ASSERT("Testing node locations", epsCmp(nloc[1], -x1));
+  LC_ASSERT("Testing node locations", epsCmp(nloc[2], x1));
+  LC_ASSERT("Testing node locations", epsCmp(nloc[3], x2));
+
+// I do not have an explicit test for the coefficient matrix. (Too
+// lazy to compute them by hand). However, it is tested via the
+// evalBasis function below. (Ammar Hakim, 10/16/2012)
+  
+  double xc[1];
+  for (unsigned b=0; b<nn; ++b)
+  {
+    for (unsigned n=0; n<nn; ++n)
+    {
+      xc[0] = nloc[n];
+
+      if (n == b)
+        LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 1.0));
+      else
+        LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 0.0));
+    }
+  }
+
+// node lists
+  std::vector<unsigned> en;
+  basis.getExclusiveNodeIndices(en);
+
+  LC_ASSERT("Testing number of exclusive nodes", en.size() == 3);
+  LC_ASSERT("Testing exclusive indices", en[0] == 0);
+  LC_ASSERT("Testing exclusive indices", en[1] == 1);
+  LC_ASSERT("Testing exclusive indices", en[2] == 2);
+
+  LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 1);
+  LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
+}
+
+void
 test_5()
 { // 2D, 2x2 nodes
   Lucee::LagrangeTensorBasisCalc<2> basis;
@@ -882,6 +933,7 @@ main(int argc, char **argv)
   test_2();
   test_3();
   test_4();
+  test_4_lobatto();
   test_5();
   test_6();
   test_6_u();
