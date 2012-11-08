@@ -72,7 +72,7 @@ namespace Lucee
     q = 0.0; // set all entries to 0.0
 
 // get list of nodes exclusively owned by element
-    std::vector<unsigned> ndIds;
+    std::vector<int> ndIds;
 
     if (sharedNodes)
       nodalBasis->getExclusiveNodeIndices(ndIds);

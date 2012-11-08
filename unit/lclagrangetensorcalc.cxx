@@ -77,7 +77,7 @@ test_1()
   LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,1), 1/2.0));
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 1);
@@ -167,7 +167,98 @@ test_2()
   LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,2), 1/2.0));
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
+  basis.getExclusiveNodeIndices(en);
+
+  LC_ASSERT("Testing number of exclusive nodes", en.size() == 2);
+  LC_ASSERT("Testing exclusive indices", en[0] == 0);
+  LC_ASSERT("Testing exclusive indices", en[1] == 1);
+
+  std::vector<int> fn;
+
+  LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 1);
+  basis.getSurfLowerNodeNums(0, fn);
+  LC_ASSERT("Tesing lower node numbers", fn[0] == 0);
+
+  LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
+  basis.getSurfUpperNodeNums(0, fn);
+  LC_ASSERT("Tesing lower node numbers", fn[0] == 2);
+}
+
+void
+test_2_lobatto()
+{  // 1D, 3 nodes
+  Lucee::LagrangeTensorBasisCalc<1> basis;
+  unsigned nn = 3;
+  unsigned numNodes[1];
+  numNodes[0] = nn;
+  basis.calc(Lucee::LOBATTO, numNodes);
+
+  LC_ASSERT("Checking number of nodes", basis.getNumNodes() == nn);
+
+  std::vector<double> nloc = basis.getNodeLoc(0);
+  LC_ASSERT("Testing node locations", nloc[0] == -1.0);
+  LC_ASSERT("Testing node locations", nloc[1] == 0.0);
+  LC_ASSERT("Testing node locations", nloc[2] == 1.0);
+  
+  Lucee::Matrix<double> coeff(nn,nn);
+  basis.getCoeffMat(coeff);
+
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(0,0), 1.0/6.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(1,0), -1.0/2.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(2,0), 1.0/3.0));
+
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(0,1), 2.0/3.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(1,1), 0.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(2,1), -2.0/3.0));
+
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(0,2), 1.0/6.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(1,2), 1.0/2.0));
+  LC_ASSERT("Testing coefficient matrix", epsCmp(coeff(2,2), 1.0/3.0));
+
+  double xc[1];
+  for (unsigned b=0; b<nn; ++b)
+  {
+    for (unsigned n=0; n<nn; ++n)
+    {
+      xc[0] = nloc[n];
+
+      if (n == b)
+        LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 1.0));
+      else
+        LC_ASSERT("Testing basis function eval", epsCmp(basis.evalBasis(b, xc), 0.0));
+    }
+  }
+
+  unsigned tn = basis.getNumNodes();
+  Lucee::Matrix<double> massMatrix(tn, tn);
+  basis.getMassMatrix(massMatrix);
+
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,0), 4.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,1), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(0,2), (-1.0)/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,0), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,1), 16.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(1,2), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,0), (-1.0)/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,1), 2.0/15.0));
+  LC_ASSERT("Tesing mass-matrix", epsCmp(massMatrix(2,2), 4.0/15.0));
+
+  Lucee::Matrix<double> gradStiffMatrix(tn, tn);
+  basis.getGradStiffnessMatrix(0, gradStiffMatrix);
+
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,0), -1/2.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,1), (-4.0)/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(0,2), 1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,0), 4.0/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,1), 0.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(1,2), (-4.0)/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,0), -1/2.0/3.0));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,1), 4.0/(3.0*2.0)));
+  LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(2,2), 1/2.0));
+
+// node lists
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 2);
@@ -286,7 +377,7 @@ test_3()
   LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,3), 1/2.0));
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 3);
@@ -344,7 +435,7 @@ test_4()
   }
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 4);
@@ -396,7 +487,7 @@ test_4_lobatto()
   }
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 3);
@@ -524,7 +615,7 @@ test_5()
   LC_ASSERT("Testing grad-stiffness matrix", epsCmp(gradStiffMatrix(3,3), 2.0/(3.0*2.0)));
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 1);
@@ -655,7 +746,7 @@ test_6_u()
   }
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 9);
@@ -755,7 +846,7 @@ test_7_2()
   }
 
 // node lists
-  std::vector<unsigned> en;
+  std::vector<int> en;
   basis.getExclusiveNodeIndices(en);
 
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 1);
@@ -931,6 +1022,7 @@ main(int argc, char **argv)
   test_0();
   test_1();
   test_2();
+  test_2_lobatto();
   test_3();
   test_4();
   test_4_lobatto();

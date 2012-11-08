@@ -5,11 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 7th
+
+  Added the quadrule library (just one header and one C file) to
+  Gkeyll. With this Lobatto quadrature nodes can be computed. Added
+  some basic tests for Lobatto node elements. Not throughly tested,
+  but things seem to work correctly for the code tested.
+
+  Need to compute weights for nodal and the face-mass matrices. With
+  that I can test the tensor product elements with nodal DG updater.
+
 * November 6th
 
   Spent last week at APS/DPP. Monday November 5th was spent talking to
   John Luginsland about possible AFOSR proposal ideas. Very productive
   meeting.
+
+  Spent afternoon with Eric going over Gkeyll code structure.
 
 * October 26th
 

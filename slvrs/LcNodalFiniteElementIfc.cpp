@@ -68,7 +68,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  NodalFiniteElementIfc<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
     throw Lucee::Except("NodalFiniteElementIfc::getExclusiveNodeIndices: Not implemented!");
   }
@@ -292,7 +292,7 @@ namespace Lucee
     NodalFiniteElementIfc<NDIM> *f
       = Lucee::PointerHolder<NodalFiniteElementIfc<NDIM> >::getObj(L);
 
-    std::vector<unsigned> ids;
+    std::vector<int> ids;
     f->getExclusiveNodeIndices(ids);
     lua_pushnumber(L, ids.size());
     return 1;

@@ -38,27 +38,7 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::calc(Node_t type, const unsigned nn[NDIM])
   {
-// copy over basic data
-    nodeLayout = type;
-    for (unsigned i=0; i<NDIM; ++i) 
-      numNodes[i] = nn[i];
-
-// allocate space to store node locations
-    for (unsigned i=0; i<NDIM; ++i)
-      nodeLocs[i].loc.resize(numNodes[i]);
-
-// compute location of nodes
-    if (type == Lucee::LOBATTO)
-      createLobattoNodes();
-    else if (type == Lucee::GAUSSIAN)
-      createGaussianNodes();
-    else if (type == Lucee::UNIFORM)
-      createUniformNodes();
-
-// total number of nodes in element
-    totalNodes = 1;
-    for (unsigned d=0; d<NDIM; ++d)
-      totalNodes *= numNodes[d];
+    calcBasicData(type, nn);
 
     int lower[NDIM], upper[NDIM];
     for (unsigned d=0; d<NDIM; ++d)
@@ -67,72 +47,11 @@ namespace Lucee
       upper[d] = numNodes[d];
     }
     Lucee::Region<NDIM, int> rgn(lower, upper);
-    nodeRgn = rgn;
-// create sequencer for looping over nodes (why RowMajor and not
-// ColumnMajor? It actually does not matter, as long as all other
-// calculations are done consistently. However, it does matter in
-// interpreting the output from an updater, as the data is arranged
-// with the same layout as used here.).
-    Lucee::RowMajorSequencer<NDIM> nodeSeq(rgn), polySeq(rgn);
-// indexer to map to location in matrix
-    Lucee::RowMajorIndexer<NDIM> idx(rgn);
 
-    int nodeIdx[NDIM], polyIdx[NDIM];
-
-// store nodal coordinates
-    nodeCoords.resize(totalNodes);
-    while (nodeSeq.step())
-    {
-      nodeSeq.fillWithIndex(nodeIdx);
-      int nn = idx.getIndex(nodeIdx); // node number
-
-      for (unsigned d=0; d<NDIM; ++d)
-        nodeCoords[nn].x[d] = nodeLocs[d].loc[nodeIdx[d]];
-    }
-
-    double xn[NDIM];
-// create matrix of linear system coefficients: each node contributes
-// one row. In that row each entry is the product of Legendre
-// polynomials evaluated at that node.
-    Lucee::Matrix<double> coeffMat(totalNodes, totalNodes);
-
-    nodeSeq.reset();
-    while (nodeSeq.step())
-    {
-      nodeSeq.fillWithIndex(nodeIdx);
-      int row = idx.getIndex(nodeIdx); // row of coeff matrix
-
-// each entry in this row is product of Legendre polynomials evaluate
-// with nodal coordinate components
-      polySeq.reset();
-      while (polySeq.step())
-      {
-        polySeq.fillWithIndex(polyIdx);
-        int col = idx.getIndex(polyIdx);
-
-// compute product of Legendre polynomials
-        double entry = 1.0;
-        for (unsigned d=0; d<NDIM; ++d)
-          entry *= Lucee::legendrePoly(polyIdx[d], nodeCoords[row].x[d]);
-
-// insert this into appropriate location in matrix
-        coeffMat(row, col) = entry;
-      }
-    }
-
-// contruct RHS matrix, which is just a unit matrix as basis functions
-// are such that they evaluate to 1 at one node and are zero at other
-// nodes.
-    expandCoeff = Lucee::Matrix<double>(totalNodes, totalNodes);
-    expandCoeff = 0.0;
-    for (unsigned i=0; i<totalNodes; ++i)
-      expandCoeff(i,i) = 1.0;
-
-// invert system to get expansion coefficients
-    Lucee::solve(coeffMat, expandCoeff);
-
-// compute various matrices and quadrature data
+// compute mass matrix
     calcMassMatrix();
+
+// grad-stiffness matrices
     for (unsigned d=0; d<NDIM; ++d)
       calcGradStiff(d);
 
@@ -225,6 +144,10 @@ namespace Lucee
         }
       }
     }
+
+// compute face-mass matrices
+    // for (unsigned d=0; d<NDIM; ++d)
+    //   calcFaceMass(d);
   }
 
   template <unsigned NDIM>
@@ -393,6 +316,141 @@ namespace Lucee
   LagrangeTensorBasisCalc<NDIM>::getIndexer() const
   {
     return Lucee::RowMajorIndexer<NDIM>(nodeRgn);
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcFaceMass(unsigned dir)
+  {
+    if (NDIM == 1)
+    {
+// do special stuff for 1D
+      return;
+    }
+
+// Basic idea is to create basis calculator in one lower dimention and
+// use its mass matrix as this object's face-matrix, with the
+// appropriate permutations applied.
+
+    unsigned ldNodes[NDIM-1];
+// create array specifying number of nodes on face
+    unsigned count = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      if (d != dir)
+        ldNodes[count++] = numNodes[d];
+
+// create calculator for one lower dimension
+    LagrangeTensorBasisCalc<NDIM-1> ldElemCalc;
+    ldElemCalc.calcBasicData(nodeLayout, ldNodes);
+    ldElemCalc.calcMassMatrix();
+
+// get mass matrix
+    unsigned ldNumNodes = ldElemCalc.getNumNodes();
+    Lucee::Matrix<double> ldMassMatrix(ldNumNodes, ldNumNodes);
+    ldElemCalc.getMassMatrix(ldMassMatrix);
+
+// allocate space for matrices
+    lowerFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    upperFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcBasicData(Node_t type, const unsigned nn[NDIM])
+  {
+// copy over basic data
+    nodeLayout = type;
+    for (unsigned i=0; i<NDIM; ++i) 
+      numNodes[i] = nn[i];
+
+// allocate space to store node locations
+    for (unsigned i=0; i<NDIM; ++i)
+      nodeLocs[i].loc.resize(numNodes[i]);
+
+// compute location of nodes
+    if (type == Lucee::LOBATTO)
+      createLobattoNodes();
+    else if (type == Lucee::GAUSSIAN)
+      createGaussianNodes();
+    else if (type == Lucee::UNIFORM)
+      createUniformNodes();
+
+// total number of nodes in element
+    totalNodes = 1;
+    for (unsigned d=0; d<NDIM; ++d)
+      totalNodes *= numNodes[d];
+
+    int lower[NDIM], upper[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lower[d] = 0;
+      upper[d] = numNodes[d];
+    }
+    Lucee::Region<NDIM, int> rgn(lower, upper);
+    nodeRgn = rgn;
+// create sequencer for looping over nodes (why RowMajor and not
+// ColumnMajor? It actually does not matter, as long as all other
+// calculations are done consistently. However, it does matter in
+// interpreting the output from an updater, as the data is arranged
+// with the same layout as used here.).
+    Lucee::RowMajorSequencer<NDIM> nodeSeq(rgn), polySeq(rgn);
+// indexer to map to location in matrix
+    Lucee::RowMajorIndexer<NDIM> idx(rgn);
+
+    int nodeIdx[NDIM], polyIdx[NDIM];
+
+// store nodal coordinates
+    nodeCoords.resize(totalNodes);
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(nodeIdx);
+      int nn = idx.getIndex(nodeIdx); // node number
+
+      for (unsigned d=0; d<NDIM; ++d)
+        nodeCoords[nn].x[d] = nodeLocs[d].loc[nodeIdx[d]];
+    }
+
+    double xn[NDIM];
+// create matrix of linear system coefficients: each node contributes
+// one row. In that row each entry is the product of Legendre
+// polynomials evaluated at that node.
+    Lucee::Matrix<double> coeffMat(totalNodes, totalNodes);
+
+    nodeSeq.reset();
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(nodeIdx);
+      int row = idx.getIndex(nodeIdx); // row of coeff matrix
+
+// each entry in this row is product of Legendre polynomials evaluate
+// with nodal coordinate components
+      polySeq.reset();
+      while (polySeq.step())
+      {
+        polySeq.fillWithIndex(polyIdx);
+        int col = idx.getIndex(polyIdx);
+
+// compute product of Legendre polynomials
+        double entry = 1.0;
+        for (unsigned d=0; d<NDIM; ++d)
+          entry *= Lucee::legendrePoly(polyIdx[d], nodeCoords[row].x[d]);
+
+// insert this into appropriate location in matrix
+        coeffMat(row, col) = entry;
+      }
+    }
+
+// contruct RHS matrix, which is just a unit matrix as basis functions
+// are such that they evaluate to 1 at one node and are zero at other
+// nodes.
+    expandCoeff = Lucee::Matrix<double>(totalNodes, totalNodes);
+    expandCoeff = 0.0;
+    for (unsigned i=0; i<totalNodes; ++i)
+      expandCoeff(i,i) = 1.0;
+
+// invert system to get expansion coefficients
+    Lucee::solve(coeffMat, expandCoeff);
   }
 
 // instantiations
