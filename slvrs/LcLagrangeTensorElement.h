@@ -314,7 +314,10 @@ namespace Lucee
       Lucee::Matrix<double> gradStiff[NDIM];
 /** Stiffness matrix */
       Lucee::Matrix<double> stiff;
-
+/** Lower face mass-matrix */
+      Lucee::Matrix<double> lowerFace[NDIM];
+/** Upepr face mass-matrix */
+      Lucee::Matrix<double> upperFace[NDIM];
   };
 }
 

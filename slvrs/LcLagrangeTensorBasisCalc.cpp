@@ -358,7 +358,7 @@ namespace Lucee
         ldNodes[count++] = numNodes[d];
 
 // create calculator for one lower dimension
-    LagrangeTensorBasisCalc<NDIM-1> ldElemCalc;
+    Lucee::LagrangeTensorBasisCalc<NDIM-1> ldElemCalc;
     ldElemCalc.calcBasicData(nodeLayout, ldNodes);
     ldElemCalc.calcMassMatrix();
 
@@ -370,7 +370,7 @@ namespace Lucee
     std::vector<int> faceNodes(ldNumNodes);
 
 // compute lower face-mass matrix
-    lowerFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    lowerFaceMass[dir] = Lucee::Matrix<double>(this->getNumNodes(), ldNumNodes);
     lowerFaceMass[dir] = 0.0;
 
     this->getSurfLowerNodeNums(dir, faceNodes);
@@ -380,7 +380,7 @@ namespace Lucee
         lowerFaceMass[dir](faceNodes[r],c) = ldMassMatrix(r,c);
 
 // compute upper face-mass matrix
-    upperFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    upperFaceMass[dir] = Lucee::Matrix<double>(this->getNumNodes(), ldNumNodes);
     upperFaceMass[dir] = 0.0;
 
     this->getSurfUpperNodeNums(dir, faceNodes);

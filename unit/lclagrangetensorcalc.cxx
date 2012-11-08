@@ -642,6 +642,61 @@ test_5()
   basis.getSurfUpperNodeNums(1, fn);
   LC_ASSERT("Tesing lower node numbers", fn[0] == 1);
   LC_ASSERT("Tesing lower node numbers", fn[1] == 3);
+
+// test face mass matrices
+  Lucee::Matrix<double> faceMass(basis.getNumNodes(), basis.getNumSurfLowerNodes(0));
+
+  basis.getLowerFaceMassMatrix(0, faceMass);
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,0), 2.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,1), 1.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,0), 1.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,1), 2.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,1), 0.0));
+
+  basis.getUpperFaceMassMatrix(0, faceMass);
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,0), 2.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,1), 1.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,0), 1.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,1), 2.0/3.0));
+
+  basis.getLowerFaceMassMatrix(1, faceMass);
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,0), 2.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,1), 1.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,0), 1.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,1), 2.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,1), 0.0));
+
+  basis.getUpperFaceMassMatrix(1, faceMass);
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(0,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,0), 2.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(1,1), 1.0/3.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,0), 0.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(2,1), 0.0));
+
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,0), 1.0/3.0));
+  LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,1), 2.0/3.0));
 }
 
 void
