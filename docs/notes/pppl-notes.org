@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 8th
+
+  Completed code to compute face-mass matrices. Not sure if this is
+  the correct way to do things, but will be testing soon in 2D/3D.
+
+  The code is barfing on a simple test case. Need to figure out why.
+
 * November 7th
 
   Added the quadrule library (just one header and one C file) to

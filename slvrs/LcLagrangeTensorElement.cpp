@@ -146,16 +146,39 @@ namespace Lucee
     }
 
 // mass matrix
-    mass = Matrix<double>(nlocal, nlocal);
+    mass = Lucee::Matrix<double>(nlocal, nlocal);
     basisCalc.getMassMatrix(mass);
     mass *= vol2;
 
 // grad-stiff matrices
     for (unsigned d=0; d<NDIM; ++d)
     {
-      gradStiff[d] = Matrix<double>(nlocal, nlocal);
+      gradStiff[d] = Lucee::Matrix<double>(nlocal, nlocal);
       basisCalc.getGradStiffnessMatrix(d, gradStiff[d]);
       gradStiff[d] *= 2.0/dx[d]*vol2;
+    }
+
+// face mass-matrices
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      unsigned nf = basisCalc.getNumSurfLowerNodes(d);
+      lowerFace[d] = Lucee::Matrix<double>(nlocal, nf);
+      basisCalc.getLowerFaceMassMatrix(d, lowerFace[d]);
+
+      nf = basisCalc.getNumSurfUpperNodes(d);
+      upperFace[d] = Lucee::Matrix<double>(nlocal, nf);
+      basisCalc.getUpperFaceMassMatrix(d, upperFace[d]);
+
+// compute factor to bring into physical space: this is propotional to
+// the area of face normal to direction 'd'.
+      double fact = 1.0;
+      for (unsigned dd=0; dd<NDIM; ++dd)
+        if (dd != d)
+          fact *= 0.5*dx[dd];
+
+// scale matrices appropriately
+      lowerFace[d] *= fact;
+      upperFace[d] *= fact;
     }
 
 // TODO: STIFFNESS MATRIX
@@ -295,14 +318,14 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getLowerFaceMassMatrix(unsigned dir, Lucee::Matrix<double>& NjNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getLowerFaceMassMatrix(dir, NjNk);
+    NjNk.copy(lowerFace[dir]);
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::getUpperFaceMassMatrix(unsigned dir, Lucee::Matrix<double>& NjNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getUpperFaceMassMatrix(dir, NjNk);
+    NjNk.copy(upperFace[dir]);
   }
 
   template <unsigned NDIM>
