@@ -5,16 +5,50 @@
 % Needs some modifications to work in 3D.
 clc
 clear
+close all
+
+% 2-D Arbitrary Quadrilateral to map reference element
+% Prefer first element be lower left corner and going around CCW
+quadList  = {[-2,-1],[1.5,-2],[2,1],[-1,2]};
 
 dim       = 2;
 % nodeList  = {[-1,-1],[1,-1],[1,1],[-1,1]};
 % degree    = 1; % (r) This is tied to nodeList!
-% nodeList  = {[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]};
-% degree    = 2; % (r) This is tied to nodeList!
-nodeList  = {[-1,-1],[-0.5,-1],[0.5,-1],[1,-1],[1,-0.5],[1,0.5],[1,1],...
-                [0.5,1],[-0.5,1],[-1,1],[-1,0.5],[-1,-0.5]};
-degree    = 3; % (r) This is tied to nodeList!
+nodeList  = {[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]};
+degree    = 2; % (r) This is tied to nodeList!
+% nodeList  = {[-1,-1],[-1/3,-1],[1/3,-1],[1,-1],[1,-1/3],[1,1/3],[1,1],...
+%                 [1/3,1],[-1/3,1],[-1,1],[-1,1/3],[-1,-1/3]};
+% degree    = 3; % (r) This is tied to nodeList!
 basisList = {};
+
+% Plot the reference element with nodes
+hold on
+for i = 1:length(nodeList)
+    plot(nodeList{i}(1),nodeList{i}(2),'b*')
+end
+% Plot the corner nodes of the 2-D arbitrary quadrilateral
+for i = 1:length(quadList)
+    plot(quadList{i}(1),quadList{i}(2),'r*')
+end
+axis square
+hold off
+
+% Figure out where the corner nodes are (arbitrary dimension)
+% put these indices in the vector refCorners
+distanceVector = zeros(length(nodeList),1); % Distance from origin squared
+for nodeIndex = 1:length(nodeList)
+    tempNode = nodeList{nodeIndex};
+    distanceVector(nodeIndex) = sum(tempNode.^2);
+end
+maxDistance = max(distanceVector);
+refCorners = zeros(length(quadList),1);
+refIndex = 1;
+for nodeIndex = 1:length(nodeList)
+    if sum(nodeList{nodeIndex}.^2) == maxDistance
+        refCorners(refIndex) = nodeIndex;
+        refIndex = refIndex + 1;
+    end
+end
 
 % Create basis monomials
 for yIndex = 0:degree
@@ -66,62 +100,72 @@ end
 %     end
 % end
 
+% Create transformation x(eta,nu) and y(eta,nu) between reference nodes
+% (nodeList) and quadList
+transformationMatrix = sym(zeros(dim,1));
+for nodeIndex = 1:length(quadList)
+    for dimIndex = 1:dim
+        transformationMatrix(dimIndex,1) = quadList{nodeIndex}(dimIndex)*functionVector(refCorners(nodeIndex)) + transformationMatrix(dimIndex,1);
+    end
+end
+jacobianDet   = det(jacobian(transformationMatrix)); % Jacobian of the transformation matrix
+% Should name the following variable something else to reduce confusion
+% with above variable
+jacobianMatrix = jacobian(functionVector); % First column is dx, second column is dy
+
 % Evaluate mass matrix
 massMatrix = zeros(length(functionVector),length(functionVector));
 for kIndex = 1:length(functionVector)
     for mIndex = 1:length(functionVector)
-        f = functionVector(kIndex)*functionVector(mIndex);
+        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
         f = int(f, x, -1, 1);
         f = int(f, y, -1, 1);
         massMatrix(kIndex,mIndex) = f;
     end
 end
-% Put in readable format
-massMatrix = sym(massMatrix)
 
 % Evaluate K matrix
 kMatrix = zeros(length(functionVector),length(functionVector));
-jacobianMatrix = jacobian(functionVector); % First column is dx, second column is dy
-
 for kIndex = 1:length(functionVector)
     for mIndex = 1:length(functionVector)
         f = jacobianMatrix(kIndex,1)*jacobianMatrix(mIndex,1) + ...
             jacobianMatrix(kIndex,2)*jacobianMatrix(mIndex,2);
+        f = jacobianDet*f;
         f = int(f, x, -1, 1);
         f = int(f, y, -1, 1);
         kMatrix(kIndex,mIndex) = f;
     end
 end
-% Put in readable format
-kMatrix = sym(kMatrix)
 
 % Evaluate G^{km}_x
 gxMatrix = zeros(length(functionVector),length(functionVector));
 for kIndex = 1:length(functionVector)
     for mIndex = 1:length(functionVector)
-        f = jacobianMatrix(kIndex,1)*functionVector(mIndex);
+        f = jacobianMatrix(kIndex,1)*functionVector(mIndex)*jacobianDet;
         f = int(f, x, -1, 1);
         f = int(f, y, -1, 1);
         gxMatrix(kIndex,mIndex) = f;
     end
 end
-% Put in readable format
-gxMatrix = sym(gxMatrix)
 
 % Evaluate G^{km}_y
 gyMatrix = zeros(length(functionVector),length(functionVector));
 for kIndex = 1:length(functionVector)
     for mIndex = 1:length(functionVector)
-        f = jacobianMatrix(kIndex,2)*functionVector(mIndex);
+        f = jacobianMatrix(kIndex,2)*functionVector(mIndex)*jacobianDet;
         f = int(f, x, -1, 1);
         f = int(f, y, -1, 1);
         gyMatrix(kIndex,mIndex) = f;
     end
 end
+
 % Put in readable format
+massMatrix = sym(massMatrix)
+kMatrix = sym(kMatrix)
+gxMatrix = sym(gxMatrix)
 gyMatrix = sym(gyMatrix)
 
-% Output code in latex
+% Generate output code in latex
 % latex(functionVector)
 % latex(massMatrix)
 % latex(kMatrix)
