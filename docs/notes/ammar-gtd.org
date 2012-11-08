@@ -42,10 +42,6 @@ archived.
 *** Figure out the exact dispersion relation for ion-acoustic waves
 *** Do the case of discontinuous potential for ion-acoustic waves
 
-** Write the Lobatto nodal layout code for LagrangeTensorElement     :GKEYLL:
-
-   Uniform and Gaussian done, Lobatto not done.
-
 ** Implement moment based modal limiters in Gkeyll 1D solver	     :GKEYLL:
 
    Compare with the Nair book notes and figure out why Seth's code is
@@ -148,6 +144,12 @@ archived.
 
   This is for broader infrastructure work which does not involve any
   specific solver or physics issue.
+
+** Use subprocess python module in xregtest.py			      :INFRA:
+
+   The problem now is that the return code form the gkeyll process is
+   being ignored. This needs to be looked at to make sure that gkeyll
+   itself worked even before comparing against accepted results.
 
 ** Add more regression tests					      :INFRA:
 

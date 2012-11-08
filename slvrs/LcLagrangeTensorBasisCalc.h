@@ -30,6 +30,8 @@ namespace Lucee
   class LagrangeTensorBasisCalc
   {
     public:
+/** We need to friend ourself to allow accessing private stuff from another dimension */
+      template <unsigned RDIM> friend class LagrangeTensorBasisCalc;
 
 /**
  * Create new tensor basis calculator object.
@@ -108,6 +110,28 @@ namespace Lucee
       }
 
 /**
+ * Get face-mass matrix on lower face in specified direction for element.
+ *
+ * @param dir Direction of face.
+ * @param fMatrix On output, face-mass matrix of element. Should be pre-allocated
+ */
+      void getLowerFaceMassMatrix(unsigned dir, Lucee::Matrix<double>& fMatrix) const
+      {
+        fMatrix.copy(lowerFaceMass[dir]);
+      }
+
+/**
+ * Get face-mass matrix on upper face in specified direction for element.
+ *
+ * @param dir Direction of face.
+ * @param fMatrix On output, face-mass matrix of element. Should be pre-allocated
+ */
+      void getUpperFaceMassMatrix(unsigned dir, Lucee::Matrix<double>& fMatrix) const
+      {
+        fMatrix.copy(upperFaceMass[dir]);
+      }
+
+/**
  * Evaluate specified basis function at location. This method is very
  * slow, and so should not be called inside an inner loop. It is
  * provided to allow initialization of data needed in updaters, so its
@@ -155,7 +179,7 @@ namespace Lucee
  *
  * @param ndIds On output indices. Vector is cleared and data filled in.
  */
-      void getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+      void getExclusiveNodeIndices(std::vector<int>& ndIds)
       {
         ndIds = exclNodes;
       }
@@ -225,7 +249,7 @@ namespace Lucee
 /** Number of exclusively owned nodes */
       unsigned numExclNodes;
 /** Indices of exclusively owned nodes */
-      std::vector<unsigned> exclNodes;
+      std::vector<int> exclNodes;
 
 /** Structure to hold node list for surface nodes */
       struct NodeList
@@ -238,6 +262,11 @@ namespace Lucee
       NodeList lowerNodes[NDIM];
 /** List of nodes on upper faces */
       NodeList upperNodes[NDIM];
+
+/** Lower face mass matrices */
+      Lucee::Matrix<double> lowerFaceMass[NDIM];
+/** Upper face mass matrices */
+      Lucee::Matrix<double> upperFaceMass[NDIM];
 
 /**
  * Create nodes located at Lobatto quadrature points.
@@ -265,6 +294,18 @@ namespace Lucee
  * @param dir Direction to compute grad-stiffness matrix in.
  */
       void calcGradStiff(unsigned dir);
+
+/**
+ * Compute lower and upper face mass-matrices in specified direction.
+ *
+ * @param dir Direction to compute face mass-matrix in.
+ */
+      void calcFaceMass(unsigned dir);
+
+/**
+ * Compute nodal layout.
+ */
+      void calcBasicData(Node_t type, const unsigned nn[NDIM]);
   };
 }
 

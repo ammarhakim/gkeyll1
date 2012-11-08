@@ -95,7 +95,7 @@ namespace Lucee
  *
  * @param ndIds On output indices. Vector is cleared and data filled in.
  */
-      void getExclusiveNodeIndices(std::vector<unsigned>& ndIds);
+      void getExclusiveNodeIndices(std::vector<int>& ndIds);
 
 /**
  * Get mapping of local node numbers in the current cell to global

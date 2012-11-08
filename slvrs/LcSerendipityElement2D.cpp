@@ -115,7 +115,7 @@ namespace Lucee
   }
 
   void
-  SerendipityElement2D::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  SerendipityElement2D::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
     ndIds.clear();
     if (polyOrder == 1)

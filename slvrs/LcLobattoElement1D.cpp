@@ -170,7 +170,7 @@ namespace Lucee
   }
 
   void
-  LobattoElement1D::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  LobattoElement1D::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
     ndIds.clear();
     ndIds.resize(this->getNumNodes()-1);

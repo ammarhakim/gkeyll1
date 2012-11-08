@@ -195,7 +195,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  LagrangeTensorElement<NDIM>::getExclusiveNodeIndices(std::vector<unsigned>& ndIds)
+  LagrangeTensorElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
     basisCalc.getExclusiveNodeIndices(ndIds);
   }

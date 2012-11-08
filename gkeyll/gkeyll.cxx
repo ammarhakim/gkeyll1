@@ -157,6 +157,8 @@ main(int argc, char **argv)
 // load lua library: this must be done before loading input file
   Lucee::registerModules(L);
 
+  bool failed = false; // flag to indicate if run failed
+
   infoStrm << "** Welcome to Lucee!" << std::endl;
   time_t start = time(0); // time at start of main loop
   clock_t start_t = clock();
@@ -178,6 +180,7 @@ main(int argc, char **argv)
   {
     infoStrm << "*** Lucee exception!" << std::endl;
     infoStrm << lce.what() << std::endl;
+    failed = true;
   }
 
   time_t end = time(0); // time at end of main loop
@@ -193,5 +196,5 @@ main(int argc, char **argv)
 #ifdef HAVE_MPI
   MPI_Finalize();
 #endif
-  return 0;
+  return failed ? 1 : 0;
 }

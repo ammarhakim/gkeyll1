@@ -357,6 +357,17 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   of the node numbers starting from one. This needs to be changed to
   a zero based indexing to be consistent with C/C++ language.
 
+* Write the Lobatto nodal layout code for LagrangeTensorElement	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-11-07 Wed 10:58
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Uniform and Gaussian done, Lobatto not done.
+
+
 
 
 

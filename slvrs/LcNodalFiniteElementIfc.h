@@ -91,7 +91,7 @@ namespace Lucee
  *
  * @param ndIds On output indices. Vector is cleared and data filled in.
  */
-      virtual void getExclusiveNodeIndices(std::vector<unsigned>& ndIds);
+      virtual void getExclusiveNodeIndices(std::vector<int>& ndIds);
 
 /**
  * Get number of surface nodes along lower face in specified
