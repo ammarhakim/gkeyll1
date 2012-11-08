@@ -146,8 +146,8 @@ namespace Lucee
     }
 
 // compute face-mass matrices
-    // for (unsigned d=0; d<NDIM; ++d)
-    //   calcFaceMass(d);
+    for (unsigned d=0; d<NDIM; ++d)
+      calcFaceMass(d);
   }
 
   template <unsigned NDIM>
@@ -318,17 +318,35 @@ namespace Lucee
     return Lucee::RowMajorIndexer<NDIM>(nodeRgn);
   }
 
+// This very strange looking function serves as a recursion trap for
+// the calcFaceMass() function for NDIM>0. Without this the compiler
+// will barf.
+  template <>
+  void
+  LagrangeTensorBasisCalc<0>::calcFaceMass(unsigned dir)
+  {
+// deliberately empty
+  }
+
   template <unsigned NDIM>
   void
   LagrangeTensorBasisCalc<NDIM>::calcFaceMass(unsigned dir)
   {
     if (NDIM == 1)
     {
-// do special stuff for 1D
+      lowerFaceMass[dir] = Lucee::Matrix<double>(1, this->getNumNodes());
+      upperFaceMass[dir] = Lucee::Matrix<double>(1, this->getNumNodes());
+
+      lowerFaceMass[dir] = 0.0;
+      upperFaceMass[dir] = 0.0;
+// set correct entries
+      lowerFaceMass[dir](0,0) = 1.0;
+      upperFaceMass[dir](0,this->getNumNodes()-1) = 1.0;
+
       return;
     }
 
-// Basic idea is to create basis calculator in one lower dimention and
+// Basic idea is to create basis calculator in one lower dimension and
 // use its mass matrix as this object's face-matrix, with the
 // appropriate permutations applied.
 
@@ -349,10 +367,27 @@ namespace Lucee
     Lucee::Matrix<double> ldMassMatrix(ldNumNodes, ldNumNodes);
     ldElemCalc.getMassMatrix(ldMassMatrix);
 
-// allocate space for matrices
-    lowerFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
-    upperFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    std::vector<int> faceNodes(ldNumNodes);
 
+// compute lower face-mass matrix
+    lowerFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    lowerFaceMass[dir] = 0.0;
+
+    this->getSurfLowerNodeNums(dir, faceNodes);
+
+    for (unsigned r=0; r<ldNumNodes; ++r)
+      for (unsigned c=0; c<ldNumNodes; ++c)
+        lowerFaceMass[dir](faceNodes[r],c) = ldMassMatrix(r,c);
+
+// compute upper face-mass matrix
+    upperFaceMass[dir] = Lucee::Matrix<double>(ldNumNodes, this->getNumNodes());
+    upperFaceMass[dir] = 0.0;
+
+    this->getSurfUpperNodeNums(dir, faceNodes);
+
+    for (unsigned r=0; r<ldNumNodes; ++r)
+      for (unsigned c=0; c<ldNumNodes; ++c)
+        upperFaceMass[dir](faceNodes[r],c) = ldMassMatrix(r,c);
   }
 
   template <unsigned NDIM>
