@@ -10,7 +10,11 @@
   Completed code to compute face-mass matrices. Not sure if this is
   the correct way to do things, but will be testing soon in 2D/3D.
 
-  The code is barfing on a simple test case. Need to figure out why.
+  The code is barfing on a simple test case. Need to figure out
+  why. [FIXED: was a memory allocation error]
+
+  Did advection test in 2D and 3D. Miraculously, worked the first
+  time.
 
 * November 7th
 
