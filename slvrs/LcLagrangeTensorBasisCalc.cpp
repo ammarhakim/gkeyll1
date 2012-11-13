@@ -417,26 +417,27 @@ namespace Lucee
       for (unsigned m=0; m<totalNodes; ++m)
       {
         double entry = 0.0;
-// double loop over nodal indices to sum up the contribution from each
-// basis function at each node
-        seq.reset();
-        while (seq.step())
-        {
-          seq.fillWithIndex(nodeIdx1);
-          seq.fillWithIndex(nodeIdx2);
-          int ix1 = idx.getIndex(nodeIdx1);
 
-          for (unsigned ia=0; ia<totalNodes; ++ia)
+        for (unsigned d=0; d<NDIM; ++d)
+        {
+// double loop over nodal indices to sum up contribution from each
+// basis function at each node
+          seq.reset();
+          while (seq.step())
           {
-            for (unsigned d=0; d<NDIM; ++d)
+            seq.fillWithIndex(nodeIdx1);
+            seq.fillWithIndex(nodeIdx2);
+            int ix1 = idx.getIndex(nodeIdx1);
+
+            for (unsigned ia=0; ia<numNodes[d]; ++ia)
             {
               nodeIdx2[d] = ia;
               int ix2 = idx.getIndex(nodeIdx2);
-              double prod = expandCoeff(ix1,k)*expandCoeff(ix2,m)*dpdp(nodeIdx1[d], nodeIdx2[d]);
+              double orthoTerm = 1.0;
               for (unsigned dd=0; dd<NDIM; ++dd)
                 if (d != dd)
-                  prod *= 2.0/(2*nodeIdx1[dd]+1.0);
-              entry += prod;
+                  orthoTerm *= 2.0/(2*nodeIdx1[dd]+1.0);
+              entry += expandCoeff(ix1,k)*expandCoeff(ix2,m)*dpdp(nodeIdx1[d], nodeIdx2[d])*orthoTerm;
             }
           }
         }
