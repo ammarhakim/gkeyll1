@@ -151,6 +151,12 @@ archived.
    a single file for all updaters etc. This makes searching and
    indexing easier.
 
+** Create documentation for complex pieces of the code		     :GKEYLL:
+
+   This could be written by hand or typed up. But should be put into
+   the repo and notes on where to find it should be in the code as
+   comments. For example, a lot of the general order, arbitrary
+   dimension code is nearly incomprehensible.
 
 * Gkeyll infrastructure work
 

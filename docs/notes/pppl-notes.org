@@ -10,8 +10,8 @@
   Spent Monday at Peton Hall in meeting for Princeton/Max-Planck
   center.
 
-  Implemented code to compute stiffness matrices. Tested in 1D and
-  seems to work.
+  Implemented code to compute stiffness matrices. Tested in 1D and 2D
+  and seems to work. (Testing was tedious, to say the least).
 
 * November 8th
 

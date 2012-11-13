@@ -101,11 +101,20 @@ namespace Lucee
 /**
  * Fetch stiffness-matrix.
  *
+ * @param dx Grid spacing in each direction
  * @param mMatrix On output, this contains the stiffness matrix. Should be pre-allocated.
  */
-      void getStiffnessMatrix(Lucee::Matrix<double>& mMatrix) const
+      void getStiffnessMatrix(double dx[NDIM], Lucee::Matrix<double>& mMatrix) const
       {
-        mMatrix.copy(stiffMatrix);
+        for (unsigned r=0; r<totalNodes; ++r)
+        {
+          for (unsigned c=0; c<totalNodes; ++c)
+          {
+            mMatrix(r,c) = 0.0;
+            for (unsigned d=0; d<NDIM; ++d)
+              mMatrix(r,c) += 4.0/(dx[d]*dx[d])*stiffMatrix[d](r,c);
+          }
+        }
       }
 
 /**
@@ -255,8 +264,10 @@ namespace Lucee
       Lucee::Matrix<double> massMatrix;
 /** Grad-stiffness matrix */
       Lucee::Matrix<double> gradStiff[NDIM];
-/** Stiffness matrix for element */
-      Lucee::Matrix<double> stiffMatrix;
+/** Stiffness matrix for element: strangely, this is stored
+ * per-direction to allow multiplication by grid space when computing
+ * the full stiffness matrix */
+      Lucee::Matrix<double> stiffMatrix[NDIM];
 
 /** Number of exclusively owned nodes */
       unsigned numExclNodes;
