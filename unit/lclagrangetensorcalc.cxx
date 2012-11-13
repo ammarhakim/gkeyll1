@@ -94,8 +94,9 @@ test_1()
   LC_ASSERT("Tesing lower node numbers", fn[0] == 1);
 
 // stiffness matrices
+  double dx[4] = {2.0, 2.0, 2.0, 2.0};
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
-  basis.getStiffnessMatrix(stiff);
+  basis.getStiffnessMatrix(dx, stiff);
 
   LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(0,0), 0.5));
   LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(0,1), -0.5));
@@ -194,8 +195,9 @@ test_2()
   LC_ASSERT("Tesing lower node numbers", fn[0] == 2);
 
 // stiffness matrices
+  double dx[4] = {2.0, 2.0, 2.0, 2.0};
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
-  basis.getStiffnessMatrix(stiff);
+  basis.getStiffnessMatrix(dx, stiff);
 
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 7.0/6.0, 2e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-4.0)/3.0, 2e-15));
@@ -419,8 +421,9 @@ test_3()
   LC_ASSERT("Tesing lower node numbers", fn[0] == 3);
 
 // stiffness matrices
+  double dx[4] = {2.0, 2.0, 2.0, 2.0};
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
-  basis.getStiffnessMatrix(stiff);
+  basis.getStiffnessMatrix(dx, stiff);
 
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 37.0/20.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-189.0)/80.0, 5e-15));
@@ -743,8 +746,9 @@ test_5()
   LC_ASSERT("Testing face-mass matrix", epsCmp(faceMass(3,1), 2.0/3.0));
 
 // stiffness matrices
+  double dx[4] = {2.0, 2.0, 2.0, 2.0};
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
-  basis.getStiffnessMatrix(stiff);
+  basis.getStiffnessMatrix(dx, stiff);
  
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 2.0/3.0, 5e1-5));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-1.0)/6.0, 5e1-5));
@@ -779,8 +783,9 @@ test_5_3x3()
   LC_ASSERT("Checking number of nodes", basis.getNumNodes() == nn*nn);
   
 // stiffness matrices
+  double dx[4] = {2.0, 2.0, 2.0, 2.0};
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
-  basis.getStiffnessMatrix(stiff);
+  basis.getStiffnessMatrix(dx, stiff);
 
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 28.0/45.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,6), (-1.0)/30.0, 5e-15));

@@ -409,17 +409,17 @@ namespace Lucee
     calcDpDp(dpdp);
 
 // space for matrix
-    stiffMatrix = Lucee::Matrix<double>(totalNodes, totalNodes);
+    for (unsigned d=0; d<NDIM; ++d)
+      stiffMatrix[d] = Lucee::Matrix<double>(totalNodes, totalNodes);
 
 // compute each entry in matrix
     for (unsigned k=0; k<totalNodes; ++k)
     {
       for (unsigned m=0; m<totalNodes; ++m)
       {
-        double entry = 0.0;
-
         for (unsigned d=0; d<NDIM; ++d)
         {
+          double entry = 0.0;
 // double loop over nodal indices to sum up contribution from each
 // basis function at each node
           seq.reset();
@@ -440,9 +440,9 @@ namespace Lucee
               entry += expandCoeff(ix1,k)*expandCoeff(ix2,m)*dpdp(nodeIdx1[d], nodeIdx2[d])*orthoTerm;
             }
           }
-        }
 // set entry in stiffness matrix
-        stiffMatrix(k,m) = entry;
+          stiffMatrix[d](k,m) = entry;
+        }
       }
     }
   }
