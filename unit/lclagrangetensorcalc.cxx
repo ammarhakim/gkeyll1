@@ -92,6 +92,15 @@ test_1()
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
   basis.getSurfUpperNodeNums(0, fn);
   LC_ASSERT("Tesing lower node numbers", fn[0] == 1);
+
+// stiffness matrices
+  Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
+  basis.getStiffnessMatrix(stiff);
+
+  LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(0,0), 0.5));
+  LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(0,1), -0.5));
+  LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(1,0), -0.5));
+  LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(1,1), 0.5));
 }
 
 void
@@ -183,6 +192,20 @@ test_2()
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
   basis.getSurfUpperNodeNums(0, fn);
   LC_ASSERT("Tesing lower node numbers", fn[0] == 2);
+
+// stiffness matrices
+  Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
+  basis.getStiffnessMatrix(stiff);
+
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 7.0/6.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-4.0)/3.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,2), 1.0/6.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,0), (-4.0)/3.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,1), 8.0/3.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,2), (-4.0)/3.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,0), 1.0/6.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,1), (-4.0)/3.0, 2e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,2), 7.0/6.0, 2e-15));
 }
 
 void
@@ -394,6 +417,27 @@ test_3()
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
   basis.getSurfUpperNodeNums(0, fn);
   LC_ASSERT("Tesing lower node numbers", fn[0] == 3);
+
+// stiffness matrices
+  Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
+  basis.getStiffnessMatrix(stiff);
+
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 37.0/20.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-189.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,2), 27.0/40.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,3), (-13.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,0), (-189.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,1), 27.0/5.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,2), (-297.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,3), 27.0/40.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,0), 27.0/40.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,1), (-297.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,2), 27.0/5.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,3), (-189.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,0), (-13.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,1), 27.0/40.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,2), (-189.0)/80.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,3), 37.0/20.0, 5e-15));
 }
 
 void

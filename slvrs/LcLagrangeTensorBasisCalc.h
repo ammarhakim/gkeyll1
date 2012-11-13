@@ -99,6 +99,16 @@ namespace Lucee
       }
 
 /**
+ * Fetch stiffness-matrix.
+ *
+ * @param mMatrix On output, this contains the stiffness matrix. Should be pre-allocated.
+ */
+      void getStiffnessMatrix(Lucee::Matrix<double>& mMatrix) const
+      {
+        mMatrix.copy(stiffMatrix);
+      }
+
+/**
  * Fetch grad-stiffness matrix in specified direction.
  *
  * @param dir Direction in which matrix is required.
@@ -245,6 +255,8 @@ namespace Lucee
       Lucee::Matrix<double> massMatrix;
 /** Grad-stiffness matrix */
       Lucee::Matrix<double> gradStiff[NDIM];
+/** Stiffness matrix for element */
+      Lucee::Matrix<double> stiffMatrix;
 
 /** Number of exclusively owned nodes */
       unsigned numExclNodes;
@@ -303,9 +315,22 @@ namespace Lucee
       void calcFaceMass(unsigned dir);
 
 /**
+ * Compute stiffness matrix.
+ */
+      void calcStiffMatrix();
+
+/**
  * Compute nodal layout.
  */
       void calcBasicData(Node_t type, const unsigned nn[NDIM]);
+
+/**
+ * Compute matrix int_{-1}^{1} P_n'(x) P_m'(x) dx.
+ *
+ * @param dpdp On output, this contains the needed matrix.
+ */
+      void calcDpDp(Lucee::Matrix<double>& dpdp);
+
   };
 }
 
