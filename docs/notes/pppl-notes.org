@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 12-13th
+
+  Spent Monday at Peton Hall in meeting for Princeton/Max-Planck
+  center.
+
+  Implemented code to compute stiffness matrices. Tested in 1D and
+  seems to work.
+
 * November 8th
 
   Completed code to compute face-mass matrices. Not sure if this is

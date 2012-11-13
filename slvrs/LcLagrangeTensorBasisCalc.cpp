@@ -148,6 +148,9 @@ namespace Lucee
 // compute face-mass matrices
     for (unsigned d=0; d<NDIM; ++d)
       calcFaceMass(d);
+
+// compute stiffness matrix
+    calcStiffMatrix();
   }
 
   template <unsigned NDIM>
@@ -169,8 +172,8 @@ namespace Lucee
   {
     for (unsigned d=0; d<NDIM; ++d)
     {
-      Lucee::Vector<double> x(numNodes[d]), w(numNodes[d]);
-      Lucee::gauleg(numNodes[d], -1, 1, x, w); // nodes at Gaussian quadrature points
+      std::vector<double> x(numNodes[d]), w(numNodes[d]);
+      legendre_set(numNodes[d], &x[0], &w[0]); // nodes at Gaussian quadrature points
       for (unsigned i=0; i<numNodes[d]; ++i)
         nodeLocs[d].loc[i] = x[i];
     }
@@ -392,6 +395,59 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  LagrangeTensorBasisCalc<NDIM>::calcStiffMatrix()
+  {
+    Lucee::RowMajorSequencer<NDIM> seq(nodeRgn);
+    Lucee::RowMajorIndexer<NDIM> idx(nodeRgn);
+    int nodeIdx1[NDIM], nodeIdx2[NDIM];
+
+    unsigned nmax = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      nmax = std::max(nmax, numNodes[d]);
+// compute Legendre polynomial derivative matrix
+    Lucee::Matrix<double> dpdp(nmax, nmax);
+    calcDpDp(dpdp);
+
+// space for matrix
+    stiffMatrix = Lucee::Matrix<double>(totalNodes, totalNodes);
+
+// compute each entry in matrix
+    for (unsigned k=0; k<totalNodes; ++k)
+    {
+      for (unsigned m=0; m<totalNodes; ++m)
+      {
+        double entry = 0.0;
+// double loop over nodal indices to sum up the contribution from each
+// basis function at each node
+        seq.reset();
+        while (seq.step())
+        {
+          seq.fillWithIndex(nodeIdx1);
+          seq.fillWithIndex(nodeIdx2);
+          int ix1 = idx.getIndex(nodeIdx1);
+
+          for (unsigned ia=0; ia<totalNodes; ++ia)
+          {
+            for (unsigned d=0; d<NDIM; ++d)
+            {
+              nodeIdx2[d] = ia;
+              int ix2 = idx.getIndex(nodeIdx2);
+              double prod = expandCoeff(ix1,k)*expandCoeff(ix2,m)*dpdp(nodeIdx1[d], nodeIdx2[d]);
+              for (unsigned dd=0; dd<NDIM; ++dd)
+                if (d != dd)
+                  prod *= 2.0/(2*nodeIdx1[dd]+1.0);
+              entry += prod;
+            }
+          }
+        }
+// set entry in stiffness matrix
+        stiffMatrix(k,m) = entry;
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
   LagrangeTensorBasisCalc<NDIM>::calcBasicData(Node_t type, const unsigned nn[NDIM])
   {
 // copy over basic data
@@ -486,6 +542,36 @@ namespace Lucee
 
 // invert system to get expansion coefficients
     Lucee::solve(coeffMat, expandCoeff);
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcDpDp(Lucee::Matrix<double>& dpdp)
+  {
+    unsigned nmax = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      nmax = std::max(nmax, numNodes[d]);
+// compute nodes and weights
+    std::vector<double> x(nmax), w(nmax);
+    legendre_set(nmax, &x[0], &w[0]);
+
+// get P_n'(x) at each quadrature node
+    Lucee::Matrix<double> dp(nmax, nmax);
+    for (unsigned p=0; p<nmax; ++p)
+      for (unsigned j=0; j<nmax; ++j)
+        dp(p,j) = Lucee::legendrePolyDeriv(p, x[j]);
+
+// compute matrix entries
+    for (unsigned r=0; r<nmax; ++r)
+    {
+      for (unsigned c=0; c<nmax; ++c)
+      {
+        double entry = 0.0;
+        for (unsigned n=0; n<nmax; ++n)
+          entry += w[n]*dp(r,n)*dp(c,n);
+        dpdp(r,c) = entry;
+      }
+    }
   }
 
 // instantiations
