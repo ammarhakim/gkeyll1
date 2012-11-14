@@ -115,6 +115,9 @@ namespace Lucee
       }
     }
 
+// store exclusively owned node indices
+    basisCalc.getExclusiveNodeIndices(exclusiveNodes);
+
 // initialize number of local nodes
     unsigned nlocal = basisCalc.getNumNodes();
     this->setNumNodes(nlocal);
@@ -246,7 +249,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
-    basisCalc.getExclusiveNodeIndices(ndIds);
+    ndIds = exclusiveNodes;
   }
 
   template <unsigned NDIM>
@@ -432,7 +435,7 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::extractFromField(fld, data);
+    return Lucee::NodalFiniteElementIfc<NDIM>::extractFromField(fld, data);    
   }
 
   template <unsigned NDIM>
