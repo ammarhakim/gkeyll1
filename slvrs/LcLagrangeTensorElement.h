@@ -298,6 +298,8 @@ namespace Lucee
 
 /** Number of nodes in each direction */
       unsigned numNodes[NDIM];
+/** Indices of exclusively owned nodes */
+      std::vector<int> exclusiveNodes;
 /** Sequencer for looping over nodes */
       mutable Lucee::RowMajorSequencer<NDIM> nodeSeq;
 /** Indexer for global to local mapping */
