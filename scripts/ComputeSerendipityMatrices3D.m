@@ -9,25 +9,37 @@ close all
 % Corners of the 3-D Arbitrary six faced element
 % quadList  = {[-2,-1,-1],[1.5,-2,-2],[2,1,0],[-1,2,0],...
 %              [-2,-1,2],[1.5,-2,1],[2,1,3],[-1,2,1]};
+syms x y z f
+bilinearVector = sym(zeros(4,1));
 quadList  = {[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],...
              [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]};
+% Functions to compute jacobian of quadrilateral transformation
+% Again, CCW convention starting with bottom left node is followed
+bilinearVector(1) = (x*y)/8 - y/8 - z/8 - x/8 + (x*z)/8 + (y*z)/8 - (x*y*z)/8 + 1/8;
+bilinearVector(2) = x/8 - y/8 - z/8 - (x*y)/8 - (x*z)/8 + (y*z)/8 + (x*y*z)/8 + 1/8;
+bilinearVector(3) = x/8 + y/8 - z/8 + (x*y)/8 - (x*z)/8 - (y*z)/8 - (x*y*z)/8 + 1/8;
+bilinearVector(4) = y/8 - x/8 - z/8 - (x*y)/8 + (x*z)/8 - (y*z)/8 + (x*y*z)/8 + 1/8;
+bilinearVector(5) = z/8 - y/8 - x/8 + (x*y)/8 - (x*z)/8 - (y*z)/8 + (x*y*z)/8 + 1/8;
+bilinearVector(6) = x/8 - y/8 + z/8 - (x*y)/8 + (x*z)/8 - (y*z)/8 - (x*y*z)/8 + 1/8;
+bilinearVector(7) = x/8 + y/8 + z/8 + (x*y)/8 + (x*z)/8 + (y*z)/8 + (x*y*z)/8 + 1/8;
+bilinearVector(8) = y/8 - x/8 + z/8 - (x*y)/8 - (x*z)/8 + (y*z)/8 - (x*y*z)/8 + 1/8;
 
 dim       = 3;
 
-% nodeList  = {[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],...
-%              [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]};
-% degree    = 1; % (r) This is tied to nodeList!
+nodeList  = {[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],...
+             [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]};
+degree    = 1; % (r) This is tied to nodeList!
 % nodeList  = {[-1,-1,-1],[0,-1,-1],[1,-1,-1],[1,0,-1],[1,1,-1],[0,1,-1],[-1,1,-1],[-1,0,-1],...% End of Bottom Layer
 %              [-1,-1,0],[1,-1,0],[1,1,0],[-1,1,0],...% End of Middle Layer
 %              [-1,-1,1],[0,-1,1],[1,-1,1],[1,0,1],[1,1,1],[0,1,1],[-1,1,1],[-1,0,1]};% End of Top Layer
 % degree    = 2; % (r) This is tied to nodeList!
-nodeList  = {[-1,-1,-1],[-1/3,-1,-1],[1/3,-1,-1],[1,-1,-1],[1,-1/3,-1],[1,1/3,-1],[1,1,-1],...
-                [1/3,1,-1],[-1/3,1,-1],[-1,1,-1],[-1,1/3,-1],[-1,-1/3,-1],... End of Bottom Layer
-                [-1,-1,-1/3],[1,-1,-1/3],[1,1,-1/3],[-1,1,-1/3],... % End of 2nd Layer
-                [-1,-1,1/3],[1,-1,1/3],[1,1,1/3],[-1,1,1/3],... % 3rd Layer
-                [-1,-1,1],[-1/3,-1,1],[1/3,-1,1],[1,-1,1],[1,-1/3,1],[1,1/3,1],[1,1,1],...
-                [1/3,1,1],[-1/3,1,1],[-1,1,1],[-1,1/3,1],[-1,-1/3,1]}; % End of Top Layer
-degree    = 3; % (r) This is tied to nodeList!
+% nodeList  = {[-1,-1,-1],[-1/3,-1,-1],[1/3,-1,-1],[1,-1,-1],[1,-1/3,-1],[1,1/3,-1],[1,1,-1],...
+%                 [1/3,1,-1],[-1/3,1,-1],[-1,1,-1],[-1,1/3,-1],[-1,-1/3,-1],... End of Bottom Layer
+%                 [-1,-1,-1/3],[1,-1,-1/3],[1,1,-1/3],[-1,1,-1/3],... % End of 2nd Layer
+%                 [-1,-1,1/3],[1,-1,1/3],[1,1,1/3],[-1,1,1/3],... % 3rd Layer
+%                 [-1,-1,1],[-1/3,-1,1],[1/3,-1,1],[1,-1,1],[1,-1/3,1],[1,1/3,1],[1,1,1],...
+%                 [1/3,1,1],[-1/3,1,1],[-1,1,1],[-1,1/3,1],[-1,-1/3,1]}; % End of Top Layer
+% degree    = 3; % (r) This is tied to nodeList!
 basisList = {};
 
 % % Plot the Nodes in 3D
@@ -53,22 +65,22 @@ basisList = {};
 % scatter3(xPointsArb,yPointsArb,zPointsArb,'r')
 % hold off
 
-% Figure out where the corner nodes are (arbitrary dimension)
-% put these indices in the vector refCorners
-distanceVector = zeros(length(nodeList),1); % Distance from origin squared
-for nodeIndex = 1:length(nodeList)
-    tempNode = nodeList{nodeIndex};
-    distanceVector(nodeIndex) = sum(tempNode.^2);
-end
-maxDistance = max(distanceVector);
-refCorners = zeros(length(quadList),1);
-refIndex = 1;
-for nodeIndex = 1:length(nodeList)
-    if sum(nodeList{nodeIndex}.^2) == maxDistance
-        refCorners(refIndex) = nodeIndex;
-        refIndex = refIndex + 1;
-    end
-end
+% % Figure out where the corner nodes are (arbitrary dimension)
+% % put these indices in the vector refCorners
+% distanceVector = zeros(length(nodeList),1); % Distance from origin squared
+% for nodeIndex = 1:length(nodeList)
+%     tempNode = nodeList{nodeIndex};
+%     distanceVector(nodeIndex) = sum(tempNode.^2);
+% end
+% maxDistance = max(distanceVector);
+% refCorners = zeros(length(quadList),1);
+% refIndex = 1;
+% for nodeIndex = 1:length(nodeList)
+%     if sum(nodeList{nodeIndex}.^2) == maxDistance
+%         refCorners(refIndex) = nodeIndex;
+%         refIndex = refIndex + 1;
+%     end
+% end
 
 % Create basis monomials
 for zIndex = 0:degree
@@ -103,7 +115,6 @@ coeffMatrixInv = inv(coeffMatrix);
 % Create the symbolic functions of x, y, and z using the computed coefficients
 % and put them in functionVector
 coeffMatrixInv = sym(coeffMatrixInv);
-syms x y z f
 functionVector = sym(zeros(size(coeffMatrixInv,2),1));
 for basisIndex = 1:size(coeffMatrixInv,2)
     f = 0;
@@ -127,7 +138,7 @@ end
 transformationMatrix = sym(zeros(dim,1));
 for nodeIndex = 1:length(quadList)
     for dimIndex = 1:dim
-        transformationMatrix(dimIndex,1) = quadList{nodeIndex}(dimIndex)*functionVector(refCorners(nodeIndex)) + transformationMatrix(dimIndex,1);
+        transformationMatrix(dimIndex,1) = quadList{nodeIndex}(dimIndex)*bilinearVector(nodeIndex) + transformationMatrix(dimIndex,1);
     end
 end
 jacobianDet = det(jacobian(transformationMatrix));
@@ -146,6 +157,45 @@ jacobianMatrix = jacobian(functionVector); % First column is dx, second column i
 %         massMatrix(kIndex,mIndex) = f;
 %     end
 % end
+
+% Evaluate face mass matrix on x = -1, +1
+faceMassMatrix_Xm = zeros(length(functionVector),length(functionVector));
+faceMassMatrix_Xp = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+        f = int(f, y, -1, 1);
+        f = int(f, z, -1, 1);
+        faceMassMatrix_Xm(kIndex,mIndex) = subs(f,x,-1);
+        faceMassMatrix_Xp(kIndex,mIndex) = subs(f,x,1);
+    end
+end
+
+% Evaluate face mass matrix on y = -1, +1
+faceMassMatrix_Ym = zeros(length(functionVector),length(functionVector));
+faceMassMatrix_Yp = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, z, -1, 1);
+        faceMassMatrix_Ym(kIndex,mIndex) = subs(f,y,-1);
+        faceMassMatrix_Yp(kIndex,mIndex) = subs(f,y,1);
+    end
+end
+
+% Evaluate face mass matrix on z = -1, +1
+faceMassMatrix_Zm = zeros(length(functionVector),length(functionVector));
+faceMassMatrix_Zp = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, y, -1, 1);
+        faceMassMatrix_Zm(kIndex,mIndex) = subs(f,z,-1);
+        faceMassMatrix_Zp(kIndex,mIndex) = subs(f,z,1);
+    end
+end
 
 % % Evaluate K matrix
 % kMatrix = zeros(length(functionVector),length(functionVector));
