@@ -29,20 +29,7 @@ archived.
    way current Lua code need not be changed. Should be easier than
    fixing all the Lua scripts.
 
-** Write draft of first paper on Gkeyll				       :PUBS:
-
-   Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and
-   show particle and energy conservation and non conservation of
-   momentum. Perhaps implement positivity in the mean. Put in
-   Lenard-Bernstein collision operator.
-
-   To complete the things needed the paper following need to be done.
-
-*** Add collisions to the Vlasov-Poisson solver
-*** Figure out the exact dispersion relation for ion-acoustic waves
-*** Do the case of discontinuous potential for ion-acoustic waves
-
-** Implement moment based modal limiters in Gkeyll 1D solver	     :GKEYLL:
+** Implement moment based modal limiters in Gkeyll 1D solver 	     :GKEYLL:
 
    Compare with the Nair book notes and figure out why Seth's code is
    diffusive. Perhaps there is something missing in their description
@@ -56,14 +43,7 @@ archived.
 
    Wall BCs are probably the ones needed for now.
 
-** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
-
-   A large number of matrices and other information is needed from FE
-   basis functions for use in different parts of the code. Document
-   these and explain why they are needed. This will also help creation
-   of the general class to do this for general quad/hex/tri/tet cells.
-
-** Work out generic kinetic equation updater			     :GKEYLL:
+** Work out generic kinetic equation updater 			     :GKEYLL:
 
    Formulate the scheme for generic kinetic equations. Use
    characteristic computed externally.
@@ -87,23 +67,6 @@ archived.
 
    Do not use Lobatton quadrature as it could be problematic when
    integrating nonlinear fields.
-
-** Write JE on using nodal DG to solve auxilary equations	     :GKEYLL:
-
-   There are a lot of problems one can do with the ability to include
-   auxiliary variables. Do advection in 1D advection-diffusion and
-   also a advection-diffusion in 2D (transverse propagation,
-   solid-body rotation with and without diffusion). This could be
-   called "Advection-Diffusion with Nodal DG and Auxiliary Variables".
-
-** Write JE on nodal DG updater with advection and Euler equations   :GKEYLL:
-
-   Check convergence of 2nd and 3rd order method, do 2D problem and
-   also do 1D Euler shock problems. For now there will be no limiters,
-   but this should be okay.
-
-   This should also include the local DG for diffusion terms and an
-   example of advection in a specified velocity field.
 
 ** Figure out a way to do sources in a modular manner		     :GKEYLL:
 
@@ -139,6 +102,61 @@ archived.
 
    At present only direct solves work. Need to fix this.
 
+
+* Gkeyll documentation
+
+  This is for writing journal notes and other documentation related
+  tasks.
+
+** Write draft of first paper on Gkeyll				       :PUBS:
+
+   Aim to solve Vlasov-Poisson/Quasineutral equations in 1D/1V and
+   show particle and energy conservation and non conservation of
+   momentum. Perhaps implement positivity in the mean. Put in
+   Lenard-Bernstein collision operator.
+
+   To complete the things needed the paper following need to be done.
+
+*** Add collisions to the Vlasov-Poisson solver
+*** Figure out the exact dispersion relation for ion-acoustic waves
+*** Do the case of discontinuous potential for ion-acoustic waves
+
+** Write notes on basis functions for use in FEM schemes	     :GKEYLL:
+
+   A large number of matrices and other information is needed from FE
+   basis functions for use in different parts of the code. Document
+   these and explain why they are needed. This will also help creation
+   of the general class to do this for general quad/hex/tri/tet cells.
+
+** Make list of all updaters, datastructs, grids in Lucee.	     :GKEYLL:
+
+   This will give some idea on what exists now and what needs to be
+   documented. Also, some code can then be removed based on this
+   master list.
+
+** Write JE on testing existing nodal DG scheme			     :GKEYLL:
+
+   Without limiters and in 2D and 3D with advection, Maxwell and Euler
+   equations. This will prep the way for two-fluid solutions.
+
+   Also show tests with auxilary variables. Do advection in 1D
+   advection-diffusion and also a advection-diffusion in 2D
+   (transverse propagation, solid-body rotation with and without
+   diffusion).
+   
+** Split each updater/datastruct docs into its own file 	     :GKEYLL:
+
+   I need to document each updater, datastructure and grid object
+   currently in Gkeyll. Each should be in its own RST file rather than
+   a single file for all updaters etc. This makes searching and
+   indexing easier.
+
+** Create documentation for complex pieces of the code		     :GKEYLL:
+
+   This could be written by hand or typed up. But should be put into
+   the repo and notes on where to find it should be in the code as
+   comments. For example, a lot of the general order, arbitrary
+   dimension code is nearly incomprehensible.
 
 * Gkeyll infrastructure work
 
@@ -236,13 +254,6 @@ archived.
 
 ** Why does Lua script not have access to command line options?	      :INFRA:
 
-** Split each updater/datastruct docs into its own file 	     :GKEYLL:
-
-   I need to document each updater, datastructure and grid object
-   currently in Gkeyll. Each should be in its own RST file rather than
-   a single file for all updaters etc. This makes searching and
-   indexing easier.
-
 ** Transition to eigen matrix package				      :INFRA:
 
    Get rid of the Lucee::Matrix, Lucee::Vector and Lucee::Vec3 classes
@@ -272,13 +283,6 @@ archived.
    These fields can not be written out, it seems. This needs to be
    fixed. Perhaps this should wait till the transition to Blitz::Array
    is done?
-
-** Make list of all updaters, datastructs, grids in Lucee.	     :GKEYLL:
-
-   This will give some idea on what exists now and what needs to be
-   documented. Also, some code can then be removed based on this
-   master list.
-
 
 
 * Work related

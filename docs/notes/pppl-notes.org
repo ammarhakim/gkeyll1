@@ -5,6 +5,25 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 12-13th
+
+  Spent Monday at Peton Hall in meeting for Princeton/Max-Planck
+  center.
+
+  Implemented code to compute stiffness matrices. Tested in 1D and 2D
+  and seems to work. (Testing was tedious, to say the least).
+
+* November 8th
+
+  Completed code to compute face-mass matrices. Not sure if this is
+  the correct way to do things, but will be testing soon in 2D/3D.
+
+  The code is barfing on a simple test case. Need to figure out
+  why. [FIXED: was a memory allocation error]
+
+  Did advection test in 2D and 3D. Miraculously, worked the first
+  time.
+
 * November 7th
 
   Added the quadrule library (just one header and one C file) to
