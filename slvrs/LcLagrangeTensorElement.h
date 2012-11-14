@@ -29,7 +29,7 @@ namespace Lucee
       static const char *id;
 
 /**
- * Create a new serendipity element. This does not create a usable
+ * Create a new Lagrange tensor element. This does not create a usable
  * object which can only be created from Lua.
  */
       LagrangeTensorElement();
@@ -302,6 +302,20 @@ namespace Lucee
       mutable Lucee::RowMajorSequencer<NDIM> nodeSeq;
 /** Indexer for global to local mapping */
       Lucee::RowMajorIndexer<NDIM> local2Global;
+
+/**
+ * Struct to store indexes of nodes on a face
+ */
+      struct FaceIndices
+      {
+          std::vector<std::vector<int> > indices;
+      };
+
+/** List of nodes on lower surface */
+      FaceIndices lowerIndices[NDIM];
+/** List of nodes on upper surface */
+      FaceIndices upperIndices[NDIM];
+
 /** Nodal coordinates relative to lower-left vertex */
       Lucee::Matrix<double> localNodeCoords;
 /** Nodal layout */
@@ -310,13 +324,13 @@ namespace Lucee
       unsigned numGlobalNodes;
 /** Mass matrix */
       Lucee::Matrix<double> mass;
-/** Grad-stiffness matrix */
-      Lucee::Matrix<double> gradStiff[NDIM];
 /** Stiffness matrix */
       Lucee::Matrix<double> stiff;
+/** Grad-stiffness matrix */
+      Lucee::Matrix<double> gradStiff[NDIM];
 /** Lower face mass-matrix */
       Lucee::Matrix<double> lowerFace[NDIM];
-/** Upepr face mass-matrix */
+/** Upper face mass-matrix */
       Lucee::Matrix<double> upperFace[NDIM];
   };
 }

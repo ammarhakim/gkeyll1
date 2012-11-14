@@ -89,7 +89,31 @@ namespace Lucee
       lower[d] = 0;
       upper[d] = numNodes[d];
     }
-    nodeSeq = Lucee::RowMajorSequencer<NDIM>(Lucee::Region<NDIM, int>(lower, upper));
+    Lucee::Region<NDIM, int> nodeRgn(lower, upper);
+    nodeSeq = Lucee::RowMajorSequencer<NDIM>(nodeRgn);
+
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      std::vector<int> idx(NDIM);
+
+// lower face indices
+      Lucee::RowMajorSequencer<NDIM> lowerSeq(
+        nodeRgn.resetBounds(d, nodeRgn.getLower(d), nodeRgn.getLower(0)+1));
+      while (lowerSeq.step())
+      {
+        lowerSeq.fillWithIndex(&idx[0]);
+        lowerIndices[d].indices.push_back(idx);
+      }
+
+// upper face indices
+      Lucee::RowMajorSequencer<NDIM> upperSeq(
+        nodeRgn.resetBounds(d, nodeRgn.getUpper(d), nodeRgn.getUpper(0)-1));
+      while (upperSeq.step())
+      {
+        upperSeq.fillWithIndex(&idx[0]);
+        upperIndices[d].indices.push_back(idx);
+      }
+    }
 
 // initialize number of local nodes
     unsigned nlocal = basisCalc.getNumNodes();
@@ -169,8 +193,8 @@ namespace Lucee
       upperFace[d] = Lucee::Matrix<double>(nlocal, nf);
       basisCalc.getUpperFaceMassMatrix(d, upperFace[d]);
 
-// compute factor to bring into physical space: this is propotional to
-// the area of face normal to direction 'd'.
+// compute factor to bring into physical space: this is promotional to
+// area of face normal to direction 'd'.
       double fact = 1.0;
       for (unsigned dd=0; dd<NDIM; ++dd)
         if (dd != d)
@@ -181,7 +205,9 @@ namespace Lucee
       upperFace[d] *= fact;
     }
 
-// TODO: STIFFNESS MATRIX
+// stiffness matrix
+    stiff = Lucee::Matrix<double>(nlocal, nlocal);
+    basisCalc.getStiffnessMatrix(dx, stiff);
 
     double eta[NDIM];
 // compute coordinates of nodes relative to lower-left vertex
@@ -243,14 +269,28 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getSurfLowerLocalToGlobal(unsigned dir, std::vector<int>& lgMap) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfLowerLocalToGlobal(dir, lgMap);
+    int idx[NDIM];
+    unsigned count = 0;
+    for (unsigned n=0; n<lowerIndices[dir].indices.size(); ++n)
+    {
+      for (unsigned d=0; d<NDIM; ++d)
+        idx[d] = this->currIdx[d] + lowerIndices[dir].indices[n][d];
+      lgMap[count++] = local2Global.getIndex(idx);
+    }
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::getSurfUpperLocalToGlobal(unsigned dir, std::vector<int>& lgMap) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfUpperLocalToGlobal(dir, lgMap);
+    int idx[NDIM];
+    unsigned count = 0;
+    for (unsigned n=0; n<upperIndices[dir].indices.size(); ++n)
+    {
+      for (unsigned d=0; d<NDIM; ++d)
+        idx[d] = this->currIdx[d] + upperIndices[dir].indices[n][d];
+      lgMap[count++] = local2Global.getIndex(idx);
+    }
   }
 
   template <unsigned NDIM>
@@ -332,7 +372,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(DNjDNk);
+    DNjDNk.copy(stiff);
   }
 
   template <unsigned NDIM>

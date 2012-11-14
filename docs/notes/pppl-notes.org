@@ -13,6 +13,11 @@
   Implemented code to compute stiffness matrices. Tested in 1D and 2D
   and seems to work. (Testing was tedious, to say the least).
 
+** Need to implement surface local->global mapping
+
+   Turns out that these mappings are still incomplete. Should be
+   simple, I think, but perhaps not.
+
 * November 8th
 
   Completed code to compute face-mass matrices. Not sure if this is
