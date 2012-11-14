@@ -290,8 +290,7 @@
   To discretize the equations introduce a triangulation $K_\nu$ of the
   domain $K$. Pick a finite-dimensional function space
   \begin{align*}
-    \mathcal{V}^k_m(K) \equiv \{w: w|_{K_\nu} \in P^k(K_\nu) \cap
-    C^m\}
+    \mathcal{V}^k_m(K) \equiv \{w: w|_{K_\nu} \in P^k(K_\nu) \} \cap C^m
   \end{align*}
   where $P^k(K_\nu)$ is the space of polynomials of order at most $k$
   on the element $K_\nu$. Then the discrete problem is stated as: find
@@ -339,7 +338,7 @@
   Liu and Shu\footfullcite{liu-shu-2000} have shown that discrete
   energy is conserved for 2D incompressible flow if
   \begin{align*}
-    \phi_h \in \mathcal{V}_1^k \subseteq f_h \in \mathcal{V}^k_{-1}
+    \phi_h \in \mathcal{V}_0^k \subseteq f_h \in \mathcal{V}^k_{-1}
   \end{align*}
   Enstrophy (generalized entropy) is conserved if \emph{central
     fluxes} are used in the DG scheme. With upwind fluxes, enstrophy
