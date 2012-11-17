@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 16th
+
+  Completed Largrange tensor element code to compute local->global
+  mapping, copyAllDataFromField and copyAllDataToField and related
+  methods. These methods were far more tricky than I initially
+  thought, but this is now complete and tested.
+
 * November 12-13th
 
   Spent Monday at Peton Hall in meeting for Princeton/Max-Planck
