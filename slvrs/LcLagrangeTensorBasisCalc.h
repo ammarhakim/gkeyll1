@@ -204,6 +204,19 @@ namespace Lucee
       }
 
 /**
+ * Get NDIM indices of nodes exclusively owned by each cell.
+ *
+ * @param ndIds On output indices. Vector is cleared and data filled in.
+ */
+      void getExclusiveNodeNdimIndices(std::vector<std::vector<int> >& ndIds)
+      {
+        ndIds.clear();
+        ndIds.resize(exclNodesIndices.size());
+        for (unsigned i=0; i<exclNodesIndices.size(); ++i)
+          ndIds[i] = exclNodesIndices[i];
+      }
+
+/**
  * Get node numbers of the nodes on specified face of element. The
  * output vector must be pre-allocated.
  *
@@ -273,6 +286,8 @@ namespace Lucee
       unsigned numExclNodes;
 /** Indices of exclusively owned nodes */
       std::vector<int> exclNodes;
+/** NDIM Indices of exclusively owned nodes */
+      std::vector<std::vector<int> > exclNodesIndices;
 
 /** Structure to hold node list for surface nodes */
       struct NodeList
