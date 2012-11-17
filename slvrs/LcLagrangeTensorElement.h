@@ -304,19 +304,23 @@ namespace Lucee
       mutable Lucee::RowMajorSequencer<NDIM> nodeSeq;
 /** Indexer for global to local mapping */
       Lucee::RowMajorIndexer<NDIM> local2Global;
+/** Strides for use in glocal to local mapping */
+      unsigned lgStrides[NDIM];
 
 /**
- * Struct to store indexes of nodes on a face
+ * Struct to store list of indexices
  */
-      struct FaceIndices
+      struct IndexList
       {
           std::vector<std::vector<int> > indices;
       };
 
-/** List of nodes on lower surface */
-      FaceIndices lowerIndices[NDIM];
-/** List of nodes on upper surface */
-      FaceIndices upperIndices[NDIM];
+/** List of node indices on lower surface */
+      IndexList lowerIndices[NDIM];
+/** List of node indices on upper surface */
+      IndexList upperIndices[NDIM];
+/** List of exclusively owned node indices */
+      IndexList exclusiveNodeIndices;
 
 /** Nodal coordinates relative to lower-left vertex */
       Lucee::Matrix<double> localNodeCoords;

@@ -48,7 +48,7 @@ archived.
    Formulate the scheme for generic kinetic equations. Use
    characteristic computed externally.
 
-** Write HyperEqn for collisions with LB operator, write JE 	     :GKEYLL:
+** Write HyperEqn for collisions with LB operator 	             :GKEYLL:
 
    Unify the advection and diffusion updates needed in the LB operator
    into a single equation. Write JE on stand-alone collision operator
@@ -89,12 +89,6 @@ archived.
    The comparison in JE15 with exact solutions is not complete. Looks
    like a problem with normalization. Also, the dispersion relation
    probably needs to be rederived for this case.
-
-** Generalize PoissonBracket updater				     :GKEYLL:
-
-   Allow this to work in arbitrary dimensions, with updateDirs
-   specified as an input. This will allow doing multiple dimension
-   solves using a splitting scheme.
 
 ** Write limiter for nodal DG					     :GKEYLL:
 
@@ -143,6 +137,10 @@ archived.
    advection-diffusion and also a advection-diffusion in 2D
    (transverse propagation, solid-body rotation with and without
    diffusion).
+
+** Write JE on collision operator				     :GKEYLL:
+
+   Test and document use of collision operator class.
    
 ** Split each updater/datastruct docs into its own file 	     :GKEYLL:
 

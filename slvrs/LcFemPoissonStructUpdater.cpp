@@ -154,6 +154,11 @@ namespace Lucee
         }
       }
     }
+
+// check if stiffness matrix should be written out
+    writeMatrix = false;
+    if (tbl.hasBool("writeStiffnessMatrix"))
+      writeMatrix = tbl.getBool("writeStiffnessMatrix");
   }
 
   template <unsigned NDIM>
@@ -483,10 +488,15 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-//     PetscViewer lab;
-//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
-//     PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
-//     MatView(stiffMat, lab);
+    if (writeMatrix)
+    {
+      std::string outName = Loki::SingletonHolder<Lucee::Globals>
+        ::Instance().outPrefix + "-poisson-stiffnessMatrix";
+      PetscViewer lab;
+      PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      MatView(stiffMat, lab);
+    }
 
 //  finalize assembly
     VecAssemblyBegin(globalSrc);
