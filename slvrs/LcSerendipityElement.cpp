@@ -291,7 +291,8 @@ namespace Lucee
   SerendipityElement<NDIM>::setupMatrices()
   {
     // Get hold of grid
-    const Lucee::StructuredGridBase<2>& grid = this->template getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     // Get grid spacing (this is assumed to be uniform for now)
     double dx = grid.getDx(0);
     double dy = grid.getDx(1);
