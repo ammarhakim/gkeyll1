@@ -29,6 +29,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
+#include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
@@ -111,6 +112,13 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<3>, Lucee::LagrangeTensorElement<3> >;
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<4>, Lucee::LagrangeTensorElement<4> >;
     new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<5>, Lucee::LagrangeTensorElement<5> >;
+
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::SerendipityElement<1> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement<2> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<3>, Lucee::SerendipityElement<3> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<4>, Lucee::SerendipityElement<4> >;
+    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<5>, Lucee::SerendipityElement<5> >;
+
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
