@@ -63,6 +63,15 @@ test_4()
   std::cout << A << std::endl;
 }
 
+void
+test_5()
+{
+  blitz::TinyVector<float, 3> shape;
+  shape = 5.0;
+  shape[0] = 0.0;
+  std::cout << shape << std::endl;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -70,5 +79,6 @@ main(int argc, char *argv[])
   test_2();
   test_3();
   test_4();
+  test_5();
   return 0;
 }
