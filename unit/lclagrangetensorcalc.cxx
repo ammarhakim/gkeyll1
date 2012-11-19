@@ -83,6 +83,14 @@ test_1()
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 1);
   LC_ASSERT("Testing exclusive indices", en[0] == 0);
 
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+  
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 1);
+  LC_ASSERT("Testing number of exclusive nodes", eni[0].size() == 1);
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+
   std::vector<int> fn;
 
   LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 1);
@@ -183,6 +191,15 @@ test_2()
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 2);
   LC_ASSERT("Testing exclusive indices", en[0] == 0);
   LC_ASSERT("Testing exclusive indices", en[1] == 1);
+
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+  
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 2);
+  LC_ASSERT("Testing number of exclusive nodes", eni[0].size() == 1);
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[1][0] == 1);
 
   std::vector<int> fn;
 
@@ -409,6 +426,15 @@ test_3()
   LC_ASSERT("Testing exclusive indices", en[0] == 0);
   LC_ASSERT("Testing exclusive indices", en[1] == 1);
   LC_ASSERT("Testing exclusive indices", en[2] == 2);
+
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+  
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 3);
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[1][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[2][0] == 2);
 
   std::vector<int> fn;
 
@@ -668,6 +694,15 @@ test_5()
   LC_ASSERT("Testing number of exclusive nodes", en.size() == 1);
   LC_ASSERT("Testing exclusive indices", en[0] == 0);
 
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+  
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 1);
+  LC_ASSERT("Testing number of exclusive nodes", eni[0].size() == 2);
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[0][1] == 0);
+
   std::vector<int> fn;
 
   LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 2);
@@ -876,6 +911,25 @@ test_5_3x3()
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(4,5), (-16.0)/15.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(4,1), (-16.0)/15.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(4,4), 256.0/45.0, 5e-15));
+
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+  
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 4);
+  LC_ASSERT("Testing number of exclusive nodes", eni[0].size() == 2);
+
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[0][1] == 0);
+
+  LC_ASSERT("Testing exclusive indices", eni[1][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[1][1] == 1);
+
+  LC_ASSERT("Testing exclusive indices", eni[2][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[2][1] == 0);
+
+  LC_ASSERT("Testing exclusive indices", eni[3][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[3][1] == 1);
 }
 
 void
@@ -927,6 +981,7 @@ test_6()
       nIdx += 1;
     }
   }
+
 }
 
 void
@@ -1023,6 +1078,40 @@ test_6_u()
   LC_ASSERT("Tesing lower node numbers", fn[1] == 7);
   LC_ASSERT("Tesing lower node numbers", fn[2] == 11);
   LC_ASSERT("Tesing lower node numbers", fn[3] == 15);
+
+// list of indices
+  std::vector<std::vector<int> > eni;
+  basis.getExclusiveNodeNdimIndices(eni);
+
+  LC_ASSERT("Testing number of exclusive nodes", eni.size() == 9);
+  LC_ASSERT("Testing number of exclusive nodes", eni[0].size() == 2);
+
+  LC_ASSERT("Testing exclusive indices", eni[0][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[0][1] == 0);
+
+  LC_ASSERT("Testing exclusive indices", eni[1][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[1][1] == 1);
+
+  LC_ASSERT("Testing exclusive indices", eni[2][0] == 0);
+  LC_ASSERT("Testing exclusive indices", eni[2][1] == 2);
+
+  LC_ASSERT("Testing exclusive indices", eni[3][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[3][1] == 0);
+
+  LC_ASSERT("Testing exclusive indices", eni[4][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[4][1] == 1);
+
+  LC_ASSERT("Testing exclusive indices", eni[5][0] == 1);
+  LC_ASSERT("Testing exclusive indices", eni[5][1] == 2);
+
+  LC_ASSERT("Testing exclusive indices", eni[6][0] == 2);
+  LC_ASSERT("Testing exclusive indices", eni[6][1] == 0);
+
+  LC_ASSERT("Testing exclusive indices", eni[7][0] == 2);
+  LC_ASSERT("Testing exclusive indices", eni[7][1] == 1);
+
+  LC_ASSERT("Testing exclusive indices", eni[8][0] == 2);
+  LC_ASSERT("Testing exclusive indices", eni[8][1] == 2);
 }
 
 void
