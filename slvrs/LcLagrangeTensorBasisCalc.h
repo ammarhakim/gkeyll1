@@ -306,6 +306,13 @@ namespace Lucee
 /** Upper face mass matrices */
       Lucee::Matrix<double> upperFaceMass[NDIM];
 
+/** Interpolation matrix for volume integral */
+      Lucee::Matrix<double> volumeGaussInterp;
+/** Ordinates for volume interpolation */
+      Lucee::Matrix<double> voumeGaussOrdinates;
+/** Weights for volume interpolation */
+      std::vector<double> voumeGaussWeights;
+
 /**
  * Create nodes located at Lobatto quadrature points.
  */
@@ -357,6 +364,41 @@ namespace Lucee
  */
       void calcDpDp(Lucee::Matrix<double>& dpdp);
 
+/**
+ * Compute volume quadrature data.
+ */
+      void calcVolumeQuad();
+  };
+
+// Explicitly instantiate NDIM=0 case to void compiler barfs. This is
+// a rather horrible hack but I do not at present see a way around
+// this. (Ammar Hakim, November 19th 2012)
+  template <>
+  class LagrangeTensorBasisCalc<0>
+  {
+    public:
+      void calcFaceMass(unsigned dir)
+      {
+// deliberately empty
+      }
+
+      void calcBasicData(Node_t type, const unsigned nn[])
+      {
+// deliberately empty
+      }
+
+      void calcMassMatrix()
+      {
+// deliberately empty
+      }
+
+      unsigned getNumNodes() const
+      { return 0; }
+
+      void getMassMatrix(Lucee::Matrix<double>& mMatrix) const
+      {
+// deliberately empty
+      }
   };
 }
 

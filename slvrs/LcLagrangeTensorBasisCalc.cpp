@@ -155,6 +155,9 @@ namespace Lucee
 
 // compute stiffness matrix
     calcStiffMatrix();
+
+// compute quadrature data
+    calcVolumeQuad();
   }
 
   template <unsigned NDIM>
@@ -323,16 +326,6 @@ namespace Lucee
   LagrangeTensorBasisCalc<NDIM>::getIndexer() const
   {
     return Lucee::RowMajorIndexer<NDIM>(nodeRgn);
-  }
-
-// This very strange looking function serves as a recursion trap for
-// the calcFaceMass() function for NDIM>0. Without this the compiler
-// will barf.
-  template <>
-  void
-  LagrangeTensorBasisCalc<0>::calcFaceMass(unsigned dir)
-  {
-// deliberately empty
   }
 
   template <unsigned NDIM>
@@ -576,6 +569,18 @@ namespace Lucee
           entry += w[n]*dp(r,n)*dp(c,n);
         dpdp(r,c) = entry;
       }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcVolumeQuad()
+  {
+// compute ordinates
+    for (int d=0; d<NDIM; ++d)
+    {
+      std::vector<double> x(numNodes[d]), w(numNodes[d]);
+      legendre_set(numNodes[d], &x[0], &w[0]);
     }
   }
 
