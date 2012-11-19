@@ -82,6 +82,15 @@ namespace Lucee
 // initialize calculator object
     basisCalc.calc(nodeLoc, numNodes);
 
+// initialize number of local nodes
+    unsigned nlocal = basisCalc.getNumNodes();
+    this->setNumNodes(nlocal);
+
+// store exclusively owned node indices
+    basisCalc.getExclusiveNodeIndices(exclusiveNodes);
+// store list of indices for exclusively owned nodes
+    basisCalc.getExclusiveNodeNdimIndices(exclusiveNodeIndices.indices);
+
 // construct sequencer for use in mapping functions
     int lower[NDIM], upper[NDIM];
     for (unsigned d=0; d<NDIM; ++d) 
@@ -89,11 +98,32 @@ namespace Lucee
       lower[d] = 0;
       upper[d] = numNodes[d];
     }
-    nodeSeq = Lucee::RowMajorSequencer<NDIM>(Lucee::Region<NDIM, int>(lower, upper));
+    Lucee::Region<NDIM, int> nodeRgn(lower, upper);
+    nodeSeq = Lucee::RowMajorSequencer<NDIM>(nodeRgn);
+    
+// store list of indices of nodes on faces
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      std::vector<int> idx(NDIM);
 
-// initialize number of local nodes
-    unsigned nlocal = basisCalc.getNumNodes();
-    this->setNumNodes(nlocal);
+// lower face indices
+      Lucee::RowMajorSequencer<NDIM> lowerSeq(
+        nodeRgn.resetBounds(d, nodeRgn.getLower(d), nodeRgn.getLower(0)+1));
+      while (lowerSeq.step())
+      {
+        lowerSeq.fillWithIndex(&idx[0]);
+        lowerIndices[d].indices.push_back(idx);
+      }
+
+// upper face indices
+      Lucee::RowMajorSequencer<NDIM> upperSeq(
+        nodeRgn.resetBounds(d, nodeRgn.getUpper(d)-1, nodeRgn.getUpper(0)));
+      while (upperSeq.step())
+      {
+        upperSeq.fillWithIndex(&idx[0]);
+        upperIndices[d].indices.push_back(idx);
+      }
+    }
 
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
@@ -111,6 +141,10 @@ namespace Lucee
       }
       local2Global = Lucee::RowMajorIndexer<NDIM>(
         Lucee::Region<NDIM, int>(lower, upper));
+
+// compute strides
+      for (unsigned d=0; d<NDIM; ++d)
+        lgStrides[d] = numNodes[d];
     }
     else
     {
@@ -122,6 +156,10 @@ namespace Lucee
       }
       local2Global = Lucee::RowMajorIndexer<NDIM>(
         Lucee::Region<NDIM, int>(lower, upper));
+
+// compute strides
+      for (unsigned d=0; d<NDIM; ++d)
+        lgStrides[d] = numNodes[d]-1;
     }
 
     if (nodeLoc == GAUSSIAN)
@@ -138,6 +176,7 @@ namespace Lucee
         numGlobalNodes *= 1 + (numNodes[d]-1)*gridRgn.getShape(d);
     }
 
+// scaling factors for use
     double dx[NDIM], vol2 = 1.0;
     for (unsigned d=0; d<NDIM; ++d)
     {
@@ -169,8 +208,8 @@ namespace Lucee
       upperFace[d] = Lucee::Matrix<double>(nlocal, nf);
       basisCalc.getUpperFaceMassMatrix(d, upperFace[d]);
 
-// compute factor to bring into physical space: this is propotional to
-// the area of face normal to direction 'd'.
+// compute factor to bring into physical space: this is promotional to
+// area of face normal to direction 'd'.
       double fact = 1.0;
       for (unsigned dd=0; dd<NDIM; ++dd)
         if (dd != d)
@@ -181,7 +220,10 @@ namespace Lucee
       upperFace[d] *= fact;
     }
 
-// TODO: STIFFNESS MATRIX
+// stiffness matrix
+    stiff = Lucee::Matrix<double>(nlocal, nlocal);
+    basisCalc.getStiffnessMatrix(dx, stiff);
+    stiff *= vol2;
 
     double eta[NDIM];
 // compute coordinates of nodes relative to lower-left vertex
@@ -220,21 +262,21 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
-    basisCalc.getExclusiveNodeIndices(ndIds);
+    ndIds = exclusiveNodes;
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
-    int idx[NDIM];
+    int nidx[NDIM], idx[NDIM];
     unsigned count = 0;
     nodeSeq.reset();
     while (nodeSeq.step())
     {
-      nodeSeq.fillWithIndex(idx);
+      nodeSeq.fillWithIndex(nidx); // local node index
       for (unsigned d=0; d<NDIM; ++d)
-        idx[d] += this->currIdx[d];
+        idx[d] = nidx[d] + lgStrides[d]*this->currIdx[d];
       lgMap[count++] = local2Global.getIndex(idx);
     }
   }
@@ -243,14 +285,28 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getSurfLowerLocalToGlobal(unsigned dir, std::vector<int>& lgMap) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfLowerLocalToGlobal(dir, lgMap);
+    int idx[NDIM];
+    unsigned count = 0;
+    for (unsigned n=0; n<lowerIndices[dir].indices.size(); ++n)
+    {
+      for (unsigned d=0; d<NDIM; ++d)
+        idx[d] = lgStrides[d]*this->currIdx[d] + lowerIndices[dir].indices[n][d];
+      lgMap[count++] = local2Global.getIndex(idx);
+    }
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::getSurfUpperLocalToGlobal(unsigned dir, std::vector<int>& lgMap) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfUpperLocalToGlobal(dir, lgMap);
+    int idx[NDIM];
+    unsigned count = 0;
+    for (unsigned n=0; n<upperIndices[dir].indices.size(); ++n)
+    {
+      for (unsigned d=0; d<NDIM; ++d)
+        idx[d] = lgStrides[d]*this->currIdx[d] + upperIndices[dir].indices[n][d];
+      lgMap[count++] = local2Global.getIndex(idx);
+    }
   }
 
   template <unsigned NDIM>
@@ -332,7 +388,7 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getStiffnessMatrix(DNjDNk);
+    DNjDNk.copy(stiff);
   }
 
   template <unsigned NDIM>
@@ -392,21 +448,99 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::extractFromField(fld, data);
+    return Lucee::NodalFiniteElementIfc<NDIM>::extractFromField(fld, data);    
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::copyAllDataFromField(const Lucee::Field<NDIM, double>& fld, double *data)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::copyAllDataFromField(fld, data);
+// region to copy
+    Lucee::Region<NDIM, int> rgn =
+      this->template getGrid<Lucee::StructuredGridBase<NDIM> >().getLocalRegion();
+// extend region by one extra layer of cells on top edges
+    int lowerExt[NDIM], upperExt[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lowerExt[d] = 0;
+      upperExt[d] = 1;
+    }
+    Lucee::Region<NDIM, int> extRgn = rgn.extend(lowerExt, upperExt);
+    Lucee::RowMajorSequencer<NDIM> extRgnSeq(extRgn);
+
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+    unsigned nn = exclusiveNodeIndices.indices.size();
+    unsigned maxNodes = getNumGlobalNodes();
+    
+    int idx[NDIM], idxN[NDIM];
+// loop over region to copy
+    while (extRgnSeq.step())
+    {
+      extRgnSeq.fillWithIndex(idx);
+// set pointer to this cell
+      fld.setPtr(fldPtr, idx);
+// for each exclusively owned node in current cell, check if it should
+// be copied and if so, copy it
+      for (unsigned n=0; n<nn; ++n)
+      {
+        for (unsigned d=0; d<NDIM; ++d)
+          idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
+        unsigned loc = local2Global.getIndex(idxN);
+// reason this test works is that the local2Global indexer will give
+// an out-of-bounds linear index for those nodes which are not in the
+// grid. This is a bit subtle due to the way ownership is handled on
+// structured grids.
+        if (loc < maxNodes)
+// copy it over
+          data[loc] = fldPtr[n];
+      }
+    }
   }
 
   template <unsigned NDIM>
   void
   LagrangeTensorElement<NDIM>::copyAllDataToField(const double *data, Lucee::Field<NDIM, double>& fld)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::copyAllDataToField(data, fld);
+// region to copy
+    Lucee::Region<NDIM, int> rgn =
+      this->template getGrid<Lucee::StructuredGridBase<NDIM> >().getLocalRegion();
+// extend region by one extra layer of cells on top edges
+    int lowerExt[NDIM], upperExt[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lowerExt[d] = 0;
+      upperExt[d] = 1;
+    }
+    Lucee::Region<NDIM, int> extRgn = rgn.extend(lowerExt, upperExt);
+    Lucee::RowMajorSequencer<NDIM> extRgnSeq(extRgn);
+
+    Lucee::FieldPtr<double> fldPtr = fld.createPtr();
+    unsigned nn = exclusiveNodeIndices.indices.size();
+    unsigned maxNodes = getNumGlobalNodes();
+    
+    int idx[NDIM], idxN[NDIM];
+// loop over region to copy
+    while (extRgnSeq.step())
+    {
+      extRgnSeq.fillWithIndex(idx);
+// set pointer to this cell
+      fld.setPtr(fldPtr, idx);
+// for each exclusively owned node in current cell, check if it should
+// be copied and if so, copy it
+      for (unsigned n=0; n<nn; ++n)
+      {
+        for (unsigned d=0; d<NDIM; ++d)
+          idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
+        unsigned loc = local2Global.getIndex(idxN);
+// reason this test works is that the local2Global indexer will give
+// an out-of-bounds linear index for those nodes which are not in the
+// grid. This is a bit subtle due to the way ownership is handled on
+// structured grids.
+        if (loc < maxNodes)
+// copy it over
+          fldPtr[n] = data[loc];
+      }
+    }
   }
 
 // instantiations

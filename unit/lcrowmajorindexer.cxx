@@ -368,6 +368,18 @@ test_10()
     LC_ASSERT("Testing deflated indexer", defRow.getIndex(i) == row.getIndex(4,15,20,i));
 }
 
+void
+test_11()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 20};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::RowMajorIndexer<2> rowIdxr(rgn);
+
+  int finalIdx = rowIdxr.getIndex(rgn.getUpper(0)-1, rgn.getUpper(1)-1);
+  LC_ASSERT("Testing indexing beyond bounds", rowIdxr.getIndex(rgn.getUpper(0), rgn.getUpper(1)-1) > finalIdx);
+  LC_ASSERT("Testing indexing beyond bounds", rowIdxr.getIndex(rgn.getLower(0)-1, rgn.getLower(1)) < 0);
+}
 
 int
 main(int argc, char **argv) 
@@ -383,6 +395,7 @@ main(int argc, char **argv)
   test_8();
   test_9();
   test_10();
+  test_11();
 
   test_1_1();
   test_2_2();

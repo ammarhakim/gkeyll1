@@ -367,6 +367,22 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
 
   Uniform and Gaussian done, Lobatto not done.
 
+* Generalize PoissonBracket updater				     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2012-11-15 Thu 10:29
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  Allow this to work in arbitrary dimensions, with updateDirs
+  specified as an input. This will allow doing multiple dimension
+  solves using a splitting scheme.
+
+  [WON'T DO: This is not needed. It is best to develop a general
+  updater which works with specified characteristics]
+
+
 
 
 

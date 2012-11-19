@@ -117,6 +117,8 @@ namespace Lucee
       bool periodicFlgs[NDIM];
 /** Flag to indicate if all directions are periodic */
       bool allPeriodic;
+/** Flag to indicate if stiffness matrix should be written out */
+      bool writeMatrix;
 
 /**
  * Function to parse out BC.
