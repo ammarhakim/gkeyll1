@@ -29,8 +29,6 @@
 // etc includes
 #include <quadrule.hpp>
 
-using namespace Eigen;
-
 namespace Lucee
 {
 /**
@@ -317,9 +315,9 @@ namespace Lucee
 /** Maximum polynomial power anticipated */
       unsigned maxPower;
 /** Matrix to represent basis monomials */
-      MatrixXi basisList;
+      Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element */
-      MatrixXd nodeList;
+      Eigen::MatrixXd nodeList;
 /** Weights for quadrature (one dimension)*/
       std::vector<double> gaussWeights;
 /** Ordinates for (one dimension) quadrature */
@@ -364,41 +362,42 @@ namespace Lucee
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
  */
-      double evalPolynomial(blitz::Array<double,3> polyCoeffs, VectorXd nodeCoords);
+      double evalPolynomial(const blitz::Array<double,3>& polyCoeffs, const Eigen::VectorXd& nodeCoords);
 
 /**
 *     Compute the product of two polynomials poly1 and pol2 and store the result in poly3
 *     Note that the size of poly3 was determined by anticipating the highest degree terms
 *     in poly1 and poly2.
 */
-      blitz::Array<double,3> computePolynomialProduct(blitz::Array<double,3> poly1, blitz::Array<double,3> poly2);
+      blitz::Array<double,3> computePolynomialProduct(const blitz::Array<double,3>& poly1, 
+        const blitz::Array<double,3>& poly2);
 
 /**
 *     Compute the partial derivative of a polynomial in direction 'dir'
 */
-      blitz::Array<double,3> computePolynomialDerivative(blitz::Array<double,3> poly, unsigned dir);
+      blitz::Array<double,3> computePolynomialDerivative(const blitz::Array<double,3>& poly, unsigned dir);
 
 /**
 *     Compute the mass matrix on the reference element.
 */
-      blitz::Array<double,2> computeMass(std::vector<blitz::Array<double,3> > functionVector);
+      blitz::Array<double,2> computeMass(const std::vector<blitz::Array<double,3> >& functionVector);
 
 /**
 *     Compute the face-mass matrices on the reference element in direction num.
 */
-      void computeFaceMass(std::vector<blitz::Array<double,3> > functionVector, unsigned dir,
-                      blitz::Array<double,2> &lowerResultArray, blitz::Array<double,2> &UpperResultArray);
+      void computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
+        blitz::Array<double,2>& lowerResultArray, blitz::Array<double,2>& UpperResultArray);
 
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      blitz::Array<double,2> computeStiffness(std::vector<blitz::Array<double,3> > functionVector);     
+      blitz::Array<double,2> computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector);     
 
 /**
 *     Compute the grad stiffness matrix in direction dir on the reference element.
 */
-      blitz::Array<double,2> computeGradStiffness(std::vector<blitz::Array<double,3> > functionVector, 
-                                                  unsigned dir);
+      blitz::Array<double,2> computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
+        unsigned dir);
   };
 }
 

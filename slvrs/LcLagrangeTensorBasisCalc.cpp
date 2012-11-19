@@ -18,6 +18,9 @@
 #include <LcRowMajorIndexer.h>
 #include <LcRowMajorSequencer.h>
 
+// blitz includes
+#include <blitz/array.h>
+
 // etc includes
 #include <quadrule.hpp>
 
@@ -576,11 +579,37 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::calcVolumeQuad()
   {
-// compute ordinates
+    unsigned maxNodes = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
+    blitz::Array<double, NDIM> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
+
+// compute ordinates/weights for 1D integration and store them
     for (int d=0; d<NDIM; ++d)
     {
       std::vector<double> x(numNodes[d]), w(numNodes[d]);
       legendre_set(numNodes[d], &x[0], &w[0]);
+      for (int i=0; i<numNodes[d]; ++i)
+      {
+        ordinates(d,i) = x[i];
+        weights(d,i) = w[i];
+      }
+    }
+
+// allocate space for quadrature data
+    volumeGaussInterp = Lucee::Matrix<double>(totalNodes, totalNodes);
+    volumeGaussOrdinates = Lucee::Matrix<double>(totalNodes*totalNodes, NDIM);
+    volumeGaussWeights.resize(totalNodes*totalNodes);
+
+    int idx[NDIM];
+    Lucee::RowMajorIndexer<NDIM> nodeIdx(nodeRgn);
+    Lucee::RowMajorSequencer<NDIM> nodeSeq(nodeRgn);
+// store quadrature data
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(idx);
+      int linIdx = nodeIdx.getIndex(idx);
+
     }
   }
 

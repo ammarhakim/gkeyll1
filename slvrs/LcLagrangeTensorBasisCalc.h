@@ -309,9 +309,9 @@ namespace Lucee
 /** Interpolation matrix for volume integral */
       Lucee::Matrix<double> volumeGaussInterp;
 /** Ordinates for volume interpolation */
-      Lucee::Matrix<double> voumeGaussOrdinates;
+      Lucee::Matrix<double> volumeGaussOrdinates;
 /** Weights for volume interpolation */
-      std::vector<double> voumeGaussWeights;
+      std::vector<double> volumeGaussWeights;
 
 /**
  * Create nodes located at Lobatto quadrature points.

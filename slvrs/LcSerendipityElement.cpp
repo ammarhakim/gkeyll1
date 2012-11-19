@@ -16,6 +16,8 @@
 
 namespace Lucee
 {
+  using namespace Eigen;
+
 // set module name
   template <> const char *SerendipityElement<1>::id = "SerendipityElement";
   template <> const char *SerendipityElement<2>::id = "SerendipityElement";
@@ -511,7 +513,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   double
-  SerendipityElement<NDIM>::evalPolynomial(blitz::Array<double,3> polyCoeffs, VectorXd nodeCoords)
+  SerendipityElement<NDIM>::evalPolynomial(const blitz::Array<double,3>& polyCoeffs, const VectorXd& nodeCoords)
   {
     double totalSum = 0.0;
     double monomialTerm;
@@ -534,7 +536,8 @@ namespace Lucee
   
   template <unsigned NDIM>
   blitz::Array<double,3>
-  SerendipityElement<NDIM>::computePolynomialProduct(blitz::Array<double,3> poly1, blitz::Array<double,3> poly2)
+  SerendipityElement<NDIM>::computePolynomialProduct(const blitz::Array<double,3>& poly1, 
+    const blitz::Array<double,3>& poly2)
   {
     int x3Index;
     int y3Index;
@@ -576,7 +579,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   blitz::Array<double,3>
-  SerendipityElement<NDIM>::computePolynomialDerivative(blitz::Array<double,3> poly, unsigned dir)
+  SerendipityElement<NDIM>::computePolynomialDerivative(const blitz::Array<double,3>& poly, unsigned dir)
   {
     int xResultIndex;
     int yResultIndex;
@@ -641,7 +644,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   blitz::Array<double,2>
-  SerendipityElement<NDIM>::computeMass(std::vector<blitz::Array<double,3> > functionVector)
+  SerendipityElement<NDIM>::computeMass(const std::vector<blitz::Array<double,3> >& functionVector)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
@@ -687,9 +690,9 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeFaceMass(std::vector<blitz::Array<double,3> > functionVector, unsigned dir,
-                                            blitz::Array<double,2> &lowerResultArray, 
-                                            blitz::Array<double,2> &upperResultArray)
+  SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
+    blitz::Array<double,2> &lowerResultArray, 
+    blitz::Array<double,2> &upperResultArray)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
@@ -753,7 +756,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   blitz::Array<double,2>
-  SerendipityElement<NDIM>::computeStiffness(std::vector<blitz::Array<double,3> > functionVector)
+  SerendipityElement<NDIM>::computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector)
   {
     blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
@@ -814,8 +817,8 @@ namespace Lucee
 
   template <unsigned NDIM>
   blitz::Array<double,2>
-  SerendipityElement<NDIM>::computeGradStiffness(std::vector<blitz::Array<double,3> > functionVector, 
-                                                 unsigned dir)
+  SerendipityElement<NDIM>::computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
+    unsigned dir)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
