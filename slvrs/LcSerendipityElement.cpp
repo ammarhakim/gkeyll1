@@ -381,12 +381,14 @@ namespace Lucee
 
     grid.getCentroid(xc);
     
+    // Loop over all node locations on reference element and convert them
+    // to appropriate coordinates
     for (unsigned i = 0; i < this->getNumNodes(); i++)
     {
-      for (unsigned dim = 0; i < NDIM; i++)
+      for (unsigned dim = 0; dim < NDIM; dim++)
       {
         // Node list already has the coordinates of nodes on reference element centered at origin
-        nodeCoords(i,dim) = xc[i] + nodeList(i,dim)*coordScales[i];
+        nodeCoords(i,dim) = xc[i] + nodeList(i,dim)*coordScales[dim];
       }
     }
   }
@@ -734,7 +736,7 @@ namespace Lucee
     refDNjNk_0     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_1     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_2     *= 0.5*dx*0.5*dy*0.5*dz;
-    std::cout << "refNjNk " << refNjNk << std::endl;
+    /*std::cout << "refNjNk " << refNjNk << std::endl;
     std::cout << "refFaceNjNk_xl " << refFaceNjNk_xl << std::endl;
     std::cout << "refFaceNjNk_xu " << refFaceNjNk_xu << std::endl;
     std::cout << "refFaceNjNk_yl " << refFaceNjNk_yl << std::endl;
@@ -744,7 +746,7 @@ namespace Lucee
     std::cout << "refDNjDNk " << refDNjDNk << std::endl;
     std::cout << "refDNjNk_0 " << refDNjNk_0 << std::endl;
     std::cout << "refDNjNk_1 " << refDNjNk_1 << std::endl;
-    std::cout << "refDNjNk_2 " << refDNjNk_2 << std::endl;
+    std::cout << "refDNjNk_2 " << refDNjNk_2 << std::endl;*/
   }
 
   template <unsigned NDIM>
