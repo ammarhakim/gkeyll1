@@ -110,6 +110,22 @@ test_1()
   LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(0,1), -0.5));
   LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(1,0), -0.5));
   LC_ASSERT("Testing stiffness matrix", epsCmp(stiff(1,1), 0.5));
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -1/std::sqrt(3)));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), 1/std::sqrt(3)));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], 1.0));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], 1.0));
+
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,0), 1/sqrt(3)/2.0+1.0/2.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,1), 1.0/2.0-1/sqrt(3)/2.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,0), 1.0/2.0-1/sqrt(3)/2.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,1), 1/sqrt(3)/2.0+1.0/2.0));
 }
 
 void
@@ -225,6 +241,29 @@ test_2()
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,0), 1.0/6.0, 2e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,1), (-4.0)/3.0, 2e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,2), 7.0/6.0, 2e-15));
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -std::sqrt(3)/std::sqrt(5)));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), 0.0));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0),  std::sqrt(3)/std::sqrt(5)));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], 5.0/9.0));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], 8.0/9.0));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], 5.0/9.0));
+
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,0), .6872983346207417));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,1), .3999999999999997));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,2), -.08729833462074155, 10));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,0), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,1), 1.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,2), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,0), -.08729833462074174, 10));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,1), .4000000000000001));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,2), .6872983346207415));
 }
 
 void
@@ -316,6 +355,29 @@ test_2_lobatto()
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
   basis.getSurfUpperNodeNums(0, fn);
   LC_ASSERT("Tesing lower node numbers", fn[0] == 2);
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -std::sqrt(3)/std::sqrt(5)));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), 0.0));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0),  std::sqrt(3)/std::sqrt(5)));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], 5.0/9.0));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], 8.0/9.0));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], 5.0/9.0));
+
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,0), .6872983346207417));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,1), .3999999999999997));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,2), -.08729833462074155, 10));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,0), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,1), 1.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,2), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,0), -.08729833462074174, 10));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,1), .4000000000000001));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,2), .6872983346207415));
 }
 
 void
@@ -467,6 +529,41 @@ test_3()
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,1), 27.0/40.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,2), (-189.0)/80.0, 5e-15));
   LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,3), 37.0/20.0, 5e-15));
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  double x1 = std::sqrt((3-2*sqrt(6./5.))/7);
+  double x2 = std::sqrt((3+2*sqrt(6./5.))/7);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -x2));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), -x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0), x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(3,0), x2));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], (18-sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[3], (18-sqrt(30))/36));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,0), .6600056650728031, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,1), .5209376877117045, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,2), -.2301879032507395, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,3), 0.0492445504662319, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,0), .003373736432772362, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,1), 1.004885854825647, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,2), -.009921353572325708, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,3), .001661762313906814, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,0), .001661762313906398, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,1), -0.00992135357232471, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,2), 1.004885854825646, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,3), .003373736432772445, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,0), .04924455046623186, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,1), -.2301879032507392, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,2), 0.520937687711704, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,3), .6600056650728033, 2e-15));
 }
 
 void
@@ -519,6 +616,38 @@ test_4()
 
   LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 0);
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 0);
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -x2));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), -x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0), x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(3,0), x2));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], (18-sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[3], (18-sqrt(30))/36));
+
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,0), 1.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,1), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,2), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,3), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,0), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,1), 1.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,2), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,3), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,0), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,1), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,2), 1.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,3), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,0), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,1), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,2), 0.0));
+  LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,3), 1.0));
 }
 
 void
@@ -570,6 +699,24 @@ test_4_lobatto()
 
   LC_ASSERT("Testing number of lower surface nodes", basis.getNumSurfLowerNodes(0) == 1);
   LC_ASSERT("Testing number of upper surface nodes", basis.getNumSurfUpperNodes(0) == 1);
+
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(nn,nn), vOrds(nn,1);
+  std::vector<double> vWeights(nn);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  x1 = std::sqrt((3-2*sqrt(6./5.))/7);
+  x2 = std::sqrt((3+2*sqrt(6./5.))/7);
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), -x2));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), -x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0), x1));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(3,0), x2));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], (18-sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], (18+sqrt(30))/36));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[3], (18-sqrt(30))/36));
 }
 
 void
@@ -785,25 +932,51 @@ test_5()
   Lucee::Matrix<double> stiff(basis.getNumNodes(), basis.getNumNodes());
   basis.getStiffnessMatrix(dx, stiff);
  
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 2.0/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,2), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,3), (-1.0)/3.0, 5e1-5));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,0), 2.0/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,1), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,2), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(0,3), (-1.0)/3.0, 5e-15));
 
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,0), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,1), 2.0/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,2), (-1.0)/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,3), (-1.0)/6.0, 5e1-5));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,0), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,1), 2.0/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,2), (-1.0)/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(1,3), (-1.0)/6.0, 5e-15));
 
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,0), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,1), (-1.0)/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,2), 2.0/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,3), (-1.0)/6.0, 5e1-5));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,0), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,1), (-1.0)/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,2), 2.0/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(2,3), (-1.0)/6.0, 5e-15));
 
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,0), (-1.0)/3.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,1), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,2), (-1.0)/6.0, 5e1-5));
-  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,3), 2.0/3.0, 5e1-5));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,0), (-1.0)/3.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,1), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,2), (-1.0)/6.0, 5e-15));
+  LC_ASSERT("Testing stiffness matrix", diffCmp(stiff(3,3), 2.0/3.0, 5e-15));
+
+  unsigned numTotalNodes = basis.getNumNodes();
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(numTotalNodes,numTotalNodes), vOrds(numTotalNodes,2);
+  std::vector<double> vWeights(numTotalNodes);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  double ords[2] = {-1/std::sqrt(3), 1/std::sqrt(3)};
+  double weights[2] = {1.0, 1.0};
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,0), ords[0]));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(0,1), ords[0]));
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,0), ords[0]));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(1,1), ords[1]));
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,0), ords[1]));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(2,1), ords[0]));
+
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(3,0), ords[1]));
+  LC_ASSERT("Testing ordinates", epsCmp(vOrds(3,1), ords[1]));
+
+  LC_ASSERT("Testing weights", epsCmp(vWeights[0], weights[0]*weights[0]));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[1], weights[0]*weights[1]));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[2], weights[1]*weights[0]));
+  LC_ASSERT("Testing weights", epsCmp(vWeights[3], weights[1]*weights[1]));
 }
 
 void
