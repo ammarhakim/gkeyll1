@@ -316,38 +316,49 @@ namespace Lucee
       unsigned maxPower;
 /** Matrix to represent basis monomials */
       Eigen::MatrixXi basisList;
-/** Matrix containing coordinates of node on reference element */
+/** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
+/** Matrix containing basis function at each node (rows) evaluated at gaussian integration locations (cols)
+    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
+      Eigen::MatrixXd functionEvaluations;
+/** Matrix whose ith row corresponds to the coordinates of the node at which the ith column of functionEvaluations
+    is evaluated at. Size NDIM+1 columns because last entry is net weight */
+      Eigen::MatrixXd gaussNodeList;
 /** Weights for quadrature (one dimension)*/
       std::vector<double> gaussWeights;
 /** Ordinates for (one dimension) quadrature */
       std::vector<double> gaussPoints;
 /** Mass matrix in reference coordinates */
-      blitz::Array<double,2> refNjNk;
+      Eigen::MatrixXd refNjNk;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_xl;
+      Eigen::MatrixXd refFaceNjNk_xl;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_xu;
+      Eigen::MatrixXd refFaceNjNk_xu;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_yl;
+      Eigen::MatrixXd refFaceNjNk_yl;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_yu;
+      Eigen::MatrixXd refFaceNjNk_yu;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_zl;
+      Eigen::MatrixXd refFaceNjNk_zl;
 /** Face-mass matrix in reference coordinates */
-      blitz::Array<double,2> refFaceNjNk_zu;
+      Eigen::MatrixXd refFaceNjNk_zu;
 /** Stiffness matrix in reference coordinates */
-      blitz::Array<double,2> refDNjDNk;
+      Eigen::MatrixXd refDNjDNk;
 /** Grad-Stiffness (in direction X) matrix in reference coordinates */
-      blitz::Array<double,2> refDNjNk_0;
+      Eigen::MatrixXd refDNjNk_0;
 /** Grad-Stiffness (in direction Y) matrix in reference coordinates */
-      blitz::Array<double,2> refDNjNk_1;
+      Eigen::MatrixXd refDNjNk_1;
 /** Grad-Stiffness (in direction Z) matrix in reference coordinates */
-      blitz::Array<double,2> refDNjNk_2;
+      Eigen::MatrixXd refDNjNk_2;
 /**
- *    Create matrices for 3rd order serendipity element, assuming 3 dimensions
+ *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
+ *    Currently only works for 3-D cases.
  */
       void setupMatrices();
+/**
+ *    Resize output matrices computed in setupMatrices()
+ */
+      void resizeMatrices();
 /**
  *    Populate nodeList with serendipity node locations on reference
  *    element
@@ -380,24 +391,26 @@ namespace Lucee
 /**
 *     Compute the mass matrix on the reference element.
 */
-      blitz::Array<double,2> computeMass(const std::vector<blitz::Array<double,3> >& functionVector);
+      void computeMass(const std::vector<blitz::Array<double,3> >& functionVector,
+        Eigen::MatrixXd& resultMatrix);
 
 /**
 *     Compute the face-mass matrices on the reference element in direction num.
 */
       void computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
-        blitz::Array<double,2>& lowerResultArray, blitz::Array<double,2>& UpperResultArray);
+        Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix);
 
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      blitz::Array<double,2> computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector);     
+      void computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector,
+        Eigen::MatrixXd& resultMatrix);     
 
 /**
 *     Compute the grad stiffness matrix in direction dir on the reference element.
 */
-      blitz::Array<double,2> computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
-        unsigned dir);
+      void computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
+        unsigned dir, Eigen::MatrixXd& resultMatrix);
   };
 }
 
