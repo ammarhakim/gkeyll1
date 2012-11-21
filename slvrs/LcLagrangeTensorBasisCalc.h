@@ -151,6 +151,23 @@ namespace Lucee
       }
 
 /**
+ * Get data needed for Gaussian quadrature for this element. All
+ * output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getGaussQuadData(Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+      {
+        interpMat.copy(volumeGaussInterp);
+        ordinates.copy(volumeGaussOrdinates);
+        weights.clear(); weights.resize(totalNodes);
+        weights = volumeGaussWeights;
+      }
+
+/**
  * Evaluate specified basis function at location. This method is very
  * slow, and so should not be called inside an inner loop. It is
  * provided to allow initialization of data needed in updaters, so its

@@ -582,7 +582,7 @@ namespace Lucee
     unsigned maxNodes = 0;
     for (unsigned d=0; d<NDIM; ++d)
       maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
-    blitz::Array<double, NDIM> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
+    blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
 
 // compute ordinates/weights for 1D integration and store them
     for (int d=0; d<NDIM; ++d)
@@ -598,7 +598,7 @@ namespace Lucee
 
 // allocate space for quadrature data
     volumeGaussInterp = Lucee::Matrix<double>(totalNodes, totalNodes);
-    volumeGaussOrdinates = Lucee::Matrix<double>(totalNodes*totalNodes, NDIM);
+    volumeGaussOrdinates = Lucee::Matrix<double>(totalNodes, NDIM);
     volumeGaussWeights.resize(totalNodes*totalNodes);
 
     int idx[NDIM];
@@ -608,8 +608,27 @@ namespace Lucee
     while (nodeSeq.step())
     {
       nodeSeq.fillWithIndex(idx);
-      int linIdx = nodeIdx.getIndex(idx);
+      int nn = nodeIdx.getIndex(idx); // node number
 
+      volumeGaussWeights[nn] = 1.0;
+      for (int d=0; d<NDIM; ++d)
+      {
+        volumeGaussWeights[nn] *= weights(d,idx[d]);
+        volumeGaussOrdinates(nn,d) = ordinates(d,idx[d]);
+      }
+    }
+
+    double xc[NDIM];
+// compute entries in interpolation matrix: these are simply values of
+// basis functions at each qudrature node.
+    for (unsigned r=0; r<totalNodes; ++r)
+    {
+// coordinate of quadrature node
+      for (unsigned d=0; d<NDIM; ++d)
+        xc[d] = volumeGaussOrdinates(r,d);
+
+      for (int bn=0; bn<totalNodes; ++bn)
+        volumeGaussInterp(r,bn) = evalBasis(bn,xc);
     }
   }
 
