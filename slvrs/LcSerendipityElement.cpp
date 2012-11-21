@@ -41,29 +41,21 @@ namespace Lucee
     // polyOrder is a misnomer for serendipity elements when we really want the degree
     basisDegree = polyOrder;
 
-    if (basisDegree == 1)
-      this->setNumNodes(8);
-    else if (basisDegree == 2)
-      this->setNumNodes(20);
-    else if (basisDegree == 3)
-      this->setNumNodes(32);
-    else
+    if (NDIM == 3)
     {
-      Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
-      lce << " Provided " << basisDegree << " instead";
-      throw lce;
-    }
-  // Initialize matrices
-    if (basisDegree == 1)
-    {
-      setupMatrices();
-    }
-    else if (basisDegree == 2)
-    {
-      setupMatrices();
-    }
-    else if (basisDegree == 3)
-    {
+      if (basisDegree == 1)
+        this->setNumNodes(8);
+      else if (basisDegree == 2)
+        this->setNumNodes(20);
+      else if (basisDegree == 3)
+        this->setNumNodes(32);
+      else
+      {
+        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
+        lce << " Provided " << basisDegree << " instead";
+        throw lce;
+      }
+
       setupMatrices();
     }
   }
@@ -72,7 +64,6 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
-    // Todo
     throw Lucee::Except("SerendipityElement::getExclusiveNodeIndices: Not implemented!");
   }
 
@@ -80,18 +71,36 @@ namespace Lucee
   unsigned
   SerendipityElement<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getNumSurfLowerNodes: Not implemented!");
-    return 0;
+    if (basisDegree == 1)
+    {
+      return 4;
+    }
+    else if (basisDegree == 2)
+    {
+      return 8;
+    }
+    else if (basisDegree == 3)
+    {
+      return 12;
+    }
   }
 
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumSurfUpperNodes(unsigned dir) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getNumSurfUpperNodes: Not implemented!");
-    return 0;
+    if (basisDegree == 1)
+    {
+      return 4;
+    }
+    else if (basisDegree == 2)
+    {
+      return 8;
+    }
+    else if (basisDegree == 3)
+    {
+      return 12;
+    }
   }
 
   template <unsigned NDIM>
@@ -130,8 +139,114 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getSurfLowerNodeNums: Not implemented!");
+    if (basisDegree == 1)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 3;
+        nodeNum[2] = 4;
+        nodeNum[3] = 7;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 4;
+        nodeNum[3] = 5;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 3;
+        nodeNum[3] = 2;
+      }
+    }
+    else if (basisDegree == 2)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 7;
+        nodeNum[2] = 6;
+        nodeNum[3] = 8;
+        nodeNum[4] = 11;
+        nodeNum[5] = 12;
+        nodeNum[6] = 19;
+        nodeNum[7] = 18;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 2;
+        nodeNum[3] = 8;
+        nodeNum[4] = 9;
+        nodeNum[5] = 12;
+        nodeNum[6] = 13;
+        nodeNum[7] = 14;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 2;
+        nodeNum[3] = 7;
+        nodeNum[4] = 3;
+        nodeNum[5] = 6;
+        nodeNum[6] = 5;
+        nodeNum[7] = 4;
+      }
+    }
+    else if (basisDegree == 3)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 11;
+        nodeNum[2] = 10;
+        nodeNum[3] = 9;
+        nodeNum[4] = 12;
+        nodeNum[5] = 15;
+        nodeNum[6] = 16;
+        nodeNum[7] = 19;
+        nodeNum[8] = 20;
+        nodeNum[9] = 31;
+        nodeNum[10] = 30;
+        nodeNum[11] = 29;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 2;
+        nodeNum[3] = 3;
+        nodeNum[4] = 12;
+        nodeNum[5] = 13;
+        nodeNum[6] = 16;
+        nodeNum[7] = 17;
+        nodeNum[8] = 20;
+        nodeNum[9] = 21;
+        nodeNum[10] = 22;
+        nodeNum[11] = 23;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 0;
+        nodeNum[1] = 1;
+        nodeNum[2] = 2;
+        nodeNum[3] = 3;
+        nodeNum[4] = 11;
+        nodeNum[5] = 4;
+        nodeNum[6] = 10;
+        nodeNum[7] = 5;
+        nodeNum[8] = 9;
+        nodeNum[9] = 8;
+        nodeNum[10] = 7;
+        nodeNum[11] = 6;
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -139,16 +254,141 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfUpperNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getSurfUpperNodeNums: Not implemented!");
+    if (basisDegree == 1)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 1;
+        nodeNum[1] = 2;
+        nodeNum[2] = 5;
+        nodeNum[3] = 6;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 3;
+        nodeNum[1] = 2;
+        nodeNum[2] = 7;
+        nodeNum[3] = 6;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 4;
+        nodeNum[1] = 5;
+        nodeNum[2] = 7;
+        nodeNum[3] = 6;
+      }
+    }
+    else if (basisDegree == 2)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 2;
+        nodeNum[1] = 3;
+        nodeNum[2] = 4;
+        nodeNum[3] = 9;
+        nodeNum[4] = 10;
+        nodeNum[5] = 14;
+        nodeNum[6] = 15;
+        nodeNum[7] = 16;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 6;
+        nodeNum[1] = 5;
+        nodeNum[2] = 4;
+        nodeNum[3] = 11;
+        nodeNum[4] = 10;
+        nodeNum[5] = 18;
+        nodeNum[6] = 17;
+        nodeNum[7] = 16;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 12;
+        nodeNum[1] = 13;
+        nodeNum[2] = 14;
+        nodeNum[3] = 19;
+        nodeNum[4] = 15;
+        nodeNum[5] = 18;
+        nodeNum[6] = 17;
+        nodeNum[7] = 16;
+      }
+    }
+    else if (basisDegree == 3)
+    {
+      if (dir == 0)
+      {
+        nodeNum[0] = 3;
+        nodeNum[1] = 4;
+        nodeNum[2] = 5;
+        nodeNum[3] = 6;
+        nodeNum[4] = 13;
+        nodeNum[5] = 14;
+        nodeNum[6] = 17;
+        nodeNum[7] = 18;
+        nodeNum[8] = 23;
+        nodeNum[9] = 24;
+        nodeNum[10] = 25;
+        nodeNum[11] = 26;
+      }
+      else if (dir == 1)
+      {
+        nodeNum[0] = 9;
+        nodeNum[1] = 8;
+        nodeNum[2] = 7;
+        nodeNum[3] = 6;
+        nodeNum[4] = 15;
+        nodeNum[5] = 14;
+        nodeNum[6] = 19;
+        nodeNum[7] = 18;
+        nodeNum[8] = 29;
+        nodeNum[9] = 28;
+        nodeNum[10] = 27;
+        nodeNum[11] = 26;
+      }
+      else if (dir == 2)
+      {
+        nodeNum[0] = 20;
+        nodeNum[1] = 21;
+        nodeNum[2] = 22;
+        nodeNum[3] = 23;
+        nodeNum[4] = 31;
+        nodeNum[5] = 24;
+        nodeNum[6] = 30;
+        nodeNum[7] = 25;
+        nodeNum[8] = 29;
+        nodeNum[9] = 28;
+        nodeNum[10] = 27;
+        nodeNum[11] = 26;
+      }
+    }
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getNodalCoordinates: Not implemented!");    
+    const Lucee::StructuredGridBase<3>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<3> >();
+    // set index and get centroid coordinate
+    grid.setIndex(this->currIdx);
+    double xc[3];
+    double coordScales[NDIM];
+    for (unsigned i = 0; i < NDIM; i++)
+    {
+      coordScales[i] = 0.5*grid.getDx(i);
+    }
+
+    grid.getCentroid(xc);
+    
+    for (unsigned i = 0; i < this->getNumNodes(); i++)
+    {
+      for (unsigned dim = 0; i < NDIM; i++)
+      {
+        // Node list already has the coordinates of nodes on reference element centered at origin
+        nodeCoords(i,dim) = xc[i] + nodeList(i,dim)*coordScales[i];
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -179,8 +419,9 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getMassMatrix: Not implemented!");
+    for (unsigned i = 0; i < refNjNk.rows(); i++)
+      for (unsigned j = 0; j < refNjNk.cols(); j++)
+        NjNk(i,j) = refNjNk(i,j);
   }
 
   template <unsigned NDIM>
@@ -188,8 +429,24 @@ namespace Lucee
   SerendipityElement<NDIM>::getLowerFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getLowerFaceMassMatrix: Not implemented!");
+    if (dir == 0)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_xl.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_xl.cols(); j++)
+          NjNk(i,j) = refFaceNjNk_xl(i,j);
+    }
+    else if (dir == 1)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_yl.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_yl.cols(); j++)
+          NjNk(i,j) = refFaceNjNk_yl(i,j);
+    }
+    else if (dir == 2)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_zl.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_zl.cols(); j++)
+          NjNk(i,j) = refFaceNjNk_zl(i,j);
+    }
   }
 
   template <unsigned NDIM>
@@ -197,15 +454,33 @@ namespace Lucee
   SerendipityElement<NDIM>::getUpperFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getUpperFaceMassMatrix: Not implemented!");
+    if (dir == 0)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_xu.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_xu.cols(); j++)
+          NjNk(i,j) = refFaceNjNk_xu(i,j);
+    }
+    else if (dir == 1)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_yu.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_yu.cols(); j++)
+          NjNk(i,j) = refFaceNjNk_yu(i,j);
+    }
+    else if (dir == 2)
+    {
+      for (unsigned i = 0; i < refFaceNjNk_zu.rows(); i++)
+        for (unsigned j = 0; j < refFaceNjNk_zu.cols(); j++)
+          NjNk(i,j) = refDNjDNk(i,j);
+    }
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
-    throw Lucee::Except("SerendipityElement::getStiffnessMatrix: Not implemented!");
+    for (unsigned i = 0; i < refDNjDNk.rows(); i++)
+        for (unsigned j = 0; j < refDNjDNk.cols(); j++)
+          DNjDNk(i,j) = refDNjDNk(i,j);
   }
 
   template <unsigned NDIM>
@@ -213,8 +488,24 @@ namespace Lucee
   SerendipityElement<NDIM>::getGradStiffnessMatrix(
     unsigned dir, Lucee::Matrix<double>& DNjNk) const
   {
-    // Todo
-    throw Lucee::Except("SerendipityElement::getGradStiffnessMatrix: Not implemented!");
+    if (dir == 0)
+    {
+      for (unsigned i = 0; i < refDNjNk_0.rows(); i++)
+        for (unsigned j = 0; j < refDNjNk_0.cols(); j++)
+          DNjNk(i,j) = refDNjNk_0(i,j);
+    }
+    else if (dir == 1)
+    {
+      for (unsigned i = 0; i < refDNjNk_1.rows(); i++)
+        for (unsigned j = 0; j < refDNjNk_1.cols(); j++)
+          DNjNk(i,j) = refDNjNk_1(i,j);
+    }
+    else if (dir == 2)
+    {
+      for (unsigned i = 0; i < refDNjNk_2.rows(); i++)
+        for (unsigned j = 0; j < refDNjNk_2.cols(); j++)
+          DNjNk(i,j) = refDNjNk_2(i,j);
+    }
   }
 
   template <unsigned NDIM>
@@ -296,8 +587,7 @@ namespace Lucee
     // Get grid spacing (this is assumed to be uniform for now)
     double dx = grid.getDx(0);
     double dy = grid.getDx(1);
-    // TODO: change when we test in 3d
-    double dz = grid.getDx(1);
+    double dz = grid.getDx(2);
     double dx2 = dx*dx;
     double dy2 = dy*dy;
     double dz2 = dz*dz;
@@ -376,28 +666,61 @@ namespace Lucee
     gaussPoints  = std::vector<double>(numGaussPoints);
     gaussWeights = std::vector<double>(numGaussPoints);
     legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
+    // Unused so far: fill out gaussian integration nodes for integration
+    // over cell volume
+    unsigned totalVolumeGaussNodes = 1.0;
+    VectorXd gaussNodeVec(3);
+    unsigned currRow = 0;
+    double totalWeight;
+    /*
+    if (NDIM == 3)
+    {
+      for (unsigned i = 0; i < NDIM; i++)
+      {
+        totalVolumeGaussNodes = NDIM*totalVolumeGaussNodes;
+      }
+
+      gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
+      functionEvaluations = Eigen::MatrixXd(this->getNumNodes(),totalVolumeGaussNodes);
+      
+      for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+      {
+        for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
+        {
+          for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
+          {
+            gaussNodeVec(0)    = gaussPoints[xNodeIndex];
+            gaussNodeVec(1)    = gaussPoints[yNodeIndex];
+            gaussNodeVec(2)    = gaussPoints[zNodeIndex];
+            totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
+            gaussNodeList.row(currRow) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            for (unsigned functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+            {
+              functionEvaluations(functionIndex,currRow) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+            }
+            currRow++;
+          }
+        }
+      }
+
+      std::cout << functionEvaluations << std::endl;
+    }*/
+
     
-    // Resize the various matrices now we know the node count
-    // TODO: check if this notation is necessary
-    refNjNk.resize(this->getNumNodes(),this->getNumNodes());
-    refDNjNk_0.resize(this->getNumNodes(),this->getNumNodes());
-    refDNjNk_1.resize(this->getNumNodes(),this->getNumNodes());
-    refDNjNk_2.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_xl.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_xu.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_yl.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_yu.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_zl.resize(this->getNumNodes(),this->getNumNodes());
-    refFaceNjNk_zu.resize(this->getNumNodes(),this->getNumNodes());
+    // Resize the output matrices we need
+    resizeMatrices();
     // Call various functions to populate the matrices
-    refNjNk    = computeMass(functionVector);
+    std::cout << "Starting matrix computation" << std::endl;
+    computeMass(functionVector,refNjNk);
     computeFaceMass(functionVector,0,refFaceNjNk_xl,refFaceNjNk_xu);
     computeFaceMass(functionVector,1,refFaceNjNk_yl,refFaceNjNk_yu);
     computeFaceMass(functionVector,2,refFaceNjNk_zl,refFaceNjNk_zu);
-    refDNjDNk  = computeStiffness(functionVector);
-    refDNjNk_0 = computeGradStiffness(functionVector,0);
-    refDNjNk_1 = computeGradStiffness(functionVector,1);
-    refDNjNk_2 = computeGradStiffness(functionVector,2);
+    computeStiffness(functionVector,refDNjDNk);
+    computeGradStiffness(functionVector,0,refDNjNk_0);
+    computeGradStiffness(functionVector,1,refDNjNk_1);
+    computeGradStiffness(functionVector,2,refDNjNk_2);
+    std::cout << "Finished computing all matrices" << std::endl;
+
     // Scale the matrices computed on reference element into physical space
     // TODO: verify correctness of this
     refNjNk        *= 0.5*dx*0.5*dy*0.5*dz;
@@ -411,6 +734,35 @@ namespace Lucee
     refDNjNk_0     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_1     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_2     *= 0.5*dx*0.5*dy*0.5*dz;
+    std::cout << "refNjNk " << refNjNk << std::endl;
+    std::cout << "refFaceNjNk_xl " << refFaceNjNk_xl << std::endl;
+    std::cout << "refFaceNjNk_xu " << refFaceNjNk_xu << std::endl;
+    std::cout << "refFaceNjNk_yl " << refFaceNjNk_yl << std::endl;
+    std::cout << "refFaceNjNk_yu " << refFaceNjNk_yu << std::endl;
+    std::cout << "refFaceNjNk_zl " << refFaceNjNk_zl << std::endl;
+    std::cout << "refFaceNjNk_zu " << refFaceNjNk_zu << std::endl;
+    std::cout << "refDNjDNk " << refDNjDNk << std::endl;
+    std::cout << "refDNjNk_0 " << refDNjNk_0 << std::endl;
+    std::cout << "refDNjNk_1 " << refDNjNk_1 << std::endl;
+    std::cout << "refDNjNk_2 " << refDNjNk_2 << std::endl;
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::resizeMatrices()
+  {
+    unsigned generalDim = this->getNumNodes();
+    refNjNk        = Eigen::MatrixXd(generalDim,generalDim);
+    refDNjDNk      = Eigen::MatrixXd(generalDim,generalDim);
+    refDNjNk_0     = Eigen::MatrixXd(generalDim,generalDim);
+    refDNjNk_1     = Eigen::MatrixXd(generalDim,generalDim);
+    refDNjNk_2     = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_xl = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_yl = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_zl = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,generalDim);
   }
  
   template <unsigned NDIM>
@@ -644,20 +996,22 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  blitz::Array<double,2>
-  SerendipityElement<NDIM>::computeMass(const std::vector<blitz::Array<double,3> >& functionVector)
+  void
+  SerendipityElement<NDIM>::computeMass(const std::vector<blitz::Array<double,3> >& functionVector,
+    Eigen::MatrixXd& resultMatrix)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
     VectorXd gaussNodeVec(3);
 
-    resultArray = 0;
     double integrationResult;
     double totalWeight;
 
-    for (unsigned kIndex = 0; kIndex < resultArray.rows(); kIndex++)
+    resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
+    
+    for (unsigned kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < resultArray.cols(); mIndex++)
+      for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset polyProduct
         polyProduct = 0;
@@ -682,31 +1036,29 @@ namespace Lucee
           }
         }
 
-        resultArray((int) kIndex,(int) mIndex) = integrationResult;
+        resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
-
-    return resultArray;
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
-    blitz::Array<double,2> &lowerResultArray, 
-    blitz::Array<double,2> &upperResultArray)
+    Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
+    
+    upperResultMatrix.Zero(upperResultMatrix.rows(),upperResultMatrix.cols());
+    lowerResultMatrix.Zero(lowerResultMatrix.rows(),lowerResultMatrix.cols());
 
-    upperResultArray = 0;
-    lowerResultArray = 0;
     double integrationResultU;
     double integrationResultL;
     double totalWeight;
 
-    for (unsigned kIndex = 0; kIndex < upperResultArray.rows(); kIndex++)
+    for (unsigned kIndex = 0; kIndex < upperResultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < upperResultArray.cols(); mIndex++)
+      for (unsigned mIndex = 0; mIndex < upperResultMatrix.cols(); mIndex++)
       {
         // Reset polyProduct
         polyProduct = 0;
@@ -749,32 +1101,31 @@ namespace Lucee
           }
         }
 
-        upperResultArray((int) kIndex,(int) mIndex) = integrationResultU;
-        lowerResultArray((int) kIndex,(int) mIndex) = integrationResultL;
+        upperResultMatrix(kIndex,mIndex) = integrationResultU;
+        lowerResultMatrix(kIndex,mIndex) = integrationResultL;
       }
     }
   }
 
   template <unsigned NDIM>
-  blitz::Array<double,2>
-  SerendipityElement<NDIM>::computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector)
+  void
+  SerendipityElement<NDIM>::computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector,
+    Eigen::MatrixXd& resultMatrix)
   {
-    blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     blitz::Array<double,3> functionDx2(maxPower,maxPower,maxPower);
     blitz::Array<double,3> functionDy2(maxPower,maxPower,maxPower);
     blitz::Array<double,3> functionDz2(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
 
-    resultArray = 0;
     double integrationResult;
     double totalWeight;
-    // Compute stiffness matrix (K)
+
+    resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
     
-    
-    for (unsigned kIndex = 0; kIndex < resultArray.rows(); kIndex++)
+    for (unsigned kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < resultArray.cols(); mIndex++)
+      for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset polyProduct
         polyProduct = 0;
@@ -809,30 +1160,28 @@ namespace Lucee
           }
         }
 
-        resultArray((int) kIndex,(int) mIndex) = integrationResult;
+        resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
-    
-    return resultArray;
   }
 
   template <unsigned NDIM>
-  blitz::Array<double,2>
+  void
   SerendipityElement<NDIM>::computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
-    unsigned dir)
+    unsigned dir, Eigen::MatrixXd& resultMatrix)
   {
     blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
-    blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
     blitz::Array<double,3> functionD(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
 
-    resultArray = 0;
     double integrationResult;
     double totalWeight;
 
-    for (unsigned kIndex = 0; kIndex < resultArray.rows(); kIndex++)
+    resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
+
+    for (unsigned kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < resultArray.cols(); mIndex++)
+      for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset polyProduct
         polyProduct = 0;
@@ -860,11 +1209,9 @@ namespace Lucee
           }
         }
 
-        resultArray((int) kIndex,(int) mIndex) = integrationResult;
+        resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
-
-    return resultArray;
   }
   
 // instantiations
