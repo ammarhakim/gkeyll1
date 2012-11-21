@@ -380,7 +380,7 @@ namespace Lucee
     }
 
     grid.getCentroid(xc);
-    
+
     // Loop over all node locations on reference element and convert them
     // to appropriate coordinates
     for (unsigned i = 0; i < this->getNumNodes(); i++)
@@ -472,7 +472,7 @@ namespace Lucee
     {
       for (unsigned i = 0; i < refFaceNjNk_zu.rows(); i++)
         for (unsigned j = 0; j < refFaceNjNk_zu.cols(); j++)
-          NjNk(i,j) = refDNjDNk(i,j);
+          NjNk(i,j) = refFaceNjNk_zu(i,j);
     }
   }
 
@@ -722,7 +722,17 @@ namespace Lucee
     computeGradStiffness(functionVector,1,refDNjNk_1);
     computeGradStiffness(functionVector,2,refDNjNk_2);
     std::cout << "Finished computing all matrices" << std::endl;
-
+    std::cout << "refNjNk " << std::endl << refNjNk << std::endl;
+    std::cout << "refFaceNjNk_xl " << std::endl << refFaceNjNk_xl << std::endl;
+    std::cout << "refFaceNjNk_xu " << std::endl << refFaceNjNk_xu << std::endl;
+    std::cout << "refFaceNjNk_yl " << std::endl << refFaceNjNk_yl << std::endl;
+    std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
+    std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
+    std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
+    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
+    std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
+    std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
+    std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;
     // Scale the matrices computed on reference element into physical space
     // TODO: verify correctness of this
     refNjNk        *= 0.5*dx*0.5*dy*0.5*dz;
@@ -736,17 +746,6 @@ namespace Lucee
     refDNjNk_0     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_1     *= 0.5*dx*0.5*dy*0.5*dz;
     refDNjNk_2     *= 0.5*dx*0.5*dy*0.5*dz;
-    /*std::cout << "refNjNk " << refNjNk << std::endl;
-    std::cout << "refFaceNjNk_xl " << refFaceNjNk_xl << std::endl;
-    std::cout << "refFaceNjNk_xu " << refFaceNjNk_xu << std::endl;
-    std::cout << "refFaceNjNk_yl " << refFaceNjNk_yl << std::endl;
-    std::cout << "refFaceNjNk_yu " << refFaceNjNk_yu << std::endl;
-    std::cout << "refFaceNjNk_zl " << refFaceNjNk_zl << std::endl;
-    std::cout << "refFaceNjNk_zu " << refFaceNjNk_zu << std::endl;
-    std::cout << "refDNjDNk " << refDNjDNk << std::endl;
-    std::cout << "refDNjNk_0 " << refDNjNk_0 << std::endl;
-    std::cout << "refDNjNk_1 " << refDNjNk_1 << std::endl;
-    std::cout << "refDNjNk_2 " << refDNjNk_2 << std::endl;*/
   }
 
   template <unsigned NDIM>
@@ -759,12 +758,12 @@ namespace Lucee
     refDNjNk_0     = Eigen::MatrixXd(generalDim,generalDim);
     refDNjNk_1     = Eigen::MatrixXd(generalDim,generalDim);
     refDNjNk_2     = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_xl = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_yl = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_zl = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceNjNk_xl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
+    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
+    refFaceNjNk_yl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
+    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
+    refFaceNjNk_zl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
+    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
   }
  
   template <unsigned NDIM>
@@ -1048,8 +1047,14 @@ namespace Lucee
   SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
     Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
-    blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
+    blitz::Array<double,3> upperPolyProduct(maxPower,maxPower,maxPower);
+    blitz::Array<double,3> lowerPolyProduct(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
+
+    std::vector<int> surfLowerNodeNums(lowerResultMatrix.cols(),0);
+    std::vector<int> surfUpperNodeNums(lowerResultMatrix.cols(),0);
+    getSurfLowerNodeNums(dir,surfLowerNodeNums);
+    getSurfUpperNodeNums(dir,surfUpperNodeNums);
     
     upperResultMatrix.Zero(upperResultMatrix.rows(),upperResultMatrix.cols());
     lowerResultMatrix.Zero(lowerResultMatrix.rows(),lowerResultMatrix.cols());
@@ -1057,15 +1062,23 @@ namespace Lucee
     double integrationResultU;
     double integrationResultL;
     double totalWeight;
+    unsigned upperNodeNum;
+    unsigned lowerNodeNum;
 
     for (unsigned kIndex = 0; kIndex < upperResultMatrix.rows(); kIndex++)
     {
+      // Note that mIndex will be those of the ones in lower/upper node nums
       for (unsigned mIndex = 0; mIndex < upperResultMatrix.cols(); mIndex++)
       {
         // Reset polyProduct
-        polyProduct = 0;
+        lowerPolyProduct = 0;
+        upperPolyProduct = 0;
+        // Assign node nums
+        lowerNodeNum = surfLowerNodeNums[mIndex];
+        upperNodeNum = surfUpperNodeNums[mIndex];
         // Calculate polynomial product of two basis functions
-        polyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[mIndex]);
+        lowerPolyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[lowerNodeNum]);
+        upperPolyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[upperNodeNum]);
 
         // Reset integration result
         integrationResultL = 0.0;
@@ -1096,10 +1109,10 @@ namespace Lucee
               gaussNodeVec(2) = 1;
               totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
             }
-            integrationResultU += totalWeight*evalPolynomial(polyProduct,gaussNodeVec);
+            integrationResultU += totalWeight*evalPolynomial(upperPolyProduct,gaussNodeVec);
             // Replace the appropriate coordinate to evaluation location
             gaussNodeVec(dir) = -1;
-            integrationResultL += totalWeight*evalPolynomial(polyProduct,gaussNodeVec);
+            integrationResultL += totalWeight*evalPolynomial(lowerPolyProduct,gaussNodeVec);
           }
         }
 
