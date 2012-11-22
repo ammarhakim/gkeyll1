@@ -17,10 +17,15 @@
    again. However, this might be a huge task and perhaps not worth
    doing?
 
+   A higher priority is to get rid of Lucee::Matrix and Lucee::Vector
+   classes.
+
 ** Google proto library
 
    Allows encoding structured data in an efficient and easy way. Is
-   this needed or is Lua good enough?
+   this needed or is Lua good enough? Website:
+
+   http://code.google.com/p/protobuf
 
 * November 16th
 

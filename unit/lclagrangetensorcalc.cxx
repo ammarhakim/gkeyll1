@@ -977,6 +977,23 @@ test_5()
   LC_ASSERT("Testing weights", epsCmp(vWeights[1], weights[0]*weights[1]));
   LC_ASSERT("Testing weights", epsCmp(vWeights[2], weights[1]*weights[0]));
   LC_ASSERT("Testing weights", epsCmp(vWeights[3], weights[1]*weights[1]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,0), .6220084679281462, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,1), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,2), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,3), .04465819873852044, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,0), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,1), .6220084679281462, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,2), .04465819873852044, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,3), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,0), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,1), .04465819873852044, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,2), .6220084679281462, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,3), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,0), .04465819873852044, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,1), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,2), .1666666666666666, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,3), .6220084679281462, 2e-15));
 }
 
 void
