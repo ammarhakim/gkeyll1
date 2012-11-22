@@ -213,7 +213,18 @@ N2_iMat_2 : calcInterpMatrix(basis2, gOrds2);
 
 /** Order 2 */
 lord3 : [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
-ord3 : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0], [0,0]];
+ord3 : [[-1,-1],[-1,0],[-1,1], [0,-1],[0,0],[0,1], [1,-1],[1,0],[1,1]];
+
+gOrds3 : [
+ [-sqrt(3/5), -sqrt(3/5)],
+ [-sqrt(3/5), 0],
+ [-sqrt(3/5), sqrt(3/5)],
+ [0, -sqrt(3/5)],
+ [0, 0],
+ [0, sqrt(3/5)],
+ [sqrt(3/5), -sqrt(3/5)],
+ [sqrt(3/5), 0],
+ [sqrt(3/5), sqrt(3/5)]];
 
 /** Construct matrix of coefficients */
 Pmat3 : makePmat(lord3, ord3);
@@ -252,3 +263,5 @@ N3_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(basis3), [1,8,4]);
 N3_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(basis3), [2,6,3]);
 N3_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(basis3), [1,5,2]);
 N3_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(basis3), [4,7,3]);
+
+N3_iMat_2 : calcInterpMatrix(basis3, gOrds3);

@@ -8,7 +8,8 @@
 * November 21st
 
   More work on LagrangeTensorBasisCalc class. Getting close to
-  completion.
+  completion. Testing is very tedious and slows down the developement
+  speed, but of course, is absolutely needed.
 
 ** How about gtest?
 
