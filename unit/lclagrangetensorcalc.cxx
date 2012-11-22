@@ -1120,6 +1120,114 @@ test_5_3x3()
 
   LC_ASSERT("Testing exclusive indices", eni[3][0] == 1);
   LC_ASSERT("Testing exclusive indices", eni[3][1] == 1);
+
+  unsigned numTotalNodes = basis.getNumNodes();
+// check quadrature data
+  Lucee::Matrix<double> vInterpMat(numTotalNodes,numTotalNodes), vOrds(numTotalNodes,2);
+  std::vector<double> vWeights(numTotalNodes);
+  basis.getGaussQuadData(vInterpMat, vOrds, vWeights);
+
+  double ords[3] = {-std::sqrt(3)/std::sqrt(5), 0.0, std::sqrt(3)/std::sqrt(5)};
+  double weights[3] = {5.0/9.0, 8.0/9.0, 5.0/9.0};
+
+  unsigned nbasis = 0;
+  for (unsigned i=0; i<3; ++i)
+    for (unsigned j=0; j<3; ++j)
+    {
+      LC_ASSERT("Testing ordinates", epsCmp(vOrds(nbasis,0), ords[i]));
+      LC_ASSERT("Testing ordinates", epsCmp(vOrds(nbasis,1), ords[j]));
+      nbasis++;
+    }
+
+  nbasis = 0;
+  for (unsigned i=0; i<3; ++i)
+    for (unsigned j=0; j<3; ++j)
+    {
+      LC_ASSERT("Testing weights", epsCmp(vWeights[nbasis], weights[i]*weights[j]));
+      nbasis++;
+    }
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,0), .4723790007724452, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,1), .2749193338482965, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,2), -.05999999999999993, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,3), .2749193338482966, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,4), .1599999999999998, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,5), -.03491933384829663, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,6), -.05999999999999989, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,7), -0.0349193338482966, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(0,8), .007620999227554933, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,1), .6872983346207417, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,4), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,7), -.08729833462074155, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(1,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,0), -.06000000000000006, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,1), .2749193338482968, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,2), 0.472379000772445, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,3), -.03491933384829671, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,4), .1599999999999999, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,5), .2749193338482965, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,6), .007620999227554954, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,7), -.03491933384829663, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(2,8), -.05999999999999982, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,3), .6872983346207419, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,4), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,5), -.08729833462074163, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,4), 1.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(4,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,3), -.08729833462074182, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,4), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,5), .6872983346207416, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(5,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,0), -.06000000000000003, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,1), -.03491933384829667, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,2), .007620999227554949, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,3), .2749193338482968, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,4), .1599999999999999, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,5), -.03491933384829667, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,6), 0.472379000772445, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,7), .2749193338482965, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(6,8), -.05999999999999991, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,1), -.08729833462074174, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,4), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,7), .6872983346207415, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(7,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,0), .007620999227554969, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,1), -.03491933384829671, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,2), -.05999999999999994, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,3), -.03491933384829674, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,4), .1600000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,5), .2749193338482968, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,6), -.06000000000000005, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,7), .2749193338482967, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,8), .4723790007724449, 2e-15));
 }
 
 void
