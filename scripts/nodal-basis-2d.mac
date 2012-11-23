@@ -155,9 +155,31 @@ calcGradStiffMatrix_y(basis) := block([n, stiff],
 	        return (stiff)
 );
 
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i][1], y=gOrds[i][2]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
 /** Order 2 */
-lord2 : [[0,0], [0,1], [1,0], [1,1]];
-ord2 : [[-1,-1],  [1,-1], [1,1], [-1,1]];
+/**lord2 : [[0,0], [0,1], [1,0], [1,1]];
+ord2 : [[-1,-1],  [1,-1], [1,1], [-1,1]];**/
+
+lord2 : [[0,0], [0,1], [1,0], [1,1] ];
+ord2 : [[-1,-1], [-1,1], [1,-1], [1,1] ];
+
+/** Ordinates for 2-node Guassian quadrature */
+gOrds2 : [
+ [-1/sqrt(3), -1/sqrt(3)], 
+ [-1/sqrt(3), 1/sqrt(3)],
+ [1/sqrt(3), -1/sqrt(3)], 
+ [1/sqrt(3), 1/sqrt(3)]];
 
 /** Construct matrix of coefficients */
 Pmat2 : makePmat(lord2, ord2);
@@ -187,10 +209,22 @@ N2_face_mass : calcFaceMassMatrix(basis2);
 N2_stiff : calcStiffMatrix(basis2);
 N2_grad_stiff_x : calcGradStiffMatrix_x(basis2);
 N2_grad_stiff_y : calcGradStiffMatrix_y(basis2);
+N2_iMat_2 : calcInterpMatrix(basis2, gOrds2);
 
 /** Order 2 */
 lord3 : [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
-ord3 : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0], [0,0]];
+ord3 : [[-1,-1],[-1,0],[-1,1], [0,-1],[0,0],[0,1], [1,-1],[1,0],[1,1]];
+
+gOrds3 : [
+ [-sqrt(3/5), -sqrt(3/5)],
+ [-sqrt(3/5), 0],
+ [-sqrt(3/5), sqrt(3/5)],
+ [0, -sqrt(3/5)],
+ [0, 0],
+ [0, sqrt(3/5)],
+ [sqrt(3/5), -sqrt(3/5)],
+ [sqrt(3/5), 0],
+ [sqrt(3/5), sqrt(3/5)]];
 
 /** Construct matrix of coefficients */
 Pmat3 : makePmat(lord3, ord3);
@@ -229,3 +263,5 @@ N3_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(basis3), [1,8,4]);
 N3_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(basis3), [2,6,3]);
 N3_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(basis3), [1,5,2]);
 N3_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(basis3), [4,7,3]);
+
+N3_iMat_2 : calcInterpMatrix(basis3, gOrds3);
