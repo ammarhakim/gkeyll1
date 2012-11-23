@@ -5,6 +5,29 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 21st
+
+  More work on LagrangeTensorBasisCalc class. Getting close to
+  completion. Testing is very tedious and slows down the developement
+  speed, but of course, is absolutely needed.
+
+** How about gtest?
+
+   Should I replace LcTest with gtest? As always, it seems like a good
+   idea to reuse existing code rather than inventing it all over
+   again. However, this might be a huge task and perhaps not worth
+   doing?
+
+   A higher priority is to get rid of Lucee::Matrix and Lucee::Vector
+   classes.
+
+** Google proto library
+
+   Allows encoding structured data in an efficient and easy way. Is
+   this needed or is Lua good enough? Website:
+
+   http://code.google.com/p/protobuf
+
 * November 16th
 
   Completed Largrange tensor element code to compute local->global
