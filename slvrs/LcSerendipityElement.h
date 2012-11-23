@@ -318,11 +318,11 @@ namespace Lucee
       Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
-/** Matrix containing basis function at each node (rows) evaluated at gaussian integration locations (cols)
+/** Matrix containing basis functions (rows) evaluated at gaussian integration locations (cols)
     Correspondance between column and gaussian node set is kept track of in gaussNodeList */
       Eigen::MatrixXd functionEvaluations;
 /** Matrix whose ith row corresponds to the coordinates of the node at which the ith column of functionEvaluations
-    is evaluated at. Size NDIM+1 columns because last entry is net weight */
+    (and functionDEvaluations) is evaluated at. Size NDIM+1 columns because last entry is net weight */
       Eigen::MatrixXd gaussNodeList;
 /** Weights for quadrature (one dimension)*/
       std::vector<double> gaussWeights;
