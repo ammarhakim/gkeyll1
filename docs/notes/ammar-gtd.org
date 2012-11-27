@@ -15,6 +15,10 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Test 1D and 3D element quadratures for LagrangeTensorBasisCalc    :GKEYLL:
+
+   Also add more tests for 2D.
+
 ** Remove restriction of nodal coordinates to 3D?		     :GKEYLL:
 
    At many places it is assumed that the coordinates live in 3D space,
