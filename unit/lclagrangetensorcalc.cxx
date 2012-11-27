@@ -994,6 +994,98 @@ test_5()
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,1), .1666666666666666, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,2), .1666666666666666, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(3,3), .6220084679281462, 2e-15));
+
+  unsigned numLowerFaceNodes = basis.getNumSurfLowerNodes(0);
+// check quadrature data
+  Lucee::Matrix<double> lfInterpMat(numLowerFaceNodes,numTotalNodes), lfOrds(numLowerFaceNodes,2);
+  std::vector<double> lfWeights(numLowerFaceNodes);
+  basis.getSurfLowerGaussQuadData(0, lfInterpMat, lfOrds, lfWeights);
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(0,0), -1.0));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(0,1), ords[0]));
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(1,0), -1.0));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(1,1), ords[1]));
+
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[0], weights[0]));
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[1], weights[1]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,0), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,1), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,0), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,1), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,3), 0.0, 2e-15));
+
+  numLowerFaceNodes = basis.getNumSurfLowerNodes(1);
+// check quadrature data
+  basis.getSurfLowerGaussQuadData(1, lfInterpMat, lfOrds, lfWeights);
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(0,0), ords[0]));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(0,1), -1.0));
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(1,0), ords[1]));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(1,1), -1.0));
+
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[0], weights[0]));
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[1], weights[1]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,0), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,2), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,0), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,2), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,3), 0.0, 2e-15));
+
+  unsigned numUpperFaceNodes = basis.getNumSurfUpperNodes(0);
+// check quadrature data
+  Lucee::Matrix<double> ufInterpMat(numUpperFaceNodes,numTotalNodes), ufOrds(numUpperFaceNodes,2);
+  std::vector<double> ufWeights(numUpperFaceNodes);
+  basis.getSurfUpperGaussQuadData(0, ufInterpMat, ufOrds, ufWeights);
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(0,0), 1.0));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(0,1), ords[0]));
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(1,0), 1.0));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(1,1), ords[1]));
+
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[0], weights[0]));
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[1], weights[1]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,2), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,3), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,2), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,3), .7886751345948129, 2e-15));
+
+  numUpperFaceNodes = basis.getNumSurfUpperNodes(1);
+// check quadrature data
+  basis.getSurfUpperGaussQuadData(1, ufInterpMat, ufOrds, ufWeights);
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(0,0), ords[0]));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(0,1), 1.0));
+
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(1,0), ords[1]));
+  LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(1,1), 1.0));
+
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[0], weights[0]));
+  LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[1], weights[1]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,1), .7886751345948129, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,3), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,1), .2113248654051871, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,3), .7886751345948129, 2e-15));
 }
 
 void

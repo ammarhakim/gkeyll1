@@ -159,8 +159,15 @@ namespace Lucee
 // compute stiffness matrix
     calcStiffMatrix();
 
-// compute quadrature data
+// compute volume quadrature data
     calcVolumeQuad();
+
+// compute surface quadrature data
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      calcLowerSurfQuad(d);
+      calcUpperSurfQuad(d);
+    }
   }
 
   template <unsigned NDIM>
@@ -597,9 +604,9 @@ namespace Lucee
     }
 
 // allocate space for quadrature data
-    volumeGaussInterp = Lucee::Matrix<double>(totalNodes, totalNodes);
-    volumeGaussOrdinates = Lucee::Matrix<double>(totalNodes, NDIM);
-    volumeGaussWeights.resize(totalNodes*totalNodes);
+    volumeQuad.interp = Lucee::Matrix<double>(totalNodes, totalNodes);
+    volumeQuad.ordinates = Lucee::Matrix<double>(totalNodes, NDIM);
+    volumeQuad.weights.resize(totalNodes*totalNodes);
 
     int idx[NDIM];
     Lucee::RowMajorIndexer<NDIM> nodeIdx(nodeRgn);
@@ -610,11 +617,11 @@ namespace Lucee
       nodeSeq.fillWithIndex(idx);
       int nn = nodeIdx.getIndex(idx); // node number
 
-      volumeGaussWeights[nn] = 1.0;
+      volumeQuad.weights[nn] = 1.0;
       for (int d=0; d<NDIM; ++d)
       {
-        volumeGaussWeights[nn] *= weights(d,idx[d]);
-        volumeGaussOrdinates(nn,d) = ordinates(d,idx[d]);
+        volumeQuad.weights[nn] *= weights(d,idx[d]);
+        volumeQuad.ordinates(nn,d) = ordinates(d,idx[d]);
       }
     }
 
@@ -625,10 +632,150 @@ namespace Lucee
     {
 // coordinate of quadrature node
       for (unsigned d=0; d<NDIM; ++d)
-        xc[d] = volumeGaussOrdinates(r,d);
+        xc[d] = volumeQuad.ordinates(r,d);
 
       for (int bn=0; bn<totalNodes; ++bn)
-        volumeGaussInterp(r,bn) = evalBasis(bn,xc);
+        volumeQuad.interp(r,bn) = evalBasis(bn,xc);
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcLowerSurfQuad(unsigned dir)
+  {
+// Storing weights and ordinate data in each direction seems wasteful
+// for surface quadrature. However, it is fine for now as it makes
+// code less confusing. (Ammar Hakim, 11/26/2012)
+
+    unsigned maxNodes = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
+    blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
+
+// compute ordinates/weights for 1D integration and store them
+    for (int d=0; d<NDIM; ++d)
+    {
+      std::vector<double> x(numNodes[d]), w(numNodes[d]);
+      legendre_set(numNodes[d], &x[0], &w[0]);
+      for (int i=0; i<numNodes[d]; ++i)
+      {
+        ordinates(d,i) = x[i];
+        weights(d,i) = w[i];
+      }
+    }
+
+// create a region representing quadrature nodes on surface
+    Lucee::Region<NDIM, int> faceNodeRgn
+      = nodeRgn.resetBounds(dir, nodeRgn.getLower(dir), nodeRgn.getLower(dir)+1);
+
+    unsigned faceNodes = faceNodeRgn.getVolume();
+// allocate space for quadrature data
+    lowerSurfQuad[dir].interp = Lucee::Matrix<double>(faceNodes, totalNodes);
+    lowerSurfQuad[dir].ordinates = Lucee::Matrix<double>(faceNodes, NDIM);
+    lowerSurfQuad[dir].weights.resize(faceNodes*faceNodes);
+
+    int idx[NDIM];
+    Lucee::RowMajorIndexer<NDIM> nodeIdx(faceNodeRgn);
+    Lucee::RowMajorSequencer<NDIM> nodeSeq(faceNodeRgn);
+// store quadrature data
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(idx);
+      int nn = nodeIdx.getIndex(idx); // node number
+
+      lowerSurfQuad[dir].weights[nn] = 1.0;
+      for (int d=0; d<NDIM; ++d)
+        if (d != dir)
+        {
+          lowerSurfQuad[dir].weights[nn] *= weights(d,idx[d]);
+          lowerSurfQuad[dir].ordinates(nn,d) = ordinates(d,idx[d]);
+        }
+      lowerSurfQuad[dir].ordinates(nn,dir) = -1.0;  // this is a lower face
+    }
+
+    double xc[NDIM];
+// compute entries in interpolation matrix: these are simply values of
+// basis functions at each qudrature node.
+    for (unsigned r=0; r<faceNodes; ++r)
+    {
+// coordinate of quadrature node
+      for (unsigned d=0; d<NDIM; ++d)
+        if (d != dir)
+          xc[d] = lowerSurfQuad[dir].ordinates(r,d);
+      xc[dir] = -1.0; // this is a lower face
+
+      for (int bn=0; bn<totalNodes; ++bn)
+        lowerSurfQuad[dir].interp(r,bn) = evalBasis(bn,xc);
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcUpperSurfQuad(unsigned dir)
+  {
+// Storing weights and ordinate data in each direction seems wasteful
+// for surface quadrature. However, it is fine for now as it makes
+// code less confusing. (Ammar Hakim, 11/26/2012)
+
+    unsigned maxNodes = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
+    blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
+
+// compute ordinates/weights for 1D integration and store them
+    for (int d=0; d<NDIM; ++d)
+    {
+      std::vector<double> x(numNodes[d]), w(numNodes[d]);
+      legendre_set(numNodes[d], &x[0], &w[0]);
+      for (int i=0; i<numNodes[d]; ++i)
+      {
+        ordinates(d,i) = x[i];
+        weights(d,i) = w[i];
+      }
+    }
+
+// create a region representing quadrature nodes on surface
+    Lucee::Region<NDIM, int> faceNodeRgn
+      = nodeRgn.resetBounds(dir, nodeRgn.getUpper(dir)-1, nodeRgn.getUpper(dir));
+
+    unsigned faceNodes = faceNodeRgn.getVolume();
+// allocate space for quadrature data
+    upperSurfQuad[dir].interp = Lucee::Matrix<double>(faceNodes, totalNodes);
+    upperSurfQuad[dir].ordinates = Lucee::Matrix<double>(faceNodes, NDIM);
+    upperSurfQuad[dir].weights.resize(faceNodes*faceNodes);
+
+    int idx[NDIM];
+    Lucee::RowMajorIndexer<NDIM> nodeIdx(faceNodeRgn);
+    Lucee::RowMajorSequencer<NDIM> nodeSeq(faceNodeRgn);
+// store quadrature data
+    while (nodeSeq.step())
+    {
+      nodeSeq.fillWithIndex(idx);
+      int nn = nodeIdx.getIndex(idx); // node number
+
+      upperSurfQuad[dir].weights[nn] = 1.0;
+      for (int d=0; d<NDIM; ++d)
+        if (d != dir)
+        {
+          upperSurfQuad[dir].weights[nn] *= weights(d,idx[d]);
+          upperSurfQuad[dir].ordinates(nn,d) = ordinates(d,idx[d]);
+        }
+      upperSurfQuad[dir].ordinates(nn,dir) = 1.0; // this is an upper face
+    }
+
+    double xc[NDIM];
+// compute entries in interpolation matrix: these are simply values of
+// basis functions at each qudrature node.
+    for (unsigned r=0; r<faceNodes; ++r)
+    {
+// coordinate of quadrature node
+      for (unsigned d=0; d<NDIM; ++d)
+        if (d != dir)
+          xc[d] = upperSurfQuad[dir].ordinates(r,d);
+      xc[dir] = 1.0; // as this is an upper face
+
+      for (int bn=0; bn<totalNodes; ++bn)
+        upperSurfQuad[dir].interp(r,bn) = evalBasis(bn,xc);
     }
   }
 

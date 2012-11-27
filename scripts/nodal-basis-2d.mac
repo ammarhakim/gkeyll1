@@ -181,6 +181,22 @@ gOrds2 : [
  [1/sqrt(3), -1/sqrt(3)], 
  [1/sqrt(3), 1/sqrt(3)]];
 
+gOrds2_left : [
+ [-1, -1/sqrt(3)], 
+ [-1, 1/sqrt(3)]];
+
+gOrds2_right : [
+ [1, -1/sqrt(3)], 
+ [1, 1/sqrt(3)]];
+
+gOrds2_bottom : [
+ [-1/sqrt(3), -1], 
+ [ 1/sqrt(3), -1]];
+
+gOrds2_top : [
+ [-1/sqrt(3), 1], 
+ [ 1/sqrt(3), 1]];
+
 /** Construct matrix of coefficients */
 Pmat2 : makePmat(lord2, ord2);
 
@@ -209,7 +225,13 @@ N2_face_mass : calcFaceMassMatrix(basis2);
 N2_stiff : calcStiffMatrix(basis2);
 N2_grad_stiff_x : calcGradStiffMatrix_x(basis2);
 N2_grad_stiff_y : calcGradStiffMatrix_y(basis2);
+
 N2_iMat_2 : calcInterpMatrix(basis2, gOrds2);
+
+N2_iMat_left_2 : calcInterpMatrix(basis2, gOrds2_left);
+N2_iMat_right_2 : calcInterpMatrix(basis2, gOrds2_right);
+N2_iMat_bottom_2 : calcInterpMatrix(basis2, gOrds2_bottom);
+N2_iMat_top_2 : calcInterpMatrix(basis2, gOrds2_top);
 
 /** Order 2 */
 lord3 : [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
