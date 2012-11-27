@@ -5,12 +5,20 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 27th
+
+  Completed code for volume and surface quadrature in
+  LagrangeTensorBasisCalc class. Tested in 2D and everything seems to
+  work fine.
+
 * November 26th
 
   Need to start preparing for talk on Dec. 13th on current
   progress. Need to really finish the LagrangeTensorBasisCalc
   class. This is taking far longer than it should and is getting to be
   a very complex and tedious class.
+
+  Spent some time going over ion-acoustic wave problem with Eric.
 
 * November 21st
 

@@ -5,7 +5,7 @@ plasmaDisp(z) := expand(%i*sqrt(%pi)*exp(-z^2)*(1+erf(%i*z)));
 diffPlasmaDisp(z) := -expand(2*(1+z*plasmaDisp(z)));
 
 /** Ion-acoustic waves dispersion relation */
-eps(z,K,T) := expand(K^2 + 1 + 1/T*(1+z*plasmaDisp(z)));
+eps(z,K,T) := expand(1 + 1/(2*T)*(1+z*plasmaDisp(z)));
 /** ... its derivative */
 epsPrime(z,K,T) := expand(1/T*(z*diffPlasmaDisp(z) + plasmaDisp(z)));
 
