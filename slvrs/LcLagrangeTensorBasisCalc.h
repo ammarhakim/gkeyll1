@@ -161,10 +161,44 @@ namespace Lucee
       void getGaussQuadData(Lucee::Matrix<double>& interpMat,
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
       {
-        interpMat.copy(volumeGaussInterp);
-        ordinates.copy(volumeGaussOrdinates);
+        interpMat.copy(volumeQuad.interp);
+        ordinates.copy(volumeQuad.ordinates);
         weights.clear(); weights.resize(totalNodes);
-        weights = volumeGaussWeights;
+        weights = volumeQuad.weights;
+      }
+
+/**
+ * Get data needed for Gaussian quadrature on lower surfaces of this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+      {
+        interpMat.copy(lowerSurfQuad[dir].interp);
+        ordinates.copy(lowerSurfQuad[dir].ordinates);
+        weights.clear(); weights.resize(this->getNumSurfLowerNodes(dir));
+        weights = lowerSurfQuad[dir].weights;
+      }
+
+/**
+ * Get data needed for Gaussian quadrature on upper surfaces of this
+ * element. All output matrices and vectors must be pre-allocated.
+ *
+ * @param interpMat On output, interpolation matrix.
+ * @param ordinates On output, quadrature ordinates.
+ * @param weights On output, quadrature weights.
+ */
+      void getSurfUpperGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
+        Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
+      {
+        interpMat.copy(upperSurfQuad[dir].interp);
+        ordinates.copy(upperSurfQuad[dir].ordinates);
+        weights.clear(); weights.resize(this->getNumSurfUpperNodes(dir));
+        weights = upperSurfQuad[dir].weights;
       }
 
 /**
@@ -323,12 +357,23 @@ namespace Lucee
 /** Upper face mass matrices */
       Lucee::Matrix<double> upperFaceMass[NDIM];
 
+      struct QuadData
+      {
 /** Interpolation matrix for volume integral */
-      Lucee::Matrix<double> volumeGaussInterp;
+          Lucee::Matrix<double> interp;
 /** Ordinates for volume interpolation */
-      Lucee::Matrix<double> volumeGaussOrdinates;
+          Lucee::Matrix<double> ordinates;
 /** Weights for volume interpolation */
-      std::vector<double> volumeGaussWeights;
+          std::vector<double> weights;
+      };
+
+/** Quadrature data for volume integral */
+      QuadData volumeQuad;
+/** Quadrature data for surface integral on lower faces */
+      QuadData lowerSurfQuad[NDIM];
+/** Quadrature data for surface integral on upper faces */
+      QuadData upperSurfQuad[NDIM];
+      
 
 /**
  * Create nodes located at Lobatto quadrature points.
@@ -385,6 +430,20 @@ namespace Lucee
  * Compute volume quadrature data.
  */
       void calcVolumeQuad();
+
+/**
+ * Compute surface quadrature data for specified direction.
+ *
+ * @param dir Direction to compute surface quadrature data.
+ */
+      void calcLowerSurfQuad(unsigned dir);
+
+/**
+ * Compute surface quadrature data for specified direction.
+ *
+ * @param dir Direction to compute surface quadrature data.
+ */
+      void calcUpperSurfQuad(unsigned dir);
   };
 
 // Explicitly instantiate NDIM=0 case to void compiler barfs. This is

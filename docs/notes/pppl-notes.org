@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 26th
+
+  Need to start preparing for talk on Dec. 13th on current
+  progress. Need to really finish the LagrangeTensorBasisCalc
+  class. This is taking far longer than it should and is getting to be
+  a very complex and tedious class.
+
 * November 21st
 
   More work on LagrangeTensorBasisCalc class. Getting close to
