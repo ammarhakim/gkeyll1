@@ -5,6 +5,23 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 28th
+
+  Implemented extractFromField() method in LagrangeTensorElement
+  class. This seems more complicated than it should be, but the
+  ownership issues with CG fields really complicates things. Tested
+  with fixed-potential Valsov solver and it works and compares to
+  ~1e-14 to the SerendipityElement2D based solver.
+
+  In the long run for the full GK solver I think the CG fields should
+  just duplicate data on shared nodes, even though that is not
+  required. This makes life much easier as there is then no need to
+  worry about all the complexity of extractFromField() and the need to
+  keep track which is a CG field and which is not. This will lead to
+  some wasted space, but it will be minor (just needed for the
+  potential) compared to the memory needed to store the distribution
+  function.
+
 * November 27th
 
   Completed code for volume and surface quadrature in
