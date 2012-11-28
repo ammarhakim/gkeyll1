@@ -338,6 +338,23 @@ namespace Lucee
       Lucee::Matrix<double> lowerFace[NDIM];
 /** Upper face mass-matrix */
       Lucee::Matrix<double> upperFace[NDIM];
+
+      struct QuadData
+      {
+/** Interpolation matrix for volume integral */
+          Lucee::Matrix<double> interp;
+/** Ordinates for volume interpolation */
+          Lucee::Matrix<double> ordinates;
+/** Weights for volume interpolation */
+          std::vector<double> weights;
+      };
+
+/** Quadrature data for volume integral */
+      QuadData volumeQuad;
+/** Quadrature data for surface integral on lower faces */
+      QuadData lowerSurfQuad[NDIM];
+/** Quadrature data for surface integral on upper faces */
+      QuadData upperSurfQuad[NDIM];
   };
 }
 
