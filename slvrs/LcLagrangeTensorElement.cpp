@@ -235,6 +235,52 @@ namespace Lucee
       for (unsigned d=0; d<NDIM; ++d)
         localNodeCoords(i,d) = (eta[d]+1)*0.5*dx[d];
     }
+
+// compute quadrature data for volume and surface quadrature
+    volumeQuad.interp = Lucee::Matrix<double>(nlocal, nlocal);
+    volumeQuad.ordinates = Lucee::Matrix<double>(nlocal, NDIM);
+    volumeQuad.weights.resize(nlocal);
+
+    basisCalc.getGaussQuadData(volumeQuad.interp, volumeQuad.ordinates,
+      volumeQuad.weights);
+
+// normalize weights
+    for (unsigned i=0; i<nlocal; ++i)
+      for (unsigned d=0; d<NDIM; ++d)
+        volumeQuad.weights[i] *= 0.5*dx[d];
+
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+// lower surface quadrature
+      unsigned nlf = basisCalc.getNumSurfLowerNodes(d);
+      lowerSurfQuad[d].interp = Lucee::Matrix<double>(nlf, nlocal);
+      lowerSurfQuad[d].ordinates = Lucee::Matrix<double>(nlf, NDIM);
+      lowerSurfQuad[d].weights.resize(nlf);
+      
+      basisCalc.getSurfLowerGaussQuadData(d, lowerSurfQuad[d].interp, lowerSurfQuad[d].ordinates,
+        lowerSurfQuad[d].weights);
+
+// normalize weights
+      for (unsigned i=0; i<nlf; ++i)
+        for (unsigned dd=0; dd<NDIM; ++dd)
+          if (dd != d)
+            lowerSurfQuad[d].weights[i] *= 0.5*dx[dd];
+
+// upper surface quadrature
+      unsigned nuf = basisCalc.getNumSurfUpperNodes(d);
+      upperSurfQuad[d].interp = Lucee::Matrix<double>(nuf, nlocal);
+      upperSurfQuad[d].ordinates = Lucee::Matrix<double>(nuf, NDIM);
+      upperSurfQuad[d].weights.resize(nuf);
+      
+      basisCalc.getSurfUpperGaussQuadData(d, upperSurfQuad[d].interp, upperSurfQuad[d].ordinates,
+        upperSurfQuad[d].weights);
+
+// normalize weights
+      for (unsigned i=0; i<nuf; ++i)
+        for (unsigned dd=0; dd<NDIM; ++dd)
+          if (dd != d)
+            upperSurfQuad[d].weights[i] *= 0.5*dx[dd];
+    }
   }
 
   template <unsigned NDIM>
@@ -402,14 +448,14 @@ namespace Lucee
   unsigned
   LagrangeTensorElement<NDIM>::getNumGaussNodes() const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNumGaussNodes();
+    return basisCalc.getNumNodes();
   }
 
   template <unsigned NDIM>
   unsigned
   LagrangeTensorElement<NDIM>::getNumSurfGaussNodes() const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getNumSurfGaussNodes();
+    return basisCalc.getNumSurfUpperNodes(0); // ASSUMPTION: ALL FACES HAVE SAME NUMBER OF SURFACE NODES
   }
 
   template <unsigned NDIM>
@@ -417,7 +463,14 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getGaussQuadData(interpMat, ordinates, weights);
+    unsigned nm = NDIM>3 ? 3 : NDIM; // needed for now due to assumption on 3D coordinates
+    interpMat.copy(volumeQuad.interp);
+    for (unsigned i=0; i<this->getNumGaussNodes(); ++i)
+    {
+      weights[i] = volumeQuad.weights[i];
+      for (unsigned d=0; d<nm; ++d)
+        ordinates(i,d) = volumeQuad.ordinates(i,d);
+    }
   }
 
   template <unsigned NDIM>
@@ -425,7 +478,14 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getSurfLowerGaussQuadData(dir, interpMat, ordinates, weights);
+    unsigned nm = NDIM>3 ? 3 : NDIM; // needed for now due to assumption on 3D coordinates
+    interpMat.copy(lowerSurfQuad[dir].interp);
+    for (unsigned i=0; i<this->getNumSurfGaussNodes(); ++i)
+    {
+      weights[i] = lowerSurfQuad[dir].weights[i];
+      for (unsigned d=0; d<nm; ++d)
+        ordinates(i,d) = lowerSurfQuad[dir].ordinates(i,d);
+    }
   }
 
   template <unsigned NDIM>
@@ -433,7 +493,14 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::getSurfUpperGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>:: getSurfUpperGaussQuadData(dir, interpMat, ordinates, weights);
+    unsigned nm = NDIM>3 ? 3 : NDIM; // needed for now due to assumption on 3D coordinates
+    interpMat.copy(upperSurfQuad[dir].interp);
+    for (unsigned i=0; i<this->getNumSurfGaussNodes(); ++i)
+    {
+      weights[i] = upperSurfQuad[dir].weights[i];
+      for (unsigned d=0; d<nm; ++d)
+        ordinates(i,d) = upperSurfQuad[dir].ordinates(i,d);
+    }
   }
 
   template <unsigned NDIM>
@@ -448,7 +515,40 @@ namespace Lucee
   LagrangeTensorElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::extractFromField(fld, data);    
+// create a region with each side being of size 2
+    int lower[NDIM], upper[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lower[d] = this->currIdx[d];
+      upper[d] = this->currIdx[d]+2;
+    }
+    Lucee::Region<NDIM, int> extRgn(lower, upper);
+    Lucee::RowMajorSequencer<NDIM> extRgnSeq(extRgn);
+    Lucee::RowMajorIndexer<NDIM> extRgnIdx(extRgn);
+
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+    unsigned nn = exclusiveNodeIndices.indices.size();
+    unsigned maxNodes = this->template getNumNodes();
+    
+    int idx[NDIM], idxN[NDIM];
+// loop over region to copy
+    while (extRgnSeq.step())
+    {
+      extRgnSeq.fillWithIndex(idx);
+// set pointer to this cell
+      fld.setPtr(fldPtr, idx);
+// for each exclusively owned node in current cell, check if it should
+// be copied and if so, copy it
+      for (unsigned n=0; n<nn; ++n)
+      {
+        for (unsigned d=0; d<NDIM; ++d)
+          idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
+        unsigned loc = extRgnIdx.getIndex(idxN);
+        if (loc < maxNodes)
+// copy it over
+          data[loc] = fldPtr[n];
+      }
+    }
   }
 
   template <unsigned NDIM>
