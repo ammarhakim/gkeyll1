@@ -79,6 +79,18 @@ namespace Lucee
       }
 
 /**
+ * Get weights for quadrature. The output vector should be
+ * pre-allocated.
+ *
+ * @param w Weights for quadrature.
+ */
+      void getWeights(std::vector<double>& w)
+      {
+        w.clear(); w.resize(totalNodes);
+        w = nodalWeights;
+      }
+
+/**
  * Fetch coefficient matrix.
  *
  * @param coeff On output, this contains the coefficient matrix. Should be pre-allocated.
@@ -373,7 +385,10 @@ namespace Lucee
       QuadData lowerSurfQuad[NDIM];
 /** Quadrature data for surface integral on upper faces */
       QuadData upperSurfQuad[NDIM];
-      
+
+/** Vecotr of weights for quadrature on nodes (this *are not*
+ * Gaussian quadrature weights) */
+      std::vector<double> nodalWeights;
 
 /**
  * Create nodes located at Lobatto quadrature points.
@@ -444,6 +459,11 @@ namespace Lucee
  * @param dir Direction to compute surface quadrature data.
  */
       void calcUpperSurfQuad(unsigned dir);
+
+/**
+ * Compute nodal weights.
+ */
+      void calcNodalWeights();
   };
 
 // Explicitly instantiate NDIM=0 case to void compiler barfs. This is

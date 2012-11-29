@@ -281,6 +281,13 @@ namespace Lucee
           if (dd != d)
             upperSurfQuad[d].weights[i] *= 0.5*dx[dd];
     }
+
+// fetch nodal quadrature weights
+    nodalWeights.resize(nlocal);
+    basisCalc.getWeights(nodalWeights);
+// normalize them
+    for (unsigned i=0; i<nlocal; ++i)
+      nodalWeights[i] *= vol2;
   }
 
   template <unsigned NDIM>
@@ -392,7 +399,8 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getWeights(std::vector<double>& w)
   {
-    return Lucee::NodalFiniteElementIfc<NDIM>::getWeights(w);
+    w.clear(); w.resize(this->template getNumNodes());
+    w = nodalWeights;
   }
 
   template <unsigned NDIM>

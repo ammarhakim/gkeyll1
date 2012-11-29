@@ -126,6 +126,13 @@ test_1()
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(0,1), 1.0/2.0-1/sqrt(3)/2.0));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,0), 1.0/2.0-1/sqrt(3)/2.0));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(1,1), 1/sqrt(3)/2.0+1.0/2.0));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[0], 1.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[1], 1.0));
 }
 
 void
@@ -264,6 +271,14 @@ test_2()
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,0), -.08729833462074174, 10));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,1), .4000000000000001));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(2,2), .6872983346207415));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[0], 1.0/3.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[1], 4.0/3.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[2], 1.0/3.0));
 }
 
 void
@@ -648,6 +663,15 @@ test_4()
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,1), 0.0));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,2), 0.0));
   LC_ASSERT("Testing interpolation matrix", epsCmp(vInterpMat(3,3), 1.0));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[0], (18-sqrt(30))/36));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[1], (18+sqrt(30))/36));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[2], (18+sqrt(30))/36));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[3], (18-sqrt(30))/36));
 }
 
 void
@@ -717,6 +741,15 @@ test_4_lobatto()
   LC_ASSERT("Testing weights", epsCmp(vWeights[1], (18+sqrt(30))/36));
   LC_ASSERT("Testing weights", epsCmp(vWeights[2], (18+sqrt(30))/36));
   LC_ASSERT("Testing weights", epsCmp(vWeights[3], (18-sqrt(30))/36));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[0], .1666666666666667));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[1], .8333333333333333));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[2], .8333333333333333));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[3], .1666666666666667));
 }
 
 void
@@ -1086,6 +1119,15 @@ test_5()
   LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,1), .2113248654051871, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,2), 0.0, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,3), .7886751345948129, 2e-15));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[0], 1.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[1], 1.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[2], 1.0));
+  LC_ASSERT("Testing nodal weights", epsCmp(nodalWeights[3], 1.0));
 }
 
 void
@@ -1320,6 +1362,20 @@ test_5_3x3()
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,6), -.06000000000000005, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,7), .2749193338482967, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,8), .4723790007724449, 2e-15));
+
+// testing nodal weights
+  std::vector<double> nodalWeights(basis.getNumNodes());
+  basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[0], 1.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[1], 4.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[2], 1.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[3], 4.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[4], 16.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[5], 4.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[6], 1.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[7], 4.0/9.0, 2e-15));
+  LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[8], 1.0/9.0, 2e-15));
 }
 
 void

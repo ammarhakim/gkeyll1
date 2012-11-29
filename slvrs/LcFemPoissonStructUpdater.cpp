@@ -820,7 +820,7 @@ namespace Lucee
           localFld[k] = fldPtr[k];
       }
 
-// compute contribition from this cell
+// compute contribution from this cell
       for (unsigned k=0; k<nlocal; ++k)
       {
         fldInt += weights[k]*localFld[k];      
