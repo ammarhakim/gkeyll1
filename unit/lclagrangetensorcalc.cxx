@@ -1363,9 +1363,173 @@ test_5_3x3()
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,7), .2749193338482967, 2e-15));
   LC_ASSERT("Testing interpolation matrix", diffCmp(vInterpMat(8,8), .4723790007724449, 2e-15));
 
+  unsigned numLowerFaceNodes = basis.getNumSurfLowerNodes(0);
+// check quadrature data
+  Lucee::Matrix<double> lfInterpMat(numLowerFaceNodes,numTotalNodes), lfOrds(numLowerFaceNodes,2);
+  std::vector<double> lfWeights(numLowerFaceNodes);
+  basis.getSurfLowerGaussQuadData(0, lfInterpMat, lfOrds, lfWeights);
+
+  for (unsigned i=0; i<numLowerFaceNodes; ++i)
+  {
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(i,0), -1.0));
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(i,1), ords[i]));
+  }
+
+  for (unsigned i=0; i<numLowerFaceNodes; ++i)
+    LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[i], weights[i]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,0), .6872983346207417, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,1), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,2), -.08729833462074155, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,1), 1.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,0), -.08729833462074174, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,1), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,2), .6872983346207415, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,8), 0.0, 2e-15));
+
+  basis.getSurfLowerGaussQuadData(1, lfInterpMat, lfOrds, lfWeights);
+
+  for (unsigned i=0; i<numLowerFaceNodes; ++i)
+  {
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(i,0), ords[i]));
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(lfOrds(i,1), -1.0));
+  }
+
+  for (unsigned i=0; i<numLowerFaceNodes; ++i)
+    LC_ASSERT("Testing surface quadrature weights", epsCmp(lfWeights[i], weights[i]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,0), .6872983346207417, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,3), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,6), -.08729833462074155, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(0,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,3), 1.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(1,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,0), -.08729833462074174, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,3), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,6), .6872983346207415, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(lfInterpMat(2,8), 0.0, 2e-15));
+
+  unsigned numUpperFaceNodes = basis.getNumSurfUpperNodes(0);
+// check quadrature data
+  Lucee::Matrix<double> ufInterpMat(numUpperFaceNodes,numTotalNodes), ufOrds(numUpperFaceNodes,2);
+  std::vector<double> ufWeights(numUpperFaceNodes);
+  basis.getSurfUpperGaussQuadData(0, ufInterpMat, ufOrds, ufWeights);
+
+  for (unsigned i=0; i<numUpperFaceNodes; ++i)
+  {
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(i,0), 1.0));
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(i,1), ords[i]));
+  }
+
+  for (unsigned i=0; i<numUpperFaceNodes; ++i)
+    LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[i], weights[i]));
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,6), .6872983346207417, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,7), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,8), -.08729833462074155, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,7), 1.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,5), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,6), -.08729833462074174, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,7), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,8), .6872983346207415, 2e-15));
+
+  basis.getSurfUpperGaussQuadData(1, ufInterpMat, ufOrds, ufWeights);
+
+  for (unsigned i=0; i<numUpperFaceNodes; ++i)
+  {
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(i,0), ords[i]));
+    LC_ASSERT("Testing surface quadrature ordinates", epsCmp(ufOrds(i,1), 1.0));
+  }
+
+  for (unsigned i=0; i<numUpperFaceNodes; ++i)
+    LC_ASSERT("Testing surface quadrature weights", epsCmp(ufWeights[i], weights[i]));
+
 // testing nodal weights
   std::vector<double> nodalWeights(basis.getNumNodes());
   basis.getWeights(nodalWeights);
+
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,2), .6872983346207417, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,5), .3999999999999997, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(0,8), -.08729833462074155, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,2), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,5), 1.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(1,8), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,0), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,1), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,2), -.08729833462074174, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,3), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,4), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,5), .4000000000000001, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,6), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,7), 0.0, 2e-15));
+  LC_ASSERT("Testing interpolation matrix", diffCmp(ufInterpMat(2,8), .6872983346207415, 2e-15));
 
   LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[0], 1.0/9.0, 2e-15));
   LC_ASSERT("Testing nodal weights", diffCmp(nodalWeights[1], 4.0/9.0, 2e-15));

@@ -248,6 +248,26 @@ gOrds3 : [
  [sqrt(3/5), 0],
  [sqrt(3/5), sqrt(3/5)]];
 
+gOrds3_left : [
+ [-1, -sqrt(3/5)],
+ [-1, 0],
+ [-1, sqrt(3/5)]];
+
+gOrds3_right : [
+ [1, -sqrt(3/5)],
+ [1, 0],
+ [1, sqrt(3/5)]];
+
+gOrds3_bottom : [
+ [-sqrt(3/5), -1],
+ [0, -1],
+ [sqrt(3/5), -1]];
+
+gOrds3_top : [
+ [-sqrt(3/5), 1],
+ [0, 1],
+ [sqrt(3/5), 1]];
+
 /** Construct matrix of coefficients */
 Pmat3 : makePmat(lord3, ord3);
 
@@ -287,3 +307,7 @@ N3_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(basis3), [1,5,2]);
 N3_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(basis3), [4,7,3]);
 
 N3_iMat_2 : calcInterpMatrix(basis3, gOrds3);
+N3_iMat_left_2 : calcInterpMatrix(basis3, gOrds3_left);
+N3_iMat_right_2 : calcInterpMatrix(basis3, gOrds3_right);
+N3_iMat_bottom_2 : calcInterpMatrix(basis3, gOrds3_bottom);
+N3_iMat_top_2 : calcInterpMatrix(basis3, gOrds3_top);
