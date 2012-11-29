@@ -22,6 +22,11 @@
   potential) compared to the memory needed to store the distribution
   function.
 
+** PolyOrder 3 Valsov solvers are not working
+
+   Not sure why, but need to find out and fix. Also, the solves are
+   taking very long compared to polyorder 3 serendipity element.
+
 * November 27th
 
   Completed code for volume and surface quadrature in
