@@ -355,6 +355,9 @@ namespace Lucee
       QuadData lowerSurfQuad[NDIM];
 /** Quadrature data for surface integral on upper faces */
       QuadData upperSurfQuad[NDIM];
+
+/** Weights for nodal quadrature */
+      std::vector<double> nodalWeights;
   };
 }
 

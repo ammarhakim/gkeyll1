@@ -168,6 +168,9 @@ namespace Lucee
       calcLowerSurfQuad(d);
       calcUpperSurfQuad(d);
     }
+
+// compute weights for nodal quadrature
+    calcNodalWeights();
   }
 
   template <unsigned NDIM>
@@ -777,6 +780,21 @@ namespace Lucee
       for (int bn=0; bn<totalNodes; ++bn)
         upperSurfQuad[dir].interp(r,bn) = evalBasis(bn,xc);
     }
+  }
+
+  template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::calcNodalWeights()
+  {
+    nodalWeights.resize(totalNodes);
+// compute factor for normalizing weights
+    double normFact = 1.0;
+    for (unsigned d=0; d<NDIM; ++d)
+      normFact *= 2;
+// nodal weights are simply first expansion coefficient for each basis
+// fucntion
+    for (unsigned b=0; b<totalNodes; ++b)
+      nodalWeights[b] = normFact*expandCoeff(0, b);
   }
 
 // instantiations
