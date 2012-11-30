@@ -139,8 +139,8 @@ namespace Lucee
         lower[d] = 0;
         upper[d] = numNodes[d]*gridRgn.getShape(d);
       }
-      local2Global = Lucee::RowMajorIndexer<NDIM>(
-        Lucee::Region<NDIM, int>(lower, upper));
+      local2GlobalRgn = Lucee::Region<NDIM, int>(lower, upper);
+      local2Global = Lucee::RowMajorIndexer<NDIM>(local2GlobalRgn);
 
 // compute strides
       for (unsigned d=0; d<NDIM; ++d)
@@ -154,8 +154,8 @@ namespace Lucee
         lower[d] = 0;
         upper[d] = (numNodes[d]-1)*gridRgn.getShape(d) + 1;
       }
-      local2Global = Lucee::RowMajorIndexer<NDIM>(
-        Lucee::Region<NDIM, int>(lower, upper));
+      local2GlobalRgn = Lucee::Region<NDIM, int>(lower, upper);
+      local2Global = Lucee::RowMajorIndexer<NDIM>(local2GlobalRgn);
 
 // compute strides
       for (unsigned d=0; d<NDIM; ++d)
@@ -530,8 +530,15 @@ namespace Lucee
       lower[d] = this->currIdx[d];
       upper[d] = this->currIdx[d]+2;
     }
+    Lucee::RowMajorSequencer<NDIM> extRgnSeq(
+      Lucee::Region<NDIM, int>(lower, upper));
+// create box for mapping to linear index in cell
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lower[d] = lgStrides[d]*this->currIdx[d];
+      upper[d] = lower[d] + lgStrides[d] + 1;
+    }
     Lucee::Region<NDIM, int> extRgn(lower, upper);
-    Lucee::RowMajorSequencer<NDIM> extRgnSeq(extRgn);
     Lucee::RowMajorIndexer<NDIM> extRgnIdx(extRgn);
 
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
@@ -551,10 +558,11 @@ namespace Lucee
       {
         for (unsigned d=0; d<NDIM; ++d)
           idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
-        unsigned loc = extRgnIdx.getIndex(idxN);
-        if (loc < maxNodes)
-// copy it over
+        if (extRgn.isInside(idxN))
+        {
+          unsigned loc = extRgnIdx.getIndex(idxN);
           data[loc] = fldPtr[n];
+        }
       }
     }
   }
@@ -593,14 +601,12 @@ namespace Lucee
       {
         for (unsigned d=0; d<NDIM; ++d)
           idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
-        unsigned loc = local2Global.getIndex(idxN);
-// reason this test works is that the local2Global indexer will give
-// an out-of-bounds linear index for those nodes which are not in the
-// grid. This is a bit subtle due to the way ownership is handled on
-// structured grids.
-        if (loc < maxNodes)
-// copy it over
+// check if node belongs to global nodal box
+        if (local2GlobalRgn.isInside(idxN))
+        {
+          unsigned loc = local2Global.getIndex(idxN);
           data[loc] = fldPtr[n];
+        }
       }
     }
   }
@@ -639,14 +645,12 @@ namespace Lucee
       {
         for (unsigned d=0; d<NDIM; ++d)
           idxN[d] = lgStrides[d]*idx[d] + exclusiveNodeIndices.indices[n][d];
-        unsigned loc = local2Global.getIndex(idxN);
-// reason this test works is that the local2Global indexer will give
-// an out-of-bounds linear index for those nodes which are not in the
-// grid. This is a bit subtle due to the way ownership is handled on
-// structured grids.
-        if (loc < maxNodes)
-// copy it over
+// check if node belongs to global nodal box
+        if (local2GlobalRgn.isInside(idxN))
+        {
+          unsigned loc = local2Global.getIndex(idxN);
           fldPtr[n] = data[loc];
+        }
       }
     }
   }

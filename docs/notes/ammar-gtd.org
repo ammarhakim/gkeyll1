@@ -15,6 +15,17 @@ archived.
 
   Things to do in Gkeyll for GKE project.
 
+** Track down "problem" with copyAllDataFromField() method	     :GKEYLL:
+
+   Not sure if this is a problem, but it needs to be tracked down as a
+   regression test is failing.
+
+** Make regression tests take extra command-line parameters 	     :GKEYLL:
+
+   This will allow passing extra parameters to gkeyll when running the
+   tests. In the long run it might be better to have a script to run
+   each test so this arbitrary addition of stuff is not needed.
+
 ** Test 1D and 3D element quadratures for LagrangeTensorBasisCalc    :GKEYLL:
 
    Also add more tests for 2D.

@@ -5,7 +5,7 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
-* November 28th
+* November 28th-29th
 
   Implemented extractFromField() method in LagrangeTensorElement
   class. This seems more complicated than it should be, but the
@@ -22,10 +22,20 @@
   potential) compared to the memory needed to store the distribution
   function.
 
+  Worked with Eric on ion-acoustic dispersion relation. Found a sign
+  error which fixed his results. Also worked through all the factors
+  of 2 and sqrt(2) etc etc etc to finally get the correct figure for
+  ion-acoustic problem. Need to upload it.
+
 ** PolyOrder 3 Valsov solvers are not working
 
    Not sure why, but need to find out and fix. Also, the solves are
    taking very long compared to polyorder 3 serendipity element.
+
+   [11:17 pm]: The proble, is with the extractFromField() method. The
+   indexing is messed up. Need to think of this more carefully. Can
+   not commit till this is fixed. Also, the slowness is connected to
+   this.
 
 * November 27th
 
