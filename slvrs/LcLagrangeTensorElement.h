@@ -304,6 +304,8 @@ namespace Lucee
       mutable Lucee::RowMajorSequencer<NDIM> nodeSeq;
 /** Indexer for global to local mapping */
       Lucee::RowMajorIndexer<NDIM> local2Global;
+/** Region for global to local mapping */
+      Lucee::Region<NDIM, int> local2GlobalRgn;
 /** Strides for use in glocal to local mapping */
       unsigned lgStrides[NDIM];
 
