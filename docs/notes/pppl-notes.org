@@ -5,6 +5,14 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* November 30th
+
+  Found the bug in extractFromField() method. However, this makes me
+  doubt my initial implementation of the copyAllDataFromField() and
+  copyAllDataToField() methods. I need to think about those carefully
+  and debug. A regression test which uses these methods is failing,
+  which is a good thing.
+
 * November 28th-29th
 
   Implemented extractFromField() method in LagrangeTensorElement
