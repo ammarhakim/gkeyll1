@@ -77,8 +77,8 @@ namespace Lucee
       double cfl;
 /** Maximum CFL number allowed */
       double cflm;
-/** Flag to indicate if to compute increments only */
-      bool onlyIncrement;
+/** Flag (one per equation) to indicate if to only compute increments */
+      std::vector<bool> onlyIncrement;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not

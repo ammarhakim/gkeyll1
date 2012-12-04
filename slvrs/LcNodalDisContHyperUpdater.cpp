@@ -75,11 +75,32 @@ namespace Lucee
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
+    unsigned meqn = equation->getNumEqns();
+    onlyIncrement.resize(meqn);
+    for (unsigned m=0; m<meqn; ++m)
+      onlyIncrement[m] = false;
 // when onlyIncrement flag is set contribution is not added to the
+
 // input field, i.e. only increment is computed
-    onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
-      onlyIncrement = tbl.getBool("onlyIncrement");
+    {
+      bool oi = tbl.getBool("onlyIncrement");
+      for (unsigned m=0; m<meqn; ++m)
+        onlyIncrement[m] = oi;
+    }
+    else if (tbl.hasBoolVec("onlyIncrement"))
+    {
+      std::vector<bool> oi = tbl.getBoolVec("onlyIncrement");
+      if (oi.size() != meqn)
+      {
+        Lucee::Except lce(
+          "NodalDisContHyperUpdater::readInput: When 'onlyIncrement' is specified as a table it must have ");
+        lce << meqn << " entries (number of equations). Provided " << oi.size() << " instead.";
+        throw lce;
+      }
+      for (unsigned m=0; m<meqn; ++m)
+        onlyIncrement[m] = oi[m];
+    }
   }
 
   template <unsigned NDIM>
@@ -313,7 +334,7 @@ namespace Lucee
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
 
-    if (onlyIncrement == false)
+    if (onlyIncrement[0] == false)
     {
 // NOTE: If only calculation of increments are requested, the final
 // Euler update is not performed. This means that the multiplication

@@ -52,7 +52,10 @@ archived.
 
 ** Write source integrator for nodal DG scheme			     :GKEYLL:
 
-   So source terms can be included in DG updates
+   So source terms can be included in DG updates. One way to do this
+   is treat the sources in a seperate updater just like the auxillary
+   variables are treated. This would remove the need to create aliases
+   of DG fields.
 
 ** Implement BC updaters for nodal DG scheme			     :GKEYLL:
 

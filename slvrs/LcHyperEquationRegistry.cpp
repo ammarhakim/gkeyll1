@@ -16,6 +16,7 @@
 #include <LcEulerEquation.h>
 #include <LcGradEquation.h>
 #include <LcHyperEquationRegistry.h>
+#include <LcLenardBernsteinVParEquation.h>
 #include <LcMaxwellEquation.h>
 #include <LcPhMaxwellEquation.h>
 
@@ -40,5 +41,7 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<1> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<2> >;
     new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<3> >;
+
+    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::LenardBernsteinVParEquation >;
   }
 }
