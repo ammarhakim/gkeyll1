@@ -334,24 +334,23 @@ namespace Lucee
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
 
-    if (onlyIncrement[0] == false)
+    seq = Lucee::RowMajorSequencer<NDIM>(localRgn);
+// final sweep, update solution with forward Euler step
+    while (seq.step())
     {
+      seq.fillWithIndex(idx);
+      qNew.setPtr(qNewPtr, idx);
+      q.setPtr(qPtr, idx);
+
 // NOTE: If only calculation of increments are requested, the final
 // Euler update is not performed. This means that the multiplication
 // of the DG RHS with dt is not done, something to keep in mind if
 // using the increment in time-dependent update.
 
-      seq = Lucee::RowMajorSequencer<NDIM>(localRgn);
-// final sweep, update solution with forward Euler step
-      while (seq.step())
-      {
-        seq.fillWithIndex(idx);
-        qNew.setPtr(qNewPtr, idx);
-        q.setPtr(qPtr, idx);
-        
-        for (unsigned k=0; k<qPtr.getNumComponents(); ++k)
-          qNewPtr[k] = qPtr[k] + dt*qNewPtr[k];
-      }
+      for (unsigned m=0; m<meqn; ++m)
+        if (onlyIncrement[m] == false)
+          for (unsigned k=0; k<nlocal; ++k)
+            qNewPtr[meqn*k+m] = qPtr[meqn*k+m] + dt*qNewPtr[meqn*k+m];
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
