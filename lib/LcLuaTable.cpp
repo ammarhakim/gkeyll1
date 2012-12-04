@@ -230,6 +230,36 @@ namespace Lucee
     return res;
   }
 
+  std::vector<bool>
+  LuaTable::getBoolVec(const std::string& key) const
+  {
+    SHOW_LUA_STACK_SIZE("getBoolVec", L);
+    std::vector<bool> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TBOOLEAN)
+      {
+        lua_pop(L, 2);
+        Lucee::Except lce("LuaTable::getBoolVec: ");
+        lce << key << " is not a table of booleans";
+        throw lce;
+      }
+      res.push_back(lua_toboolean(L, -1) == 1 ? true : false);
+      lua_pop(L, 1);
+    }
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return res;
+  }
+
   LuaTable
   LuaTable::getTable(const std::string& nm) const
   {
@@ -383,6 +413,40 @@ namespace Lucee
     while (lua_next(L, t) != 0) 
     {
       if (lua_type(L, -1) != LUA_TNUMBER)
+      {
+        lua_pop(L, 2);
+        return false;
+      }
+      lua_pop(L, 1);
+    }
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return true;
+  }
+
+  bool
+  LuaTable::hasBoolVec(const std::string& key) const
+  {
+    SHOW_LUA_STACK_SIZE("hasBoolVec", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// push name of table onto stack
+    lua_pushstring(L, key.c_str());
+// now put table of values on stack
+    lua_gettable(L, -2);
+// check if this is a table in the first place
+    if (lua_type(L, -1) != LUA_TTABLE)
+    {
+      lua_pop(L, 2);
+      SHOW_LUA_STACK_SIZE2(L);
+      return false;
+    }
+
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) != LUA_TBOOLEAN)
       {
         lua_pop(L, 2);
         return false;

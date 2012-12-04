@@ -25,6 +25,7 @@ test_1(Lucee::LuaState& L)
     "subcolors = {a=1.0, b=2.0, c=3.0},"
     "correct = true,"
     "screw = false,"
+    "boolList = {true, false, true},"
     "}";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
@@ -82,6 +83,14 @@ test_1(Lucee::LuaState& L)
   LC_ASSERT("Testing list of strings", address.size() == 2);
   LC_ASSERT("Testing list of strings", address[0] == "hello");
   LC_ASSERT("Testing list of strings", address[1] == "world");
+
+  LC_ASSERT("Testing Lua table", back.hasBoolVec("boolList"));
+  std::vector<bool> blist = back.getBoolVec("boolList");
+  LC_ASSERT("Testing list of bools", blist.size() == 3);
+  LC_ASSERT("Testing list of bools", blist[0] == true);
+  LC_ASSERT("Testing list of bools", blist[1] == false);
+  LC_ASSERT("Testing list of bools", blist[2] == true);
+
 }
 
 void

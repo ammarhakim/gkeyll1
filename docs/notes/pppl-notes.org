@@ -5,6 +5,21 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* December 4th
+
+  Added hasBoolVec() and getBoolVec() methods to LuaTable class and
+  corresponding tests. Not sure why these were not in the code in the
+  first place.
+
+  Added LenardBernsteinVParEquation class to represent LB collisions
+  in X-vpar space.
+
+* December 3rd
+
+  Working on LDG scheme. Need to implement a class for the LB
+  collision operator. Spent a lot of time trying to compute best-fit
+  parameters for Maxwellian weighted basis functions.
+
 * November 30th
 
   Found the bug in extractFromField() method. However, this makes me
@@ -40,7 +55,7 @@
    Not sure why, but need to find out and fix. Also, the solves are
    taking very long compared to polyorder 3 serendipity element.
 
-   [11:17 pm]: The proble, is with the extractFromField() method. The
+   [11:17 pm]: The problem, is with the extractFromField() method. The
    indexing is messed up. Need to think of this more carefully. Can
    not commit till this is fixed. Also, the slowness is connected to
    this.

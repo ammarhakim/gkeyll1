@@ -264,6 +264,14 @@ namespace Lucee
       std::vector<double> getNumVec(const std::string& key) const;
 
 /**
+ * Get vector of booleans from table.
+ *
+ * @param key Key in table.
+ * @return vector of booleans corresponding to key.
+ */
+      std::vector<bool> getBoolVec(const std::string& key) const;
+
+/**
  * Get a table inside this table.
  * 
  * @param nm Name of table to fetch.
@@ -318,6 +326,14 @@ namespace Lucee
  * @return true if exists, false otherwise.
  */
       bool hasNumVec(const std::string& key) const;
+
+/**
+ * Check if vector of booleans is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasBoolVec(const std::string& key) const;
 
 /**
  * Check if a table is inside this table.

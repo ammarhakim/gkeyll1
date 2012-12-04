@@ -38,6 +38,10 @@ namespace Lucee
   Lucee::UpdaterStatus
   Copy1DTo2DNodalField::update(double t)
   {
+// NOTE: This method only works for polyOrder 1 or 2 serendipity
+// elements. Eventually, I need to fix this, but not sure how. (Ammar
+// Hakim, August 2012).
+
 // get hold of grid
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();

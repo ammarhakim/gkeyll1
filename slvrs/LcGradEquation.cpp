@@ -21,6 +21,7 @@ namespace Lucee
   template <> const char *GradEquation<2>::id = "GradAuxFlux2D";
   template <> const char *GradEquation<3>::id = "GradAuxFlux3D";
 
+
   template <unsigned NDIM>
   GradEquation<NDIM>::GradEquation()
     : Lucee::HyperEquation(NDIM, 0)
