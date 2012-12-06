@@ -34,8 +34,28 @@ namespace Lucee
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
+
+    alpha = 1.0;
 // coefficient
-    alpha = tbl.getNumber("coefficient");
+    if (tbl.hasNumber("coefficient"))
+      alpha = tbl.getNumber("coefficient");
+
+    fluxType = FIVE_POINT;
+// flux type
+    if (tbl.hasString("fluxType"))
+    {
+      if (tbl.getString("fluxType") == "3-point")
+        fluxType = THREE_POINT;
+      else if (tbl.getString("fluxType") == "5-point")
+        fluxType = FIVE_POINT;
+      else
+      {
+        Lucee::Except lce("GradEquation::readInput: 'fluxType' must be one of ");
+        lce << "'3-point' or '5-point'. '" << tbl.getString("fluxType")
+            << "' specified instead";
+        throw lce;
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -79,7 +99,11 @@ namespace Lucee
     const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
     double* f)
   {
-    f[0] = 0.5*alpha*(auxVarsl[0][0] + auxVarsr[0][0]);
+    if (fluxType == THREE_POINT)
+      f[0] = alpha*auxVarsl[0][0];
+    else
+      f[0] = 0.5*alpha*(auxVarsr[0][0] + auxVarsl[0][0]);
+
     for (unsigned i=1; i<NDIM; ++i)
       f[i] = 0.0;
     return 0.0;

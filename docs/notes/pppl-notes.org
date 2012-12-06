@@ -14,6 +14,13 @@
   Added LenardBernsteinVParEquation class to represent LB collisions
   in X-vpar space.
 
+** A problem with DG with multiple fields
+
+   An issue is that DG fields are can be alias()-ed. This makes
+   updating LB collision terms complicated. For now, one option would
+   be maintain a extra copy of the distribution function and copy the
+   data back and forth appropriately.
+
 * December 3rd
 
   Working on LDG scheme. Need to implement a class for the LB

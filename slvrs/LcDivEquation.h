@@ -23,6 +23,9 @@ namespace Lucee
   template <unsigned NDIM>
   class DivEquation : public Lucee::HyperEquation
   {
+/** Type of flux to use */
+      enum DiffFluxType { THREE_POINT, FIVE_POINT };
+
     public:
 /** Class id: this is used by registration system */
       static const char *id;
@@ -90,6 +93,8 @@ namespace Lucee
         double* f);
 
     private:
+/** Type of flux to use */
+      DiffFluxType fluxType;
   };
 }
 
