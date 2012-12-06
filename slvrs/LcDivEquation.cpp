@@ -33,6 +33,23 @@ namespace Lucee
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
+
+    fluxType = FIVE_POINT;
+// flux type
+    if (tbl.hasString("fluxType"))
+    {
+      if (tbl.getString("fluxType") == "3-point")
+        fluxType = THREE_POINT;
+      else if (tbl.getString("fluxType") == "5-point")
+        fluxType = FIVE_POINT;
+      else
+      {
+        Lucee::Except lce("DivEquation::readInput: 'fluxType' must be one of ");
+        lce << "'3-point' or '5-point'. '" << tbl.getString("fluxType")
+            << "' specified instead";
+        throw lce;
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -80,8 +97,11 @@ namespace Lucee
 // rotate to bring into normal-tangent space
     c.rotateVecToLocal(wvecl, wvecNorml);
     c.rotateVecToLocal(wvecr, wvecNormr);
-// use central flux
-    f[0] = 0.5*(wvecNorml[0] + wvecNormr[0]);
+
+    if (fluxType == THREE_POINT)
+      f[0] = wvecNormr[0];
+    else
+      f[0] = 0.5*(wvecNorml[0] + wvecNormr[0]);
 
     return 0.0;
   }
