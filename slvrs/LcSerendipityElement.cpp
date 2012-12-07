@@ -586,25 +586,23 @@ namespace Lucee
     // Get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
-    // Get grid spacing (this is assumed to be uniform for now)
-    double dx = grid.getDx(0);
-    double dy = grid.getDx(1);
-    double dz = grid.getDx(2);
-    double dx2 = dx*dx;
-    double dy2 = dy*dy;
-    double dz2 = dz*dz;
+    // Get grid spacing
+    double dq[NDIM];
+    double dq2[NDIM];
+    for (unsigned i = 0; i < NDIM; i++)
+    {
+      dq[i] = grid.getDx(i);
+      dq2[i] = dq[i]*dq[i];
+    }
     // Populate nodeList according to basisDegree
-    // TODO: Give Matrix name in argument for readability
     nodeList = MatrixXd(this->getNumNodes(),3);
-    setupNodeListMatrix();
+    setupNodeListMatrix(nodeList);
     // Populate basisList according to basisDegree
     basisList = MatrixXi(this->getNumNodes(),3);
-    setupBasisMatrix();
+    setupBasisMatrix(basisList);
     // Compute coefficients for basis functions
     MatrixXd coeffMatrix(this->getNumNodes(),this->getNumNodes());
     double coeffProduct;
-
-    // TODO: Write a function that only sets the values of functionVector
 
     // Compute monomial terms evaluated at each nodal coordinate
     for (unsigned nodeIndex = 0; nodeIndex < nodeList.rows(); nodeIndex++)
@@ -650,17 +648,6 @@ namespace Lucee
       // Store the newly represented basis function into functionVector
       functionVector.push_back(polynomial3DArray.copy());
     }
-    
-    // Below is for testing purposes only!
-    /**for (unsigned nodeIndex = 0; nodeIndex < nodeList.rows(); nodeIndex++)
-    {
-      // Loop over the basis functions
-      for (unsigned basisIndex = 0; basisIndex < invCoeffMatrix.cols(); basisIndex++)
-      {
-          // Evaluate each basis function at the node we are at to check for correct behavior
-          evalMatrix(nodeIndex,basisIndex) = evalPolynomial(functionVector[basisIndex],nodeList.row(nodeIndex));
-      }
-    }*/
 
     // Compute gaussian quadrature weights and locations in 1-D
     // TODO: should these be at the class scope?
@@ -670,20 +657,29 @@ namespace Lucee
     legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
     // Unused so far: fill out gaussian integration nodes for integration
     // over cell volume
+    blitz::Array<double,3> functionDx(maxPower,maxPower,maxPower);
+    blitz::Array<double,3> functionDy(maxPower,maxPower,maxPower);
+    blitz::Array<double,3> functionDz(maxPower,maxPower,maxPower);
     unsigned totalVolumeGaussNodes = 1.0;
     VectorXd gaussNodeVec(3);
-    unsigned currRow = 0;
+    unsigned currNode = 0;
     double totalWeight;
-    /*
+    
+    // Figure out how many gaussian points there are
+    for (unsigned i = 0; i < NDIM; i++)
+    {
+      totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
+    }
+    
+    gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
+    functionEvaluations  = Eigen::MatrixXd(this->getNumNodes(),totalVolumeGaussNodes);
+/** 3D Array containing derivatives of basis functions (rows) evaluated at gaussian integration locations (cols)
+    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
+    blitz::Array<double,3> functionDEvaluations(this->getNumNodes(),totalVolumeGaussNodes,NDIM);
+    
     if (NDIM == 3)
     {
-      for (unsigned i = 0; i < NDIM; i++)
-      {
-        totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
-      }
-
-      gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
-      functionEvaluations  = Eigen::MatrixXd(this->getNumNodes(),totalVolumeGaussNodes);
+      
       
       for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
       {
@@ -695,57 +691,49 @@ namespace Lucee
             gaussNodeVec(1)    = gaussPoints[yNodeIndex];
             gaussNodeVec(2)    = gaussPoints[zNodeIndex];
             totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-            gaussNodeList.row(currRow) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            
+            // Evaluate all basis functions and their derivatives in every direction at this particular gaussian node
             for (unsigned functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
             {
-              functionEvaluations(functionIndex,currRow) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+              functionEvaluations(functionIndex,currNode) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+              for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+              {
+                functionDEvaluations((int)functionIndex,(int)currNode,(int)dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[functionIndex],dimIndex),gaussNodeVec);
+              }
             }
-            currRow++;
+            currNode++;
           }
         }
       }
-    }*/
+    }
 
-    
     // Resize the output matrices we need
     resizeMatrices();
     // Call various functions to populate the matrices
     std::cout << "Starting matrix computation" << std::endl;
-    computeMass(functionVector,refNjNk);
+    computeMass(refNjNk);
     computeFaceMass(functionVector,0,refFaceNjNk_xl,refFaceNjNk_xu);
     computeFaceMass(functionVector,1,refFaceNjNk_yl,refFaceNjNk_yu);
     computeFaceMass(functionVector,2,refFaceNjNk_zl,refFaceNjNk_zu);
-    computeStiffness(functionVector,refDNjDNk);
-    computeGradStiffness(functionVector,0,refDNjNk_0);
-    computeGradStiffness(functionVector,1,refDNjNk_1);
-    computeGradStiffness(functionVector,2,refDNjNk_2);
-    /*std::cout << "Finished computing all matrices" << std::endl;
-    std::cout << "refNjNk " << std::endl << refNjNk << std::endl;
-    std::cout << "refFaceNjNk_xl " << std::endl << refFaceNjNk_xl << std::endl;
-    std::cout << "refFaceNjNk_xu " << std::endl << refFaceNjNk_xu << std::endl;
-    std::cout << "refFaceNjNk_yl " << std::endl << refFaceNjNk_yl << std::endl;
-    std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
-    std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
-    std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
-    std::cout << "refDNjDNk " << std::endl << refDNjDNk*(dx*dx/4.0) << std::endl;
-    std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
-    std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
-    std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;*/
+    computeStiffness(functionDEvaluations,refDNjDNk);
+    computeGradStiffness(functionDEvaluations,0,refDNjNk_0);
+    computeGradStiffness(functionDEvaluations,1,refDNjNk_1);
+    computeGradStiffness(functionDEvaluations,2,refDNjNk_2);
+    std::cout << "Finished computing all matrices" << std::endl;
+    //printAllMatrices();
     // Scale the matrices computed on reference element into physical space
-    // TODO: verify correctness of this
-    refNjNk        *= 0.5*dx*0.5*dy*0.5*dz;
-    refFaceNjNk_xl *= 0.5*dy*0.5*dz;
-    refFaceNjNk_xu *= 0.5*dy*0.5*dz;
-    refFaceNjNk_yl *= 0.5*dx*0.5*dz;
-    refFaceNjNk_yu *= 0.5*dx*0.5*dz;
-    refFaceNjNk_zl *= 0.5*dx*0.5*dy;
-    refFaceNjNk_zu *= 0.5*dx*0.5*dy;
-    refDNjDNk      *= 0.5*dx*0.5*dy*0.5*dz;
-    refDNjNk_0     *= 0.5*dy*0.5*dz;
-    refDNjNk_1     *= 0.5*dx*0.5*dz;
-    refDNjNk_2     *= 0.5*dx*0.5*dy;
-    
-    //std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
+    refNjNk        *= 0.5*dq[0]*0.5*dq[1]*0.5*dq[2];
+    refFaceNjNk_xl *= 0.5*dq[1]*0.5*dq[2];
+    refFaceNjNk_xu *= 0.5*dq[1]*0.5*dq[2];
+    refFaceNjNk_yl *= 0.5*dq[0]*0.5*dq[2];
+    refFaceNjNk_yu *= 0.5*dq[0]*0.5*dq[2];
+    refFaceNjNk_zl *= 0.5*dq[0]*0.5*dq[1];
+    refFaceNjNk_zu *= 0.5*dq[0]*0.5*dq[1];
+    refDNjDNk      *= 0.5*dq[0]*0.5*dq[1]*0.5*dq[2];
+    refDNjNk_0     *= 0.5*dq[1]*0.5*dq[2];
+    refDNjNk_1     *= 0.5*dq[0]*0.5*dq[2];
+    refDNjNk_2     *= 0.5*dq[0]*0.5*dq[1];
   }
 
   template <unsigned NDIM>
@@ -768,10 +756,10 @@ namespace Lucee
  
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::setupNodeListMatrix()
+  SerendipityElement<NDIM>::setupNodeListMatrix(Eigen::MatrixXd& nodeMatrix)
   {
     if (basisDegree == 1) {
-      nodeList << -1,-1,-1,
+      nodeMatrix << -1,-1,-1,
                    1,-1,-1,
                    1,1,-1,
                    -1,1,-1,
@@ -782,7 +770,7 @@ namespace Lucee
     }
     else if (basisDegree == 2)
     {
-      nodeList << -1,-1,-1,
+      nodeMatrix << -1,-1,-1,
                   0,-1,-1,
                   1,-1,-1,
                   1,0,-1,
@@ -805,7 +793,7 @@ namespace Lucee
     }
     else if (basisDegree == 3)
     {
-      nodeList << -1,-1,-1,
+      nodeMatrix << -1,-1,-1,
                   -1/3.0,-1,-1,
                   1/3.0,-1,-1,
                   1,-1,-1,
@@ -842,7 +830,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::setupBasisMatrix()
+  SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix)
   {
     // Superlinear degree
     unsigned superDegree;
@@ -857,7 +845,7 @@ namespace Lucee
           
           if (superDegree < basisDegree + 1)
           {
-            basisList.row(dataIndex) = Vector3i(xIndex,yIndex,zIndex);
+            basisMatrix.row(dataIndex) = Vector3i(xIndex,yIndex,zIndex);
             dataIndex = dataIndex + 1;
           }
         }
@@ -998,16 +986,10 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeMass(const std::vector<blitz::Array<double,3> >& functionVector,
-    Eigen::MatrixXd& resultMatrix)
+  SerendipityElement<NDIM>::computeMass(Eigen::MatrixXd& resultMatrix)
   {
-    blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
     blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
-    VectorXd gaussNodeVec(3);
-
     double integrationResult;
-    double integrationResultTest;
-    double totalWeight;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
     
@@ -1015,38 +997,16 @@ namespace Lucee
     {
       for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
-        // Reset polyProduct
-        polyProduct = 0;
-        // Calculate polynomial product of two basis functions
-        polyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[mIndex]);
-
         // Reset integration result
         integrationResult = 0.0;
-        integrationResultTest = 0.0;
-        // Integrate using gaussian quadrature
-        for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
-        {
-          for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
-          {
-            for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
-            {
-              gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-              gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-              gaussNodeVec(2)    = gaussPoints[zNodeIndex];
-              totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-              integrationResult += totalWeight*evalPolynomial(polyProduct,gaussNodeVec);
-            }
-          }
-        }
-/*
+
+        // Loop over 3d gauss points to evaluate integral using gaussian quadrature
         for (unsigned gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
         {
-          // result = weight(node) * f(node)getNumSurfLowerNodes()
-          integrationResultTest += gaussNodeList(gaussIndex,NDIM+1)*functionEvaluations(kIndex,gaussIndex)*functionEvaluations(mIndex,gaussIndex);
+          // result = weight(node) * f1(node) * f2(node)
+          integrationResult += gaussNodeList(gaussIndex,NDIM)*functionEvaluations(kIndex,gaussIndex)*functionEvaluations(mIndex,gaussIndex);
         }
-
-        std::cout << integrationResult - integrationResultTest << std::endl;*/
-
+        
         resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
@@ -1134,15 +1094,9 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector,
+  SerendipityElement<NDIM>::computeStiffness(const blitz::Array<double,3>& functionDerivative,
     Eigen::MatrixXd& resultMatrix)
   {
-    blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionDx2(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionDy2(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionDz2(maxPower,maxPower,maxPower);
-    VectorXd gaussNodeVec(3);
-
     // Get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -1155,7 +1109,6 @@ namespace Lucee
     double dz2 = dz*dz;
 
     double integrationResult;
-    double totalWeight;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
     
@@ -1163,39 +1116,16 @@ namespace Lucee
     {
       for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
-        // Reset polyProduct
-        polyProduct = 0;
-        functionDx2 = 0;
-        functionDy2 = 0;
-        functionDz2 = 0;
-        // Calculate derivatives of basis functions
-        functionDx2 = computePolynomialProduct(computePolynomialDerivative(functionVector[kIndex],0),
-                                               computePolynomialDerivative(functionVector[mIndex],0));
-        functionDy2 = computePolynomialProduct(computePolynomialDerivative(functionVector[kIndex],1),
-                                               computePolynomialDerivative(functionVector[mIndex],1));
-        functionDz2 = computePolynomialProduct(computePolynomialDerivative(functionVector[kIndex],2),
-                                               computePolynomialDerivative(functionVector[mIndex],2));
-        // Calculate stiffness matrix integrand
-        polyProduct = functionDx2*(4.0/dx2) + functionDy2*(4.0/dy2) + functionDz2*(4.0/dz2);
-
         // Reset integration result
         integrationResult = 0.0;
-        // Integrate using gaussian quadrature
-        for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+        
+        // Loop over 3d gauss points to evaluate integral using gaussian quadrature
+        for (unsigned gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
         {
-          for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
-          {
-            for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
-            {
-            gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-            gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-            gaussNodeVec(2)    = gaussPoints[zNodeIndex];
-            totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-            integrationResult += totalWeight*evalPolynomial(polyProduct,gaussNodeVec);
-            }
-          }
+          integrationResult += gaussNodeList(gaussIndex,NDIM)*(functionDerivative((int)kIndex,(int)gaussIndex,0)*functionDerivative((int)mIndex,(int)gaussIndex,0)*4.0/dx2 +
+                                functionDerivative((int)kIndex,(int)gaussIndex,1)*functionDerivative((int)mIndex,(int)gaussIndex,1)*4.0/dy2 +
+                                functionDerivative((int)kIndex,(int)gaussIndex,2)*functionDerivative((int)mIndex,(int)gaussIndex,2)*4.0/dz2);
         }
-
         resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
@@ -1203,15 +1133,12 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
+  SerendipityElement<NDIM>::computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
     unsigned dir, Eigen::MatrixXd& resultMatrix)
   {
-    blitz::Array<double,3> polyProduct(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionD(maxPower,maxPower,maxPower);
     VectorXd gaussNodeVec(3);
 
     double integrationResult;
-    double totalWeight;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
 
@@ -1219,36 +1146,37 @@ namespace Lucee
     {
       for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
-        // Reset polyProduct
-        polyProduct = 0;
-        functionD = 0;
-        // Calculate derivatives of basis functions
-        functionD = computePolynomialDerivative(functionVector[kIndex],dir);
-        // Calculate polynomial product of two basis functions
-        polyProduct = computePolynomialProduct(functionD,functionVector[mIndex]);
-
         // Reset integration result
         integrationResult = 0.0;
-        // Integrate using gaussian quadrature
-        for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+
+        // Loop over 3d gauss points to evaluate integral using gaussian quadrature
+        for (unsigned gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
         {
-          for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
-          {
-            for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
-            {
-              gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-              gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-              gaussNodeVec(2)    = gaussPoints[zNodeIndex];
-              totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-              integrationResult += totalWeight*evalPolynomial(polyProduct,gaussNodeVec);
-            }
-          }
+          integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative((int)kIndex,(int)gaussIndex,(int)dir)*functionEvaluations(mIndex,gaussIndex);
         }
 
         resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
   }
+  
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::printAllMatrices()
+  {
+    std::cout << "refNjNk " << std::endl << refNjNk << std::endl;
+    std::cout << "refFaceNjNk_xl " << std::endl << refFaceNjNk_xl << std::endl;
+    std::cout << "refFaceNjNk_xu " << std::endl << refFaceNjNk_xu << std::endl;
+    std::cout << "refFaceNjNk_yl " << std::endl << refFaceNjNk_yl << std::endl;
+    std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
+    std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
+    std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
+    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
+    std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
+    std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
+    std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;
+  }
+
   
 // instantiations
   template class SerendipityElement<1>;

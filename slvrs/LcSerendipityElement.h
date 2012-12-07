@@ -363,12 +363,12 @@ namespace Lucee
  *    Populate nodeList with serendipity node locations on reference
  *    element
  */
-      void setupNodeListMatrix();
+      void setupNodeListMatrix(Eigen::MatrixXd& nodeMatrix);
 /**
  *    Create basis monomials by populating matrix of rows
  *    [a b c] to represent x^a*y^b*z^c monomials
  */
-      void setupBasisMatrix();
+      void setupBasisMatrix(Eigen::MatrixXi& basisMatrix);
  /**
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
@@ -391,8 +391,7 @@ namespace Lucee
 /**
 *     Compute the mass matrix on the reference element.
 */
-      void computeMass(const std::vector<blitz::Array<double,3> >& functionVector,
-        Eigen::MatrixXd& resultMatrix);
+      void computeMass(Eigen::MatrixXd& resultMatrix);
 
 /**
 *     Compute the face-mass matrices on the reference element in direction num.
@@ -403,14 +402,18 @@ namespace Lucee
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      void computeStiffness(const std::vector<blitz::Array<double,3> >& functionVector,
-        Eigen::MatrixXd& resultMatrix);     
+      void computeStiffness(const blitz::Array<double,3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
 
 /**
 *     Compute the grad stiffness matrix in direction dir on the reference element.
 */
-      void computeGradStiffness(const std::vector<blitz::Array<double,3> >& functionVector, 
+      void computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
         unsigned dir, Eigen::MatrixXd& resultMatrix);
+
+/**
+*     Print out matrix values to the console (testing purposes only).
+*/
+      void printAllMatrices();
   };
 }
 
