@@ -1,4 +1,4 @@
-% ComputeSerendipityMatrices.m
+% ComputeSerendipityMatrices2D.m
 % Eric Shi (10-19-2012)
 % Computes the serendipity basis functions for 4, 8, and 12 node elements
 % in 2-D. Then evaluates the M, K, and G_i matrices.
@@ -24,9 +24,9 @@ nodeList  = {[-1,-1],[1,-1],[1,1],[-1,1]};
 degree    = 1; % (r) This is tied to nodeList!
 % nodeList  = {[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]};
 % degree    = 2; % (r) This is tied to nodeList!
-nodeList  = {[-1,-1],[-1/3,-1],[1/3,-1],[1,-1],[1,-1/3],[1,1/3],[1,1],...
-                [1/3,1],[-1/3,1],[-1,1],[-1,1/3],[-1,-1/3]};
-degree    = 3; % (r) This is tied to nodeList!
+% nodeList  = {[-1,-1],[-1/3,-1],[1/3,-1],[1,-1],[1,-1/3],[1,1/3],[1,1],...
+%                 [1/3,1],[-1/3,1],[-1,1],[-1,1/3],[-1,-1/3]};
+% degree    = 3; % (r) This is tied to nodeList!
 basisList = {};
 
 % Plot the reference element with nodes
