@@ -1,5 +1,4 @@
 /** A script to verify properties of local DG discretization */
-kill(all);
 
 /** The flux is written as
 
