@@ -21,6 +21,7 @@ set(lcslvrs_SOURCES
   LcBoundaryCondition.cpp
   LcConstBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
+  LcCopyContToDisContFieldUpdater.cpp
   LcCurrentSource.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp

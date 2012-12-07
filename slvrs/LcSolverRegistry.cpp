@@ -13,6 +13,7 @@
 #include <LcBcUpdater.h>
 #include <LcConstBoundaryCondition.h>
 #include <LcCopyBoundaryCondition.h>
+#include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
@@ -91,6 +92,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<3> >;
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;

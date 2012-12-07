@@ -5,6 +5,22 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* December 7th
+
+  Worked out explicit formulas for gradient and divergence using local
+  DG. Turns out that the results of using local DG as a means of
+  computing Laplacians works but the derivatives look very
+  strange. More thought on this is needed.
+
+  Added new class to copy continuous fields into discontinuous
+  fields. This is needed to get the sources in the Hasegawa-Wakatani
+  equations computed in Lua. 
+
+  A subtle point: The loop must be over extended regions on each rank
+  but must not include the ghost cells. The issue is that the
+  continuous feilds are not well defined in the ghost cells due to the
+  funny ownership issues.
+
 * December 5th-6th
 
   Spent the day working on JE16. The advection algorithms are

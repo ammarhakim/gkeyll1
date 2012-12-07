@@ -179,6 +179,10 @@ archived.
   This is for broader infrastructure work which does not involve any
   specific solver or physics issue.
 
+** Split tests/slvr directory into multiple directories		      :INFRA:
+
+   Slvr directory is getting very crowded.
+
 ** Use subprocess python module in xregtest.py			      :INFRA:
 
    The problem now is that the return code form the gkeyll process is
