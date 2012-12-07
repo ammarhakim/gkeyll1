@@ -1,11 +1,11 @@
 /**
- * @file	LcCopy1DTo2DNodalField.h
+ * @file	LcCopyContToDisContFieldUpdater.h
  *
- * @brief	Updater to copy 1D field to 2D field.
+ * @brief	Updater to copy continuous field to a discontinuous field.
  */
 
-#ifndef LC_COPY_1D_TO_2D_NODAL_FIELD_H
-#define LC_COPY_1D_TO_2D_NODAL_FIELD_H
+#ifndef LC_COPY_CONT_TO_DIS_CONT_FIELD_UPDATER_H
+#define LC_COPY_CONT_TO_DIS_CONT_FIELD_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -20,16 +20,17 @@
 namespace Lucee
 {
 /**
- * Updater to copy a 1D nodal field to a 2D nodal field
+ * Updater to copy a continuous field to a discontinuous field.
  */
-  class Copy1DTo2DNodalField : public Lucee::UpdaterIfc
+  template <unsigned NDIM>
+  class CopyContToDisContFieldUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new modal DG solver in 1D */
-      Copy1DTo2DNodalField();
+      CopyContToDisContFieldUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -64,7 +65,9 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
   };
 }
 
-#endif // LC_COPY_1D_TO_2D_NODAL_FIELD_H
+#endif // LC_COPY_CONT_TO_DIS_CONT_FIELD_UPDATER_H

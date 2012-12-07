@@ -3,7 +3,7 @@ import numpy
 import math
 
 # number of cells
-NX = 32
+NX = 16
 
 def P1(x):
     return x
@@ -22,6 +22,9 @@ def D1fx(x):
 def D2fx(x):
     return -pylab.sin(x)
 
+def D4fx(x):
+    return pylab.sin(x)
+
 # eta -> x
 def xeta(e, xc, dx):
     return 0.5*dx*e+xc
@@ -36,19 +39,12 @@ def plotLines(X, q0, q1, color):
 dx = 2*math.pi/NX
 # nodal coordinates
 X = pylab.linspace(0, 2*math.pi, NX+1)
+# cell center coordinates
+Xc = pylab.linspace(0.5*dx, 2*math.pi-0.5*dx, NX)
 
 # cell averages and slopes of function
 f0 = numpy.zeros((NX,), numpy.float)
 f1 = numpy.zeros((NX,), numpy.float)
-
-# cell averages and slopes of first derivatives
-w0 = numpy.zeros((NX,), numpy.float)
-w1 = numpy.zeros((NX,), numpy.float)
-
-# cell averages and slopes of second derivatives
-q0 = numpy.zeros((NX,), numpy.float)
-q1 = numpy.zeros((NX,), numpy.float)
-
 
 # project function on piece-wise linear basis functions
 for i in range(NX):
@@ -66,68 +62,116 @@ for i in range(NX):
     f0[i] = 0.5*(fx(xeta(1, xc, dx)) + fx(xeta(-1, xc, dx)))
     f1[i] = 0.5*(fx(xeta(1, xc, dx)) - fx(xeta(-1, xc, dx)))
 
-# compute derivatives in interior
-for J in range(NX):
-    # funkyness for periodic BCs
-    JP = J+1
-    JM = J-1
-    if (J==0):
-        JM = NX-1
-    if (J==NX-1):
-        JP = 0
+def calcGrad(f0, f1):
+    NX = f0.shape[0]
 
-    ##
-    # 3-point stencil
-    ## 
-    #w0[J] = -(f1[J]+f0[J]) + (f1[JM]+f0[JM])
-    #w1[J] = -3*(f1[J]-f0[J]) - 3*(f1[JM]+f0[JM])
+    # cell averages and slopes of gradients
+    w0 = numpy.zeros((NX,), numpy.float)
+    w1 = numpy.zeros((NX,), numpy.float) 
 
-    ##
-    # 5-point stencil
-    ##     
-    w0[J] = 0.5*(f1[JP]-f0[JP]- 2*f1[J] + f1[JM]+f0[JM])
-    w1[J] = 0.5*(3*f1[JP]-3*f0[JP] + 6*f0[J] - 3*f1[JM]-3*f0[JM])
-    
-# compute derivatives in interior
-for J in range(NX):
-    # funkyness for periodic BCs
-    JP = J+1
-    JM = J-1
-    if (J==0):
-        JM = NX-1
-    if (J==NX-1):
-        JP = 0
+    # compute derivatives in interior
+    for J in range(NX):
+        # funkyness for periodic BCs
+        JP = J+1
+        JM = J-1
+        if (J==0):
+            JM = NX-1
+        if (J==NX-1):
+            JP = 0
 
-    ##
-    # 3-point stencil
-    ##        
-    #q0[J] = (w1[JP]-w0[JP]) - (w1[J]-w0[J])
-    #q1[J] = 3*(w1[JP]-w0[JP]) +3*(w1[J]+w0[J])
+        ##
+        # 3-point stencil
+        ## 
+        #w0[J] = -(f1[J]+f0[J]) + (f1[JM]+f0[JM])
+        #w1[J] = -3*(f1[J]-f0[J]) - 3*(f1[JM]+f0[JM])
 
-    ##
-    # 5-point stencil
-    ##
-    q0[J] = 0.5*(w1[JP]-w0[JP] - 2*w1[J] + w1[JP]+w0[JM])
-    q1[J] = 0.5*(3*w1[JP]-3*w0[JP] + 6*w0[J] - 3*w1[JM]-3*w0[JM])
+        ##
+        # 5-point stencil
+        ##     
+        w0[J] = 0.5*(f1[JP]-f0[JP]- 2*f1[J] + f1[JM]+f0[JM])
+        w1[J] = 0.5*(3*f1[JP]-3*f0[JP] + 6*f0[J] - 3*f1[JM]-3*f0[JM])
+
+    return w0, w1
+
+def calcDiv(w0, w1):
+    NX = f0.shape[0]
+
+    # cell averages and slopes of gradients
+    q0 = numpy.zeros((NX,), numpy.float)
+    q1 = numpy.zeros((NX,), numpy.float)
+
+    # compute derivatives in interior
+    for J in range(NX):
+        # funkyness for periodic BCs
+        JP = J+1
+        JM = J-1
+        if (J==0):
+            JM = NX-1
+        if (J==NX-1):
+            JP = 0
+
+        ##
+        # 3-point stencil
+        ##        
+        #q0[J] = (w1[JP]-w0[JP]) - (w1[J]-w0[J])
+        #q1[J] = 3*(w1[JP]-w0[JP]) +3*(w1[J]+w0[J])
+
+        ##
+        # 5-point stencil
+        ##
+        q0[J] = 0.5*(w1[JP]-w0[JP] - 2*w1[J] + w1[JP]+w0[JM])
+        q1[J] = 0.5*(3*w1[JP]-3*w0[JP] + 6*w0[J] - 3*w1[JM]-3*w0[JM])
+
+    return q0, q1
+
+def calcD2(f0, f1):
+    w0, w1 = calcGrad(f0, f1)
+    return calcDiv(w0, w1)
 
 # make plots
 pylab.figure(1)
 pylab.plot(X, fx(X), '-r')
 plotLines(X, f0, f1, '-ko')
 pylab.axis('tight')
+pylab.title('Function')
 
 dx = math.fabs(X[1]-X[0])
 dx2 = dx*dx
 
+w0, w1 = calcGrad(f0, f1)
+
 pylab.figure(2)
 pylab.plot(X, -D1fx(X), '-r')
 plotLines(X, w0/dx, w1/dx, '-k')
+pylab.plot(Xc, w0/dx, '-m')
 pylab.axis('tight')
+pylab.title('Gradient')
+
+q0, q1 = calcD2(f0, f1)
 
 pylab.figure(3)
 pylab.plot(X, D2fx(X), '-r')
 plotLines(X, q0/dx2, q1/dx2, '-k')
+pylab.plot(Xc, q0/dx2, '-m')
 pylab.axis('tight')
+pylab.title('Divergence')
+
+# now compute D4
+q40, q41 = calcD2(q0/dx2, q1/dx2)
+
+pylab.figure(4)
+pylab.plot(X, D4fx(X), '-r')
+plotLines(X, q40/dx2, q41/dx2, '-k')
+pylab.plot(Xc, q40/dx2, '-m')
+pylab.axis('tight')
+pylab.title('D4')
+
+#fNew0 = f0 + 0.1*q0/dx2
+#fNew1 = f1 + 0.1*q1/dx2
+
+#pylab.figure(4)
+#plotLines(X, fNew0, fNew1, '-k')
+#pylab.axis('tight')
 
 pylab.show()
 
