@@ -88,8 +88,8 @@ namespace Lucee
     const std::vector<const double*>& auxVars, double* f)
   {
     f[0] = alpha*auxVars[0][0];
-    for (unsigned i=1; i<NDIM; ++i)
-      f[i] = 0.0;
+    for (unsigned d=1; d<NDIM; ++d)
+      f[d] = 0.0;
   }
 
   template <unsigned NDIM>
@@ -104,8 +104,8 @@ namespace Lucee
     else
       f[0] = 0.5*alpha*(auxVarsr[0][0] + auxVarsl[0][0]);
 
-    for (unsigned i=1; i<NDIM; ++i)
-      f[i] = 0.0;
+    for (unsigned d=1; d<NDIM; ++d)
+      f[d] = 0.0;
     return 0.0;
   }
 

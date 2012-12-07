@@ -347,14 +347,14 @@ namespace Lucee
   {
     if (NDIM == 1)
     {
-      lowerFaceMass[dir] = Lucee::Matrix<double>(1, this->getNumNodes());
-      upperFaceMass[dir] = Lucee::Matrix<double>(1, this->getNumNodes());
+      lowerFaceMass[dir] = Lucee::Matrix<double>(this->getNumNodes(), 1);
+      upperFaceMass[dir] = Lucee::Matrix<double>(this->getNumNodes(), 1);
 
       lowerFaceMass[dir] = 0.0;
       upperFaceMass[dir] = 0.0;
 // set correct entries
       lowerFaceMass[dir](0,0) = 1.0;
-      upperFaceMass[dir](0,this->getNumNodes()-1) = 1.0;
+      upperFaceMass[dir](this->getNumNodes()-1,0) = 1.0;
 
       return;
     }

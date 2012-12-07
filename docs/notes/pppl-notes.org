@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* December 5th-6th
+
+  Spent the day working on JE16. The advection algorithms are
+  tested. The advection-diffusion algorithms are also tested. These
+  seem to work fine. However, the second-order derivatives computed
+  from these look very spiky. Not sure what is going on, but the code
+  and the algorithms are correct. Need to write down the explicit form
+  of the update equations for piece-wise linear basis functions.
+
 * December 4th
 
   Added hasBoolVec() and getBoolVec() methods to LuaTable class and
