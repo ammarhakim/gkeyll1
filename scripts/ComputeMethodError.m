@@ -1,4 +1,4 @@
-function [errorMatrix] = ComputeMethodError(pathBase,cellSizes)
+function [errorMatrix,lengthVector] = ComputeMethodError(pathBase,cellSizes)
 % Compute the error of the "3d pulse" lua script output by summing up the
 % absolute value of the differences between the initial and final solutions
 
