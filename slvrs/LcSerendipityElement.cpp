@@ -727,7 +727,7 @@ namespace Lucee
     std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
     std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
     std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
-    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
+    std::cout << "refDNjDNk " << std::endl << refDNjDNk*(dx*dx/4.0) << std::endl;
     std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
     std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
     std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;*/
@@ -745,7 +745,7 @@ namespace Lucee
     refDNjNk_1     *= 0.5*dx*0.5*dz;
     refDNjNk_2     *= 0.5*dx*0.5*dy;
     
-    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
+    //std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
   }
 
   template <unsigned NDIM>
@@ -759,11 +759,11 @@ namespace Lucee
     refDNjNk_1     = Eigen::MatrixXd(generalDim,generalDim);
     refDNjNk_2     = Eigen::MatrixXd(generalDim,generalDim);
     refFaceNjNk_xl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
-    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
+    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(0));
     refFaceNjNk_yl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
-    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
+    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(1));
     refFaceNjNk_zl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
-    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
+    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(2));
   }
  
   template <unsigned NDIM>
