@@ -26,13 +26,13 @@ bilinearVector(8) = y/8 - x/8 + z/8 - (x*y)/8 - (x*z)/8 + (y*z)/8 - (x*y*z)/8 + 
 
 dim       = 3;
 
-nodeList  = {[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],...
-             [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]};
-degree    = 1; % (r) This is tied to nodeList!
-% nodeList  = {[-1,-1,-1],[0,-1,-1],[1,-1,-1],[1,0,-1],[1,1,-1],[0,1,-1],[-1,1,-1],[-1,0,-1],...% End of Bottom Layer
-%              [-1,-1,0],[1,-1,0],[1,1,0],[-1,1,0],...% End of Middle Layer
-%              [-1,-1,1],[0,-1,1],[1,-1,1],[1,0,1],[1,1,1],[0,1,1],[-1,1,1],[-1,0,1]};% End of Top Layer
-% degree    = 2; % (r) This is tied to nodeList!
+% nodeList  = {[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],...
+%              [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]};
+% degree    = 1; % (r) This is tied to nodeList!
+nodeList  = {[-1,-1,-1],[0,-1,-1],[1,-1,-1],[1,0,-1],[1,1,-1],[0,1,-1],[-1,1,-1],[-1,0,-1],...% End of Bottom Layer
+             [-1,-1,0],[1,-1,0],[1,1,0],[-1,1,0],...% End of Middle Layer
+             [-1,-1,1],[0,-1,1],[1,-1,1],[1,0,1],[1,1,1],[0,1,1],[-1,1,1],[-1,0,1]};% End of Top Layer
+degree    = 2; % (r) This is tied to nodeList!
 % nodeList  = {[-1,-1,-1],[-1/3,-1,-1],[1/3,-1,-1],[1,-1,-1],[1,-1/3,-1],[1,1/3,-1],[1,1,-1],...
 %                 [1/3,1,-1],[-1/3,1,-1],[-1,1,-1],[-1,1/3,-1],[-1,-1/3,-1],... End of Bottom Layer
 %                 [-1,-1,-1/3],[1,-1,-1/3],[1,1,-1/3],[-1,1,-1/3],... % End of 2nd Layer
@@ -133,7 +133,7 @@ end
 %     end
 % end
 
-% Create transformation x(eta,nu) and y(eta,nu) between reference nodes
+% Create transformation x(eta,nu,xi) y(eta,nu,xi) z(eta,nu,xi) between reference nodes
 % (nodeList) and quadList
 transformationMatrix = sym(zeros(dim,1));
 for nodeIndex = 1:length(quadList)
@@ -146,107 +146,111 @@ jacobianDet = det(jacobian(transformationMatrix));
 % with above variable
 jacobianMatrix = jacobian(functionVector); % First column is dx, second column is dy, third is dz
 
-% % Evaluate mass matrix
-% massMatrix = zeros(length(functionVector),length(functionVector));
+% Evaluate mass matrix
+massMatrix = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, y, -1, 1);
+        f = int(f, z, -1, 1);
+        massMatrix(kIndex,mIndex) = f;
+    end
+end
+
+% Face mass matrices are computed incorrectly. They need to be integrated
+% products of basis functions corresponding to nodes on a face with
+% all basis functions
+
+% % Evaluate face mass matrix on x = -1, +1
+% faceMassMatrix_Xm = zeros(length(functionVector),length(functionVector));
+% faceMassMatrix_Xp = zeros(length(functionVector),length(functionVector));
+% for kIndex = 1:length(functionVector)
+%     for mIndex = 1:length(functionVector)
+%         f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+%         f = int(f, y, -1, 1);
+%         f = int(f, z, -1, 1);
+%         faceMassMatrix_Xm(kIndex,mIndex) = subs(f,x,-1);
+%         faceMassMatrix_Xp(kIndex,mIndex) = subs(f,x,1);
+%     end
+% end
+% 
+% % Evaluate face mass matrix on y = -1, +1
+% faceMassMatrix_Ym = zeros(length(functionVector),length(functionVector));
+% faceMassMatrix_Yp = zeros(length(functionVector),length(functionVector));
+% for kIndex = 1:length(functionVector)
+%     for mIndex = 1:length(functionVector)
+%         f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+%         f = int(f, x, -1, 1);
+%         f = int(f, z, -1, 1);
+%         faceMassMatrix_Ym(kIndex,mIndex) = subs(f,y,-1);
+%         faceMassMatrix_Yp(kIndex,mIndex) = subs(f,y,1);
+%     end
+% end
+% 
+% % Evaluate face mass matrix on z = -1, +1
+% faceMassMatrix_Zm = zeros(length(functionVector),length(functionVector));
+% faceMassMatrix_Zp = zeros(length(functionVector),length(functionVector));
 % for kIndex = 1:length(functionVector)
 %     for mIndex = 1:length(functionVector)
 %         f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
 %         f = int(f, x, -1, 1);
 %         f = int(f, y, -1, 1);
-%         f = int(f, z, -1, 1);
-%         massMatrix(kIndex,mIndex) = f;
+%         faceMassMatrix_Zm(kIndex,mIndex) = subs(f,z,-1);
+%         faceMassMatrix_Zp(kIndex,mIndex) = subs(f,z,1);
 %     end
 % end
 
-% Evaluate face mass matrix on x = -1, +1
-faceMassMatrix_Xm = zeros(length(functionVector),length(functionVector));
-faceMassMatrix_Xp = zeros(length(functionVector),length(functionVector));
+% Evaluate K matrix
+kMatrix = zeros(length(functionVector),length(functionVector));
 for kIndex = 1:length(functionVector)
     for mIndex = 1:length(functionVector)
-        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
-        f = int(f, y, -1, 1);
-        f = int(f, z, -1, 1);
-        faceMassMatrix_Xm(kIndex,mIndex) = subs(f,x,-1);
-        faceMassMatrix_Xp(kIndex,mIndex) = subs(f,x,1);
-    end
-end
-
-% Evaluate face mass matrix on y = -1, +1
-faceMassMatrix_Ym = zeros(length(functionVector),length(functionVector));
-faceMassMatrix_Yp = zeros(length(functionVector),length(functionVector));
-for kIndex = 1:length(functionVector)
-    for mIndex = 1:length(functionVector)
-        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
-        f = int(f, x, -1, 1);
-        f = int(f, z, -1, 1);
-        faceMassMatrix_Ym(kIndex,mIndex) = subs(f,y,-1);
-        faceMassMatrix_Yp(kIndex,mIndex) = subs(f,y,1);
-    end
-end
-
-% Evaluate face mass matrix on z = -1, +1
-faceMassMatrix_Zm = zeros(length(functionVector),length(functionVector));
-faceMassMatrix_Zp = zeros(length(functionVector),length(functionVector));
-for kIndex = 1:length(functionVector)
-    for mIndex = 1:length(functionVector)
-        f = functionVector(kIndex)*functionVector(mIndex)*jacobianDet;
+        f = jacobianMatrix(kIndex,1)*jacobianMatrix(mIndex,1) + ...
+            jacobianMatrix(kIndex,2)*jacobianMatrix(mIndex,2) + ...
+            jacobianMatrix(kIndex,3)*jacobianMatrix(mIndex,3);
+        f = jacobianDet*f;
         f = int(f, x, -1, 1);
         f = int(f, y, -1, 1);
-        faceMassMatrix_Zm(kIndex,mIndex) = subs(f,z,-1);
-        faceMassMatrix_Zp(kIndex,mIndex) = subs(f,z,1);
+        f = int(f, z, -1, 1);
+        kMatrix(kIndex,mIndex) = f;
     end
 end
 
-% % Evaluate K matrix
-% kMatrix = zeros(length(functionVector),length(functionVector));
-% for kIndex = 1:length(functionVector)
-%     for mIndex = 1:length(functionVector)
-%         f = jacobianMatrix(kIndex,1)*jacobianMatrix(mIndex,1) + ...
-%             jacobianMatrix(kIndex,2)*jacobianMatrix(mIndex,2) + ...
-%             jacobianMatrix(kIndex,3)*jacobianMatrix(mIndex,3);
-%         f = jacobianDet*f;
-%         f = int(f, x, -1, 1);
-%         f = int(f, y, -1, 1);
-%         f = int(f, z, -1, 1);
-%         kMatrix(kIndex,mIndex) = f;
-%     end
-% end
-% 
-% % Evaluate G^{km}_x
-% gxMatrix = zeros(length(functionVector),length(functionVector));
-% for kIndex = 1:length(functionVector)
-%     for mIndex = 1:length(functionVector)
-%         f = jacobianMatrix(kIndex,1)*functionVector(mIndex)*jacobianDet;
-%         f = int(f, x, -1, 1);
-%         f = int(f, y, -1, 1);
-%         f = int(f, z, -1, 1);
-%         gxMatrix(kIndex,mIndex) = f;
-%     end
-% end
-% 
-% % Evaluate G^{km}_y
-% gyMatrix = zeros(length(functionVector),length(functionVector));
-% for kIndex = 1:length(functionVector)
-%     for mIndex = 1:length(functionVector)
-%         f = jacobianMatrix(kIndex,2)*functionVector(mIndex)*jacobianDet;
-%         f = int(f, x, -1, 1);
-%         f = int(f, y, -1, 1);
-%         f = int(f, z, -1, 1);
-%         gyMatrix(kIndex,mIndex) = f;
-%     end
-% end
-% 
-% % Evaluate G^{km}_z
-% gzMatrix = zeros(length(functionVector),length(functionVector));
-% for kIndex = 1:length(functionVector)
-%     for mIndex = 1:length(functionVector)
-%         f = jacobianMatrix(kIndex,3)*functionVector(mIndex)*jacobianDet;
-%         f = int(f, x, -1, 1);
-%         f = int(f, y, -1, 1);
-%         f = int(f, z, -1, 1);
-%         gzMatrix(kIndex,mIndex) = f;
-%     end
-% end
+% Evaluate G^{km}_x
+gxMatrix = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = jacobianMatrix(kIndex,1)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, y, -1, 1);
+        f = int(f, z, -1, 1);
+        gxMatrix(kIndex,mIndex) = f;
+    end
+end
+
+% Evaluate G^{km}_y
+gyMatrix = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = jacobianMatrix(kIndex,2)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, y, -1, 1);
+        f = int(f, z, -1, 1);
+        gyMatrix(kIndex,mIndex) = f;
+    end
+end
+
+% Evaluate G^{km}_z
+gzMatrix = zeros(length(functionVector),length(functionVector));
+for kIndex = 1:length(functionVector)
+    for mIndex = 1:length(functionVector)
+        f = jacobianMatrix(kIndex,3)*functionVector(mIndex)*jacobianDet;
+        f = int(f, x, -1, 1);
+        f = int(f, y, -1, 1);
+        f = int(f, z, -1, 1);
+        gzMatrix(kIndex,mIndex) = f;
+    end
+end
 
 % % Put in readable format
 % massMatrix = sym(massMatrix)
