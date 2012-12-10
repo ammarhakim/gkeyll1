@@ -142,6 +142,8 @@ namespace Lucee
       MatrixHolder mSurfLowerPhi[2];
 /** Basis fucntions at surface quadrature point */
       MatrixHolder mSurfUpperPhi[2];
+/** Flag to indicate if only increments should be computed */
+      bool onlyIncrement;
 
 /**
  * Structure to store node numbers on edges.
