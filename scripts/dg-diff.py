@@ -3,7 +3,7 @@ import numpy
 import math
 
 # number of cells
-NX = 16
+NX = 32
 
 def P1(x):
     return x
@@ -94,7 +94,7 @@ def calcGrad(f0, f1):
     return w0, w1
 
 def calcDiv(w0, w1):
-    NX = f0.shape[0]
+    NX = w0.shape[0]
 
     # cell averages and slopes of gradients
     q0 = numpy.zeros((NX,), numpy.float)
@@ -128,6 +128,31 @@ def calcD2(f0, f1):
     w0, w1 = calcGrad(f0, f1)
     return calcDiv(w0, w1)
 
+def calcD2Direct(f0, f1):
+    NX = f0.shape[0]
+
+    # cell averages and slopes D2
+    q0 = numpy.zeros((NX,), numpy.float)
+    q1 = numpy.zeros((NX,), numpy.float)
+
+    # compute derivatives in interior
+    for J in range(NX):
+        # funkyness for periodic BCs
+        JP = J+1
+        JM = J-1
+        if (J==0):
+            JM = NX-1
+        if (J==NX-1):
+            JP = 0
+
+        ##
+        # 5-point stencil
+        ##
+        q0[J] = -2*f1[JP]+4*f0[JP]-2*f1[J]-8*f0[J]+4*f1[JM]+4*f0[JM]
+        q1[J] = -6*f1[JP]+12*f0[JP]-24*f1[J]-6*f0[J]-6*f1[JM]-6*f0[JM]
+
+    return q0, q1
+
 # make plots
 pylab.figure(1)
 pylab.plot(X, fx(X), '-r')
@@ -148,30 +173,16 @@ pylab.axis('tight')
 pylab.title('Gradient')
 
 q0, q1 = calcD2(f0, f1)
+q0d, q1d = calcD2Direct(f0, f1)
 
 pylab.figure(3)
 pylab.plot(X, D2fx(X), '-r')
 plotLines(X, q0/dx2, q1/dx2, '-k')
+#plotLines(X, q0d, q1d, '-k')
 pylab.plot(Xc, q0/dx2, '-m')
 pylab.axis('tight')
 pylab.title('Divergence')
 
-# now compute D4
-q40, q41 = calcD2(q0/dx2, q1/dx2)
-
-pylab.figure(4)
-pylab.plot(X, D4fx(X), '-r')
-plotLines(X, q40/dx2, q41/dx2, '-k')
-pylab.plot(Xc, q40/dx2, '-m')
-pylab.axis('tight')
-pylab.title('D4')
-
-#fNew0 = f0 + 0.1*q0/dx2
-#fNew1 = f1 + 0.1*q1/dx2
-
-#pylab.figure(4)
-#plotLines(X, fNew0, fNew1, '-k')
-#pylab.axis('tight')
-
+    
 pylab.show()
 
