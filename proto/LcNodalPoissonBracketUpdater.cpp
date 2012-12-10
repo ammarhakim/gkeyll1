@@ -55,6 +55,10 @@ namespace Lucee
         throw lce;
       }
     }
+
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
   }
 
   void 
@@ -357,16 +361,25 @@ namespace Lucee
       }
     }
 
-// Perform final sweep, updating solution with forward Euler step
-    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
-    {
-      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
-      {
-        aNew.setPtr(aNewPtr, ix, iy);
-        aCurr.setPtr(aCurrPtr, ix, iy);
+// NOTE: If only calculation of increments are requested, the final
+// Euler update is not performed. This means that the multiplication
+// of the DG RHS with dt is not done, something to keep in mind if
+// using the increment in time-dependent update.
 
-        for (unsigned k=0; k<nlocal; ++k)
-          aNewPtr[k] = aCurrPtr[k] + dt*aNewPtr[k];
+    if (onlyIncrement == false)
+    { // only do this if full update is requested
+
+// Perform final sweep, updating solution with forward Euler step
+      for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
+      {
+        for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
+        {
+          aNew.setPtr(aNewPtr, ix, iy);
+          aCurr.setPtr(aCurrPtr, ix, iy);
+          
+          for (unsigned k=0; k<nlocal; ++k)
+            aNewPtr[k] = aCurrPtr[k] + dt*aNewPtr[k];
+        }
       }
     }
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
