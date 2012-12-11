@@ -1,0 +1,58 @@
+/** This script computes the SYMMETRIC explicit update formula for
+ second-order derivatives using local DG scheme. The equation is:
+
+ q = d^f/dx^2
+
+Rewrite this as a system of first-order equations
+
+  q + dw/dx = 0
+  w + df/dx = 0
+
+  c12 : -1/2;
+  c21 : 1/2;
+
+  c12 : 0;
+  c21 : 0;
+
+ */
+
+/** Part 1 */
+
+c12_a : -1/2;
+c21_a : 1/2;
+
+fp_a(j) := f0(j)-f1(j);
+fm_a(j) := f0(j-1)+f1(j-1);
+
+ff_a(j) := 1/2*(fp_a(j)+fm_a(j)) - c21_a*(fp_a(j)-fm_a(j));
+
+w0_a(j) := -(ff_a(j+1)-ff_a(j));
+w1_a(j) := -3*(ff_a(j+1)+ff_a(j)) + 6*f0(j);
+
+wp_a(j) := w0_a(j)-w1_a(j);
+wm_a(j) := w0_a(j-1)+w1_a(j-1);
+
+ww_a(j) := 1/2*(wp_a(j)+wm_a(j)) - c12_a*(wp_a(j)-wm_a(j));
+
+q0_a(j) := -(ww_a(j+1)-ww_a(j));
+q1_a(j) := -3*(ww_a(j+1)+ww_a(j)) + 6*w0_a(j);
+
+/** Part 2 */
+c12_b : 1/2;
+c21_b : -1/2;
+
+fp_b(j) := f0(j)-f1(j);
+fm_b(j) := f0(j-1)+f1(j-1);
+
+ff_b(j) := 1/2*(fp_b(j)+fm_b(j)) - c21_b*(fp_b(j)-fm_b(j));
+
+w0_b(j) := -(ff_b(j+1)-ff_b(j));
+w1_b(j) := -3*(ff_b(j+1)+ff_b(j)) + 6*f0(j);
+
+wp_b(j) := w0_b(j)-w1_b(j);
+wm_b(j) := w0_b(j-1)+w1_b(j-1);
+
+ww_b(j) := 1/2*(wp_b(j)+wm_b(j)) - c12_b*(wp_b(j)-wm_b(j));
+
+q0_b(j) := -(ww_b(j+1)-ww_b(j));
+q1_b(j) := -3*(ww_b(j+1)+ww_b(j)) + 6*w0_b(j);
