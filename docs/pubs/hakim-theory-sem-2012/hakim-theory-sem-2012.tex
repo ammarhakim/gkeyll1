@@ -359,7 +359,8 @@
     \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
     \incfig{advection-p0-c.png}
     \caption{Advection equation solution (black) compared to exact
-      solution (red) with central fluxes.}
+      solution (red) with central fluxes and piecewise constant basis
+      functions.}
   \end{figure}
 
 \end{frame}
@@ -373,7 +374,8 @@
     \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
     \incfig{advection-p0.png}
     \caption{Advection equation solution (black) compared to exact
-      solution (red) with upwind fluxes.}
+      solution (red) with upwind fluxes and piecewise constant basis
+      functions.}
   \end{figure}
 
 \end{frame}
@@ -387,7 +389,7 @@
     \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
     \incfig{advection-p1.png}
     \caption{Advection equation solution (black) compared to exact
-      solution (red) with upwind fluxes with piecewise linear basis
+      solution (red) with upwind fluxes and piecewise linear basis
       functions.}
   \end{figure}
 
@@ -418,8 +420,6 @@
 \end{frame}
 % ----------------------------------------------------------------
 
-\end{document}
-
 % ----------------------------------------------------------------
 \begin{frame}{Several fluid and kinetic problems are described by a
     Hamiltonian}%
@@ -439,7 +439,8 @@
   \begin{align*}
     \pfrac{f}{t} + \nabla\cdot\left(\gvec{\alpha}f\right) = 0.
   \end{align*}
-  Additionally $\nabla\cdot\gvec{\alpha} = 0$ (Liouville theorem).
+  Additionally $\nabla\cdot\gvec{\alpha} = 0$ (Liouville
+  theorem). Often, Hamiltonian is determined from field equations.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -449,17 +450,34 @@
     gyrokinetics}%
 
   A basic model problem is the \emph{incompressible} 2D Euler
-  equations written in the stream-function ($\phi$) vorticity ($f$)
-  formulation. Here the Hamiltonian is simply $H(x,y) = \phi(x,y)$.
+  equations written in the stream-function ($\phi$) vorticity
+  ($\zeta$) formulation. Here the Hamiltonian is simply $H(x,y) =
+  \phi(x,y)$.
 
   \begin{align*}
-    \pfrac{f}{t} + \nabla\cdot(\mvec{u}f) = 0
+    \pfrac{\zeta}{t} + \nabla\cdot(\mvec{u}\zeta) = 0
   \end{align*}
   where $u_x = \{x,H\} = \partial\phi/\partial y$ and $u_y = \{y,H\} =
   -\partial\phi/\partial x$. The potential is determined from
+  $\nabla^2 \phi = -\zeta$.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Hasegawa-Wakatani equations serve as a model
+    for drift-wave turbulence in tokamak edge}%
+
+  The Hasegawa-Wakatani equations describe $E\times B$ driven flows in
+  certain limits:
   \begin{align*}
-    \nabla^2 \phi = -f.
+    \pfrac{n}{t} + \{\phi,n+N\} &= D(\phi-n) \\
+    \pfrac{\zeta}{t} + \{\phi,\zeta\} &= D(\phi-n)
   \end{align*}
+  with $\nabla^2 \phi = \zeta.$ Here $n$ is the number density
+  fluctuations, $\zeta$ the $E\times B$ vorticity, $\phi$ is the
+  potential, $D$ is an adiabacity parameter and $N(x)$ is the fixed
+  background density profile.
+
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -480,133 +498,21 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{For Vlasov equation potential can be determined in two
-    different ways}%
+\begin{frame}{Hamiltonian systems admit two quadratic invariants}%
 
-  For electron plasma waves use full Poisson equation
+  For the incompressible Euler equations the quadratic invariants are
+  \emph{energy}
   \begin{align*}
-    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\rho_c}{\epsilon_0}
+    \pfraca{t}\int_K \frac{1}{2} |\nabla\phi|^2  d\Omega &= 0
   \end{align*}
-  where $\rho_c = |e| (n_{io}(x) - n(x,t))$ is total charge
-  density. For ion-acoustic waves use quasi-neutrality
+  and \emph{enstrophy}
   \begin{align*}
-    n_{i}(x) = n_{eo}\left(1 + \frac{|e|\phi}{T_e}\right)
+    \pfraca{t}\int_K \frac{1}{2}\zeta^2 d\Omega &= 0.
   \end{align*}
-  where $n_{eo}$ is the constant electron initial density and $T_e$ is
-  the fixed electron temperature. This determines potential without
-  the need to solve a Poisson equation and is a model of parallel
-  dynamics in gyrokinetics.
+  Similar invariants can be derived for Vlasov-Poisson and
+  Hasegawa-Wakatani equations. In addition, Vlasov-Poisson also
+  conserves \emph{momentum}.
 
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Gyrokinetic equation can also be derived from
-    gyro-center Hamiltonian}
-
-  In the Hamiltonian gyrokinetic theory\footfullcite{Brizard:2007fs}
-  the gyrokinetic equation is derived from the gyrocentre Hamiltonian
-  in gyro-center coordinates $(\mvec{R}, v_{\parallel}, \mu, \alpha)$
-  \begin{align*}
-    H = \frac{1}{2}m_i v_{\parallel}^2 + \mu B + e_i \langle\phi \rangle_\alpha
-  \end{align*}
-  where $v_{\parallel}$ is the parallel velocity, $\mu$ is the
-  magnetic moment, $\alpha$ is gyro-angle and $\phi$ is the
-  electrostatic potential. Poisson bracket is no longer canonical, but
-  gyrokinetic Vlasov equation can still be written as a conservation
-  equation in phase-space.
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Invariants for Hamiltonian systems can be derived by
-    looking at \emph{weak-form} of equations}%
-
-  Multiplying conservation law form by a smooth test function $w(x,v)$
-  and integrating over an arbitrary volume element $K$ gives the
-  weak-form
-  \begin{align*}
-    \int_K w\pfrac{f}{t}d\Omega 
-    + \int_{\partial K}w^- \gvec{\alpha}\cdot\mvec{n}f dS
-    - \int_K \nabla w \cdot \gvec{\alpha} f d\Omega
-    = 0.
-  \end{align*}
-  Picking $w=1$ leads to (with periodic boundary conditions)
-  \emph{particle conservation}
-  \begin{align*}
-    \frac{d}{dt} \int_K f d\Omega = 0.
-  \end{align*}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Energy conservation is derived using Hamiltonian itself
-    as test function}%
-
-  Substituting the Hamiltonian for the test function and using the
-  identity $\nabla H \cdot \gvec{\alpha} = 0$ leads to
-  \begin{align*}
-    \int_K H \pfrac{f}{t}d\Omega = 0.
-  \end{align*}
-  For the incompressible Euler equation this becomes
-  \begin{align*}
-    \pfraca{t}\int_K \frac{1}{2} |\nabla\phi|^2  d\Omega = 0.
-  \end{align*}
-  For the Vlasov-Poisson system this becomes
-  \begin{align*}
-    \pfraca{t}\int \mathcal{E} +
-    \frac{\epsilon_0}{2}\left(\pfrac{\phi}{x}\right)^2 dx = 0
-  \end{align*}
-  where $\mathcal{E}(x,t) \equiv \frac{1}{2}\int_{-\infty}^{\infty}
-  mv^2f dv$ is the fluid energy.
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Generalized entropy (enstrophy) conservation can be
-    derived using the solution as test function}%
-
-  The solution itself can be used as a test function. This gives
-  \begin{align*}
-    \int_K f\pfrac{f}{t}d\Omega 
-    + \int_{\partial K}f^- \gvec{\alpha}\cdot\mvec{n}f dS
-    - \int_K \nabla f \cdot \gvec{\alpha} f d\Omega
-    = 0.
-  \end{align*}
-  As $\nabla f \cdot \gvec{\alpha} f = \nabla\cdot (\gvec{\alpha}
-  f^2/2)$ the last term reduces to a surface integral, leading to
-  \begin{align*}
-    \pfraca{t}\int_K \frac{1}{2}f^2 d\Omega = 0.
-  \end{align*}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Valsov-Poisson system also admits momentum
-    conservation}%
-  
-  For the Vlasov-Poisson system we can select the coordinate $v$ as
-  the test function. This leads to
-  \begin{align*}
-    \int_K v\pfrac{f}{t}d\Omega 
-    + \int_{\partial K}v \gvec{\alpha}\cdot\mvec{n}f dS
-    - \int_K \nabla v \cdot \gvec{\alpha} f d\Omega
-    = 0.
-  \end{align*}
-  As $\nabla v \cdot \gvec{\alpha} = \{v,H\} = \dot{v}f$ the last term
-  becomes
-  \begin{align*}
-    \int_K\dot{v} f d\Omega = \int \frac{|e|}{m} \pfrac{\phi}{x} n\thinspace dx.
-  \end{align*}
-  Using the Poisson equation to eliminate $n(x,t)$, integrating by
-  parts and applying boundary condition leads to the momentum
-  conservation law
-  \begin{align*}
-    \frac{d}{dt}\int_K vf d\Omega = 0.
-  \end{align*} 
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -616,21 +522,17 @@
 
   To discretize the equations introduce a triangulation $K_\nu$ of the
   domain $K$. Pick a finite-dimensional function space
+  $\mathcal{V}^k_m(K)$. Then the discrete problem is stated as: find
+  $\zeta_h\in \mathcal{V}^k_{-1}$ such that for all smooth $w$ we have
   \begin{align*}
-    \mathcal{V}^k_m(K) \equiv \{w: w|_{K_\nu} \in P^k(K_\nu) \} \cap C^m
-  \end{align*}
-  where $P^k(K_\nu)$ is the space of polynomials of order at most $k$
-  on the element $K_\nu$. Then the discrete problem is stated as: find
-  $f_h\in \mathcal{V}^k_{-1}$ such that for all smooth $w$ we have
-  \begin{align*}
-    \int_{K_\nu} w \pfrac{f_h}{t}\thinspace d\Omega 
+    \int_{K_\nu} w \pfrac{\zeta_h}{t}\thinspace d\Omega 
     +
-    \int_{\partial K_\nu}w^- \mvec{n}\cdot\gvec{\alpha}_h\hat{f}_h\thinspace dS
+    \int_{\partial K_\nu}w^- \mvec{n}\cdot\gvec{\alpha}_h\hat{\zeta}_h\thinspace dS
     -
-    \int_{K_\nu} \nabla w\cdot\gvec{\alpha}_h f_h\thinspace d\Omega = 0.
+    \int_{K_\nu} \nabla w\cdot\gvec{\alpha}_h \zeta_h\thinspace d\Omega = 0.
   \end{align*}
-  Here $\hat{f}_h = \hat{f}(f^+_h,f^-_h)$ is the consistent
-  \emph{numerical} flux on $\partial K_\nu$.
+  Here $\hat{\zeta}_h = \hat{\zeta}(\zeta^+_h,\zeta^-_h)$ is the
+  consistent numerical flux on $\partial K_\nu$.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -641,20 +543,14 @@
   To discretize the Poisson equation the problem is stated as: find
   $\phi_h \in \mathcal{V}^r_0$ such that for all smooth $\psi$ we have
   \begin{align*}
-    \int_K \psi \nabla^2 \phi_h d\Omega = \int_K \psi s d\Omega
+    \int_K \psi \nabla^2 \phi_h d\Omega = -\int_K \psi \zeta_h d\Omega
   \end{align*}
-  where $s$ represents the sources. For ion-acoustic waves the number
-  density and potential are related by a \emph{projection} operator:
-  find $\phi_h \in \mathcal{V}^k_0$ given a $n_{ih} \in
-  \mathcal{V}_{-1}^k$ such that for all smooth $w$
-  \begin{align*}
-    \int w n_{ih}\thinspace dx = 
-    n_{eo}\int w \left(1 + \frac{|e|\phi_h}{T_e}\right) dx
-  \end{align*}
-  This leads to a \emph{global} solve for the potential. For the case
-  in which potential is allowed to be \emph{discontinuous} leading
-  hence a local determination of the potential, see poster by
-  G. Hammett.
+  \begin{block}{Questions}
+    We have $\zeta_h\in \mathcal{V}^k_{-1}$ and $\phi_h \in
+    \mathcal{V}^r_0$. How to pick these spaces? We also have not
+    specified numerical fluxes to use. How to pick them? Do they
+    effect invariants?
+  \end{block}
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -665,17 +561,23 @@
   Liu and Shu\footfullcite{liu-shu-2000} have shown that discrete
   energy is conserved for 2D incompressible flow if
   \begin{align*}
-    \phi_h \in \mathcal{V}_0^k \subseteq f_h \in \mathcal{V}^k_{-1}
+    \phi_h \in \mathcal{V}_0^k \subseteq \zeta_h \in \mathcal{V}^k_{-1}
   \end{align*}
-  Enstrophy (generalized entropy) is conserved if \emph{central
-    fluxes} are used in the DG scheme. With upwind fluxes, enstrophy
-  decays and hence the scheme is \emph{stable} in the $L_2$ norm.
+  \emph{irrespective of numerical flux choosen}! However, enstrophy is
+  conserved only if \emph{central fluxes} are used.  DG with central
+  fluxes can be thought of as high-order generalization of the
+  well-known \emph{Arakawa} schemes, widely used in plasma physics as
+  well as climate modeling.
+
+  With upwind fluxes, enstrophy decays and hence the scheme is
+  \emph{stable} in the $L_2$ norm.
+
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Momentum conservation is not exact but is independent
-    of velocity resolution}%
+\begin{frame}{For Vlasov-Poisson momentum conservation is not exact
+    but is \emph{independent of velocity resolution}}%
 
   For electrostatic problems the condition for conservation of
   discrete momentum reduces to a vanishing average force, i.e. we must
@@ -693,6 +595,28 @@
   conserved. Solving the Poisson equation with higher order continuity
   ($\phi_h \in \mathcal{V}_1^r$) also does not help as then the energy
   conservation condition is violated.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Summary of hybrid DG/CG schemes for Hamiltonian systems}
+
+  \begin{itemize}
+  \item With proper choice of function spaces and a \emph{central}
+    flux, both quadratic invariants are exactly conserved by the
+    semi-discrete scheme.
+  \item With upwind fluxes (preferred choice) energy is still
+    conserved, and the scheme is stable in the $L_2$ norm of the
+    solution.
+  \item For Vlasov-Poisson system the momentum is not exactly
+    conserved, but is independent of velocity space resolution.
+  \end{itemize}
+  \begin{block}{Questions}
+    Can this scheme be modified to also conserve momentum? Can the
+    fully discrete scheme also exactly conserve these invariants?
+    Perhaps try symplectic integrators ...
+  \end{block}
+
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -851,6 +775,13 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
+\begin{frame}{Initial studies of Hasegawa-Wakatani drift-wave
+    turbulence have been carried out}%
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
 \begin{frame}{Linear Landau damping simulations were compared with
     exact solutions of dispersion relations}%
   \begin{columns}
@@ -936,21 +867,6 @@
     \caption{Convergence of energy error with time-step. The red curve
       shows errors from second order scheme, black from third order
       scheme.}
-  \end{figure}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{To test momentum conservation an asymmetric initial
-    density profile needs to be used}%
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
-    \incfig{s183-initial-numDensity.png}
-    \caption{Initial density profile to drive momentum. Using a
-      symmetric density (net zero initial momentum) profile can
-      lead to misleading conservation results.}
   \end{figure}
 
 \end{frame}
@@ -1080,15 +996,16 @@
 
 % ----------------------------------------------------------------
 \begin{frame}{A particle, momentum and energy conserving
-    Lenard-Bernstein collision operator is implemented using local DG
-    diffusion solver}%
+    Lenard-Bernstein collision operator is implemented}%
 
   \begin{columns}
     \begin{column}{0.4\textwidth}
-      Relaxation of a step-function distribution function to
-      Maxwellian due to collisions. The solid lines show distribution
-      function at different times and the dots the exact Maxwellian
-      distribution with specified temperature and density.
+      A simple collision operator is implemented:
+      \begin{align*}
+        C_{LB}[f] = \nu \left( (v-u)f + v_t^2 \pfrac{f}{v} \right)
+      \end{align*}
+      Figure shows relaxation of an initial step-function distribution
+      function to Maxwellian due to collisions.
     \end{column}
     \begin{column}{0.6\textwidth}
       \begin{figure}
@@ -1112,8 +1029,8 @@
     functions.
   \item With proper choice of basis functions energy is
     conserved. 
-  \item With central fluxes enstrophy (generalize entropy) is
-    conserved. With upwind fluxes the scheme is $L_2$ stable.
+  \item With central fluxes enstrophy is conserved. With upwind fluxes
+    the scheme is $L_2$ stable.
   \item Momentum is not conserved but is independent of velocity space
     resolution and converges rapidly with spatial resolution and
     polynomial order of the scheme.
@@ -1127,17 +1044,16 @@
     general geometries and collision terms}%
 
   \begin{itemize}
-  \item Higher-order basis functions have been implemented and are
-    being tested.
-  \item The schemes will be extended to take into account complicated
-    edge geometries using a multi-block structured grid.
+  \item The schemes have been extended to higher dimensions and basis
+    functions developed (along with Eric Shi). Testing is in progress.
   \item Special basis functions for velocity space discretization will
     be developed to allow coarse resolution simulations with the
     option of fine scale resolution when needed.
-  \item A collision model has been implemented. It will be extended to
-    higher dimensions.
+  \item A collision model has been implemented. It will be tested with
+    standard text-book problems and extended to higher dimensions.
+  \item Extentions will be made to take into account complicated edge
+    geometries using a multi-block structured grid.
   \end{itemize}
-
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -1149,12 +1065,42 @@
 \end{frame}
 % ----------------------------------------------------------------
 
+% ----------------------------------------------------------------
+\begin{frame}{For Vlasov equation potential can be determined in two
+    different ways}%
 
-  \begin{columns}
-    \begin{column}{0.55\textwidth}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-    \end{column}
-  \end{columns}
+  For electron plasma waves use full Poisson equation
+  \begin{align*}
+    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\rho_c}{\epsilon_0}
+  \end{align*}
+  where $\rho_c = |e| (n_{io}(x) - n(x,t))$ is total charge
+  density. For ion-acoustic waves use quasi-neutrality
+  \begin{align*}
+    n_{i}(x) = n_{eo}\left(1 + \frac{|e|\phi}{T_e}\right)
+  \end{align*}
+  where $n_{eo}$ is the constant electron initial density and $T_e$ is
+  the fixed electron temperature. This determines potential without
+  the need to solve a Poisson equation and is a model of parallel
+  dynamics in gyrokinetics.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Gyrokinetic equation can also be derived from
+    gyro-center Hamiltonian}
+
+  In the Hamiltonian gyrokinetic theory\footfullcite{Brizard:2007fs}
+  the gyrokinetic equation is derived from the gyrocentre Hamiltonian
+  in gyro-center coordinates $(\mvec{R}, v_{\parallel}, \mu, \alpha)$
+  \begin{align*}
+    H = \frac{1}{2}m_i v_{\parallel}^2 + \mu B + e_i \langle\phi \rangle_\alpha
+  \end{align*}
+  where $v_{\parallel}$ is the parallel velocity, $\mu$ is the
+  magnetic moment, $\alpha$ is gyro-angle and $\phi$ is the
+  electrostatic potential. Poisson bracket is no longer canonical, but
+  gyrokinetic Vlasov equation can still be written as a conservation
+  equation in phase-space.
+\end{frame}
+% ----------------------------------------------------------------
 
