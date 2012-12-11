@@ -21,6 +21,9 @@ namespace Lucee
  */
   class AdvectionEquation : public Lucee::HyperEquation
   {
+/** Numerical flux to use */
+      enum NumFluxType { CENTRAL_FLUX, UPWIND_FLUX };
+
     public:
 /** Class id: this is used by registration system */
       static const char *id;
@@ -158,6 +161,8 @@ namespace Lucee
     private:
 /** advection speeds */
       double u[3];
+/** Type of numerical flux to use */
+      NumFluxType fluxType;
   };
 }
 
