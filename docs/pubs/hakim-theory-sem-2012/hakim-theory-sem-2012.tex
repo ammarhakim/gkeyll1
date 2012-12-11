@@ -1,4 +1,4 @@
- \documentclass[pdf]{beamer}
+\documentclass[pdf]{beamer}
 \usepackage{biblatex}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -75,7 +75,7 @@
   \titlepage
 \end{frame}
 
-% ----------------------------------------------------------------
+%----------------------------------------------------------------
 \begin{frame}{Edge region is very important but poorly understood}
 
   \begin{figure}
@@ -94,9 +94,9 @@
   \end{itemize}
 
 \end{frame}
-% ----------------------------------------------------------------
+%----------------------------------------------------------------
 
-% ----------------------------------------------------------------
+%----------------------------------------------------------------
 \begin{frame}{Edge region is very difficult and efficient numerical
     methods are needed}
 
@@ -114,7 +114,7 @@
     \item Need good algorithms to distinguish physical oscillations
       from numerical noise (Gibb's phenomena)
     \end{itemize}
-  \item Complicated geometry and magentic topology due, X-points in
+  \item Complicated geometry and magnetic topology, X-points in
     domain, open field lines and divertor plates.
   \end{itemize}
 
@@ -156,7 +156,7 @@
     error, high accuracy, flexible geometries) with finite-volume
     schemes (limiters to produce positivity/monotonicity, locality)
     \mypause
-  \item Certain type of DG have excellent conservation properties for
+  \item Certain types of DG have excellent conservation properties for
     Hamiltonian systems, low noise and low dissipation.
     \mypause
   \item DG is inherently super-convergent: in FV methods we
@@ -174,8 +174,15 @@
     changer'' for (gyro)kinetic plasma simulations}
   
   Edge/pedestal gyrokinetic turbulence is very challenging, 5D problem
-  not yet solved. Benefits from all tricks we can find: factor of 2
-  reduction in resolution would lead to 64$\times$ speedup.
+  not yet solved. Benefits from all tricks we can find.
+  \begin{itemize}
+  \item Factor of 2 reduction in resolution would lead to 64$\times$
+    speedup.
+  \item High FLOP count, combined with data-locality means that modern
+    CPU optimization techniques (cache optimization, vectorization,
+    fast linear-algebra routines, etc.) and GPU optimization
+    techniques can be used\footfullcite{Dickson:2010wt}.
+  \end{itemize}
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -216,7 +223,7 @@
   for all $m=1,\ldots,N$.
   \mypause
   \begin{block}{Key Idea}
-    Projection of original function on the basis set choosen for
+    Projection of original function on the basis set chosen for
     expansion leads to minimum errors in the $L_2$ sense. For this
     reason DG/CG schemes are constructed by projecting residuals of
     PDEs on basis sets.
@@ -233,12 +240,14 @@
     \pfrac{f}{t} + \lambda \pfrac{f}{x} = 0
   \end{align*}
   with $\lambda$ the constant advection speed. $f(x,t) = f_0(x-\lambda
-  t)$ is the exact solution, where $f_0(x)$ is the initial condition.
+  t)$ is the exact solution, where $f_0(x)$ is the initial
+  condition. Designing a good scheme is much harder than it looks.
+
   First step is to discretize the domain into elements $I_j\in
   [x_{j-1/2},x_{j+1/2}]$, and pick a finite-dimensional function space
   to represent the solution.
   \begin{align*}
-    \mathcal{V}^k_m(I) \equiv \{w: w|_{K_j} \in P^k(I_j) \} \cap C^m
+    \mathcal{V}^k_m(I) \equiv \{w: w|_{I_j} \in P^k(I_j) \} \cap C^m
   \end{align*}
   where $P^k(I_j)$ is the space of polynomials of order at most $k$
   on the element $I_j$.
@@ -246,10 +255,25 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
+\begin{frame}{The space $\mathcal{V}^k_m(I)$ encompasses large
+    families of functions}
+  \begin{figure}
+    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
+    \incfig{v1m1.png}
+    \incfig{v1p0.png}
+    \caption{Functions in the space $\mathcal{V}^1_{-1}(I)$ (left) and
+      $\mathcal{V}^1_{0}(I)$ (right). Note the discontinuity across
+      cell interfaces for the function on the left.}
+  \end{figure}  
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
 \begin{frame}{Discrete problem can be stated as finding the
     coefficients that minimize the $L_2$ norm of the residual}
 
-  Then the discrete problem DG is stated as: find $f_h\in
+  The discrete problem DG is stated as: find $f_h\in
   \mathcal{V}^k_{-1}$ such that for all smooth $\varphi$ we have
   \begin{align*}
     \int_{I_j} \varphi\left(
@@ -270,6 +294,60 @@
   \emph{numerical flux} on the cell boundary.
   
 \end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Picking a good numerical flux is key to stability,
+    accuracy}
+
+  \begin{columns}
+    \begin{column}{0.45\textwidth}
+      \begin{itemize}
+      \item Take averages
+        \begin{align*}
+          \hat{f}_{h}(f^+_h,f^-_h) = \frac{1}{2}(f_h^+ + f_h^-)
+        \end{align*}
+      \item Use upwinding
+        \begin{align*}
+          \hat{f}_{h}(f^+_h,f^-_h) &= f_h^- \quad\mathrm{\lambda>0} \\
+          &= f_h^+ \quad\mathrm{\lambda<0}
+        \end{align*}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.65\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{v1m1-anno.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  For systems of nonlinear equations (Euler, ideal MHD, etc.) there is
+  an applied math cottage industry just on choosing numerical
+  fluxes. Google ``Riemann solvers''
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Piecewise constant space
+    ($\mathcal{V}^0_{-1}(I)$) leads to familiar difference equations}
+  
+  \begin{itemize}
+  \item A central flux on space $\mathcal{V}^0_{-1}(I)$ leads to the
+    familiar central difference scheme
+    \begin{align*}
+      \pfrac{f_{j}}{t} + \lambda\frac{f_{j+1}-f_{j-1}}{2\Delta x} = 0
+    \end{align*}
+  \item An upwind flux on space $\mathcal{V}^0_{-1}(I)$ leads to the
+    familiar upwind difference scheme (for $\lambda>0$)
+    \begin{align*}
+      \pfrac{f_{j}}{t} + \lambda \frac{f_{j}-f_{j-1}}{\Delta x} = 0
+    \end{align*}
+  \end{itemize}
+
+
+\end{frame}
+% ----------------------------------------------------------------
 
 \end{document}
 
