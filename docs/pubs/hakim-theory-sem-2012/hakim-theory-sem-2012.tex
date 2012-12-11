@@ -228,20 +228,20 @@
 % ----------------------------------------------------------------
 \begin{frame}{Passive advection is a good prototype to study DG
     schemes}
-  Consider the 1D passive advection equation on $\Omega\in [L,R]$
+  Consider the 1D passive advection equation on $I\in [L,R]$
   \begin{align*}
     \pfrac{f}{t} + \lambda \pfrac{f}{x} = 0
   \end{align*}
   with $\lambda$ the constant advection speed. $f(x,t) = f_0(x-\lambda
   t)$ is the exact solution, where $f_0(x)$ is the initial condition.
-  First step is to discretize the domain into elements $\Omega_j$,
-  and pick a finite-dimensional function space to represent the
-  solution.
+  First step is to discretize the domain into elements $I_j\in
+  [x_{j-1/2},x_{j+1/2}]$, and pick a finite-dimensional function space
+  to represent the solution.
   \begin{align*}
-    \mathcal{V}^k_m(K) \equiv \{w: w|_{K_j} \in P^k(K_j) \} \cap C^m
+    \mathcal{V}^k_m(I) \equiv \{w: w|_{K_j} \in P^k(I_j) \} \cap C^m
   \end{align*}
-  where $P^k(K_j)$ is the space of polynomials of order at most $k$
-  on the element $K_j$.
+  where $P^k(I_j)$ is the space of polynomials of order at most $k$
+  on the element $I_j$.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -250,9 +250,9 @@
     coefficients that minimize the $L_2$ norm of the residual}
 
   Then the discrete problem DG is stated as: find $f_h\in
-  \mathcal{V}^k_{-1}$ such that for all smooth $w$ we have
+  \mathcal{V}^k_{-1}$ such that for all smooth $\varphi$ we have
   \begin{align*}
-    \int_{K_j} w\left(
+    \int_{I_j} \varphi\left(
       \pfrac{f_h}{t} 
       + \lambda \pfrac{f_h}{x}
       \right)
@@ -260,14 +260,14 @@
   \end{align*}
   Integrating by parts leads to the discrete system
   \begin{align*}
-    \int_{K_j} w \pfrac{f_h}{t}\thinspace dx
+    \int_{I_j} \varphi \pfrac{f_h}{t}\thinspace dx
     +
-    \lambda \hat{f}_h
+    \lambda \varphi_{j+1/2}\hat{f}_{hj+1/2} - \lambda \varphi_{j-1/2}\hat{f}_{hj-1/2}
     -
-    \int_{K_j} \nabla w\cdot\gvec{\alpha}_h f_h\thinspace d\Omega = 0.
+    \int_{I_j}  \frac{d\varphi}{dx}\lambda f_h\thinspace dx = 0.
   \end{align*}
-  Here $\hat{f}_h = \hat{f}(f^+_h,f^-_h)$ is the consistent
-  \emph{numerical} flux on $\partial K_j$.
+  Here $\hat{f}_{h} = \hat{f}(f^+_h,f^-_h)$ is the consistent
+  \emph{numerical flux} on the cell boundary.
   
 \end{frame}
 
