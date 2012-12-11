@@ -18,8 +18,8 @@ Rewrite this as a system of first-order equations
 
 /** Part 1 */
 
-c12 : -1/2;
-c21 : 1/2;
+c12 : 0;
+c21 : 0;
 
 fp(j) := f0(j)-f1(j);
 fm(j) := f0(j-1)+f1(j-1);
@@ -31,8 +31,8 @@ w1(j) := -3*(ff(j+1)+ff(j)) + 6*f0(j);
 
 /** Part 2 */
 
-c12 : -1/2;
-c21 : 1/2;
+c12 : 0;
+c21 : 0;
 
 wp(j) := w0(j)-w1(j);
 wm(j) := w0(j-1)+w1(j-1);

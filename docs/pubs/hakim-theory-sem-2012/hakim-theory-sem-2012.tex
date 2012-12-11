@@ -25,6 +25,8 @@
 \newcommand{\eer}{\mvec{e}_r}
 \newcommand{\eez}{\mvec{e}_z}
 \newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
+%\newcommand{\mypause}{\pause}
+\newcommand{\mypause}{}
 
 \newtheorem{thm}{Theorem}
 \newtheorem{lem}{Lemma}
@@ -74,28 +76,209 @@
 \end{frame}
 
 % ----------------------------------------------------------------
-\begin{frame}{Long term goal: Accurate and stable continuum schemes
-    for full-F edge gyrokinetics in 3D geometries}
+\begin{frame}{Edge region is very important but poorly understood}
 
-  Question: Can one develop accurate and stable schemes that conserve
-  invariants, maintain positivity and use as few grid points as
-  possible?
+  \begin{figure}
+    \setkeys{Gin}{width=0.75\linewidth,keepaspectratio}
+    \incfig{edge-important.png}
+  \end{figure}
 
-  \begin{proposed}
-    Explore high-order hybrid discontinuous/continuous Galerkin
-    finite-element schemes, enhanced with flux-reconstruction and a
-    proper choice of velocity space basis functions.
-  \end{proposed}
+  \begin{itemize}
+  \item Need sufficiently high pedestal temperature for core to get to
+    fusion temperatures
+  \item Periodic instabilities in edge region can dump outer ~5-10\%
+    of plasma onto divertor plates. Might be manageable, or divertor
+    erodes, melts?
+  \item Is there a way to enhance spontaneous flow to reduce
+    turbulence?
+  \end{itemize}
 
 \end{frame}
 % ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Edge region is very difficult and efficient numerical
+    methods are needed}
+
+  Detailed understanding of edge physics is relatively poor compared
+  to core of tokamak.
+
+  \begin{itemize}
+  \item Tokamak edge physics remains relatively unexplored: no
+    self-consistent model of cross-field transport in open-field line
+    region, very little study of neutral transport, wall effects, etc.
+  \item Large density/amplitude variations, large relative banana
+    width, wide range of collisionalities
+    \begin{itemize}
+    \item Stick with full-F simulations
+    \item Need good algorithms to distinguish physical oscillations
+      from numerical noise (Gibb's phenomena)
+    \end{itemize}
+  \item Complicated geometry and magentic topology due, X-points in
+    domain, open field lines and divertor plates.
+  \end{itemize}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Long term goal: Accurate and stable continuum schemes
+    for full-F edge gyrokinetics in 3D geometries}
+
+  \begin{block}{Question}
+    Can one develop accurate and stable schemes that conserve
+    invariants, maintain positivity and use as few grid points as
+    possible?
+  \end{block}
+
+  \begin{block}{Proposed Answer}
+    Explore high-order hybrid discontinuous/continuous Galerkin
+    finite-element schemes, enhanced with flux-reconstruction and a
+    proper choice of velocity space basis functions.
+  \end{block}
+  \mypause
+  A robust code capable of running very quickly at coarse velocity
+  space resolution while preserving all conservation laws of
+  gyro-fluid/fluid equations and giving fairly good results. Can
+  occasionally turn up velocity resolution for convergence tests.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Discontinuous Galerkin algorithms represent state-of-art
+    for solution of hyperbolic partial differential equations}
+  \begin{itemize}
+  \item DG algorithms are a hot topic in CFD and applied
+    mathematics. General formulation in a paper by Cockburn and Shu,
+    JCP 1998. More than 700 citations.  \mypause
+  \item DG combines key advantages of finite-elements (low phase
+    error, high accuracy, flexible geometries) with finite-volume
+    schemes (limiters to produce positivity/monotonicity, locality)
+    \mypause
+  \item Certain type of DG have excellent conservation properties for
+    Hamiltonian systems, low noise and low dissipation.
+    \mypause
+  \item DG is inherently super-convergent: in FV methods we
+    interpolate $p$ points to get $p$th order accuracy. In DG
+    interpolate $p$ points to get $2p-1$ order accuracy.
+  \end{itemize}
+  DG combined with FV schemes can lead to best-in-class algorithms
+  for hyperbolic PDEs.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Discontinuous Galerkin can be a potential ``game
+    changer'' for (gyro)kinetic plasma simulations}
+  
+  Edge/pedestal gyrokinetic turbulence is very challenging, 5D problem
+  not yet solved. Benefits from all tricks we can find: factor of 2
+  reduction in resolution would lead to 64$\times$ speedup.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
+    of errors on a finite-dimensional subspace}
+
+  Consider expanding a function $f(x)$ with a finite set of basis
+  functions $w_k(x)$
+  \begin{align*}
+    f(x) \approx f_h(x)  = \sum_{k=1}^N f_k w_k(x)
+  \end{align*}
+  Question: What are best values of $f_k$ one can select?  \mypause
+  Answer: Do an $L_2$ minimization of the error, i.e. find $f_k$ such
+  that
+  \begin{align*}
+    E_N = \int \left[
+      f(x) - \sum_{k=1}^N f_k w_k(x)\right]^2\thinspace dx
+  \end{align*}
+  is minimum.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
+    of errors on a finite-dimensional subspace}
+
+  For minimum error $\partial E_N/\partial f_k = 0$ for all
+  $k=1,\ldots,N$. This leads to the linear system that determines the
+  coefficients $f_k$
+  \begin{align*}
+    \int w_m(x) \left(
+      f(x) - \sum_{k=1}^N f_k w_k(x)
+    \right)\thinspace dx = 0
+  \end{align*}
+  for all $m=1,\ldots,N$.
+  \mypause
+  \begin{block}{Key Idea}
+    Projection of original function on the basis set choosen for
+    expansion leads to minimum errors in the $L_2$ sense. For this
+    reason DG/CG schemes are constructed by projecting residuals of
+    PDEs on basis sets.
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Passive advection is a good prototype to study DG
+    schemes}
+  Consider the 1D passive advection equation on $\Omega\in [L,R]$
+  \begin{align*}
+    \pfrac{f}{t} + \lambda \pfrac{f}{x} = 0
+  \end{align*}
+  with $\lambda$ the constant advection speed. $f(x,t) = f_0(x-\lambda
+  t)$ is the exact solution, where $f_0(x)$ is the initial condition.
+  First step is to discretize the domain into elements $\Omega_j$,
+  and pick a finite-dimensional function space to represent the
+  solution.
+  \begin{align*}
+    \mathcal{V}^k_m(K) \equiv \{w: w|_{K_j} \in P^k(K_j) \} \cap C^m
+  \end{align*}
+  where $P^k(K_j)$ is the space of polynomials of order at most $k$
+  on the element $K_j$.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Discrete problem can be stated as finding the
+    coefficients that minimize the $L_2$ norm of the residual}
+
+  Then the discrete problem DG is stated as: find $f_h\in
+  \mathcal{V}^k_{-1}$ such that for all smooth $w$ we have
+  \begin{align*}
+    \int_{K_j} w\left(
+      \pfrac{f_h}{t} 
+      + \lambda \pfrac{f_h}{x}
+      \right)
+    \thinspace dx = 0.
+  \end{align*}
+  Integrating by parts leads to the discrete system
+  \begin{align*}
+    \int_{K_j} w \pfrac{f_h}{t}\thinspace dx
+    +
+    \lambda \hat{f}_h
+    -
+    \int_{K_j} \nabla w\cdot\gvec{\alpha}_h f_h\thinspace d\Omega = 0.
+  \end{align*}
+  Here $\hat{f}_h = \hat{f}(f^+_h,f^-_h)$ is the consistent
+  \emph{numerical} flux on $\partial K_j$.
+  
+\end{frame}
+
+\end{document}
 
 % ----------------------------------------------------------------
 \begin{frame}{Several fluid and kinetic problems are described by a
     Hamiltonian}%
 
   \begin{align*}
-    \pfrac{f}{t} = \{H,f\}
+    \pfrac{f}{t} + \{f,H\} = 0
   \end{align*}
   where $H(z^1,z^2)$ is the Hamiltonian and canonical Poisson bracket
   is
