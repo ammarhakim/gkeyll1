@@ -30,7 +30,7 @@ def xeta(e, xc, dx):
     return 0.5*dx*e+xc
 
 def plotLines(X, q0, q1, color):
-    dx = math.fabs(X[1]-X[0])
+    dx2 = math.fabs(X[1]-X[0])/2.0
     for i in range(X.shape[0]-1):
         ql = q0[i] - q1[i]
         qr = q0[i] + q1[i]
@@ -53,14 +53,14 @@ for i in range(NX):
     ## 
     # Use projection on piecewise linear
     ## 
-    #f0[i] = 0.5*( w[0]*fx(xeta(eta[0], xc, dx)) + w[1]*fx(xeta(eta[1], xc, dx)) )
-    #f1[i] = 1.5*( w[0]*P1(eta[0])*fx(xeta(eta[0], xc, dx)) + w[1]*P1(eta[1])*fx(xeta(eta[1], xc, dx)) )
+    f0[i] = 0.5*( w[0]*fx(xeta(eta[0], xc, dx)) + w[1]*fx(xeta(eta[1], xc, dx)) )
+    f1[i] = 1.5*( w[0]*P1(eta[0])*fx(xeta(eta[0], xc, dx)) + w[1]*P1(eta[1])*fx(xeta(eta[1], xc, dx)) )
 
     ## 
     # Use nodal initialization
     ##     
-    f0[i] = 0.5*(fx(xeta(1, xc, dx)) + fx(xeta(-1, xc, dx)))
-    f1[i] = 0.5*(fx(xeta(1, xc, dx)) - fx(xeta(-1, xc, dx)))
+    #f0[i] = 0.5*(fx(xeta(1, xc, dx)) + fx(xeta(-1, xc, dx)))
+    #f1[i] = 0.5*(fx(xeta(1, xc, dx)) - fx(xeta(-1, xc, dx)))
 
 def calcGrad(f0, f1):
     NX = f0.shape[0]
@@ -82,14 +82,14 @@ def calcGrad(f0, f1):
         ##
         # 3-point stencil
         ## 
-        #w0[J] = -(f1[J]+f0[J]) + (f1[JM]+f0[JM])
-        #w1[J] = -3*(f1[J]-f0[J]) - 3*(f1[JM]+f0[JM])
+        w0[J] = -(f1[J]+f0[J]) + (f1[JM]+f0[JM])
+        w1[J] = -3*(f1[J]-f0[J]) - 3*(f1[JM]+f0[JM])
 
         ##
         # 5-point stencil
         ##     
-        w0[J] = 0.5*(f1[JP]-f0[JP]- 2*f1[J] + f1[JM]+f0[JM])
-        w1[J] = 0.5*(3*f1[JP]-3*f0[JP] + 6*f0[J] - 3*f1[JM]-3*f0[JM])
+        #w0[J] = 0.5*(f1[JP]-f0[JP]- 2*f1[J] + f1[JM]+f0[JM])
+        #w1[J] = 0.5*(3*f1[JP]-3*f0[JP] + 6*f0[J] - 3*f1[JM]-3*f0[JM])
 
     return w0, w1
 
@@ -146,12 +146,34 @@ def calcD2Direct(f0, f1):
             JP = 0
 
         ##
-        # 5-point stencil
+        # 3-point stencil
         ##
         q0[J] = -2*f1[JP]+4*f0[JP]-2*f1[J]-8*f0[J]+4*f1[JM]+4*f0[JM]
         q1[J] = -6*f1[JP]+12*f0[JP]-24*f1[J]-6*f0[J]-6*f1[JM]-6*f0[JM]
 
     return q0, q1
+
+def calcD2DirectSym3(f0, f1):
+    NX = f0.shape[0]
+
+    # cell averages and slopes D2
+    q0 = numpy.zeros((NX,), numpy.float)
+    q1 = numpy.zeros((NX,), numpy.float)
+
+    # compute derivatives in interior
+    for J in range(NX):
+        # funkyness for periodic BCs
+        JP = J+1
+        JM = J-1
+        if (J==0):
+            JM = NX-1
+        if (J==NX-1):
+            JP = 0
+
+        q0[J] = -6*f1[JP]+8*f0[JP]-16*f0[J]+8*f0[JM]+6*f1[JM]
+        q1[J] = -12*f1[JP]+18*f0[JP]-48*f1[J]-18*f0[JM]-12*f1[JM]
+
+    return 0.5*q0, 0.5*q1
 
 # make plots
 pylab.figure(1)
@@ -162,6 +184,7 @@ pylab.title('Function')
 
 dx = math.fabs(X[1]-X[0])
 dx2 = dx*dx
+dx4 = dx*dx*dx*dx
 
 w0, w1 = calcGrad(f0, f1)
 
@@ -173,16 +196,29 @@ pylab.axis('tight')
 pylab.title('Gradient')
 
 q0, q1 = calcD2(f0, f1)
-q0d, q1d = calcD2Direct(f0, f1)
 
 pylab.figure(3)
 pylab.plot(X, D2fx(X), '-r')
 plotLines(X, q0/dx2, q1/dx2, '-k')
-#plotLines(X, q0d, q1d, '-k')
 pylab.plot(Xc, q0/dx2, '-m')
 pylab.axis('tight')
-pylab.title('Divergence')
+pylab.title('Divergence (5-point)')
 
+q0d, q1d = calcD2Direct(f0, f1)
+pylab.figure(4)
+pylab.plot(X, D2fx(X), '-r')
+plotLines(X, q0d/dx2, q1d/dx2, '-k')
+pylab.plot(Xc, q0/dx2, '-m')
+pylab.axis('tight')
+pylab.title('Divergence (3-point)')
+
+q0s, q1s = calcD2DirectSym3(f0, f1)
+pylab.figure(5)
+pylab.plot(X, D2fx(X), '-r')
+plotLines(X, q0s/dx2, q1s/dx2, '-k')
+pylab.plot(Xc, q0s/dx2, '-m')
+pylab.axis('tight')
+pylab.title('Divergence (3-point symmetric)')
     
 pylab.show()
 
