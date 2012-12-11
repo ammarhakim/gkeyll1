@@ -39,6 +39,22 @@ namespace Lucee
     }
     else
       throw Lucee::Except("AdvectionEquation::readInput: Must provide speeds in each direction");
+
+    fluxType = UPWIND_FLUX;
+    if (tbl.hasString("flux"))
+    {
+      if (tbl.getString("flux") == "central")
+        fluxType = CENTRAL_FLUX;
+      else if (tbl.getString("flux") == "upwind")
+        fluxType = UPWIND_FLUX;
+      else
+      {
+        Lucee::Except lce("AdvectionEquation::readInput: 'flux' must be one of ");
+        lce << " 'central' or 'upwind'. Provided '" << tbl.getString("flux")
+            << "' instead";
+        throw lce;
+      }
+    }
   }
 
   void
@@ -104,10 +120,18 @@ namespace Lucee
     double v[3];
     c.rotateVecToLocal(u, v);
 
-    if (v[0] > 0)
-      f[0] = v[0]*ql[0];
+    if (fluxType == UPWIND_FLUX)
+    {
+      if (v[0] > 0)
+        f[0] = v[0]*ql[0];
+      else
+        f[0] = v[0]*qr[0];
+    }
     else
-      f[0] = v[0]*qr[0];
+    {
+// central flux
+      f[0] = 0.5*v[0]*(ql[0]+qr[0]);
+    }
 
     return v[0];
   }

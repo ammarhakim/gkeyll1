@@ -136,11 +136,11 @@
     finite-element schemes, enhanced with flux-reconstruction and a
     proper choice of velocity space basis functions.
   \end{block}
-  \mypause
-  A robust code capable of running very quickly at coarse velocity
-  space resolution while preserving all conservation laws of
-  gyro-fluid/fluid equations and giving fairly good results. Can
-  occasionally turn up velocity resolution for convergence tests.
+  \mypause \textcolor{red}{A robust code capable of running very
+    quickly at coarse velocity space resolution while preserving all
+    conservation laws of gyro-fluid/fluid equations and giving fairly
+    good results. Can occasionally turn up velocity resolution for
+    convergence tests.}
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -282,7 +282,7 @@
       \right)
     \thinspace dx = 0.
   \end{align*}
-  Integrating by parts leads to the discrete system
+  Integrating by parts leads to the discrete \emph{weak-form}
   \begin{align*}
     \int_{I_j} \varphi \pfrac{f_h}{t}\thinspace dx
     +
@@ -291,7 +291,8 @@
     \int_{I_j}  \frac{d\varphi}{dx}\lambda f_h\thinspace dx = 0.
   \end{align*}
   Here $\hat{f}_{h} = \hat{f}(f^+_h,f^-_h)$ is the consistent
-  \emph{numerical flux} on the cell boundary.
+  \emph{numerical flux} on the cell boundary. Integrals are performed
+  using suitable quadrature schemes.
   
 \end{frame}
 % ----------------------------------------------------------------
@@ -345,6 +346,74 @@
     \end{align*}
   \end{itemize}
 
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Piecewise constant space
+    ($\mathcal{V}^0_{-1}(I)$) with central flux leads to dispersive
+    errors}
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
+    \incfig{advection-p0-c.png}
+    \caption{Advection equation solution (black) compared to exact
+      solution (red) with central fluxes.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Piecewise constant space
+    ($\mathcal{V}^0_{-1}(I)$) with upwind flux is very diffusive}
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
+    \incfig{advection-p0.png}
+    \caption{Advection equation solution (black) compared to exact
+      solution (red) with upwind fluxes.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Piecewise linear space
+    ($\mathcal{V}^1_{-1}(I)$) with upwind flux leads to good results}
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.6\linewidth,keepaspectratio}
+    \incfig{advection-p1.png}
+    \caption{Advection equation solution (black) compared to exact
+      solution (red) with upwind fluxes with piecewise linear basis
+      functions.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Summary of DG schemes}
+
+  \begin{itemize}
+  \item Pick a finite-dimensional function space,
+    $\mathcal{V}^k_{-1}$. This need not be space of piecewise
+    polynomials.
+  \item Construct discrete weak-form using integration by parts.
+  \item Pick suitable numerical fluxes (Riemann solvers) for the
+    surface integrals.
+  \item Pick a suitable quadrature scheme to perform surface and
+    volume integrals.
+  \item Use Runge-Kutta (or other suitable) schemes for evolving the
+    equations in time.
+  \end{itemize}
+
+  Other major topics in DG: limiters for positivity/monotonicity,
+  nodal v/s modal basis functions, Serendipity basis functions,
+  diffusion terms, general geometry, error and accuracy analysis,
+  $hp$-refinement, etc.
 
 \end{frame}
 % ----------------------------------------------------------------
