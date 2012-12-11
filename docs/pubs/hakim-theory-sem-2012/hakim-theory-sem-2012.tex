@@ -6,6 +6,7 @@
 \usepackage{longtable}
 \usepackage{multirow}
 \usepackage{tabulary}
+\usepackage{multimedia}
 
 \captionsetup{font=scriptsize,labelfont=scriptsize}
 
@@ -1064,43 +1065,3 @@
 
 \end{frame}
 % ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{For Vlasov equation potential can be determined in two
-    different ways}%
-
-  For electron plasma waves use full Poisson equation
-  \begin{align*}
-    \frac{\partial^2 \phi}{\partial x^2} = -\frac{\rho_c}{\epsilon_0}
-  \end{align*}
-  where $\rho_c = |e| (n_{io}(x) - n(x,t))$ is total charge
-  density. For ion-acoustic waves use quasi-neutrality
-  \begin{align*}
-    n_{i}(x) = n_{eo}\left(1 + \frac{|e|\phi}{T_e}\right)
-  \end{align*}
-  where $n_{eo}$ is the constant electron initial density and $T_e$ is
-  the fixed electron temperature. This determines potential without
-  the need to solve a Poisson equation and is a model of parallel
-  dynamics in gyrokinetics.
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Gyrokinetic equation can also be derived from
-    gyro-center Hamiltonian}
-
-  In the Hamiltonian gyrokinetic theory\footfullcite{Brizard:2007fs}
-  the gyrokinetic equation is derived from the gyrocentre Hamiltonian
-  in gyro-center coordinates $(\mvec{R}, v_{\parallel}, \mu, \alpha)$
-  \begin{align*}
-    H = \frac{1}{2}m_i v_{\parallel}^2 + \mu B + e_i \langle\phi \rangle_\alpha
-  \end{align*}
-  where $v_{\parallel}$ is the parallel velocity, $\mu$ is the
-  magnetic moment, $\alpha$ is gyro-angle and $\phi$ is the
-  electrostatic potential. Poisson bracket is no longer canonical, but
-  gyrokinetic Vlasov equation can still be written as a conservation
-  equation in phase-space.
-\end{frame}
-% ----------------------------------------------------------------
-
