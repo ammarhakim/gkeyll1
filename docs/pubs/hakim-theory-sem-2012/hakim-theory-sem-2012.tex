@@ -97,7 +97,7 @@
     plates
   \item Is there a way to enhance spontaneous flow to reduce
     turbulence?
-  \item How much can Lithium improve performace?
+  \item How much can Lithium improve performance?
   \end{itemize}
 
 \end{frame}
@@ -112,9 +112,8 @@
 
   \begin{itemize}
   \item Tokamak edge physics relatively unexplored: no complete model
-    of self-consistent model of cross-field transport in open-field
-    line region, very little study of neutral transport, wall effects,
-    etc.
+    of self-consistent cross-field transport in open-field line
+    region, very little study of neutral transport, wall effects, etc.
   \item Large density/amplitude variations, large relative banana
     width, wide range of collisionalities
     \begin{itemize}
@@ -122,8 +121,8 @@
     \item Need good algorithms to distinguish physical oscillations
       from numerical noise (Gibb's phenomena)
     \end{itemize}
-  \item Complicated geometry and magnetic topology, X-points in
-    domain, open field lines and divertor plates.
+  \item Complicated geometry and magnetic topology, X-points, open
+    field lines, divertor plates ...
   \end{itemize}
 
 \end{frame}
@@ -174,17 +173,15 @@
 \end{frame}
 % ----------------------------------------------------------------
 
-
 % ----------------------------------------------------------------
 \begin{frame}{Discontinuous Galerkin algorithms represent state-of-art
     for solution of hyperbolic partial differential equations}
   \begin{itemize}
     \small
-  \item DG algorithms are a hot topic in CFD and applied
-    mathematics. First introduced by Reed and Hill in 1973 for neutron
-    transport in 2D.
+  \item DG algorithms hot topic in CFD and applied mathematics. First
+    introduced by Reed and Hill in 1973 for neutron transport in 2D.
     \mypause
-  \item General formulation in a paper by Cockburn and Shu, JCP
+  \item General formulation in paper by Cockburn and Shu, JCP
     1998. More than 700 citations.  \mypause
   \item DG combines key advantages of finite-elements (low phase
     error, high accuracy, flexible geometries) with finite-volume
@@ -193,9 +190,9 @@
   \item Certain types of DG have excellent conservation properties for
     Hamiltonian systems, low noise and low dissipation.
     \mypause
-  \item DG is inherently super-convergent: in FV methods we
-    interpolate $p$ points to get $p$th order accuracy. In DG
-    interpolate $p$ points to get $2p-1$ order accuracy.
+  \item DG is inherently super-convergent: in FV methods interpolate
+    $p$ points to get $p$th order accuracy. In DG interpolate $p$
+    points to get $2p-1$ order accuracy.
   \end{itemize}
   DG combined with FV schemes can lead to best-in-class explicit
   algorithms for hyperbolic PDEs.
@@ -212,10 +209,11 @@
   \begin{itemize}
   \item Factor of 2 reduction in resolution would lead to 64$\times$
     speedup.
-  \item High FLOP count, combined with data-locality means that modern
-    CPU optimization techniques (cache optimization, vectorization,
-    fast linear-algebra routines, etc.) and GPU optimization
-    techniques can be used\footfullcite{Dickson:2010wt}.
+  \item Higher order methods require more FLOPs per data point, but
+    more efficient on modern CPUs where memory bandwidth is the
+    limitation.  Combined with data-locality, means modern CPU/GPU
+    optimization can be better (cache optimization, vectorization,
+    fast linear-algebra routines, etc.).
   \end{itemize}
 
 \end{frame}
@@ -279,8 +277,8 @@
 % ----------------------------------------------------------------
 \begin{frame}{What does a typical $L_2$ fit look like for
     discontinuous Galerkin scheme?}
-  Discontinous Galerkin schemes use function spaces that allow
-  \emph{discontinuties} across cell boundaries.
+  Discontinuous Galerkin schemes use function spaces that allow
+  \emph{discontinuities} across cell boundaries.
   \begin{figure}
     \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
     \incfig{v1m1.png}
@@ -308,7 +306,7 @@
     [x_{j-1/2},x_{j+1/2}]$
   \item Pick a finite-dimensional function space to represent the
     solution. For DG we usually pick polynomials in each cell but
-    allow discontinuties across cell boundaries
+    allow discontinuities across cell boundaries
   \item Expand $f(x,t) \approx f_h(x,t) = \sum_k f_k(t) w_k(x)$.
   \end{itemize}
 \end{frame}
@@ -462,11 +460,10 @@
   \item Use Runge-Kutta (or other suitable) schemes for evolving the
     equations in time.
   \end{itemize}
-  \mypause
-  Other major topics in DG: limiters for positivity/monotonicity,
-  nodal v/s modal basis functions, Serendipity basis functions,
-  diffusion terms, general geometry, error and accuracy analysis,
-  $hp$-refinement, etc.
+  \mypause Other major topics in DG: limiters for
+  positivity/monotonicity, nodal vs. modal basis functions,
+  Serendipity basis functions, diffusion terms, general geometry,
+  error and accuracy analysis, $hp$-refinement, etc.
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -579,7 +576,7 @@
 
   To discretize the equations introduce a mesh $K_j$ of the domain
   $K$. Then the discrete problem is stated as: find $\zeta_h$ in the
-  space of discontinous piecewise polynomials such that for all basis
+  space of discontinuous piecewise polynomials such that for all basis
   functions $w$ we have
   \begin{align*}
     \int_{K_j} w \pfrac{\zeta_h}{t}\thinspace d\Omega 
@@ -605,7 +602,7 @@
   \end{align*}
   \mypause
   \begin{block}{Questions}
-    How to pick basis functions for discontinous and continuous
+    How to pick basis functions for discontinuous and continuous
     spaces? We also have not specified numerical fluxes to use. How to
     pick them?  Do they effect invariants?
   \end{block}
@@ -619,9 +616,9 @@
   \begin{block}{Energy Conservation}
     Liu and Shu (2000) have shown that discrete energy is conserved
     for 2D incompressible flow if \emph{basis functions for potential
-      are a continous subset of the basis functions for the vorticity
+      are a continuous subset of the basis functions for the vorticity
       irrespective of numerical flux chosen}! We discovered extension
-    to discontinous phi for the Vlasov equation.
+    to discontinuous phi for the Vlasov equation.
   \end{block}
 
   \begin{block}{Enstrophy Conservation}
@@ -630,10 +627,9 @@
     \emph{stable} in the $L_2$ norm.
   \end{block}
 
-  \mypause \textcolor{red}{DG with central fluxes can be thought of as
-    high-order generalization of the well-known \emph{Arakawa}
-    schemes, widely used in plasma physics as well as climate
-    modeling.}
+  \mypause \textcolor{red}{DG with central fluxes like high-order
+    generalization of the well-known \emph{Arakawa} schemes, widely
+    used in climate modeling and recently also in plasma physics.}
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -652,7 +648,108 @@
 
   \mypause One can imagine smoothing $E_h$ or solving the Poisson
   equation with higher order continuity. However, we have not yet been
-  able to construct a momentum conserving scheme.
+  able to construct a direct scheme that conserves momentum and energy
+  simultaneously.
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Small errors in momentum conservation, independent of
+    velocity space resolution and converging rapidly with spatial
+    resolution}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{tabulary}{\linewidth}{|L|L|L|}
+        \hline
+        
+          $N_x$
+        & {
+          Error P1
+        } & {
+          Order
+        }\\\hline
+        8
+        & 
+        $1.3332\times 10^{-3}$
+        &  
+        \\\hline
+        
+        16
+        & 
+        $3.9308\times 10^{-4}$
+        & 
+        1.76
+        \\\hline
+        
+        32
+        & 
+        $8.5969\times 10^{-5}$
+        & 
+        2.19
+        \\\hline
+        
+        64
+        & 
+        $1.5254\times 10^{-5}$
+        & 
+        2.49
+        \\\hline
+        
+        128
+        & 
+        $2.3105\times 10^{-6}$
+        & 
+        2.72
+        \\\hline
+      \end{tabulary}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{tabulary}{\linewidth}{|L|L|L|}
+        \hline
+        $N_x$
+        & {
+          Error P2
+        } & {
+          Order
+        }\\\hline
+        8
+        & 
+        $1.9399\times 10^{-5}$
+        &  
+        \\\hline
+        
+        16
+        & 
+        $4.0001\times 10^{-7}$
+        & 
+        5.60
+        \\\hline
+        
+        32
+        & 
+        $5.1175\times 10^{-8}$
+        & 
+        2.97
+        \\\hline
+
+        64
+        & 
+        $2.2289\times 10^{-9}$
+        & 
+        4.52
+        \\\hline
+
+        128
+        & 
+        $8.9154\times 10^{-11}$
+        & 
+        4.64
+        \\\hline
+      \end{tabulary}
+    \end{column}
+  \end{columns}
+
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -672,9 +769,9 @@
   \end{itemize}
   \mypause
   \begin{block}{Questions}
-    Can this scheme be modified to also conserve momentum exactly? Can
-    the fully discrete scheme also exactly conserve these invariants?
-    Perhaps try symplectic integrators ...
+    Can this scheme be modified to conserve momentum exactly? Can time
+    discretization exactly conserve these invariants?  Perhaps try
+    symplectic integrators ...
   \end{block}
 
 \end{frame}
@@ -694,9 +791,9 @@
   \item Linear solvers from
     Petsc\footnote{http://www.mcs.anl.gov/petsc/} are used for
     inverting stiffness matrices.
-  \item Games programming language Lua\footnote{http://www.lua.org},
-    used in widely played games like World of Warcraft, is used as an
-    embedded scripting language to drive simulations.
+  \item Programming language Lua\footnote{http://www.lua.org}, used in
+    widely played games like World of Warcraft, is used as an embedded
+    scripting language to drive simulations.
   \item MPI is used for parallelization via the {\tt txbase} library
     developed at Tech-X Corporation.
   \end{itemize}
@@ -807,6 +904,29 @@
 % ----------------------------------------------------------------
 \begin{frame}{Initial studies of Hasegawa-Wakatani drift-wave
     turbulence are carried out}%
+  \begin{figure}
+    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
+    \includemovie[attach=true,%
+    text={\incfig{s217-hw_numDens_00000.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{s217-numDens.mov}
+    \caption{[Movie] Number density from Hasegawa-Wakatani drift-wave
+      turbulence simulations with adiabacity parameter $D=0.1$.}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Initial scans of turbulent structures were performed
+    with varying adiabacity parameter}%
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.45\linewidth,keepaspectratio}
+    \incfig{s215-hw_numDens_00100.png}
+    \incfig{s218-hw_numDens_00100.png}
+    \caption{Number density from Hasegawa-Wakatani drift-wave
+      turbulence simulations with adiabacity parameter $D=0.1$ (left)
+      and $D=1.0$.}
+  \end{figure}
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -884,106 +1004,6 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Small errors in momentum conservation, independent of
-    velocity space resolution and converging rapidly with spatial
-    resolution}%
-
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \begin{tabulary}{\linewidth}{|L|L|L|}
-        \hline
-        
-          $N_x$
-        & {
-          Error DG2
-        } & {
-          Order
-        }\\\hline
-        8
-        & 
-        $1.3332\times 10^{-3}$
-        &  
-        \\\hline
-        
-        16
-        & 
-        $3.9308\times 10^{-4}$
-        & 
-        1.76
-        \\\hline
-        
-        32
-        & 
-        $8.5969\times 10^{-5}$
-        & 
-        2.19
-        \\\hline
-        
-        64
-        & 
-        $1.5254\times 10^{-5}$
-        & 
-        2.49
-        \\\hline
-        
-        128
-        & 
-        $2.3105\times 10^{-6}$
-        & 
-        2.72
-        \\\hline
-      \end{tabulary}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{tabulary}{\linewidth}{|L|L|L|}
-        \hline
-        $N_x$
-        & {
-          Error DG3
-        } & {
-          Order
-        }\\\hline
-        8
-        & 
-        $1.9399\times 10^{-5}$
-        &  
-        \\\hline
-        
-        16
-        & 
-        $4.0001\times 10^{-7}$
-        & 
-        5.60
-        \\\hline
-        
-        32
-        & 
-        $5.1175\times 10^{-8}$
-        & 
-        2.97
-        \\\hline
-
-        64
-        & 
-        $2.2289\times 10^{-9}$
-        & 
-        4.52
-        \\\hline
-
-        128
-        & 
-        $8.9154\times 10^{-11}$
-        & 
-        4.64
-        \\\hline
-      \end{tabulary}
-    \end{column}
-  \end{columns}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
 \begin{frame}{A particle, momentum and energy conserving
     Lenard-Bernstein collision operator is implemented}%
 
@@ -992,7 +1012,8 @@
     \begin{column}{0.4\textwidth}
       A simple collision operator is implemented:
       \begin{align*}
-        C_{LB}[f] = \nu \frac{\partial }{\partial v}\left( (v-u)f + v_t^2 \pfrac{f}{v} \right)
+        C_{LB}[f] = \frac{\partial }{\partial v}
+        \left( \nu (v-u)f + \nu v_t^2 \pfrac{f}{v} \right)
       \end{align*}
       Figure shows relaxation of an initial step-function distribution
       function to Maxwellian due to collisions.
@@ -1035,7 +1056,7 @@
   \begin{itemize}
     \small
   \item The schemes have been extended to higher dimensions and
-    Serendipity basis functions are being explored (along with Eric
+    Serendipity basis functions are being explored (with Eric
     Shi). Testing is in progress.
   \item Maxwellian weighted basis functions for velocity space
     discretization will be developed to allow coarse resolution
