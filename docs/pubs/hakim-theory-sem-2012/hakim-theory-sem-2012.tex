@@ -82,8 +82,7 @@
 \end{frame}
 
 %----------------------------------------------------------------
-\begin{frame}{Edge region of tokamaks and stellerators is very
-    important but poorly understood}
+\begin{frame}{Edge region very important but poorly understood}
 
   \begin{figure}
     \setkeys{Gin}{width=0.75\linewidth,keepaspectratio}
@@ -92,15 +91,13 @@
 
   \begin{itemize}
     \small
-  \item Need sufficiently high pedestal temperature for core to get to
-    fusion temperatures
-  \item Periodic instabilities in edge region can dump outer ~5-10\%
-    of plasma onto divertor plates. Might be manageable, or divertor
-    erodes, melts?
+  \item Need high pedestal temperature for core to get to fusion
+    temperatures
+  \item Need ways to reduce/suppress ELMs than can damage divertor
+    plates
   \item Is there a way to enhance spontaneous flow to reduce
     turbulence?
-  \item How does Lithium effect the edge plasma in Lithium wall and
-    other experiments?
+  \item How much can Lithium improve performace?
   \end{itemize}
 
 \end{frame}
@@ -110,13 +107,14 @@
 \begin{frame}{Edge region of tokamaks and stellerators is very
     difficult and efficient numerical methods are needed}
 
-  Detailed understanding of edge physics is relatively poor compared
-  to core of tokamak.
+  Detailed understanding of edge physics relatively poor compared to
+  core of tokamak.
 
   \begin{itemize}
-  \item Tokamak edge physics remains relatively unexplored: no
-    self-consistent model of cross-field transport in open-field line
-    region, very little study of neutral transport, wall effects, etc.
+  \item Tokamak edge physics relatively unexplored: no complete model
+    of self-consistent model of cross-field transport in open-field
+    line region, very little study of neutral transport, wall effects,
+    etc.
   \item Large density/amplitude variations, large relative banana
     width, wide range of collisionalities
     \begin{itemize}
@@ -136,24 +134,46 @@
     for full-F edge gyrokinetics in 3D geometries}
 
   \begin{block}{Question}
+    \small
     Can one develop accurate and stable schemes that conserve
     invariants, maintain positivity and use as few grid points as
     possible?
   \end{block}
   \mypause
   \begin{block}{Proposed Answer}
+    \small
     Explore high-order hybrid discontinuous/continuous Galerkin
     finite-element schemes, enhanced with flux-reconstruction and a
     proper choice of velocity space basis functions.
   \end{block}
-  \textcolor{red}{A robust code capable of running very
-    quickly at coarse velocity space resolution while preserving all
-    conservation laws of gyro-fluid/fluid equations and giving fairly
-    good results. Can occasionally turn up velocity resolution for
-    convergence tests.}
 
 \end{frame}
 % ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Long term goal: Accurate and stable continuum schemes
+    for full-F edge gyrokinetics in 3D geometries}
+
+  \begin{block}{Dream Goal}
+    \textcolor{red}{A robust code capable of running very quickly at
+      coarse velocity space resolution while preserving all
+      conservation laws of gyro-fluid/fluid equations and giving
+      fairly good results. Can occasionally turn up velocity
+      resolution for convergence tests.}
+  \end{block}
+
+  To achieve this, exploring combination of techniques
+  \begin{itemize}
+  \item Efficient, high order, hybrid DG/finite-element scheme with
+    excellent conservation properties.
+  \item Subgrid turbulence models/hypercollision operators and
+    limiters than enable robust results on coarse grids.
+  \item Maxwellian-weighted basis functions.
+  \end{itemize}
+
+\end{frame}
+% ----------------------------------------------------------------
+
 
 % ----------------------------------------------------------------
 \begin{frame}{Discontinuous Galerkin algorithms represent state-of-art
@@ -291,11 +311,6 @@
     allow discontinuties across cell boundaries
   \item Expand $f(x,t) \approx f_h(x,t) = \sum_k f_k(t) w_k(x)$.
   \end{itemize}
-  %\begin{align*}
-  %  \mathcal{V}^k_m(I) \equiv \{w: w|_{I_j} \in P^k(I_j) \} \cap C^m
-  %\end{align*}
-  %where $P^k(I_j)$ is the space of polynomials of order at most $k$
-  %on the element $I_j$.
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -322,7 +337,7 @@
   \end{align*}
   Here $\hat{f}_{h} = \hat{f}(f^+_h,f^-_h)$ is the consistent
   \emph{numerical flux} on the cell boundary. Integrals are performed
-  using suitable quadrature schemes.
+  using high-order quadrature schemes.
   
 \end{frame}
 % ----------------------------------------------------------------
@@ -707,9 +722,9 @@
       \includemovie[attach=true,%
       text={\incfig{s121-projected-solution_00000.png}}%
       ]{\linewidth}{0.75\linewidth}{s121-swirl-flow.mov}
-      \caption{Swirling flow problem. The initial Gaussian pulses
-        distort strongly but regain their shapes after a period of
-        $1.5$~seconds.}
+      \caption{[Movie] Swirling flow problem. The initial Gaussian
+        pulses distort strongly but regain their shapes after a period
+        of $1.5$~seconds.}
       \end{figure}
     \end{column}
   \end{columns}
@@ -724,7 +739,7 @@
     \includemovie[attach=true,%
     text={\incfig{s128-double-shear_00000.png}}%
     ]{0.65\linewidth}{0.4875\linewidth}{s128-double-shear.mov}
-    \caption{Vorticity from double shear problem with piecewise
+    \caption{[Movie] Vorticity from double shear problem with piecewise
       quadratic DG scheme on $128\times 128$ grid.}
   \end{figure}
 \end{frame}
@@ -757,8 +772,8 @@
     \includemovie[attach=true,%
     text={\incfig{s139-vortex-waltz_00000.png}}%
     ]{0.65\linewidth}{0.4875\linewidth}{s139-vortex-waltz.mov}
-    \caption{Vorticity from vortex waltz problem with piecewise
-      quadratic DG scheme on $128\times 128$ grid.}
+    \caption{[Movie] Vorticity from vortex waltz problem with
+      piecewise quadratic DG scheme on $128\times 128$ grid.}
   \end{figure}
 \end{frame}
 % ----------------------------------------------------------------
@@ -849,7 +864,8 @@
     \includemovie[attach=true,%
     text={\incfig{s162-landau-damping-vp_distf_00000.png}}%
     ]{0.65\linewidth}{0.4875\linewidth}{s162-distf-nonlin.mov}
-    \caption{Distribution function from nonlinear Landau damping problem.}
+    \caption{[Movie] Distribution function from nonlinear Landau
+      damping problem.}
   \end{figure}
 
 \end{frame}
@@ -1004,7 +1020,7 @@
     conserved. 
   \item With central fluxes enstrophy is conserved. With upwind fluxes
     the scheme is $L_2$ stable.
-  \item Momentum conserved has small errors but is independent of
+  \item Momentum conservation has small errors but is independent of
     velocity space resolution and converges rapidly with spatial
     resolution.
   \end{itemize}
@@ -1017,6 +1033,7 @@
     geometries and do first physics problems}%
 
   \begin{itemize}
+    \small
   \item The schemes have been extended to higher dimensions and
     Serendipity basis functions are being explored (along with Eric
     Shi). Testing is in progress.
@@ -1030,7 +1047,6 @@
   \end{itemize}
 \end{frame}
 % ----------------------------------------------------------------
-conservation, Maxwellian basis functions, hypercollisions as subgrid models.
 
 \end{document}
 
