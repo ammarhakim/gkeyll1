@@ -72,18 +72,6 @@ X = pylab.linspace(-1, 1, 6)
 f0p, f1p = projectOnLinear(func, X)
 f0c, f1c = initWithLinear(func, X)
 
-pylab.figure(1)
-plotLines(X, f0p, f1p, '-ko')
-pylab.title('A member of $\mathcal{V}^1_{-1}$ family', fontsize='xx-large')
-pylab.axis('tight')
-pylab.savefig('v1m1.png')
-
-pylab.figure(2)
-plotLines(X, f0c, f1c, '-ro')
-pylab.title('A member of $\mathcal{V}^1_{0}$ family', fontsize='xx-large')
-pylab.axis('tight')
-pylab.savefig('v1p0.png')
-
 dx = math.fabs(X[1]-X[0])
 xjm1 = 0.5*(X[1]+X[2])-0.25*dx
 xj = 0.5*(X[2]+X[3])
@@ -100,7 +88,6 @@ xjh_m = xj-0.2*dx
 pylab.text(xjh_m, 0.9, "$f_{hj+1/2}^-$", fontsize='xx-large')
 xjh_p = xjp1-0.1*dx
 pylab.text(xjh_p, 1.2, "$f_{hj+1/2}^+$", fontsize='xx-large')
-
 
 pylab.axis('tight')
 pylab.savefig('v1m1-anno.png')
