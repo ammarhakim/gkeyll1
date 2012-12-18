@@ -1,0 +1,13 @@
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+f(x) := x^2;
+xeta(eta, xc, dx) := dx/2*eta+xc;
+
+c1_0 : 0.5*integrate(f(xeta(x,-0.5,1.0))*legendre_p(0, x), x, -1, 1);
+c1_1 : 1.5*integrate(f(xeta(x,-0.5,1.0))*legendre_p(1, x), x, -1, 1);
+c1_2 : 2.5*integrate(f(xeta(x,-0.5,1.0))*legendre_p(2, x), x, -1, 1);
+
+c2_0 : 0.5*integrate(f(xeta(x,0.5,1.0))*legendre_p(0, x), x, -1, 1);
+c2_1 : 1.5*integrate(f(xeta(x,0.5,1.0))*legendre_p(1, x), x, -1, 1);
+c2_2 : 2.5*integrate(f(xeta(x,0.5,1.0))*legendre_p(2, x), x, -1, 1);

@@ -64,6 +64,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Are common nodes shared? */
+      bool shareCommonNodes;
   };
 }
 
