@@ -314,6 +314,8 @@ namespace Lucee
       unsigned basisDegree;
 /** Maximum polynomial power anticipated */
       unsigned maxPower;
+/** Total number of quadrature points in 1-D */
+      unsigned numGaussPoints;
 /** Matrix to represent basis monomials */
       Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
@@ -328,6 +330,12 @@ namespace Lucee
       std::vector<double> gaussWeights;
 /** Ordinates for (one dimension) quadrature */
       std::vector<double> gaussPoints;
+/** Vector of face-mass matrices indexed by dimension (Lower) */
+      std::vector<Eigen::MatrixXd> refFaceNjNkLower;
+/** Vector of face-mass matrices indexed by dimension (Upper) */
+      std::vector<Eigen::MatrixXd> refFaceNjNkUpper;
+/** Vector of grad stiffness matrices indexed by dimension */
+      std::vector<Eigen::MatrixXd> refDNjNk;
 /** Mass matrix in reference coordinates */
       Eigen::MatrixXd refNjNk;
 /** Face-mass matrix in reference coordinates */
