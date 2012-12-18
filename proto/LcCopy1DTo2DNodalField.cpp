@@ -26,6 +26,10 @@ namespace Lucee
   {
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
+// are common nodes shared?
+    shareCommonNodes = true;
+    if (tbl.hasBool("shareCommonNodes"))
+      shareCommonNodes = tbl.getBool("shareCommonNodes");
   }
 
   void
@@ -52,14 +56,29 @@ namespace Lucee
     Lucee::Field<2, double>& fld2d = this->getOut<Lucee::Field<2, double> >(0);
 
     unsigned polyOrder = 1;
-    if (fld1d.getNumComponents() == 1)
-      polyOrder = 1;
-    else if (fld1d.getNumComponents() == 2)
-      polyOrder = 2;
+    if (shareCommonNodes)
+    {
+      if (fld1d.getNumComponents() == 1)
+        polyOrder = 1;
+      else if (fld1d.getNumComponents() == 2)
+        polyOrder = 2;
+      else
+      {
+        Lucee::Except lce("Copy1DTo2DNodalField::update: element not supported");
+        throw lce;
+      }
+    }
     else
     {
-      Lucee::Except lce("Copy1DTo2DNodalField::update: element not supported");
-      throw lce;
+      if (fld1d.getNumComponents() == 2)
+        polyOrder = 1;
+      else if (fld1d.getNumComponents() == 3)
+        polyOrder = 2;
+      else
+      {
+        Lucee::Except lce("Copy1DTo2DNodalField::update: element not supported");
+        throw lce;
+      }
     }
 
 // local region to update (This is the 2D region. The 1D region is
@@ -78,13 +97,40 @@ namespace Lucee
       {
         fld2d.setPtr(fld2dPtr, i, j);
 // copy data based on polynomial order
-        if (polyOrder == 1)
-          fld2dPtr[0] = fld1dPtr[0];
+        if (shareCommonNodes)
+        {
+          if (polyOrder == 1)
+            fld2dPtr[0] = fld1dPtr[0];
+          else
+          {
+            fld2dPtr[0] = fld1dPtr[0];
+            fld2dPtr[1] = fld1dPtr[1];
+            fld2dPtr[2] = fld1dPtr[0];
+          }
+        }
         else
         {
-          fld2dPtr[0] = fld1dPtr[0];
-          fld2dPtr[1] = fld1dPtr[1];
-          fld2dPtr[2] = fld1dPtr[0];
+          if (polyOrder == 1)
+          {
+            fld2dPtr[0] = fld1dPtr[0];
+            fld2dPtr[1] = fld1dPtr[1];
+
+            fld2dPtr[3] = fld1dPtr[0];
+            fld2dPtr[2] = fld1dPtr[1];
+          }
+          else
+          {
+            fld2dPtr[0] = fld1dPtr[0];
+            fld2dPtr[4] = fld1dPtr[1];
+            fld2dPtr[1] = fld1dPtr[2];
+
+            fld2dPtr[7] = fld1dPtr[0];
+            fld2dPtr[5] = fld1dPtr[2];
+
+            fld2dPtr[3] = fld1dPtr[0];
+            fld2dPtr[6] = fld1dPtr[1];
+            fld2dPtr[2] = fld1dPtr[2];
+          }
         }
       }
     }
