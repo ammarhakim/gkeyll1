@@ -9,14 +9,14 @@ cellSizes = [4,8,16,32];
 
 % Manual input data (could parse but...)
 execTimesS = zeros(length(cellSizes),3);
-execTimesS(:,1) = [0.546904 2.76353 18.4613 142.552];
-execTimesS(:,2) = [1.42926 7.94137 55.3581 428.358];
-execTimesS(:,3) = [2.60174 15.4653 110.327 856.953];
+execTimesS(:,1) = [0.013989 0.123331 1.4644 22.591];
+execTimesS(:,2) = [0.083322 0.931234 12.9819 199.278];
+execTimesS(:,3) = [0.250375 2.97663 42.3626 654.312];
 
 execTimesL = zeros(length(cellSizes),3);
-execTimesL(:,1) = [0.546053 2.76703 18.4478 143.458];
-execTimesL(:,2) = [2.00978 11.6285 81.9071 634.071];
-execTimesL(:,3) = [7.04044 44.9869 340.633 2627.37];
+execTimesL(:,1) = [0.016877 0.124448 1.47013 22.5999];
+execTimesL(:,2) = [0.115783 1.37645 19.5869 301.046];
+execTimesL(:,3) = [0.678743 8.69726 129.266 2016.38];
 
 errorMatrixS = ComputeMethodError(serendipityPath,cellSizes);
 [errorMatrixL,lengthVector] = ComputeMethodError(lagrangePath,cellSizes);
@@ -24,14 +24,12 @@ errorMatrixS = ComputeMethodError(serendipityPath,cellSizes);
 %% Plot execution time vs error
 set(0,'DefaultAxesFontSize',12);
 % figure('OuterPosition',[50, 50, 1100, 800]);%,'DefaultAxesFontWeight','bold'
-% Currently not plotting the third order Lagrange result on a 32x32x32 grid
-% because results have too high an error--need to run at lower CFL number.
 loglog(execTimesS(:,1),errorMatrixS(:,1),'g.-',...
     execTimesL(:,1),errorMatrixL(:,1),'g.--',...
     execTimesS(:,2),errorMatrixS(:,2),'r.-',...
     execTimesL(:,2),errorMatrixL(:,2),'r.--',...
     execTimesS(:,3),errorMatrixS(:,3),'b.-',...
-    execTimesL(1:end-1,3),errorMatrixL(1:end-1,3),'b.--')
+    execTimesL(1:end,3),errorMatrixL(1:end,3),'b.--')
 legend('Serendipity 1','Lagrange 1','Serendipity 2','Lagrange 2','Serendipity 3','Lagrange 3')
 xlabel('Time (s)')
 ylabel('Error')
