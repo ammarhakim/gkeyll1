@@ -553,7 +553,7 @@ namespace Lucee
     double coordScales[NDIM];
     for (unsigned i = 0; i < NDIM; i++)
     {
-      coordScales[i] = 0.5*grid.getDx(i);
+      coordScales[i] = 0.5*dq[i];
     }
 
     grid.getCentroid(xc);
@@ -598,9 +598,9 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
-    for (unsigned i = 0; i < refNjNk.rows(); i++)
-      for (unsigned j = 0; j < refNjNk.cols(); j++)
-        NjNk(i,j) = refNjNk(i,j);
+    for (unsigned i = 0; i < refMass.rows(); i++)
+      for (unsigned j = 0; j < refMass.cols(); j++)
+        NjNk(i,j) = refMass(i,j);
   }
 
   template <unsigned NDIM>
@@ -608,28 +608,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getLowerFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    for (unsigned i = 0; i < refFaceNjNkLower[dir].rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNkLower[dir].cols(); j++)
-          NjNk(i,j) = refFaceNjNkLower[dir](i,j);
-/*
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_xl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_xl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_xl(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_yl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_yl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_yl(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_zl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_zl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_zl(i,j);
-    }*/
+    for (unsigned i = 0; i < refFaceMassLower[dir].rows(); i++)
+      for (unsigned j = 0; j < refFaceMassLower[dir].cols(); j++)
+        NjNk(i,j) = refFaceMassLower[dir](i,j);
   }
 
   template <unsigned NDIM>
@@ -637,37 +618,18 @@ namespace Lucee
   SerendipityElement<NDIM>::getUpperFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    for (unsigned i = 0; i < refFaceNjNkUpper[dir].rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNkUpper[dir].cols(); j++)
-          NjNk(i,j) = refFaceNjNkUpper[dir](i,j);
-          /*
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_xu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_xu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_xu(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_yu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_yu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_yu(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_zu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_zu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_zu(i,j);
-    }*/
+    for (unsigned i = 0; i < refFaceMassUpper[dir].rows(); i++)
+      for (unsigned j = 0; j < refFaceMassUpper[dir].cols(); j++)
+        NjNk(i,j) = refFaceMassUpper[dir](i,j);
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
-    for (unsigned i = 0; i < refDNjDNk.rows(); i++)
-        for (unsigned j = 0; j < refDNjDNk.cols(); j++)
-          DNjDNk(i,j) = refDNjDNk(i,j);
+    for (unsigned i = 0; i < refStiffness.rows(); i++)
+      for (unsigned j = 0; j < refStiffness.cols(); j++)
+        DNjDNk(i,j) = refStiffness(i,j);
   }
 
   template <unsigned NDIM>
@@ -675,29 +637,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getGradStiffnessMatrix(
     unsigned dir, Lucee::Matrix<double>& DNjNk) const
   {
-    
-    for (unsigned i = 0; i < refDNjNk[dir].rows(); i++)
-        for (unsigned j = 0; j < refDNjNk[dir].cols(); j++)
-          DNjNk(i,j) = refDNjNk[dir](i,j);
-          /*
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refDNjNk_0.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_0.cols(); j++)
-          DNjNk(i,j) = refDNjNk_0(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refDNjNk_1.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_1.cols(); j++)
-          DNjNk(i,j) = refDNjNk_1(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refDNjNk_2.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_2.cols(); j++)
-          DNjNk(i,j) = refDNjNk_2(i,j);
-    }*/
+    for (unsigned i = 0; i < refGradStiffness[dir].rows(); i++)
+      for (unsigned j = 0; j < refGradStiffness[dir].cols(); j++)
+        DNjNk(i,j) = refGradStiffness[dir](i,j);
   }
 
   template <unsigned NDIM>
@@ -718,7 +660,14 @@ namespace Lucee
   unsigned
   SerendipityElement<NDIM>::getNumSurfGaussNodes() const
   {
-    throw Lucee::Except("SerendipityElement::getNumSurfGaussNodes: Not implemented!");
+    if (NDIM == 2)
+    {
+      return numGaussPoints;
+    }
+    else if (NDIM == 3)
+    {
+      return numGaussPoints*numGaussPoints;
+    }
   }
 
   template <unsigned NDIM>
@@ -726,7 +675,31 @@ namespace Lucee
   SerendipityElement<NDIM>::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    throw Lucee::Except("SerendipityElement::getGaussQuadData: Not implemented!");
+    double weightScale = 1.0;
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      weightScale *= 0.5*dq[dimIndex];
+
+    for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
+    {
+      if (NDIM == 2)
+      {
+        ordinates(gaussIndex,0) = gaussNodeList(gaussIndex,0);
+        ordinates(gaussIndex,1) = gaussNodeList(gaussIndex,1);
+        ordinates(gaussIndex,2) = 0;
+      }
+      else
+      {
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          ordinates(gaussIndex,dimIndex) = gaussNodeList(gaussIndex,dimIndex);
+      }
+
+      weights[gaussIndex] = gaussNodeList(gaussIndex,NDIM)*weightScale;
+
+      // Copy interpolation matrix
+      for (int functionIndex = 0; functionIndex < functionEvaluations.rows(); functionIndex++)
+        interpMat(gaussIndex,functionIndex) = functionEvaluations(functionIndex,gaussIndex);
+    }
   }
 
   template <unsigned NDIM>
@@ -784,8 +757,6 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     // Get grid spacing
-    double dq[NDIM];
-    double dq2[NDIM];
     for (unsigned i = 0; i < NDIM; i++)
     {
       dq[i] = grid.getDx(i);
@@ -831,7 +802,6 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
-      //blitz::Array<double,3> polynomial3DArray(maxPower,maxPower,maxPower);
       blitz::Array<double,3> shapeArray(maxPower,maxPower,maxPower);
       polynomial3DArray.resize(shapeArray.shape());
       polynomial3DArray = 0;
@@ -943,65 +913,39 @@ namespace Lucee
     resizeMatrices();
     // Call various functions to populate the matrices
     std::cout << "Starting matrix computation" << std::endl;
-    computeMass(refNjNk);
+    
+    computeMass(refMass);
+    computeStiffness(functionDEvaluations,refStiffness);
+
+    std::cout << "Finished computing mass and stiffness" << std::endl;
+    
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      computeFaceMass(functionVector,dimIndex,refFaceNjNkLower[dimIndex],refFaceNjNkUpper[dimIndex]);
-      computeGradStiffness(functionDEvaluations,dimIndex,refDNjNk[dimIndex]);
+      computeFaceMass(functionVector,dimIndex,refFaceMassLower[dimIndex],refFaceMassUpper[dimIndex]);
+      computeGradStiffness(functionDEvaluations,dimIndex,refGradStiffness[dimIndex]);
     }
-    // TODO: change these to a loop over NDIM and change refFaceNjNk to a vector
-    computeFaceMass(functionVector,0,refFaceNjNk_xl,refFaceNjNk_xu);
-    computeFaceMass(functionVector,1,refFaceNjNk_yl,refFaceNjNk_yu);
-    computeStiffness(functionDEvaluations,refDNjDNk);
-    computeGradStiffness(functionDEvaluations,0,refDNjNk_0);
-    computeGradStiffness(functionDEvaluations,1,refDNjNk_1);
-    if (NDIM == 3)
-    {
-      computeFaceMass(functionVector,2,refFaceNjNk_zl,refFaceNjNk_zu);
-      computeGradStiffness(functionDEvaluations,2,refDNjNk_2);
-    }
+    
     std::cout << "Finished computing all matrices" << std::endl;
 
     // Scale the matrices computed on reference element into physical space
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      refNjNk   *= 0.5*dq[dimIndex];
-      refDNjDNk *= 0.5*dq[dimIndex];
+      refMass   *= 0.5*dq[dimIndex];
+      refStiffness *= 0.5*dq[dimIndex];
 
       // Scale face-mass matrices
       for (unsigned matrixIndex = 0; matrixIndex < NDIM; matrixIndex++)
       {
         if (dimIndex != matrixIndex)
         {
-          refFaceNjNkUpper[matrixIndex] *= 0.5*dq[dimIndex];
-          refFaceNjNkLower[matrixIndex] *= 0.5*dq[dimIndex];
-          refDNjNk[matrixIndex]         *= 0.5*dq[dimIndex];
+          refFaceMassUpper[matrixIndex] *= 0.5*dq[dimIndex];
+          refFaceMassLower[matrixIndex] *= 0.5*dq[dimIndex];
+          refGradStiffness[matrixIndex] *= 0.5*dq[dimIndex];
         }
       }
     }
 
-    if (NDIM == 2)
-    {
-      refFaceNjNk_xl *= 0.5*dq[1];
-      refFaceNjNk_xu *= 0.5*dq[1];
-      refFaceNjNk_yl *= 0.5*dq[0];
-      refFaceNjNk_yu *= 0.5*dq[0];
-      refDNjNk_0     *= 0.5*dq[1];
-      refDNjNk_1     *= 0.5*dq[0];
-    }
-    else if (NDIM == 3)
-    {
-      refFaceNjNk_xl *= 0.5*dq[1]*0.5*dq[2];
-      refFaceNjNk_xu *= 0.5*dq[1]*0.5*dq[2];
-      refFaceNjNk_yl *= 0.5*dq[0]*0.5*dq[2];
-      refFaceNjNk_yu *= 0.5*dq[0]*0.5*dq[2];
-      refFaceNjNk_zl *= 0.5*dq[0]*0.5*dq[1];
-      refFaceNjNk_zu *= 0.5*dq[0]*0.5*dq[1];
-      refDNjNk_0     *= 0.5*dq[1]*0.5*dq[2];
-      refDNjNk_1     *= 0.5*dq[0]*0.5*dq[2];
-      refDNjNk_2     *= 0.5*dq[0]*0.5*dq[1];
-    }
-    printAllMatrices();
+    //printAllMatrices();
   }
 
   template <unsigned NDIM>
@@ -1009,25 +953,16 @@ namespace Lucee
   SerendipityElement<NDIM>::resizeMatrices()
   {
     unsigned generalDim = this->getNumNodes();
-    refNjNk        = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjDNk      = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_0     = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_1     = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_2     = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_xl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
-    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(0));
-    refFaceNjNk_yl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
-    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(1));
-    refFaceNjNk_zl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
-    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(2));
-    refFaceNjNkLower = std::vector<Eigen::MatrixXd>(NDIM);
-    refFaceNjNkUpper = std::vector<Eigen::MatrixXd>(NDIM);
-    refDNjNk         = std::vector<Eigen::MatrixXd>(NDIM);
+    refMass        = Eigen::MatrixXd(generalDim,generalDim);
+    refStiffness      = Eigen::MatrixXd(generalDim,generalDim);
+    refFaceMassLower = std::vector<Eigen::MatrixXd>(NDIM);
+    refFaceMassUpper = std::vector<Eigen::MatrixXd>(NDIM);
+    refGradStiffness         = std::vector<Eigen::MatrixXd>(NDIM);
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      refFaceNjNkLower[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(dimIndex));
-      refFaceNjNkUpper[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(dimIndex));
-      refDNjNk[dimIndex]         = Eigen::MatrixXd(generalDim,generalDim);
+      refFaceMassLower[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(dimIndex));
+      refFaceMassUpper[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(dimIndex));
+      refGradStiffness[dimIndex]         = Eigen::MatrixXd(generalDim,generalDim);
     }
   }
  
@@ -1470,25 +1405,13 @@ namespace Lucee
   SerendipityElement<NDIM>::computeStiffness(const blitz::Array<double,3>& functionDerivative,
     Eigen::MatrixXd& resultMatrix)
   {
-    // Get hold of grid
-    const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
-    // Get grid spacing
-    double dq[NDIM];
-    double dq2[NDIM];
-    for (unsigned i = 0; i < NDIM; i++)
-    {
-      dq[i] = grid.getDx(i);
-      dq2[i] = dq[i]*dq[i];
-    }
-
     double integrationResult;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
     
-    for (unsigned kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
+    for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
+      for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset integration result
         integrationResult = 0.0;
@@ -1498,7 +1421,7 @@ namespace Lucee
         {
           for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
           {
-            integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative((int)kIndex,gaussIndex,dimIndex)*functionDerivative((int)mIndex,gaussIndex,dimIndex)*4.0/dq2[dimIndex];
+            integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative(kIndex,gaussIndex,dimIndex)*functionDerivative(mIndex,gaussIndex,dimIndex)*4.0/dq2[dimIndex];
           }
         }
         resultMatrix(kIndex,mIndex) = integrationResult;
@@ -1511,8 +1434,6 @@ namespace Lucee
   SerendipityElement<NDIM>::computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
     unsigned dir, Eigen::MatrixXd& resultMatrix)
   {
-    VectorXd gaussNodeVec(3);
-
     double integrationResult;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
@@ -1539,29 +1460,19 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::printAllMatrices()
   {
-    std::cout << "refNjNk " << std::endl << refNjNk << std::endl;
-    std::cout << "refFaceNjNk_xl " << std::endl << refFaceNjNk_xl << std::endl;
-    std::cout << "refFaceNjNk_xu " << std::endl << refFaceNjNk_xu << std::endl;
-    std::cout << "refFaceNjNk_yl " << std::endl << refFaceNjNk_yl << std::endl;
-    std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
-    if (NDIM == 3)
-    {
-      std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
-      std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
-    }
+    std::cout << "refMass " << std::endl << refMass << std::endl;
+
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      std::cout << "refDNjNk_Lower" << dimIndex << std::endl << refFaceNjNkLower[dimIndex] << std::endl;
-      std::cout << "refDNjNk_Upper" << dimIndex << std::endl << refFaceNjNkUpper[dimIndex] << std::endl;
+      std::cout << "refFaceMass_Lower" << dimIndex << std::endl << refFaceMassLower[dimIndex] << std::endl;
+      std::cout << "refFaceMass_Upper" << dimIndex << std::endl << refFaceMassUpper[dimIndex] << std::endl;
     }
-    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
-    std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
-    std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
-    if (NDIM == 3)
-      std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;
+
+    std::cout << "refStiffness " << std::endl << refStiffness << std::endl;
+
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      std::cout << "refDNjNk_" << dimIndex << std::endl << refDNjNk[dimIndex] << std::endl;
+      std::cout << "refGradStiffness_" << dimIndex << std::endl << refGradStiffness[dimIndex] << std::endl;
     }
   }
 
