@@ -9,14 +9,14 @@ cellSizes = [4,8,16,32];
 
 % Manual input data (could parse but...)
 execTimesS = zeros(length(cellSizes),3);
-execTimesS(:,1) = [0.013989 0.123331 1.4644 22.591];
-execTimesS(:,2) = [0.083322 0.931234 12.9819 199.278];
-execTimesS(:,3) = [0.250375 2.97663 42.3626 654.312];
+execTimesS(:,1) = [0.03081 0.360195 4.806 73.2142];
+execTimesS(:,2) = [0.093965 1.0351 14.4054 219.66];
+execTimesS(:,3) = [0.252053 2.98708 42.3902 653.952];
 
 execTimesL = zeros(length(cellSizes),3);
-execTimesL(:,1) = [0.016877 0.124448 1.47013 22.5999];
-execTimesL(:,2) = [0.115783 1.37645 19.5869 301.046];
-execTimesL(:,3) = [0.678743 8.69726 129.266 2016.38];
+execTimesL(:,1) = [0.03828 0.360748 4.80756 73.1977];
+execTimesL(:,2) = [0.254555 3.01086 43.0352 663.005];
+execTimesL(:,3) = [1.7516 22.9395 342.476 5352.65];
 
 errorMatrixS = ComputeMethodError(serendipityPath,cellSizes);
 [errorMatrixL,lengthVector] = ComputeMethodError(lagrangePath,cellSizes);

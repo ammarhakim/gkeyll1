@@ -316,6 +316,10 @@ namespace Lucee
       unsigned maxPower;
 /** Total number of quadrature points in 1-D */
       unsigned numGaussPoints;
+/** Grid spacing in various dimensions */
+      double dq[NDIM];
+/** Grid spacing squared in various dimensions */
+      double dq2[NDIM];
 /** Matrix to represent basis monomials */
       Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
@@ -331,33 +335,15 @@ namespace Lucee
 /** Ordinates for (one dimension) quadrature */
       std::vector<double> gaussPoints;
 /** Vector of face-mass matrices indexed by dimension (Lower) */
-      std::vector<Eigen::MatrixXd> refFaceNjNkLower;
+      std::vector<Eigen::MatrixXd> refFaceMassLower;
 /** Vector of face-mass matrices indexed by dimension (Upper) */
-      std::vector<Eigen::MatrixXd> refFaceNjNkUpper;
+      std::vector<Eigen::MatrixXd> refFaceMassUpper;
 /** Vector of grad stiffness matrices indexed by dimension */
-      std::vector<Eigen::MatrixXd> refDNjNk;
+      std::vector<Eigen::MatrixXd> refGradStiffness;
 /** Mass matrix in reference coordinates */
-      Eigen::MatrixXd refNjNk;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_xl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_xu;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_yl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_yu;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_zl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_zu;
+      Eigen::MatrixXd refMass;
 /** Stiffness matrix in reference coordinates */
-      Eigen::MatrixXd refDNjDNk;
-/** Grad-Stiffness (in direction X) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_0;
-/** Grad-Stiffness (in direction Y) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_1;
-/** Grad-Stiffness (in direction Z) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_2;
+      Eigen::MatrixXd refStiffness;
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
