@@ -314,42 +314,55 @@ namespace Lucee
       unsigned basisDegree;
 /** Maximum polynomial power anticipated */
       unsigned maxPower;
+/** Total number of quadrature points in 1-D */
+      unsigned numGaussPoints;
+/** Grid spacing in various dimensions */
+      double dq[NDIM];
+/** Grid spacing squared in various dimensions */
+      double dq2[NDIM];
 /** Matrix to represent basis monomials */
       Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
-/** Matrix containing basis functions (rows) evaluated at gaussian integration locations (cols)
-    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
+/** Matrix containing basis functions evaluated at volume gaussian integration locations
+    Correspondance between column and gaussian node set is kept track of in gaussNodeList
+    Each row is a different basis function.
+    Each column is a different evaluation location */
       Eigen::MatrixXd functionEvaluations;
+/** Matrix containing basis functions evaluated at surface gaussian integration locations
+    Correspondance between row and gaussian node set is kept track of in gaussNodeListUpperSurf
+    Each row is a different evaluation location
+    Each column is a different basis function */
+      std::vector<Eigen::MatrixXd> upperSurfaceEvaluations;
+/** Matrix containing basis functions evaluated at surface gaussian integration locations
+    Correspondance between row and gaussian node set is kept track of in gaussNodeListLowerSurf
+    Each row is a different evaluation location
+    Each column is a different basis function */
+      std::vector<Eigen::MatrixXd> lowerSurfaceEvaluations;
 /** Matrix whose ith row corresponds to the coordinates of the node at which the ith column of functionEvaluations
     (and functionDEvaluations) is evaluated at. Size NDIM+1 columns because last entry is net weight */
       Eigen::MatrixXd gaussNodeList;
+/** Vector of gaussian quadrature coordinates on upper surface indexed by dimension
+    Each row is the coordinates of a node + weight in last col */
+      std::vector<Eigen::MatrixXd> gaussNodeListUpperSurf;
+/** Vector of gaussian quadrature coordinates on lower surface indexed by dimension*/
+      std::vector<Eigen::MatrixXd> gaussNodeListLowerSurf;
 /** Weights for quadrature (one dimension)*/
       std::vector<double> gaussWeights;
 /** Ordinates for (one dimension) quadrature */
       std::vector<double> gaussPoints;
+/** Vector of face-mass matrices indexed by dimension (Lower) */
+      std::vector<Eigen::MatrixXd> refFaceMassLower;
+/** Vector of face-mass matrices indexed by dimension (Upper) */
+      std::vector<Eigen::MatrixXd> refFaceMassUpper;
+/** Vector of grad stiffness matrices indexed by dimension */
+      std::vector<Eigen::MatrixXd> refGradStiffness;
 /** Mass matrix in reference coordinates */
-      Eigen::MatrixXd refNjNk;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_xl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_xu;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_yl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_yu;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_zl;
-/** Face-mass matrix in reference coordinates */
-      Eigen::MatrixXd refFaceNjNk_zu;
+      Eigen::MatrixXd refMass;
 /** Stiffness matrix in reference coordinates */
-      Eigen::MatrixXd refDNjDNk;
-/** Grad-Stiffness (in direction X) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_0;
-/** Grad-Stiffness (in direction Y) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_1;
-/** Grad-Stiffness (in direction Z) matrix in reference coordinates */
-      Eigen::MatrixXd refDNjNk_2;
+      Eigen::MatrixXd refStiffness;
+/** Vector of moment matrices indexed by moment value p  */
+      std::vector<Eigen::MatrixXd> momMatrix;
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
@@ -363,12 +376,16 @@ namespace Lucee
  *    Populate nodeList with serendipity node locations on reference
  *    element
  */
-      void setupNodeListMatrix(Eigen::MatrixXd& nodeMatrix);
+      void getNodeList(Eigen::MatrixXd& nodeMatrix);
 /**
  *    Create basis monomials by populating matrix of rows
  *    [a b c] to represent x^a*y^b*z^c monomials
  */
       void setupBasisMatrix(Eigen::MatrixXi& basisMatrix);
+/**
+  *   Compute the basis functions in terms of the basis monomials
+  */
+      void computeBasisFunctions(std::vector<blitz::Array<double,3> >& functionVector);
  /**
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
@@ -409,7 +426,10 @@ namespace Lucee
 */
       void computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
         unsigned dir, Eigen::MatrixXd& resultMatrix);
-
+/**
+ *    Compute 'cross-dimensional' basis functions
+ */
+      void setupMomentMatrices();
 /**
 *     Print out matrix values to the console (testing purposes only).
 */

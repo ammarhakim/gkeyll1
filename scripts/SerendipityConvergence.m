@@ -9,14 +9,14 @@ cellSizes = [4,8,16,32];
 
 % Manual input data (could parse but...)
 execTimesS = zeros(length(cellSizes),3);
-execTimesS(:,1) = [0.546904 2.76353 18.4613 142.552];
-execTimesS(:,2) = [1.42926 7.94137 55.3581 428.358];
-execTimesS(:,3) = [2.60174 15.4653 110.327 856.953];
+execTimesS(:,1) = [0.03081 0.360195 4.806 73.2142];
+execTimesS(:,2) = [0.093965 1.0351 14.4054 219.66];
+execTimesS(:,3) = [0.252053 2.98708 42.3902 653.952];
 
 execTimesL = zeros(length(cellSizes),3);
-execTimesL(:,1) = [0.546053 2.76703 18.4478 143.458];
-execTimesL(:,2) = [2.00978 11.6285 81.9071 634.071];
-execTimesL(:,3) = [7.04044 44.9869 340.633 2627.37];
+execTimesL(:,1) = [0.03828 0.360748 4.80756 73.1977];
+execTimesL(:,2) = [0.254555 3.01086 43.0352 663.005];
+execTimesL(:,3) = [1.7516 22.9395 342.476 5352.65];
 
 errorMatrixS = ComputeMethodError(serendipityPath,cellSizes);
 [errorMatrixL,lengthVector] = ComputeMethodError(lagrangePath,cellSizes);
@@ -24,16 +24,26 @@ errorMatrixS = ComputeMethodError(serendipityPath,cellSizes);
 %% Plot execution time vs error
 set(0,'DefaultAxesFontSize',12);
 % figure('OuterPosition',[50, 50, 1100, 800]);%,'DefaultAxesFontWeight','bold'
-% Currently not plotting the third order Lagrange result on a 32x32x32 grid
-% because results have too high an error--need to run at lower CFL number.
 loglog(execTimesS(:,1),errorMatrixS(:,1),'g.-',...
     execTimesL(:,1),errorMatrixL(:,1),'g.--',...
     execTimesS(:,2),errorMatrixS(:,2),'r.-',...
     execTimesL(:,2),errorMatrixL(:,2),'r.--',...
     execTimesS(:,3),errorMatrixS(:,3),'b.-',...
-    execTimesL(1:end-1,3),errorMatrixL(1:end-1,3),'b.--')
+    execTimesL(:,3),errorMatrixL(:,3),'b.--')
 legend('Serendipity 1','Lagrange 1','Serendipity 2','Lagrange 2','Serendipity 3','Lagrange 3')
 xlabel('Time (s)')
+ylabel('Error')
+axis tight
+
+figure
+loglog(lengthVector,errorMatrixS(:,1),'g.-',...
+    lengthVector,errorMatrixL(:,1),'g.--',...
+    lengthVector,errorMatrixS(:,2),'r.-',...
+    lengthVector,errorMatrixL(:,2),'r.--',...
+    lengthVector,errorMatrixS(:,3),'b.-',...
+    lengthVector,errorMatrixL(:,3),'b.--')
+legend('Serendipity 1','Lagrange 1','Serendipity 2','Lagrange 2','Serendipity 3','Lagrange 3','Location','SouthEast')
+xlabel('Element Size')
 ylabel('Error')
 axis tight
 
