@@ -40,8 +40,24 @@ namespace Lucee
     polyOrder = (unsigned) tbl.getNumber("polyOrder");
     // polyOrder is a misnomer for serendipity elements when we really want the degree
     basisDegree = polyOrder;
-
-    if (NDIM == 3)
+    
+    if (NDIM == 2)
+    {
+      if (basisDegree == 1)
+        this->setNumNodes(4);
+      else if (basisDegree == 2)
+        this->setNumNodes(8);
+      else if (basisDegree == 3)
+        this->setNumNodes(12);
+      else
+      {
+        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
+        lce << " Provided " << basisDegree << " instead";
+        throw lce;
+      }
+      setupMatrices();
+    }
+    else if (NDIM == 3)
     {
       if (basisDegree == 1)
         this->setNumNodes(8);
@@ -55,8 +71,13 @@ namespace Lucee
         lce << " Provided " << basisDegree << " instead";
         throw lce;
       }
-
       setupMatrices();
+    }
+    else
+    {
+      Lucee::Except lce("SerendipityElement: NDIM must be 2 or 3.");
+      lce << " Provided " << NDIM << " instead";
+      throw lce;
     }
   }
 
@@ -64,24 +85,72 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
-    throw Lucee::Except("SerendipityElement::getExclusiveNodeIndices: Not implemented!");
+    if (NDIM == 2)
+    {
+      ndIds.clear();
+      if (polyOrder == 1)
+      {
+        ndIds.resize(1);
+        ndIds[0] = 0;
+      }
+      else if (polyOrder == 2)
+      {
+        ndIds.resize(3);
+        ndIds[0] = 0;
+        ndIds[1] = 1;
+        ndIds[2] = 7;
+      }
+      else if (polyOrder == 3)
+      {
+        ndIds.resize(5);
+        ndIds[0] = 0;
+        ndIds[1] = 1;
+        ndIds[2] = 2;
+        ndIds[3] = 11;
+        ndIds[4] = 10;
+      }
+      else if (polyOrder == 4)
+      {
+        ndIds.resize(8);
+        ndIds[0] = 0;
+        ndIds[1] = 1;
+        ndIds[2] = 2;
+        ndIds[3] = 3;
+        ndIds[4] = 15;
+        ndIds[5] = 14;
+        ndIds[6] = 13;
+        ndIds[7] = 16;
+      }
+    }
+    else
+    {
+      Lucee::Except lce("SerendipityElement::getExclusiveNodeIndices NDIM must be 2.");
+      lce << " Provided " << NDIM << " instead";
+      throw lce;
+    }
   }
 
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {
-    if (basisDegree == 1)
+    if (NDIM == 2)
     {
-      return 4;
+      if (basisDegree == 1)
+        return 2;
+      else if (basisDegree == 2)
+        return 3;
+      else if (basisDegree == 3)
+        return 4;
     }
-    else if (basisDegree == 2)
+    else if (NDIM ==3)
     {
-      return 8;
-    }
-    else if (basisDegree == 3)
-    {
-      return 12;
+      if (basisDegree == 1)
+        return 4;
+      else if (basisDegree == 2)
+        return 8;
+      else if (basisDegree == 3)
+        return 12;
     }
   }
 
@@ -89,17 +158,23 @@ namespace Lucee
   unsigned
   SerendipityElement<NDIM>::getNumSurfUpperNodes(unsigned dir) const
   {
-    if (basisDegree == 1)
+    if (NDIM == 2)
     {
-      return 4;
+      if (basisDegree == 1)
+        return 2;
+      else if (basisDegree == 2)
+        return 3;
+      else if (basisDegree == 3)
+        return 4;
     }
-    else if (basisDegree == 2)
+    else if (NDIM ==3)
     {
-      return 8;
-    }
-    else if (basisDegree == 3)
-    {
-      return 12;
+      if (basisDegree == 1)
+        return 4;
+      else if (basisDegree == 2)
+        return 8;
+      else if (basisDegree == 3)
+        return 12;
     }
   }
 
@@ -139,112 +214,163 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    if (basisDegree == 1)
+    if (NDIM == 2)
     {
-      if (dir == 0)
+      if (basisDegree == 1)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 3;
-        nodeNum[2] = 4;
-        nodeNum[3] = 7;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 3;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+        }
       }
-      else if (dir == 1)
+      else if (basisDegree == 2)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 4;
-        nodeNum[3] = 5;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 7;
+          nodeNum[2] = 6;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+        }
       }
-      else if (dir == 2)
+      else if (basisDegree == 3)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 3;
-        nodeNum[3] = 2;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 11;
+          nodeNum[2] = 10;
+          nodeNum[3] = 9;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 3;
+        }
       }
     }
-    else if (basisDegree == 2)
+    else if (NDIM == 3)
     {
-      if (dir == 0)
+      if (basisDegree == 1)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 7;
-        nodeNum[2] = 6;
-        nodeNum[3] = 8;
-        nodeNum[4] = 11;
-        nodeNum[5] = 12;
-        nodeNum[6] = 19;
-        nodeNum[7] = 18;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 3;
+          nodeNum[2] = 4;
+          nodeNum[3] = 7;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 4;
+          nodeNum[3] = 5;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 3;
+          nodeNum[3] = 2;
+        }
       }
-      else if (dir == 1)
+      else if (basisDegree == 2)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 2;
-        nodeNum[3] = 8;
-        nodeNum[4] = 9;
-        nodeNum[5] = 12;
-        nodeNum[6] = 13;
-        nodeNum[7] = 14;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 7;
+          nodeNum[2] = 6;
+          nodeNum[3] = 8;
+          nodeNum[4] = 11;
+          nodeNum[5] = 12;
+          nodeNum[6] = 19;
+          nodeNum[7] = 18;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 8;
+          nodeNum[4] = 9;
+          nodeNum[5] = 12;
+          nodeNum[6] = 13;
+          nodeNum[7] = 14;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 7;
+          nodeNum[4] = 3;
+          nodeNum[5] = 6;
+          nodeNum[6] = 5;
+          nodeNum[7] = 4;
+        }
       }
-      else if (dir == 2)
+      else if (basisDegree == 3)
       {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 2;
-        nodeNum[3] = 7;
-        nodeNum[4] = 3;
-        nodeNum[5] = 6;
-        nodeNum[6] = 5;
-        nodeNum[7] = 4;
-      }
-    }
-    else if (basisDegree == 3)
-    {
-      if (dir == 0)
-      {
-        nodeNum[0] = 0;
-        nodeNum[1] = 11;
-        nodeNum[2] = 10;
-        nodeNum[3] = 9;
-        nodeNum[4] = 12;
-        nodeNum[5] = 15;
-        nodeNum[6] = 16;
-        nodeNum[7] = 19;
-        nodeNum[8] = 20;
-        nodeNum[9] = 31;
-        nodeNum[10] = 30;
-        nodeNum[11] = 29;
-      }
-      else if (dir == 1)
-      {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 2;
-        nodeNum[3] = 3;
-        nodeNum[4] = 12;
-        nodeNum[5] = 13;
-        nodeNum[6] = 16;
-        nodeNum[7] = 17;
-        nodeNum[8] = 20;
-        nodeNum[9] = 21;
-        nodeNum[10] = 22;
-        nodeNum[11] = 23;
-      }
-      else if (dir == 2)
-      {
-        nodeNum[0] = 0;
-        nodeNum[1] = 1;
-        nodeNum[2] = 2;
-        nodeNum[3] = 3;
-        nodeNum[4] = 11;
-        nodeNum[5] = 4;
-        nodeNum[6] = 10;
-        nodeNum[7] = 5;
-        nodeNum[8] = 9;
-        nodeNum[9] = 8;
-        nodeNum[10] = 7;
-        nodeNum[11] = 6;
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 11;
+          nodeNum[2] = 10;
+          nodeNum[3] = 9;
+          nodeNum[4] = 12;
+          nodeNum[5] = 15;
+          nodeNum[6] = 16;
+          nodeNum[7] = 19;
+          nodeNum[8] = 20;
+          nodeNum[9] = 31;
+          nodeNum[10] = 30;
+          nodeNum[11] = 29;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 3;
+          nodeNum[4] = 12;
+          nodeNum[5] = 13;
+          nodeNum[6] = 16;
+          nodeNum[7] = 17;
+          nodeNum[8] = 20;
+          nodeNum[9] = 21;
+          nodeNum[10] = 22;
+          nodeNum[11] = 23;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 3;
+          nodeNum[4] = 11;
+          nodeNum[5] = 4;
+          nodeNum[6] = 10;
+          nodeNum[7] = 5;
+          nodeNum[8] = 9;
+          nodeNum[9] = 8;
+          nodeNum[10] = 7;
+          nodeNum[11] = 6;
+        }
       }
     }
   }
@@ -254,112 +380,163 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfUpperNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    if (basisDegree == 1)
+    if (NDIM == 2)
     {
-      if (dir == 0)
+      if (basisDegree == 1)
       {
-        nodeNum[0] = 1;
-        nodeNum[1] = 2;
-        nodeNum[2] = 5;
-        nodeNum[3] = 6;
+        if (dir == 0)
+        {
+          nodeNum[0] = 1;
+          nodeNum[1] = 2;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 3;
+          nodeNum[1] = 2;
+        }
       }
-      else if (dir == 1)
+      else if (basisDegree == 2)
       {
-        nodeNum[0] = 3;
-        nodeNum[1] = 2;
-        nodeNum[2] = 7;
-        nodeNum[3] = 6;
+        if (dir == 0)
+        {
+          nodeNum[0] = 2;
+          nodeNum[1] = 3;
+          nodeNum[2] = 4;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 6;
+          nodeNum[1] = 5;
+          nodeNum[2] = 4;
+        }
       }
-      else if (dir == 2)
+      else if (basisDegree == 3)
       {
-        nodeNum[0] = 4;
-        nodeNum[1] = 5;
-        nodeNum[2] = 7;
-        nodeNum[3] = 6;
+        if (dir == 0)
+        {
+          nodeNum[0] = 3;
+          nodeNum[1] = 4;
+          nodeNum[2] = 5;
+          nodeNum[3] = 6;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 9;
+          nodeNum[1] = 8;
+          nodeNum[2] = 7;
+          nodeNum[3] = 6;
+        }
       }
     }
-    else if (basisDegree == 2)
+    else if (NDIM == 3)
     {
-      if (dir == 0)
+      if (basisDegree == 1)
       {
-        nodeNum[0] = 2;
-        nodeNum[1] = 3;
-        nodeNum[2] = 4;
-        nodeNum[3] = 9;
-        nodeNum[4] = 10;
-        nodeNum[5] = 14;
-        nodeNum[6] = 15;
-        nodeNum[7] = 16;
+        if (dir == 0)
+        {
+          nodeNum[0] = 1;
+          nodeNum[1] = 2;
+          nodeNum[2] = 5;
+          nodeNum[3] = 6;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 3;
+          nodeNum[1] = 2;
+          nodeNum[2] = 7;
+          nodeNum[3] = 6;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 4;
+          nodeNum[1] = 5;
+          nodeNum[2] = 7;
+          nodeNum[3] = 6;
+        }
       }
-      else if (dir == 1)
+      else if (basisDegree == 2)
       {
-        nodeNum[0] = 6;
-        nodeNum[1] = 5;
-        nodeNum[2] = 4;
-        nodeNum[3] = 11;
-        nodeNum[4] = 10;
-        nodeNum[5] = 18;
-        nodeNum[6] = 17;
-        nodeNum[7] = 16;
+        if (dir == 0)
+        {
+          nodeNum[0] = 2;
+          nodeNum[1] = 3;
+          nodeNum[2] = 4;
+          nodeNum[3] = 9;
+          nodeNum[4] = 10;
+          nodeNum[5] = 14;
+          nodeNum[6] = 15;
+          nodeNum[7] = 16;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 6;
+          nodeNum[1] = 5;
+          nodeNum[2] = 4;
+          nodeNum[3] = 11;
+          nodeNum[4] = 10;
+          nodeNum[5] = 18;
+          nodeNum[6] = 17;
+          nodeNum[7] = 16;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 12;
+          nodeNum[1] = 13;
+          nodeNum[2] = 14;
+          nodeNum[3] = 19;
+          nodeNum[4] = 15;
+          nodeNum[5] = 18;
+          nodeNum[6] = 17;
+          nodeNum[7] = 16;
+        }
       }
-      else if (dir == 2)
+      else if (basisDegree == 3)
       {
-        nodeNum[0] = 12;
-        nodeNum[1] = 13;
-        nodeNum[2] = 14;
-        nodeNum[3] = 19;
-        nodeNum[4] = 15;
-        nodeNum[5] = 18;
-        nodeNum[6] = 17;
-        nodeNum[7] = 16;
-      }
-    }
-    else if (basisDegree == 3)
-    {
-      if (dir == 0)
-      {
-        nodeNum[0] = 3;
-        nodeNum[1] = 4;
-        nodeNum[2] = 5;
-        nodeNum[3] = 6;
-        nodeNum[4] = 13;
-        nodeNum[5] = 14;
-        nodeNum[6] = 17;
-        nodeNum[7] = 18;
-        nodeNum[8] = 23;
-        nodeNum[9] = 24;
-        nodeNum[10] = 25;
-        nodeNum[11] = 26;
-      }
-      else if (dir == 1)
-      {
-        nodeNum[0] = 9;
-        nodeNum[1] = 8;
-        nodeNum[2] = 7;
-        nodeNum[3] = 6;
-        nodeNum[4] = 15;
-        nodeNum[5] = 14;
-        nodeNum[6] = 19;
-        nodeNum[7] = 18;
-        nodeNum[8] = 29;
-        nodeNum[9] = 28;
-        nodeNum[10] = 27;
-        nodeNum[11] = 26;
-      }
-      else if (dir == 2)
-      {
-        nodeNum[0] = 20;
-        nodeNum[1] = 21;
-        nodeNum[2] = 22;
-        nodeNum[3] = 23;
-        nodeNum[4] = 31;
-        nodeNum[5] = 24;
-        nodeNum[6] = 30;
-        nodeNum[7] = 25;
-        nodeNum[8] = 29;
-        nodeNum[9] = 28;
-        nodeNum[10] = 27;
-        nodeNum[11] = 26;
+        if (dir == 0)
+        {
+          nodeNum[0] = 3;
+          nodeNum[1] = 4;
+          nodeNum[2] = 5;
+          nodeNum[3] = 6;
+          nodeNum[4] = 13;
+          nodeNum[5] = 14;
+          nodeNum[6] = 17;
+          nodeNum[7] = 18;
+          nodeNum[8] = 23;
+          nodeNum[9] = 24;
+          nodeNum[10] = 25;
+          nodeNum[11] = 26;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 9;
+          nodeNum[1] = 8;
+          nodeNum[2] = 7;
+          nodeNum[3] = 6;
+          nodeNum[4] = 15;
+          nodeNum[5] = 14;
+          nodeNum[6] = 19;
+          nodeNum[7] = 18;
+          nodeNum[8] = 29;
+          nodeNum[9] = 28;
+          nodeNum[10] = 27;
+          nodeNum[11] = 26;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 20;
+          nodeNum[1] = 21;
+          nodeNum[2] = 22;
+          nodeNum[3] = 23;
+          nodeNum[4] = 31;
+          nodeNum[5] = 24;
+          nodeNum[6] = 30;
+          nodeNum[7] = 25;
+          nodeNum[8] = 29;
+          nodeNum[9] = 28;
+          nodeNum[10] = 27;
+          nodeNum[11] = 26;
+        }
       }
     }
   }
@@ -368,15 +545,15 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getNodalCoordinates(Lucee::Matrix<double>& nodeCoords)
   {
-    const Lucee::StructuredGridBase<3>& grid 
-      = this->template getGrid<Lucee::StructuredGridBase<3> >();
-    // set index and get centroid coordinate
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+    // Set index and get centroid coordinate
     grid.setIndex(this->currIdx);
     double xc[3];
     double coordScales[NDIM];
     for (unsigned i = 0; i < NDIM; i++)
     {
-      coordScales[i] = 0.5*grid.getDx(i);
+      coordScales[i] = 0.5*dq[i];
     }
 
     grid.getCentroid(xc);
@@ -421,9 +598,9 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getMassMatrix(Lucee::Matrix<double>& NjNk) const
   {
-    for (unsigned i = 0; i < refNjNk.rows(); i++)
-      for (unsigned j = 0; j < refNjNk.cols(); j++)
-        NjNk(i,j) = refNjNk(i,j);
+    for (unsigned i = 0; i < refMass.rows(); i++)
+      for (unsigned j = 0; j < refMass.cols(); j++)
+        NjNk(i,j) = refMass(i,j);
   }
 
   template <unsigned NDIM>
@@ -431,24 +608,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getLowerFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_xl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_xl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_xl(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_yl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_yl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_yl(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_zl.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_zl.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_zl(i,j);
-    }
+    for (unsigned i = 0; i < refFaceMassLower[dir].rows(); i++)
+      for (unsigned j = 0; j < refFaceMassLower[dir].cols(); j++)
+        NjNk(i,j) = refFaceMassLower[dir](i,j);
   }
 
   template <unsigned NDIM>
@@ -456,33 +618,18 @@ namespace Lucee
   SerendipityElement<NDIM>::getUpperFaceMassMatrix(unsigned dir,
     Lucee::Matrix<double>& NjNk) const
   {
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_xu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_xu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_xu(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_yu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_yu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_yu(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refFaceNjNk_zu.rows(); i++)
-        for (unsigned j = 0; j < refFaceNjNk_zu.cols(); j++)
-          NjNk(i,j) = refFaceNjNk_zu(i,j);
-    }
+    for (unsigned i = 0; i < refFaceMassUpper[dir].rows(); i++)
+      for (unsigned j = 0; j < refFaceMassUpper[dir].cols(); j++)
+        NjNk(i,j) = refFaceMassUpper[dir](i,j);
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
   {
-    for (unsigned i = 0; i < refDNjDNk.rows(); i++)
-        for (unsigned j = 0; j < refDNjDNk.cols(); j++)
-          DNjDNk(i,j) = refDNjDNk(i,j);
+    for (unsigned i = 0; i < refStiffness.rows(); i++)
+      for (unsigned j = 0; j < refStiffness.cols(); j++)
+        DNjDNk(i,j) = refStiffness(i,j);
   }
 
   template <unsigned NDIM>
@@ -490,38 +637,37 @@ namespace Lucee
   SerendipityElement<NDIM>::getGradStiffnessMatrix(
     unsigned dir, Lucee::Matrix<double>& DNjNk) const
   {
-    if (dir == 0)
-    {
-      for (unsigned i = 0; i < refDNjNk_0.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_0.cols(); j++)
-          DNjNk(i,j) = refDNjNk_0(i,j);
-    }
-    else if (dir == 1)
-    {
-      for (unsigned i = 0; i < refDNjNk_1.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_1.cols(); j++)
-          DNjNk(i,j) = refDNjNk_1(i,j);
-    }
-    else if (dir == 2)
-    {
-      for (unsigned i = 0; i < refDNjNk_2.rows(); i++)
-        for (unsigned j = 0; j < refDNjNk_2.cols(); j++)
-          DNjNk(i,j) = refDNjNk_2(i,j);
-    }
+    for (unsigned i = 0; i < refGradStiffness[dir].rows(); i++)
+      for (unsigned j = 0; j < refGradStiffness[dir].cols(); j++)
+        DNjNk(i,j) = refGradStiffness[dir](i,j);
   }
 
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumGaussNodes() const
   {
-    throw Lucee::Except("SerendipityElement::getNumGaussNodes: Not implemented!");
+    unsigned totalNodes = 1;
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      totalNodes *= numGaussPoints;
+    }
+
+    return totalNodes;
   }
 
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumSurfGaussNodes() const
   {
-    throw Lucee::Except("SerendipityElement::getNumSurfGaussNodes: Not implemented!");
+    if (NDIM == 2)
+    {
+      return numGaussPoints;
+    }
+    else if (NDIM == 3)
+    {
+      return numGaussPoints*numGaussPoints;
+    }
   }
 
   template <unsigned NDIM>
@@ -529,7 +675,31 @@ namespace Lucee
   SerendipityElement<NDIM>::getGaussQuadData(Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    throw Lucee::Except("SerendipityElement::getGaussQuadData: Not implemented!");
+    double weightScale = 1.0;
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      weightScale *= 0.5*dq[dimIndex];
+
+    for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
+    {
+      if (NDIM == 2)
+      {
+        ordinates(gaussIndex,0) = gaussNodeList(gaussIndex,0);
+        ordinates(gaussIndex,1) = gaussNodeList(gaussIndex,1);
+        ordinates(gaussIndex,2) = 0;
+      }
+      else
+      {
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          ordinates(gaussIndex,dimIndex) = gaussNodeList(gaussIndex,dimIndex);
+      }
+
+      weights[gaussIndex] = gaussNodeList(gaussIndex,NDIM)*weightScale;
+
+      // Copy interpolation matrix
+      for (int functionIndex = 0; functionIndex < functionEvaluations.rows(); functionIndex++)
+        interpMat(gaussIndex,functionIndex) = functionEvaluations(functionIndex,gaussIndex);
+    }
   }
 
   template <unsigned NDIM>
@@ -537,7 +707,34 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    throw Lucee::Except("SerendipityElement::getSurfLowerGaussQuadData: Not implemented!");
+    double weightScale = 1.0;
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      if (dimIndex != dir)
+        weightScale *= 0.5*dq[dimIndex];
+    }
+
+    for (int gaussIndex = 0; gaussIndex < gaussNodeListLowerSurf[dir].rows(); gaussIndex++)
+    {
+      if (NDIM == 2)
+      {
+        ordinates(gaussIndex,0) = gaussNodeListLowerSurf[dir](gaussIndex,0);
+        ordinates(gaussIndex,1) = gaussNodeListLowerSurf[dir](gaussIndex,1);
+        ordinates(gaussIndex,2) = 0;
+      }
+      else
+      {
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          ordinates(gaussIndex,dimIndex) = gaussNodeListLowerSurf[dir](gaussIndex,dimIndex);
+      }
+
+      weights[gaussIndex] = gaussNodeListLowerSurf[dir](gaussIndex,NDIM)*weightScale;
+
+      // Copy interpolation matrix
+      for (int functionIndex = 0; functionIndex < lowerSurfaceEvaluations[dir].cols(); functionIndex++)
+        interpMat(gaussIndex,functionIndex) = lowerSurfaceEvaluations[dir](gaussIndex,functionIndex);
+    }
   }
 
   template <unsigned NDIM>
@@ -545,14 +742,57 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfUpperGaussQuadData(unsigned dir, Lucee::Matrix<double>& interpMat,
     Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const
   {
-    throw Lucee::Except("SerendipityElement::getSurfUpperGaussQuadData: Not implemented!");
+    double weightScale = 1.0;
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      if (dimIndex != dir)
+        weightScale *= 0.5*dq[dimIndex];
+    }
+
+    for (int gaussIndex = 0; gaussIndex < gaussNodeListUpperSurf[dir].rows(); gaussIndex++)
+    {
+      if (NDIM == 2)
+      {
+        ordinates(gaussIndex,0) = gaussNodeListUpperSurf[dir](gaussIndex,0);
+        ordinates(gaussIndex,1) = gaussNodeListUpperSurf[dir](gaussIndex,1);
+        ordinates(gaussIndex,2) = 0;
+      }
+      else
+      {
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          ordinates(gaussIndex,dimIndex) = gaussNodeListUpperSurf[dir](gaussIndex,dimIndex);
+      }
+
+      weights[gaussIndex] = gaussNodeListUpperSurf[dir](gaussIndex,NDIM)*weightScale;
+
+      // Copy interpolation matrix
+      for (int functionIndex = 0; functionIndex < upperSurfaceEvaluations[dir].cols(); functionIndex++)
+        interpMat(gaussIndex,functionIndex) = upperSurfaceEvaluations[dir](gaussIndex,functionIndex);
+    }
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const
   {
-    throw Lucee::Except("SerendipityElement::getMomentMatrix: Not implemented!");
+    if (p > 2)
+    {
+      // moments higher than 2 not supported for now
+      Lucee::Except lce("SerendipityElement::getMomentMatrix: Moment matrix of order ");
+      lce << p << " not supported";
+      throw lce;
+    }
+    else
+    {
+      for (int rowIndex = 0; rowIndex < momMatrix[p].rows(); rowIndex++)
+      {
+        for (int colIndex = 0; colIndex < momMatrix[p].cols(); colIndex++)
+        {
+          momMat(rowIndex,colIndex) = momMatrix[p](rowIndex,colIndex);
+        }
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -587,19 +827,432 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     // Get grid spacing
-    double dq[NDIM];
-    double dq2[NDIM];
     for (unsigned i = 0; i < NDIM; i++)
     {
       dq[i] = grid.getDx(i);
       dq2[i] = dq[i]*dq[i];
     }
+ 
+    // Compute maximum polynomial power we want (no transformations)
+    // This will be the maximum power of a single variable in anything
+    // evaluated (e.g. product of basis functions)
+    maxPower = 2*basisDegree;
     // Populate nodeList according to basisDegree
-    nodeList = MatrixXd(this->getNumNodes(),3);
-    setupNodeListMatrix(nodeList);
+    nodeList = MatrixXd(this->getNumNodes(),NDIM);
+    getNodeList(nodeList);
+
+    std::vector<blitz::Array<double,3> > functionVector;
+    computeBasisFunctions(functionVector);
+
+    // Compute gaussian quadrature weights and locations in 1-D
+    numGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
+    gaussPoints  = std::vector<double>(numGaussPoints);
+    gaussWeights = std::vector<double>(numGaussPoints);
+    legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
+    // Fill out gaussian integration nodes for integration over cell volume
+    VectorXd gaussNodeVec(NDIM);
+    int currNode = 0;
+    double totalWeight;
+    
+    // Figure out how many gaussian points there are
+    int totalVolumeGaussNodes = 1.0;
+    int totalSurfaceGaussNodes = 1.0;
+    for (unsigned i = 0; i < NDIM; i++)
+    {
+      totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
+      if (i < NDIM-1)
+        totalSurfaceGaussNodes = gaussPoints.size()*totalSurfaceGaussNodes;
+    }
+    
+    gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
+    functionEvaluations  = Eigen::MatrixXd(this->getNumNodes(),totalVolumeGaussNodes);
+/** 3D Array containing derivatives of basis functions (rows) evaluated at gaussian integration locations (cols)
+    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
+    blitz::Array<double,3> functionDEvaluations(this->getNumNodes(),totalVolumeGaussNodes,NDIM);
+    
+    gaussNodeListUpperSurf  = std::vector<Eigen::MatrixXd>(NDIM);
+    gaussNodeListLowerSurf  = std::vector<Eigen::MatrixXd>(NDIM);
+    upperSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
+    lowerSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
+    
+    if (NDIM == 2)
+    {
+      // Compute surface quadrature locations
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      {
+        // Initialize matrices
+        gaussNodeListUpperSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
+        gaussNodeListLowerSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
+        upperSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
+        lowerSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
+        
+        // Evaluate all basis functions at all upper and lower surfaces
+        for (int nodeIndex = 0; nodeIndex < gaussPoints.size(); nodeIndex++)
+        {
+          gaussNodeVec(0) = gaussPoints[nodeIndex];
+          gaussNodeVec(1) = gaussPoints[nodeIndex];
+          gaussNodeVec(dimIndex) = 1;
+          totalWeight = gaussWeights[nodeIndex];
+          gaussNodeListUpperSurf[dimIndex].row(nodeIndex) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
+          // Evaluate all basis functions at this node location
+          for (int functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+            upperSurfaceEvaluations[dimIndex](nodeIndex, functionIndex) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+          gaussNodeVec(dimIndex) = -1;
+          gaussNodeListLowerSurf[dimIndex].row(nodeIndex) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
+          // Evaluate all basis functions at this node location
+          for (int functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+            lowerSurfaceEvaluations[dimIndex](nodeIndex, functionIndex) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+        }
+      }
+
+      // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
+      for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+      {
+        for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
+        {
+          gaussNodeVec(0)    = gaussPoints[xNodeIndex];
+          gaussNodeVec(1)    = gaussPoints[yNodeIndex];
+          totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex];
+          gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
+          
+          for (unsigned functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+          {
+            functionEvaluations(functionIndex,currNode) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+            for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+            {
+              functionDEvaluations((int)functionIndex,currNode,dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[functionIndex],dimIndex),gaussNodeVec);
+            }
+          }
+          currNode++;
+        }
+      }
+    }
+    else if (NDIM == 3)
+    {
+      // Compute surface quadrature locations
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      {
+        // Initialize matrices
+        gaussNodeListUpperSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
+        gaussNodeListLowerSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
+        upperSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
+        lowerSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
+        
+        // Evaluate all basis functions at all upper and lower surfaces
+        currNode = 0;
+        for (unsigned dir1NodeIndex = 0; dir1NodeIndex < gaussPoints.size(); dir1NodeIndex++)
+        {
+          for (unsigned dir2NodeIndex = 0; dir2NodeIndex < gaussPoints.size(); dir2NodeIndex++)
+          {
+            if (dimIndex == 0)
+            {
+              gaussNodeVec(0) = 1;
+              gaussNodeVec(1) = gaussPoints[dir1NodeIndex];
+              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
+              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
+            }
+            else if (dimIndex == 1)
+            {
+              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
+              gaussNodeVec(1) = 1;
+              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
+              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
+            }
+            else if (dimIndex == 2)
+            {
+              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
+              gaussNodeVec(1) = gaussPoints[dir2NodeIndex];
+              gaussNodeVec(2) = 1;
+              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
+            }
+          
+            gaussNodeListUpperSurf[dimIndex].row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            
+            // Evaluate all basis functions at this node location
+            for (int functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+              upperSurfaceEvaluations[dimIndex](currNode, functionIndex) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+            
+            gaussNodeVec(dimIndex) = -1;
+            gaussNodeListLowerSurf[dimIndex].row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            // Evaluate all basis functions at this node location
+            for (int functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+              lowerSurfaceEvaluations[dimIndex](currNode, functionIndex) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+
+            currNode++;
+          }
+        }
+      }
+
+      // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
+      currNode = 0;
+      for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+      {
+        for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
+        {
+          for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
+          {
+            gaussNodeVec(0)    = gaussPoints[xNodeIndex];
+            gaussNodeVec(1)    = gaussPoints[yNodeIndex];
+            gaussNodeVec(2)    = gaussPoints[zNodeIndex];
+            totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
+            gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
+            
+            for (unsigned functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
+            {
+              functionEvaluations(functionIndex,currNode) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+              for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+                functionDEvaluations((int)functionIndex,currNode,dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[functionIndex],dimIndex),gaussNodeVec);
+            }
+            currNode++;
+          }
+        }
+      }
+    }
+
+    // Resize the output matrices we need
+    resizeMatrices();
+    // Call various functions to populate the matrices
+    std::cout << "Starting matrix computation" << std::endl;
+
+    if (NDIM == 2)
+    {
+      setupMomentMatrices();
+      for(int pIndex=0; pIndex<3; pIndex++)
+      {
+        //std::cout << "pIndex=" << pIndex << ":" << std::endl << momMatrix[pIndex] << std::endl;
+        // Scale into physical space
+        for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        {
+          momMatrix[pIndex] *= 0.5*dq[dimIndex];
+        }
+      }
+    }
+    
+    computeMass(refMass);
+    computeStiffness(functionDEvaluations,refStiffness);
+
+    std::cout << "Finished computing mass and stiffness" << std::endl;
+    
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      computeFaceMass(functionVector,dimIndex,refFaceMassLower[dimIndex],refFaceMassUpper[dimIndex]);
+      std::cout << "Finished computing faceMass" << std::endl;
+      computeGradStiffness(functionDEvaluations,dimIndex,refGradStiffness[dimIndex]);
+      std::cout << "Finished computing gradStiffness" << std::endl;
+    }
+    
+    std::cout << "Finished computing all matrices" << std::endl;
+    printAllMatrices();
+
+    // Scale the matrices computed on reference element into physical space
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      refMass   *= 0.5*dq[dimIndex];
+      refStiffness *= 0.5*dq[dimIndex];
+
+      // Scale face-mass matrices
+      for (unsigned matrixIndex = 0; matrixIndex < NDIM; matrixIndex++)
+      {
+        if (dimIndex != matrixIndex)
+        {
+          refFaceMassUpper[matrixIndex] *= 0.5*dq[dimIndex];
+          refFaceMassLower[matrixIndex] *= 0.5*dq[dimIndex];
+          refGradStiffness[matrixIndex] *= 0.5*dq[dimIndex];
+        }
+      }
+    }
+
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::resizeMatrices()
+  {
+    unsigned generalDim = this->getNumNodes();
+
+    refMass          = Eigen::MatrixXd(generalDim,generalDim);
+    refStiffness     = Eigen::MatrixXd(generalDim,generalDim);
+
+    refFaceMassLower = std::vector<Eigen::MatrixXd>(NDIM);
+    refFaceMassUpper = std::vector<Eigen::MatrixXd>(NDIM);
+    refGradStiffness = std::vector<Eigen::MatrixXd>(NDIM);
+
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      refFaceMassLower[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(dimIndex));
+      refFaceMassUpper[dimIndex] = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(dimIndex));
+      refGradStiffness[dimIndex] = Eigen::MatrixXd(generalDim,generalDim);
+    }
+  }
+ 
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix)
+  {
+    if (NDIM == 2)
+    {
+      if (basisDegree == 1)
+      {
+        nodeMatrix << -1,-1,
+                      1,-1,
+                      1,1,
+                      -1,1;
+      }
+      else if (basisDegree == 2)
+      {
+        nodeMatrix << -1,-1,
+                    0,-1,
+                    1,-1,
+                    1,0,
+                    1,1,
+                    0,1,
+                    -1,1,
+                    -1,0;
+      }
+      else if (basisDegree = 3)
+      {
+        nodeMatrix << -1,-1,
+                    -1/3.0,-1,
+                    1/3.0,-1,
+                    1,-1,
+                    1,-1/3.0,
+                    1,1/3.0,
+                    1,1,
+                    1/3.0,1,
+                    -1/3.0,1,
+                    -1,1,
+                    -1,1/3.0,
+                    -1,-1/3.0;
+      }
+    }
+    else if (NDIM == 3)
+    {
+      if (basisDegree == 1) {
+        nodeMatrix << -1,-1,-1,
+                     1,-1,-1,
+                     1,1,-1,
+                     -1,1,-1,
+                     -1,-1,1,
+                     1,-1,1,
+                     1,1,1,
+                     -1,1,1;
+      }
+      else if (basisDegree == 2)
+      {
+        nodeMatrix << -1,-1,-1,
+                    0,-1,-1,
+                    1,-1,-1,
+                    1,0,-1,
+                    1,1,-1,
+                    0,1,-1,
+                    -1,1,-1,
+                    -1,0,-1,// End of Bottom Layer
+                    -1,-1,0,
+                    1,-1,0,
+                    1,1,0,
+                    -1,1,0, // End of Middle Layer
+                    -1,-1,1,
+                    0,-1,1,
+                    1,-1,1,
+                    1,0,1,
+                    1,1,1,
+                    0,1,1,
+                    -1,1,1,
+                    -1,0,1; // End of Top Layer
+      }
+      else if (basisDegree == 3)
+      {
+        nodeMatrix << -1,-1,-1,
+                    -1/3.0,-1,-1,
+                    1/3.0,-1,-1,
+                    1,-1,-1,
+                    1,-1/3.0,-1,
+                    1,1/3.0,-1,
+                    1,1,-1,
+                    1/3.0,1,-1,
+                    -1/3.0,1,-1,
+                    -1,1,-1,
+                    -1,1/3.0,-1,
+                    -1,-1/3.0,-1,// End of Bottom Layer
+                    -1,-1,-1/3.0,
+                    1,-1,-1/3.0,
+                    1,1,-1/3.0,
+                    -1,1,-1/3.0, // End of 2nd Layer
+                    -1,-1,1/3.0,
+                    1,-1,1/3.0,
+                    1,1,1/3.0,
+                    -1,1,1/3.0,  // End of 3rd Layer
+                    -1,-1,1,
+                    -1/3.0,-1,1,
+                    1/3.0,-1,1,
+                    1,-1,1,
+                    1,-1/3.0,1,
+                    1,1/3.0,1,
+                    1,1,1,
+                    1/3.0,1,1,
+                    -1/3.0,1,1,
+                    -1,1,1,
+                    -1,1/3.0,1,
+                    -1,-1/3.0,1; // End of Top Layer
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix)
+  {
+    // Superlinear degree
+    unsigned superDegree;
+    unsigned dataIndex = 0;
+
+    if (NDIM == 2)
+    {
+      for (unsigned yIndex = 0; yIndex <= basisDegree; yIndex++)
+      {
+        for (unsigned xIndex = 0; xIndex <= basisDegree; xIndex++)
+        {
+          superDegree = (xIndex>1)*xIndex + (yIndex>1)*yIndex;
+          
+          if (superDegree < basisDegree + 1)
+          {
+            basisMatrix.row(dataIndex) = Vector2i(xIndex,yIndex);
+            dataIndex = dataIndex + 1;
+          }
+        }
+      }
+    }
+    else if (NDIM == 3)
+    {
+      for (unsigned zIndex = 0; zIndex <= basisDegree; zIndex++)
+      {
+        for (unsigned yIndex = 0; yIndex <= basisDegree; yIndex++)
+        {
+          for (unsigned xIndex = 0; xIndex <= basisDegree; xIndex++)
+          {
+            superDegree = (xIndex>1)*xIndex + (yIndex>1)*yIndex + (zIndex>1)*zIndex;
+            
+            if (superDegree < basisDegree + 1)
+            {
+              basisMatrix.row(dataIndex) = Vector3i(xIndex,yIndex,zIndex);
+              dataIndex = dataIndex + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,3> >& functionVector)
+  {
+
     // Populate basisList according to basisDegree
-    basisList = MatrixXi(this->getNumNodes(),3);
+    // Matrix to represent basis monomials
+    Eigen::MatrixXi basisList(this->getNumNodes(),NDIM);
     setupBasisMatrix(basisList);
+    
     // Compute coefficients for basis functions
     MatrixXd coeffMatrix(this->getNumNodes(),this->getNumNodes());
     double coeffProduct;
@@ -621,235 +1274,43 @@ namespace Lucee
     // Each column of invCoeffMatrix will be coefficient of basis monomial in basisList
     MatrixXd invCoeffMatrix = coeffMatrix.inverse();
 
-    // Check that basis functions evaluate to 1 at each node and 0 otherwise:
-    MatrixXd evalMatrix(this->getNumNodes(), this->getNumNodes());
-    // Compute maximum polynomial power we want (no transformations)
-    maxPower = 2*(polyOrder + 3 - 1); 
-    blitz::Array<double,3> polynomial3DArray(maxPower,maxPower,maxPower);
-    std::vector<blitz::Array<double,3> > functionVector;
+    blitz::Array<double,3> polynomial3DArray;
+
+    if (NDIM == 2)
+    {
+      blitz::Array<double,3> shapeArray(maxPower,maxPower,1);
+      polynomial3DArray.resize(shapeArray.shape());
+      polynomial3DArray = 0;
+    }
+    else if (NDIM == 3)
+    {
+      blitz::Array<double,3> shapeArray(maxPower,maxPower,maxPower);
+      polynomial3DArray.resize(shapeArray.shape());
+      polynomial3DArray = 0;
+    }
 
     int xPow,yPow,zPow;
 
     // Loop over the coefficient matrix (each column represents a basis function)
-    for (unsigned functionIndex = 0; functionIndex < invCoeffMatrix.cols(); functionIndex++)
+    for (int functionIndex = 0; functionIndex < invCoeffMatrix.cols(); functionIndex++)
     {
       // Reset the polynomial3DArray
       polynomial3DArray = 0;
       // Loop over the monomial terms that make up the basis function
-      for (unsigned monomialIndex = 0; monomialIndex < invCoeffMatrix.rows(); monomialIndex++)
+      for (int monomialIndex = 0; monomialIndex < invCoeffMatrix.rows(); monomialIndex++)
       {
         // Store the basis function in polynomial3DArray by storing its coefficient at
         // a location specified by the monimial term powers
         xPow = basisList(monomialIndex,0);
         yPow = basisList(monomialIndex,1);
-        zPow = basisList(monomialIndex,2);
+        if (NDIM == 2)
+          zPow = 0;
+        else if (NDIM == 3)
+          zPow = basisList(monomialIndex,2);
         polynomial3DArray(xPow,yPow,zPow) = polynomial3DArray(xPow,yPow,zPow) + invCoeffMatrix(monomialIndex,functionIndex);
       }
       // Store the newly represented basis function into functionVector
       functionVector.push_back(polynomial3DArray.copy());
-    }
-
-    // Compute gaussian quadrature weights and locations in 1-D
-    // TODO: should these be at the class scope?
-    unsigned numGaussPoints = (unsigned)((maxPower-1)/2.0 + 0.5);
-    gaussPoints  = std::vector<double>(numGaussPoints);
-    gaussWeights = std::vector<double>(numGaussPoints);
-    legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
-    // Unused so far: fill out gaussian integration nodes for integration
-    // over cell volume
-    blitz::Array<double,3> functionDx(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionDy(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> functionDz(maxPower,maxPower,maxPower);
-    unsigned totalVolumeGaussNodes = 1.0;
-    VectorXd gaussNodeVec(3);
-    unsigned currNode = 0;
-    double totalWeight;
-    
-    // Figure out how many gaussian points there are
-    for (unsigned i = 0; i < NDIM; i++)
-    {
-      totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
-    }
-    
-    gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
-    functionEvaluations  = Eigen::MatrixXd(this->getNumNodes(),totalVolumeGaussNodes);
-/** 3D Array containing derivatives of basis functions (rows) evaluated at gaussian integration locations (cols)
-    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
-    blitz::Array<double,3> functionDEvaluations(this->getNumNodes(),totalVolumeGaussNodes,NDIM);
-    
-    if (NDIM == 3)
-    {
-      
-      
-      for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
-      {
-        for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
-        {
-          for (unsigned zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
-          {
-            gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-            gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-            gaussNodeVec(2)    = gaussPoints[zNodeIndex];
-            totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-            gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
-            
-            // Evaluate all basis functions and their derivatives in every direction at this particular gaussian node
-            for (unsigned functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
-            {
-              functionEvaluations(functionIndex,currNode) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
-              for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
-              {
-                functionDEvaluations((int)functionIndex,(int)currNode,(int)dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[functionIndex],dimIndex),gaussNodeVec);
-              }
-            }
-            currNode++;
-          }
-        }
-      }
-    }
-
-    // Resize the output matrices we need
-    resizeMatrices();
-    // Call various functions to populate the matrices
-    std::cout << "Starting matrix computation" << std::endl;
-    computeMass(refNjNk);
-    computeFaceMass(functionVector,0,refFaceNjNk_xl,refFaceNjNk_xu);
-    computeFaceMass(functionVector,1,refFaceNjNk_yl,refFaceNjNk_yu);
-    computeFaceMass(functionVector,2,refFaceNjNk_zl,refFaceNjNk_zu);
-    computeStiffness(functionDEvaluations,refDNjDNk);
-    computeGradStiffness(functionDEvaluations,0,refDNjNk_0);
-    computeGradStiffness(functionDEvaluations,1,refDNjNk_1);
-    computeGradStiffness(functionDEvaluations,2,refDNjNk_2);
-    std::cout << "Finished computing all matrices" << std::endl;
-    //printAllMatrices();
-    // Scale the matrices computed on reference element into physical space
-    refNjNk        *= 0.5*dq[0]*0.5*dq[1]*0.5*dq[2];
-    refFaceNjNk_xl *= 0.5*dq[1]*0.5*dq[2];
-    refFaceNjNk_xu *= 0.5*dq[1]*0.5*dq[2];
-    refFaceNjNk_yl *= 0.5*dq[0]*0.5*dq[2];
-    refFaceNjNk_yu *= 0.5*dq[0]*0.5*dq[2];
-    refFaceNjNk_zl *= 0.5*dq[0]*0.5*dq[1];
-    refFaceNjNk_zu *= 0.5*dq[0]*0.5*dq[1];
-    refDNjDNk      *= 0.5*dq[0]*0.5*dq[1]*0.5*dq[2];
-    refDNjNk_0     *= 0.5*dq[1]*0.5*dq[2];
-    refDNjNk_1     *= 0.5*dq[0]*0.5*dq[2];
-    refDNjNk_2     *= 0.5*dq[0]*0.5*dq[1];
-  }
-
-  template <unsigned NDIM>
-  void
-  SerendipityElement<NDIM>::resizeMatrices()
-  {
-    unsigned generalDim = this->getNumNodes();
-    refNjNk        = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjDNk      = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_0     = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_1     = Eigen::MatrixXd(generalDim,generalDim);
-    refDNjNk_2     = Eigen::MatrixXd(generalDim,generalDim);
-    refFaceNjNk_xl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(0));
-    refFaceNjNk_xu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(0));
-    refFaceNjNk_yl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(1));
-    refFaceNjNk_yu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(1));
-    refFaceNjNk_zl = Eigen::MatrixXd(generalDim,getNumSurfLowerNodes(2));
-    refFaceNjNk_zu = Eigen::MatrixXd(generalDim,getNumSurfUpperNodes(2));
-  }
- 
-  template <unsigned NDIM>
-  void
-  SerendipityElement<NDIM>::setupNodeListMatrix(Eigen::MatrixXd& nodeMatrix)
-  {
-    if (basisDegree == 1) {
-      nodeMatrix << -1,-1,-1,
-                   1,-1,-1,
-                   1,1,-1,
-                   -1,1,-1,
-                   -1,-1,1,
-                   1,-1,1,
-                   1,1,1,
-                   -1,1,1;
-    }
-    else if (basisDegree == 2)
-    {
-      nodeMatrix << -1,-1,-1,
-                  0,-1,-1,
-                  1,-1,-1,
-                  1,0,-1,
-                  1,1,-1,
-                  0,1,-1,
-                  -1,1,-1,
-                  -1,0,-1,// End of Bottom Layer
-                  -1,-1,0,
-                  1,-1,0,
-                  1,1,0,
-                  -1,1,0, // End of Middle Layer
-                  -1,-1,1,
-                  0,-1,1,
-                  1,-1,1,
-                  1,0,1,
-                  1,1,1,
-                  0,1,1,
-                  -1,1,1,
-                  -1,0,1; // End of Top Layer
-    }
-    else if (basisDegree == 3)
-    {
-      nodeMatrix << -1,-1,-1,
-                  -1/3.0,-1,-1,
-                  1/3.0,-1,-1,
-                  1,-1,-1,
-                  1,-1/3.0,-1,
-                  1,1/3.0,-1,
-                  1,1,-1,
-                  1/3.0,1,-1,
-                  -1/3.0,1,-1,
-                  -1,1,-1,
-                  -1,1/3.0,-1,
-                  -1,-1/3.0,-1,// End of Bottom Layer
-                  -1,-1,-1/3.0,
-                  1,-1,-1/3.0,
-                  1,1,-1/3.0,
-                  -1,1,-1/3.0, // End of 2nd Layer
-                  -1,-1,1/3.0,
-                  1,-1,1/3.0,
-                  1,1,1/3.0,
-                  -1,1,1/3.0,  // End of 3rd Layer
-                  -1,-1,1,
-                  -1/3.0,-1,1,
-                  1/3.0,-1,1,
-                  1,-1,1,
-                  1,-1/3.0,1,
-                  1,1/3.0,1,
-                  1,1,1,
-                  1/3.0,1,1,
-                  -1/3.0,1,1,
-                  -1,1,1,
-                  -1,1/3.0,1,
-                  -1,-1/3.0,1; // End of Top Layer
-    }
-  }
-
-  template <unsigned NDIM>
-  void
-  SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix)
-  {
-    // Superlinear degree
-    unsigned superDegree;
-    unsigned dataIndex = 0;
-    for (unsigned zIndex = 0; zIndex <= basisDegree; zIndex++)
-    {
-      for (unsigned yIndex = 0; yIndex <= basisDegree; yIndex++)
-      {
-        for (unsigned xIndex = 0; xIndex <= basisDegree; xIndex++)
-        {
-          superDegree = (xIndex>1)*xIndex + (yIndex>1)*yIndex + (zIndex>1)*zIndex;
-          
-          if (superDegree < basisDegree + 1)
-          {
-            basisMatrix.row(dataIndex) = Vector3i(xIndex,yIndex,zIndex);
-            dataIndex = dataIndex + 1;
-          }
-        }
-      }
     }
   }
 
@@ -860,19 +1321,34 @@ namespace Lucee
     double totalSum = 0.0;
     double monomialTerm;
 
-    for (int xIndex = 0; xIndex < polyCoeffs.extent(0); xIndex++)
+    // TODO: Combine NDIM == 2 with NDIM == 3 case by looping over pow(nodeCoords(i),iIndex) multiplications
+    if (NDIM == 2)
     {
-      for (int yIndex = 0; yIndex < polyCoeffs.extent(1); yIndex++)
+      for (int xIndex = 0; xIndex < polyCoeffs.extent(0); xIndex++)
       {
-        for (int zIndex = 0; zIndex < polyCoeffs.extent(2); zIndex++)
+        for (int yIndex = 0; yIndex < polyCoeffs.extent(1); yIndex++)
         {
           // Maybe add a check to see if polyCoeffs is 0 so we don't have to compute pow's
-          monomialTerm = pow(nodeCoords(0),xIndex)*pow(nodeCoords(1),yIndex)*pow(nodeCoords(2),zIndex);
-          totalSum += polyCoeffs(xIndex,yIndex,zIndex)*monomialTerm;
+          monomialTerm = pow(nodeCoords(0),xIndex)*pow(nodeCoords(1),yIndex);
+          totalSum += polyCoeffs(xIndex,yIndex,0)*monomialTerm;
         }
       }
     }
-
+    else if (NDIM == 3)
+    {
+      for (int xIndex = 0; xIndex < polyCoeffs.extent(0); xIndex++)
+      {
+        for (int yIndex = 0; yIndex < polyCoeffs.extent(1); yIndex++)
+        {
+          for (int zIndex = 0; zIndex < polyCoeffs.extent(2); zIndex++)
+          {
+            // Maybe add a check to see if polyCoeffs is 0 so we don't have to compute pow's
+            monomialTerm = pow(nodeCoords(0),xIndex)*pow(nodeCoords(1),yIndex)*pow(nodeCoords(2),zIndex);
+            totalSum += polyCoeffs(xIndex,yIndex,zIndex)*monomialTerm;
+          }
+        }
+      }
+    }
     return totalSum;
   }
   
@@ -1017,21 +1493,14 @@ namespace Lucee
   SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
     Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
-    blitz::Array<double,3> upperPolyProduct(maxPower,maxPower,maxPower);
-    blitz::Array<double,3> lowerPolyProduct(maxPower,maxPower,maxPower);
     std::vector<int> surfLowerNodeNums(lowerResultMatrix.cols(),0);
-    std::vector<int> surfUpperNodeNums(lowerResultMatrix.cols(),0);
-    VectorXd gaussNodeVec(3);
+    std::vector<int> surfUpperNodeNums(upperResultMatrix.cols(),0);
 
     getSurfLowerNodeNums(dir,surfLowerNodeNums);
     getSurfUpperNodeNums(dir,surfUpperNodeNums);
     
-    upperResultMatrix.Zero(upperResultMatrix.rows(),upperResultMatrix.cols());
-    lowerResultMatrix.Zero(lowerResultMatrix.rows(),lowerResultMatrix.cols());
-
     double integrationResultU;
     double integrationResultL;
-    double totalWeight;
     unsigned upperNodeNum;
     unsigned lowerNodeNum;
 
@@ -1040,50 +1509,17 @@ namespace Lucee
       // Note that mIndex will be those of the ones in lower/upper node nums
       for (unsigned mIndex = 0; mIndex < upperResultMatrix.cols(); mIndex++)
       {
-        // Reset polyProduct
-        lowerPolyProduct = 0;
-        upperPolyProduct = 0;
-        // Assign node nums
         lowerNodeNum = surfLowerNodeNums[mIndex];
         upperNodeNum = surfUpperNodeNums[mIndex];
-        // Calculate polynomial product of two basis functions
-        lowerPolyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[lowerNodeNum]);
-        upperPolyProduct = computePolynomialProduct(functionVector[kIndex],functionVector[upperNodeNum]);
-
-        // Reset integration result
         integrationResultL = 0.0;
         integrationResultU = 0.0;
-        // Integrate using gaussian quadrature
-        for (unsigned dir1NodeIndex = 0; dir1NodeIndex < gaussPoints.size(); dir1NodeIndex++)
+        
+        for (int testIndex = 0; testIndex < gaussNodeListUpperSurf[dir].rows(); testIndex++)
         {
-          for (unsigned dir2NodeIndex = 0; dir2NodeIndex < gaussPoints.size(); dir2NodeIndex++)
-          {
-            if (dir == 0)
-            {
-              gaussNodeVec(0) = 1;
-              gaussNodeVec(1) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-            else if (dir == 1)
-            {
-              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(1) = 1;
-              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-            else if (dir == 2)
-            {
-              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(1) = gaussPoints[dir2NodeIndex];
-              gaussNodeVec(2) = 1;
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-            integrationResultU += totalWeight*evalPolynomial(upperPolyProduct,gaussNodeVec);
-            // Replace the appropriate coordinate to evaluation location
-            gaussNodeVec(dir) = -1;
-            integrationResultL += totalWeight*evalPolynomial(lowerPolyProduct,gaussNodeVec);
-          }
+          integrationResultU += upperSurfaceEvaluations[dir](testIndex,upperNodeNum)*
+            upperSurfaceEvaluations[dir](testIndex,kIndex)*gaussNodeListUpperSurf[dir](testIndex,NDIM);
+          integrationResultL += lowerSurfaceEvaluations[dir](testIndex,lowerNodeNum)*
+            lowerSurfaceEvaluations[dir](testIndex,kIndex)*gaussNodeListLowerSurf[dir](testIndex,NDIM);
         }
 
         upperResultMatrix(kIndex,mIndex) = integrationResultU;
@@ -1097,34 +1533,24 @@ namespace Lucee
   SerendipityElement<NDIM>::computeStiffness(const blitz::Array<double,3>& functionDerivative,
     Eigen::MatrixXd& resultMatrix)
   {
-    // Get hold of grid
-    const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
-    // Get grid spacing (this is assumed to be uniform for now)
-    double dx = grid.getDx(0);
-    double dy = grid.getDx(1);
-    double dz = grid.getDx(2);
-    double dx2 = dx*dx;
-    double dy2 = dy*dy;
-    double dz2 = dz*dz;
-
     double integrationResult;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
     
-    for (unsigned kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
+    for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
-      for (unsigned mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
+      for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset integration result
         integrationResult = 0.0;
         
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
-        for (unsigned gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
+        for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
         {
-          integrationResult += gaussNodeList(gaussIndex,NDIM)*(functionDerivative((int)kIndex,(int)gaussIndex,0)*functionDerivative((int)mIndex,(int)gaussIndex,0)*4.0/dx2 +
-                                functionDerivative((int)kIndex,(int)gaussIndex,1)*functionDerivative((int)mIndex,(int)gaussIndex,1)*4.0/dy2 +
-                                functionDerivative((int)kIndex,(int)gaussIndex,2)*functionDerivative((int)mIndex,(int)gaussIndex,2)*4.0/dz2);
+          for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          {
+            integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative(kIndex,gaussIndex,dimIndex)*functionDerivative(mIndex,gaussIndex,dimIndex)*4.0/dq2[dimIndex];
+          }
         }
         resultMatrix(kIndex,mIndex) = integrationResult;
       }
@@ -1136,8 +1562,6 @@ namespace Lucee
   SerendipityElement<NDIM>::computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
     unsigned dir, Eigen::MatrixXd& resultMatrix)
   {
-    VectorXd gaussNodeVec(3);
-
     double integrationResult;
 
     resultMatrix.Zero(resultMatrix.rows(),resultMatrix.cols());
@@ -1150,31 +1574,82 @@ namespace Lucee
         integrationResult = 0.0;
 
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
-        for (unsigned gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
+        for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
         {
-          integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative((int)kIndex,(int)gaussIndex,(int)dir)*functionEvaluations(mIndex,gaussIndex);
+          integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative((int)kIndex,gaussIndex,(int)dir)*functionEvaluations(mIndex,gaussIndex);
         }
 
         resultMatrix(kIndex,mIndex) = integrationResult;
       }
     }
   }
-  
+ 
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::setupMomentMatrices()
+  {
+    double gaussWeight;
+    double xCoord;
+    double xPowerFactor;
+    unsigned rollingIndex;
+    int lowerNodeNum;
+    unsigned nodesPerSide = getNumSurfLowerNodes(0);
+    std::vector<int> surfLowerNodeNums(nodesPerSide,0);
+    getSurfLowerNodeNums(0,surfLowerNodeNums);
+
+    // Currently computing moments up to p = 2;
+    unsigned momentMax = 2;
+    momMatrix = std::vector<Eigen::MatrixXd>(momentMax+1);
+
+    // Initialize Matrices
+    for (int momentVal = 0; momentVal <= momentMax; momentVal++)
+    {
+      momMatrix[momentVal] = Eigen::MatrixXd::Zero(nodesPerSide,functionEvaluations.rows());
+    }
+
+    // Evaluate Integral x^p*phi(y)psi(x,y)dA
+    for (int j = 0; j < nodesPerSide; j++)
+    {
+      lowerNodeNum = surfLowerNodeNums[j];
+      for (int k = 0; k < functionEvaluations.rows(); k++)
+      {
+        for (int nodeIndex = 0; nodeIndex < gaussNodeList.rows(); nodeIndex++)
+        {
+          gaussWeight  = gaussNodeList(nodeIndex,NDIM);
+          xCoord       = gaussNodeList(nodeIndex,0);
+          rollingIndex = nodeIndex % nodesPerSide;
+
+          xPowerFactor = 1.0;
+          for (int momentVal = 0; momentVal <= momentMax; momentVal++)
+          {
+            if (momentVal != 0)
+              xPowerFactor *= xCoord;
+            momMatrix[momentVal](j,k) += gaussWeight*xPowerFactor*functionEvaluations(k,nodeIndex)*
+              lowerSurfaceEvaluations[0](rollingIndex,lowerNodeNum);
+          }
+        }
+      }
+    }
+  }
+
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::printAllMatrices()
   {
-    std::cout << "refNjNk " << std::endl << refNjNk << std::endl;
-    std::cout << "refFaceNjNk_xl " << std::endl << refFaceNjNk_xl << std::endl;
-    std::cout << "refFaceNjNk_xu " << std::endl << refFaceNjNk_xu << std::endl;
-    std::cout << "refFaceNjNk_yl " << std::endl << refFaceNjNk_yl << std::endl;
-    std::cout << "refFaceNjNk_yu " << std::endl << refFaceNjNk_yu << std::endl;
-    std::cout << "refFaceNjNk_zl " << std::endl << refFaceNjNk_zl << std::endl;
-    std::cout << "refFaceNjNk_zu " << std::endl << refFaceNjNk_zu << std::endl;
-    std::cout << "refDNjDNk " << std::endl << refDNjDNk << std::endl;
-    std::cout << "refDNjNk_0 " << std::endl << refDNjNk_0 << std::endl;
-    std::cout << "refDNjNk_1 "  << std::endl << refDNjNk_1 << std::endl;
-    std::cout << "refDNjNk_2 " << std::endl << refDNjNk_2 << std::endl;
+    std::cout << "refMass " << std::endl << refMass << std::endl;
+
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      std::cout << "refFaceMass_Lower" << dimIndex << std::endl << refFaceMassLower[dimIndex] << std::endl;
+      std::cout << "refFaceMass_Upper" << dimIndex << std::endl << refFaceMassUpper[dimIndex] << std::endl;
+    }
+
+    std::cout << "refStiffness " << std::endl << refStiffness << std::endl;
+
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      std::cout << "refGradStiffness_" << dimIndex << std::endl << refGradStiffness[dimIndex] << std::endl;
+    }
   }
 
   
