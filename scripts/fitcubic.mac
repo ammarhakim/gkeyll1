@@ -5,23 +5,36 @@ fl(x) := a0_l + a1_l*(x-(xh-dx/2))/(dx/2);
 /** Function in right cell */
 fr(x) := a0_r + a1_r*(x-(xh+dx/2))/(dx/2);
 
+/** Map x to [-1,1] on two adjacent cells */
+eta2(x) := (x-xh)/dx;
+
 /** Compute coefficients */
 
 b0 : integrate(legendre_p(0,eta2(x))*fl(x), x, xh-dx, xh) 
-       + integrate(legendre_p(0,eta2(x))*fr(x), x, xh, xh+dx);
+   + integrate(legendre_p(0,eta2(x))*fr(x), x, xh, xh+dx);
 
 b1 : integrate(legendre_p(1,eta2(x))*fl(x), x, xh-dx, xh) 
-       + integrate(legendre_p(1,eta2(x))*fr(x), x, xh, xh+dx);
+   + integrate(legendre_p(1,eta2(x))*fr(x), x, xh, xh+dx);
 
 b2 : integrate(legendre_p(2,eta2(x))*fl(x), x, xh-dx, xh) 
-       + integrate(legendre_p(2,eta2(x))*fr(x), x, xh, xh+dx);
+   + integrate(legendre_p(2,eta2(x))*fr(x), x, xh, xh+dx);
 
 b3 : integrate(legendre_p(3,eta2(x))*fl(x), x, xh-dx, xh) 
-       + integrate(legendre_p(3,eta2(x))*fr(x), x, xh, xh+dx);
-
-/** Representation on two cells */
-eta2(x) := (x-xh)/dx;
+   + integrate(legendre_p(3,eta2(x))*fr(x), x, xh, xh+dx);
+   
 g(x) := b0/2 + 3*b1/2*legendre_p(1, eta2(x)) + 5*b2/2*legendre_p(2, eta2(x)) + 7*b3/2*legendre_p(3, eta2(x));
 
-/** Derivative of function */
+/** 1st Derivative of function */
+d1g(x) := subst([y=x], diff(g(y),y,1));
+/** Evaluate this at cell edge */
+d1g_edge : fullratsimp( d1g(xh) );
+
+/** 2nd Derivative of function */
+d2g(x) := subst([y=x], diff(g(y),y,2));
+/** Evaluate this at cell edge */
+d2g_edge : fullratsimp( d1g(xh) );
+
+/** 3rd Derivative of function */
 d3g(x) := subst([y=x], diff(g(y),y,3));
+/** Evaluate this at cell edge */
+d3g_edge : fullratsimp( d3g(xh) );
