@@ -70,8 +70,8 @@
   \url{http://www.ammar-hakim.org/sj}
 }
 
-%\date[MPI/PU/PPPL]{Max-Planck/Princeton Workshop, January
-%  14^$\mathrm{th}$ 2013}
+\date[MPI/PU/PPPL]{Max-Planck/Princeton Center Discussions, January
+  4$^\mathrm{th}$ 2013}
 
 \bibliography{gke}
 %\footfullcite{jones00}
@@ -93,10 +93,9 @@
   \end{block}
   \mypause
   \begin{block}{Proposed Answer}
-    \small
-    Explore high-order hybrid discontinuous/continuous Galerkin
+    \small Explore high-order hybrid discontinuous/continuous Galerkin
     finite-element schemes, enhanced with flux-reconstruction and a
-    proper choice of velocity space basis functions.
+    better choice of velocity space basis functions.
   \end{block}
 
 \end{frame}
@@ -173,63 +172,7 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
-    of errors on a finite-dimensional subspace}
-  \small
-  Consider a general time-dependent problem
-  \begin{align*}
-    f'(x,t) = G[f]
-  \end{align*}
-  where $G[f]$ is some operator. To approximate it expand $f(x)$ with
-  a finite set of basis functions $w_k(x)$,
-  \begin{align*}
-    f(x,t) \approx f_h(x,t)  = \sum_{k=1}^N f_k(t) w_k(x)
-  \end{align*}
-  This gives discrete system
-  \begin{align*}
-    \sum_{k=1}^N f_k' w_k(x) = G[f_h]
-  \end{align*}
-  \mypause
-  \begin{block}{Question}
-    How to determine $f_k'$ in an optimum manner?
-  \end{block}
-  
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
-    of errors on a finite-dimensional subspace}
-  \small
-  Answer: Do an $L_2$ minimization of the error, i.e. find $f_k'$ such
-  that
-  \begin{align*}
-    E_N = \int \left[
-      \sum_{k=1}^N f_k' w_k(x) - G[f_h]\right]^2\thinspace dx
-  \end{align*}
-  is minimum. For minimum error $\partial E_N/\partial f_m' = 0$ for
-  all $k=1,\ldots,N$. This leads to the linear system that determines
-  the coefficients $f_k'$
-  \begin{align*}
-    \int w_m(x) \left(
-      \sum_{k=1}^N f_k' w_k(x) - G[f_h]
-    \right)\thinspace dx = 0
-  \end{align*}
-  for all $m=1,\ldots,N$.
-  \mypause
-  \begin{block}{Key Idea}
-    Projection of residual on the basis set chosen for expansion leads
-    to minimum errors in the $L_2$ sense. For this reason DG/CG
-    schemes are constructed by projecting residuals of PDEs on basis
-    sets.
-  \end{block}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{What does a typical $L_2$ fit look like for
-    discontinuous Galerkin scheme?}
+\begin{frame}{What does a typical DG solution look like?}
   Discontinuous Galerkin schemes use function spaces that allow
   \emph{discontinuities} across cell boundaries.
   \begin{figure}
@@ -239,28 +182,6 @@
     \caption{The best $L_2$ fit of $x^4+\sin(5x)$ with piecewise
       linear (left) and quadratic (right) basis functions.}
   \end{figure}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Summary of DG schemes}
-
-  \begin{itemize}
-  \item Pick basis functions. These are usually piecewise polynomials,
-    but could be other suitable functions.
-  \item Construct discrete weak-form using integration by parts.
-  \item Pick suitable numerical fluxes (Riemann solvers) for the
-    surface integrals.
-  \item Pick a suitable quadrature scheme to perform surface and
-    volume integrals.
-  \item Use Runge-Kutta (or other suitable) schemes for evolving the
-    equations in time.
-  \end{itemize}
-  \mypause Other major topics in DG: limiters for
-  positivity/monotonicity, nodal vs. modal basis functions,
-  Serendipity basis functions, diffusion terms, general geometry,
-  error and accuracy analysis, $hp$-refinement, etc.
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -310,40 +231,6 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Example: Hasegawa-Wakatani equations serve as a model
-    for drift-wave turbulence in tokamak edge}%
-
-  The Hasegawa-Wakatani equations describe $E\times B$ driven flows in
-  certain limits:
-  \begin{align*}
-    \pfrac{n}{t} + \{\phi,n+N\} &= D(\phi-n) \\
-    \pfrac{\zeta}{t} + \{\phi,\zeta\} &= D(\phi-n)
-  \end{align*}
-  with $\nabla^2 \phi = \zeta.$ Here $n$ is the number density
-  fluctuations, $\zeta$ the $E\times B$ vorticity, $\phi$ is the
-  potential, $D$ is an adiabacity parameter and $N(x)$ is the fixed
-  background density profile.
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Example: Vlasov equation for electrostatic plasmas}%
-  The Vlasov-Poisson system has the Hamiltonian
-  \begin{align*}
-    H(x,p) = \frac{1}{2m}p^2 + q\phi(x)
-  \end{align*}
-  where $q$ is species charge and $m$ is species mass and $p=mv$ is
-  momentum. With this $\dot{x} = v$ and $\dot{v} =
-  -q\partial\phi/\partial x$ leading to
-  \begin{align*}
-    \pfrac{f}{t} + v\pfrac{f}{x} -
-    \frac{q}{m}\pfrac{\phi}{x}\pfrac{f}{v} = 0
-  \end{align*}
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
 \begin{frame}{It is important to preserve quadratic invariants of
     these systems}%
 
@@ -368,7 +255,7 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Summary of hybrid DG/CG schemes for Hamiltonian systems}
+\begin{frame}{We use hybrid DG/CG schemes for Hamiltonian systems}
 
   \begin{itemize}
   \item With proper choice of function spaces and a \emph{central}
@@ -377,9 +264,9 @@
   \item With upwind fluxes (preferred choice) energy is still
     conserved, and the scheme is stable in the $L_2$ norm of the
     solution.
-  \item For Vlasov-Poisson system there are small errors in momentum
-    conservation even on a coarse velocity grid, and decrease rapidly
-    with spatial resolution.
+  \item For Vlasov-Poisson system, momentum conservation is not exact,
+    but the errors decrease rapidly with spatial resolution, even on a
+    coarse velocity grid.
   \end{itemize}
   \mypause
   \begin{block}{Questions}
@@ -420,8 +307,7 @@
     {http://www.ammar-hakim.org/sj}}
   \begin{columns}
     \begin{column}{0.55\textwidth}
-      Results are presented for each of the equation systems described
-      above.
+      Results are presented for the equation systems.
       \begin{itemize}
       \item Incompressible Euler equations
       \item Hasegawa-Wakatani equations
@@ -475,45 +361,6 @@
 \end{frame}
 % ----------------------------------------------------------------
 
-% ----------------------------------------------------------------
-\begin{frame}{Vortex waltz problem tests resolution of small-scale
-    vortex features}%
-  \begin{figure}
-    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
-    \includemovie[inline=false,%
-    text={\incfig{s139-vortex-waltz_00000.png}}%
-    ]{0.65\linewidth}{0.4875\linewidth}{s139-vortex-waltz.mov}
-    \caption{[Movie] Vorticity from vortex waltz problem with
-      piecewise quadratic DG scheme on $128\times 128$ grid.}
-  \end{figure}
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Vortex waltz problem tests resolution of small-scale
-    vortex features and energy and enstrophy conservation}%
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
-        \incfig{s139-vortex-waltz_00010.png}
-        \caption{Vorticity for the vortex waltz problem with the
-          piecewise quadratic scheme on a $128 \times
-          128$. \emph{Upwind fluxes} were used for this calculation.}
-      \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
-        \incfig{s140s141s142-vortex-waltz-totalEnergyEnstrophy_cmp.png}
-        \caption{Energy and enstrophy error for vortex waltz
-          problem. \emph{Central fluxes} were used and show $O(\Delta
-          t)^3$ convergence on a fixed $64\times 64$ grid.}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
-% ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
 \begin{frame}{Initial studies of Hasegawa-Wakatani drift-wave
@@ -521,124 +368,29 @@
   \begin{figure}
     \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
     \includemovie[inline=false,%
-    text={\incfig{s217-hw_numDens_00000.png}}%
-    ]{0.65\linewidth}{0.4875\linewidth}{s217-numDens.mov}
+    text={\incfig{s215-hw_numDens_00100.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{zonal-nonzonal-hw.mov}
     \caption{[Movie] Number density from Hasegawa-Wakatani drift-wave
-      turbulence simulations with adiabacity parameter $D=0.1$.}
+      turbulence simulations with adiabacity parameter $D=0.1$ with
+      (left) and without (right) zonal flow modification.}
   \end{figure}
 \end{frame}
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{Initial scans of turbulent structures were performed
-    with varying adiabacity parameter}%
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.45\linewidth,keepaspectratio}
-    \incfig{s215-hw_numDens_00100.png}
-    \incfig{s218-hw_numDens_00100.png}
-    \caption{Number density from Hasegawa-Wakatani drift-wave
-      turbulence simulations with adiabacity parameter $D=0.1$ (left)
-      and $D=1.0$.}
-  \end{figure}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Linear Landau damping simulations were compared with
-    exact solutions of dispersion relations}%
-  \begin{columns}
-    \begin{column}{0.4\textwidth}
-      Field energy (blue) as a function of time for linear Landau
-      damping problem with $k=0.5$ and $Te=1.0$. The red dots
-      represent the maxima in the field energy which are used to
-      compute a linear least-square fit. The slope of the black line
-      gives the damping rate.
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \begin{figure}
-        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
-        \incfig{s151-field-energy.png}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Nonlinear Landau damping simulations show particle
-    trapping and phase-space hole formation}%
-
-  \begin{columns}
-    \begin{column}{0.4\textwidth}
-      Field energy as a function of time for nonlinear Landau damping
-      problem with k=0.5, $Te=1.0$ and $\alpha=0.5$. The initial
-      perturbation decays at a rate of $\gamma=−0.2916$, after which
-      the damping is halted from particle trapping. The growth rate of
-      this phase is $\gamma=0.0879$.
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \begin{figure}
-        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
-        \incfig{s162-field-energy.png}
-      \end{figure}
-    \end{column}
-  \end{columns}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{DG scheme can efficiently capture fine-scale features in
-    phase-space}%
+\begin{frame}{Algorithms have been tested with nonlinear Landau
+    damping problem}%
 
   \begin{figure}
     \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
     \includemovie[inline=false,%
     text={\incfig{s162-landau-damping-vp_distf_00000.png}}%
-    ]{0.65\linewidth}{0.4875\linewidth}{s162-distf-nonlin.mov}
+    ]{0.65\linewidth}{0.4875\linewidth}{s162-distf.mov}
     \caption{[Movie] Distribution function from nonlinear Landau
-      damping problem.}
+      damping problem. Hyper-collisions are being implemented for
+      phase-mixing to unresolved scales in velocity.}
   \end{figure}
 
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{DG scheme can efficiently capture fine-scale features in
-    phase-space}%
-
-  \begin{figure}
-    \setkeys{Gin}{width=0.8\linewidth,keepaspectratio}
-    \incfig{s162-landau-damping-vp_distf.png}
-  \end{figure}
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{A particle, momentum and energy conserving
-    Lenard-Bernstein collision operator is implemented}%
-
-  \begin{columns}
-    \small
-    \begin{column}{0.4\textwidth}
-      A simple collision operator is implemented:
-      \begin{align*}
-        C_{LB}[f] = \frac{\partial }{\partial v}
-        \left( \nu (v-u)f + \nu v_t^2 \pfrac{f}{v} \right)
-      \end{align*}
-      Figure shows relaxation of an initial step-function distribution
-      function to Maxwellian due to collisions.
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \begin{figure}
-        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
-        \incfig{lb-collisions.png}
-      \end{figure}
-    \end{column}
-  \end{columns}
 \end{frame}
 % ----------------------------------------------------------------
 
