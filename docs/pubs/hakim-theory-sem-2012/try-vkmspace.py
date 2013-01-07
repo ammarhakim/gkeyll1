@@ -40,7 +40,7 @@ def plotLines(X, q0, q1, color):
     low, high = qlqr[0], qlqr[len(qlqr)-1]
     for i in range(X.shape[0]-1):
         xe = X[i+1]
-        pylab.plot([xe, xe], [low, high], 'm-')
+        pylab.plot([xe, xe], [low, high], '-', color='#808080')
 
 def plotQuads(X, q0, q1, q2, color):
     dx = math.fabs(X[1]-X[0])
@@ -64,7 +64,7 @@ def plotQuads(X, q0, q1, q2, color):
     low, high = qlqr[0], qlqr[len(qlqr)-1]
     for i in range(X.shape[0]-1):
         xe = X[i+1]
-        pylab.plot([xe, xe], [low, high], 'm-')        
+        pylab.plot([xe, xe], [low, high], '-', color='#808080')        
 
 
 def projectOnLinear(fx, X):
@@ -130,15 +130,15 @@ Xhr = pylab.linspace(-1, 1, 201)
 fhr = func(Xhr)
 
 pylab.figure(1)
+pylab.plot(Xhr, fhr, color='#00FF00', linewidth=2)
 plotLines(X, f0p, f1p, '-k')
-#pylab.plot(Xhr, fhr, '-b')
 pylab.title('A Piecewise Linear Function', fontsize='xx-large')
 pylab.axis('tight')
 pylab.savefig('v1m1.png')
 
-pylab.figure(3)
+pylab.figure(2)
+pylab.plot(Xhr, fhr, color='#00FF00', linewidth=2)
 plotQuads(X, f0q, f1q, f2q, '-k')
-#pylab.plot(Xhr, fhr, '-b')
 pylab.title('A Piecewise Quadratic Function', fontsize='xx-large')
 pylab.axis('tight')
 pylab.savefig('v2m1.png')

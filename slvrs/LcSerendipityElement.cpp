@@ -65,6 +65,8 @@ namespace Lucee
         this->setNumNodes(20);
       else if (basisDegree == 3)
         this->setNumNodes(32);
+      else if (basisDegree == 4)
+        this->setNumNodes(50);
       else
       {
         Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
@@ -151,6 +153,8 @@ namespace Lucee
         return 8;
       else if (basisDegree == 3)
         return 12;
+      else if (basisDegree == 4)
+        return 17;
     }
   }
 
@@ -175,6 +179,8 @@ namespace Lucee
         return 8;
       else if (basisDegree == 3)
         return 12;
+      else if (basisDegree == 4)
+        return 17;
     }
   }
 
@@ -372,6 +378,70 @@ namespace Lucee
           nodeNum[11] = 6;
         }
       }
+      else if (basisDegree == 4)
+      {
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 15;
+          nodeNum[2] = 14;
+          nodeNum[3] = 13;
+          nodeNum[4] = 12;
+          nodeNum[5] = 17;
+          nodeNum[6] = 20;
+          nodeNum[7] = 21;
+          nodeNum[8] = 28;
+          nodeNum[9] = 27;
+          nodeNum[10] = 29;
+          nodeNum[11] = 32;
+          nodeNum[12] = 33;
+          nodeNum[13] = 48;
+          nodeNum[14] = 47;
+          nodeNum[15] = 46;
+          nodeNum[16] = 45;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 3;
+          nodeNum[4] = 4;
+          nodeNum[5] = 17;
+          nodeNum[6] = 18;
+          nodeNum[7] = 21;
+          nodeNum[8] = 22;
+          nodeNum[9] = 23;
+          nodeNum[10] = 29;
+          nodeNum[11] = 30;
+          nodeNum[12] = 33;
+          nodeNum[13] = 34;
+          nodeNum[14] = 35;
+          nodeNum[15] = 36;
+          nodeNum[16] = 37;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 3;
+          nodeNum[4] = 4;
+          nodeNum[5] = 15;
+          nodeNum[6] = 5;
+          nodeNum[7] = 14;
+          nodeNum[8] = 16;
+          nodeNum[9] = 6;
+          nodeNum[10] = 13;
+          nodeNum[11] = 7;
+          nodeNum[12] = 12;
+          nodeNum[13] = 11;
+          nodeNum[14] = 10;
+          nodeNum[15] = 9;
+          nodeNum[16] = 8;
+        }
+      }
+
     }
   }
 
@@ -536,6 +606,69 @@ namespace Lucee
           nodeNum[9] = 28;
           nodeNum[10] = 27;
           nodeNum[11] = 26;
+        }
+      }
+      else if (basisDegree == 4)
+      {
+        if (dir == 0)
+        {
+          nodeNum[0] = 4;
+          nodeNum[1] = 5;
+          nodeNum[2] = 6;
+          nodeNum[3] = 7;
+          nodeNum[4] = 8;
+          nodeNum[5] = 18;
+          nodeNum[6] = 19;
+          nodeNum[7] = 23;
+          nodeNum[8] = 24;
+          nodeNum[9] = 25;
+          nodeNum[10] = 30;
+          nodeNum[11] = 31;
+          nodeNum[12] = 37;
+          nodeNum[13] = 38;
+          nodeNum[14] = 39;
+          nodeNum[15] = 40;
+          nodeNum[16] = 41;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 12;
+          nodeNum[1] = 11;
+          nodeNum[2] = 10;
+          nodeNum[3] = 9;
+          nodeNum[4] = 8;
+          nodeNum[5] = 20;
+          nodeNum[6] = 19;
+          nodeNum[7] = 27;
+          nodeNum[8] = 26;
+          nodeNum[9] = 25;
+          nodeNum[10] = 32;
+          nodeNum[11] = 31;
+          nodeNum[12] = 45;
+          nodeNum[13] = 44;
+          nodeNum[14] = 43;
+          nodeNum[15] = 42;
+          nodeNum[16] = 41;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 33;
+          nodeNum[1] = 34;
+          nodeNum[2] = 35;
+          nodeNum[3] = 36;
+          nodeNum[4] = 37;
+          nodeNum[5] = 48;
+          nodeNum[6] = 38;
+          nodeNum[7] = 47;
+          nodeNum[8] = 49;
+          nodeNum[9] = 39;
+          nodeNum[10] = 46;
+          nodeNum[11] = 40;
+          nodeNum[12] = 45;
+          nodeNum[13] = 44;
+          nodeNum[14] = 43;
+          nodeNum[15] = 42;
+          nodeNum[16] = 41;
         }
       }
     }
@@ -800,7 +933,85 @@ namespace Lucee
   SerendipityElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
-    throw Lucee::Except("SerendipityElement::extractFromField: Not implemented!");
+    // Only implemented for 2-D elements
+    if (NDIM != 2)
+    {
+      Lucee::Except lce("SerendipityElement::extractFromField: NDIM ");
+      lce << NDIM << " not supported";
+      throw lce;
+    }
+
+    Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_r = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_t = fld.createConstPtr();
+    Lucee::ConstFieldPtr<double> fldPtr_tr = fld.createConstPtr();
+
+    // attach pointers to proper locations
+    fld.setPtr(fldPtr, this->currIdx[0], this->currIdx[1]);
+    fld.setPtr(fldPtr_r, this->currIdx[0]+1, this->currIdx[1]);
+    fld.setPtr(fldPtr_t, this->currIdx[0], this->currIdx[1]+1);
+    fld.setPtr(fldPtr_tr, this->currIdx[0]+1, this->currIdx[1]+1);
+
+    // copy data
+    if (basisDegree == 1)
+    {
+      data[0] = fldPtr[0];
+      data[1] = fldPtr_r[0];
+      data[2] = fldPtr_tr[0];
+      data[3] = fldPtr_t[0];
+    }
+    else if (basisDegree == 2)
+    {
+      data[0] = fldPtr[0];
+      data[1] = fldPtr[1];
+      data[2] = fldPtr_r[0];
+      data[3] = fldPtr_r[2];
+      data[4] = fldPtr_tr[0];
+      data[5] = fldPtr_t[1];
+      data[6] = fldPtr_t[0];
+      data[7] = fldPtr[2];
+    }
+    else if (basisDegree == 3)
+    {
+      data[0] = fldPtr[0];
+      data[1] = fldPtr[1];
+      data[2] = fldPtr[2];
+      data[3] = fldPtr_r[0];
+      data[4] = fldPtr_r[3];
+      data[5] = fldPtr_r[4];
+      data[6] = fldPtr_tr[0];
+      data[7] = fldPtr_t[2];
+      data[8] = fldPtr_t[1];
+      data[9] = fldPtr_t[0];
+      data[10] = fldPtr[4];
+      data[11] = fldPtr[3];
+    }
+    else if (basisDegree == 4)
+    {
+      data[0] = fldPtr[0];
+      data[1] = fldPtr[1];
+      data[2] = fldPtr[2];
+      data[3] = fldPtr[3];
+      data[4] = fldPtr_r[0];
+      data[5] = fldPtr_r[4];
+      data[6] = fldPtr_r[5];
+      data[7] = fldPtr_r[6];
+      data[8] = fldPtr_tr[0];
+      data[9] = fldPtr_t[3];
+      data[10] = fldPtr_t[2];
+      data[11] = fldPtr_t[1];
+      data[12] = fldPtr_t[0];
+      data[13] = fldPtr[6];
+      data[14] = fldPtr[5];
+      data[15] = fldPtr[4];
+      data[16] = fldPtr[7];
+    }
+    else
+    {
+      Lucee::Except lce("SerendipityElement::extractFromField: basisDegree ");
+      lce << basisDegree << " not supported";
+      throw lce;
+    }
   }
 
   template <unsigned NDIM>
@@ -1042,7 +1253,7 @@ namespace Lucee
     }
     
     std::cout << "Finished computing all matrices" << std::endl;
-    printAllMatrices();
+    //printAllMatrices();
 
     // Scale the matrices computed on reference element into physical space
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
@@ -1194,6 +1405,59 @@ namespace Lucee
                     -1,1,1,
                     -1,1/3.0,1,
                     -1,-1/3.0,1; // End of Top Layer
+      }
+      else if (basisDegree == 4)
+      {
+        nodeMatrix << -1,-1,-1,
+                      -0.5,-1,-1,
+                      0,-1,-1,
+                      0.5,-1,-1,
+                      1,-1,-1,
+                      1,-0.5,-1,
+                      1,0,-1,
+                      1,0.5,-1,
+                      1,1,-1,
+                      0.5,1,-1,
+                      0,1,-1,
+                      -0.5,1,-1,
+                      -1,1,-1,
+                      -1,0.5,-1,
+                      -1,0,-1,
+                      -1,-0.5,-1,
+                      0,0,-1,
+                      -1,-1,-0.5,
+                      1,-1,-0.5,
+                      1,1,-0.5,
+                      -1,1,-0.5,
+                      -1,-1,0,
+                      0,-1,0,
+                      1,-1,0,
+                      1,0,0,
+                      1,1,0,
+                      0,1,0,
+                      -1,1,0,
+                      -1,0,0,
+                      -1,-1,0.5,
+                      1,-1,0.5,
+                      1,1,0.5,
+                      -1,1,0.5,
+                      -1,-1,1,
+                      -0.5,-1,1,
+                      0,-1,1,
+                      0.5,-1,1,
+                      1,-1,1,
+                      1,-0.5,1,
+                      1,0,1,
+                      1,0.5,1,
+                      1,1,1,
+                      0.5,1,1,
+                      0,1,1,
+                      -0.5,1,1,
+                      -1,1,1,
+                      -1,0.5,1,
+                      -1,0,1,
+                      -1,-0.5,1,
+                      0,0,1;
       }
     }
   }
