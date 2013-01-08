@@ -1,0 +1,222 @@
+\documentclass[11pt, reqno]{amsart}
+\usepackage{hyperref}
+%% AMS packages and font files
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage[dvips]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+% \pagestyle{fancyplain}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+%% Set page size properly
+% \oddsidemargin  0.0in
+% \evensidemargin 0.0in
+% \textwidth      6.5in
+% \textheight     9.0in
+% \leftmargin     1.0in
+% \rightmargin    1.0in
+
+%% Autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+
+%% Commonly used macros
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+\newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{example}{Example}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+
+\title[Flux Reconstruction]{A summary of flux-reconstruction schemes
+  for advection and diffusion terms}%
+\author{Ammar H. Hakim}%
+\date{}%
+
+\begin{document}
+% header text
+\lhead{Tech-Note 1021}%
+\maketitle
+
+Flux reconstruction is methodology introduced by H.T Huynh
+(H.T. Huynh, AIAA 2007-4079) that can be used to construct a family of
+schemes for the solution of advection-diffusion type equations. In
+this document I summarize the main results and work out explicit
+formulas for certain classes of flux reconstruction schemes.
+
+\section{Polynomial reconstruction}
+
+In a DG scheme the solution in a cell $C_j\equiv
+[x_{j-1/2},x_{j+1/2}]$ is represented (usually) as polynomial
+expansion in that cell. For an expansion containing $K$ pieces of
+independent data (for example, values of the function at nodes or
+expansion coefficients) the polynomial is of degree $K-1$. Let
+$u_j(x)$ be the DG representation of a function and $\phi_{j,k}(x)$,
+$k=1,\ldots,K$ be basis functions in cell $I_j$. Then, we have the
+expansion
+\begin{align}
+  u_j(x) = \sum_{k=1}^K u_{j,k} \phi_{j,k}(x).
+\end{align}
+The basis functions can be Lagrange interpolation polynomials, for
+example. At a cell interface $x_{j+1/2}$ let $u^-_{j+1/2}$ and
+$u^+_{j+1/2}$ be the values of the function just to the left and right
+of the interface, respectively
+\begin{align}
+  u_{j+1/2}^- = u_{j,k}(x_{j+1/2}) \quad\mathrm{and}\quad
+  u_{j+1/2}^+ = u_{j+1,k}(x_{j+1/2}).
+\end{align}
+Note that in general $u^-_{j+1/2}\ne u^+_{j+1/2}$. The flux
+reconstruction approach is essentially a method of reconstructing a
+new function $\bar{u}_j(x)$ that is continuous at cell
+interfaces. 
+
+There are several ways in which such a reconstruction can be
+accomplished. In the FR approach the basic idea is to reconstruct a
+polynomial of one higher degree (i.e. degree $K$) with the additional
+conditions that the reconstructed function $\bar{u}_j(x)$ take on some
+common value at each interface. That is, let us assume we have some
+means (yet unspecified) of constructing a common value, which we
+denote by $u_{j+1/2}^c$, at each interface. Then, we require that
+\begin{align}
+  \bar{u}_{j}(x_{j+1/2}) = u_{j+1/2}^c, \quad\quad
+  \bar{u}_{j}(x_{j-1/2}) = u_{j-1/2}^c.
+\end{align}
+
+To develop the reconstruction function consider the polynomials of
+degree $K$, $g^{LB}(\eta)$ and $g^{RB}(\eta)$, in the interval $I\in
+[-1,1]$, such that
+\begin{align}
+  g^{LB}(-1) = 1, \qquad
+  g^{LB}(1) = 0 \label{eq:glb}
+\end{align}
+and 
+\begin{align}
+  g^{RB}(-1) = 0, \qquad
+  g^{RB}(1) = 1. \label{eq:grb}
+\end{align}
+Then, using these polynomials we can write down the required
+reconstruction as
+\begin{align}\label{eq:fr_recon}
+  \boxed{
+  \bar{u}_j(x)
+  =
+  u_j(x)
+  +
+  [u^c_{j-1/2} - u_j(-1)]g^{LB}(\eta)
+  +
+  [u^c_{j+1/2} - u_j(1)]g^{RB}(\eta)
+}
+\end{align}
+where $\eta = \eta(x) \equiv (x-x_j)/\Delta_j$ and $x_j$ is the
+coordinate of the cell center and $\Delta_j$ is the cell size. Also,
+$u_j(\pm 1) \equiv u_j(x_{j\pm 1/2})$.
+
+In the form \eqr{\ref{eq:fr_recon}} the reconstructed polynomial
+appears as a correction to the function $u_j(x)$. The first correction
+term ensures that at $x_{j-1/2}$ the reconstruction takes the common
+value $u^c(x_{j-1/2})$ and the second correction term ensures that at
+$x_{j+1/2}$ the reconstruction takes the common value
+$u^c(x_{j+1/2})$. Hence, the polynomials $g^{LB}(\eta)$ and
+$g^{RB}(\eta)$ are called the \emph{left} and the \emph{right}
+correction functions, respectively. Note that the first
+(second) correction term does not affect the right (left) boundary.
+
+\section{Correction functions}
+
+The correction functions are the critical pieces in reconstructing a
+continuous polynomial. Let $g(\eta)\equiv g^{LB}(\eta)$. Once this is
+determined, then we use reflection to determine the other correction
+function, i.e. $g^{RB}(\eta) = g(-\eta)$. To determine $g(\eta)$ we
+already have two constraints
+\begin{align}\label{eq:gcond}
+  g(-1) = 1, \qquad g(1) = 0.
+\end{align}
+As $g(\eta)$ is of degree $K$ we need $K-1$ additional pieces of
+information to determine it. Different correction functions can be
+constructed by imposing different constraints. Note that each choice
+of the correction function yields a \emph{different} reconstruction
+function and hence, when used to solve PDEs, a \emph{different}
+scheme.
+
+\subsection{The DG correction polynomial}
+
+Let $\script{V}^k(I)$ be the space of polynomials of degree at most
+$k$ on $I$. This space has $k+1$ independent functions. Then, the
+first choice of $g(\eta)$ can be constructed by requiring that
+$g(\eta)$ is orthogonal to $\script{V}^{K-2}(I)$. Note that this gives
+$K-2+1 = K-1$ conditions, hence determining $g(\eta)$. 
+
+Consider the \emph{modified} Radau polynomial defined as
+\begin{align}
+  R_k(\eta) = \frac{(-1)^k}{2}
+  \left( 
+    P_k(\eta) - P_{k-1}(\eta)
+  \right)
+\end{align}
+where, $P_l(\eta)$ is the Legendre polynomial of degree $l$. As
+$P_l(-1) = (-1)^l$ and $P(1) = 1$ it can be easily verified that this
+polynomial satisfies \eqr{\ref{eq:gcond}}. Further, as $P_l(\eta)$ is
+orthogonal to $\script{V}^{l-1}(I)$, $R_k(\eta)$ is orthogonal to
+$\script{V}^{k-2}$. Hence, we can use this as the correction function,
+i.e. we set
+\begin{align}
+  \boxed{
+  g_{DG}(\eta) = R_K(\eta)
+}
+\end{align}
+The subscript ``DG'' indicates that when used for hyperbolic problems
+the resulting scheme is exactly equivalent to the standard DG scheme.
+
+\subsection{The Gauss correction polynomials}
+
+The second choice requires that the correction polynomials vanishes at
+the $K-1$ Gauss quadrature points in $I$. This yields the needed
+additional constraints that determine the polynomials
+$g_{Ga}(\eta)$. It can be shown that this polynomial can be written as
+\begin{align}
+  \boxed{
+  g_{Ga}(\eta) = 
+  \frac{K}{2K-1}R_K(\eta) 
+  +
+  \frac{K-1}{2K-1}R_{K-1}(\eta)
+}
+\end{align}
+
+\subsection{The Lumped Lobatto correction polynomials}
+
+Another choice is to enforce that $g'(\eta)$ vanishes at $K-1$ of the
+$K$ Lobatto quadrature points in $I$. This yields the polynomials
+\begin{align}
+  \boxed{
+  g_{Lo}(\eta) = 
+  \frac{K-1}{2K-1}R_K(\eta) 
+  +
+  \frac{K}{2K-1}R_{K-1}(\eta)
+}
+\end{align}
+The reason this is called the \emph{lumped} Lobatto polynomial is that
+the corrections to the \emph{derivatives} of $u_j$ are all lumped to
+the left boundary. For use in numerical schemes it is the derivatives
+that are usually required, and hence this choice can lead to a more
+efficient scheme.
+
+\end{document}
