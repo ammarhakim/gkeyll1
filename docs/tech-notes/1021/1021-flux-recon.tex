@@ -76,8 +76,8 @@ expansion
 \begin{align}
   u_j(x) = \sum_{k=1}^K u_{j,k} \phi_{j,k}(x).
 \end{align}
-The basis functions can be Lagrange interpolation polynomials, for
-example. At a cell interface $x_{j+1/2}$ let $u^-_{j+1/2}$ and
+The basis functions can be, for example, Lagrange interpolation
+polynomials. At a cell interface $x_{j+1/2}$ let $u^-_{j+1/2}$ and
 $u^+_{j+1/2}$ be the values of the function just to the left and right
 of the interface, respectively
 \begin{align}
@@ -219,4 +219,56 @@ the left boundary. For use in numerical schemes it is the derivatives
 that are usually required, and hence this choice can lead to a more
 efficient scheme.
 
+\section{Computing fluxes for scalar hyperbolic equations}
+
+The reconstruction technique outlined above can be used to solve
+hyperbolic equations. For simplicity, consider the scalar hyperbolic
+equation
+\begin{align}
+  \pfrac{q}{t} + \pfrac{f}{x} = 0
+\end{align}
+where $q(x,t)$ is the conserved variable and $f = f(q)$ is the flux
+function. To solve this equation in the FR framework, we first need to
+define a \emph{numerical flux-function}
+\begin{align}
+  F_{j+1/2} \equiv F(q^-_{j+1/2},q^+_{j+1/2})
+\end{align}
+where $q^-_{j+1/2}$ ($q^+_{j+1/2}$) are is the value of the conserved
+variable just to the left (right) of interface $x_{j+1/2}$. Any
+numerical flux-function traditionally used in finite-volume or DG
+schemes can be used.
+
+The next step is to construct a polynomial expansion, $f_j(x)$, in
+each cell
+\begin{align}
+  f_j(x) = \sum_{k=1}^K f_{j,k} \phi_{j,k}(x).
+\end{align}
+This function is constructed using the $K$ pieces of data (for
+example, the values of the conserved variables at the $K$ solution
+points) used in the construction of $q_j(x,t)$. Note that, in general,
+for a nonlinear flux function $f_j(x) \ne f(q_j)$.
+
+We next reconstruct the flux in each cell such that the reconstructed
+flux matches the numerical flux at the interfaces, and is one degree
+higher than the degree used to represent the solution. That is we
+use the FR procedure developed above to write
+\begin{align}\label{eq:flux_recon}
+  \bar{f}_j(x)
+  =
+  f_j(x)
+  +
+  [F_{j-1/2} - f_j(-1)]g^{LB}(\eta)
+  +
+  [F_{j+1/2} - f_j(1)]g^{RB}(\eta)
+\end{align}
+where now $f_j(\pm 1) = f_j(x_{j\pm 1/2},t)$.
+
 \end{document}
+
+As usual,
+the flux function must satisfy the consistency condition
+\begin{align}
+  F(q,q) = f(q)
+\end{align}
+and be a non-increasing function of the first parameter and a
+non-decreasing function of the second parameter.
