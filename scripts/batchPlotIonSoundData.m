@@ -2,11 +2,12 @@
 % the instability growth rates
 
 % Add path to directory will data files
-addpath('Users/dark1egion/Research/Gkeyll-Project/gkeyllall/ionsound')
+addpath('Users/dark1egion/Research/Gkeyll-Project/gkeyllall/ionsound/serendipityTests')
 
 tRatios = {'0.1','0.3','0.5','0.75','1.0','1.5','2.0'};
 % Data files for 8 have been created using a higher polyOrder
-resolutionList = [8,16,32,64,128];
+% 8,16,32,64,128
+resolutionList = [8 16 32];
 % First column is reserved for T_ratios
 growthRateList = zeros(length(tRatios)+1,length(resolutionList)+1);
 
