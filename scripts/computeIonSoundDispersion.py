@@ -54,7 +54,7 @@ for index, T_ratio in enumerate(T_ratio_list):
         dampingRates[index] = -z0.imag;
 
 # Import growth rates from input file
-dat = loadtxt('simGrowthRatesTest.txt')
+dat = loadtxt('simGrowthRates.txt')
 simTempRatios = dat[1:,0]
 simDampRates  = dat[1:,1:]
 simVPoints    = dat[0,1:]
@@ -75,6 +75,6 @@ plt.ylabel('Normalized Damping Rate ($\gamma/\sqrt{2} v_t k$)')
 plt.legend(loc='lower right')
 #plt.autoscale(enable=True,axis='y',tight=True)
 plt.ylim(0.01,1.0)
-plt.savefig('ericIonSoundDampingRates.png')
+plt.savefig('ericIonSoundDampingRatesNew.png')
 plt.show()
 plt.close()
