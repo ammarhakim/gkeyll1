@@ -30,6 +30,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
+#include <LcProjectOnNodalBasisUpdater.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
@@ -88,6 +89,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<3> >;
+    
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<3> >;
 
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<2> >;

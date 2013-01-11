@@ -48,6 +48,7 @@ set(lcslvrs_SOURCES
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcProjectOnBasisUpdater.cpp
+  LcProjectOnNodalBasisUpdater.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSolverRegistry.cpp
