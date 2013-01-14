@@ -12,7 +12,8 @@
   theory seminar was well received and there is some optimism that we
   can keep the project in good shape in 2013.
 
-  Started a new tech note on flux reconstruction schemes.
+  Started a new tech note on flux reconstruction schemes. Attempting
+  to understand the discretization of the second-order terms.
 
 * December 7th
 
