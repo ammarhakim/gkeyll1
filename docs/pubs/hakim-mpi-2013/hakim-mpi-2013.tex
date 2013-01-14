@@ -70,8 +70,8 @@
   \url{http://www.ammar-hakim.org/sj}
 }
 
-\date[MPI/PU/PPPL]{Max-Planck/Princeton Center Discussions, January
-  4$^\mathrm{th}$ 2013}
+\date[MPI/PU/PPPL]{Max-Planck Institute of Plasma Physics, January
+  14$^\mathrm{th}$ 2013}
 
 \bibliography{gke}
 %\footfullcite{jones00}
@@ -146,28 +146,6 @@
     $p$ points to get $p$th order accuracy. In DG interpolate $p$
     points to get $2p-1$ order accuracy.
   \end{itemize}
-  DG combined with FV schemes can lead to best-in-class explicit
-  algorithms for hyperbolic PDEs.
-
-\end{frame}
-% ----------------------------------------------------------------
-
-% ----------------------------------------------------------------
-\begin{frame}{Discontinuous Galerkin can be a potential ``game
-    changer'' for (gyro)kinetic plasma simulations}
-  
-  Edge/pedestal gyrokinetic turbulence is very challenging, 5D problem
-  not yet solved. Benefits from all tricks we can find.
-  \begin{itemize}
-  \item Factor of 2 reduction in resolution would lead to 64$\times$
-    speedup.
-  \item Higher order methods require more FLOPs per data point, but
-    more efficient on modern CPUs where memory bandwidth is the
-    limitation.  Combined with data-locality, means modern CPU/GPU
-    optimization can be better (cache optimization, vectorization,
-    fast linear-algebra routines, etc.).
-  \end{itemize}
-
 \end{frame}
 % ----------------------------------------------------------------
 
@@ -231,8 +209,7 @@
 % ----------------------------------------------------------------
 
 % ----------------------------------------------------------------
-\begin{frame}{It is important to preserve quadratic invariants of
-    these systems}%
+\begin{frame}{It is important to preserve quadratic invariants}%
 
   The incompressible Euler equations has two quadratic invariants,
   \emph{energy}
@@ -254,8 +231,48 @@
 \end{frame}
 % ----------------------------------------------------------------
 
+% 16 -------------------------------------------------------------
+\begin{frame}{A DG scheme is used to discretize phase-space advection
+    equation}
+
+  To discretize the equations introduce a mesh $K_j$ of the domain
+  $K$. Then the discrete problem is stated as: find $\zeta_h$ in the
+  space of discontinuous piecewise polynomials such that for all basis
+  functions $w$ we have
+  \begin{align*}
+    \int_{K_j} w \pfrac{\zeta_h}{t}\thinspace d\Omega 
+    +
+    \int_{\partial K_j}w^- \mvec{n}\cdot\gvec{\alpha}_h\hat{\zeta}_h\thinspace dS
+    -
+    \int_{K_j} \nabla w\cdot\gvec{\alpha}_h \zeta_h\thinspace d\Omega = 0.
+  \end{align*}
+  Here $\hat{\zeta}_h = \hat{\zeta}(\zeta^+_h,\zeta^-_h)$ is the
+  consistent numerical flux on $\partial K_j$.
+\end{frame}
 % ----------------------------------------------------------------
-\begin{frame}{We use hybrid DG/CG schemes for Hamiltonian systems}
+
+% 16 -------------------------------------------------------------
+\begin{frame}{A continuous finite element scheme is used to discretize
+    Poisson equation}
+
+  To discretize the Poisson equation the problem is stated as: find
+  $\phi_h$ in the space of \emph{continuous} piecewise polynomials
+  such that for all basis functions $\psi$ we have
+  \begin{align*}
+    \int_K \psi \nabla^2 \phi_h d\Omega = -\int_K \psi \zeta_h d\Omega
+  \end{align*}
+  \mypause
+  \begin{block}{Questions}
+    How to pick basis functions for discontinuous and continuous
+    spaces? We also have not specified numerical fluxes to use. How to
+    pick them?  Do they effect invariants?
+  \end{block}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Hybrid DG/CG schemes for Hamiltonian systems have good
+    conservation properties}
 
   \begin{itemize}
   \item With proper choice of function spaces and a \emph{central}
@@ -274,6 +291,31 @@
     discretization exactly conserve these invariants?  Perhaps try
     symplectic integrators ...
   \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Only recently conditions for conservation of discrete
+    energy and enstrophy were discovered}%
+  \small
+  \begin{block}{Energy Conservation}
+    Liu and Shu (2000) have shown that discrete energy is conserved
+    for 2D incompressible flow if \emph{basis functions for potential
+      are a continuous subset of the basis functions for the vorticity
+      irrespective of numerical flux chosen}! We discovered extension
+    to discontinuous phi for the Vlasov equation.
+  \end{block}
+
+  \begin{block}{Enstrophy Conservation}
+    Enstrophy is conserved only if \emph{central fluxes} are
+    used. With upwind fluxes, enstrophy decays and hence the scheme is
+    \emph{stable} in the $L_2$ norm.
+  \end{block}
+
+  \mypause \textcolor{red}{DG with central fluxes like high-order
+    generalization of the well-known \emph{Arakawa} schemes, widely
+    used in climate modeling and recently also in plasma physics.}
 
 \end{frame}
 % ----------------------------------------------------------------
@@ -391,6 +433,31 @@
       phase-mixing to unresolved scales in velocity.}
   \end{figure}
 
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{A particle, momentum and energy conserving
+    Lenard-Bernstein collision operator is implemented}%
+
+  \begin{columns}
+    \small
+    \begin{column}{0.4\textwidth}
+      A simple collision operator is implemented:
+      \begin{align*}
+        C_{LB}[f] = \frac{\partial }{\partial v}
+        \left( \nu (v-u)f + \nu v_t^2 \pfrac{f}{v} \right)
+      \end{align*}
+      Figure shows relaxation of an initial step-function distribution
+      function to Maxwellian due to collisions.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{lb-collisions.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
 \end{frame}
 % ----------------------------------------------------------------
 
