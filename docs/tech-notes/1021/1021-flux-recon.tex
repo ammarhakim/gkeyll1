@@ -126,8 +126,8 @@ reconstruction as
   [u^c_{j+1/2} - u_j(1)]g^{RB}(\eta)
 }
 \end{align}
-where $\eta = \eta(x) \equiv (x-x_j)/\Delta_j$ and $x_j$ is the
-coordinate of the cell center and $\Delta_j$ is the cell size. Also,
+where $\eta = \eta(x) \equiv 2(x-x_j)/\Delta x_j$ and $x_j$ is the
+coordinate of the cell center and $\Delta x_j$ is the cell size. Also,
 $u_j(\pm 1) \equiv u_j(x_{j\pm 1/2})$.
 
 In the form \eqr{\ref{eq:fr_recon}} the reconstructed polynomial
@@ -219,7 +219,17 @@ the left boundary. For use in numerical schemes it is the derivatives
 that are usually required, and hence this choice can lead to a more
 efficient scheme.
 
-\section{Computing fluxes for scalar hyperbolic equations}
+Figure\thinspace(\ref{fig:gpoly}) shows the correction polynomials for
+the case of $K=2$ and $K=4$.
+
+\begin{figure}\label{fig:gpoly}
+  \setkeys{Gin}{width=0.45\linewidth,keepaspectratio}
+  \incfig{gK2.png}
+  \incfig{gK4.png}
+  \caption{Correction polynomials for $K=2$ (left) and $K=4$.}
+\end{figure}
+
+\section{Solving a scalar hyperbolic equation}
 
 The reconstruction technique outlined above can be used to solve
 hyperbolic equations. For simplicity, consider the scalar hyperbolic
@@ -228,30 +238,46 @@ equation
   \pfrac{q}{t} + \pfrac{f}{x} = 0
 \end{align}
 where $q(x,t)$ is the conserved variable and $f = f(q)$ is the flux
-function. To solve this equation in the FR framework, we first need to
-define a \emph{numerical flux-function}
+function. Also, we will use a \emph{nodal} scheme and assume that the
+solution is evolved at $K$ points in each cell, i.e.
+\begin{align}
+  q_j(x) = \sum_{k=1}^K q_{j,k} \phi_{j,k}(x)
+\end{align}
+where $q_{j,k}$ is the value of the conserved variable at node
+$k=1,\ldots,K$ in cell $j$.
+
+To solve this equation in the FR framework, we first need to define a
+\emph{numerical flux-function}
 \begin{align}
   F_{j+1/2} \equiv F(q^-_{j+1/2},q^+_{j+1/2})
 \end{align}
 where $q^-_{j+1/2}$ ($q^+_{j+1/2}$) are is the value of the conserved
 variable just to the left (right) of interface $x_{j+1/2}$. Any
 numerical flux-function traditionally used in finite-volume or DG
-schemes can be used.
+schemes can be used. For example, one can use the numerical flux
+\begin{align}
+  F(q^-_{j+1/2},q^+_{j+1/2})
+  =
+  \frac{1}{2}\big(f(q^+_{j+1/2}) + f(q^-_{j+1/2})\big)
+  -
+  \frac{1}{2}|\lambda|
+  (q^+_{j+1/2} - q^-_{j+1/2})
+\end{align}
+where $\lambda = \lambda(q^-_{j+1/2},q^+_{j+1/2})$ is some estimate of
+the wave-speed at the interface.
 
 The next step is to construct a polynomial expansion, $f_j(x)$, in
 each cell
 \begin{align}
   f_j(x) = \sum_{k=1}^K f_{j,k} \phi_{j,k}(x).
 \end{align}
-This function is constructed using the $K$ pieces of data (for
-example, the values of the conserved variables at the $K$ solution
-points) used in the construction of $q_j(x,t)$. Note that, in general,
-for a nonlinear flux function $f_j(x) \ne f(q_j)$.
+where $f_{j,k} = f(q_{j,k})$. Note that, in general, for a nonlinear
+flux function $f_j(x) \ne f(q_j)$.
 
 We next reconstruct the flux in each cell such that the reconstructed
 flux matches the numerical flux at the interfaces, and is one degree
-higher than the degree used to represent the solution. That is we
-use the FR procedure developed above to write
+higher than the degree used to represent the solution. That is, we use
+the FR procedure developed above to write
 \begin{align}\label{eq:flux_recon}
   \bar{f}_j(x)
   =
@@ -263,10 +289,63 @@ use the FR procedure developed above to write
 \end{align}
 where now $f_j(\pm 1) = f_j(x_{j\pm 1/2},t)$.
 
+With the reconstructed flux the solution can be updated by solving the
+ODE
+\begin{align}
+  \frac{d q_{j,k}}{dt} = -\frac{d\bar{f}_j(x_k)}{dx}
+\end{align}
+using a suitable time-stepping scheme.
+
+\section{Computing second derivatives}
+
+To solve equations with second order derivatives, for example
+advection-diffusion equations, we need to discretize terms of the form
+\begin{align}
+  q = \frac{\partial^2 u}{\partial x^2}.
+\end{align}
+For this, first consider how one can compute the first derivatives
+\begin{align}
+  g_j(x) = \frac{\partial u_j(x)}{\partial x}
+\end{align}
+in each cell $j$ given a DG representation $u_j(x)$. As $u_j(x)$ is
+discontinuous, one can use the FR approach to reconstruct a continuous
+function $\bar{u}_j(x)$, which can then be used to compute the
+derivative $g_j(x)$ in each cell. Unlike in the hyperbolic case there
+is no obvious way to compute a common value at each interface. One
+option is to use a weighted average of the form
+\begin{align}\label{eq:ucomm}
+  u^c_{j+1/2} = \kappa u_{j+1/2}^-
+  +
+  (1-\kappa) u_{j+1/2}^+
+\end{align}
+where $\kappa \in [0,1]$. Using $\kappa=0$ or $\kappa=1$ will lead to
+a one-sided average, while using $\kappa=1/2$ will lead to a straight
+average. Once the reconstruction is complete, we use
+\begin{align}
+  g_j(x) = \frac{\partial \bar{u}_j(x)}{\partial x}
+\end{align}
+to compute the needed gradient.
+
+To determine the second derivative we now need to compute
+\begin{align}
+  q_j(x) = \frac{\partial g_j(x)}{\partial x}.
+\end{align}
+In general, $g_j(x)$ is discontinuous. Hence, one could use the FR
+procedure again to compute a continuous function, with the common
+interface values given by
+\begin{align}\label{eq:gcomm}
+  g_{j+1/2}^c = (1-\kappa) g_{j+1/2}^-
+  +
+  \kappa g_{j+1/2}^+.
+\end{align}
+Note the switch in the weights between Eqns.\thinspace(\ref{eq:ucomm})
+and (\ref{eq:gcomm}). However, the problem with this approach is that
+the the resulting scheme for the second derivative will lead to, in
+general, a 5-point stencil, instead of a compact 3-point stencil.
+
 \end{document}
 
-As usual,
-the flux function must satisfy the consistency condition
+As usual, the flux function must satisfy the consistency condition
 \begin{align}
   F(q,q) = f(q)
 \end{align}
