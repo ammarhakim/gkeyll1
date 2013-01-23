@@ -5,6 +5,10 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* January 15th
+
+  Spending week in Garching, in MPI/Princeton workshop.
+
 * January 8th 2013
 
   In the last month I have given a theory seminar on Gkeyll and worked

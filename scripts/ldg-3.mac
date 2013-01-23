@@ -56,3 +56,7 @@ ww_b(j) := 1/2*(wp_b(j)+wm_b(j)) - c12_b*(wp_b(j)-wm_b(j));
 
 q0_b(j) := -(ww_b(j+1)-ww_b(j));
 q1_b(j) := -3*(ww_b(j+1)+ww_b(j)) + 6*w0_b(j);
+
+/** Average */
+q0_av(j) := (q0_a(j) + q0_b(j))/2;
+q1_av(j) := (q1_a(j) + q1_b(j))/2;

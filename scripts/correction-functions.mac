@@ -1,3 +1,4 @@
+/* ratcoef to extract coefficients of powers */
 load(orthopoly);
 
 /** Everything is in terms of Radau polynomials */
@@ -25,4 +26,3 @@ uprime_gDg(k,y) := diff(ubar_gDg(k,y), y);
 uprime_gGa(k,y) := diff(ubar_gGa(k,y), y);
 uprime_gLo(k,y) := diff(ubar_gLo(k,y), y);
 
-/** ratcoef to extract coefficients of powers */
