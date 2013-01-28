@@ -28,6 +28,7 @@ set(lcslvrs_SOURCES
   LcEulerEquation.cpp
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
+  LcFunctionBoundaryCondition.cpp
   LcFunctionSource.cpp
   LcGradEquation.cpp
   LcGridOdeIntegrator.cpp

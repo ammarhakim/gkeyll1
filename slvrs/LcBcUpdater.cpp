@@ -78,6 +78,7 @@ namespace Lucee
     Lucee::AlignedRectCoordSys coordSys(dir);
 
     int idx[NDIM];
+    double xc[3];
 // loop over each array and apply boundary conditions
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
 // get array
@@ -109,6 +110,10 @@ namespace Lucee
       while (seq.step())
       {
         seq.fillWithIndex(idx);
+// get centroid coordinate
+        grid.setIndex(idx);
+        grid.getCentroid(xc);
+
         A.setPtr(gPtr, idx);
 // set pointer to skin cell
         if (edge == LC_LOWER_EDGE)
@@ -119,7 +124,7 @@ namespace Lucee
 // apply boundary conditions
         for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
              bcItr != bcList.end(); ++bcItr)
-          (*bcItr)->applyBc(coordSys, iPtr, gPtr);
+          (*bcItr)->applyBc(t, xc, coordSys, iPtr, gPtr);
       }
     }
 

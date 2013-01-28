@@ -36,11 +36,14 @@ namespace Lucee
  * the skin cell (first/last interior cell) while 'qbc' represents
  * data in the ghost cells.
  *
+ * @param tm Time at which source is requested.
+ * @param loc Coordinate at which source is requested.
  * @param c Coordinate system to use.
  * @param qin Data in skin cell.
  * @param qbc Data in ghost cell.
  */
-      void applyBc(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
+      void applyBc(double tm, const double loc[3], const Lucee::RectCoordSys& c, 
+        const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
 
     private:
 /** factor to multiply while copying */

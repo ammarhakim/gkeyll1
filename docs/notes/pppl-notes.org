@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* January 23
+
+  After large chunks of my time have been sunk since APS/DPP, I am
+  finally getting back to serious work. I need to work both on the
+  multifluid as well as the GK projects.
+
+  Worked out exact solution to implicit update formula for two-fluid
+  source terms. Typing this up before implementation in Gkeyll.
+
 * January 15th
 
   Spending week in Garching, in MPI/Princeton workshop.
