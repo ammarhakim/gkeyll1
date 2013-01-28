@@ -18,6 +18,7 @@
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
+#include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
 #include <LcLagrangeTensorElement.h>
@@ -107,6 +108,7 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ConstBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroTangentBoundaryCondition>;
+    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::FunctionBoundaryCondition>;
 
 // register point sources
     new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::LorentzForceSource>;

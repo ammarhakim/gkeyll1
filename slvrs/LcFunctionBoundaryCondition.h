@@ -46,6 +46,8 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
 
     private:
+/** Reference to Lua function */
+      int fnRef;
   };
 }
 
