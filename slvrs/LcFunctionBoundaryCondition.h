@@ -1,11 +1,11 @@
 /**
- * @file	LcZeroNormalBoundaryCondition.h
+ * @file	LcFunctionBoundaryCondition.h
  *
- * @brief	Class for applying zero-normal BCs.
+ * @brief	Class for applying constant (fixed value) boundary conditions.
  */
 
-#ifndef LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
-#define LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
+#ifndef LC_FUNCTION_BOUNDARY_CONDITION_H
+#define LC_FUNCTION_BOUNDARY_CONDITION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -17,8 +17,8 @@
 
 namespace Lucee
 {
-/** Class to apply a zero-normal boundary condition to vectors */
-  class ZeroNormalBoundaryCondition : public Lucee::BoundaryCondition
+/** Interface class for applying boundary conditions */
+  class FunctionBoundaryCondition : public Lucee::BoundaryCondition
   {
     public:
 /** Class id: this is used by registration system */
@@ -44,7 +44,9 @@ namespace Lucee
  */
       void applyBc(double tm, const double loc[3], const Lucee::RectCoordSys& c, 
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
+
+    private:
   };
 }
 
-#endif // LC_ZERO_NORMAL_BOUNDARY_CONDITION_H
+#endif // LC_FUNCTION_BOUNDARY_CONDITION_H

@@ -1,7 +1,7 @@
 /** Attempt to construct implicit solution to two-fluid source equations */
 
 /** Current equation */
-Jn(s,nu) := (1-%i*nu*Om(s)*dt/2)/(1+%i*nu*Om(s)*dt/2)*J(s,nu) + w(s)*dt/2/(1+%i*nu*Om(s)*dt/2)*(En(nu)+E(nu));
+Jn(s,nu) := (1-%i*nu*Om(s)*dt/2)/(1+%i*nu*Om(s)*dt/2)*J(s,nu) + w(s)^2*dt/2/(1+%i*nu*Om(s)*dt/2)*(En(nu)+E(nu));
 
 /** Matrix to go from x,y to polarized coordinates */
 A : 1/sqrt(2)*matrix([1, %i], [1, -%i]);
@@ -16,7 +16,13 @@ T1(s) := coefmatrix([Jn(s,1),Jn(s,-1)], [J(s,1),J(s,-1)]);
 T2(s) := coefmatrix([Jn(s,1),Jn(s,-1)], [En(1),En(-1)]);
 T3(s) := coefmatrix([Jn(s,1),Jn(s,-1)], [E(1),E(-1)]);
 
+/*
 JnxyFunc(s) := Ainv.(T1(s).A.Jxy + w(s)*dt/2*(T2(s).A.Enxy + T3(s).A.Exy));
+*/
 
-/** Electric field equation */
+/** Compute matrices for explicit expressions in Jx, Jy */
+m1(s) := Ainv.T1(s).A;
+m2(s) := Ainv.T2(s).A;
 
+/** Terms in electric field update equation */
+LHS : ident(2)+dt/2*sum(m2(s),s,1,p);

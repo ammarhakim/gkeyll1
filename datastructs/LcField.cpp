@@ -245,7 +245,8 @@ namespace Lucee
     for (unsigned i=0; i<NDIM; ++i)
     {
       dataSetSize[i] = globalRgnGst.getShape(i);
-      dataSetBeg[i] = rgnGst.getLower(i);
+// HDF5 expects global start index is always zero-based
+      dataSetBeg[i] = rgnGst.getLower(i) - globalRgnGst.getLower(i);
       dataSetLen[i] = rgnGst.getShape(i);
     }
     dataSetSize[NDIM] = numComponents;
