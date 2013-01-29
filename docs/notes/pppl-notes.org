@@ -5,6 +5,40 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* January 28th
+
+  Spent some time trying to figure out why the Maxwell solver is not
+  working as expected. I suspect that the Riemann solver is
+  buggy. Seems like the Ez component is getting messed up by a small
+  amount. The problem is very subtle, and appears as one-cell thick
+  striations in the Ez component. The weird thing is that these
+  striations appear in a single time step, which means they are faster
+  than light, basically instantaneous.
+
+  Spent time formulating the generic advection solver in arbitrary
+  dimension and arbitrary grids. Need to finish it this week.
+
+  Modified a lot of the BC code, adding a new one to apply a
+  time-dependent boundary condition. This needed addition of extra
+  parameters in the applyBc() method.
+  
+  Completed CPC review. Very distastful job.
+
+  Learned a little bit about EC-FDTD (EC = Equivalent
+  Circuit). Basically, the idea is to evolve the EM voltages and
+  currents, i.e. electric field multiplied by some length (to give
+  units of volts) and the magentic field multiplied by some area, to
+  give amps. Seems like a slightly more efficient way that standard
+  FDTD.
+
+  Need to get the parallel code debugged so the X-point forced
+  reconnection can be conducted with fine meshes.
+
+  I have also learned that even though the GTD seems like a fine idea
+  it is not working for me. So, I will just use it to keep track of
+  major things to do, but not for daily work. This set of notes are
+  actually much better and efficient way to manage my time.
+
 * January 23
 
   After large chunks of my time have been sunk since APS/DPP, I am
