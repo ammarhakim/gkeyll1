@@ -67,7 +67,43 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** */
+/** Number of fluids */
+      unsigned nFluids;
+/** Charges of each fluid */
+      std::vector<double> charge;
+/** Mass of each fluid */
+      std::vector<double> mass;
+/** Permittivity of free space */
+      double epsilon0;
+/** Charge-mass ratio for each fluid */
+      std::vector<double> qbym;
+/** Charge-mass ratio squared for each fluid */
+      std::vector<double> qbym2;
+
+/**
+ * Compute index for fluid current component.
+ *
+ * @param n Fluid number
+ * @param c Component number (0,1,2)
+ * @return index for fluid current.
+ */
+      inline
+      int fidx(int n, int c)
+      {
+        return 3*n+c;
+      }
+
+/**
+ * Compute index for electric field.
+ *
+ * @param c Component number (0,1,2)
+ * @return index for electric field
+ */
+      inline
+      int eidx(int c)
+      {
+        return 3*nFluids+c;
+      }
   };
 }
 
