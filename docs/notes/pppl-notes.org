@@ -5,6 +5,44 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* January 30th
+
+  Something seems to be happening in the x-point reconnection
+  problem. Now to run with higher resolution and on a bigger
+  domain. The reconnection electric field (Ez) seems to be doing the
+  right thing. However, it is not clear yet if the BCs are correct and
+  this might still need more work.
+
+  Need to fix the code in parallel. This is very important, specially
+  now that the code will be used for reconnection studies.
+
+** Memory leak in gkeyll?
+
+   There seems to be a memory leak in Gkeyll. Need to trace is down
+   with valgrind.
+
+* January 29th
+
+** Debugging X-point geometry Lua file
+   
+   This looks like some nasty memory leak problem (perhaps). Not yet
+   sure what is going on as the problem is manfesting itself in
+   bizarre way. If it *is* a memory leak this will turn into a
+   nightmare ...
+
+   [Update, January 30th]: This problem is due to machine precision
+   roundoff errors when subtracting two almost exactly the same
+   numbers. I am not sure if anything can be done about this.
+
+   For the sake of posterity, the problem lines are
+#+BEGIN_EXAMPLE
+          for (unsigned m=0; m<meqn; ++m)
+          {
+            qNewPtr[m] += -dtdx*apdqPtr[m];
+            qNewPtrl[m] += -dtdx*amdqPtr[m];
+          }
+#+END_EXAMPLE
+
 * January 28th
 
   Spent some time trying to figure out why the Maxwell solver is not
@@ -21,6 +59,10 @@
   Modified a lot of the BC code, adding a new one to apply a
   time-dependent boundary condition. This needed addition of extra
   parameters in the applyBc() method.
+
+  Fixed a bug in the HDF5 output of the fields when ghost cells on the
+  lower edge were being written out. Turns out that all indexes in
+  HDF5 need to begin with (0,0).
   
   Completed CPC review. Very distastful job.
 

@@ -40,10 +40,13 @@ def getHist(baseName=None,histName=None,tostdout=0):
     baseName=sys.argv[1]
   if not histName:
     histName=sys.argv[2]
+  loc = 0
+  if len(sys.argv)>3:
+    loc = int(sys.argv[3])
   fname=baseName+'_1.h5'
   hname=histName
   fh=tables.openFile(fname)
-  datastr='myb=fh.root.'+hname+'.data[:,0]'
+  datastr='myb=fh.root.'+hname+('.data[:,%d]'%loc)
   exec(datastr)
   timestr='myt=fh.root.'+hname+'.timeMesh[:,0]'
   exec(timestr)
@@ -53,7 +56,7 @@ def getHist(baseName=None,histName=None,tostdout=0):
     try:
       fname=baseName+'_'+str(j)+'.h5'
       fh=tables.openFile(fname)
-      datastr='tempb=fh.root.'+hname+'.data[:,0]'
+      datastr='tempb=fh.root.'+hname+('.data[:,%d]'%loc)
       exec(datastr)
       timestr='tempt=fh.root.'+hname+'.timeMesh[:,0]'
       exec(timestr)
