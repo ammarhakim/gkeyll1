@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 1st
+
+  Now have my work computer back. 
+
+  Turns out that the parallel build of Gkeyll on my work Mac
+  barfs. The problem is the PetscInitialize() call. Likely, my petsc
+  build is messed up. The parallel executable, though, works on
+  portal. Need to get rid of petsc.  
+
 * January 30th
 
   Something seems to be happening in the x-point reconnection
