@@ -12,7 +12,20 @@
   Turns out that the parallel build of Gkeyll on my work Mac
   barfs. The problem is the PetscInitialize() call. Likely, my petsc
   build is messed up. The parallel executable, though, works on
-  portal. Need to get rid of petsc.  
+  portal. Need to get rid of petsc.
+
+  Working on implicit updater for two-fluid sources. A potential
+  layout for this updater could be
+#+BEGIN_EXAMPLE
+  srcUpdater = Updater.ImplicitFiveMomentSrc1D {
+    nfluids = 2,
+    charge = {-1, 1},
+    mass = {1/25, 1},
+    epsilon0 = 1.0,
+  }
+  srcUpdater:setOut( {elcFluid, ionFluid, emField} )
+#+END_EXAMPLE
+  
 
 * January 30th
 
