@@ -36,6 +36,7 @@ set(lcslvrs_SOURCES
   LcGridOdePointIntegratorUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
+  LcImplicitFiveMomentSrcUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinVParEquation.cpp

@@ -98,20 +98,20 @@ test_1()
   LC_ASSERT("Testing if PI read properly",
     dpi ==3.141592654);
 
-  // // read a vector attribute
-  // std::vector<int> intVecR;
-  // io->readAttribute(dnr, "Int Vect", intVecR);
+  // read a vector attribute
+  std::vector<int> intVecR;
+  io->readAttribute(dnr, "Int Vect", intVecR);
 
-  // std::vector<double> floatVecR;
-  // io->readAttribute(dnr, "Float Vect", floatVecR);
+  std::vector<double> floatVecR;
+  io->readAttribute(dnr, "Float Vect", floatVecR);
 
-  // for (unsigned i=0; i<3; ++i)
-  // {
-  //   LC_ASSERT("Checking for vector int attribute",
-  //     intVecR[i]==intVec[i]);
-  //   LC_ASSERT("Checking for vector float attribute",
-  //     floatVecR[i]==floatVec[i]);
-  // }
+  for (unsigned i=0; i<3; ++i)
+  {
+    LC_ASSERT("Checking for vector int attribute",
+      intVecR[i]==intVec[i]);
+    LC_ASSERT("Checking for vector float attribute",
+      floatVecR[i]==floatVec[i]);
+  }
 
   delete ior;
 }
