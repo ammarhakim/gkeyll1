@@ -21,6 +21,7 @@
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
+#include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
@@ -102,6 +103,10 @@ namespace Lucee
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<1> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<2> >;
     new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<3> >;
+
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<1> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<2> >;
+    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<3> >;
 
 // register boundary conditions
     new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
