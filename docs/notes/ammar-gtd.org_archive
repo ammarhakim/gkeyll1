@@ -390,6 +390,19 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   :ARCHIVE_CATEGORY: ammar-gtd
   :END:
 
+* Figure out the normalization issue with Maxima root-finder	     :GKEYLL:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2013-02-01 Fri 12:07
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll GKE project
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  The comparison in JE15 with exact solutions is not complete. Looks
+  like a problem with normalization. Also, the dispersion relation
+  probably needs to be rederived for this case.
+
+
 
 
 

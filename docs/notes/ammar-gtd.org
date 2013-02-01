@@ -102,12 +102,6 @@ archived.
    not hard, but will need to look into the complete chain of classes,
    including
 
-** Figure out the normalization issue with Maxima root-finder	     :GKEYLL:
-
-   The comparison in JE15 with exact solutions is not complete. Looks
-   like a problem with normalization. Also, the dispersion relation
-   probably needs to be rederived for this case.
-
 ** Write limiter for nodal DG					     :GKEYLL:
 
 ** Fix the asymmetric matrix issue in Poisson (and related updaters) :GKEYLL:
@@ -304,6 +298,10 @@ archived.
    fixed. Perhaps this should wait till the transition to Blitz::Array
    is done?
 
+** Parallel HDF5 unit test fails				      :INFRA:
+   
+   Somehow, reading a vector attribute fails on my Mac. It works on
+   portal, however.
 
 * Work related
 
