@@ -12,6 +12,9 @@
 
 namespace Lucee
 {
+
+#define LSQ(x) ((x)*(x))
+
   static const unsigned X = 0;
   static const unsigned Y = 1;
   static const unsigned Z = 2;
@@ -20,6 +23,7 @@ namespace Lucee
   static const unsigned RHOUX = 1;
   static const unsigned RHOUY = 2;
   static const unsigned RHOUZ = 3;
+  static const unsigned ER = 4;
 
   static const unsigned EX = 0;
   static const unsigned EY = 1;
@@ -160,12 +164,34 @@ namespace Lucee
       rhs(eidx(EZ)) = emPtr[EZ];
 
 // invert to find solution
-      lhs.colPivHouseholderQr().solve(rhs);
+      Eigen::VectorXd sol = lhs.colPivHouseholderQr().solve(rhs);
 
-// update solution with sources
+      double keold = 0.0;
+// update solution for fluids (solution is at half-time step)
+      for (unsigned n=0; n<nFluids; ++n)
+      {
+        fluids[n]->setPtr(fPtr, idx);
+
+// compute old kinetic energy before it is over-written
+        keold = 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
+
+// momentum equation
+        fPtr[RHOUX] = 2*sol(fidx(n,X))/qbym[n] - fPtr[RHOUX];
+        fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
+        fPtr[RHOUZ] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUZ];
+
+// energy equation: there is no explicit energy source, so just
+// recompute new kinetic energy to update total energy
+        fPtr[ER] = fPtr[ER]-keold
+          + 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
+      }
+
+// update electric field
+      emPtr[EX] = 2*sol(eidx(X)) - emPtr[EX];
+      emPtr[EY] = 2*sol(eidx(Y)) - emPtr[EY];
+      emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
     }
     
-
     return Lucee::UpdaterStatus();
   }
 
