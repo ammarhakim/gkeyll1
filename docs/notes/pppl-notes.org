@@ -25,6 +25,12 @@
   }
   srcUpdater:setOut( {elcFluid, ionFluid, emField} )
 #+END_EXAMPLE
+
+  [Updates at 5:42pm] Did a quick test. The implicit updater just
+  works. More tests are needed, but the solutions are stable to large
+  time-steps, much larger than those allowed by the plasma
+  frequency. However, for the same time-step the implicit solver
+  doubles the time to solution.
   
 
 * January 30th
