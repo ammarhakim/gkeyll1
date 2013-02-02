@@ -79,6 +79,8 @@ namespace Lucee
       std::vector<double> qbym;
 /** Charge-mass ratio squared for each fluid */
       std::vector<double> qbym2;
+/** Type of linear solver to use */
+      int linSolType;
 
 /**
  * Compute index for fluid current component.

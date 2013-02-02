@@ -13,8 +13,6 @@
 namespace Lucee
 {
 
-#define LSQ(x) ((x)*(x))
-
   static const unsigned X = 0;
   static const unsigned Y = 1;
   static const unsigned Z = 2;
@@ -31,6 +29,9 @@ namespace Lucee
   static const unsigned BX = 3;
   static const unsigned BY = 4;
   static const unsigned BZ = 5;
+
+  static const int COL_PIV_HOUSEHOLDER_QR = 0;
+  static const int PARTIAL_PIV_LU = 1;
 
 // set ids for module system
   template <> const char *ImplicitFiveMomentSrcUpdater<1>::id = "ImplicitFiveMomentSrc1D";
@@ -67,6 +68,23 @@ namespace Lucee
 
 // permittivity of free space
     epsilon0 = tbl.getNumber("epsilon0");
+
+// linear solver type
+    linSolType = PARTIAL_PIV_LU;
+    if (tbl.hasString("linearSolver"))
+    {
+      if (tbl.getString("linearSolver") == "partialPivLu")
+        linSolType = PARTIAL_PIV_LU;
+      else if (tbl.getString("linearSolver") == "colPivHouseholderQr")
+        linSolType = COL_PIV_HOUSEHOLDER_QR;
+      else
+      {
+        Lucee::Except lce("ImplicitFiveMomentSrcUpdater::readInput: 'linearSolver' must be ");
+        lce << " one of partialPivLu or colPivHouseholderQr. Provided " << tbl.getString("linearSolver")
+            << " instead";
+        throw lce;
+      }
+    }
 
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
@@ -164,7 +182,13 @@ namespace Lucee
       rhs(eidx(EZ)) = emPtr[EZ];
 
 // invert to find solution
-      Eigen::VectorXd sol = lhs.colPivHouseholderQr().solve(rhs);
+      Eigen::VectorXd sol;
+      if (linSolType == COL_PIV_HOUSEHOLDER_QR)
+        sol = lhs.colPivHouseholderQr().solve(rhs);
+      else if (linSolType == PARTIAL_PIV_LU)
+        sol = lhs.partialPivLu().solve(rhs);
+      else
+      { /* can not happen */ }
 
       double keold = 0.0;
 // update solution for fluids (solution is at half-time step)
@@ -175,13 +199,14 @@ namespace Lucee
 // compute old kinetic energy before it is over-written
         keold = 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
 
-// momentum equation
+// momentum equation (sol has currents, so divide out charge and
+// multiply by mass to give momentum density)
         fPtr[RHOUX] = 2*sol(fidx(n,X))/qbym[n] - fPtr[RHOUX];
         fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
         fPtr[RHOUZ] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUZ];
 
-// energy equation: there is no explicit energy source, so just
-// recompute new kinetic energy to update total energy
+// energy equation (there is no explicit energy source, so just
+// recompute new kinetic energy to update total energy)
         fPtr[ER] = fPtr[ER]-keold
           + 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
       }
