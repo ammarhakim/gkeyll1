@@ -86,6 +86,7 @@ namespace Lucee
       }
     }
 
+// pre-compute these
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
     for (unsigned i=0; i<nFluids; ++i)
@@ -196,7 +197,7 @@ namespace Lucee
       {
         fluids[n]->setPtr(fPtr, idx);
 
-// compute old kinetic energy before it is over-written
+// compute old kinetic energy before momenta are over-written
         keold = 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
 
 // momentum equation (sol has currents, so divide out charge and
@@ -207,7 +208,7 @@ namespace Lucee
 
 // energy equation (there is no explicit energy source, so just
 // recompute new kinetic energy to update total energy)
-        fPtr[ER] = fPtr[ER]-keold
+        fPtr[ER] = fPtr[ER] - keold
           + 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
       }
 
