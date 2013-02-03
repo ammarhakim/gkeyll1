@@ -109,6 +109,10 @@ archived.
    At present only direct solves work. Need to fix this.
 
 
+** Write a ExplicitFiveMomentSrc updater			     :GKEYLL:
+
+** Add collisional terms to momentum equations			     :GKEYLL:
+
 * Gkeyll documentation
 
   This is for writing journal notes and other documentation related
@@ -264,7 +268,9 @@ archived.
 
 ** Enable initializing fields from HDF5 files			      :INFRA:
    
-   So restart can be enabled.
+   So restart can be enabled. For this, pass command line parameters
+   to the Lua script so it can restart instead of calling initialize
+   method/updater.
 
 ** Why does Lua script not have access to command line options?	      :INFRA:
 

@@ -5,6 +5,47 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 3rd
+
+  Registration system needs to be changed to avoid the memory
+  leaks. The "new" object is never deleted and so it becomes hard to
+  debug real memory leaks. (This is not really a memory leak as the
+  registration must anyway last through the simulation lifetime).
+
+  One possible solution is to have a global object that stores the
+  pointers to the objects, with the destructors deleting the pointers
+  when the simulation is stopped.
+  
+  There also seems a leak in the logger. Is it time to get rid of the
+  loggers completely? Perhaps replace them with something
+  off-the-shelf. Which also reminds me to get rid of Matrix, Vector
+  and Array and home-brewed Lua classes. When?
+
+* Febuary 2nd
+
+  Did a 400x400 XPR simulation with me/mi = 1/25. Turns out that the
+  five-moment implicit updater crashes on this problem. Perhaps a bug,
+  or perhaps there is a negative density/pressure problem. Need to
+  test on the GEM problem with different mass ratios.
+
+  For higher resolution run the reconnection rate is reduced. This is
+  probably because the scheme has lower numerical dissapation. Perhaps
+  it might be best to add physical dissapation.
+
+  Write a ExplicitFiveMomentSrc updater to make the input file easier
+  to write and understand.
+
+  Extend updaters to do collisional terms.
+
+  Top priority for early next week: get parallel bugs fixed. Write a
+  load from HDF5 updater. Also, formulate the generic advection
+  updater.
+
+  For late next week: Implement advection updater.
+
+  Need to write up the reconnection stuff up in a JE, even if there
+  isn't 100% confidence in the results.
+
 * Febuary 1st
 
   Now have my work computer back. 
@@ -31,7 +72,8 @@
   time-steps, much larger than those allowed by the plasma
   frequency. However, for the same time-step the implicit solver
   doubles the time to solution.
-  
+
+  Really need to get parallel bugs fixed.
 
 * January 30th
 

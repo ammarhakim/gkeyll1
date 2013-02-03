@@ -13,6 +13,7 @@
 #include <LcLogger.h>
 #include <LcLuaModule.h>
 #include <LcLuaTable.h>
+#include <LcObjRegistryBase.h>
 #include <LcPointerHolder.h>
 
 // loki includes
@@ -34,8 +35,8 @@ namespace Lucee
  * registers the specific methods exposed by the derived class, making
  * them available ot the Lua script.
  */
-  template<class B, class D>
-  class ObjRegistry
+  template <class B, class D>
+  class ObjRegistry : public Lucee::ObjRegistryBase<B>
   {
     public:
 /**
