@@ -29,7 +29,7 @@ namespace Lucee
  */
       ~RegisteredObjList()
       {
-        std::vector<Lucee::ObjRegistryBase<B>*>::iterator itr
+        typename std::vector<Lucee::ObjRegistryBase<B>*>::iterator itr
           = objList.begin();
         for ( ; itr != objList.end(); ++itr)
           delete *itr;
@@ -51,7 +51,7 @@ namespace Lucee
     private:
 /** List of objects registered with base class B */
       std::vector<Lucee::ObjRegistryBase<B>*> objList;
-  }
+  };
 }
 
 #endif // LC_REGISTERED_OBJ_LIST_H
