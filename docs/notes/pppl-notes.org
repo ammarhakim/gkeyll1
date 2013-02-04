@@ -21,6 +21,14 @@
   off-the-shelf. Which also reminds me to get rid of Matrix, Vector
   and Array and home-brewed Lua classes. When?
 
+  Added a RegisteredObjList class that keeps a list of registered
+  object. With this the memory leaks from "new" of ObjRegistry<>
+  classes can be removed. Tested with RTE object. Need to do the same
+  for all other registries in the system. Easy, but PITA.
+
+  Parallel Petsc fails on my Mac in PetscInitialize() function. Darned
+  Petsc.
+
 * Febuary 2nd
 
   Did a 400x400 XPR simulation with me/mi = 1/25. Turns out that the

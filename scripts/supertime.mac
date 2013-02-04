@@ -9,3 +9,4 @@ mu(j) := (2*j-1)/j*b(j)/b(j-1);
 nu(j) := -(j-1)/j*b(j)/b(j-2);
 gbar(s,j) := -a(j-1)*mubar(s,j);
 
+calcNumStages(dhdp) := ceiling (sqrt(4*dhdp+9/4) - 1/2);

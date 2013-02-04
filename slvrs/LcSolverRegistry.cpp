@@ -33,12 +33,16 @@
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
+#include <LcRegisteredObjList.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 #ifdef HAVE_PETSC
 # include <LcFemPoissonStructUpdater.h>
@@ -50,92 +54,109 @@ namespace Lucee
   registerSolverObjects(Lucee::LuaState& L)
   {
 // register updaters
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::LinCombiner<3> >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+      ::Instance()
+      .append<Lucee::LinCombiner<1> >()
+      .append<Lucee::LinCombiner<2> >()
+      .append<Lucee::LinCombiner<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::WavePropagationUpdater<3> >;
+      .append<Lucee::WavePropagationUpdater<1> >()
+      .append<Lucee::WavePropagationUpdater<2> >()
+      .append<Lucee::WavePropagationUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FaceEdgeCurlUpdater<3> >;
+      .append<Lucee::FaceEdgeCurlUpdater<1> >()
+      .append<Lucee::FaceEdgeCurlUpdater<2> >()
+      .append<Lucee::FaceEdgeCurlUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EdgeFaceCurlUpdater<3> >;
+      .append<Lucee::EdgeFaceCurlUpdater<1> >()
+      .append<Lucee::EdgeFaceCurlUpdater<2> >()
+      .append<Lucee::EdgeFaceCurlUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::BcUpdater<3> >;
+      .append<Lucee::BcUpdater<1> >()
+      .append<Lucee::BcUpdater<2> >()
+      .append<Lucee::BcUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::GridOdePointIntegratorUpdater<3> >;
+      .append<Lucee::GridOdePointIntegratorUpdater<1> >()
+      .append<Lucee::GridOdePointIntegratorUpdater<2> >()
+      .append<Lucee::GridOdePointIntegratorUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContSrcIncrUpdater<3> >;
+      .append<Lucee::NodalDisContSrcIncrUpdater<1> >()
+      .append<Lucee::NodalDisContSrcIncrUpdater<2> >()
+      .append<Lucee::NodalDisContSrcIncrUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnBasisUpdater<3> >;
+      .append<Lucee::ProjectOnBasisUpdater<1> >()
+      .append<Lucee::ProjectOnBasisUpdater<2> >()
+      .append<Lucee::ProjectOnBasisUpdater<3> >()
 
 #ifdef HAVE_PETSC
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::FemPoissonStructUpdater<3> >;
+      .append<Lucee::FemPoissonStructUpdater<1> >()
+      .append<Lucee::FemPoissonStructUpdater<2> >()
+      .append<Lucee::FemPoissonStructUpdater<3> >()
 #endif
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EvalOnNodesUpdater<3> >;
+      .append<Lucee::EvalOnNodesUpdater<1> >()
+      .append<Lucee::EvalOnNodesUpdater<2> >()
+      .append<Lucee::EvalOnNodesUpdater<3> >()
     
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ProjectOnNodalBasisUpdater<3> >;
+      .append<Lucee::ProjectOnNodalBasisUpdater<1> >()
+      .append<Lucee::ProjectOnNodalBasisUpdater<2> >()
+      .append<Lucee::ProjectOnNodalBasisUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalDisContHyperUpdater<3> >;
+      .append<Lucee::NodalDisContHyperUpdater<1> >()
+      .append<Lucee::NodalDisContHyperUpdater<2> >()
+      .append<Lucee::NodalDisContHyperUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::CopyContToDisContFieldUpdater<3> >;
+      .append<Lucee::CopyContToDisContFieldUpdater<1> >()
+      .append<Lucee::CopyContToDisContFieldUpdater<2> >()
+      .append<Lucee::CopyContToDisContFieldUpdater<3> >()
 
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ImplicitFiveMomentSrcUpdater<3> >;
+      .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
+      .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()
+      .append<Lucee::ImplicitFiveMomentSrcUpdater<3> >();
 
 // register boundary conditions
-    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::CopyBoundaryCondition>;
-    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ConstBoundaryCondition>;
-    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroNormalBoundaryCondition>;
-    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::ZeroTangentBoundaryCondition>;
-    new Lucee::ObjRegistry<Lucee::BoundaryCondition, Lucee::FunctionBoundaryCondition>;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::BoundaryCondition> >
+      ::Instance()
+      .append<Lucee::CopyBoundaryCondition>()
+      .append<Lucee::ConstBoundaryCondition>()
+      .append<Lucee::ZeroNormalBoundaryCondition>()
+      .append<Lucee::ZeroTangentBoundaryCondition>()
+      .append<Lucee::FunctionBoundaryCondition>();
 
 // register point sources
-    new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::LorentzForceSource>;
-    new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::CurrentSource>;
-    new Lucee::ObjRegistry<Lucee::PointSourceIfc, Lucee::FunctionSource>;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >
+      ::Instance()
+      .append<Lucee::LorentzForceSource>()
+      .append<Lucee::CurrentSource>()
+      .append<Lucee::FunctionSource>();
 
 // register nodal basis functions
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LobattoElement1D>;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement2D>;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<1> > >
+      ::Instance()
+      .append<Lucee::LobattoElement1D>()
+      .append<Lucee::LagrangeTensorElement<1> >()
+      .append<Lucee::SerendipityElement<1> >();
 
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::LagrangeTensorElement<1> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::LagrangeTensorElement<2> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<3>, Lucee::LagrangeTensorElement<3> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<4>, Lucee::LagrangeTensorElement<4> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<5>, Lucee::LagrangeTensorElement<5> >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<2> > >
+      ::Instance()
+      .append<Lucee::SerendipityElement2D>()
+      .append<Lucee::LagrangeTensorElement<2> >()
+      .append<Lucee::SerendipityElement<2> >();
 
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<1>, Lucee::SerendipityElement<1> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<2>, Lucee::SerendipityElement<2> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<3>, Lucee::SerendipityElement<3> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<4>, Lucee::SerendipityElement<4> >;
-    new Lucee::ObjRegistry<Lucee::NodalFiniteElementIfc<5>, Lucee::SerendipityElement<5> >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<3> > >
+      ::Instance()
+      .append<Lucee::LagrangeTensorElement<3> >()
+      .append<Lucee::SerendipityElement<3> >();
 
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<4> > >
+      ::Instance()
+      .append<Lucee::LagrangeTensorElement<4> >()
+      .append< Lucee::SerendipityElement<4> >();
+
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<5> > >
+      ::Instance()
+      .append<Lucee::LagrangeTensorElement<5> >()
+      .append<Lucee::SerendipityElement<5> >();
 
 // register boundary condition library into Lucee (this needs to be
 // done once here as boundary conditions are local to the slvr
