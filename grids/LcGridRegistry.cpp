@@ -13,6 +13,10 @@
 #include <LcGridRegistry.h>
 #include <LcMappedCartGrid.h>
 #include <LcRectCartGrid.h>
+#include <LcRegisteredObjList.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -20,12 +24,13 @@ namespace Lucee
   registerGridObjects(Lucee::LuaState& L)
   {
 // register grids
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::RectCartGrid<1> >;
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::RectCartGrid<2> >;
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::RectCartGrid<3> >;
-
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<1> >;
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<2> >;
-    new Lucee::ObjRegistry<Lucee::GridIfc, Lucee::MappedCartGrid<3> >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::GridIfc> >
+      ::Instance()
+      .append<Lucee::RectCartGrid<1> >()
+      .append<Lucee::RectCartGrid<2> >()
+      .append<Lucee::RectCartGrid<3> >()
+      .append<Lucee::MappedCartGrid<1> >()
+      .append<Lucee::MappedCartGrid<2> >()
+      .append<Lucee::MappedCartGrid<3> >();
   }
 }

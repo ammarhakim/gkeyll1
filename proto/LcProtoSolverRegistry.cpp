@@ -26,6 +26,10 @@
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
+#include <LcRegisteredObjList.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 #ifdef HAVE_PETSC
 # include <LcContFromDisContUpdater.h>
@@ -41,50 +45,36 @@ namespace Lucee
   registerProtoSolverObjects(Lucee::LuaState& L)
   {
 // register updaters
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MaxwellTm2DUpdater>;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::MusclHancock1DUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RectSecondOrderCentralDiffUpdater<3> >;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ModalDg1DUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ModalDgLimiter1DUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalPoissonBracketUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamFunctionUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnergyFromStreamAndVortUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::EnstrophyUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NodalGradientUpdater>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::DistFuncMomentCalc1D>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::IntegrateNodalField<3> >;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::RecordFieldInCell<3> >;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::Copy1DTo2DNodalField>;
-
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<1> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<2> >;
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::NormGradPhiUpdater<3> >;
-
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+      ::Instance()
+      .append<Lucee::MaxwellTm2DUpdater>()
+      .append<Lucee::MusclHancock1DUpdater>()
+      .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
+      .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
+      .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+      .append<Lucee::ModalDg1DUpdater>()
+      .append<Lucee::ModalDgLimiter1DUpdater>()
+      .append<Lucee::NodalPoissonBracketUpdater>()
+      .append<Lucee::EnergyFromStreamFunctionUpdater>()
+      .append<Lucee::EnergyFromStreamAndVortUpdater>()
+      .append<Lucee::EnstrophyUpdater>()
+      .append<Lucee::NodalGradientUpdater>()
+      .append<Lucee::DistFuncMomentCalc1D>()
+      .append<Lucee::IntegrateNodalField<1> >()
+      .append<Lucee::IntegrateNodalField<2> >()
+      .append<Lucee::IntegrateNodalField<3> >()
+      .append<Lucee::RecordFieldInCell<1> >()
+      .append<Lucee::RecordFieldInCell<2> >()
+      .append<Lucee::RecordFieldInCell<3> >()
+      .append<Lucee::Copy1DTo2DNodalField>()
+      .append<Lucee::NormGradPhiUpdater<1> >()
+      .append<Lucee::NormGradPhiUpdater<2> >()
+      .append<Lucee::NormGradPhiUpdater<3> >()
 #ifdef HAVE_PETSC
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::ContFromDisContUpdater<1> >;
+      .append<Lucee::ContFromDisContUpdater<1> >()
 #endif
-    
 #ifdef HAVE_FFTW3
-    new Lucee::ObjRegistry<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>;
+      .append<Lucee::PeriodicPoisson2DUpdater>();
 #endif
-
   }
 }

@@ -14,6 +14,10 @@
 #include <LcLuaModuleRegistry.h>
 #include <LcObjRegistry.h>
 #include <LcQuadratureRule.h>
+#include <LcRegisteredObjList.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -21,7 +25,9 @@ namespace Lucee
   registerLibObjects(Lucee::LuaState& L)
   {
 // register objects
-    new Lucee::ObjRegistry<Lucee::QuadratureRule, Lucee::GaussianQuadRule>;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::QuadratureRule> >
+      ::Instance()
+      .append<Lucee::GaussianQuadRule>();
 
 // register modules
     Lucee::LuaModuleRegistry<Lucee::QuadratureRule>::registerModule(L);
