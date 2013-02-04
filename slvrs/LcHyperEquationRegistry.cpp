@@ -19,29 +19,31 @@
 #include <LcLenardBernsteinVParEquation.h>
 #include <LcMaxwellEquation.h>
 #include <LcPhMaxwellEquation.h>
+#include <LcRegisteredObjList.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
   void
   registerHyperEquationsObjects(Lucee::LuaState& L)
   {
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AdvectionEquation>;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::EulerEquation>;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::MaxwellEquation>;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::PhMaxwellEquation>;
-
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<1> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<2> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::DivEquation<3> >;
-
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<1> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<2> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::GradEquation<3> >;
-
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<1> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<2> >;
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::AuxAdvectionEquation<3> >;
-
-    new Lucee::ObjRegistry<Lucee::HyperEquation, Lucee::LenardBernsteinVParEquation >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::HyperEquation> >
+      ::Instance()
+      .append<Lucee::AdvectionEquation>()
+      .append<Lucee::EulerEquation>()
+      .append<Lucee::MaxwellEquation>()
+      .append<Lucee::PhMaxwellEquation>()
+      .append<Lucee::DivEquation<1> >()
+      .append<Lucee::DivEquation<2> >()
+      .append<Lucee::DivEquation<3> >()
+      .append<Lucee::GradEquation<1> >()
+      .append<Lucee::GradEquation<2> >()
+      .append<Lucee::GradEquation<3> >()
+      .append<Lucee::AuxAdvectionEquation<1> >()
+      .append<Lucee::AuxAdvectionEquation<2> >()
+      .append<Lucee::AuxAdvectionEquation<3> >()
+      .append<Lucee::LenardBernsteinVParEquation >();
   }
 }

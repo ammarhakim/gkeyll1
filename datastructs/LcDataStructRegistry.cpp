@@ -12,7 +12,11 @@
 // lucee includes
 #include <LcDataStructRegistry.h>
 #include <LcDynVector.h>
+#include <LcRegisteredObjList.h>
 #include <LcStructGridField.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -20,14 +24,15 @@ namespace Lucee
   registerDataStructObjects(Lucee::LuaState& L)
   {
 // register data-structures
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<1, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<2, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<3, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<4, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<5, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<6, double> >;
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::StructGridField<7, double> >;
-
-    new Lucee::ObjRegistry<Lucee::DataStructIfc, Lucee::DynVector<double> >;
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DataStructIfc> >
+      ::Instance()
+      .append<Lucee::StructGridField<1, double> >()
+      .append<Lucee::StructGridField<2, double> >()
+      .append<Lucee::StructGridField<3, double> >()
+      .append<Lucee::StructGridField<4, double> >()
+      .append<Lucee::StructGridField<5, double> >()
+      .append<Lucee::StructGridField<6, double> >()
+      .append<Lucee::StructGridField<7, double> >()
+      .append<Lucee::DynVector<double> >();
   }
 }
