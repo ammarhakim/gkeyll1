@@ -156,6 +156,28 @@ namespace Lucee
       bool contains(const Region<NDIM, T>& rgn) const;
 
 /**
+ * Set lower bound of region in a given direction.
+ *
+ * @param dir Direction to reset bound.
+ * @param lo New lower bound of region.
+ */
+      void setLower(unsigned dir, const T& lo) { 
+        lower[dir] = lo;
+        volume = calcVolume(); 
+      }
+
+/**
+ * Set upper bound of region in a given direction.
+ *
+ * @param dir Direction to reset bound.
+ * @param up New uppper bound of region.
+ */
+      void setUpper(unsigned dir, const T& up) {
+        upper[dir] = up;
+        volume = calcVolume(); 
+      }
+
+/**
  * Reset the bounds of box in specified direction to range
  * [nl,nu). This region is not modified but a new region is returned.
  *
@@ -204,24 +226,27 @@ namespace Lucee
       Lucee::FixedVector<NDIM, T> upper;
 /** Volume of region */
       T volume;
+
+/**
+ * Compute volume of region.
+ *
+ * @return volume of region.
+ */
+      T calcVolume() const;
   };
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>::Region(const T shape[NDIM])
     : lower((T) 0), upper(shape)
   {
-    volume = 1;
-    for (unsigned i=0; i<NDIM; ++i)
-      volume *= shape[i];
+    volume = calcVolume();
   }
 
   template <unsigned NDIM, typename T>
   Region<NDIM, T>::Region(const T lo[NDIM], const T up[NDIM])
     : lower(lo), upper(up)
   {
-    volume = 1;
-    for (unsigned i=0; i<NDIM; ++i)
-      volume *= (up[i]-lo[i]);
+    volume = calcVolume();
   }
 
   template <unsigned NDIM, typename T>
@@ -371,6 +396,16 @@ namespace Lucee
   {
   }
 
+  template <unsigned NDIM, typename T>
+  T
+  Region<NDIM, T>::calcVolume() const
+  {
+    T vol = 1;
+    for (unsigned i=0; i<NDIM; ++i)
+      vol *= getShape(i);
+    return vol;
+  }
+
 /**
  * Create a new region from start and shape arrays.
  *
@@ -387,6 +422,7 @@ namespace Lucee
       upper[i] = start[i] + shape[i];
     return Region<NDIM, T>(start, upper);
   }
+  
 }
 
 #endif // LC_REGION_H
