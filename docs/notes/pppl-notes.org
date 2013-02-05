@@ -5,6 +5,18 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 4th
+
+  Added a new test for wave-propagation scheme for Maxwell equations
+  in parallel. Turns out that it just works, at least on 4 procs. This
+  parallel buisness is "almost working" and perhaps just needs some
+  more work for it to work fully. Also, should move in the general
+  decomp method into Gkeyll and then test.
+
+  It might be a good idea to have a number of MPI variables exposed to
+  Lua. This will allow, for example, doing auto-decomposition, rather
+  than hard coding it in the input file.
+
 * Febuary 3rd
 
   Registration system needs to be changed to avoid the memory
