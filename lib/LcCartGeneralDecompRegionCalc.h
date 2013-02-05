@@ -34,14 +34,6 @@ namespace Lucee
       CartGeneralDecompRegionCalc();
 
 /**
- * Create a new decomp calculator with specified number of
- * sub-regions.
- *
- * @param nrgns Number of regions to create.
- */
-      CartGeneralDecompRegionCalc(const unsigned nrgns);
-
-/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
@@ -59,8 +51,15 @@ namespace Lucee
       void decompose(unsigned nrgs, const Lucee::Region<NDIM, int>& globalRgn);
 
     private:
-/** Number of total sub-regions */
-      unsigned nsub;
+/**
+ * Creates a set of boxes
+ *
+ * @param breakme box which should be broken down
+ * @param num number of boxes to put in each direction
+ * @return a vector of decomposed FcBoxes
+ */
+      std::vector< Lucee::Region<NDIM, int> > breakBoxes(size_t subBox[NDIM], 
+        const Lucee::Region<NDIM, int>& box);
   };
 }
 

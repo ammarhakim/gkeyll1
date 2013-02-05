@@ -315,6 +315,24 @@ test_12()
   LC_ASSERT("Testing resetBound method", ibox1.getUpper(1) == 17);
 }
 
+void
+test_13()
+{
+  int lower[2] = {1, 0};
+  int upper[2] = {10, 12};
+  Lucee::Region<2, int> rgn(lower, upper);
+
+  LC_ASSERT("Testing volume before reset", rgn.getVolume() == 9*12);
+
+  rgn.setLower(0, 3);
+  LC_ASSERT("Testing new bounds", rgn.getLower(0) == 3);
+  LC_ASSERT("Testing volume after reset", rgn.getVolume() == (10-3)*(12-0));
+
+  rgn.setUpper(1, 15);
+  LC_ASSERT("Testing new bounds", rgn.getUpper(1) == 15);
+  LC_ASSERT("Testing volume after reset", rgn.getVolume() == (10-3)*(15-0));
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -331,5 +349,6 @@ main(int argc, char **argv)
   test_10();
   test_11();
   test_12();
+  test_13();
   LC_END_TESTS;
 }
