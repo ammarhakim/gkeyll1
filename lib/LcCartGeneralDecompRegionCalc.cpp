@@ -73,7 +73,7 @@ namespace Lucee
     breaks[NDIM-1] = 1;
 
 //  Now break down the box into a series of strips
-    std::vector< Lucee::Region<NDIM, int> > intermediate = breakBoxes(breaks, decompBox);
+    std::vector<Lucee::Region<NDIM, int> > intermediate = breakBoxes(breaks, decompBox);
 
 // Do the final breakdown, the first rmdr boxes have sbrk + 1 breaks
 // in it, while the rest have sbrk breaks in it.  rmdr is the

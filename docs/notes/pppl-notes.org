@@ -5,6 +5,22 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 5th
+
+  Added a new class CartGeneralDecompRegionCalc that basically is a
+  copy of the Facets domain decomposition algorithm. Did basic
+  tests. Not sure how to do more testing.
+
+  Getting closer to supporting periodic BCs in parallel. Need to
+  understand how to wrap-around the decomposition in case of periodic
+  domains.
+
+  Added code to duplicate regions in case any direction is
+  periodic. Turns out that the internal data-structures on the
+  decomposition class, i.e. the vector of regions, might not be
+  able to handle this case. I might have to convert it to the Facets
+  style std::map. Grr. At least I have regression tests ...
+
 * Febuary 4th
 
   Added a new test for wave-propagation scheme for Maxwell equations

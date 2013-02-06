@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcCartGeneralDecompRegionCalc.h>
 #include <LcCartProdDecompRegionCalc.h>
 #include <LcDecompRegionCalcRegistry.h>
 #include <LcRegisteredObjList.h>
@@ -24,23 +25,23 @@ namespace Lucee
 // register region decomp calculators
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<1> > >
       ::Instance()
-      .append<Lucee::CartProdDecompRegionCalc<1> >();
+      .append<Lucee::CartProdDecompRegionCalc<1> >()
+      .append<Lucee::CartGeneralDecompRegionCalc<1> >();
 
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<2> > >
       ::Instance()
-      .append<Lucee::CartProdDecompRegionCalc<2> >();
+      .append<Lucee::CartProdDecompRegionCalc<2> >()
+      .append<Lucee::CartGeneralDecompRegionCalc<2> >();
 
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<3> > >
       ::Instance()
-      .append<Lucee::CartProdDecompRegionCalc<3> >();
+      .append<Lucee::CartProdDecompRegionCalc<3> >()
+      .append<Lucee::CartGeneralDecompRegionCalc<3> >();
 
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<4> > >
       ::Instance()
-      .append<Lucee::CartProdDecompRegionCalc<4> >();
-
-    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<5> > >
-      ::Instance()
-      .append<Lucee::CartProdDecompRegionCalc<5> >();
+      .append<Lucee::CartProdDecompRegionCalc<4> >()
+      .append<Lucee::CartGeneralDecompRegionCalc<4> >();
   }
 }
 

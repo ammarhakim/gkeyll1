@@ -5,6 +5,7 @@
  */
 
 // lucee includes
+#include <LcCartGeneralDecompRegionCalc.h>
 #include <LcCartProdDecompRegionCalc.h>
 #include <LcColMajorSequencer.h>
 #include <LcDecompRegion.h>
@@ -358,6 +359,65 @@ test_8()
   LC_ASSERT("Testing default decomp neighbors", neigh.size() == 0);
 }
 
+void
+test_9()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {50, 50};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+// create product decomposer
+  Lucee::CartGeneralDecompRegionCalc<2> cartDecomp;
+// now decompose domain
+  cartDecomp.calcDecomp(4, dcomp);
+
+// check if decomp is covering
+  LC_ASSERT("Testing if general decomp is covering", dcomp.checkCovering() == true);
+}
+
+void
+test_10()
+{
+  int lower[3] = {0, 0, 0};
+  int upper[3] = {50, 50, 201};
+  Lucee::Region<3, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<3> dcomp(globalRgn);
+
+// create product decomposer
+  Lucee::CartGeneralDecompRegionCalc<3> cartDecomp;
+// now decompose domain
+  cartDecomp.calcDecomp(7, dcomp);
+
+// check if decomp is covering
+  LC_ASSERT("Testing if general decomp is covering", dcomp.checkCovering() == true);
+}
+
+void
+test_11()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {32, 64};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+  int cuts[2] = {1, 1};
+  std::vector<int> periodicDirs(2);
+  periodicDirs[0] = 0;
+
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+// set periodic directions
+  cartDecomp.setPeriodicDir(0);
+
+// now decompose domain
+  cartDecomp.calcDecomp(1, dcomp);
+
+  LC_ASSERT("Testing decomposition", dcomp.getNumRegions() == 1);
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -371,5 +431,8 @@ main(int argc, char **argv)
   test_6();
   test_7();
   test_8();
+  test_9();
+  test_10();
+  test_11();
   LC_END_TESTS;
 }
