@@ -56,11 +56,19 @@ namespace Lucee
       DecompRegion(const DecompRegion<NDIM>& decompRgn);
 
 /**
- * Return bumber of sub-regions in decomposition.
+ * Return number of sub-regions in decomposition.
  *
  * @return number of sub-regions.
  */
       unsigned getNumRegions() const;
+
+/**
+ * Return total number of sub-regions in decomposition, including
+ * pseudo-regions.
+ *
+ * @return number of sub-regions.
+ */
+      unsigned getNumTotalRegions() const;
 
 /**
  * Return specified sub-region in decomposition.
@@ -69,6 +77,14 @@ namespace Lucee
  * @return region requested.
  */
       Lucee::Region<NDIM, int> getRegion(unsigned rn) const;
+
+/**
+ * Return rank of specified sub-region in decomposition.
+ *
+ * @param rn Region number.
+ * @return rank of region.
+ */
+      int getRank(unsigned rn) const;
 
 /**
  * Return specified sub-region in decomposition.
@@ -145,8 +161,12 @@ namespace Lucee
     private:
 /** Global region */
       Lucee::Region<NDIM, int> globalRgn;
+/** Number of regions */
+      unsigned numRegions;
 /** Regions making up decomposition */
       std::vector<Lucee::Region<NDIM, int> > rgns;
+/** Region to rank list */
+      std::vector<int> rgnRank;
 
 /**
  * A private class to define a comparison operator that allows using
@@ -211,6 +231,16 @@ namespace Lucee
  * @param subRgn Region to add.
  */
       void addRegion(const Lucee::Region<NDIM, int>& subRgn);
+
+/**
+ * Append pseudo-region to decomposition. Pseudo regions are regions
+ * created explicitly to handle periodic BCs. They are not used
+ * otherwise.
+ *
+ * @param rank Rank of pseudo region.
+ * @param subRgn Region to add.
+ */
+      void addPseudoRegion(int rank, const Lucee::Region<NDIM, int>& subRgn);
 
 /**
  * Calculate neighbor information given ghost cell distribution. This

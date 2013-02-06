@@ -399,7 +399,7 @@ void
 test_11()
 {
   int lower[2] = {0, 0};
-  int upper[2] = {32, 64};
+  int upper[2] = {10, 10};
   Lucee::Region<2, int> globalRgn(lower, upper);
 // create default decomp
   Lucee::DecompRegion<2> dcomp(globalRgn);
@@ -416,6 +416,121 @@ test_11()
   cartDecomp.calcDecomp(1, dcomp);
 
   LC_ASSERT("Testing decomposition", dcomp.getNumRegions() == 1);
+  LC_ASSERT("Testing decomposition", dcomp.getNumTotalRegions() == 3);
+
+// check decomposition
+  Lucee::Region<2, int> rgn = dcomp.getRegion(1); // left pseudo box
+  LC_ASSERT("Checking lower", rgn.getLower(0) == -10);
+  LC_ASSERT("Checking lower", rgn.getLower(1) == 0);
+
+  LC_ASSERT("Checking upper", rgn.getUpper(0) == 0);
+  LC_ASSERT("Checking upper", rgn.getUpper(1) == 10);
+
+  rgn = dcomp.getRegion(2); // right pseudo box
+  LC_ASSERT("Checking lower", rgn.getLower(0) == 10);
+  LC_ASSERT("Checking lower", rgn.getLower(1) == 0);
+
+  LC_ASSERT("Checking upper", rgn.getUpper(0) == 20);
+  LC_ASSERT("Checking upper", rgn.getUpper(1) == 10);
+
+  int lowerExt[2], upperExt[2];
+
+  lowerExt[0] = 1; lowerExt[1] = 0;
+  upperExt[0] = 1; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getRecvNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 2);
+  }
+
+  lowerExt[0] = 1; lowerExt[1] = 0;
+  upperExt[0] = 0; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getRecvNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 1);
+    LC_ASSERT("Testing periodic BCs", neigh[0] == 1);
+  }
+
+  lowerExt[0] = 0; lowerExt[1] = 0;
+  upperExt[0] = 1; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getRecvNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 1);
+    LC_ASSERT("Testing periodic BCs", neigh[0] == 2);
+  }
+
+  lowerExt[0] = 1; lowerExt[1] = 0;
+  upperExt[0] = 1; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getSendNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 2);
+  }
+
+  lowerExt[0] = 1; lowerExt[1] = 0;
+  upperExt[0] = 0; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getSendNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 1);
+    LC_ASSERT("Testing periodic BCs", neigh[0] == 2);
+  }
+
+  lowerExt[0] = 0; lowerExt[1] = 0;
+  upperExt[0] = 1; upperExt[1] = 0;
+// loop over each region, getting neighbors
+  for (unsigned rn=0; rn<dcomp.getNumRegions(); ++rn)
+  {
+    std::vector<unsigned> neigh = dcomp.getSendNeighbors(rn, lowerExt, upperExt);
+    LC_ASSERT("Testing periodic BCs", neigh.size() == 1);
+    LC_ASSERT("Testing periodic BCs", neigh[0] == 1);
+  }
+}
+
+void
+test_12()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {10, 10};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+  int cuts[2] = {1, 1};
+  std::vector<int> periodicDirs(2);
+  periodicDirs[0] = 0;
+
+// create product decomposer
+  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
+// set periodic directions
+  cartDecomp.setPeriodicDir(1);
+
+// now decompose domain
+  cartDecomp.calcDecomp(1, dcomp);
+
+  LC_ASSERT("Testing decomposition", dcomp.getNumRegions() == 1);
+  LC_ASSERT("Testing decomposition", dcomp.getNumTotalRegions() == 3);
+
+// check decomposition
+  Lucee::Region<2, int> rgn = dcomp.getRegion(1); // bottom pseudo box
+  LC_ASSERT("Checking lower", rgn.getLower(0) == 0);
+  LC_ASSERT("Checking lower", rgn.getLower(1) == -10);
+
+  LC_ASSERT("Checking upper", rgn.getUpper(0) == 10);
+  LC_ASSERT("Checking upper", rgn.getUpper(1) == 0);
+
+  rgn = dcomp.getRegion(2); // top pseudo box
+  LC_ASSERT("Checking lower", rgn.getLower(0) == 0);
+  LC_ASSERT("Checking lower", rgn.getLower(1) == 10);
+
+  LC_ASSERT("Checking upper", rgn.getUpper(0) == 10);
+  LC_ASSERT("Checking upper", rgn.getUpper(1) == 20);
 }
 
 int
@@ -434,5 +549,6 @@ main(int argc, char **argv)
   test_9();
   test_10();
   test_11();
+  test_12();
   LC_END_TESTS;
 }

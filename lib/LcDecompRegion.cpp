@@ -20,14 +20,15 @@ namespace Lucee
 {
   template <unsigned NDIM> 
   DecompRegion<NDIM>::DecompRegion(const Lucee::Region<NDIM, int>& globalRgn)
-    : globalRgn(globalRgn)
+    : globalRgn(globalRgn), numRegions(0)
   {
-    rgns.push_back(globalRgn); // by default global region is not decomposed
+    addRegion(globalRgn);
   }
 
   template <unsigned NDIM> 
   DecompRegion<NDIM>::DecompRegion(const DecompRegion<NDIM>& decompRgn)
-    : globalRgn(decompRgn.globalRgn), rgns(decompRgn.rgns),
+    : globalRgn(decompRgn.globalRgn), numRegions(decompRgn.numRegions),
+      rgns(decompRgn.rgns), rgnRank(decompRgn.rgnRank),
       rgnRecvNeighborMap(decompRgn.rgnRecvNeighborMap),
       rgnSendNeighborMap(decompRgn.rgnSendNeighborMap)
   {
@@ -36,6 +37,13 @@ namespace Lucee
   template <unsigned NDIM> 
   unsigned
   DecompRegion<NDIM>::getNumRegions() const
+  {
+    return numRegions;
+  }
+
+  template <unsigned NDIM> 
+  unsigned
+  DecompRegion<NDIM>::getNumTotalRegions() const
   {
     return rgns.size();
   }
@@ -51,6 +59,19 @@ namespace Lucee
       throw lce;
     }
     return rgns[rn];
+  }
+
+  template <unsigned NDIM> 
+  int
+  DecompRegion<NDIM>::getRank(unsigned rn) const
+  {
+    if (rn >= rgnRank.size())
+    {
+      Lucee::Except lce("DecompRegion::getRank: Region number ");
+      lce << rn << " is not valid. Should be smaller than " << rgns.size();
+      throw lce;
+    }
+    return rgnRank[rn];
   }
 
   template <unsigned NDIM> 
@@ -81,7 +102,9 @@ namespace Lucee
   void
   DecompRegion<NDIM>::clearDecomp()
   {
+    numRegions = 0;
     rgns.clear();
+    rgnRank.clear();
   }
 
   template <unsigned NDIM> 
@@ -91,11 +114,9 @@ namespace Lucee
 // create array over global region
     Lucee::Array<NDIM, int> check(globalRgn, 0);
 // loop over each sub-region
-    typename std::vector<Lucee::Region<NDIM, int> >::const_iterator itr
-      = rgns.begin();
-    for ( ; itr != rgns.end(); ++itr)
+    for (unsigned i=0; i<getNumRegions(); ++i)
     {
-      Lucee::ColMajorSequencer<NDIM> seq(*itr);
+      Lucee::ColMajorSequencer<NDIM> seq(rgns[i]);
 // loop over region, incrementing count in 'check' array
       while (seq.step())
         check(seq.getIndex()) += 1;
@@ -118,11 +139,9 @@ namespace Lucee
     int minVol = std::numeric_limits<int>::max();
     int maxVol = 0;
 // loop over each sub-region
-    typename std::vector<Lucee::Region<NDIM, int> >::const_iterator itr
-      = rgns.begin();
-    for ( ; itr != rgns.end(); ++itr)
+    for (unsigned i=0; i<getNumRegions(); ++i)
     {
-      int vol = itr->getVolume();
+      int vol = rgns[i].getVolume();
       minVol = vol < minVol ? vol : minVol;
       maxVol = vol > maxVol ? vol : maxVol;
     }
@@ -151,6 +170,18 @@ namespace Lucee
   DecompRegion<NDIM>::addRegion(const Lucee::Region<NDIM, int>& subRgn)
   {
     rgns.push_back(subRgn);
+    rgnRank.push_back(numRegions);
+    numRegions++;
+  }
+
+  template <unsigned NDIM> 
+  void
+  DecompRegion<NDIM>::addPseudoRegion(int rank, const Lucee::Region<NDIM, int>& subRgn)
+  {
+    rgns.push_back(subRgn);
+// Pseudo-regions will have ranks that do not correspond to their
+// region number. So we need the rank specified explicitly.
+    rgnRank.push_back(rank);
   }
 
   template <unsigned NDIM> 
@@ -162,7 +193,7 @@ namespace Lucee
 // get current region 
     Lucee::Region<NDIM, int> currRgn = getRegion(rn);
 // intersect extended region it with all other regions
-    for (unsigned i=0; i<getNumRegions(); ++i)
+    for (unsigned i=0; i<getNumTotalRegions(); ++i)
     {
       if (rn == i) 
         continue; // no need to intersect with ourself
@@ -182,7 +213,7 @@ namespace Lucee
 // get current region 
     Lucee::Region<NDIM, int> currRgn = getRegion(rn);
 // intersect it with all other regions extended by ghost cells
-    for (unsigned i=0; i<getNumRegions(); ++i)
+    for (unsigned i=0; i<getNumTotalRegions(); ++i)
     {
       if (rn == i) 
         continue; // no need to intersect with ourself

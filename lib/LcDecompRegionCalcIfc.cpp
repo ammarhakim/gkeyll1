@@ -75,6 +75,7 @@ namespace Lucee
     if (decompRgn.checkCovering() == false)
       throw Lucee::Except(
         "DecompRegionCalcIfc: Decomposition does not cover global region");
+
 // take into account periodic directions (if any)
     handlePeriodicDirs();
   }
@@ -90,17 +91,23 @@ namespace Lucee
   void
   DecompRegionCalcIfc<NDIM>::handlePeriodicDirs()
   {
+// The basic idea here is to duplicate the decomposition in the
+// periodic directions. This is a bit tricky as periodicity of corners
+// also needs to be constructed. So, for example, in 2D if the
+// decomposition is unitary (i.e. only a single sub-region) and the
+// domain is periodic in both directions, then EIGHT additional
+// regions will be added. It is possible that for a large problem
+// (1000s of regions) there is a huge amount of storage wasted for
+// periodic BCs, but I think that is unavoidable, in general. However,
+// it is possible that one could duplicate only the regions that lie
+// on a boundary, but that might be a much more trickier
+// implementation and will not work in general. (A. Hakim 2/06/2013)
+
     Lucee::Region<NDIM, int> rgn = decompRgnPtr->getGlobalRegion();
-// make a copy
+// make a copy as list of regions changes as it is extended.
     std::vector<Lucee::Region<NDIM, int> > realVec;
     for (unsigned i=0; i<decompRgnPtr->getNumRegions(); ++i)
       realVec.push_back( decompRgnPtr->getRegion(i) );
-
-    // for (typename BoxMap_t::const_iterator i = realMap.begin(); i != realMap.end(); ++i) 
-    // {
-    //   BoxRPair_t insertme((*i).first, (*i).first);
-    //   data->boxRank.insert(insertme);
-    // }
 
     int itrMin[NDIM], itrMax[NDIM];
     for (size_t i = 0; i < NDIM; ++i) {
@@ -129,25 +136,8 @@ namespace Lucee
           lext[i] = -1*idx[i]*dist[i];
           uext[i] =  1*idx[i]*dist[i];
         }
-        typename std::vector< Lucee::Region<NDIM, int> >::const_iterator itr
-          = realVec.begin();
-        for ( ; itr != realVec.end(); ++itr) {
-          //std::cout << "nTotBoxes " << nTotBoxes << std::endl;
-          Lucee::Region<NDIM, int> rgn = itr->extend(lext, uext);
-
-          // for (unsigned dd=0; dd<NDIM; ++dd)
-          //   std::cout << rgn.getLower(dd) << ", ";
-          // std::cout << std::endl;
-          // for (unsigned dd=0; dd<NDIM; ++dd)
-          //   std::cout << rgn.getUpper(dd) << ", ";
-          // std::cout << std::endl;
-          
-          // BoxPair_t insertme(nTotBoxes, (*i).second.extend(lext, uext));
-          // BoxRPair_t insertmetoo(nTotBoxes, (*i).first);
-          // data->boxMap.insert(insertme);
-          // data->boxRank.insert(insertmetoo);
-          nTotBoxes++;
-        }
+        for (unsigned i=0 ; i<realVec.size(); ++i)
+          decompRgnPtr->addPseudoRegion(i, realVec[i].extend(lext, uext));
       }
     }
   }
