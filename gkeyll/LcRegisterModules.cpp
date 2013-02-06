@@ -55,7 +55,5 @@ namespace Lucee
     Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<3> >::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<4> >::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<5> >::registerModule(L);
-    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<6> >::registerModule(L);
-    Lucee::LuaModuleRegistry<Lucee::DecompRegionCalcIfc<7> >::registerModule(L);
   }
 }

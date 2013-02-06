@@ -91,7 +91,7 @@ namespace Lucee
     decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
 
 #ifdef HAVE_MPI
-// get pointer to decomposition object
+// get decomposition object
     if (tbl.template hasObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition"))
     {
       Lucee::DecompRegionCalcIfc<NDIM>& decompCalc

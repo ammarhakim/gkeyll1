@@ -31,12 +31,22 @@ namespace Lucee
 /** Class id: this is used by registration system */
       static const char *id;
 
+/** Create new decomposition object */
+      DecompRegionCalcIfc();
+
 /**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
  */
       virtual void readInput(Lucee::LuaTable& tbl);
+
+/**
+ * Set specified direction as periodic.
+ *
+ * @param dir Direction to set as periodic.
+ */
+      void setPeriodicDir(unsigned dir);
 
 /**
  * Calculate decomposition adding subregions into decompRgn object.
@@ -70,6 +80,13 @@ namespace Lucee
     private:
 /** Pointer to decomp region box: this is so addRegion can access it */
       Lucee::DecompRegion<NDIM> *decompRgnPtr;
+/** Periodic directions */
+      bool isPeriodic[NDIM];
+
+/**
+ * Account for periodic directions by duplicating boxes appropriately.
+ */
+      void handlePeriodicDirs();
   };
 }
 
