@@ -323,6 +323,15 @@ namespace Lucee
     private:
 /** Decomposed region */
       boost::shared_ptr<Lucee::DecompRegion<NDIM> > decompRgn;
+/** Periodic directions */
+      bool isPeriodic[NDIM];
+
+/**
+ * Set direction as periodic.
+ *
+ * @param dir Direction to set periodic.
+ */
+      void setPeriodicDir(unsigned dir);
   };
 }
 

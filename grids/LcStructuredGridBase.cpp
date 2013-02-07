@@ -1,5 +1,5 @@
 /**
- * @file	LcStructuredGridBase.cpp
+ * @File	LcStructuredGridBase.cpp
  *
  * @brief	Base class for body fitted grid in arbitrary dimensions.
  */
@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcCartProdDecompRegionCalc.h>
 #include <LcGlobals.h>
 #include <LcPointerHolder.h>
 #include <LcStructuredGridBase.h>
@@ -83,6 +84,17 @@ namespace Lucee
     }
     compSpace = Lucee::Region<NDIM, double>(&lower[0], &upper[0]);
 
+    for (unsigned d=0; d<NDIM; ++d)
+      isPeriodic[d] = false;
+// check if any directions are periodic
+    if (tbl.hasNumVec("periodicDirs"))
+    {
+      std::vector<double> pd = tbl.getNumVec("periodicDirs");
+      for (unsigned i=0; i<pd.size(); ++i)
+        setPeriodicDir( (unsigned) pd[i]);
+    }
+
+
 // get comm pointer
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
@@ -96,10 +108,26 @@ namespace Lucee
     {
       Lucee::DecompRegionCalcIfc<NDIM>& decompCalc
         = tbl.template getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
+
+      for (unsigned d=0; d<NDIM; ++d)
+        decompCalc.setPeriodicDir(d, isPeriodic[d]);
 // compute decomposition
       decompCalc.calcDecomp(comm->getNumProcs(), *decompRgn);
     }
+#else
+// In serial create a unitary decomposition: this needs to be done to
+// handle the case of periodic directions.
+    int cuts[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+      cuts[d] = 1;
+
+    Lucee::CartProdDecompRegionCalc<NDIM> decompCalc(cuts);
+    for (unsigned d=0; d<NDIM; ++d)
+        decompCalc.setPeriodicDir(d, isPeriodic[d]);
+// compute decomposition
+      decompCalc.calcDecomp(1, *decompRgn);
 #endif
+
 // compute local region
     localRgn = decompRgn->getRegion(comm->getRank());
   }
@@ -333,6 +361,21 @@ namespace Lucee
     globalRgn = gb;
     compSpace = cs;
     decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
+  }
+
+  template <unsigned NDIM> 
+  void
+  StructuredGridBase<NDIM>::setPeriodicDir(unsigned dir)
+  {
+    if (dir>=0 && dir<NDIM)
+      isPeriodic[dir] = true;
+    else
+    {
+      Lucee::Except lce(
+        "StructuredGridBase::setPeriodicDirs: Direction must be between 0 and ");
+      lce << (NDIM-1);
+      throw lce;
+    }
   }
 
 // instantiations

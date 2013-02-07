@@ -45,8 +45,9 @@ namespace Lucee
  * Set specified direction as periodic.
  *
  * @param dir Direction to set as periodic.
+ * @param isp Flag to indicate if direction is periodic.
  */
-      void setPeriodicDir(unsigned dir);
+      void setPeriodicDir(unsigned dir, bool isp = true);
 
 /**
  * Calculate decomposition adding subregions into decompRgn object.
