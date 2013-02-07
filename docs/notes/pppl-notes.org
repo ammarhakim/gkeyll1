@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 6th
+
+  Completed the code to handle periodic BCs for arbitrary
+  decomposition. This was a bit tricky, and in the end did not
+  require the switch to std::map. Unit tests were a life saver.
+
+  Final step in this mess is to fix the StructGridField code to apply
+  the periodic BC when the sync() method is called.
+
 * Febuary 5th
 
   Added a new class CartGeneralDecompRegionCalc that basically is a

@@ -31,8 +31,6 @@ namespace Lucee
       .append<Lucee::StructGridField<3, double> >()
       .append<Lucee::StructGridField<4, double> >()
       .append<Lucee::StructGridField<5, double> >()
-      .append<Lucee::StructGridField<6, double> >()
-      .append<Lucee::StructGridField<7, double> >()
       .append<Lucee::DynVector<double> >();
   }
 }

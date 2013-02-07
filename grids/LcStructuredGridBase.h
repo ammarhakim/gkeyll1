@@ -189,17 +189,22 @@ namespace Lucee
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**
- * Get neigbors of target region for a given number of ghost cells on
- * each side of the target region. The neigbors also include corner
- * cells.
+ * Get specified region from decomposition.
  *
- * @param rn Target region number
- * @param lowerExt Lenght of extension along lower end in each direction.
- * @param upperExt Lenght of extension along upper end in each direction.
- * @return list of neigbors region numbers.
+ * @param rn Region number
+ * @return Region to get.
  */
       Lucee::Region<NDIM, int> getNeighborRgn(unsigned rn) const
       { return decompRgn->getRegion(rn); }
+
+/**
+ * Get rank of specified region
+ *
+ * @param rn Region number.
+ * @return Rank of specified region.
+ */
+      int getRgnRank(unsigned rn) const
+      { return decompRgn->getRank(rn); }
 
 /**
  * Method that performs registration of Lua functions.
