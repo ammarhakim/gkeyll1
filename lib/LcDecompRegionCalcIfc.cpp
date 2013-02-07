@@ -49,10 +49,10 @@ namespace Lucee
 
   template <unsigned NDIM> 
   void
-  DecompRegionCalcIfc<NDIM>::setPeriodicDir(unsigned dir)
+  DecompRegionCalcIfc<NDIM>::setPeriodicDir(unsigned dir, bool isp)
   {
     if (dir>=0 && dir<NDIM)
-      isPeriodic[dir] = true;
+      isPeriodic[dir] = isp;
     else
     {
       Lucee::Except lce(
