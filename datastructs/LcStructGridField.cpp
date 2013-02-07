@@ -37,8 +37,6 @@ namespace Lucee
   template <> const char *StructGridField<3, double>::id = "Field3D";
   template <> const char *StructGridField<4, double>::id = "Field4D";
   template <> const char *StructGridField<5, double>::id = "Field5D";
-  template <> const char *StructGridField<6, double>::id = "Field6D";
-  template <> const char *StructGridField<7, double>::id = "Field7D";
 
   template <unsigned NDIM, typename T>
   StructGridField<NDIM, T>::StructGridField()
@@ -283,28 +281,50 @@ namespace Lucee
   void
   StructGridField<NDIM, T>::startRecv(unsigned rank, int lg[NDIM], int ug[NDIM])
   {
-// THIS PRESENTLY (1-17-2012) DOES NOT WORK WITH PERIODIC BCs
+// finish receiving if we are already receiving
+    if (isReceiving) finishRecv();
 
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
 
+    Lucee::Region<NDIM, int> localBox = this->getRegion();
 // get neighbor information
     std::vector<unsigned> neigh = grid->getRecvNeighbors(rank, lg, ug);
-// receive data from our neighbors
-    for (unsigned i=0; i<neigh.size(); ++i)
+    std::vector<unsigned>::const_iterator niter;
+// receive stuff from our neighbors
+    for (niter = neigh.begin(); niter != neigh.end(); ++niter) 
     {
-      int tag = 1000; // tag for message
-      Lucee::Region<NDIM, int> srcBox = grid->getNeighborRgn(neigh[i]); // region to receive from
-// initiate communication
-      Lucee::Region<NDIM, int> rgn = srcBox.intersect( this->getExtRegion() );
+      int srcrank = grid->getRgnRank(*niter);
+      Lucee::Region<NDIM, int> otherBox = grid->getNeighborRgn(*niter);
+      int tag = 1000;
+      if (rank == srcrank) 
+//  skip if we're receiving from ourselves
+        continue;
 
-      if (rgn.getVolume() == 0)
-        continue; // nothing to do if no intersection
+      if (srcrank != *niter) 
+      { // periodic direction
+//  receiving a wrapped boundary block, tag according to direction.
+//  receiving from the negative side = -1, receiving from the positive
+//  side = +1
+        int tagmod = 1;
+        for (unsigned i=0; i<NDIM; ++i)
+        {
+          if (otherBox.getLower(i) > localBox.getLower(i)) 
+            tag += tagmod;
+          else if (otherBox.getLower(i) < localBox.getLower(i)) 
+            tag -= tagmod;
+          tagmod *= 10;
+        }
+      }
+//  set up a communication
+      Lucee::Region<NDIM, int> recvRgn = otherBox.intersect( this->getExtRegion() );
+      if ( recvRgn.getVolume() == 0 )
+        continue; // nothing do if no intersection
 
       TxMsgStatus ms = comm->template
-        startRecv<T>(this->getNumComponents()*rgn.getVolume(), neigh[i], tag);
-      msgStatus[neigh[i]] = ms; // key in msgStatus map is region we expect receive
+        startRecv<T>(this->getNumComponents()*recvRgn.getVolume(), srcrank, tag);
+      msgStatus[*niter] = ms;  // key in msgStatus map is region we expect receive
     }
     isReceiving = true;
   }
@@ -313,43 +333,78 @@ namespace Lucee
   void
   StructGridField<NDIM, T>::send(unsigned rank, int lg[NDIM], int ug[NDIM])
   {
-// THIS PRESENTLY (1-17-2012) DOES NOT WORK WITH PERIODIC BCs
-
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
 
+    Lucee::Region<NDIM, int> localBox = this->getRegion();
+
     std::vector<unsigned> neigh = grid->getSendNeighbors(rank, lg, ug);
-// send data to each of our neighbors
-    for (unsigned i=0; i<neigh.size(); ++i)
+    std::vector<unsigned>::const_iterator niter;
+    for (niter = neigh.begin(); niter != neigh.end(); ++niter)  
     {
-      int tag = 1000; // tag for message
-      unsigned destRank = neigh[i]; // rank to send data to
-      Lucee::Region<NDIM, int> destRgn = grid->getNeighborRgn(destRank); // region to send to
-// region to send is our local region intersected with destination's extended region
-      Lucee::Region<NDIM, int> sendRgn = this->getRegion().intersect(
-        destRgn.extend(lg, ug));
+      int destrank = grid->getRgnRank(*niter);
+      Lucee::Region<NDIM, int> otherBox = grid->getNeighborRgn(*niter);
+      int tag = 1000;
 
-      if (sendRgn.getVolume() == 0)
-        continue; // nothing to send
-
-// buffer to store data to send
-      std::vector<T> sendVec( this->getNumComponents()*sendRgn.getVolume() );
-
-// copy data over: this works because startRecv() function uses same
-// ordering of data as we use below.
-      Lucee::RowMajorSequencer<NDIM> seq(sendRgn);
-      Lucee::FieldPtr<T> ptr = this->createPtr();
-      unsigned loc = 0;
-      while ( seq.step() )
+      if (rank == destrank) 
       {
-        this->setPtr(ptr, seq.getIndex());
-        for (unsigned k=0; k<this->getNumComponents(); ++k)
-          sendVec[loc++] = ptr[k];
-      }
+//  destination is the same as the source.  Just copy it over
+        Lucee::Region<NDIM, int> fakeBox = grid->getNeighborRgn(*niter);
+        int lCor[NDIM], uCor[NDIM];
+        for (unsigned i=0; i<NDIM; ++i) 
+        {
+          lCor[i] = fakeBox.getLower(i) - localBox.getLower(i);
+          uCor[i] = localBox.getLower(i) - fakeBox.getLower(i);
+        }
+        Lucee::Region<NDIM, int> sendRgn =  localBox.intersect(fakeBox.extend(lg, ug));
+        Lucee::Region<NDIM, int> recvRgn = (localBox.intersect(
+            fakeBox.extend(lg, ug))).extend(lCor, uCor);
 
+        Lucee::RowMajorSequencer<NDIM> sendSeq(sendRgn);
+        Lucee::RowMajorSequencer<NDIM> recvSeq(recvRgn);
+        Lucee::FieldPtr<T> sendItr = this->createPtr();
+        Lucee::FieldPtr<T> recvItr = this->createPtr();
+        while ( sendSeq.step() && recvSeq.step() ) 
+        {
+          this->setPtr(sendItr, sendSeq.getIndex());
+          this->setPtr(recvItr, recvSeq.getIndex());
+          for (unsigned k=0; k<this->getNumComponents(); ++k)
+            recvItr[k] = sendItr[k];
+        }
+        continue;
+      }
+      if (destrank != *niter) 
+      {
+// sending a wrapped boundary block, tag according to direction.
+// sending to the negative side = +1, sending to the positive side =
+// -1
+        int tagmod = 1;
+        for (unsigned i=0; i<NDIM; ++i) 
+        {
+          if (otherBox.getLower(i) > localBox.getLower(i))
+            tag -= tagmod;
+          else if (otherBox.getLower(i) < localBox.getLower(i))
+            tag += tagmod;
+          tagmod *= 10;
+        }
+      }
+      Lucee::Region<NDIM, int> sendRgn = localBox.intersect(
+        grid->getNeighborRgn(*niter).extend(lg, ug));
+      if ( sendRgn.getVolume() == 0 )
+        continue;
+      std::vector<T> sendVec(this->getNumComponents()*sendRgn.getVolume());
+      Lucee::RowMajorSequencer<NDIM> seq(sendRgn);
+      int i = 0;
+      Lucee::FieldPtr<T> itr = this->createPtr();
+      while ( seq.step() ) 
+      {
+        this->setPtr(itr, seq.getIndex());
+        for (unsigned k=0; k<this->getNumComponents(); ++k)
+          sendVec[i++] = itr[k];
+      }
       comm->template
-        send<T>(this->getNumComponents()*sendRgn.getVolume(), &sendVec[0], destRank, tag);
+        send<T>(this->getNumComponents()*sendRgn.getVolume(), &sendVec[0], destrank, tag);
     }
   }
 
@@ -667,22 +722,17 @@ namespace Lucee
   template class StructGridField<3, int>;
   template class StructGridField<4, int>;
   template class StructGridField<5, int>;
-  template class StructGridField<6, int>;
-  template class StructGridField<7, int>;
 
   template class StructGridField<1, float>;
   template class StructGridField<2, float>;
   template class StructGridField<3, float>;
   template class StructGridField<4, float>;
   template class StructGridField<5, float>;
-  template class StructGridField<6, float>;
-  template class StructGridField<7, float>;
 
   template class StructGridField<1, double>;
   template class StructGridField<2, double>;
   template class StructGridField<3, double>;
   template class StructGridField<4, double>;
   template class StructGridField<5, double>;
-  template class StructGridField<6, double>;
-  template class StructGridField<7, double>;
+
 }

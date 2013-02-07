@@ -213,6 +213,4 @@ namespace Lucee
   template class RectCartGrid<3>;
   template class RectCartGrid<4>;
   template class RectCartGrid<5>;
-  template class RectCartGrid<6>;
-  template class RectCartGrid<7>;
 }
