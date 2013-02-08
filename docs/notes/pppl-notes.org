@@ -5,6 +5,12 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 8th
+
+  Completed tests for the general decomposition with nodal DG
+  algorithm. Seems to work and now all of Gkeyll explicit updaters are
+  parallel. Next, to think of the updaters that use petsc.
+
 * Febuary 6th
 
   Completed the code to handle periodic BCs for arbitrary
