@@ -36,15 +36,6 @@ namespace Lucee
   void
   DecompRegionCalcIfc<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-    for (unsigned d=0; d<NDIM; ++d)
-      isPeriodic[d] = false;
-// check if any directions are periodic
-    if (tbl.hasNumVec("periodicDirs"))
-    {
-      std::vector<double> pd = tbl.getNumVec("periodicDirs");
-      for (unsigned i=0; i<pd.size(); ++i)
-        setPeriodicDir( (unsigned) pd[i]);
-    }
   }
 
   template <unsigned NDIM> 
@@ -103,6 +94,11 @@ namespace Lucee
 // on a boundary, but that might be a much more trickier
 // implementation and will not work in general. (A. Hakim 2/06/2013)
 
+// This algorithm was originally written by Mahmood Miah and A. Hakim
+// for the Facets project. This implementation is essentially the same
+// as in Facets. I am retaining the original comments. (A. Hakim,
+// 2/5/2013)
+
     Lucee::Region<NDIM, int> rgn = decompRgnPtr->getGlobalRegion();
 // make a copy as list of regions changes as it is extended.
     std::vector<Lucee::Region<NDIM, int> > realVec;
@@ -122,7 +118,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
 // skip case of zero offset
       bool skipStep = true;
-      for (size_t i = 0; i < NDIM; ++i) {
+      for (size_t i=0; i<NDIM; ++i) {
         if (idx[i] != 0) {
           skipStep = false;
           break;
