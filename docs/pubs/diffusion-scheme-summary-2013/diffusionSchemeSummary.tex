@@ -64,16 +64,24 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Notation}
+\begin{align*}
+\lbrack u \rbrack = & u^+ - u^-\\
+\overline{u} = & \frac{u^+ + u^-}{2}\\
+u^{\pm} = & \lim_{\epsilon \to 0^\pm} u(x+\epsilon,t)
+\end{align*}
+\end{frame}
+
 \section{Antisymmetric LDG}
 \begin{frame}
 \frametitle{Asymmetric Local DG (AS LDG)}
 \begin{align*}
-\frac{\partial w}{\partial x} + f =& 0\\
-\frac{\partial g}{\partial x} + w =& 0
+	\frac{\partial w}{\partial x} + f =& 0,\; \frac{\partial g}{\partial x} + w = 0
 \end{align*}
 \begin{itemize}
 	\item Two choices of fluxes:
-	\begin{enumerate}
+	\begin{itemize}
 		\item $\hat{f} = f^+$, $\hat{w} = w^-$\\
 		\begin{center}
 		$\frac{\partial}{\partial t}\left(\begin{array}{cc}u_0\\u_1
@@ -96,7 +104,7 @@
 		\end{array}
 		\right)$
 		\end{center}
-	\end{enumerate}
+	\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -147,7 +155,7 @@
 \begin{frame}
 \frametitle{Direct DG (DDG)}
 \begin{itemize}
-	\item We looked at two versions of Direct DG, the 'plain' asymmetric version with interface corrections (DDG) and a symmetric version (SDDG)
+	\item We looked at two versions of Direct DG, the standard asymmetric version with interface corrections (DDG) and a symmetric version (SDDG)
 	\item DDG solves the following weak form:
 	\begin{align*}
 		\int_{I_j} u_t v \mathrm{d}x -\widehat{(u_x)}v\bigr|_{x_{j-\frac{1}{2}}}^{x_{j+\frac{1}{2}}}+\int_{I_j} u_x v_x \mathrm{d}x+ \frac{1}{2}\lbrack u\rbrack(v_x)_{j+\frac{1}{2}}^- + \frac{1}{2}\lbrack u\rbrack(v_x)_{j-\frac{1}{2}}^+= & 0
