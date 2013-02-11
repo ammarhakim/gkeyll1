@@ -196,6 +196,61 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
+    // determine number of global degrees of freedom
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> grgn = grid.getGlobalRegion();
+    unsigned cellsPerDim[NDIM];
+    unsigned currIndex[NDIM];
+
+    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      cellsPerDim[dimIndex] = grgn.getShape(dimIndex);
+      // Get global index of current cell, too
+      currIndex[dimIndex]   = this->currIdx[dimIndex];
+    }
+
+    // Number of nodes on an edge
+    unsigned nodesPerSide = basisDegree + 1;
+    // Number of nodes on a 2-D serendipity element of same degree
+    unsigned nodesPerCell2D;
+    // Figure out number of nodes per row
+    unsigned nodesPerRow2D[nodesPerSide];
+    unsigned globalNodesPerRow2D[nodesPerSide];
+    if (basisDegree == 1)
+    {
+      nodesPerCell2D = 4;
+      nodesPerRow2D[0] = 2;
+      nodesPerRow2D[1] = 2;
+    }
+    else if (basisDegree == 2)
+    {
+      nodesPerCell2D = 8;
+      nodesPerRow2D[0] = 3;
+      nodesPerRow2D[1] = 2;
+      nodesPerRow2D[2] = 3;
+    }
+    else if (basisDegree == 3)
+    {
+      nodesPerCell2D = 12;
+      nodesPerRow2D[0] = 4;
+      nodesPerRow2D[1] = 2;
+      nodesPerRow2D[2] = 2;
+      nodesPerRow2D[3] = 4;
+    }
+
+    // Total number of nodes in one cell row of the mesh, minus the 'top row'
+    // Type A nodes are those on the top and bottom rows of an element
+    unsigned typeAPad = 0;
+    for (unsigned rowIndex = 0; rowIndex < nodesPerSide; rowIndex++)
+    {
+      globalNodesPerRow2D[rowIndex] = (nodesPerRow2D[rowIndex]-1)*cellsPerDim[0] + 1;
+      if (rowIndex != nodesPerSide-1)
+        typeAPad += globalNodesPer2D[rowIndex];
+    }
+
+    unsigned nodeIndices[nodesPerCell2D];
+
     throw Lucee::Except("SerendipityElement::getLocalToGlobal: Not implemented!");
   }
 

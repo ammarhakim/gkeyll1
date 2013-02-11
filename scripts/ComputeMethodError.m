@@ -63,8 +63,8 @@ function [errorMatrix,lengthVector,slopeVector] = ComputeMethodError(pathBase,ce
         
         [polyCoeffs,S] = polyfit(xPlot,yPlot,1);
         slopeVector(orderIndex) = polyCoeffs(1);
-%         orderIndex
-%         rsquare = 1 - S.normr^2 / norm(yPlot-mean(yPlot))^2
+        orderIndex
+        rsquare = 1 - S.normr^2 / norm(yPlot-mean(yPlot))^2
 %         yFit = polyval(polyCoeffs,xPlot);
         
 %         plot(xPlot,yPlot,'.-',xPlot,yFit)
