@@ -1,0 +1,37 @@
+/** Script to perform interface reconstruction */
+
+load(orthopoly);
+
+etal(x) := (x+dx/2)/(dx/2);
+etar(x) := (x-dx/2)/(dx/2);
+zet(x) := (x-0)/dx;
+
+ul(x,pm) := sum(cl(k)*legendre_p(k,etal(x)), k, 0, pm);
+ur(x,pm) := sum(cr(k)*legendre_p(k,etar(x)), k, 0, pm);
+fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, 2*(pm+1)-1);
+
+eqnl(k,pm) := integrate(fit(x,pm)*legendre_p(k,etal(x)), x, -dx,0) = integrate(ul(x,pm)*legendre_p(k,etal(x)), x, -dx,0);
+eqnr(k,pm) := integrate(fit(x,pm)*legendre_p(k,etar(x)), x, 0,dx) = integrate(ur(x,pm)*legendre_p(k,etar(x)), x, 0,dx);
+
+/** Function to perform reconstruction at interface */
+calcRecon(x,pm) := block([eq, un, res],
+  eq : (eq : [], for i from 0 thru pm
+         do (eq : append([eqnl(i,pm),eqnr(i,pm)], eq)),
+       eq),
+  un : (un : [], for i from 0 thru 2*(pm+1)-1
+         do (un : endcons(f(i), un)),
+       un),
+  res : solve(eq, un),
+  return (map(rhs, res[1]))
+);
+  
+
+/** 
+Notes:
+
+One can represent the reconstruction in terms of a Legendre polynomials as
+
+fit(x,pm) := sum(f(k)*legendre_p(k,zet(x)), k, 0, 2*(pm+1)-1);
+
+However, it is easier to real off the derivatives from a Taylor series around xh.
+*/

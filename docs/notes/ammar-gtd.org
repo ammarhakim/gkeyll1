@@ -210,44 +210,6 @@ archived.
    to allow a data-structure to take a sub-communicator so only a
    sub-set of processors do the I/O.
 
-** Make neighbor calculations for periodic boundaries. 		      :INFRA:
-
-   A significant unresolved issue: how to deal with periodic domains?
-   The neighbor calculation code needs to change for that. Essentially
-   on each periodic side of the global region (including corners) we
-   need to make copies of the global region. This will then give the
-   proper neighbors, including self-intersections. Some ambiguity
-   exists in the case in which the only one direction is
-   periodic. Question: should the periodic conditions include corners
-   in this case? I do not know, yet.
-
-** Fix hang in parallel test					      :INFRA:
-
-   With this Gkeyll will be ready for parallel runs. The problem is in
-   the sync() method.
-
-** Registration of objects 					      :INFRA:
-
-   Currently the object registration depends on a doing a "new". Need
-   to replace this with a proper function so that cleanup of the
-   registred objects can be done if needed. Also, this adds an
-   additional layer, opening up the possibility for doing more complex
-   things later.
-   
-   One possible solution:
-
-#+BEGIN_EXAMPLE
-   Lucee::registerObject<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>();
-#+END_EXAMPLE
-
-   I.e. the method would be templated over the base and derived class
-   but otherwise would not take any parameters. In the body of the
-   method the ObjRegistry<> object would be created and the object
-   pointer put into a map, using the derived class Id as a key. Then,
-   a set of "unload" methods would be provided that would remove the
-   appropriate objects from the map, or all objects for a specified
-   base class or clear out all registered objects completely.
-
 ** Improve HDF5 output
 
    Allow appending data to the same file. Also somehow one needs to
