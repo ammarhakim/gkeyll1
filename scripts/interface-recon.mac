@@ -8,30 +8,65 @@ zet(x) := (x-0)/dx;
 
 ul(x,pm) := sum(cl(k)*legendre_p(k,etal(x)), k, 0, pm);
 ur(x,pm) := sum(cr(k)*legendre_p(k,etar(x)), k, 0, pm);
+
+/** Reconstruction is expressed as Taylor series */
 fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, 2*(pm+1)-1);
 
+/** The following two expressions enforce the fit to be L2 fit to ul and ur */
 eqnl(k,pm) := integrate(fit(x,pm)*legendre_p(k,etal(x)), x, -dx,0) = integrate(ul(x,pm)*legendre_p(k,etal(x)), x, -dx,0);
 eqnr(k,pm) := integrate(fit(x,pm)*legendre_p(k,etar(x)), x, 0,dx) = integrate(ur(x,pm)*legendre_p(k,etar(x)), x, 0,dx);
 
 /** Function to perform reconstruction at interface */
 calcRecon(x,pm) := block([eq, un, res],
-  eq : (eq : [], for i from 0 thru pm
-         do (eq : append([eqnl(i,pm),eqnr(i,pm)], eq)),
-       eq),
-  un : (un : [], for i from 0 thru 2*(pm+1)-1
-         do (un : endcons(f(i), un)),
-       un),
+  /* Make list of equations to solve */
+  eq : append(makelist(eqnl(i,pm), i, 0, pm), makelist(eqnr(i,pm), i, 0, pm)),
+  /* Make list of unknowns */
+  un : makelist(f(i), i, 0, 2*(pm+1)-1),
+  /* Solve and extract results */
   res : solve(eq, un),
   return (map(rhs, res[1]))
 );
-  
 
-/** 
-Notes:
+/** p=0 case */
+c0 : calcRecon(x,0);
 
-One can represent the reconstruction in terms of a Legendre polynomials as
+/** Flux at right interface */
+fj1 : subst([cr(0)=u0(j+1), cl(0)=u0(j)], c0[2]);
 
-fit(x,pm) := sum(f(k)*legendre_p(k,zet(x)), k, 0, 2*(pm+1)-1);
+/** Flux at left interface */
+fj : subst([cr(0)=u0(j), cl(0)=u0(j-1)], c0[2]);
 
-However, it is easier to real off the derivatives from a Taylor series around xh.
-*/
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** p=1 case */
+c1 : calcRecon(x,1);
+
+/** Flux at right interface */
+fj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[2]);
+
+/** Flux at left interface */
+fj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[2]);
+
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** Value at right interface */
+fvj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[1]);
+
+/** Flux at left interface */
+fvj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[1]);
+
+/** Update for second equation */
+du1(j) := fullratsimp( (fj1+fj - 2/dx*(fvj1-fvj))*3/dx );
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du0(j));
+du1T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du1(j));
+
+/** Collect terms */
+Tmat : dx^2*coefmatrix([du0T(j), du1T(j)], [u0(j),u1(j)]);
+
+/** Compute eigenmatrix */
+vN : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
+
