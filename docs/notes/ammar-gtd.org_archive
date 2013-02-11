@@ -402,6 +402,65 @@ Archived entries from file /Users/ahakim/research/gkeyll-project/gkeyllall/gkeyl
   like a problem with normalization. Also, the dispersion relation
   probably needs to be rederived for this case.
 
+* Make neighbor calculations for periodic boundaries.		      :INFRA:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2013-02-08 Fri 11:45
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll infrastructure work
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  A significant unresolved issue: how to deal with periodic domains?
+  The neighbor calculation code needs to change for that. Essentially
+  on each periodic side of the global region (including corners) we
+  need to make copies of the global region. This will then give the
+  proper neighbors, including self-intersections. Some ambiguity
+  exists in the case in which the only one direction is
+  periodic. Question: should the periodic conditions include corners
+  in this case? I do not know, yet.
+
+* Fix hang in parallel test					      :INFRA:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2013-02-08 Fri 11:46
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll infrastructure work
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+  With this Gkeyll will be ready for parallel runs. The problem is in
+  the sync() method.
+
+* Registration of objects					      :INFRA:
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2013-02-08 Fri 11:46
+  :ARCHIVE_FILE: ~/research/gkeyll-project/gkeyllall/gkeyll/docs/notes/ammar-gtd.org
+  :ARCHIVE_OLPATH: Gkeyll infrastructure work
+  :ARCHIVE_CATEGORY: ammar-gtd
+  :END:
+
+   Currently the object registration depends on a doing a "new". Need
+   to replace this with a proper function so that cleanup of the
+   registred objects can be done if needed. Also, this adds an
+   additional layer, opening up the possibility for doing more complex
+   things later.
+   
+   One possible solution:
+
+#+BEGIN_EXAMPLE
+   Lucee::registerObject<Lucee::UpdaterIfc, Lucee::PeriodicPoisson2DUpdater>();
+#+END_EXAMPLE
+
+   I.e. the method would be templated over the base and derived class
+   but otherwise would not take any parameters. In the body of the
+   method the ObjRegistry<> object would be created and the object
+   pointer put into a map, using the derived class Id as a key. Then,
+   a set of "unload" methods would be provided that would remove the
+   appropriate objects from the map, or all objects for a specified
+   base class or clear out all registered objects completely.
+
+
+
+
 
 
 

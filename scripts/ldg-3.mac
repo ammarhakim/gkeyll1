@@ -60,3 +60,8 @@ q1_b(j) := -3*(ww_b(j+1)+ww_b(j)) + 6*w0_b(j);
 /** Average */
 q0_av(j) := (q0_a(j) + q0_b(j))/2;
 q1_av(j) := (q1_a(j) + q1_b(j))/2;
+
+/** Matrices */
+A_a : rectform(matrix([4*T-8+4*Ti, -2*T-2+4*Ti], [12*T-6-6*Ti, -6*T-24-6*Ti]));
+A_b : rectform(matrix([4*T-8+4*Ti, -4*T+2+2*Ti], [6*T+6-12*Ti, -6*T-24-6*Ti]));
+A_av : rectform(matrix([4*T-8+4*Ti, -3*T+3*Ti], [9*T-9*Ti, -6*T-24-6*Ti]));
