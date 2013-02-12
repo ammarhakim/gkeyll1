@@ -107,6 +107,7 @@ endif (BLITZ_FOUND)
 # find Eigen
 find_package(SciEigen REQUIRED)
 if (EIGEN_FOUND)
+  add_definitions(-DEIGEN_NO_DEBUG)
   include_directories(${Eigen_INCLUDE_DIRS})
 endif (EIGEN_FOUND)
 

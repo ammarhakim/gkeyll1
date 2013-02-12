@@ -198,7 +198,7 @@ namespace Lucee
   {
     // determine number of global degrees of freedom
     const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Region<NDIM, int> grgn = grid.getGlobalRegion();
     unsigned cellsPerDim[NDIM];
     unsigned currIndex[NDIM];
@@ -246,7 +246,7 @@ namespace Lucee
     {
       globalNodesPerRow2D[rowIndex] = (nodesPerRow2D[rowIndex]-1)*cellsPerDim[0] + 1;
       if (rowIndex != nodesPerSide-1)
-        typeAPad += globalNodesPer2D[rowIndex];
+        typeAPad += globalNodesPerRow2D[rowIndex];
     }
 
     unsigned nodeIndices[nodesPerCell2D];
