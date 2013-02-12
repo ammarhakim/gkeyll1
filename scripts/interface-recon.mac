@@ -6,17 +6,20 @@ etal(x) := (x+dx/2)/(dx/2);
 etar(x) := (x-dx/2)/(dx/2);
 zet(x) := (x-0)/dx;
 
+/** Solution in left/right cells */
 ul(x,pm) := sum(cl(k)*legendre_p(k,etal(x)), k, 0, pm);
 ur(x,pm) := sum(cr(k)*legendre_p(k,etar(x)), k, 0, pm);
 
 /** Reconstruction is expressed as Taylor series */
 fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, 2*(pm+1)-1);
 
-/** The following two expressions enforce the fit to be L2 fit to ul and ur */
+/** Reconstruction is expressed as Taylor series */
 eqnl(k,pm) := integrate(fit(x,pm)*legendre_p(k,etal(x)), x, -dx,0) = integrate(ul(x,pm)*legendre_p(k,etal(x)), x, -dx,0);
 eqnr(k,pm) := integrate(fit(x,pm)*legendre_p(k,etar(x)), x, 0,dx) = integrate(ur(x,pm)*legendre_p(k,etar(x)), x, 0,dx);
 
-/** Function to perform reconstruction at interface */
+/** Function to perform reconstruction at interface. The return list
+contains the expansion coefficients in a Taylor series around the cell
+interface. */
 calcRecon(x,pm) := block([eq, un, res],
   /* Make list of equations to solve */
   eq : append(makelist(eqnl(i,pm), i, 0, pm), makelist(eqnr(i,pm), i, 0, pm)),
