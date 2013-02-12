@@ -20,14 +20,15 @@ lambdaActual = -(1/deltaX)**2*x**2
 
 plt.figure(1)
 plt.plot(x,lambdaDDG,'b',x,lambdaSDDG,'g',x,lambdaLDG_AS,'r',x,lambdaLDG_S,'c')
-plt.plot(x,lambdaActual,'m',linewidth=2)
-plt.plot(x,lambdaIR,'k', x, lambdaIR1, '--k')
+plt.plot(x, lambdaIR,'k')
+plt.plot(x, lambdaActual,'m', linewidth=2)
+plt.plot(x, lambdaIR1, '--k')
 plt.plot(x,lambdaDDG1,'b--',x,lambdaSDDG1,'g--',x,lambdaLDG_AS1,'r--',x,lambdaLDG_S1,'c--')
 plt.xlabel('k$\Delta$x')
 plt.ylabel('$\lambda\Delta$x$^2$')
 plt.title('Eigenvalue Comparison')
 plt.xlim(0,2*pi)
-plt.legend(('DDG','SDDG','ALDG','SLDG','Recovery', 'Exact'), loc='lower center')
+plt.legend(('DDG','SDDG','ALDG','SLDG', 'Recovery', 'Exact'), loc='lower center')
 
 # Put legend outside plot
 #ax = plt.subplot(111)
