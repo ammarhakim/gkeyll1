@@ -78,10 +78,6 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Equation to solve */
-      Lucee::HyperEquation *equation;
-/** Number of equations */
-      unsigned meqn;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number */
@@ -90,16 +86,7 @@ namespace Lucee
       unsigned numBasis;
 /** Diffusion coefficient */
       double diffCoef;
-/** Values of Legendre polynomials at the ordinates */
-      Matrix<double> Pmk; // m <- Polynomial order k <- ordinate index
-/** Values of Legendre polynomials derivate at the ordinates */
-      Matrix<double> DPmk; // m <- Polynomial order k <- ordinate index
-/** Normalization coefficients */
-      Vector<double> normCoeff;
-/** Weights for quadrature */
-      Lucee::Vector<double> w;
-/** Ordinates for quadrature */
-      Lucee::Vector<double> mu;
+      std::vector<double> normCoeff;
 /** Inverse of recovery matrix */
       Eigen::MatrixXd recoveryMatrixInv;
 /** Precomputed volume integrals */
@@ -109,13 +96,12 @@ namespace Lucee
  * the location x
  */
       double legendrePoly2ndDeriv(int order, double x);
-
 /**
  * Returns the coefficients of "1" and "x" terms of recovery polynomial.
  * col 1 = f0, col 2 = f1, each row is f's for one eqn
  */
       void computeRecoveryPolynomial(const Lucee::ConstFieldPtr<double>& qLeft,
-        Lucee::ConstFieldPtr<double>& qRight, Eigen::MatrixXd& boundaryTerms);
+        Lucee::ConstFieldPtr<double>& qRight, std::vector<double>& boundaryTerms);
   };
 }
 
