@@ -6,6 +6,7 @@ include_directories(${PROJECT_SOURCE_DIR}/grids)
 include_directories(${PROJECT_SOURCE_DIR}/datastructs)
 include_directories(${PROJECT_SOURCE_DIR}/slvrs)
 include_directories(${PROJECT_SOURCE_DIR}/proto)
+include_directories(${PROJECT_SOURCE_DIR}/etc/quadrule)
 include_directories(${PROJECT_SOURCE_DIR}/etc/loki/include)
 
 if (FFTW3_FOUND)
@@ -25,6 +26,7 @@ set (proto_SOURCES
   LcIntegrateNodalField.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
+  LcModalDg1DDiffusionUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp

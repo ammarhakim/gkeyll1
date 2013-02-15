@@ -18,6 +18,7 @@
 #include <LcIntegrateNodalField.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DUpdater.h>
+#include <LcModalDg1DDiffusionUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
@@ -53,6 +54,7 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
       .append<Lucee::ModalDg1DUpdater>()
+      .append<Lucee::ModalDg1DDiffusionUpdater>()
       .append<Lucee::ModalDgLimiter1DUpdater>()
       .append<Lucee::NodalPoissonBracketUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
@@ -69,11 +71,15 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
-      .append<Lucee::NormGradPhiUpdater<3> >()
+      .append<Lucee::NormGradPhiUpdater<3> >();
 #ifdef HAVE_PETSC
-      .append<Lucee::ContFromDisContUpdater<1> >()
+      Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+      ::Instance()
+      .append<Lucee::ContFromDisContUpdater<1> >();
 #endif
 #ifdef HAVE_FFTW3
+      Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+      ::Instance()
       .append<Lucee::PeriodicPoisson2DUpdater>();
 #endif
   }
