@@ -1,0 +1,2 @@
+diffusionSchemeSummary.pdf: diffusionSchemeSummary.tex
+	pdflatex diffusionSchemeSummary.tex

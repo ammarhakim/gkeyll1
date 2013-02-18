@@ -5,6 +5,15 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 13th
+
+  Completed (with Eric Shi) notes on various diffusion schemes with
+  DG. Turns out that the best scheme to use is van Leer's recovery
+  based DG scheme (RDG). These names, "recovery" and "reconstruction"
+  are horrible. Did a bunch of von Neumann analysis, results of which
+  were surprizing. Eric will now implement a modal RDG in Gkell and
+  test.
+
 * Febuary 8th
 
   Completed tests for the general decomposition with nodal DG
