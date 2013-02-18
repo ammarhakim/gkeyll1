@@ -24,27 +24,17 @@ namespace Lucee
   const char *ModalDg1DDiffusionUpdater::id = "ModalDg1DDiffusion";
 
   ModalDg1DDiffusionUpdater::ModalDg1DDiffusionUpdater()
-    : UpdaterIfc(), numBasis(1), Pmk(1,1), DPmk(1,1), normCoeff(1), w(1), mu(1)
+    : UpdaterIfc()
   {
   }
 
   void
   ModalDg1DDiffusionUpdater::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
+    // Call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
-// equation to solve
-    if (tbl.hasObject<Lucee::HyperEquation>("equation"))
-      equation = &tbl.getObjectAsBase<Lucee::HyperEquation>("equation");
-    else
-    {
-      Lucee::Except lce("ModalDg1DiffusionUpdater::readInput: Must specify an equation to solve!");
-      throw lce;
-    }
-    meqn = equation->getNumEqns();
-
-// get number of basis functions to project on
+    // Get number of basis functions to project on
     numBasis = (unsigned) tbl.getNumber("numBasis");
 
     // Get diffusion coefficient
@@ -55,29 +45,8 @@ namespace Lucee
     if (tbl.hasNumber("cflm"))
       cflm = tbl.getNumber("cflm"); // maximum CFL number
 
-    normCoeff = Lucee::Vector<double>(numBasis);
-// allocate space
-/*
-    Pmk = Matrix<double>(numBasis, numBasis);
-    DPmk = Matrix<double>(numBasis, numBasis);
-    normCoeff = Lucee::Vector<double>(numBasis);
-    w = Lucee::Vector<double>(numBasis);
-    mu = Lucee::Vector<double>(numBasis);
-
-// compute weights and ordinates
-    Lucee::gauleg(numBasis, -1, 1, mu, w);
-
-// compute Legendre polynomials at ordinates
-    for (unsigned m=0; m<numBasis; ++m)
-      for (unsigned k=0; k<numBasis; ++k)
-        Pmk(m,k) = Lucee::legendrePoly(m, mu[k]);
-
-// compute derivatives of Legendre polynomials at ordinates
-    for (unsigned m=0; m<numBasis; ++m)
-      for (unsigned k=0; k<numBasis; ++k)
-        DPmk(m,k) = Lucee::legendrePolyDeriv(m, mu[k]);*/
-
-// compute normalization coefficients
+    normCoeff = std::vector<double>(numBasis);
+    // Compute normalization coefficients
     for (unsigned m=0; m<numBasis; ++m)    
       normCoeff[m] = 1/(2.0*m+1);
   }
@@ -223,13 +192,13 @@ namespace Lucee
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
 // state on left and right of each edge
-    Lucee::FieldPtr<double> qL(meqn), qR(meqn);
+    Lucee::FieldPtr<double> qL(1), qR(1);
 
-    if ( (q.getNumComponents() != meqn*numBasis) && (qNew.getNumComponents() != meqn*numBasis) )
+    if ( (q.getNumComponents() != numBasis) && (qNew.getNumComponents() != numBasis) )
     {
       Lucee::Except lce(
         "ModalDg1DDiffusionUpdater::update: Number of components in input/output fields should be ");
-      lce << meqn*numBasis << ". Instead provided " << q.getNumComponents() << std::endl;
+      lce << numBasis << ". Instead provided " << q.getNumComponents() << std::endl;
     }
 
 // iterators
@@ -245,7 +214,7 @@ namespace Lucee
     int sliceLower = localRgn.getLower(0);
     int sliceUpper = localRgn.getUpper(0);
 
-    Eigen::MatrixXd boundaryTerms(meqn,2);
+    std::vector<double> boundaryTerms(2);
 
 // loop over edges computing edge fluxes, accumulating contribution
 // from edge flux in cells connected to that edge. NOTE: There is one
@@ -268,15 +237,12 @@ namespace Lucee
       qNew.setPtr(qNewrPtr, i); // right cell
 
 // accumulate increment to appropriate cells
-      for (int k = 0; k < meqn; k++)
+      int sgn = -1.0;
+      for (int m = 0; m < numBasis; m++)
       {
-        int sgn = -1.0;
-        for (int m = 0; m < numBasis; m++)
-        {
-          qNewlPtr[k+m*meqn] += boundaryTerms(k,1) - (m*(m+1)/dx)*boundaryTerms(k,0);
-          qNewrPtr[k+m*meqn] += sgn*(boundaryTerms(k,1) + (m*(m+1)/dx)*boundaryTerms(k,0));
-          sgn *= -1;
-        }
+        qNewlPtr[m] += boundaryTerms[1] - (m*(m+1)/dx)*boundaryTerms[0];
+        qNewrPtr[m] += sgn*(boundaryTerms[1] + (m*(m+1)/dx)*boundaryTerms[0]);
+        sgn *= -1;
       }
     }
 
@@ -290,24 +256,19 @@ namespace Lucee
         // Attach iterators to cell
         q.setPtr(qPtr, i);
         qNew.setPtr(qNewPtr, i);
-
-        // Loop over each equation set
-        for (int eqnIndex = 0; eqnIndex < meqn; eqnIndex++)
+        // Loop over each basis function. Only when test function is
+        // degree 2 or higher will contribute due to (v_m)_{xx} term
+        for (int basisIndex = 2; basisIndex < numBasis; basisIndex++)
         {
-          // Loop over each basis function. Only when test function is
-          // degree 2 or higher will contribute due to (v_m)_{xx} term
-          for (int basisIndex = 2; basisIndex < numBasis; basisIndex++)
+          integralResult = 0.0;
+          // Compute Integral[(v_m)_{xx}*u dx] over cell by summing
+          // weights of u with precomputed integral
+          for (int uCoeffIndex = 0; uCoeffIndex < numBasis; uCoeffIndex++)
           {
-            integralResult = 0.0;
-            // Compute Integral[(v_m)_{xx}*u dx] over cell by summing
-            // weights of u with precomputed integral
-            for (int uCoeffIndex = 0; uCoeffIndex < numBasis; uCoeffIndex++)
-            {
-              integralResult += qPtr[eqnIndex+uCoeffIndex*meqn]*recoveryVolume(basisIndex,uCoeffIndex);
-            }
-            // Add this result to the new state of the cell
-            qNewPtr[eqnIndex+basisIndex*meqn] += integralResult;
+            integralResult += qPtr[uCoeffIndex]*recoveryVolume(basisIndex,uCoeffIndex);
           }
+          // Add this result to the new state of the cell
+          qNewPtr[basisIndex] += integralResult;
         }
       }
     }
@@ -324,8 +285,7 @@ namespace Lucee
       for (unsigned m=0; m<numBasis; ++m)
       {
         nc = diffCoef*dt/(normCoeff[m]*dx);
-        for (unsigned k=0; k<meqn; ++k)
-          qNewPtr[k+m*meqn] *= nc;
+          qNewPtr[m] *= nc;
       }
 
       q.setPtr(qPtr, i);
@@ -353,34 +313,26 @@ namespace Lucee
 
   void
   ModalDg1DDiffusionUpdater::computeRecoveryPolynomial(const Lucee::ConstFieldPtr<double>& qLeft,
-    Lucee::ConstFieldPtr<double>& qRight, Eigen::MatrixXd& boundaryTerms)
+    Lucee::ConstFieldPtr<double>& qRight, std::vector<double>& boundaryTerms)
   {
 
-    Eigen::MatrixXd qVals(2*numBasis,meqn);
-    // Zero out boundaryTerms matrix
-    boundaryTerms = Eigen::MatrixXd::Zero(meqn, 2);
+    Eigen::MatrixXd qVals(2*numBasis,1);
 
     // Fill out qVals
-    for (int eqnIndex = 0; eqnIndex < meqn; eqnIndex++)
+    for (int componentIndex = 0; componentIndex < numBasis; componentIndex++)
     {
-      for (int componentIndex = 0; componentIndex < numBasis; componentIndex++)
-      {
-        // left goes in 2*componentIndex, right goes in 2*componentIndex+1
-        qVals(2*componentIndex,eqnIndex)   = qLeft[eqnIndex+componentIndex*meqn];
-        qVals(2*componentIndex+1,eqnIndex) = qRight[eqnIndex+componentIndex*meqn];
-      }
+      // left goes in 2*componentIndex, right goes in 2*componentIndex+1
+      qVals(2*componentIndex,0)   = qLeft[componentIndex];
+      qVals(2*componentIndex+1,0) = qRight[componentIndex];
     }
 
     // Get coefficients of reconstructed polynomial at a single edge
-    Eigen::MatrixXd fVals(2*numBasis,meqn);
+    Eigen::MatrixXd fVals(2*numBasis,1);
 
     fVals = recoveryMatrixInv*qVals;
 
     // Copy relevant data to boundaryTerms matrix
-    for (int eqnIndex = 0; eqnIndex < meqn; eqnIndex++)
-    {
-      boundaryTerms(eqnIndex,0) = fVals(0,eqnIndex);
-      boundaryTerms(eqnIndex,1) = fVals(1,eqnIndex);
-    }
+    boundaryTerms[0] = fVals(0,0);
+    boundaryTerms[1] = fVals(1,0);
   }
 }
