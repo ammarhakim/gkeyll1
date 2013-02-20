@@ -38,6 +38,7 @@ plt.legend(('DDG','SDDG','ALDG','SLDG', 'Recovery', 'Exact'), loc='lower center'
 #          loc='upper center', bbox_to_anchor=(0.5, -0.1),fancybox=True,shadow=True,ncol=6)
 
 plt.savefig('compareDiffusionSchemes.pdf')
+plt.savefig('compareDiffusionSchemes.png')
 
 plt.figure(2)
 plt.plot(x,lambdaDDG,'b',x,lambdaSDDG,'g',x,lambdaLDG_AS,'r',x,lambdaLDG_S,'c')
