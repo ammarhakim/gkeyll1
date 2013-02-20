@@ -5,6 +5,26 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 20th
+
+  Did initial tests of recovery based DG scheme (RDG) and tested it on
+  diffusion problem. We see very high order of convergence of the
+  solutions, much higher than the corresponding order DG scheme.
+
+  Trying to work out recovery based DG scheme. Turns out that doing a
+  van Leer style recovery (i.e. best L2 fit in each cell) does not
+  work as that just gives the standard DG scheme back. Doing a best L2
+  fit across three cells, with the constraint that the edge values be
+  upwind, gives a scheme, which, apparently, is not
+  superconvergent. This is an odd result, which I do not know how to
+  explain. Perhaps there is an error in the script.
+
+  Last weekend I also added some particle classes to Gkeyll. These are
+  not complete yet, as I have not yet figured out how to do the move
+  of particles between cells. When this is complete, I want to PIC
+  simulations of reconnection and do side-by-side comparison of
+  two-fluid 5/10 moment and PIC.
+
 * Febuary 13th
 
   Completed (with Eric Shi) notes on various diffusion schemes with
