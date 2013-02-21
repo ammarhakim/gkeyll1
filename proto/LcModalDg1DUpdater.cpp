@@ -52,6 +52,11 @@ namespace Lucee
     if (tbl.hasNumber("cflm"))
       cflm = tbl.getNumber("cflm"); // maximum CFL number
 
+// check to see if we are only computing L(q) or q+dt*L(q)
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
+
 // allocate space
     Pmk = Matrix<double>(numBasis, numBasis);
     DPmk = Matrix<double>(numBasis, numBasis);
@@ -227,15 +232,19 @@ namespace Lucee
 // normalize increment
       for (unsigned m=0; m<numBasis; ++m)
       {
-        nc = dt/(normCoeff[m]*dx);
+        nc = 1.0/(normCoeff[m]*dx);
         for (unsigned k=0; k<meqn; ++k)
           qNewPtr[k+m*meqn] *= nc;
       }
-
-      q.setPtr(qPtr, i);
+      
+      // Only do this if full update is requested
+      if (onlyIncrement == false)
+      {
+        q.setPtr(qPtr, i);
 // do forward Euler step
-      for (unsigned n=0; n<q.getNumComponents(); ++n)
-        qNewPtr[n] += qPtr[n];
+        for (unsigned n=0; n<q.getNumComponents(); ++n)
+          qNewPtr[n] = qPtr[n] + dt*qNewPtr[n];
+      }
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);

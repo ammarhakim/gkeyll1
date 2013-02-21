@@ -45,10 +45,9 @@ namespace Lucee
     if (tbl.hasNumber("cflm"))
       cflm = tbl.getNumber("cflm"); // maximum CFL number
 
-    normCoeff = std::vector<double>(numBasis);
-    // Compute normalization coefficients
-    for (unsigned m=0; m<numBasis; ++m)    
-      normCoeff[m] = 1/(2.0*m+1);
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
   }
 
 
@@ -154,6 +153,10 @@ namespace Lucee
       }
     }
 
+    normCoeff = std::vector<double>(numBasis);
+    // Compute normalization coefficients
+    for (unsigned m=0; m<numBasis; ++m)    
+      normCoeff[m] = 1/(2.0*m+1);
 // call base class method
     Lucee::UpdaterIfc::initialize();
   }
@@ -178,8 +181,7 @@ namespace Lucee
 
 // time-step
     double dt = t-this->getCurrTime();
-    double dx, xc[3];
-    dx = grid.getDx(0);
+    double dx = grid.getDx(0);
 
     // Figure out whether time step is too large
     if(dt > (cfl*dx*dx/(2*diffCoef)))
@@ -221,10 +223,6 @@ namespace Lucee
 // more edge that cells hence the upper limit in the for loop.
     for (int i=sliceLower; i<sliceUpper+1; ++i)
     {
-// cell spacing in left cell
-      grid.setIndex(i-1);
-// cell spacing in right cell
-      grid.setIndex(i);
 // attach iterators to left/right cells of this edge
       q.setPtr(qlPtr, i-1); // left cell
       q.setPtr(qrPtr, i); // right cell
@@ -273,25 +271,26 @@ namespace Lucee
       }
     }
 
-// Perform final update
+    // Perform final update
     double nc;
     for (unsigned i=sliceLower; i<sliceUpper; ++i)
     {
-      grid.setIndex(i);
-      double dx = grid.getDx(0);
-
       qNew.setPtr(qNewPtr, i);
-// normalize increment
-      for (unsigned m=0; m<numBasis; ++m)
+      // Normalize increment
+      for (int m = 0; m < numBasis; m++)
       {
-        nc = diffCoef*dt/(normCoeff[m]*dx);
-          qNewPtr[m] *= nc;
+        nc = diffCoef/(normCoeff[m]*dx);
+        qNewPtr[m] *= nc;
       }
 
-      q.setPtr(qPtr, i);
-// do forward Euler step
-      for (unsigned n=0; n<q.getNumComponents(); ++n)
-        qNewPtr[n] += qPtr[n];
+      // Only do this if full update is requested
+      if (onlyIncrement == false)
+      {
+        q.setPtr(qPtr, i);
+        // do forward Euler step
+        for (int n = 0; n < q.getNumComponents(); n++)
+          qNewPtr[n] = qPtr[n] + dt*qNewPtr[n];
+      }
     }
 
     return Lucee::UpdaterStatus(true, cfl*dx*dx/(2*diffCoef));
