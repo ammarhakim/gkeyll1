@@ -1,11 +1,11 @@
 /**
- * @file	LcModalDg1DUpdater.h
+ * @file	LcModalDg1DSymmetricDDGUpdater.h
  *
- * @brief	Updater to solver 1D hyperbolic equations using modal DG scheme
+ * @brief	Updater to solve diffusion equation using modal SDDG scheme
  */
 
-#ifndef LC_MODAL_DG_1D_UPDATER_H
-#define LC_MODAL_DG_1D_UPDATER_H
+#ifndef LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H
+#define LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -16,6 +16,13 @@
 #include <LcField.h>
 #include <LcHyperEquation.h>
 #include <LcUpdaterIfc.h>
+
+// eigen includes
+#include <Eigen/Dense>
+#include <Eigen/LU>
+
+// etc includes
+#include <quadrule.hpp>
 
 namespace Lucee
 {
@@ -29,14 +36,14 @@ namespace Lucee
  * semi-discrete equation. Using the output of this updater any RK
  * scheme can be easily implemented in Lua itself.
  */
-  class ModalDg1DUpdater : public Lucee::UpdaterIfc
+  class ModalDg1DSymmetricDDGUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new modal DG solver in 1D */
-      ModalDg1DUpdater();
+      ModalDg1DSymmetricDDGUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -71,38 +78,27 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Equation to solve */
-      Lucee::HyperEquation *equation;
-/** Number of equations */
-      unsigned meqn;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number */
       double cflm;
 /** Number of basis functions to use */
-      double numBasis;
-/** Values of Legendre polynomials at the ordinates */
-      Matrix<double> Pmk; // m <- Polynomial order k <- ordinate index
-/** Values of Legendre polynomials derivate at the ordinates */
-      Matrix<double> DPmk; // m <- Polynomial order k <- ordinate index
+      unsigned numBasis;
+/** Diffusion coefficient */
+      double diffCoef;
+/** Projection of DPj on DPk */
+      Eigen::MatrixXd legendreDerivProjections;
+/** 2nd Derivative of Legendre Polynomial evaluated at edges -1 and +1
+  * Col 0 = -1 edge, Col 1 = +1 edge
+  */
+      Eigen::MatrixXd secondDerivEdgeEvals;
 /** Normalization coefficients */
-      Vector<double> normCoeff;
-/** Weights for quadrature */
-      Lucee::Vector<double> w;
-/** Ordinates for quadrature */
-      Lucee::Vector<double> mu;
+      std::vector<double> normCoeff;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
-/**
- * Evaluate expansion function at specified ordinate index.
- *
- * @param qCoeff Coefficients of expansion in cell.
- * @param c Ordinate index.
- * @param qOut On output, the expansion at left edge of cell.
- */
-      void evalExpansion(const Lucee::ConstFieldPtr<double>& qCoeff,
-        unsigned c, Lucee::FieldPtr<double>& qOut);
-
+/** */
+      double beta0;
+      double beta1;
 /**
  * Evaluate expansion function at left edge of cell.
  *
@@ -110,7 +106,7 @@ namespace Lucee
  * @param qOut On output, the expansion at left edge of cell.
  */
       void evalExpansionLeftEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
-        Lucee::FieldPtr<double>& qOut);
+        double& qOut);
 
 /**
  * Evaluate expansion function at right edge of cell.
@@ -119,8 +115,8 @@ namespace Lucee
  * @param qOut On output, the expansion at right edge of cell.
  */
       void evalExpansionRightEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
-        Lucee::FieldPtr<double>& qOut);
+        double& qOut);
   };
 }
 
-#endif // LC_MODAL_DG_1D_UPDATER_H
+#endif // LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H

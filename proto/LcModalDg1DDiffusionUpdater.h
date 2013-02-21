@@ -86,11 +86,14 @@ namespace Lucee
       unsigned numBasis;
 /** Diffusion coefficient */
       double diffCoef;
+/** Normalization values */
       std::vector<double> normCoeff;
 /** Inverse of recovery matrix */
       Eigen::MatrixXd recoveryMatrixInv;
 /** Precomputed volume integrals */
       Eigen::MatrixXd recoveryVolume;
+/** Flag to indicate if only increments should be computed */
+      bool onlyIncrement;
 /**
  * Evaluate the second derivative of a legendre polynomial (order 'order') at
  * the location x

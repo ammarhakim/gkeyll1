@@ -27,6 +27,7 @@ set (proto_SOURCES
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
+  LcModalDg1DSymmetricDDGUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp
