@@ -42,17 +42,26 @@ namespace Lucee
 // get function to project
     fnRef = tbl.getFunctionRef("project");
 
+    unsigned integrationOrder;
+
+    if (tbl.hasNumber("exactOrder"))
+    {
+      integrationOrder = (unsigned) tbl.getNumber("exactOrder");
+      numGaussPoints   = (unsigned)((integrationOrder+1)/2.0 + 0.5);
+    }
+    else numGaussPoints = numBasis;
+
 // allocate space
-    Pmk = Matrix<double>(numBasis, numBasis);
-    w = Lucee::Vector<double>(numBasis);
-    mu = Lucee::Vector<double>(numBasis);
+    Pmk = Matrix<double>(numBasis, numGaussPoints);
+    w = Lucee::Vector<double>(numGaussPoints);
+    mu = Lucee::Vector<double>(numGaussPoints);
 
 // compute weights and ordinates
-    Lucee::gauleg(numBasis, -1, 1, mu, w);
+    Lucee::gauleg(numGaussPoints, -1, 1, mu, w);
 
 // compute Legendre polynomials at ordinates
     for (unsigned m=0; m<numBasis; ++m)
-      for (unsigned k=0; k<numBasis; ++k)
+      for (unsigned k=0; k<numGaussPoints; ++k)
         Pmk(m,k) = Lucee::legendrePoly(m, mu[k]);
   }
 
@@ -77,10 +86,17 @@ namespace Lucee
 
 // create region to walk over ordinates
     int shape[NDIM];
-    for (unsigned i=0; i<NDIM; ++i) shape[i] = numBasis;
+    int quadratureShape[NDIM];
+
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      shape[i] = numBasis;
+      quadratureShape[i] = numGaussPoints;
+    }
     Lucee::Region<NDIM, int> ordRgn(shape);
+    Lucee::Region<NDIM, int> quadRgn(quadratureShape);
 // create sequencer on this region
-    Lucee::RowMajorSequencer<NDIM> ordSeq(ordRgn), modeSeq(ordRgn);
+    Lucee::RowMajorSequencer<NDIM> ordSeq(quadRgn), modeSeq(ordRgn);
     Lucee::RowMajorIndexer<NDIM> modeIdxr(ordRgn);
 
 // determine number of components in field (THIS IS NOT GOOD PRACTICE
