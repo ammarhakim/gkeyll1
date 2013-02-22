@@ -71,6 +71,8 @@ namespace Lucee
     private:
 /** Number of basis functions to project on */
       unsigned numBasis;
+/** Number of gaussian quadrature points to use */
+      unsigned numGaussPoints;
 /** Reference to function to project */
       int fnRef;
 /** Values of Legendre polynomials at the ordinates */
