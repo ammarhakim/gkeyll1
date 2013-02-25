@@ -71,7 +71,7 @@ du1T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti
 Tmat : dx^2*coefmatrix([du0T(j), du1T(j)], [u0(j),u1(j)]);
 
 /** Compute eigenmatrix */
-vN : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
+vN_1 : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
 
 /** p=2 case */
 c2 : calcRecon(x,2);
@@ -115,5 +115,5 @@ du2T(j) := subst([u0(j+1)=T*u0(j),  u1(j+1)=T*u1(j),  u2(j+1)=T*u2(j),
 Tmat : dx^2*coefmatrix([du0T(j), du1T(j), du2T(j)], [u0(j),u1(j),u2(j)]);
 
 /** Compute eigenmatrix */
-vN : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
+vN_2 : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
 

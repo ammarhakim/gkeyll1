@@ -5,6 +5,16 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 23rd
+
+  More work on diffusion equation schemes with DG. The initial
+  condition issue is now worked out, at least for sin(k*x)
+  initialization. However, this does not seem to improve the
+  convergence of the scheme.
+
+  Need to write this up next week, while in Boston, based on the
+  initial draft Greg wrote.
+
 * Febuary 20th
 
   Did initial tests of recovery based DG scheme (RDG) and tested it on
