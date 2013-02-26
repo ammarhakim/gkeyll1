@@ -1,11 +1,11 @@
 /**
- * @file	LcModalDg1DSymmetricDDGUpdater.h
+ * @file	LcModalDg1DDiffusionUpdater.h
  *
- * @brief	Updater to solve diffusion equation using modal SDDG scheme
+ * @brief	Updater to solver 1D hyper diffusion equations using modal DG scheme
  */
 
-#ifndef LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H
-#define LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H
+#ifndef LC_MODAL_DG_1D_HYPER_DIFFUSION_UPDATER_H
+#define LC_MODAL_DG_1D_HYPER_DIFFUSION_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -36,14 +36,14 @@ namespace Lucee
  * semi-discrete equation. Using the output of this updater any RK
  * scheme can be easily implemented in Lua itself.
  */
-  class ModalDg1DSymmetricDDGUpdater : public Lucee::UpdaterIfc
+  class ModalDg1DHyperDiffusionUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new modal DG solver in 1D */
-      ModalDg1DSymmetricDDGUpdater();
+      ModalDg1DHyperDiffusionUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -86,37 +86,34 @@ namespace Lucee
       unsigned numBasis;
 /** Diffusion coefficient */
       double diffCoef;
-/** Projection of DPj on DPk */
-      Eigen::MatrixXd legendreDerivProjections;
+/** Normalization values */
+      std::vector<double> normCoeff;
+/** Inverse of recovery matrix */
+      Eigen::MatrixXd recoveryMatrixInv;
+/** Precomputed volume integrals */
+      Eigen::MatrixXd recoveryVolume;
 /** 2nd Derivative of Legendre Polynomial evaluated at edges -1 and +1
-  * Col 0 = -1 edge, Col 1 = +1 edge (then normalized to physical space)
+  * Col 0 = -1 edge, Col 1 = +1 edge (then normalied to physical space)
   */
       Eigen::MatrixXd secondDerivEdgeEvals;
-/** Normalization coefficients */
-      std::vector<double> normCoeff;
+/** 3rd Derivative of Legendre Polynomial evaluated at edges -1 and +1
+  * Col 0 = -1 edge, Col 1 = +1 edge (then normalied to physical space)
+  */
+      Eigen::MatrixXd thirdDerivEdgeEvals;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
-/** */
-      double beta0;
-      double beta1;
 /**
- * Evaluate expansion function at left edge of cell.
- *
- * @param qCoeff Coefficients of expansion in cell.
- * @param qOut On output, the expansion at left edge of cell.
+ * Evaluate the second derivative of a legendre polynomial (order 'order') at
+ * the location x
  */
-      void evalExpansionLeftEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
-        double& qOut);
-
+      double legendrePoly2ndDeriv(int order, double x);
 /**
- * Evaluate expansion function at right edge of cell.
- *
- * @param qCoeff Coefficients of expansion in cell.
- * @param qOut On output, the expansion at right edge of cell.
+ * Returns the coefficients of "1" and "x" terms of recovery polynomial.
+ * col 1 = f0, col 2 = f1, each row is f's for one eqn
  */
-      void evalExpansionRightEdge(const Lucee::ConstFieldPtr<double>& qCoeff,
-        double& qOut);
+      void computeRecoveryPolynomial(const Lucee::ConstFieldPtr<double>& qLeft,
+        Lucee::ConstFieldPtr<double>& qRight, std::vector<double>& boundaryTerms);
   };
 }
 
-#endif // LC_MODAL_DG_1D_SYMMETRIC_DDG_UPDATER_H
+#endif // LC_MODAL_DG_1D_HYPER_DIFFUSION_UPDATER_H
