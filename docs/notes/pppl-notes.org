@@ -5,6 +5,13 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* Febuary 27th
+
+  How can one off-load as much of the work to libraries, so that
+  Gkeyll can become as small as possible. All the libraries needed
+  (Blitz++, Eigen, Boost, etc) are already linked to Gkeyll. Need to
+  make best use of them, and cut down on total C++ LOCs.
+
 * Febuary 23rd
 
   More work on diffusion equation schemes with DG. The initial
