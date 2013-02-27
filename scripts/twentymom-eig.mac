@@ -33,6 +33,8 @@ Q223 : 18;
 Q233 : 19;
 Q333 : 20;
 
+n : p0; /** it is better to work with rho (p0) than number density */
+
 /** n */
 Atm[N,N] : u1; Atm[N,U1] : n;
 
@@ -82,6 +84,4 @@ Atm[P33,U1] : p33; Atm[P33,U3] : 2*p13; Atm[P33,P33] : u1; Atm[P33,Q133] : 1;
 /** q233 */
 
 /** q333 */
-
-/** Now compute eigenvalues */
-/** eigVals : eigenvalues(Atm); */
+Atm;
