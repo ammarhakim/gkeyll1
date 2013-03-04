@@ -20,6 +20,7 @@
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDg1DDiffusionUpdater.h>
 #include <LcModalDg1DHyperDiffusionUpdater.h>
+#include <LcModalDg1DLocalDGUpdater.h>
 #include <LcModalDg1DSymmetricDDGUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
@@ -58,6 +59,7 @@ namespace Lucee
       .append<Lucee::ModalDg1DUpdater>()
       .append<Lucee::ModalDg1DDiffusionUpdater>()
       .append<Lucee::ModalDg1DHyperDiffusionUpdater>()
+      .append<Lucee::ModalDg1DLocalDGUpdater>()
       .append<Lucee::ModalDg1DSymmetricDDGUpdater>()
       .append<Lucee::ModalDgLimiter1DUpdater>()
       .append<Lucee::NodalPoissonBracketUpdater>()

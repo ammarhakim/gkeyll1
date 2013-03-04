@@ -28,6 +28,7 @@ set (proto_SOURCES
   LcModalDg1DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
   LcModalDg1DHyperDiffusionUpdater.cpp
+  LcModalDg1DLocalDGUpdater.cpp
   LcModalDg1DSymmetricDDGUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcMusclHancock1DUpdater.cpp
