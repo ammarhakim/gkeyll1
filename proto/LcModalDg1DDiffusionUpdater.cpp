@@ -79,15 +79,13 @@ namespace Lucee
     std::vector<double> gaussWeights(numGaussPoints);
     legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
 
-    Eigen::MatrixXd legendreEvaluationsLeft(numGaussPoints,numBasis);
-    Eigen::MatrixXd legendreEvaluationsRight(numGaussPoints,numBasis);
-    // Evaluate legendre polynomials at left and right sides
+    Eigen::MatrixXd legendreEvaluations(numGaussPoints,numBasis);
+    // Evaluate legendre polynomials at gaussian quadrature points on reference cell
     for(int basisIndex = 0; basisIndex < numBasis; basisIndex++)
     {
       for(int nodeIndex = 0; nodeIndex < numGaussPoints; nodeIndex++)
       {
-        legendreEvaluationsLeft(nodeIndex,basisIndex) = Lucee::legendrePoly(basisIndex,gaussPoints[nodeIndex]);
-        legendreEvaluationsRight(nodeIndex,basisIndex) = Lucee::legendrePoly(basisIndex,gaussPoints[nodeIndex]);
+        legendreEvaluations(nodeIndex,basisIndex) = Lucee::legendrePoly(basisIndex,gaussPoints[nodeIndex]);
       }
     }
 
@@ -108,11 +106,11 @@ namespace Lucee
         {
           // left cell integral
           integralValueLeft += gaussWeights[nodeIndex]*recoveryPoly[colIndex]*pow((dx/2.0)*(gaussPoints[nodeIndex]-1),colIndex)*
-            legendreEvaluationsLeft(nodeIndex,rowIndex);
+            legendreEvaluations(nodeIndex,rowIndex);
 
           // right cell integral
           integralValueRight += gaussWeights[nodeIndex]*recoveryPoly[colIndex]*pow((dx/2.0)*(gaussPoints[nodeIndex]+1),colIndex)*
-            legendreEvaluationsRight(nodeIndex,rowIndex);
+            legendreEvaluations(nodeIndex,rowIndex);
         }
         // Store results in recovery matrix
         recoveryMatrix(2*rowIndex,colIndex) = ((2*rowIndex+1)/2.0)*integralValueLeft;

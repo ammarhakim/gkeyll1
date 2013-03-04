@@ -184,7 +184,7 @@ namespace Lucee
     // Get grid size (assume constant size)
     double dx = grid.getDx(0);
     // Figure out whether time step is too large
-    if(dt > (cfl*dx*dx/(2*diffCoef)))
+    if(dt > 1.01*(cfl*dx*dx/(2*diffCoef)))
     {
       // time-step was too large: return a suggestion with correct time-step
       return Lucee::UpdaterStatus(false, cfl*dx*dx/(2*diffCoef));
@@ -219,14 +219,14 @@ namespace Lucee
     // Lower and upper bounds of slice.
     int sliceLower = localRgn.getLower(0);
     int sliceUpper = localRgn.getUpper(0);
-    
+
     double qFlux;
     double vFluxLeft;
     double vFluxRight;
-    double sgn;
+    int sgn;
 // loop over edges computing edge fluxes, accumulating contribution
 // from edge flux in cells connected to that edge. NOTE: There is one
-// more edge that cells hence the upper limit in the for loop.
+// more edge than cells hence the upper limit in the for loop.
     for (int i=sliceLower; i<sliceUpper+1; ++i)
     {
       // Attach iterators to left/right cells of this edge
@@ -244,14 +244,14 @@ namespace Lucee
       qRd1 = 0.0;
       qLd2 = 0.0;
       qRd2 = 0.0;
-      sgn = 1.0;
+      sgn = 1;
       for (int polyOrder = 1; polyOrder < numBasis; polyOrder++)
       {
         qLd1 += polyOrder*(polyOrder+1)/dx*qlPtr[polyOrder];
         qRd1 += sgn*polyOrder*(polyOrder+1)/dx*qrPtr[polyOrder];
         qLd2 += secondDerivEdgeEvals(polyOrder,1)*qlPtr[polyOrder];
         qRd2 += secondDerivEdgeEvals(polyOrder,0)*qrPtr[polyOrder];
-        sgn *= -1.0;
+        sgn *= -1;
       }
       qFlux = beta0*(qR-qL)/dx + 0.5*(qLd1+qRd1) + beta1*dx*(qRd2-qLd2);
 
@@ -260,7 +260,7 @@ namespace Lucee
       qNew.setPtr(qNewrPtr, i); // right cell
 
       // accumulate increment to appropriate cells
-      sgn = 1.0;
+      sgn = 1;
       for (int m = 0; m < numBasis; m++)
       {
         // vFluxLeft corresponds to interface term _{j-1/2}, but named because this
@@ -269,7 +269,7 @@ namespace Lucee
         vFluxRight = (qR-qL)*(sgn*beta0/dx - sgn*m*(m+1)/(2.0*dx) + beta1*dx*secondDerivEdgeEvals(m,0));
         qNewlPtr[m] += qFlux - vFluxLeft;
         qNewrPtr[m] += -sgn*qFlux - vFluxRight;
-        sgn *= -1.0;
+        sgn *= -1;
       }
     }
     
