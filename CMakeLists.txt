@@ -93,7 +93,7 @@ if (LUA_FOUND)
 endif (LUA_FOUND)
 
 # find LUABIND
-find_package(SciLuabind REQUIRED)
+find_package(SciLuabind)
 if (LUABIND_FOUND)
   include_directories(${Luabind_INCLUDE_DIRS})
 endif (LUABIND_FOUND)
