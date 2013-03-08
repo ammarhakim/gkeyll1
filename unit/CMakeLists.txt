@@ -100,9 +100,11 @@ target_link_libraries(lclincombiner lcslvrs lcdatastructs
 add_executable(lcluacobj lcluacobj.cxx)
 target_link_libraries(lcluacobj lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
-add_executable(lcluabind lcluabind.cxx)
-target_link_libraries(lcluabind lclib lcloki 
-  ${Luabind_STLIBS} ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES} ${Blitz_LIBRARIES})
+if (LUABIND_FOUND)
+  add_executable(lcluabind lcluabind.cxx)
+  target_link_libraries(lcluabind lclib lcloki 
+   ${Luabind_STLIBS} ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES} ${Blitz_LIBRARIES})
+endif (LUABIND_FOUND)
 
 add_executable(lcfieldptr lcfieldptr.cxx)
 target_link_libraries(lcfieldptr lcdatastructs lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
