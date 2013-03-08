@@ -225,7 +225,7 @@ test_ptcl_update()
 }
 
 int
-main(void)
+main(int argc, char *argv[])
 {
   LC_BEGIN_TESTS("lcparticleideas");
   test_ptcl_classes();

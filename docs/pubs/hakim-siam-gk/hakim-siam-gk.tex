@@ -1,0 +1,726 @@
+\documentclass[pdf]{beamer}
+\usepackage{biblatex}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{tabulary}
+\usepackage{movie15}
+
+
+\captionsetup{font=scriptsize,labelfont=scriptsize}
+\footnotesize\small
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\newcommand{\eqr}[1]{Eq.\thinspace(#1)}
+\newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
+\newcommand{\mvec}[1]{\mathbf{#1}}
+\newcommand{\gvec}[1]{\boldsymbol{#1}}
+\newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+\newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
+%\newcommand{\mypause}{\pause}
+\newcommand{\mypause}{}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}
+%\newtheorem{thm}{Theorem}
+\newtheorem{proposed}{Proposed Answer}
+\DeclareMathOperator{\spn}{span}
+
+%% autoscaled figures
+\newcommand{\incfig}{\centering\includegraphics}
+\setkeys{Gin}{width=0.7\linewidth,keepaspectratio}
+
+\usepackage{beamerthemesplit}
+\setbeamercovered{transparent}
+\usetheme{lined}
+%\usetheme{CambridgeUS}
+\usecolortheme{dolphin}
+
+\usefonttheme[onlymath]{serif}
+\setbeamertemplate{navigation symbols}{}
+
+% Setup TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\tikzstyle{block}=[draw opacity=0.7,line width=1.4cm]
+
+\title[Continuum Discontinuous Galerkin Algorithms]{Discontinuous
+  Galerkin algorithms for (gyro) kinetic simulations of turbulence in
+  plasmas}%
+\author{A. H. Hakim \and G. W. Hammett}%
+
+\institute[http://www.ammar-hakim.org/sj] % (optional, aber oft nötig)
+{
+  Princeton Univeristy\\
+  Plasma Physics Laboratory, Princeton, NJ\\
+  ammar@princeton.edu\\
+  \url{http://www.ammar-hakim.org/sj}
+}
+
+\date[SIAM/CSE]{SIAM CSE Conference, February 25$^\mathrm{th}$ 2013}
+
+\bibliography{gke}
+%\footfullcite{jones00}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ----------------------------------------------------------------
+\begin{frame}{}
+  \begin{figure}
+    \setkeys{Gin}{width=0.95\linewidth,keepaspectratio}
+    \incfig{prominences.png}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{}
+  \begin{figure}
+    \setkeys{Gin}{width=0.95\linewidth,keepaspectratio}
+    \incfig{MRI.pdf}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{}
+  \begin{figure}
+    \setkeys{Gin}{width=0.95\linewidth,keepaspectratio}
+    \incfig{GYRO.pdf}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Turbulence in fusion systems is now prime time!}
+  \begin{figure}
+    \setkeys{Gin}{width=0.95\linewidth,keepaspectratio}
+    \incfig{big-bang-theory.png}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Plasma dynamics is well approximated by Vlasov-Maxwell
+    Equations}
+  The Vlasov equation is a scalar hyperbolic equation in 6 dimensions.
+  \begin{align*}
+    \pfrac{f}{t}+\mvec{v}\cdot\pfrac{f}{\mvec{x}} +
+    \frac{q}{m}(\mvec{E}+\mvec{v}\times \mvec{B})\cdot\pfrac{f}{\mvec{v}} = 
+    C[f]
+  \end{align*}
+  Here $f(\mvec{x},\mvec{v},t)d\mvec{x}d\mvec{v}$ is the number of
+  particles in phase-space volume $d\mvec{x}d\mvec{v}$, and $C[f]$
+  represent collisions.
+
+  \begin{block}{Challenges}
+    \textcolor{red}{High dimensionality of phase-space, vast range of
+      spatial and temporal scales, complex geometries and a lot
+      ``kitchen sink'' physics.}
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Gyrokinetic approximation is appropriate for many
+    astrophysical and fusion plasmas}
+  
+  \begin{figure}
+    \setkeys{Gin}{width=0.75\linewidth,keepaspectratio}
+    \incfig{gyro-not-fad-.pdf}
+    \caption{Gyrokinetics is a \emph{coordinate} transformation
+      followed by asymptotic expansion, assuing \emph{gyrofrequency}
+      is faster than all temporal scales and \emph{gyroradius} is
+      smaller than all gradient scales in plasma. {\color{red} Reduces
+        problem to 5D from 6D and changes time-scales.}}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Since 2008 gyrokinetics has been under attack}
+  
+  \begin{figure}
+    \setkeys{Gin}{width=0.75\linewidth,keepaspectratio}
+    \incfig{gke-under-attack.png}
+    \caption{This is a \emph{verification} problem: does the
+      gyrokinetic equation give the correct momentum transport? How to
+      best describe electromagnetic terms?}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Long term goal: Accurate and stable continuum schemes
+    for full-F edge gyrokinetics in 3D geometries}
+
+  \begin{block}{Question}
+    \small
+    Can one develop accurate and stable schemes that conserve
+    invariants, maintain positivity and use as few grid points as
+    possible?
+  \end{block}
+  \mypause
+  \begin{block}{Proposed Answer}
+    \small Explore high-order hybrid discontinuous/continuous Galerkin
+    finite-element schemes, enhanced with flux-reconstruction and a
+    better choice of velocity space basis functions.
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Long term goal: Accurate and stable continuum schemes
+    for full-F edge gyrokinetics in 3D geometries}
+
+  \begin{block}{Dream Goal}
+    \textcolor{red}{A robust code capable of running very quickly at
+      coarse velocity space resolution while preserving all
+      conservation laws of gyro-fluid/fluid equations and giving
+      fairly good results. Can occasionally turn up velocity
+      resolution for convergence tests.}
+  \end{block}
+  \mypause
+  To achieve this, exploring combination of techniques
+  \begin{itemize}
+  \item Efficient, high order, hybrid DG/finite-element scheme with
+    excellent conservation properties.
+  \item Subgrid turbulence models/hypercollision operators and
+    limiters than enable robust results on coarse grids.
+  \item Maxwellian-weighted basis functions.
+  \end{itemize}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Discontinuous Galerkin algorithms represent state-of-art
+    for solution of hyperbolic partial differential equations}
+  \begin{itemize}
+    \small
+  \item DG algorithms hot topic in CFD and applied mathematics. First
+    introduced by Reed and Hill in 1973 for neutron transport in 2D.
+    \mypause
+  \item General formulation in paper by Cockburn and Shu, JCP
+    1998. More than 1000 citations.  \mypause
+  \item DG combines key advantages of finite-elements (low phase
+    error, high accuracy, flexible geometries) with finite-volume
+    schemes (limiters to produce positivity/monotonicity, locality)
+    \mypause
+  \item Certain types of DG have excellent conservation properties for
+    Hamiltonian systems, low noise and low dissipation.
+    \mypause
+  \item DG is inherently super-convergent: in FV methods interpolate
+    $p$ points to get $p$th order accuracy. In DG interpolate $p$
+    points to get $2p-1$ order accuracy.
+  \end{itemize}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
+    of errors on a finite-dimensional subspace}
+  \small
+  Consider a general time-dependent problem
+  \begin{align*}
+    f'(x,t) = G[f]
+  \end{align*}
+  where $G[f]$ is some operator. To approximate it expand $f(x)$ with
+  a finite set of basis functions $w_k(x)$,
+  \begin{align*}
+    f(x,t) \approx f_h(x,t)  = \sum_{k=1}^N f_k(t) w_k(x)
+  \end{align*}
+  This gives discrete system
+  \begin{align*}
+    \sum_{k=1}^N f_k' w_k(x) = G[f_h]
+  \end{align*}
+  \mypause
+  \begin{block}{Question}
+    How to determine $f_k'$ in an optimum manner?
+  \end{block}
+  
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Essential idea of Galerkin methods: $L_2$ minimization
+    of errors on a finite-dimensional subspace}
+  \small
+  Answer: Do an $L_2$ minimization of the error, i.e. find $f_k'$ such
+  that
+  \begin{align*}
+    E_N = \int \left[
+      \sum_{k=1}^N f_k' w_k(x) - G[f_h]\right]^2\thinspace dx
+  \end{align*}
+  is minimum. For minimum error $\partial E_N/\partial f_m' = 0$ for
+  all $k=1,\ldots,N$. This leads to the linear system that determines
+  the coefficients $f_k'$
+  \begin{align*}
+    \int w_m(x) \left(
+      \sum_{k=1}^N f_k' w_k(x) - G[f_h]
+    \right)\thinspace dx = 0
+  \end{align*}
+  for all $m=1,\ldots,N$.
+  \mypause
+  \begin{block}{Key Idea}
+    Projection of residual on the basis set chosen for expansion leads
+    to minimum errors in the $L_2$ sense. For this reason DG/CG
+    schemes are constructed by projecting residuals of PDEs on basis
+    sets.
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{What does a typical DG solution look like?}
+  Discontinuous Galerkin schemes use function spaces that allow
+  \emph{discontinuities} across cell boundaries.
+  \begin{figure}
+    \setkeys{Gin}{width=0.5\linewidth,keepaspectratio}
+    \incfig{v1m1.png}
+    \incfig{v2m1.png}
+    \caption{The best $L_2$ fit of $x^4+\sin(5x)$ with piecewise
+      linear (left) and quadratic (right) basis functions.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Several fluid and kinetic problems can be written with
+    Poisson bracket structure leading to phase-space advection
+    equation}%
+
+  \begin{align*}
+    \pfrac{f}{t} + \{f,H\} = 0
+  \end{align*}
+  where $H(z^1,z^2)$ is the Hamiltonian and canonical Poisson bracket
+  is
+  \begin{align*}
+    \{g,h\} \equiv \pfrac{g}{z^1}\pfrac{h}{z^2} -
+    \pfrac{g}{z^2}\pfrac{h}{z^1}.
+  \end{align*}
+  Defining phase-space velocity vector $\gvec{\alpha} = (\dot{z}^1,
+  \dot{z}^2)$, with $\dot{z}^i = \{z^i,H\}$ leads to \emph{phase-space
+    conservation form}
+  \begin{align*}
+    \pfrac{f}{t} + \nabla\cdot\left(\gvec{\alpha}f\right) = 0.
+  \end{align*}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Incompressible Euler equations in two
+    dimensions serves as a model for $E\times B$ nonlinearities in
+    gyrokinetics}%
+
+  A basic model problem is the \emph{incompressible} 2D Euler
+  equations written in the stream-function ($\phi$) vorticity
+  ($\zeta$) formulation. Here the Hamiltonian is simply $H(x,y) =
+  \phi(x,y)$.
+
+  \begin{align*}
+    \pfrac{\zeta}{t} + \nabla\cdot(\mvec{u}\zeta) = 0
+  \end{align*}
+  where $\mvec{u} = \nabla\phi \times \eez$. The potential is
+  determined from
+  \begin{align*}
+    \nabla^2 \phi = -\zeta.
+  \end{align*}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Example: Hasegawa-Wakatani equations serve as a model
+    for drift-wave turbulence in tokamak edge}%
+
+  The Hasegawa-Wakatani equations describe $E\times B$ driven flows in
+  certain limits:
+  \begin{align*}
+    \pfrac{n}{t} + \{\phi,n+N\} &= D(\phi-n) \\
+    \pfrac{\zeta}{t} + \{\phi,\zeta\} &= D(\phi-n)
+  \end{align*}
+  with $\nabla^2 \phi = \zeta.$ Here $n$ is the number density
+  fluctuations, $\zeta$ the $E\times B$ vorticity, $\phi$ is the
+  potential, $D$ is an adiabacity parameter and $N(x)$ is the fixed
+  background density profile.
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{It is important to preserve quadratic invariants}%
+
+  The incompressible Euler equations has two quadratic invariants,
+  \emph{energy}
+  \begin{align*}
+    \pfraca{t}\int_K \frac{1}{2} |\nabla\phi|^2  d\Omega &= 0
+  \end{align*}
+  and \emph{enstrophy}
+  \begin{align*}
+    \pfraca{t}\int_K \frac{1}{2}\zeta^2 d\Omega &= 0.
+  \end{align*}
+  Similar invariants can be derived for Vlasov-Poisson and
+  Hasegawa-Wakatani equations.  In addition, Vlasov-Poisson also
+  conserves momentum.
+  \mypause
+  \begin{block}{Question}
+    Can one design schemes that conserve these invariants?
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% 16 -------------------------------------------------------------
+\begin{frame}{A DG scheme is used to discretize phase-space advection
+    equation}
+
+  To discretize the equations introduce a mesh $K_j$ of the domain
+  $K$. Then the discrete problem is stated as: find $\zeta_h$ in the
+  space of discontinuous piecewise polynomials such that for all basis
+  functions $w$ we have
+  \begin{align*}
+    \int_{K_j} w \pfrac{\zeta_h}{t}\thinspace d\Omega 
+    +
+    \int_{\partial K_j}w^- \mvec{n}\cdot\gvec{\alpha}_h\hat{\zeta}_h\thinspace dS
+    -
+    \int_{K_j} \nabla w\cdot\gvec{\alpha}_h \zeta_h\thinspace d\Omega = 0.
+  \end{align*}
+  Here $\hat{\zeta}_h = \hat{\zeta}(\zeta^+_h,\zeta^-_h)$ is the
+  consistent numerical flux on $\partial K_j$.
+\end{frame}
+% ----------------------------------------------------------------
+
+% 16 -------------------------------------------------------------
+\begin{frame}{A continuous finite element scheme is used to discretize
+    Poisson equation}
+
+  To discretize the Poisson equation the problem is stated as: find
+  $\phi_h$ in the space of \emph{continuous} piecewise polynomials
+  such that for all basis functions $\psi$ we have
+  \begin{align*}
+    \int_K \psi \nabla^2 \phi_h d\Omega = -\int_K \psi \zeta_h d\Omega
+  \end{align*}
+  \mypause
+  \begin{block}{Questions}
+    How to pick basis functions for discontinuous and continuous
+    spaces? We also have not specified numerical fluxes to use. How to
+    pick them?  Do they effect invariants?
+  \end{block}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Hybrid DG/CG schemes for Hamiltonian systems have good
+    conservation properties}
+
+  \begin{itemize}
+  \item With proper choice of function spaces and a \emph{central}
+    flux, both quadratic invariants are exactly conserved by the
+    semi-discrete scheme.
+  \item With upwind fluxes (preferred choice) energy is still
+    conserved, and the scheme is stable in the $L_2$ norm of the
+    solution.
+  \item For Vlasov-Poisson system, momentum conservation is not exact,
+    but the errors decrease rapidly with spatial resolution, even on a
+    coarse velocity grid.
+  \end{itemize}
+  \mypause
+  \begin{block}{Questions}
+    Can this scheme be modified to conserve momentum exactly? Can time
+    discretization exactly conserve these invariants?  Perhaps try
+    symplectic integrators ...
+  \end{block}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Only recently conditions for conservation of discrete
+    energy and enstrophy were discovered}%
+  \small
+  \begin{block}{Energy Conservation}
+    Liu and Shu (2000) have shown that discrete energy is conserved
+    for 2D incompressible flow if \emph{basis functions for potential
+      are a continuous subset of the basis functions for the vorticity
+      irrespective of numerical flux chosen}! We discovered extension
+    to discontinuous phi for the Vlasov equation.
+  \end{block}
+
+  \begin{block}{Enstrophy Conservation}
+    Enstrophy is conserved only if \emph{central fluxes} are
+    used. With upwind fluxes, enstrophy decays and hence the scheme is
+    \emph{stable} in the $L_2$ norm.
+  \end{block}
+
+  \mypause \textcolor{red}{DG with central fluxes like high-order
+    generalization of the well-known \emph{Arakawa} schemes, widely
+    used in climate modeling and recently also in plasma physics.}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Prototype code named Gkeyll is being developed}%
+
+  \begin{itemize}
+    \small
+  \item Gkeyll is written in C++ and is inspired by framework efforts
+    like Facets, VORPAL (Tech-X Corporation) and WarpX
+    (U. Washington). Uses structured grids with arbitrary
+    dimension/order nodal basis functions.
+  \item Package management and builds are automated via {\tt scimake}
+    and {\tt bilder}, both developed at Tech-X Corporation.
+  \item Linear solvers from
+    Petsc\footnote{http://www.mcs.anl.gov/petsc/} are used for
+    inverting stiffness matrices.
+  \item Programming language Lua\footnote{http://www.lua.org}, used in
+    widely played games like World of Warcraft, is used as an embedded
+    scripting language to drive simulations.
+  \item MPI is used for parallelization via the {\tt txbase} library
+    developed at Tech-X Corporation.
+  \end{itemize}
+  
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Simulation journal with results is maintained at
+    {http://www.ammar-hakim.org/sj}}
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+      Results are presented for the equation systems.
+      \begin{itemize}
+      \item Incompressible Euler equations
+      \item Hasegawa-Wakatani equations
+      \item Vlasov-Poisson equations
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+      \includemovie[inline=false,%
+      text={\incfig{s121-projected-solution_00000.png}}%
+      ]{\linewidth}{0.75\linewidth}{s121-swirl-flow.mov}
+      \caption{[Movie] Swirling flow problem. The initial Gaussian
+        pulses distort strongly but regain their shapes after a period
+        of $1.5$~seconds.}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Double shear problem is a good test for resolution of
+    vortex shearing in $E\times B$ driven flows}%
+  \begin{figure}
+    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
+    \includemovie[inline=false,%
+    text={\incfig{s128-double-shear_00000.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{s128-double-shear.mov}
+    \caption{[Movie] Vorticity from double shear problem with piecewise
+      quadratic DG scheme on $128\times 128$ grid.}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Double shear problem is a good test for resolution of
+    vortex shearing in $E\times B$ driven flows}%
+  \begin{columns}
+    \begin{column}{0.3\textwidth}
+      Vorticity at $t=8$ with different grid resolutions and
+      schemes. Third order DG scheme runs faster and produces better
+      results than DG2 scheme.
+    \end{column}
+    \begin{column}{0.7\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s125to128-double-shear-cmp.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Vortex waltz problem tests resolution of small-scale
+    vortex features}%
+  \begin{figure}
+    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
+    \includemovie[inline=false,%
+    text={\incfig{s139-vortex-waltz_00000.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{s139-vortex-waltz.mov}
+    \caption{[Movie] Vorticity from vortex waltz problem with
+      piecewise quadratic DG scheme on $128\times 128$ grid.}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Vortex waltz problem tests resolution of small-scale
+    vortex features and energy and enstrophy conservation}%
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s139-vortex-waltz_00010.png}
+        \caption{Vorticity for the vortex waltz problem with the
+          piecewise quadratic scheme on a $128 \times
+          128$. \emph{Upwind fluxes} were used for this calculation.}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s140s141s142-vortex-waltz-totalEnergyEnstrophy_cmp.png}
+        \caption{Energy and enstrophy error for vortex waltz
+          problem. \emph{Central fluxes} were used and show $O(\Delta
+          t)^3$ convergence on a fixed $64\times 64$ grid.}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Initial studies of Hasegawa-Wakatani drift-wave
+    turbulence are carried out}%
+  \begin{figure}
+    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
+    \includemovie[inline=false,%
+    text={\incfig{s215-hw_numDens_00100.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{zonal-nonzonal-hw.mov}
+    \caption{[Movie] Number density from Hasegawa-Wakatani drift-wave
+      turbulence simulations with adiabacity parameter $D=0.1$ with
+      (left) and without (right) zonal flow modification.}
+  \end{figure}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Linear Landau damping simulations were compared with
+    exact solutions of dispersion relations}%
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Field energy (blue) as a function of time for linear Landau
+      damping problem with $k=0.5$ and $Te=1.0$. The red dots
+      represent the maxima in the field energy which are used to
+      compute a linear least-square fit. The slope of the black line
+      gives the damping rate.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s151-field-energy.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Nonlinear Landau damping simulations show particle
+    trapping and phase-space hole formation}%
+
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      Field energy as a function of time for nonlinear Landau damping
+      problem with k=0.5, $Te=1.0$ and $\alpha=0.5$. The initial
+      perturbation decays at a rate of $\gamma=−0.2916$, after which
+      the damping is halted from particle trapping. The growth rate of
+      this phase is $\gamma=0.0879$.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \setkeys{Gin}{width=1.0\linewidth,keepaspectratio}
+        \incfig{s162-field-energy.png}
+      \end{figure}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Algorithms have been tested with nonlinear Landau
+    damping problem}%
+
+  \begin{figure}
+    \setkeys{Gin}{width=0.65\linewidth,keepaspectratio}
+    \includemovie[inline=false,%
+    text={\incfig{s162-landau-damping-vp_distf_00000.png}}%
+    ]{0.65\linewidth}{0.4875\linewidth}{s162-distf.mov}
+    \caption{[Movie] Distribution function from nonlinear Landau
+      damping problem. Hyper-collisions are being implemented for
+      phase-mixing to unresolved scales in velocity.}
+  \end{figure}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Conclusions: Our tests confirm that DG algorithms are
+    promising for kinetic problems}%
+
+  \begin{itemize}
+  \item A discontinuous Galerkin scheme to solve a general class of
+    Hamiltonian field equations is presented.
+  \item The Poisson equation is discretized using continuous basis
+    functions.
+  \item With proper choice of basis functions energy is
+    conserved. 
+  \item With central fluxes enstrophy is conserved. With upwind fluxes
+    the scheme is $L_2$ stable.
+  \item Momentum conservation has small errors but is independent of
+    velocity space resolution and converges rapidly with spatial
+    resolution.
+  \end{itemize}
+
+\end{frame}
+% ----------------------------------------------------------------
+
+% ----------------------------------------------------------------
+\begin{frame}{Future work: extend scheme to higher dimensions, general
+    geometries and do first physics problems}%
+
+  \begin{itemize}
+    \small
+  \item The schemes have been extended to higher dimensions and
+    Serendipity basis functions are being explored (with Eric
+    Shi). Testing is in progress.
+  \item Maxwellian weighted basis functions for velocity space
+    discretization will be developed to allow coarse resolution
+    simulations with the option of fine scale resolution when needed.
+  \item A collision model is implemented. It will be tested with
+    standard problems and extended to higher dimensions.
+  \item Extensions will be made to take into account complicated edge
+    geometries using a multi-block structured grid.
+  \end{itemize}
+\end{frame}
+% ----------------------------------------------------------------
+
+\end{document}
+

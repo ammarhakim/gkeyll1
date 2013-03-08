@@ -80,7 +80,6 @@ namespace Lucee
     for (unsigned m=0; m<meqn; ++m)
       onlyIncrement[m] = false;
 // when onlyIncrement flag is set contribution is not added to the
-
 // input field, i.e. only increment is computed
     if (tbl.hasBool("onlyIncrement"))
     {
