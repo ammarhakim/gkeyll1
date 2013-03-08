@@ -1,4 +1,5 @@
 \documentclass{siamltex}
+\usepackage{graphicx}% Include figure files
 
 %% Autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
@@ -13,18 +14,27 @@
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-\title{Consistency of discontinuous Galerkin discretization of
-  diffusion operators}
+\title{Consistency and entropy correctness of discontinuous Galerkin
+  discretizations of diffusion operators}
 
-\author{A.~H. Hakim and G.~W. Hammett and E.~Shi}
+\author{A.~H. Hakim\footnotemark[2] \and G.~W. Hammett\footnotemark[2]
+  \and E.~Shi\footnotemark[2]\ \footnotemark[3]}
+
+\footnotetext[2]{Princeton Plasma Physics Laboratory, Princeton, NJ
+  08543-0451.}%
+\footnotetext[3]{Program in Plasma Physics, Department of Astrophysics,
+  Princeton University, NJ}
 
 \begin{document}
 
+\maketitle
 
 \begin{abstract}
-  XXX
+  DG schemes are inconsistent.
 \end{abstract}
 
-\maketitle
+\begin{keywords} 
+Discontinuous Galerkin, diffusion, consistency.
+\end{keywords}
 
 \end{document}
