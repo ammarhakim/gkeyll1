@@ -23,6 +23,7 @@
 #include <LcModalDg1DLocalDGUpdater.h>
 #include <LcModalDg1DSymmetricDDGUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
+#include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
@@ -62,6 +63,7 @@ namespace Lucee
       .append<Lucee::ModalDg1DLocalDGUpdater>()
       .append<Lucee::ModalDg1DSymmetricDDGUpdater>()
       .append<Lucee::ModalDgLimiter1DUpdater>()
+      .append<Lucee::ModalL2NormUpdater>()
       .append<Lucee::NodalPoissonBracketUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
