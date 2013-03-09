@@ -31,6 +31,7 @@ set (proto_SOURCES
   LcModalDg1DLocalDGUpdater.cpp
   LcModalDg1DSymmetricDDGUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
+  LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
