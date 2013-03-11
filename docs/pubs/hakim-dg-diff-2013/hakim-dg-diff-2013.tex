@@ -1,4 +1,5 @@
 \documentclass{siamltex}
+\usepackage{amsmath}
 \usepackage{graphicx}% Include figure files
 
 %% Autoscaled figures
@@ -8,14 +9,15 @@
 %% Commonly used macros
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\pfracb}[2]{\partial #1/\partial #2}
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
 
-\title{Consistency and entropy correctness of discontinuous Galerkin
-  discretizations of diffusion operators}
+\title{Consistency of discontinuous Galerkin discretizations of
+  diffusion operators}
 
 \author{A.~H. Hakim\footnotemark[2] \and G.~W. Hammett\footnotemark[2]
   \and E.~Shi\footnotemark[2]\ \footnotemark[3]}
@@ -30,11 +32,96 @@
 \maketitle
 
 \begin{abstract}
-  DG schemes are inconsistent.
+  Commony used DG schemes for diffusion are inconsistent.
+  % Here we compare two classes of discontinuous Galerkin algorithms for
+  % diffusion problems, the Local Discontinuous Galerkin (Local DG)
+  % approach and the Recover Discontinuous Galerkin approach. The Local
+  % DG approach has been widely used, but there are asymmetries in its
+  % solution which do not seem to have been noted before, and it appears
+  % to be very sensitive to small changes in the level of discontinuity
+  % in the solution at the cell interfaces. The Recover DG algorithm is
+  % based on the idea of evaluating diffusive fluxes at cell interfaces
+  % by recovering a smooth solution that interpolates between two
+  % adjacent cells. This approach appears to work well for the tests
+  % done here. For hyperdiffusion, a Recovery DG algorithm is more
+  % efficient because it has a narrower stencil than Local DG. These
+  % comparisons also indicate the importance of projecting the initial
+  % conditions onto the proper discrete representation (attempting to
+  % force continuity can degrade accuracy). It should be noted that
+  % multiple eigenfunctions in DG algorithms have a physical
+  % interpretation as representing different wavelength modes, some of
+  % which are shorter than the usual Nyquist limit wavelength of 2
+  % cells.
 \end{abstract}
 
 \begin{keywords} 
-Discontinuous Galerkin, diffusion, consistency.
+  Discontinuous Galerkin, diffusion equation, consistency, interface
+  recovery, local discontinuous Galerkin, symmetric discontinuous
+  Galerkin.
 \end{keywords}
 
+\section{Introduction}
+
+The discontinuous Galerkin (DG) method is a class of high-order
+schemes for the numerical solution of partial differential equations
+(PDEs). Developed originally for solving the linear, two-dimensional,
+steady-state neutron transport equation\cite{reed-hill-1973}, these
+schemes were extended to time-dependent, nonlinear, hyperbolic
+PDEs\cite{Cockburn:2001vr}, and, subsequently, are now a leading
+choice to achieve high-order solutions on complex geometries.
+
+DG schemes are a generalization of finite-volume schemes: in addition
+to evolving the cell averages, additional moments of the solution are
+also evolved. Explicitly evolving moments eliminates the
+``reconstruct'' and ``average'' steps in the standard finite-volume
+Reconstruct-Evolve-Average (RAE) procedure\cite{leveque_book_2002} as
+a high-order representation is already available in each cell. This
+representation is expressed using basis functions local to a cell. In
+this sense, the DG representation appears like a Finite-Element (FE)
+method. However, unlike FE methods in which some degree of continuity
+of the solution across cell boundaries is assumed, no such assumption
+is made in DG schemes. In fact, similar to finite-volume schemes, the
+jump across cell interfaces is used in an approximate or exact Riemann
+solver to couple neighboring cells together and, with appropriate
+choices, provide upwinding.
+
+Although the jumps across cell interfaces serve as an important aspect
+of DG schemes for hyperbolic equations, the presence of these
+discontinuities can be an issue when discretizing second or higher
+order operators using the DG framework. In particular, estimates of
+the solution derivatives are needed at cell interfaces. As the
+solution itself is discontinuous at cell interfaces, it is not clear
+how to compute such derivative estimates.
+
+At present there are three broad techniques for computing the solution
+derivatives. The first is to introduce auxiliary variables to rewrite
+the high-order PDE as a system of first-order PDEs, and use the DG
+framework on the resulting larger system. This leads naturally to
+estimates of solution derivatives at cell interfaces by particular
+choices of numerical fluxes for the introduced auxiliary variables.
+The second technique is to derive a weak-form of the PDE and introduce
+special numerical fluxes, combined with ``penalty'' terms that
+penalize the solution for being discontinuous across interfaces. These
+two techniques are not completely independent, and, in some ways,
+result from an attempt to apply ideas from FE methods to the DG
+discretization. The third technique is to reconstruct a continuous
+representation of the solution in the two cells sharing an interface
+and use that instead to compute the needed derivatives. This approach
+is closer in spirit to finite-volume methods in which solution
+gradients at cell interfaces, for example, needed in Navier-Stokes
+solvers, are reconstructed using a least-square approach.
+
+\bibliography{gke}
+\bibliographystyle{siam}
+
 \end{document}
+
+A particular class of DG schemes for second (and higher) order
+operators is obtained by rewriting the original system as a larger
+system of first-order equations. In particular, consider the heat
+conduction equation
+\begin{align}
+  \pfrac{f}{t} = \alpha \pfracc{f}{x}
+\end{align}
+where $f(x,t)$ is a scalar quantity and $\alpha$ is a diffusion
+coefficient.
