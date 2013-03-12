@@ -142,6 +142,29 @@ g2 : fullratsimp(t1+t2+t3);
 
 g_ldg_s_p2 : fullratsimp(convertMat_p2.transpose(matrix([g0,g1,g2])));
 
+/** SDDG scheme */
+Tmat_sddg_p2 : 1/dx^2*matrix(
+ [-6*I+3*Ti+3*T, -2*T+2*Ti, -6*I+3*Ti+3*T],
+ [6*T-6*Ti, -18*I-3*Ti-3*T, 6*T-6*Ti],
+ [-30*I+15*Ti+15*T, -10*T+10*Ti, -90*I+15*Ti+15*T]);
+
+t1 : subst([T=R0, Ti=L0, I=I0], Tmat_sddg_p2[1][1]);
+t2 : subst([T=R1, Ti=L1, I=I1], Tmat_sddg_p2[1][2]);
+t3 : subst([T=R2, Ti=L2, I=I2], Tmat_sddg_p2[1][3]);
+g0 : fullratsimp(t1+t2+t3);
+
+t1 : subst([T=R0, Ti=L0, I=I0], Tmat_sddg_p2[2][1]);
+t2 : subst([T=R1, Ti=L1, I=I1], Tmat_sddg_p2[2][2]);
+t3 : subst([T=R2, Ti=L2, I=I2], Tmat_sddg_p2[2][3]);
+g1 : fullratsimp(t1+t2+t3);
+
+t1 : subst([T=R0, Ti=L0, I=I0], Tmat_sddg_p2[3][1]);
+t2 : subst([T=R1, Ti=L1, I=I1], Tmat_sddg_p2[3][2]);
+t3 : subst([T=R2, Ti=L2, I=I2], Tmat_sddg_p2[3][3]);
+g2 : fullratsimp(t1+t2+t3);
+
+g_sddg_p2 : fullratsimp(convertMat_p2.transpose(matrix([g0,g1,g2])));
+
 /** Recovery DG scheme */
 Tmat_rdg_p2 : matrix(
  [(15*T+15*Ti-30*I)/(4*dx^2),-(11*T-11*Ti)/(4*dx^2),(6*T+6*Ti-12*I)/(5*dx^2)],

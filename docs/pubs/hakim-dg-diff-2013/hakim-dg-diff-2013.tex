@@ -1,57 +1,43 @@
-\documentclass{siamltex}
+\documentclass[final]{siamltex}
 \usepackage{amsmath}
-\usepackage{graphicx}% Include figure files
+\usepackage{graphicx}
 
-%% Autoscaled figures
+%% autoscaled figures
 \newcommand{\incfig}{\centering\includegraphics}
-\setkeys{Gin}{width=0.9\linewidth,keepaspectratio}
+\setkeys{Gin}{width=0.7\linewidth,keepaspectratio}
 
-%% Commonly used macros
 \newcommand{\eqr}[1]{Eq.\thinspace(#1)}
 \newcommand{\pfrac}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\pfracc}[2]{\frac{\partial^2 #1}{\partial #2^2}}
 \newcommand{\pfraca}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\pfracb}[2]{\partial #1/\partial #2}
+\newcommand{\pfracbb}[2]{\partial^2 #1/\partial #2^2}
+\newcommand{\spfrac}[2]{{\partial_{#1}} {#2}}
 \newcommand{\mvec}[1]{\mathbf{#1}}
 \newcommand{\gvec}[1]{\boldsymbol{#1}}
 \newcommand{\script}[1]{\mathpzc{#1}}
+\newcommand{\eep}{\mvec{e}_\phi}
+\newcommand{\eer}{\mvec{e}_r}
+\newcommand{\eez}{\mvec{e}_z}
+\newcommand{\iprod}[2]{\langle{#1}\rangle_{#2}}
 
 \title{Consistency of discontinuous Galerkin discretizations of
   diffusion operators}
+\author{A.~H. Hakim\footnotemark[2] 
+   \and G.~W. Hammett\footnotemark[2]
+   \and E.~Shi\footnotemark[2]\ \footnotemark[3]}
 
-\author{A.~H. Hakim\footnotemark[2] \and G.~W. Hammett\footnotemark[2]
-  \and E.~Shi\footnotemark[2]\ \footnotemark[3]}
+\begin{document}
+\maketitle
 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \footnotetext[2]{Princeton Plasma Physics Laboratory, Princeton, NJ
   08543-0451.}%
 \footnotetext[3]{Program in Plasma Physics, Department of Astrophysics,
   Princeton University, NJ}
 
-\begin{document}
-
-\maketitle
-
 \begin{abstract}
-  Commony used DG schemes for diffusion are inconsistent.
-  % Here we compare two classes of discontinuous Galerkin algorithms for
-  % diffusion problems, the Local Discontinuous Galerkin (Local DG)
-  % approach and the Recover Discontinuous Galerkin approach. The Local
-  % DG approach has been widely used, but there are asymmetries in its
-  % solution which do not seem to have been noted before, and it appears
-  % to be very sensitive to small changes in the level of discontinuity
-  % in the solution at the cell interfaces. The Recover DG algorithm is
-  % based on the idea of evaluating diffusive fluxes at cell interfaces
-  % by recovering a smooth solution that interpolates between two
-  % adjacent cells. This approach appears to work well for the tests
-  % done here. For hyperdiffusion, a Recovery DG algorithm is more
-  % efficient because it has a narrower stencil than Local DG. These
-  % comparisons also indicate the importance of projecting the initial
-  % conditions onto the proper discrete representation (attempting to
-  % force continuity can degrade accuracy). It should be noted that
-  % multiple eigenfunctions in DG algorithms have a physical
-  % interpretation as representing different wavelength modes, some of
-  % which are shorter than the usual Nyquist limit wavelength of 2
-  % cells.
+  Commonly used DG schemes for diffusion are inconsistent.
 \end{abstract}
 
 \begin{keywords} 
@@ -59,6 +45,11 @@
   recovery, local discontinuous Galerkin, symmetric discontinuous
   Galerkin.
 \end{keywords}
+
+\begin{AMS}\end{AMS}
+
+\pagestyle{myheadings}
+\thispagestyle{plain}
 
 \section{Introduction}
 
@@ -88,10 +79,10 @@ choices, provide upwinding.
 Although the jumps across cell interfaces serve as an important aspect
 of DG schemes for hyperbolic equations, the presence of these
 discontinuities can be an issue when discretizing second or higher
-order operators using the DG framework. In particular, estimates of
-the solution derivatives are needed at cell interfaces. As the
-solution itself is discontinuous at cell interfaces, it is not clear
-how to compute such derivative estimates.
+order operators using the DG framework. In particular, continuous
+solution derivatives are needed at cell interfaces. As the solution
+itself is discontinuous at cell interfaces, it is not clear how to
+compute such derivatives.
 
 At present there are three broad techniques for computing the solution
 derivatives. The first is to introduce auxiliary variables to rewrite
@@ -108,20 +99,113 @@ discretization. The third technique is to reconstruct a continuous
 representation of the solution in the two cells sharing an interface
 and use that instead to compute the needed derivatives. This approach
 is closer in spirit to finite-volume methods in which solution
-gradients at cell interfaces, for example, needed in Navier-Stokes
-solvers, are reconstructed using a least-square approach.
+gradients at cell interfaces, needed in Navier-Stokes equations, for
+example, are reconstructed using a least-square approach.
+
+Although each of these techniques leads to satisfactory looking
+solutions when used in solving PDEs, the question of
+\emph{consistency} of the resulting schemes has not been addressed
+before. By consistency we mean, intuitively, that as the cell size
+goes to zero, the discrete representation of the high-order
+\emph{operator} (and not just the solution at some later time)
+recovers the exact operator. Our notion of full consistency is made
+precise below.
+
+In this paper we address the consistency of a few commonly used DG
+discretizations of the diffusion operator in one-dimension. We show
+that the widely used forms of local DG (LDG)
+schemes\cite{Cockburn:1998uy} and penalty based methods, for example,
+the symmetric variants of the direct DG schemes\cite{Liu:2010eq}, are
+not fully consistent. We also show that van Leer and Nomura's recovery
+DG approach\cite{vanLeer:2005kk}, is fully consistent. In addition to
+consistency, we also perform von Neumann analysis of each of these
+schemes and discuss the resulting eigenvalue spectrum. We point out
+that that multiple eigenfunctions in DG schemes have a physical
+interpretation as representing different wavelength modes, some of
+which are shorter than the usual Nyquist limit wavelength of two
+cells.
+
+\section{Consistent discretizations}
+
+In the discontinuous Galerkin scheme the discrete solution in a cell
+$I_j\equiv [-x_j-\Delta x/2, x_j+\Delta x/2]$, is written as a sum
+over polynomial basis functions. Using Legendre polynomials as modal
+basis we can write
+\begin{align}
+  f(x) \approx f_{jh}(x) = \sum_{n=0}^N f_j^n P_n(\eta_j(x)),
+  \qquad x \in I_j
+\end{align}
+where $f_j^n$ are expansion coefficients and $P_n(\eta)$ are Legendre
+polynomials of degree $n$, and $\eta_j(x) = 2(x-x_j)/\Delta x$. The
+expansion coefficient $f^0$ is the cell average, and the other
+coefficients represent (combinations of) solution derivatives. For
+example, for piecewise linear ($N=1$) basis functions, $2 f^1/\Delta
+x$ is the solution slope. In fact, a linear transformation allows us
+to write the expansion in a cell using Taylor series basis functions
+centered around $x=x_j$
+\begin{align}
+  f_{jh}(x) = \sum_{n=0}^N f^{(n)}_j (x-x_j)^n/n!
+\end{align}
+where $f^{(n)}(x_j)$ is the $n$-th derivative evaluated at the cell
+center, showing explicitly the relationship between expansion
+coefficients and solution derivatives. 
+
+Given a function $f(x)$, we call a discrete representation $f_{jh}$
+\emph{consistent} if
+\begin{align}
+  \lim_{\Delta x \rightarrow 0} f_j^{(n)} = \frac{d^nf}{dx^n} \biggr|_{x_j}.
+\end{align}
+For example, the standard Galerkin procedure of minimization of the
+error in each cell, $\int_{I_j} \big[f(x)-f_{jh}(x)\big]^2dx$, leads
+to a consistent representation.
+
+This concept of consistency can be extended to the approximation of
+operators. Consider
+\begin{align}
+  g(x) = f_{xx}(x)
+\end{align}
+where subscripts represent derivatives. Given a domain $I\in[a,b]$
+divided into uniform cells $I_j$, we wish to determine a discrete
+representation of $g(x)$ using a DG scheme, i.e.
+\begin{align}
+  g(x) = f_{xx}(x) \approx g_{jh}(x) = \sum_{n=0}^N g_j^n P_n(\eta_j(x))
+\end{align}
+in each cell $I_j$. We define a discretization to be \emph{consistent
+  in the mean} as follows
+\begin{definition}[Consistency in the mean]
+  A discrete DG representation, $g_{jh}(x)$, of $f_{xx}$ said to be
+  \emph{consistent in the mean}, if
+  \begin{align}
+    \lim_{\Delta x\rightarrow 0} g_j^0 = f_{xx}|_{x_j}.
+  \end{align}
+\end{definition}
+
+Consistency in the mean is required if the discrete operator is to be
+represented correctly. However, for higher than piecewise constant
+polynomial basis functions, the discrete operator also contains
+estimates for derivatives of $f_{xx}$. Simply ensuring that the
+discretization is consistent in the mean will not ensure that these
+derivatives are computed correctly. Hence, we define a discretization
+to be \emph{fully consistent} as follows
+\begin{definition}[Full consistency]
+  A discrete DG representation, $g_{jh}(x)$, of $f_{xx}$ said to be
+  \emph{fully consistent}, if
+  \begin{align}
+    \lim_{\Delta x \rightarrow 0} \frac{d^ng_{jh}}{dx^n} =
+    \frac{d^nf_{xx}}{dx^n} \biggr|_{x_j}
+  \end{align}
+for all $n=0,\ldots,N$.
+\end{definition}
+
+For example for piecewise linear basis functions, and a fully
+consistent scheme $2g^1/\Delta x = d^3f/dx^3$. 
+
+\section{Consistency of discontinuous Galerkin schemes for diffusion}
+
+In this section we examine if widely used DG discretizations of
+$g=f_{xx}$ are consistent.
 
 \bibliography{gke}
 \bibliographystyle{siam}
 
 \end{document}
-
-A particular class of DG schemes for second (and higher) order
-operators is obtained by rewriting the original system as a larger
-system of first-order equations. In particular, consider the heat
-conduction equation
-\begin{align}
-  \pfrac{f}{t} = \alpha \pfracc{f}{x}
-\end{align}
-where $f(x,t)$ is a scalar quantity and $\alpha$ is a diffusion
-coefficient.
