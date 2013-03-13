@@ -1,0 +1,170 @@
+\documentclass[10pt,letterpaper]{article}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+
+\setlength{\parskip}{0.1in}
+\setlength{\parindent}{0.0in}
+
+\usepackage{amssymb,amsmath}
+\usepackage{graphicx}
+
+\begin{document}
+
+\textbf{Factors of $1/\Delta x^2$ in the matrices have been omitted.}
+
+\section{Comparison of Scheme Convergence}
+\begin{tabular}{c|c|c}
+Scheme & k = 1 Order & k = 2 Order\\
+\hline
+ALDG & 4 & 6\\
+SLDG & 2 & 4\\
+SDDG & 2 & 4\\
+RLDG & 4 & 8
+\end{tabular}
+
+\section{Symmetric Direct DG}
+\begin{itemize}
+  \item SDDG solves the following weak form:
+    \begin{align*}
+      \int_{I_j} u_t v \mathrm{d}x -\widehat{(u_x)}v\bigr|_{x_{j-\frac{1}{2}}}^{x_{j+\frac{1}{2}}}+\int_{I_j} u_x v_x \mathrm{d}x+ (\lbrack u\rbrack\widehat{v_x})_{j+\frac{1}{2}}^- + (\lbrack u\rbrack \widehat{v_x} )_{j-\frac{1}{2}} = & 0
+    \end{align*}
+	\item The flux is defined as:
+    \begin{align*}
+      \widehat{u_x} = & \beta_0 \frac{\lbrack u \rbrack}{\Delta x} + \overline{u_x} + \beta_1 \Delta x \lbrack u_{xx} \rbrack\\
+      \widehat{v_x} = & \beta_0 \frac{\lbrack v \rbrack}{\Delta x} + \overline{v_x} + \beta_1 \Delta x \lbrack v_{xx} \rbrack
+    \end{align*}
+  \item $v$ is nonzero only inside the cell $I_j$, so only half of the terms contribute to the computation of $\widehat{v_x}$
+  \item $\beta_0$ and $\beta_1$ have minimum values for an admissible numerical flux, and these limits are a function of the polynomial order used
+  \item It appears that certain choices of $\beta_0$ and $\beta_1$ can make the scheme equivalent to the one obtained by averaging the update equations for the two choices of fluxes for local DG, but these choices might not satisfy the admissibility criteria
+\end{itemize}
+  
+\subsection{k = 1}
+$\left(\begin{array}{cc}
+4\hat{T}^{-1} -8+4 \hat{T} & 3\hat{T}^{-1}-3 \hat{T} \\
+-9 \hat{T}^{-1} +9 \hat{T} & -6 \hat{T}^{-1} -24-6 \hat{T}
+\end{array}\right)$
+
+Using $\beta_0 = 2$ and $\beta_1 = 0$
+    
+\subsection{k = 2}
+$\left(
+\begin{array}{ccc}
+ 3 \hat{T}^{-1}-6+3 \hat{T} & 2 \hat{T}^{-1}-2 \hat{T} & 3 \hat{T}^{-1}-6+3 \hat{T} \\
+ -6 \hat{T}^{-1}+6 \hat{T} & -3 \hat{T}^{-1}-18-3 \hat{T} & -6 \hat{T}^{-1}+6 \hat{T} \\
+ 15 \hat{T}^{-1}-30+15 \hat{T} & 10 \hat{T}^{-1}-10 \hat{T} & 15 \hat{T}^{-1}-90+15 \hat{T} \\
+\end{array}
+\right)$
+
+Using $\beta_0 = 3/2$ and $\beta_1 = 1/4$
+
+$\left(
+\begin{array}{ccc}
+ 9 \hat{T}^{-1}-18+9 \hat{T} & 8 \hat{T}^{-1} -8 \hat{T}& 6 \hat{T}^{-1}-12+6 \hat{T} \\
+ -24 \hat{T}^{-1}+24 \hat{T} & -21 \hat{T}^{-1}-54-21 \hat{T} & -15 \hat{T}^{-1}15 \hat{T} \\
+ 30 \hat{T}^{-1}-60+30 \hat{T} & 25 \hat{T}^{-1}-25 \hat{T} & 15 \hat{T}^{-1}-90+15 \hat{T}
+\end{array}
+\right)$
+
+Using $\beta_0 = 9/2$ and $\beta_1 = 0$
+
+\section{Local DG}
+\begin{itemize}
+\item Local DG is done by solving the two equations:
+\begin{align*}
+w + \frac{\partial f}{\partial x} &= 0\\
+\frac{\partial f}{\partial t} + \frac{\partial w}{\partial x} &= 0
+\end{align*}
+\item This form uses a three cell stencil, but will use a wider stencil if extended to the calculation of higher order derivatives.
+\end{itemize}
+
+\subsection{k = 1}
+\subsection{Choice 1: $\hat{f} = f^+$ and $\hat{w} = w^-$}
+$\left(
+\begin{array}{cc}
+ 4\hat{T}^{-1} -8+4 \hat{T} & 2\hat{T}^{-1}+2-4 \hat{T} \\
+ -12 \hat{T}^{-1} +6+6 \hat{T} & -6 \hat{T}^{-1} -24-6 \hat{T}
+ \end{array}\right)$
+ 
+ \subsubsection{Choice 2: $\hat{f} = f^-$ and $\hat{w} = w^+$}
+ $\left(
+\begin{array}{cc}
+4\hat{T}^{-1} -8+4 \hat{T} & 4\hat{T}^{-1}-2-2 \hat{T} \\
+-6 \hat{T}^{-1} -6+12 \hat{T} & -6 \hat{T}^{-1} -24-6 \hat{T}
+\end{array}\right)$
+
+\subsubsection{Symmetric Version}
+$\left(\begin{array}{cc}
+4\hat{T}^{-1} -8+4 \hat{T} & 3\hat{T}^{-1}-3 \hat{T} \\
+-9 \hat{T}^{-1} +9 \hat{T} & -6 \hat{T}^{-1} -24-6 \hat{T}
+\end{array}\right)$
+
+\subsection{k = 2}
+\subsubsection{Choice 1: $\hat{f} = f^+$ and $\hat{w} = w^-$}
+$\left(
+\begin{array}{ccc}
+ -18+9 \hat{T}+9 \hat{T}^{-1}& 2-9 \hat{T}+7 \hat{T}^{-1}& -12+9 \hat{T}+3 \hat{T}^{-1}\\
+ 6+21 \hat{T}-27 \hat{T}^{-1}& -54-21 \hat{T}-21 \hat{T}^{-1}& 24+21 \hat{T}-9 \hat{T}^{-1}\\
+ -60+15 \hat{T}+45 \hat{T}^{-1}& 40-15 \hat{T}+35 \hat{T}^{-1}& -90+15 \hat{T}+15 \hat{T}^{-1}
+\end{array}
+\right)$
+
+\subsubsection{Choice 2: $\hat{f} = f^-$ and $\hat{w} = w^+$}
+$\left(
+\begin{array}{ccc}
+ -18+9 \hat{T}+9 \hat{T}^{-1}& -2-7 \hat{T}+9 \hat{T}^{-1}& -12+3 \hat{T}+9 \hat{T}^{-1}\\
+ -6+27 \hat{T}-21 \hat{T}^{-1}& -54-21 \hat{T}-21 \hat{T}^{-1}& -24+9 \hat{T}-21 \hat{T}^{-1}\\
+ -60+45 \hat{T}+15 \hat{T}^{-1}& -40-35 \hat{T}+15 \hat{T}^{-1}& -90+15 \hat{T}+15 \hat{T}^{-1}
+\end{array}
+\right)$
+
+\subsubsection{Symmetric Version}
+$\left(
+\begin{array}{ccc}
+ 9 \hat{T}^{-1}-18+9 \hat{T} & 8 \hat{T}^{-1} -8 \hat{T}& 6 \hat{T}^{-1}-12+6 \hat{T} \\
+ -24 \hat{T}^{-1}+24 \hat{T} & -21 \hat{T}^{-1}-54-21 \hat{T} & -15 \hat{T}^{-1}15 \hat{T} \\
+ 30 \hat{T}^{-1}-60+30 \hat{T} & 25 \hat{T}^{-1}-25 \hat{T} & 15 \hat{T}^{-1}-90+15 \hat{T}
+\end{array}
+\right)$
+
+\section{Interface Recovery}
+  A second integration by parts is performed to give weak form
+  \begin{align*}
+    \int_{I_j} u_t v \mathrm{d}x 
+    =
+    \left(vf_x - v_xf\right) \bigr|_{x_{j-\frac{1}{2}}}^{x_{j+\frac{1}{2}}}
+    +
+    \int_{I_j}v_{xx}u\mathrm{d}x
+  \end{align*}
+  where $f(\zeta)$, $\zeta=x_{j-1/2}-x \in [-\Delta x,\Delta x]$, is a
+  \emph{reconstructed} poynomial that extends across two cells
+  and defined as
+  \begin{align*}
+    f(\zeta) = f_0 + \zeta f' + \frac{1}{2}\zeta^2 f'' + \ldots
+  \end{align*}
+  and
+  \begin{align*}
+    \int_{I_{j-1}} v f \mathrm{d}x &= \int_{I_{j-1}} v u \mathrm{d}x \\
+    \int_{I_{j}} v f \mathrm{d}x &= \int_{I_{j}} v u \mathrm{d}x
+  \end{align*}
+  
+  
+  
+  \subsection{k = 1}
+  $\left(\begin{array}{cc}
+      9\hat{T}-18+9\hat{T}^{-1} & -5\hat{T} + 5\hat{T}^{-1} \\
+      15 \hat{T} -15 \hat{T}^{-1} & -7 \hat{T} - 46 - 7\hat{T}^{-1}
+    \end{array}\right)$
+    
+  \subsection{k = 2}
+  $\left(
+\begin{array}{ccc}
+ -18+9 \hat{T}+9 \hat{T}^{-1} & -8 \hat{T}+8 \hat{T}^{-1} & -12+6 \hat{T}+6 \hat{T}^{-1} \\
+ 24 \hat{T}-24 \hat{T}^{-1} & -54-21 \hat{T}-21 \hat{T}^{-1} & 15 \hat{T}-15 \hat{T}^{-1} \\
+ -60+30 \hat{T}+30 \hat{T}^{-1} & -25 \hat{T}+25 \hat{T}^{-1} & -90+15 \hat{T}+15 \hat{T}^{-1}
+\end{array}
+\right)$
+\end{document}

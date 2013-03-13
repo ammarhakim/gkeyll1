@@ -1,0 +1,58 @@
+\documentclass[10pt,letterpaper]{article}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+
+\setlength{\parskip}{0.1in}
+\setlength{\parindent}{0.0in}
+
+\usepackage{amssymb,amsmath}
+\begin{document}
+
+Factors of $1/\Delta x^2$ have been omitted.
+
+\section{Symmetrized Direct DG}
+$\left(
+\begin{array}{ccc}
+ -6+3 \hat{T}+3 \hat{T}^{-1} & -2 \hat{T}+2 \hat{T}^{-1} & -6+3 \hat{T}+3 \hat{T}^{-1} \\
+ 6 \hat{T}-6 \hat{T}^{-1} & -18-3 \hat{T}-3 \hat{T}^{-1} & 6 \hat{T}-6 \hat{T}^{-1} \\
+ -30+15 \hat{T}+15 \hat{T}^{-1} & -10 \hat{T}+10 \hat{T}^{-1} & -90+15 \hat{T}+15 \hat{T}^{-1} \\
+\end{array}
+\right)$
+
+Using $\beta_0 = 3/2$ and $\beta_1 = 1/4$
+
+\section{Local DG}
+Local DG is done by solving the two equations:
+
+\begin{align*}
+w + \frac{\partial f}{\partial x} &= 0\\
+\frac{\partial f}{\partial t} + \frac{\partial w}{\partial x} &= 0
+\end{align*}
+
+\subsection{Choice 1}
+$\left(
+\begin{array}{ccc}
+ -18+9 \hat{T}+9 \hat{T}^{-1}& 2-9 \hat{T}+7 \hat{T}^{-1}& -12+9 \hat{T}+3 \hat{T}^{-1}\\
+ 6+21 \hat{T}-27 \hat{T}^{-1}& -54-21 \hat{T}-21 \hat{T}^{-1}& 24+21 \hat{T}-9 \hat{T}^{-1}\\
+ -60+15 \hat{T}+45 \hat{T}^{-1}& 40-15 \hat{T}+35 \hat{T}^{-1}& -90+15 \hat{T}+15 \hat{T}^{-1}
+\end{array}
+\right)$
+
+Using the choices of fluxes $\hat{f} = f^+$ and $\hat{w} = w^-$
+
+\subsection{Choice 2}
+$\left(
+\begin{array}{ccc}
+ -18+9 \hat{T}+9 \hat{T}^{-1}& -2-7 \hat{T}+9 \hat{T}^{-1}& -12+3 \hat{T}+9 \hat{T}^{-1}\\
+ -6+27 \hat{T}-21 \hat{T}^{-1}& -54-21 \hat{T}-21 \hat{T}^{-1}& -24+9 \hat{T}-21 \hat{T}^{-1}\\
+ -60+45 \hat{T}+15 \hat{T}^{-1}& -40-35 \hat{T}+15 \hat{T}^{-1}& -90+15 \hat{T}+15 \hat{T}^{-1}
+\end{array}
+\right)$
+
+Using the choices of fluxes $\hat{f} = f^-$ and $\hat{w} = w^+$
+
+\end{document}
