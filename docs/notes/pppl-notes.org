@@ -5,6 +5,17 @@
 #+EMAIL:     ahakim@pppl.gov
 #+LANGUAGE:  en
 
+* March 20th
+
+  In this last month I have presented at SIAM and started work on a
+  paper decribing the inconsistency of standard DG schemes for
+  diffusion. In the last few days have also spent time thinking about
+  the leap to 3D/4D/5D kinetic equations.
+
+  Need to move out all the Gkeyll documents (tech notes and papers) to
+  a new repo. Manual could still reside in the main gkeyll repo, but
+  other things need to move out.
+
 * Febuary 27th
 
   How can one off-load as much of the work to libraries, so that
