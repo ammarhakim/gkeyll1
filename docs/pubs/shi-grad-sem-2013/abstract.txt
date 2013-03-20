@@ -1,7 +1,0 @@
-In this talk, I will report progress in the first few months of my second-year project working with Ammar Hakim and Greg Hammett. 
-Gkeyll is a prototype code developed to investigate advanced numerical methods for continuum edge gyrokinetic simulations. 
-In finite element methods, Lagrange basis functions are a popular choice due to their easy of implementation and generalization to higher dimensions and orders. 
-These elements, however, contain a large number of degrees of freedom in higher dimension and order, which can increase computational time.
- Serendipity basis functions have fewer degrees of freedom per element, and a definition for arbitrary dimension and order has only recently been provided (Arnold, 2011). When compared to Lagrange basis functions, these basis functions could reduce computational effort while retaining the same formal accuracy. 
-3-D serendipity basis functions up to 4th order have been implemented in Gkeyll, and comparisons between serendipity and Lagrange finite-elements on a simple advection problem will be presented. 
-Additionally, I will provide brief introduction to finite element methods, with emphasis on the concepts of basis functions and degrees of freedom.
