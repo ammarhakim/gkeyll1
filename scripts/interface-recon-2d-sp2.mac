@@ -1,0 +1,95 @@
+/** Mapping between cell to unit element */
+etal(x) := (x+dx/2)/(dx/2);
+etar(x) := (x-dx/2)/(dx/2);
+zet(y) := (y-0)/(dy/2);
+
+/** Ordinates */
+ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
+/** Basis functions of order 3 */
+N3(x,y) := [
+  1/4*(1+ords[1][1]*x)*(1+ords[1][2]*y)*(-1+ords[1][1]*x+ords[1][2]*y),
+  1/4*(1+ords[2][1]*x)*(1+ords[2][2]*y)*(-1+ords[2][1]*x+ords[2][2]*y),
+  1/4*(1+ords[3][1]*x)*(1+ords[3][2]*y)*(-1+ords[3][1]*x+ords[3][2]*y),
+  1/4*(1+ords[4][1]*x)*(1+ords[4][2]*y)*(-1+ords[4][1]*x+ords[4][2]*y),
+  1/2*(1-x^2)*(1+ords[5][2]*y),
+  1/2*(1-y^2)*(1+ords[6][1]*x),
+  1/2*(1-x^2)*(1+ords[7][2]*y),
+  1/2*(1-y^2)*(1+ords[8][1]*x)];
+
+/** Left expansion */
+ul3(x,y) := sum(cl(j)*N3(etal(x),zet(y))[j], j, 1, 8);
+/** Right expansion */
+ur3(x,y) := sum(cr(j)*N3(etar(x),zet(y))[j], j, 1, 8);
+
+/** 1D fit */
+fit(x) := df(0) + sum(df(j)*x^j/factorial(j), j, 1, 5);
+
+eqnl(n,yloc) := integrate(fit(x)*legendre_p(n,etal(x)), x, -dx, 0)
+                =
+		integrate(ul3(x,yloc)*legendre_p(n,etal(x)), x, -dx, 0);
+eqnr(n,yloc) := integrate(fit(x)*legendre_p(n,etar(x)), x, 0, dx)
+                =
+		integrate(ur3(x,yloc)*legendre_p(n,etar(x)), x, 0, dx);
+
+calcRecon(yloc) := block([eq, un, res],
+  /* Make list of equations to solve */
+  eq : append( makelist(eqnl(n,yloc), n, 0, 2), makelist(eqnr(n,yloc), n, 0, 2) ),
+  /* Make list of unknowns */
+  un : makelist(df(n), n, 0, 5),
+  /* Solve and extract results */
+  res : map(rhs, solve(eq, un)[1]),
+  return (res)
+);
+
+un : makelist(df(n), n, 0, 5);
+
+res0 : calcRecon(0);
+/** Construct final expression for fit */
+edgeFit3_0 : subst(append([x=0], makelist(un[i]=res0[i], i, 1, 6)), fit(x));
+edgeGradFit3_0 : subst(append([x=0], makelist(un[i]=res0[i], i, 1, 6)), diff(fit(x),x));
+fit_0(x) := subst(makelist(un[i]=res0[i], i, 1, 6), fit(x));
+
+resm : calcRecon(-dy/2);
+/** Construct final expression for fit */
+edgeFit3_m : subst(append([x=0], makelist(un[i]=resm[i], i, 1, 6)), fit(x));
+edgeGradFit3_m : subst(append([x=0], makelist(un[i]=resm[i], i, 1, 6)), diff(fit(x),x));
+fit_m(x) := subst(makelist(un[i]=resm[i], i, 1, 6), fit(x));
+
+resp : calcRecon(dy/2);
+/** Construct final expression for fit */
+edgeFit3_p : subst(append([x=0], makelist(un[i]=resp[i], i, 1, 6)), fit(x));
+edgeGradFit3_p : subst(append([x=0], makelist(un[i]=resp[i], i, 1, 6)), diff(fit(x),x));
+fit_p(x) := subst(makelist(un[i]=resp[i], i, 1, 6), fit(x));
+
+/** Now reconstruct the full fit as function of (x,y) */
+a0(x) := fit_0(x);
+a1(x) := 1/dy*(fit_p(x)-fit_m(x));
+a2(x) := 2/dy^2*(fit_p(x)+fit_m(x)-2*a0(x));
+
+ffit(x,y) := a0(x) + a1(x)*y + a2(x)*y^2;
+r : ffit(x,y);
+
+mono : (mono : [], for py from 0 thru 2
+       do (for px from 0 thru 5
+        do (mono : endcons( x^px*y^py, mono ))),
+      mono);
+
+cev : (cev : [], for py from 0 thru 2
+       do (for px from 0 thru 5
+        do (cev : endcons( ratcoef(ratcoef(r, x, px), y, py), cev ))),
+      cev);
+cm : coefmatrix(cev, append(makelist(cl(i),i,1,8), makelist(cl(i),i,1,8)));
+
+/** Cross check if L2 projection on left, right cells work (ll and rr
+should be lists of zeros )*/
+
+ll : (ll : [], for i from 1 thru 8
+       do (ll : endcons(
+         integrate(integrate(ffit(x,y)*N3(x,y)[i],x,-dx,0),-dy/2,dy/2) -
+	 integrate(integrate(ul3(x,y)*N3(x,y)[i],x,-dx,0),-dy/2,dy/2), ll)),
+      ll);
+rr : (rr : [], for i from 1 thru 8
+       do (rr : endcons(
+         integrate(integrate(ffit(x,y)*N3(x,y)[i],x,0,dx),-dy/2,dy/2) -
+	 integrate(integrate(ur3(x,y)*N3(x,y)[i],x,0,dx),-dy/2,dy/2), rr)),
+      rr);
