@@ -1,0 +1,88 @@
+/** Ordinates */
+ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
+
+/** Basis function of order 2 */
+N2(x,y) := 1/4*[
+ (1+ords[1][1]*x)*(1+ords[1][2]*y), 
+ (1+ords[2][1]*x)*(1+ords[2][2]*y), 
+ (1+ords[3][1]*x)*(1+ords[3][2]*y), 
+ (1+ords[4][1]*x)*(1+ords[4][2]*y)];
+
+/** Mapping between cell to unit element */
+etal(x) := (x+dx/2)/(dx/2);
+etar(x) := (x-dx/2)/(dx/2);
+zet(y) := (y-0)/(dy/2);
+
+/** Left expansion */
+ul(x,y) := sum(cl(j)*N2(etal(x),zet(y))[j], j, 1, 4);
+/** Right expansion */
+ur(x,y) := sum(cr(j)*N2(etar(x),zet(y))[j], j, 1, 4);
+
+/** Reconstruction expressed as Taylor series */
+fit(x,y) := sum(sum(df(j,k)*x^j*y^k/factorial(j)*factorial(k), k, 0, 1), j, 0, 3);
+
+/** Left equation */
+eqnl(n) := integrate(
+            integrate(fit(x,y)*N2(etal(x),zet(y))[n], y, -dy/2, dy/2),
+	    x, -dx, 0)
+          =
+	  integrate(
+            integrate(ul(x,y)*N2(etal(x),zet(y))[n], y, -dy/2, dy/2),
+	    x, -dx, 0);
+
+/** Right equation */
+eqnr(n) := integrate(
+            integrate(fit(x,y)*N2(etar(x),zet(y))[n], y, -dy/2, dy/2),
+	    x, 0, dx)
+          =
+	  integrate(
+            integrate(ur(x,y)*N2(etar(x),zet(y))[n], y, -dy/2, dy/2),
+	    x, 0, dx);
+
+/** Collect equations together */
+eq : append( makelist(eqnl(n), n, 1, 4), makelist(eqnr(n), n, 1, 4) );
+/** Collect list of unknowns */
+un : append( makelist(df(n,0), n, 0, 3), makelist(df(n,1), n, 0, 3) );
+/** Solve system of equations */
+res : map(rhs, solve(eq, un)[1]);
+
+/** Construct final expression for fit */
+edgeFit(y) := subst(append([x=0], makelist(un[i]=res[i], i, 1, 8)), fit(x,y));
+edgeGradFit(y) := subst(append([x=0], makelist(un[i]=res[i], i, 1, 8)), 
+	       diff(fit(x,y),x));
+
+/** Compute reconstruction along 1D slices */
+
+/** 1D fit */
+fit1d(x) := df(0) + sum(df(j)*x^j/factorial(j), j, 1, 3);
+
+/** Equations are computed by L2 projections on Legendre polynomials */
+eqnl(n,yloc) := integrate(fit1d(x)*legendre_p(n,etal(x)), x, -dx, 0)
+                =
+		integrate(ul(x,yloc)*legendre_p(n,etal(x)), x, -dx, 0);
+eqnr(n,yloc) := integrate(fit1d(x)*legendre_p(n,etar(x)), x, 0, dx)
+                =
+		integrate(ur(x,yloc)*legendre_p(n,etar(x)), x, 0, dx);
+
+calcRecon(yloc) := block([eq, un, res],
+  /* Make list of equations to solve */
+  eq : append( makelist(eqnl(n,yloc), n, 0, 1), makelist(eqnr(n,yloc), n, 0, 1) ),
+  /* Make list of unknowns */
+  un : makelist(df(n), n, 0, 3),
+  /* Solve and extract results */
+  res : map(rhs, solve(eq, un)[1]),
+  return (res)
+);
+
+un : makelist(df(n), n, 0, 3);
+
+res0 : calcRecon(0);
+/** Construct final expression for fit1d */
+edgeFit_0 : subst(append([x=0], makelist(un[i]=res0[i], i, 1, length(un))), fit1d(x));
+edgeGradFit_0 : subst(append([x=0], makelist(un[i]=res0[i], i, 1, length(un))), diff(fit1d(x),x));
+fit_0(x) := subst(makelist(un[i]=res0[i], i, 1, length(un))), fit1d(x));
+
+resm : calcRecon(-dy/2);
+/** Construct final expression for fit1d */
+edgeFit_1 : subst(append([x=0], makelist(un[i]=resm[i], i, 1, length(un))), fit1d(x));
+edgeGradFit_1 : subst(append([x=0], makelist(un[i]=resm[i], i, 1, length(un))), diff(fit1d(x),x));
