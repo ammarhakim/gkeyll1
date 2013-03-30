@@ -374,10 +374,10 @@ namespace Lucee
     calcGuassData(2);
 
 // interpolation matrix (automatically generated. See scripts/nodal-basis-1d.mac)
-    gaussData.interpMat(1,1) = 1/std::sqrt(3)/2.0+1.0/2.0;
-    gaussData.interpMat(1,2) = 1.0/2.0-1/std::sqrt(3)/2.0;
-    gaussData.interpMat(2,1) = 1.0/2.0-1/std::sqrt(3)/2.0;
-    gaussData.interpMat(2,2) = 1/std::sqrt(3)/2.0+1.0/2.0;
+    gaussData.interpMat(1,1) = 1/std::sqrt(3.0)/2.0+1.0/2.0;
+    gaussData.interpMat(1,2) = 1.0/2.0-1/std::sqrt(3.0)/2.0;
+    gaussData.interpMat(2,1) = 1.0/2.0-1/std::sqrt(3.0)/2.0;
+    gaussData.interpMat(2,2) = 1/std::sqrt(3.0)/2.0+1.0/2.0;
   }
 
   void
@@ -478,20 +478,20 @@ namespace Lucee
 // mass matrix (automatically generated. See scripts/nodal-basis-1d.mac)
     refNjNk = Lucee::Matrix<double>(shape, start);
     refNjNk(1,1) = 1.0/7.0;
-    refNjNk(1,2) = std::sqrt(5)/42.0;
-    refNjNk(1,3) = -std::sqrt(5)/42.0;
+    refNjNk(1,2) = std::sqrt(5.0)/42.0;
+    refNjNk(1,3) = -std::sqrt(5.0)/42.0;
     refNjNk(1,4) = 1.0/42.0;
-    refNjNk(2,1) = std::sqrt(5)/42.0;
+    refNjNk(2,1) = std::sqrt(5.0)/42.0;
     refNjNk(2,2) = 5.0/7.0;
     refNjNk(2,3) = 5.0/42.0;
-    refNjNk(2,4) = -std::sqrt(5)/42.0;
-    refNjNk(3,1) = -std::sqrt(5)/42.0;
+    refNjNk(2,4) = -std::sqrt(5.0)/42.0;
+    refNjNk(3,1) = -std::sqrt(5.0)/42.0;
     refNjNk(3,2) = 5.0/42.0;
     refNjNk(3,3) = 5.0/7.0;
-    refNjNk(3,4) = std::sqrt(5)/42.0;
+    refNjNk(3,4) = std::sqrt(5.0)/42.0;
     refNjNk(4,1) = 1.0/42.0;
-    refNjNk(4,2) = -std::sqrt(5)/42.0;
-    refNjNk(4,3) = std::sqrt(5)/42.0;
+    refNjNk(4,2) = -std::sqrt(5.0)/42.0;
+    refNjNk(4,3) = std::sqrt(5.0)/42.0;
     refNjNk(4,4) = 1.0/7.0;
 
 // scale to bring this into physical space
