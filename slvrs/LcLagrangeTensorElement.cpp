@@ -399,7 +399,8 @@ namespace Lucee
   void
   LagrangeTensorElement<NDIM>::getWeights(std::vector<double>& w)
   {
-    w.clear(); w.resize(this->template getNumNodes());
+    w.clear(); 
+    w.resize(LagrangeTensorElement<NDIM>::getNumNodes());
     w = nodalWeights;
   }
 
@@ -543,7 +544,7 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
     unsigned nn = exclusiveNodeIndices.indices.size();
-    unsigned maxNodes = this->template getNumNodes();
+    unsigned maxNodes = LagrangeTensorElement<NDIM>::getNumNodes();
     
     int idx[NDIM], idxN[NDIM];
 // loop over region to copy
