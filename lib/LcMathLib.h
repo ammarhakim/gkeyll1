@@ -16,6 +16,8 @@
 #include <LcVector.h>
 #include <LcVec3.h>
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 // std includes
 #include <algorithm>
 #include <cmath>
@@ -151,7 +153,7 @@ namespace Lucee
   template <typename FLT>
   bool isNan(const FLT& x)
   { // This might need to be rewritten for Windows as it does not support C99 standard
-    return std::isnan(x);
+    return (boost::math::isnan)(x);
   }
 }
 
