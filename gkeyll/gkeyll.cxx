@@ -36,6 +36,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 
 int
@@ -130,7 +131,9 @@ main(int argc, char **argv)
   Lucee::Logger& logger = Lucee::Logger::create("lucee");
   logger.setLevel("debug"); // base logger should log everything
 // create file stream
-  Lucee::FileHandler fhndlr(outPrefix + "_0.log");
+  std::ostringstream snm;
+  snm << outPrefix << "_" << comm->getRank() << ".log";
+  Lucee::FileHandler fhndlr(snm.str());
   fhndlr.attachToLogger("lucee");
 
 // create console logger
