@@ -301,14 +301,14 @@ namespace Lucee
         av = 0.0;
         break;
 
-        case EPSILON_LIMITER:
-        {
-          double a2 = a*a, b2 = b*b, e2 = epsFac;
-          av = ((b2+e2)*a + (a2+e2)*b)/(a2+b2+2*e2);
-        }
-        break;
+      case EPSILON_LIMITER:
+      {
+        double a2 = a*a, b2 = b*b, e2 = epsFac;
+        av = ((b2+e2)*a + (a2+e2)*b)/(a2+b2+2*e2);
+      }
+      break;
           
-        default:
+      default:
 // this can not happen
           break;
     };
