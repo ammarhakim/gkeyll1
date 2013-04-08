@@ -91,11 +91,17 @@ namespace Lucee
         localVals[i] = fldPtr[i];
     }
 
-// TODO TODO all reduce so everyone has data: should an all-reduce be
-// done before dump or here?
+// filled up from all reduce across all processors
+    std::vector<double> commLocalVals(fld.getNumComponents());
+// get hold of comm pointer to do all parallel messaging
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+// sum across all processors (this works because except for one
+// processor, all others have zeros)
+    comm->allreduce(fld.getNumComponents(), localVals, commLocalVals, TX_SUM);
 
 // push value into dynvector
-    fldVal.appendData(t, localVals);
+    fldVal.appendData(t, commLocalVals);
 
     return Lucee::UpdaterStatus();
   }
