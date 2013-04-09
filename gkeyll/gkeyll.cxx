@@ -58,6 +58,8 @@ main(int argc, char **argv)
   cmdParser.addArg("p", "PETSC-OPTIONS", "Options database file for PetSc");
   cmdParser.addArg("verbosity", "VERBOSITY", "Verbosity of log messages."
     " Should be one of disabled,\n   debug, info, error. Defaults to info.");
+  cmdParser.addArg("baseVerbosity", "VERBOSITY", "Verbosity of log messages from each processor."
+    " Should be one of disabled,\n   debug, info, error. Defaults to debug.");
 
 // parse command line
   cmdParser.parse(argc, argv);
@@ -129,12 +131,18 @@ main(int argc, char **argv)
 
 // create top-level logger
   Lucee::Logger& logger = Lucee::Logger::create("lucee");
-  logger.setLevel("debug"); // base logger should log everything
+  if (cmdParser.hasArg("verbosity"))
+    logger.setLevel(cmdParser.getArg("baseVerbosity"));
+  else
+    logger.setLevel("debug");
 // create file stream
-  std::ostringstream snm;
-  snm << outPrefix << "_" << comm->getRank() << ".log";
-  Lucee::FileHandler fhndlr(snm.str());
-  fhndlr.attachToLogger("lucee");
+  if (comm->getRank() == 0)
+  {
+    std::ostringstream snm;
+    snm << outPrefix << "_" << comm->getRank() << ".log";
+    Lucee::FileHandler fhndlr(snm.str());
+    fhndlr.attachToLogger("lucee");
+  }
 
 // create console logger
   Lucee::Logger& conLogger = Lucee::Logger::create("lucee.console");
