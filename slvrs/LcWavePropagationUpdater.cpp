@@ -32,15 +32,25 @@ namespace Lucee
   template <> const char *WavePropagationUpdater<1>::id = "WavePropagation1D";
   template <> const char *WavePropagationUpdater<2>::id = "WavePropagation2D";
   template <> const char *WavePropagationUpdater<3>::id = "WavePropagation3D";
+  
+  static
+  void clearFieldVect(std::vector<Lucee::Field<1, double>* >& fldVec)
+  {
+    std::vector<Lucee::Field<1, double>* >::iterator itr
+      = fldVec.begin();
+    for ( ; itr != fldVec.end(); ++itr)
+      delete *itr;
+    fldVec.clear();
+  }
 
   template <unsigned NDIM>
   WavePropagationUpdater<NDIM>::~WavePropagationUpdater()
   {
-    apdq.clear();
-    amdq.clear();
-    speeds.clear();
-    waves.clear();
-    fs.clear();
+    clearFieldVect(apdq);
+    clearFieldVect(amdq);
+    clearFieldVect(speeds);
+    clearFieldVect(waves);
+    clearFieldVect(fs);
   }
 
   template <unsigned NDIM>
@@ -144,11 +154,11 @@ namespace Lucee
       lower[0] = localRgn.getLower(dir); 
       upper[0] = localRgn.getUpper(dir);
       Lucee::Region<1, int> slice(lower, upper);
-      apdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
-      amdq.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
-      speeds.push_back(Lucee::Field<1, double>(slice, mwave, lg, ug));
-      waves.push_back(Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
-      fs.push_back(Lucee::Field<1, double>(slice, meqn, lg, ug));
+      apdq.push_back(new Lucee::Field<1, double>(slice, meqn, lg, ug));
+      amdq.push_back(new Lucee::Field<1, double>(slice, meqn, lg, ug));
+      speeds.push_back(new Lucee::Field<1, double>(slice, mwave, lg, ug));
+      waves.push_back(new Lucee::Field<1, double>(slice, meqn*mwave, lg, ug));
+      fs.push_back(new Lucee::Field<1, double>(slice, meqn, lg, ug));
     }
   }
 
@@ -193,12 +203,12 @@ namespace Lucee
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
-      Lucee::FieldPtr<double> apdqPtr = apdq[dir].createPtr();
-      Lucee::FieldPtr<double> amdqPtr = amdq[dir].createPtr();
-      Lucee::FieldPtr<double> speedsPtr = speeds[dir].createPtr();
-      Lucee::FieldPtr<double> wavesPtr = waves[dir].createPtr();
-      Lucee::FieldPtr<double> fsPtr = fs[dir].createPtr();
-      Lucee::FieldPtr<double> fsPtr1 = fs[dir].createPtr();
+      Lucee::FieldPtr<double> apdqPtr = apdq[dir]->createPtr();
+      Lucee::FieldPtr<double> amdqPtr = amdq[dir]->createPtr();
+      Lucee::FieldPtr<double> speedsPtr = speeds[dir]->createPtr();
+      Lucee::FieldPtr<double> wavesPtr = waves[dir]->createPtr();
+      Lucee::FieldPtr<double> fsPtr = fs[dir]->createPtr();
+      Lucee::FieldPtr<double> fsPtr1 = fs[dir]->createPtr();
 
 // lower and upper bounds of 1D slice. (We need to make sure that the
 // Riemann problem is computed for one edge outside the domain
@@ -225,10 +235,10 @@ namespace Lucee
           equation->rotateToLocal(coordSys, &qPtrl[0], &qLocall[0]);
 
 // attach pointers to fluctuations, speeds, waves (note these are 1D arrays)
-          apdq[dir].setPtr(apdqPtr, i);
-          amdq[dir].setPtr(amdqPtr, i);
-          speeds[dir].setPtr(speedsPtr, i);
-          waves[dir].setPtr(wavesPtr, i);
+          apdq[dir]->setPtr(apdqPtr, i);
+          amdq[dir]->setPtr(amdqPtr, i);
+          speeds[dir]->setPtr(speedsPtr, i);
+          waves[dir]->setPtr(wavesPtr, i);
 
 // compute jump across edge
           for (unsigned m=0; m<meqn; ++m)
@@ -264,16 +274,16 @@ namespace Lucee
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-        applyLimiters(waves[dir], speeds[dir]);
+        applyLimiters(*waves[dir], *speeds[dir]);
 
 // compute second order corrections to flux (we need to go one cell
 // beyond the last cell to ensure the right most edge flux is
 // computed)
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
         {
-          fs[dir].setPtr(fsPtr, i);
-          speeds[dir].setPtr(speedsPtr, i);
-          waves[dir].setPtr(wavesPtr, i);
+          fs[dir]->setPtr(fsPtr, i);
+          speeds[dir]->setPtr(speedsPtr, i);
+          waves[dir]->setPtr(wavesPtr, i);
 
           Lucee::Matrix<double> wavesMat(meqn, mwave, wavesPtr);
 
@@ -292,8 +302,8 @@ namespace Lucee
           idx[dir] = i; // left edge of cell
 
           qNew.setPtr(qNewPtr, idx);
-          fs[dir].setPtr(fsPtr, i);
-          fs[dir].setPtr(fsPtr1, i+1);
+          fs[dir]->setPtr(fsPtr, i);
+          fs[dir]->setPtr(fsPtr1, i+1);
 
           for (unsigned m=0; m<meqn; ++m)
             qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);

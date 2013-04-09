@@ -60,10 +60,6 @@ namespace Lucee
     src[1] = qbym*(rho*ey+rhow*bx-rhou*bz); // y-momentum
     src[2] = qbym*(rho*ez+rhou*by-rhov*bx); // z-momentum
     src[3] = qbym*(rhou*ex+rhov*ey+rhow*ez); // energy
-//     std::cout << "Lorentz source ..." << std::endl;
-//     for (unsigned i=0; i<4; ++i)
-//       std::cout << src[i] << std::endl;
-//     std::cout << ".. done " << std::endl;
   }
 
   void

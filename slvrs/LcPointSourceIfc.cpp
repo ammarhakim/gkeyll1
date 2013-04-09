@@ -27,6 +27,10 @@ namespace Lucee
       outComponents[i] = i;
   }
 
+  PointSourceIfc::~PointSourceIfc()
+  {
+  }
+
   void
   PointSourceIfc::readInput(Lucee::LuaTable& tbl)
   {

@@ -39,6 +39,11 @@ namespace Lucee
       PointSourceIfc(unsigned nInp, unsigned nOut, bool allowArb = false);
 
 /**
+ * Destructor.
+ */
+      virtual ~PointSourceIfc();
+
+/**
  * Bootstrap method: Read input from specified table.
  *
  * @param tbl Table of input values.
