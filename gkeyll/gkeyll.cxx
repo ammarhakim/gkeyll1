@@ -131,18 +131,15 @@ main(int argc, char **argv)
 
 // create top-level logger
   Lucee::Logger& logger = Lucee::Logger::create("lucee");
-  if (cmdParser.hasArg("verbosity"))
+  if (cmdParser.hasArg("baseVerbosity"))
     logger.setLevel(cmdParser.getArg("baseVerbosity"));
   else
     logger.setLevel("debug");
 // create file stream
-  if (comm->getRank() == 0)
-  {
-    std::ostringstream snm;
-    snm << outPrefix << "_" << comm->getRank() << ".log";
-    Lucee::FileHandler fhndlr(snm.str());
-    fhndlr.attachToLogger("lucee");
-  }
+  std::ostringstream snm;
+  snm << outPrefix << "_" << comm->getRank() << ".log";
+  Lucee::FileHandler fhndlr(snm.str());
+  fhndlr.attachToLogger("lucee");
 
 // create console logger
   Lucee::Logger& conLogger = Lucee::Logger::create("lucee.console");
