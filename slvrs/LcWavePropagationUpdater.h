@@ -80,15 +80,15 @@ namespace Lucee
 /** Maximum CFL number */
       double cflm;
 /** Fields to store positive fluctuations */
-      std::vector<Lucee::Field<1, double> > apdq;
+      std::vector<Lucee::Field<1, double>* > apdq;
 /** Fields to store negative fluctuations */
-      std::vector<Lucee::Field<1, double> > amdq;
+      std::vector<Lucee::Field<1, double>* > amdq;
 /** Fields to store speeds */
-      std::vector<Lucee::Field<1, double> > speeds;
+      std::vector<Lucee::Field<1, double>* > speeds;
 /** Fields to store waves */
-      std::vector<Lucee::Field<1, double> > waves;
+      std::vector<Lucee::Field<1, double>* > waves;
 /** Fields to store second order corrections */
-      std::vector<Lucee::Field<1, double> > fs;
+      std::vector<Lucee::Field<1, double>* > fs;
 
 /**
  * Apply limiters to waves.

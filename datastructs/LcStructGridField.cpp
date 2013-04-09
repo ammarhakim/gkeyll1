@@ -424,8 +424,7 @@ namespace Lucee
     {
       Lucee::Region<NDIM, int> recvRgn = this->getExtRegion().intersect(
         grid->getNeighborRgn(i->first)); // ghost cell region
-// get data and store in shared array so it gets collected when this loop exits
-      boost::shared_array<T> recvData ( (T*) comm->finishRecv(i->second) );
+      T* recvData = (T*) comm->finishRecv(i->second);
 
 // copy data over: this works because send() function uses same
 // ordering of data as we use below.
@@ -438,6 +437,7 @@ namespace Lucee
         for (unsigned k=0; k<this->getNumComponents(); ++k)
           ptr[k] = recvData[loc++];
       }
+      delete [] recvData;
     }
     msgStatus.erase(msgStatus.begin(), msgStatus.end());
     isReceiving = false; // we are done

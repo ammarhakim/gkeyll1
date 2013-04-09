@@ -458,7 +458,7 @@ namespace Lucee
     : indexer(shp, &Lucee::FixedVector<NDIM,int>(0)[0]),
       traits(0),
       useCount(new int(1))
-  {
+  { // **** SET_ALLOC
     len = 1;
     for (unsigned i=0; i<NDIM; ++i)
     {
@@ -568,7 +568,7 @@ namespace Lucee
   template <unsigned NDIM, typename T, template <unsigned> class INDEXER>
   Array<NDIM, T, INDEXER>::~Array()
   {
-    if (--*useCount == 0)
+    if (--*useCount <= 0)
     {
       delete useCount;
       if (LC_IS_ALLOC(traits))
