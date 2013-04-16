@@ -31,6 +31,24 @@ namespace Lucee
   static const unsigned P23 = 8;
   static const unsigned P33 = 9;
 
+  static
+  void multiplyByPhiPrime(double p0, double u1, double u2, double u3,
+    double p11, double p12, double p13, double p22, double p23, double p33,
+    const double wv[10],
+    int waveNum, Lucee::Matrix<double>& waves)
+  {
+    waves(0,waveNum) = wv[0];
+    waves(1,waveNum) = p0*wv[1]+u1*wv[0];
+    waves(2,waveNum) = p0*wv[2]+u2*wv[0];
+    waves(3,waveNum) = p0*wv[3]+u3*wv[0];
+    waves(4,waveNum) = wv[4]+2*p0*u1*wv[1]+u1*u1*wv[0];
+    waves(5,waveNum) = wv[5]+p0*u1*wv[2]+p0*u2*wv[1]+u1*u2*wv[0];
+    waves(6,waveNum) = wv[6]+p0*u1*wv[3]+p0*u3*wv[1]+u1*u3*wv[0];
+    waves(7,waveNum) = wv[7]+2*p0*u2*wv[2]+u2*u2*wv[0];
+    waves(8,waveNum) = wv[8]+p0*u2*wv[3]+p0*u3*wv[2]+u2*u3*wv[0];
+    waves(9,waveNum) = wv[9]+2*p0*u3*wv[3]+u3*u3*wv[0];
+  }
+
   TenMomentEquation::TenMomentEquation()
     : Lucee::HyperEquation(10, 5)
   {
@@ -85,7 +103,11 @@ namespace Lucee
   void
   TenMomentEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
-// TODO
+    double rho = q[RHO];
+    double u1 = q[U1]/rho;
+    double p11 = q[P11] - rho*u1*u1;
+    s[0] = u1-sqrt(3*p11/rho);
+    s[1] = u1+sqrt(3*p11/rho);
   }
 
   void
@@ -169,16 +191,18 @@ namespace Lucee
     phiJump[8] = jump[8]-u2*jump[3]+u3*(u2*jump[0]-jump[2]);
     phiJump[9] = jump[9]-2*u3*jump[3]+u3*u3*jump[0];
 
-// project jumps on left eigenvectors
-    double lp[10];
-    double sqp0 = ::sqrt(p0);
-    double sqp11 = ::sqrt(p11);
+// bunch of useful stuff
+    double sqp0 = sqrt(p0);
+    double sqp11 = sqrt(p11);
     double sp11 = p11*p11;
-    double fp11 = ::pow(3,-1.5)*::pow(p11,-2.5); // 3**((-3.0)/2.0)*p11**((-5.0)/2.0)
+    double fp11 = pow(3,-1.5)*pow(p11,-2.5); // 3**((-3.0)/2.0)*p11**((-5.0)/2.0)
     double sp12 = p12*p12;
     double sp13 = p13*p13;
-    double sq3 = ::sqrt(3.0);
+    double sq3 = sqrt(3.0);
+    double thp11 = pow(p11, 1.5);
 
+    double lp[10];
+// project jumps on left eigenvectors
     lp[0] = (sqp0*sqp11*(phiJump[1]*p12-phiJump[2]*p11)-phiJump[4]*p12+phiJump[5]*p11)/sp11/2.0;
     lp[1] = (sqp0*sqp11*(phiJump[1]*p13-phiJump[3]*p11)-phiJump[4]*p13+phiJump[6]*p11)/sp11/2.0;
     lp[2] = -(sqp0*sqp11*(phiJump[1]*p12-phiJump[2]*p11)+phiJump[4]*p12-phiJump[5]*p11)/sp11/2.0;
@@ -189,5 +213,88 @@ namespace Lucee
     lp[7] = -(phiJump[4]*p11*p22-4*phiJump[4]*sp12+6*phiJump[5]*p11*p12-3*phiJump[7]*sp11)/sp11/3.0;
     lp[8] = -(phiJump[4]*p11*p23+(3*phiJump[5]*p11-4*phiJump[4]*p12)*p13+3*phiJump[6]*p11*p12-3*phiJump[8]*sp11)/sp11/3.0;
     lp[9] = -(phiJump[4]*p11*p33-4*phiJump[4]*sp13+6*phiJump[6]*p11*p13-3*phiJump[9]*sp11)/sp11/3.0;
+
+// compute waves
+    double wv[10];
+
+// wave 1: eigenvalues 1,2
+    s[0] = u1-sqrt(p11/p0);
+
+    wv[0] = 0;
+    wv[1] = 0;
+    wv[2] = -lp[0]*sqp11/sqp0;
+    wv[3] = -lp[1]*sqp11/sqp0;
+    wv[4] = 0;
+    wv[5] = lp[0]*p11;
+    wv[6] = lp[1]*p11;
+    wv[7] = 2*lp[0]*p12;
+    wv[8] = lp[0]*p13+lp[1]*p12;
+    wv[9] = 2*lp[1]*p13;
+
+    multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 0, waves);
+
+// wave 2: eigenvalues 3,4
+    s[1] = u1+sqrt(p11/p0);
+
+    wv[0] = 0;
+    wv[1] = 0;
+    wv[2] = lp[2]*sqp11/sqp0;
+    wv[3] = lp[3]*sqp11/sqp0;
+    wv[4] = 0;
+    wv[5] = lp[2]*p11;
+    wv[6] = lp[3]*p11;
+    wv[7] = 2*lp[2]*p12;
+    wv[8] = lp[2]*p13+lp[3]*p12;
+    wv[9] = 2*lp[3]*p13;
+
+    multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 1, waves);
+
+// wave 3: eigenvalue 5
+    s[2] = u1-sqrt(3*p11/p0);
+
+    wv[0] = lp[4]*p0*p11;
+    wv[1] = -sq3*lp[4]*thp11/sqp0;
+    wv[2] = -sq3*lp[4]*sqp11*p12/sqp0;
+    wv[3] = -sq3*lp[4]*sqp11*p13/sqp0;
+    wv[4] = 3*lp[4]*sp11;
+    wv[5] = 3*lp[4]*p11*p12;
+    wv[6] = 3*lp[4]*p11*p13;
+    wv[7] = lp[4]*(p11*p22+2*sp12);
+    wv[8] = lp[4]*(p11*p23+2*p12*p13);
+    wv[9] = lp[4]*(p11*p33+2*sp13);
+
+    multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 2, waves);
+
+// wave 4: eigenvalue 6
+    s[3] = u1+sqrt(3*p11/p0);
+
+    wv[0] = lp[5]*p0*p11;
+    wv[1] = sq3*lp[5]*thp11/sqrt(p0);
+    wv[2] = sq3*lp[5]*sqp11*p12/sqp0;
+    wv[3] = sq3*lp[5]*sqp11*p13/sqp0;
+    wv[4] = 3*lp[5]*sp11;
+    wv[5] = 3*lp[5]*p11*p12;
+    wv[6] = 3*lp[5]*p11*p13;
+    wv[7] = lp[5]*(p11*p22+2*sp12);
+    wv[8] = lp[5]*(p11*p23+2*p12*p13);
+    wv[9] = lp[5]*(p11*p33+2*sp13);
+
+    multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 3, waves);
+
+// wave 5: eigenvalue 7,8,9,10
+    s[4] = u1;
+
+    wv[0] = lp[6];
+    wv[1] = 0;
+    wv[2] = 0;
+    wv[3] = 0;
+    wv[4] = 0;
+    wv[5] = 0;
+    wv[6] = 0;
+    wv[7] = lp[7];
+    wv[8] = lp[8];
+    wv[9] = lp[9];
+
+    multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 4, waves);
   }
 }
