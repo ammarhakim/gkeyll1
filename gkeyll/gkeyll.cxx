@@ -60,6 +60,7 @@ main(int argc, char **argv)
     " Should be one of disabled,\n   debug, info, error. Defaults to info.");
   cmdParser.addArg("baseVerbosity", "VERBOSITY", "Verbosity of log messages from each processor."
     " Should be one of disabled,\n   debug, info, error. Defaults to debug.");
+  cmdParser.addArg("r", "RESTART-FRAME", "Frame to restart from.");
 
 // parse command line
   cmdParser.parse(argc, argv);
@@ -166,6 +167,18 @@ main(int argc, char **argv)
   Lucee::registerModules(L);
 
   bool failed = false; // flag to indicate if run failed
+
+// add command line options to the top-level module
+  static const luaL_Reg topFuncs[] = { {NULL, NULL} };
+  luaL_register(L, "Lucee", topFuncs);
+
+  lua_pushstring(L, inpFile.c_str());
+  lua_setfield(L, -2, "InputFile");
+
+  lua_pushstring(L, outPrefix.c_str());
+  lua_setfield(L, -2, "OutPrefix");
+
+  lua_pop(L, 1); // done adding command line stuff
 
   infoStrm << "** Welcome to Lucee!" << std::endl;
   time_t start = time(0); // time at start of main loop

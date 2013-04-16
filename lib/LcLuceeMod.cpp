@@ -1,7 +1,7 @@
 /**
  * @file	LcLuceeMod.cpp
  *
- * @brief	Base class for generic Lua-callable modects in Lucee.
+ * @brief	Base class for generic Lua-callable objects in Lucee.
  */
 
 // config stuff
