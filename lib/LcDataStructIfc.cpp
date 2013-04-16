@@ -49,51 +49,26 @@ namespace Lucee
   void
   DataStructIfc::write(const std::string& nm)
   {
-    bool isH5 = true;
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
-// check file extention to determine if hdf5 or plain text should be written
-    std::string snm = nm;
-    unsigned trunc = nm.find_last_of(".", snm.size());
-    if (trunc > 0)
-      snm.erase(0, trunc);
-    if (snm == ".txt")
-      isH5 = false; // write out text file
-
-// text output is no longer supported
-    if (!isH5)
-      throw Lucee::Except("DataStructIfc::write: Output to text files is no longer supported.");
-
-// output name
     std::string outNm = outPrefix + "_" + nm;
+    TxCommBase& comm = this->getDataComm();
 
-    if (isH5)
-    {
-      TxCommBase& comm = this->getDataComm(); // get communicator for I/O
-      TxIoBase *io = new TxHdf5Base(&comm);
-// open file to write in
-      TxIoNodeType fn = io->createFile(outNm);
-// write data
-      this->writeToFile(*io, fn, this->getName());
-// delete I/O pointer
-      delete io;
-    }
-    else
-    {
-// open text file to write in
-      std::ofstream outFl(outNm.c_str(), std::fstream::out);
-// write out data
-      this->writeToTxtFile(outFl);
-    }
+    TxIoBase *io = new TxHdf5Base(&comm);
+    TxIoNodeType fn = io->createFile(outNm);
+    this->writeToFile(*io, fn, this->getName());
+    delete io;
   }
 
   void
   DataStructIfc::read(const std::string& nm, const std::string& grp)
   {
-    TxCommBase& comm = this->getDataComm(); // get communicator for I/O
+    TxCommBase& comm = this->getDataComm();
+
     TxIoBase *io = new TxHdf5Base(&comm);
-// open file to reade in
     TxIoNodeType fn = io->openFile(nm, "r");
+    this->readFromFile(*io, fn, nm);
+    delete io;
   }
 
   TxIoNodeType
