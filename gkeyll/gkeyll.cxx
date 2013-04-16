@@ -18,6 +18,9 @@
 // loki includes
 #include <loki/Singleton.h>
 
+// boost includes
+#include <boost/lexical_cast.hpp>
+
 // txbase includes
 #ifdef HAVE_MPI
 # include <TxMpiBase.h>
@@ -83,6 +86,16 @@ main(int argc, char **argv)
       cmdParser.showHelp();
     }
     exit(1);
+  }
+
+  bool isRestarting = false;
+  int rFrame = 0;
+  if (cmdParser.hasArg("r"))
+  {
+    std::string reStr = cmdParser.getArg("r");
+    isRestarting = true;
+    reStr = cmdParser.getArg("r");
+    rFrame = boost::lexical_cast<int>(reStr);
   }
 
 #ifdef HAVE_PETSC
@@ -177,6 +190,12 @@ main(int argc, char **argv)
 
   lua_pushstring(L, outPrefix.c_str());
   lua_setfield(L, -2, "OutPrefix");
+
+  lua_pushboolean(L, isRestarting);
+  lua_setfield(L, -2, "IsRestarting");
+
+  lua_pushnumber(L, rFrame);
+  lua_setfield(L, -2, "RestartFrame");
 
   lua_pop(L, 1); // done adding command line stuff
 
