@@ -172,8 +172,9 @@ namespace Lucee
     double p23 = 0.5*(vl[P23]+vr[P23]);
     double p33 = 0.5*(vl[P33]+vr[P33]);
 
-// The following expressions are cut-paste and then massaged from the
-// script tenmom-eig.mac. Also see Tech-Note 1013.
+// The following expressions are cut-paste from the script
+// tenmom-eig.mac and then massaged around a bit. Also see Tech-Note
+// 1013.
 
 // multiply jumps by (phi')^-1 matrix first (this is because the left
 // eigenvectors are computed from the quasilinear form and not the
