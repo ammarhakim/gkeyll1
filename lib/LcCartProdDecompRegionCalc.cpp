@@ -30,8 +30,8 @@ namespace Lucee
   {
 // set some reasonable defaults
     for (unsigned i=0; i<NDIM; ++i)
-      cuts[i] = 1; // just decompose into a single block
-    nsub = 1; // total number of regions
+      cuts[i] = 1;
+    nsub = 1;
   }
 
   template <unsigned NDIM>
@@ -57,7 +57,7 @@ namespace Lucee
   {
 // call base class method first
     DecompRegionCalcIfc<NDIM>::readInput(tbl);
-// now read in number of cuts
+
     if (tbl.hasNumVec("cuts"))
     {
       std::vector<double> dblCuts = tbl.getNumVec("cuts");
@@ -82,7 +82,6 @@ namespace Lucee
   void
   CartProdDecompRegionCalc<NDIM>::decompose(unsigned nrgs, const Lucee::Region<NDIM, int>& globalRgn)
   {
-// check if cuts match up with number of regions
     if (nrgs != nsub)
     {
       Lucee::Except lce("CartProdDecompRegionCalc::decompose: Number of sub-regions from cuts (");

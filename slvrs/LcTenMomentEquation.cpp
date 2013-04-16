@@ -130,6 +130,64 @@ namespace Lucee
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
-// TODO
+// compute right and left primitive values
+    double vl[10], vr[10];
+    primitive(&ql[0], vl);
+    primitive(&qr[0], vr);
+
+// compute averages for use in Riemann solver (Note: These are
+// straight averages and not Roe averages. This should not be a
+// problem, but might be best to use f-waves to ensure conservation).
+
+    double p0 = 0.5*(vl[RHO]+vr[RHO]);
+    double u1 = 0.5*(vl[U1]+vr[U1]);
+    double u2 = 0.5*(vl[U2]+vr[U2]);
+    double u3 = 0.5*(vl[U3]+vr[U3]);
+    double p11 = 0.5*(vl[P11]+vr[P11]);
+    double p12 = 0.5*(vl[P12]+vr[P12]);
+    double p13 = 0.5*(vl[P13]+vr[P13]);
+    double p22 = 0.5*(vl[P22]+vr[P22]);
+    double p23 = 0.5*(vl[P23]+vr[P23]);
+    double p33 = 0.5*(vl[P33]+vr[P33]);
+
+// The following expressions are cut-paste and then massaged from the
+// script tenmom-eig.mac. Also see Tech-Note 1013.
+
+// multiply jumps by (phi')^-1 matrix first (this is because the left
+// eigenvectors are computed from the quasilinear form and not the
+// primitive form of the equations)
+    double phiJump[10];
+
+    phiJump[0] = jump[0];
+    phiJump[1] = -(u1*jump[0]-jump[1])/p0;
+    phiJump[2] = -(u2*jump[0]-jump[2])/p0;
+    phiJump[3] = -(u3*jump[0]-jump[3])/p0;
+    phiJump[4] = jump[4]-2*u1*jump[1]+u1*u1*jump[0];
+    phiJump[5] = jump[5]-u1*jump[2]+u2*(u1*jump[0]-jump[1]);
+    phiJump[6] = jump[6]-u1*jump[3]+u3*(u1*jump[0]-jump[1]);
+    phiJump[7] = jump[7]-2*u2*jump[2]+u2*u2*jump[0];
+    phiJump[8] = jump[8]-u2*jump[3]+u3*(u2*jump[0]-jump[2]);
+    phiJump[9] = jump[9]-2*u3*jump[3]+u3*u3*jump[0];
+
+// project jumps on left eigenvectors
+    double lp[10];
+    double sqp0 = ::sqrt(p0);
+    double sqp11 = ::sqrt(p11);
+    double sp11 = p11*p11;
+    double fp11 = ::pow(3,-1.5)*::pow(p11,-2.5); // 3**((-3.0)/2.0)*p11**((-5.0)/2.0)
+    double sp12 = p12*p12;
+    double sp13 = p13*p13;
+    double sq3 = ::sqrt(3.0);
+
+    lp[0] = (sqp0*sqp11*(phiJump[1]*p12-phiJump[2]*p11)-phiJump[4]*p12+phiJump[5]*p11)/sp11/2.0;
+    lp[1] = (sqp0*sqp11*(phiJump[1]*p13-phiJump[3]*p11)-phiJump[4]*p13+phiJump[6]*p11)/sp11/2.0;
+    lp[2] = -(sqp0*sqp11*(phiJump[1]*p12-phiJump[2]*p11)+phiJump[4]*p12-phiJump[5]*p11)/sp11/2.0;
+    lp[3] = -(sqp0*sqp11*(phiJump[1]*p13-phiJump[3]*p11)+phiJump[4]*p13-phiJump[6]*p11)/sp11/2.0;
+    lp[4] = fp11*(sq3*phiJump[4]*sqp11-3*phiJump[1]*sqp0*p11)/2.0;
+    lp[5] = fp11*(3*phiJump[1]*sqp0*p11+sq3*phiJump[4]*sqp11)/2.0;
+    lp[6] = (3*phiJump[0]*p11-phiJump[4]*p0)/p11/3.0;
+    lp[7] = -(phiJump[4]*p11*p22-4*phiJump[4]*sp12+6*phiJump[5]*p11*p12-3*phiJump[7]*sp11)/sp11/3.0;
+    lp[8] = -(phiJump[4]*p11*p23+(3*phiJump[5]*p11-4*phiJump[4]*p12)*p13+3*phiJump[6]*p11*p12-3*phiJump[8]*sp11)/sp11/3.0;
+    lp[9] = -(phiJump[4]*p11*p33-4*phiJump[4]*sp13+6*phiJump[6]*p11*p13-3*phiJump[9]*sp11)/sp11/3.0;
   }
 }
