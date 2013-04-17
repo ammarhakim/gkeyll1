@@ -49,6 +49,7 @@ set(lcslvrs_SOURCES
   LcNodalFiniteElementIfc.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
+  LcPressureTensorSource.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcSerendipityElement.cpp
