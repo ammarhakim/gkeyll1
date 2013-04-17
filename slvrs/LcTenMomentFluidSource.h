@@ -1,10 +1,10 @@
 /**
- * @file	LcPressureTensorSource.h
+ * @file	LcTenMomentFluidSource.h
  *
- * @brief       Compute source terms in pressure tensor equations.
+ * @brief       Compute source terms in 10-moment fluid equations.
  */
-#ifndef LC_PRESSURE_TENSOR_SOURCE_H
-#define LC_PRESSURE_TENSOR_SOURCE_H
+#ifndef LC_TEN_MOMENT_FLUID_SOURCE_H
+#define LC_TEN_MOMENT_FLUID_SOURCE_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,7 @@ namespace Lucee
 /**
  * Source for computing source terms in pressure tensor equations.
  */
-  class PressureTensorSource : public Lucee::PointSourceIfc
+  class TenMomentFluidSource : public Lucee::PointSourceIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -28,7 +28,7 @@ namespace Lucee
 /** 
  * Create new pressure tensor source evaluator.
  */
-      PressureTensorSource();
+      TenMomentFluidSource();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -65,4 +65,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_PRESSURE_TENSOR_SOURCE_H
+#endif // LC_TEN_MOMENT_FLUID_SOURCE_H

@@ -49,13 +49,13 @@ set(lcslvrs_SOURCES
   LcNodalFiniteElementIfc.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
-  LcPressureTensorSource.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
+  LcTenMomentFluidSource.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcWavePropagationUpdater.cpp
