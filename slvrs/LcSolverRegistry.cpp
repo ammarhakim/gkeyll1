@@ -31,6 +31,7 @@
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
+#include <LcPressureTensorSource.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -128,7 +129,8 @@ namespace Lucee
       ::Instance()
       .append<Lucee::LorentzForceSource>()
       .append<Lucee::CurrentSource>()
-      .append<Lucee::FunctionSource>();
+      .append<Lucee::FunctionSource>()
+      .append<Lucee::PressureTensorSource>();
 
 // register nodal basis functions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<1> > >
