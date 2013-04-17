@@ -1,5 +1,5 @@
 /**
- * @file	LcPressureTensorSource.cpp
+ * @file	LcTenMomentFluidSource.cpp
  *
  * @brief       Compute source terms in pressure tensor equations.
  */
@@ -10,23 +10,23 @@
 #endif
 
 // lucee includes
-#include <LcPressureTensorSource.h>
+#include <LcTenMomentFluidSource.h>
 
 namespace Lucee
 {
 // set id for creators
-  const char *PressureTensorSource::id = "PressureTensor";
+  const char *TenMomentFluidSource::id = "TenMomentFluid";
 
-  PressureTensorSource::PressureTensorSource()
-    : Lucee::PointSourceIfc(16, 6)
+  TenMomentFluidSource::TenMomentFluidSource()
+    : Lucee::PointSourceIfc(16, 10)
   { 
 // takes in [rho, rho*u, rho*v, rho*w, P11, P12, P13, P22, P23 P33,
 //   Ex, Ey, Ez, Bx, By, Bz] and computes
-// sources for [P11, P12, P13, P22, P23, P33]
+// sources for [rho, rho*u, rho*v, rho*w, P11, P12, P13, P22, P23, P33]
   }
 
   void
-  PressureTensorSource::readInput(Lucee::LuaTable& tbl)
+  TenMomentFluidSource::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::PointSourceIfc::readInput(tbl);
 // get charge and mass of species
@@ -36,7 +36,7 @@ namespace Lucee
   }
 
   void
-  PressureTensorSource::getSource(double tm, const double loc[3], std::vector<double>& src)
+  TenMomentFluidSource::getSource(double tm, const double loc[3], std::vector<double>& src)
   {
 // takes in [rho, rho*u, rho*v, rho*w, P11, P12, P13, P22, P23 P33,
 //   Ex, Ey, Ez, Bx, By, Bz]
@@ -59,18 +59,23 @@ namespace Lucee
 
     double re = qbym;
 
-// computes sources for [P11, P12, P13, P22, P23 P33]
-    src[0] = 2.0*r*re*u*ex+2.0*re*(bz*pxy-by*pxz);
-    src[1] = r*re*(u*ey+v*ex)+re*(bz*pyy-by*pyz-bz*pxx+bx*pxz);
-    src[2] = r*re*(u*ez+w*ex)+re*(bz*pyz+by*pxx-by*pzz-bx*pxy);
-    src[3] = 2.0*r*re*v*ey+2.0*re*(bx*pyz-bz*pxy);
-    src[4] = r*re*(v*ez+w*ey)+re*(by*pxy-bz*pxz+bx*pzz-bx*pyy);
-    src[5] = 2.0*r*re*w*ez+2.0*re*(by*pxz-bx*pyz);
+    src[0] = 0.0;
+// momentum source terms
+    src[1] = r*re*(ex+v*bz-w*by);
+    src[2] = r*re*(ey+w*bx-u*bz);
+    src[3] = r*re*(ez+u*by-v*bx);
+// pressure tensor source terms
+    src[4] = 2.0*r*re*u*ex+2.0*re*(bz*pxy-by*pxz);
+    src[5] = r*re*(u*ey+v*ex)+re*(bz*pyy-by*pyz-bz*pxx+bx*pxz);
+    src[6] = r*re*(u*ez+w*ex)+re*(bz*pyz+by*pxx-by*pzz-bx*pxy);
+    src[7] = 2.0*r*re*v*ey+2.0*re*(bx*pyz-bz*pxy);
+    src[8] = r*re*(v*ez+w*ey)+re*(by*pxy-bz*pxz+bx*pzz-bx*pyy);
+    src[9] = 2.0*r*re*w*ez+2.0*re*(by*pxz-bx*pyz);
   }
 
   void
-  PressureTensorSource::getSourceJac(double tm, const double loc[3], Lucee::Matrix<double>& jac)
+  TenMomentFluidSource::getSourceJac(double tm, const double loc[3], Lucee::Matrix<double>& jac)
   {
-    throw Lucee::Except("PressureTensorSource::getSourceJac: Not implemented!");
+    throw Lucee::Except("TenMomentFluidSource::getSourceJac: Not implemented!");
   }
 }

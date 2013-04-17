@@ -31,13 +31,13 @@
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcPointSourceIfc.h>
-#include <LcPressureTensorSource.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
+#include <LcTenMomentFluidSource.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -130,7 +130,7 @@ namespace Lucee
       .append<Lucee::LorentzForceSource>()
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
-      .append<Lucee::PressureTensorSource>();
+      .append<Lucee::TenMomentFluidSource>();
 
 // register nodal basis functions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<1> > >
