@@ -1,10 +1,10 @@
 /**
- * @file	LcTenMomentFluidSource.h
+ * @file	LcTenMomentCollisionSource.h
  *
- * @brief       Compute source terms in 10-moment fluid equations.
+ * @brief       Compute collisional source terms in 10-moment fluid equations.
  */
-#ifndef LC_TEN_MOMENT_FLUID_SOURCE_H
-#define LC_TEN_MOMENT_FLUID_SOURCE_H
+#ifndef LC_TEN_MOMENT_COLLISION_SOURCE_H
+#define LC_TEN_MOMENT_COLLISION_SOURCE_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,7 @@ namespace Lucee
 /**
  * Source for computing source terms in pressure tensor equations.
  */
-  class TenMomentFluidSource : public Lucee::PointSourceIfc
+  class TenMomentCollisionSource : public Lucee::PointSourceIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -28,7 +28,7 @@ namespace Lucee
 /** 
  * Create new pressure tensor source evaluator.
  */
-      TenMomentFluidSource();
+      TenMomentCollisionSource();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -60,13 +60,9 @@ namespace Lucee
       void getSourceJac(double tm, const double loc[3], Lucee::Matrix<double>& jac);
 
     private:
-/** Charge to mass ratio of fluid species */
-      double qbym;
-/** Flag to indicate if collisions should be included */
-      bool hasCollisions;
 /** Value of collision frequency (this is fixed for now) */
       double nu;
   };
 }
 
-#endif // LC_TEN_MOMENT_FLUID_SOURCE_H
+#endif // LC_TEN_MOMENT_COLLISION_SOURCE_H

@@ -37,6 +37,7 @@
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
+#include <LcTenMomentCollisionSource.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -130,6 +131,7 @@ namespace Lucee
       .append<Lucee::LorentzForceSource>()
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
+      .append<Lucee::TenMomentCollisionSource>()
       .append<Lucee::TenMomentFluidSource>();
 
 // register nodal basis functions

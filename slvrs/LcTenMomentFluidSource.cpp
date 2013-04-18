@@ -17,6 +17,18 @@ namespace Lucee
 // set id for creators
   const char *TenMomentFluidSource::id = "TenMomentFluid";
 
+// makes indexing easier
+  static const unsigned RHO = 0;
+  static const unsigned U1 = 1;
+  static const unsigned U2 = 2;
+  static const unsigned U3 = 3;
+  static const unsigned P11 = 4;
+  static const unsigned P12 = 5;
+  static const unsigned P13 = 6;
+  static const unsigned P22 = 7;
+  static const unsigned P23 = 8;
+  static const unsigned P33 = 9;
+
   TenMomentFluidSource::TenMomentFluidSource()
     : Lucee::PointSourceIfc(16, 10)
   { 
@@ -29,10 +41,17 @@ namespace Lucee
   TenMomentFluidSource::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::PointSourceIfc::readInput(tbl);
-// get charge and mass of species
+
     double charge = tbl.getNumber("charge");
     double mass = tbl.getNumber("mass");
     qbym = charge/mass;
+
+    hasCollisions = false;
+    if (tbl.hasNumber("collisionFrequency"))
+    {
+      hasCollisions = true;
+      nu = tbl.getNumber("collisionFrequency");
+    }
   }
 
   void
@@ -59,18 +78,40 @@ namespace Lucee
 
     double re = qbym;
 
-    src[0] = 0.0;
+    src[RHO] = 0.0;
 // momentum source terms
-    src[1] = r*re*(ex+v*bz-w*by);
-    src[2] = r*re*(ey+w*bx-u*bz);
-    src[3] = r*re*(ez+u*by-v*bx);
+    src[U1] = r*re*(ex+v*bz-w*by);
+    src[U2] = r*re*(ey+w*bx-u*bz);
+    src[U3] = r*re*(ez+u*by-v*bx);
 // pressure tensor source terms
-    src[4] = 2.0*r*re*u*ex+2.0*re*(bz*pxy-by*pxz);
-    src[5] = r*re*(u*ey+v*ex)+re*(bz*pyy-by*pyz-bz*pxx+bx*pxz);
-    src[6] = r*re*(u*ez+w*ex)+re*(bz*pyz+by*pxx-by*pzz-bx*pxy);
-    src[7] = 2.0*r*re*v*ey+2.0*re*(bx*pyz-bz*pxy);
-    src[8] = r*re*(v*ez+w*ey)+re*(by*pxy-bz*pxz+bx*pzz-bx*pyy);
-    src[9] = 2.0*r*re*w*ez+2.0*re*(by*pxz-bx*pyz);
+    src[P11] = 2.0*r*re*u*ex+2.0*re*(bz*pxy-by*pxz);
+    src[P12] = r*re*(u*ey+v*ex)+re*(bz*pyy-by*pyz-bz*pxx+bx*pxz);
+    src[P13] = r*re*(u*ez+w*ex)+re*(bz*pyz+by*pxx-by*pzz-bx*pxy);
+    src[P22] = 2.0*r*re*v*ey+2.0*re*(bx*pyz-bz*pxy);
+    src[P23] = r*re*(v*ez+w*ey)+re*(by*pxy-bz*pxz+bx*pzz-bx*pyy);
+    src[P33] = 2.0*r*re*w*ez+2.0*re*(by*pxz-bx*pyz);
+
+    if (hasCollisions)
+    {
+// compute pressure tensor in fluid frame
+      double fpxx = pxx-r*u*u;
+      double fpxy = pxy-r*u*v;
+      double fpxz = pxz-r*u*w;
+      double fpyy = pyy-r*v*v;
+      double fpyz = pyz-r*v*w;
+      double fpzz = pzz-r*w*w;
+
+// compute scalar pressure
+      double pr = (fpxx+fpyy+fpzz)/3.0;
+
+// add in collision terms
+      src[P11] += nu*(pr-fpxx);
+      src[P12] += nu*(0-fpxy);
+      src[P13] += nu*(0-fpxz);
+      src[P22] += nu*(pr-fpyy);
+      src[P23] += nu*(0-fpyz);
+      src[P33] += nu*(pr-fpzz);
+    }
   }
 
   void
