@@ -42,10 +42,8 @@ namespace Lucee
   void
   ImplicitFiveMomentSrcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     UpdaterIfc::readInput(tbl);
 
-// number of fluids to update
     nFluids = (int) tbl.getNumber("numFluids");
 
 // charge on each fluid species
@@ -86,7 +84,6 @@ namespace Lucee
       }
     }
 
-// pre-compute these
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
     for (unsigned i=0; i<nFluids; ++i)
@@ -100,7 +97,6 @@ namespace Lucee
   void
   ImplicitFiveMomentSrcUpdater<NDIM>::initialize()
   {
-// call base class method
     UpdaterIfc::initialize();
   }
 
@@ -131,7 +127,6 @@ namespace Lucee
     Eigen::VectorXd rhs(3*nFluids+3);
 
     int idx[NDIM];
-// loop over each cell in extended region
     Lucee::Region<NDIM, int> localRgn = emField.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     while (seq.step())
