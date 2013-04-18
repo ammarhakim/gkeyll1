@@ -16,6 +16,19 @@
 
 namespace Lucee
 {
+// indexing into a symmetric 3x3 matrix (the assumption here is that
+// the components of the symmetric matrix are stored in a vector of
+// size 6 with entries in the order 11, 12, 13, 22, 23, 33).
+  static unsigned S11 = 0;
+  static unsigned S12 = 1;
+  static unsigned S13 = 2;
+  static unsigned S21 = 1;
+  static unsigned S22 = 3;
+  static unsigned S23 = 4;
+  static unsigned S31 = 2;
+  static unsigned S32 = 4;
+  static unsigned S33 = 5;
+
   AlignedRectCoordSys::AlignedRectCoordSys(unsigned dir)
     : RectCoordSys(), dir(dir)
   {
@@ -103,7 +116,50 @@ namespace Lucee
     }
     else
     {
-      throw Lucee::Except("AlignedRectCoordSys::rotateSymMatrixToLocal: Not implemented");
+// first rotate all the columns
+      double V0[3], V1[3], V2[3];
+      double R0[3], R1[3], R2[3];
+      
+      V0[0] = inSM[S11];
+      V0[1] = inSM[S21];
+      V0[2] = inSM[S31];
+
+      V1[0] = inSM[S12];
+      V1[1] = inSM[S22];
+      V1[2] = inSM[S32];
+
+      V2[0] = inSM[S13];
+      V2[1] = inSM[S23];
+      V2[2] = inSM[S33];
+
+      rotateVecToLocal(V0, R0);
+      rotateVecToLocal(V1, R1);
+      rotateVecToLocal(V2, R2);
+
+// now rotate the resulting rows
+      V0[0] = R0[0];
+      V0[1] = R1[0];
+      V0[2] = R2[0];
+
+      V1[0] = R0[1];
+      V1[1] = R1[1];
+      V1[2] = R2[1];
+
+      V2[0] = R0[2];
+      V2[1] = R1[2];
+      V2[2] = R2[2];
+
+      rotateVecToLocal(V0, R0);
+      rotateVecToLocal(V1, R1);
+      rotateVecToLocal(V2, R2);
+
+// copy over rotated data
+      outSM[0] = R0[0];
+      outSM[1] = R0[1];
+      outSM[2] = R0[2];
+      outSM[3] = R1[1];
+      outSM[4] = R1[2];
+      outSM[5] = R2[2];
     }
   }
 
@@ -117,7 +173,50 @@ namespace Lucee
     }
     else
     {
-      throw Lucee::Except("AlignedRectCoordSys::rotateSymMatrixToGlobal: Not implemented");
+// first rotate all the columns
+      double V0[3], V1[3], V2[3];
+      double R0[3], R1[3], R2[3];
+      
+      V0[0] = inSM[S11];
+      V0[1] = inSM[S21];
+      V0[2] = inSM[S31];
+
+      V1[0] = inSM[S12];
+      V1[1] = inSM[S22];
+      V1[2] = inSM[S32];
+
+      V2[0] = inSM[S13];
+      V2[1] = inSM[S23];
+      V2[2] = inSM[S33];
+
+      rotateVecToGlobal(V0, R0);
+      rotateVecToGlobal(V1, R1);
+      rotateVecToGlobal(V2, R2);
+
+// now rotate the resulting rows
+      V0[0] = R0[0];
+      V0[1] = R1[0];
+      V0[2] = R2[0];
+
+      V1[0] = R0[1];
+      V1[1] = R1[1];
+      V1[2] = R2[1];
+
+      V2[0] = R0[2];
+      V2[1] = R1[2];
+      V2[2] = R2[2];
+
+      rotateVecToGlobal(V0, R0);
+      rotateVecToGlobal(V1, R1);
+      rotateVecToGlobal(V2, R2);
+
+// copy over rotated data
+      outSM[0] = R0[0];
+      outSM[1] = R0[1];
+      outSM[2] = R0[2];
+      outSM[3] = R1[1];
+      outSM[4] = R1[2];
+      outSM[5] = R2[2];
     }
   }
 }
