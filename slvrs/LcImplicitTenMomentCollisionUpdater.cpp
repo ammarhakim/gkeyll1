@@ -53,7 +53,6 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-
       tmFluid.setPtr(ptr, idx);
 
       double r = ptr[0];
