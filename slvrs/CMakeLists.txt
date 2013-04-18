@@ -54,6 +54,7 @@ set(lcslvrs_SOURCES
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSolverRegistry.cpp
+  LcTenMomentCollisionSource.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
   LcUpdaterIfc.cpp
