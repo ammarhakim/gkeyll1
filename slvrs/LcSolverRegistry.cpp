@@ -22,6 +22,7 @@
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
+#include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
@@ -37,7 +38,6 @@
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
-#include <LcTenMomentCollisionSource.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -112,6 +112,10 @@ namespace Lucee
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
       .append<Lucee::CopyContToDisContFieldUpdater<3> >()
 
+      .append<Lucee::ImplicitTenMomentCollisionUpdater<1> >()
+      .append<Lucee::ImplicitTenMomentCollisionUpdater<2> >()
+      .append<Lucee::ImplicitTenMomentCollisionUpdater<3> >()
+
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<3> >();
@@ -131,7 +135,6 @@ namespace Lucee
       .append<Lucee::LorentzForceSource>()
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
-      .append<Lucee::TenMomentCollisionSource>()
       .append<Lucee::TenMomentFluidSource>();
 
 // register nodal basis functions
