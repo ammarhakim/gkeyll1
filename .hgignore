@@ -32,5 +32,6 @@ docs/tech-notes/*.xml
 docs/tech-notes/*.snm
 docs/tech-notes/*.toc
 docs/tech-notes/*.mov
+scripts/*.pyc
 BROWSE
 doxyerrors
