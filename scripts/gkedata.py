@@ -3,6 +3,7 @@ r"""Read HDF5 files produced by Gkeyll"""
 import numpy
 import tables
 import os
+import exceptions
 
 class GkeData:
     r"""GkeData(base: string, frame : int) -> GkeData
@@ -16,13 +17,14 @@ class GkeData:
         self.frame = frame
         fn = base + "_%d.h5" % frame
         if not os.path.exists(fn):
-            raise "GkeData: File %s (base name %s, frame %d) does not exist!" % (fn, base, frame)
+            raise exceptions.RuntimeError(
+                "GkeData: File %s (base name %s, frame %d) does not exist!" % (fn, base, frame))
         self.fh = tables.openFile(fn)
 
         grid = self.fh.root.StructGrid
         # read in information about grid
         self.lowerBounds = grid._v_attrs.vsLowerBounds
-        self.upperBounds = grid._v_attrs.vsLowerBounds
+        self.upperBounds = grid._v_attrs.vsUpperBounds
         self.cells = grid._v_attrs.vsNumCells
         
         # read in data
