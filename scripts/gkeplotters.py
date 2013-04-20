@@ -22,18 +22,23 @@ class Plot2D:
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
         XX, YY = pylab.meshgrid(X, Y)
         pylab.pcolormesh(XX, YY, data.transpose())
+        pylab.colorbar()
         pylab.axis('image')
 
         if title:
             titleStr = title
         else:
           titleStr = defaultTitle
+
+        extraNm = ""
+        if transformMod:
+            extraNm = "_" + transformVar
           
         pylab.title('%s' % (titleStr))
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:
-            figNm = gd.base + ("_%d.png" % component)
+            figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
             pylab.savefig(figNm)
 
 class PlotHistory:
