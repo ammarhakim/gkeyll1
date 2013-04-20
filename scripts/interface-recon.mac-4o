@@ -1,0 +1,28 @@
+/*
+/********************** Fourth order derivatives ******************/
+
+/** f''' at left and right interfaces */
+fj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[4]);
+fj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[4]);
+
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** f'' at left and right interfaces */
+fvj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[3]);
+fvj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[3]);
+
+/** Update for second equation */
+du1(j) := fullratsimp( (fj1+fj - 2/dx*(fvj1-fvj))*3/dx );
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du0(j));
+du1T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du1(j));
+
+/** Collect terms */
+Tmat : dx^2*coefmatrix([du0T(j), du1T(j)], [u0(j),u1(j)]);
+
+/** Compute eigenmatrix */
+vN : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat) );
+
+*/

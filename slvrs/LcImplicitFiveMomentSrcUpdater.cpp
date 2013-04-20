@@ -6,6 +6,7 @@
 
 // lucee includes
 #include <LcImplicitFiveMomentSrcUpdater.h>
+#include <LcStructGridField.h>
 
 // eigen inlcudes
 #include <Eigen/Eigen>
