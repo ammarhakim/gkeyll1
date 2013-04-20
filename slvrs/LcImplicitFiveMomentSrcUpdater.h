@@ -14,7 +14,6 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcHyperEquation.h>
 #include <LcUpdaterIfc.h>
 
 // std includes

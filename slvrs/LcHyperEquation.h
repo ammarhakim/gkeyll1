@@ -226,7 +226,7 @@ namespace Lucee
  * @param amdq On output, fluctuations in the negative direction.
  * @param apdq On output, fluctuations in the positive direction.
  */
-      void qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+      virtual void qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
 /**
@@ -237,7 +237,7 @@ namespace Lucee
  * @param amdq On output, fluctuations in the negative direction.
  * @param apdq On output, fluctuations in the positive direction.
  */
-      void fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+      virtual void fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
 /**
@@ -254,6 +254,13 @@ namespace Lucee
  * @param m Number of equations in system.
  */
       void setNumEqns(unsigned m) { meqn = m; }
+
+/**
+ * Reset the number of waves in this system.
+ *
+ * @param m Number of waves in system.
+ */
+      void setNumWaves(unsigned mw) { mwave = mw; }
 
     private:
 /** Number of equations */
