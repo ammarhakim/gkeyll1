@@ -1,5 +1,31 @@
 import pylab
 
+class Plot2D:
+    r"""Plot2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
+
+    Given a data object, plot it and optionally save it (if ``save``
+    is ``True``) to a PNG file.
+    """
+
+    def __init__(self, gd, component=0, title=None, save=False):    
+        data = gd.q[:,:,component]
+        X = pylab.linspace(gd.lowerBounds[0], gd.upperBounds[0], gd.cells[0]+1)
+        Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
+        XX, YY = pylab.meshgrid(X, Y)
+        pylab.pcolormesh(XX, YY, data.transpose())
+        pylab.axis('image')
+
+        if title:
+            titleStr = title
+        else:
+          titleStr = gd.base  
+        pylab.title('%s' % (titleStr))
+        pylab.xlabel('X')
+        pylab.ylabel('Y')
+        if save:
+            figNm = gd.base + ("_%d.png" % component)
+            pylab.savefig(figNm)
+
 class PlotHistory:
     r"""PlotHistory(gkeh : GkeHistoryData, [comp : int, save : bool]) -> PlotHistory
 

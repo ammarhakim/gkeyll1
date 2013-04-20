@@ -38,6 +38,21 @@ parser.add_option('--dont-show', action = 'store_true',
 
 (options, args) = parser.parse_args()
 
+# 1D/2D plots
+if options.baseName:
+    frame = int(options.frame)
+    gd = gkedata.GkeData(options.baseName, frame)
+
+    dims = len(gd.q.shape)-1
+    # plot, depending on dimension
+    if dims == 1:
+        pass
+    elif dims == 2:
+        gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
+                           component=int(options.component))
+    elif dims == 3:
+        raise "Plotting 3D data is not currently supported"
+
 # plot history
 if options.history:
     hist = gkedata.GkeHistoryData(options.history)
