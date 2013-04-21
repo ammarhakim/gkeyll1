@@ -33,6 +33,9 @@ parser.add_option('--transforms-file', action = 'store',
 parser.add_option('-v', '--transform-variable', action = 'store',
                   dest = 'transformVariable',
                   help=  'Name of transform variable to plot')
+parser.add_option('--list-variables', action = 'store_true',
+                  dest = 'listTransformVariables',
+                  help=  'List all transform variables in file')
 parser.add_option('-y', '--history', action = 'store',
                   dest = 'history',
                   help = 'Plot specified history')
@@ -62,6 +65,9 @@ if options.transformsFile:
         raise exceptions.RuntimeError(
             "Transforms file %s.py does not exist" % options.transformsFile)
 
+    if options.listTransformVariables:
+        print transformMod.transformRegistry.keys()
+
 # 1D/2D plots
 if options.baseName:
     frame = int(options.frame)
@@ -70,7 +76,9 @@ if options.baseName:
     dims = len(gd.q.shape)-1
     # plot, depending on dimension
     if dims == 1:
-        pass
+        gkeplotters.Plot1D(gd, save=options.savePng, title=options.title,
+                           component=int(options.component), transformMod=transformMod,
+                           transformVar=options.transformVariable)
     elif dims == 2:
         gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
                            component=int(options.component), transformMod=transformMod,
