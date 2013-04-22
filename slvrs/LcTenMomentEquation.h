@@ -92,6 +92,15 @@ namespace Lucee
       virtual void conserved(const double* v, double* q) const;
 
 /**
+ * Compute the absolute maximum wave speed
+ *
+ * @param c Coordinate system in which to compute speeds.
+ * @param q Conserved variables for which to compute speeds.
+ * @return maxium absolute speed.
+ */
+      double maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q);
+
+/**
  * Decompose jump into waves and wave-speeds using right and left
  * states. The states and jump are already in the local coordinate
  * system specified by 'c'. Hence, in most case (equation system is
@@ -109,8 +118,81 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
+/**
+ * Compute fluctuations using q-waves from waves and speeds. In most
+ * cases derived classes do not need to provide this method. The only
+ * exception is when using Lax fluxes with the wave propagation
+ * scheme.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves Waves. This matrix has shape (meqn X mwave).
+ * @param s Wave speeds.
+ * @param amdq On output, fluctuations in the negative direction.
+ * @param apdq On output, fluctuations in the positive direction.
+ */
+      virtual void qFluctuations(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+        Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
+
+/**
+ * Check if conserved variables satisfies invariant domains of the
+ * system. Return true if it does, false otherwise.
+ *
+ * @param q Conserved variables.
+ * @return true if invariant domains are satisfied, false otherwise.
+ */
+      virtual bool isInvariantDomain(const double* q) const;
+
     private:
+/** Enum for flux types */
+      enum NumFlux { NF_ROE, NF_LAX };
+
+/** Flag to indicate type of numerical flux to use */
+      NumFlux numFlux;
+/** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
+      bool useIntermediateWave;
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states using Roe decomposition. The states and jump are already in
+ * the local coordinate system specified by 'c'. Hence, in most case
+ * (equation system is isotropic) the coordinate system should be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      void wavesRoe(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states using Lax fluxes. The states and jump are already in the
+ * local coordinate system specified by 'c'. Hence, in most case
+ * (equation system is isotropic) the coordinate system should be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      void wavesLax(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
   };
 }
 
-#endif //  LC_EULER_EQUATION_H
+#endif //  LC_TEN_MOMENT_EQUATION_H
