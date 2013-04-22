@@ -276,11 +276,19 @@ namespace Lucee
       flux(c, &qr[0], auxVars, fr);
 
       double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
+      double amdqL[5], apdqL[5];
       for (unsigned m=0; m<5; ++m)
       {
-        amdq[m] = 0.5*(fr[m]-fl[m] - absMaxs*(qr[m]-ql[m]));
-        apdq[m] = 0.5*(fr[m]-fl[m] + absMaxs*(qr[m]-ql[m]));
+        amdqL[m] = 0.5*(fr[m]-fl[m] - absMaxs*(qr[m]-ql[m]));
+        apdqL[m] = 0.5*(fr[m]-fl[m] + absMaxs*(qr[m]-ql[m]));
       }
+
+// These rotations to global coordinate system are needed as the
+// solvers expect fluctuations in global coordinates. This is contrary
+// to most other methods in this class which work in the local
+// coordinate system.
+      rotateToGlobal(c, amdqL, &amdq[0]);
+      rotateToGlobal(c, apdqL, &apdq[0]);
     }
   }
       
