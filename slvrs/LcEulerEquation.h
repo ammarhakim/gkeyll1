@@ -158,6 +158,15 @@ namespace Lucee
         const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
+/**
+ * Check if conserved variables satisfies invariant domains of the
+ * system. Return true if it does, false otherwise.
+ *
+ * @param q Conserved variables.
+ * @return true if invariant domains are satisfied, false otherwise.
+ */
+      virtual bool isInvariantDomain(const double* q) const;
+
     protected:
 
     private:
@@ -175,6 +184,9 @@ namespace Lucee
 
 /** Flag to indicate type of numerical flux to use */
       NumFlux numFlux;
+/** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
+      bool useIntermediateWave;
+
 /**
  * Compute pressure from conserved variables.
  *

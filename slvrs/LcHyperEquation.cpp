@@ -181,6 +181,7 @@ namespace Lucee
   {
     lfm.appendFunc("primitive", luaPrimitive);
     lfm.appendFunc("conserved", luaConserved);
+    lfm.appendFunc("checkInvariantDomain", luaIsInvariantDomain);
   }
 
   int
@@ -214,19 +215,22 @@ namespace Lucee
           "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
       hyp->calcPrimVars<1>(*(Lucee::StructGridField<1, double>*) cv->pointer, *(Lucee::StructGridField<1, double>*)pv->pointer);
     }
-    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) {
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) 
+    {
       if (pv->pointer->getType() != cv->pointer->getType())
         throw Lucee::Except(
           "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
       hyp->calcPrimVars<2>(*(Lucee::StructGridField<2, double>*) cv->pointer, *(Lucee::StructGridField<2, double>*)pv->pointer);
     }
-    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) {
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) 
+    {
       if (pv->pointer->getType() != cv->pointer->getType())
         throw Lucee::Except(
           "HyperEquation::luaPrimitive: Mismatched object types in 'primitive' method");
       hyp->calcPrimVars<3>(*(Lucee::StructGridField<3, double>*) cv->pointer, *(Lucee::StructGridField<3, double>*)pv->pointer);
     }
-    else {
+    else 
+    {
       throw Lucee::Except("HyperEquation::luaPrimitive: Incorrect object in method 'primitive'");
     }
 
@@ -258,28 +262,74 @@ namespace Lucee
       (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 3);
 
 // call proper method based on type of object supplied
-    if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) {
+    if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) 
+    {
       if (pv->pointer->getType() != cv->pointer->getType())
         throw Lucee::Except(
           "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
       hyp->calcConsVars<1>(*(Lucee::StructGridField<1, double>*) pv->pointer, *(Lucee::StructGridField<1, double>*) cv->pointer);
     }
-    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) {
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) 
+    {
       if (pv->pointer->getType() != cv->pointer->getType())
         throw Lucee::Except(
           "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
       hyp->calcConsVars<2>(*(Lucee::StructGridField<2, double>*) pv->pointer, *(Lucee::StructGridField<2, double>*) cv->pointer);
     }
-    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) {
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) 
+    {
       if (pv->pointer->getType() != cv->pointer->getType())
         throw Lucee::Except(
           "HyperEquation::luaConserved: Mismatched object types in 'conserved' method");
       hyp->calcConsVars<3>(*(Lucee::StructGridField<3, double>*) pv->pointer, *(Lucee::StructGridField<3, double>*) cv->pointer);
     }
-    else {
+    else 
+    {
       throw Lucee::Except("HyperEquation::luaConserved: Incorrect object in method 'conserved'");
     }
 
     return 0;
+  }
+
+  int
+  HyperEquation::luaIsInvariantDomain(lua_State *L)
+  {
+    HyperEquation *hyp
+      = Lucee::PointerHolder<HyperEquation>::getObjAsBase(L);
+
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce(
+        "HyperEquation::luaIsInvariantDomain: Must provide a conserved variables field to 'checkInvariantDomain' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<Lucee::BasicObj> *cv =
+      (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 2);
+
+    bool result = true;
+// call proper method based on type of object supplied
+    if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) 
+    {
+      result = hyp->checkInvariantDomain<1>(*(Lucee::StructGridField<1, double>*) cv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<2, double>).name()) 
+    {
+      result = hyp->checkInvariantDomain<2>(*(Lucee::StructGridField<2, double>*) cv->pointer);
+    }
+    else if (cv->pointer->getType() == typeid(Lucee::StructGridField<3, double>).name()) 
+    {
+      result = hyp->checkInvariantDomain<3>(*(Lucee::StructGridField<3, double>*) cv->pointer);
+    }
+    else 
+    {
+      throw Lucee::Except("HyperEquation::luaConserved: Incorrect object in method 'conserved'");
+    }
+// push results on stack
+    if (result)
+      lua_pushboolean(L, 0);
+    else
+      lua_pushboolean(L, 1);
+
+    return 1;
   }
 }

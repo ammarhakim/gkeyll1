@@ -303,6 +303,14 @@ namespace Lucee
       static int luaConserved(lua_State *L);
 
 /**
+ * Lua callable method to check if invariant domains are satisfied.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaIsInvariantDomain(lua_State *L);
+
+/**
  * Compute primitive variables given conserved variables.
  *
  * @param cons Conserved variables to use.
@@ -352,6 +360,36 @@ namespace Lucee
 // compute primitive variables
           this->conserved(&pPtr[0], &cPtr[0]);
         }
+      }
+
+/**
+ * Compute primitive variables given conserved variables.
+ *
+ * @param cons Conserved variables to use.
+ * @return true, if invariant domains are satisfied.
+ */
+      template <unsigned NDIM>
+      bool
+      checkInvariantDomain(const Lucee::StructGridField<NDIM, double>& cons) const 
+      {
+        Lucee::ConstFieldPtr<double> cPtr = cons.createConstPtr();
+
+        bool isOkay = true;
+        int idx[NDIM];
+// loop over extended region and check invariant domain
+        Lucee::RowMajorSequencer<NDIM> seq(cons.getExtRegion());
+        while (seq.step())
+        {
+          seq.fillWithIndex(idx);
+          cons.setPtr(cPtr, idx);
+// compute primitive variables
+          if (this->isInvariantDomain(&cPtr[0]) == false)
+          {
+            isOkay = false;
+            break;
+          }
+        }
+        return isOkay;
       }
   };
 }
