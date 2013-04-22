@@ -62,6 +62,7 @@ class Plot1D:
         dx = (gd.upperBounds[0]-gd.lowerBounds[0])/gd.cells[0]
         X = pylab.linspace(gd.lowerBounds[0]+0.5*dx, gd.upperBounds[0]-0.5*dx, gd.cells[0])
         pylab.plot(X, data)
+        pylab.axis('tight')
 
         if title:
             titleStr = title

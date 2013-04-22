@@ -139,6 +139,25 @@ namespace Lucee
         const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
         double* f);
 
+/**
+ * Compute fluctuations using q-waves from waves and speeds. In most
+ * cases derived classes do not need to provide this method. The only
+ * exception is when using Lax fluxes with the wave propagation
+ * scheme.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves Waves. This matrix has shape (meqn X mwave).
+ * @param s Wave speeds.
+ * @param amdq On output, fluctuations in the negative direction.
+ * @param apdq On output, fluctuations in the positive direction.
+ */
+      virtual void qFluctuations(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+        Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
+
     protected:
 
     private:
@@ -151,6 +170,11 @@ namespace Lucee
 /** Minium density in case correct=true */
       double minDensity;
 
+/** Enum for flux types */
+      enum NumFlux { NF_ROE, NF_LAX };
+
+/** Flag to indicate type of numerical flux to use */
+      NumFlux numFlux;
 /**
  * Compute pressure from conserved variables.
  *
@@ -166,6 +190,44 @@ namespace Lucee
  * @param correct density
  */
       double getSafeRho(double rho) const;
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states using Roe decomposition. The states and jump are already in
+ * the local coordinate system specified by 'c'. Hence, in most case
+ * (equation system is isotropic) the coordinate system should be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      void wavesRoe(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
+
+/**
+ * Decompose jump into waves and wave-speeds using right and left
+ * states using Lax fluxes. The states and jump are already in the
+ * local coordinate system specified by 'c'. Hence, in most case
+ * (equation system is isotropic) the coordinate system should be
+ * ignored.
+ *
+ * @param c Coordinate system in which to compute waves.
+ * @param jump Jump to decompose.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param waves On output, waves. This matrix has shape (meqn X mwave).
+ * @param s On output, wave speeds.
+ */
+      void wavesLax(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& jump,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
   };
 }
 

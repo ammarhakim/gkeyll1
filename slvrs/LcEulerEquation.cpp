@@ -45,6 +45,26 @@ namespace Lucee
     minPressure = 0.0;
     if (tbl.hasNumber("minPressure"))
       minPressure = tbl.getNumber("minPressure");
+
+    numFlux = NF_ROE;
+    if (tbl.hasString("numericalFlux"))
+    {
+      std::string nf = tbl.getString("numericalFlux");
+      if (nf == "roe")
+        numFlux = NF_ROE;
+      else if (nf == "lax")
+        numFlux = NF_LAX;
+      else
+      {
+        Lucee::Except lce("EulerEquation::readInput: 'numericalFlux' ");
+        lce << nf << " not recognized!" << std::endl;
+          throw lce;
+      }
+    }
+
+    if (numFlux == NF_LAX)
+// for Lax fluxes there is just a single wave
+      this->setNumWaves(1);
   }
 
   void
@@ -68,9 +88,8 @@ namespace Lucee
     const std::vector<const double*>& auxVars, double* f)
   {
     double rho1 = 1/getSafeRho(q[0]);
-// compute pressure
     double pr = pressure(q);
-// now compute flux
+
     f[0] = q[1]; // rho*u
     f[1] = rho1*q[1]*q[1] + pr; // rho*u*u + pr
     f[2] = rho1*q[1]*q[2]; // rho*u*v
@@ -82,7 +101,6 @@ namespace Lucee
   EulerEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s[2])
   {
     double rho = getSafeRho(q[0]);
-// compute pressure
     double pr = pressure(q);
     double cs = std::sqrt(gas_gamma*pr/rho); // sound speed
     double u = q[1]/rho; // fluid velocity
@@ -94,7 +112,6 @@ namespace Lucee
   EulerEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q)
   {
     double rho1 = 1/getSafeRho(q[0]);
-// compute pressure
     double pr = pressure(&q[0]);
     double cs = std::sqrt(gas_gamma*pr*rho1); // sound speed
     double u = q[1]*rho1; // fluid velocity
@@ -124,6 +141,20 @@ namespace Lucee
 
   void
   EulerEquation::waves(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
+  {
+    if (numFlux == NF_ROE)
+      wavesRoe(c, jump, ql, qr, waves, s);
+    else if (numFlux == NF_LAX)
+      wavesLax(c, jump, ql, qr, waves, s);
+    else
+    { /* this can't happen */ }
+  }
+
+  void
+  EulerEquation::wavesRoe(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
@@ -190,6 +221,21 @@ namespace Lucee
     s[2] = u+a;
   }
 
+  void
+  EulerEquation::wavesLax(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
+  {
+    for (unsigned i=0; i<5; ++i)
+      waves(i,0) = qr[i]-ql[i];
+
+    double sl[2], sr[2];
+    speeds(c, &ql[0], sl);
+    speeds(c, &qr[0], sr);
+    s[0] = 0.5*(sl[1]+sr[1]); // NOT SURE OF THIS
+  }
+
   double
   EulerEquation::numericalFlux(const Lucee::RectCoordSys& c,
     const double* ql, const double* qr, 
@@ -198,21 +244,46 @@ namespace Lucee
   {
 // NOTE: This numerical flux is using Lax-Fluxes
 
-// compute maximum speed
-    double absMaxs = std::max(maxAbsSpeed(c, ql), maxAbsSpeed(c, qr));
+    double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
 
-    Lucee::FieldPtr<double> fl(5), fr(5);
-// compute left and right fluxes
-    this->flux(c, ql, auxVarsl, fl);
-    this->flux(c, qr, auxVarsr, fr);
+    double fl[5], fr[5];
+    flux(c, ql, auxVarsl, fl);
+    flux(c, qr, auxVarsr, fr);
 
-// compute numerical fluxes
     for (unsigned i=0; i<5; ++i)
       f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);
 
     return absMaxs;
   }
 
+  void
+  EulerEquation::qFluctuations(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+    Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
+  {
+    if (numFlux == NF_ROE)
+      Lucee::HyperEquation::qFluctuations(c, ql, qr, waves, s, amdq, apdq);
+    else if (numFlux == NF_LAX)
+    {
+// This might appear strange: we are arranging the fluctuations to
+// effectively give Lax fluxes. Note that the sum of the fluctuations
+// must be the jump in the physical flux, in all cases, as it does
+// below.
+      std::vector<const double*> auxVars;
+      double fl[5], fr[5];
+      flux(c, &ql[0], auxVars, fl);
+      flux(c, &qr[0], auxVars, fr);
+
+      double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
+      for (unsigned m=0; m<5; ++m)
+      {
+        amdq[m] = 0.5*(fr[m]-fl[m] - absMaxs*(qr[m]-ql[m]));
+        apdq[m] = 0.5*(fr[m]-fl[m] + absMaxs*(qr[m]-ql[m]));
+      }
+    }
+  }
+      
   double
   EulerEquation::pressure(const double* q) const
   {
