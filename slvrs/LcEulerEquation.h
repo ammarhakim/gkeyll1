@@ -167,8 +167,6 @@ namespace Lucee
  */
       virtual bool isInvariantDomain(const double* q) const;
 
-    protected:
-
     private:
 /** Gas gamma */
       double gas_gamma;

@@ -60,6 +60,38 @@ namespace Lucee
   {
 // call base class method
     Lucee::HyperEquation::readInput(tbl);
+
+    numFlux = NF_ROE;
+    if (tbl.hasString("numericalFlux"))
+    {
+      std::string nf = tbl.getString("numericalFlux");
+      if (nf == "roe")
+        numFlux = NF_ROE;
+      else if (nf == "lax")
+        numFlux = NF_LAX;
+      else
+      {
+        Lucee::Except lce("TenMomentEquation::readInput: 'numericalFlux' ");
+        lce << nf << " not recognized!" << std::endl;
+          throw lce;
+      }
+    }
+
+    if (numFlux == NF_LAX)
+    {
+      useIntermediateWave = false;
+      if (tbl.hasBool("useIntermediateWave"))
+// this flag activates the intermediate state wave: it is best to use
+// this when using Lax fluxes with second order wave-propagation
+// scheme so as to avoid asymmetries.
+        useIntermediateWave = tbl.getBool("useIntermediateWave");
+
+// adjust number of waves accordingly
+      if (useIntermediateWave)
+        this->setNumWaves(2);
+      else
+        this->setNumWaves(1);
+    }
   }
 
   void
@@ -92,7 +124,7 @@ namespace Lucee
     f[U2] = v[RHO]*v[U1]*v[U2] + v[P12];
     f[U3] = v[RHO]*v[U1]*v[U3] + v[P13];
 // total pressure flux
-    f[P11] = v[RHO]*v[U1]*v[U1]*v[U1] + 3*v[U1]*v[P13];
+    f[P11] = v[RHO]*v[U1]*v[U1]*v[U1] + 3*v[U1]*v[P11];
     f[P12] = v[RHO]*v[U1]*v[U1]*v[U2] + 2*v[U1]*v[P12] + v[U2]*v[P11];
     f[P13] = v[RHO]*v[U1]*v[U1]*v[U3] + 2*v[U1]*v[P13] + v[U3]*v[P11];
     f[P22] = v[RHO]*v[U1]*v[U2]*v[U2] + v[U1]*v[P22] + 2*v[U2]*v[P12];
@@ -108,6 +140,15 @@ namespace Lucee
     double p11 = q[P11] - rho*u1*u1;
     s[0] = u1-sqrt(3*p11/rho);
     s[1] = u1+sqrt(3*p11/rho);
+  }
+
+  double
+  TenMomentEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q)
+  {
+    double rho = q[RHO];
+    double u1 = q[U1]/rho;
+    double p11 = q[P11] - rho*u1*u1;
+    return std::fabs(u1)+sqrt(3*p11/rho);
   }
 
   void
@@ -148,6 +189,20 @@ namespace Lucee
 
   void
   TenMomentEquation::waves(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
+  {
+    if (numFlux == NF_ROE)
+      wavesRoe(c, jump, ql, qr, waves, s);
+    else if (numFlux == NF_LAX)
+      wavesLax(c, jump, ql, qr, waves, s);
+    else
+    { /* this can't happen */ }
+  }
+
+  void
+  TenMomentEquation::wavesRoe(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
@@ -297,5 +352,108 @@ namespace Lucee
     wv[9] = lp[9];
 
     multiplyByPhiPrime(p0, u1, u2, u3, p11, p12, p13, p22, p23, p33, wv, 4, waves);
+  }
+
+  void
+  TenMomentEquation::wavesLax(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
+  {
+    if (useIntermediateWave)
+    {
+// this uses the HLLE technique to construct an intermediate state
+      std::vector<const double*> auxVars;
+      double fl[10], fr[10];
+      flux(c, &ql[0], auxVars, fl);
+      flux(c, &qr[0], auxVars, fr);
+
+      double sl[2], sr[2];
+      speeds(c, &ql[0], sl);
+      speeds(c, &qr[0], sr);
+      s[0] = 0.5*(sl[0]+sr[0]);
+      s[1] = 0.5*(sl[1]+sr[1]);
+
+// compute intermediate HLLE state
+      double sdiff1 = 1/(s[1]-s[0]);
+      double qHHLE[10];
+      for (unsigned i=0; i<10; ++i)
+        qHHLE[i] = (s[1]*qr[i]-s[0]*ql[i]+fl[i]-fr[i])*sdiff1;
+
+// compute waves
+      for (unsigned i=0; i<10; ++i)
+      {
+        waves(i,0) = qHHLE[i]-ql[i];
+        waves(i,1) = qr[i]-qHHLE[i];
+      }
+    }
+    else
+    {
+// use a single wave
+      for (unsigned i=0; i<10; ++i)
+        waves(i,0) = qr[i]-ql[i];
+      
+      double sl[2], sr[2];
+      speeds(c, &ql[0], sl);
+      speeds(c, &qr[0], sr);
+      s[0] = 0.5*(sl[1]+sr[1]);
+    }
+  }
+
+  void
+  TenMomentEquation::qFluctuations(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+    Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
+  {
+    if (numFlux == NF_ROE)
+      Lucee::HyperEquation::qFluctuations(c, ql, qr, waves, s, amdq, apdq);
+    else if (numFlux == NF_LAX)
+    {
+// This might appear strange: we are arranging the fluctuations to
+// effectively give Lax fluxes. Note that the sum of the fluctuations
+// must be the jump in the physical flux, in all cases, as it does
+// below.
+      std::vector<const double*> auxVars;
+      double fl[10], fr[10];
+      flux(c, &ql[0], auxVars, fl);
+      flux(c, &qr[0], auxVars, fr);
+
+      double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
+      double amdqL[10], apdqL[10];
+      for (unsigned m=0; m<10; ++m)
+      {
+        amdqL[m] = 0.5*(fr[m]-fl[m] - absMaxs*(qr[m]-ql[m]));
+        apdqL[m] = 0.5*(fr[m]-fl[m] + absMaxs*(qr[m]-ql[m]));
+      }
+
+// These rotations to global coordinate system are needed as the
+// solvers expect fluctuations in global coordinates. This is contrary
+// to most other methods in this class which work in the local
+// coordinate system.
+      rotateToGlobal(c, amdqL, &amdq[0]);
+      rotateToGlobal(c, apdqL, &apdq[0]);
+    }
+  }
+
+  bool
+  TenMomentEquation::isInvariantDomain(const double* q) const
+  {
+    double rho = q[RHO];
+    if (rho<=0.0)
+      return false;
+
+    double u = q[U1]/rho;
+    double v = q[U2]/rho;
+    double w = q[U3]/rho;
+
+    if ((q[P11] - rho*u*u)<=0)
+      return false;
+    if ((q[P22] - rho*v*v)<=0)
+      return false;
+    if ((q[P33] - rho*w*w)<=0)
+      return false;
+
+    return true;
   }
 }
