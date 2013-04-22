@@ -63,8 +63,17 @@ namespace Lucee
     }
 
     if (numFlux == NF_LAX)
-// for Lax fluxes there is just a single wave
-      this->setNumWaves(1);
+    {
+      useIntermediateWave = false;
+      if (tbl.hasBool("useIntermediateWave"))
+        useIntermediateWave = tbl.getBool("useIntermediateWave");
+
+// adjust number of waves accordingly
+      if (useIntermediateWave)
+        this->setNumWaves(2);
+      else
+        this->setNumWaves(1);
+    }
   }
 
   void
@@ -122,20 +131,20 @@ namespace Lucee
   EulerEquation::primitive(const double* q, double* v) const
   {
     double rho = getSafeRho(q[0]);
-    v[0] = rho; // rho
-    v[1] = q[1]/rho; // u
-    v[2] = q[2]/rho; // v
-    v[3] = q[3]/rho; // w
-    v[4] = pressure(q); // pressure
+    v[0] = rho;
+    v[1] = q[1]/rho;
+    v[2] = q[2]/rho;
+    v[3] = q[3]/rho;
+    v[4] = pressure(q);
   }
 
   void
   EulerEquation::conserved(const double* v, double* q) const
   {
-    q[0] = v[0]; // rho
-    q[1] = v[0]*v[1]; // rho*u
-    q[2] = v[0]*v[2]; // rho*v
-    q[3] = v[0]*v[3]; // rho*w
+    q[0] = v[0];
+    q[1] = v[0]*v[1];
+    q[2] = v[0]*v[2];
+    q[3] = v[0]*v[3];
     q[4] = v[4]/(gas_gamma-1) + 0.5*v[0]*(v[1]*v[1] + v[2]*v[2] + v[3]*v[3]); // energy
   }
 
@@ -290,6 +299,20 @@ namespace Lucee
       rotateToGlobal(c, amdqL, &amdq[0]);
       rotateToGlobal(c, apdqL, &apdq[0]);
     }
+  }
+
+  bool
+  EulerEquation::isInvariantDomain(const double* q) const
+  {
+    double rho = q[0];
+    if (rho<=0.0)
+      return false;
+
+    double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1]+q[2]*q[2]+q[3]*q[3])/rho);
+    if (pr<=0.0)
+      return false;
+
+    return true;
   }
       
   double
