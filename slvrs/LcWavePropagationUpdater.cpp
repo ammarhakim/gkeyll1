@@ -245,7 +245,7 @@ namespace Lucee
             jump[m] = qLocal[m] - qLocall[m];
 
 // calculate waves and speeds
-          equation->waves(coordSys, jump, qLocal, qLocall, wavesLocal, speedsPtr);
+          equation->waves(coordSys, jump, qLocall, qLocal, wavesLocal, speedsPtr);
 // rotate waves back to global frame (stored in waves[dir] array)
           Lucee::Matrix<double> wavesGlobal(meqn, mwave, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)
@@ -254,7 +254,8 @@ namespace Lucee
             equation->rotateToGlobal(coordSys, &wavesLocal(0,mw), &wavesGlobal(0,mw));
 
 // compute fluctuations
-          equation->qFluctuations(wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
+          equation->qFluctuations(coordSys, qLocall, qLocal,
+            wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
 
 // compute first-order Gudonov update
           qNew.setPtr(qNewPtr, idx);

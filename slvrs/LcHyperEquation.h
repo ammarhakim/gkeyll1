@@ -219,25 +219,41 @@ namespace Lucee
       virtual bool isInvariantDomain(const double* q) const;
 
 /**
- * Compute fluctuations using q-waves from waves and speeds.
+ * Compute fluctuations using q-waves from waves and speeds. In most
+ * cases derived classes do not need to provide this method. The only
+ * exception is when using Lax fluxes with the wave propagation
+ * scheme.
  *
+ * @param c Coordinate system in which to compute waves.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
  * @param waves Waves. This matrix has shape (meqn X mwave).
  * @param s Wave speeds.
  * @param amdq On output, fluctuations in the negative direction.
  * @param apdq On output, fluctuations in the positive direction.
  */
-      virtual void qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+      virtual void qFluctuations(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
 /**
- * Compute fluctuations using f-waves from waves and speeds.
+ * Compute fluctuations using f-waves from waves and speeds. In most
+ * cases derived classes do not need to provide this method. The only
+ * exception is when using Lax fluxes with the wave propagation
+ * scheme.
  *
+ * @param c Coordinate system in which to compute waves.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
  * @param waves Waves. This matrix has shape (meqn X mwave).
  * @param s Wave speeds.
  * @param amdq On output, fluctuations in the negative direction.
  * @param apdq On output, fluctuations in the positive direction.
  */
-      virtual void fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+      virtual void fFluctuations(const Lucee::RectCoordSys& c,
+        const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
         Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq);
 
 /**

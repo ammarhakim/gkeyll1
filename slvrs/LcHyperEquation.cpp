@@ -121,7 +121,9 @@ namespace Lucee
   }
 
   void
-  HyperEquation::qFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+  HyperEquation::qFluctuations(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
     Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
   {
     for (unsigned m=0; m<meqn; ++m)
@@ -144,7 +146,9 @@ namespace Lucee
   }
 
   void
-  HyperEquation::fFluctuations(const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
+  HyperEquation::fFluctuations(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const Lucee::Matrix<double>& waves, const Lucee::FieldPtr<double>& s,
     Lucee::FieldPtr<double>& amdq, Lucee::FieldPtr<double>& apdq)
   {
     for (unsigned m=0; m<meqn; ++m)
