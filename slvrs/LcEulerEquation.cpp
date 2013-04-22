@@ -66,6 +66,9 @@ namespace Lucee
     {
       useIntermediateWave = false;
       if (tbl.hasBool("useIntermediateWave"))
+// this flag activates the intermediate state wave: it is best to use
+// this when using Lax fluxes with second order wave-propagation
+// scheme so as to avoid asymmetries.
         useIntermediateWave = tbl.getBool("useIntermediateWave");
 
 // adjust number of waves accordingly
@@ -236,13 +239,44 @@ namespace Lucee
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
-    for (unsigned i=0; i<5; ++i)
-      waves(i,0) = qr[i]-ql[i];
+    if (useIntermediateWave)
+    {
+// this uses the HLLE technique to construct an intermediate state
+      std::vector<const double*> auxVars;
+      double fl[5], fr[5];
+      flux(c, &ql[0], auxVars, fl);
+      flux(c, &qr[0], auxVars, fr);
 
-    double sl[2], sr[2];
-    speeds(c, &ql[0], sl);
-    speeds(c, &qr[0], sr);
-    s[0] = 0.5*(sl[1]+sr[1]); // NOT SURE OF THIS
+      double sl[2], sr[2];
+      speeds(c, &ql[0], sl);
+      speeds(c, &qr[0], sr);
+      s[0] = 0.5*(sl[0]+sr[0]);
+      s[1] = 0.5*(sl[1]+sr[1]);
+
+// compute intermediate HLLE state
+      double sdiff1 = 1/(s[1]-s[0]);
+      double qHHLE[5];
+      for (unsigned i=0; i<5; ++i)
+        qHHLE[i] = (s[1]*qr[i]-s[0]*ql[i]+fl[i]-fr[i])*sdiff1;
+
+// compute waves
+      for (unsigned i=0; i<5; ++i)
+      {
+        waves(i,0) = qHHLE[i]-ql[i];
+        waves(i,1) = qr[i]-qHHLE[i];
+      }
+    }
+    else
+    {
+// use a single wave
+      for (unsigned i=0; i<5; ++i)
+        waves(i,0) = qr[i]-ql[i];
+      
+      double sl[2], sr[2];
+      speeds(c, &ql[0], sl);
+      speeds(c, &qr[0], sr);
+      s[0] = 0.5*(sl[1]+sr[1]);
+    }
   }
 
   double
