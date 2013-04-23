@@ -32,7 +32,6 @@ namespace Lucee
   void
   IntegrateNodalField<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
 // get hold of element to use
@@ -51,7 +50,6 @@ namespace Lucee
   void
   IntegrateNodalField<NDIM>::initialize()
   {
-// call base class method
     Lucee::UpdaterIfc::initialize();
 
 // get weights for quadrature
@@ -63,18 +61,14 @@ namespace Lucee
   Lucee::UpdaterStatus
   IntegrateNodalField<NDIM>::update(double t)
   {
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-// get input array
     const Lucee::Field<NDIM, double>& fld = this->getInp<Lucee::Field<NDIM, double> >(0);
-// get output dynVector
     Lucee::DynVector<double>& fldInt = this->getOut<Lucee::DynVector<double> >(0);
 
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-// sequencer over region to update
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
     unsigned nlocal = nodalBasis->getNumNodes();
@@ -109,12 +103,10 @@ namespace Lucee
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
-// sum across all processors
     comm->allreduce(1, &localInt, &volInt, TX_SUM);
 
     std::vector<double> data(1);
     data[0] = volInt;
-// push value into dynVector
     fldInt.appendData(t, data);
 
     return Lucee::UpdaterStatus();

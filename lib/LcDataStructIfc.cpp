@@ -47,7 +47,7 @@ namespace Lucee
   }
 
   void
-  DataStructIfc::write(const std::string& nm)
+  DataStructIfc::write(const std::string& nm, double tCurr)
   {
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
@@ -56,6 +56,12 @@ namespace Lucee
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->createFile(outNm);
+    TxIoNodeType rootGrp = io->openGroup(fn, "/");
+    TxIoNodeType td = io->createGroup(rootGrp, "timeData");
+    io->writeAttribute(td, "vsType", "time");
+    io->writeAttribute(td, "vsStep", 0);
+    io->writeAttribute(td, "vsTime", tCurr);
+
     this->writeToFile(*io, fn, this->getName());
     delete io;
   }
@@ -104,7 +110,21 @@ namespace Lucee
   {
     DataStructIfc *d = Lucee::PointerHolder<DataStructIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
-    d->write(nm);
+
+    double tCurr = 0.0;
+// check if time was specified
+    unsigned nArgs = lua_gettop(L);
+    if (nArgs == 3)
+    {
+      if (!lua_isnumber(L, 3))
+      {
+        Lucee::Except lce("DataStructIfc::luaWrite: Must provide a number when specifying time");
+        throw lce;
+      }
+      tCurr = lua_tonumber(L, 3);
+    }
+    d->write(nm, tCurr);
+
     return 0;
   }
 

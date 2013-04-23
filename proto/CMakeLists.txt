@@ -23,13 +23,14 @@ set (proto_SOURCES
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcIntegrateFieldAlongLine.cpp
   LcIntegrateNodalField.cpp
   LcMaxwellTm2DUpdater.cpp
-  LcModalDg1DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
   LcModalDg1DHyperDiffusionUpdater.cpp
   LcModalDg1DLocalDGUpdater.cpp
   LcModalDg1DSymmetricDDGUpdater.cpp
+  LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp

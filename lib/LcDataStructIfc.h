@@ -47,8 +47,9 @@ namespace Lucee
  * Write data-structure to specified HDF5 file.
  *
  * @param nm Name of file to write.
+ * @param tm Time which data was written.
  */
-      void write(const std::string& nm);
+      void write(const std::string& nm, double tm);
 
 /**
  * Read data-structure from specified HDF5 file.

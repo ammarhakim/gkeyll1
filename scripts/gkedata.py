@@ -26,6 +26,12 @@ class GkeData:
         self.lowerBounds = grid._v_attrs.vsLowerBounds
         self.upperBounds = grid._v_attrs.vsUpperBounds
         self.cells = grid._v_attrs.vsNumCells
+
+        # read in time data if it exists
+        try:
+            self.time = self.fh.root.timeData._v_attrs.vsTime
+        except:
+            self.time = 0.0
         
         # read in data
         self.q = self.fh.root.StructGridField

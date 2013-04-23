@@ -1,5 +1,43 @@
 import pylab
 
+class Plot1D:
+    r"""Plot1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
+
+    Given a data object, plot it and optionally save it (if ``save``
+    is ``True``) to a PNG file.
+    """
+
+    def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
+                 transformVar=None):
+
+        if transformMod:
+            # transform data if needed
+            data = transformMod.transformRegistry[transformVar](gd.q)
+            defaultTitle = transformVar
+        else:
+            data = gd.q[:,component]
+            defaultTitle = gd.base + "[" + str(component) + "]"
+
+        dx = (gd.upperBounds[0]-gd.lowerBounds[0])/gd.cells[0]
+        X = pylab.linspace(gd.lowerBounds[0]+0.5*dx, gd.upperBounds[0]-0.5*dx, gd.cells[0])
+        pylab.plot(X, data)
+        pylab.axis('tight')
+
+        if title:
+            titleStr = title
+        else:
+          titleStr = defaultTitle
+
+        extraNm = ""
+        if transformMod:
+            extraNm = "_" + transformVar
+          
+        pylab.title('%s at t %g' % (titleStr, gd.time))
+        pylab.xlabel('X')
+        if save:
+            figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
+            pylab.savefig(figNm)            
+
 class Plot2D:
     r"""Plot2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
 
@@ -28,56 +66,18 @@ class Plot2D:
         if title:
             titleStr = title
         else:
-          titleStr = defaultTitle
+          titleStr = defaultTitle + "[" + str(component) + "]"
 
         extraNm = ""
         if transformMod:
             extraNm = "_" + transformVar
-          
-        pylab.title('%s' % (titleStr))
+
+        pylab.title('%s at t %g' % (titleStr, gd.time))
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:
             figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
             pylab.savefig(figNm)
-
-class Plot1D:
-    r"""Plot1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
-
-    Given a data object, plot it and optionally save it (if ``save``
-    is ``True``) to a PNG file.
-    """
-
-    def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None):
-
-        if transformMod:
-            # transform data if needed
-            data = transformMod.transformRegistry[transformVar](gd.q)
-            defaultTitle = transformVar
-        else:
-            data = gd.q[:,component]
-            defaultTitle = gd.base
-
-        dx = (gd.upperBounds[0]-gd.lowerBounds[0])/gd.cells[0]
-        X = pylab.linspace(gd.lowerBounds[0]+0.5*dx, gd.upperBounds[0]-0.5*dx, gd.cells[0])
-        pylab.plot(X, data)
-        pylab.axis('tight')
-
-        if title:
-            titleStr = title
-        else:
-          titleStr = defaultTitle
-
-        extraNm = ""
-        if transformMod:
-            extraNm = "_" + transformVar
-          
-        pylab.title('%s' % (titleStr))
-        pylab.xlabel('X')
-        if save:
-            figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
-            pylab.savefig(figNm)            
 
 class PlotHistory:
     r"""PlotHistory(gkeh : GkeHistoryData, [comp : int, save : bool]) -> PlotHistory

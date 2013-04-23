@@ -15,13 +15,14 @@
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateNodalField.h>
 #include <LcMaxwellTm2DUpdater.h>
-#include <LcModalDg1DUpdater.h>
 #include <LcModalDg1DDiffusionUpdater.h>
 #include <LcModalDg1DHyperDiffusionUpdater.h>
 #include <LcModalDg1DLocalDGUpdater.h>
 #include <LcModalDg1DSymmetricDDGUpdater.h>
+#include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
@@ -79,12 +80,17 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
-      .append<Lucee::NormGradPhiUpdater<3> >();
+      .append<Lucee::NormGradPhiUpdater<3> >()
+      .append<Lucee::IntegrateFieldAlongLine<1> >()
+      .append<Lucee::IntegrateFieldAlongLine<2> >()
+      .append<Lucee::IntegrateFieldAlongLine<3> >();
+
 #ifdef HAVE_PETSC
       Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
       .append<Lucee::ContFromDisContUpdater<1> >();
 #endif
+
 #ifdef HAVE_FFTW3
       Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
