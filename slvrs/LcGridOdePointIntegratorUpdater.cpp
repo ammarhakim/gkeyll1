@@ -54,7 +54,7 @@ namespace Lucee
 // integrate ODEs
     integrator->integrate(this->getCurrTime(), t, fld);
 
-    return Lucee::UpdaterStatus(true, t-this->getCurrTime());
+    return Lucee::UpdaterStatus();
   }
 
   template <unsigned NDIM>

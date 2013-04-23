@@ -200,7 +200,7 @@ namespace Lucee
 // multiply by mass to give momentum density)
         fPtr[RHOUX] = 2*sol(fidx(n,X))/qbym[n] - fPtr[RHOUX];
         fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
-        fPtr[RHOUZ] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUZ];
+        fPtr[RHOUZ] = 2*sol(fidx(n,Z))/qbym[n] - fPtr[RHOUZ];
 
 // energy equation (there is no explicit energy source, so just
 // recompute new kinetic energy to update total energy)

@@ -76,6 +76,18 @@ namespace Lucee
       unsigned dir;
 /** Number of cells to perform integration */
       unsigned numCells;
+/** Reference to Lua function */
+      int fnRef;
+/** Flag to indicate if Lua function was specified */
+      bool hasFunction;
+
+/** 
+ * Compute quantity to integrate.
+ *
+ * @param inp Input vector of data.
+ * @return value of integrand given data.
+ */
+      double getIntegrand(const Lucee::ConstFieldPtr<double>& inp);
   };
 }
 

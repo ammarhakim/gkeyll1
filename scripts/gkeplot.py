@@ -14,13 +14,9 @@ from optparse import OptionParser
 
 # set command line options
 parser = OptionParser()
-parser.add_option('-b', '--base', action = 'store',
-                  dest = 'baseName',
-                  help = 'Base name of simulation')
-parser.add_option('-f', '--frame', action = 'store',
-                  dest = 'frame',
-                  help = 'Frame to plot.',
-                  default = 0)
+parser.add_option('-p', '--plot', action = 'store',
+                  dest = 'fileName',
+                  help = 'Hdf5 file to plot')
 parser.add_option('-c', '--component', action = 'store',
                   dest = 'component', default=0,
                   help = 'Component to plot')
@@ -71,11 +67,11 @@ if options.transformsFile:
 
     if options.listTransformVariables:
         print transformMod.transformRegistry.keys()
-
+        exit(0)
+        
 # 1D/2D plots
-if options.baseName:
-    frame = int(options.frame)
-    gd = gkedata.GkeData(options.baseName, frame)
+if options.fileName:
+    gd = gkedata.GkeData(options.fileName)
 
     dims = len(gd.q.shape)-1
     # plot, depending on dimension
