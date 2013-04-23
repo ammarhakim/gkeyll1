@@ -46,6 +46,10 @@ parser.add_option('--dont-show', action = 'store_true',
                   dest = 'dontShow',
                   help = 'Do not show plot',
                   default = False)
+parser.add_option('--write-history', action = 'store_true',
+                  dest = 'writeHistory',
+                  help = 'Write history data',
+                  default = False)
 
 (options, args) = parser.parse_args()
 
@@ -91,6 +95,12 @@ if options.history:
     hist = gkedata.GkeHistoryData(options.history)
     gkeplotters.PlotHistory(hist, save=options.savePng, title=options.title,
                             component=int(options.component))
+
+    if options.writeHistory:
+        fl = open(hist.base + ".txt", "w")
+        for idx in range(hist.time.shape[0]):
+            fl.writelines("%g %g\n" % (hist.time[idx], hist.history[idx]))
+        fl.close()
 
 # show figure if requested
 if options.dontShow == False:
