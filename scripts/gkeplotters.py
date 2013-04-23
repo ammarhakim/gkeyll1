@@ -54,7 +54,7 @@ class Plot2D:
             defaultTitle = transformVar
         else:
             data = gd.q[:,:,component]
-            defaultTitle = gd.base
+            defaultTitle = gd.base + "[" + str(component) + "]"
             
         X = pylab.linspace(gd.lowerBounds[0], gd.upperBounds[0], gd.cells[0]+1)
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
@@ -66,13 +66,13 @@ class Plot2D:
         if title:
             titleStr = title
         else:
-          titleStr = defaultTitle + "[" + str(component) + "]"
+          titleStr = defaultTitle
 
         extraNm = ""
         if transformMod:
             extraNm = "_" + transformVar
 
-        pylab.title('%s at t %g' % (titleStr, gd.time))
+        pylab.title('%s at t = %g' % (titleStr, gd.time))
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:
