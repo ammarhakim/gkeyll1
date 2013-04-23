@@ -1,5 +1,18 @@
 import pylab
 
+class MakeTitle:
+    def __init__(self, gd, component, title, transformMod, transformVar):
+        self.title = gd.fName[:-3]+"["+str(component)+"]"
+        if transformMod:
+            self.title = transformVar
+        if title:
+            self.title = title
+
+        self.figName = gd.fName[:-3]
+        if transformMod:
+            self.figName = self.figName+"_"+transformVar
+        self.figName = self.figName+".png"
+
 class Plot1D:
     r"""Plot1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
 
@@ -10,33 +23,22 @@ class Plot1D:
     def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
                  transformVar=None):
 
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar)
+
         if transformMod:
-            # transform data if needed
             data = transformMod.transformRegistry[transformVar](gd.q)
-            defaultTitle = transformVar
         else:
             data = gd.q[:,component]
-            defaultTitle = gd.base + "[" + str(component) + "]"
 
         dx = (gd.upperBounds[0]-gd.lowerBounds[0])/gd.cells[0]
         X = pylab.linspace(gd.lowerBounds[0]+0.5*dx, gd.upperBounds[0]-0.5*dx, gd.cells[0])
         pylab.plot(X, data)
         pylab.axis('tight')
 
-        if title:
-            titleStr = title
-        else:
-          titleStr = defaultTitle
-
-        extraNm = ""
-        if transformMod:
-            extraNm = "_" + transformVar
-          
-        pylab.title('%s at t %g' % (titleStr, gd.time))
+        pylab.title('%s at t %g' % (mtitle.title, gd.time))
         pylab.xlabel('X')
         if save:
-            figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
-            pylab.savefig(figNm)            
+            pylab.savefig(mtitle.figName)
 
 class Plot2D:
     r"""Plot2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
@@ -48,13 +50,12 @@ class Plot2D:
     def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
                  transformVar=None):
 
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar)
         if transformMod:
             # transform data if needed
             data = transformMod.transformRegistry[transformVar](gd.q)
-            defaultTitle = transformVar
         else:
             data = gd.q[:,:,component]
-            defaultTitle = gd.base + "[" + str(component) + "]"
             
         X = pylab.linspace(gd.lowerBounds[0], gd.upperBounds[0], gd.cells[0]+1)
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
@@ -63,21 +64,11 @@ class Plot2D:
         pylab.colorbar()
         pylab.axis('image')
 
-        if title:
-            titleStr = title
-        else:
-          titleStr = defaultTitle
-
-        extraNm = ""
-        if transformMod:
-            extraNm = "_" + transformVar
-
-        pylab.title('%s at t = %g' % (titleStr, gd.time))
+        pylab.title('%s at t = %g' % (mtitle.title, gd.time))
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:
-            figNm = gd.base + extraNm + ("_f%d_c%d.png" % (gd.frame, component))
-            pylab.savefig(figNm)
+            pylab.savefig(mtitle.figName)
 
 class PlotHistory:
     r"""PlotHistory(gkeh : GkeHistoryData, [comp : int, save : bool]) -> PlotHistory
@@ -91,10 +82,10 @@ class PlotHistory:
       if title:
           titleStr = title
       else:
-          titleStr = gkeh.base    
-      pylab.title('History %s[%d]' % (titleStr, component))
+          titleStr = gkeh.base + ("[%d]" % component)
+      pylab.title('History %s' % (titleStr))
       pylab.xlabel('Time')
-      pylab.ylabel('%s[%d]' % (titleStr, component))
+      pylab.ylabel('%s' % (titleStr))
       if save:
           figNm = gkeh.base + ("_%d.png" % component)
           pylab.savefig(figNm)

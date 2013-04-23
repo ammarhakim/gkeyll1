@@ -49,8 +49,11 @@ namespace Lucee
 // call function
     if (lua_pcall(*L, 4, src.size(), 0) != 0)
     {
+      std::string err(lua_tostring(*L, -1));
+      lua_pop(*L, 1);
       Lucee::Except lce("FunctionSource::getSource: ");
       lce << "Problem evaluating function supplied as 'source' ";
+      lce << std::endl << "[" << err << "]";
       throw lce;
     }
 // fetch results

@@ -12,14 +12,12 @@ class GkeData:
     HDF5 file, with base name ``base`` and frame ``frame``.
     """
 
-    def __init__(self, base, frame):
-        self.base = base
-        self.frame = frame
-        fn = base + "_%d.h5" % frame
-        if not os.path.exists(fn):
+    def __init__(self, fName):
+        self.fName = fName
+        if not os.path.exists(self.fName):
             raise exceptions.RuntimeError(
-                "GkeData: File %s (base name %s, frame %d) does not exist!" % (fn, base, frame))
-        self.fh = tables.openFile(fn)
+                "GkeData: File %s does not exist!" % fName)
+        self.fh = tables.openFile(fName)
 
         grid = self.fh.root.StructGrid
         # read in information about grid
