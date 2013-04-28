@@ -42,6 +42,10 @@ parser.add_option('--dont-show', action = 'store_true',
                   dest = 'dontShow',
                   help = 'Do not show plot',
                   default = False)
+parser.add_option('-d', '--nodal-order', action = 'store',
+                  dest = 'dgOrder',
+                  help = 'Polynomial order of DG scheme. '
+                  'Only makes sense for plotting output from DG schemes')
 parser.add_option('--write-history', action = 'store_true',
                   dest = 'writeHistory',
                   help = 'Write history data',
@@ -68,23 +72,45 @@ if options.transformsFile:
     if options.listTransformVariables:
         print transformMod.transformRegistry.keys()
         exit(0)
+
+# check if to plot data from DG
+plotDg = False
+dgOrder = 0
+if options.dgOrder:
+    plotDg = True
+    dgOrder = int(options.dgOrder)
         
 # 1D/2D plots
 if options.fileName:
     gd = gkedata.GkeData(options.fileName)
 
     dims = len(gd.q.shape)-1
-    # plot, depending on dimension
-    if dims == 1:
-        gkeplotters.Plot1D(gd, save=options.savePng, title=options.title,
-                           component=int(options.component), transformMod=transformMod,
-                           transformVar=options.transformVariable)
-    elif dims == 2:
-        gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
-                           component=int(options.component), transformMod=transformMod,
-                           transformVar=options.transformVariable)
-    elif dims == 3:
-        raise "Plotting 3D data is not currently supported"
+
+    if plotDg:
+        # plot, depending on dimension
+        if dims == 1:
+            raise exceptions.RuntimeError(
+                "Plotting 1D DG data is not currently supported")
+        elif dims == 2:
+            gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
+                                 component=int(options.component), transformMod=transformMod,
+                                 transformVar=options.transformVariable)
+        elif dims == 3:
+            raise exceptions.RuntimeError(
+                "Plotting 3D DG data is not currently supported")
+    else:
+        # plot, depending on dimension
+        if dims == 1:
+            gkeplotters.Plot1D(gd, save=options.savePng, title=options.title,
+                               component=int(options.component), transformMod=transformMod,
+                               transformVar=options.transformVariable)
+        elif dims == 2:
+            gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
+                               component=int(options.component), transformMod=transformMod,
+                               transformVar=options.transformVariable)
+        elif dims == 3:
+            raise exceptions.RuntimeError(
+                "Plotting 3D data is not currently supported")
 
 # plot history
 if options.history:
@@ -92,10 +118,11 @@ if options.history:
     gkeplotters.PlotHistory(hist, save=options.savePng, title=options.title,
                             component=int(options.component))
 
+    c = int(options.component)
     if options.writeHistory:
         fl = open(hist.base + ".txt", "w")
         for idx in range(hist.time.shape[0]):
-            fl.writelines("%g %g\n" % (hist.time[idx], hist.history[idx]))
+            fl.writelines("%g %g\n" % (hist.time[idx], hist.history[idx,c]))
         fl.close()
 
 # show figure if requested
