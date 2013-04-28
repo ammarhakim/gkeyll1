@@ -42,7 +42,7 @@ class GkeData:
         self.fh.close()
         
 class GkeHistoryData:
-    r"""GkeHistoryData(base: string, [start : int]) -> GkeHistoryData
+    r"""GkeHistoryData(base: string, [component : int, start : int]) -> GkeHistoryData
 
     Given a base name to a history, reads in all existing frames and
     concatenates them into a single array. Optionally, a ``start``
