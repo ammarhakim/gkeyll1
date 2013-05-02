@@ -548,6 +548,12 @@ namespace Lucee
     Lucee::Field<NDIM, T> aliasFld = sgf->getSubCompView(s, e);
     Lucee::StructGridField<NDIM, T>* aliasSgf = 
       new Lucee::StructGridField<NDIM, T>(aliasFld, *sgf->grid);
+// copy data for ghost I/O
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      aliasSgf->lowerWriteGhost[d] = sgf->lowerWriteGhost[d];
+      aliasSgf->upperWriteGhost[d] = sgf->upperWriteGhost[d];
+    }
 
     size_t nbytes = sizeof(Lucee::PointerHolder<StructGridField<NDIM, T> >);
     Lucee::PointerHolder<StructGridField<NDIM, T> > *ph =
