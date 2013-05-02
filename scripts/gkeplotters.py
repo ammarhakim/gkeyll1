@@ -1,7 +1,7 @@
 import pylab
 
 class MakeTitle:
-    def __init__(self, gd, component, title, transformMod, transformVar):
+    def __init__(self, gd, component, title, transformMod, transformVar, outNm):
         self.title = gd.fName[:-3]+"["+str(component)+"]"
         if transformMod:
             self.title = transformVar
@@ -13,6 +13,9 @@ class MakeTitle:
             self.figName = self.figName+"_"+transformVar
         self.figName = self.figName+".png"
 
+        if outNm:
+            self.figName = outNm+".png"
+
 class Plot1D:
     r"""Plot1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
 
@@ -21,9 +24,9 @@ class Plot1D:
     """
 
     def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None):
+                 transformVar=None, outNm=None):
 
-        mtitle = MakeTitle(gd, component, title, transformMod, transformVar)
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
 
         if transformMod:
             data = transformMod.transformRegistry[transformVar](gd.q)
@@ -48,9 +51,9 @@ class Plot2D:
     """
 
     def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None):
+                 transformVar=None, outNm=None):
 
-        mtitle = MakeTitle(gd, component, title, transformMod, transformVar)
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
         if transformMod:
             # transform data if needed
             data = transformMod.transformRegistry[transformVar](gd.q)
@@ -61,7 +64,7 @@ class Plot2D:
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
         XX, YY = pylab.meshgrid(X, Y)
         pylab.pcolormesh(XX, YY, data.transpose())
-        pylab.colorbar()
+        #pylab.colorbar()
         pylab.axis('image')
 
         pylab.title('%s at t = %g' % (mtitle.title, gd.time))
@@ -78,9 +81,9 @@ class PlotDg2D:
     """
 
     def __init__(self, gd, dgOrder=1, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None):
+                 transformVar=None, outNm=None):
 
-        mtitle = MakeTitle(gd, component, title, transformMod, transformVar)
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
         rawData = gd.q
         #if transformMod:
         #    # transform data if needed

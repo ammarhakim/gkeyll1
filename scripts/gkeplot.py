@@ -38,6 +38,9 @@ parser.add_option('-y', '--history', action = 'store',
 parser.add_option('-s', '--save', action = 'store_true',
                   dest = 'savePng',
                   help = 'Save png of plot displayed')
+parser.add_option('-o', '--output', action = 'store',
+                  dest = 'outNm',
+                  help = 'When saving figures, use this file name')
 parser.add_option('--dont-show', action = 'store_true',
                   dest = 'dontShow',
                   help = 'Do not show plot',
@@ -94,7 +97,8 @@ if options.fileName:
         elif dims == 2:
             gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
                                  component=int(options.component), transformMod=transformMod,
-                                 transformVar=options.transformVariable)
+                                 transformVar=options.transformVariable,
+                                 outNm=options.outNm)
         elif dims == 3:
             raise exceptions.RuntimeError(
                 "Plotting 3D DG data is not currently supported")
@@ -103,11 +107,13 @@ if options.fileName:
         if dims == 1:
             gkeplotters.Plot1D(gd, save=options.savePng, title=options.title,
                                component=int(options.component), transformMod=transformMod,
-                               transformVar=options.transformVariable)
+                               transformVar=options.transformVariable,
+                               outNm=options.outNm)
         elif dims == 2:
             gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
                                component=int(options.component), transformMod=transformMod,
-                               transformVar=options.transformVariable)
+                               transformVar=options.transformVariable,
+                               outNm=options.outNm)
         elif dims == 3:
             raise exceptions.RuntimeError(
                 "Plotting 3D data is not currently supported")
