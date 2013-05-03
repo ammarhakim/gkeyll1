@@ -64,7 +64,7 @@ class Plot2D:
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
         XX, YY = pylab.meshgrid(X, Y)
         pylab.pcolormesh(XX, YY, data.transpose())
-        #pylab.colorbar()
+        pylab.colorbar()
         pylab.axis('image')
 
         pylab.title('%s at t = %g' % (mtitle.title, gd.time))

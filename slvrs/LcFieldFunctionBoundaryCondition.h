@@ -1,11 +1,11 @@
 /**
- * @file	LcFunctionBoundaryCondition.h
+ * @file	LcFieldFunctionBoundaryCondition.h
  *
  * @brief	Class for applying boundary conditions specified via a Lua function.
  */
 
-#ifndef LC_FUNCTION_BOUNDARY_CONDITION_H
-#define LC_FUNCTION_BOUNDARY_CONDITION_H
+#ifndef LC_FIELD_FUNCTION_BOUNDARY_CONDITION_H
+#define LC_FIELD_FUNCTION_BOUNDARY_CONDITION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -18,7 +18,7 @@
 namespace Lucee
 {
 /** Interface class for applying boundary conditions */
-  class FunctionBoundaryCondition : public Lucee::BoundaryCondition
+  class FieldFunctionBoundaryCondition : public Lucee::BoundaryCondition
   {
     public:
 /** Class id: this is used by registration system */
@@ -48,7 +48,9 @@ namespace Lucee
     private:
 /** Reference to Lua function */
       int fnRef;
+/** Input components to send to Lua function */
+      std::vector<unsigned> inpComponents;
   };
 }
 
-#endif // LC_FUNCTION_BOUNDARY_CONDITION_H
+#endif // LC_FIELD_FUNCTION_BOUNDARY_CONDITION_H

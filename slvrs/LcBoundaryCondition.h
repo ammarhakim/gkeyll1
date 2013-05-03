@@ -39,6 +39,23 @@ namespace Lucee
  */
       virtual void readInput(Lucee::LuaTable& tbl);
 
+/**
+ * Return component given index.
+ *
+ * @param k Component index.
+ * @return Corresponding component.
+ */
+      unsigned component(unsigned k) const 
+      { return components[k]; }
+
+/**
+ * Number of components.
+ *
+ * @return Number of componenents.
+ */
+      unsigned numComponents() const
+      { return components.size(); }
+
 /** 
  * Apply boundary conditions. The variable 'qin' represents data in
  * the skin cell (first/last interior cell) while 'qbc' represents
@@ -53,7 +70,7 @@ namespace Lucee
       virtual void applyBc(double tm, const double loc[3], const Lucee::RectCoordSys& c, 
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
 
-    protected:
+    private:
 /** Components to apply to */
       std::vector<unsigned> components;
   };

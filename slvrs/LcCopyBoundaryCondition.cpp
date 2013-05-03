@@ -25,13 +25,13 @@ namespace Lucee
     if (tbl.hasNumVec("fact"))
     {
       fact = tbl.getNumVec("fact");
-      if (fact.size() != components.size())
+      if (fact.size() != this->numComponents())
         throw Lucee::Except(
           "CopyBoundaryCondition::readInput: If 'fact' table is specified it must have same size as 'components' table");
     }
     else
     {
-      fact.resize(components.size());
+      fact.resize(this->numComponents());
       for (unsigned i=0; i<fact.size(); ++i) fact[i] = 1.0;
     }
   }
@@ -41,7 +41,7 @@ namespace Lucee
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // just copy data over
-    for (unsigned i=0; i<components.size(); ++i)
-      qbc[components[i]] = fact[i]*qin[components[i]];
+    for (unsigned i=0; i<this->numComponents(); ++i)
+      qbc[this->component(i)] = fact[i]*qin[this->component(i)];
   }
 }
