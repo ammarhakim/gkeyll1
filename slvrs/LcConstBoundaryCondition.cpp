@@ -25,7 +25,7 @@ namespace Lucee
     if (tbl.hasNumVec("values"))
     {
       values = tbl.getNumVec("values");
-      if (values.size() != components.size())
+      if (values.size() != this->numComponents())
         throw Lucee::Except(
           "ConstBoundaryCondition::readInput: 'values' table must have same size as 'components' table");
     }
@@ -40,7 +40,7 @@ namespace Lucee
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // just copy data over
-    for (unsigned i=0; i<components.size(); ++i)
-      qbc[components[i]] = values[i];
+    for (unsigned i=0; i<this->numComponents(); ++i)
+      qbc[this->component(i)] = values[i];
   }
 }

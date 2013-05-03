@@ -22,7 +22,7 @@ namespace Lucee
   {
     Lucee::BoundaryCondition::readInput(tbl);
 // ensure exactly 3 components are specified
-    if (components.size() != 3)
+    if (this->numComponents() != 3)
       throw Lucee::Except(
         "ZeroNormalBoundaryCondition::readInput: Zero-normal BCs can be applied only to 3-component vector");
   }
@@ -34,7 +34,7 @@ namespace Lucee
 // rotate vector to local coordinate system
     double vel[3], normVel[3];
     for (unsigned i=0; i<3; ++i)
-      vel[i] = qin[components[i]];
+      vel[i] = qin[this->component(i)];
     c.rotateVecToLocal(vel, normVel);
 
 // flip sign of normal component
@@ -44,6 +44,6 @@ namespace Lucee
     c.rotateVecToGlobal(normVel, vel);
 
     for (unsigned i=0; i<3; ++i)
-      qbc[components[i]] = vel[i];
+      qbc[this->component(i)] = vel[i];
   }
 }

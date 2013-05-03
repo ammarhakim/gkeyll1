@@ -18,6 +18,7 @@
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
+#include <LcFieldFunctionBoundaryCondition.h>
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
@@ -127,6 +128,7 @@ namespace Lucee
       .append<Lucee::ConstBoundaryCondition>()
       .append<Lucee::ZeroNormalBoundaryCondition>()
       .append<Lucee::ZeroTangentBoundaryCondition>()
+      .append<Lucee::FieldFunctionBoundaryCondition>()
       .append<Lucee::FunctionBoundaryCondition>();
 
 // register point sources
