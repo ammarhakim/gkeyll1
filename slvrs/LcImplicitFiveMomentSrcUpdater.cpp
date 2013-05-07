@@ -85,6 +85,11 @@ namespace Lucee
       }
     }
 
+// flag to indicate if there is a static field
+    hasStatic = false;
+    if (tbl.hasBool("hasStaticField"))
+      hasStatic = tbl.getBool("hasStaticField");
+
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
     for (unsigned i=0; i<nFluids; ++i)
@@ -120,8 +125,18 @@ namespace Lucee
 // get EM field (this is last out parameter)
     Lucee::Field<NDIM, double>& emField = this->getOut<Lucee::Field<NDIM, double> >(nFluids);
 
+// get static EM field if one is present (it is the first and only
+// input field)
+    const Lucee::Field<NDIM, double>* staticField = 0;
+    if (hasStatic)
+      staticField = &this->getInp<Lucee::Field<NDIM, double> >(0);
+
     Lucee::FieldPtr<double> fPtr = fluids[0]->createPtr();
     Lucee::FieldPtr<double> emPtr = emField.createPtr();
+
+    std::vector<double> zeros(6);
+    for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
+    Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
 
     Eigen::MatrixXd lhs;
     lhs = Eigen::MatrixXd::Constant(3*nFluids+3, 3*nFluids+3, 0.0);
@@ -135,6 +150,9 @@ namespace Lucee
       seq.fillWithIndex(idx);
 
       emField.setPtr(emPtr, idx);
+      if (hasStatic)
+        staticField->setPtr(staticEmPtr, idx);
+
 // fill elements corresponding to each fluid
       for (unsigned n=0; n<nFluids; ++n)
       {
@@ -142,19 +160,19 @@ namespace Lucee
 
 // eqn. for X-component of current
         lhs(fidx(n,X), fidx(n,X)) = 1.0;
-        lhs(fidx(n,X), fidx(n,Y)) = -dt1*qbym[n]*emPtr[BZ];
-        lhs(fidx(n,X), fidx(n,Z)) = dt1*qbym[n]*emPtr[BY];
+        lhs(fidx(n,X), fidx(n,Y)) = -dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
+        lhs(fidx(n,X), fidx(n,Z)) = dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
         lhs(fidx(n,X), eidx(X)) = -dt1*qbym2[n]*fPtr[RHO];
 
 // eqn. for Y-component of current
-        lhs(fidx(n,Y), fidx(n,X)) = dt1*qbym[n]*emPtr[BZ];
+        lhs(fidx(n,Y), fidx(n,X)) = dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
         lhs(fidx(n,Y), fidx(n,Y)) = 1.0;
-        lhs(fidx(n,Y), fidx(n,Z)) = -dt1*qbym[n]*emPtr[BX];
+        lhs(fidx(n,Y), fidx(n,Z)) = -dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
         lhs(fidx(n,Y), eidx(Y)) = -dt1*qbym2[n]*fPtr[RHO];
 
 // eqn. for Z-component of current
-        lhs(fidx(n,Z), fidx(n,X)) = -dt1*qbym[n]*emPtr[BY];
-        lhs(fidx(n,Z), fidx(n,Y)) = dt1*qbym[n]*emPtr[BX];
+        lhs(fidx(n,Z), fidx(n,X)) = -dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
+        lhs(fidx(n,Z), fidx(n,Y)) = dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
         lhs(fidx(n,Z), fidx(n,Z)) = 1.0;
         lhs(fidx(n,Z), eidx(Z)) = -dt1*qbym2[n]*fPtr[RHO];
 
@@ -216,6 +234,7 @@ namespace Lucee
     
     return Lucee::UpdaterStatus();
   }
+  
 
   template <unsigned NDIM>
   void

@@ -80,6 +80,8 @@ namespace Lucee
       std::vector<double> qbym2;
 /** Type of linear solver to use */
       int linSolType;
+/** Flag to indicate if static magnetic field is present */
+      bool hasStatic;
 
 /**
  * Compute index for fluid current component.
