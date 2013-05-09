@@ -10,9 +10,12 @@
 
 // lucee includes
 #include <LcExcept.h>
+#include <LcGlobals.h>
 #include <LcHyperEquation.h>
 #include <LcPointerHolder.h>
 
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -306,7 +309,7 @@ namespace Lucee
     Lucee::PointerHolder<Lucee::BasicObj> *cv =
       (Lucee::PointerHolder<Lucee::BasicObj>*) lua_touserdata(L, 2);
 
-    bool result = true;
+    int result = true;
 // call proper method based on type of object supplied
     if (cv->pointer->getType() == typeid(Lucee::StructGridField<1, double>).name()) 
     {
@@ -324,11 +327,17 @@ namespace Lucee
     {
       throw Lucee::Except("HyperEquation::luaConserved: Incorrect object in method 'conserved'");
     }
+// make sure all processors return same answer
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+    int globalResult;
+    comm->allreduce(1, &result, &globalResult, TX_AND);
+
 // push results on stack
-    if (result)
-      lua_pushboolean(L, 0);
-    else
+    if (globalResult)
       lua_pushboolean(L, 1);
+    else
+      lua_pushboolean(L, 0);
 
     return 1;
   }

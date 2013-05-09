@@ -11,8 +11,12 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcGlobals.h>
 #include <LcMathLib.h>
 #include <LcPointerHolder.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -552,6 +556,7 @@ namespace Lucee
     Field<NDIM, T> *fld
       = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
 
+    int hasNan = false;
 // loop over field, checking for nans
     Lucee::ConstFieldPtr<T> ptr = fld->createConstPtr();
     Lucee::RowMajorSequencer<NDIM> seq(fld->getExtRegion());
@@ -562,13 +567,24 @@ namespace Lucee
       {
         if (Lucee::isNan(ptr[k])) 
         {
-          lua_pushboolean(L, 1);
-          return 1; // no need to search further
+          hasNan = true;
+          break;
         }
       }
     }
-// no nan found
-    lua_pushboolean(L, 0);
+
+// make sure all processors return same answer
+    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+    int globalResult;
+    comm->allreduce(1, &hasNan, &globalResult, TX_AND);
+
+// push results on stack
+    if (globalResult)
+      lua_pushboolean(L, 1);
+    else
+      lua_pushboolean(L, 0);
+
     return 1;
   }
 
