@@ -249,6 +249,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+    std::vector<Lucee::Matrix>& lowerMat, std::vector<Lucee::Matrix>& upperMat) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getDiffMatrices: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
