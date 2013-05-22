@@ -309,6 +309,21 @@ namespace Lucee
       virtual void getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const;
 
 /**
+ * Get matrices needed to compute diffusion operator. The matrices are
+ * for the current cell and each of its face neighbors, stored in
+ * "lowerMat" for cells sharing lower faces and "upperMat" for cells
+ * sharing upper faces. A linear combination of these matrices when
+ * multiplied by the nodal data in the corresponding cells should give
+ * the discrete diffusion operator.
+ *
+ * @param iMat Matrix for current cell.
+ * @param lowerMat Matrices for cells sharing lower faces.
+ * @param upperMat Matrices for cells sharing upper faces.
+ */
+      virtual void getDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+        std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
