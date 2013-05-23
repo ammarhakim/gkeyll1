@@ -3,8 +3,10 @@ import pylab
 class MakeTitle:
     def __init__(self, gd, component, title, transformMod, transformVar, outNm):
         self.title = gd.fName[:-3]+"["+str(component)+"]"
+        self.title = self.title + (" at t %g" % gd.time)
         if transformMod:
             self.title = transformVar
+            self.title = self.title + (" at t %g" % gd.time)
         if title:
             self.title = title
 
@@ -38,7 +40,7 @@ class Plot1D:
         pylab.plot(X, data)
         pylab.axis('tight')
 
-        pylab.title('%s at t %g' % (mtitle.title, gd.time))
+        pylab.title(mtitle.title)
         pylab.xlabel('X')
         if save:
             pylab.savefig(mtitle.figName)
@@ -67,7 +69,7 @@ class Plot2D:
         pylab.colorbar()
         pylab.axis('image')
 
-        pylab.title('%s at t = %g' % (mtitle.title, gd.time))
+        pylab.title(mtitle.title)
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:
@@ -106,7 +108,7 @@ class PlotDg2D:
         pylab.colorbar()
         pylab.axis('image')
 
-        pylab.title('%s at t = %g' % (mtitle.title, gd.time))
+        pylab.title(mtitle.title)
         pylab.xlabel('X')
         pylab.ylabel('Y')
         if save:

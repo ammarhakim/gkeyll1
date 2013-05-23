@@ -316,11 +316,11 @@ namespace Lucee
  * multiplied by the nodal data in the corresponding cells should give
  * the discrete diffusion operator.
  *
- * @param iMat Matrix for current cell.
+ * @param iMat Matrix for current cell, split into contributions from each direction.
  * @param lowerMat Matrices for cells sharing lower faces.
  * @param upperMat Matrices for cells sharing upper faces.
  */
-      virtual void getDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+      virtual void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
@@ -335,7 +335,7 @@ namespace Lucee
  * @param lowerMat Matrices for cells sharing lower faces.
  * @param upperMat Matrices for cells sharing upper faces.
  */
-      virtual void getHyperDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+      virtual void getHyperDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat, 
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**

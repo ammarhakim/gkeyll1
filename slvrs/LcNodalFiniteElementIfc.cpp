@@ -249,7 +249,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+  NodalFiniteElementIfc<NDIM>::getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
     std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getDiffMatrices: Not implemented!");
@@ -257,7 +257,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NodalFiniteElementIfc<NDIM>::getHyperDiffusionMatrices(Lucee::Matrix<double>& iMat, 
+  NodalFiniteElementIfc<NDIM>::getHyperDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
     std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getHyperDiffMatrices: Not implemented!");
