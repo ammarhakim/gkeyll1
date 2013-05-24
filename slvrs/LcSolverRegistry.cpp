@@ -32,6 +32,7 @@
 #include <LcNodalDisContHyperUpdater.h>
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
+#include <LcNodalHyperDiffusionUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
@@ -86,6 +87,10 @@ namespace Lucee
       .append<Lucee::NodalDisContSrcIncrUpdater<1> >()
       .append<Lucee::NodalDisContSrcIncrUpdater<2> >()
       .append<Lucee::NodalDisContSrcIncrUpdater<3> >()
+
+      .append<Lucee::NodalHyperDiffusionUpdater<1> >()
+      .append<Lucee::NodalHyperDiffusionUpdater<2> >()
+      .append<Lucee::NodalHyperDiffusionUpdater<3> >()
 
       .append<Lucee::ProjectOnBasisUpdater<1> >()
       .append<Lucee::ProjectOnBasisUpdater<2> >()
