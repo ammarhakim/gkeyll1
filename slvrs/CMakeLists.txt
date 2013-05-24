@@ -49,6 +49,7 @@ set(lcslvrs_SOURCES
   LcNodalDisContHyperUpdater.cpp
   LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp
+  LcNodalHyperDiffusionUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcProjectOnBasisUpdater.cpp
