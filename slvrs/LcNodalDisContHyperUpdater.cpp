@@ -37,7 +37,6 @@ namespace Lucee
   void 
   NodalDisContHyperUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))

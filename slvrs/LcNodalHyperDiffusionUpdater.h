@@ -79,6 +79,29 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Directions to update */
+      std::vector<unsigned> updateDirs;
+/** List of matrices for current cell */
+      std::vector<Lucee::Matrix<double> > iMat;
+/** List of matrices on each lower face */
+      std::vector<Lucee::Matrix<double> > lowerMat;
+/** List of matrices on each upper face */
+      std::vector<Lucee::Matrix<double> > upperMat;
+
+/**
+ * Compute matrix-vector multiply. Output vector must be
+ * pre-allocated. Note that the computation performed is
+ *
+ * out = m*mat*vec + v*out
+ *
+ * @param m Factor for accumulation.
+ * @param mat Matrix for multiplication.
+ * @param vec Vector for multiplication.
+ * @param v Factor for accumulation.
+ * @param out On output, holds the product.
+ */
+      void matVec(double m, const Lucee::Matrix<double>& mat,
+        const double* vec, double v, double* out);
   };
 }
 
