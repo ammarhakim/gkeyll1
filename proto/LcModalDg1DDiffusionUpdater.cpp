@@ -182,7 +182,7 @@ namespace Lucee
     double dx = grid.getDx(0);
 
     // Figure out whether time step is too large
-    if(dt > (cfl*dx*dx/(2*diffCoef)))
+    if(dt > (1.01*cfl*dx*dx/(2*diffCoef)))
     {
       // time-step was too large: return a suggestion with correct time-step
       return Lucee::UpdaterStatus(false, cfl*dx*dx/(2*diffCoef));
