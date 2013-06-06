@@ -10,7 +10,9 @@
 #endif
 
 // lucee includes
+#include <LcLinAlgebra.h>
 #include <LcNodalHyperDiffusionUpdater.h>
+
 
 namespace Lucee
 {
@@ -38,6 +40,15 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("NodalHyperDiffusionUpdater::readInput: Must specify element to use using 'basis'");
+
+// diffusion coefficient
+    alpha = tbl.getNumber("diffusionCoeff");
+// CFL number to control time-step
+    cfl = tbl.getNumber("cfl"); // CFL number
+// should only increments be computed?
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
 
 // directions to update
     if (tbl.hasNumVec("updateDirections"))
@@ -71,17 +82,47 @@ namespace Lucee
 // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
+    unsigned nlocal = nodalBasis->getNumNodes();
+// allocate space for matrices
+    iMat.resize(NDIM);
+    lowerMat.resize(NDIM);
+    upperMat.resize(NDIM);
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      iMat[d] = Lucee::Matrix<double>(nlocal, nlocal);
+      lowerMat[d] = Lucee::Matrix<double>(nlocal, nlocal);
+      upperMat[d] = Lucee::Matrix<double>(nlocal, nlocal);
+    }
+
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     seq.step(); // just to get to first index
     int idx[NDIM];
     seq.fillWithIndex(idx);
     nodalBasis->setIndex(idx);
 
-    iMat.resize(NDIM);
-    lowerMat.resize(NDIM);
-    upperMat.resize(NDIM);
 // get various matrices needed
     nodalBasis->getDiffusionMatrices(iMat, lowerMat, upperMat);
+
+// pre-multiply each of the matrices by inverse matrix
+    Lucee::Matrix<double> massMatrix(nlocal, nlocal);
+
+// NOTE: mass matrix is fetched repeatedly as the solve() method
+// destroys it during the inversion process
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, iMat[d]);
+    }
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, lowerMat[d]);
+    }
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, upperMat[d]);
+    }
   }
 
   template <unsigned NDIM>
@@ -94,8 +135,30 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& inpFld = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& diffOut = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-// clear out current contents of output field
-    diffOut = 0.0;
+    double dt = t-this->getCurrTime();
+    double dxMax = 0.0;
+    for (unsigned d=0; d<NDIM; ++d)
+      dxMax = std::max(dxMax, grid.getDx(d));
+
+// check time-step
+    double cflm = 1.1*cfl;
+    double cfla = alpha*dt/(dxMax*dxMax);
+    if (cfla>cflm)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+
+    double fact = 1.0;
+    if (onlyIncrement)
+    {
+// if only increments are requested, the updater computes alpha*d^2/dx^x inpFld
+      diffOut = 0.0;
+      fact = alpha*1.0;
+    }
+    else
+    {
+// updater computes inpFld + dt*alpha*d^2/dx^x inpFld
+      diffOut.copy(inpFld);
+      fact = alpha*dt;
+    }
     
     Lucee::ConstFieldPtr<double> inpFldPtr = inpFld.createConstPtr();
     Lucee::FieldPtr<double> diffOutPtr = diffOut.createPtr();
@@ -115,17 +178,17 @@ namespace Lucee
         unsigned dir = updateDirs[d];
 // add in contribution to cell from current cell
         inpFld.setPtr(inpFldPtr, idx);
-        matVec(1.0, iMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        matVec(fact, iMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
         seq.fillWithIndex(idxL);
 // add in contribution from cells attached to lower/upper faces
         idxL[dir] = idx[dir]-1; // cell attached to lower face
         inpFld.setPtr(inpFldPtr, idxL);
-        matVec(1.0, lowerMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        matVec(fact, lowerMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
         idxL[dir] = idx[dir]+1; // cell attached to upper face
         inpFld.setPtr(inpFldPtr, idxL);
-        matVec(1.0, upperMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        matVec(fact, upperMat[d], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
       }
     }
 

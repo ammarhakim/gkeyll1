@@ -160,7 +160,7 @@ namespace Lucee
  * @param dir Direction for gradient.
  * @param DNjNk On output, partial stiffness matrix of element.
  */
-      virtual void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
+      void getGradStiffnessMatrix(unsigned dir, Lucee::Matrix<double>& DNjNk) const;
 
 /**
  * Get number of nodes needed for Gaussian quadrature in the element
@@ -168,7 +168,7 @@ namespace Lucee
  *
  * @return Number of nodes needed for Gaussian quadrature.
  */
-      virtual unsigned getNumGaussNodes() const;
+      unsigned getNumGaussNodes() const;
 
 /**
  * Get data needed for Gaussian quadrature for this element. All
@@ -178,8 +178,23 @@ namespace Lucee
  * @param ordinates On output, quadrature ordinates.
  * @param weights On output, quadrature weights.
  */
-      virtual void getGaussQuadData(Lucee::Matrix<double>& interpMat,
+      void getGaussQuadData(Lucee::Matrix<double>& interpMat,
         Lucee::Matrix<double>& ordinates, std::vector<double>& weights) const;
+
+/**
+ * Get matrices needed to compute diffusion operator. The matrices are
+ * for the current cell and each of its face neighbors, stored in
+ * "lowerMat" for cells sharing lower faces and "upperMat" for cells
+ * sharing upper faces. A linear combination of these matrices when
+ * multiplied by the nodal data in the corresponding cells should give
+ * the discrete diffusion operator.
+ *
+ * @param iMat Matrix for current cell, split into contributions from each direction.
+ * @param lowerMat Matrices for cells sharing lower faces.
+ * @param upperMat Matrices for cells sharing upper faces.
+ */
+      void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
+        std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
  * Extract nodal data at current grid location from field and copy it
@@ -223,6 +238,12 @@ namespace Lucee
       unsigned numGlobal;
 /** Weights for quadrature */
       std::vector<double> weights;
+/** List of matrices for current cell */
+      std::vector<Lucee::Matrix<double> > iMat;
+/** List of matrices on each lower face */
+      std::vector<Lucee::Matrix<double> > lowerMat;
+/** List of matrices on each upper face */
+      std::vector<Lucee::Matrix<double> > upperMat;
 
 /**
  * Struct to hold data for Guassian quadrature.

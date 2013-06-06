@@ -77,6 +77,12 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Diffusion coefficient */
+      double alpha;
+/** CFL number */
+      double cfl;
+/** Flag to indicate if to compute only increments */
+      bool onlyIncrement;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Directions to update */
