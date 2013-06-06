@@ -258,6 +258,20 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat_o,
+    std::vector<Lucee::Matrix<double> >& lowerMat_o, std::vector<Lucee::Matrix<double> >& upperMat_o) const
+  {
+    if (polyOrder==2 || polyOrder==3)
+      Lucee::Except("LobattoElement1D::getDiffusionMatrices: Not implemented for quadratic/cubic basis!");
+    for (unsigned d=0; d<1; ++d)
+    {
+      iMat_o[0].copy(iMat[0]);
+      lowerMat_o[0].copy(lowerMat[0]);
+      upperMat_o[0].copy(upperMat[0]);
+    }
+  }
+
+  void
   LobattoElement1D::extractFromField(const Lucee::Field<1, double>& fld,
     std::vector<double>& data)
   {
@@ -361,6 +375,32 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_0 *= 0.5*dx;
+
+// various diffusion matrices (automatically generated. See scripts/interface-recon-stencil-calc-p1-1d.mac)
+    iMat.resize(1);
+    lowerMat.resize(1);
+    upperMat.resize(1);
+    for (unsigned d=0; d<1; ++d)
+    {
+      iMat[d] = Lucee::Matrix<double>(shape, start);
+      lowerMat[d] = Lucee::Matrix<double>(shape, start);
+      upperMat[d] = Lucee::Matrix<double>(shape, start);
+    }
+
+    iMat[0](1,1) = -(2*dx+21)/dx/12.0;
+    iMat[0](1,2) = (dx-3)/dx/6.0;
+    iMat[0](2,1) = (dx-3)/dx/6.0;
+    iMat[0](2,2) = -(2*dx+21)/dx/12.0;
+
+    lowerMat[0](1,1) = -(dx-12)/dx/24.0;
+    lowerMat[0](1,2) = -(5*dx-42)/dx/24.0;
+    lowerMat[0](2,1) = 1.0/24.0;
+    lowerMat[0](2,2) = 5.0/24.0;
+
+    upperMat[0](1,1) = 5.0/24.0;
+    upperMat[0](1,2) = 1.0/24.0;
+    upperMat[0](2,1) = -(5*dx-42)/dx/24.0;
+    upperMat[0](2,2) = -(dx-12)/dx/24.0;
 
 // compute weights
     weights.resize(2);

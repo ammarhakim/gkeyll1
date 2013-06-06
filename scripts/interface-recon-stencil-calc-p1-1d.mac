@@ -112,13 +112,13 @@ lBasisVals : transpose(N2(-1));
 rBasisVals : transpose(N2(1));
 
 /** Left/right basis gradients */
-lBasisGrad : transpose(subst([x=-1], diff(N2(x),x)));
-rBasisGrad : transpose(subst([x= 1], diff(N2(x),x)));
+lBasisGrads : transpose(subst([x=-1], diff(N2(x),x)));
+rBasisGrads : transpose(subst([x= 1], diff(N2(x),x)));
 
 /** Stencil of update (does not include mass matrix) */
-stencil : (rBasisVals*rightGrad - lBasisVals*leftGrad) - (rBasisGrad*rightVal - lBasisGrad*leftVal) + volMat.u0col;
+stencil : (rBasisVals*rightGrad - lBasisVals*leftGrad) - (rBasisGrads*rightVal - lBasisGrads*leftVal) + volMat.u0col;
 
-/** Multiply by inverse mass matrix to get final stencil */
+/** Multiply by inverse mass matrix to get final stencil (this is just for testing) */
 massMatrix : dx/2*calcMassMatrix(N2(x));
 t_stencil : invert(massMatrix) . stencil;
 
