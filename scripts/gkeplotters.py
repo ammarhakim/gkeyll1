@@ -75,6 +75,71 @@ class Plot2D:
         if save:
             pylab.savefig(mtitle.figName)
 
+class PlotDg1D:
+    r"""PlotDg1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
+
+    Given a data object, plot it and optionally save it (if ``save``
+    is ``True``) to a PNG file.
+    """
+
+    def __init__(self, gd, dgOrder=1, component=0, title=None, save=False, transformMod=None,
+                 transformVar=None, outNm=None):
+
+        mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
+        rawData = gd.q
+        #if transformMod:
+        #    # transform data if needed
+        #    rawData = transformMod.transformRegistry[transformVar](gd.q)
+        #else:
+        #    rawData = gd.q[:,:,component]
+
+        dx = (gd.upperBounds[:]-gd.lowerBounds[:])/gd.cells[:]
+        rX = pylab.linspace(gd.lowerBounds[0]+0.5*dx[0],
+                            gd.upperBounds[0]-0.5*dx[0], gd.cells[0])
+        
+        if dgOrder == 1:
+            X, data = self.projectOnFinerGrid_f_p1(rX, rawData)
+        elif dgOrder == 2:
+            pass
+
+        pylab.plot(X, data, '-k')
+        pylab.axis('tight')
+
+        pylab.title(mtitle.title)
+        pylab.xlabel('X')
+        if save:
+            pylab.savefig(mtitle.figName)            
+
+    def evalSum(self, coeff, fields):
+        res = 0.0*fields[0]
+        for i in range(len(coeff)):
+            res = res + coeff[i]*fields[i]
+        return res
+
+    def projectOnFinerGrid_f_p1(self, Xc, q):
+        dx = Xc[1]-Xc[0]
+        nx = Xc.shape[0]
+
+        # mesh coordinates
+        xlo = Xc[0]-0.5*dx
+        xup = Xc[-1]+0.5*dx
+        dx2 = dx/2.0
+        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 2*nx)
+        print Xn
+
+        # data
+        qn = pylab.zeros((2*Xc.shape[0],), float)
+        vList = [q[:,0], q[:,1]]
+
+        # node 1
+        c1 = [0.75, 0.25]
+        qn[0:2*nx:2] = self.evalSum(c1, vList)
+        # node 2
+        c2 = [0.25, 0.75]
+        qn[1:2*nx:2] = self.evalSum(c2, vList)
+
+        return Xn, qn
+
 class PlotDg2D:
     r"""PlotDg2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
 
