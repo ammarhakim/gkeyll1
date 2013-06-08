@@ -265,9 +265,9 @@ namespace Lucee
       Lucee::Except("LobattoElement1D::getDiffusionMatrices: Not implemented for quadratic/cubic basis!");
     for (unsigned d=0; d<1; ++d)
     {
-      iMat_o[0].copy(iMat[0]);
-      lowerMat_o[0].copy(lowerMat[0]);
-      upperMat_o[0].copy(upperMat[0]);
+      iMat_o[d].copy(iMat[d]);
+      lowerMat_o[d].copy(lowerMat[d]);
+      upperMat_o[d].copy(upperMat[d]);
     }
   }
 
@@ -387,20 +387,20 @@ namespace Lucee
       upperMat[d] = Lucee::Matrix<double>(shape, start);
     }
 
-    iMat[0](1,1) = -(2*dx+21)/dx/12.0;
-    iMat[0](1,2) = (dx-3)/dx/6.0;
-    iMat[0](2,1) = (dx-3)/dx/6.0;
-    iMat[0](2,2) = -(2*dx+21)/dx/12.0;
+    iMat[0](1,1) = (-25.0)/(12.0*dx);
+    iMat[0](1,2) = -1/dx/6.0;
+    iMat[0](2,1) = -1/dx/6.0;
+    iMat[0](2,2) = (-25.0)/(12.0*dx);
 
-    lowerMat[0](1,1) = -(dx-12)/dx/24.0;
-    lowerMat[0](1,2) = -(5*dx-42)/dx/24.0;
-    lowerMat[0](2,1) = 1.0/24.0;
-    lowerMat[0](2,2) = 5.0/24.0;
+    lowerMat[0](1,1) = 5.0/(12.0*dx);
+    lowerMat[0](1,2) = 4.0/(3.0*dx);
+    lowerMat[0](2,1) = 1/dx/12.0;
+    lowerMat[0](2,2) = 5.0/(12.0*dx);
 
-    upperMat[0](1,1) = 5.0/24.0;
-    upperMat[0](1,2) = 1.0/24.0;
-    upperMat[0](2,1) = -(5*dx-42)/dx/24.0;
-    upperMat[0](2,2) = -(dx-12)/dx/24.0;
+    upperMat[0](1,1) = 5.0/(12.0*dx);
+    upperMat[0](1,2) = 1/dx/12.0;
+    upperMat[0](2,1) = 4.0/(3.0*dx);
+    upperMat[0](2,2) = 5.0/(12.0*dx);
 
 // compute weights
     weights.resize(2);

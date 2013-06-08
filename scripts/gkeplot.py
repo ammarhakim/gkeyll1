@@ -92,8 +92,10 @@ if options.fileName:
     if plotDg:
         # plot, depending on dimension
         if dims == 1:
-            raise exceptions.RuntimeError(
-                "Plotting 1D DG data is not currently supported")
+            gkeplotters.PlotDg1D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
+                                 component=int(options.component), transformMod=transformMod,
+                                 transformVar=options.transformVariable,
+                                 outNm=options.outNm)
         elif dims == 2:
             gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
                                  component=int(options.component), transformMod=transformMod,

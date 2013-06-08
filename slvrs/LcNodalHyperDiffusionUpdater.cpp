@@ -49,6 +49,7 @@ namespace Lucee
     onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
+    std::cout << "Only increment is " << onlyIncrement << std::endl;
 
 // directions to update
     if (tbl.hasNumVec("updateDirections"))
@@ -151,7 +152,7 @@ namespace Lucee
     {
 // if only increments are requested, the updater computes alpha*d^2/dx^x inpFld
       diffOut = 0.0;
-      fact = alpha*1.0;
+      fact = alpha;
     }
     else
     {
@@ -192,7 +193,7 @@ namespace Lucee
       }
     }
 
-    return Lucee::UpdaterStatus();
+    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   template <unsigned NDIM>
