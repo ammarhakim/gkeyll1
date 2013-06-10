@@ -276,7 +276,20 @@ namespace Lucee
  * @param momMatt On output, moment matrix.
  */
       virtual void getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const;
-
+/**
+ * Get matrices needed to compute diffusion operator. The matrices are
+ * for the current cell and each of its face neighbors, stored in
+ * "lowerMat" for cells sharing lower faces and "upperMat" for cells
+ * sharing upper faces. A linear combination of these matrices when
+ * multiplied by the nodal data in the corresponding cells should give
+ * the discrete diffusion operator.
+ *
+ * @param iMat Matrix for current cell, split into contributions from each direction.
+ * @param lowerMat Matrices for cells sharing lower faces.
+ * @param upperMat Matrices for cells sharing upper faces.
+ */
+      void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
+        std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 /**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
@@ -363,6 +376,15 @@ namespace Lucee
       Eigen::MatrixXd refStiffness;
 /** Vector of moment matrices indexed by moment value p  */
       std::vector<Eigen::MatrixXd> momMatrix;
+/** List of matrices for current cell */
+      std::vector<Eigen::MatrixXd> iMatDiffusion;
+      std::vector<Eigen::MatrixXd> iMatHyperDiffusion;
+/** List of matrices on each lower face */
+      std::vector<Eigen::MatrixXd> lowerMatDiffusion;
+      std::vector<Eigen::MatrixXd> lowerMatHyperDiffusion;
+/** List of matrices on each upper face */
+      std::vector<Eigen::MatrixXd> upperMatDiffusion;
+      std::vector<Eigen::MatrixXd> upperMatHyperDiffusion;
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
