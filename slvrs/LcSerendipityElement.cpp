@@ -1302,7 +1302,6 @@ namespace Lucee
     // Resize the output matrices we need
     resizeMatrices();
     // Call various functions to populate the matrices
-    std::cout << "Starting matrix computation" << std::endl;
 
     if (NDIM == 2)
     {
@@ -1349,7 +1348,6 @@ namespace Lucee
       computeGradStiffness(functionDEvaluations,dimIndex,refGradStiffness[dimIndex]);
     }
     
-    std::cout << "Finished computing all matrices" << std::endl;
     //printAllMatrices();
 
     // Scale the matrices computed on reference element into physical space
