@@ -49,7 +49,6 @@ namespace Lucee
     onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
-    std::cout << "Only increment is " << onlyIncrement << std::endl;
 
 // directions to update
     if (tbl.hasNumVec("updateDirections"))
