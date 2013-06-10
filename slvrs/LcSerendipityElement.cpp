@@ -985,6 +985,30 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  SerendipityElement<NDIM>::getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat_o,
+    std::vector<Lucee::Matrix<double> >& lowerMat_o, std::vector<Lucee::Matrix<double> >& upperMat_o) const
+  {
+    if (polyOrder > 2)
+      Lucee::Except("SerendipityElement::getDiffusionMatrices: Not implemented for higher than quadratic!");
+    if (NDIM != 2)
+      Lucee::Except("SerendipityElement::getDiffusionMatrices: Only implemented for 2D");
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      for (int rowIndex = 0; rowIndex < iMatDiffusion[dimIndex].rows(); rowIndex++)
+      {
+        for (int colIndex = 0; colIndex < iMatDiffusion[dimIndex].cols(); colIndex++)
+        {
+          iMat_o[dimIndex](rowIndex,colIndex) = iMatDiffusion[dimIndex](rowIndex,colIndex);
+          lowerMat_o[dimIndex](rowIndex,colIndex) = lowerMatDiffusion[dimIndex](rowIndex,colIndex);
+          upperMat_o[dimIndex](rowIndex,colIndex) = upperMatDiffusion[dimIndex](rowIndex,colIndex);
+        }
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
   SerendipityElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
@@ -1278,20 +1302,41 @@ namespace Lucee
     // Resize the output matrices we need
     resizeMatrices();
     // Call various functions to populate the matrices
-    std::cout << "Starting matrix computation" << std::endl;
 
     if (NDIM == 2)
     {
       setupMomentMatrices();
-      for(int pIndex=0; pIndex<3; pIndex++)
+      for(int pIndex = 0; pIndex < 3; pIndex++)
       {
         //std::cout << "pIndex=" << pIndex << ":" << std::endl << momMatrix[pIndex] << std::endl;
         // Scale into physical space
-        for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
         {
           momMatrix[pIndex] *= 0.5*dq[dimIndex];
         }
       }
+      
+      // Set up diffusion matrices
+      iMatDiffusion          = std::vector<Eigen::MatrixXd>(NDIM);
+      iMatHyperDiffusion     = std::vector<Eigen::MatrixXd>(NDIM);
+      lowerMatDiffusion      = std::vector<Eigen::MatrixXd>(NDIM);
+      lowerMatHyperDiffusion = std::vector<Eigen::MatrixXd>(NDIM);
+      upperMatDiffusion      = std::vector<Eigen::MatrixXd>(NDIM);
+      upperMatHyperDiffusion = std::vector<Eigen::MatrixXd>(NDIM);
+
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      {
+        iMatDiffusion[dimIndex]          = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        iMatHyperDiffusion[dimIndex]     = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        lowerMatDiffusion[dimIndex]      = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        lowerMatHyperDiffusion[dimIndex] = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        upperMatDiffusion[dimIndex]      = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        upperMatHyperDiffusion[dimIndex] = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+      }
+
+      // Explicity assign values to matrix elements (very long)
+      #include <LcSerendipityElementDiffusionOutput>
+      #include <LcSerendipityElementHyperDiffusionOutput>
     }
     
     computeMass(refMass);
@@ -1303,7 +1348,6 @@ namespace Lucee
       computeGradStiffness(functionDEvaluations,dimIndex,refGradStiffness[dimIndex]);
     }
     
-    std::cout << "Finished computing all matrices" << std::endl;
     //printAllMatrices();
 
     // Scale the matrices computed on reference element into physical space
@@ -1323,7 +1367,6 @@ namespace Lucee
         }
       }
     }
-
   }
 
   template <unsigned NDIM>

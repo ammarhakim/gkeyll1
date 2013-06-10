@@ -56,6 +56,8 @@ set(lcslvrs_SOURCES
   LcProjectOnNodalBasisUpdater.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
+  LcSerendipityElementDiffusionOutput
+  LcSerendipityElementHyperDiffusionOutput
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
