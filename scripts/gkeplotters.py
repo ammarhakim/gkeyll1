@@ -125,7 +125,6 @@ class PlotDg1D:
         xup = Xc[-1]+0.5*dx
         dx2 = dx/2.0
         Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 2*nx)
-        print Xn
 
         # data
         qn = pylab.zeros((2*Xc.shape[0],), float)
