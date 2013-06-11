@@ -1117,7 +1117,7 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     // Get grid spacing
-    for (unsigned i = 0; i < NDIM; i++)
+    for (int i = 0; i < NDIM; i++)
     {
       dq[i] = grid.getDx(i);
       dq2[i] = dq[i]*dq[i];
