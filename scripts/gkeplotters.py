@@ -148,19 +148,21 @@ class PlotDg1D:
         # mesh coordinates
         xlo = Xc[0]-0.5*dx
         xup = Xc[-1]+0.5*dx
-        dx2 = dx/2.0
-        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 2*nx)
+        dx2 = dx/3.0
+        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 3*nx)
 
         # data
-        qn = pylab.zeros((2*Xc.shape[0],), float)
-        vList = [q[:,0], q[:,1]]
+        qn = pylab.zeros((3*Xc.shape[0],), float)
+        vList = [q[:,0], q[:,1], q[:,2]]
 
-        # node 1
-        c1 = [0.75, 0.25]
-        qn[0:2*nx:2] = self.evalSum(c1, vList)
+        c1 = [5.0/9.0, 5.0/9.0, -1.0/9.0]
+        qn[0:3*nx:3] = self.evalSum(c1, vList)
         # node 2
-        c2 = [0.25, 0.75]
-        qn[1:2*nx:2] = self.evalSum(c2, vList)
+        c2 = [0.0, 1.0, 0.0]
+        qn[1:3*nx:3] = self.evalSum(c2, vList)
+        # node 3
+        c3 = [-1.0/9.0, 5.0/9.0, 5.0/9.0]
+        qn[2:3*nx:3] = self.evalSum(c3, vList)
 
         return Xn, qn    
 
@@ -189,7 +191,7 @@ class PlotDg2D:
                             gd.upperBounds[1]+0.5*dx[1], gd.cells[1])
 
         if dgOrder == 1:
-            pass
+            raise Exception("2D plotting not implemented for DG polyOrder 1!")
         elif dgOrder == 2:
             XX, YY, data = self.projectOnFinerGrid_f39(rX, rY, rawData)
             
