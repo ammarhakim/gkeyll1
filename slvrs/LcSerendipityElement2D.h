@@ -288,6 +288,21 @@ namespace Lucee
       void getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const;
 
 /**
+ * Get matrices needed to compute diffusion operator. The matrices are
+ * for the current cell and each of its face neighbors, stored in
+ * "lowerMat" for cells sharing lower faces and "upperMat" for cells
+ * sharing upper faces. A linear combination of these matrices when
+ * multiplied by the nodal data in the corresponding cells should give
+ * the discrete diffusion operator.
+ *
+ * @param iMat Matrix for current cell, split into contributions from each direction.
+ * @param lowerMat Matrices for cells sharing lower faces.
+ * @param upperMat Matrices for cells sharing upper faces.
+ */
+      void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
+        std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -347,6 +362,12 @@ namespace Lucee
       std::vector<double> surfWeightsDir0;
 /** Weights for surface quadrature on 1-direction surfaces */
       std::vector<double> surfWeightsDir1;
+/** List of diffusion matrices for current cell */
+      std::vector<Lucee::Matrix<double> > iMatDiffusion;
+/** List of diffusion matrices on each lower face */
+      std::vector<Lucee::Matrix<double> > lowerMatDiffusion;
+/** List of diffusion matrices on each upper face */
+      std::vector<Lucee::Matrix<double> > upperMatDiffusion;
 
 /**
  * Struct to hold data for Guassian quadrature.
