@@ -261,8 +261,8 @@ namespace Lucee
   LobattoElement1D::getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat_o,
     std::vector<Lucee::Matrix<double> >& lowerMat_o, std::vector<Lucee::Matrix<double> >& upperMat_o) const
   {
-    if (polyOrder==2 || polyOrder==3)
-      Lucee::Except("LobattoElement1D::getDiffusionMatrices: Not implemented for quadratic/cubic basis!");
+    if (polyOrder==3)
+      Lucee::Except("LobattoElement1D::getDiffusionMatrices: Not implemented for cubic basis!");
     for (unsigned d=0; d<1; ++d)
     {
       iMat_o[d].copy(iMat[d]);
@@ -477,6 +477,47 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_0 *= 0.5*dx;
+
+// various diffusion matrices (automatically generated. See scripts/interface-recon-stencil-calc-p2-1d.mac)
+    iMat.resize(1);
+    lowerMat.resize(1);
+    upperMat.resize(1);
+    for (unsigned d=0; d<1; ++d)
+    {
+      iMat[d] = Lucee::Matrix<double>(shape, start);
+      lowerMat[d] = Lucee::Matrix<double>(shape, start);
+      upperMat[d] = Lucee::Matrix<double>(shape, start);
+    }
+
+    iMat[0](1,1) = (-1327.0)/(480.0*dx);
+    iMat[0](1,2) = 13.0/(60.0*dx);
+    iMat[0](1,3) = 383.0/(480.0*dx);
+    iMat[0](2,1) = -1/dx/12.0;
+    iMat[0](2,2) = (-23.0)/(6.0*dx);
+    iMat[0](2,3) = -1/dx/12.0;
+    iMat[0](3,1) = 383.0/(480.0*dx);
+    iMat[0](3,2) = 13.0/(60.0*dx);
+    iMat[0](3,3) = (-1327.0)/(480.0*dx);
+
+    lowerMat[0](1,1) = (-67.0)/(320.0*dx);
+    lowerMat[0](1,2) = 91.0/(80.0*dx);
+    lowerMat[0](1,3) = 423.0/(320.0*dx);
+    lowerMat[0](2,1) = (-3.0)/(16.0*dx);
+    lowerMat[0](2,2) = 3.0/(4.0*dx);
+    lowerMat[0](2,3) = 23.0/(16.0*dx);
+    lowerMat[0](3,1) = 3.0/(64.0*dx);
+    lowerMat[0](3,2) = (-3.0)/(16.0*dx);
+    lowerMat[0](3,3) = (-23.0)/(64.0*dx);
+
+    upperMat[0](1,1) = (-23.0)/(64.0*dx);
+    upperMat[0](1,2) = (-3.0)/(16.0*dx);
+    upperMat[0](1,3) = 3.0/(64.0*dx);
+    upperMat[0](2,1) = 23.0/(16.0*dx);
+    upperMat[0](2,2) = 3.0/(4.0*dx);
+    upperMat[0](2,3) = (-3.0)/(16.0*dx);
+    upperMat[0](3,1) = 423.0/(320.0*dx);
+    upperMat[0](3,2) = 91.0/(80.0*dx);
+    upperMat[0](3,3) = (-67.0)/(320.0*dx);
 
 // compute weights
     weights.resize(3);

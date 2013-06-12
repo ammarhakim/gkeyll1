@@ -100,7 +100,9 @@ class PlotDg1D:
         if dgOrder == 1:
             X, data = self.projectOnFinerGrid_f_p1(rX, rawData)
         elif dgOrder == 2:
-            pass
+            X, data = self.projectOnFinerGrid_f_p2(rX, rawData)
+        elif dgOrder == 3:
+            raise Exception("1D plotting not implemented for DG polyOrder 3!")
 
         pylab.plot(X, data, '-k')
         pylab.axis('tight')
@@ -138,6 +140,29 @@ class PlotDg1D:
         qn[1:2*nx:2] = self.evalSum(c2, vList)
 
         return Xn, qn
+
+    def projectOnFinerGrid_f_p2(self, Xc, q):
+        dx = Xc[1]-Xc[0]
+        nx = Xc.shape[0]
+
+        # mesh coordinates
+        xlo = Xc[0]-0.5*dx
+        xup = Xc[-1]+0.5*dx
+        dx2 = dx/2.0
+        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 2*nx)
+
+        # data
+        qn = pylab.zeros((2*Xc.shape[0],), float)
+        vList = [q[:,0], q[:,1]]
+
+        # node 1
+        c1 = [0.75, 0.25]
+        qn[0:2*nx:2] = self.evalSum(c1, vList)
+        # node 2
+        c2 = [0.25, 0.75]
+        qn[1:2*nx:2] = self.evalSum(c2, vList)
+
+        return Xn, qn    
 
 class PlotDg2D:
     r"""PlotDg2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
