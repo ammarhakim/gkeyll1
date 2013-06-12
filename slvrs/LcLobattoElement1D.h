@@ -238,11 +238,11 @@ namespace Lucee
       unsigned numGlobal;
 /** Weights for quadrature */
       std::vector<double> weights;
-/** List of matrices for current cell */
+/** List of diffusion matrices for current cell */
       std::vector<Lucee::Matrix<double> > iMat;
-/** List of matrices on each lower face */
+/** List of diffusion matrices on each lower face */
       std::vector<Lucee::Matrix<double> > lowerMat;
-/** List of matrices on each upper face */
+/** List of diffusion matrices on each upper face */
       std::vector<Lucee::Matrix<double> > upperMat;
 
 /**

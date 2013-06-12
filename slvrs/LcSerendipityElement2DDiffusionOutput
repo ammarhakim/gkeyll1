@@ -384,7 +384,7 @@ else if (polyOrder == 2)
   upperMatDiffusion[0](1,7)=(-37*dy)/(320*dx);
   upperMatDiffusion[0](2,0)=(17*dy)/(96*dx);
   upperMatDiffusion[0](2,1)=-dy/(16*dx);
-  upperMatDifusion[0](2,2)=dy/(4*dx);
+  upperMatDiffusion[0](2,2)=dy/(4*dx);
   upperMatDiffusion[0](2,3)=dy/(8*dx);
   upperMatDiffusion[0](2,4)=(-3*dy)/(32*dx);
   upperMatDiffusion[0](2,5)=-dy/(16*dx);

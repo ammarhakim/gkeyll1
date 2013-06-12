@@ -544,6 +544,18 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
+    std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const
+  {
+    for (unsigned d=0; d<2; ++d)
+    {
+      iMat[d].copy(iMatDiffusion[d]);
+      lowerMat[d].copy(lowerMatDiffusion[d]);
+      upperMat[d].copy(upperMatDiffusion[d]);
+    }
+  }
+
+  void
   SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
     std::vector<double>& data)
   {
@@ -823,6 +835,18 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_1 *= 0.5*dx*0.5*dy;
+
+// various diffusion matrices (automatically generated)
+    iMatDiffusion.resize(2);
+    lowerMatDiffusion.resize(2);
+    upperMatDiffusion.resize(2);
+    for (unsigned d=0; d<2; ++d)
+    {
+      iMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+      lowerMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+      upperMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+    }
+#include <LcSerendipityElement2DDiffusionOutput>
 
     unsigned mShape[2] = {2, 4}; // shape of moment matrix
 // allocate memory for the moment matrices
@@ -1300,6 +1324,18 @@ namespace Lucee
 
 // scale to bring this into physical space
     refDNjNk_1 *= 0.5*dx*0.5*dy;
+
+// various diffusion matrices (automatically generated)
+    iMatDiffusion.resize(2);
+    lowerMatDiffusion.resize(2);
+    upperMatDiffusion.resize(2);
+    for (unsigned d=0; d<2; ++d)
+    {
+      iMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+      lowerMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+      upperMatDiffusion[d] = Lucee::Matrix<double>(shape[0], shape[1]);
+    }
+#include <LcSerendipityElement2DDiffusionOutput>
 
     unsigned mShape[2] = {3, 8}; // shape of moment matrix
 // allocate memory for the moment matrices
