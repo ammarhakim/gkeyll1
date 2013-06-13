@@ -191,7 +191,7 @@ class PlotDg2D:
                             gd.upperBounds[1]+0.5*dx[1], gd.cells[1])
 
         if dgOrder == 1:
-            raise Exception("2D plotting not implemented for DG polyOrder 1!")
+            XX, YY, data = self.projectOnFinerGrid_f24(rX, rY, rawData)
         elif dgOrder == 2:
             XX, YY, data = self.projectOnFinerGrid_f39(rX, rY, rawData)
             
@@ -210,6 +210,45 @@ class PlotDg2D:
         for i in range(len(coeff)):
             res = res + coeff[i]*fields[i]
         return res
+
+    def projectOnFinerGrid_f24(self, Xc, Yc, q):
+        dx = Xc[1]-Xc[0]
+        dy = Yc[1]-Yc[0]
+        nx = Xc.shape[0]
+        ny = Yc.shape[0]
+
+        # mesh coordinates
+        Xn = pylab.linspace(Xc[0]-0.5*dx, Xc[-1]+0.5*dx, 2*nx+1) # one more
+        Yn = pylab.linspace(Yc[0]-0.5*dy, Yc[-1]+0.5*dy, 2*ny+1) # one more
+        XXn, YYn = pylab.meshgrid(Xn, Yn)
+
+        # data
+        qn = pylab.zeros((2*Xc.shape[0], 2*Yc.shape[0]), float)
+
+        v1 = q[:,:,0]
+        v2 = q[:,:,1]
+        v3 = q[:,:,2]
+        v4 = q[:,:,3]
+
+        vList = [v1,v2,v3,v4]
+
+        # node 1
+        c1 = [0.5625,0.1875,0.0625,0.1875]
+        qn[0:2*nx:2, 0:2*ny:2] = self.evalSum(c1, vList)
+
+        # node 2
+        c2 = [0.1875,0.5625,0.1875,0.0625]
+        qn[1:2*nx:2, 0:2*ny:2] = self.evalSum(c2, vList)
+
+        # node 3
+        c3 = [0.1875,0.0625,0.1875,0.5625]
+        qn[0:2*nx:2, 1:2*ny:2] = self.evalSum(c3, vList)
+
+        # node 4
+        c4 = [0.0625,0.1875,0.5625,0.1875]
+        qn[1:2*nx:2, 1:2*ny:2] = self.evalSum(c4, vList)
+   
+        return XXn, YYn, qn                
 
     def projectOnFinerGrid_f39(self, Xc, Yc, q):
         dx = Xc[1]-Xc[0]
