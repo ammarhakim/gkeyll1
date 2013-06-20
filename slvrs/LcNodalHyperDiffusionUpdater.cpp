@@ -136,13 +136,13 @@ namespace Lucee
     Lucee::Field<NDIM, double>& diffOut = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     double dt = t-this->getCurrTime();
-    double dxMax = 0.0;
-    for (unsigned d=0; d<NDIM; ++d)
-      dxMax = std::max(dxMax, grid.getDx(d));
+    double dxMin = grid.getDx(0);
+    for (unsigned d=1; d<NDIM; ++d)
+      dxMin = std::min(dxMin, grid.getDx(d));
 
 // check time-step
     double cflm = 1.1*cfl;
-    double cfla = alpha*dt/(dxMax*dxMax);
+    double cfla = alpha*dt/(dxMin*dxMin);
     if (cfla>cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
