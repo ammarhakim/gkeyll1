@@ -173,7 +173,7 @@ namespace Lucee
     unsigned meqn = equation->getNumEqns();
 
 // determine number of auxillary variables
-    unsigned numAuxVars = this->getNumInpVars()-1; // first is alway conserved variable
+    unsigned numAuxVars = this->getNumInpVars()-1; // first is always conserved variable
 // store them
     std::vector<const Lucee::Field<NDIM, double>* > auxVars;
     for (unsigned i=0; i<numAuxVars; ++i)
