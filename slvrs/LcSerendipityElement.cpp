@@ -1,7 +1,7 @@
 /**
  * @file	LcSerendipityElement.cpp
  *
- * @brief       Interface class for a reference nodal finite element.
+ * @brief Serendipity element implemented so far for 2 and 3 dimensions.
  */
 
 // config stuff

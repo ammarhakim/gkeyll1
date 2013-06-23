@@ -25,6 +25,8 @@
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcLagrangeTensorElement.h>
+#include <LcLenardBernsteinDragUpdater.h>
+#include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
@@ -83,6 +85,9 @@ namespace Lucee
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
       .append<Lucee::GridOdePointIntegratorUpdater<3> >()
+
+      .append<Lucee::LenardBernsteinDragUpdater>()
+      .append<Lucee::LenardBernsteinDiffUpdater>()
 
       .append<Lucee::NodalDisContSrcIncrUpdater<1> >()
       .append<Lucee::NodalDisContSrcIncrUpdater<2> >()

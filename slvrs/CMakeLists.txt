@@ -41,6 +41,8 @@ set(lcslvrs_SOURCES
   LcImplicitTenMomentCollisionUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
+  LcLenardBernsteinDiffUpdater.cpp
+  LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp

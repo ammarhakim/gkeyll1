@@ -1,7 +1,7 @@
 /**
  * @file	LcSerendipityElement.h
  *
- * @brief   Serendipity element in arbitrary dimensions.
+ * @brief Serendipity element implemented so far for 2 and 3 dimensions.
  */
 
 #ifndef LC_SERENDIPITY_ELEMENT_H
