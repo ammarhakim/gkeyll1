@@ -127,6 +127,14 @@ namespace Lucee
  */
       Eigen::MatrixXd interpSurfMatrixUpper;
 /** 
+ * Mass matrix inverse times tranpose of interpSurfMatrixLower precomputed.
+ */
+      Eigen::MatrixXd surfIntegralMatrixLower;
+/** 
+ * Mass matrix inverse times tranpose of interpSurfMatrixUpper precomputed.
+ */
+      Eigen::MatrixXd surfIntegralMatrixUpper;
+/** 
  * Interpolation matrix for bringing data that lives on surface in dragDir
  * to quadrature points on same surface. It is constructed from the bottom surf
  * basis function evaluations but should work for upper surface as well.
@@ -134,8 +142,6 @@ namespace Lucee
  * gaussSurfWeights.
  */
       Eigen::MatrixXd surfNodeInterpMatrix;
-/** Mass Matrix */
-      Eigen::MatrixXd massMatrixInv;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

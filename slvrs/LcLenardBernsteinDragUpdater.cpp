@@ -127,13 +127,14 @@ namespace Lucee
     copyLuceeToEigen(gaussVolOrdinatesLucee, gaussVolOrdinates);
 
     // Compute and store inverse of mass matrix
-    massMatrixInv = massMatrix.inverse();
+    Eigen::MatrixXd massMatrixInv = massMatrix.inverse();
     // Compute derivative of basis function evaluated at volume quadrature points
     basisDerivAtVolQuad = interpVolMatrix*massMatrixInv*gradStiffMatrix.transpose();
     // Take transpose so same basis function evaluated at diff quad points in the same row
     // Need to use transposeInPlace because otherwise there will be a bug!
     basisDerivAtVolQuad.transposeInPlace();
-    // TODO: multiply by inverse mass matrix
+    // Pre-multiply by inverse mass matrix
+    basisDerivAtVolQuad = massMatrixInv*basisDerivAtVolQuad;
 
     surfNodeInterpMatrix = Eigen::MatrixXd(numSurfQuadNodes, lowerSurfNodeNums.size());
 
@@ -151,6 +152,10 @@ namespace Lucee
           lowerSurfNodeNums[basisIndex]);
       }
     }
+
+    // Precompute two matrices for surface integrals
+    surfIntegralMatrixLower = massMatrixInv*interpSurfMatrixLower.transpose();
+    surfIntegralMatrixUpper = massMatrixInv*interpSurfMatrixUpper.transpose();
   }
 
   Lucee::UpdaterStatus 
@@ -240,7 +245,7 @@ namespace Lucee
         }
 
         // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
-        Eigen::VectorXd volIntegralResult = massMatrixInv*basisDerivAtVolQuad*fVolQuad;
+        Eigen::VectorXd volIntegralResult = basisDerivAtVolQuad*fVolQuad;
         
         for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
           qNewPtr[componentIndex] -= volIntegralResult(componentIndex);
@@ -334,8 +339,8 @@ namespace Lucee
         // Compute all surface integrals using a matrix multiply.
         // Each row in result is a basis function times flux projection
         // Then inverse of mass matrix is multiplied to find appropriate increments
-        Eigen::VectorXd leftSurfIntegralResult = massMatrixInv*interpSurfMatrixUpper.transpose()*surfIntegralFluxes;
-        Eigen::VectorXd rightSurfIntegralResult = massMatrixInv*interpSurfMatrixLower.transpose()*surfIntegralFluxes;
+        Eigen::VectorXd leftSurfIntegralResult = surfIntegralMatrixUpper*surfIntegralFluxes;
+        Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower*surfIntegralFluxes;
 
         // Update left cell connected to edge with flux on face
         qNew.setPtr(qNewPtrLeft, idxl);
