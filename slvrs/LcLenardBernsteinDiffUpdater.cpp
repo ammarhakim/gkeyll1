@@ -185,11 +185,11 @@ namespace Lucee
       double vtSqAvg = 0.0;
       for (int quadPoint = 0; quadPoint < vtSqSurfQuad.rows(); quadPoint++)
       {
-        vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint)/grid.getDx(0);
+        vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint)/(0.5*grid.getDx(1));
       }
 
       // Keep track of maximum cfla
-      cfla = std::max(cfla, alpha*vtSqAvg*dt/(grid.getDx(0)*grid.getDx(0)));
+      cfla = std::max(cfla, alpha*vtSqAvg*dt/(grid.getDx(1)*grid.getDx(1)));
       if (cfla>cflm)
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
