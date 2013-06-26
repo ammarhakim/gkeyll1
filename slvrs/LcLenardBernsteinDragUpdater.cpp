@@ -145,9 +145,8 @@ namespace Lucee
       // those basis functions associated with the nodes on the lower surface
       for (int basisIndex = 0; basisIndex < lowerSurfNodeNums.size(); basisIndex++)
       {
-        // Need order of elements in lowerSurfNodeNums to match up with the
-        // 1-D data in u(x) for this to work. Not sure how to enforce, but maybe
-        // it will just happen to be that way.
+        // Assume order of elements in lowerSurfNodeNums to match up with the
+        // 1-D data in u(x) for this to work. 
         surfNodeInterpMatrix(nodeIndex, basisIndex) = interpSurfMatrixLower(nodeIndex, 
           lowerSurfNodeNums[basisIndex]);
       }
@@ -177,7 +176,7 @@ namespace Lucee
 
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
-    double cfla = 0.0; // maximum CFL number used
+    double cfla = 0.0; // maximum CFL number
 
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
@@ -242,6 +241,7 @@ namespace Lucee
           double physicalV = cellCentroid[dragDir] + gaussVolOrdinates(volNodeIndex,dragDir)*grid.getDx(dragDir)/2.0;
           fVolQuad(volNodeIndex) = gaussVolWeights[volNodeIndex]*fVolQuad(volNodeIndex)*(physicalV 
             - uSurfQuad(uMatchedIndex));
+          //fVolQuad(volNodeIndex) = gaussVolWeights[volNodeIndex]*fVolQuad(volNodeIndex)*(physicalV);
         }
 
         // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
@@ -288,11 +288,6 @@ namespace Lucee
         idxr[dragDir] = i; // cell right of edge
         idxl[dragDir] = i-1; // cell left of edge
         
-        // Need to know center of right cell to figure out
-        // the global velocity coordinate
-        grid.setIndex(idxr);
-        grid.getCentroid(cellCentroid);
-        
         q.setPtr(qPtr, idxr);
         q.setPtr(qPtrl, idxl);
         
@@ -300,6 +295,9 @@ namespace Lucee
         double dxL = grid.getDx(dragDir);
         grid.setIndex(idxr);
         double dxR = grid.getDx(dragDir);
+        // Need to know center of right cell to figure out
+        // the global velocity coordinate
+        grid.getCentroid(cellCentroid);
 
         // Copy q data to Eigen vectors for matrix multiplications
         Eigen::VectorXd fLeft(nlocal);
@@ -319,18 +317,19 @@ namespace Lucee
 
         // physicalV shouldn't be changing in the loop since all gaussSurfOrdinates should
         // be at a fixed v
-        double physicalV = cellCentroid[dragDir] + gaussSurfOrdinates(0,dragDir)*grid.getDx(dragDir)/2.0;
+        double physicalV = cellCentroid[dragDir] + gaussSurfOrdinates(0,dragDir)*0.5*dxR;
         
         for (int nodeIndex = 0; nodeIndex < gaussSurfOrdinates.rows(); nodeIndex++)
         {
-          // Compute Lax flux
+          // Compute Lax flux at each surface quadrature point
           double numFlux = 0.5*(physicalV - uSurfQuad(nodeIndex))*(fLeftSurfEvals(nodeIndex) + fRightSurfEvals(nodeIndex)) -
             0.5*std::abs(physicalV - uSurfQuad(nodeIndex))*(fRightSurfEvals(nodeIndex) - fLeftSurfEvals(nodeIndex));
+          //double numFlux = 0.5*(physicalV)*(fLeftSurfEvals(nodeIndex) + fRightSurfEvals(nodeIndex));
           // Store result of weight*(v-u)*f at this location in a vector
           surfIntegralFluxes(nodeIndex) = gaussSurfWeights[nodeIndex]*numFlux;
 
           // Keep track of max CFL number
-          cfla = std::max(cfla, alpha*std::abs(physicalV-uSurfQuad(nodeIndex))*dt/grid.getDx(dragDir));
+          cfla = std::max(cfla, std::abs(alpha*(physicalV-uSurfQuad(nodeIndex))*dt/(0.5*(dxL+dxR))));
           // Time-step was too large: return a suggestion with correct time-step
           if (cfla > cflm)
             return Lucee::UpdaterStatus(false, dt*cfl/cfla);
@@ -364,12 +363,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       qNew.setPtr(qNewPtr, idx);
       q.setPtr(qPtr, idx);
-
-      // NOTE: If only calculation of increments are requested, the final
-      // Euler update is not performed. This means that the multiplication
-      // of the DG RHS with dt is not done, something to keep in mind if
-      // using the increment in time-dependent update.
-
+      
       if (onlyIncrement == false)
       {
         for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
