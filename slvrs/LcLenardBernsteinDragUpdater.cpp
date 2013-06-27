@@ -22,6 +22,8 @@
 
 namespace Lucee
 {
+  static const int UPWIND = 0;
+  static const int CENTRAL = 1;
 // set id for module system
   const char *LenardBernsteinDragUpdater::id = "LenardBernsteinDragUpdater2D";
 
@@ -46,12 +48,27 @@ namespace Lucee
     cfl = tbl.getNumber("cfl");
     // use slightly large max CFL to avoid thrashing around
     cflm = 1.1*cfl;
-    // Assume operator will always be in 1 direction
+    // Assume operator will be in 1 direction
     dragDir = 1;
+
+    fluxType = UPWIND;
+    if (tbl.hasString("fluxType"))
+    {
+      if (tbl.getString("fluxType") == "upwind")
+        fluxType = UPWIND;
+      else if (tbl.getString("fluxType") == "central")
+        fluxType = CENTRAL;
+      else
+      {
+        Lucee::Except lce("LenardBernsteinDragUpdater::readInput: 'fluxType' ");
+        lce << tbl.getString("fluxType") << " is not valid";
+        throw lce;
+      }
+    }
     
+    onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
-    else onlyIncrement = false;
   }
 
   void 
@@ -133,6 +150,7 @@ namespace Lucee
     // Take transpose so same basis function evaluated at diff quad points in the same row
     // Need to use transposeInPlace because otherwise there will be a bug!
     basisDerivAtVolQuad.transposeInPlace();
+
     // Pre-multiply by inverse mass matrix
     basisDerivAtVolQuad = massMatrixInv*basisDerivAtVolQuad;
 
@@ -206,9 +224,12 @@ namespace Lucee
 
       for (int iv = localRgn.getLower(1); iv < localRgn.getUpper(1); iv++)
       {
-        q.setPtr(qPtr, ix, iv);
-        qNew.setPtr(qNewPtr, ix, iv);
-        grid.setIndex(ix, iv);
+        idx[0] = ix;
+        idx[1] = iv;
+
+        q.setPtr(qPtr, idx);
+        qNew.setPtr(qNewPtr, idx);
+        grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
         
         // Figure out what f is at each quadrature point
@@ -241,7 +262,6 @@ namespace Lucee
           double physicalV = cellCentroid[dragDir] + gaussVolOrdinates(volNodeIndex,dragDir)*grid.getDx(dragDir)/2.0;
           fVolQuad(volNodeIndex) = gaussVolWeights[volNodeIndex]*fVolQuad(volNodeIndex)*(physicalV 
             - uSurfQuad(uMatchedIndex));
-          //fVolQuad(volNodeIndex) = gaussVolWeights[volNodeIndex]*fVolQuad(volNodeIndex)*(physicalV);
         }
 
         // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
@@ -255,11 +275,6 @@ namespace Lucee
     // Contributions from surface integrals
     // Create sequencer to loop over *each* 1D slice in 'dragDir' direction
     Lucee::RowMajorSequencer<2> seq(localRgn.deflate(dragDir));
-
-    // Lower and upper bounds of 1D slice. (We need to make sure that flux
-    // is computed for one edge outside domain interior)
-    int sliceLower = localRgn.getLower(dragDir);
-    int sliceUpper = localRgn.getUpper(dragDir)+1;
 
     int idxr[2], idxl[2];
     // Loop over each 1D slice
@@ -283,7 +298,7 @@ namespace Lucee
       // Loop over each edge in slice (in v-direction)
       // Note: I keep the left/right convention, but it makes
       // more sense mentally to go from bottom to top
-      for (int i = sliceLower; i < sliceUpper; i++)
+      for (int i = localRgn.getLower(dragDir); i < localRgn.getUpper(dragDir)+1; i++)
       {
         idxr[dragDir] = i; // cell right of edge
         idxl[dragDir] = i-1; // cell left of edge
@@ -316,15 +331,16 @@ namespace Lucee
         Eigen::VectorXd surfIntegralFluxes(gaussSurfOrdinates.rows());
 
         // physicalV shouldn't be changing in the loop since all gaussSurfOrdinates should
-        // be at a fixed v
+        // be at the same v
         double physicalV = cellCentroid[dragDir] + gaussSurfOrdinates(0,dragDir)*0.5*dxR;
         
         for (int nodeIndex = 0; nodeIndex < gaussSurfOrdinates.rows(); nodeIndex++)
         {
           // Compute Lax flux at each surface quadrature point
-          double numFlux = 0.5*(physicalV - uSurfQuad(nodeIndex))*(fLeftSurfEvals(nodeIndex) + fRightSurfEvals(nodeIndex)) -
-            0.5*std::abs(physicalV - uSurfQuad(nodeIndex))*(fRightSurfEvals(nodeIndex) - fLeftSurfEvals(nodeIndex));
-          //double numFlux = 0.5*(physicalV)*(fLeftSurfEvals(nodeIndex) + fRightSurfEvals(nodeIndex));
+          double numFlux;
+          if (physicalV - uSurfQuad(nodeIndex) > 0)
+            numFlux = (physicalV - uSurfQuad(nodeIndex))*fRightSurfEvals(nodeIndex);
+          else numFlux = (physicalV - uSurfQuad(nodeIndex))*fLeftSurfEvals(nodeIndex);
           // Store result of weight*(v-u)*f at this location in a vector
           surfIntegralFluxes(nodeIndex) = gaussSurfWeights[nodeIndex]*numFlux;
 
@@ -362,10 +378,10 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       qNew.setPtr(qNewPtr, idx);
-      q.setPtr(qPtr, idx);
       
       if (onlyIncrement == false)
       {
+        q.setPtr(qPtr, idx);
         for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
           qNewPtr[componentIndex] = qPtr[componentIndex] + dt*alpha*qNewPtr[componentIndex];
       }
@@ -375,7 +391,6 @@ namespace Lucee
           qNewPtr[componentIndex] = alpha*qNewPtr[componentIndex];
       }
     }
-
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 

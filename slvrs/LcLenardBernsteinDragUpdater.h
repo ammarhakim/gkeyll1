@@ -88,6 +88,8 @@ namespace Lucee
       int dragDir;
 /** Flag to indicate if to only compute increments */
       bool onlyIncrement;
+/** Type of interface flux to use */
+      int fluxType;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
