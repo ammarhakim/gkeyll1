@@ -193,6 +193,7 @@ namespace Lucee
     double dt = t-this->getCurrTime();
 
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
 
     double cfla = 0.0; // maximum CFL number
 
@@ -206,6 +207,15 @@ namespace Lucee
 
     int idx[2];
     double cellCentroid[3];
+    int ivLower, ivUpper;
+
+    if (globalRgn.getLower(dragDir) == localRgn.getLower(dragDir))
+      ivLower = localRgn.getLower(dragDir)+1;
+    else ivLower = localRgn.getLower(dragDir);
+
+    if (globalRgn.getUpper(dragDir) == localRgn.getUpper(dragDir))
+      ivUpper = localRgn.getUpper(dragDir)-1;
+    else ivUpper = localRgn.getUpper(dragDir);
 
     // Volume integral contribution
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
@@ -222,7 +232,7 @@ namespace Lucee
       // Each row of uSurfQuad is value of u at the quad location
       Eigen::VectorXd uSurfQuad = surfNodeInterpMatrix*uVals;
 
-      for (int iv = localRgn.getLower(1); iv < localRgn.getUpper(1); iv++)
+      for (int iv = ivLower; iv < ivUpper; iv++)
       {
         idx[0] = ix;
         idx[1] = iv;
