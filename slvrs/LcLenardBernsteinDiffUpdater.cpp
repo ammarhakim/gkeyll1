@@ -165,6 +165,7 @@ namespace Lucee
     int idx[2], idxL[2];
 // local region to index
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
 
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
     {
@@ -185,7 +186,7 @@ namespace Lucee
       double vtSqAvg = 0.0;
       for (int quadPoint = 0; quadPoint < vtSqSurfQuad.rows(); quadPoint++)
       {
-        vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint)/(0.5*grid.getDx(1));
+        vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint)/grid.getDx(0);
       }
 
       // Keep track of maximum cfla
@@ -208,11 +209,17 @@ namespace Lucee
         matVec(fact, iMat[diffDir], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
         // add in contribution from cells attached to lower/upper faces
-        inpFld.setPtr(inpFldPtr, ix, iv-1); // cell attached to lower face
-        matVec(fact, lowerMat[diffDir], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        if (iv > globalRgn.getLower(1))
+        {
+          inpFld.setPtr(inpFldPtr, ix, iv-1); // cell attached to lower face
+          matVec(fact, lowerMat[diffDir], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        }
 
-        inpFld.setPtr(inpFldPtr, ix, iv+1); // cell attached to lower face
-        matVec(fact, upperMat[diffDir], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        if (iv < globalRgn.getUpper(1)-1)
+        {
+          inpFld.setPtr(inpFldPtr, ix, iv+1); // cell attached to upper face
+          matVec(fact, upperMat[diffDir], &inpFldPtr[0], 1.0, &diffOutPtr[0]);
+        }
       }
     }
 
