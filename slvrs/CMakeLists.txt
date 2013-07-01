@@ -66,6 +66,7 @@ set(lcslvrs_SOURCES
   LcTenMomentFluidSource.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
+  LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp

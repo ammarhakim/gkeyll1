@@ -185,13 +185,11 @@ namespace Lucee
       // Integrate vtSqSurf to find its average value
       double vtSqAvg = 0.0;
       for (int quadPoint = 0; quadPoint < vtSqSurfQuad.rows(); quadPoint++)
-      {
         vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint)/grid.getDx(0);
-      }
 
       // Keep track of maximum cfla
       cfla = std::max(cfla, alpha*vtSqAvg*dt/(grid.getDx(1)*grid.getDx(1)));
-      if (cfla>cflm)
+      if (cfla > cflm)
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
       // Update factor
