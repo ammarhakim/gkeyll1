@@ -425,7 +425,7 @@ namespace Lucee
 /**
 *     Compute the partial derivative of a polynomial in direction 'dir'
 */
-      blitz::Array<double,3> computePolynomialDerivative(const blitz::Array<double,3>& poly, unsigned dir);
+      blitz::Array<double,3> computePolynomialDerivative(const blitz::Array<double,3>& poly, int dir);
 
 /**
 *     Compute the mass matrix on the reference element.
@@ -435,7 +435,7 @@ namespace Lucee
 /**
 *     Compute the face-mass matrices on the reference element in direction num.
 */
-      void computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, unsigned dir,
+      void computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, int dir,
         Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix);
 
 /**
@@ -447,7 +447,7 @@ namespace Lucee
 *     Compute the grad stiffness matrix in direction dir on the reference element.
 */
       void computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
-        unsigned dir, Eigen::MatrixXd& resultMatrix);
+        int dir, Eigen::MatrixXd& resultMatrix);
 /**
  *    Compute 'cross-dimensional' basis functions
  */
