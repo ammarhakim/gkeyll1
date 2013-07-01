@@ -1187,6 +1187,7 @@ namespace Lucee
           // Evaluate all basis functions at this node location
           for (int functionIndex = 0; functionIndex < functionVector.size(); functionIndex++)
             upperSurfaceEvaluations[dimIndex](nodeIndex, functionIndex) = evalPolynomial(functionVector[functionIndex],gaussNodeVec);
+          
           gaussNodeVec(dimIndex) = -1;
           gaussNodeListLowerSurf[dimIndex].row(nodeIndex) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
           // Evaluate all basis functions at this node location
@@ -1196,9 +1197,9 @@ namespace Lucee
       }
 
       // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
-      for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
+      for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
       {
-        for (unsigned yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
+        for (unsigned xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
         {
           gaussNodeVec(0)    = gaussPoints[xNodeIndex];
           gaussNodeVec(1)    = gaussPoints[yNodeIndex];
@@ -1308,12 +1309,9 @@ namespace Lucee
       setupMomentMatrices();
       for(int pIndex = 0; pIndex < 3; pIndex++)
       {
-        //std::cout << "pIndex=" << pIndex << ":" << std::endl << momMatrix[pIndex] << std::endl;
         // Scale into physical space
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        {
           momMatrix[pIndex] *= 0.5*dq[dimIndex];
-        }
       }
       
       // Set up diffusion matrices
@@ -1946,44 +1944,38 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::setupMomentMatrices()
   {
-    double gaussWeight;
-    double xCoord;
-    double xPowerFactor;
-    unsigned rollingIndex;
-    int lowerNodeNum;
-    unsigned nodesPerSide = getNumSurfLowerNodes(0);
-    std::vector<int> surfLowerNodeNums(nodesPerSide,0);
-    getSurfLowerNodeNums(0,surfLowerNodeNums);
+    unsigned nodesPerSide = getNumSurfLowerNodes(1);
+    std::vector<int> surfLowerNodeNums(nodesPerSide,1);
+    getSurfLowerNodeNums(1,surfLowerNodeNums);
 
     // Currently computing moments up to p = 2;
     unsigned momentMax = 2;
     momMatrix = std::vector<Eigen::MatrixXd>(momentMax+1);
 
     // Initialize Matrices
-    for (int momentVal = 0; momentVal <= momentMax; momentVal++)
-    {
+    for (int momentVal = 0; momentVal < momentMax + 1; momentVal++)
       momMatrix[momentVal] = Eigen::MatrixXd::Zero(nodesPerSide,functionEvaluations.rows());
-    }
 
-    // Evaluate Integral x^p*phi(y)psi(x,y)dA
+    // Evaluate Integral y^p*phi(x)psi(x,y)dA
     for (int j = 0; j < nodesPerSide; j++)
     {
-      lowerNodeNum = surfLowerNodeNums[j];
+      // 1-d basis function in this loop
+      int lowerNodeNum = surfLowerNodeNums[j];
       for (int k = 0; k < functionEvaluations.rows(); k++)
       {
         for (int nodeIndex = 0; nodeIndex < gaussNodeList.rows(); nodeIndex++)
         {
-          gaussWeight  = gaussNodeList(nodeIndex,NDIM);
-          xCoord       = gaussNodeList(nodeIndex,0);
-          rollingIndex = nodeIndex % nodesPerSide;
+          double gaussWeight  = gaussNodeList(nodeIndex,NDIM);
+          double yCoord       = gaussNodeList(nodeIndex,1);
+          unsigned rollingIndex = nodeIndex % nodesPerSide;
 
-          xPowerFactor = 1.0;
+          double yPowerFactor = 1.0;
           for (int momentVal = 0; momentVal <= momentMax; momentVal++)
           {
             if (momentVal != 0)
-              xPowerFactor *= xCoord;
-            momMatrix[momentVal](j,k) += gaussWeight*xPowerFactor*functionEvaluations(k,nodeIndex)*
-              lowerSurfaceEvaluations[0](rollingIndex,lowerNodeNum);
+              yPowerFactor *= yCoord;
+            momMatrix[momentVal](j,k) += gaussWeight*yPowerFactor*functionEvaluations(k,nodeIndex)*
+              lowerSurfaceEvaluations[1](rollingIndex,lowerNodeNum);
           }
         }
       }

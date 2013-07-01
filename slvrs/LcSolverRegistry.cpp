@@ -43,6 +43,7 @@
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
 #include <LcTenMomentFluidSource.h>
+#include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -129,7 +130,9 @@ namespace Lucee
 
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()
-      .append<Lucee::ImplicitFiveMomentSrcUpdater<3> >();
+      .append<Lucee::ImplicitFiveMomentSrcUpdater<3> >()
+
+      .append<Lucee::VelocitiesFromMomentsUpdater>();
 
 // register boundary conditions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::BoundaryCondition> >
