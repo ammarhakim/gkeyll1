@@ -56,6 +56,7 @@ set(lcslvrs_SOURCES
   LcPointSourceIfc.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
+  LcRecoveryPolynomialUpdater.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSerendipityElement2DDiffusionOutput

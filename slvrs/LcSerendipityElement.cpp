@@ -69,7 +69,7 @@ namespace Lucee
         this->setNumNodes(50);
       else
       {
-        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
+        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, 3, or 4.");
         lce << " Provided " << basisDegree << " instead";
         throw lce;
       }
@@ -1108,6 +1108,8 @@ namespace Lucee
     // Compute maximum polynomial power we want (no transformations)
     // This will be the maximum power of a single variable in anything
     // evaluated (e.g. product of basis functions)
+    // Note: don't change this without paying attention to how maxPower is
+    // used in the rest of the code! Affects more than just gaussPoints.
     maxPower = 2*basisDegree;
     // Populate nodeList according to basisDegree
     nodeList = MatrixXd(this->getNumNodes(),NDIM);
@@ -1266,7 +1268,6 @@ namespace Lucee
             gaussNodeVec(2)    = gaussPoints[zNodeIndex];
             totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
             gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
-            
             for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
             {
               functionEvaluations(currNode, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
@@ -1540,40 +1541,29 @@ namespace Lucee
     // Superlinear degree
     int superDegree;
     int dataIndex = 0;
+    int shape[NDIM];
+    int idx[NDIM];
 
-    if (NDIM == 2)
+    for(int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      shape[dimIndex] = basisDegree+1;
+
+    Lucee::Region<NDIM, int> polyRegion(shape);
+    Lucee::RowMajorSequencer<NDIM> polySeq = RowMajorSequencer<NDIM>(polyRegion);
+
+    while(polySeq.step())
     {
-      for (int yIndex = 0; yIndex <= basisDegree; yIndex++)
+      polySeq.fillWithIndex(idx);
+
+      // Compute superlinear degree of this monimial
+      superDegree = 0;
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        superDegree += (idx[dimIndex] > 1)*idx[dimIndex];
+      
+      if (superDegree < basisDegree + 1)
       {
-        for (int xIndex = 0; xIndex <= basisDegree; xIndex++)
-        {
-          superDegree = (xIndex>1)*xIndex + (yIndex>1)*yIndex;
-          
-          if (superDegree < basisDegree + 1)
-          {
-            basisMatrix.row(dataIndex) = Vector2i(xIndex,yIndex);
-            dataIndex = dataIndex + 1;
-          }
-        }
-      }
-    }
-    else if (NDIM == 3)
-    {
-      for (int zIndex = 0; zIndex <= basisDegree; zIndex++)
-      {
-        for (int yIndex = 0; yIndex <= basisDegree; yIndex++)
-        {
-          for (int xIndex = 0; xIndex <= basisDegree; xIndex++)
-          {
-            superDegree = (xIndex>1)*xIndex + (yIndex>1)*yIndex + (zIndex>1)*zIndex;
-            
-            if (superDegree < basisDegree + 1)
-            {
-              basisMatrix.row(dataIndex) = Vector3i(xIndex,yIndex,zIndex);
-              dataIndex = dataIndex + 1;
-            }
-          }
-        }
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          basisMatrix(dataIndex, dimIndex) = idx[dimIndex];
+        dataIndex++;
       }
     }
   }
@@ -1583,6 +1573,7 @@ namespace Lucee
   SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,3> >& functionVector)
   {
 
+    int xPow,yPow,zPow;
     // Populate basisList according to basisDegree
     // Matrix to represent basis monomials
     Eigen::MatrixXi basisList(this->getNumNodes(),NDIM);
@@ -1608,9 +1599,34 @@ namespace Lucee
 
     // Each column of invCoeffMatrix will be coefficient of basis monomial in basisList
     MatrixXd invCoeffMatrix = coeffMatrix.inverse();
+/*
+    blitz::TinyVector<int, NDIM> polynomialShape(maxPower);
+    blitz::TinyVector<int, NDIM> polynomialCoord;
+    blitz::Array<double, NDIM> polynomialArray(polynomialShape);
+
+    // Put together representations of the basis functions into functionVector
+    // Loop over the coefficient matrix (each column represents a basis function)
+    for (int basisIndex = 0; basisIndex < invCoeffMatrix.cols(); basisIndex++)
+    {
+      // Reset the polynomial3DArray
+      polynomialArray = 0;
+      // Loop over the monomial terms that make up the basis function
+      for (int monomialIndex = 0; monomialIndex < invCoeffMatrix.rows(); monomialIndex++)
+      {
+        polynomialCoord = 0;
+        // Store the basis function in polynomialArray by storing its coefficient at
+        // a location specified by the monimial term powers
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          polynomialCoord(dimIndex) = basisList(monomialIndex, dimIndex);
+
+        polynomialArray(polynomialCoord) = polynomialArray(polynomialCoord) + invCoeffMatrix(monomialIndex, basisIndex);
+      }
+      std::cout << polynomialArray << std::endl;
+      // Store the newly represented basis function into functionVector
+      //functionVector.push_back(polynomial3DArray.copy());
+    }*/
 
     blitz::Array<double,3> polynomial3DArray;
-
     if (NDIM == 2)
     {
       blitz::Array<double,3> shapeArray(maxPower,maxPower,1);
@@ -1624,7 +1640,6 @@ namespace Lucee
       polynomial3DArray = 0;
     }
 
-    int xPow,yPow,zPow;
 
     // Loop over the coefficient matrix (each column represents a basis function)
     for (int basisIndex = 0; basisIndex < invCoeffMatrix.cols(); basisIndex++)
