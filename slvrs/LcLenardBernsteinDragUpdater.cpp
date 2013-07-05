@@ -207,16 +207,6 @@ namespace Lucee
 
     int idx[2];
     double cellCentroid[3];
-    int ivLower, ivUpper;
-
-    if (globalRgn.getLower(dragDir) == localRgn.getLower(dragDir))
-      ivLower = localRgn.getLower(dragDir)+1;
-    else ivLower = localRgn.getLower(dragDir);
-
-    if (globalRgn.getUpper(dragDir) == localRgn.getUpper(dragDir))
-      ivUpper = localRgn.getUpper(dragDir)-1;
-    else ivUpper = localRgn.getUpper(dragDir);
-
     // Volume integral contribution
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
     {
@@ -232,7 +222,7 @@ namespace Lucee
       // Each row of uSurfQuad is value of u at the quad location
       Eigen::VectorXd uSurfQuad = surfNodeInterpMatrix*uVals;
 
-      for (int iv = ivLower; iv < ivUpper; iv++)
+      for (int iv = localRgn.getLower(dragDir); iv < localRgn.getUpper(dragDir); iv++)
       {
         idx[0] = ix;
         idx[1] = iv;
@@ -287,6 +277,17 @@ namespace Lucee
     Lucee::RowMajorSequencer<2> seq(localRgn.deflate(dragDir));
 
     int idxr[2], idxl[2];
+    int ivLower, ivUpper;
+
+    if (globalRgn.getLower(dragDir) == localRgn.getLower(dragDir))
+      ivLower = localRgn.getLower(dragDir)+1;
+    else ivLower = localRgn.getLower(dragDir);
+
+    if (globalRgn.getUpper(dragDir) == localRgn.getUpper(dragDir))
+      ivUpper = localRgn.getUpper(dragDir)-1;
+    else ivUpper = localRgn.getUpper(dragDir);
+
+
     // Loop over each 1D slice
     // Each seq steps along the 0 direction
     while (seq.step())
@@ -308,7 +309,7 @@ namespace Lucee
       // Loop over each edge in slice (in v-direction)
       // Note: I keep the left/right convention, but it makes
       // more sense mentally to go from bottom to top
-      for (int i = localRgn.getLower(dragDir); i < localRgn.getUpper(dragDir)+1; i++)
+      for (int i = ivLower; i < ivUpper + 1; i++)
       {
         idxr[dragDir] = i; // cell right of edge
         idxl[dragDir] = i-1; // cell left of edge

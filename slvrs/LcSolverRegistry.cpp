@@ -38,6 +38,7 @@
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
+#include <LcRecoveryPolynomialUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -101,6 +102,8 @@ namespace Lucee
       .append<Lucee::ProjectOnBasisUpdater<1> >()
       .append<Lucee::ProjectOnBasisUpdater<2> >()
       .append<Lucee::ProjectOnBasisUpdater<3> >()
+      
+      .append<Lucee::RecoveryPolynomialUpdater>()
 
 #ifdef HAVE_PETSC
       .append<Lucee::FemPoissonStructUpdater<1> >()

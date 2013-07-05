@@ -39,7 +39,7 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("VelocitiesFromMomentsUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("VelocitiesFromMomentsUpdater::readInput: Must specify element to use using 'basis1d'");
   }
 
   void 
@@ -106,6 +106,9 @@ namespace Lucee
     const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(1);
     // Second velocity moment <v^2>(x)
     const Lucee::Field<1, double>& mom2In = this->getInp<Lucee::Field<1, double> >(2);
+    // Recovery polynomial eval on edges
+    const Lucee::Field<1, double>& frBotIn = this->getInp<Lucee::Field<1, double> >(3);
+    const Lucee::Field<1, double>& frTopIn = this->getInp<Lucee::Field<1, double> >(4);
     // Drift velocity u(x)
     Lucee::Field<1, double>& uOut = this->getOut<Lucee::Field<1, double> >(0);
     // Thermal velocity squared vt(x)^2
@@ -118,6 +121,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> mom0Ptr = mom0In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom2Ptr = mom2In.createConstPtr();
+    Lucee::ConstFieldPtr<double> frBotPtr = frBotIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> frTopPtr = frTopIn.createConstPtr();
     Lucee::FieldPtr<double> uPtr = uOut.createPtr();
     Lucee::FieldPtr<double> vtSqPtr = vtSqOut.createPtr();
 
@@ -131,35 +136,54 @@ namespace Lucee
       mom0In.setPtr(mom0Ptr, ix);
       mom1In.setPtr(mom1Ptr, ix);
       mom2In.setPtr(mom2Ptr, ix);
+      frBotIn.setPtr(frBotPtr, ix);
+      frTopIn.setPtr(frTopPtr, ix);
       // Set outputs
       uOut.setPtr(uPtr, ix);
       vtSqOut.setPtr(vtSqPtr, ix);
       Eigen::VectorXd uVec(nlocal);
+      /*
+      for (int cIdx = 0; cIdx < nlocal; cIdx++)
+      {
+        double vMax = 6.0;
+        double vMin = -6.0;
+        double det = mom0Ptr[cIdx]*mom0Ptr[cIdx] - 
+          mom0Ptr[cIdx]*(vMax*frTopPtr[cIdx] - vMin*frBotPtr[cIdx]) + 
+          mom1Ptr[cIdx]*(frTopPtr[cIdx] - frBotPtr[cIdx]);
+        uPtr[cIdx] = ( mom0Ptr[cIdx]*mom1Ptr[cIdx] - 
+          mom1Ptr[cIdx]*(vMax*frTopPtr[cIdx] - vMin*frBotPtr[cIdx]) + 
+          mom2Ptr[cIdx]*(frTopPtr[cIdx] - frBotPtr[cIdx]) )/det;
+        vtSqPtr[cIdx] = ( -mom1Ptr[cIdx]*mom1Ptr[cIdx] + mom0Ptr[cIdx]*mom2Ptr[cIdx] )/det;
+      }*/
       
       // Compute u(x) naively by dividing weights of n*u by n(x)
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
       {
-        uPtr[componentIndex] = mom1Ptr[componentIndex]/mom0Ptr[componentIndex];
+        if (mom0Ptr[componentIndex] == 0.0)
+        {
+          uPtr[componentIndex] = 0.0;
+          vtSqPtr[componentIndex] = 0.0;
+        }
+        else 
+        {
+          uPtr[componentIndex] = mom1Ptr[componentIndex]/mom0Ptr[componentIndex];
+          // Fill in first part of vt(x)^2
+          vtSqPtr[componentIndex] = mom2Ptr[componentIndex]/mom0Ptr[componentIndex];
+        }
         uVec(componentIndex) = uPtr[componentIndex];
-        // Fill in first part of vt(x)^2
-        vtSqPtr[componentIndex] = mom2Ptr[componentIndex]/mom0Ptr[componentIndex];
       }
 
       // Compute projection of u(x)^2
       Eigen::VectorXd uAtQuadPoints = interpMatrix*uVec;
+      // Compute u^2*weight at each quadrature point
       for (int componentIndex = 0; componentIndex < uAtQuadPoints.rows(); componentIndex++)
-      {
-        // Compute u^2*weight at each quadrature point
         uAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*uAtQuadPoints(componentIndex)*uAtQuadPoints(componentIndex);
-      }
 
       Eigen::VectorXd uSqWeights = massMatrixInv*interpMatrixTranspose*uAtQuadPoints;
 
       // Fill in second part of vt(x)^2
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-      {
         vtSqPtr[componentIndex] -= uSqWeights(componentIndex);
-      }
     }
 
     return Lucee::UpdaterStatus();
@@ -168,8 +192,11 @@ namespace Lucee
   void
   VelocitiesFromMomentsUpdater::declareTypes()
   {
-    // takes two inputs (moment0=<1>=n, moment1=<v>un, moment2=<v^2>) 
+    // takes three inputs (moment0=<1>=n, moment1=<v>un, moment2=<v^2>) 
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // additional inputs containing recovery poly at edges
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns two outputs (u(x), vt^2(x))
@@ -182,11 +209,7 @@ namespace Lucee
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
-    {
       for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
-      {
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
-      }
-    }
   }
 }

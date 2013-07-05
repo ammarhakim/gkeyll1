@@ -339,8 +339,8 @@ namespace Lucee
       Eigen::MatrixXd nodeList;
 /** Matrix containing basis functions evaluated at volume gaussian integration locations
     Correspondance between column and gaussian node set is kept track of in gaussNodeList
-    Each row is a different basis function.
-    Each column is a different evaluation location */
+    Each row is a different quadrature point.
+    Each column is a different basis function evaluated at the same point*/
       Eigen::MatrixXd functionEvaluations;
 /** Matrix containing basis functions evaluated at surface gaussian integration locations
     Correspondance between row and gaussian node set is kept track of in gaussNodeListUpperSurf
