@@ -107,8 +107,8 @@ namespace Lucee
     // Second velocity moment <v^2>(x)
     const Lucee::Field<1, double>& mom2In = this->getInp<Lucee::Field<1, double> >(2);
     // Recovery polynomial eval on edges
-    const Lucee::Field<1, double>& frBotIn = this->getInp<Lucee::Field<1, double> >(3);
-    const Lucee::Field<1, double>& frTopIn = this->getInp<Lucee::Field<1, double> >(4);
+    //const Lucee::Field<1, double>& frBotIn = this->getInp<Lucee::Field<1, double> >(3);
+    // const Lucee::Field<1, double>& frTopIn = this->getInp<Lucee::Field<1, double> >(4);
     // Drift velocity u(x)
     Lucee::Field<1, double>& uOut = this->getOut<Lucee::Field<1, double> >(0);
     // Thermal velocity squared vt(x)^2
@@ -121,8 +121,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> mom0Ptr = mom0In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom2Ptr = mom2In.createConstPtr();
-    Lucee::ConstFieldPtr<double> frBotPtr = frBotIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> frTopPtr = frTopIn.createConstPtr();
+    //Lucee::ConstFieldPtr<double> frBotPtr = frBotIn.createConstPtr();
+    //Lucee::ConstFieldPtr<double> frTopPtr = frTopIn.createConstPtr();
     Lucee::FieldPtr<double> uPtr = uOut.createPtr();
     Lucee::FieldPtr<double> vtSqPtr = vtSqOut.createPtr();
 
@@ -136,8 +136,8 @@ namespace Lucee
       mom0In.setPtr(mom0Ptr, ix);
       mom1In.setPtr(mom1Ptr, ix);
       mom2In.setPtr(mom2Ptr, ix);
-      frBotIn.setPtr(frBotPtr, ix);
-      frTopIn.setPtr(frTopPtr, ix);
+      //frBotIn.setPtr(frBotPtr, ix);
+      //frTopIn.setPtr(frTopPtr, ix);
       // Set outputs
       uOut.setPtr(uPtr, ix);
       vtSqOut.setPtr(vtSqPtr, ix);
@@ -197,8 +197,8 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // additional inputs containing recovery poly at edges
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns two outputs (u(x), vt^2(x))
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
