@@ -53,6 +53,10 @@ parser.add_option('--write-history', action = 'store_true',
                   dest = 'writeHistory',
                   help = 'Write history data',
                   default = False)
+parser.add_option('--axis-free', action = 'store_true',
+                  dest = 'axisFree',
+                  help = "If set, 2D plots won't have equal axis",
+                  default = False)
 
 (options, args) = parser.parse_args()
 
@@ -100,7 +104,7 @@ if options.fileName:
             gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
                                  component=int(options.component), transformMod=transformMod,
                                  transformVar=options.transformVariable,
-                                 outNm=options.outNm)
+                                 outNm=options.outNm, options=options)
         elif dims == 3:
             raise exceptions.RuntimeError(
                 "Plotting 3D DG data is not currently supported")
@@ -115,7 +119,7 @@ if options.fileName:
             gkeplotters.Plot2D(gd, save=options.savePng, title=options.title,
                                component=int(options.component), transformMod=transformMod,
                                transformVar=options.transformVariable,
-                               outNm=options.outNm)
+                               outNm=options.outNm, options=options)
         elif dims == 3:
             raise exceptions.RuntimeError(
                 "Plotting 3D data is not currently supported")
