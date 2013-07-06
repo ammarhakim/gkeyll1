@@ -119,6 +119,8 @@ namespace Lucee
       bool allPeriodic;
 /** Flag to indicate if stiffness matrix should be written out */
       bool writeMatrix;
+/** Flag to indicate if update() method was called at least once */
+      bool runOnce;
 
 /**
  * Function to parse out BC.
