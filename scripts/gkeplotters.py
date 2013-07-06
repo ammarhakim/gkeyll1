@@ -53,7 +53,7 @@ class Plot2D:
     """
 
     def __init__(self, gd, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None, outNm=None):
+                 transformVar=None, outNm=None, options=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
         if transformMod:
@@ -67,7 +67,10 @@ class Plot2D:
         XX, YY = pylab.meshgrid(X, Y)
         pylab.pcolormesh(XX, YY, data.transpose())
         pylab.colorbar()
-        pylab.axis('image')
+        if options.axisFree:
+            pylab.axis('tight')
+        else:
+            pylab.axis('image')
 
         pylab.title(mtitle.title)
         pylab.xlabel('X')
@@ -174,7 +177,7 @@ class PlotDg2D:
     """
 
     def __init__(self, gd, dgOrder=1, component=0, title=None, save=False, transformMod=None,
-                 transformVar=None, outNm=None):
+                 transformVar=None, outNm=None, options=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
         rawData = gd.q
@@ -197,7 +200,10 @@ class PlotDg2D:
             
         pylab.pcolormesh(XX, YY, data.transpose())
         pylab.colorbar()
-        pylab.axis('image')
+        if options.axisFree:
+            pylab.axis('tight')
+        else:
+            pylab.axis('image')
 
         pylab.title(mtitle.title)
         pylab.xlabel('X')
