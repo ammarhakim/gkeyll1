@@ -339,6 +339,32 @@ namespace Lucee
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
+ * Get coefficients for applying reflecting boundary conditions on
+ * lower side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i' and coeff[i] is the
+ * coefficient to multiply the value at node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ * @param coeff Coefficients to multiply value at node.
+ */
+      virtual void getLowerReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const;
+
+/**
+ * Get coefficients for applying reflecting boundary conditions on
+ * upper side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i' and coeff[i] is the
+ * coefficient to multiply the value at node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ * @param coeff Coefficients to multiply value at node.
+ */
+      virtual void getUpperReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
