@@ -265,6 +265,22 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getLowerReflectingBcMapping(unsigned dir,
+    std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLowerReflectingBcMapping: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getUpperReflectingBcMapping(unsigned dir,
+    std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLowerReflectingBcMapping: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {

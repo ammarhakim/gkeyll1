@@ -107,6 +107,10 @@ class PlotDg1D:
         elif dgOrder == 3:
             raise Exception("1D plotting not implemented for DG polyOrder 3!")
 
+        # store
+        self.X = X
+        self.data = data
+        
         pylab.plot(X, data, '-k')
         pylab.axis('tight')
 
@@ -197,7 +201,12 @@ class PlotDg2D:
             XX, YY, data = self.projectOnFinerGrid_f24(rX, rY, rawData)
         elif dgOrder == 2:
             XX, YY, data = self.projectOnFinerGrid_f39(rX, rY, rawData)
-            
+
+        # store
+        self.XX = XX
+        self.YY = YY
+        self.data = data
+                    
         pylab.pcolormesh(XX, YY, data.transpose())
         pylab.colorbar()
         if options.axisFree:
