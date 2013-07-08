@@ -70,6 +70,15 @@ namespace Lucee
       virtual void applyBc(double tm, const double loc[3], const Lucee::RectCoordSys& c, 
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
 
+    protected:
+/**
+ * Set components: this can be used by derived classes to set the
+ * components array.
+ *
+ * @param comps Component list to set.
+ */
+      void setComponents(const std::vector<unsigned>& comps);
+
     private:
 /** Components to apply to */
       std::vector<unsigned> components;

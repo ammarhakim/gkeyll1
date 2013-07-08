@@ -26,8 +26,19 @@ namespace Lucee
   BoundaryCondition::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::BasicObj::readInput(tbl);
+    if (tbl.hasNumVec("components"))
+    {
 // get list of components to apply this boundary condition
-    std::vector<double> cd = tbl.getNumVec("components");
+      std::vector<double> cd = tbl.getNumVec("components");
+      for (unsigned i=0; i<cd.size(); ++i)
+        components.push_back( (int) cd[i] );
+    }
+  }
+
+  void
+  BoundaryCondition::setComponents(const std::vector<unsigned>& cd)
+  {
+    components.clear();
     for (unsigned i=0; i<cd.size(); ++i)
       components.push_back( (int) cd[i] );
   }
