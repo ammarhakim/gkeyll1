@@ -38,39 +38,27 @@ namespace Lucee
   {
     Lucee::NodalFiniteElementIfc<NDIM>::readInput(tbl);
     polyOrder = (unsigned) tbl.getNumber("polyOrder");
-    // polyOrder is a misnomer for serendipity elements when we really want the degree
-    basisDegree = polyOrder;
     
     if (NDIM == 2)
     {
-      if (basisDegree == 1)
-        this->setNumNodes(4);
-      else if (basisDegree == 2)
-        this->setNumNodes(8);
-      else if (basisDegree == 3)
-        this->setNumNodes(12);
+      if (polyOrder < 4)
+        this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
       else
       {
         Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
-        lce << " Provided " << basisDegree << " instead";
+        lce << " Provided " << polyOrder << " instead";
         throw lce;
       }
       setupMatrices();
     }
     else if (NDIM == 3)
     {
-      if (basisDegree == 1)
-        this->setNumNodes(8);
-      else if (basisDegree == 2)
-        this->setNumNodes(20);
-      else if (basisDegree == 3)
-        this->setNumNodes(32);
-      else if (basisDegree == 4)
-        this->setNumNodes(50);
+      if (polyOrder < 5)
+        this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
       else
       {
         Lucee::Except lce("SerendipityElement: Degree must be 1, 2, 3, or 4.");
-        lce << " Provided " << basisDegree << " instead";
+        lce << " Provided " << polyOrder << " instead";
         throw lce;
       }
       setupMatrices();
@@ -136,52 +124,14 @@ namespace Lucee
   unsigned
   SerendipityElement<NDIM>::getNumSurfLowerNodes(unsigned dir) const
   {
-    if (NDIM == 2)
-    {
-      if (basisDegree == 1)
-        return 2;
-      else if (basisDegree == 2)
-        return 3;
-      else if (basisDegree == 3)
-        return 4;
-    }
-    else if (NDIM ==3)
-    {
-      if (basisDegree == 1)
-        return 4;
-      else if (basisDegree == 2)
-        return 8;
-      else if (basisDegree == 3)
-        return 12;
-      else if (basisDegree == 4)
-        return 17;
-    }
+    return getSerendipityDimension(polyOrder, NDIM-1);
   }
 
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumSurfUpperNodes(unsigned dir) const
   {
-    if (NDIM == 2)
-    {
-      if (basisDegree == 1)
-        return 2;
-      else if (basisDegree == 2)
-        return 3;
-      else if (basisDegree == 3)
-        return 4;
-    }
-    else if (NDIM ==3)
-    {
-      if (basisDegree == 1)
-        return 4;
-      else if (basisDegree == 2)
-        return 8;
-      else if (basisDegree == 3)
-        return 12;
-      else if (basisDegree == 4)
-        return 17;
-    }
+    return getSerendipityDimension(polyOrder, NDIM-1);
   }
 
   template <unsigned NDIM>
@@ -212,26 +162,26 @@ namespace Lucee
     }
 
     // Number of nodes on an edge
-    unsigned nodesPerSide = basisDegree + 1;
+    unsigned nodesPerSide = polyOrder + 1;
     // Number of nodes on a 2-D serendipity element of same degree
     unsigned nodesPerCell2D;
     // Figure out number of nodes per row
     unsigned nodesPerRow2D[nodesPerSide];
     unsigned globalNodesPerRow2D[nodesPerSide];
-    if (basisDegree == 1)
+    if (polyOrder == 1)
     {
       nodesPerCell2D = 4;
       nodesPerRow2D[0] = 2;
       nodesPerRow2D[1] = 2;
     }
-    else if (basisDegree == 2)
+    else if (polyOrder == 2)
     {
       nodesPerCell2D = 8;
       nodesPerRow2D[0] = 3;
       nodesPerRow2D[1] = 2;
       nodesPerRow2D[2] = 3;
     }
-    else if (basisDegree == 3)
+    else if (polyOrder == 3)
     {
       nodesPerCell2D = 12;
       nodesPerRow2D[0] = 4;
@@ -278,7 +228,7 @@ namespace Lucee
   {
     if (NDIM == 2)
     {
-      if (basisDegree == 1)
+      if (polyOrder == 1)
       {
         if (dir == 0)
         {
@@ -291,7 +241,7 @@ namespace Lucee
           nodeNum[1] = 1;
         }
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         if (dir == 0)
         {
@@ -306,7 +256,7 @@ namespace Lucee
           nodeNum[2] = 2;
         }
       }
-      else if (basisDegree == 3)
+      else if (polyOrder == 3)
       {
         if (dir == 0)
         {
@@ -326,7 +276,7 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
-      if (basisDegree == 1)
+      if (polyOrder == 1)
       {
         if (dir == 0)
         {
@@ -350,7 +300,7 @@ namespace Lucee
           nodeNum[3] = 2;
         }
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         if (dir == 0)
         {
@@ -386,7 +336,7 @@ namespace Lucee
           nodeNum[7] = 4;
         }
       }
-      else if (basisDegree == 3)
+      else if (polyOrder == 3)
       {
         if (dir == 0)
         {
@@ -434,7 +384,7 @@ namespace Lucee
           nodeNum[11] = 6;
         }
       }
-      else if (basisDegree == 4)
+      else if (polyOrder == 4)
       {
         if (dir == 0)
         {
@@ -508,7 +458,7 @@ namespace Lucee
   {
     if (NDIM == 2)
     {
-      if (basisDegree == 1)
+      if (polyOrder == 1)
       {
         if (dir == 0)
         {
@@ -521,7 +471,7 @@ namespace Lucee
           nodeNum[1] = 2;
         }
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         if (dir == 0)
         {
@@ -536,7 +486,7 @@ namespace Lucee
           nodeNum[2] = 4;
         }
       }
-      else if (basisDegree == 3)
+      else if (polyOrder == 3)
       {
         if (dir == 0)
         {
@@ -556,7 +506,7 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
-      if (basisDegree == 1)
+      if (polyOrder == 1)
       {
         if (dir == 0)
         {
@@ -580,7 +530,7 @@ namespace Lucee
           nodeNum[3] = 6;
         }
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         if (dir == 0)
         {
@@ -616,7 +566,7 @@ namespace Lucee
           nodeNum[7] = 16;
         }
       }
-      else if (basisDegree == 3)
+      else if (polyOrder == 3)
       {
         if (dir == 0)
         {
@@ -664,7 +614,7 @@ namespace Lucee
           nodeNum[11] = 26;
         }
       }
-      else if (basisDegree == 4)
+      else if (polyOrder == 4)
       {
         if (dir == 0)
         {
@@ -745,13 +695,8 @@ namespace Lucee
     // Loop over all node locations on reference element and convert them
     // to appropriate coordinates
     for (int i = 0; i < this->getNumNodes(); i++)
-    {
       for (int dim = 0; dim < NDIM; dim++)
-      {
-        // Node list already has the coordinates of nodes on reference element centered at origin
-        nodeCoords(i,dim) = xc[dim] + nodeList(i,dim)*0.5*dq[dim];
-      }
-    }
+        nodeCoords(i, dim) = xc[dim] + nodeList(i, dim)*0.5*dq[dim];
   }
 
   template <unsigned NDIM>
@@ -784,7 +729,7 @@ namespace Lucee
   {
     for (int i = 0; i < refMass.rows(); i++)
       for (int j = 0; j < refMass.cols(); j++)
-        NjNk(i,j) = refMass(i,j);
+        NjNk(i, j) = refMass(i, j);
   }
 
   template <unsigned NDIM>
@@ -794,7 +739,7 @@ namespace Lucee
   {
     for (int i = 0; i < refFaceMassLower[dir].rows(); i++)
       for (int j = 0; j < refFaceMassLower[dir].cols(); j++)
-        NjNk(i,j) = refFaceMassLower[dir](i,j);
+        NjNk(i, j) = refFaceMassLower[dir](i, j);
   }
 
   template <unsigned NDIM>
@@ -804,7 +749,7 @@ namespace Lucee
   {
     for (int i = 0; i < refFaceMassUpper[dir].rows(); i++)
       for (int j = 0; j < refFaceMassUpper[dir].cols(); j++)
-        NjNk(i,j) = refFaceMassUpper[dir](i,j);
+        NjNk(i, j) = refFaceMassUpper[dir](i, j);
   }
 
   template <unsigned NDIM>
@@ -813,7 +758,7 @@ namespace Lucee
   {
     for (int i = 0; i < refStiffness.rows(); i++)
       for (int j = 0; j < refStiffness.cols(); j++)
-        DNjDNk(i,j) = refStiffness(i,j);
+        DNjDNk(i, j) = refStiffness(i, j);
   }
 
   template <unsigned NDIM>
@@ -823,7 +768,7 @@ namespace Lucee
   {
     for (int i = 0; i < refGradStiffness[dir].rows(); i++)
       for (int j = 0; j < refGradStiffness[dir].cols(); j++)
-        DNjNk(i,j) = refGradStiffness[dir](i,j);
+        DNjNk(i, j) = refGradStiffness[dir](i, j);
   }
 
   template <unsigned NDIM>
@@ -1014,14 +959,14 @@ namespace Lucee
     fld.setPtr(fldPtr_tr, this->currIdx[0]+1, this->currIdx[1]+1);
 
     // copy data
-    if (basisDegree == 1)
+    if (polyOrder == 1)
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr_r[0];
       data[2] = fldPtr_tr[0];
       data[3] = fldPtr_t[0];
     }
-    else if (basisDegree == 2)
+    else if (polyOrder == 2)
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr[1];
@@ -1032,7 +977,7 @@ namespace Lucee
       data[6] = fldPtr_t[0];
       data[7] = fldPtr[2];
     }
-    else if (basisDegree == 3)
+    else if (polyOrder == 3)
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr[1];
@@ -1047,7 +992,7 @@ namespace Lucee
       data[10] = fldPtr[4];
       data[11] = fldPtr[3];
     }
-    else if (basisDegree == 4)
+    else if (polyOrder == 4)
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr[1];
@@ -1069,8 +1014,8 @@ namespace Lucee
     }
     else
     {
-      Lucee::Except lce("SerendipityElement::extractFromField: basisDegree ");
-      lce << basisDegree << " not supported";
+      Lucee::Except lce("SerendipityElement::extractFromField: polyOrder ");
+      lce << polyOrder << " not supported";
       throw lce;
     }
   }
@@ -1110,8 +1055,8 @@ namespace Lucee
     // evaluated (e.g. product of basis functions)
     // Note: don't change this without paying attention to how maxPower is
     // used in the rest of the code! Affects more than just gaussPoints.
-    maxPower = 2*basisDegree;
-    // Populate nodeList according to basisDegree
+    maxPower = 2*polyOrder;
+    // Populate nodeList according to polyOrder
     nodeList = MatrixXd(this->getNumNodes(),NDIM);
     getNodeList(nodeList);
 
@@ -1374,14 +1319,14 @@ namespace Lucee
   {
     if (NDIM == 2)
     {
-      if (basisDegree == 1)
+      if (polyOrder == 1)
       {
         nodeMatrix << -1,-1,
                       1,-1,
                       1,1,
                       -1,1;
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         nodeMatrix << -1,-1,
                     0,-1,
@@ -1392,7 +1337,7 @@ namespace Lucee
                     -1,1,
                     -1,0;
       }
-      else if (basisDegree = 3)
+      else if (polyOrder = 3)
       {
         nodeMatrix << -1,-1,
                     -1/3.0,-1,
@@ -1410,7 +1355,7 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
-      if (basisDegree == 1) {
+      if (polyOrder == 1) {
         nodeMatrix << -1,-1,-1,
                      1,-1,-1,
                      1,1,-1,
@@ -1420,7 +1365,7 @@ namespace Lucee
                      1,1,1,
                      -1,1,1;
       }
-      else if (basisDegree == 2)
+      else if (polyOrder == 2)
       {
         nodeMatrix << -1,-1,-1,
                     0,-1,-1,
@@ -1443,7 +1388,7 @@ namespace Lucee
                     -1,1,1,
                     -1,0,1; // End of Top Layer
       }
-      else if (basisDegree == 3)
+      else if (polyOrder == 3)
       {
         nodeMatrix << -1,-1,-1,
                     -1/3.0,-1,-1,
@@ -1478,7 +1423,7 @@ namespace Lucee
                     -1,1/3.0,1,
                     -1,-1/3.0,1; // End of Top Layer
       }
-      else if (basisDegree == 4)
+      else if (polyOrder == 4)
       {
         nodeMatrix << -1,-1,-1,
                       -0.5,-1,-1,
@@ -1545,7 +1490,7 @@ namespace Lucee
     int idx[NDIM];
 
     for(int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-      shape[dimIndex] = basisDegree+1;
+      shape[dimIndex] = polyOrder + 1;
 
     Lucee::Region<NDIM, int> polyRegion(shape);
     Lucee::RowMajorSequencer<NDIM> polySeq = RowMajorSequencer<NDIM>(polyRegion);
@@ -1559,7 +1504,7 @@ namespace Lucee
       for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
         superDegree += (idx[dimIndex] > 1)*idx[dimIndex];
       
-      if (superDegree < basisDegree + 1)
+      if (superDegree < polyOrder + 1)
       {
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
           basisMatrix(dataIndex, dimIndex) = idx[dimIndex];
@@ -1574,7 +1519,7 @@ namespace Lucee
   {
 
     int xPow,yPow,zPow;
-    // Populate basisList according to basisDegree
+    // Populate basisList according to polyOrder
     // Matrix to represent basis monomials
     Eigen::MatrixXi basisList(this->getNumNodes(),NDIM);
     setupBasisMatrix(basisList);
@@ -1623,7 +1568,7 @@ namespace Lucee
       }
       std::cout << polynomialArray << std::endl;
       // Store the newly represented basis function into functionVector
-      //functionVector.push_back(polynomial3DArray.copy());
+      //functionVector.push_back(polynomialArray.copy());
     }*/
 
     blitz::Array<double,3> polynomial3DArray;
@@ -1670,140 +1615,66 @@ namespace Lucee
   {
     double totalSum = 0.0;
     double monomialTerm;
+    int shape[NDIM];
+    int idx[NDIM];
+    blitz::TinyVector<int, NDIM> polyCoord;
 
-    // TODO: Combine NDIM == 2 with NDIM == 3 case by looping over pow(nodeCoords(i),iIndex) multiplications
-    if (NDIM == 2)
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      shape[dimIndex] = polyCoeffs.extent(dimIndex);
+
+    Lucee::Region<NDIM, int> polyRegion(shape);
+    Lucee::RowMajorSequencer<NDIM> polySeq = RowMajorSequencer<NDIM>(polyRegion);
+    // Loop over each element of polyCoeffs
+    while(polySeq.step())
     {
-      for (int xIndex = 0; xIndex < polyCoeffs.extent(0); xIndex++)
+      polySeq.fillWithIndex(idx);
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        polyCoord(dimIndex) = idx[dimIndex];
+      
+      if (polyCoeffs(polyCoord) != 0.0)
       {
-        for (int yIndex = 0; yIndex < polyCoeffs.extent(1); yIndex++)
-        {
-          // Maybe add a check to see if polyCoeffs is 0 so we don't have to compute pow's
-          monomialTerm = pow(nodeCoords(0),xIndex)*pow(nodeCoords(1),yIndex);
-          totalSum += polyCoeffs(xIndex,yIndex,0)*monomialTerm;
-        }
+        monomialTerm = polyCoeffs(polyCoord);
+        // Compute monomial term associated with polyCoord
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          monomialTerm *= pow(nodeCoords(dimIndex), idx[dimIndex]);
+        totalSum += monomialTerm;
       }
     }
-    else if (NDIM == 3)
-    {
-      for (int xIndex = 0; xIndex < polyCoeffs.extent(0); xIndex++)
-      {
-        for (int yIndex = 0; yIndex < polyCoeffs.extent(1); yIndex++)
-        {
-          for (int zIndex = 0; zIndex < polyCoeffs.extent(2); zIndex++)
-          {
-            // Maybe add a check to see if polyCoeffs is 0 so we don't have to compute pow's
-            monomialTerm = pow(nodeCoords(0),xIndex)*pow(nodeCoords(1),yIndex)*pow(nodeCoords(2),zIndex);
-            totalSum += polyCoeffs(xIndex,yIndex,zIndex)*monomialTerm;
-          }
-        }
-      }
-    }
+
     return totalSum;
-  }
-  
-  template <unsigned NDIM>
-  blitz::Array<double,3>
-  SerendipityElement<NDIM>::computePolynomialProduct(const blitz::Array<double,3>& poly1, 
-    const blitz::Array<double,3>& poly2)
-  {
-    int x3Index;
-    int y3Index;
-    int z3Index;
-
-    blitz::Array<double,3> poly3(poly1.extent(0),poly1.extent(1),poly1.extent(2));
-    poly3 = 0;
-    
-    // Loop over each element of poly1, multiplying it by every element of poly2...
-    for (int x1Index = 0; x1Index < poly1.extent(0); x1Index++)
-    {
-      for (int y1Index = 0; y1Index < poly1.extent(1); y1Index++)
-      {
-        for (int z1Index = 0; z1Index < poly1.extent(2); z1Index++)
-        {
-          for (int x2Index = 0; x2Index < poly2.extent(0); x2Index++)
-          {
-            for (int y2Index = 0; y2Index < poly2.extent(1); y2Index++)
-            {
-              for (int z2Index = 0; z2Index < poly2.extent(2); z2Index++)
-              {
-                x3Index = x1Index + x2Index;
-                y3Index = y1Index + y2Index;
-                z3Index = z1Index + z2Index;
-                
-                if ((x3Index > poly3.extent(0)) || (y3Index > poly3.extent(1)) || (z3Index > poly3.extent(2)))
-                  continue;
-
-                poly3(x3Index,y3Index,z3Index) += poly1(x1Index,y1Index,z1Index)*poly2(x2Index,y2Index,z2Index);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return poly3;
   }
 
   template <unsigned NDIM>
   blitz::Array<double,3>
   SerendipityElement<NDIM>::computePolynomialDerivative(const blitz::Array<double,3>& poly, int dir)
   {
-    int xResultIndex;
-    int yResultIndex;
-    int zResultIndex;
-    double resultCoefficient;
-
-    blitz::Array<double,3> polyResult(poly.extent(0),poly.extent(1),poly.extent(2));
+    int shape[NDIM];
+    int idx[NDIM];
+    double resultCoeff;
+    blitz::TinyVector<int, NDIM> polyCoord;
+    blitz::Array<double,3> polyResult(poly.shape());
     polyResult = 0;
-    
-    // Loop over each element of poly1, multiplying it by every element of poly2...
-    for (int xIndex = 0; xIndex < poly.extent(0); xIndex++)
+
+    for(int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      shape[dimIndex] = poly.extent(dimIndex);
+
+    Lucee::Region<NDIM, int> polyRegion(shape);
+
+    Lucee::RowMajorSequencer<NDIM> polySeq = RowMajorSequencer<NDIM>(polyRegion);
+    // Loop over each element of polyCoeffs
+    while(polySeq.step())
     {
-      for (int yIndex = 0; yIndex < poly.extent(1); yIndex++)
+      polySeq.fillWithIndex(idx);
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        polyCoord(dimIndex) = idx[dimIndex];
+      
+      if (polyCoord(dir) != 0 && poly(polyCoord) != 0.0)
       {
-        for (int zIndex = 0; zIndex < poly.extent(2); zIndex++)
-        {
-          if (dir == 0)
-          {
-            // Compute new location of coefficient
-            if (xIndex == 0)
-              continue;
-            else {
-              xResultIndex = xIndex - 1;
-              yResultIndex = yIndex;
-              zResultIndex = zIndex;
-            }
-            // Compute and store new coefficient
-            polyResult(xResultIndex,yResultIndex,zResultIndex) += xIndex*poly(xIndex,yIndex,zIndex);
-          }
-          else if (dir == 1)
-          {
-            // Compute new location of coefficient
-            if (yIndex == 0)
-              continue;
-            else {
-              xResultIndex = xIndex;
-              yResultIndex = yIndex - 1;
-              zResultIndex = zIndex;
-            }
-            // Compute and store new coefficient
-            polyResult(xResultIndex,yResultIndex,zResultIndex) += yIndex*poly(xIndex,yIndex,zIndex);
-          }
-          else if (dir == 2)
-          {
-            // Compute new location of coefficient
-            if (zIndex == 0)
-              continue;
-            else {
-              xResultIndex = xIndex;
-              yResultIndex = yIndex;
-              zResultIndex = zIndex-1;
-            }
-            // Compute and store new coefficient
-            polyResult(xResultIndex,yResultIndex,zResultIndex) += zIndex*poly(xIndex,yIndex,zIndex);
-          }
-        }
+        resultCoeff = polyCoord(dir)*poly(polyCoord);
+        // Compute coordinate of derivative term
+        polyCoord(dir) = polyCoord(dir) - 1;
+        // Store new coefficient
+        polyResult(polyCoord) += resultCoeff;
       }
     }
 
@@ -1989,7 +1860,28 @@ namespace Lucee
     }
   }
 
-  
+  template <unsigned NDIM>
+  int
+  SerendipityElement<NDIM>::getSerendipityDimension(int degree, int dimension) const
+  {
+    int upperBound = std::min(dimension, (int) std::floor(degree/2.0));
+    int totalTerms = 0;
+
+    for (int d = 0; d < upperBound + 1; d++)
+    {
+      totalTerms = totalTerms + pow(2,dimension-d)*factorial(dimension)/(factorial(dimension-d)*factorial(d))*
+        factorial(degree-d)/(factorial(degree-2*d)*factorial(d));
+    }
+
+    return totalTerms;
+  }
+
+  template <unsigned NDIM>
+  int
+  SerendipityElement<NDIM>::factorial(int n) const
+  {
+    return (n == 1 || n == 0) ? 1 : factorial(n-1)*n;
+  }
 // instantiations
   template class SerendipityElement<1>;
   template class SerendipityElement<2>;
