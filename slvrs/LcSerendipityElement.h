@@ -323,8 +323,6 @@ namespace Lucee
   private :
 /** Polynomial order of element */
       unsigned polyOrder;
-/** Serendipity element degree */
-      unsigned basisDegree;
 /** Maximum polynomial power anticipated */
       unsigned maxPower;
 /** Total number of quadrature points in 1-D */
@@ -415,14 +413,6 @@ namespace Lucee
       double evalPolynomial(const blitz::Array<double,3>& polyCoeffs, const Eigen::VectorXd& nodeCoords);
 
 /**
-*     Compute the product of two polynomials poly1 and pol2 and store the result in poly3
-*     Note that the size of poly3 was determined by anticipating the highest degree terms
-*     in poly1 and poly2.
-*/
-      blitz::Array<double,3> computePolynomialProduct(const blitz::Array<double,3>& poly1, 
-        const blitz::Array<double,3>& poly2);
-
-/**
 *     Compute the partial derivative of a polynomial in direction 'dir'
 */
       blitz::Array<double,3> computePolynomialDerivative(const blitz::Array<double,3>& poly, int dir);
@@ -444,8 +434,8 @@ namespace Lucee
       void computeStiffness(const blitz::Array<double,3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
 
 /**
-*     Compute the grad stiffness matrix in direction dir on the reference element.
-*/
+ *     Compute the grad stiffness matrix in direction dir on the reference element.
+ */
       void computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
         int dir, Eigen::MatrixXd& resultMatrix);
 /**
@@ -453,9 +443,18 @@ namespace Lucee
  */
       void setupMomentMatrices();
 /**
-*     Print out matrix values to the console (testing purposes only).
-*/
+ *     Print out matrix values to the console (testing purposes only).
+ */
       void printAllMatrices();
+/**
+ *    Compute the number of degrees of freedom for serendipity element
+ *    with degree r and in dimension n
+ */
+      int getSerendipityDimension(int degree, int dimension) const;
+/**
+ *    Compute n!
+ */
+      int factorial(int n) const;
   };
 }
 
