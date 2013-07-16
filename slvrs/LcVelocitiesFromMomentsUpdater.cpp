@@ -47,10 +47,10 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::initialize();
 
-// get hold of grid
+    // get hold of grid
     const Lucee::StructuredGridBase<1>& grid 
       = this->getGrid<Lucee::StructuredGridBase<1> >();
-// local region to update
+    // local region to update
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
     Lucee::RowMajorSequencer<1> seq(localRgn);
@@ -106,9 +106,6 @@ namespace Lucee
     const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(1);
     // Second velocity moment <v^2>(x)
     const Lucee::Field<1, double>& mom2In = this->getInp<Lucee::Field<1, double> >(2);
-    // Recovery polynomial eval on edges
-    //const Lucee::Field<1, double>& frBotIn = this->getInp<Lucee::Field<1, double> >(3);
-    // const Lucee::Field<1, double>& frTopIn = this->getInp<Lucee::Field<1, double> >(4);
     // Drift velocity u(x)
     Lucee::Field<1, double>& uOut = this->getOut<Lucee::Field<1, double> >(0);
     // Thermal velocity squared vt(x)^2
@@ -121,8 +118,6 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> mom0Ptr = mom0In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom2Ptr = mom2In.createConstPtr();
-    //Lucee::ConstFieldPtr<double> frBotPtr = frBotIn.createConstPtr();
-    //Lucee::ConstFieldPtr<double> frTopPtr = frTopIn.createConstPtr();
     Lucee::FieldPtr<double> uPtr = uOut.createPtr();
     Lucee::FieldPtr<double> vtSqPtr = vtSqOut.createPtr();
 
@@ -136,26 +131,22 @@ namespace Lucee
       mom0In.setPtr(mom0Ptr, ix);
       mom1In.setPtr(mom1Ptr, ix);
       mom2In.setPtr(mom2Ptr, ix);
-      //frBotIn.setPtr(frBotPtr, ix);
-      //frTopIn.setPtr(frTopPtr, ix);
       // Set outputs
       uOut.setPtr(uPtr, ix);
       vtSqOut.setPtr(vtSqPtr, ix);
       Eigen::VectorXd uVec(nlocal);
-      /*
-      for (int cIdx = 0; cIdx < nlocal; cIdx++)
-      {
-        double vMax = 6.0;
-        double vMin = -6.0;
-        double det = mom0Ptr[cIdx]*mom0Ptr[cIdx] - 
-          mom0Ptr[cIdx]*(vMax*frTopPtr[cIdx] - vMin*frBotPtr[cIdx]) + 
-          mom1Ptr[cIdx]*(frTopPtr[cIdx] - frBotPtr[cIdx]);
-        uPtr[cIdx] = ( mom0Ptr[cIdx]*mom1Ptr[cIdx] - 
-          mom1Ptr[cIdx]*(vMax*frTopPtr[cIdx] - vMin*frBotPtr[cIdx]) + 
-          mom2Ptr[cIdx]*(frTopPtr[cIdx] - frBotPtr[cIdx]) )/det;
-        vtSqPtr[cIdx] = ( -mom1Ptr[cIdx]*mom1Ptr[cIdx] + mom0Ptr[cIdx]*mom2Ptr[cIdx] )/det;
-      }*/
-      
+
+      // Figure out mean n in the cell (Not tested yet)
+      /*Eigen::VectorXd nVec(nlocal);
+      double meanN = 0.0;
+      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+        nVec(componentIndex) = mom0Ptr[componentIndex];
+      Eigen::VectorXd nAtQuadPoints = interpMatrix*nVec;
+      for (int componentIndex = 0; componentIndex < nAtQuadPoints.rows(); componentIndex++)
+        meanN += gaussWeights[componentIndex]*nAtQuadPoints(componentIndex);
+      // Divide by total area of cell
+      meanN = meanN/grid.getDx(0);*/
+
       // Compute u(x) naively by dividing weights of n*u by n(x)
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
       {
@@ -196,9 +187,6 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // additional inputs containing recovery poly at edges
-    // this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns two outputs (u(x), vt^2(x))
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
