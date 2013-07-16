@@ -331,8 +331,6 @@ namespace Lucee
       double dq[NDIM];
 /** Grid spacing squared in various dimensions */
       double dq2[NDIM];
-/** Matrix to represent basis monomials */
-      Eigen::MatrixXi basisList;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
 /** Matrix containing basis functions evaluated at volume gaussian integration locations
