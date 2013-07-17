@@ -38,6 +38,12 @@ namespace Lucee
   {
     Lucee::NodalFiniteElementIfc<NDIM>::readInput(tbl);
     polyOrder = (unsigned) tbl.getNumber("polyOrder");
+    // Compute maximum polynomial power we want (no transformations)
+    // This will be the maximum power of a single variable in anything
+    // evaluated (e.g. product of basis functions)
+    // Note: don't change this without paying attention to how maxPower is
+    // used in the rest of the code! Affects more than just gaussPoints.
+    maxPower = 3*polyOrder;
     
     if (NDIM == 2)
     {
@@ -891,9 +897,9 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const
   {
-    if (p > 2)
+    if (p > maxMoment)
     {
-      // moments higher than 2 not supported for now
+      // moments higher than 3 not supported for now
       Lucee::Except lce("SerendipityElement::getMomentMatrix: Moment matrix of order ");
       lce << p << " not supported";
       throw lce;
@@ -901,12 +907,8 @@ namespace Lucee
     else
     {
       for (int rowIndex = 0; rowIndex < momMatrix[p].rows(); rowIndex++)
-      {
         for (int colIndex = 0; colIndex < momMatrix[p].cols(); colIndex++)
-        {
           momMat(rowIndex,colIndex) = momMatrix[p](rowIndex,colIndex);
-        }
-      }
     }
   }
 
@@ -1049,18 +1051,12 @@ namespace Lucee
       dq[i] = grid.getDx(i);
       dq2[i] = dq[i]*dq[i];
     }
- 
-    // Compute maximum polynomial power we want (no transformations)
-    // This will be the maximum power of a single variable in anything
-    // evaluated (e.g. product of basis functions)
-    // Note: don't change this without paying attention to how maxPower is
-    // used in the rest of the code! Affects more than just gaussPoints.
-    maxPower = 2*polyOrder;
+
     // Populate nodeList according to polyOrder
     nodeList = Eigen::MatrixXd(this->getNumNodes(),NDIM);
     getNodeList(nodeList);
 
-    std::vector<blitz::Array<double,3> > functionVector;
+    std::vector<blitz::Array<double,NDIM> > functionVector;
     computeBasisFunctions(functionVector);
 
     // Compute gaussian quadrature weights and locations in 1-D
@@ -1072,7 +1068,7 @@ namespace Lucee
     // Figure out how many gaussian points there are
     int totalVolumeGaussNodes = 1;
 
-    for (int i = 0; i < NDIM; i++)
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
       totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
 
     int totalSurfaceGaussNodes = totalVolumeGaussNodes/gaussPoints.size();
@@ -1198,19 +1194,19 @@ namespace Lucee
       }
     }
  
-    // Resize the output matrices we need
+    // Resize+Initialize (most of) the output matrices we need
     resizeMatrices();
+
     // Call various functions to populate the matrices
 
     if (NDIM == 2)
     {
+      // Comput moment matrices on reference element
       setupMomentMatrices();
-      for(int pIndex = 0; pIndex < 3; pIndex++)
-      {
-        // Scale into physical space
+      // Scale into physical space
+      for(int pIndex = 0; pIndex < maxMoment+1; pIndex++)
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
           momMatrix[pIndex] *= 0.5*dq[dimIndex];
-      }
       
       // Set up diffusion matrices
       iMatDiffusion          = std::vector<Eigen::MatrixXd>(NDIM);
@@ -1243,8 +1239,6 @@ namespace Lucee
       computeFaceMass(functionVector, dimIndex, refFaceMassLower[dimIndex], refFaceMassUpper[dimIndex]);
       computeGradStiffness(functionDEvaluations, dimIndex, refGradStiffness[dimIndex]);
     }
-    
-    //printAllMatrices();
 
     // Scale the matrices computed on reference element into physical space
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
@@ -1271,8 +1265,8 @@ namespace Lucee
   {
     int numNodes = this->getNumNodes();
 
-    refMass          = Eigen::MatrixXd(numNodes, numNodes);
-    refStiffness     = Eigen::MatrixXd(numNodes, numNodes);
+    refMass          = Eigen::MatrixXd::Zero(numNodes, numNodes);
+    refStiffness     = Eigen::MatrixXd::Zero(numNodes, numNodes);
 
     refFaceMassLower = std::vector<Eigen::MatrixXd>(NDIM);
     refFaceMassUpper = std::vector<Eigen::MatrixXd>(NDIM);
@@ -1280,9 +1274,9 @@ namespace Lucee
 
     for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      refFaceMassLower[dimIndex] = Eigen::MatrixXd(numNodes, getNumSurfLowerNodes(dimIndex));
-      refFaceMassUpper[dimIndex] = Eigen::MatrixXd(numNodes, getNumSurfUpperNodes(dimIndex));
-      refGradStiffness[dimIndex] = Eigen::MatrixXd(numNodes, numNodes);
+      refFaceMassLower[dimIndex] = Eigen::MatrixXd::Zero(numNodes, getNumSurfLowerNodes(dimIndex));
+      refFaceMassUpper[dimIndex] = Eigen::MatrixXd::Zero(numNodes, getNumSurfUpperNodes(dimIndex));
+      refGradStiffness[dimIndex] = Eigen::MatrixXd::Zero(numNodes, numNodes);
     }
   }
  
@@ -1456,8 +1450,6 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix)
   {
-    // Superlinear degree
-    int superDegree;
     int dataIndex = 0;
     int shape[NDIM];
     int idx[NDIM];
@@ -1473,7 +1465,7 @@ namespace Lucee
       polySeq.fillWithIndex(idx);
 
       // Compute superlinear degree of this monimial
-      superDegree = 0;
+      int superDegree = 0;
       for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
         superDegree += (idx[dimIndex] > 1)*idx[dimIndex];
       
@@ -1488,25 +1480,21 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,3> >& functionVector)
+  SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,NDIM> >& functionVector)
   {
-
-    int xPow,yPow,zPow;
-    // Populate basisList according to polyOrder
     // Matrix to represent basis monomials
     Eigen::MatrixXi basisList = Eigen::MatrixXi::Zero(this->getNumNodes(), NDIM);
+    // Populate basisList according to polyOrder
     setupBasisMatrix(basisList);
-    
     // Compute coefficients for basis functions
-    MatrixXd coeffMatrix(this->getNumNodes(),this->getNumNodes());
-    double coeffProduct;
+    MatrixXd coeffMatrix(this->getNumNodes(), this->getNumNodes());
 
     // Compute monomial terms evaluated at each nodal coordinate
     for (int nodeIndex = 0; nodeIndex < nodeList.rows(); nodeIndex++)
     {
       for (int basisIndex = 0; basisIndex < basisList.rows(); basisIndex++)
       {
-        coeffProduct = 1.0;
+        double coeffProduct = 1.0;
         
         for (int dimIndex = 0; dimIndex < basisList.cols(); dimIndex++)
           coeffProduct = coeffProduct*pow(nodeList(nodeIndex, dimIndex), basisList(basisIndex, dimIndex));
@@ -1517,7 +1505,7 @@ namespace Lucee
 
     // Each column of invCoeffMatrix will be coefficient of basis monomial in basisList
     MatrixXd invCoeffMatrix = coeffMatrix.inverse();
-/*
+
     blitz::TinyVector<int, NDIM> polynomialShape(maxPower);
     blitz::TinyVector<int, NDIM> polynomialCoord;
     blitz::Array<double, NDIM> polynomialArray(polynomialShape);
@@ -1539,52 +1527,14 @@ namespace Lucee
 
         polynomialArray(polynomialCoord) = polynomialArray(polynomialCoord) + invCoeffMatrix(monomialIndex, basisIndex);
       }
-      std::cout << polynomialArray << std::endl;
       // Store the newly represented basis function into functionVector
-      //functionVector.push_back(polynomialArray.copy());
-    }*/
-
-    blitz::Array<double,3> polynomial3DArray;
-    if (NDIM == 2)
-    {
-      blitz::Array<double,3> shapeArray(maxPower,maxPower,1);
-      polynomial3DArray.resize(shapeArray.shape());
-      polynomial3DArray = 0;
-    }
-    else if (NDIM == 3)
-    {
-      blitz::Array<double,3> shapeArray(maxPower,maxPower,maxPower);
-      polynomial3DArray.resize(shapeArray.shape());
-      polynomial3DArray = 0;
-    }
-
-
-    // Loop over the coefficient matrix (each column represents a basis function)
-    for (int basisIndex = 0; basisIndex < invCoeffMatrix.cols(); basisIndex++)
-    {
-      // Reset the polynomial3DArray
-      polynomial3DArray = 0;
-      // Loop over the monomial terms that make up the basis function
-      for (int monomialIndex = 0; monomialIndex < invCoeffMatrix.rows(); monomialIndex++)
-      {
-        // Store the basis function in polynomial3DArray by storing its coefficient at
-        // a location specified by the monimial term powers
-        xPow = basisList(monomialIndex,0);
-        yPow = basisList(monomialIndex,1);
-        if (NDIM == 2)
-          zPow = 0;
-        else if (NDIM == 3)
-          zPow = basisList(monomialIndex,2);
-        polynomial3DArray(xPow,yPow,zPow) = polynomial3DArray(xPow,yPow,zPow) + invCoeffMatrix(monomialIndex, basisIndex);
-      }
-      // Store the newly represented basis function into functionVector
-      functionVector.push_back(polynomial3DArray.copy());
+      functionVector.push_back(polynomialArray.copy());
     }
   }
 
   template <unsigned NDIM>
   double
-  SerendipityElement<NDIM>::evalPolynomial(const blitz::Array<double,3>& polyCoeffs, const VectorXd& nodeCoords)
+  SerendipityElement<NDIM>::evalPolynomial(const blitz::Array<double,NDIM>& polyCoeffs, const VectorXd& nodeCoords)
   {
     double totalSum = 0.0;
     double monomialTerm;
@@ -1618,14 +1568,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  blitz::Array<double,3>
-  SerendipityElement<NDIM>::computePolynomialDerivative(const blitz::Array<double,3>& poly, int dir)
+  blitz::Array<double, NDIM>
+  SerendipityElement<NDIM>::computePolynomialDerivative(const blitz::Array<double,NDIM>& poly, int dir)
   {
     int shape[NDIM];
     int idx[NDIM];
-    double resultCoeff;
     blitz::TinyVector<int, NDIM> polyCoord;
-    blitz::Array<double,3> polyResult(poly.shape());
+    blitz::Array<double, NDIM> polyResult(poly.shape());
     polyResult = 0;
 
     for(int dimIndex = 0; dimIndex < NDIM; dimIndex++)
@@ -1643,7 +1592,7 @@ namespace Lucee
       
       if (polyCoord(dir) != 0 && poly(polyCoord) != 0.0)
       {
-        resultCoeff = polyCoord(dir)*poly(polyCoord);
+        double resultCoeff = polyCoord(dir)*poly(polyCoord);
         // Compute coordinate of derivative term
         polyCoord(dir) = polyCoord(dir) - 1;
         // Store new coefficient
@@ -1658,17 +1607,12 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::computeMass(Eigen::MatrixXd& resultMatrix)
   {
-    blitz::Array<double,2> resultArray(this->getNumNodes(),this->getNumNodes());
-    double integrationResult;
-
-    resultMatrix.setZero(resultMatrix.rows(),resultMatrix.cols());
-    
     for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
       for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset integration result
-        integrationResult = 0.0;
+        double integrationResult = 0.0;
 
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
         // result = weight(node) * f1(node) * f2(node)
@@ -1682,7 +1626,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, int dir,
+  SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,NDIM> >& functionVector, int dir,
     Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
     std::vector<int> surfLowerNodeNums(lowerResultMatrix.cols(),0);
@@ -1690,21 +1634,16 @@ namespace Lucee
 
     getSurfLowerNodeNums(dir,surfLowerNodeNums);
     getSurfUpperNodeNums(dir,surfUpperNodeNums);
-    
-    double integrationResultU;
-    double integrationResultL;
-    unsigned upperNodeNum;
-    unsigned lowerNodeNum;
 
     for (int kIndex = 0; kIndex < upperResultMatrix.rows(); kIndex++)
     {
       // Note that mIndex will be those of the ones in lower/upper node nums
       for (int mIndex = 0; mIndex < upperResultMatrix.cols(); mIndex++)
       {
-        lowerNodeNum = surfLowerNodeNums[mIndex];
-        upperNodeNum = surfUpperNodeNums[mIndex];
-        integrationResultL = 0.0;
-        integrationResultU = 0.0;
+        int lowerNodeNum = surfLowerNodeNums[mIndex];
+        int upperNodeNum = surfUpperNodeNums[mIndex];
+        double integrationResultL = 0.0;
+        double integrationResultU = 0.0;
         
         for (int testIndex = 0; testIndex < gaussNodeListUpperSurf[dir].rows(); testIndex++)
         {
@@ -1722,19 +1661,15 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeStiffness(const blitz::Array<double,3>& functionDerivative,
+  SerendipityElement<NDIM>::computeStiffness(const blitz::Array<double, 3>& functionDerivative,
     Eigen::MatrixXd& resultMatrix)
   {
-    double integrationResult;
-
-    resultMatrix.setZero(resultMatrix.rows(),resultMatrix.cols());
-    
     for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
       for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset integration result
-        integrationResult = 0.0;
+        double integrationResult = 0.0;
         
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
         for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
@@ -1748,25 +1683,21 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
+  SerendipityElement<NDIM>::computeGradStiffness(const blitz::Array<double, 3>& functionDerivative,
     int dir, Eigen::MatrixXd& resultMatrix)
   {
-    double integrationResult;
-
-    resultMatrix.setZero(resultMatrix.rows(),resultMatrix.cols());
-
     for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
     {
       for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
       {
         // Reset integration result
-        integrationResult = 0.0;
+        double integrationResult = 0.0;
 
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
         for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
           integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative(gaussIndex, kIndex, dir)*functionEvaluations(gaussIndex, mIndex);
 
-        resultMatrix(kIndex,mIndex) = integrationResult;
+        resultMatrix(kIndex, mIndex) = integrationResult;
       }
     }
   }
@@ -1779,13 +1710,12 @@ namespace Lucee
     std::vector<int> surfLowerNodeNums(nodesPerSide,1);
     getSurfLowerNodeNums(1,surfLowerNodeNums);
 
-    // Currently computing moments up to p = 2;
-    unsigned momentMax = 2;
-    momMatrix = std::vector<Eigen::MatrixXd>(momentMax+1);
+    maxMoment = 3;
+    momMatrix = std::vector<Eigen::MatrixXd>(maxMoment+1);
 
     // Initialize Matrices
-    for (int momentVal = 0; momentVal < momentMax + 1; momentVal++)
-      momMatrix[momentVal] = Eigen::MatrixXd::Zero(nodesPerSide,functionEvaluations.cols());
+    for (int momentVal = 0; momentVal < maxMoment + 1; momentVal++)
+      momMatrix[momentVal] = Eigen::MatrixXd::Zero(nodesPerSide, functionEvaluations.cols());
 
     // Evaluate Integral y^p*phi(x)psi(x,y)dA
     for (int j = 0; j < nodesPerSide; j++)
@@ -1798,38 +1728,18 @@ namespace Lucee
         {
           double gaussWeight  = gaussNodeList(nodeIndex,NDIM);
           double yCoord       = gaussNodeList(nodeIndex,1);
-          unsigned rollingIndex = nodeIndex % nodesPerSide;
+          unsigned rollingIndex = nodeIndex % numGaussPoints;
 
           double yPowerFactor = 1.0;
-          for (int momentVal = 0; momentVal <= momentMax; momentVal++)
+          for (int momentVal = 0; momentVal <= maxMoment; momentVal++)
           {
             if (momentVal != 0)
               yPowerFactor *= yCoord;
-            momMatrix[momentVal](j,k) += gaussWeight*yPowerFactor*functionEvaluations(nodeIndex,k)*
-              lowerSurfaceEvaluations[1](rollingIndex,lowerNodeNum);
+            momMatrix[momentVal](j,k) += gaussWeight*yPowerFactor*functionEvaluations(nodeIndex, k)*
+              lowerSurfaceEvaluations[1](rollingIndex, lowerNodeNum);
           }
         }
       }
-    }
-  }
-
-  template <unsigned NDIM>
-  void
-  SerendipityElement<NDIM>::printAllMatrices()
-  {
-    std::cout << "refMass " << std::endl << refMass << std::endl;
-
-    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-    {
-      std::cout << "refFaceMass_Lower" << dimIndex << std::endl << refFaceMassLower[dimIndex] << std::endl;
-      std::cout << "refFaceMass_Upper" << dimIndex << std::endl << refFaceMassUpper[dimIndex] << std::endl;
-    }
-
-    std::cout << "refStiffness " << std::endl << refStiffness << std::endl;
-
-    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-    {
-      std::cout << "refGradStiffness_" << dimIndex << std::endl << refGradStiffness[dimIndex] << std::endl;
     }
   }
 
@@ -1855,7 +1765,8 @@ namespace Lucee
   {
     return (n == 1 || n == 0) ? 1 : factorial(n-1)*n;
   }
-// instantiations
+  
+  // instantiations
   template class SerendipityElement<1>;
   template class SerendipityElement<2>;
   template class SerendipityElement<3>;

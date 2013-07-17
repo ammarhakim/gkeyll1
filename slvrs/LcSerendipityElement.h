@@ -327,6 +327,8 @@ namespace Lucee
       unsigned maxPower;
 /** Total number of quadrature points in 1-D */
       unsigned numGaussPoints;
+/** Highest moment degree to compute */
+      int maxMoment;
 /** Grid spacing in various dimensions */
       double dq[NDIM];
 /** Grid spacing squared in various dimensions */
@@ -403,17 +405,17 @@ namespace Lucee
 /**
   *   Compute the basis functions in terms of the basis monomials
   */
-      void computeBasisFunctions(std::vector<blitz::Array<double,3> >& functionVector);
+      void computeBasisFunctions(std::vector<blitz::Array<double, NDIM> >& functionVector);
  /**
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
  */
-      double evalPolynomial(const blitz::Array<double,3>& polyCoeffs, const Eigen::VectorXd& nodeCoords);
+      double evalPolynomial(const blitz::Array<double, NDIM>& polyCoeffs, const Eigen::VectorXd& nodeCoords);
 
 /**
 *     Compute the partial derivative of a polynomial in direction 'dir'
 */
-      blitz::Array<double,3> computePolynomialDerivative(const blitz::Array<double,3>& poly, int dir);
+      blitz::Array<double, NDIM> computePolynomialDerivative(const blitz::Array<double, NDIM>& poly, int dir);
 
 /**
 *     Compute the mass matrix on the reference element.
@@ -423,27 +425,23 @@ namespace Lucee
 /**
 *     Compute the face-mass matrices on the reference element in direction num.
 */
-      void computeFaceMass(const std::vector<blitz::Array<double,3> >& functionVector, int dir,
+      void computeFaceMass(const std::vector<blitz::Array<double, NDIM> >& functionVector, int dir,
         Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix);
 
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      void computeStiffness(const blitz::Array<double,3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
+      void computeStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
 
 /**
  *     Compute the grad stiffness matrix in direction dir on the reference element.
  */
-      void computeGradStiffness(const blitz::Array<double,3>& functionDerivative,
+      void computeGradStiffness(const blitz::Array<double, 3>& functionDerivative,
         int dir, Eigen::MatrixXd& resultMatrix);
 /**
  *    Compute 'cross-dimensional' basis functions
  */
       void setupMomentMatrices();
-/**
- *     Print out matrix values to the console (testing purposes only).
- */
-      void printAllMatrices();
 /**
  *    Compute the number of degrees of freedom for serendipity element
  *    with degree r and in dimension n

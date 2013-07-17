@@ -137,7 +137,7 @@ namespace Lucee
       Eigen::VectorXd uVec(nlocal);
 
       // Figure out mean n in the cell (Not tested yet)
-      /*Eigen::VectorXd nVec(nlocal);
+      Eigen::VectorXd nVec(nlocal);
       double meanN = 0.0;
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
         nVec(componentIndex) = mom0Ptr[componentIndex];
@@ -145,7 +145,7 @@ namespace Lucee
       for (int componentIndex = 0; componentIndex < nAtQuadPoints.rows(); componentIndex++)
         meanN += gaussWeights[componentIndex]*nAtQuadPoints(componentIndex);
       // Divide by total area of cell
-      meanN = meanN/grid.getDx(0);*/
+      meanN = meanN/grid.getDx(0);
 
       // Compute u(x) naively by dividing weights of n*u by n(x)
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
@@ -157,9 +157,9 @@ namespace Lucee
         }
         else 
         {
-          uPtr[componentIndex] = mom1Ptr[componentIndex]/mom0Ptr[componentIndex];
+          uPtr[componentIndex] = mom1Ptr[componentIndex]/meanN;
           // Fill in first part of vt(x)^2
-          vtSqPtr[componentIndex] = mom2Ptr[componentIndex]/mom0Ptr[componentIndex];
+          vtSqPtr[componentIndex] = mom2Ptr[componentIndex]/meanN;
         }
         uVec(componentIndex) = uPtr[componentIndex];
       }
