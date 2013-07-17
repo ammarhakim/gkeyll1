@@ -1057,7 +1057,7 @@ namespace Lucee
     // used in the rest of the code! Affects more than just gaussPoints.
     maxPower = 2*polyOrder;
     // Populate nodeList according to polyOrder
-    nodeList = MatrixXd(this->getNumNodes(),NDIM);
+    nodeList = Eigen::MatrixXd(this->getNumNodes(),NDIM);
     getNodeList(nodeList);
 
     std::vector<blitz::Array<double,3> > functionVector;
@@ -1068,163 +1068,136 @@ namespace Lucee
     gaussPoints  = std::vector<double>(numGaussPoints);
     gaussWeights = std::vector<double>(numGaussPoints);
     legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);
-    // Fill out gaussian integration nodes for integration over cell volume
-    VectorXd gaussNodeVec(NDIM);
-    int currNode = 0;
-    double totalWeight;
     
     // Figure out how many gaussian points there are
     int totalVolumeGaussNodes = 1;
-    int totalSurfaceGaussNodes;
 
     for (int i = 0; i < NDIM; i++)
       totalVolumeGaussNodes = gaussPoints.size()*totalVolumeGaussNodes;
-    totalSurfaceGaussNodes = totalVolumeGaussNodes/gaussPoints.size();
+
+    int totalSurfaceGaussNodes = totalVolumeGaussNodes/gaussPoints.size();
     
-    gaussNodeList = Eigen::MatrixXd(totalVolumeGaussNodes,NDIM+1);
-    functionEvaluations  = Eigen::MatrixXd(totalVolumeGaussNodes,this->getNumNodes());
-/** 3D Array containing derivatives of basis functions (cols) evaluated at gaussian integration locations (rows)
-    Correspondance between column and gaussian node set is kept track of in gaussNodeList */
-    blitz::Array<double,3> functionDEvaluations(totalVolumeGaussNodes,this->getNumNodes(),NDIM);
+    gaussNodeList = Eigen::MatrixXd::Zero(totalVolumeGaussNodes, NDIM+1);
+    functionEvaluations  = Eigen::MatrixXd(totalVolumeGaussNodes, this->getNumNodes());
+    // 3D Array containing derivatives of basis functions (cols) evaluated at gaussian
+    // integration locations (rows). Correspondance between column and gaussian node set
+    // is kept track of in gaussNodeList
+    blitz::Array<double,3> functionDEvaluations(totalVolumeGaussNodes, this->getNumNodes(),NDIM);
     
     gaussNodeListUpperSurf  = std::vector<Eigen::MatrixXd>(NDIM);
     gaussNodeListLowerSurf  = std::vector<Eigen::MatrixXd>(NDIM);
     upperSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
     lowerSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
+
+    // TODO: roll surface and volume quadrature code into one function
+    // since they do the same thing, but in diff dimensions
+    // Compute surface gaussian quadrature locations
+    int surfShape[NDIM-1];
+    int surfIdx[NDIM-1];
     
-    if (NDIM == 2)
+    for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
+      surfShape[dimIndex] = gaussPoints.size();
+
+    Lucee::Region<NDIM-1, int> surfRegion(surfShape);
+
+    Lucee::RowMajorSequencer<NDIM-1> surfSeq = RowMajorSequencer<NDIM-1>(surfRegion);
+    Lucee::RowMajorIndexer<NDIM-1> surfIdxr = RowMajorIndexer<NDIM-1>(surfRegion);
+    Eigen::MatrixXd gaussNodeListSurf = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, NDIM);
+    
+    // Find all quadrature locations on a NDIM-1 surface
+    while(surfSeq.step())
     {
-      // Compute surface quadrature locations
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-      {
-        // Initialize matrices
-        gaussNodeListUpperSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
-        gaussNodeListLowerSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
-        upperSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
-        lowerSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
-        
-        // Evaluate all basis functions at all upper and lower surfaces
-        for (int nodeIndex = 0; nodeIndex < gaussPoints.size(); nodeIndex++)
-        {
-          gaussNodeVec(0) = gaussPoints[nodeIndex];
-          gaussNodeVec(1) = gaussPoints[nodeIndex];
-          gaussNodeVec(dimIndex) = 1;
-          totalWeight = gaussWeights[nodeIndex];
-          gaussNodeListUpperSurf[dimIndex].row(nodeIndex) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
-          // Evaluate all basis functions at this node location
-          for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-            upperSurfaceEvaluations[dimIndex](nodeIndex, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-          
-          gaussNodeVec(dimIndex) = -1;
-          gaussNodeListLowerSurf[dimIndex].row(nodeIndex) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
-          // Evaluate all basis functions at this node location
-          for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-            lowerSurfaceEvaluations[dimIndex](nodeIndex, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-        }
-      }
+      surfSeq.fillWithIndex(surfIdx);
+      int nodeNumber = surfIdxr.getIndex(surfIdx);
 
-      // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
-      for (int yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
+      gaussNodeListSurf(nodeNumber, NDIM-1) = 1.0;
+      for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
       {
-        for (int xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
-        {
-          gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-          gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-          totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex];
-          gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),totalWeight;
-          
-          for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-          {
-            functionEvaluations(currNode, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-            
-            for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-              functionDEvaluations(currNode, basisIndex, dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[basisIndex],dimIndex),gaussNodeVec);
-          }
-          currNode++;
-        }
-      }
-    }
-    else if (NDIM == 3)
-    {
-      // Compute surface quadrature locations
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-      {
-        // Initialize matrices
-        gaussNodeListUpperSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
-        gaussNodeListLowerSurf[dimIndex]  = Eigen::MatrixXd(totalSurfaceGaussNodes,NDIM+1);
-        upperSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
-        lowerSurfaceEvaluations[dimIndex] = Eigen::MatrixXd(totalSurfaceGaussNodes,functionVector.size());
-        
-        // Evaluate all basis functions at all upper and lower surfaces
-        currNode = 0;
-        for (unsigned dir1NodeIndex = 0; dir1NodeIndex < gaussPoints.size(); dir1NodeIndex++)
-        {
-          for (unsigned dir2NodeIndex = 0; dir2NodeIndex < gaussPoints.size(); dir2NodeIndex++)
-          {
-            if (dimIndex == 0)
-            {
-              gaussNodeVec(0) = 1;
-              gaussNodeVec(1) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-            else if (dimIndex == 1)
-            {
-              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(1) = 1;
-              gaussNodeVec(2) = gaussPoints[dir2NodeIndex];
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-            else if (dimIndex == 2)
-            {
-              gaussNodeVec(0) = gaussPoints[dir1NodeIndex];
-              gaussNodeVec(1) = gaussPoints[dir2NodeIndex];
-              gaussNodeVec(2) = 1;
-              totalWeight = gaussWeights[dir1NodeIndex]*gaussWeights[dir2NodeIndex];
-            }
-          
-            gaussNodeListUpperSurf[dimIndex].row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
-            
-            // Evaluate all basis functions at this node location
-            for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-              upperSurfaceEvaluations[dimIndex](currNode, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-            
-            gaussNodeVec(dimIndex) = -1;
-            gaussNodeListLowerSurf[dimIndex].row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
-            // Evaluate all basis functions at this node location
-            for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-              lowerSurfaceEvaluations[dimIndex](currNode, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-
-            currNode++;
-          }
-        }
-      }
-
-      // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
-      currNode = 0;
-      for (int xNodeIndex = 0; xNodeIndex < gaussPoints.size(); xNodeIndex++)
-      {
-        for (int yNodeIndex = 0; yNodeIndex < gaussPoints.size(); yNodeIndex++)
-        {
-          for (int zNodeIndex = 0; zNodeIndex < gaussPoints.size(); zNodeIndex++)
-          {
-            gaussNodeVec(0)    = gaussPoints[xNodeIndex];
-            gaussNodeVec(1)    = gaussPoints[yNodeIndex];
-            gaussNodeVec(2)    = gaussPoints[zNodeIndex];
-            totalWeight        = gaussWeights[xNodeIndex]*gaussWeights[yNodeIndex]*gaussWeights[zNodeIndex];
-            gaussNodeList.row(currNode) << gaussNodeVec(0),gaussNodeVec(1),gaussNodeVec(2),totalWeight;
-            for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
-            {
-              functionEvaluations(currNode, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-              for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-                functionDEvaluations(currNode, basisIndex, dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[basisIndex],dimIndex),gaussNodeVec);
-            }
-            currNode++;
-          }
-        }
+        gaussNodeListSurf(nodeNumber, dimIndex) = gaussPoints[surfIdx[dimIndex]];
+        gaussNodeListSurf(nodeNumber, NDIM-1)    *= gaussWeights[surfIdx[dimIndex]];
       }
     }
 
+    // Evaluate quadrature points on all surfaces
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      // Initialize matrices
+      gaussNodeListUpperSurf[dimIndex]  = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, NDIM+1);
+      gaussNodeListLowerSurf[dimIndex]  = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, NDIM+1);
+      upperSurfaceEvaluations[dimIndex] = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, functionVector.size());
+      lowerSurfaceEvaluations[dimIndex] = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, functionVector.size());
+      
+      Eigen::VectorXd gaussNodeVec = Eigen::VectorXd::Zero(NDIM);
+      // Evaluate all basis functions at all upper and lower surfaces
+      for (int nodeIndex = 0; nodeIndex < gaussNodeListSurf.rows(); nodeIndex++)
+      {
+        int rollingIndex = 0;
+        
+        for (int coordIndex = 0; coordIndex < NDIM; coordIndex++)
+        {
+          if (coordIndex == dimIndex)
+            gaussNodeVec(dimIndex) = 1;
+          else
+          {
+            gaussNodeVec(coordIndex) = gaussNodeListSurf(nodeIndex, rollingIndex);
+            rollingIndex++;
+          }
+          gaussNodeListUpperSurf[dimIndex](nodeIndex, coordIndex) = gaussNodeVec(coordIndex);
+        }
+        gaussNodeListUpperSurf[dimIndex](nodeIndex, NDIM) = gaussNodeListSurf(nodeIndex, NDIM-1);
+
+        // Evaluate all basis functions at this node location
+        for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
+          upperSurfaceEvaluations[dimIndex](nodeIndex, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
+        
+        // Copy upper surface matrix into lower one first, then replace surface index
+        gaussNodeListLowerSurf[dimIndex].row(nodeIndex) = gaussNodeListUpperSurf[dimIndex].row(nodeIndex);
+        gaussNodeListLowerSurf[dimIndex](nodeIndex, dimIndex) = -1;
+        gaussNodeVec(dimIndex) = -1;
+        // Evaluate all basis functions at this node location
+        for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
+          lowerSurfaceEvaluations[dimIndex](nodeIndex, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
+      }
+    }
+
+    // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
+    // First compute all volume gaussian quadrature locations
+    int volShape[NDIM];
+    int volIdx[NDIM];
+    
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      volShape[dimIndex] = gaussPoints.size();
+
+    Lucee::Region<NDIM, int> volRegion(volShape);
+
+    // Needs col-major right now to help project 1-D data into 2-D element
+    Lucee::ColMajorSequencer<NDIM> volSeq = ColMajorSequencer<NDIM>(volRegion);
+    Lucee::ColMajorIndexer<NDIM> volIdxr = ColMajorIndexer<NDIM>(volRegion);
+
+    // Find all quadrature locations on a NDIM volume
+    while(volSeq.step())
+    {
+      volSeq.fillWithIndex(volIdx);
+      int nodeNumber = volIdxr.getIndex(volIdx);
+
+      gaussNodeList(nodeNumber, NDIM) = 1.0;
+      Eigen::VectorXd gaussNodeVec = Eigen::VectorXd::Zero(NDIM);
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      {
+        gaussNodeVec(dimIndex)              = gaussPoints[volIdx[dimIndex]];
+        gaussNodeList(nodeNumber, dimIndex) = gaussPoints[volIdx[dimIndex]];
+        gaussNodeList(nodeNumber, NDIM)    *= gaussWeights[volIdx[dimIndex]];
+      }
+
+      for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
+      {
+        functionEvaluations(nodeNumber, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
+        
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+          functionDEvaluations(nodeNumber, basisIndex, dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[basisIndex],dimIndex),gaussNodeVec);
+      }
+    }
+ 
     // Resize the output matrices we need
     resizeMatrices();
     // Call various functions to populate the matrices
@@ -1261,7 +1234,7 @@ namespace Lucee
       #include <LcSerendipityElementDiffusionOutput>
       #include <LcSerendipityElementHyperDiffusionOutput>
     }
-    
+
     computeMass(refMass);
     computeStiffness(functionDEvaluations,refStiffness);
 
@@ -1521,7 +1494,7 @@ namespace Lucee
     int xPow,yPow,zPow;
     // Populate basisList according to polyOrder
     // Matrix to represent basis monomials
-    Eigen::MatrixXi basisList(this->getNumNodes(),NDIM);
+    Eigen::MatrixXi basisList = Eigen::MatrixXi::Zero(this->getNumNodes(), NDIM);
     setupBasisMatrix(basisList);
     
     // Compute coefficients for basis functions
@@ -1702,7 +1675,7 @@ namespace Lucee
         for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
           integrationResult += gaussNodeList(gaussIndex, NDIM)*functionEvaluations(gaussIndex, kIndex)*functionEvaluations(gaussIndex, mIndex);
         
-        resultMatrix(kIndex,mIndex) = integrationResult;
+        resultMatrix(kIndex, mIndex) = integrationResult;
       }
     }
   }
