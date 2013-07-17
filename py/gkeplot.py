@@ -41,11 +41,11 @@ plotGroup.add_argument("--xlabel",
                        help="X-label on plot")
 plotGroup.add_argument("--ylabel",
                        help="Y-label on plot")
-plotGroup.add_argument("--semilogx",
+plotGroup.add_argument("--semilogx", action='store_true', default=False,
                        help="For 1D plots, make a log plot on X-axis.")
-plotGroup.add_argument("--semilogy",
+plotGroup.add_argument("--semilogy", action='store_true', default=False,
                        help="For 1D plots, make a log plot on Y-axis.")
-plotGroup.add_argument("--loglog",
+plotGroup.add_argument("--loglog", action='store_true', default=False,
                        help="For 1D plots, make a log plot on both axis.")
 plotGroup.add_argument("--axis-image", action='store_true', default=True,
                        help="For 2D plots preserve aspect ratio. This is the default option.")
