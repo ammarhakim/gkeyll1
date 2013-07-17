@@ -11,6 +11,7 @@ DG polynomial order
 Type of basis functions
 Transforms file (default none)
 Transforms variable
+List transform variables
 Save data as an HDF5 file?
 
 History(s) to plot
