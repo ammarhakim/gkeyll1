@@ -20,9 +20,6 @@ parser.add_option('-p', '--plot', action = 'store',
 parser.add_option('-c', '--component', action = 'store',
                   dest = 'component', default=0,
                   help = 'Component to plot')
-parser.add_option('-t', '--title', action = 'store',
-                  dest = 'title',
-                  help = 'Title to put on plots')
 parser.add_option('--transforms-file', action = 'store',
                   dest = 'transformsFile',
                   help=  'File for variable transforms')
@@ -49,6 +46,9 @@ parser.add_option('-d', '--nodal-order', action = 'store',
                   dest = 'dgOrder',
                   help = 'Polynomial order of DG scheme. '
                   'Only makes sense for plotting output from DG schemes')
+parser.add_option('-t', '--title', action = 'store',
+                  dest = 'title',
+                  help = 'Title to put on plots')
 parser.add_option('--write-history', action = 'store_true',
                   dest = 'writeHistory',
                   help = 'Write history data',

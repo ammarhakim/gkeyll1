@@ -1,4 +1,5 @@
-r"""Read HDF5 files produced by Gkeyll"""
+r"""Read HDF files produced by Gkeyll
+"""
 
 import numpy
 import tables
