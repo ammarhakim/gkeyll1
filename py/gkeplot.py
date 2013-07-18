@@ -10,7 +10,8 @@ parser = argparse.ArgumentParser(description="Plot HDF5 data produced by Gkeyll"
 
 dataGroup = parser.add_argument_group('Data specification')
 dataGroup.add_argument("files", nargs='+',
-                       help="List of HDF5 files to plot. Separate multiple files by spaces.")
+                       help="List of HDF5 files to plot. Separate multiple files by spaces. If plotting history"
+                       " specify only the first HDF5 file storing the history.")
 dataGroup.add_argument('-c', '--component', default=0, type=int,
                        help='Component of vector data to plot. Defaults to 0.')
 dataGroup.add_argument('-d', '--dg-polyorder', type=int,
@@ -20,7 +21,7 @@ dataGroup.add_argument('-g', '--cg-polyorder', type=int,
 dataGroup.add_argument('--basis', default='serendip', choices=['serendip', 'serendipity', 
                                                                'tensor-lobatto', 'tensor-gaussian', 
                                                                'tensor-uniform'],
-                       help='Type of basis functions used in DG/CG scheme. Defaults to serendip')
+                       help='Type of basis functions used in DG/CG scheme. Defaults to serendip.')
 dataGroup.add_argument('--trans-file',
                        help='Name of Python file that performs data transformation.')
 dataGroup.add_argument('--trans-var',
@@ -61,4 +62,4 @@ plotGroup.add_argument("--save-as",
                        help="Optional name of PNG file to save.")
 
 args = parser.parse_args()
-print args
+
