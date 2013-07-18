@@ -44,6 +44,11 @@ namespace Lucee
 // check if nodes are shared
     if (tbl.hasBool("shareCommonNodes"))
       sharedNodes = tbl.getBool("shareCommonNodes");
+
+// get background value to subtract off
+    backValue = 0.0;
+    if (tbl.hasNumber("background"))
+      backValue = tbl.getNumber("background");
   }
 
   template <unsigned NDIM>
@@ -99,12 +104,12 @@ namespace Lucee
 
 // contribution to average
       for (unsigned k=0; k<nlocal; ++k)
-        localAvg += weights[k]*localVals[k];
+        localAvg += weights[k]*(localVals[k]-backValue);
 // contribution to moment
       for (unsigned d=0; d<NDIM; ++d)
       {
         for (unsigned k=0; k<nlocal; ++k)
-          localMom[d] += weights[k]*nodeCoords(k,d)*localVals[k];
+          localMom[d] += weights[k]*nodeCoords(k,d)*(localVals[k]-backValue);
       }
     }
 
