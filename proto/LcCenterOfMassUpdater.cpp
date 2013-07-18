@@ -18,9 +18,9 @@
 
 namespace Lucee
 {
-  template <> const char *CenterOfMassUpdater<1>::id = "CenterOfMassUpdater1D";
-  template <> const char *CenterOfMassUpdater<2>::id = "CenterOfMassUpdater2D";
-  template <> const char *CenterOfMassUpdater<3>::id = "CenterOfMassUpdater3D";
+  template <> const char *CenterOfMassUpdater<1>::id = "CenterOfMass1D";
+  template <> const char *CenterOfMassUpdater<2>::id = "CenterOfMass2D";
+  template <> const char *CenterOfMassUpdater<3>::id = "CenterOfMass3D";
 
   template <unsigned NDIM>
   CenterOfMassUpdater<NDIM>::CenterOfMassUpdater()
@@ -74,14 +74,17 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
     std::vector<double> localVals(nlocal);
     int idx[NDIM];
+    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
 
-    double localInt = 0.0;
+    double localMom[NDIM];
+    for (unsigned d=0; d<NDIM; ++d) localMom[d] = 0.0;
+    double localAvg = 0;
 // loop, performing integration
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-// set index into element basis
       nodalBasis->setIndex(idx);
+      nodalBasis->getNodalCoordinates(nodeCoords);
 
 // extract values at nodes in cell
       if (sharedNodes)
@@ -94,19 +97,30 @@ namespace Lucee
           localVals[k] = fldPtr[k];
       }
 
-// perform quadrature
+// contribution to average
       for (unsigned k=0; k<nlocal; ++k)
-        localInt += weights[k]*localVals[k];
+        localAvg += weights[k]*localVals[k];
+// contribution to moment
+      for (unsigned d=0; d<NDIM; ++d)
+      {
+        for (unsigned k=0; k<nlocal; ++k)
+          localMom[d] += weights[k]*nodeCoords(k,d)*localVals[k];
+      }
     }
 
-    double volInt = localInt;
+    double volAvg = localAvg;
+    double volMom[NDIM];
+    for (unsigned d=0; d<NDIM; ++d) volMom[d] = localMom[d];
+
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
-    comm->allreduce(1, &localInt, &volInt, TX_SUM);
+    comm->allreduce(1, &localAvg, &volAvg, TX_SUM);
+    comm->allreduce(NDIM, &localMom[0], &volMom[0], TX_SUM);
 
-    std::vector<double> data(1);
-    data[0] = volInt;
+    std::vector<double> data(NDIM);
+    for (unsigned d=0; d<NDIM; ++d)
+      data[d] = volMom[d]/volAvg;
     fldInt.appendData(t, data);
 
     return Lucee::UpdaterStatus();
