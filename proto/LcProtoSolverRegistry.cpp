@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcCenterOfMassUpdater.h>
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
@@ -53,6 +54,9 @@ namespace Lucee
 // register updaters
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
+      .append<Lucee::CenterOfMassUpdater<1> >()
+      .append<Lucee::CenterOfMassUpdater<2> >()
+      .append<Lucee::CenterOfMassUpdater<3> >()
       .append<Lucee::MaxwellTm2DUpdater>()
       .append<Lucee::MusclHancock1DUpdater>()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
