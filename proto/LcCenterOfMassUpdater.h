@@ -75,6 +75,8 @@ namespace Lucee
       bool sharedNodes;
 /** Weights for quadrature */
       std::vector<double> weights;
+/** Background value to subtract */
+      double backValue;
   };
 }
 
