@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcBcUpdater.h>
+#include <LcBoltzmannPhiUpdater.h>
 #include <LcConstBoundaryCondition.h>
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
@@ -22,6 +23,7 @@
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
+#include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcLagrangeTensorElement.h>
@@ -38,7 +40,6 @@
 #include <LcPointSourceIfc.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
-#include <LcRecoveryPolynomialUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -83,6 +84,10 @@ namespace Lucee
       .append<Lucee::BcUpdater<1> >()
       .append<Lucee::BcUpdater<2> >()
       .append<Lucee::BcUpdater<3> >()
+      
+      .append<Lucee::BoltzmannPhiUpdater>()
+      
+      .append<Lucee::HeatFluxAtEdgeUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
@@ -102,8 +107,6 @@ namespace Lucee
       .append<Lucee::ProjectOnBasisUpdater<1> >()
       .append<Lucee::ProjectOnBasisUpdater<2> >()
       .append<Lucee::ProjectOnBasisUpdater<3> >()
-      
-      .append<Lucee::RecoveryPolynomialUpdater>()
 
 #ifdef HAVE_PETSC
       .append<Lucee::FemPoissonStructUpdater<1> >()
