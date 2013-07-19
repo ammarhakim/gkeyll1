@@ -84,7 +84,7 @@ namespace Lucee
       };
 
 /** Moment matrices */
-      MatrixHolder mm[3];
+      MatrixHolder mm[4];
 
 /**
  * Compute matrix-vector multiply. Output vector must be

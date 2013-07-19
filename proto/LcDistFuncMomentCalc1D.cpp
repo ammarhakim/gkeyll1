@@ -57,9 +57,9 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalc1D::readInput: Must specify moment using 'moment'");
 
-    if (calcMom > 2)
+    if (calcMom > 3)
     {
-      Lucee::Except lce("DistFuncMomentCalc1D::readInput: Only 'moment' 0, 1 or 2 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalc1D::readInput: Only 'moment' 0, 1 2, or 3 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }
@@ -88,7 +88,7 @@ namespace Lucee
 // should really be in their own class.
 
 // allocate and get moment matrices
-    for (unsigned m=0; m<3; ++m)
+    for (unsigned m=0; m<4; ++m)
     {
       mm[m].m = Lucee::Matrix<double>(nlocal1d, nlocal2d);
       nodalBasis2d->getMomentMatrix(m, mm[m].m);
@@ -96,7 +96,7 @@ namespace Lucee
 
     Lucee::Matrix<double> massMatrix1d(nlocal1d, nlocal1d);
 // now multiply each of these by inverse of 1D mass matrix
-    for (unsigned m=0; m<3; ++m)
+    for (unsigned m=0; m<4; ++m)
     {
       nodalBasis1d->getMassMatrix(massMatrix1d);
       Lucee::solve(massMatrix1d, mm[m].m);
@@ -130,6 +130,7 @@ namespace Lucee
     double dv = grid.getDx(1);
     double dv2 = 0.5*dv;
     double dv22 = dv2*dv2;
+    double dv23 = dv2*dv2*dv2;
 
 // loop over all X-direction cells
     for (int i=localRgn.getLower(0); i<localRgn.getUpper(0); ++i)
@@ -162,6 +163,13 @@ namespace Lucee
           matVec(xc[1]*xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
           matVec(xc[1]*dv, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
           matVec(dv22, mm[2].m, &distFPtr[0], 1.0, &momentPtr[0]);
+        }
+        else if (calcMom == 3)
+        {
+          matVec(3*xc[1]*xc[1]*xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(xc[1]*xc[1]*dv2, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(xc[1]*dv22, mm[2].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(3*dv23, mm[3].m, &distFPtr[0], 1.0, &momentPtr[0]);
         }
       }
     }

@@ -18,6 +18,7 @@ set(lcslvrs_SOURCES
   LcAdvectionEquation.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
+  LcBoltzmannPhiUpdater.cpp
   LcBoundaryCondition.cpp
   LcConstBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
@@ -35,6 +36,7 @@ set(lcslvrs_SOURCES
   LcGridOdeIntegrator.cpp
   LcGridOdePointIntegrator.cpp
   LcGridOdePointIntegratorUpdater.cpp
+  LcHeatFluxAtEdgeUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
@@ -56,7 +58,6 @@ set(lcslvrs_SOURCES
   LcPointSourceIfc.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
-  LcRecoveryPolynomialUpdater.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSerendipityElement2DDiffusionOutput
