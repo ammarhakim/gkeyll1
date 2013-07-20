@@ -187,9 +187,7 @@ namespace Lucee
 #else
 // Explicit initialization of stiffness matrix speeds up
 // initialization tremendously.
-    int nz = 10; // number of non-zero entries per row (WHAT SHOULD IT REALLY BE?)
-    if (nodalBasis->getNumNodes() > 4)
-      nz = 21; // HACK FOR NOW
+    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
     MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #endif
     MatSetFromOptions(stiffMat);
