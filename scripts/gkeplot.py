@@ -134,7 +134,7 @@ if options.history:
     if options.writeHistory:
         fl = open(hist.base + ".txt", "w")
         for idx in range(hist.time.shape[0]):
-            fl.writelines("%g %g\n" % (hist.time[idx], hist.history[idx,c]))
+            fl.writelines("%.16g %.16g\n" % (hist.time[idx], hist.history[idx,c]))
         fl.close()
 
 # show figure if requested
