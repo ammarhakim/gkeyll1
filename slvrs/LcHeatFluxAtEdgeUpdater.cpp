@@ -37,16 +37,50 @@ namespace Lucee
     else
       throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify element to use using 'basis1d'");
 
-    if (tbl.hasNumber("speciesMass"))
-      speciesMass = tbl.getNumber("speciesMass");
+    if (tbl.hasNumber("ionMass"))
+      ionMass = tbl.getNumber("ionMass");
     else
-      throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify speciesMass");
+      throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
   }
 
   void 
   HeatFluxAtEdgeUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
+
+    // get hold of grid
+    const Lucee::StructuredGridBase<1>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    // global region to update
+    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
+
+    Lucee::RowMajorSequencer<1> seq(globalRgn);
+    seq.step(); // just to get to first index
+    int idx[1];
+    seq.fillWithIndex(idx);
+    nodalBasis->setIndex(idx);
+    
+    int nlocal = nodalBasis->getNumNodes();
+    int numQuadNodes = nodalBasis->getNumGaussNodes();
+
+    // Get mass matrix and then copy to Eigen format
+    Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
+
+    nodalBasis->getMassMatrix(massMatrixLucee);
+    
+    // Get interpolation matrix, gaussian quadrature points, and weights
+    Lucee::Matrix<double> interpMatrixLucee(numQuadNodes, nlocal);
+
+    Lucee::Matrix<double> gaussOrdinatesLucee(numQuadNodes, 3);
+
+    gaussWeights = std::vector<double>(numQuadNodes);
+
+    // Allocate Eigen matrices
+    interpMatrix = Eigen::MatrixXd(numQuadNodes, nlocal);
+
+    // Get the interpolation matrix for the volume quadrature points
+    nodalBasis->getGaussQuadData(interpMatrixLucee, gaussOrdinatesLucee, gaussWeights);
+    copyLuceeToEigen(interpMatrixLucee, interpMatrix);
   }
 
   Lucee::UpdaterStatus 
@@ -57,9 +91,8 @@ namespace Lucee
 
     // First three velocity moments + driftU
     const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& mom2In = this->getInp<Lucee::Field<1, double> >(1);
-    const Lucee::Field<1, double>& mom3In = this->getInp<Lucee::Field<1, double> >(2);
-    const Lucee::Field<1, double>& driftUIn = this->getInp<Lucee::Field<1, double> >(3);
+    const Lucee::Field<1, double>& mom3In = this->getInp<Lucee::Field<1, double> >(1);
+    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -68,23 +101,42 @@ namespace Lucee
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom2Ptr = mom2In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom3Ptr = mom3In.createConstPtr();
-    Lucee::ConstFieldPtr<double> driftUPtr = driftUIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
+    
+    // Find mean vtSq in entire domain
+    double meanVtSq = 0.0;
+
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    {
+      // Set inputs
+      vtSqIn.setPtr(vtSqPtr, ix);
+      Eigen::VectorXd vtSqVec(nlocal);
+      
+      // Figure out vtSq(x) at quadrature points in the cell
+      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+        vtSqVec(componentIndex) = vtSqPtr[componentIndex];
+      Eigen::VectorXd vtSqAtQuadPoints = interpMatrix*vtSqVec;
+
+      for (int componentIndex = 0; componentIndex < vtSqAtQuadPoints.rows(); componentIndex++)
+        meanVtSq += gaussWeights[componentIndex]*vtSqAtQuadPoints(componentIndex);
+    }
+
+    // Divide by length of domain
+    // Consider using grid.getNumCells(0)
+    meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
     // Find value of the following input fields at the very last edge of the domain
     mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
-    mom2In.setPtr(mom2Ptr, globalRgn.getUpper(0)-1);
     mom3In.setPtr(mom3Ptr, globalRgn.getUpper(0)-1);
-    driftUIn.setPtr(driftUPtr, globalRgn.getUpper(0)-1);
     
-    double heatFlux = 0.5*speciesMass*(mom3Ptr[nlocal-1] 
-      - 3*driftUPtr[nlocal-1]*mom2Ptr[nlocal-1]
-      + 3*driftUPtr[nlocal-1]*driftUPtr[nlocal-1]*mom1Ptr[nlocal-1]
-      - driftUPtr[nlocal-1]*driftUPtr[nlocal-1]*driftUPtr[nlocal-1]);
+    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1];
+    double electronHeatFlux = 1.5*ionMass*meanVtSq*mom1Ptr[nlocal-1];
     
-    std::vector<double> data(1);
-    data[0] = heatFlux;
+    std::vector<double> data(3);
+    data[0] = ionHeatFlux + electronHeatFlux;
+    data[1] = ionHeatFlux;
+    data[2] = electronHeatFlux;
     qVsTime.appendData(t, data);
 
     return Lucee::UpdaterStatus();
@@ -93,12 +145,20 @@ namespace Lucee
   void
   HeatFluxAtEdgeUpdater::declareTypes()
   {
-    // takes four inputs (<v>,<v^2>,<v^3>) moments + driftU
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // takes three inputs (<v>,<v^3>) moments + vtSq
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns one output: dynvector of heat flux at edge vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
+  }
+  
+  void
+  HeatFluxAtEdgeUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+    Eigen::MatrixXd& destinationMatrix)
+  {
+    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
+      for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
+        destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
 }

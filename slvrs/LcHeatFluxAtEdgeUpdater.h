@@ -21,6 +21,9 @@
 // std includes
 #include <vector>
 
+// eigen includes
+#include <Eigen/Dense>
+
 namespace Lucee
 {
 /**
@@ -72,7 +75,20 @@ namespace Lucee
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
 /** Mass of species we are computing the heat flux using */
-      double speciesMass;
+      double ionMass;
+/** Weights for gaussian quadrature points */
+      std::vector<double> gaussWeights;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to
+ * gaussian quadrature points.
+ */
+      Eigen::MatrixXd interpMatrix;
+/**
+ * Copy a Lucee-type matrix to an Eigen-type matrix.
+ * No checks are performed to make sure source and destination matrices are
+ * of the same size.
+ */
+      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
   };
 }
 

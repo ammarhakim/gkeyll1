@@ -88,6 +88,12 @@ namespace Lucee
       int dragDir;
 /** Flag to indicate if to only compute increments */
       bool onlyIncrement;
+/** Flag to indicate if Braginskii collisional time should be used */
+      bool useBraginskii;
+/** The following (in SI units) is used for Braginskii collisional time */
+      double ionMass;
+      double elementaryCharge;
+      double epsilon0;
 /** Type of interface flux to use */
       int fluxType;
 /**

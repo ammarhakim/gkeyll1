@@ -87,6 +87,12 @@ namespace Lucee
       int diffDir;
 /** Flag to indicate if to compute only increments */
       bool onlyIncrement;
+/** Flag to indicate if Braginskii collisional time should be used */
+      bool useBraginskii;
+/** The following (in SI units) is used for Braginskii collisional time */
+      double ionMass;
+      double elementaryCharge;
+      double epsilon0;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
 /** List of matrices for current cell */
