@@ -51,6 +51,7 @@ namespace Lucee
     // Assume operator will be in 1 direction
     dragDir = 1;
 
+    // Not actually implemented yet
     fluxType = UPWIND;
     if (tbl.hasString("fluxType"))
     {
@@ -69,6 +70,29 @@ namespace Lucee
     onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
+
+        useBraginskii = false;
+    if (tbl.hasBool("useBraginskii"))
+      useBraginskii = tbl.getBool("useBraginskii");
+
+    if (useBraginskii == true)
+    {
+      if (tbl.hasNumber("ionMass"))
+        ionMass = tbl.getNumber("ionMass");
+      else
+        throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify ionMass");
+
+      // Note: should be singly charged
+      if (tbl.hasNumber("elementaryCharge"))
+        elementaryCharge = tbl.getNumber("elementaryCharge");
+      else
+        throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify elementaryCharge");
+
+      if (tbl.hasNumber("epsilon0"))
+        epsilon0 = tbl.getNumber("epsilon0");
+      else
+        throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify epsilon0");
+    }
   }
 
   void 
@@ -204,6 +228,56 @@ namespace Lucee
     Lucee::FieldPtr<double> qNewPtrLeft = qNew.createPtr();
 
     qNew = 0.0; // use qNew to store increment initially
+
+    if (useBraginskii == true)
+    {
+      const Lucee::Field<1, double>& inpVtSq    = this->getInp<Lucee::Field<1, double> >(2);
+      const Lucee::Field<1, double>& inpDensity = this->getInp<Lucee::Field<1, double> >(3);
+      Lucee::ConstFieldPtr<double> vtSqPtr    = inpVtSq.createConstPtr();
+      Lucee::ConstFieldPtr<double> densityPtr = inpDensity.createConstPtr();
+      double vtSqAvg    = 0.0;
+      double densityAvg = 0.0;
+      // Calculate line-averaged ion temperature and density
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        inpVtSq.setPtr(vtSqPtr, ix);
+        inpDensity.setPtr(densityPtr, ix);
+        
+        Eigen::VectorXd vtSqVals(surfNodeInterpMatrix.cols());
+        Eigen::VectorXd densityVals(surfNodeInterpMatrix.cols());
+        
+        // Copy values of vtSq into an Eigen vector
+        for (int componentIndex = 0; componentIndex < vtSqVals.rows(); componentIndex++)
+        {
+          vtSqVals(componentIndex) = vtSqPtr[componentIndex];
+          densityVals(componentIndex) = densityPtr[componentIndex];
+        }
+        
+        // Interpolate u to quadrature points on the surface
+        Eigen::VectorXd vtSqSurfQuad = surfNodeInterpMatrix*vtSqVals;
+        Eigen::VectorXd densitySurfQuad = surfNodeInterpMatrix*densityVals;
+        
+        // Integrate to find average values
+        for (int quadPoint = 0; quadPoint < vtSqSurfQuad.rows(); quadPoint++)
+        {
+          vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint);
+          densityAvg += gaussSurfWeights[quadPoint]*densitySurfQuad(quadPoint);
+        }
+      }
+
+      // Divide by length of domain
+      vtSqAvg = vtSqAvg/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+      densityAvg = densityAvg/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+
+      // Really computing k*T in joules
+      double tempAvg = ionMass*vtSqAvg;
+      // Coulomb logarithm
+      double lambda = 23 - std::log(sqrt(2*densityAvg/1000000.0)/pow(tempAvg/elementaryCharge,3.0/2.0));
+      // Calculate Braginskii collisional time (see NRL formulary)
+      // Actually utexas page for SI units
+      const double PI = 3.141592653589793238462;
+      alpha = densityAvg*lambda*pow(elementaryCharge,4)/(12*pow(PI*tempAvg,3.0/2.0)*epsilon0*epsilon0*sqrt(ionMass));
+    }
 
     int idx[2];
     double cellCentroid[3];
@@ -410,6 +484,9 @@ namespace Lucee
   {
     // takes two inputs (fOld, u) 
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // Optional vtSq, density
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns one output (fNew)
     this->appendOutVarType(typeid(Lucee::Field<2, double>));

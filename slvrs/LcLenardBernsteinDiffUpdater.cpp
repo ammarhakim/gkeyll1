@@ -46,6 +46,29 @@ namespace Lucee
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
 
+    useBraginskii = false;
+    if (tbl.hasBool("useBraginskii"))
+      useBraginskii = tbl.getBool("useBraginskii");
+
+    if (useBraginskii == true)
+    {
+      if (tbl.hasNumber("ionMass"))
+        ionMass = tbl.getNumber("ionMass");
+      else
+        throw Lucee::Except("LenardBernsteinDiffUpdater::readInput: Must specify ionMass");
+
+      // Note: should be singly charged
+      if (tbl.hasNumber("elementaryCharge"))
+        elementaryCharge = tbl.getNumber("elementaryCharge");
+      else
+        throw Lucee::Except("LenardBernsteinDiffUpdater::readInput: Must specify elementaryCharge");
+
+      if (tbl.hasNumber("epsilon0"))
+        epsilon0 = tbl.getNumber("epsilon0");
+      else
+        throw Lucee::Except("LenardBernsteinDiffUpdater::readInput: Must specify epsilon0");
+    }
+
     // directions to update
     diffDir = 1;
   }
@@ -142,8 +165,8 @@ namespace Lucee
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
 
-    const Lucee::Field<2, double>& inpFld = this->getInp<Lucee::Field<2, double> >(0);
-    const Lucee::Field<1, double>& inpVtSq = this->getInp<Lucee::Field<1, double> >(1);
+    const Lucee::Field<2, double>& inpFld     = this->getInp<Lucee::Field<2, double> >(0);
+    const Lucee::Field<1, double>& inpVtSq    = this->getInp<Lucee::Field<1, double> >(1);
     Lucee::Field<2, double>& diffOut = this->getOut<Lucee::Field<2, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -152,8 +175,8 @@ namespace Lucee
     else
       diffOut.copy(inpFld);
     
-    Lucee::ConstFieldPtr<double> inpFldPtr = inpFld.createConstPtr();
-    Lucee::ConstFieldPtr<double> vtSqPtr = inpVtSq.createConstPtr();
+    Lucee::ConstFieldPtr<double> inpFldPtr  = inpFld.createConstPtr();
+    Lucee::ConstFieldPtr<double> vtSqPtr    = inpVtSq.createConstPtr();
     Lucee::FieldPtr<double> diffOutPtr = diffOut.createPtr();
 
     // check time-step
@@ -163,9 +186,57 @@ namespace Lucee
     double fact = 0.0;
 
     int idx[2], idxL[2];
-// local region to index
+    // local region to index
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
     Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
+ 
+    if (useBraginskii == true)
+    {
+      const Lucee::Field<1, double>& inpDensity = this->getInp<Lucee::Field<1, double> >(2);
+      Lucee::ConstFieldPtr<double> densityPtr = inpDensity.createConstPtr();
+      double vtSqAvg = 0.0;
+      double densityAvg = 0.0;
+      // Calculate line-averaged ion temperature and density
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        inpVtSq.setPtr(vtSqPtr, ix);
+        inpDensity.setPtr(densityPtr, ix);
+        
+        Eigen::VectorXd vtSqVals(surfNodeInterpMatrix.cols());
+        Eigen::VectorXd densityVals(surfNodeInterpMatrix.cols());
+        
+        // Copy values of vtSq into an Eigen vector
+        for (int componentIndex = 0; componentIndex < vtSqVals.rows(); componentIndex++)
+        {
+          vtSqVals(componentIndex) = vtSqPtr[componentIndex];
+          densityVals(componentIndex) = densityPtr[componentIndex];
+        }
+        
+        // Interpolate u to quadrature points on the surface
+        Eigen::VectorXd vtSqSurfQuad = surfNodeInterpMatrix*vtSqVals;
+        Eigen::VectorXd densitySurfQuad = surfNodeInterpMatrix*densityVals;
+        
+        // Integrate to find average values
+        for (int quadPoint = 0; quadPoint < vtSqSurfQuad.rows(); quadPoint++)
+        {
+          vtSqAvg += gaussSurfWeights[quadPoint]*vtSqSurfQuad(quadPoint);
+          densityAvg += gaussSurfWeights[quadPoint]*densitySurfQuad(quadPoint);
+        }
+      }
+
+      // Divide by length of domain
+      vtSqAvg = vtSqAvg/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+      densityAvg = densityAvg/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+
+      // Really computing k*T in joules
+      double tempAvg = ionMass*vtSqAvg;
+      // Coulomb logarithm
+      double lambda = 23 - std::log(sqrt(2*densityAvg/1000000.0)/pow(tempAvg/elementaryCharge,3.0/2.0));
+      // Calculate Braginskii collisional time (see NRL formulary)
+      // Actually utexas page for SI units
+      const double PI = 3.141592653589793238462;
+      alpha = densityAvg*lambda*pow(elementaryCharge,4)/(12*pow(PI*tempAvg,3.0/2.0)*epsilon0*epsilon0*sqrt(ionMass));
+    }
 
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
     {
@@ -173,13 +244,13 @@ namespace Lucee
       Eigen::VectorXd vtSqVals(surfNodeInterpMatrix.cols());
       grid.setIndex(ix, localRgn.getLower(1));
       
-      // Copy values of u into uVals vector
+      // Copy values of vtSq into an Eigen vector
       for (int componentIndex = 0; componentIndex < vtSqVals.rows(); componentIndex++)
         vtSqVals(componentIndex) = vtSqPtr[componentIndex];
       
-      // Interpolate u to quadrature points on the surface
+      // Interpolate vtSq to quadrature points on the surface
       // Quadrature coordinates located in gaussSurfOrdinates
-      // Each row of uSurfQuad is value of u at the quad location
+      // Each row of vtSqSurfQuad is value of vtSq at the quad location
       Eigen::VectorXd vtSqSurfQuad = surfNodeInterpMatrix*vtSqVals;
 
       // Integrate vtSqSurf to find its average value
@@ -228,7 +299,9 @@ namespace Lucee
   LenardBernsteinDiffUpdater::declareTypes()
   {
     // Takes two inputs (f, v_t^2)
+    // Optional: n(x)
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
