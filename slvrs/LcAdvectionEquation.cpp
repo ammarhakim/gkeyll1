@@ -41,11 +41,11 @@ namespace Lucee
       throw Lucee::Except("AdvectionEquation::readInput: Must provide speeds in each direction");
 
     fluxType = UPWIND_FLUX;
-    if (tbl.hasString("flux"))
+    if (tbl.hasString("fluxType"))
     {
-      if (tbl.getString("flux") == "central")
+      if (tbl.getString("fluxType") == "central")
         fluxType = CENTRAL_FLUX;
-      else if (tbl.getString("flux") == "upwind")
+      else if (tbl.getString("fluxType") == "upwind")
         fluxType = UPWIND_FLUX;
       else
       {
