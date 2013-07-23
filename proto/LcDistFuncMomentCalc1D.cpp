@@ -88,7 +88,7 @@ namespace Lucee
 // should really be in their own class.
 
 // allocate and get moment matrices
-    for (unsigned m=0; m<4; ++m)
+    for (unsigned m=0; m<=calcMom; ++m)
     {
       mm[m].m = Lucee::Matrix<double>(nlocal1d, nlocal2d);
       nodalBasis2d->getMomentMatrix(m, mm[m].m);
