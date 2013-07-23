@@ -96,7 +96,7 @@ namespace Lucee
 
     Lucee::Matrix<double> massMatrix1d(nlocal1d, nlocal1d);
 // now multiply each of these by inverse of 1D mass matrix
-    for (unsigned m=0; m<4; ++m)
+    for (unsigned m=0; m<=calcMom; ++m)
     {
       nodalBasis1d->getMassMatrix(massMatrix1d);
       Lucee::solve(massMatrix1d, mm[m].m);
