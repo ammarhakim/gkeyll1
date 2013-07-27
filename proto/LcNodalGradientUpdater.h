@@ -22,6 +22,7 @@ namespace Lucee
 /**
  * Updater to compute total energy in domain given the streamfunction.
  */
+  template <unsigned NDIM>
   class NodalGradientUpdater : public Lucee::UpdaterIfc
   {
     public:
@@ -65,7 +66,7 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -80,7 +81,7 @@ namespace Lucee
       };
 
 /** Differentiation matrices */
-      MatrixHolder diffMatrix[2];
+      MatrixHolder diffMatrix[NDIM];
 /** Interpolation matrix */
       MatrixHolder interpMat;
 /** Weights for quadrature */
@@ -88,7 +89,7 @@ namespace Lucee
 /** Ordinates for quadrature */
       MatrixHolder ordinates;
 /** Differentiation matrices, computing derivatives at quadrature nodes */
-      MatrixHolder pDiffMatrix[2];
+      MatrixHolder pDiffMatrix[NDIM];
 
 /**
  * Compute matrix-vector multiply. Output vector must be
