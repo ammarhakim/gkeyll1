@@ -22,42 +22,51 @@
 
 namespace Lucee
 {
-  const char *NodalGradientUpdater::id = "NodalGradient2D";
+  template <> const char *NodalGradientUpdater<1>::id = "NodalGradient1D";
+  template <> const char *NodalGradientUpdater<2>::id = "NodalGradient2D";
+  template <> const char *NodalGradientUpdater<3>::id = "NodalGradient3D";
 
-  NodalGradientUpdater::NodalGradientUpdater()
+  template <unsigned NDIM>
+  NodalGradientUpdater<NDIM>::NodalGradientUpdater()
     : Lucee::UpdaterIfc()
   {
   }
   
+  template <unsigned NDIM>
   void
-  NodalGradientUpdater::readInput(Lucee::LuaTable& tbl)
+  NodalGradientUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
 // get hold of element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
-      throw Lucee::Except("NodalFiniteElementIfc::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("NodalGradientUpdater::readInput: Must specify element to use using 'basis'");
   }
 
+  template <unsigned NDIM>
   void
-  NodalGradientUpdater::initialize()
+  NodalGradientUpdater<NDIM>::initialize()
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
 
 // get hold of grid
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
 // local region to update
-    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    seq.step();
+    int idx[NDIM];
+    seq.fillWithIndex(idx);
 
 // set index to first location in grid (this is okay as in this
 // updater we are assuming grid is uniform)
-    nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
+    nodalBasis->setIndex(idx);
 
     unsigned nVol = nodalBasis->getNumGaussNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
@@ -65,7 +74,7 @@ namespace Lucee
 // space for mass matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
 
-    for (unsigned dir=0; dir<2; ++dir)
+    for (unsigned dir=0; dir<NDIM; ++dir)
     {
 // get stiffness matrice
       Lucee::Matrix<double> stiffMatrix(nlocal, nlocal);
@@ -91,7 +100,7 @@ namespace Lucee
 // get data needed for Gaussian quadrature
     nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
 
-    for (unsigned dir=0; dir<2; ++dir)
+    for (unsigned dir=0; dir<NDIM; ++dir)
     {
       pDiffMatrix[dir].m = Lucee::Matrix<double>(nVol, nlocal);
 // compute differentiation matrices that compute derivatives at
@@ -100,19 +109,21 @@ namespace Lucee
     }
   }
 
+  template <unsigned NDIM>
   Lucee::UpdaterStatus
-  NodalGradientUpdater::update(double t)
+  NodalGradientUpdater<NDIM>::update(double t)
   {
 // get hold of grid
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 // get input arrays
-    const Lucee::Field<2, double>& phi = this->getInp<Lucee::Field<2, double> >(0);
+    const Lucee::Field<NDIM, double>& phi = this->getInp<Lucee::Field<NDIM, double> >(0);
 // get output arrays
-    Lucee::Field<2, double>& gradXY = this->getOut<Lucee::Field<2, double> >(0);
+    Lucee::Field<NDIM, double>& gradXY = this->getOut<Lucee::Field<NDIM, double> >(0);
 
 // local region to update
-    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
 // number of nodes in quadrature
     unsigned nVol = nodalBasis->getNumGaussNodes();
@@ -120,44 +131,42 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // space for various quantities
-    std::vector<double> phiK(nlocal), gradX(nlocal), gradY(nlocal);
+    std::vector<double> phiK(nlocal), grad(nlocal);
     Lucee::FieldPtr<double> gPtr = gradXY.createPtr();
 
-// compute gradients
-    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
+    int idx[NDIM];
+    while (seq.step())
     {
-      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
-      {
-        nodalBasis->setIndex(ix, iy);
-        gradXY.setPtr(gPtr, ix, iy);
+      seq.fillWithIndex(idx);
+      nodalBasis->setIndex(idx);
+      gradXY.setPtr(gPtr, idx);
 
 // extract potential at this location
-        nodalBasis->extractFromField(phi, phiK);
-// compute gradients in X- and Y-directions
-        matVec(1.0, pDiffMatrix[0].m, phiK, 0.0, &gradX[0]);
-        matVec(1.0, pDiffMatrix[1].m, phiK, 0.0, &gradY[0]);
+      nodalBasis->extractFromField(phi, phiK);
 
+      for (unsigned dir=0; dir<NDIM; ++dir)
+      {
+// compute gradients in dir directions
+        matVec(1.0, pDiffMatrix[dir].m, phiK, 0.0, &grad[0]);
 // copy gradient into output field
         for (unsigned k=0; k<nlocal; ++k)
-        {
-          gPtr[2*k+0] = gradX[k];
-          gPtr[2*k+1] = gradY[k];
-        }
+          gPtr[NDIM*k+dir] = grad[k];
       }
     }
-
     return Lucee::UpdaterStatus();
   }
 
+  template <unsigned NDIM>
   void
-  NodalGradientUpdater::declareTypes()
+  NodalGradientUpdater<NDIM>::declareTypes()
   {
-    this->appendInpVarType(typeid(Lucee::Field<2, double>));
-    this->appendOutVarType(typeid(Lucee::Field<2, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
+  template <unsigned NDIM>
   void 
-  NodalGradientUpdater::matVec(double m, const Lucee::Matrix<double>& mat,
+  NodalGradientUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
     const std::vector<double>& vec, double v, double *out)
   {
     double tv;
@@ -170,4 +179,9 @@ namespace Lucee
       out[i] = m*tv + v*out[i];
     }
   }
+
+// instantiations
+  template class Lucee::NodalGradientUpdater<1>;
+  template class Lucee::NodalGradientUpdater<2>;
+  template class Lucee::NodalGradientUpdater<3>;
 }
