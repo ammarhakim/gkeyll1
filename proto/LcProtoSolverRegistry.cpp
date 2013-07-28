@@ -34,6 +34,7 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSheathParticleSource1x1v.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -89,7 +90,8 @@ namespace Lucee
       .append<Lucee::NormGradPhiUpdater<3> >()
       .append<Lucee::IntegrateFieldAlongLine<1> >()
       .append<Lucee::IntegrateFieldAlongLine<2> >()
-      .append<Lucee::IntegrateFieldAlongLine<3> >();
+      .append<Lucee::IntegrateFieldAlongLine<3> >()
+      .append<Lucee::SheathParticleSource1x1v>();
 
 #ifdef HAVE_PETSC
       Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
