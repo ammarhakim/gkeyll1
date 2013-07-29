@@ -50,6 +50,7 @@ set(lcslvrs_SOURCES
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
+  LcNodalDgFunctionBoundaryCondition.cpp
   LcNodalDisContHyperUpdater.cpp
   LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp
