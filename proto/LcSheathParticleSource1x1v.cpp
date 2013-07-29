@@ -60,12 +60,7 @@ namespace Lucee
     Lucee::Field<2, double>& src = this->getOut<Lucee::Field<2, double> >(0);
     src = 0.0;
 
-    std::vector<int> ndIds;
-    ndIds.resize(nodalBasis->getNumNodes());
-    for (unsigned i = 0; i<ndIds.size(); ++i)
-      ndIds[i] = i;
-
-    unsigned numNodes = ndIds.size();
+    unsigned numNodes = nodalBasis->getNumNodes();
     int idx[2];
     Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
     Lucee::FieldPtr<double> ptr = src.createPtr();
@@ -102,7 +97,6 @@ namespace Lucee
         ptr[n] = maxFact*std::exp(-vu*vu/2/vt2);
       }
     }
-
     return Lucee::UpdaterStatus();
   }
 
