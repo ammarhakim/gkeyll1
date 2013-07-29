@@ -35,6 +35,11 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("NodalDisContHyperUpdater::readInput: Must specify element to use using 'basis'");
+// matrix to store coordinates of nodes
+    nodeCoords = Lucee::Matrix<double>(nodalBasis->getNumNodes(), 3);
+// create unit mapping
+    ndIds.resize(nodalBasis->getNumNodes());
+    for (unsigned i=0; i<ndIds.size(); ++i) ndIds[i] = i;
   }
 
   template <unsigned NDIM>
@@ -43,30 +48,53 @@ namespace Lucee
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
+
+    unsigned numNodes = nodalBasis->getNumNodes();
+    unsigned nc = qbc.getNumComponents()/numNodes;
+    std::vector<double> res(nc);
+
+// get nodal coordinates
+    nodalBasis->setIndex(idx);
+    nodalBasis->getNodalCoordinates(nodeCoords);
+
+    for (unsigned n=0; n<numNodes; ++n)
+    {
+      evaluateFunction(*L, tm, nodeCoords, ndIds[n], res);
+      for (unsigned k=0; k<nc; ++k)
+        qbc[nc*n+k] = res[k];
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalDgFunctionBoundaryCondition<NDIM>::evaluateFunction(Lucee::LuaState& L, double tm,
+    const Lucee::Matrix<double>& nc, unsigned nn, std::vector<double>& res)
+  {
 // push function object on stack
-    lua_rawgeti(*L, LUA_REGISTRYINDEX, fnRef);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
 // push variables on stack
     for (unsigned i=0; i<3; ++i)
-      lua_pushnumber(*L, loc[i]);
-    lua_pushnumber(*L, tm);
+      lua_pushnumber(L, nc(nn,i));
+    lua_pushnumber(L, tm);
 // call function
-    if (lua_pcall(*L, 4, this->numComponents(), 0) != 0)
+    if (lua_pcall(L, 4, res.size(), 0) != 0)
     {
-      std::string err(lua_tostring(*L, -1));
-      lua_pop(*L, 1);
-      Lucee::Except lce("NodalDgFunctionBoundaryCondition::applyBc: ");
-      lce << "Problem evaluating function supplied as 'bc' ";
-      lce << std::endl << "[" << err << "]";
+      Lucee::Except lce("NodalDgFunctionBoundaryCondition::evaluateFunction: ");
+      lce << "Problem evaluating function supplied as 'evaluate' "
+          << std::endl;
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
+      lce << "[" << err << "]";
       throw lce;
     }
 // fetch results
-    for (int i=-this->numComponents(); i<0; ++i)
+    for (int i=-res.size(); i<0; ++i)
     {
-      if (!lua_isnumber(*L, i))
-        throw Lucee::Except("NodalDgFunctionBoundaryCondition::applyBc: Return value not a number");
-      qbc[this->component(this->numComponents()+i)] = lua_tonumber(*L, i);
+      if (!lua_isnumber(L, i))
+        throw Lucee::Except("NodalDgFunctionBoundaryCondition::evaluateFunction: Return value not a number");
+      res[res.size()+i] = lua_tonumber(L, i);
     }
-    lua_pop(*L, 1);
+    lua_pop(L, 1);
   }
 
 // instatiations

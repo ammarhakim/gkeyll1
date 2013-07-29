@@ -14,6 +14,7 @@
 
 // lucee includes
 #include <LcBoundaryCondition.h>
+#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 
 namespace Lucee
@@ -54,6 +55,23 @@ namespace Lucee
       int fnRef;
 /** Nodal finite element basis functions */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Nodal coordinates */
+      Lucee::Matrix<double> nodeCoords;
+/** Unit mapping (I am not sure what this is for) */
+      std::vector<int> ndIds;
+
+/**
+ * Evaluate function at specified location and fill output array with
+ * result.
+ *
+ * @param L Lua state object to use.
+ * @param tm Time to evaluate function at.
+ * @param nc Matrix with nodal cooridates.
+ * @param nn Node number
+ * @param res On output, result of evaluating function.
+ */
+      void evaluateFunction(Lucee::LuaState& L, double tm, 
+        const Lucee::Matrix<double>& nc, unsigned nn, std::vector<double>& res);
   };
 }
 

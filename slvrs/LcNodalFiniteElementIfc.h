@@ -365,6 +365,28 @@ namespace Lucee
         std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const;
 
 /**
+ * Compute mapping of nodes from a face to element interior for lower
+ * face in specified direction. The shape of the output matrix
+ * faceToIntMap is (numVolNodes X numFaceNodes).
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param faceToIntMap Matrix storing the mapping.
+ */
+      virtual void getLowerFaceToInteriorMapping(unsigned dir,
+        Lucee::Matrix<double>& faceToIntMap) const;
+
+/**
+ * Compute mapping of nodes from a face to element interior for upper
+ * face in specified direction. The shape of the output matrix
+ * faceToIntMap is (numVolNodes X numFaceNodes).
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param faceToIntMap Matrix storing the mapping.
+ */
+      virtual void getUpperFaceToInteriorMapping(unsigned dir,
+        Lucee::Matrix<double>& faceToIntMap) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output

@@ -27,12 +27,13 @@
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcLagrangeTensorElement.h>
-#include <LcLenardBernsteinDragUpdater.h>
 #include <LcLenardBernsteinDiffUpdater.h>
+#include <LcLenardBernsteinDragUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcNodalDgFunctionBoundaryCondition.h>
 #include <LcNodalDisContHyperUpdater.h>
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
@@ -148,7 +149,11 @@ namespace Lucee
       .append<Lucee::ZeroNormalBoundaryCondition>()
       .append<Lucee::ZeroTangentBoundaryCondition>()
       .append<Lucee::FieldFunctionBoundaryCondition>()
-      .append<Lucee::FunctionBoundaryCondition>();
+      .append<Lucee::FunctionBoundaryCondition>()
+
+      .append<Lucee::NodalDgFunctionBoundaryCondition<1> >()
+      .append<Lucee::NodalDgFunctionBoundaryCondition<2> >()
+      .append<Lucee::NodalDgFunctionBoundaryCondition<3> >();
 
 // register point sources
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >

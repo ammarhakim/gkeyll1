@@ -134,7 +134,8 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  BcUpdater<NDIM>::declareTypes() {
+  BcUpdater<NDIM>::declareTypes() 
+  {
 // any number of output fields
     this->setLastInpVarType(typeid(Lucee::Field<NDIM, double>));
   }
