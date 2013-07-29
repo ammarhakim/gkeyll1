@@ -438,12 +438,12 @@ namespace Lucee
 // mappings for reflection BCs
     unsigned lMap[2] = {1, 0};
     lowerNodeMap.resize(2);
-    for (unsigned i=0; i<2; +i)
+    for (unsigned i=0; i<2; ++i)
       lowerNodeMap[i] = lMap[i];
 
     unsigned uMap[2] = {1, 0};
     upperNodeMap.resize(2);
-    for (unsigned i=0; i<2; +i)
+    for (unsigned i=0; i<2; ++i)
       upperNodeMap[i] = uMap[i];
   }
 
@@ -572,12 +572,12 @@ namespace Lucee
 // mappings for reflection BCs
     unsigned lMap[3] = {2, 1, 0};
     lowerNodeMap.resize(3);
-    for (unsigned i=0; i<3; +i)
+    for (unsigned i=0; i<3; ++i)
       lowerNodeMap[i] = lMap[i];
 
     unsigned uMap[3] = {2, 1, 0};
     upperNodeMap.resize(3);
-    for (unsigned i=0; i<3; +i)
+    for (unsigned i=0; i<3; ++i)
       upperNodeMap[i] = uMap[i];
   }
 
@@ -697,12 +697,12 @@ namespace Lucee
 // mappings for reflection BCs
     unsigned lMap[4] = {3, 2, 1, 0};
     lowerNodeMap.resize(4);
-    for (unsigned i=0; i<4; +i)
+    for (unsigned i=0; i<4; ++i)
       lowerNodeMap[i] = lMap[i];
 
     unsigned uMap[4] = {3, 2, 1, 0};
     upperNodeMap.resize(4);
-    for (unsigned i=0; i<4; +i)
+    for (unsigned i=0; i<4; ++i)
       upperNodeMap[i] = uMap[i];
   }
 
