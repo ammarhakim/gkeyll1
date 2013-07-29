@@ -341,28 +341,24 @@ namespace Lucee
 /**
  * Get coefficients for applying reflecting boundary conditions on
  * lower side in direction 'dir'. The vector nodeMap[i] is the
- * reflected node corresponding to node 'i' and coeff[i] is the
- * coefficient to multiply the value at node 'i'.
+ * reflected node corresponding to node 'i'.
  *
  * @param dir Direction to which face is perpendicular.
  * @param nodeMap Map for reflecting nodes.
- * @param coeff Coefficients to multiply value at node.
  */
       virtual void getLowerReflectingBcMapping(unsigned dir,
-        std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const;
+        std::vector<unsigned>& nodeMap) const;
 
 /**
  * Get coefficients for applying reflecting boundary conditions on
  * upper side in direction 'dir'. The vector nodeMap[i] is the
- * reflected node corresponding to node 'i' and coeff[i] is the
- * coefficient to multiply the value at node 'i'.
+ * reflected node corresponding to node 'i'.
  *
  * @param dir Direction to which face is perpendicular.
  * @param nodeMap Map for reflecting nodes.
- * @param coeff Coefficients to multiply value at node.
  */
       virtual void getUpperReflectingBcMapping(unsigned dir,
-        std::vector<unsigned>& nodeMap, std::vector<double>& coeff) const;
+        std::vector<unsigned>& nodeMap) const;
 
 /**
  * Compute mapping of nodes from a face to element interior for lower
