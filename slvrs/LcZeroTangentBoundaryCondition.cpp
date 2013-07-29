@@ -28,7 +28,7 @@ namespace Lucee
   }
 
   void
-  ZeroTangentBoundaryCondition::applyBc(double tm, const double loc[3],
+  ZeroTangentBoundaryCondition::applyBc(double tm, const double loc[3], const int *idx,
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // rotate vector to local coordinate system

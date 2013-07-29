@@ -28,7 +28,7 @@ namespace Lucee
   }
 
   void
-  ZeroNormalBoundaryCondition::applyBc(double tm, const double loc[3],
+  ZeroNormalBoundaryCondition::applyBc(double tm, const double loc[3], const int *idx,
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // rotate vector to local coordinate system
