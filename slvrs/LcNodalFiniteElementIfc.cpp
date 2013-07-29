@@ -281,6 +281,22 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getLowerFaceToInteriorMapping(unsigned dir,
+    Lucee::Matrix<double>& faceToIntMap) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLowerFaceToInteriorMapping: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getUpperFaceToInteriorMapping(unsigned dir,
+    Lucee::Matrix<double>& faceToIntMap) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getUpperFaceToInteriorMapping: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
