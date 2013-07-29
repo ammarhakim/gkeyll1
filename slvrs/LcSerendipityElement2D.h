@@ -310,7 +310,7 @@ namespace Lucee
  * @param dir Direction to which face is perpendicular.
  * @param nodeMap Map for reflecting nodes.
  */
-      virtual void getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+      void getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
 
 /**
  * Get coefficients for applying reflecting boundary conditions on
@@ -320,7 +320,7 @@ namespace Lucee
  * @param dir Direction to which face is perpendicular.
  * @param nodeMap Map for reflecting nodes.
  */
-      virtual void getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+      void getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
 
 /**
  * Extract nodal data at current grid location from field and copy it

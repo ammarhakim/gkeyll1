@@ -272,6 +272,22 @@ namespace Lucee
   }
 
   void
+  LobattoElement1D::getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
+  {
+    nodeMap.resize(this->getNumNodes());
+    for (unsigned i=0; i<this->getNumNodes(); ++i)
+      nodeMap[i] = lowerNodeMap[i];
+  }
+
+  void
+  LobattoElement1D::getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
+  {
+    nodeMap.resize(this->getNumNodes());
+    for (unsigned i=0; i<this->getNumNodes(); ++i)
+      nodeMap[i] = upperNodeMap[i];
+  }
+
+  void
   LobattoElement1D::extractFromField(const Lucee::Field<1, double>& fld,
     std::vector<double>& data)
   {
@@ -418,6 +434,17 @@ namespace Lucee
     gaussData.interpMat(1,2) = 1.0/2.0-1/std::sqrt(3.0)/2.0;
     gaussData.interpMat(2,1) = 1.0/2.0-1/std::sqrt(3.0)/2.0;
     gaussData.interpMat(2,2) = 1/std::sqrt(3.0)/2.0+1.0/2.0;
+
+// mappings for reflection BCs
+    unsigned lMap[2] = {1, 0};
+    lowerNodeMap.resize(2);
+    for (unsigned i=0; i<2; +i)
+      lowerNodeMap[i] = lMap[i];
+
+    unsigned uMap[2] = {1, 0};
+    upperNodeMap.resize(2);
+    for (unsigned i=0; i<2; +i)
+      upperNodeMap[i] = uMap[i];
   }
 
   void
@@ -541,6 +568,17 @@ namespace Lucee
     gaussData.interpMat(3,1) = -.08729833462074174;
     gaussData.interpMat(3,2) = .4000000000000001;
     gaussData.interpMat(3,3) = .6872983346207415;
+
+// mappings for reflection BCs
+    unsigned lMap[3] = {2, 1, 0};
+    lowerNodeMap.resize(3);
+    for (unsigned i=0; i<3; +i)
+      lowerNodeMap[i] = lMap[i];
+
+    unsigned uMap[3] = {2, 1, 0};
+    upperNodeMap.resize(3);
+    for (unsigned i=0; i<3; +i)
+      upperNodeMap[i] = uMap[i];
   }
 
   void
@@ -655,6 +693,17 @@ namespace Lucee
     gaussData.interpMat(4,2) = -.1495034310460798;
     gaussData.interpMat(4,3) = .4725587471138186;
     gaussData.interpMat(4,4) = .6299431661034451;
+
+// mappings for reflection BCs
+    unsigned lMap[4] = {3, 2, 1, 0};
+    lowerNodeMap.resize(4);
+    for (unsigned i=0; i<4; +i)
+      lowerNodeMap[i] = lMap[i];
+
+    unsigned uMap[4] = {3, 2, 1, 0};
+    upperNodeMap.resize(4);
+    for (unsigned i=0; i<4; +i)
+      upperNodeMap[i] = uMap[i];
   }
 
   void

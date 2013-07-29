@@ -558,25 +558,25 @@ namespace Lucee
   void
   SerendipityElement2D::getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
   {
-    nodeMap.resize(4);
+    nodeMap.resize(this->getNumNodes());
     if (dir == 0)
-      for (unsigned i=0; i<4; ++i)
-        nodeMap[i] = lowerNodeMap0[0];
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = lowerNodeMap0[i];
     else if (dir == 1)
-      for (unsigned i=0; i<4; ++i)
-        nodeMap[i] = lowerNodeMap1[0];
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = lowerNodeMap1[i];
   }
 
   void
   SerendipityElement2D::getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
   {
-    nodeMap.resize(4);
+    nodeMap.resize(this->getNumNodes());
     if (dir == 0)
-      for (unsigned i=0; i<4; ++i)
-        nodeMap[i] = upperNodeMap0[0];
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = upperNodeMap0[i];
     else if (dir == 1)
-      for (unsigned i=0; i<4; ++i)
-        nodeMap[i] = upperNodeMap1[0];
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = upperNodeMap1[i];
   }
 
   void
