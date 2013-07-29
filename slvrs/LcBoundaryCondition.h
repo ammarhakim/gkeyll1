@@ -63,11 +63,13 @@ namespace Lucee
  *
  * @param tm Time at which source is requested.
  * @param loc Coordinate at which source is requested.
+ * @param idx Grid index at which source is requested.
  * @param c Coordinate system to use.
  * @param qin Data in skin cell.
  * @param qbc Data in ghost cell.
  */
-      virtual void applyBc(double tm, const double loc[3], const Lucee::RectCoordSys& c, 
+      virtual void applyBc(double tm, const double loc[3], const int *idx,
+        const Lucee::RectCoordSys& c, 
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
 
     protected:

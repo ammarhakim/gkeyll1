@@ -37,7 +37,7 @@ namespace Lucee
   }
 
   void
-  FieldFunctionBoundaryCondition::applyBc(double tm, const double loc[3],
+  FieldFunctionBoundaryCondition::applyBc(double tm, const double loc[3], const int *idx,
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;

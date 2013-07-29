@@ -77,7 +77,7 @@ namespace Lucee
 // create coordinate system along this direction
     Lucee::AlignedRectCoordSys coordSys(dir);
 
-    int idx[NDIM];
+    int idx[NDIM], idxG[NDIM];
     double xc[3];
 // loop over each array and apply boundary conditions
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
@@ -110,6 +110,7 @@ namespace Lucee
       while (seq.step())
       {
         seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxG);
 // get centroid coordinate
         grid.setIndex(idx);
         grid.getCentroid(xc);
@@ -124,7 +125,7 @@ namespace Lucee
 // apply boundary conditions
         for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
              bcItr != bcList.end(); ++bcItr)
-          (*bcItr)->applyBc(t, xc, coordSys, iPtr, gPtr);
+          (*bcItr)->applyBc(t, xc, idxG, coordSys, iPtr, gPtr);
       }
     }
 
