@@ -16,6 +16,7 @@
 #include <LcMathLib.h>
 #include <LcLenardBernsteinDragUpdater.h>
 #include <LcStructuredGridBase.h>
+#include <LcMathPhysConstants.h>
 
 // math include
 #include <cmath>
@@ -81,17 +82,6 @@ namespace Lucee
         ionMass = tbl.getNumber("ionMass");
       else
         throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify ionMass");
-
-      // Note: should be singly charged
-      if (tbl.hasNumber("elementaryCharge"))
-        elementaryCharge = tbl.getNumber("elementaryCharge");
-      else
-        throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify elementaryCharge");
-
-      if (tbl.hasNumber("epsilon0"))
-        epsilon0 = tbl.getNumber("epsilon0");
-      else
-        throw Lucee::Except("LenardBernsteinDragUpdater::readInput: Must specify epsilon0");
     }
   }
 
@@ -197,6 +187,8 @@ namespace Lucee
     // Precompute two matrices for surface integrals
     surfIntegralMatrixLower = massMatrixInv*interpSurfMatrixLower.transpose();
     surfIntegralMatrixUpper = massMatrixInv*interpSurfMatrixUpper.transpose();
+
+    elementaryChargePow4 = ELEMENTARY_CHARGE*ELEMENTARY_CHARGE*ELEMENTARY_CHARGE*ELEMENTARY_CHARGE;
   }
 
   Lucee::UpdaterStatus 
@@ -272,11 +264,10 @@ namespace Lucee
       // Really computing k*T in joules
       double tempAvg = ionMass*vtSqAvg;
       // Coulomb logarithm
-      double lambda = 23 - std::log(sqrt(2*densityAvg/1000000.0)/pow(tempAvg/elementaryCharge,3.0/2.0));
+      double lambda = 23 - std::log(sqrt(2*densityAvg/1000000.0)/pow(tempAvg/ELEMENTARY_CHARGE,3.0/2.0));
       // Calculate Braginskii collisional time (see NRL formulary)
       // Actually utexas page for SI units
-      const double PI = 3.141592653589793238462;
-      alpha = densityAvg*lambda*pow(elementaryCharge,4)/(12*pow(PI*tempAvg,3.0/2.0)*epsilon0*epsilon0*sqrt(ionMass));
+      alpha = densityAvg*lambda*elementaryChargePow4/(12*pow(PI*tempAvg,3.0/2.0)*EPSILON0*EPSILON0*sqrt(ionMass));
     }
 
     int idx[2];
