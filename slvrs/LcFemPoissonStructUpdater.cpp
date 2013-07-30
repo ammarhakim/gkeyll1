@@ -53,7 +53,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   FemPoissonStructUpdater<NDIM>::~FemPoissonStructUpdater()
-  { // get rid of stuff
+  {
     if (runOnce)
     {
       MatDestroy(stiffMat);
@@ -66,10 +66,8 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
-// get hold of element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
@@ -171,14 +169,10 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::initialize()
   {
-// call base class method
     Lucee::UpdaterIfc::initialize();
 
-// number of global nodes
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
-// number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
-
 // map to hold periodicially identified nodes
     std::map<int, int> periodicNodeMap;
 
@@ -199,20 +193,14 @@ namespace Lucee
     VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
     VecSetFromOptions(globalSrc);
 
-// local stiffness matrix
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
-// map for local indices to global indices
     std::vector<int> lgMap(nlocal);
-
-// storage for passing to petsc
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-// global region for grid
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
-// create sequencer for looping over local box
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion(); 
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     int idx[NDIM];
@@ -221,10 +209,8 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-// set index into element basis
       nodalBasis->setIndex(idx);
 
-// get local stiffness matrix
       nodalBasis->getStiffnessMatrix(localStiff);
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
@@ -233,9 +219,7 @@ namespace Lucee
           vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
       }
 
-// get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
-
 // insert into global stiffness matrix, adding them to existing value
       MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0],
         &vals[0], ADD_VALUES);
@@ -272,7 +256,6 @@ namespace Lucee
           while (seq.step())
           {
             seq.fillWithIndex(idx);
-// set index into element basis
             nodalBasis->setIndex(idx);
 // get surface nodes -> global mapping
             if (side == 0)
@@ -310,11 +293,8 @@ namespace Lucee
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
-// space for mappings
         std::vector<int> lgUpperSurfMap(nsl), lgLowerSurfMap(nsl);
-// space for local node numbers on faces
         std::vector<int> lgLocalNodeNum(nsl), lgMapMod(nlocal);
-// space for stiffness mods
         std::vector<int> stiffModRowIdx(nsl);
         std::vector<double> modVals(nlocal*nlocal);
 
@@ -329,11 +309,8 @@ namespace Lucee
         while (seq.step())
         {
           seq.fillWithIndex(idx);
-
-// set index into element basis
           nodalBasis->setIndex(idx);
 
-// get stiffness matrix for modification of the terms on the lower boundary
           nodalBasis->getStiffnessMatrix(localStiff);
 // construct arrays for passing into Petsc
           for (unsigned k=0; k<nlocal; ++k)
@@ -404,9 +381,7 @@ namespace Lucee
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
-// space for mappings
         std::vector<int> lgSurfMap(nsl), lgLowerSurfMap(nsl);
-// space for local node numbers on faces
         std::vector<int> lgLocalNodeNum(nsl), lgLowerLocalNodeNum(nsl);
 
 // create region to loop over side
@@ -420,8 +395,6 @@ namespace Lucee
         while (seq.step())
         {
           seq.fillWithIndex(idx);
-
-// set index into element basis
           nodalBasis->setIndex(idx);
 // get surface nodes -> global mapping
           nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
@@ -522,33 +495,20 @@ namespace Lucee
 // set flag to indicate we should delete PetSc vectors/matrices
     runOnce = true;
 
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-// get input/output fields
     const Lucee::Field<NDIM, double>& src = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& sol = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-// global region for grid
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
-// create sequencer for looping over local box
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
-// number of local nodes
     unsigned nlocal = nodalBasis->getNumNodes();
 
-// local mass matrix
     Lucee::Matrix<double> localMass(nlocal, nlocal);
-// map for local indices to global indices
     std::vector<int> lgMap(nlocal);
-
-// storage for computing source contribution
     std::vector<double> localSrc(nlocal), localMassSrc(nlocal);
-
-// pointers
     Lucee::ConstFieldPtr<double> srcPtr = src.createConstPtr();
 
-// create sequencer for looping over local box
     Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
     int idx[NDIM];
 
@@ -557,7 +517,7 @@ namespace Lucee
 // if all directions are periodic, we need to adjust source to ensure
 // solvability of the equations
     if (allPeriodic)
-      intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;    // PetscViewer lab;
+      intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;
 
 // clear out existing stuff in source vector: this is required
 // otherwise successive calls to advance() will accumulate into source
@@ -568,12 +528,9 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-// set index into element basis
       nodalBasis->setIndex(idx);
 
-// get local mass matrix
       nodalBasis->getMassMatrix(localMass);
-// get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
 
       if (srcNodesShared)
@@ -617,11 +574,8 @@ namespace Lucee
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
-// space for mappings
         std::vector<int> lgLowerSurfMap(nsl);
-// space for local node numbers on faces
         std::vector<int> lgLocalNodeNum(nsl);
-// space for passing into Petsc
         std::vector<double> localMassMod(nsl);
 
 // create region to loop over side
@@ -635,13 +589,8 @@ namespace Lucee
         while (seq.step())
         {
           seq.fillWithIndex(idx);
-
-// set index into element basis
           nodalBasis->setIndex(idx);
-// get local node number of upper face
           nodalBasis->getSurfUpperNodeNums(d, lgLocalNodeNum);
-
-// get local mass matrix
           nodalBasis->getMassMatrix(localMass);
 
           if (srcNodesShared)
@@ -706,11 +655,6 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-//     PetscViewer lab;
-//     PetscViewerASCIIOpen(PETSC_COMM_WORLD, "vector", &lab);
-//     PetscViewerSetFormat(lab, PETSC_VIEWER_DEFAULT);
-//     VecView(globalSrc, lab);
-
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
     unsigned count = 0;
@@ -758,9 +702,7 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::declareTypes()
   {
-// takes one input (source terms)
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
-// returns one output, solution
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
@@ -793,13 +735,10 @@ namespace Lucee
   {
     unsigned nlocal = nodalBasis->getNumNodes();
     std::vector<double> weights(nlocal), localFld(nlocal);
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-// create pointers
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
-
     Lucee::RowMajorSequencer<NDIM> seq(grid.getLocalRegion());
     int idx[NDIM];
     double fldInt = 0.0;
@@ -807,11 +746,7 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-
-// set index into element basis
       nodalBasis->setIndex(idx);
-
-// get quadrature weights
       nodalBasis->getWeights(weights);
 
       if (shareFlag)
@@ -827,18 +762,14 @@ namespace Lucee
           localFld[k] = fldPtr[k];
       }
 
-// compute contribution from this cell
       for (unsigned k=0; k<nlocal; ++k)
-      {
         fldInt += weights[k]*localFld[k];      
-      }
     }
 
     double netFldInt = fldInt;
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
-// sum across all processors
     comm->allreduce(1, &fldInt, &netFldInt, TX_SUM);
 
     return netFldInt;
