@@ -27,6 +27,7 @@ set(lcslvrs_SOURCES
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcEulerEquation.cpp
+  LcEvalOnBoundaryNodesUpdater.cpp
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
   LcFieldFunctionBoundaryCondition.cpp
