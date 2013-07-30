@@ -18,7 +18,7 @@
 namespace Lucee
 {
 /**
- * Lobatto element in 2D. The reference element is the interval [-1,1]
+ * Lobatto element in 1D. The reference element is the interval [-1,1]
  * X [-1,1].
  */
   class LobattoElement1D : public Lucee::NodalFiniteElementIfc<1>
@@ -197,6 +197,26 @@ namespace Lucee
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
+ * Get coefficients for applying reflecting boundary conditions on
+ * lower side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      void getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+
+/**
+ * Get coefficients for applying reflecting boundary conditions on
+ * upper side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      void getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -244,6 +264,11 @@ namespace Lucee
       std::vector<Lucee::Matrix<double> > lowerMat;
 /** List of diffusion matrices on each upper face */
       std::vector<Lucee::Matrix<double> > upperMat;
+
+/** Mapping for reflection on lower faces in X */
+      std::vector<unsigned> lowerNodeMap;
+/** Mapping for reflection on lower faces in Y */
+      std::vector<unsigned> upperNodeMap;
 
 /**
  * Struct to hold data for Guassian quadrature.
