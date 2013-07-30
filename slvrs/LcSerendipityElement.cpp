@@ -1252,7 +1252,7 @@ namespace Lucee
         lowerFaceToInteriorMapMatrices[dimIndex] = Eigen::MatrixXd::Zero(functionVector.size(), polyOrder + 1);
 
       // Explicitly assign values to matrix elements (somewhat long)
-      #include <LcSerendipityElementFaceToInteriorOutput>
+      //#include <LcSerendipityElementFaceToInteriorOutput>
     }
 
     computeMass(refMass);
