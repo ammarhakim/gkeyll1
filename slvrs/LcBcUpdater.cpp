@@ -70,10 +70,8 @@ namespace Lucee
   {
     int lo[NDIM], up[NDIM];
 
-// get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-
 // create coordinate system along this direction
     Lucee::AlignedRectCoordSys coordSys(dir);
 
@@ -83,7 +81,6 @@ namespace Lucee
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
 // get array
       Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(n);
-// create pointers to copy data
       Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr();
       Lucee::FieldPtr<double> gPtr = A.createPtr();
 
