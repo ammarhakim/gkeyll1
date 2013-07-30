@@ -21,6 +21,8 @@
 
 namespace Lucee
 {
+  static const unsigned LC_LOWER_EDGE = 0;
+  static const unsigned LC_UPPER_EDGE = 1;
 
   template <> const char *EvalOnBoundaryNodesUpdater<1>::id = "EvalOnBoundaryNodes1D";
   template <> const char *EvalOnBoundaryNodesUpdater<2>::id = "EvalOnBoundaryNodes2D";
@@ -49,6 +51,13 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("EvalOnBoundaryNodesUpdater::readInput: Must specify element to use using 'basis'");
+
+    dir = tbl.getNumber("dir");
+    std::string edgeStr = tbl.getString("edge");
+    if (edgeStr == "lower")
+      edge = LC_LOWER_EDGE;
+    else
+      edge = LC_UPPER_EDGE;
   }
 
   template <unsigned NDIM>

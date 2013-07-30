@@ -73,6 +73,10 @@ namespace Lucee
       bool sharedNodes;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Direction to apply boundary condtion */
+      unsigned dir;
+/** Edge to apply boundary condition */
+      unsigned edge;
 
 /**
  * Evaluate function at specified location and fill output array with
