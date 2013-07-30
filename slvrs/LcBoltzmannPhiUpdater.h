@@ -75,6 +75,12 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
+/** Mass of electron */
+      double electronMass;
+/** Mass of ion */
+      double ionMass;
+/** Elementary charge */
+      double elementaryCharge;
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)

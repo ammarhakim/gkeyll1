@@ -1,11 +1,12 @@
 /**
- * @file	LcHeatFluxAtEdgeUpdater.h
+ * @file	LcNodalCopyFaceToInteriorUpdater.h
  *
- * @brief	Updater to compute heat flux at right-most edge in domain
+ * @brief	Updater to copy data on the node face into the volume nodes.
+ * Assumes common nodes are not shared
  */
 
-#ifndef LC_HEAT_FLUX_AT_EDGE_UPDATER_H
-#define LC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#ifndef LC_NODAL_COPY_FACE_TO_INTERIOR_UPDATER_H
+#define LC_NODAL_COPY_FACE_TO_INTERIOR_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,31 +14,26 @@
 #endif
 
 // lucee includes
-#include <LcDynVector.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
-// std includes
-#include <vector>
-
 // eigen includes
 #include <Eigen/Dense>
+#include <Eigen/LU>
 
 namespace Lucee
 {
 /**
- * Updater to solve hyperbolic equations using a nodal discontinous
- * Galerkin scheme.
+ * Updater to copy a 1D nodal field to a 2D nodal field
  */
-  class HeatFluxAtEdgeUpdater : public Lucee::UpdaterIfc
+  class NodalCopyFaceToInteriorUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new nodal DG solver */
-      HeatFluxAtEdgeUpdater();
+      NodalCopyFaceToInteriorUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,26 +68,17 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Mass of species we are computing the heat flux using */
-      double ionMass;
-/** Perpendicular temperature of ions and electrons */
-      double tPerp;
-/** Weights for gaussian quadrature points */
-      std::vector<double> gaussWeights;
-/** 
- * Interpolation matrix for bringing quantities from nodal locations to
- * gaussian quadrature points.
- */
-      Eigen::MatrixXd interpMatrix;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/** Pointer to 2d nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** Pointer to 1d nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
+/** Needed to distinguish continuous fields vs. discontinuous for now */
+      bool shareCommonNodes;
+/** Direction that 1-D nodal data "lives on" */
+      unsigned dir;
+/** Matrix that maps the 1-D nodes to 2-D */
+      Eigen::MatrixXd mappingMatrix;
   };
 }
 
-#endif // LC_BOLTZMANN_PHI_UPDATER_H
+#endif // LC_NODAL_COPY_FACE_TO_INTERIOR_UPDATER_H

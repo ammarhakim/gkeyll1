@@ -92,8 +92,7 @@ namespace Lucee
       bool useBraginskii;
 /** The following (in SI units) is used for Braginskii collisional time */
       double ionMass;
-      double elementaryCharge;
-      double epsilon0;
+      double elementaryChargePow4;
 /** Type of interface flux to use */
       int fluxType;
 /**

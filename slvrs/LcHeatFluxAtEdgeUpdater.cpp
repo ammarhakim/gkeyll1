@@ -16,6 +16,7 @@
 #include <LcMathLib.h>
 #include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcStructuredGridBase.h>
+#include <LcMathPhysConstants.h>
 
 namespace Lucee
 {
@@ -41,6 +42,11 @@ namespace Lucee
       ionMass = tbl.getNumber("ionMass");
     else
       throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
+
+    if (tbl.hasNumber("tPerp"))
+      tPerp = tbl.getNumber("tPerp");
+    else
+      throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify tPerp");
   }
 
   void 
@@ -93,6 +99,7 @@ namespace Lucee
     const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(0);
     const Lucee::Field<1, double>& mom3In = this->getInp<Lucee::Field<1, double> >(1);
     const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
+    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(3);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -103,6 +110,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
     Lucee::ConstFieldPtr<double> mom3Ptr = mom3In.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
     
     // Find mean vtSq in entire domain
     double meanVtSq = 0.0;
@@ -129,9 +137,10 @@ namespace Lucee
     // Find value of the following input fields at the very last edge of the domain
     mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
     mom3In.setPtr(mom3Ptr, globalRgn.getUpper(0)-1);
+    phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
     
-    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1];
-    double electronHeatFlux = 1.5*ionMass*meanVtSq*mom1Ptr[nlocal-1];
+    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1] + mom1Ptr[nlocal-1]*ELEMENTARY_CHARGE*(tPerp + phiPtr[nlocal-1]);
+    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerp)*mom1Ptr[nlocal-1];
     
     std::vector<double> data(3);
     data[0] = ionHeatFlux + electronHeatFlux;
@@ -145,7 +154,8 @@ namespace Lucee
   void
   HeatFluxAtEdgeUpdater::declareTypes()
   {
-    // takes three inputs (<v>,<v^3>) moments + vtSq
+    // takes four inputs (<v>,<v^3>) moments + vtSq + phi(x)
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));

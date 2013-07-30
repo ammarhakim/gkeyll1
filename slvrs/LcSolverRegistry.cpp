@@ -33,6 +33,7 @@
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
 #include <LcNodalDisContHyperUpdater.h>
 #include <LcNodalDisContSrcIncrUpdater.h>
@@ -96,6 +97,8 @@ namespace Lucee
 
       .append<Lucee::LenardBernsteinDragUpdater>()
       .append<Lucee::LenardBernsteinDiffUpdater>()
+      
+      .append<Lucee::NodalCopyFaceToInteriorUpdater>()
 
       .append<Lucee::NodalDisContSrcIncrUpdater<1> >()
       .append<Lucee::NodalDisContSrcIncrUpdater<2> >()

@@ -35,10 +35,25 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
+    if (tbl.hasNumber("electronMass"))
+      electronMass = tbl.getNumber("electronMass");
+    else
+      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify electronMass");
+
+    if (tbl.hasNumber("ionMass"))
+      ionMass = tbl.getNumber("ionMass");
+    else
+      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify ionMass");
+
+    if (tbl.hasNumber("elementaryCharge"))
+      elementaryCharge = tbl.getNumber("elementaryCharge");
+    else
+      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify elementaryCharge");
+
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify element to use using 'basis1d'");
+      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify element to use using 'basis'");
   }
 
   void 
@@ -101,8 +116,10 @@ namespace Lucee
 
     // Particle density n(x)
     const Lucee::Field<1, double>& nIn = this->getInp<Lucee::Field<1, double> >(0);
+    // First velocity moment of ion distribution function
+    const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(1);
     // Thermal velocity squared vt(x)^2
-    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(1);
+    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
     // Returns (e/m_i)*phi(x), so need to multiply by m_i/e outside of code
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
@@ -111,6 +128,7 @@ namespace Lucee
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::ConstFieldPtr<double> nPtr = nIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
@@ -118,7 +136,9 @@ namespace Lucee
     
     // Find value of n(x) at the very last edge of the domain
     nIn.setPtr(nPtr, globalRgn.getUpper(0)-1);
+    mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
     double nEdge = nPtr[nlocal-1];
+    double ionFluxAtEdge = mom1Ptr[nlocal-1];
 
     // Find mean vtSq in entire domain
     double meanVtSq = 0.0;
@@ -142,6 +162,20 @@ namespace Lucee
     // Consider using grid.getNumCells(0)
     meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
+    // Electron temperature in joules
+    double Te = ionMass*meanVtSq;
+    // Electron thermal velocity
+    double vThermElec = sqrt(Te/electronMass);
+    const double PI = 3.141592653589793238462;
+    // Figure out phi_s (sheath potential)
+    double phiS = -Te/elementaryCharge*log(sqrt(2*PI)*ionFluxAtEdge/(nEdge*vThermElec));
+
+    if (nEdge < 0.0)
+    {
+      throw Lucee::Except("BoltzmannPhiUpdater::update: nEdge is negative!");
+    }
+
+
     // Loop over all cells
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
@@ -159,11 +193,14 @@ namespace Lucee
       
       // Compute projection of ln(n_i(x)/nEdge) onto basis functions
       for (int componentIndex = 0; componentIndex < phiAtQuadPoints.rows(); componentIndex++)
-        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*std::log(phiAtQuadPoints(componentIndex)/nEdge);
+      {
+        //if (phiAtQuadPoints(componentIndex) < 0.0)
+        //  throw Lucee::Except("BoltzmannPhiUpdater::update: n at quad point is negative!");
+        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge) + phiS);
+        //phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge));
+      }
 
       Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;
-      // Multiply all components by meanVtSq
-      phiWeights *= meanVtSq;
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
@@ -176,7 +213,8 @@ namespace Lucee
   void
   BoltzmannPhiUpdater::declareTypes()
   {
-    // takes three inputs (moment0=<1>=n(x), vt^2(x)) 
+    // takes three inputs (moment0=<1>=n(x), vt^2(x), moment1=<v>) 
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns one output: mean(vt^2(x)) * ln(n(x)/n(xMax))

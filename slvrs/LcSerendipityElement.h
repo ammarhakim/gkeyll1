@@ -291,6 +291,16 @@ namespace Lucee
       void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 /**
+ * Compute mapping of nodes from a face to element interior for lower
+ * face in specified direction. The shape of the output matrix
+ * faceToIntMap is (numVolNodes X numFaceNodes).
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param faceToIntMap Matrix storing the mapping.
+ */
+      virtual void getLowerFaceToInteriorMapping(unsigned dir,
+        Lucee::Matrix<double>& faceToIntMap) const;
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -383,6 +393,8 @@ namespace Lucee
 /** List of matrices on each upper face */
       std::vector<Eigen::MatrixXd> upperMatDiffusion;
       std::vector<Eigen::MatrixXd> upperMatHyperDiffusion;
+/** Face to interior mapping matrices */
+      std::vector<Eigen::MatrixXd> lowerFaceToInteriorMapMatrices;
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.

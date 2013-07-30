@@ -938,6 +938,21 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  SerendipityElement<NDIM>::getLowerFaceToInteriorMapping(unsigned dir,
+        Lucee::Matrix<double>& faceToIntMap) const
+  {
+    if (polyOrder > 3)
+      Lucee::Except("SerendipityElement::getLowerFaceToInteriorMapping: Not implemented for higher than cubic!");
+    if (NDIM != 2)
+      Lucee::Except("SerendipityElement::getLowerFaceToInteriorMapping: Only implemented for 2D");
+
+    for (int rowIndex = 0; rowIndex < lowerFaceToInteriorMapMatrices[dir].rows(); rowIndex++)
+      for (int colIndex = 0; colIndex < lowerFaceToInteriorMapMatrices[dir].cols(); colIndex++)
+        faceToIntMap(rowIndex, colIndex) = lowerFaceToInteriorMapMatrices[dir](rowIndex, colIndex);
+  }
+
+  template <unsigned NDIM>
+  void
   SerendipityElement<NDIM>::extractFromField(const Lucee::Field<NDIM, double>& fld,
     std::vector<double>& data)
   {
@@ -1229,6 +1244,15 @@ namespace Lucee
       // Explicity assign values to matrix elements (very long)
       #include <LcSerendipityElementDiffusionOutput>
       #include <LcSerendipityElementHyperDiffusionOutput>
+
+      // Set up 1D to 2D mapping matrix
+      lowerFaceToInteriorMapMatrices = std::vector<Eigen::MatrixXd>(NDIM);
+      
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        lowerFaceToInteriorMapMatrices[dimIndex] = Eigen::MatrixXd::Zero(functionVector.size(), polyOrder + 1);
+
+      // Explicitly assign values to matrix elements (somewhat long)
+      #include <LcSerendipityElementFaceToInteriorOutput>
     }
 
     computeMass(refMass);
