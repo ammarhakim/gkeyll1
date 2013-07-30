@@ -1328,7 +1328,7 @@ namespace Lucee
                     -1,1,
                     -1,0;
       }
-      else if (polyOrder = 3)
+      else if (polyOrder == 3)
       {
         nodeMatrix << -1,-1,
                     -1/3.0,-1,
