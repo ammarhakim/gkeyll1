@@ -303,6 +303,26 @@ namespace Lucee
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
+ * Get coefficients for applying reflecting boundary conditions on
+ * lower side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      void getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+
+/**
+ * Get coefficients for applying reflecting boundary conditions on
+ * upper side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      void getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const;
+
+/**
  * Extract nodal data at current grid location from field and copy it
  * into a vector. This basically "flattens" the nodal data consistent
  * with the node layout and the stiffness, mass matrices. The output
@@ -368,6 +388,15 @@ namespace Lucee
       std::vector<Lucee::Matrix<double> > lowerMatDiffusion;
 /** List of diffusion matrices on each upper face */
       std::vector<Lucee::Matrix<double> > upperMatDiffusion;
+
+/** Mapping for reflection on lower faces in X */
+      std::vector<unsigned> lowerNodeMap0;
+/** Mapping for reflection on lower faces in Y */
+      std::vector<unsigned> lowerNodeMap1;
+/** Mapping for reflection on upper faces in X */
+      std::vector<unsigned> upperNodeMap0;
+/** Mapping for reflection on upper faces in Y */
+      std::vector<unsigned> upperNodeMap1;
 
 /**
  * Struct to hold data for Guassian quadrature.

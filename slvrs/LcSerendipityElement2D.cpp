@@ -556,6 +556,30 @@ namespace Lucee
   }
 
   void
+  SerendipityElement2D::getLowerReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
+  {
+    nodeMap.resize(this->getNumNodes());
+    if (dir == 0)
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = lowerNodeMap0[i];
+    else if (dir == 1)
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = lowerNodeMap1[i];
+  }
+
+  void
+  SerendipityElement2D::getUpperReflectingBcMapping(unsigned dir, std::vector<unsigned>& nodeMap) const
+  {
+    nodeMap.resize(this->getNumNodes());
+    if (dir == 0)
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = upperNodeMap0[i];
+    else if (dir == 1)
+      for (unsigned i=0; i<this->getNumNodes(); ++i)
+        nodeMap[i] = upperNodeMap1[i];
+  }
+
+  void
   SerendipityElement2D::extractFromField(const Lucee::Field<2, double>& fld,
     std::vector<double>& data)
   {
@@ -886,6 +910,23 @@ namespace Lucee
 // bring moment matrices in physical space
     for (unsigned p=0; p<3; ++p)
       momMatrix[p].m *= 0.5*dx*0.5*dy;
+
+// compute reflection mappings
+    unsigned l0Map[4] = {1, 0, 3, 2};
+    lowerNodeMap0.resize(4);
+    for (unsigned i=0; i<4; ++i) lowerNodeMap0[i] = l0Map[i];
+
+    unsigned l1Map[4] = {3, 2, 1, 0};
+    lowerNodeMap1.resize(4);
+    for (unsigned i=0; i<4; ++i) lowerNodeMap1[i] = l1Map[i];
+
+    unsigned u0Map[4] = {1, 0, 3, 2};
+    upperNodeMap0.resize(4);
+    for (unsigned i=0; i<4; ++i) upperNodeMap0[i] = u0Map[i];
+
+    unsigned u1Map[4] = {3, 2, 1, 0};
+    upperNodeMap1.resize(4);
+    for (unsigned i=0; i<4; ++i) upperNodeMap1[i] = u1Map[i];
   }
 
   void
@@ -1423,6 +1464,23 @@ namespace Lucee
 // bring moment matrices in physical space
     for (unsigned p=0; p<3; ++p)
       momMatrix[p].m *= 0.5*dx*0.5*dy;
+
+// compute reflection mappings
+    unsigned l0Map[8] = {1, 0, 3, 2, 4, 7, 6, 5};
+    lowerNodeMap0.resize(8);
+    for (unsigned i=0; i<8; ++i) lowerNodeMap0[i] = l0Map[i];
+
+    unsigned l1Map[8] = {3, 2, 1, 0, 6, 5, 4, 7};
+    lowerNodeMap1.resize(8);
+    for (unsigned i=0; i<8; ++i) lowerNodeMap1[i] = l1Map[i];
+
+    unsigned u0Map[8] = {1, 0, 3, 2, 4, 7, 6, 5};
+    upperNodeMap0.resize(8);
+    for (unsigned i=0; i<8; ++i) upperNodeMap0[i] = u0Map[i];
+
+    unsigned u1Map[8] = {3, 2, 1, 0, 6, 5, 4, 7};
+    upperNodeMap1.resize(8);
+    for (unsigned i=0; i<8; ++i) upperNodeMap1[i] = u1Map[i];
   }
 
   void
