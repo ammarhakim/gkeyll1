@@ -74,7 +74,20 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Field<NDIM, double>& q = this->getOut<Lucee::Field<NDIM, double> >(0);
-    q = 0.0;
+
+    unsigned numNodes = nodalBasis->getNumNodes();
+// get list of nodes on face
+    unsigned surfNumNodes;
+    if (edge == LC_LOWER_EDGE)
+      surfNumNodes = nodalBasis->getNumSurfLowerNodes(dir);
+    else
+      surfNumNodes = nodalBasis->getNumSurfUpperNodes(dir);
+
+    std::vector<int> surfNodeNums(surfNumNodes);
+    if (edge == LC_LOWER_EDGE)
+      nodalBasis->getSurfLowerNodeNums(dir, surfNodeNums);
+    else
+      nodalBasis->getSurfUpperNodeNums(dir, surfNodeNums);
 
 // get list of nodes exclusively owned by element
     std::vector<int> ndIds;
@@ -82,24 +95,47 @@ namespace Lucee
       nodalBasis->getExclusiveNodeIndices(ndIds);
     else
     { // create "unit" mapping
-      ndIds.resize(nodalBasis->getNumNodes());
+      ndIds.resize(numNodes);
       for (unsigned i = 0; i<ndIds.size(); ++i)
         ndIds[i] = i;
     }
 
-    unsigned numNodes = ndIds.size();
-    unsigned nc = q.getNumComponents()/numNodes;
+// create mapping of nodes to index locations
+    std::vector<int> nodeToLoc(numNodes);
+    for (unsigned i=0; i<numNodes; ++i) nodeToLoc[i] = -1; // by default node is not included
+    for (unsigned i=0; i<ndIds.size(); ++i)
+      nodeToLoc[ndIds[i]] = i;
 
+// number of components per node
+    unsigned nc = q.getNumComponents()/ndIds.size();
     std::vector<double> res(nc);
-    int idx[NDIM];
 
+    int lo[NDIM], up[NDIM];
+// create a region to represent skin layer
+      for (unsigned i=0; i<NDIM; ++i)
+      { // whole region, including extended region
+        lo[i] = q.getGlobalLower(i);
+        up[i] = q.getGlobalUpper(i);
+      }
+// adjust region so it only indexes ghost cells
+      if (edge == LC_LOWER_EDGE)
+      { // lower side
+        up[dir] = q.getGlobalLower(dir)+1;
+      }
+      else
+      { // upper side
+        lo[dir] = q.getGlobalUpper(dir)-1;
+      }
+// region must be local to processor
+      Lucee::Region<NDIM, int> sknRgn = q.getRegion().intersect(
+        Lucee::Region<NDIM, int>(lo, up));
+
+    int idx[NDIM];
     Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
 
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
     Lucee::FieldPtr<double> ptr = q.createPtr();
-
-    Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
-    Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(sknRgn);
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -108,11 +144,14 @@ namespace Lucee
       nodalBasis->setIndex(idx);
       nodalBasis->getNodalCoordinates(nodeCoords);
 
-      for (unsigned n=0; n<numNodes; ++n)
+      for (unsigned n=0; n<surfNumNodes; ++n)
       {
-        evaluateFunction(*L, t, nodeCoords, ndIds[n], res);
-        for (unsigned k=0; k<nc; ++k)
-          ptr[nc*n+k] = res[k];
+        unsigned nn = surfNodeNums[n];
+        evaluateFunction(*L, t, nodeCoords, nn, res);
+// check if this node should be updated
+        if (nodeToLoc[nn] != -1)
+          for (unsigned k=0; k<nc; ++k)
+            ptr[nc*nn+k] = res[k];
       }
     }
 
