@@ -17,6 +17,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
+#include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFieldFunctionBoundaryCondition.h>
@@ -121,6 +122,10 @@ namespace Lucee
       .append<Lucee::EvalOnNodesUpdater<1> >()
       .append<Lucee::EvalOnNodesUpdater<2> >()
       .append<Lucee::EvalOnNodesUpdater<3> >()
+
+      .append<Lucee::EvalOnBoundaryNodesUpdater<1> >()
+      .append<Lucee::EvalOnBoundaryNodesUpdater<2> >()
+      .append<Lucee::EvalOnBoundaryNodesUpdater<3> >()
     
       .append<Lucee::ProjectOnNodalBasisUpdater<1> >()
       .append<Lucee::ProjectOnNodalBasisUpdater<2> >()
