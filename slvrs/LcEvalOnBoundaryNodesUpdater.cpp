@@ -148,10 +148,9 @@ namespace Lucee
       {
         unsigned nn = surfNodeNums[n];
         evaluateFunction(*L, t, nodeCoords, nn, res);
-// check if this node should be updated
         if (nodeToLoc[nn] != -1)
           for (unsigned k=0; k<nc; ++k)
-            ptr[nc*nn+k] = res[k];
+            ptr[nc*nodeToLoc[nn]+k] = res[k];
       }
     }
 
