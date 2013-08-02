@@ -17,6 +17,11 @@
 #include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
+// For function handle:
+#include <LcGlobals.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 namespace Lucee
 {
@@ -47,6 +52,13 @@ namespace Lucee
       tPerp = tbl.getNumber("tPerp");
     else
       throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify tPerp");
+
+    fnProvided = false;
+    if (tbl.hasFunction("tPerpProfile"))
+    {
+      fnProvided = true;
+      fnRef = tbl.getFunctionRef("tPerpProfile");
+    }
   }
 
   void 
@@ -138,9 +150,24 @@ namespace Lucee
     mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
     mom3In.setPtr(mom3Ptr, globalRgn.getUpper(0)-1);
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
+
+    double tPerpIon = tPerp;
+    double tPerpElc = tPerp;
+
+    // Figure out value of perpendicular electron and ion temperatures
+    if (fnProvided == true)
+    {
+      std::vector<double> res(2);
+      Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
+
+      evaluateFunction(*L, t, res);
+
+      tPerpIon = res[0];
+      tPerpElc = res[1];
+    }
     
-    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1] + mom1Ptr[nlocal-1]*ELEMENTARY_CHARGE*(tPerp + phiPtr[nlocal-1]);
-    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerp)*mom1Ptr[nlocal-1];
+    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1] + mom1Ptr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*mom1Ptr[nlocal-1];
     
     std::vector<double> data(3);
     data[0] = ionHeatFlux + electronHeatFlux;
@@ -170,5 +197,34 @@ namespace Lucee
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
       for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
+  }
+
+  void
+  HeatFluxAtEdgeUpdater::evaluateFunction(Lucee::LuaState& L, double tm,
+    std::vector<double>& res)
+  {
+    // push function object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
+    // push variables on stack
+    lua_pushnumber(L, tm);
+    // call function
+    if (lua_pcall(L, 1, res.size(), 0) != 0)
+    {
+      Lucee::Except lce("HeatFluxAtEdgeUpdater::evaluateFunction: ");
+      lce << "Problem evaluating function supplied as 'tPerpProfile' "
+          << std::endl;
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
+      lce << "[" << err << "]";
+      throw lce;
+    }
+    // fetch results
+    for (int i=-res.size(); i<0; ++i)
+    {
+      if (!lua_isnumber(L, i))
+        throw Lucee::Except("HeatFluxAtEdgeUpdater::evaluateFunction: Return value not a number");
+      res[res.size()+i] = lua_tonumber(L, i);
+    }
+    lua_pop(L, 1);
   }
 }
