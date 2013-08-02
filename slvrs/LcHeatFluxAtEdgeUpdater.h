@@ -78,6 +78,9 @@ namespace Lucee
       double ionMass;
 /** Perpendicular temperature of ions and electrons */
       double tPerp;
+/** Reference to optional input function specifying tPerp profile */
+      int fnRef;
+      bool fnProvided;
 /** Weights for gaussian quadrature points */
       std::vector<double> gaussWeights;
 /** 
@@ -91,6 +94,18 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/**
+ * Evaluate function at specified location and fill output array with
+ * result.
+ *
+ * @param L Lua state object to use.
+ * @param tm Time to evaluate function at.
+ * @param nc Matrix with nodal cooridates.
+ * @param nn Node number
+ * @param res On output, result of evaluating function.
+ */
+      void evaluateFunction(Lucee::LuaState& L, double tm, 
+        std::vector<double>& res);
   };
 }
 
