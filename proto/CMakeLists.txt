@@ -21,6 +21,7 @@ set (proto_SOURCES
   LcCenterOfMassUpdater.cpp
   LcCopy1DTo2DNodalField.cpp
   LcDistFuncMomentCalc1D.cpp
+  LcDistFuncReflectionBcUpdater.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
