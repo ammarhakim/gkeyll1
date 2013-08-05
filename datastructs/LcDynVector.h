@@ -105,6 +105,13 @@ namespace Lucee
       TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
         const std::string& nm);
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      //static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     private:
 /** Number of components to store */
       unsigned numComponents;
