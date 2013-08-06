@@ -1,5 +1,5 @@
 /**
- * @file	LcHeatFluxAtEdgeUpdater.cpp
+ * @file	LcKineticKineticHeatFluxAtEdgeUpdater.cpp
  *
  * @brief	Updater to compute heat flux at right-most edge in domain
  */
@@ -14,7 +14,7 @@
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
-#include <LcHeatFluxAtEdgeUpdater.h>
+#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
 // For function handle:
@@ -26,27 +26,27 @@
 namespace Lucee
 {
 // set id for module system
-  const char *HeatFluxAtEdgeUpdater::id = "HeatFluxAtEdgeUpdater";
+  const char *KineticHeatFluxAtEdgeUpdater::id = "KineticHeatFluxAtEdgeUpdater";
 
-  HeatFluxAtEdgeUpdater::HeatFluxAtEdgeUpdater()
+  KineticHeatFluxAtEdgeUpdater::KineticHeatFluxAtEdgeUpdater()
     : UpdaterIfc()
   {
   }
 
   void 
-  HeatFluxAtEdgeUpdater::readInput(Lucee::LuaTable& tbl)
+  KineticHeatFluxAtEdgeUpdater::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify element to use using 'basis1d'");
+      throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify element to use using 'basis1d'");
 
     if (tbl.hasNumber("ionMass"))
       ionMass = tbl.getNumber("ionMass");
     else
-      throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
+      throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
 
     fnProvided = false;
     if (tbl.hasFunction("tPerpProfile"))
@@ -59,12 +59,12 @@ namespace Lucee
       if (tbl.hasNumber("tPerp"))
         tPerp = tbl.getNumber("tPerp");
       else
-        throw Lucee::Except("HeatFluxAtEdgeUpdater::readInput: Must specify tPerp");
+        throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify tPerp");
     }
   }
 
   void 
-  HeatFluxAtEdgeUpdater::initialize()
+  KineticHeatFluxAtEdgeUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
 
@@ -104,16 +104,17 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus 
-  HeatFluxAtEdgeUpdater::update(double t)
+  KineticHeatFluxAtEdgeUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<1>& grid
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
     // First three velocity moments + driftU
-    const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& mom3In = this->getInp<Lucee::Field<1, double> >(1);
-    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
-    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(3);
+    const Lucee::Field<1, double>& mom1ElcIn = this->getInp<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& mom1IonIn = this->getInp<Lucee::Field<1, double> >(1);
+    const Lucee::Field<1, double>& mom3ElcIn = this->getInp<Lucee::Field<1, double> >(2);
+    const Lucee::Field<1, double>& mom3IonIn = this->getInp<Lucee::Field<1, double> >(3);
+    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(4);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -121,38 +122,19 @@ namespace Lucee
 
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom3Ptr = mom3In.createConstPtr();
-    Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom1ElcPtr = mom1ElcIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom1IonPtr = mom1IonIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom3ElcPtr = mom3ElcIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom3IonPtr = mom3IonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
-    
-    // Find mean vtSq in entire domain
-    double meanVtSq = 0.0;
-
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
-    {
-      // Set inputs
-      vtSqIn.setPtr(vtSqPtr, ix);
-      Eigen::VectorXd vtSqVec(nlocal);
-      
-      // Figure out vtSq(x) at quadrature points in the cell
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        vtSqVec(componentIndex) = vtSqPtr[componentIndex];
-      Eigen::VectorXd vtSqAtQuadPoints = interpMatrix*vtSqVec;
-
-      for (int componentIndex = 0; componentIndex < vtSqAtQuadPoints.rows(); componentIndex++)
-        meanVtSq += gaussWeights[componentIndex]*vtSqAtQuadPoints(componentIndex);
-    }
-
-    // Divide by length of domain
-    // Consider using grid.getNumCells(0)
-    meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
     // Find value of the following input fields at the very last edge of the domain
-    mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
-    mom3In.setPtr(mom3Ptr, globalRgn.getUpper(0)-1);
+    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getUpper(0)-1);
+    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getUpper(0)-1);
+    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getUpper(0)-1);
+    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getUpper(0)-1);
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
-
+    
     double tPerpIon;
     double tPerpElc;
 
@@ -173,8 +155,8 @@ namespace Lucee
       tPerpElc = tPerp;
     }
     
-    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1] + mom1Ptr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*mom1Ptr[nlocal-1];
+    double ionHeatFlux = 0.5*ionMass*mom3IonPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    double electronHeatFlux = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1] + mom1ElcPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc + phiPtr[nlocal-1]);
     
     std::vector<double> data(3);
     data[0] = ionHeatFlux + electronHeatFlux;
@@ -186,9 +168,10 @@ namespace Lucee
   }
 
   void
-  HeatFluxAtEdgeUpdater::declareTypes()
+  KineticHeatFluxAtEdgeUpdater::declareTypes()
   {
-    // takes four inputs (<v>,<v^3>) moments + vtSq + phi(x)
+    // takes five inputs (<v>,<v^3>) elc moments + same for ions + phi(x)
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
@@ -198,7 +181,7 @@ namespace Lucee
   }
   
   void
-  HeatFluxAtEdgeUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  KineticHeatFluxAtEdgeUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
@@ -207,7 +190,7 @@ namespace Lucee
   }
 
   void
-  HeatFluxAtEdgeUpdater::evaluateFunction(Lucee::LuaState& L, double tm,
+  KineticHeatFluxAtEdgeUpdater::evaluateFunction(Lucee::LuaState& L, double tm,
     std::vector<double>& res)
   {
     // push function object on stack
@@ -217,7 +200,7 @@ namespace Lucee
     // call function
     if (lua_pcall(L, 1, res.size(), 0) != 0)
     {
-      Lucee::Except lce("HeatFluxAtEdgeUpdater::evaluateFunction: ");
+      Lucee::Except lce("KineticHeatFluxAtEdgeUpdater::evaluateFunction: ");
       lce << "Problem evaluating function supplied as 'tPerpProfile' "
           << std::endl;
       std::string err(lua_tostring(L, -1));
@@ -229,7 +212,7 @@ namespace Lucee
     for (int i=-res.size(); i<0; ++i)
     {
       if (!lua_isnumber(L, i))
-        throw Lucee::Except("HeatFluxAtEdgeUpdater::evaluateFunction: Return value not a number");
+        throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::evaluateFunction: Return value not a number");
       res[res.size()+i] = lua_tonumber(L, i);
     }
     lua_pop(L, 1);

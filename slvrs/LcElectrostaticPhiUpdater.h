@@ -1,11 +1,11 @@
 /**
- * @file	LcHeatFluxAtEdgeUpdater.h
+ * @file	LcElectrostaticPhiUpdater.h
  *
- * @brief	Updater to compute heat flux at right-most edge in domain
+ * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
  */
 
-#ifndef LC_HEAT_FLUX_AT_EDGE_UPDATER_H
-#define LC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#ifndef LC_ELECTROSTATIC_PHI_UPDATER_H
+#define LC_ELECTROSTATIC_PHI_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,7 +13,6 @@
 #endif
 
 // lucee includes
-#include <LcDynVector.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
@@ -23,6 +22,7 @@
 
 // eigen includes
 #include <Eigen/Dense>
+#include <Eigen/LU>
 
 namespace Lucee
 {
@@ -30,14 +30,14 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class HeatFluxAtEdgeUpdater : public Lucee::UpdaterIfc
+  class ElectrostaticPhiUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      HeatFluxAtEdgeUpdater();
+      ElectrostaticPhiUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -74,13 +74,14 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Mass of species we are computing the heat flux using */
-      double ionMass;
-/** Perpendicular temperature of ions and electrons */
-      double tPerp;
-/** Reference to optional input function specifying tPerp profile */
-      int fnRef;
-      bool fnProvided;
+/** Value of k_perp0*rho_s */
+      double kPerpTimesRho;
+/**
+ * Matrix of gaussian quadrature locations.
+ * There are three columns by default for (x,y,z)
+ * and each row is a different quadrature point for doing integrals.
+ */
+      Eigen::MatrixXd gaussOrdinates;
 /** Weights for gaussian quadrature points */
       std::vector<double> gaussWeights;
 /** 
@@ -88,25 +89,17 @@ namespace Lucee
  * gaussian quadrature points.
  */
       Eigen::MatrixXd interpMatrix;
+/** Transpose of interpolation matrix */
+      Eigen::MatrixXd interpMatrixTranspose;
+/** Inverse of mass matrix */
+      Eigen::MatrixXd massMatrixInv;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-/**
- * Evaluate function at specified location and fill output array with
- * result.
- *
- * @param L Lua state object to use.
- * @param tm Time to evaluate function at.
- * @param nc Matrix with nodal cooridates.
- * @param nn Node number
- * @param res On output, result of evaluating function.
- */
-      void evaluateFunction(Lucee::LuaState& L, double tm, 
-        std::vector<double>& res);
   };
 }
 
-#endif // LC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#endif // LC_ELECTROSTATIC_PHI_UPDATER_H
