@@ -110,7 +110,7 @@ namespace Lucee
  *
  * @param lfm Lua function map object.
  */
-      //static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     private:
 /** Number of components to store */
@@ -139,6 +139,22 @@ namespace Lucee
  * @return Node to which data was written.
  */
     TxIoNodeType writeData(const TxIoBase& io, const TxIoNodeType& node) const;
+
+/**
+ * Lua callable method for getting last inserted data.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaLastInsertedData(lua_State *L);
+
+/**
+ * Lua callable method for getting last inserted time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaLastInsertedTime(lua_State *L);
   };
 }
 

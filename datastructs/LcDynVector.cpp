@@ -195,6 +195,39 @@ namespace Lucee
     return node;
   }
 
+  template <typename T>
+  void
+  DynVector<T>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    DataStructIfc::appendLuaCallableMethods(lfm);
+    lfm.appendFunc("lastInsertedData", luaLastInsertedData);
+    lfm.appendFunc("lastInsertedTime", luaLastInsertedTime);
+  }
+
+  template <typename T>
+  int
+  DynVector<T>::luaLastInsertedData(lua_State *L)
+  {
+    DynVector<T> *dynv
+      = Lucee::PointerHolder<DynVector<T> >::getObjAsDerived(L);
+
+    std::vector<T> data = dynv->getLastInsertedData();
+    for (unsigned i=0; i<data.size(); ++i)
+      lua_pushnumber(L, data[i]);
+    return dynv->getNumComponents();
+  }
+
+  template <typename T>
+  int
+  DynVector<T>::luaLastInsertedTime(lua_State *L)
+  {
+    DynVector<T> *dynv
+      = Lucee::PointerHolder<DynVector<T> >::getObjAsDerived(L);
+    lua_pushnumber(L, dynv->getLastInsertedTime());
+    return 1;
+  }
+
 // instantiations
+  template class DynVector<float>;
   template class DynVector<double>;
 }

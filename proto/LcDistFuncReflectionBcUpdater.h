@@ -65,11 +65,42 @@ namespace Lucee
  */
       void declareTypes();
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
 /** Edges to apply boundary condition */
       unsigned edge;
+/** Mapping for 180 degree rotations for upper edge */
+      std::vector<unsigned> rotMapUpper;
+/** Mapping for 180 degree rotations for lower edge */
+      std::vector<unsigned> rotMapLower;
+/** Cutoff velocity */
+      double cutOffVel;
+
+/**
+ * Lua callable method to set cut-off velocity.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetCutOffVelocity(lua_State *L);
+
+/**
+ * Set cut-off velocity.
+ *
+ * @param cv Cut-off velocity.
+ */
+      void setCutOffVelocity(double cv)
+      { 
+        cutOffVel = cv;
+      }
   };
 }
 
