@@ -75,8 +75,10 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Edges to apply boundary condition */
-      unsigned edge;
+/** Flag to indicate if BCs should be applied to left edge */
+      bool applyLeftEdge;
+/** Flag to indicate if BCs should be applied to right edge */
+      bool applyRightEdge;
 /** Mapping for 180 degree rotations for upper edge */
       std::vector<unsigned> rotMapRight;
 /** Mapping for 180 degree rotations for lower edge */
