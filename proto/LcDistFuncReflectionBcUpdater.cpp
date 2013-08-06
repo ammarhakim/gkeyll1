@@ -17,6 +17,7 @@
 #include <loki/Singleton.h>
 
 // std includes
+#include <limits>
 #include <vector>
 
 namespace Lucee
@@ -48,12 +49,17 @@ namespace Lucee
       edge = LC_LOWER_EDGE;
     else if (edgeStr == "upper")
       edge = LC_UPPER_EDGE;
+
+    cutOffVel = std::numeric_limits<double>::max(); // cut-off at infinity
+    if (tbl.hasNumber("cutOffVelocity"))
+      cutOffVel = tbl.getNumber("cutOffVelocity");
   }
 
   void
   DistFuncReflectionBcUpdater::initialize()
   {
     UpdaterIfc::initialize();
+
   }
 
   Lucee::UpdaterStatus
@@ -70,5 +76,23 @@ namespace Lucee
   DistFuncReflectionBcUpdater::declareTypes()
   {
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
+  }
+
+  void
+  DistFuncReflectionBcUpdater::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    Lucee::UpdaterIfc::appendLuaCallableMethods(lfm);
+
+    lfm.appendFunc("setCutOffVelocity", luaSetCutOffVelocity);
+  }
+
+  int
+  DistFuncReflectionBcUpdater::luaSetCutOffVelocity(lua_State *L)
+  {
+    DistFuncReflectionBcUpdater *up
+      = Lucee::PointerHolder<DistFuncReflectionBcUpdater>::getObjAsDerived(L);
+    double cv = lua_tonumber(L, 2);
+    up->setCutOffVelocity(cv);
+    return 0;
   }
 }
