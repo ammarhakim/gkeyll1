@@ -60,6 +60,22 @@ namespace Lucee
   {
     UpdaterIfc::initialize();
 
+    unsigned numNodes = nodalBasis->getNumNodes();
+    std::vector<unsigned> yRef(numNodes), xRef(numNodes);
+
+// right side reflection mapping
+    std::vector<unsigned> rotMapRight(numNodes);
+    nodalBasis->getUpperReflectingBcMapping(0, yRef);
+    nodalBasis->getLowerReflectingBcMapping(1, xRef);
+    for (unsigned i=0; i<numNodes; ++i)
+      rotMapRight[i] = xRef[yRef[i]];
+
+// left side reflection mapping
+    std::vector<unsigned> rotMapLeft(numNodes);
+    nodalBasis->getLowerReflectingBcMapping(0, yRef);
+    nodalBasis->getUpperReflectingBcMapping(1, xRef);
+    for (unsigned i=0; i<numNodes; ++i)
+      rotMapLeft[i] = xRef[yRef[i]];
   }
 
   Lucee::UpdaterStatus
