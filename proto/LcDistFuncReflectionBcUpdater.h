@@ -78,9 +78,9 @@ namespace Lucee
 /** Edges to apply boundary condition */
       unsigned edge;
 /** Mapping for 180 degree rotations for upper edge */
-      std::vector<unsigned> rotMapUpper;
+      std::vector<unsigned> rotMapRight;
 /** Mapping for 180 degree rotations for lower edge */
-      std::vector<unsigned> rotMapLower;
+      std::vector<unsigned> rotMapLeft;
 /** Cutoff velocity */
       double cutOffVel;
 
