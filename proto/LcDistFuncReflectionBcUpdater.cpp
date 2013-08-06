@@ -43,12 +43,14 @@ namespace Lucee
     else
       throw Lucee::Except("DistFuncReflectionBcUpdater::readInput: Must specify element to use using 'basis'");
 
-    edge = LC_BOTH_EDGES; // by default apply to both sides of domain
+    applyLeftEdge = applyRightEdge = false;
     std::string edgeStr = tbl.getString("edge");
     if (edgeStr == "lower")
-      edge = LC_LOWER_EDGE;
+      applyLeftEdge = true;
     else if (edgeStr == "upper")
-      edge = LC_UPPER_EDGE;
+      applyRightEdge = true;
+    else if (edgeStr == "both")
+      applyLeftEdge = applyRightEdge = true;
 
     cutOffVel = std::numeric_limits<double>::max(); // cut-off at infinity
     if (tbl.hasNumber("cutOffVelocity"))
@@ -84,6 +86,64 @@ namespace Lucee
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
     Lucee::Field<2, double>& distf = this->getOut<Lucee::Field<2, double> >(0);
+
+#ifdef HAVE_MPI
+// barf if we this is called in parallel
+    throw Lucee::Except("DistFuncReflectionBcUpdater does not work in parallel!");
+#endif
+
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
+    Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
+    Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
+
+    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
+    unsigned numNodes = nodalBasis->getNumNodes();
+
+    if (applyRightEdge)
+    {
+      int ix = globalRgn.getUpper(0)-1; // right skin cell x index
+      for (unsigned js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      {
+        nodalBasis->setIndex(ix, js);
+        nodalBasis->getNodalCoordinates(nodeCoords);
+
+        distf.setPtr(sknPtr, ix, js);
+        distf.setPtr(gstPtr, ix+1, jg);
+
+        for (unsigned k=0; k<numNodes; ++k)
+        {
+          if (std::fabs(nodeCoords(k,1)) < cutOffVel)
+// copy data into ghost after rotating skin cell data by 180 degrees
+            gstPtr[k] = sknPtr[rotMapRight[k]];
+          else
+// set to no inflow condition
+            gstPtr[k] = 0.0;
+        }
+      }
+    }
+    
+    if (applyLeftEdge)
+    {
+      int ix = globalRgn.getLower(0); // left skin cell x index
+      for (unsigned js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      {
+        nodalBasis->setIndex(ix, js);
+        nodalBasis->getNodalCoordinates(nodeCoords);
+
+        distf.setPtr(sknPtr, ix, js);
+        distf.setPtr(gstPtr, ix-1, jg);
+
+        for (unsigned k=0; k<numNodes; ++k)
+        {
+          if (std::fabs(nodeCoords(k,1)) < cutOffVel)
+// copy data into ghost after rotating skin cell data by 180 degrees
+            gstPtr[k] = sknPtr[rotMapRight[k]];
+          else
+// set to no inflow condition
+            gstPtr[k] = 0.0; 
+        }
+      }
+    }
 
     return Lucee::UpdaterStatus();
   }
