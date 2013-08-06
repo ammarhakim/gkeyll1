@@ -28,7 +28,6 @@ namespace Lucee
 
   const char *DistFuncReflectionBcUpdater::id = "DistFuncReflectionBc";
 
-
   DistFuncReflectionBcUpdater::DistFuncReflectionBcUpdater()
   {
   }
@@ -66,14 +65,14 @@ namespace Lucee
     std::vector<unsigned> yRef(numNodes), xRef(numNodes);
 
 // right side reflection mapping
-    std::vector<unsigned> rotMapRight(numNodes);
+    rotMapRight.resize(numNodes);
     nodalBasis->getUpperReflectingBcMapping(0, yRef);
     nodalBasis->getLowerReflectingBcMapping(1, xRef);
     for (unsigned i=0; i<numNodes; ++i)
       rotMapRight[i] = xRef[yRef[i]];
 
 // left side reflection mapping
-    std::vector<unsigned> rotMapLeft(numNodes);
+    rotMapLeft.resize(numNodes);
     nodalBasis->getLowerReflectingBcMapping(0, yRef);
     nodalBasis->getUpperReflectingBcMapping(1, xRef);
     for (unsigned i=0; i<numNodes; ++i)
@@ -88,7 +87,10 @@ namespace Lucee
     Lucee::Field<2, double>& distf = this->getOut<Lucee::Field<2, double> >(0);
 
 #ifdef HAVE_MPI
-// barf if we this is called in parallel
+// This updater presently will not work in parallel. Eventually, we
+// need to fix this, but it requires some MPI-fu to collect the values
+// and put them on the appropriate processors. (Ammar Hakim,
+// 8/06/2013)
     throw Lucee::Except("DistFuncReflectionBcUpdater does not work in parallel!");
 #endif
 
@@ -96,13 +98,13 @@ namespace Lucee
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
 
-    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
     unsigned numNodes = nodalBasis->getNumNodes();
+    Lucee::Matrix<double> nodeCoords(numNodes, 3);
 
     if (applyRightEdge)
     {
       int ix = globalRgn.getUpper(0)-1; // right skin cell x index
-      for (unsigned js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
       {
         nodalBasis->setIndex(ix, js);
         nodalBasis->getNodalCoordinates(nodeCoords);
@@ -125,7 +127,7 @@ namespace Lucee
     if (applyLeftEdge)
     {
       int ix = globalRgn.getLower(0); // left skin cell x index
-      for (unsigned js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
       {
         nodalBasis->setIndex(ix, js);
         nodalBasis->getNodalCoordinates(nodeCoords);
