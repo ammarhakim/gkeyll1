@@ -1,11 +1,11 @@
 /**
- * @file	LcHeatFluxAtEdgeUpdater.h
+ * @file	LcKineticHeatFluxAtEdgeUpdater.h
  *
  * @brief	Updater to compute heat flux at right-most edge in domain
  */
 
-#ifndef LC_HEAT_FLUX_AT_EDGE_UPDATER_H
-#define LC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#ifndef LC_KINETIC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#define LC_KINETIC_HEAT_FLUX_AT_EDGE_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -30,14 +30,14 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class HeatFluxAtEdgeUpdater : public Lucee::UpdaterIfc
+  class KineticHeatFluxAtEdgeUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      HeatFluxAtEdgeUpdater();
+      KineticHeatFluxAtEdgeUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -109,4 +109,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_HEAT_FLUX_AT_EDGE_UPDATER_H
+#endif // LC_KINETIC_HEAT_FLUX_AT_EDGE_UPDATER_H

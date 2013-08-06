@@ -26,6 +26,7 @@ set(lcslvrs_SOURCES
   LcCurrentSource.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
+  LcElectrostaticPhiUpdater.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp
   LcEvalOnNodesUpdater.cpp
@@ -42,6 +43,7 @@ set(lcslvrs_SOURCES
   LcHyperEquationRegistry.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
+  LcKineticHeatFluxAtEdgeUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiffUpdater.cpp

@@ -1,7 +1,7 @@
 /**
- * @file	LcBoltzmannPhiUpdater.cpp
+ * @file	LcElectrostaticPhiUpdater.cpp
  *
- * @brief	Updater to compute average v_therm(x)^2 times ln(ni(x)/ni0)
+ * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
  */
 
 // config stuff
@@ -14,9 +14,8 @@
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
-#include <LcBoltzmannPhiUpdater.h>
+#include <LcElectrostaticPhiUpdater.h>
 #include <LcStructuredGridBase.h>
-// Get Lucee constants
 #include <LcMathPhysConstants.h>
 
 // math include
@@ -25,41 +24,31 @@
 namespace Lucee
 {
 // set id for module system
-  const char *BoltzmannPhiUpdater::id = "BoltzmannPhiUpdater";
+  const char *ElectrostaticPhiUpdater::id = "ElectrostaticPhiUpdater";
 
-  BoltzmannPhiUpdater::BoltzmannPhiUpdater()
+  ElectrostaticPhiUpdater::ElectrostaticPhiUpdater()
     : UpdaterIfc()
   {
   }
 
   void 
-  BoltzmannPhiUpdater::readInput(Lucee::LuaTable& tbl)
+  ElectrostaticPhiUpdater::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
-
-    if (tbl.hasNumber("electronMass"))
-      electronMass = tbl.getNumber("electronMass");
-    else
-      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify electronMass");
-
-    if (tbl.hasNumber("ionMass"))
-      ionMass = tbl.getNumber("ionMass");
-    else
-      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify ionMass");
-
-    if (tbl.hasNumber("elementaryCharge"))
-      elementaryCharge = tbl.getNumber("elementaryCharge");
-    else
-      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify elementaryCharge");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify element to use using 'basis'");
+
+    if (tbl.hasNumber("kPerpTimesRho"))
+      kPerpTimesRho = tbl.getNumber("kPerpTimesRho");
+    else
+      throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify kPerpTimesRho");
   }
 
   void 
-  BoltzmannPhiUpdater::initialize()
+  ElectrostaticPhiUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
 
@@ -111,96 +100,51 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus 
-  BoltzmannPhiUpdater::update(double t)
+  ElectrostaticPhiUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<1>& grid
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
-    // Particle density n(x)
-    const Lucee::Field<1, double>& nIn = this->getInp<Lucee::Field<1, double> >(0);
-    // First velocity moment of ion distribution function
-    const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(1);
-    // Thermal velocity squared vt(x)^2
+    // Electron and ion densities
+    const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
+    // Electron thermal velocity squared vt(x)^2
     const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
-    // Returns (e/m_i)*phi(x), so need to multiply by m_i/e outside of code
+    // Need to multiply by 1/(kPerpRhoSquared) in the Lua script
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
     int nlocal = nodalBasis->getNumNodes();
 
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::ConstFieldPtr<double> nPtr = nIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
+    Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
     phiPtr = 0.0;
-    
-    // Find value of n(x) at the very last edge of the domain
-    nIn.setPtr(nPtr, globalRgn.getUpper(0)-1);
-    mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
-    double nEdge = nPtr[nlocal-1];
-    double ionFluxAtEdge = mom1Ptr[nlocal-1];
-
-    // Find mean vtSq in entire domain
-    double meanVtSq = 0.0;
-
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
-    {
-      // Set inputs
-      vtSqIn.setPtr(vtSqPtr, ix);
-      Eigen::VectorXd vtSqVec(nlocal);
-      
-      // Figure out vtSq(x) at quadrature points in the cell
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        vtSqVec(componentIndex) = vtSqPtr[componentIndex];
-      Eigen::VectorXd vtSqAtQuadPoints = interpMatrix*vtSqVec;
-
-      for (int componentIndex = 0; componentIndex < vtSqAtQuadPoints.rows(); componentIndex++)
-        meanVtSq += gaussWeights[componentIndex]*vtSqAtQuadPoints(componentIndex);
-    }
-
-    // Divide by length of domain
-    // Consider using grid.getNumCells(0)
-    meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
-
-    // Electron temperature in joules
-    double Te = ionMass*meanVtSq;
-    // Electron thermal velocity
-    double vThermElec = sqrt(Te/electronMass);
-    // Figure out phi_s (sheath potential)
-    double phiS = -Te/elementaryCharge*log(sqrt(2*PI)*ionFluxAtEdge/(nEdge*vThermElec));
-
-    if (nEdge < 0.0)
-    {
-      throw Lucee::Except("BoltzmannPhiUpdater::update: nEdge is negative!");
-    }
-
 
     // Loop over all cells
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       // Set inputs
-      nIn.setPtr(nPtr, ix);
+      nElcIn.setPtr(nElcPtr, ix);
+      nIonIn.setPtr(nIonPtr, ix);
+      vtSqIn.setPtr(vtSqPtr, ix);
       // Set outputs
       phiOut.setPtr(phiPtr, ix);
 
       Eigen::VectorXd nVec(nlocal);
 
-      // Find n(x) at gaussian quadrature points
+      // Compute phi(x) at nodal points, then interpolate to gaussian quadrature points
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        nVec(componentIndex) = nPtr[componentIndex];
+        nVec(componentIndex) = ELECTRON_MASS*vtSqPtr[componentIndex]*(1-nElcPtr[componentIndex]/nIonPtr[componentIndex])
+          /(EPSILON0*ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
       Eigen::VectorXd phiAtQuadPoints = interpMatrix*nVec;
       
-      // Compute projection of ln(n_i(x)/nEdge) onto basis functions
+      // Compute projection of phi(x) onto basis functions
       for (int componentIndex = 0; componentIndex < phiAtQuadPoints.rows(); componentIndex++)
-      {
-        //if (phiAtQuadPoints(componentIndex) < 0.0)
-        //  throw Lucee::Except("BoltzmannPhiUpdater::update: n at quad point is negative!");
-        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge) + phiS);
-        //phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge));
-      }
-
+        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*phiAtQuadPoints(componentIndex);
       Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;
 
       // Copy into output pointer
@@ -212,18 +156,18 @@ namespace Lucee
   }
 
   void
-  BoltzmannPhiUpdater::declareTypes()
+  ElectrostaticPhiUpdater::declareTypes()
   {
-    // takes three inputs (moment0=<1>=n(x), vt^2(x), moment1=<v>) 
+    // takes three inputs (n_e(x), n_i(x), vThermElecSq(x))
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // returns one output: mean(vt^2(x)) * ln(n(x)/n(xMax))
+    // returns one output: phi(x)
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
   void
-  BoltzmannPhiUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  ElectrostaticPhiUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)

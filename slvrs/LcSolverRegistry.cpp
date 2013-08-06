@@ -17,6 +17,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
+#include <LcElectrostaticPhiUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
@@ -27,6 +28,7 @@
 #include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
+#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDragUpdater.h>
@@ -89,8 +91,10 @@ namespace Lucee
       .append<Lucee::BcUpdater<3> >()
       
       .append<Lucee::BoltzmannPhiUpdater>()
+      .append<Lucee::ElectrostaticPhiUpdater>()
       
       .append<Lucee::HeatFluxAtEdgeUpdater>()
+      .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
