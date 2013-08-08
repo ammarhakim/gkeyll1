@@ -413,6 +413,15 @@ namespace Lucee
       virtual void copyAllDataToField(const double *data, Lucee::Field<NDIM, double>& fld);
 
 /**
+ * Evaluate basis functions at location. The results should be stored
+ * in the pre-allocated 'vals' vector.
+ *
+ * @param xc Coorinates in element.
+ * @param vals Values of basis functions. Pre-allocated.
+ */
+      virtual void evalBasis(double xc[NDIM], std::vector<double>& vals) const;
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
