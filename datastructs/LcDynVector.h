@@ -53,19 +53,19 @@ namespace Lucee
  *
  * @return components in vector
  */
-    unsigned getNumComponents() const;
+      unsigned getNumComponents() const;
 
 /**
  * Return number of elements in vector.
  *
  * @return components in vector
  */
-    unsigned getSize() const;
+      unsigned getSize() const;
 
 /**
  * Clear the data held by this vector.
  */
-    void clear() const;
+      void clear() const;
 
 /**
  * Append data to end of this vector.
@@ -73,26 +73,26 @@ namespace Lucee
  * @param t Time at which data was taken.
  * @param data Data vector.
  */
-    void appendData(double t, const std::vector<T>& data);
+      void appendData(double t, const std::vector<T>& data);
 
 /**
  * Get last data stored in this vector.
  *
  * @return Data vector.
  */
-    std::vector<T> getLastInsertedData() const;
+      std::vector<T> getLastInsertedData() const;
 
 /**
  * Get time at which last data value was stored.
  *
  * @return time at which last data value was stored.
  */
-    double getLastInsertedTime() const;
+      double getLastInsertedTime() const;
 
 /**
  * Remove last data time stored in this vector.
  */
-    void removeLastInsertedData();
+      void removeLastInsertedData();
 
 /**
  * Write dataStruct to given node in HDF5 file.
@@ -129,7 +129,7 @@ namespace Lucee
  * @param node Node to write data to.
  * @return Node to which data was written.
  */
-    TxIoNodeType writeTimeMesh(const TxIoBase& io, const TxIoNodeType& node) const;
+      TxIoNodeType writeTimeMesh(const TxIoBase& io, const TxIoNodeType& node) const;
 
 /**
  * Write the data out to h5 file.
@@ -138,7 +138,7 @@ namespace Lucee
  * @param node Node to write data to.
  * @return Node to which data was written.
  */
-    TxIoNodeType writeData(const TxIoBase& io, const TxIoNodeType& node) const;
+      TxIoNodeType writeData(const TxIoBase& io, const TxIoNodeType& node) const;
 
 /**
  * Lua callable method for getting last inserted data.
