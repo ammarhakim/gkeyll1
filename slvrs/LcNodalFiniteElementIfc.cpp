@@ -320,6 +320,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::evalBasis(double xc[NDIM], std::vector<double>& vals) const;
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::evalBasis: Not implemented!");
+  }
+
+  template <unsigned NDIM>
   NodalFiniteElementIfc<NDIM>::NodalFiniteElementIfc(unsigned numNodes)
     : numNodes(numNodes)
   {
