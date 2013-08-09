@@ -131,10 +131,9 @@ namespace Lucee
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
 
     unsigned numNodes = nodalBasis->getNumNodes();
-    Lucee::Matrix<double> nodeCoords(numNodes, 3);
 
     std::vector<double> data(2);
-    // Initialize data to 0's. Convenction: 0 = left, 1 = right
+    // Initialize data to 0's. Convention: 0 = left, 1 = right
     data[0] = 0.0;
     data[1] = 0.0;
 
@@ -155,7 +154,6 @@ namespace Lucee
       for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
       {
         nodalBasis->setIndex(ix, js);
-        nodalBasis->getNodalCoordinates(nodeCoords);
       
         idx[0] = ix;
         idx[1] = js;
@@ -239,7 +237,6 @@ namespace Lucee
       for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
       {
         nodalBasis->setIndex(ix, js);
-        nodalBasis->getNodalCoordinates(nodeCoords);
 
         distf.setPtr(sknPtr, ix, js);
         distf.setPtr(gstPtr, ix-1, jg);
@@ -288,7 +285,7 @@ namespace Lucee
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
             
             foundCutoffVelocity = true;
-            data[0] = cellCentroid[1] - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            data[0] = cellCentroid[1] + grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
             
             // Scale all values by appropriate fraction to conserve flux
             // Copy data into ghost after rotating skin cell data by 180 degrees
