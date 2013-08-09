@@ -206,7 +206,7 @@ namespace Lucee
         typeAPad += globalNodesPerRow2D[rowIndex];
     }
 
-    unsigned nodeIndices[nodesPerCell2D];
+    std::vector<unsigned> nodeIndices(nodesPerCell2D);
 
     throw Lucee::Except("SerendipityElement::getLocalToGlobal: Not implemented!");
   }
