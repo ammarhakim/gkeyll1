@@ -172,8 +172,8 @@ namespace Lucee
     // Number of nodes on a 2-D serendipity element of same degree
     unsigned nodesPerCell2D;
     // Figure out number of nodes per row
-    unsigned nodesPerRow2D[nodesPerSide];
-    unsigned globalNodesPerRow2D[nodesPerSide];
+    std::vector<unsigned> nodesPerRow2D(nodesPerSide);
+    std::vector<unsigned> globalNodesPerRow2D(nodesPerSide);
     if (polyOrder == 1)
     {
       nodesPerCell2D = 4;
