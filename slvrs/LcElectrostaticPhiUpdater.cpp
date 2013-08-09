@@ -17,6 +17,8 @@
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
+// for cutoff velocities
+#include <LcDynVector.h>
 
 // math include
 #include <cmath>
@@ -110,6 +112,8 @@ namespace Lucee
     const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
     // Electron thermal velocity squared vt(x)^2
     const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
+    // Dynvector containing the cutoff velocities computed at one or both edges
+    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(3);
     // Need to multiply by 1/(kPerpRhoSquared) in the Lua script
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
@@ -123,6 +127,44 @@ namespace Lucee
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
     phiPtr = 0.0;
+
+    // Compute average T_e and n_i
+    double meanVtSq = 0.0;
+    double meanIonDensity = 0.0;
+
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    {
+      // Set inputs
+      vtSqIn.setPtr(vtSqPtr, ix);
+      nIonIn.setPtr(nIonPtr, ix);
+      Eigen::VectorXd vtSqVec(nlocal);
+      Eigen::VectorXd nVec(nlocal);
+      
+      // Figure out vtSq(x) at quadrature points in the cell
+      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+      {
+        vtSqVec(componentIndex) = vtSqPtr[componentIndex];
+        nVec(componentIndex)    = nIonPtr[componentIndex];
+      }
+
+      Eigen::VectorXd vtSqAtQuadPoints = interpMatrix*vtSqVec;
+      Eigen::VectorXd nAtQuadPoints = interpMatrix*nVec;
+
+      for (int componentIndex = 0; componentIndex < vtSqAtQuadPoints.rows(); componentIndex++)
+      {
+        meanVtSq += gaussWeights[componentIndex]*vtSqAtQuadPoints(componentIndex);
+        meanIonDensity += gaussWeights[componentIndex]*nAtQuadPoints(componentIndex);
+      }
+    }
+
+    // Divide by length of domain
+    // Consider using grid.getNumCells(0)
+    meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+    meanIonDensity = meanIonDensity/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+
+    // Compute cutoff velocity on the right edge
+    std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
+    double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
 
     // Loop over all cells
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
@@ -138,8 +180,8 @@ namespace Lucee
 
       // Compute phi(x) at nodal points, then interpolate to gaussian quadrature points
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        nVec(componentIndex) = ELECTRON_MASS*vtSqPtr[componentIndex]*(1-nElcPtr[componentIndex]/nIonPtr[componentIndex])
-          /(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
+        nVec(componentIndex) = ELECTRON_MASS*meanVtSq*(nIonPtr[componentIndex]-nElcPtr[componentIndex])
+          /(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho*meanIonDensity) + phiS;
       Eigen::VectorXd phiAtQuadPoints = interpMatrix*nVec;
       
       // Compute projection of phi(x) onto basis functions
@@ -158,10 +200,11 @@ namespace Lucee
   void
   ElectrostaticPhiUpdater::declareTypes()
   {
-    // takes three inputs (n_e(x), n_i(x), vThermElecSq(x))
+    // takes three inputs (n_e(x), n_i(x), vThermElecSq(x)) + cutoff velocities at edges
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: phi(x)
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }

@@ -1,7 +1,7 @@
 /**
  * @file	LcDistFuncReflectionBcUpdater.cpp
  *
- * @brief	Project a function of a basis functions.
+ * @brief	Applies particle refection BCs to distribution function.
  */
 
 // config stuff
@@ -50,10 +50,6 @@ namespace Lucee
       applyRightEdge = true;
     else if (edgeStr == "both")
       applyLeftEdge = applyRightEdge = true;
-
-    cutOffVel = std::numeric_limits<double>::max(); // cut-off at infinity
-    if (tbl.hasNumber("cutOffVelocity"))
-      cutOffVel = tbl.getNumber("cutOffVelocity");
   }
 
   void
@@ -64,19 +60,48 @@ namespace Lucee
     unsigned numNodes = nodalBasis->getNumNodes();
     std::vector<unsigned> yRef(numNodes), xRef(numNodes);
 
-// right side reflection mapping
-    rotMapRight.resize(numNodes);
+    // reflection mapping
+    rotMap.resize(numNodes);
     nodalBasis->getUpperReflectingBcMapping(0, yRef);
     nodalBasis->getLowerReflectingBcMapping(1, xRef);
     for (unsigned i=0; i<numNodes; ++i)
-      rotMapRight[i] = xRef[yRef[i]];
+      rotMap[i] = xRef[yRef[i]];
 
-// left side reflection mapping
-    rotMapLeft.resize(numNodes);
-    nodalBasis->getLowerReflectingBcMapping(0, yRef);
-    nodalBasis->getUpperReflectingBcMapping(1, xRef);
-    for (unsigned i=0; i<numNodes; ++i)
-      rotMapLeft[i] = xRef[yRef[i]];
+    // Figure out what nodes are on the right edge
+    int numEdgeQuadNodes = nodalBasis->getNumSurfGaussNodes();
+    Lucee::Matrix<double> interpEdgeMatrixLucee(numEdgeQuadNodes, numNodes);
+    Lucee::Matrix<double> gaussEdgeOrdinatesLucee(numEdgeQuadNodes, 3);
+    // Allocate Eigen matrices
+    Eigen::MatrixXd interpEdgeMatrix(numEdgeQuadNodes, numNodes);
+    gaussEdgeOrdinates = Eigen::MatrixXd(numEdgeQuadNodes, 3);
+    gaussEdgeWeights = std::vector<double>(numEdgeQuadNodes);
+    // Get the interpolation matrix for the right edge quadrature points.
+    nodalBasis->getSurfUpperGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
+      gaussEdgeWeights);
+
+    rightEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfUpperNodes(0));
+    leftEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfLowerNodes(0));
+    nodalBasis->getSurfUpperNodeNums(0, rightEdgeNodeNums);
+    nodalBasis->getSurfLowerNodeNums(0, leftEdgeNodeNums);
+
+    // Copy matrices to eigen objects
+    copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
+    copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinates);
+
+    edgeNodeInterpMatrix = Eigen::MatrixXd(numEdgeQuadNodes, rightEdgeNodeNums.size());
+
+    // Create a lower dimension (1-D) interpolation matrix
+    for (int nodeIndex = 0; nodeIndex < numEdgeQuadNodes; nodeIndex++)
+    {
+      // At each quadrature node, copy basis function evaluations for
+      // those basis functions associated with the nodes on the (right) edge
+      for (int basisIndex = 0; basisIndex < rightEdgeNodeNums.size(); basisIndex++)
+      {
+        edgeNodeInterpMatrix(nodeIndex, basisIndex) = interpEdgeMatrix(nodeIndex, 
+          rightEdgeNodeNums[basisIndex]);
+      }
+    }
+
   }
 
   Lucee::UpdaterStatus
@@ -84,7 +109,13 @@ namespace Lucee
   {
     const Lucee::StructuredGridBase<2>& grid 
       = this->getGrid<Lucee::StructuredGridBase<2> >();
+
+    // Momentum flux for ions
+    const Lucee::Field<1, double>& mom1 = this->getInp<Lucee::Field<1, double> >(0);
+    // Output distribution function
     Lucee::Field<2, double>& distf = this->getOut<Lucee::Field<2, double> >(0);
+    // Output cutoff velocities vs time
+    Lucee::DynVector<double>& cutoffVelocities = this->getOut<Lucee::DynVector<double> >(1);
 
 #ifdef HAVE_MPI
 // This updater presently will not work in parallel. Eventually, we
@@ -95,31 +126,98 @@ namespace Lucee
 #endif
 
     Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
+    Lucee::ConstFieldPtr<double> mom1Ptr = mom1.createConstPtr();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
 
     unsigned numNodes = nodalBasis->getNumNodes();
     Lucee::Matrix<double> nodeCoords(numNodes, 3);
 
+    std::vector<double> data(2);
+    // Initialize data to 0's. Convenction: 0 = left, 1 = right
+    data[0] = 0.0;
+    data[1] = 0.0;
+
     if (applyRightEdge)
     {
       int ix = globalRgn.getUpper(0)-1; // right skin cell x index
+      double totalFluxAlongEdge = 0.0; 
+      double cellCentroid[3];
+      int idx[2];
+      bool foundCutoffVelocity = false;
+
+      // Find flux at right-most node
+      mom1.setPtr(mom1Ptr, ix);
+      // Assume that the location of the right-most node in 1-D
+      // is the number of nodes along an edge in 2-D minus 1
+      double totalIonFlux = mom1Ptr[rightEdgeNodeNums.size()-1];
+
       for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
       {
         nodalBasis->setIndex(ix, js);
         nodalBasis->getNodalCoordinates(nodeCoords);
+      
+        idx[0] = ix;
+        idx[1] = js;
+        grid.setIndex(idx);
+        grid.getCentroid(cellCentroid);
+
+        // Don't need to loop over left-moving cells
+        if (cellCentroid[1] < 0.0)
+          break;
 
         distf.setPtr(sknPtr, ix, js);
         distf.setPtr(gstPtr, ix+1, jg);
 
-        for (unsigned k=0; k<numNodes; ++k)
+        // Copy nodes on right edge into a vector
+        Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());
+        for (int edgeNodeIndex = 0; edgeNodeIndex < rightEdgeData.rows(); edgeNodeIndex++)
+          rightEdgeData(edgeNodeIndex) = sknPtr[rightEdgeNodeNums[edgeNodeIndex]];
+        
+        // Interpolate nodal data to quadrature points on the edge
+        Eigen::VectorXd rightEdgeQuadData = edgeNodeInterpMatrix*rightEdgeData;
+        
+        // Integrate v*f over entire cell using gaussian quadrature
+        double fluxInEntireCell = 0.0;
+        for (int quadNodeIndex = 0; quadNodeIndex < rightEdgeQuadData.rows(); quadNodeIndex++)
         {
-          if (std::fabs(nodeCoords(k,1)) < cutOffVel)
-// copy data into ghost after rotating skin cell data by 180 degrees
-            gstPtr[k] = sknPtr[rotMapRight[k]];
+          double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*rightEdgeQuadData(quadNodeIndex);
+        }
+
+        if (foundCutoffVelocity == false)
+        {
+          if (totalFluxAlongEdge + fluxInEntireCell < totalIonFlux)
+          {
+            totalFluxAlongEdge += fluxInEntireCell;
+
+            // Set to no inflow condition then go on to next cell
+            for (int componentIndex = 0; componentIndex < numNodes; componentIndex++)
+              gstPtr[componentIndex] = 0.0;
+          }
           else
-// set to no inflow condition
-            gstPtr[k] = 0.0;
+          {
+            // This is the cell that contains the cutoff velocity
+            
+            // Figure out fraction of cell that contains the excess flux
+            // (Flux over what is needed for equivalence with Gamma_i)
+            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+            
+            foundCutoffVelocity = true;
+            data[1] = cellCentroid[1] - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            
+            // Scale all values by appropriate fraction to conserve flux
+            // Copy data into ghost after rotating skin cell data by 180 degrees
+            for (int k = 0; k < numNodes; k++)
+              gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+          }
+        }
+        else
+        {
+          // We have already iterated past and found the cutoff velocity.
+          // Copy data into ghost after rotating skin cell data by 180 degrees
+          for (int k = 0; k < numNodes; k++)
+            gstPtr[k] = sknPtr[rotMap[k]];
         }
       }
     }
@@ -127,25 +225,89 @@ namespace Lucee
     if (applyLeftEdge)
     {
       int ix = globalRgn.getLower(0); // left skin cell x index
-      for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      double totalFluxAlongEdge = 0.0; 
+      double cellCentroid[3];
+      int idx[2];
+      bool foundCutoffVelocity = false;
+
+      // Find flux at left-most node
+      mom1.setPtr(mom1Ptr, ix);
+      // Assume that the location of the left-most node in 1-D is 0
+      // This should be a negative number
+      double totalIonFlux = mom1Ptr[0];
+
+      for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
       {
         nodalBasis->setIndex(ix, js);
         nodalBasis->getNodalCoordinates(nodeCoords);
 
         distf.setPtr(sknPtr, ix, js);
         distf.setPtr(gstPtr, ix-1, jg);
+      
+        idx[0] = ix;
+        idx[1] = js;
+        grid.setIndex(idx);
+        grid.getCentroid(cellCentroid);
 
-        for (unsigned k=0; k<numNodes; ++k)
+        // Don't need to loop over right-moving cells
+        if (cellCentroid[1] > 0.0)
+          break;
+
+        // Copy nodes on left edge into a vector
+        Eigen::VectorXd leftEdgeData(leftEdgeNodeNums.size());
+        for (int edgeNodeIndex = 0; edgeNodeIndex < leftEdgeData.rows(); edgeNodeIndex++)
+          leftEdgeData(edgeNodeIndex) = sknPtr[leftEdgeNodeNums[edgeNodeIndex]];
+        
+        // Interpolate nodal data to quadrature points on the edge
+        Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrix*leftEdgeData;
+        
+        // Integrate v*f over entire cell using gaussian quadrature
+        double fluxInEntireCell = 0.0;
+        for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
         {
-          if (std::fabs(nodeCoords(k,1)) < cutOffVel)
-// copy data into ghost after rotating skin cell data by 180 degrees
-            gstPtr[k] = sknPtr[rotMapRight[k]];
+          double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*leftEdgeQuadData(quadNodeIndex);
+        }
+
+        if (foundCutoffVelocity == false)
+        {
+          if (totalFluxAlongEdge + fluxInEntireCell > totalIonFlux)
+          {
+            totalFluxAlongEdge += fluxInEntireCell;
+
+            // Set to no inflow condition then go on to next cell
+            for (int componentIndex = 0; componentIndex < numNodes; componentIndex++)
+              gstPtr[componentIndex] = 0.0;
+          }
           else
-// set to no inflow condition
-            gstPtr[k] = 0.0; 
+          {
+            // This is the cell that contains the cutoff velocity
+            
+            // Figure out fraction of cell that contains the excess flux
+            // (Flux over what is needed for equivalence with Gamma_i)
+            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+            
+            foundCutoffVelocity = true;
+            data[0] = cellCentroid[1] - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            
+            // Scale all values by appropriate fraction to conserve flux
+            // Copy data into ghost after rotating skin cell data by 180 degrees
+            for (int k = 0; k < numNodes; k++)
+              gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+          }
+        }
+        else
+        {
+          // We have already iterated past and found the cutoff velocity.
+          // Copy data into ghost after rotating skin cell data by 180 degrees
+          for (int k = 0; k < numNodes; k++)
+            gstPtr[k] = sknPtr[rotMap[k]];
         }
       }
     }
+
+    // Put data into the DynVector
+    cutoffVelocities.appendData(t, data);
 
     return Lucee::UpdaterStatus();
   }
@@ -153,24 +315,24 @@ namespace Lucee
   void
   DistFuncReflectionBcUpdater::declareTypes()
   {
+    // Momentum flux for ion
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // Distribution function output
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
+    // Output cutoff velocities
+    this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
   void
-  DistFuncReflectionBcUpdater::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  DistFuncReflectionBcUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+    Eigen::MatrixXd& destinationMatrix)
   {
-    Lucee::UpdaterIfc::appendLuaCallableMethods(lfm);
-
-    lfm.appendFunc("setCutOffVelocity", luaSetCutOffVelocity);
-  }
-
-  int
-  DistFuncReflectionBcUpdater::luaSetCutOffVelocity(lua_State *L)
-  {
-    DistFuncReflectionBcUpdater *up
-      = Lucee::PointerHolder<DistFuncReflectionBcUpdater>::getObjAsDerived(L);
-    double cv = lua_tonumber(L, 2);
-    up->setCutOffVelocity(cv);
-    return 0;
+    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
+    {
+      for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
+      {
+        destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
+      }
+    }
   }
 }

@@ -290,6 +290,28 @@ namespace Lucee
  */
       void getDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat,
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
+
+/**
+ * Get coefficients for applying reflecting boundary conditions on
+ * lower side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      virtual void getLowerReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap) const;
+
+/**
+ * Get coefficients for applying reflecting boundary conditions on
+ * upper side in direction 'dir'. The vector nodeMap[i] is the
+ * reflected node corresponding to node 'i'.
+ *
+ * @param dir Direction to which face is perpendicular.
+ * @param nodeMap Map for reflecting nodes.
+ */
+      virtual void getUpperReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap) const;
 /**
  * Compute mapping of nodes from a face to element interior for lower
  * face in specified direction. The shape of the output matrix

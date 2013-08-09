@@ -18,6 +18,11 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 #include <LcVector.h>
+#include <LcDynVector.h>
+
+// eigen includes
+#include <Eigen/Dense>
+#include <Eigen/LU>
 
 namespace Lucee
 {
@@ -65,13 +70,6 @@ namespace Lucee
  */
       void declareTypes();
 
-/**
- * Method that performs registration of Lua functions.
- *
- * @param lfm Lua function map object.
- */
-      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
-
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
@@ -79,30 +77,35 @@ namespace Lucee
       bool applyLeftEdge;
 /** Flag to indicate if BCs should be applied to right edge */
       bool applyRightEdge;
-/** Mapping for 180 degree rotations for upper edge */
-      std::vector<unsigned> rotMapRight;
-/** Mapping for 180 degree rotations for lower edge */
-      std::vector<unsigned> rotMapLeft;
-/** Cutoff velocity */
-      double cutOffVel;
+/** Mapping for 180 degree rotations */
+      std::vector<unsigned> rotMap;
+/** Contains the right edge node numbers */
+      std::vector<int> rightEdgeNodeNums;
+/** Contains the left edge node numbers */
+      std::vector<int> leftEdgeNodeNums;
+/**
+ * Matrix of surface gaussian quadrature locations on bottom face..
+ * There are three columns by default for (x,y,z)
+ * and each row is a different quadrature point for doing surface integrals.
+ */
+      Eigen::MatrixXd gaussEdgeOrdinates;
+/** Weights for edge gaussian quadrature points */
+      std::vector<double> gaussEdgeWeights;
+/** 
+ * Interpolation matrix for bringing data that lives on the left or right edge
+ * to quadrature points on same surface. It is constructed from the right edge
+ * basis function evaluations but should work for the left edge as well.
+ * The quadrature locations for these nodes are also in gaussSurfOrdinates and
+ * gaussSurfWeights.
+ */
+      Eigen::MatrixXd edgeNodeInterpMatrix;
 
 /**
- * Lua callable method to set cut-off velocity.
- *
- * @param L Lua state to use.
- * @return number of output parameters.
+ * Copy a Lucee-type matrix to an Eigen-type matrix.
+ * No checks are performed to make sure source and destination matrices are
+ * of the same size.
  */
-      static int luaSetCutOffVelocity(lua_State *L);
-
-/**
- * Set cut-off velocity.
- *
- * @param cv Cut-off velocity.
- */
-      void setCutOffVelocity(double cv)
-      { 
-        cutOffVel = cv;
-      }
+      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
   };
 }
 

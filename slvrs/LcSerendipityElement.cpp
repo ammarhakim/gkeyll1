@@ -938,6 +938,114 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  SerendipityElement<NDIM>::getLowerReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap) const
+  {
+    if (polyOrder > 2)
+      Lucee::Except("SerendipityElement::getLowerReflectingBcMapping: Not implemented for higher than quadratic!");
+    if (NDIM != 2)
+      Lucee::Except("SerendipityElement::getLowerReflectingBcMapping: Only implemented for 2D");
+
+    if(dir == 0)
+    {
+      if (polyOrder == 1)
+      {
+        nodeMap[0] = 1;
+        nodeMap[1] = 0;
+        nodeMap[2] = 3;
+        nodeMap[3] = 2;
+      }
+      else if (polyOrder == 2)
+      {
+        nodeMap[0] = 2;
+        nodeMap[1] = 1;
+        nodeMap[2] = 0;
+        nodeMap[3] = 7;
+        nodeMap[4] = 6;
+        nodeMap[5] = 5;
+        nodeMap[6] = 4;
+        nodeMap[7] = 3;
+      }
+    }
+    else if (dir == 1)
+    {
+      if (polyOrder == 1)
+      {
+        nodeMap[0] = 3;
+        nodeMap[1] = 2;
+        nodeMap[2] = 1;
+        nodeMap[3] = 0;
+      }
+      else if (polyOrder == 2)
+      {
+        nodeMap[0] = 6;
+        nodeMap[1] = 5;
+        nodeMap[2] = 4;
+        nodeMap[3] = 3;
+        nodeMap[4] = 2;
+        nodeMap[5] = 1;
+        nodeMap[6] = 0;
+        nodeMap[7] = 7;
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::getUpperReflectingBcMapping(unsigned dir,
+        std::vector<unsigned>& nodeMap) const
+  {
+    if (polyOrder > 2)
+      Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Not implemented for higher than quadratic!");
+    if (NDIM != 2)
+      Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Only implemented for 2D");
+
+    if(dir == 0)
+    {
+      if (polyOrder == 1)
+      {
+        nodeMap[0] = 1;
+        nodeMap[1] = 0;
+        nodeMap[2] = 3;
+        nodeMap[3] = 2;
+      }
+      else if (polyOrder == 2)
+      {
+        nodeMap[0] = 2;
+        nodeMap[1] = 1;
+        nodeMap[2] = 0;
+        nodeMap[3] = 7;
+        nodeMap[4] = 6;
+        nodeMap[5] = 5;
+        nodeMap[6] = 4;
+        nodeMap[7] = 3;
+      }
+    }
+    else if (dir == 1)
+    {
+      if (polyOrder == 1)
+      {
+        nodeMap[0] = 3;
+        nodeMap[1] = 2;
+        nodeMap[2] = 1;
+        nodeMap[3] = 0;
+      }
+      else if (polyOrder == 2)
+      {
+        nodeMap[0] = 6;
+        nodeMap[1] = 5;
+        nodeMap[2] = 4;
+        nodeMap[3] = 3;
+        nodeMap[4] = 2;
+        nodeMap[5] = 1;
+        nodeMap[6] = 0;
+        nodeMap[7] = 7;
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
   SerendipityElement<NDIM>::getLowerFaceToInteriorMapping(unsigned dir,
         Lucee::Matrix<double>& faceToIntMap) const
   {

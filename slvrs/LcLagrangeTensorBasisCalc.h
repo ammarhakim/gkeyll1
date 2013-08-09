@@ -220,7 +220,7 @@ namespace Lucee
  * cost will be amortized.
  *
  * @param bIdx Basis function index (0-based).
- * @param xc Coorinates in element.
+ * @param xc Coordinates in element.
  * @return value of basis function at location.
  */
       double evalBasis(unsigned bIdx, double xc[NDIM]) const;
