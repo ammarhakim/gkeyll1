@@ -114,7 +114,7 @@ namespace Lucee
     const Lucee::Field<1, double>& mom1IonIn = this->getInp<Lucee::Field<1, double> >(1);
     const Lucee::Field<1, double>& mom3ElcIn = this->getInp<Lucee::Field<1, double> >(2);
     const Lucee::Field<1, double>& mom3IonIn = this->getInp<Lucee::Field<1, double> >(3);
-    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(4);
+    const Lucee::Field<1, double>& phiIn     = this->getInp<Lucee::Field<1, double> >(4);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
