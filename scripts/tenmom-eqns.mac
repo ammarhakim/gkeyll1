@@ -3,8 +3,8 @@
 load(itensor);
 
 /** Declare symmetries */
-decsym(P(2,0,[sym(all)],[]));
-decsym(Q(3,0,[sym(all)],[]));
+decsym(P,2,0,[sym(all)],[]);
+decsym(Q,3,0,[sym(all)],[]);
 
 /** Number density */
 dn : p0*D(u(1)) + u(1)*D(n);
