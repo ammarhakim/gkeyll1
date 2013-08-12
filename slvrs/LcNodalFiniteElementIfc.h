@@ -416,7 +416,7 @@ namespace Lucee
  * Evaluate basis functions at location. The results should be stored
  * in the pre-allocated 'vals' vector.
  *
- * @param xc Coorinates in element.
+ * @param xc Coordinates in element.
  * @param vals Values of basis functions. Pre-allocated.
  */
       virtual void evalBasis(double xc[NDIM], std::vector<double>& vals) const;
