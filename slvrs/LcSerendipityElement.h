@@ -351,6 +351,15 @@ namespace Lucee
  * @param fld Field to copy data to.
  */
       virtual void copyAllDataToField(const double *data, Lucee::Field<NDIM, double>& fld);
+
+/**
+ * Evaluate basis functions at location. The results should be stored
+ * in the pre-allocated 'vals' vector.
+ *
+ * @param xc Coordinates in element.
+ * @param vals Values of basis functions. Pre-allocated.
+ */
+      virtual void evalBasis(double xc[NDIM], std::vector<double>& vals) const;
   
   private :
 /** Polynomial order of element */
@@ -367,6 +376,7 @@ namespace Lucee
       double dq2[NDIM];
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
+      std::vector<blitz::Array<double,NDIM> > functionVector;
 /** Matrix containing basis functions evaluated at volume gaussian integration locations
     Correspondance between column and gaussian node set is kept track of in gaussNodeList
     Each row is a different quadrature point.
@@ -444,7 +454,7 @@ namespace Lucee
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
  */
-      double evalPolynomial(const blitz::Array<double, NDIM>& polyCoeffs, const Eigen::VectorXd& nodeCoords);
+      double evalPolynomial(const blitz::Array<double, NDIM>& polyCoeffs, const Eigen::VectorXd& nodeCoords) const;
 
 /**
 *     Compute the partial derivative of a polynomial in direction 'dir'
