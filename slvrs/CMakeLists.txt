@@ -43,6 +43,7 @@ set(lcslvrs_SOURCES
   LcHyperEquationRegistry.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
+  LcImplicitTenMomentSrcUpdater.cpp
   LcKineticHeatFluxAtEdgeUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
