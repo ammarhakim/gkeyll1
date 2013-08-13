@@ -83,6 +83,8 @@ namespace Lucee
       std::vector<int> rightEdgeNodeNums;
 /** Contains the left edge node numbers */
       std::vector<int> leftEdgeNodeNums;
+/** Tolerance to which cutoff velocities should be found */
+      double cutoffTolerance;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
@@ -106,6 +108,11 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+
+      double findRightCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld, const double initialGuess,
+        const double exactResult, const double cellWidth, const double* cellCentroid, const double tol);
+      double findLeftCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld, const double initialGuess,
+        const double exactResult, const double cellWidth, const double* cellCentroid, const double tol);
   };
 }
 

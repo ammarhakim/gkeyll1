@@ -102,6 +102,8 @@ namespace Lucee
       }
     }
 
+    // Tolerance for finding cutoff velocities
+    double cutoffTolerance = 0.0001;
   }
 
   Lucee::UpdaterStatus
@@ -200,9 +202,17 @@ namespace Lucee
             // Figure out fraction of cell that contains the excess flux
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-            
+
+            // cutoffGuess is between -deltaV/2 and +deltaV/2
+            double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            double exactResult = totalIonFlux - totalFluxAlongEdge;
+            double cellWidth = grid.getDx(1)/2.0;
+
+            if (exactResult != 0)
+              cutoffGuess = findRightCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, cutoffTolerance);
+
             foundCutoffVelocity = true;
-            data[1] = cellCentroid[1] - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            data[1] = cellCentroid[1] + cutoffGuess;
             
             // Scale all values by appropriate fraction to conserve flux
             // Copy data into ghost after rotating skin cell data by 180 degrees
@@ -283,9 +293,17 @@ namespace Lucee
             // Figure out fraction of cell that contains the excess flux
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+
+            // cutoffGuess is between -deltaV/2 and +deltaV/2
+            double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+            double exactResult = totalIonFlux - totalFluxAlongEdge;
+            double cellWidth = grid.getDx(1)/2.0;
+
+            if (exactResult != 0)
+              cutoffGuess = findLeftCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, cutoffTolerance);
             
             foundCutoffVelocity = true;
-            data[0] = cellCentroid[1] + grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
+            data[0] = cellCentroid[1] + cutoffGuess;
             
             // Scale all values by appropriate fraction to conserve flux
             // Copy data into ghost after rotating skin cell data by 180 degrees
@@ -331,5 +349,113 @@ namespace Lucee
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
       }
     }
+  }
+
+  double
+  DistFuncReflectionBcUpdater::findRightCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld,
+    const double initialGuess, const double exactResult, const double cellWidth, const double* cellCentroid, const double tol)
+  {
+    double refCoord[2];
+    refCoord[0] = 1;
+
+    std::vector<double> basisAtPoint(nodalBasis->getNumNodes());
+
+    double b = cellWidth;
+    double cutoffGuess;
+    double nextCutoffGuess = initialGuess;
+    
+    double upperBound = cellWidth;
+    double lowerBound = -cellWidth;
+    
+    double relError; 
+
+    do
+    {
+      cutoffGuess = nextCutoffGuess;
+
+      double integralResult = 0.0;
+      for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+      {
+        // physicalCoord is between -deltaV/2 and +deltaV/2
+        double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+          + 0.5*(b + cutoffGuess);
+        refCoord[1] = physicalCoord/cellWidth;
+        
+        nodalBasis->evalBasis(refCoord, basisAtPoint);
+        // Evaluate f at this location
+        double fAtPoint = 0.0;
+        // Loop over 1-D basis functions
+        for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
+          fAtPoint += searchFld[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[rightEdgeNodeNums[nodeIndex]];
+
+        integralResult += 0.5*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]/cellWidth*(cellCentroid[1] + physicalCoord)*fAtPoint;
+      }
+      
+      relError = (integralResult - exactResult)/exactResult;
+      
+      if (relError < 0)
+        upperBound = cutoffGuess;
+      else
+        lowerBound = cutoffGuess;
+
+      nextCutoffGuess = 0.5*(lowerBound + upperBound);
+    }
+    while (fabs(relError) > tol);
+
+    return cutoffGuess;
+  }
+
+  double
+  DistFuncReflectionBcUpdater::findLeftCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld,
+    const double initialGuess, const double exactResult, const double cellWidth, const double* cellCentroid, const double tol)
+  {
+    double refCoord[2];
+    refCoord[0] = -1;
+
+    std::vector<double> basisAtPoint(nodalBasis->getNumNodes());
+
+    double b = -cellWidth;
+    double cutoffGuess;
+    double nextCutoffGuess = initialGuess;
+    
+    double upperBound = cellWidth;
+    double lowerBound = -cellWidth;
+    
+    double relError; 
+
+    do
+    {
+      cutoffGuess = nextCutoffGuess;
+
+      double integralResult = 0.0;
+      for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+      {
+        // physicalCoord is between -deltaV/2 and +deltaV/2
+        double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+          + 0.5*(cutoffGuess + b);
+        refCoord[1] = physicalCoord/cellWidth;
+        
+        nodalBasis->evalBasis(refCoord, basisAtPoint);
+        // Evaluate f at this location
+        double fAtPoint = 0.0;
+        // Loop over 1-D basis functions
+        for (int nodeIndex = 0; nodeIndex < leftEdgeNodeNums.size(); nodeIndex++)
+          fAtPoint += searchFld[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[leftEdgeNodeNums[nodeIndex]];
+
+        integralResult += 0.5*(cutoffGuess - b)*gaussEdgeWeights[gaussNodeIndex]/cellWidth*(cellCentroid[1] + physicalCoord)*fAtPoint;
+      }
+      
+      relError = (integralResult - exactResult)/exactResult;
+      
+      if (relError > 0)
+        upperBound = cutoffGuess;
+      else
+        lowerBound = cutoffGuess;
+
+      nextCutoffGuess = 0.5*(lowerBound + upperBound);
+    }
+    while (fabs(relError) > tol);
+
+    return cutoffGuess;
   }
 }
