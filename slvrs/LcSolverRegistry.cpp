@@ -28,6 +28,7 @@
 #include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
+#include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiffUpdater.h>
@@ -150,6 +151,10 @@ namespace Lucee
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<3> >()
+
+      .append<Lucee::ImplicitTenMomentSrcUpdater<1> >()
+      .append<Lucee::ImplicitTenMomentSrcUpdater<2> >()
+      .append<Lucee::ImplicitTenMomentSrcUpdater<3> >()
 
       .append<Lucee::VelocitiesFromMomentsUpdater>();
 
