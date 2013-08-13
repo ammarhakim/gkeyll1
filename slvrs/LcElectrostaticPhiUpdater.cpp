@@ -190,7 +190,7 @@ namespace Lucee
       // Compute phi(x) at nodal points, then interpolate to gaussian quadrature points
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
         nVec(componentIndex) = ELECTRON_MASS*vtSqPtr[componentIndex]*(1-nElcPtr[componentIndex]/nIonPtr[componentIndex])
-          /(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho) + phiN;
+          /(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho) + phiS;
       Eigen::VectorXd phiAtQuadPoints = interpMatrix*nVec;
       
       // Compute projection of phi(x) onto basis functions
