@@ -103,7 +103,7 @@ namespace Lucee
     }
 
     // Tolerance for finding cutoff velocities
-    double cutoffTolerance = 0.0001;
+    cutoffTolerance = 0.0001;
   }
 
   Lucee::UpdaterStatus
@@ -207,7 +207,7 @@ namespace Lucee
             double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
-
+  
             if (exactResult != 0)
               cutoffGuess = findRightCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, cutoffTolerance);
 
