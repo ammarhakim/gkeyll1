@@ -151,8 +151,8 @@ namespace Lucee
 
 // for pressure update
     Eigen::MatrixXd prLhs;
-    lhs = Eigen::MatrixXd::Constant(3*nFluids+3, 3*nFluids+3, 0.0);
-    Eigen::VectorXd prRhs(3*nFluids+3);
+    prLhs = Eigen::MatrixXd::Constant(6, 6, 0.0);
+    Eigen::VectorXd prRhs(6);
 // updated pressure tensor
     std::vector<double> prTen(6*nFluids);
 
@@ -278,13 +278,13 @@ namespace Lucee
           prSol = prLhs.partialPivLu().solve(prRhs);
         else
         { /* can not happen */ }
-        
-// update solution (solution is at half-time step)
+
+// update solution
         for (unsigned i=0; i<6; ++i)
-          prTen[nFluids*n+i] = 2*prSol[i]-prRhs[i];
+          prTen[6*n+i] = 2*prSol[i]-prRhs[i];
       }
 
-// update solution for fluids (solution is at half-time step)
+// update solution for fluids
       for (unsigned n=0; n<nFluids; ++n)
       {
         fluids[n]->setPtr(fPtr, idx);
@@ -298,12 +298,12 @@ namespace Lucee
 // total pressure tensor equations (we have computed pressure tensor,
 // so we need to add in the Reynold stress terms to get the total
 // pressure)
-        fPtr[P11] = fPtr[RHOUX]*fPtr[RHOUX]/fPtr[RHO] + prTen[nFluids*n+0];
-        fPtr[P12] = fPtr[RHOUX]*fPtr[RHOUY]/fPtr[RHO] + prTen[nFluids*n+1];
-        fPtr[P13] = fPtr[RHOUX]*fPtr[RHOUZ]/fPtr[RHO] + prTen[nFluids*n+2];
-        fPtr[P22] = fPtr[RHOUY]*fPtr[RHOUY]/fPtr[RHO] + prTen[nFluids*n+3];
-        fPtr[P23] = fPtr[RHOUY]*fPtr[RHOUZ]/fPtr[RHO] + prTen[nFluids*n+4];
-        fPtr[P33] = fPtr[RHOUZ]*fPtr[RHOUZ]/fPtr[RHO] + prTen[nFluids*n+5];
+        fPtr[P11] = fPtr[RHOUX]*fPtr[RHOUX]/fPtr[RHO] + prTen[6*n+0];
+        fPtr[P12] = fPtr[RHOUX]*fPtr[RHOUY]/fPtr[RHO] + prTen[6*n+1];
+        fPtr[P13] = fPtr[RHOUX]*fPtr[RHOUZ]/fPtr[RHO] + prTen[6*n+2];
+        fPtr[P22] = fPtr[RHOUY]*fPtr[RHOUY]/fPtr[RHO] + prTen[6*n+3];
+        fPtr[P23] = fPtr[RHOUY]*fPtr[RHOUZ]/fPtr[RHO] + prTen[6*n+4];
+        fPtr[P33] = fPtr[RHOUZ]*fPtr[RHOUZ]/fPtr[RHO] + prTen[6*n+5];
       }
 
 // update electric field
