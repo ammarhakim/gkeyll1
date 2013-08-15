@@ -53,6 +53,9 @@ class ExtractFluidVars1D(object):
         w = self.getW(q)
         return q[:,self.v['zz']] - r*w*w
 
+    def getTemp(self, q):
+        return (self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/self.getRho(q)/mass/3.0
+
 class ExtractEmVars1D(object):
     def __init__(self):
         pass
@@ -123,6 +126,9 @@ class ExtractFluidVars2D(object):
         w = self.getW(q)
         return q[:,:,self.v['zz']] - r*w*w
 
+    def getTemp(self, q):
+        return (self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/self.getRho(q)/mass/3.0
+
 class ExtractEmVars2D(object):
     def getEx(self, q):
         return q[:,:,20]
@@ -173,6 +179,8 @@ class ExtractFluidVars(object):
         return self.get(q, 'getPyz')
     def getPzz(self, q):
         return self.get(q, 'getPzz')
+    def getTemp(self, q):
+        return self.get(q, 'getTemp')
 
 class ExtractEmVars(object):
     def __init__(self):
@@ -218,6 +226,7 @@ transformRegistry = {
     'pyyElc' : elcEx.getPyy,
     'pyzElc' : elcEx.getPyz,
     'pzzElc' : elcEx.getPzz,
+    'tempElc' : elcEx.getTemp,
     'rhoIon' : ionEx.getRho,
     'uIon' : ionEx.getU,
     'vIon' : ionEx.getV,
@@ -228,6 +237,7 @@ transformRegistry = {
     'pyyIon' : ionEx.getPyy,
     'pyzIon' : ionEx.getPyz,
     'pzzIon' : ionEx.getPzz,
+    'tempElc' : ionEx.getTemp,
     'Ex' : emEx.getEx,
     'Ey' : emEx.getEy,
     'Ez' : emEx.getEz,

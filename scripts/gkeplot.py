@@ -32,6 +32,9 @@ parser.add_option('-v', '--transform-variable', action = 'store',
 parser.add_option('--list-variables', action = 'store_true',
                   dest = 'listTransformVariables',
                   help=  'List all transform variables in file')
+parser.add_option('--transform-params', action = 'store',
+                  dest = 'transformParams',
+                  help = 'List of comma seperated variables needed in computing transforms')
 parser.add_option('-y', '--history', action = 'store',
                   dest = 'history',
                   help = 'Plot specified history')
@@ -63,6 +66,12 @@ parser.add_option('--axis-free', action = 'store_true',
 transformMod = None
 # first load in a transforms module, if specified
 if options.transformsFile:
+    varList = []
+
+    if options.transformParams:
+        # values needed for transforms to work
+        varList = [(x.split('=')[0], float(x.split('=')[1])) for x in options.transformParams.split(",")]
+
     scriptPath = os.path.dirname(sys.argv[0])
     scriptFile = scriptPath + ("/%s.py" % options.transformsFile)
     if os.path.exists(options.transformsFile+".py"):
@@ -75,6 +84,10 @@ if options.transformsFile:
     else:
         raise exceptions.RuntimeError(
             "Transforms file %s.py does not exist" % options.transformsFile)
+
+    # add global values to module for transforms to work
+    for var,val in varList:
+        transformMod.__dict__[var] = val
 
     if options.listTransformVariables:
         print transformMod.transformRegistry.keys()
