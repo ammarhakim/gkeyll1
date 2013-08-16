@@ -1,4 +1,5 @@
 import exceptions
+import numpy
 
 class ExtractFluidVars1D(object):
     def __init__(self, offset):
@@ -55,6 +56,9 @@ class ExtractFluidVars1D(object):
 
     def getTemp(self, q):
         return 1/3.0*(self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/(self.getRho(q)/mass)
+
+    def getThermVel(self, q):
+        return numpy.sqrt(self.getTemp(q)/mass)
 
 class ExtractEmVars1D(object):
     def __init__(self):
@@ -129,6 +133,9 @@ class ExtractFluidVars2D(object):
     def getTemp(self, q):
         return 1/3.0*(self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/(self.getRho(q)/mass)
 
+    def getThermVel(self, q):
+        return numpy.sqrt(self.getTemp(q)/mass)
+
 class ExtractEmVars2D(object):
     def getEx(self, q):
         return q[:,:,20]
@@ -181,6 +188,8 @@ class ExtractFluidVars(object):
         return self.get(q, 'getPzz')
     def getTemp(self, q):
         return self.get(q, 'getTemp')
+    def getThermVel(self, q):
+        return self.get(q, 'getThermVel')
 
 class ExtractEmVars(object):
     def __init__(self):
@@ -227,6 +236,7 @@ transformRegistry = {
     'pyzElc' : elcEx.getPyz,
     'pzzElc' : elcEx.getPzz,
     'tempElc' : elcEx.getTemp,
+    'thermalVelElc' : elcEx.getThermVel,
     'rhoIon' : ionEx.getRho,
     'uIon' : ionEx.getU,
     'vIon' : ionEx.getV,
@@ -238,6 +248,7 @@ transformRegistry = {
     'pyzIon' : ionEx.getPyz,
     'pzzIon' : ionEx.getPzz,
     'tempIon' : ionEx.getTemp,
+    'thermalVelIon' : ionEx.getThermVel,
     'Ex' : emEx.getEx,
     'Ey' : emEx.getEy,
     'Ez' : emEx.getEz,
