@@ -72,7 +72,7 @@ args = parser.parse_args()
 # plot each file as specified
 fileList = args.files
 for f in fileList:
-    print ("Working on %s ..." % f)
+    print ("Plotting %s ..." % f)
     if not gkeplotters.plotFile(f, args):
         print ("  Warning: Unable to plot file %s!" % f)
     
