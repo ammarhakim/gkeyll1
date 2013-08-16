@@ -4,6 +4,8 @@ r"""Command line tool to plot Gkeyll results.
 """
 
 import argparse
+import gkeplotters
+import pylab
 
 # create option parser
 parser = argparse.ArgumentParser(description="Plot HDF5 data produced by Gkeyll")
@@ -42,6 +44,10 @@ plotGroup.add_argument("--xlabel",
                        help="X-label on plot")
 plotGroup.add_argument("--ylabel",
                        help="Y-label on plot")
+plotGroup.add_argument("--xlim",
+                       help="X-axis limits for plots")
+plotGroup.add_argument("--ylim",
+                       help="Y-axis limits for plots")
 plotGroup.add_argument("--semilogx", action='store_true', default=False,
                        help="For 1D plots, make a log plot on X-axis.")
 plotGroup.add_argument("--semilogy", action='store_true', default=False,
@@ -61,5 +67,13 @@ plotGroup.add_argument('-s', "--save", action='store_true', default=False,
 plotGroup.add_argument("--save-as",
                        help="Optional name of PNG file to save.")
 
+# parse out arguments
 args = parser.parse_args()
-
+# plot each file as specified
+fileList = args.files
+for f in fileList:
+    print ("Working on %s ..." % f)
+    if not gkeplotters.plotFile(f, args):
+        print ("  Warning: Unable to plot file %s!" % f)
+    
+pylab.show()

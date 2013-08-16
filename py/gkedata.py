@@ -7,10 +7,10 @@ import os
 import exceptions
 
 class GkeData:
-    r"""GkeData(base: string, frame : int) -> GkeData
+    r"""GkeData(fName: string) -> GkeData
 
     Provides an interface to read data stored in a Gkeyll produced
-    HDF5 file, with base name ``base`` and frame ``frame``.
+    HDF5 file names 'fName'.
     """
 
     def __init__(self, fName):
@@ -25,6 +25,7 @@ class GkeData:
         self.lowerBounds = grid._v_attrs.vsLowerBounds
         self.upperBounds = grid._v_attrs.vsUpperBounds
         self.cells = grid._v_attrs.vsNumCells
+        self.ndim = len(self.cells)
 
         # read in time data if it exists
         try:
