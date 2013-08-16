@@ -54,7 +54,7 @@ class ExtractFluidVars1D(object):
         return q[:,self.v['zz']] - r*w*w
 
     def getTemp(self, q):
-        return (self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/self.getRho(q)/mass/3.0
+        return 1/3.0*(self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/(self.getRho(q)/mass)
 
 class ExtractEmVars1D(object):
     def __init__(self):
@@ -127,7 +127,7 @@ class ExtractFluidVars2D(object):
         return q[:,:,self.v['zz']] - r*w*w
 
     def getTemp(self, q):
-        return (self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/self.getRho(q)/mass/3.0
+        return 1/3.0*(self.getPxx(q)+self.getPyy(q)+self.getPzz(q))/(self.getRho(q)/mass)
 
 class ExtractEmVars2D(object):
     def getEx(self, q):
@@ -237,7 +237,7 @@ transformRegistry = {
     'pyyIon' : ionEx.getPyy,
     'pyzIon' : ionEx.getPyz,
     'pzzIon' : ionEx.getPzz,
-    'tempElc' : ionEx.getTemp,
+    'tempIon' : ionEx.getTemp,
     'Ex' : emEx.getEx,
     'Ey' : emEx.getEy,
     'Ez' : emEx.getEz,
