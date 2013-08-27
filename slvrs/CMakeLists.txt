@@ -72,6 +72,7 @@ set(lcslvrs_SOURCES
   LcSolverRegistry.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
+  LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMomentsUpdater.cpp
