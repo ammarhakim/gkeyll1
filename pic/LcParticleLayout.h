@@ -18,7 +18,7 @@ namespace Lucee
  * This class is used by custom particle classes to define the layout
  * of space and velocity coordinates, and indicate how much total
  * space they need. One can either derive from this class or use it
- * directly with the appropriate temaplte parameters.
+ * directly with the appropriate template parameters.
  *
  * @tparam XOFF Offset for first spatial coordinate.
  * @tparam VOFF Offset for first velocity coordinate.
