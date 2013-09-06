@@ -103,7 +103,7 @@ namespace Lucee
     }
 
     // Tolerance for finding cutoff velocities
-    cutoffTolerance = 0.0001;
+    cutoffTolerance = 1.0e-10;
   }
 
   Lucee::UpdaterStatus
@@ -207,8 +207,8 @@ namespace Lucee
             double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
-  
-            if (exactResult != 0)
+
+            if (exactResult != 0.0 && totalIonFlux != 0.0)
               cutoffGuess = findRightCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, cutoffTolerance);
 
             foundCutoffVelocity = true;
@@ -299,7 +299,7 @@ namespace Lucee
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
 
-            if (exactResult != 0)
+            if (exactResult != 0.0 && totalIonFlux != 0.0)
               cutoffGuess = findLeftCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, cutoffTolerance);
             
             foundCutoffVelocity = true;
@@ -369,9 +369,14 @@ namespace Lucee
     
     double relError; 
 
+    int iterCount = 0;
+
     do
     {
       cutoffGuess = nextCutoffGuess;
+
+      if (upperBound == lowerBound || iterCount > 100)
+        break;
 
       double integralResult = 0.0;
       for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
@@ -392,6 +397,16 @@ namespace Lucee
       }
       
       relError = (integralResult - exactResult)/exactResult;
+
+      if (iterCount > 50)
+      {
+        std::cout << "iterCount = " << iterCount << std::endl;
+        std::cout << "relError = " << fabs(relError) << std::endl;
+        std::cout << "integralResult = " << integralResult << std::endl;
+        std::cout << "exactResult = " << exactResult << std::endl;
+        std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
+        std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
+      }
       
       if (relError < 0)
         upperBound = cutoffGuess;
@@ -399,6 +414,7 @@ namespace Lucee
         lowerBound = cutoffGuess;
 
       nextCutoffGuess = 0.5*(lowerBound + upperBound);
+      iterCount++;
     }
     while (fabs(relError) > tol);
 
@@ -422,10 +438,15 @@ namespace Lucee
     double lowerBound = -cellWidth;
     
     double relError; 
+    
+    int iterCount = 0;
 
     do
     {
       cutoffGuess = nextCutoffGuess;
+
+      if (upperBound == lowerBound || iterCount > 100)
+        break;
 
       double integralResult = 0.0;
       for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
@@ -453,6 +474,7 @@ namespace Lucee
         lowerBound = cutoffGuess;
 
       nextCutoffGuess = 0.5*(lowerBound + upperBound);
+      iterCount++;
     }
     while (fabs(relError) > tol);
 

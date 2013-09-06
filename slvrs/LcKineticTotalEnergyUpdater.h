@@ -1,11 +1,11 @@
 /**
- * @file	LcElectrostaticPhiUpdater.h
+ * @file	LcKineticTotalEnergyUpdater.h
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Updater to compute total energy in the domain at a given instant
  */
 
-#ifndef LC_ELECTROSTATIC_PHI_UPDATER_H
-#define LC_ELECTROSTATIC_PHI_UPDATER_H
+#ifndef LC_KINETIC_TOTAL_ENERGY_UPDATER_H
+#define LC_KINETIC_TOTAL_ENERGY_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -30,14 +30,14 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class ElectrostaticPhiUpdater : public Lucee::UpdaterIfc
+  class KineticTotalEnergyUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      ElectrostaticPhiUpdater();
+      KineticTotalEnergyUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -74,8 +74,10 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Value of k_perp0*rho_s */
-      double kPerpTimesRho;
+/** Mass of ions in system */
+      double ionMass;
+/** Perpendicular temperature of electrons and ions */
+      double tPerp;
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)
@@ -84,19 +86,11 @@ namespace Lucee
       Eigen::MatrixXd gaussOrdinates;
 /** Weights for gaussian quadrature points */
       std::vector<double> gaussWeights;
-/** Vector containing various triple-product basis integrals */
-      std::vector<Eigen::MatrixXd> tripleProducts;
 /** 
  * Interpolation matrix for bringing quantities from nodal locations to
  * gaussian quadrature points.
  */
       Eigen::MatrixXd interpMatrix;
-/** Transpose of interpolation matrix */
-      Eigen::MatrixXd interpMatrixTranspose;
-/** Mass matrix */
-      Eigen::MatrixXd massMatrix;
-/** Inverse of mass matrix */
-      Eigen::MatrixXd massMatrixInv;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -106,4 +100,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_ELECTROSTATIC_PHI_UPDATER_H
+#endif // LC_KINETIC_TOTAL_ENERGY_UPDATER_H

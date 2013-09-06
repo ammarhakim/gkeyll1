@@ -45,6 +45,7 @@ set(lcslvrs_SOURCES
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
   LcKineticHeatFluxAtEdgeUpdater.cpp
+  LcKineticTotalEnergyUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiffUpdater.cpp
@@ -62,6 +63,7 @@ set(lcslvrs_SOURCES
   LcNodalHyperDiffusionUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
+  LcPositivityUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcSerendipityElement.cpp

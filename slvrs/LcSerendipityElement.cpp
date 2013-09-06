@@ -45,7 +45,19 @@ namespace Lucee
     // used in the rest of the code! Affects more than just gaussPoints.
     maxPower = 3*polyOrder;
     
-    if (NDIM == 2)
+    if (NDIM == 1)
+    {
+      if (polyOrder < 4)
+        this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
+      else
+      {
+        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, or 3.");
+        lce << " Provided " << polyOrder << " instead";
+        throw lce;
+      }
+      setupMatrices();
+    }
+    else if (NDIM == 2)
     {
       if (polyOrder < 4)
         this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
@@ -71,7 +83,7 @@ namespace Lucee
     }
     else
     {
-      Lucee::Except lce("SerendipityElement: NDIM must be 2 or 3.");
+      Lucee::Except lce("SerendipityElement: NDIM must be 1, 2, or 3.");
       lce << " Provided " << NDIM << " instead";
       throw lce;
     }
@@ -81,7 +93,15 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getExclusiveNodeIndices(std::vector<int>& ndIds)
   {
-    if (NDIM == 2)
+    if (NDIM == 1)
+    {
+      ndIds.clear();
+      ndIds.resize(polyOrder);
+
+      for (int nodeIndex = 0; nodeIndex < polyOrder; nodeIndex++)
+        ndIds[nodeIndex] = nodeIndex;
+    }
+    else if (NDIM == 2)
     {
       ndIds.clear();
       if (polyOrder == 1)
@@ -120,7 +140,7 @@ namespace Lucee
     }
     else
     {
-      Lucee::Except lce("SerendipityElement::getExclusiveNodeIndices NDIM must be 2.");
+      Lucee::Except lce("SerendipityElement::getExclusiveNodeIndices NDIM must be 1 or 2.");
       lce << " Provided " << NDIM << " instead";
       throw lce;
     }
@@ -144,14 +164,31 @@ namespace Lucee
   unsigned
   SerendipityElement<NDIM>::getNumGlobalNodes() const
   {
-    throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented!");
-    return 0;
+    if (NDIM != 1)
+      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 1!");
+    // get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> gridRgn = grid.getGlobalRegion();
+
+    int numGlobalNodes = 1 + polyOrder*gridRgn.getShape(0);
+    return numGlobalNodes;
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
+    std::cout << "this->currIdx[0] = " << this->currIdx[0] << std::endl;
+
+    if (NDIM == 1)
+    {
+    // Loop over excusive nodes
+    for (int nodeIndex = 0; nodeIndex < polyOrder; nodeIndex++)
+      lgMap[nodeIndex] = this->currIdx[0]*polyOrder + nodeIndex;
+    }
+    else throw Lucee::Except("SerendipityElement::getLocalToGlobal: Not implemented!");
+    /*
     // TODO: untested, not sure what this does anymore.
     // determine number of global degrees of freedom
     const Lucee::StructuredGridBase<NDIM>& grid 
@@ -206,9 +243,7 @@ namespace Lucee
         typeAPad += globalNodesPerRow2D[rowIndex];
     }
 
-    std::vector<unsigned> nodeIndices(nodesPerCell2D);
-
-    throw Lucee::Except("SerendipityElement::getLocalToGlobal: Not implemented!");
+    std::vector<unsigned> nodeIndices(nodesPerCell2D);*/
   }
 
   template <unsigned NDIM>
@@ -216,7 +251,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerLocalToGlobal(unsigned dim,
     std::vector<int>& lgMap) const
   {
-    throw Lucee::Except("SerendipityElement::getSurfLowerLocalToGlobal: Not implemented!");
+    if (NDIM == 1)
+      lgMap[0] = this->currIdx[0]*polyOrder;
+    else throw Lucee::Except("SerendipityElement::getSurfLowerLocalToGlobal: Not implemented!");
   }
 
   template <unsigned NDIM>
@@ -224,7 +261,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfUpperLocalToGlobal(unsigned dim,
     std::vector<int>& lgMap) const
   {
-    throw Lucee::Except("SerendipityElement::getSurfUpperLocalToGlobal: Not implemented!");
+    if (NDIM == 1)
+      lgMap[0] = (this->currIdx[0]+1)*polyOrder;
+    else throw Lucee::Except("SerendipityElement::getSurfUpperLocalToGlobal: Not implemented!");
   }
 
   template <unsigned NDIM>
@@ -232,7 +271,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    if (NDIM == 2)
+    if (NDIM == 1)
+      nodeNum[0] = 0;
+    else if (NDIM == 2)
     {
       if (polyOrder == 1)
       {
@@ -462,7 +503,9 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfUpperNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
-    if (NDIM == 2)
+    if (NDIM == 1)
+      nodeNum[0] = polyOrder;
+    else if (NDIM == 2)
     {
       if (polyOrder == 1)
       {
@@ -803,7 +846,13 @@ namespace Lucee
 
     for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
     {
-      if (NDIM == 2)
+      if (NDIM == 1)
+      {
+        ordinates(gaussIndex,0) = gaussNodeList(gaussIndex,0);
+        ordinates(gaussIndex,1) = 0;
+        ordinates(gaussIndex,2) = 0;
+      }
+      else if (NDIM == 2)
       {
         ordinates(gaussIndex,0) = gaussNodeList(gaussIndex,0);
         ordinates(gaussIndex,1) = gaussNodeList(gaussIndex,1);
@@ -838,7 +887,13 @@ namespace Lucee
 
     for (int gaussIndex = 0; gaussIndex < gaussNodeListLowerSurf[dir].rows(); gaussIndex++)
     {
-      if (NDIM == 2)
+      if (NDIM == 1)
+      {
+        ordinates(gaussIndex,0) = gaussNodeListLowerSurf[dir](gaussIndex,0);
+        ordinates(gaussIndex,1) = 0;
+        ordinates(gaussIndex,2) = 0;
+      }
+      else if (NDIM == 2)
       {
         ordinates(gaussIndex,0) = gaussNodeListLowerSurf[dir](gaussIndex,0);
         ordinates(gaussIndex,1) = gaussNodeListLowerSurf[dir](gaussIndex,1);
@@ -873,7 +928,13 @@ namespace Lucee
 
     for (int gaussIndex = 0; gaussIndex < gaussNodeListUpperSurf[dir].rows(); gaussIndex++)
     {
-      if (NDIM == 2)
+      if (NDIM == 1)
+      {
+        ordinates(gaussIndex,0) = gaussNodeListUpperSurf[dir](gaussIndex,0);
+        ordinates(gaussIndex,1) = 0;
+        ordinates(gaussIndex,2) = 0;
+      }
+      else if (NDIM == 2)
       {
         ordinates(gaussIndex,0) = gaussNodeListUpperSurf[dir](gaussIndex,0);
         ordinates(gaussIndex,1) = gaussNodeListUpperSurf[dir](gaussIndex,1);
@@ -897,11 +958,11 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getMomentMatrix(unsigned p, Lucee::Matrix<double>& momMat) const
   {
-    if (p > maxMoment)
+    if (p > maxMoment || NDIM != 2)
     {
       // moments higher than 3 not supported for now
       Lucee::Except lce("SerendipityElement::getMomentMatrix: Moment matrix of order ");
-      lce << p << " not supported";
+      lce << p << " not supported. NDIM must also be 2.";
       throw lce;
     }
     else
@@ -1221,33 +1282,42 @@ namespace Lucee
     upperSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
     lowerSurfaceEvaluations = std::vector<Eigen::MatrixXd>(NDIM);
 
-    // TODO: roll surface and volume quadrature code into one function
-    // since they do the same thing, but in diff dimensions
-    // Compute surface gaussian quadrature locations
-    int surfShape[NDIM-1];
-    int surfIdx[NDIM-1];
-    
-    for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
-      surfShape[dimIndex] = gaussPoints.size();
-
-    Lucee::Region<NDIM-1, int> surfRegion(surfShape);
-
-    Lucee::RowMajorSequencer<NDIM-1> surfSeq = RowMajorSequencer<NDIM-1>(surfRegion);
-    Lucee::RowMajorIndexer<NDIM-1> surfIdxr = RowMajorIndexer<NDIM-1>(surfRegion);
     Eigen::MatrixXd gaussNodeListSurf = Eigen::MatrixXd::Zero(totalSurfaceGaussNodes, NDIM);
-    
-    // Find all quadrature locations on a NDIM-1 surface
-    while(surfSeq.step())
-    {
-      surfSeq.fillWithIndex(surfIdx);
-      int nodeNumber = surfIdxr.getIndex(surfIdx);
 
-      gaussNodeListSurf(nodeNumber, NDIM-1) = 1.0;
+    if (NDIM > 1)
+    {
+      // TODO: roll surface and volume quadrature code into one function
+      // since they do the same thing, but in diff dimensions
+      // Compute surface gaussian quadrature locations
+      int surfShape[NDIM-1];
+      int surfIdx[NDIM-1];
+      
       for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
+        surfShape[dimIndex] = gaussPoints.size();
+
+      Lucee::Region<NDIM-1, int> surfRegion(surfShape);
+
+      Lucee::RowMajorSequencer<NDIM-1> surfSeq = RowMajorSequencer<NDIM-1>(surfRegion);
+      Lucee::RowMajorIndexer<NDIM-1> surfIdxr = RowMajorIndexer<NDIM-1>(surfRegion);
+
+      
+      // Find all quadrature locations on a NDIM-1 surface
+      while(surfSeq.step())
       {
-        gaussNodeListSurf(nodeNumber, dimIndex) = gaussPoints[surfIdx[dimIndex]];
-        gaussNodeListSurf(nodeNumber, NDIM-1)    *= gaussWeights[surfIdx[dimIndex]];
+        surfSeq.fillWithIndex(surfIdx);
+        int nodeNumber = surfIdxr.getIndex(surfIdx);
+
+        gaussNodeListSurf(nodeNumber, NDIM-1) = 1.0;
+        for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
+        {
+          gaussNodeListSurf(nodeNumber, dimIndex) = gaussPoints[surfIdx[dimIndex]];
+          gaussNodeListSurf(nodeNumber, NDIM-1)    *= gaussWeights[surfIdx[dimIndex]];
+        }
       }
+    }
+    else
+    {
+      gaussNodeListSurf(0, 0) = 1.0;
     }
 
     // Evaluate quadrature points on all surfaces
@@ -1429,7 +1499,27 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix)
   {
-    if (NDIM == 2)
+    if (NDIM == 1)
+    {
+      if (polyOrder == 1)
+        nodeMatrix << -1,
+                      1;
+      else if (polyOrder == 2)
+        nodeMatrix << -1,
+                       0,
+                       1;
+      else if (polyOrder == 3)
+        nodeMatrix << -1,
+                      -1/3.0,
+                      1/3.0,
+                      1;
+      else if (polyOrder == 4)
+        nodeMatrix << -1,
+                      -0.5,
+                      0.5,
+                      1;
+    }
+    else if (NDIM == 2)
     {
       if (polyOrder == 1)
       {

@@ -72,7 +72,7 @@ namespace Lucee
     // Get mass matrix and then copy to Eigen format
     Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
 
-    Eigen::MatrixXd massMatrix(nlocal, nlocal);
+    massMatrix = Eigen::MatrixXd(nlocal, nlocal);
     
     nodalBasis->getMassMatrix(massMatrixLucee);
     
@@ -99,6 +99,30 @@ namespace Lucee
 
     // Compute and store transpose of interpolation matrix
     interpMatrixTranspose = interpMatrix.transpose();
+
+    tripleProducts = std::vector<Eigen::MatrixXd>(nlocal);
+    // Create and store the triple-product basis integrals
+
+    for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+    {
+      // Initialize matrices
+      tripleProducts[basisIndex]  = Eigen::MatrixXd::Zero(nlocal, nlocal);
+      for (int rowIndex = 0; rowIndex < nlocal; rowIndex++)
+      {
+        for (int colIndex = 0; colIndex < nlocal; colIndex++)
+        {
+          double integralResult = 0.0;
+
+          for (int gaussNodeIndex = 0; gaussNodeIndex < numQuadNodes; gaussNodeIndex++)
+          {
+            integralResult += gaussWeights[gaussNodeIndex]*interpMatrix(gaussNodeIndex, basisIndex)*
+              interpMatrix(gaussNodeIndex, rowIndex)*interpMatrix(gaussNodeIndex, colIndex);
+          }
+
+          tripleProducts[basisIndex](rowIndex, colIndex) = integralResult;
+        }
+      }
+    }
   }
 
   Lucee::UpdaterStatus 
@@ -114,7 +138,6 @@ namespace Lucee
     const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
     // Dynvector containing the cutoff velocities computed at one or both edges
     const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(3);
-    // Need to multiply by 1/(kPerpRhoSquared) in the Lua script
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
     int nlocal = nodalBasis->getNumNodes();
@@ -125,7 +148,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
-
+/*
     // Compute average T_e and n_i
     double meanVtSq = 0.0;
     double meanIonDensity = 0.0;
@@ -167,11 +190,11 @@ namespace Lucee
     meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
     meanIonDensity = meanIonDensity/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
     meanPhiTimesN = meanPhiTimesN/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
-
+*/
     // Compute cutoff velocity on the right edge
     std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
     double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-    double phiN = meanPhiTimesN/meanIonDensity;
+    //double phiN = meanPhiTimesN/meanIonDensity;
 
     phiPtr = 0.0;
     
@@ -181,12 +204,38 @@ namespace Lucee
       // Set inputs
       nElcIn.setPtr(nElcPtr, ix);
       nIonIn.setPtr(nIonPtr, ix);
-      vtSqIn.setPtr(vtSqPtr, ix);
+      //vtSqIn.setPtr(vtSqPtr, ix);
       // Set outputs
       phiOut.setPtr(phiPtr, ix);
 
-      Eigen::VectorXd nVec(nlocal);
 
+      Eigen::VectorXd nIonVec(nlocal);
+      Eigen::VectorXd nDiffVec(nlocal);
+      
+      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+      {
+        nIonVec(componentIndex) = nIonPtr[componentIndex];
+        nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
+        // Scale by various factors in the phi-equation
+        nDiffVec(componentIndex) = 250*ELEMENTARY_CHARGE*nDiffVec(componentIndex)/(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
+      }
+
+      Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
+
+      Eigen::MatrixXd phiProjections(nlocal, nlocal);
+
+      for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+      {
+        Eigen::VectorXd phiProjectionsSingle = tripleProducts[basisIndex]*nIonVec;
+        // Store components into rows of phiProjections matrix
+        for (int colIndex = 0; colIndex < nlocal; colIndex++)
+          phiProjections(basisIndex, colIndex) = phiProjectionsSingle(colIndex);
+      }
+
+      // Compute phi(x) weights
+      Eigen::VectorXd phiWeights = phiProjections.inverse()*rhsIntegrals;
+/*
+      Eigen::VectorXd nVec(nlocal);
       // Compute phi(x) at nodal points, then interpolate to gaussian quadrature points
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
         nVec(componentIndex) = ELECTRON_MASS*vtSqPtr[componentIndex]*(1-nElcPtr[componentIndex]/nIonPtr[componentIndex])
@@ -196,11 +245,11 @@ namespace Lucee
       // Compute projection of phi(x) onto basis functions
       for (int componentIndex = 0; componentIndex < phiAtQuadPoints.rows(); componentIndex++)
         phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*phiAtQuadPoints(componentIndex);
-      Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;
+      Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;*/
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiWeights(componentIndex);
+        phiPtr[componentIndex] = phiWeights(componentIndex) + phiS;
     }
 
     return Lucee::UpdaterStatus();
