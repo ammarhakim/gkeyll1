@@ -30,6 +30,7 @@
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
+#include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDragUpdater.h>
@@ -44,6 +45,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcPointSourceIfc.h>
+#include <LcPositivityUpdater.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -97,6 +99,7 @@ namespace Lucee
       
       .append<Lucee::HeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
+      .append<Lucee::KineticTotalEnergyUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
@@ -132,6 +135,8 @@ namespace Lucee
       .append<Lucee::EvalOnBoundaryNodesUpdater<1> >()
       .append<Lucee::EvalOnBoundaryNodesUpdater<2> >()
       .append<Lucee::EvalOnBoundaryNodesUpdater<3> >()
+      
+      .append<Lucee::PositivityUpdater>()
     
       .append<Lucee::ProjectOnNodalBasisUpdater<1> >()
       .append<Lucee::ProjectOnNodalBasisUpdater<2> >()

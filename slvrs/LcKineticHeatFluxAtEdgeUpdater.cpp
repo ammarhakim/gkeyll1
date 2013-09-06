@@ -156,12 +156,16 @@ namespace Lucee
     }
     
     double ionHeatFlux = 0.5*ionMass*mom3IonPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFlux = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1] + mom1ElcPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc + phiPtr[nlocal-1]);
+    double electronHeatFlux = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
     
-    std::vector<double> data(3);
+    std::vector<double> data(6);
     data[0] = ionHeatFlux + electronHeatFlux;
     data[1] = ionHeatFlux;
     data[2] = electronHeatFlux;
+    data[3] = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1];
+    data[4] = mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*tPerpElc;
+    data[5] = mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
+    
     qVsTime.appendData(t, data);
 
     return Lucee::UpdaterStatus();
