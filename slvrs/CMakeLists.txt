@@ -26,6 +26,7 @@ set(lcslvrs_SOURCES
   LcCurrentSource.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
+  LcElectrostaticContPhiUpdater.cpp
   LcElectrostaticPhiUpdater.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp

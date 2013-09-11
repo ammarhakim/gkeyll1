@@ -74,8 +74,10 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Mass of species we are computing the heat flux using */
+/** Mass of ions in system */
       double ionMass;
+/** Mass of electrons in the system */
+      double electronMass;
 /** Perpendicular temperature of ions and electrons */
       double tPerp;
 /** Reference to optional input function specifying tPerp profile */
