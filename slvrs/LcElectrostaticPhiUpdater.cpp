@@ -148,53 +148,10 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
-/*
-    // Compute average T_e and n_i
-    double meanVtSq = 0.0;
-    double meanIonDensity = 0.0;
-    double meanPhiTimesN = 0.0;
 
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
-    {
-      // Set inputs
-      vtSqIn.setPtr(vtSqPtr, ix);
-      nIonIn.setPtr(nIonPtr, ix);
-      phiOut.setPtr(phiPtr, ix);
-
-      Eigen::VectorXd vtSqVec(nlocal);
-      Eigen::VectorXd nVec(nlocal);
-      Eigen::VectorXd phiTimesNVec(nlocal);
-      
-      // Figure out vtSq(x) at quadrature points in the cell
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-      {
-        vtSqVec(componentIndex) = vtSqPtr[componentIndex];
-        nVec(componentIndex)    = nIonPtr[componentIndex];
-        phiTimesNVec(componentIndex) = nIonPtr[componentIndex]*phiPtr[componentIndex];
-      }
-
-      Eigen::VectorXd vtSqAtQuadPoints = interpMatrix*vtSqVec;
-      Eigen::VectorXd nAtQuadPoints = interpMatrix*nVec;
-      Eigen::VectorXd phiTimesNAtQuadPoints = interpMatrix*phiTimesNVec;
-
-      for (int componentIndex = 0; componentIndex < vtSqAtQuadPoints.rows(); componentIndex++)
-      {
-        meanVtSq += gaussWeights[componentIndex]*vtSqAtQuadPoints(componentIndex);
-        meanIonDensity += gaussWeights[componentIndex]*nAtQuadPoints(componentIndex);
-        meanPhiTimesN += gaussWeights[componentIndex]*phiTimesNAtQuadPoints(componentIndex);
-      }
-    }
-
-    // Divide by length of domain
-    // Consider using grid.getNumCells(0)
-    meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
-    meanIonDensity = meanIonDensity/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
-    meanPhiTimesN = meanPhiTimesN/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
-*/
     // Compute cutoff velocity on the right edge
     std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
     double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-    //double phiN = meanPhiTimesN/meanIonDensity;
 
     phiPtr = 0.0;
     
@@ -204,7 +161,6 @@ namespace Lucee
       // Set inputs
       nElcIn.setPtr(nElcPtr, ix);
       nIonIn.setPtr(nIonPtr, ix);
-      //vtSqIn.setPtr(vtSqPtr, ix);
       // Set outputs
       phiOut.setPtr(phiPtr, ix);
 
@@ -234,18 +190,6 @@ namespace Lucee
 
       // Compute phi(x) weights
       Eigen::VectorXd phiWeights = phiProjections.inverse()*rhsIntegrals;
-/*
-      Eigen::VectorXd nVec(nlocal);
-      // Compute phi(x) at nodal points, then interpolate to gaussian quadrature points
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        nVec(componentIndex) = ELECTRON_MASS*vtSqPtr[componentIndex]*(1-nElcPtr[componentIndex]/nIonPtr[componentIndex])
-          /(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho) + phiS;
-      Eigen::VectorXd phiAtQuadPoints = interpMatrix*nVec;
-      
-      // Compute projection of phi(x) onto basis functions
-      for (int componentIndex = 0; componentIndex < phiAtQuadPoints.rows(); componentIndex++)
-        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*phiAtQuadPoints(componentIndex);
-      Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;*/
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)

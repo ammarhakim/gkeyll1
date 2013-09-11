@@ -48,6 +48,11 @@ namespace Lucee
     else
       throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
 
+    if (tbl.hasNumber("electronMass"))
+      electronMass = tbl.getNumber("electronMass");
+    else
+      throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify electronMass");
+
     fnProvided = false;
     if (tbl.hasFunction("tPerpProfile"))
     {
@@ -127,13 +132,6 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> mom3ElcPtr = mom3ElcIn.createConstPtr();
     Lucee::ConstFieldPtr<double> mom3IonPtr = mom3IonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
-
-    // Find value of the following input fields at the very last edge of the domain
-    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getUpper(0)-1);
-    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getUpper(0)-1);
-    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getUpper(0)-1);
-    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getUpper(0)-1);
-    phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
     
     double tPerpIon;
     double tPerpElc;
@@ -154,17 +152,34 @@ namespace Lucee
       tPerpIon = tPerp;
       tPerpElc = tPerp;
     }
+
+    // Find value of the following input fields at the right-most edge of the domain
+    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getUpper(0)-1);
+    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getUpper(0)-1);
+    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getUpper(0)-1);
+    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getUpper(0)-1);
+    phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
     
-    double ionHeatFlux = 0.5*ionMass*mom3IonPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFlux = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
+    double ionHeatFluxRight = 0.5*ionMass*mom3IonPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    double electronHeatFluxRight = 0.5*electronMass*mom3ElcPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
+
+    // Find value of the following input fields at the left-most edge of the domain
+    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getLower(0));
+    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getLower(0));
+    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getLower(0));
+    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getLower(0));
+    phiIn.setPtr(phiPtr, globalRgn.getLower(0));
+
+    double ionHeatFluxLeft = 0.5*ionMass*mom3IonPtr[0] + mom1IonPtr[0]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[0]);
+    double electronHeatFluxLeft = 0.5*electronMass*mom3ElcPtr[0] + mom1IonPtr[0]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[0]);
     
     std::vector<double> data(6);
-    data[0] = ionHeatFlux + electronHeatFlux;
-    data[1] = ionHeatFlux;
-    data[2] = electronHeatFlux;
-    data[3] = 0.5*ELECTRON_MASS*mom3ElcPtr[nlocal-1];
-    data[4] = mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*tPerpElc;
-    data[5] = mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
+    data[0] = ionHeatFluxRight + electronHeatFluxRight;
+    data[1] = ionHeatFluxRight;
+    data[2] = electronHeatFluxRight;
+    data[3] = -(ionHeatFluxLeft + electronHeatFluxLeft);
+    data[4] = -ionHeatFluxLeft;
+    data[5] = -electronHeatFluxLeft;
     
     qVsTime.appendData(t, data);
 

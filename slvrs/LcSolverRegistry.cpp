@@ -17,6 +17,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
+#include <LcElectrostaticContPhiUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
@@ -95,6 +96,7 @@ namespace Lucee
       .append<Lucee::BcUpdater<3> >()
       
       .append<Lucee::BoltzmannPhiUpdater>()
+      .append<Lucee::ElectrostaticContPhiUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
       
       .append<Lucee::HeatFluxAtEdgeUpdater>()

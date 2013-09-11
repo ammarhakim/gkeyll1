@@ -1,11 +1,11 @@
 /**
- * @file	LcKineticTotalEnergyUpdater.h
+ * @file	LcElectrostaticContPhiUpdater.h
  *
- * @brief	Updater to compute total energy in the domain at a given instant
+ * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
  */
 
-#ifndef LC_KINETIC_TOTAL_ENERGY_UPDATER_H
-#define LC_KINETIC_TOTAL_ENERGY_UPDATER_H
+#ifndef LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
+#define LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -16,6 +16,9 @@
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
+
+// petsc includes
+#include <petsc.h>
 
 // std includes
 #include <vector>
@@ -30,14 +33,17 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class KineticTotalEnergyUpdater : public Lucee::UpdaterIfc
+  class ElectrostaticContPhiUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      KineticTotalEnergyUpdater();
+      ElectrostaticContPhiUpdater();
+
+/** Destroy updater */
+      ~ElectrostaticContPhiUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -74,12 +80,18 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Mass of ions in system */
-      double ionMass;
-/** Mass of electrons in the system */
-      double electronMass;
-/** Perpendicular temperature of electrons and ions */
-      double tPerp;
+/** Value of k_perp0*rho_s */
+      double kPerpTimesRho;
+/** Petsc matrices to store linear operator */
+      Mat stiffMat;
+/** Petsc vectors for source and initial guess */
+      Vec globalSrc, initGuess;
+/** Krylov subspace method context */
+      KSP ksp;
+/** Map of rows to Dirichlet BC values */
+      std::map<int, double> rowBcValues;
+/** Flags to indicated periodic directions */
+      bool periodicFlgs[1];
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)
@@ -88,11 +100,15 @@ namespace Lucee
       Eigen::MatrixXd gaussOrdinates;
 /** Weights for gaussian quadrature points */
       std::vector<double> gaussWeights;
+/** Vector containing various triple-product basis integrals */
+      std::vector<Eigen::MatrixXd> tripleProducts;
 /** 
  * Interpolation matrix for bringing quantities from nodal locations to
  * gaussian quadrature points.
  */
       Eigen::MatrixXd interpMatrix;
+/** Mass matrix */
+      Eigen::MatrixXd massMatrix;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -102,4 +118,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_KINETIC_TOTAL_ENERGY_UPDATER_H
+#endif // LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
