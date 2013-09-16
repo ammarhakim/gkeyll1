@@ -17,8 +17,6 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
-#include <LcElectrostaticContPhiUpdater.h>
-#include <LcElectrostaticPhiUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
@@ -64,6 +62,8 @@
 #include <loki/Singleton.h>
 
 #ifdef HAVE_PETSC
+# include <LcElectrostaticContPhiUpdater.h>
+# include <LcElectrostaticPhiUpdater.h>
 # include <LcFemPoissonStructUpdater.h>
 #endif
 
@@ -96,8 +96,6 @@ namespace Lucee
       .append<Lucee::BcUpdater<3> >()
       
       .append<Lucee::BoltzmannPhiUpdater>()
-      .append<Lucee::ElectrostaticContPhiUpdater>()
-      .append<Lucee::ElectrostaticPhiUpdater>()
       
       .append<Lucee::HeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
@@ -128,6 +126,9 @@ namespace Lucee
       .append<Lucee::FemPoissonStructUpdater<1> >()
       .append<Lucee::FemPoissonStructUpdater<2> >()
       .append<Lucee::FemPoissonStructUpdater<3> >()
+
+      .append<Lucee::ElectrostaticContPhiUpdater>()
+      .append<Lucee::ElectrostaticPhiUpdater>()
 #endif
 
       .append<Lucee::EvalOnNodesUpdater<1> >()
