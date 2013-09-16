@@ -28,7 +28,7 @@ namespace Lucee
 
   PhMaxwellEquation::PhMaxwellEquation()
     : Lucee::HyperEquation(8, 6)
-  { // 8 eqns and 6 waves: -c*chi_m, c*chi_m, -c*chi_e, c*chi_e, c, c, -c, -c
+  { // 8 eqns and 6 waves: -c*chi_m, c*chi_m, -c*chi_e, c*chi_e, -c, -c, c, c
   }
 
   void
@@ -131,10 +131,10 @@ namespace Lucee
     double a1 = 0.5*(jump[3] + c1*jump[7]);
     double a2 = 0.5*(jump[0] - lightSpeed*jump[6]);
     double a3 = 0.5*(jump[0] + lightSpeed*jump[6]);
-    double a4 = 0.5*(c1*jump[1] + jump[5]);
-    double a5 = 0.5*(-c1*jump[2] + jump[4]);
-    double a6 = 0.5*(-c1*jump[1] + jump[5]);
-    double a7 = 0.5*(c1*jump[2] + jump[4]);
+    double a4 = 0.5*(jump[1] - lightSpeed*jump[5]);
+    double a5 = 0.5*(jump[2] + lightSpeed*jump[4]);
+    double a6 = 0.5*(jump[1] + lightSpeed*jump[5]);
+    double a7 = 0.5*(jump[2] - lightSpeed*jump[4]);
 
 // compute waves (see Tech Note 1012)
 
@@ -182,26 +182,26 @@ namespace Lucee
     waves(7,3) = 0.0;
     s[3] = lightSpeed*chi_e;
 
-// wave 5: eigenvalue is c (multiplicity 2)
+// wave 5: eigenvalue is -c (multiplicity 2)
     waves(0,4) = 0.0;
-    waves(1,4) = a4*lightSpeed;
-    waves(2,4) = -a5*lightSpeed;
+    waves(1,4) = a4;
+    waves(2,4) = a5;
     waves(3,4) = 0.0;
-    waves(4,4) = a5;
-    waves(5,4) = a4;
+    waves(4,4) = a5*c1;
+    waves(5,4) = -a4*c1;
     waves(6,4) = 0.0;
     waves(7,4) = 0.0;
-    s[4] = lightSpeed;
+    s[4] = -lightSpeed;
 
-// wave 6: eigenvalue is -c (multiplicity 2)
+// wave 6: eigenvalue is c (multiplicity 2)
     waves(0,5) = 0.0;
-    waves(1,5) = -a6*lightSpeed;
-    waves(2,5) = a7*lightSpeed;
+    waves(1,5) = a6;
+    waves(2,5) = a7;
     waves(3,5) = 0.0;
-    waves(4,5) = a7;
-    waves(5,5) = a6;
+    waves(4,5) = -a7*c1;
+    waves(5,5) = a6*c1;
     waves(6,5) = 0.0;
     waves(7,5) = 0.0;
-    s[5] = -lightSpeed;
+    s[5] = lightSpeed;
   }
 }

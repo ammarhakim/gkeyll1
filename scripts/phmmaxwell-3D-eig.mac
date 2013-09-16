@@ -1,4 +1,4 @@
-/** Jacobian is 6x6 */
+/** Jacobian is 8x8 */
 A : zeromatrix(8, 8);
 
 EX : 1;
