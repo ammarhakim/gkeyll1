@@ -21,9 +21,6 @@
 // std includes
 #include <vector>
 
-// eigen includes
-#include <Eigen/Dense>
-
 namespace Lucee
 {
 /**
@@ -83,19 +80,6 @@ namespace Lucee
 /** Reference to optional input function specifying tPerp profile */
       int fnRef;
       bool fnProvided;
-/** Weights for gaussian quadrature points */
-      std::vector<double> gaussWeights;
-/** 
- * Interpolation matrix for bringing quantities from nodal locations to
- * gaussian quadrature points.
- */
-      Eigen::MatrixXd interpMatrix;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
 /**
  * Evaluate function at specified location and fill output array with
  * result.

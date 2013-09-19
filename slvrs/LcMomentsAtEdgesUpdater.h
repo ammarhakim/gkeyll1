@@ -1,11 +1,11 @@
 /**
- * @file	LcDistFuncReflectionBcUpdater.h
+ * @file	LcMomentsAtEdgesUpdater.h
  *
  * @brief	Applies particle refection BCs to distribution function
  */
 
-#ifndef LC_DIST_FUNC_REFLECTION_BC_UPDATER_H
-#define LC_DIST_FUNC_REFLECTION_BC_UPDATER_H
+#ifndef LC_MOMENTS_AT_EDGES_UPDATER_H
+#define LC_MOMENTS_AT_EDGES_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -29,14 +29,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class DistFuncReflectionBcUpdater : public Lucee::UpdaterIfc
+  class MomentsAtEdgesUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      DistFuncReflectionBcUpdater();
+      MomentsAtEdgesUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -73,18 +73,12 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Flag to indicate if BCs should be applied to left edge */
-      bool applyLeftEdge;
-/** Flag to indicate if BCs should be applied to right edge */
-      bool applyRightEdge;
 /** Mapping for 180 degree rotations */
       std::vector<unsigned> rotMap;
 /** Contains the right edge node numbers */
       std::vector<int> rightEdgeNodeNums;
 /** Contains the left edge node numbers */
       std::vector<int> leftEdgeNodeNums;
-/** Tolerance to which cutoff velocities should be found */
-      double cutoffTolerance;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
@@ -101,6 +95,10 @@ namespace Lucee
  * gaussSurfWeights.
  */
       Eigen::MatrixXd edgeNodeInterpMatrix;
+/**
+ * Multiplies vector of nodal values to get derivatives at nodes
+ */
+      Eigen::MatrixXd derivativeMatrix;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
@@ -108,12 +106,7 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-
-      double findRightCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld, const double initialGuess,
-        const double exactResult, const double cellWidth, const double* cellCentroid, const double tol);
-      double findLeftCutoffVelocity(const Lucee::ConstFieldPtr<double>& searchFld, const double initialGuess,
-        const double exactResult, const double cellWidth, const double* cellCentroid, const double tol);
   };
 }
 
-#endif // LC_DIST_FUNC_REFLECTION_BC_UPDATER_H
+#endif // LC_MOMENTS_AT_EDGES_UPDATER_H

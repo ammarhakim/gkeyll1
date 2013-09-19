@@ -72,40 +72,6 @@ namespace Lucee
   KineticHeatFluxAtEdgeUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
-
-    // get hold of grid
-    const Lucee::StructuredGridBase<1>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<1> >();
-    // global region to update
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
-
-    Lucee::RowMajorSequencer<1> seq(globalRgn);
-    seq.step(); // just to get to first index
-    int idx[1];
-    seq.fillWithIndex(idx);
-    nodalBasis->setIndex(idx);
-    
-    int nlocal = nodalBasis->getNumNodes();
-    int numQuadNodes = nodalBasis->getNumGaussNodes();
-
-    // Get mass matrix and then copy to Eigen format
-    Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
-
-    nodalBasis->getMassMatrix(massMatrixLucee);
-    
-    // Get interpolation matrix, gaussian quadrature points, and weights
-    Lucee::Matrix<double> interpMatrixLucee(numQuadNodes, nlocal);
-
-    Lucee::Matrix<double> gaussOrdinatesLucee(numQuadNodes, 3);
-
-    gaussWeights = std::vector<double>(numQuadNodes);
-
-    // Allocate Eigen matrices
-    interpMatrix = Eigen::MatrixXd(numQuadNodes, nlocal);
-
-    // Get the interpolation matrix for the volume quadrature points
-    nodalBasis->getGaussQuadData(interpMatrixLucee, gaussOrdinatesLucee, gaussWeights);
-    copyLuceeToEigen(interpMatrixLucee, interpMatrix);
   }
 
   Lucee::UpdaterStatus 
@@ -114,12 +80,11 @@ namespace Lucee
     const Lucee::StructuredGridBase<1>& grid
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
-    // First three velocity moments + driftU
-    const Lucee::Field<1, double>& mom1ElcIn = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& mom1IonIn = this->getInp<Lucee::Field<1, double> >(1);
-    const Lucee::Field<1, double>& mom3ElcIn = this->getInp<Lucee::Field<1, double> >(2);
-    const Lucee::Field<1, double>& mom3IonIn = this->getInp<Lucee::Field<1, double> >(3);
-    const Lucee::Field<1, double>& phiIn     = this->getInp<Lucee::Field<1, double> >(4);
+    // potential
+    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(0);
+    // mom1 and mom3 at left and right edges
+    const Lucee::DynVector<double>& momentsAtEdgesElcIn = this->getInp<Lucee::DynVector<double> >(1);
+    const Lucee::DynVector<double>& momentsAtEdgesIonIn = this->getInp<Lucee::DynVector<double> >(2);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -127,11 +92,10 @@ namespace Lucee
 
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::ConstFieldPtr<double> mom1ElcPtr = mom1ElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom1IonPtr = mom1IonIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom3ElcPtr = mom3ElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom3IonPtr = mom3IonIn.createConstPtr();
     Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
+
+    std::vector<double> momentsAtEdgesElc = momentsAtEdgesElcIn.getLastInsertedData();
+    std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
     
     double tPerpIon;
     double tPerpElc;
@@ -154,25 +118,17 @@ namespace Lucee
     }
 
     // Find value of the following input fields at the right-most edge of the domain
-    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getUpper(0)-1);
-    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getUpper(0)-1);
-    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getUpper(0)-1);
-    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getUpper(0)-1);
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
     
-    double ionHeatFluxRight = 0.5*ionMass*mom3IonPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFluxRight = 0.5*electronMass*mom3ElcPtr[nlocal-1] + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
+    double ionHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[3] + momentsAtEdgesIon[2]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);// + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    double electronHeatFluxRight = 0.5*electronMass*momentsAtEdgesElc[3] + momentsAtEdgesElc[2]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
 
     // Find value of the following input fields at the left-most edge of the domain
-    mom1ElcIn.setPtr(mom1ElcPtr, globalRgn.getLower(0));
-    mom1IonIn.setPtr(mom1IonPtr, globalRgn.getLower(0));
-    mom3ElcIn.setPtr(mom3ElcPtr, globalRgn.getLower(0));
-    mom3IonIn.setPtr(mom3IonPtr, globalRgn.getLower(0));
     phiIn.setPtr(phiPtr, globalRgn.getLower(0));
 
-    double ionHeatFluxLeft = 0.5*ionMass*mom3IonPtr[0] + mom1IonPtr[0]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[0]);
-    double electronHeatFluxLeft = 0.5*electronMass*mom3ElcPtr[0] + mom1IonPtr[0]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[0]);
-    
+    double ionHeatFluxLeft = 0.5*ionMass*momentsAtEdgesIon[1] + momentsAtEdgesIon[0]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[0]);
+    double electronHeatFluxLeft = 0.5*electronMass*momentsAtEdgesElc[1] + momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[0]);
+
     std::vector<double> data(6);
     data[0] = ionHeatFluxRight + electronHeatFluxRight;
     data[1] = ionHeatFluxRight;
@@ -189,23 +145,12 @@ namespace Lucee
   void
   KineticHeatFluxAtEdgeUpdater::declareTypes()
   {
-    // takes five inputs (<v>,<v^3>) elc moments + same for ions + phi(x)
+    // takes phi(x) + dynvectors containing moments at edges of domain
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::DynVector<double>));
+    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: dynvector of heat flux at edge vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
-  }
-  
-  void
-  KineticHeatFluxAtEdgeUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
-    Eigen::MatrixXd& destinationMatrix)
-  {
-    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
-      for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
-        destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
 
   void

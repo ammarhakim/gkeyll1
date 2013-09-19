@@ -166,10 +166,10 @@ namespace Lucee
         }
         else if (calcMom == 3)
         {
-          matVec(3*xc[1]*xc[1]*xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
-          matVec(xc[1]*xc[1]*dv2, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
-          matVec(xc[1]*dv22, mm[2].m, &distFPtr[0], 1.0, &momentPtr[0]);
-          matVec(3*dv23, mm[3].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(xc[1]*xc[1]*xc[1], mm[0].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(3*xc[1]*xc[1]*dv2, mm[1].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(3*xc[1]*dv22, mm[2].m, &distFPtr[0], 1.0, &momentPtr[0]);
+          matVec(dv23, mm[3].m, &distFPtr[0], 1.0, &momentPtr[0]);
         }
       }
     }

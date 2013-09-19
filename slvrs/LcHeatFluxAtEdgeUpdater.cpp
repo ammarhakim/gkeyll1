@@ -110,10 +110,10 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
     // First three velocity moments + driftU
-    const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& mom3In = this->getInp<Lucee::Field<1, double> >(1);
-    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
-    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(3);
+    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(1);
+    // mom1 and mom3 at left and right edges
+    const Lucee::DynVector<double>& momentsAtEdgesIn = this->getInp<Lucee::DynVector<double> >(2);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -121,10 +121,10 @@ namespace Lucee
 
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
-    Lucee::ConstFieldPtr<double> mom3Ptr = mom3In.createConstPtr();
     Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
+
+    std::vector<double> momentsAtEdges = momentsAtEdgesIn.getLastInsertedData();
     
     // Find mean vtSq in entire domain
     double meanVtSq = 0.0;
@@ -149,8 +149,6 @@ namespace Lucee
     meanVtSq = meanVtSq/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
     // Find value of the following input fields at the very last edge of the domain
-    mom1In.setPtr(mom1Ptr, globalRgn.getUpper(0)-1);
-    mom3In.setPtr(mom3Ptr, globalRgn.getUpper(0)-1);
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
 
     double tPerpIon;
@@ -173,8 +171,9 @@ namespace Lucee
       tPerpElc = tPerp;
     }
     
-    double ionHeatFlux = 0.5*ionMass*mom3Ptr[nlocal-1] + mom1Ptr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*mom1Ptr[nlocal-1];
+    double ionHeatFlux = 0.5*ionMass*momentsAtEdges[3] + momentsAtEdges[2]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    // Te = average of Ti(x)
+    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*momentsAtEdges[2];
     
     std::vector<double> data(3);
     data[0] = ionHeatFlux + electronHeatFlux;
@@ -188,11 +187,11 @@ namespace Lucee
   void
   HeatFluxAtEdgeUpdater::declareTypes()
   {
-    // takes four inputs (<v>,<v^3>) moments + vtSq + phi(x)
+    // takes inputs vtSq + phi(x)
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // moments evaluated at edges input
+    this->appendOutVarType(typeid(Lucee::DynVector<double>));
     // returns one output: dynvector of heat flux at edge vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }

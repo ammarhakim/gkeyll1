@@ -16,6 +16,8 @@
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
+#include <LcElectromagneticAUpdater.h>
+#include <LcElectrostaticPhiUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
@@ -28,6 +30,7 @@
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
+#include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
@@ -37,6 +40,7 @@
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
 #include <LcNodalDisContHyperUpdater.h>
@@ -63,7 +67,6 @@
 
 #ifdef HAVE_PETSC
 # include <LcElectrostaticContPhiUpdater.h>
-# include <LcElectrostaticPhiUpdater.h>
 # include <LcFemPoissonStructUpdater.h>
 #endif
 
@@ -98,8 +101,12 @@ namespace Lucee
       .append<Lucee::BoltzmannPhiUpdater>()
       
       .append<Lucee::HeatFluxAtEdgeUpdater>()
+      .append<Lucee::KineticEnergyUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticTotalEnergyUpdater>()
+      .append<Lucee::MomentsAtEdgesUpdater>()
+      .append<Lucee::ElectromagneticAUpdater>()
+      .append<Lucee::ElectrostaticPhiUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
@@ -128,7 +135,6 @@ namespace Lucee
       .append<Lucee::FemPoissonStructUpdater<3> >()
 
       .append<Lucee::ElectrostaticContPhiUpdater>()
-      .append<Lucee::ElectrostaticPhiUpdater>()
 #endif
 
       .append<Lucee::EvalOnNodesUpdater<1> >()
