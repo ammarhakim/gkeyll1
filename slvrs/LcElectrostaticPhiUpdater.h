@@ -76,27 +76,12 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
 /** Value of k_perp0*rho_s */
       double kPerpTimesRho;
-/**
- * Matrix of gaussian quadrature locations.
- * There are three columns by default for (x,y,z)
- * and each row is a different quadrature point for doing integrals.
- */
-      Eigen::MatrixXd gaussOrdinates;
-/** Weights for gaussian quadrature points */
-      std::vector<double> gaussWeights;
+/** Fixed electron temp parameter (eV) */
+      double Te0;
 /** Vector containing various triple-product basis integrals */
       std::vector<Eigen::MatrixXd> tripleProducts;
-/** 
- * Interpolation matrix for bringing quantities from nodal locations to
- * gaussian quadrature points.
- */
-      Eigen::MatrixXd interpMatrix;
-/** Transpose of interpolation matrix */
-      Eigen::MatrixXd interpMatrixTranspose;
 /** Mass matrix */
       Eigen::MatrixXd massMatrix;
-/** Inverse of mass matrix */
-      Eigen::MatrixXd massMatrixInv;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

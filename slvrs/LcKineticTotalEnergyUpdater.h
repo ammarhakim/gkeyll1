@@ -1,7 +1,7 @@
 /**
  * @file	LcKineticTotalEnergyUpdater.h
  *
- * @brief	Updater to compute total energy in the domain at a given instant
+ * @brief	Updater to take in various DynVectors and combine them to give energy quantities.
  */
 
 #ifndef LC_KINETIC_TOTAL_ENERGY_UPDATER_H
@@ -13,30 +13,17 @@
 #endif
 
 // lucee includes
-#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
-// std includes
-#include <vector>
-
-// eigen includes
-#include <Eigen/Dense>
-#include <Eigen/LU>
-
 namespace Lucee
 {
-/**
- * Updater to solve hyperbolic equations using a nodal discontinous
- * Galerkin scheme.
- */
   class KineticTotalEnergyUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new nodal DG solver */
       KineticTotalEnergyUpdater();
 
 /**
@@ -78,27 +65,6 @@ namespace Lucee
       double ionMass;
 /** Mass of electrons in the system */
       double electronMass;
-/** Perpendicular temperature of electrons and ions */
-      double tPerp;
-/**
- * Matrix of gaussian quadrature locations.
- * There are three columns by default for (x,y,z)
- * and each row is a different quadrature point for doing integrals.
- */
-      Eigen::MatrixXd gaussOrdinates;
-/** Weights for gaussian quadrature points */
-      std::vector<double> gaussWeights;
-/** 
- * Interpolation matrix for bringing quantities from nodal locations to
- * gaussian quadrature points.
- */
-      Eigen::MatrixXd interpMatrix;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
   };
 }
 

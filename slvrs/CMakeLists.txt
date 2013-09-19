@@ -26,6 +26,8 @@ set(lcslvrs_SOURCES
   LcCurrentSource.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
+  LcElectromagneticAUpdater.cpp
+  LcElectrostaticPhiUpdater.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp
   LcEvalOnNodesUpdater.cpp
@@ -43,6 +45,7 @@ set(lcslvrs_SOURCES
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
+  LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdgeUpdater.cpp
   LcKineticTotalEnergyUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
@@ -54,6 +57,7 @@ set(lcslvrs_SOURCES
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
   LcMaxwellEquation.cpp
+  LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
   LcNodalDisContHyperUpdater.cpp
@@ -86,7 +90,6 @@ if (PETSC_FOUND)
   set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
     LcFemPoissonStructUpdater.cpp
     LcElectrostaticContPhiUpdater.cpp
-    LcElectrostaticPhiUpdater.cpp
   )
 endif (PETSC_FOUND)
 

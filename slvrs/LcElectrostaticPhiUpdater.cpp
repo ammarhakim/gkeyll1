@@ -47,6 +47,11 @@ namespace Lucee
       kPerpTimesRho = tbl.getNumber("kPerpTimesRho");
     else
       throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify kPerpTimesRho");
+
+    if (tbl.hasNumber("Te0"))
+      Te0 = tbl.getNumber("Te0");
+    else
+      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify Te0");
   }
 
   void 
@@ -81,11 +86,11 @@ namespace Lucee
 
     Lucee::Matrix<double> gaussOrdinatesLucee(numQuadNodes, 3);
 
-    gaussWeights = std::vector<double>(numQuadNodes);
+    std::vector<double> gaussWeights(numQuadNodes);
 
     // Allocate Eigen matrices
-    interpMatrix = Eigen::MatrixXd(numQuadNodes, nlocal);
-    gaussOrdinates = Eigen::MatrixXd(numQuadNodes, 3);
+    Eigen::MatrixXd interpMatrix(numQuadNodes, nlocal);
+    Eigen::MatrixXd gaussOrdinates(numQuadNodes, 3);
 
     // Get the interpolation matrix for the volume quadrature points
     nodalBasis->getGaussQuadData(interpMatrixLucee, gaussOrdinatesLucee, gaussWeights);
@@ -93,12 +98,6 @@ namespace Lucee
     copyLuceeToEigen(massMatrixLucee, massMatrix);
     copyLuceeToEigen(interpMatrixLucee, interpMatrix);
     copyLuceeToEigen(gaussOrdinatesLucee, gaussOrdinates);
-
-    // Compute and store inverse of mass matrix
-    massMatrixInv = massMatrix.inverse();
-
-    // Compute and store transpose of interpolation matrix
-    interpMatrixTranspose = interpMatrix.transpose();
 
     tripleProducts = std::vector<Eigen::MatrixXd>(nlocal);
     // Create and store the triple-product basis integrals
@@ -134,10 +133,8 @@ namespace Lucee
     // Electron and ion densities
     const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
     const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
-    // Electron thermal velocity squared vt(x)^2
-    const Lucee::Field<1, double>& vtSqIn = this->getInp<Lucee::Field<1, double> >(2);
     // Dynvector containing the cutoff velocities computed at one or both edges
-    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(3);
+    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
     int nlocal = nodalBasis->getNumNodes();
@@ -146,7 +143,6 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> vtSqPtr = vtSqIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
     // Compute cutoff velocity on the right edge
@@ -164,7 +160,6 @@ namespace Lucee
       // Set outputs
       phiOut.setPtr(phiPtr, ix);
 
-
       Eigen::VectorXd nIonVec(nlocal);
       Eigen::VectorXd nDiffVec(nlocal);
       
@@ -173,7 +168,7 @@ namespace Lucee
         nIonVec(componentIndex) = nIonPtr[componentIndex];
         nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
         // Scale by various factors in the phi-equation
-        nDiffVec(componentIndex) = 250*ELEMENTARY_CHARGE*nDiffVec(componentIndex)/(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
+        nDiffVec(componentIndex) = Te0*ELEMENTARY_CHARGE*nDiffVec(componentIndex)/(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
       }
 
       Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
@@ -203,7 +198,6 @@ namespace Lucee
   ElectrostaticPhiUpdater::declareTypes()
   {
     // takes three inputs (n_e(x), n_i(x), vThermElecSq(x)) + cutoff velocities at edges
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::DynVector<double>));

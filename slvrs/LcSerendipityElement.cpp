@@ -43,7 +43,10 @@ namespace Lucee
     // evaluated (e.g. product of basis functions)
     // Note: don't change this without paying attention to how maxPower is
     // used in the rest of the code! Affects more than just gaussPoints.
-    maxPower = 3*polyOrder;
+    if (polyOrder == 1)
+      maxPower = 4;
+    else
+      maxPower = 3*polyOrder;
     
     if (NDIM == 1)
     {
