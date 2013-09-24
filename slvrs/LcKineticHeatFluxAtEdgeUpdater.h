@@ -14,12 +14,8 @@
 
 // lucee includes
 #include <LcDynVector.h>
-#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-
-// std includes
-#include <vector>
 
 namespace Lucee
 {

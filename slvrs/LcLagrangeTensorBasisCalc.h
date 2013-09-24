@@ -175,7 +175,7 @@ namespace Lucee
       {
         interpMat.copy(volumeQuad.interp);
         ordinates.copy(volumeQuad.ordinates);
-        weights.clear(); weights.resize(totalNodes);
+        weights.clear(); weights.resize(numGaussVolNodes);
         weights = volumeQuad.weights;
       }
 
@@ -310,6 +310,8 @@ namespace Lucee
       unsigned numNodes[NDIM];
 /** Total number of nodes */
       unsigned totalNodes;
+/** Total number of volume quadrature nodes */
+      unsigned numGaussVolNodes;
 /** Region representing node shape */
       typename Lucee::Region<NDIM, int> nodeRgn;
 

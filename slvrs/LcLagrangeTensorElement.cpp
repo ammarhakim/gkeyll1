@@ -236,16 +236,26 @@ namespace Lucee
         localNodeCoords(i,d) = (eta[d]+1)*0.5*dx[d];
     }
 
+// figure out how many quadrature points needed to do 4*polyOrder integration
+    unsigned maxNodes = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+      maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
+    unsigned polyOrder = maxNodes - 1;
+    unsigned num1DGaussPoints = (unsigned)((4*polyOrder+1)/2.0 + 0.5);
+    numGaussVolNodes = 1;
+    for(int d=0; d<NDIM; d++)
+      numGaussVolNodes = numGaussVolNodes*num1DGaussPoints;
+
 // compute quadrature data for volume and surface quadrature
-    volumeQuad.interp = Lucee::Matrix<double>(nlocal, nlocal);
-    volumeQuad.ordinates = Lucee::Matrix<double>(nlocal, NDIM);
-    volumeQuad.weights.resize(nlocal);
+    volumeQuad.interp = Lucee::Matrix<double>(numGaussVolNodes, nlocal);
+    volumeQuad.ordinates = Lucee::Matrix<double>(numGaussVolNodes, NDIM);
+    volumeQuad.weights.resize(numGaussVolNodes);
 
     basisCalc.getGaussQuadData(volumeQuad.interp, volumeQuad.ordinates,
       volumeQuad.weights);
 
 // normalize weights
-    for (unsigned i=0; i<nlocal; ++i)
+    for (unsigned i=0; i<numGaussVolNodes; ++i)
       for (unsigned d=0; d<NDIM; ++d)
         volumeQuad.weights[i] *= 0.5*dx[d];
 
@@ -457,7 +467,7 @@ namespace Lucee
   unsigned
   LagrangeTensorElement<NDIM>::getNumGaussNodes() const
   {
-    return basisCalc.getNumNodes();
+    return numGaussVolNodes;
   }
 
   template <unsigned NDIM>

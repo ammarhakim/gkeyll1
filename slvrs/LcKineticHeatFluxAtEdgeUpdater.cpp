@@ -10,12 +10,7 @@
 #endif
 
 // lucee includes
-#include <LcAlignedRectCoordSys.h>
-#include <LcField.h>
-#include <LcLinAlgebra.h>
-#include <LcMathLib.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
-#include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
 // For function handle:
 #include <LcGlobals.h>
