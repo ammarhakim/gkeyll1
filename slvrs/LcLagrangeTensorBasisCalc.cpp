@@ -592,14 +592,23 @@ namespace Lucee
     unsigned maxNodes = 0;
     for (unsigned d=0; d<NDIM; ++d)
       maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
+
+// figure out how many quadrature points needed to do 4*polyOrder integration
+    numGaussVolNodes = 1;
+    unsigned polyOrder = maxNodes - 1;
+    unsigned num1DGaussPoints = (unsigned)((4*polyOrder+1)/2.0 + 0.5);
+    maxNodes = num1DGaussPoints;
+
     blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
 
 // compute ordinates/weights for 1D integration and store them
     for (int d=0; d<NDIM; ++d)
     {
-      std::vector<double> x(numNodes[d]), w(numNodes[d]);
-      legendre_set(numNodes[d], &x[0], &w[0]);
-      for (int i=0; i<numNodes[d]; ++i)
+      numGaussVolNodes = numGaussVolNodes*num1DGaussPoints;
+
+      std::vector<double> x(num1DGaussPoints), w(num1DGaussPoints);
+      legendre_set(num1DGaussPoints, &x[0], &w[0]);
+      for (int i=0; i<num1DGaussPoints; ++i)
       {
         ordinates(d,i) = x[i];
         weights(d,i) = w[i];
@@ -607,13 +616,22 @@ namespace Lucee
     }
 
 // allocate space for quadrature data
-    volumeQuad.interp = Lucee::Matrix<double>(totalNodes, totalNodes);
-    volumeQuad.ordinates = Lucee::Matrix<double>(totalNodes, NDIM);
-    volumeQuad.weights.resize(totalNodes*totalNodes);
+    volumeQuad.interp = Lucee::Matrix<double>(numGaussVolNodes, totalNodes);
+    volumeQuad.ordinates = Lucee::Matrix<double>(numGaussVolNodes, NDIM);
+    volumeQuad.weights.resize(numGaussVolNodes);
+
+// create region to loop over volume quadrature nodes
+    int lower[NDIM], upper[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      lower[d] = 0;
+      upper[d] = num1DGaussPoints;
+    }
+    Lucee::Region<NDIM, int> gaussNodeRgn(lower, upper);
 
     int idx[NDIM];
-    Lucee::RowMajorIndexer<NDIM> nodeIdx(nodeRgn);
-    Lucee::RowMajorSequencer<NDIM> nodeSeq(nodeRgn);
+    Lucee::RowMajorIndexer<NDIM> nodeIdx(gaussNodeRgn);
+    Lucee::RowMajorSequencer<NDIM> nodeSeq(gaussNodeRgn);
 // store quadrature data
     while (nodeSeq.step())
     {
@@ -631,7 +649,7 @@ namespace Lucee
     double xc[NDIM];
 // compute entries in interpolation matrix: these are simply values of
 // basis functions at each qudrature node.
-    for (unsigned r=0; r<totalNodes; ++r)
+    for (unsigned r=0; r<numGaussVolNodes; ++r)
     {
 // coordinate of quadrature node
       for (unsigned d=0; d<NDIM; ++d)

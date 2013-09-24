@@ -13,12 +13,8 @@
 #endif
 
 // lucee includes
-#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-
-// std includes
-#include <vector>
 
 // eigen includes
 #include <Eigen/Dense>

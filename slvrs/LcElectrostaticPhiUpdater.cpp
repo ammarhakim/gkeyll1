@@ -10,18 +10,11 @@
 #endif
 
 // lucee includes
-#include <LcAlignedRectCoordSys.h>
-#include <LcField.h>
-#include <LcLinAlgebra.h>
-#include <LcMathLib.h>
 #include <LcElectrostaticPhiUpdater.h>
-#include <LcStructuredGridBase.h>
+//#include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
 // for cutoff velocities
 #include <LcDynVector.h>
-
-// math include
-#include <cmath>
 
 namespace Lucee
 {
@@ -197,7 +190,7 @@ namespace Lucee
   void
   ElectrostaticPhiUpdater::declareTypes()
   {
-    // takes three inputs (n_e(x), n_i(x), vThermElecSq(x)) + cutoff velocities at edges
+    // takes three inputs (n_e(x), n_i(x)) + cutoff velocities at edges
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::DynVector<double>));

@@ -308,6 +308,8 @@ namespace Lucee
       Lucee::Region<NDIM, int> local2GlobalRgn;
 /** Strides for use in glocal to local mapping */
       unsigned lgStrides[NDIM];
+/** Total number of volume quadrature nodes */
+      unsigned numGaussVolNodes;
 
 /**
  * Struct to store list of indexices
