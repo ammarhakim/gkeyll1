@@ -48,6 +48,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcPointSourceIfc.h>
+#include <LcPonderomotivePotentialUpdater.h>
 #include <LcPositivityUpdater.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
@@ -107,6 +108,7 @@ namespace Lucee
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
+      .append<Lucee::PonderomotivePotentialUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()

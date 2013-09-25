@@ -66,6 +66,7 @@ set(lcslvrs_SOURCES
   LcNodalHyperDiffusionUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
+  LcPonderomotivePotentialUpdater.cpp
   LcPositivityUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
