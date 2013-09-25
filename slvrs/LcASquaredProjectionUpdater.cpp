@@ -1,7 +1,8 @@
 /**
- * @file	LcElectrostaticPhiUpdater.cpp
+ * @file	LcASquaredProjectionUpdater.cpp
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Projects A(x)^2 onto the same basis functions that A(x) uses
+ * Inputs and outputs assume DG fields, not CG fields.
  */
 
 // config stuff
@@ -10,45 +11,31 @@
 #endif
 
 // lucee includes
-#include <LcElectrostaticPhiUpdater.h>
-//#include <LcStructuredGridBase.h>
-#include <LcMathPhysConstants.h>
-// for cutoff velocities
-#include <LcDynVector.h>
+#include <LcASquaredProjectionUpdater.h>
 
 namespace Lucee
 {
 // set id for module system
-  const char *ElectrostaticPhiUpdater::id = "ElectrostaticPhiUpdater";
+  const char *ASquaredProjectionUpdater::id = "ASquaredProjectionUpdater";
 
-  ElectrostaticPhiUpdater::ElectrostaticPhiUpdater()
+  ASquaredProjectionUpdater::ASquaredProjectionUpdater()
     : UpdaterIfc()
   {
   }
 
   void 
-  ElectrostaticPhiUpdater::readInput(Lucee::LuaTable& tbl)
+  ASquaredProjectionUpdater::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify element to use using 'basis'");
-
-    if (tbl.hasNumber("kPerpTimesRho"))
-      kPerpTimesRho = tbl.getNumber("kPerpTimesRho");
-    else
-      throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify kPerpTimesRho");
-
-    if (tbl.hasNumber("Te0"))
-      Te0 = tbl.getNumber("Te0");
-    else
-      throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify Te0");
+      throw Lucee::Except("ASquaredProjectionUpdater::readInput: Must specify element to use using 'basis'");
   }
 
   void 
-  ElectrostaticPhiUpdater::initialize()
+  ASquaredProjectionUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
 
@@ -70,7 +57,7 @@ namespace Lucee
     // Get mass matrix and then copy to Eigen format
     Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
 
-    massMatrix = Eigen::MatrixXd(nlocal, nlocal);
+    Eigen::MatrixXd massMatrix(nlocal, nlocal);
     
     nodalBasis->getMassMatrix(massMatrixLucee);
     
@@ -91,6 +78,9 @@ namespace Lucee
     copyLuceeToEigen(massMatrixLucee, massMatrix);
     copyLuceeToEigen(interpMatrixLucee, interpMatrix);
     copyLuceeToEigen(gaussOrdinatesLucee, gaussOrdinates);
+
+    // Compute and store the inverse of the mass matrix
+    massMatrixInv = massMatrix.inverse();
 
     tripleProducts = std::vector<Eigen::MatrixXd>(nlocal);
     // Create and store the triple-product basis integrals
@@ -118,88 +108,71 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus 
-  ElectrostaticPhiUpdater::update(double t)
+  ASquaredProjectionUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<1>& grid
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
     // Electron and ion densities
-    const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
-    // Dynvector containing the cutoff velocities computed at one or both edges
-    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
-    Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& aIn = this->getInp<Lucee::Field<1, double> >(0);
+    Lucee::Field<1, double>& aSquaredOut = this->getOut<Lucee::Field<1, double> >(0);
 
     int nlocal = nodalBasis->getNumNodes();
 
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
-    Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
+    Lucee::ConstFieldPtr<double> aPtr = aIn.createConstPtr();
+    Lucee::FieldPtr<double> aSquaredPtr = aSquaredOut.createPtr();
 
-    // Compute cutoff velocity on the right edge
-    std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
-    double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-
-    phiPtr = 0.0;
+    aSquaredPtr = 0.0;
     
     // Loop over all cells
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       // Set inputs
-      nElcIn.setPtr(nElcPtr, ix);
-      nIonIn.setPtr(nIonPtr, ix);
+      aIn.setPtr(aPtr, ix);
       // Set outputs
-      phiOut.setPtr(phiPtr, ix);
+      aSquaredOut.setPtr(aSquaredPtr, ix);
 
-      Eigen::VectorXd nIonVec(nlocal);
-      Eigen::VectorXd nDiffVec(nlocal);
+      Eigen::VectorXd aVec(nlocal);
       
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-      {
-        nIonVec(componentIndex) = nIonPtr[componentIndex];
-        nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
-        // Scale by various factors in the phi-equation
-        nDiffVec(componentIndex) = Te0*ELEMENTARY_CHARGE*nDiffVec(componentIndex)/(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
-      }
+        aVec(componentIndex) = aPtr[componentIndex];
 
-      Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
-
-      Eigen::MatrixXd phiProjections(nlocal, nlocal);
+      Eigen::MatrixXd aProjections(nlocal, nlocal);
 
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
       {
-        Eigen::VectorXd phiProjectionsSingle = tripleProducts[basisIndex]*nIonVec;
-        // Store components into rows of phiProjections matrix
+        Eigen::VectorXd aProjectionsSingle = tripleProducts[basisIndex]*aVec;
+        // Store components into rows of aProjections matrix
         for (int colIndex = 0; colIndex < nlocal; colIndex++)
-          phiProjections(basisIndex, colIndex) = phiProjectionsSingle(colIndex);
+          aProjections(basisIndex, colIndex) = aProjectionsSingle(colIndex);
       }
 
-      // Compute phi(x) weights
-      Eigen::VectorXd phiWeights = phiProjections.inverse()*rhsIntegrals;
+      // Multiply aProjections by aVec again to get a vector made up of
+      // Int(phi_n*A(x)*A(x)) where n = component index, then multiply by
+      // inverse of mass matrix to find the weights of A(x)^2
+      Eigen::VectorXd aSquaredWeights = massMatrixInv*aProjections*aVec;
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiWeights(componentIndex) + phiS;
+        aSquaredPtr[componentIndex] = aSquaredWeights(componentIndex);
     }
 
     return Lucee::UpdaterStatus();
   }
 
   void
-  ElectrostaticPhiUpdater::declareTypes()
+  ASquaredProjectionUpdater::declareTypes()
   {
-    // takes three inputs (n_e(x), n_i(x)) + cutoff velocities at edges
+    // takes input A(x)
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::DynVector<double>));
-    // returns one output: phi(x)
+    // returns projection of A(x)^2 onto same order basis functions
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
   void
-  ElectrostaticPhiUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  ASquaredProjectionUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)

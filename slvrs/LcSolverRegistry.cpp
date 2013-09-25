@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcASquaredProjectionUpdater.h>
 #include <LcBcUpdater.h>
 #include <LcBoltzmannPhiUpdater.h>
 #include <LcConstBoundaryCondition.h>
@@ -108,6 +109,7 @@ namespace Lucee
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
+      .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::PonderomotivePotentialUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
