@@ -16,6 +16,7 @@ endif (PETSC_FOUND)
 # Create the library
 set(lcslvrs_SOURCES
   LcAdvectionEquation.cpp
+  LcASquaredProjectionUpdater.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoltzmannPhiUpdater.cpp
