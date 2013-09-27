@@ -37,7 +37,7 @@ namespace Lucee
     else
       throw Lucee::Except("NodalCopyFaceToInteriorUpdater::readInput: Must specify element to use using 'basis1d'");
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis1d"))
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
       throw Lucee::Except("NodalCopyFaceToInteriorUpdater::readInput: Must specify element to use using 'basis2d'");
