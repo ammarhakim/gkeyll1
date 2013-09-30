@@ -44,7 +44,7 @@ namespace Lucee
       throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify ionMass");
 
     if (tbl.hasNumber("electronMass"))
-      electronMass = tbl.getNumber("electronMass");
+      elcMass = tbl.getNumber("electronMass");
     else
       throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify electronMass");
 
@@ -61,6 +61,11 @@ namespace Lucee
       else
         throw Lucee::Except("KineticHeatFluxAtEdgeUpdater::readInput: Must specify tPerp");
     }
+
+    // Check to see if we need to compute the sheat power transmission coefficient
+    computeSheathCoefficient = false;
+    if (tbl.hasBool("computeSheathCoefficient"))
+      computeSheathCoefficient = tbl.getBool("computeSheathCoefficient");
   }
 
   void 
@@ -115,24 +120,63 @@ namespace Lucee
     // Find value of the following input fields at the right-most edge of the domain
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
     
-    double ionHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[3] + momentsAtEdgesIon[2]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);// + mom1IonPtr[nlocal-1]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
-    double electronHeatFluxRight = 0.5*electronMass*momentsAtEdgesElc[3] + momentsAtEdgesElc[2]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[nlocal-1]);
+    double ionParallelHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[7] + 
+      momentsAtEdgesIon[5]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
+    double ionHeatFluxRight = ionParallelHeatFluxRight +
+      momentsAtEdgesIon[5]*ELEMENTARY_CHARGE*tPerpIon;
+
+    double elcParallelHeatFluxRight = 0.5*elcMass*momentsAtEdgesElc[7] - 
+      momentsAtEdgesElc[5]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
+    double elcHeatFluxRight = elcParallelHeatFluxRight + 
+      momentsAtEdgesElc[5]*ELEMENTARY_CHARGE*tPerpElc;
 
     // Find value of the following input fields at the left-most edge of the domain
     phiIn.setPtr(phiPtr, globalRgn.getLower(0));
 
-    double ionHeatFluxLeft = 0.5*ionMass*momentsAtEdgesIon[1] + momentsAtEdgesIon[0]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[0]);
-    double electronHeatFluxLeft = 0.5*electronMass*momentsAtEdgesElc[1] + momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*(tPerpElc - phiPtr[0]);
+    double ionParallelHeatFluxLeft = 0.5*ionMass*momentsAtEdgesIon[3] + 
+      momentsAtEdgesIon[1]*ELEMENTARY_CHARGE*phiPtr[0];
+    double ionHeatFluxLeft = ionParallelHeatFluxLeft +
+      momentsAtEdgesIon[1]*ELEMENTARY_CHARGE*tPerpIon;
+
+    double elcParallelHeatFluxLeft = 0.5*elcMass*momentsAtEdgesElc[3] - 
+      momentsAtEdgesElc[1]*ELEMENTARY_CHARGE*phiPtr[0];
+    double elcHeatFluxLeft = elcParallelHeatFluxLeft + 
+      momentsAtEdgesElc[1]*ELEMENTARY_CHARGE*tPerpElc;
 
     std::vector<double> data(6);
-    data[0] = ionHeatFluxRight + electronHeatFluxRight;
+    data[0] = ionHeatFluxRight + elcHeatFluxRight;
     data[1] = ionHeatFluxRight;
-    data[2] = electronHeatFluxRight;
-    data[3] = -(ionHeatFluxLeft + electronHeatFluxLeft);
+    data[2] = elcHeatFluxRight;
+    data[3] = -(ionHeatFluxLeft + elcHeatFluxLeft);
     data[4] = -ionHeatFluxLeft;
-    data[5] = -electronHeatFluxLeft;
+    data[5] = -elcHeatFluxLeft;
     
     qVsTime.appendData(t, data);
+
+    if (computeSheathCoefficient == true)
+    {
+      Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
+      
+      std::vector<double> sheathData(4);
+      
+      double ionParallelTempRight = -ionMass*momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/
+        (momentsAtEdgesIon[4]*momentsAtEdgesIon[4]) + ionMass*momentsAtEdgesIon[6]/momentsAtEdgesIon[4];
+      double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
+        (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
+      
+      sheathData[0] = ionParallelHeatFluxRight/(ionParallelTempRight*momentsAtEdgesIon[5]);
+      sheathData[1] = elcParallelHeatFluxRight/(elcParallelTempRight*momentsAtEdgesElc[5]);
+
+      double ionParallelTempLeft = -ionMass*momentsAtEdgesIon[1]*momentsAtEdgesIon[1]/
+        (momentsAtEdgesIon[0]*momentsAtEdgesIon[0]) + ionMass*momentsAtEdgesIon[2]/momentsAtEdgesIon[0];
+      double elcParallelTempLeft = -elcMass*momentsAtEdgesElc[1]*momentsAtEdgesElc[1]/
+        (momentsAtEdgesElc[0]*momentsAtEdgesElc[0]) + elcMass*momentsAtEdgesElc[2]/momentsAtEdgesElc[0];
+
+      sheathData[2] = ionParallelHeatFluxLeft/(ionParallelTempLeft*momentsAtEdgesIon[1]);
+      sheathData[3] = elcParallelHeatFluxLeft/(elcParallelTempLeft*momentsAtEdgesElc[1]);
+
+      sheathCoefficientVsTime.appendData(t, sheathData);
+    }
 
     return Lucee::UpdaterStatus();
   }
@@ -145,6 +189,9 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: dynvector of heat flux at edge vs time
+    this->appendOutVarType(typeid(Lucee::DynVector<double>));
+    // optional second output: dynvector of sheat power transmission
+    // coefficient vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 

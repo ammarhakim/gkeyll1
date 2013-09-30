@@ -17,6 +17,7 @@ endif (PETSC_FOUND)
 set(lcslvrs_SOURCES
   LcAdvectionEquation.cpp
   LcASquaredProjectionUpdater.cpp
+  LcATimesPUpdater.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoltzmannPhiUpdater.cpp

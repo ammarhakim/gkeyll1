@@ -70,9 +70,11 @@ namespace Lucee
 /** Mass of ions in system */
       double ionMass;
 /** Mass of electrons in the system */
-      double electronMass;
+      double elcMass;
 /** Perpendicular temperature of ions and electrons */
       double tPerp;
+/** Flag specifying whether to compute sheath transmission coefficients also */
+      bool computeSheathCoefficient;
 /** Reference to optional input function specifying tPerp profile */
       int fnRef;
       bool fnProvided;

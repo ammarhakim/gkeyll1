@@ -1,7 +1,8 @@
 /**
  * @file	LcATimesPUpdater.h
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Projects A(x)^2 onto the same basis functions that A(x) uses
+ * Inputs and outputs assume CG fields, not DG fields.
  */
 
 #ifndef LC_A_TIMES_P_UPDATER_H
@@ -69,11 +70,8 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Vector containing various triple-product basis integrals */
-      std::vector<Eigen::MatrixXd> tripleProducts;
-/** Mass matrix inverse */
-      Eigen::MatrixXd massMatrixInv;
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
