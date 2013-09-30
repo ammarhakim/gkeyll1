@@ -171,9 +171,9 @@ namespace Lucee
       tPerpElc = tPerp;
     }
     
-    double ionHeatFlux = 0.5*ionMass*momentsAtEdges[3] + momentsAtEdges[2]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
+    double ionHeatFlux = 0.5*ionMass*momentsAtEdges[7] + momentsAtEdges[5]*ELEMENTARY_CHARGE*(tPerpIon + phiPtr[nlocal-1]);
     // Te = average of Ti(x)
-    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*momentsAtEdges[2];
+    double electronHeatFlux = (ionMass*meanVtSq + ELEMENTARY_CHARGE*tPerpElc)*momentsAtEdges[5];
     
     std::vector<double> data(3);
     data[0] = ionHeatFlux + electronHeatFlux;

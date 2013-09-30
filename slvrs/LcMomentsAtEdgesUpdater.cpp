@@ -125,10 +125,15 @@ namespace Lucee
 
     unsigned numNodes = nodalBasis->getNumNodes();
 
+    double mom0AlongRightEdge = 0.0;
+    double mom0AlongLeftEdge = 0.0;
     double mom1AlongRightEdge = 0.0;
     double mom1AlongLeftEdge = 0.0;
+    double mom2AlongRightEdge = 0.0;
+    double mom2AlongLeftEdge = 0.0;
     double mom3AlongRightEdge = 0.0;
     double mom3AlongLeftEdge = 0.0;
+
     double cellCentroid[3];
     int idx[2];
 
@@ -173,19 +178,29 @@ namespace Lucee
       Eigen::VectorXd edgeQuadData = edgeNodeInterpMatrix*edgeData;
 
       // Integrate v*f over entire cell using gaussian quadrature
+      double mom0InEntireCell = 0.0;
       double mom1InEntireCell = 0.0;
+      double mom2InEntireCell = 0.0;
       double mom3InEntireCell = 0.0;
 
       for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
       {
         double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+        
+        mom0InEntireCell += gaussEdgeWeights[quadNodeIndex]*edgeQuadData(quadNodeIndex);
+
         mom1InEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+
+        mom2InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
+          edgeQuadData[quadNodeIndex];
 
         mom3InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
           edgeHamilDerivQuadData[quadNodeIndex]*edgeQuadData[quadNodeIndex];
       }
 
+      mom0AlongRightEdge += mom0InEntireCell;
       mom1AlongRightEdge += mom1InEntireCell;
+      mom2AlongRightEdge += mom2InEntireCell;
       mom3AlongRightEdge += mom3InEntireCell;
     }
 
@@ -228,19 +243,29 @@ namespace Lucee
       Eigen::VectorXd edgeQuadData = edgeNodeInterpMatrix*edgeData;
 
       // Integrate v*f over entire cell using gaussian quadrature
+      double mom0InEntireCell = 0.0;
       double mom1InEntireCell = 0.0;
+      double mom2InEntireCell = 0.0;
       double mom3InEntireCell = 0.0;
 
       for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
       {
         double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+        
+        mom0InEntireCell += gaussEdgeWeights[quadNodeIndex]*edgeQuadData(quadNodeIndex);
+        
         mom1InEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+
+        mom2InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
+          edgeQuadData[quadNodeIndex];
 
         mom3InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
           edgeHamilDerivQuadData[quadNodeIndex]*edgeQuadData[quadNodeIndex];
       }
 
+      mom0AlongRightEdge += mom0InEntireCell;
       mom1AlongRightEdge += mom1InEntireCell;
+      mom2AlongRightEdge += mom2InEntireCell;
       mom3AlongRightEdge += mom3InEntireCell;
     }
 
@@ -285,19 +310,29 @@ namespace Lucee
       Eigen::VectorXd edgeQuadData = edgeNodeInterpMatrix*edgeData;
 
       // Integrate v*f over entire cell using gaussian quadrature
+      double mom0InEntireCell = 0.0;
       double mom1InEntireCell = 0.0;
+      double mom2InEntireCell = 0.0;
       double mom3InEntireCell = 0.0;
 
       for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
       {
         double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+        
+        mom0InEntireCell += gaussEdgeWeights[quadNodeIndex]*edgeQuadData(quadNodeIndex);
+        
         mom1InEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+
+        mom2InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
+          edgeQuadData[quadNodeIndex];
 
         mom3InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
           edgeHamilDerivQuadData[quadNodeIndex]*edgeQuadData[quadNodeIndex];
       }
 
+      mom0AlongLeftEdge += mom0InEntireCell;
       mom1AlongLeftEdge += mom1InEntireCell;
+      mom2AlongLeftEdge += mom2InEntireCell;
       mom3AlongLeftEdge += mom3InEntireCell;
     }
 
@@ -340,28 +375,42 @@ namespace Lucee
       Eigen::VectorXd edgeQuadData = edgeNodeInterpMatrix*edgeData;
 
       // Integrate v*f over entire cell using gaussian quadrature
+      double mom0InEntireCell = 0.0;
       double mom1InEntireCell = 0.0;
+      double mom2InEntireCell = 0.0;
       double mom3InEntireCell = 0.0;
 
       for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
       {
         double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+        
+        mom0InEntireCell += gaussEdgeWeights[quadNodeIndex]*edgeQuadData(quadNodeIndex);
+        
         mom1InEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+
+        mom2InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
+          edgeQuadData[quadNodeIndex];
 
         mom3InEntireCell += gaussEdgeWeights[quadNodeIndex]*2*edgeHamilQuadData[quadNodeIndex]*
           edgeHamilDerivQuadData[quadNodeIndex]*edgeQuadData[quadNodeIndex];
       }
 
+      mom0AlongLeftEdge += mom0InEntireCell;
       mom1AlongLeftEdge += mom1InEntireCell;
+      mom2AlongLeftEdge += mom2InEntireCell;
       mom3AlongLeftEdge += mom3InEntireCell;
     }
 
-    std::vector<double> data(4);
+    std::vector<double> data(8);
     
-    data[0] = mom1AlongLeftEdge;
-    data[1] = mom3AlongLeftEdge;
-    data[2] = mom1AlongRightEdge;
-    data[3] = mom3AlongRightEdge;
+    data[0] = mom0AlongLeftEdge;
+    data[1] = mom1AlongLeftEdge;
+    data[2] = mom2AlongLeftEdge;
+    data[3] = mom3AlongLeftEdge;
+    data[4] = mom0AlongRightEdge;
+    data[5] = mom1AlongRightEdge;
+    data[6] = mom2AlongRightEdge;
+    data[7] = mom3AlongRightEdge;
 
     // Put data into the DynVector
     velocityMoments.appendData(t, data);
