@@ -55,9 +55,8 @@ namespace Lucee
  * Read data-structure from specified HDF5 file.
  *
  * @param nm Name of file to read.
- * @param grp Name of group (full path) to extract data from.
  */
-      void read(const std::string& nm, const std::string& grp);
+      void read(const std::string& nm);
 
 /**
  * Clone data and return pointer to cloned object.
@@ -123,6 +122,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaWrite(lua_State *L);
+
+/**
+ * Lua callable method for reading data from HDF5 file.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaRead(lua_State *L);
 
 /**
  * Lua callable method for synchronizing ghost cell data.
