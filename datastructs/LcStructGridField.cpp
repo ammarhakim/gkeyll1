@@ -259,6 +259,16 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  TxIoNodeType
+  StructGridField<NDIM, T>::readFromFile(TxIoBase& io, TxIoNodeType& node,
+    const std::string& nm)
+  {
+    TxIoNodeType dn 
+      = Lucee::Field<NDIM, T>::readFromFile(io, node, "StructGridField");
+    return dn;
+  }
+
+  template <unsigned NDIM, typename T>
   void
   StructGridField<NDIM, T>::sync()
   {

@@ -99,6 +99,17 @@ namespace Lucee
          const std::string& nm);
 
 /**
+ * Read dataStruct from given node in HDF5 file.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to read data from.
+ * @param nm Name of the data-struct as it appears in input
+ * @return node from which data was read.
+ */
+      virtual TxIoNodeType readFromFile(TxIoBase& io, TxIoNodeType& node,
+        const std::string& nm);
+
+/**
  * Write dataStruct to specified text file. The data is written as
  * plain text.
  *

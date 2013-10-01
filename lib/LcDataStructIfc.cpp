@@ -67,13 +67,16 @@ namespace Lucee
   }
 
   void
-  DataStructIfc::read(const std::string& nm, const std::string& grp)
+  DataStructIfc::read(const std::string& nm)
   {
+    std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
+    std::string inNm = outPrefix + "_" + nm;
     TxCommBase& comm = this->getDataComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
-    TxIoNodeType fn = io->openFile(nm, "r");
-    this->readFromFile(*io, fn, this->getName());
+    TxIoNodeType fn = io->openFile(inNm, "r");
+    TxIoNodeType rootGrp = io->openGroup(fn, "/");
+    this->readFromFile(*io, rootGrp, this->getName());
     delete io;
   }
 
@@ -102,6 +105,7 @@ namespace Lucee
   DataStructIfc::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
     lfm.appendFunc("write", luaWrite);
+    lfm.appendFunc("read", luaRead);
     lfm.appendFunc("sync", luaSync);
   }
 
@@ -124,6 +128,16 @@ namespace Lucee
       tCurr = lua_tonumber(L, 3);
     }
     d->write(nm, tCurr);
+
+    return 0;
+  }
+
+  int
+  DataStructIfc::luaRead(lua_State *L)
+  {
+    DataStructIfc *d = Lucee::PointerHolder<DataStructIfc>::getObj(L);
+    std::string nm = lua_tostring(L, 2);
+    d->read(nm);
 
     return 0;
   }
