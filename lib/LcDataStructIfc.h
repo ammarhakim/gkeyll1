@@ -90,7 +90,7 @@ namespace Lucee
  * @param io I/O object for I/O.
  * @param node Node to read data from.
  * @param nm Name of the data-struct as it appears in input.
- * @return node to which data was written.
+ * @return node from which data was read.
  */
       virtual TxIoNodeType readFromFile(TxIoBase& io, TxIoNodeType& node,
         const std::string& nm);

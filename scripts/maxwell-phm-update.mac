@@ -1,5 +1,5 @@
 /** Load Maxwell RP solver */
-load("/Users/ammar/research/thoughtshop/high-order-moments-paper/scripts/maxwell-rp.mac");
+load("./maxwell-rp.mac");
 
 /** Flux jacobian in X and Y directions */
 Ax : matrix( [0, 0, 0, gam], [0, 0, -1, 0], [0, -c^2, 0, 0], [c^2*gam, 0, 0, 0] );

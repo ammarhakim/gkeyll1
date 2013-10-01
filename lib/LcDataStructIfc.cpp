@@ -73,7 +73,7 @@ namespace Lucee
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->openFile(nm, "r");
-    this->readFromFile(*io, fn, nm);
+    this->readFromFile(*io, fn, this->getName());
     delete io;
   }
 
