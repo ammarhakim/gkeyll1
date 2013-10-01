@@ -271,6 +271,36 @@ namespace Lucee
     return dn;
   }
 
+    template <unsigned NDIM, typename T>
+    TxIoNodeType
+    Field<NDIM, T>::readFromFile(TxIoBase& io, TxIoNodeType& node, const std::string& nm)
+    {
+      std::vector<size_t> dataSetSize(NDIM+1), dataSetBeg(NDIM+1), dataSetLen(NDIM+1);
+
+// construct sizes and shapes to read stuff in
+      for (unsigned i=0; i<NDIM; ++i)
+      {
+        dataSetSize[i] = globalRgn.getShape(i);
+        dataSetBeg[i] = rgn.getLower(i);
+        dataSetLen[i] = rgn.getShape(i);
+      }
+      dataSetSize[NDIM] = numComponents;
+      dataSetBeg[NDIM] = 0;
+      dataSetLen[NDIM] = numComponents;
+
+      Lucee::Region<NDIM+1, int> myRgn = rgn.inflate(0, numComponents);
+      std::vector<T> rdata(myRgn.getVolume());
+      TxIoNodeType dn = io.readDataSet(node, nm, dataSetBeg, dataSetLen, &rdata[0]);
+
+      Lucee::RowMajorSequencer<NDIM+1> seq(myRgn); // must be row-major for HDF5
+// copy data from buffer
+      unsigned count = 0;
+      while (seq.step())
+        this->operator()(seq.getIndex()) = rdata[count++];
+
+      return dn;
+    }
+
   template <unsigned NDIM, typename T>
   Field<NDIM, T>&
   Field<NDIM, T>::copy(const Field<NDIM, T>& fld)
