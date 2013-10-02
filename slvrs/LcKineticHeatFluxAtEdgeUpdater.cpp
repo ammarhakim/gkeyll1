@@ -157,13 +157,21 @@ namespace Lucee
     {
       Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
       
-      std::vector<double> sheathData(4);
+      std::vector<double> sheathData(1);
+
+      double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
+        (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
+            
+      double kTe0 = 1.0/3.0*elcParallelTempRight + 2.0/3.0*ELEMENTARY_CHARGE*tPerpElc;
+      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
       
+      /*
       double ionParallelTempRight = -ionMass*momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/
         (momentsAtEdgesIon[4]*momentsAtEdgesIon[4]) + ionMass*momentsAtEdgesIon[6]/momentsAtEdgesIon[4];
       double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
         (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
-      
+
+
       sheathData[0] = ionParallelHeatFluxRight/(ionParallelTempRight*momentsAtEdgesIon[5]);
       sheathData[1] = elcParallelHeatFluxRight/(elcParallelTempRight*momentsAtEdgesElc[5]);
 
@@ -173,7 +181,7 @@ namespace Lucee
         (momentsAtEdgesElc[0]*momentsAtEdgesElc[0]) + elcMass*momentsAtEdgesElc[2]/momentsAtEdgesElc[0];
 
       sheathData[2] = ionParallelHeatFluxLeft/(ionParallelTempLeft*momentsAtEdgesIon[1]);
-      sheathData[3] = elcParallelHeatFluxLeft/(elcParallelTempLeft*momentsAtEdgesElc[1]);
+      sheathData[3] = elcParallelHeatFluxLeft/(elcParallelTempLeft*momentsAtEdgesElc[1]);*/
 
       sheathCoefficientVsTime.appendData(t, sheathData);
     }
