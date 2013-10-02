@@ -29,6 +29,7 @@ set(lcslvrs_SOURCES
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcElectromagneticAUpdater.cpp
+  LcElectromagneticDistFuncReflectionBcUpdater.cpp
   LcElectrostaticPhiUpdater.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp
