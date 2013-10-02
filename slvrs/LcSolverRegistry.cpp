@@ -19,6 +19,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcElectromagneticAUpdater.h>
+#include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
@@ -109,6 +110,7 @@ namespace Lucee
       .append<Lucee::KineticTotalEnergyUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
+      .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
