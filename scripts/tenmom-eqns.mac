@@ -37,7 +37,7 @@ prSrc(i,j) := sum(sum(Om(m)*levi_civita([k,m,i])*P([j,k]), m, 1, 3), k, 1, 3)
    + sum(sum(Om(m)*levi_civita([k,m,j])*P([k,i]), m, 1, 3), k, 1, 3);
 
 srcList : map(canform, [prSrc(1,1), prSrc(1,2), prSrc(1,3), prSrc(2,2), prSrc(2,3), prSrc(3,3)]);
-srcJac : coefmatrix(srcList, [P([1,1],[]), P([1,2],[]), P([1,3],[]), P([2,2],[]), P([2,3],[]), P([3,3],[])  ]);
+srcJac : coefmatrix(srcList, [P([1,1],[]), P([1,2],[]), P([1,3],[]), P([2,2],[]), P([2,3],[]), P([3,3],[])]);
 
 /** Define scalar pressure */
 p : sum(P([i,i],[]), i, 1, 3)/3;
@@ -51,3 +51,14 @@ collSrcJac : coefmatrix(collSrcList, [P([1,1],[]), P([1,2],[]), P([1,3],[]), P([
 /** Collect diagonal terms */
 collSrcListDiag : map(canform, [collSrc(1,1), collSrc(2,2), collSrc(3,3)]);
 collSrcJacDiag : coefmatrix(collSrcListDiag, [P([1,1],[]), P([2,2],[]), P([3,3],[])  ]);
+
+/** Derive simplified 1D system (keeping u(1) and u(2) to be non-zero) */
+cEqnsIdx : [1, 2, 3, 5, 6];
+cEqList : 
+  (cEqns : [], 
+    for idx in cEqnsIdx do (cEqns : append(cEqns, [eqList[idx]])), cEqns);
+cDiffList : 
+  (cDiffList : [], 
+    for idx in cEqnsIdx do (cDiffList : append(cDiffList, [diffList[idx]])), cDiffList);
+cAtmp : coefmatrix(cEqList, cDiffList);
+
