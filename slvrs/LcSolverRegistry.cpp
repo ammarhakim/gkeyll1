@@ -20,6 +20,7 @@
 #include <LcCurrentSource.h>
 #include <LcElectromagneticAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
+#include <LcElectromagneticMomentsAtEdgesUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
@@ -111,6 +112,7 @@ namespace Lucee
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
+      .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()

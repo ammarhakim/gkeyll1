@@ -10,11 +10,7 @@
 #endif
 
 // lucee includes
-//#include <LcAlignedRectCoordSys.h>
-//#include <LcField.h>
 #include <LcElectromagneticAUpdater.h>
-//#include <LcStructuredGridBase.h>
-#include <LcMathPhysConstants.h>
 
 namespace Lucee
 {
@@ -41,15 +37,30 @@ namespace Lucee
     else
       throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify kPerp");
 
-    if (tbl.hasNumber("electronMass"))
-      electronMass = tbl.getNumber("electronMass");
+    if (tbl.hasNumber("elcMass"))
+      electronMass = tbl.getNumber("elcMass");
     else
-      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify electronMass");
+      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify elcMass");
 
     if (tbl.hasNumber("ionMass"))
       ionMass = tbl.getNumber("ionMass");
     else
       throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify ionMass");
+
+    if (tbl.hasNumber("elcCharge"))
+      elcCharge = tbl.getNumber("elcCharge");
+    else
+      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify elcCharge");
+
+    if (tbl.hasNumber("ionCharge"))
+      ionCharge = tbl.getNumber("ionCharge");
+    else
+      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify ionCharge");
+
+    if (tbl.hasNumber("mu0"))
+      mu0 = tbl.getNumber("mu0");
+    else
+      throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify mu0");
   }
 
   void 
@@ -163,12 +174,12 @@ namespace Lucee
       
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
       {
-        rhsVec(componentIndex) = -MU0*ELEMENTARY_CHARGE*( 
-            mom1ElcPtr[componentIndex]/(electronMass*electronMass) -
-            mom1IonPtr[componentIndex]/(ionMass*ionMass) );
-        lhsVec(componentIndex) = kPerp*kPerp + MU0*ELEMENTARY_CHARGE*ELEMENTARY_CHARGE*(
-            mom0ElcPtr[componentIndex]/(electronMass*electronMass) + 
-            mom0IonPtr[componentIndex]/(ionMass*ionMass) );
+        rhsVec(componentIndex) = mu0*( 
+            ionCharge*mom1IonPtr[componentIndex]/(ionMass*ionMass) + 
+            elcCharge*mom1ElcPtr[componentIndex]/(electronMass*electronMass) );
+        lhsVec(componentIndex) = kPerp*kPerp + mu0*(
+            elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(electronMass*electronMass) + 
+            ionCharge*ionCharge*mom0IonPtr[componentIndex]/(ionMass*ionMass) );
       }
 
       Eigen::VectorXd rhsIntegrals = massMatrix*rhsVec;

@@ -74,6 +74,8 @@ namespace Lucee
       double kPerpTimesRho;
 /** Fixed electron temp parameter (eV) */
       double Te0;
+/** Flag to determine if cutoff velocities will be used to set phi_s */
+      bool useCutoffVelocities;
 /** Vector containing various triple-product basis integrals */
       std::vector<Eigen::MatrixXd> tripleProducts;
 /** Mass matrix */

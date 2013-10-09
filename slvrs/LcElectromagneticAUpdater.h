@@ -80,6 +80,12 @@ namespace Lucee
       double electronMass;
 /** Mass of ions in system (kg) */
       double ionMass;
+/** Charge of electrons (C) */
+      double elcCharge;
+/** Charge of ions (C) */
+      double ionCharge;
+/** Permeability of free space */
+      double mu0;
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)

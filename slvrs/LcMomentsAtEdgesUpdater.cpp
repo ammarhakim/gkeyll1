@@ -425,7 +425,7 @@ namespace Lucee
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
     // A hamiltonian
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
-    // First and third moments at left and right edges
+    // Moments 0-3 at left and right edges
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 

@@ -1,7 +1,7 @@
 /**
  * @file	LcMomentsAtEdgesUpdater.h
  *
- * @brief	Applies particle refection BCs to distribution function
+ * @brief	Computes first and third moments of the distribution function at both edges.
  */
 
 #ifndef LC_MOMENTS_AT_EDGES_UPDATER_H
