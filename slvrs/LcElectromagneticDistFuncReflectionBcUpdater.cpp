@@ -62,7 +62,7 @@ namespace Lucee
       throw Lucee::Except("ElectromagneticDistFuncReflectionBcUpdater::readInput: Must specify ionCharge");
 
     if (tbl.hasNumber("elcMass"))
-      ionMass = tbl.getNumber("elcMass");
+      elcMass = tbl.getNumber("elcMass");
     else
       throw Lucee::Except("ElectromagneticDistFuncReflectionBcUpdater::readInput: Must specify electronMass");
 
@@ -233,7 +233,7 @@ namespace Lucee
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
 
-            // cutoffGuess is between -deltaV/2 and +deltaV/2
+            // cutoffGuess is between -deltaP/2 and +deltaP/2
             double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
@@ -307,7 +307,7 @@ namespace Lucee
         for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
         {
           double physicalP = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*physicalP*leftEdgeQuadData(quadNodeIndex);
+          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*leftEdgeQuadData(quadNodeIndex)*(physicalP - elcCharge*aAtEdge)/(elcMass*elcMass);;
         }
 
         if (foundCutoffVelocity == false)
@@ -328,7 +328,7 @@ namespace Lucee
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
 
-            // cutoffGuess is between -deltaV/2 and +deltaV/2
+            // cutoffGuess is between -deltaP/2 and +deltaP/2
             double cutoffGuess = - grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
@@ -420,7 +420,7 @@ namespace Lucee
       double integralResult = 0.0;
       for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
       {
-        // physicalCoord is between -deltaV/2 and +deltaV/2
+        // physicalCoord is between -deltaP/2 and +deltaP/2
         double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
           + 0.5*(b + cutoffGuess);
         refCoord[1] = physicalCoord/cellWidth;
@@ -491,7 +491,7 @@ namespace Lucee
       double integralResult = 0.0;
       for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
       {
-        // physicalCoord is between -deltaV/2 and +deltaV/2
+        // physicalCoord is between -deltaP/2 and +deltaP/2
         double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
           + 0.5*(cutoffGuess + b);
         refCoord[1] = physicalCoord/cellWidth;

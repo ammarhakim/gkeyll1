@@ -91,7 +91,7 @@ namespace Lucee
 
         // Copy into output pointer
         for (int componentIndex = 0; componentIndex < ndIds.size(); componentIndex++)
-          aTimesPPtr[componentIndex] = aPtr[componentIndex]*nodeCoordsLucee(ndIds[componentIndex], 1);
+          aTimesPPtr[componentIndex] = aPtr[componentIndex]*nodeCoords(ndIds[componentIndex], 1);
       }
     }
 

@@ -45,6 +45,10 @@ namespace Lucee
       Te0 = tbl.getNumber("Te0");
     else
       throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify Te0");
+
+    useCutoffVelocities = false;
+    if (tbl.hasBool("useCutoffVelocities"))
+      useCutoffVelocities = tbl.getBool("useCutoffVelocities");
   }
 
   void 
@@ -126,8 +130,6 @@ namespace Lucee
     // Electron and ion densities
     const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
     const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
-    // Dynvector containing the cutoff velocities computed at one or both edges
-    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
     int nlocal = nodalBasis->getNumNodes();
@@ -138,9 +140,20 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
-    // Compute cutoff velocity on the right edge
-    std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
-    double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
+    double phiS;
+
+    if (useCutoffVelocities == true)
+    {
+      // Dynvector containing the cutoff velocities computed at one or both edges
+      const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
+      // Compute cutoff velocity on the right edge
+      std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
+      phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
+    }
+    else
+    {
+      phiS = 0.0;
+    }
 
     phiPtr = 0.0;
     
@@ -161,7 +174,8 @@ namespace Lucee
         nIonVec(componentIndex) = nIonPtr[componentIndex];
         nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
         // Scale by various factors in the phi-equation
-        nDiffVec(componentIndex) = Te0*ELEMENTARY_CHARGE*nDiffVec(componentIndex)/(ELEMENTARY_CHARGE*kPerpTimesRho*kPerpTimesRho);
+        // Assuming that kTe0/q_i has units of eV
+        nDiffVec(componentIndex) = Te0*nDiffVec(componentIndex)/(kPerpTimesRho*kPerpTimesRho);
       }
 
       Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
@@ -190,9 +204,10 @@ namespace Lucee
   void
   ElectrostaticPhiUpdater::declareTypes()
   {
-    // takes three inputs (n_e(x), n_i(x)) + cutoff velocities at edges
+    // takes three inputs (n_e(x), n_i(x))
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // optional input: cutoff velocity at edges
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: phi(x)
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
