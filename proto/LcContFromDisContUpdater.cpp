@@ -337,10 +337,6 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-// reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
     //PetscViewer lab;
     //PetscViewerASCIIOpen(PETSC_COMM_WORLD, "matrix", &lab);
     //PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);

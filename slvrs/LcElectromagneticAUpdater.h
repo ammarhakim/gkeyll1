@@ -77,7 +77,7 @@ namespace Lucee
 /** Value of k_perp (1/m) */
       double kPerp;
 /** Mass of electrons in system (kg) */
-      double electronMass;
+      double elcMass;
 /** Mass of ions in system (kg) */
       double ionMass;
 /** Charge of electrons (C) */
