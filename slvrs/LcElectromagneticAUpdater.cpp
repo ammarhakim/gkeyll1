@@ -38,7 +38,7 @@ namespace Lucee
       throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify kPerp");
 
     if (tbl.hasNumber("elcMass"))
-      electronMass = tbl.getNumber("elcMass");
+      elcMass = tbl.getNumber("elcMass");
     else
       throw Lucee::Except("ElectromagneticAUpdater::readInput: Must specify elcMass");
 
@@ -176,9 +176,9 @@ namespace Lucee
       {
         rhsVec(componentIndex) = mu0*( 
             ionCharge*mom1IonPtr[componentIndex]/(ionMass*ionMass) + 
-            elcCharge*mom1ElcPtr[componentIndex]/(electronMass*electronMass) );
+            elcCharge*mom1ElcPtr[componentIndex]/(elcMass*elcMass) );
         lhsVec(componentIndex) = kPerp*kPerp + mu0*(
-            elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(electronMass*electronMass) + 
+            elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(elcMass*elcMass) + 
             ionCharge*ionCharge*mom0IonPtr[componentIndex]/(ionMass*ionMass) );
       }
 

@@ -1,11 +1,11 @@
 /**
- * @file	LcElectrostaticContPhiUpdater.h
+ * @file	LcElectromagneticContAUpdater.h
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Updater to compute A using continuous basis functions
  */
 
-#ifndef LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
-#define LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
+#ifndef LC_ELECTROMAGNETIC_CONT_A_UPDATER_H
+#define LC_ELECTROMAGNETIC_CONT_A_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -33,17 +33,17 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class ElectrostaticContPhiUpdater : public Lucee::UpdaterIfc
+  class ElectromagneticContAUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      ElectrostaticContPhiUpdater();
+      ElectromagneticContAUpdater();
 
 /** Destroy updater */
-      ~ElectrostaticContPhiUpdater();
+      ~ElectromagneticContAUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -80,12 +80,18 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-/** Value of k_perp0*rho_s */
-      double kPerpTimesRho;
-/** Fixed electron temp parameter (eV) */
-      double Te0;
-/** Flag to determine if cutoff velocities will be used to set phi_s */
-      bool useCutoffVelocities;
+/** Value of k_perp (1/m) */
+      double kPerp;
+/** Mass of electrons in system (kg) */
+      double elcMass;
+/** Mass of ions in system (kg) */
+      double ionMass;
+/** Charge of electrons (C) */
+      double elcCharge;
+/** Charge of ions (C) */
+      double ionCharge;
+/** Permeability of free space */
+      double mu0;
 /** Petsc matrices to store linear operator */
       Mat stiffMat;
 /** Petsc vectors for source and initial guess */
@@ -122,4 +128,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_ELECTROSTATIC_CONT_PHI_UPDATER_H
+#endif // LC_ELECTROMAGNETIC_CONT_A_UPDATER_H

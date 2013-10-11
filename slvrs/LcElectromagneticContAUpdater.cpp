@@ -1,7 +1,7 @@
 /**
- * @file	LcElectrostaticContPhiUpdater.cpp
+ * @file	LcElectromagneticContAUpdater.cpp
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Updater to compute A using continuous basis functions
  */
 
 // config stuff
@@ -14,7 +14,7 @@
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
-#include <LcElectrostaticContPhiUpdater.h>
+#include <LcElectromagneticContAUpdater.h>
 #include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
 // from the contfromdiscontupdater
@@ -31,23 +31,20 @@
 #include <vector>
 #include <limits>
 
-// for cutoff velocities
-#include <LcDynVector.h>
-
 // math include
 #include <cmath>
 
 namespace Lucee
 {
 // set id for module system
-  const char *ElectrostaticContPhiUpdater::id = "ElectrostaticContPhiUpdater";
+  const char *ElectromagneticContAUpdater::id = "ElectromagneticContAUpdater";
 
-  ElectrostaticContPhiUpdater::ElectrostaticContPhiUpdater()
+  ElectromagneticContAUpdater::ElectromagneticContAUpdater()
     : UpdaterIfc()
   {
   }
 
-  ElectrostaticContPhiUpdater::~ElectrostaticContPhiUpdater()
+  ElectromagneticContAUpdater::~ElectromagneticContAUpdater()
   {
     MatDestroy(stiffMat);
     VecDestroy(globalSrc);
@@ -55,28 +52,44 @@ namespace Lucee
   }
 
   void 
-  ElectrostaticContPhiUpdater::readInput(Lucee::LuaTable& tbl)
+  ElectromagneticContAUpdater::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
-      throw Lucee::Except("ElectrostaticContPhiUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify element to use using 'basis'");
 
-    if (tbl.hasNumber("kPerpTimesRho"))
-      kPerpTimesRho = tbl.getNumber("kPerpTimesRho");
+    if (tbl.hasNumber("kPerp"))
+      kPerp = tbl.getNumber("kPerp");
     else
-      throw Lucee::Except("ElectrostaticContPhiUpdater::readInput: Must specify kPerpTimesRho");
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify kPerp");
 
-    if (tbl.hasNumber("Te0"))
-      Te0 = tbl.getNumber("Te0");
+    if (tbl.hasNumber("elcMass"))
+      elcMass = tbl.getNumber("elcMass");
     else
-      throw Lucee::Except("ElectrostaticContPhiUpdater::readInput: Must specify Te0");
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify elcMass");
 
-    useCutoffVelocities = false;
-    if (tbl.hasBool("useCutoffVelocities"))
-      useCutoffVelocities = tbl.getBool("useCutoffVelocities");
+    if (tbl.hasNumber("ionMass"))
+      ionMass = tbl.getNumber("ionMass");
+    else
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify ionMass");
+
+    if (tbl.hasNumber("elcCharge"))
+      elcCharge = tbl.getNumber("elcCharge");
+    else
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify elcCharge");
+
+    if (tbl.hasNumber("ionCharge"))
+      ionCharge = tbl.getNumber("ionCharge");
+    else
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify ionCharge");
+
+    if (tbl.hasNumber("mu0"))
+      mu0 = tbl.getNumber("mu0");
+    else
+      throw Lucee::Except("ElectromagneticContAUpdater::readInput: Must specify mu0");
 
     // force all directions to be periodic
     for (int i = 0; i < 1; i++) 
@@ -84,7 +97,7 @@ namespace Lucee
   }
 
   void 
-  ElectrostaticContPhiUpdater::initialize()
+  ElectromagneticContAUpdater::initialize()
   {
     Lucee::UpdaterIfc::initialize();
 
@@ -155,7 +168,7 @@ namespace Lucee
     }
 
 #ifdef HAVE_MPI
-    throw Lucee::Except("ElectrostaticContPhiUpdater does not yet work in parallel!");
+    throw Lucee::Except("ElectromagneticContAUpdater does not yet work in parallel!");
 #else
     // Explicit initialization of stiffness matrix speeds up
     // initialization tremendously.
@@ -188,19 +201,23 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus 
-  ElectrostaticContPhiUpdater::update(double t)
+  ElectromagneticContAUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<1>& grid
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
     // Electron and ion densities
-    const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
-    Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& mom0ElcIn = this->getInp<Lucee::Field<1, double> >(0);
+    const Lucee::Field<1, double>& mom0IonIn = this->getInp<Lucee::Field<1, double> >(1);
+    const Lucee::Field<1, double>& mom1ElcIn = this->getInp<Lucee::Field<1, double> >(2);
+    const Lucee::Field<1, double>& mom1IonIn = this->getInp<Lucee::Field<1, double> >(3);
+    Lucee::Field<1, double>& aOut = this->getOut<Lucee::Field<1, double> >(0);
 
-    Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
-    Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
+    Lucee::ConstFieldPtr<double> mom0ElcPtr = mom0ElcIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom0IonPtr = mom0IonIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom1ElcPtr = mom1ElcIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> mom1IonPtr = mom1IonIn.createConstPtr();
+    Lucee::FieldPtr<double> aPtr = aOut.createPtr();
 
     // number of global nodes
     int nglobal = nodalBasis->getNumGlobalNodes();
@@ -238,28 +255,31 @@ namespace Lucee
       seq.fillWithIndex(idx);
       // set index into element basis
       nodalBasis->setIndex(idx);
-      // set index of nIon
-      nIonIn.setPtr(nIonPtr, idx);
+      // Set inputs
+      mom0ElcIn.setPtr(mom0ElcPtr, idx);
+      mom0IonIn.setPtr(mom0IonPtr, idx);
 
-      Eigen::VectorXd nIonVec(nlocal);
-      
+      Eigen::VectorXd lhsVec(nlocal);
+
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        nIonVec(componentIndex) = nIonPtr[componentIndex];
+        lhsVec(componentIndex) = kPerp*kPerp + mu0*(
+            elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(elcMass*elcMass) + 
+            ionCharge*ionCharge*mom0IonPtr[componentIndex]/(ionMass*ionMass) );
 
-      Eigen::MatrixXd phiProjections(nlocal, nlocal);
+      Eigen::MatrixXd aProjections(nlocal, nlocal);
 
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
       {
-        Eigen::VectorXd phiProjectionsSingle = tripleProducts[basisIndex]*nIonVec;
-        // Store components into rows of phiProjections matrix
+        Eigen::VectorXd aProjectionsSingle = tripleProducts[basisIndex]*lhsVec;
+        // Store components into rows of aProjections matrix
         for (int colIndex = 0; colIndex < nlocal; colIndex++)
-          phiProjections(basisIndex, colIndex) = phiProjectionsSingle(colIndex);
+          aProjections(basisIndex, colIndex) = aProjectionsSingle(colIndex);
       }
 
       // construct arrays for passing into Petsc
       for (int k = 0; k < nlocal; k++)
         for (int m = 0; m < nlocal; m++)
-          vals[nlocal*k + m] = phiProjections(k, m); // Default PetSc layout is row-major
+          vals[nlocal*k + m] = aProjections(k, m); // Default PetSc layout is row-major
 
       // get local to global mapping
       nodalBasis->getLocalToGlobal(lgMap);
@@ -310,28 +330,31 @@ namespace Lucee
 
           // set index into element basis
           nodalBasis->setIndex(idx);
-          // set index of nIon
-          nIonIn.setPtr(nIonPtr, idx);
+          // Set inputs
+          mom0ElcIn.setPtr(mom0ElcPtr, idx);
+          mom0IonIn.setPtr(mom0IonPtr, idx);
 
-          Eigen::VectorXd nIonVec(nlocal);
-          
+          Eigen::VectorXd lhsVec(nlocal);
+
           for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-            nIonVec(componentIndex) = nIonPtr[componentIndex];
+            lhsVec(componentIndex) = kPerp*kPerp + mu0*(
+              elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(elcMass*elcMass) + 
+              ionCharge*ionCharge*mom0IonPtr[componentIndex]/(ionMass*ionMass) );
 
-          Eigen::MatrixXd phiProjections(nlocal, nlocal);
+          Eigen::MatrixXd aProjections(nlocal, nlocal);
 
           for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
           {
-            Eigen::VectorXd phiProjectionsSingle = tripleProducts[basisIndex]*nIonVec;
-            // Store components into rows of phiProjections matrix
+            Eigen::VectorXd aProjectionsSingle = tripleProducts[basisIndex]*lhsVec;
+            // Store components into rows of aProjections matrix
             for (int colIndex = 0; colIndex < nlocal; colIndex++)
-              phiProjections(basisIndex, colIndex) = phiProjectionsSingle(colIndex);
+              aProjections(basisIndex, colIndex) = aProjectionsSingle(colIndex);
           }
 
           // construct arrays for passing into Petsc
           for (int k = 0; k < nlocal; k++)
             for (int m = 0; m < nlocal; m++)
-              vals[nlocal*k + m] = phiProjections(k, m); // Default PetSc layout is row-major
+              vals[nlocal*k + m] = aProjections(k, m); // Default PetSc layout is row-major
 
           // Now compute correct locations in global stiffness matrix to add
           // these values. This code looks very bizarre as the logic for
@@ -496,21 +519,18 @@ namespace Lucee
       nodalBasis->getLocalToGlobal(lgMap);
 
       // Set inputs
-      nElcIn.setPtr(nElcPtr, idx);
-      nIonIn.setPtr(nIonPtr, idx);
+      mom1ElcIn.setPtr(mom1ElcPtr, idx);
+      mom1IonIn.setPtr(mom1IonPtr, idx);
 
-      Eigen::VectorXd nIonVec(nlocal);
-      Eigen::VectorXd nDiffVec(nlocal);
-      
+      Eigen::VectorXd rhsVec(nlocal);
+
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-      {
-        nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
-        // Scale by various factors in the phi-equation
-        nDiffVec(componentIndex) = Te0*nDiffVec(componentIndex)/(kPerpTimesRho*kPerpTimesRho);
-      }
+        rhsVec(componentIndex) = mu0*( 
+            ionCharge*mom1IonPtr[componentIndex]/(ionMass*ionMass) + 
+            elcCharge*mom1ElcPtr[componentIndex]/(elcMass*elcMass) );
 
       // evaluate local mass matrix times local source
-      Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
+      Eigen::VectorXd rhsIntegrals = massMatrix*rhsVec;
 
       // Copy over rhsIntegrals to localMassSrc
       for (int k = 0; k < nlocal; k++)
@@ -563,21 +583,18 @@ namespace Lucee
           copyLuceeToEigen(localMassLucee, massMatrix);
 
           // Set inputs
-          nElcIn.setPtr(nElcPtr, idx);
-          nIonIn.setPtr(nIonPtr, idx);
+          mom1ElcIn.setPtr(mom1ElcPtr, idx);
+          mom1IonIn.setPtr(mom1IonPtr, idx);
 
-          Eigen::VectorXd nIonVec(nlocal);
-          Eigen::VectorXd nDiffVec(nlocal);
-          
+          Eigen::VectorXd rhsVec(nlocal);
+
           for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-          {
-            nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
-            // Scale by various factors in the phi-equation
-            nDiffVec(componentIndex) = Te0*nDiffVec(componentIndex)/(kPerpTimesRho*kPerpTimesRho);
-          }
+            rhsVec(componentIndex) = mu0*( 
+                ionCharge*mom1IonPtr[componentIndex]/(ionMass*ionMass) + 
+                elcCharge*mom1ElcPtr[componentIndex]/(elcMass*elcMass) );
 
           // evaluate local mass matrix times local source
-          Eigen::VectorXd rhsIntegrals = massMatrix*nDiffVec;
+          Eigen::VectorXd rhsIntegrals = massMatrix*rhsVec;
 
           // Copy over rhsIntegrals to localMassSrc
           for (unsigned k=0; k<nlocal; ++k)
@@ -623,7 +640,7 @@ namespace Lucee
     PetscScalar *ptGuess;
     unsigned count = 0;
     VecGetArray(initGuess, &ptGuess);
-    nodalBasis->copyAllDataFromField(phiOut, ptGuess);
+    nodalBasis->copyAllDataFromField(aOut, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
@@ -646,12 +663,12 @@ namespace Lucee
     if (reason < 0) 
     {
       status = false;
-      msgStrm << ElectrostaticContPhiUpdater::id << ": KSPSolve failed!";
+      msgStrm << ElectromagneticContAUpdater::id << ": KSPSolve failed!";
       msgStrm << " Petsc reason code was " << reason << ".";
     }
     else
     {
-      msgStrm << ElectrostaticContPhiUpdater::id << ": KSPSolve converged.";
+      msgStrm << ElectromagneticContAUpdater::id << ": KSPSolve converged.";
     }
     msgStrm << " Number of iterations " << itNum
             << ". Final residual norm was " << resNorm;
@@ -659,52 +676,27 @@ namespace Lucee
     // copy solution from PetSc array to solution field
     PetscScalar *ptSol;
     VecGetArray(initGuess, &ptSol);
-    nodalBasis->copyAllDataToField(ptSol, phiOut);
+    nodalBasis->copyAllDataToField(ptSol, aOut);
     VecRestoreArray(initGuess, &ptSol);
-
-    double phiS;
-
-    if (useCutoffVelocities == true)
-    {
-      // Dynvector containing the cutoff velocities computed at one or both edges
-      const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
-      // Compute cutoff velocity on the right edge
-      std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
-      phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-    }
-    else
-    {
-      phiS = 0.0;
-    }
-    
-    Lucee::Region<1, int> globalRgnDup = grid.getGlobalRegion(); 
-    // Add phiS to the solution
-    for (int ix = globalRgnDup.getLower(0); ix < globalRgnDup.getUpper(0); ix++)
-    {
-      phiOut.setPtr(phiPtr, ix);
-
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiPtr[componentIndex] + phiS;
-    }
 
     return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max(),
       msgStrm.str());
   }
 
   void
-  ElectrostaticContPhiUpdater::declareTypes()
+  ElectromagneticContAUpdater::declareTypes()
   {
-    // inputs n_e(x), n_i(x)
+    // takes mom0Elc, mom0Ion, mom1Elc, mom1Ion (in p-space)
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // optional input: cutoff velocity at edges
-    this->appendInpVarType(typeid(Lucee::DynVector<double>));
-    // returns one output: phi(x) -- continuous version!
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // returns one output: A(x)
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
   void
-  ElectrostaticContPhiUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  ElectromagneticContAUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
