@@ -92,9 +92,9 @@ Atm : subst(
      Q([3,3,3],[])=q333],
  Atmp);
 
-/** Derive simplified 1D system (keeping u(1) to be non-zero) [1,2,5,11] */
+/** Derive simplified 1D system (keeping u(1) to be non-zero) */
 
-cEqnsIdx : [1, 2, 5, 8, 11, 14];
+cEqnsIdx : [1, 2, 5, 11];
 cEqList : 
   (cEqns : [], 
     for idx in cEqnsIdx do (cEqns : append(cEqns, [eqList[idx]])), cEqns);
@@ -114,5 +114,3 @@ cAtm : subst(
      Q([2,3,3],[])=q233,
      Q([3,3,3],[])=q333],
  cAtmp);
-
-cAtm : subst( [p12=0], cAtm);
