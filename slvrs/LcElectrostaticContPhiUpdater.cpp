@@ -662,29 +662,23 @@ namespace Lucee
     nodalBasis->copyAllDataToField(ptSol, phiOut);
     VecRestoreArray(initGuess, &ptSol);
 
-    double phiS;
-
     if (useCutoffVelocities == true)
     {
       // Dynvector containing the cutoff velocities computed at one or both edges
       const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
       // Compute cutoff velocity on the right edge
       std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
-      phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-    }
-    else
-    {
-      phiS = 0.0;
-    }
+      double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
     
-    Lucee::Region<1, int> globalRgnDup = grid.getGlobalRegion(); 
-    // Add phiS to the solution
-    for (int ix = globalRgnDup.getLower(0); ix < globalRgnDup.getUpper(0); ix++)
-    {
-      phiOut.setPtr(phiPtr, ix);
+      Lucee::Region<1, int> globalRgnDup = grid.getGlobalRegion(); 
+      // Add phiS to the solution
+      for (int ix = globalRgnDup.getLower(0); ix < globalRgnDup.getUpper(0); ix++)
+      {
+        phiOut.setPtr(phiPtr, ix);
 
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiPtr[componentIndex] + phiS;
+        for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+          phiPtr[componentIndex] = phiPtr[componentIndex] + phiS;
+      }
     }
 
     return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max(),
