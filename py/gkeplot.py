@@ -71,9 +71,9 @@ plotGroup.add_argument("--save-as",
 args = parser.parse_args()
 # plot each file as specified
 fileList = args.files
-for f in fileList:
-    print ("Plotting %s ..." % f)
-    if not gkeplotters.plotFile(f, args):
-        print ("  Warning: Unable to plot file %s!" % f)
+#for f in fileList:
+#    print ("Plotting %s ..." % f)
+#    if not gkeplotters.plotFile(f, args):
+#        print ("  Warning: Unable to plot file %s!" % f)
     
-pylab.show()
+#pylab.show()

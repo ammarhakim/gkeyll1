@@ -1,4 +1,47 @@
 import pylab
+from matplotlib import rcParams
+import matplotlib.pyplot as plt
+
+# customization for figure
+rcParams['lines.linewidth']            = 2
+rcParams['font.size']                  = 18
+#rcParams['xtick.major.size']           = 8 # default is 4
+#rcParams['xtick.major.width']          = 3 # default is 0.5
+#rcParams['ytick.major.size']           = 8 # default is 4
+#rcParams['ytick.major.width']          = 3 # default is 0.5
+rcParams['figure.facecolor']           = 'white'
+#rcParams['figure.subplot.bottom']      = 0.125
+#rcParams['figure.subplot.right']       = 0.85 # keep labels/ticks of colobar in figure
+rcParams['image.interpolation']        = 'none'
+rcParams['image.origin']               = 'lower'
+rcParams['contour.negative_linestyle'] = 'solid'
+#rcParams['savefig.bbox']               = 'tight'
+
+# Math/LaTex fonts:
+# http://matplotlib.org/users/mathtext.html
+# http://matplotlib.org/users/usetex.html
+# Example: xlabel(r'$t \cdot l / V_{A,bc}$')
+rcParams['mathtext.default'] = 'regular' # match the font used for regular text
+
+def colorbar_adj(obj, mode=1, redraw=False, _fig_=None, _ax_=None, aspect=None):
+    '''
+    Add a colorbar adjacent to obj, with a matching height
+    For use of aspect, see http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.set_aspect ; E.g., to fill the rectangle, try "auto"
+    '''
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    if mode == 1:
+        _fig_ = obj.figure; _ax_ = obj.axes
+    elif mode == 2: # assume obj is in the current figure/axis instance
+        _fig_ = plt.gcf(); _ax_ = plt.gca()
+    _divider_ = make_axes_locatable(_ax_)
+    _cax_ = _divider_.append_axes("right", size="5%", pad=0.05)
+    _cbar_ =  _fig_.colorbar(obj, cax=_cax_)
+    if aspect != None:
+        _ax_.set_aspect(aspect)
+    if redraw:
+        _fig_.canvas.draw()
+    return _cbar_
+
 
 class MakeTitle:
     def __init__(self, gd, component, title, transformMod, transformVar, outNm):
@@ -65,8 +108,8 @@ class Plot2D:
         X = pylab.linspace(gd.lowerBounds[0], gd.upperBounds[0], gd.cells[0]+1)
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
         XX, YY = pylab.meshgrid(X, Y)
-        pylab.pcolormesh(XX, YY, data.transpose())
-        pylab.colorbar()
+        im = pylab.pcolormesh(XX, YY, data.transpose())
+        #pylab.colorbar()
         if options.axisFree:
             pylab.axis('tight')
         else:
@@ -75,8 +118,10 @@ class Plot2D:
         pylab.title(mtitle.title)
         pylab.xlabel('X')
         pylab.ylabel('Y')
+        colorbar_adj(im)
+        plt.tight_layout()
         if save:
-            pylab.savefig(mtitle.figName)
+            pylab.savefig(mtitle.figName, bbox_inches='tight')
 
 class PlotDg1D:
     r"""PlotDg1D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D
@@ -207,8 +252,8 @@ class PlotDg2D:
         self.YY = YY
         self.data = data
                     
-        pylab.pcolormesh(XX, YY, data.transpose())
-        pylab.colorbar()
+        im = pylab.pcolormesh(XX, YY, data.transpose())
+        #pylab.colorbar()
         if options.axisFree:
             pylab.axis('tight')
         else:
@@ -217,8 +262,10 @@ class PlotDg2D:
         pylab.title(mtitle.title)
         pylab.xlabel('X')
         pylab.ylabel('Y')
+        colorbar_adj(im)
+        plt.tight_layout()
         if save:
-            pylab.savefig(mtitle.figName)            
+            pylab.savefig(mtitle.figName, bbox_inches='tight')
 
     def evalSum(self, coeff, fields):
         res = 0.0*fields[0]
