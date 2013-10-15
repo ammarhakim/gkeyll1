@@ -18,12 +18,12 @@
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
+#include <LcEdgeFaceCurlUpdater.h>
 #include <LcElectromagneticAUpdater.h>
 #include <LcElectromagneticContAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectromagneticMomentsAtEdgesUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
-#include <LcEdgeFaceCurlUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
@@ -63,6 +63,7 @@
 #include <LcSolverRegistry.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
+#include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
@@ -186,6 +187,10 @@ namespace Lucee
       .append<Lucee::ImplicitTenMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitTenMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitTenMomentSrcUpdater<3> >()
+
+      .append<TwoFluidMomentumRelaxSrcUpdater<1> >()
+      .append<TwoFluidMomentumRelaxSrcUpdater<2> >()
+      .append<TwoFluidMomentumRelaxSrcUpdater<3> >()
 
       .append<Lucee::VelocitiesFromMomentsUpdater>();
 

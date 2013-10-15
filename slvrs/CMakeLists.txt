@@ -15,9 +15,9 @@ endif (PETSC_FOUND)
 
 # Create the library
 set(lcslvrs_SOURCES
-  LcAdvectionEquation.cpp
   LcASquaredProjectionUpdater.cpp
   LcATimesPUpdater.cpp
+  LcAdvectionEquation.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoltzmannPhiUpdater.cpp
@@ -84,6 +84,7 @@ set(lcslvrs_SOURCES
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
+  LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMomentsUpdater.cpp
