@@ -24,7 +24,7 @@ namespace Lucee
   TwoFluidMomentumRelaxSrcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
-    elcNu = tbl.getNumber("electronCollisionFrequency");
+    elcNu = tbl.getNumber("electronIonCollisionFrequency");
   }
 
   template <unsigned NDIM>
@@ -48,6 +48,8 @@ namespace Lucee
     Lucee::FieldPtr<double> ionPtr = ionFluid.createPtr();
     int idx[NDIM];
 
+    double diffU[3];
+
     Lucee::Region<NDIM, int> localRgn = elcFluid.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     while (seq.step())
@@ -55,6 +57,21 @@ namespace Lucee
       seq.fillWithIndex(idx);
       elcFluid.setPtr(ionPtr, idx);
       ionFluid.setPtr(elcPtr, idx);
+
+      double ionNu = elcPtr[0]/ionPtr[0]*elcNu; // ion-electron collision frequency
+      double aNu = 0.5*(ionNu+elcNu);
+      double ent = std::exp(-aNu*dt);
+
+// initial velocity difference
+      for (unsigned d=0; d<3; ++d)
+        diffU[d] = elcPtr[1+d]/elcPtr[0]-ionPtr[1+d]/ionPtr[0];
+
+// update electron momentum
+      for (unsigned d=0; d<3; ++d)
+        elcPtr[1+d] = elcPtr[1+d]-elcNu/(2*aNu)*elcPtr[0]*diffU[d]*(1-ent);
+// update ion momentum
+      for (unsigned d=0; d<3; ++d)
+        ionPtr[1+d] = ionPtr[1+d]+ionNu/(2*aNu)*ionPtr[0]*diffU[d]*(1-ent);
     }
     
     return Lucee::UpdaterStatus();
