@@ -22,4 +22,5 @@ isZero : fullratsimp( diff(f1,t) + v*diff(f1,z) + realpart(E(z,t))*diff(f0(v),v)
 if isZero=0 then print("Verified") else print("Failed");
 
 /** One needs to take limits as k*v->w to get solution when k*v=w */
-
+declare(v, noninteger);
+f1Sin : trigreduce(limit(f1, w, k*v));
