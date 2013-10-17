@@ -670,13 +670,17 @@ namespace Lucee
       std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
       double phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
     
-      Lucee::Region<1, int> globalRgnDup = grid.getGlobalRegion(); 
+      // Figure out how many exclusive nodes there are per cell
+      std::vector<int> ndIds;
+      nodalBasis->getExclusiveNodeIndices(ndIds);
+
+      Lucee::Region<1, int> globalRgnDup = phiOut.getExtRegion(); 
       // Add phiS to the solution
       for (int ix = globalRgnDup.getLower(0); ix < globalRgnDup.getUpper(0); ix++)
       {
         phiOut.setPtr(phiPtr, ix);
 
-        for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+        for (int componentIndex = 0; componentIndex < ndIds.size(); componentIndex++)
           phiPtr[componentIndex] = phiPtr[componentIndex] + phiS;
       }
     }
