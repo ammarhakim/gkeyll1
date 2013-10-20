@@ -28,6 +28,7 @@
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFieldFunctionBoundaryCondition.h>
+#include <LcFiveMomentNumDensityRelax.h>
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>

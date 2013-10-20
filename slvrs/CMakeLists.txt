@@ -38,6 +38,7 @@ set(lcslvrs_SOURCES
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
   LcFieldFunctionBoundaryCondition.cpp
+  LcFiveMomentNumDensityRelax.cpp
   LcFunctionBoundaryCondition.cpp
   LcFunctionSource.cpp
   LcGradEquation.cpp
