@@ -60,7 +60,7 @@ namespace Lucee
 
       double elcNum0 = elcPtr[0]/elcMass;
       double ionNum0 = ionPtr[0]/ionMass;
-      double relaxNum = 0.5*(elcNum0+ionNum0);
+      double relaxNum = 0.5*(elcNum0+ionNum0); // instantaneous relaxation 
 
 // adust electron conserved quantities
       double rho = elcPtr[0];
