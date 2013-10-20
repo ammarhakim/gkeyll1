@@ -193,6 +193,10 @@ namespace Lucee
       .append<TwoFluidMomentumRelaxSrcUpdater<2> >()
       .append<TwoFluidMomentumRelaxSrcUpdater<3> >()
 
+      .append<FiveMomentNumDensityRelax<1> >()
+      .append<FiveMomentNumDensityRelax<2> >()
+      .append<FiveMomentNumDensityRelax<3> >()
+
       .append<Lucee::VelocitiesFromMomentsUpdater>();
 
 // register boundary conditions
