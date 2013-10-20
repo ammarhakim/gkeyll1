@@ -24,7 +24,7 @@ namespace Lucee
   FiveMomentNumDensityRelax<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
-    elcMass = tbl.getNumber("elecronMass");
+    elcMass = tbl.getNumber("electronMass");
     ionMass = tbl.getNumber("ionMass");
     gasGamma = tbl.getNumber("gasGamma");
   }
@@ -50,15 +50,13 @@ namespace Lucee
     Lucee::FieldPtr<double> ionPtr = ionFluid.createPtr();
     int idx[NDIM];
 
-    double diffU[3];
-
     Lucee::Region<NDIM, int> localRgn = elcFluid.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-      elcFluid.setPtr(ionPtr, idx);
-      ionFluid.setPtr(elcPtr, idx);
+      elcFluid.setPtr(elcPtr, idx);
+      ionFluid.setPtr(ionPtr, idx);
 
       double elcNum0 = elcPtr[0]/elcMass;
       double ionNum0 = ionPtr[0]/ionMass;
@@ -73,7 +71,7 @@ namespace Lucee
       elcPtr[1] = elcPtr[1]/rho*elcPtr[0];
       elcPtr[2] = elcPtr[2]/rho*elcPtr[0];
       elcPtr[3] = elcPtr[3]/rho*elcPtr[0];
-      elcPtr[4] = pr/(gasGamma-1) + 0.5*(elcPtr[1]*elcPtr[1]+elcPtr[2]*elcPtr[2]+elcPtr[3]*elcPtr[4])/elcPtr[0];
+      elcPtr[4] = pr/(gasGamma-1) + 0.5*(elcPtr[1]*elcPtr[1]+elcPtr[2]*elcPtr[2]+elcPtr[3]*elcPtr[3])/elcPtr[0];
 
 // adust ion conserved quantities
       rho = ionPtr[0];
@@ -84,7 +82,7 @@ namespace Lucee
       ionPtr[1] = ionPtr[1]/rho*ionPtr[0];
       ionPtr[2] = ionPtr[2]/rho*ionPtr[0];
       ionPtr[3] = ionPtr[3]/rho*ionPtr[0];
-      ionPtr[4] = pr/(gasGamma-1) + 0.5*(ionPtr[1]*ionPtr[1]+ionPtr[2]*ionPtr[2]+ionPtr[3]*ionPtr[4])/ionPtr[0];
+      ionPtr[4] = pr/(gasGamma-1) + 0.5*(ionPtr[1]*ionPtr[1]+ionPtr[2]*ionPtr[2]+ionPtr[3]*ionPtr[3])/ionPtr[0];
     }
     
     return Lucee::UpdaterStatus();

@@ -55,8 +55,8 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-      elcFluid.setPtr(ionPtr, idx);
-      ionFluid.setPtr(elcPtr, idx);
+      elcFluid.setPtr(elcPtr, idx);
+      ionFluid.setPtr(ionPtr, idx);
 
       double ionNu = elcPtr[0]/ionPtr[0]*elcNu; // ion-electron collision frequency
       double aNu = 0.5*(ionNu+elcNu);
