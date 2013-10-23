@@ -20,7 +20,6 @@
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcElectromagneticAUpdater.h>
-#include <LcElectromagneticContAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectromagneticMomentsAtEdgesUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
@@ -76,6 +75,7 @@
 #ifdef HAVE_PETSC
 # include <LcElectrostaticContPhiUpdater.h>
 # include <LcFemPoissonStructUpdater.h>
+# include <LcElectromagneticContAUpdater.h>
 #endif
 
 namespace Lucee
@@ -114,7 +114,6 @@ namespace Lucee
       .append<Lucee::KineticTotalEnergyUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
-      .append<Lucee::ElectromagneticContAUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
@@ -149,6 +148,8 @@ namespace Lucee
       .append<Lucee::FemPoissonStructUpdater<3> >()
 
       .append<Lucee::ElectrostaticContPhiUpdater>()
+
+      .append<Lucee::ElectromagneticContAUpdater>()
 #endif
 
       .append<Lucee::EvalOnNodesUpdater<1> >()

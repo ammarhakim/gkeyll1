@@ -29,7 +29,6 @@ set(lcslvrs_SOURCES
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcElectromagneticAUpdater.cpp
-  LcElectromagneticContAUpdater.cpp
   LcElectromagneticDistFuncReflectionBcUpdater.cpp
   LcElectromagneticMomentsAtEdgesUpdater.cpp
   LcElectrostaticPhiUpdater.cpp
@@ -97,6 +96,7 @@ set(lcslvrs_SOURCES
 if (PETSC_FOUND)
   set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
     LcFemPoissonStructUpdater.cpp
+    LcElectromagneticContAUpdater.cpp
     LcElectrostaticContPhiUpdater.cpp
   )
 endif (PETSC_FOUND)
