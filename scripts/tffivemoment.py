@@ -112,6 +112,8 @@ class ExtractFluidVars(object):
         return self.get(q, 'getW')
     def getP(self, q):
         return self.get(q, 'getP')
+    def getT(self, q):
+        return self.getP(q)/(self.getRho(q)/mass)
 
 class ExtractEmVars(object):
     def __init__(self):
@@ -152,11 +154,13 @@ transformRegistry = {
     'vElc' : elcEx.getV,
     'wElc' : elcEx.getW,
     'pElc' : elcEx.getP,
+    'tempElc' : elcEx.getT,
     'rhoIon' : ionEx.getRho,
     'uIon' : ionEx.getU,
     'vIon' : ionEx.getV,
     'wIon' : ionEx.getW,
     'pIon' : ionEx.getP,
+    'tempIon' : ionEx.getT,
     'Ex' : emEx.getEx,
     'Ey' : emEx.getEy,
     'Ez' : emEx.getEz,
