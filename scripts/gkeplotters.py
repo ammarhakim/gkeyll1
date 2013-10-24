@@ -391,6 +391,7 @@ class PlotHistory:
       pylab.title('History %s' % (titleStr))
       pylab.xlabel('Time')
       pylab.ylabel('%s' % (titleStr))
+      plt.tight_layout()
       if save:
           figNm = gkeh.base + ("_%d.png" % component)
           pylab.savefig(figNm)
