@@ -40,6 +40,7 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNormGradPhiUpdater.cpp
   LcProtoSolverRegistry.cpp
+  LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcSheathParticleSource1x1v.cpp
