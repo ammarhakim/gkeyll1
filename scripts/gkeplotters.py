@@ -109,7 +109,8 @@ class Plot2D:
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)
         XX, YY = pylab.meshgrid(X, Y)
         im = pylab.pcolormesh(XX, YY, data.transpose())
-        #pylab.colorbar()
+        if options.cmap:
+            plt.set_cmap(options.cmap)
         if options.axisFree:
             pylab.axis('tight')
         else:
@@ -253,7 +254,8 @@ class PlotDg2D:
         self.data = data
                     
         im = pylab.pcolormesh(XX, YY, data.transpose())
-        #pylab.colorbar()
+        if options.cmap:
+            plt.set_cmap(options.cmap)
         if options.axisFree:
             pylab.axis('tight')
         else:
