@@ -32,6 +32,7 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcProtoSolverRegistry.h>
+#include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -87,9 +88,15 @@ namespace Lucee
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
       .append<Lucee::NormGradPhiUpdater<3> >()
+
       .append<Lucee::RecordFieldInCell<1> >()
       .append<Lucee::RecordFieldInCell<2> >()
       .append<Lucee::RecordFieldInCell<3> >()
+
+      .append<Lucee::RecordFieldDerivInCell<1> >()
+      .append<Lucee::RecordFieldDerivInCell<2> >()
+      .append<Lucee::RecordFieldDerivInCell<3> >()
+
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
