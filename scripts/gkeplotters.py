@@ -386,6 +386,7 @@ class PlotHistory:
     
     def __init__(self, gkeh, component=0, title=None, save=False):
       pylab.plot(gkeh.time, gkeh.history[:,component])
+      pylab.axis('tight')
       if title:
           titleStr = title
       else:
