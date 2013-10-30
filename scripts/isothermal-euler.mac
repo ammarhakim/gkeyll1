@@ -1,0 +1,48 @@
+/** Compute eigensystem for isothemal Euler equations */
+
+load(itensor);
+
+/** Number density */
+dn : u(1)*D(n) + n*D(u(1));
+
+/** Velocity */
+du(i) := u(1)*D(u(i)) + vt^2/n*D(n)*kdelta([],[i,1]);
+
+/** Construct list of equations and derivatives */
+eqList : [dn, du(1), du(2), du(3)];
+diffList : [D(n), D(u(1)), D(u(2)), D(u(3))];
+
+/** Construct coefficient matrix */
+Atmp : coefmatrix(eqList, diffList);
+
+/** Perform substitutions to clean up final matrix */
+Atm : subst(
+    [u(1)=u1, u(2)=u2, u(3)=u3],
+Atmp);
+
+/** Compute eigensystem */
+[vals, vects] : eigenvectors(Atm);
+
+/** Right eigenvectors. This nastiness is needed as the eigesystem is
+returned as a list of nested lists. These nested lists are taken apart
+based on eigenvalue multiplicity and put as columns in a matrix of
+right-eigenvectors */
+
+Rev : (Rev : matrix([]), for i from 1 thru length (vals[1]) 
+        do (for j from 1 thru vals[2][i] 
+          do ( (Rev : addcol(Rev, transpose(matrix(vects[i][j])))))), Rev);
+
+
+/** Compute left-eigenvectors */
+Lev : fullratsimp( invert(Rev) ); /** Reduce as best you can */
+/** Compute check: this should be an identiy matrix */
+id : fullratsimp( Lev . Rev );
+
+/** Compute phiPrime matrix */
+phi : [n, n*u1, n*u2, n*u3];
+phiPrime : coefmatrix(phi, [n, u1, u2, u3]);
+
+/** Conserved equations eigenvectors */
+Rev_cons : fullratsimp( phiPrime . Rev );
+Lev_cons : fullratsimp( Lev . invert(phiPrime) );
+
