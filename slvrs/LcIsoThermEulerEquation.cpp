@@ -176,7 +176,7 @@ namespace Lucee
     double a2 = jump[3]-jump[0]*w;
     double a3 = jump[0]*(vt-u)/vt/2.0+jump[1]/vt/2.0;
 
-// compute waves (see Tech Note 1007)
+// compute waves
 
 // wave 1: eigenvalue is u-c
     waves(0,0) = a0;

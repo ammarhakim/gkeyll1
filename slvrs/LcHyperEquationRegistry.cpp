@@ -16,6 +16,7 @@
 #include <LcEulerEquation.h>
 #include <LcGradEquation.h>
 #include <LcHyperEquationRegistry.h>
+#include <LcIsoThermEulerEquation.h>
 #include <LcLenardBernsteinVParEquation.h>
 #include <LcMaxwellEquation.h>
 #include <LcPhMaxwellEquation.h>
@@ -34,6 +35,7 @@ namespace Lucee
       ::Instance()
       .append<Lucee::AdvectionEquation>()
       .append<Lucee::EulerEquation>()
+      .append<Lucee::IsoThermEulerEquation>()
       .append<Lucee::TenMomentEquation>()
       .append<Lucee::MaxwellEquation>()
       .append<Lucee::PhMaxwellEquation>()
