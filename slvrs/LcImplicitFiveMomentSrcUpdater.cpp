@@ -90,6 +90,11 @@ namespace Lucee
     if (tbl.hasBool("hasStaticField"))
       hasStatic = tbl.getBool("hasStaticField");
 
+// flag to indicate if there is a pressure equation
+    hasPressure = true;
+    if (tbl.hasBool("hasPressure"))
+      hasPressure = tbl.getBool("hasPressure");
+
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
     for (unsigned i=0; i<nFluids; ++i)
@@ -220,10 +225,13 @@ namespace Lucee
         fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
         fPtr[RHOUZ] = 2*sol(fidx(n,Z))/qbym[n] - fPtr[RHOUZ];
 
+        if (hasPressure)
+        {
 // energy equation (there is no explicit energy source, so just
 // recompute new kinetic energy to update total energy)
-        fPtr[ER] = fPtr[ER] - keold
-          + 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
+          fPtr[ER] = fPtr[ER] - keold
+            + 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
+        }
       }
 
 // update electric field
