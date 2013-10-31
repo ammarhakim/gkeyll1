@@ -170,51 +170,35 @@ namespace Lucee
     double v = (ql[2]/rhsqrtl  + qr[2]/rhsqrtr)/rhsq2;
     double w = (ql[3]/rhsqrtl  + qr[3]/rhsqrtr)/rhsq2;
 
-    double q2 = u*u + v*v + w*w;
-// // Roe averaged enthalpy
-//     double enth = ((ql[4]+pl)/rhsqrtl + (qr[4]+pr)/rhsqrtr)/rhsq2;
-// // speed of sound
-//     double aa2 = gas_gamma1*(enth - 0.5*q2);
-//     if (correct && (aa2 < 0))
-//       aa2 = gas_gamma*minPressure/minDensity;
-//     double a = std::sqrt(aa2);
-// // other quantities
-//     double g1a2 = gas_gamma1/aa2;
-//     double euv = enth - q2;
+// project onto left eigenvectors with Roe averaged values (see isothermal-euler.mac)
+    double a0 = jump[0]*(vt+u)/vt/2.0-jump[1]/vt/2.0;
+    double a1 = jump[2]-jump[0]*v;
+    double a2 = jump[3]-jump[0]*w;
+    double a3 = jump[0]*(vt-u)/vt/2.0+jump[1]/vt/2.0;
 
-// // project onto left eigenvectors with Roe averaged values (see Tech Note 1007)
-//     double a3 = g1a2*(euv*jump[0] + u*jump[1] + v*jump[2] + w*jump[3] - jump[4]);
-//     double a1 = -v*jump[0] + jump[2];
-//     double a2 = -w*jump[0] + jump[3];
-//     double a4 = (jump[1] + (a-u)*jump[0] - a*a3)/(2*a);
-//     double a0 = jump[0] - a3 - a4;
+// compute waves (see Tech Note 1007)
 
-// // compute waves (see Tech Note 1007)
+// wave 1: eigenvalue is u-c
+    waves(0,0) = a0;
+    waves(1,0) = a0*(u-vt);
+    waves(2,0) = a0*v;
+    waves(3,0) = a0*w;
+    s[0] = u-vt;
 
-// // wave 1: eigenvalue is u-c
-//     waves(0,0) = a0;
-//     waves(1,0) = a0*(u-a);
-//     waves(2,0) = a0*v;
-//     waves(3,0) = a0*w;
-//     waves(4,0) = a0*(enth-u*a);
-//     s[0] = u-a;
+// wave 2: 2 eigenvectors for the repeated roots are combined into a
+// single wave
+    waves(0,1) = 0;
+    waves(1,1) = 0;
+    waves(2,1) = a1;
+    waves(3,1) = a2;
+    s[1] = u;
 
-// // wave 2: 3 eigenvectors for the repeated roots are combined into a
-// // single wave
-//     waves(0,1) = a3;
-//     waves(1,1) = a3*u;
-//     waves(2,1) = a1 + v*a3;
-//     waves(3,1) = a2 + w*a3;
-//     waves(4,1) = a1*v + a2*w + 0.5*a3*q2;
-//     s[1] = u;
-
-// // wave 3: eigenvalue is u+c
-//     waves(0,2) = a4;
-//     waves(1,2) = a4*(u+a);
-//     waves(2,2) = a4*v;
-//     waves(3,2) = a4*w;
-//     waves(4,2) = a4*(enth + u*a);
-//     s[2] = u+a;
+// wave 3: eigenvalue is u+c
+    waves(0,2) = a3;
+    waves(1,2) = a3*(u+vt);
+    waves(2,2) = a3*v;
+    waves(3,2) = a3*w;
+    s[2] = u+vt;
   }
 
   void
@@ -227,7 +211,7 @@ namespace Lucee
     {
 // this uses the HLLE technique to construct an intermediate state
       std::vector<const double*> auxVars;
-      double fl[5], fr[5];
+      double fl[4], fr[4];
       flux(c, &ql[0], auxVars, fl);
       flux(c, &qr[0], auxVars, fr);
 
@@ -239,12 +223,12 @@ namespace Lucee
 
 // compute intermediate HLLE state
       double sdiff1 = 1/(s[1]-s[0]);
-      double qHHLE[5];
-      for (unsigned i=0; i<5; ++i)
+      double qHHLE[4];
+      for (unsigned i=0; i<4; ++i)
         qHHLE[i] = (s[1]*qr[i]-s[0]*ql[i]+fl[i]-fr[i])*sdiff1;
 
 // compute waves
-      for (unsigned i=0; i<5; ++i)
+      for (unsigned i=0; i<4; ++i)
       {
         waves(i,0) = qHHLE[i]-ql[i];
         waves(i,1) = qr[i]-qHHLE[i];
@@ -253,7 +237,7 @@ namespace Lucee
     else
     {
 // use a single wave
-      for (unsigned i=0; i<5; ++i)
+      for (unsigned i=0; i<4; ++i)
         waves(i,0) = qr[i]-ql[i];
       
       double sl[2], sr[2];
@@ -273,11 +257,11 @@ namespace Lucee
 
     double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
 
-    double fl[5], fr[5];
+    double fl[4], fr[4];
     flux(c, ql, auxVarsl, fl);
     flux(c, qr, auxVarsr, fr);
 
-    for (unsigned i=0; i<5; ++i)
+    for (unsigned i=0; i<4; ++i)
       f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);
 
     return absMaxs;
@@ -298,13 +282,13 @@ namespace Lucee
 // must be the jump in the physical flux, in all cases, as it does
 // below.
       std::vector<const double*> auxVars;
-      double fl[5], fr[5];
+      double fl[4], fr[4];
       flux(c, &ql[0], auxVars, fl);
       flux(c, &qr[0], auxVars, fr);
 
       double absMaxs = std::max(maxAbsSpeed(c, &ql[0]), maxAbsSpeed(c, &qr[0]));
-      double amdqL[5], apdqL[5];
-      for (unsigned m=0; m<5; ++m)
+      double amdqL[4], apdqL[4];
+      for (unsigned m=0; m<4; ++m)
       {
         amdqL[m] = 0.5*(fr[m]-fl[m] - absMaxs*(qr[m]-ql[m]));
         apdqL[m] = 0.5*(fr[m]-fl[m] + absMaxs*(qr[m]-ql[m]));
