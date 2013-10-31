@@ -28,10 +28,16 @@ returned as a list of nested lists. These nested lists are taken apart
 based on eigenvalue multiplicity and put as columns in a matrix of
 right-eigenvectors */
 
-Rev : (Rev : matrix([]), for i from 1 thru length (vals[1]) 
+Revt : (Rev : matrix([]), for i from 1 thru length (vals[1]) 
         do (for j from 1 thru vals[2][i] 
           do ( (Rev : addcol(Rev, transpose(matrix(vects[i][j])))))), Rev);
 
+/** Massage and rearrange right-eigenvectors */
+Rev : matrix([]);
+Rev : addcol(Rev, col(Revt,1) );
+Rev : addcol(Rev, col(Revt,3)/n );
+Rev : addcol(Rev, col(Revt,4)/n );
+Rev : addcol(Rev, col(Revt,2) );
 
 /** Compute left-eigenvectors */
 Lev : fullratsimp( invert(Rev) ); /** Reduce as best you can */
@@ -46,3 +52,5 @@ phiPrime : coefmatrix(phi, [n, u1, u2, u3]);
 Rev_cons : fullratsimp( phiPrime . Rev );
 Lev_cons : fullratsimp( Lev . invert(phiPrime) );
 
+/** Cross check for consistency (should be a 4x4 matrix of zeros) */
+isZero : fullratsimp(Rev_cons - invert(Lev_cons));
