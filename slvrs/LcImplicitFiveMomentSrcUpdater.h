@@ -82,6 +82,8 @@ namespace Lucee
       int linSolType;
 /** Flag to indicate if static magnetic field is present */
       bool hasStatic;
+/** Flag to indicate if to update pressure equation */
+      bool hasPressure;
 
 /**
  * Compute index for fluid current component.
