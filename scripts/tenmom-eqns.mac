@@ -62,3 +62,9 @@ cDiffList :
     for idx in cEqnsIdx do (cDiffList : append(cDiffList, [diffList[idx]])), cDiffList);
 cAtmp : coefmatrix(cEqList, cDiffList);
 
+/** Anisotropic relaxation */
+
+/** N(i,j) is tensor of magnetic field direction */
+decsym(N, 2, 0, [sym(all)], []);
+
+p_par : sum(sum(P([i,j],[])*N([i,j],[]), i, 1, 3), j, 1, 3);
