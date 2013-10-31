@@ -17,7 +17,7 @@
 namespace Lucee
 {
 // set ids for creators
-  const char *IsoThermEulerEquation::id = "IsoThermalEuler";
+  const char *IsoThermEulerEquation::id = "IsothermalEuler";
 
   IsoThermEulerEquation::IsoThermEulerEquation()
     : Lucee::HyperEquation(4, 3)
