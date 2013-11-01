@@ -340,11 +340,11 @@ namespace Lucee
   EulerEquation::isInvariantDomain(const double* q) const
   {
     double rho = q[0];
-    if (Lucee::isNan(rho) || (rho<=0.0))
+    if (rho<=0.0)
       return false;
 
     double pr = (gas_gamma-1)*(q[4] - 0.5*(q[1]*q[1]+q[2]*q[2]+q[3]*q[3])/rho);
-    if (Lucee::isNan(pr) || (pr<=0.0))
+    if (pr<=0.0)
       return false;
 
     return true;
