@@ -308,7 +308,7 @@ namespace Lucee
   IsoThermEulerEquation::isInvariantDomain(const double* q) const
   {
     double rho = q[0];
-    if (rho<=0.0)
+    if (Lucee::isNan(rho) || (rho<=0.0))
       return false;
     return true;
   }
