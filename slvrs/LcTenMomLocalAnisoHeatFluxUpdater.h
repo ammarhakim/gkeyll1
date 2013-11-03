@@ -70,6 +70,8 @@ namespace Lucee
       double kA;
 /** Reference magnetic field strength */
       double B0;
+/** Small number to make smooth transition in magnetic field free case */
+      double eps;
   };
 }
 
