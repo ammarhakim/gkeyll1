@@ -61,6 +61,7 @@
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSolverRegistry.h>
+#include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
@@ -181,6 +182,10 @@ namespace Lucee
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<1> >()
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<2> >()
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<3> >()
+
+      .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<1> >()
+      .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<2> >()
+      .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<3> >()
 
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()

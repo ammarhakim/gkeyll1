@@ -82,6 +82,7 @@ set(lcslvrs_SOURCES
   LcSerendipityElementDiffusionOutput
   LcSerendipityElementHyperDiffusionOutput
   LcSolverRegistry.cpp
+  LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
