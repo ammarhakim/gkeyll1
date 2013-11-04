@@ -53,6 +53,7 @@ namespace Lucee
     int nlocal = nodalBasis->getNumNodes();
 
     Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
+    Lucee::Region<2, int> extRgn = aTimesPOut.getExtRegion();
 
     Lucee::ConstFieldPtr<double> aPtr = aIn.createConstPtr();
     Lucee::FieldPtr<double> aTimesPPtr = aTimesPOut.createPtr();
@@ -65,11 +66,11 @@ namespace Lucee
     Eigen::MatrixXd nodeCoords(nlocal, 3);
     
     // Loop over all cells
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    for (int ix = extRgn.getLower(0); ix < extRgn.getUpper(0); ix++)
     {
       idx[0] = ix;
 
-      for (int iv = globalRgn.getLower(1); iv < globalRgn.getUpper(1); iv++)
+      for (int iv = extRgn.getLower(1); iv < extRgn.getUpper(1); iv++)
       {
         // Set inputs
         aIn.setPtr(aPtr, ix, iv);
