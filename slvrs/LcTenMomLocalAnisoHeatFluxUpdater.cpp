@@ -20,7 +20,7 @@ namespace Lucee
   static const unsigned T22 = 3;
   static const unsigned T23 = 4;
   static const unsigned T33 = 5;
-// indices for magentic field
+// indices for magnetic field
   static const unsigned BX = 3;
   static const unsigned BY = 4;
   static const unsigned BZ = 5;
@@ -40,7 +40,7 @@ namespace Lucee
 // this may need more clever selection
     eps = 1e-14;
     if (B0>0)
-      eps = B0*1e-6;
+      eps = std::fabs(B0)*1e-6;
   }
 
   template <unsigned NDIM>
@@ -61,10 +61,11 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& emField = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& tmFluid = this->getOut<Lucee::Field<NDIM, double> >(0);
     Lucee::FieldPtr<double> ptr = tmFluid.createPtr();
-    Lucee::ConstFieldPtr<double> emPtr = tmFluid.createConstPtr();
+    Lucee::ConstFieldPtr<double> emPtr = emField.createConstPtr();
     int idx[NDIM];
 
     double N[6], T[6], cgl[6], p[6], u[3];
+    eps = 0.0;
     double e3 = eps/3.0;
 
     Lucee::Region<NDIM, int> localRgn = tmFluid.getRegion();
@@ -75,7 +76,7 @@ namespace Lucee
       tmFluid.setPtr(ptr, idx);
       emField.setPtr(emPtr, idx);
 
-      double bNorm = emPtr[BX]*emPtr[BX]+emPtr[BY]*emPtr[BY]+emPtr[BZ]*emPtr[BZ];
+      double bNorm = emPtr[BX]*emPtr[BX] + emPtr[BY]*emPtr[BY] + emPtr[BZ]*emPtr[BZ];
 // construct needed tensors: N projects pressure to parallel
 // direction, T to perpendicular direction. The eps terms ensure that
 // in the absence of a magnetic field the relaxation is isotropic.
@@ -87,30 +88,30 @@ namespace Lucee
       N[T33] = (emPtr[BZ]*emPtr[BZ] + e3)/(bNorm+eps);
 
       T[T11] = 1-N[T11];
-      T[T12] = -N[T12];
-      T[T13] = -N[T13];
+      T[T12] = 0-N[T12];
+      T[T13] = 0-N[T13];
       T[T22] = 1-N[T22];
-      T[T23] = -N[T23];
+      T[T23] = 0-N[T23];
       T[T33] = 1-N[T33];
 
       double r = ptr[0];
       u[0] = ptr[1]/r;
       u[1] = ptr[2]/r;
       u[2] = ptr[3]/r;
-      p[T11] = ptr[4]-r*u[0]*u[0];
-      p[T12] = ptr[5]-r*u[0]*u[1];
-      p[T13] = ptr[6]-r*u[0]*u[2];
-      p[T22] = ptr[7]-r*u[1]*u[1];
-      p[T23] = ptr[8]-r*u[1]*u[2];
-      p[T33] = ptr[9]-r*u[2]*u[2];
+      p[T11] = ptr[4] - r*u[0]*u[0];
+      p[T12] = ptr[5] - r*u[0]*u[1];
+      p[T13] = ptr[6] - r*u[0]*u[2];
+      p[T22] = ptr[7] - r*u[1]*u[1];
+      p[T23] = ptr[8] - r*u[1]*u[2];
+      p[T33] = ptr[9] - r*u[2]*u[2];
 
       double pr = (p[T11]+p[T22]+p[T33])/3;
       double vt = std::sqrt(pr/r);
       double edt = std::exp(-vt*kA*dt);
 
 // compute p_par and p_perp
-      double p_par = p[T11]*N[T11]+p[T22]*N[T22]+p[T33]*N[T33]
-        +2*(p[T12]*N[T12]+p[T13]*N[T13]+p[T23]*N[T23]);
+      double p_par = p[T11]*N[T11] + p[T22]*N[T22] + p[T33]*N[T33]
+        + 2*(p[T12]*N[T12] + p[T13]*N[T13] + p[T23]*N[T23]);
       double p_per = 0.5*(3*pr-p_par);
 
 // construct CGL part of pressure tensor (this remains invariant under
