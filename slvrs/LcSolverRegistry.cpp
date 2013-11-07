@@ -20,6 +20,7 @@
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcElectromagneticAUpdater.h>
+#include <LcElectromagneticAForcingUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectromagneticMomentsAtEdgesUpdater.h>
 #include <LcElectrostaticPhiUpdater.h>
@@ -115,6 +116,7 @@ namespace Lucee
       .append<Lucee::KineticTotalEnergyUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
+      .append<Lucee::ElectromagneticAForcingUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()
       .append<Lucee::ElectrostaticPhiUpdater>()
