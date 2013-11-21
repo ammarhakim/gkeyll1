@@ -3,21 +3,11 @@ load(orthopoly);
 
 eta(x) := 2*x/dx;
 
-/** Function to make matrix of coefficients */
-makeTaylorMat(n) := block([Tmat],
-  Tmat : (Tmat : zeromatrix(n,n), 
-         for i from 0 thru n-1
-	   do (for j from 0 thru n-1
-	     do (Tmat[i+1,j+1] : integrate(x^j*legendre_p(i,eta(x))/factorial(j), x, -dx/2, dx/2))),
-           Tmat),
-  return (Tmat));
+/** Expansion in Legendre polynomials */
+u(x,pm) := sum(c(k)*legendre_p(k,eta(x)), k, 0, pm);
 
-/** Make RHS */
-makeRhsMat(n) := block([RHS],
-  RHS : (RHS : diagmatrix(n,1),
-         for i from 0 thru n-1
-           do (RHS[i+1,i+1] : 2/(2*i+1)*dx/2),
-         RHS),
-  return (RHS));
+/** Expansion in Taylor series */
+fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, pm);
+
 
 
