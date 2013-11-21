@@ -22,7 +22,7 @@ namespace Lucee
   static const double ELEMENTARY_CHARGE = 1.602176565e-19; // C
   static const double BOLTZMANN_CONSTANT = 1.3806488e-23; // J/K
   static const double EPSILON0 = 8.854187817e-12; // F/m
-  static const double MU0 = 2.566370614e-7; // H/m
+  static const double MU0 = 12.566370614e-7; // H/m
   static const double EV2KELVIN = 1.1604519e4; // eV/K
 }
 
