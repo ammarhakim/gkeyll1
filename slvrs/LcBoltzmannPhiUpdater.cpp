@@ -56,6 +56,14 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
       throw Lucee::Except("BoltzmannPhiUpdater::readInput: Must specify element to use using 'basis'");
+
+    elcTempProvided = false;
+    // Check to see if T_e is being supplied. Otherwise use T_e = <T_i>
+    if (tbl.hasNumber("elcTemp"))
+    {
+      elcTempProvidedValue = tbl.getNumber("elcTemp");
+      elcTempProvided = true;
+    }
   }
 
   void 
@@ -172,10 +180,7 @@ namespace Lucee
     double phiS = -Te/elementaryCharge*log(sqrt(2*PI)*ionFluxAtEdge/(nEdge*vThermElec));
 
     if (nEdge < 0.0)
-    {
       throw Lucee::Except("BoltzmannPhiUpdater::update: nEdge is negative!");
-    }
-
 
     // Loop over all cells
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
@@ -195,17 +200,21 @@ namespace Lucee
       // Compute projection of ln(n_i(x)/nEdge) onto basis functions
       for (int componentIndex = 0; componentIndex < phiAtQuadPoints.rows(); componentIndex++)
       {
-        //if (phiAtQuadPoints(componentIndex) < 0.0)
-        //  throw Lucee::Except("BoltzmannPhiUpdater::update: n at quad point is negative!");
-        phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge) + phiS);
-        //phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge));
+        // Note: not adding phiS if elcTemp is provided because unclear how sheath potential should be set
+        // for ion acoustic problem with periodic bc's
+        if (elcTempProvided == true)
+          phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(elcTempProvidedValue*std::log(phiAtQuadPoints(componentIndex)/nEdge));
+        else
+          phiAtQuadPoints(componentIndex) = gaussWeights[componentIndex]*(meanVtSq*ionMass/elementaryCharge*std::log(phiAtQuadPoints(componentIndex)/nEdge) + phiS);
       }
 
       Eigen::VectorXd phiWeights = massMatrixInv*interpMatrixTranspose*phiAtQuadPoints;
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+      {
         phiPtr[componentIndex] = phiWeights(componentIndex);
+      }
     }
 
     return Lucee::UpdaterStatus();

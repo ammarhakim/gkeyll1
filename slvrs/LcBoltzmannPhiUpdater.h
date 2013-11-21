@@ -81,6 +81,10 @@ namespace Lucee
       double ionMass;
 /** Elementary charge */
       double elementaryCharge;
+/** Flag indiciting if T_e in eV provided */
+      bool elcTempProvided;
+/** Value of optional T_e in eV provided */
+      double elcTempProvidedValue;
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)

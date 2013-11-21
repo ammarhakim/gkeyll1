@@ -36,8 +36,8 @@ def findRoot(z0,T_ratio,tol):
     return root
 
 # Number of points to calculate damping rate at
-nPoints = 100;
-T_ratio_list = linspace(0.1,2.5,nPoints) # Ti/Te
+nPoints = 1;
+T_ratio_list = [0.25] # Ti/Te
 dampingRates = zeros(nPoints);
 
 # Initial guess for z0
@@ -51,30 +51,32 @@ for index, T_ratio in enumerate(T_ratio_list):
         print 'Did not find root for T_ratio = %05f' % T_ratio
         break
     else:
-        dampingRates[index] = -z0.imag;
+        dampingRates[index] = z0.real;
+
+print dampingRates
 
 # Import growth rates from input file
-dat = loadtxt('simGrowthRates.txt')
-simTempRatios = dat[1:,0]
-simDampRates  = dat[1:,1:]
-simVPoints    = dat[0,1:]
+#dat = loadtxt('simGrowthRates.txt')
+#simTempRatios = dat[1:,0]
+#simDampRates  = dat[1:,1:]
+#simVPoints    = dat[0,1:]
 
-rc('text', usetex=True)
-plt.semilogy(T_ratio_list,dampingRates,'m-',label='Exact')
+#rc('text', usetex=True)
+#plt.semilogy(T_ratio_list,dampingRates,'m-',label='Exact')
 
 # Plot the different simulation-derived points at the various velocity
 # resolutions
-for index, vRes in enumerate(simVPoints):
+#for index, vRes in enumerate(simVPoints):
   # Divide simDampRates by two to get field energy damp rates
-  yPoints = simDampRates[:,index]*0.5/(sqrt(2)*1.0*0.5)
-  plt.semilogy(simTempRatios,yPoints,marker='o',linestyle='None',label=str(vRes))
+#  yPoints = simDampRates[:,index]*0.5/(sqrt(2)*1.0*0.5)
+#  plt.semilogy(simTempRatios,yPoints,marker='o',linestyle='None',label=str(vRes))
 
 # plt.xlim(simTempRatios[0],simTempRatios[-1])
-plt.xlabel(r'$T = T_i/T_e$')
-plt.ylabel('Normalized Damping Rate ($\gamma/\sqrt{2} v_t k$)')
-plt.legend(loc='lower right')
+#plt.xlabel(r'$T = T_i/T_e$')
+#plt.ylabel('Normalized Damping Rate ($\gamma/\sqrt{2} v_t k$)')
+#plt.legend(loc='lower right')
 #plt.autoscale(enable=True,axis='y',tight=True)
-plt.ylim(0.01,1.0)
-plt.savefig('ericIonSoundDampingRatesNew.png')
-plt.show()
-plt.close()
+#plt.ylim(0.01,1.0)
+#plt.savefig('ericIonSoundDampingRatesNew.png')
+#plt.show()
+#plt.close()
