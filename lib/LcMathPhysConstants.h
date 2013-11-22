@@ -7,23 +7,32 @@
 #ifndef LC_MATH_PHYS_CONSTANTS_H
 #define LC_MATH_PHYS_CONSTANTS_H
 
+// boost includes
+#include <boost/math/constants/constants.hpp>
+#include <boost/units/cmath.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+
+// make extracting value from Boost constants easier
+#define _LCGBV(v) v.value().value()
+
 namespace Lucee
 {
 // math constants
-  static const double PI = 3.14159265358979323846264338328;
-  static const double E = 2.71828182845904523536028747135;
-  static const double EULER = 0.57721566490153286060651209008;
+  static const double PI = boost::math::double_constants::pi;
+  static const double E = boost::math::double_constants::e;
+  static const double EULER = boost::math::double_constants::euler;
 
 // physical constants
-  static const double SPEED_OF_LIGHT = 2.99792458e8; // m / s
-  static const double PLANCKS_CONSTANT_H = 6.62606896e-34; // kg m^2 / s
-  static const double ELECTRON_MASS = 9.10938188e-31; // kg
-  static const double PROTON_MASS = 1.672621777e-27; // kg
-  static const double ELEMENTARY_CHARGE = 1.602176565e-19; // C
-  static const double BOLTZMANN_CONSTANT = 1.3806488e-23; // J/K
-  static const double EPSILON0 = 8.854187817e-12; // F/m
-  static const double MU0 = 12.566370614e-7; // H/m
-  static const double EV2KELVIN = 1.1604519e4; // eV/K
+  static const double SPEED_OF_LIGHT = _LCGBV(boost::units::si::constants::codata::c);
+  static const double PLANCKS_CONSTANT_H = _LCGBV(boost::units::si::constants::codata::h);
+  static const double ELECTRON_MASS = _LCGBV(boost::units::si::constants::codata::m_e);
+  static const double PROTON_MASS = _LCGBV(boost::units::si::constants::codata::m_p);
+  static const double ELEMENTARY_CHARGE = _LCGBV(boost::units::si::constants::codata::e);
+  static const double BOLTZMANN_CONSTANT = _LCGBV(boost::units::si::constants::codata::k_B);
+  static const double EPSILON0 = _LCGBV(boost::units::si::constants::codata::epsilon_0);
+  static const double MU0 = _LCGBV(boost::units::si::constants::codata::mu_0);
+  static const double EV2KELVIN = 1.1604519e4;
 }
 
 #endif // LC_MATH_PHYS_CONSTANTS_H
