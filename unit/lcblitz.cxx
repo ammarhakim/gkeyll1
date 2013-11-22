@@ -7,6 +7,13 @@
 // blitz inlcudes
 #include <blitz/array.h>
 
+// boost includes
+#include <boost/units/cmath.hpp>
+#include <boost/units/io.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si/io.hpp>
+
 // std includes
 #include <cstdlib>
 #include <iostream>
@@ -72,6 +79,26 @@ test_5()
   std::cout << shape << std::endl;
 }
 
+template <class Y>
+double
+getBoostValue(const boost::units::constant<Y>& val)
+{
+  typedef typename Y::value_type value_type;
+  return val.value().value();
+}
+
+void
+test_6()
+{
+  using namespace boost::units;
+  using namespace boost::units::si;
+  quantity<electric_charge> elcCharge = boost::units::si::constants::codata::e;
+  std::cout << elcCharge << std::endl;
+  double v = getBoostValue(boost::units::si::constants::codata::e);
+  std::cout << v << std::endl;
+  std::cout << boost::units::si::constants::codata::e.value().value() << std::endl;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -80,5 +107,6 @@ main(int argc, char *argv[])
   test_3();
   test_4();
   test_5();
+  test_6();
   return 0;
 }
