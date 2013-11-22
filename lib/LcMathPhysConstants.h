@@ -29,10 +29,10 @@ namespace Lucee
   static const double ELECTRON_MASS = _LCGBV(boost::units::si::constants::codata::m_e);
   static const double PROTON_MASS = _LCGBV(boost::units::si::constants::codata::m_p);
   static const double ELEMENTARY_CHARGE = _LCGBV(boost::units::si::constants::codata::e);
-  static const double BOLTZMANN_CONSTANT = _LCGBV(boost::units::si::constants::codata::k_B);
+  static const double BOLTZMANN_CONSTANT = 1.3806488e-23;
   static const double EPSILON0 = _LCGBV(boost::units::si::constants::codata::epsilon_0);
   static const double MU0 = _LCGBV(boost::units::si::constants::codata::mu_0);
-  static const double EV2KELVIN = 1.1604519e4;
+  static const double EV2KELVIN = ELEMENTARY_CHARGE/BOLTZMANN_CONSTANT;
 }
 
 #endif // LC_MATH_PHYS_CONSTANTS_H
