@@ -60,18 +60,25 @@ namespace Lucee
       .append<Lucee::CenterOfMassUpdater<1> >()
       .append<Lucee::CenterOfMassUpdater<2> >()
       .append<Lucee::CenterOfMassUpdater<3> >()
+
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
-      .append<Lucee::EnstrophyUpdater>()
+
+      .append<Lucee::EnstrophyUpdater<1> >()
+      .append<Lucee::EnstrophyUpdater<2> >()
+      .append<Lucee::EnstrophyUpdater<3> >()
+
       .append<Lucee::IntegrateFieldAlongLine<1> >()
       .append<Lucee::IntegrateFieldAlongLine<2> >()
       .append<Lucee::IntegrateFieldAlongLine<3> >()
+
       .append<Lucee::IntegrateNodalField<1> >()
       .append<Lucee::IntegrateNodalField<2> >()
       .append<Lucee::IntegrateNodalField<3> >()
+
       .append<Lucee::MaxwellTm2DUpdater>()
       .append<Lucee::ModalDg1DDiffusionUpdater>()
       .append<Lucee::ModalDg1DHyperDiffusionUpdater>()
@@ -81,10 +88,13 @@ namespace Lucee
       .append<Lucee::ModalDgLimiter1DUpdater>()
       .append<Lucee::ModalL2NormUpdater>()
       .append<Lucee::MusclHancock1DUpdater>()
+
       .append<Lucee::NodalGradientUpdater<1> >()
       .append<Lucee::NodalGradientUpdater<2> >()
       .append<Lucee::NodalGradientUpdater<3> >()
+
       .append<Lucee::NodalPoissonBracketUpdater>()
+
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
       .append<Lucee::NormGradPhiUpdater<3> >()
@@ -100,6 +110,7 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+
       .append<Lucee::SheathParticleSource1x1v>();
 
 #ifdef HAVE_PETSC

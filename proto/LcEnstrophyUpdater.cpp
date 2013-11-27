@@ -22,42 +22,50 @@
 
 namespace Lucee
 {
-  const char *EnstrophyUpdater::id = "TotalEnstrophy";
+  template <> const char *EnstrophyUpdater<1>::id = "TotalEnstrophy1D";
+  template <> const char *EnstrophyUpdater<2>::id = "TotalEnstrophy"; // NOTE: this is for backward compatibility
+  template <> const char *EnstrophyUpdater<3>::id = "TotalEnstrophy3D";
 
-  EnstrophyUpdater::EnstrophyUpdater()
+  template <unsigned NDIM>
+  EnstrophyUpdater<NDIM>::EnstrophyUpdater()
     : Lucee::UpdaterIfc()
   {
   }
   
+  template <unsigned NDIM>
   void
-  EnstrophyUpdater::readInput(Lucee::LuaTable& tbl)
+  EnstrophyUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
 // get hold of element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("NodalFiniteElementIfc::readInput: Must specify element to use using 'basis'");
   }
 
+  template <unsigned NDIM>
   void
-  EnstrophyUpdater::initialize()
+  EnstrophyUpdater<NDIM>::initialize()
   {
 // call base class method
     Lucee::UpdaterIfc::initialize();
 
 // get hold of grid
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
 // local region to update
-    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
+    int idx[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+      idx[d] = localRgn.getLower(d);
 // set index to first location in grid (this is okay as in this
 // updater we are assuming grid is uniform)
-    nodalBasis->setIndex(localRgn.getLower(0), localRgn.getLower(1));
+    nodalBasis->setIndex(idx);
 
     unsigned nVol = nodalBasis->getNumGaussNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
@@ -70,19 +78,20 @@ namespace Lucee
     nodalBasis->getGaussQuadData(interpMat.m, ordinates.m, weights);
   }
 
+  template <unsigned NDIM>
   Lucee::UpdaterStatus
-  EnstrophyUpdater::update(double t)
+  EnstrophyUpdater<NDIM>::update(double t)
   {
 // get hold of grid
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 // get input arrays
-    const Lucee::Field<2, double>& chi = this->getInp<Lucee::Field<2, double> >(0);
+    const Lucee::Field<NDIM, double>& chi = this->getInp<Lucee::Field<NDIM, double> >(0);
 // get output dynVector
     Lucee::DynVector<double>& enstrophy = this->getOut<Lucee::DynVector<double> >(0);
 
 // local region to update
-    Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
 // number of ordinates for volume integral
     unsigned nVol = nodalBasis->getNumGaussNodes();
@@ -94,22 +103,23 @@ namespace Lucee
 // space for various quantities
     std::vector<double> quadChi(nVol);
 
+    int idx[NDIM];
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+
     double totalEnstrophy = 0.0;
 // compute total enstrophy
-    for (int ix=localRgn.getLower(0); ix<localRgn.getUpper(0); ++ix)
+    while (seq.step())
     {
-      for (int iy=localRgn.getLower(1); iy<localRgn.getUpper(1); ++iy)
-      {
-        nodalBasis->setIndex(ix, iy);
-        chi.setPtr(chiPtr, ix, iy);
+      seq.fillWithIndex(idx);
+
+      nodalBasis->setIndex(idx);
+      chi.setPtr(chiPtr, idx);
 
 // compute vorticity at quadrature nodes
-        matVec(1.0, interpMat.m, &chiPtr[0], 0.0, &quadChi[0]);
-
-// compute contribition to enstrophy from this cell
-        for (unsigned k=0; k<nVol; ++k)
-          totalEnstrophy += weights[k]*quadChi[k]*quadChi[k];
-      }
+      matVec(1.0, interpMat.m, &chiPtr[0], 0.0, &quadChi[0]);
+// compute contribution to enstrophy from this cell
+      for (unsigned k=0; k<nVol; ++k)
+        totalEnstrophy += weights[k]*quadChi[k]*quadChi[k];
     }
 
     double netTotalEnstrophy = totalEnstrophy;
@@ -127,15 +137,17 @@ namespace Lucee
     return Lucee::UpdaterStatus();
   }
 
+  template <unsigned NDIM>
   void
-  EnstrophyUpdater::declareTypes()
+  EnstrophyUpdater<NDIM>::declareTypes()
   {
-    this->appendInpVarType(typeid(Lucee::Field<2, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
+  template <unsigned NDIM>
   void 
-  EnstrophyUpdater::matVec(double m, const Lucee::Matrix<double>& mat,
+  EnstrophyUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
     const double* vec, double v, double *out)
   {
     double tv;
@@ -148,4 +160,9 @@ namespace Lucee
       out[i] = m*tv + v*out[i];
     }
   }
+
+// instantiations
+  template class EnstrophyUpdater<1>;
+  template class EnstrophyUpdater<2>;
+  template class EnstrophyUpdater<3>;
 }

@@ -20,6 +20,7 @@ endif (PETSC_FOUND)
 set (proto_SOURCES
   LcCenterOfMassUpdater.cpp
   LcCopy1DTo2DNodalField.cpp
+  LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
