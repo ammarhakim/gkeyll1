@@ -1,11 +1,11 @@
 /**
- * @file	LcEnstrophyUpdater.h
+ * @file	LcDGDiffusionUpdater1D.h
  *
- * @brief	Updater to compute energy from streamfunction.
+ * @brief	Updater to evaluate (hyper)diffusion operators using nodal DG
  */
 
-#ifndef LC_ENSTROPHY_UPDATER_H
-#define LC_ENSTROPHY_UPDATER_H
+#ifndef LC_DG_DIFFUSION_UPDATER_1D_H
+#define LC_DG_DIFFUSION_UPDATER_1D_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,25 +13,34 @@
 #endif
 
 // lucee includes
-#include <LcDynVector.h>
-#include <LcField.h>
-#include <LcNodalFiniteElementIfc.h>
+#include <LcStructGridField.h>
 #include <LcUpdaterIfc.h>
+
+// std includes
+#include <vector>
 
 namespace Lucee
 {
 /**
- * Updater to compute total energy in domain given the streamfunction.
+ * Updater to evaluate diffusion operator using a DG scheme. This
+ * updater hard-codes a bunch of stencils for various schemes, and can
+ * be used to test the efficacy of these schemes.
  */
-  template <unsigned NDIM>
-  class EnstrophyUpdater : public Lucee::UpdaterIfc
+  class DGDiffusionUpdater1D : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new modal DG solver in 1D */
-      EnstrophyUpdater();
+/**
+ * Create new updater.
+ */
+      DGDiffusionUpdater1D();
+
+/**
+ * Destroy updater.
+ */
+      ~DGDiffusionUpdater1D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -66,27 +75,22 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
-
-/**
- * Matrix holder: this class is needed as the Matrix class does not
- * have a default constructor.
- */
-      struct MatrixHolder
-      {
-/** Ctor */
-          MatrixHolder() : m(1, 1) {}
-/** Differentiation matrix */
-          Lucee::Matrix<double> m;
-      };
-
-/** Interpolation matrix */
-      MatrixHolder interpMat;
-/** Weights for quadrature */
-      std::vector<double> weights;
-/** Ordinates for quadrature */
-      MatrixHolder ordinates;
+/** Diffusion coefficient */
+      double alpha;
+/** CFL number */
+      double cfl;
+/** Flag to indicate if to compute only increments */
+      bool onlyIncrement;
+/** Polynomial order */
+      int polyOrder;
+/** Tyep of scheme to use */
+      unsigned schemeType;
+/** Matrix for current cell */
+      Lucee::Matrix<double> iMat;
+/** Matrix for left cell */
+      Lucee::Matrix<double> lowerMat;
+/** Matrix for upper cell */
+      Lucee::Matrix<double> upperMat;
 
 /**
  * Compute matrix-vector multiply. Output vector must be
@@ -105,4 +109,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_ENSTROPHY_UPDATER_H
+#endif // LC_DG_DIFFUSION_UPDATER_1D_H
