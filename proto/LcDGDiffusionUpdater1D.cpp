@@ -70,6 +70,10 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::initialize();
 
+    const Lucee::StructuredGridBase<1>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    double dx = grid.getDx(0);
+
 // allocate space
     unsigned nlocal = polyOrder+1;
     iMat = Lucee::Matrix<double>(nlocal, nlocal);
@@ -77,6 +81,14 @@ namespace Lucee
     upperMat = Lucee::Matrix<double>(nlocal, nlocal);
 
 // set matrices
+    if (schemeType == SC_LDG)
+      calcLDGStencil(dx);
+    else if (schemeType == SC_SLDG)
+      calcSLDGStencil(dx);
+    else if (schemeType == SC_RDG)
+      calcRDGStencil(dx);
+    else
+    { /* Can not happen */ }
   }
 
   Lucee::UpdaterStatus
@@ -159,6 +171,90 @@ namespace Lucee
       for (unsigned j=0; j<cols; ++j)
         tv += mat(i,j)*vec[j];
       out[i] = m*tv + v*out[i];
+    }
+  }
+
+  void
+  DGDiffusionUpdater1D::calcLDGStencil(double dx)
+  {
+    double dx2 = dx*dx;
+
+    if (polyOrder == 1)
+    {
+      lowerMat(0,0) = 4/dx2;
+      lowerMat(0,1) = 2/dx2;
+      lowerMat(1,0) = -12/dx2;
+      lowerMat(1,1) = -6/dx2;
+
+      iMat(0,0) = -8/dx2;
+      iMat(0,1) = 2/dx2;
+      iMat(1,0) = 6/dx2;
+      iMat(1,1) = -24/dx2;
+
+      upperMat(0,0) = 4/dx2;
+      upperMat(0,1) = -4/dx2;
+      upperMat(1,0) = 6/dx2;
+      upperMat(1,1) = -6/dx2;
+    }
+    else
+    {
+      throw Lucee::Except("DGDiffusionUpdater1D::calcLDGStencil: Only polyOrder 1 is supported!");
+    }
+  }
+
+  void
+  DGDiffusionUpdater1D::calcSLDGStencil(double dx)
+  {
+    double dx2 = dx*dx;
+
+    if (polyOrder == 1)
+    {
+      lowerMat(0,0) = 4/dx2;
+      lowerMat(0,1) = 3/dx2;
+      lowerMat(1,0) = -9/dx2;
+      lowerMat(1,1) = -6/dx2;
+
+      iMat(0,0) = -8/dx2;
+      iMat(0,1) = 0;
+      iMat(1,0) = 0;
+      iMat(1,1) = -24/dx2;
+
+      upperMat(0,0) = 4/dx2;
+      upperMat(0,1) = -3/dx2;
+      upperMat(1,0) = 9/dx2;
+      upperMat(1,1) = -6/dx2;
+    }
+    else
+    {
+      throw Lucee::Except("DGDiffusionUpdater1D::calcSLDGStencil: Only polyOrder 1 is supported!");
+    }
+  }
+
+  void
+  DGDiffusionUpdater1D::calcRDGStencil(double dx)
+  {
+    double dx2 = dx*dx;
+
+    if (polyOrder == 1)
+    {
+      lowerMat(1,1) = 9.0/(4.0*dx2);
+      lowerMat(1,2) = 5.0/(4.0*dx2);
+      lowerMat(2,1) = (-15.0)/(4.0*dx2);
+      lowerMat(2,2) = (-7.0)/(4.0*dx2);
+
+      iMat(1,1) = (-9.0)/(2.0*dx2);
+      iMat(1,2) = 0;
+      iMat(2,1) = 0;
+      iMat(2,2) = (-23.0)/(2.0*dx2);
+
+      upperMat(1,1) = 9.0/(4.0*dx2);
+      upperMat(1,2) = (-5.0)/(4.0*dx2);
+      upperMat(2,1) = 15.0/(4.0*dx2);
+      upperMat(2,2) = (-7.0)/(4.0*dx2);
+    }
+    else
+    {
+      throw Lucee::Except("DGDiffusionUpdater1D::calcRDGStencil: Only polyOrder 1 is supported!");
     }
   }
 }

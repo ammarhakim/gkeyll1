@@ -106,6 +106,27 @@ namespace Lucee
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
         const double* vec, double v, double* out);
+
+/**
+ * Set stencils for LDG scheme 
+ *
+ * @param dx Grid spacing.  
+ */
+      void calcLDGStencil(double dx);
+
+/**
+ * Set stencils for SLDG scheme 
+ *
+ * @param dx Grid spacing.  
+ */
+      void calcSLDGStencil(double dx);
+
+/**
+ * Set stencils for RDG scheme 
+ *
+ * @param dx Grid spacing.  
+ */
+      void calcRDGStencil(double dx);
   };
 }
 
