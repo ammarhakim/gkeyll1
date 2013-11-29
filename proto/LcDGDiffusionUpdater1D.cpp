@@ -118,7 +118,7 @@ namespace Lucee
     }
     else
     {
-// updater computes inpFld + dt*alpha*d^2/dx^x inpFld
+// updater computes inpFld + dt*alpha*d^2/dx^2 inpFld
       diffOut.copy(inpFld);
       fact = alpha*dt;
     }
@@ -126,7 +126,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> inpFldPtr = inpFld.createConstPtr();
     Lucee::FieldPtr<double> diffOutPtr = diffOut.createPtr();
 
-    int idx[1], idxL[1];
+    int idx[1], idxL[1], idxR[1];
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
     Lucee::RowMajorSequencer<1> seq(localRgn);
@@ -144,8 +144,8 @@ namespace Lucee
       inpFld.setPtr(inpFldPtr, idxL);
       matVec(fact, lowerMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
-      idxL[0] = idx[0]+1; // cell attached to upper face
-      inpFld.setPtr(inpFldPtr, idxL);
+      idxR[0] = idx[0]+1; // cell attached to upper face
+      inpFld.setPtr(inpFldPtr, idxR);
       matVec(fact, upperMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
     }
 
@@ -237,20 +237,20 @@ namespace Lucee
 
     if (polyOrder == 1)
     {
-      lowerMat(1,1) = 9.0/(4.0*dx2);
-      lowerMat(1,2) = 5.0/(4.0*dx2);
-      lowerMat(2,1) = (-15.0)/(4.0*dx2);
-      lowerMat(2,2) = (-7.0)/(4.0*dx2);
+      lowerMat(0,0) = 9.0/(4.0*dx2);
+      lowerMat(0,1) = 5.0/(4.0*dx2);
+      lowerMat(1,0) = (-15.0)/(4.0*dx2);
+      lowerMat(1,1) = (-7.0)/(4.0*dx2);
 
-      iMat(1,1) = (-9.0)/(2.0*dx2);
-      iMat(1,2) = 0;
-      iMat(2,1) = 0;
-      iMat(2,2) = (-23.0)/(2.0*dx2);
+      iMat(0,0) = (-9.0)/(2.0*dx2);
+      iMat(0,1) = 0;
+      iMat(1,0) = 0;
+      iMat(1,1) = (-23.0)/(2.0*dx2);
 
-      upperMat(1,1) = 9.0/(4.0*dx2);
-      upperMat(1,2) = (-5.0)/(4.0*dx2);
-      upperMat(2,1) = 15.0/(4.0*dx2);
-      upperMat(2,2) = (-7.0)/(4.0*dx2);
+      upperMat(0,0) = 9.0/(4.0*dx2);
+      upperMat(0,1) = (-5.0)/(4.0*dx2);
+      upperMat(1,0) = 15.0/(4.0*dx2);
+      upperMat(1,1) = (-7.0)/(4.0*dx2);
     }
     else
     {

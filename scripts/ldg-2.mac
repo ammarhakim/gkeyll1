@@ -39,5 +39,12 @@ wm(j) := w0(j-1)+w1(j-1);
 
 ww(j) := 1/2*(wp(j)+wm(j)) - c12*(wp(j)-wm(j));
 
-q0(j) := -(ww(j+1)-ww(j));
-q1(j) := -3*(ww(j+1)+ww(j)) + 6*w0(j);
+dq0(j) := -(ww(j+1)-ww(j));
+dq1(j) := -3*(ww(j+1)+ww(j)) + 6*w0(j);
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], dq0(j));
+du1T(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], dq1(j));
+
+/** Collect terms */
+Tmat_1 : coefmatrix([du0T(j), du1T(j)], [f0(j),f1(j)]);
