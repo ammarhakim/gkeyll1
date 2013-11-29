@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcCenterOfMassUpdater.h>
 #include <LcCopy1DTo2DNodalField.h>
+#include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
@@ -88,6 +89,7 @@ namespace Lucee
       .append<Lucee::ModalDgLimiter1DUpdater>()
       .append<Lucee::ModalL2NormUpdater>()
       .append<Lucee::MusclHancock1DUpdater>()
+      .append<Lucee::DGDiffusionUpdater1D>()
 
       .append<Lucee::NodalGradientUpdater<1> >()
       .append<Lucee::NodalGradientUpdater<2> >()
