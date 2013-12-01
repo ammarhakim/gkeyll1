@@ -6,13 +6,21 @@ l_Tmat_rdg : subst([Ti=1,I=0,T=0], Tmat_rdg);
 c_Tmat_rdg : subst([Ti=0,I=1,T=0], Tmat_rdg);
 r_Tmat_rdg : subst([Ti=0,I=0,T=1], Tmat_rdg);
 
-Tmat_ldg : 1/dx^2*matrix(
+Tmat_ldg_a : 1/dx^2*matrix(
        [4*Ti-8*I+4*T, 2*Ti+2*I-4*T],
        [-12*Ti+6*I+6*T, -6*Ti-24*I-6*T]);
 
-l_Tmat_ldg : subst([Ti=1,I=0,T=0], Tmat_ldg);
-c_Tmat_ldg : subst([Ti=0,I=1,T=0], Tmat_ldg);
-r_Tmat_ldg : subst([Ti=0,I=0,T=1], Tmat_ldg);
+l_Tmat_a_ldg : subst([Ti=1,I=0,T=0], Tmat_ldg_a);
+c_Tmat_a_ldg : subst([Ti=0,I=1,T=0], Tmat_ldg_a);
+r_Tmat_a_ldg : subst([Ti=0,I=0,T=1], Tmat_ldg_a);
+
+Tmat_ldg_b : 1/dx^2*matrix(
+	[4*T-8*I+4*Ti, -2*T-2*I+4*Ti], 
+        [12*T-6*I-6*Ti, -6*T-24*I-6*Ti]);
+
+l_Tmat_b_ldg : subst([Ti=1,I=0,T=0], Tmat_ldg_b);
+c_Tmat_b_ldg : subst([Ti=0,I=1,T=0], Tmat_ldg_b);
+r_Tmat_b_ldg : subst([Ti=0,I=0,T=1], Tmat_ldg_b);
 
 Tmat_sldg : 1/dx^2*matrix(
        [4*Ti-8*I+4*T, 3*Ti-3*T],

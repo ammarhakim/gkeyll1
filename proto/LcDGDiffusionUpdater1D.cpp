@@ -20,9 +20,8 @@ namespace Lucee
   const char *DGDiffusionUpdater1D::id = "DGDiffusion1D";
 
 // types of supported schemes
-  static const unsigned SC_LDG = 0; // local DG
-  static const unsigned SC_SLDG = 1; // symmetic local DG
-  static const unsigned SC_RDG = 2; // recovery DG
+  enum { SC_LDG_L, SC_LDG_R, SC_LDG_S, SC_RDG };
+
 
   DGDiffusionUpdater1D::DGDiffusionUpdater1D()
   {
@@ -50,17 +49,19 @@ namespace Lucee
 
 // type of scheme
     std::string scm = tbl.getString("scheme");
-    if (scm == "LDG")
-      schemeType = SC_LDG;
-    else if (scm == "SLDG")
-      schemeType = SC_SLDG;
+    if (scm == "LDG-L")
+      schemeType = SC_LDG_L;
+    else if (scm == "LDG-R")
+      schemeType = SC_LDG_R;
+    else if (scm == "LDG-S")
+      schemeType = SC_LDG_S;
     else if (scm == "RDG")
       schemeType = SC_RDG;
     else
     {
       Lucee::Except lce("DGDiffusionUpdater1D::readInput: unrecongnized scheme '");
       lce << scm << "'."
-          << " Must be one of 'LDG', 'SLDG' or 'RDG'";
+          << " Must be one of 'LDG-L', 'LDG-R', 'LDG-S' or 'RDG'";
       throw lce;
     }
   }
@@ -81,14 +82,24 @@ namespace Lucee
     upperMat = Lucee::Matrix<double>(nlocal, nlocal);
 
 // set matrices
-    if (schemeType == SC_LDG)
-      calcLDGStencil(dx);
-    else if (schemeType == SC_SLDG)
-      calcSLDGStencil(dx);
-    else if (schemeType == SC_RDG)
-      calcRDGStencil(dx);
-    else
-    { /* Can not happen */ }
+    switch (schemeType)
+    {
+      case SC_LDG_L:
+          calcLDGLStencil(dx);
+          break;
+      case SC_LDG_R:
+          calcLDGRStencil(dx);
+          break;
+      case SC_LDG_S:
+          calcLDGSStencil(dx);
+          break;
+      case SC_RDG:
+          calcRDGStencil(dx);
+          break;
+      default:
+          // can not happen
+          ;
+    }
   }
 
   Lucee::UpdaterStatus
@@ -105,7 +116,7 @@ namespace Lucee
 
 // check time-step
     double cflm = 1.1*cfl;
-    double cfla = alpha*dt/(dxMin*dxMin);
+    double cfla = 2.0*alpha*dt/(dxMin*dxMin);
     if (cfla>cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
@@ -175,7 +186,7 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcLDGStencil(double dx)
+  DGDiffusionUpdater1D::calcLDGLStencil(double dx)
   {
     double dx2 = dx*dx;
 
@@ -203,7 +214,35 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcSLDGStencil(double dx)
+  DGDiffusionUpdater1D::calcLDGRStencil(double dx)
+  {
+    double dx2 = dx*dx;
+
+    if (polyOrder == 1)
+    {
+      lowerMat(0,0) = 4/dx2;
+      lowerMat(0,1) = 4/dx2;
+      lowerMat(1,0) = -6/dx2;
+      lowerMat(1,1) = -6/dx2;
+
+      iMat(0,0) = -8/dx2;
+      iMat(0,1) = -2/dx2;
+      iMat(1,0) = -6/dx2;
+      iMat(1,1) = -24/dx2;
+
+      upperMat(0,0) = 4/dx2;
+      upperMat(0,1) = -2/dx2;
+      upperMat(1,0) = 12/dx2;
+      upperMat(1,1) = -6/dx2;
+    }
+    else
+    {
+      throw Lucee::Except("DGDiffusionUpdater1D::calcLDGStencil: Only polyOrder 1 is supported!");
+    }
+  }
+
+  void
+  DGDiffusionUpdater1D::calcLDGSStencil(double dx)
   {
     double dx2 = dx*dx;
 

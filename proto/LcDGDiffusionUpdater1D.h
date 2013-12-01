@@ -108,18 +108,25 @@ namespace Lucee
         const double* vec, double v, double* out);
 
 /**
- * Set stencils for LDG scheme 
+ * Set stencils for LDG-L scheme 
  *
  * @param dx Grid spacing.  
  */
-      void calcLDGStencil(double dx);
+      void calcLDGLStencil(double dx);
 
 /**
- * Set stencils for SLDG scheme 
+ * Set stencils for LDG-R scheme 
  *
  * @param dx Grid spacing.  
  */
-      void calcSLDGStencil(double dx);
+      void calcLDGRStencil(double dx);
+
+/**
+ * Set stencils for LDG-S scheme 
+ *
+ * @param dx Grid spacing.  
+ */
+      void calcLDGSStencil(double dx);
 
 /**
  * Set stencils for RDG scheme 
