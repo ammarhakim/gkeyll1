@@ -64,7 +64,7 @@ for index, n_val in enumerate(nSim):
   betaSim[index] = nSim[index]*2*mu0*Te0*eV/(B**2)
 
 #rc('text', usetex=True)
-plt.semilogx(beta_e_list, freqList,'m-',label='Exact')
+plt.semilogx(beta_e_list, freqList,'g-',label='Better Approx')
 plt.semilogx(beta_e_list, approxFreqList,'b-',label='Approx')
 plt.semilogx(betaSim, omegaSim,'r-o',label='Simulation')
 

@@ -209,13 +209,14 @@ namespace Lucee
       Eigen::VectorXd rhsComplete = massMatrix*rhsVecPart1 + rhsPart2Projections*aForcedVec;
       Eigen::VectorXd aWeights = massMatrixInv*rhsComplete;
 
+      /*
       // Extra step to rescale A^{n+1} using A_out to test stability
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
       {
         double aScaledValue = 1.0/(1.0 + mu0*elcCharge*elcCharge*mom0ElcPtr[componentIndex]/(elcMass*elcMass*kPerp*kPerp)
             + mu0*ionCharge*ionCharge*mom0IonPtr[componentIndex]/(ionMass*ionMass*kPerp*kPerp) )*aWeights(componentIndex);
         aWeights(componentIndex) = aScaledValue;
-      }
+      }*/
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)

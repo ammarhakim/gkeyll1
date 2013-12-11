@@ -46,6 +46,7 @@
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
+#include <LcMHDHamiltonianUpdater.h>
 #include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
@@ -114,6 +115,7 @@ namespace Lucee
       .append<Lucee::KineticEnergyUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticTotalEnergyUpdater>()
+      .append<Lucee::MHDHamiltonianUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectromagneticAForcingUpdater>()

@@ -63,6 +63,7 @@ set(lcslvrs_SOURCES
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
+  LcMHDHamiltonianUpdater.cpp
   LcMaxwellEquation.cpp
   LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
