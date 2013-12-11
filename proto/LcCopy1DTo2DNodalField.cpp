@@ -62,6 +62,8 @@ namespace Lucee
         polyOrder = 1;
       else if (fld1d.getNumComponents() == 2)
         polyOrder = 2;
+      else if (fld1d.getNumComponents() == 3)
+        polyOrder = 3;
       else
       {
         Lucee::Except lce("Copy1DTo2DNodalField::update: element not supported");
@@ -101,11 +103,19 @@ namespace Lucee
         {
           if (polyOrder == 1)
             fld2dPtr[0] = fld1dPtr[0];
-          else
+          else if (polyOrder == 2)
           {
             fld2dPtr[0] = fld1dPtr[0];
             fld2dPtr[1] = fld1dPtr[1];
             fld2dPtr[2] = fld1dPtr[0];
+          }
+          else if (polyOrder == 3)
+          {
+            fld2dPtr[0] = fld1dPtr[0];
+            fld2dPtr[1] = fld1dPtr[1];
+            fld2dPtr[2] = fld1dPtr[2];
+            fld2dPtr[3] = fld1dPtr[0];
+            fld2dPtr[4] = fld1dPtr[0];
           }
         }
         else

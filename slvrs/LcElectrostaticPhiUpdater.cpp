@@ -141,6 +141,8 @@ namespace Lucee
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
     double phiS;
+    // Value of dPhi(x) on right boundary
+    double dPhiRight;
 
     if (useCutoffVelocities == true)
     {
@@ -158,7 +160,7 @@ namespace Lucee
     phiPtr = 0.0;
     
     // Loop over all cells
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    for (int ix = globalRgn.getUpper(0)-1; ix >= globalRgn.getLower(0); ix--)
     {
       // Set inputs
       nElcIn.setPtr(nElcPtr, ix);
@@ -190,12 +192,18 @@ namespace Lucee
           phiProjections(basisIndex, colIndex) = phiProjectionsSingle(colIndex);
       }
 
-      // Compute phi(x) weights
+      // Compute phi(x) weights (this is really dPhi(x))
       Eigen::VectorXd phiWeights = phiProjections.inverse()*rhsIntegrals;
 
+      // Set value of dPhi(right edge)
+      if (ix == globalRgn.getUpper(0)-1)
+        dPhiRight = phiPtr[nlocal-1];
+
       // Copy into output pointer
+      // Currently imposing condition that phi(edge) = phi_s by adding
+      // phi_s - dPhi(edge) to all values of dPhi(edge)
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiWeights(componentIndex) + phiS;
+        phiPtr[componentIndex] = phiWeights(componentIndex) + phiS - dPhiRight;
     }
 
     return Lucee::UpdaterStatus();
