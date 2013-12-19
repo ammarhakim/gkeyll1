@@ -197,7 +197,7 @@ namespace Lucee
 
       // Set value of dPhi(right edge)
       if (ix == globalRgn.getUpper(0)-1)
-        dPhiRight = phiPtr[nlocal-1];
+        dPhiRight = phiWeights(nlocal-1);
 
       // Copy into output pointer
       // Currently imposing condition that phi(edge) = phi_s by adding
