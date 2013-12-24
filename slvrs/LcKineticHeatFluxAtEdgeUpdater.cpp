@@ -119,6 +119,9 @@ namespace Lucee
 
     // Find value of the following input fields at the right-most edge of the domain
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
+    // Guide:
+    // momentsAtEdges[0 to 3] mom 0 to 3 on right edge
+    // momentsAtEdges[4 to 7] mom 0 to 3 on left edge
     
     double ionParallelHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[7] + 
       momentsAtEdgesIon[5]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
@@ -157,17 +160,25 @@ namespace Lucee
     {
       Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
       
-      std::vector<double> sheathData(1);
+      std::vector<double> sheathData(3);
 
       double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
         (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
             
       double kTe0 = 1.0/3.0*elcParallelTempRight + 2.0/3.0*ELEMENTARY_CHARGE*tPerpElc;
-      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
       
-      /*
       double ionParallelTempRight = -ionMass*momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/
         (momentsAtEdgesIon[4]*momentsAtEdgesIon[4]) + ionMass*momentsAtEdgesIon[6]/momentsAtEdgesIon[4];
+
+      double kTi0 = 1.0/3.0*ionParallelTempRight + 2.0/3.0*ELEMENTARY_CHARGE*tPerpElc;
+      
+      // Total transmission coefficient
+      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
+      sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[5] );
+      sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[5] );
+      
+      /*
+      
       double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
         (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
 
