@@ -40,14 +40,20 @@ namespace Lucee
   ContFromDisContUpdater<NDIM>::ContFromDisContUpdater()
     : Lucee::UpdaterIfc()
   {
+// this flag is needed to ensure PetSc arrays are only deleted if
+// update() method is called at least once.
+    runOnce = false;
   }
 
   template <unsigned NDIM>
   ContFromDisContUpdater<NDIM>::~ContFromDisContUpdater()
-  { // get rid of stuff
-    MatDestroy(stiffMat);
-    VecDestroy(globalSrc);
-    VecDestroy(initGuess);
+  {
+    if (runOnce)
+    {
+      MatDestroy(stiffMat);
+      VecDestroy(globalSrc);
+      VecDestroy(initGuess);
+    }
   }
 
   template <unsigned NDIM>
@@ -359,6 +365,9 @@ namespace Lucee
   Lucee::UpdaterStatus
   ContFromDisContUpdater<NDIM>::update(double t)
   {
+// set flag to indicate we should delete PetSc vectors/matrices
+    runOnce = true;
+
 // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
