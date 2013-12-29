@@ -20,6 +20,7 @@
 #include <LcEnstrophyUpdater.h>
 #include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateNodalField.h>
+#include <LcLinEmGke1dHamilPertUpdater.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DDiffusionUpdater.h>
 #include <LcModalDg1DHyperDiffusionUpdater.h>
@@ -67,7 +68,7 @@ namespace Lucee
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
-
+    
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
       .append<Lucee::EnstrophyUpdater<3> >()
@@ -112,17 +113,19 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+    
+      .append<Lucee::LinEmGke1dPertHamilUpdater>()
 
       .append<Lucee::SheathParticleSource1x1v>();
 
 #ifdef HAVE_PETSC
-      Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
       .append<Lucee::ContFromDisContUpdater<1> >();
 #endif
 
 #ifdef HAVE_FFTW3
-      Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
       .append<Lucee::PeriodicPoisson2DUpdater>();
 #endif
