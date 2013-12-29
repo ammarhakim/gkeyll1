@@ -28,6 +28,7 @@ set (proto_SOURCES
   LcEnstrophyUpdater.cpp
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateNodalField.cpp
+  LcLinEmGke1dHamilPertUpdater.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
   LcModalDg1DHyperDiffusionUpdater.cpp
