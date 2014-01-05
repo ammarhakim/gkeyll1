@@ -32,6 +32,7 @@
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
+#include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
@@ -115,6 +116,7 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
     
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
+      .append<Lucee::NonLinEmGke1dHamilUpdater>()
 
       .append<Lucee::SheathParticleSource1x1v>();
 
