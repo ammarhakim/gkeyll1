@@ -48,3 +48,16 @@ writeDampRates(fname, kl, ku, steps) := block([sz, fh, kcurr, guess, r],
     kcurr : kcurr + sz
   )
 );
+
+writeOsccDampRates(fname, kl, ku, steps) := block([sz, fh, kcurr, guess, r],
+  sz : (ku-kl)/steps,
+  fh : openw(fname),
+  kcurr : kl,
+  guess : initialGuess(kl), /** One hopes this converges */
+  for s : 0 thru steps do (
+    r : findRoot(kcurr, guess, 1e-6),
+    write_data([kcurr, float(sqrt(2)*realpart(r)), float(sqrt(2)*imagpart(r))], fh),
+    guess : r, /** Use previous value as a initial for next root */
+    kcurr : kcurr + sz
+  )
+);

@@ -36,9 +36,10 @@ def findRoot(z0,T_ratio,tol):
     return root
 
 # Number of points to calculate damping rate at
-nPoints = 1;
-T_ratio_list = [0.25] # Ti/Te
+T_ratio_list = linspace(0.1, 1.0, 100)
+nPoints = T_ratio_list.shape[0]
 dampingRates = zeros(nPoints);
+freq = zeros(nPoints);
 
 # Initial guess for z0
 z0 = sqrt(1/(2*T_ratio_list[0]))
@@ -52,8 +53,10 @@ for index, T_ratio in enumerate(T_ratio_list):
         break
     else:
         dampingRates[index] = z0.real;
+        freq[index] = z0.imag;
 
-print dampingRates
+for i in range(nPoints):
+    print dampingRates[i], freq[i]
 
 # Import growth rates from input file
 #dat = loadtxt('simGrowthRates.txt')

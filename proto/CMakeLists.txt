@@ -40,6 +40,7 @@ set (proto_SOURCES
   LcMusclHancock1DUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
+  LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
