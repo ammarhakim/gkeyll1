@@ -112,7 +112,7 @@ test_ptcl_container()
   unsigned nalloc = 0;
 // start adding particles
   StandardParticle<double> p;
-  for (unsigned i=0; i<10000; ++i)
+  for (unsigned i=0; i<100000; ++i)
   {
     p.setx(0, i+0.5);
     p.setx(1, i+1.5);
@@ -121,6 +121,9 @@ test_ptcl_container()
     p.setv(0, 2*i+0.5);
     p.setv(1, 2*i+1.5);
     p.setv(2, 2*i+2.5);
+
+    if (plist.excessCapacity() <= 0)
+      nalloc++;
 
     plist.addParticle(p);
   }
@@ -222,6 +225,50 @@ test_ptcl_update()
       pItr->incrx(1, dt*pItr->v(1));
     }
   }
+}
+
+void crossProd(const double a[], const double b[], double axb[])
+{
+  axb[0] =  a[1]*b[2]-a[2]*b[1];
+  axb[1] =  a[2]*b[0]-a[0]*b[2];
+  axb[2] =  a[0]*b[1]-a[1]*b[0];
+}
+
+void
+borisPush(double q, double m, double dt, StandardParticle<double>& p)
+{
+  double qmdt = 0.5*q/m*dt;
+  double vm[3], vp[3], vprime[3], t[3], s[3], cp[3];
+  double B[3] = {0.0, 0.0, 1.0};
+  double E[3] = {0.0, 0.0, 0.0};
+
+// compute t and s vectors
+  for (unsigned d=0; d<3; ++d)
+    t[d] = qmdt*B[d];
+  double tNorm = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
+  for (unsigned d=0; d<3; ++d)
+    s[d] = 2*t[d]/(1+tNorm);
+
+// half-step electric field update
+  for (unsigned d=0; d<3; ++d)
+    vm[d] = p.v(d) + qmdt*E[d];
+
+// rotation around magentic field
+  crossProd(vm, t, cp);
+  for (unsigned d=0; d<3; ++d)
+    vprime[d] = vm[d] + cp[d];
+
+  crossProd(vprime, s, cp);
+  for (unsigned d=0; d<3; ++d)
+    vp[d] = vm[d] + cp[d];
+
+// half-step electric field update: this gives final particle velocity
+  for (unsigned d=0; d<3; ++d)
+    p.setv(d, vp[d]-qmdt*E[d]);
+
+// update particle position
+  for (unsigned d=0; d<3; ++d)
+    p.incrx(d, dt*p.v(d));
 }
 
 int

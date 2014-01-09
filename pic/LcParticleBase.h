@@ -42,7 +42,8 @@ namespace Lucee
 /**
  * Fetch coordinate data.
  *
- * @return d Direction.
+ * @param d Direction.
+ * @return coordinate in specified direction.
  */
       REAL x(unsigned d) const
       {
@@ -52,7 +53,8 @@ namespace Lucee
 /**
  * Fetch velocity data.
  *
- * @return d Direction.
+ * @param d Direction.
+ * @return velocity in specified direction.
  */
       REAL v(unsigned d) const
       { 
