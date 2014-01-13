@@ -7,7 +7,6 @@
 // lucee includes
 #include <LcParticleBase.h>
 #include <LcParticleLayout.h>
-#include <LcParticleList.h>
 #include <LcRegion.h>
 #include <LcRowMajorIndexer.h>
 #include <LcRowMajorSequencer.h>
@@ -105,90 +104,6 @@ test_ptcl_classes()
   LC_ASSERT("Testing particle", wp.v(2) == 3.5);
 
   LC_ASSERT("Testing particle", wp.w() == (float) 5.6);
-}
-
-void
-test_ptcl_container()
-{
-  Lucee::ParticleList<StandardParticle<double> > plist(50);
-  unsigned nalloc = 0;
-// start adding particles
-  StandardParticle<double> p;
-  for (unsigned i=0; i<100000; ++i)
-  {
-    p.setx(0, i+0.5);
-    p.setx(1, i+1.5);
-    p.setx(2, i+2.5);
-
-    p.setv(0, 2*i+0.5);
-    p.setv(1, 2*i+1.5);
-    p.setv(2, 2*i+2.5);
-
-    if (plist.excessCapacity() <= 0)
-      nalloc++;
-
-    plist.addParticle(p);
-  }
-
-  unsigned i=127;
-  LC_ASSERT("Testing particle", plist[i].x(0) == i+0.5);
-  LC_ASSERT("Testing particle", plist[i].x(1) == i+1.5);
-  LC_ASSERT("Testing particle", plist[i].x(2) == i+2.5);
-
-  LC_ASSERT("Testing particle", plist[i].v(0) == 2*i+0.5);
-  LC_ASSERT("Testing particle", plist[i].v(1) == 2*i+1.5);
-  LC_ASSERT("Testing particle", plist[i].v(2) == 2*i+2.5);
-
-  i=9867;
-  LC_ASSERT("Testing particle", plist[i].x(0) == i+0.5);
-  LC_ASSERT("Testing particle", plist[i].x(1) == i+1.5);
-  LC_ASSERT("Testing particle", plist[i].x(2) == i+2.5);
-
-  LC_ASSERT("Testing particle", plist[i].v(0) == 2*i+0.5);
-  LC_ASSERT("Testing particle", plist[i].v(1) == 2*i+1.5);
-  LC_ASSERT("Testing particle", plist[i].v(2) == 2*i+2.5);
-}
-
-void
-test_ptcl_container_2()
-{
-  Lucee::ParticleList<StandardParticle<double> > plist(50);
-  unsigned nalloc = 0;
-// start adding particles
-  StandardParticle<double> p;
-  for (unsigned i=0; i<100000; ++i)
-  {
-    p.x(0) = i+0.5;
-    p.x(1) = i+1.5;
-    p.x(2) = i+2.5;
-
-    p.v(0) = 2*i+0.5;
-    p.v(1) = 2*i+1.5;
-    p.v(2) = 2*i+2.5;
-
-    if (plist.excessCapacity() <= 0)
-      nalloc++;
-
-    plist.addParticle(p);
-  }
-
-  unsigned i=127;
-  LC_ASSERT("Testing particle", plist[i].x(0) == i+0.5);
-  LC_ASSERT("Testing particle", plist[i].x(1) == i+1.5);
-  LC_ASSERT("Testing particle", plist[i].x(2) == i+2.5);
-
-  LC_ASSERT("Testing particle", plist[i].v(0) == 2*i+0.5);
-  LC_ASSERT("Testing particle", plist[i].v(1) == 2*i+1.5);
-  LC_ASSERT("Testing particle", plist[i].v(2) == 2*i+2.5);
-
-  i=9867;
-  LC_ASSERT("Testing particle", plist[i].x(0) == i+0.5);
-  LC_ASSERT("Testing particle", plist[i].x(1) == i+1.5);
-  LC_ASSERT("Testing particle", plist[i].x(2) == i+2.5);
-
-  LC_ASSERT("Testing particle", plist[i].v(0) == 2*i+0.5);
-  LC_ASSERT("Testing particle", plist[i].v(1) == 2*i+1.5);
-  LC_ASSERT("Testing particle", plist[i].v(2) == 2*i+2.5);
 }
 
 struct IntParticle : public Lucee::ParticleBase<int,
@@ -377,8 +292,6 @@ main(int argc, char *argv[])
 {
   LC_BEGIN_TESTS("lcparticleideas");
   test_ptcl_classes();
-  test_ptcl_container();
-  test_ptcl_container_2();
   test_ptcl_copy_delete();
   //cyclotron();
 

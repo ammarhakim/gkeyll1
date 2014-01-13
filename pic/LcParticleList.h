@@ -100,7 +100,7 @@ namespace Lucee
  */
       void deleteParticle(unsigned idx)
       {
-        unsigned last = particleList.size();
+        unsigned last = particleList.size()-1;
 // copy last particle to this location
         particleList[idx].copyParticle(particleList[last]);
 // delete last particle
@@ -114,7 +114,7 @@ namespace Lucee
  */
       void deleteParticle(iterator itr)
       {
-        unsigned last = particleList.size();
+        unsigned last = particleList.size()-1;
 // copy last particle to this location
         itr->copyParticle(particleList[last]);
 // delete last particle
