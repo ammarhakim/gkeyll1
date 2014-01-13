@@ -65,6 +65,28 @@ namespace Lucee
  * Set coordinate data.
  *
  * @param d Direction.
+ * @return coordinate in specified direction.
+ */
+      REAL& x(unsigned d)
+      {
+        return getLoc(LAYOUT::positionOffset+d);
+      }
+
+/**
+ * Set velocity data.
+ *
+ * @param d Direction.
+ * @return velocity in specified direction.
+ */
+      REAL& v(unsigned d)
+      { 
+        return getLoc(LAYOUT::velocityOffset+d);
+      }
+
+/**
+ * Set coordinate data.
+ *
+ * @param d Direction.
  * @param xn Value to set.
  */
       void setx(unsigned d, REAL xn)
@@ -134,6 +156,17 @@ namespace Lucee
  * @return value at location
  */
       REAL getLoc(unsigned loc) const
+      {
+        return data[loc];
+      }
+
+/**
+ * Get specified location in particle data array.
+ *
+ * @param loc Location to set.
+ * @return value at location
+ */
+      REAL& getLoc(unsigned loc)
       {
         return data[loc];
       }
