@@ -119,6 +119,8 @@ namespace Lucee
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
       .append<Lucee::NonLinEmGke1dHamilUpdater>()
 
+      .append<Lucee::SmoothQuadPhiToC1Updater>()
+
       .append<Lucee::SheathParticleSource1x1v>();
 
 #ifdef HAVE_PETSC
