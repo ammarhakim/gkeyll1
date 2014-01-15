@@ -12,10 +12,11 @@
 // lucee includes
 #include <LcLinAlgebra.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
+#include <LcVector.h>
 
 namespace Lucee
 {
-  static const char *SmoothQuadPhiToC1Updaterid = "SmoothQuadPhiToC1";
+  const char *SmoothQuadPhiToC1Updater::id = "SmoothQuadPhiToC1";
 
   static
   double avg(double *nv)
@@ -43,6 +44,8 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
     else
       throw Lucee::Except("SmoothQuadPhiToC1Updater::readInput: Must specify element to use using 'basis'");
+
+    alpha = tbl.getNumber("alpha");
   }
 
   void
@@ -94,47 +97,50 @@ namespace Lucee
     Lucee::Field<1, double>& phiC1 = this->getOut<Lucee::Field<1, double> >(0);
 
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
-    Lucee::RowMajorSequencer<1> seq(localRgn);
 
-    unsigned nlocal = nodalBasis->getNumNodes();
-    std::vector<double> phiK(nlocal);
-
-    std::vector<double> grad(3*(localRgn.getVolume()+2)); // +2 for ghost cells
+    std::vector<double> phiK(3); // three nodes per element
+    Lucee::Vector<double> grad(3*(localRgn.getVolume()+2), -1); // +2 for ghost cells
+    double phi0; // value of phi on left-most edge
 
 // compute gradient of potential (loop is over extended region)
-    for (unsigned i=localRgn.getLower(0)-1; i<localRgn.getUpper(0)+1; ++i)
+    for (int i=localRgn.getLower(0)-1; i<localRgn.getUpper(0)+1; ++i)
     {
       nodalBasis->setIndex(i);
 // extract potential at this location
       nodalBasis->extractFromField(phiC0, phiK);
 // compute gradient and store in appropriate location
       matVec(1.0, diffMatrix, phiK, 0.0, &grad[3*i]);
+
+      if (i==0) phi0 = phiK[0]; // for future use
     }
 
-    double alpha = 1.0/3.0; // weight factor
     double a2 = 0.5*alpha;
+    std::vector<double> smoothedGradEdge(localRgn.getVolume()+1); // one more edge than cells
 
 // smooth gradient (this is actually piece-wise linear, even though
 // three local nodes are used). Edge values are stored.
-    std::vector<double> smoothedGradEdge(localRgn.getVolume()+1); // one more edge than cells
-    for (unsigned i=localRgn.getLower(0); i<localRgn.getUpper(0)+1; ++i)
+    for (int i=localRgn.getLower(0); i<localRgn.getUpper(0)+1; ++i)
     {
       smoothedGradEdge[i] = 0.5*(
-        avg(&grad[3*i]) - a2*slp(&grad[3*i])
-        + avg(&grad[3*(i-1)]) + a2*slp(&grad[3*(i-1)]) );
+        avg(&grad[3*i])     - a2*slp(&grad[3*i])
+      + avg(&grad[3*(i-1)]) + a2*slp(&grad[3*(i-1)]) );
+
+      std::cout << "Gradients " << i-1 << ": " << grad[3*(i-1)+0] << " " << grad[3*(i-1)+2] << std::endl;
+      std::cout << "Gradients " << i << ": " << grad[3*i+0] << " " << grad[3*i+2] << std::endl;
+      std::cout << "Smoothed value " << i << ": " << smoothedGradEdge[i] << std::endl;
     }    
 
-    double cumTot = smoothedGradEdge[0]; // value at the left-most edge
+    double cumTot = phi0; // value at the left-most edge should match
     Lucee::FieldPtr<double> ptr = phiC1.createPtr();
 
 // integrate to compute a C1 approximation to potential
     double dx = grid.getDx(0);
-    for (unsigned i=localRgn.getLower(0); i<localRgn.getUpper(0)+1; ++i)
+    for (int i=localRgn.getLower(0); i<localRgn.getUpper(0)+1; ++i)
     {
       phiC1.setPtr(ptr, i);
       ptr[0] = cumTot;
-      ptr[1] = ptr[0] + dx/8*(smoothedGradEdge[i+1] + 3*smoothedGradEdge[i]);
-      cumTot += ptr[0] + dx/2*(smoothedGradEdge[i+1] + smoothedGradEdge[i]);
+      ptr[1] = cumTot + dx/8*(smoothedGradEdge[i+1] + 3*smoothedGradEdge[i]);
+      cumTot = cumTot + dx/2*(smoothedGradEdge[i+1] + smoothedGradEdge[i]);
     }        
 
     return Lucee::UpdaterStatus();

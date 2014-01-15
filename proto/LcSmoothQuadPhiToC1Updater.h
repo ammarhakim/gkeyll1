@@ -66,9 +66,10 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
-
 /** Differentiation matrix */
       Lucee::Matrix<double> diffMatrix;
+/** Weight factor */
+      double alpha;
 
 /**
  * Compute matrix-vector multiply. Output vector must be
