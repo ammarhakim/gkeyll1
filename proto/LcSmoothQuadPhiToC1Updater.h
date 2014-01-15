@@ -1,11 +1,11 @@
-/**
- * @file	LcNonLinEmGke1dHamilUpdater.h
- *
- * @brief	Compute nonlinear Hamiltonian for 1D EM/GKE
- */
 
-#ifndef LC_NON_LIN_EM_GKE_1D_HAMIL_UPDATER_H
-#define LC_NON_LIN_EM_GKE_1D_HAMIL_UPDATER_H
+
+
+/**
+ * @file	LcSmoothQuadPhiToC1Updater.h
+ *
+ * @brief	Project piecewise quadriatic phi to C1 basis functions
+ */
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -20,16 +20,16 @@
 namespace Lucee
 {
 /**
- * Compute nonlinear Hamiltonian
+ * Project piecewise quadriatic phi to C1 basis functions
  */
-  class NonLinEmGke1dHamilUpdater : public Lucee::UpdaterIfc
+  class SmoothQuadPhiToC1Updater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      NonLinEmGke1dHamilUpdater();
+      SmoothQuadPhiToC1Updater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -65,12 +65,24 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Charge of species */
-      double charge;
-/** Mass of species */
-      double mass;
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
+
+/** Differentiation matrix */
+      Lucee::Matrix<double> diffMatrix;
+
+/**
+ * Compute matrix-vector multiply. Output vector must be
+ * pre-allocated. Note that the computation performed is
+ *
+ * out = m*mat*vec + v*out
+ *
+ * @param m Factor for accumulation.
+ * @param mat Matrix for multiplication.
+ * @param vec Vector for multiplication.
+ * @param v Factor for accumulation.
+ * @param out On output, holds the product.
+ */
+      void matVec(double m, const Lucee::Matrix<double>& mat,
+        const std::vector<double>& vec, double v, double* out);
   };
 }
-
-#endif // LC_NON_LIN_EM_GKE_1D_HAMIL_UPDATER_H

@@ -47,6 +47,7 @@ set (proto_SOURCES
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcSheathParticleSource1x1v.cpp
+  LcSmoothQuadPhiToC1Updater.cpp
 )
 
 if (FFTW3_FOUND)
