@@ -125,9 +125,9 @@ namespace Lucee
         avg(&grad[3*i])     - a2*slp(&grad[3*i])
       + avg(&grad[3*(i-1)]) + a2*slp(&grad[3*(i-1)]) );
 
-      std::cout << "Gradients " << i-1 << ": " << grad[3*(i-1)+0] << " " << grad[3*(i-1)+2] << std::endl;
-      std::cout << "Gradients " << i << ": " << grad[3*i+0] << " " << grad[3*i+2] << std::endl;
-      std::cout << "Smoothed value " << i << ": " << smoothedGradEdge[i] << std::endl;
+      // std::cout << "Gradients " << i-1 << ": " << grad[3*(i-1)+0] << " " << grad[3*(i-1)+2] << std::endl;
+      // std::cout << "Gradients " << i << ": " << grad[3*i+0] << " " << grad[3*i+2] << std::endl;
+      // std::cout << "Smoothed value " << i << ": " << smoothedGradEdge[i] << std::endl;
     }    
 
     double cumTot = phi0; // value at the left-most edge should match
