@@ -31,7 +31,7 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
-      throw Lucee::Except("EvalOnNodesUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("NonLinEmGke1dHamilUpdater::readInput: Must specify element to use using 'basis'");
   }
 
   void
@@ -92,7 +92,7 @@ namespace Lucee
 // takes two inputs (phi, Apar)
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
-// returns one output, perturbed Hamiltonian
+// returns one output, nonlinear Hamiltonian
     this->appendOutVarType(typeid(Lucee::Field<2, double>));    
   }
 }
