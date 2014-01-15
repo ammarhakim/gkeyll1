@@ -40,6 +40,7 @@
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSheathParticleSource1x1v.h>
+#include <LcSmoothQuadPhiToC1Updater.h>
 
 // loki includes
 #include <loki/Singleton.h>
