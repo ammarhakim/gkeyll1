@@ -99,7 +99,8 @@ namespace Lucee
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
 
     std::vector<double> phiK(3); // three nodes per element
-    Lucee::Vector<double> grad(3*(localRgn.getVolume()+2), -1); // +2 for ghost cells
+// +2 is for ghost cells, and -1*3 is to get the index of the ghost cell on left correct
+    Lucee::Vector<double> grad(3*(localRgn.getVolume()+2), -1*3);
     double phi0; // value of phi on left-most edge
 
 // compute gradient of potential (loop is over extended region)
