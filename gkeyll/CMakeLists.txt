@@ -19,6 +19,7 @@ set(lucee_LIBRARIES
   lcrte
   lcproto
   lcslvrs
+  lcpic
   lcdatastructs
   lcgrids
   lclib

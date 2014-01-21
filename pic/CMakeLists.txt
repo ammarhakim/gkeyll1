@@ -16,10 +16,9 @@ if (PETSC_FOUND)
    include_directories(${Petsc_INCLUDE_DIRS})
 endif (PETSC_FOUND)
 
-set (pic_SOURCES
-)
-
 # Create the library
-#add_library(lcpic ${proto_SOURCES})
+add_library(lcpic
+  LcParticleSpecies.cpp
+)
 
 
