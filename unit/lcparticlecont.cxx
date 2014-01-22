@@ -244,6 +244,7 @@ testParticlesListNaive()
   double dt = qbm/10.0;
   double pi = 3.141592654;
   unsigned nsteps = 5000;
+  unsigned npart = 40; // particles per cell
   
   double dLo[2] = {-5, -5};
   double dUp[2] = {5, 5};
@@ -269,8 +270,6 @@ testParticlesListNaive()
       emPtr[5] = 1.0;
     }
   }
-
-  unsigned npart = 40; // particles per cell
 
   for (int i=grid.getLower(0); i<grid.getUpper(0)-1; ++i)
   {
@@ -298,9 +297,10 @@ testParticlesListNaive()
   pushParticlesListNaive(ptclList, domain, EM, nsteps, dt);
   clock_t end = clock();
   double tsec = (end-start)/ (double) CLOCKS_PER_SEC;
-  std::cout <<  tsec << " Naive List" << std::endl;
-  unsigned numPushes = (grid.getShape(0)-1)*(grid.getShape(1)-1)*nsteps*ptclList.size();
-  std::cout << tsec/numPushes << " per particle" << std::endl;
+  size_t numPushes = (grid.getShape(0)-1)*(grid.getShape(1)-1)*nsteps*npart;
+  std::cout <<  tsec << " for flat-list.  "
+            << " With " << numPushes << " pushes, resulting in "
+            << tsec/numPushes << " per particle" << std::endl;
 }
 
 // Particle list in each cell
@@ -349,6 +349,7 @@ pushParticlesPerCellList(
   {
 // main loop is over cells
     for (int i=interior.getLower(0); i<interior.getUpper(0); ++i)
+    {
       for (int j=interior.getLower(1); j<interior.getUpper(1); ++j)
       {
         idx[0] = i; idx[1] = j;
@@ -386,40 +387,50 @@ pushParticlesPerCellList(
             }
 // move particle
             pusher.push(dt, &EB[0], &EB[3], *pItr);
+
+// check if particle has left domain (periodic BCs)
+            for (unsigned d=0; d<2; ++d)
+            {
+              if (pItr->x(d) > upper[d])
+                pItr->x(d) = lower[d] + (pItr->x(d)-upper[d]);
+              if (pItr->x(d) < lower[d])
+                pItr->x(d) = upper[d] - (lower[d]-pItr->x(d));
+            }
           }
         }
 
 // loop over particles again, and copy those that have moved to
 // appropriate cell
-//         pItr = ptclList[cellIdx].ptcls.begin();
-//         for ( ; pItr != ptclList[cellIdx].ptcls.end(); )
-//         {
-//           std::cout << "Checking particle bounds ..." 
-//                     << idx[0] << " " << idx[1] << " "
-//                     << std::endl;
-//           int newIdx[2];
-// // check if particle has moved out of current cell
-//           for (unsigned d=0; d<2; ++d)
-//             newIdx[d] = (int) (pItr->x(d)-lower[d])/dx[d];
-
-//           if ((newIdx[0] != idx[0]) || (newIdx[1] != idx[1]))
-//           { // particle moved to another cell, remove it
-//             std::cout << "Removing particle ..." << std::endl;
-
-// // add it to new location, marking it as "non-native"
-//             pItr->setIsNative(false);
-//             unsigned newCellIdx = indexer.getIndex(newIdx);
-//             ptclList[newCellIdx].ptcls.push_back(*pItr);
-// // erase it from here
-//             pItr = ptclList[cellIdx].ptcls.erase(pItr); // sets it to next element
-//           }
-//           else
-//           {
-//             pItr->setIsNative(true);
-//             ++pItr;
-//           }
-//         }
+        pItr = ptclList[cellIdx].ptcls.begin();
+        for ( ; pItr != ptclList[cellIdx].ptcls.end(); )
+        {
+          if (pItr->isNative())
+          {
+            int newIdx[2];
+// check if particle has moved out of current cell
+            for (unsigned d=0; d<2; ++d)
+              newIdx[d] = (int) (pItr->x(d)-lower[d])/dx[d];
+            
+            if ((newIdx[0] != idx[0]) || (newIdx[1] != idx[1]))
+            { // particle moved to another cell, remove it
+// add it to new location, marking it as "non-native"
+              pItr->setIsNative(false);
+              unsigned newCellIdx = indexer.getIndex(newIdx);
+              ptclList[newCellIdx].ptcls.push_back(*pItr);
+// erase it from here
+              pItr = ptclList[cellIdx].ptcls.erase(pItr); // sets it to next element
+            }
+            else
+              ++pItr; // bump
+          }
+          else
+          { // make non-native particle, native
+            pItr->setIsNative(true);
+            ++pItr; // bump
+          }
+        }
       }
+    }
   }
 }
 
@@ -430,6 +441,7 @@ testParticlesPerCellList()
   double dt = qbm/10.0;
   double pi = 3.141592654;
   unsigned nsteps = 5000;
+  unsigned npart = 40; // particles per cell
   
   double dLo[2] = {-5, -5};
   double dUp[2] = {5, 5};
@@ -456,7 +468,6 @@ testParticlesPerCellList()
     }
   }
 
-  unsigned npart = 40; // particles per cell
 // allocate memory for particles
   unsigned ncells = (grid.getShape(0)-1)*(grid.getShape(1)-1);
   std::vector<CellList> ptclList(ncells);
@@ -496,15 +507,16 @@ testParticlesPerCellList()
   pushParticlesPerCellList(ptclList, domain, EM, nsteps, dt);
   clock_t end = clock();
   double tsec = (end-start)/ (double) CLOCKS_PER_SEC;
-  std::cout <<  tsec << " Per-cell List" << std::endl;
-  unsigned numPushes = (grid.getShape(0)-1)*(grid.getShape(1)-1)*nsteps*ptclList.size();
-  std::cout << tsec/numPushes << " per particle" << std::endl;
+  size_t numPushes = (grid.getShape(0)-1)*(grid.getShape(1)-1)*nsteps*npart;
+  std::cout <<  tsec << " for local-list. "
+            << " With " << numPushes << " pushes, resulting in "
+            << tsec/numPushes << " per particle" << std::endl;
 }
 
 int
 main(int argc, char *argv[])
 {
-  //testParticlesListNaive();
+  testParticlesListNaive();
   testParticlesPerCellList();
   return 0;
 }
