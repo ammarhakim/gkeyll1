@@ -7,8 +7,9 @@
 // lucee includes
 #include <LcArray.h>
 #include <LcConstFieldPtr.h>
-#include <LcFieldPtr.h>
 #include <LcField.h>
+#include <LcFieldPtr.h>
+#include <LcMathPhysConstants.h>
 #include <LcParticleBase.h>
 #include <LcParticleLayout.h>
 #include <LcRegion.h>
@@ -17,35 +18,31 @@
 #include <LcTest.h>
 
 // boost includes
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/generator_iterator.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
 
 // std includes
+#include <cmath>
 #include <ctime>
 #include <iostream>
 #include <list>
 #include <vector>
 
-// 3D/3V, double precision particle
-class StandardParticle : public Lucee::ParticleBase<double, 
-  Lucee::ParticleLayout<0, 3, 6> >
+// initialize a particle with Maxwellian distribution
+template <class PTCL>
+void
+initRandom(PTCL& ptcl, double vmag, double low[2], double dx[2])
 {
-};
-
-// 3D/3V, double precision particle, with extra marker flag to
-// indicate if particle was moved from another cell
-class StandardMarkedParticle : public Lucee::ParticleBase<double, 
-  Lucee::ParticleLayout<0, 3, 6> >
-{
-  public:
-    bool isNative() const { return isNativeFlag; }
-    void setIsNative(bool inFlag) { isNativeFlag = inFlag; }
-  private:
-    bool isNativeFlag;
-};
+  boost::random::mt19937 rng;
+  boost::random::uniform_01<double> uniGen;
+  double angle = 2*Lucee::PI*uniGen(rng);
+  double speed = vmag*uniGen(rng);
+  ptcl.v(0) = speed*cos(angle);
+  ptcl.v(1) = speed*sin(angle);
+  ptcl.v(2) = 0.0;
+  for (unsigned d=0; d<2; ++d)
+    ptcl.x(d) = low[d] + dx[d]*uniGen(rng);
+}
 
 template <class PTCL>
 class BorisPusher
@@ -56,7 +53,7 @@ class BorisPusher
     {
     }
 
-    void push(double dt, double E[], double B[], PTCL& p)
+    void push(double dt, const double E[], const double B[], PTCL& p)
     {
       double qmdt = 0.5*q/m*dt;
       double vm[3], vp[3], vprime[3], t[3], s[3], cp[3];
@@ -101,7 +98,16 @@ class BorisPusher
     double q, m; // charge and mass
 };
 
-// particles stored as a global, unsorted linked list.
+/*
+ * Particles stored as a global, unsorted linked list.
+ */
+
+// 3D/3V, double precision particle
+class StandardParticle : public Lucee::ParticleBase<double, 
+  Lucee::ParticleLayout<0, 3, 6> >
+{
+};
+
 void
 pushParticlesListNaive(
   std::list<StandardParticle>& ptclList,
@@ -244,7 +250,7 @@ testParticlesListNaive()
   double dt = qbm/10.0;
   double pi = 3.141592654;
   unsigned nsteps = 5000;
-  unsigned npart = 40; // particles per cell
+  unsigned npart = 50; // particles per cell
   
   double dLo[2] = {-5, -5};
   double dUp[2] = {5, 5};
@@ -271,6 +277,11 @@ testParticlesListNaive()
     }
   }
 
+  double dx[2];
+  for (unsigned d=0; d<2; ++d)
+    dx[d] = (domain.getUpper(d)-domain.getLower(d))/(grid.getShape(d)-1);
+  double xc[2];
+
   for (int i=grid.getLower(0); i<grid.getUpper(0)-1; ++i)
   {
     for (int j=grid.getLower(1); j<grid.getUpper(1)-1; ++j)
@@ -278,15 +289,9 @@ testParticlesListNaive()
       for (unsigned p=0; p<npart; ++p)
       {
         StandardParticle p;
-// for now, just load all particles at cell center
-        p.x(0) = domain.getLower(0) + 0.5*i;
-        p.x(1) = domain.getLower(1) + 0.5*j;
-        p.x(2) = 0.0;
-
-        p.v(0) = 0.0;
-        p.v(1) = 1.0;
-        p.v(2) = 0.0;
-
+        xc[0] = domain.getLower(0) + dx[0]*i;
+        xc[1] = domain.getLower(1) + dx[1]*j;
+        initRandom(p, 1.0, xc, dx);
         ptclList.push_back(p);
       }
     }
@@ -303,12 +308,25 @@ testParticlesListNaive()
             << tsec/numPushes << " per particle" << std::endl;
 }
 
+/*
+ * Particles stored as a linked list in each cell.
+ */
+
+class StandardMarkedParticle : public Lucee::ParticleBase<double, 
+  Lucee::ParticleLayout<0, 3, 6> >
+{
+  public:
+    bool isNative() const { return isNativeFlag; }
+    void setIsNative(bool inFlag) { isNativeFlag = inFlag; }
+  private:
+    bool isNativeFlag;
+};
+
 // Particle list in each cell
 struct CellList
 {
     std::list<StandardMarkedParticle> ptcls;
 };
-
 
 // Returns number of particles not in the cell they are supposed to
 // be. This number should be exactly zero.
@@ -353,7 +371,6 @@ checkIfAllPtclsInCell(const std::vector<CellList>& ptclList,
   return nOutOfBoundPtcls;
 }
 
-// particles stored as a global, unsorted linked list.
 void
 pushParticlesPerCellList(
   std::vector<CellList>& ptclList,
@@ -375,6 +392,7 @@ pushParticlesPerCellList(
 
 // for timing
   double ptclPushTm = 0, ptclMoveTm = 0;
+  clock_t start, mid, end;
 
   double lower[2], upper[2], dx[2];
   for (unsigned d=0; d<2; ++d)
@@ -492,8 +510,8 @@ pushParticlesPerCellList(
       }
     }    
   }
-  std::cout << "Particle push time " << ptclPushTm
-            << ". Particle move time " << ptclMoveTm << std::endl;
+  // std::cout << "Particle push time " << ptclPushTm
+  //           << ". Particle move time " << ptclMoveTm << std::endl;
 }
 
 void
@@ -503,7 +521,7 @@ testParticlesPerCellList()
   double dt = qbm/10.0;
   double pi = 3.141592654;
   unsigned nsteps = 5000;
-  unsigned npart = 40; // particles per cell
+  unsigned npart = 50; // particles per cell
   
   double dLo[2] = {-5, -5};
   double dUp[2] = {5, 5};
@@ -540,6 +558,11 @@ testParticlesPerCellList()
   Lucee::Region<2, int> interior(intShape);
   Lucee::RowMajorIndexer<2> indexer(interior);
 
+  double dx[2];
+  for (unsigned d=0; d<2; ++d)
+    dx[d] = (domain.getUpper(d)-domain.getLower(d))/(grid.getShape(d)-1);
+  double xc[2];
+
   for (int i=grid.getLower(0); i<grid.getUpper(0)-1; ++i)
   {
     for (int j=grid.getLower(1); j<grid.getUpper(1)-1; ++j)
@@ -548,17 +571,10 @@ testParticlesPerCellList()
       for (unsigned p=0; p<npart; ++p)
       {
         StandardMarkedParticle p;
-// for now, just load all particles at cell center
-        p.x(0) = domain.getLower(0) + 0.5*i;
-        p.x(1) = domain.getLower(1) + 0.5*j;
-        p.x(2) = 0.0;
-
-        p.v(0) = 0.0;
-        p.v(1) = 1.0;
-        p.v(2) = 0.0;
-
+        xc[0] = domain.getLower(0) + dx[0]*i;
+        xc[1] = domain.getLower(1) + dx[1]*j;
+        initRandom(p, 1.0, xc, dx);
         p.setIsNative(true); // initially all particles are "native"
-
         ptclList[idx].ptcls.push_back(p);
       }
     }
@@ -573,16 +589,264 @@ testParticlesPerCellList()
   std::cout <<  tsec << " for local-list. "
             << " With " << numPushes << " pushes, resulting in "
             << tsec/numPushes << " per particle" << std::endl;
-  unsigned noob = checkIfAllPtclsInCell(ptclList, domain, grid);
-  std::cout << "Number of out-of-bound particles (should be zero) " 
-            << noob << std::endl;
+  // unsigned noob = checkIfAllPtclsInCell(ptclList, domain, grid);
+  // std::cout << "Number of out-of-bound particles (should be zero) " 
+  //           << noob << std::endl;
+}
+
+/*
+ * Particles stored as a vector in each cell.
+ */
+
+// Particle list in each cell
+struct CellVect
+{
+    std::vector<StandardMarkedParticle> ptcls;
+
+// delete particle at location (potential optimizations: replace copy
+// via assignment by memcpy)
+    void deletePtcl(unsigned loc)
+    {
+      if (ptcls.size()>1)
+        ptcls[loc] = ptcls[ptcls.size()-1];
+      ptcls.pop_back();
+    }
+};
+
+void
+pushParticlesPerCellVect(
+  std::vector<CellVect>& ptclList,
+  const Lucee::Region<2, double>& domain,
+  const Lucee::Field<2, double>& EM,
+  unsigned nsteps, double dt)
+{
+// assumptions: EM fields are stored at nodes. Hence, the number of
+// cells in each direction is one less than the number of nodes.
+
+  BorisPusher<StandardMarkedParticle> pusher(-1.0, 1.0); // electrons
+
+  Lucee::ConstFieldPtr<double> emPtr_11 = EM.createConstPtr();
+  Lucee::ConstFieldPtr<double> emPtr_21 = EM.createConstPtr();
+  Lucee::ConstFieldPtr<double> emPtr_12 = EM.createConstPtr();
+  Lucee::ConstFieldPtr<double> emPtr_22 = EM.createConstPtr();
+
+  Lucee::Region<2, int> rgn = EM.getRegion();
+
+// for timing
+  double ptclPushTm = 0, ptclMoveTm = 0;
+
+  double lower[2], upper[2], dx[2];
+  for (unsigned d=0; d<2; ++d)
+  {
+    lower[d] = domain.getLower(d);
+    upper[d] = domain.getUpper(d);
+    dx[d] = (upper[d]-lower[d])/(rgn.getShape(d)-1); // numCells = numNodes-1
+  }
+
+  double EB[6], ploc[2];
+  int idx[2];
+  int intShape[2];
+  intShape[0] = rgn.getShape(0)-1;
+  intShape[1] = rgn.getShape(1)-1;
+  Lucee::Region<2, int> interior(intShape);
+  Lucee::RowMajorIndexer<2> indexer(interior);
+
+  for (unsigned ns=0; ns<nsteps; ++ns)
+  {
+// main loop is over cells
+    for (int i=interior.getLower(0); i<interior.getUpper(0); ++i)
+    {
+      for (int j=interior.getLower(1); j<interior.getUpper(1); ++j)
+      {
+        idx[0] = i; idx[1] = j;
+// set pointers to EM field
+        EM.setPtr(emPtr_11, idx[0], idx[1]);
+        EM.setPtr(emPtr_21, idx[0]+1, idx[1]);
+        EM.setPtr(emPtr_12, idx[0], idx[1]+1);
+        EM.setPtr(emPtr_22, idx[0]+1, idx[1]+1);
+
+// coordinates of lower-left and upper-right corners in cell
+        double lowcc[2], upcc[2];
+        for (unsigned d=0; d<2; ++d)
+        {
+          lowcc[d] = lower[d] + idx[d]*dx[d];
+          upcc[d] = lower[d] + (idx[d]+1)*dx[d];
+        }
+
+        int cellIdx = indexer.getIndex(i,j);
+
+// push particles current cell
+        std::vector<StandardMarkedParticle>::iterator pItr = ptclList[cellIdx].ptcls.begin();
+        for ( ; pItr != ptclList[cellIdx].ptcls.end(); ++pItr)
+        {
+          if (pItr->isNative())
+          { // only move if the particle is "native" to this cell
+// compute incremental normalized position of particle in cell
+            for (unsigned d=0; d<2; ++d)
+              ploc[d] = (pItr->x(d)-lowcc[d])/dx[d];
+          
+// interpolate field to particle location
+            for (unsigned i=0; i<6; ++i)
+            {
+              double a1 = (1-ploc[0])*emPtr_11[i] + ploc[0]*emPtr_21[i];
+              double a2 = (1-ploc[0])*emPtr_12[i] + ploc[0]*emPtr_22[i];
+              EB[i] = (1-ploc[1])*a1 + ploc[1]*a2;
+            }
+// move particle
+            pusher.push(dt, &EB[0], &EB[3], *pItr);
+
+// check if particle has left domain (periodic BCs)
+            for (unsigned d=0; d<2; ++d)
+            {
+              if (pItr->x(d) > upper[d])
+                pItr->x(d) = lower[d] + (pItr->x(d)-upper[d]);
+              if (pItr->x(d) < lower[d])
+                pItr->x(d) = upper[d] - (lower[d]-pItr->x(d));
+            }
+          }
+        }
+
+// loop over particles again, and copy those that have moved to
+// appropriate cell
+        unsigned pIdx = 0;
+        pItr = ptclList[cellIdx].ptcls.begin();
+        for ( ; pIdx<ptclList[cellIdx].ptcls.size(); )
+        {
+          if (pItr->isNative())
+          {
+            int newIdx[2];
+// check if particle has moved out of current cell
+            for (unsigned d=0; d<2; ++d)
+              newIdx[d] = (int) (pItr->x(d)-lower[d])/dx[d];
+            
+            if ((newIdx[0] != idx[0]) || (newIdx[1] != idx[1]))
+            { // particle moved to another cell, remove it
+// add it to new location, marking it as "non-native"
+              pItr->setIsNative(false);
+              unsigned newCellIdx = indexer.getIndex(newIdx);
+              ptclList[newCellIdx].ptcls.push_back(*pItr);
+// erase it from here
+              ++pItr; // bump
+              ptclList[cellIdx].deletePtcl(pIdx);
+            }
+            else
+            {
+              ++pIdx;
+              ++pItr; // bump
+            }
+          }
+          else
+          { // make non-native particle, native
+            pItr->setIsNative(true);
+            ++pIdx;
+            ++pItr; // bump
+          }
+        }
+      }
+    }
+
+// final loop, making all particles local
+    for (int i=interior.getLower(0); i<interior.getUpper(0); ++i)
+    {
+      for (int j=interior.getLower(1); j<interior.getUpper(1); ++j)
+      {
+        int cellIdx = indexer.getIndex(i,j);
+        std::vector<StandardMarkedParticle>::iterator pItr = ptclList[cellIdx].ptcls.begin();
+        for ( ; pItr != ptclList[cellIdx].ptcls.end(); ++pItr)
+          pItr->setIsNative(true);
+      }
+    }    
+  }
+  // std::cout << "Particle push time " << ptclPushTm
+  //           << ". Particle move time " << ptclMoveTm << std::endl;
+}
+
+void
+testParticlesPerCellVect()
+{
+  double qbm = 1.0;
+  double dt = qbm/10.0;
+  double pi = 3.141592654;
+  unsigned nsteps = 5000;
+  unsigned npart = 50; // particles per cell
+  
+  double dLo[2] = {-5, -5};
+  double dUp[2] = {5, 5};
+  Lucee::Region<2, double> domain(dLo, dUp);
+
+// set field
+  int shape[2] = {41, 41};
+  Lucee::Region<2, int> grid(shape);
+  Lucee::Field<2, double> EM(grid, 6, 0.0);
+  Lucee::FieldPtr<double> emPtr = EM.createPtr();
+  for (int i=grid.getLower(0); i<grid.getUpper(0); ++i)
+  {
+    for (int j=grid.getLower(1); j<grid.getUpper(1); ++j)
+    {
+      EM.setPtr(emPtr, i, j);
+// electric field
+      emPtr[0] = 0.0;
+      emPtr[1] = 0.0;
+      emPtr[2] = 0.0;
+// magnetic field
+      emPtr[3] = 0.0;
+      emPtr[4] = 0.0;
+      emPtr[5] = 1.0;
+    }
+  }
+
+// allocate memory for particles
+  unsigned ncells = (grid.getShape(0)-1)*(grid.getShape(1)-1);
+  std::vector<CellVect> ptclList(ncells);
+
+  int intShape[2];
+  intShape[0] = grid.getShape(0)-1;
+  intShape[1] = grid.getShape(1)-1;
+  Lucee::Region<2, int> interior(intShape);
+  Lucee::RowMajorIndexer<2> indexer(interior);
+
+  double dx[2];
+  for (unsigned d=0; d<2; ++d)
+    dx[d] = (domain.getUpper(d)-domain.getLower(d))/(grid.getShape(d)-1);
+  double xc[2];
+
+  for (int i=grid.getLower(0); i<grid.getUpper(0)-1; ++i)
+  {
+    for (int j=grid.getLower(1); j<grid.getUpper(1)-1; ++j)
+    {
+      int idx = indexer.getIndex(i,j); // cell index
+      for (unsigned p=0; p<npart; ++p)
+      {
+        StandardMarkedParticle p;
+        xc[0] = domain.getLower(0) + dx[0]*i;
+        xc[1] = domain.getLower(1) + dx[1]*j;
+        initRandom(p, 1.0, xc, dx);
+        p.setIsNative(true); // initially all particles are "native"
+        ptclList[idx].ptcls.push_back(p);
+      }
+    }
+  }
+
+// push particles
+  clock_t start = clock();
+  pushParticlesPerCellVect(ptclList, domain, EM, nsteps, dt);
+  clock_t end = clock();
+  double tsec = (end-start)/ (double) CLOCKS_PER_SEC;
+  size_t numPushes = (grid.getShape(0)-1)*(grid.getShape(1)-1)*nsteps*npart;
+  std::cout <<  tsec << " for local-vect. "
+            << " With " << numPushes << " pushes, resulting in "
+            << tsec/numPushes << " per particle" << std::endl;
+  // unsigned noob = checkIfAllPtclsInCell(ptclList, domain, grid);
+  // std::cout << "Number of out-of-bound particles (should be zero) " 
+  //           << noob << std::endl;
 }
 
 int
 main(int argc, char *argv[])
 {
-  //testParticlesListNaive();
+  testParticlesListNaive();
   testParticlesPerCellList();
+  testParticlesPerCellVect();
   return 0;
 }
 
