@@ -193,7 +193,7 @@ namespace Lucee
         grid.getCentroid(cellCentroid);
 
         // Don't need to loop over left-moving cells
-        if (cellCentroid[1] < 0.0)
+        if ((cellCentroid[1] - elcCharge*aAtEdge)/elcMass < 0.0)
           break;
 
         distf.setPtr(sknPtr, ix, js);
@@ -291,7 +291,7 @@ namespace Lucee
         grid.getCentroid(cellCentroid);
 
         // Don't need to loop over right-moving cells
-        if (cellCentroid[1] > 0.0)
+        if ((cellCentroid[1] - elcCharge*aAtEdge)/elcMass > 0.0)
           break;
 
         // Copy nodes on left edge into a vector
