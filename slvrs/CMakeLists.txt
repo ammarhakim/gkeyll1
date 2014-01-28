@@ -29,7 +29,6 @@ set(lcslvrs_SOURCES
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcElectromagneticAUpdater.cpp
-  LcElectromagneticAForcingUpdater.cpp
   LcElectromagneticDistFuncReflectionBcUpdater.cpp
   LcElectromagneticMomentsAtEdgesUpdater.cpp
   LcElectrostaticPhiUpdater.cpp
