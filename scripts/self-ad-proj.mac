@@ -1,0 +1,106 @@
+/** Algebra to determine a self-adjoint projection operator */
+
+load(diag);
+/** Matrix of Legendre polynomial normalization coefficients (two is taken out) */
+nCoeff : diag([1, 1/3, 1/5]); 
+
+abar_l(i) := 1/2*(a(0,i-1) + a(1,i-1) + alp*a(2,i-1) + a(0,i) - a(1,i) + alp*a(2,i));
+abar_r(i) := 1/2*(a(0,i) + a(1,i) + alp*a(2,i) + a(0,i+1) - a(1,i+1) + alp*a(2,i+1));
+
+/** Attempt 1: match cell averages */
+abar_0(i) := a(0,i);
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+abar_mat_1 : nCoeff . coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+
+/** Attempt 2: cell average computed over three cells */
+abar_0(i) := 1/3*(a(0,i-1)+a(0,i)+a(0,i+1));
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+abar_mat_2 : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+
+/** Attempt 3:  XXX */
+abar_0(i) := c0*(a(0,i-1)+2*a(0,i)+a(0,i+1)) + c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)+2*a(2,i)+a(2,i-1));
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+abar_mat_3 : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+
+/** Attempt 3-prime:  XXX */
+abar_0(i) := 1/4*(a(0,i-1)+2*a(0,i)+a(0,i+1)) - 1/12*(a(1,i+1)-a(1,i-1));
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+abar_mat_3p : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+
+/** Attempt 4:
+
+c0 : (1+20*c2)/4;
+*/
+c1 : 1/12;
+c0 : (1+20*c2)/4;
+alp : 2/5;
+
+abar_0(i) := c0*(a(0,i-1)+2*a(0,i)+a(0,i+1)) - c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)-2*a(2,i)+a(2,i-1));
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+abar_mat_4 : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+coef_mat_4 : coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
