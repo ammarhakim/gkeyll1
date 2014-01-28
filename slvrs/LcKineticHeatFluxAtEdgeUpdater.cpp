@@ -176,23 +176,6 @@ namespace Lucee
       sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
       sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[5] );
       sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[5] );
-      
-      /*
-      
-      double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
-        (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
-
-
-      sheathData[0] = ionParallelHeatFluxRight/(ionParallelTempRight*momentsAtEdgesIon[5]);
-      sheathData[1] = elcParallelHeatFluxRight/(elcParallelTempRight*momentsAtEdgesElc[5]);
-
-      double ionParallelTempLeft = -ionMass*momentsAtEdgesIon[1]*momentsAtEdgesIon[1]/
-        (momentsAtEdgesIon[0]*momentsAtEdgesIon[0]) + ionMass*momentsAtEdgesIon[2]/momentsAtEdgesIon[0];
-      double elcParallelTempLeft = -elcMass*momentsAtEdgesElc[1]*momentsAtEdgesElc[1]/
-        (momentsAtEdgesElc[0]*momentsAtEdgesElc[0]) + elcMass*momentsAtEdgesElc[2]/momentsAtEdgesElc[0];
-
-      sheathData[2] = ionParallelHeatFluxLeft/(ionParallelTempLeft*momentsAtEdgesIon[1]);
-      sheathData[3] = elcParallelHeatFluxLeft/(elcParallelTempLeft*momentsAtEdgesElc[1]);*/
 
       sheathCoefficientVsTime.appendData(t, sheathData);
     }
