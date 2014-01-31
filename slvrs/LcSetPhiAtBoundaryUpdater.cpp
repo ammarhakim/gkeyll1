@@ -61,10 +61,14 @@ namespace Lucee
 
     const Lucee::Field<1, double>& phiIn = this->getInp<Lucee::Field<1, double> >(0);
     // Dynvector containing the cutoff velocities computed at one or both edges
-    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
+    const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(1);
     Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
 
-    int nlocal = nodalBasis->getNumNodes();
+    // Get exclusive node indices
+    std::vector<int> exclusiveIndices;
+    nodalBasis->getExclusiveNodeIndices(exclusiveIndices);
+    //int nlocal = nodalBasis->getNumNodes();
+    int nlocal = exclusiveIndices.size();
 
     Lucee::Region<1, int> extRegion = phiIn.getExtRegion();
 
@@ -97,9 +101,7 @@ namespace Lucee
       phiOut.setPtr(phiOutPtr, ix);
 
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-      {
         phiOutPtr[componentIndex] = phiInPtr[componentIndex] + phiS - dPhiRight;
-      }
     }
     
     return Lucee::UpdaterStatus();
