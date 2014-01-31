@@ -13,8 +13,6 @@
 #include <LcElectrostaticPhiUpdater.h>
 //#include <LcStructuredGridBase.h>
 #include <LcMathPhysConstants.h>
-// for cutoff velocities
-#include <LcDynVector.h>
 
 namespace Lucee
 {
@@ -45,10 +43,6 @@ namespace Lucee
       Te0 = tbl.getNumber("Te0");
     else
       throw Lucee::Except("ElectrostaticPhiUpdater::readInput: Must specify Te0");
-
-    useCutoffVelocities = false;
-    if (tbl.hasBool("useCutoffVelocities"))
-      useCutoffVelocities = tbl.getBool("useCutoffVelocities");
   }
 
   void 
@@ -140,27 +134,10 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
     Lucee::FieldPtr<double> phiPtr = phiOut.createPtr();
 
-    double phiS;
-    // Value of dPhi(x) on right boundary
-    double dPhiRight;
-
-    if (useCutoffVelocities == true)
-    {
-      // Dynvector containing the cutoff velocities computed at one or both edges
-      const Lucee::DynVector<double>& cutoffVIn = this->getInp<Lucee::DynVector<double> >(2);
-      // Compute cutoff velocity on the right edge
-      std::vector<double> cutoffVelocities = cutoffVIn.getLastInsertedData();
-      phiS = 0.5*ELECTRON_MASS*cutoffVelocities[1]*cutoffVelocities[1]/ELEMENTARY_CHARGE;
-    }
-    else
-    {
-      phiS = 0.0;
-    }
-
     phiPtr = 0.0;
     
     // Loop over all cells
-    for (int ix = globalRgn.getUpper(0)-1; ix >= globalRgn.getLower(0); ix--)
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       // Set inputs
       nElcIn.setPtr(nElcPtr, ix);
@@ -195,15 +172,9 @@ namespace Lucee
       // Compute phi(x) weights (this is really dPhi(x))
       Eigen::VectorXd phiWeights = phiProjections.inverse()*rhsIntegrals;
 
-      // Set value of dPhi(right edge)
-      if (ix == globalRgn.getUpper(0)-1)
-        dPhiRight = phiWeights(nlocal-1);
-
       // Copy into output pointer
-      // Currently imposing condition that phi(edge) = phi_s by adding
-      // phi_s - dPhi(edge) to all values of dPhi(edge)
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        phiPtr[componentIndex] = phiWeights(componentIndex) + phiS - dPhiRight;
+        phiPtr[componentIndex] = phiWeights(componentIndex);
     }
 
     return Lucee::UpdaterStatus();
@@ -215,8 +186,6 @@ namespace Lucee
     // takes three inputs (n_e(x), n_i(x))
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // optional input: cutoff velocity at edges
-    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: phi(x)
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
