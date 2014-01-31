@@ -73,7 +73,6 @@ set(lcslvrs_SOURCES
   LcNodalHyperDiffusionUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
-  LcPonderomotivePotentialUpdater.cpp
   LcPositivityUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
@@ -82,6 +81,7 @@ set(lcslvrs_SOURCES
   LcSerendipityElement2DDiffusionOutput
   LcSerendipityElementDiffusionOutput
   LcSerendipityElementHyperDiffusionOutput
+  LcSetPhiAtBoundaryUpdater.cpp
   LcSolverRegistry.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp

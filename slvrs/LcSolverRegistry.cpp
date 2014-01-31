@@ -54,13 +54,13 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcPointSourceIfc.h>
-#include <LcPonderomotivePotentialUpdater.h>
 #include <LcPositivityUpdater.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
+#include <LcSetPhiAtBoundaryUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
@@ -108,8 +108,8 @@ namespace Lucee
       .append<Lucee::BcUpdater<2> >()
       .append<Lucee::BcUpdater<3> >()
       
+      // Probably used for SOL problem simulations
       .append<Lucee::BoltzmannPhiUpdater>()
-      
       .append<Lucee::HeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticEnergyUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
@@ -122,7 +122,7 @@ namespace Lucee
       .append<Lucee::ElectrostaticPhiUpdater>()
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
-      .append<Lucee::PonderomotivePotentialUpdater>()
+      .append<Lucee::SetPhiAtBoundaryUpdater>()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
