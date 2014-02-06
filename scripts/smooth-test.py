@@ -59,18 +59,30 @@ def plotQuads(X, q0, q1, q2, color):
         xe = X[i+1]
         plot([xe, xe], [low, high], '-', color='#808080')
 
+# def smoothQuad(fx):
+#     nx = fx.shape[0]-2
+#     gx = 0.0*fx
+#     c0 = 2.0
+#     for i in range(1,nx+1):
+#         gx[i,0] = (fx[i+1,0]+c0*fx[i,0]+fx[i-1,0])/(c0+2) - (fx[i+1,1]-fx[i-1,1])/12.0 \
+#             + (c0-2)*(fx[i+1,2]-2*fx[i,2]+fx[i-1,2])/(20*c0+40)
+#         gx[i,1] = (fx[i+1,0]-fx[i-1,0])/4 - (fx[i+1,1]-2*fx[i,1]+fx[i-1,1])/4.0 \
+#             + (fx[i+1,2]-fx[i-1,2])/10
+#         gx[i,2] = (c0-2)*(fx[i+1,0]-2*fx[i,0]+fx[i-1,0])/(4*c0+8) - (fx[i+1,1]-fx[i-1,1])/6.0 \
+#             + ((c0+6)*fx[i+1,2]+(6*c0+4)*fx[i,2]+(c0+6)*fx[i-1,2])/(20*c0+40)
+#     return gx
+
 def smoothQuad(fx):
     nx = fx.shape[0]-2
     gx = 0.0*fx
-    c0 = 2.0
     for i in range(1,nx+1):
-        gx[i,0] = (fx[i+1,0]+c0*fx[i,0]+fx[i-1,0])/(c0+2) - (fx[i+1,1]-fx[i-1,1])/12.0 \
-            + (c0-2)*(fx[i+1,2]-2*fx[i,2]+fx[i-1,2])/(20*c0+40)
-        #gx[i,1] = (fx[i+1,0]-fx[i-1,0])/4 - (fx[i+1,1]-2*fx[i,1]+fx[i-1,1])/4.0 \
-        #    + (fx[i+1,2]-fx[i-1,2])/10
-        #gx[i,2] = (c0-2)*(fx[i+1,0]-2*fx[i,0]+fx[i-1,0])/(4*c0+8) - (fx[i+1,1]-fx[i-1,1])/6.0 \
-        #    + ((c0+6)*fx[i+1,2]+(6*c0+4)*fx[i,2]+(c0+6)*fx[i-1,2])/(20*c0+40)
+        gx[i,0] = (fx[i+1,0]+2*fx[i,0]+fx[i-1,0])/4 - (fx[i+1,1]-fx[i-1,1])/12.0
+        gx[i,1] = (fx[i+1,0]-fx[i-1,0])/4 - (fx[i+1,1]-2*fx[i,1]+fx[i-1,1])/4.0 \
+            + (fx[i+1,2]-fx[i-1,2])/10
+        gx[i,2] = -(fx[i+1,1]-fx[i-1,1])/6.0 \
+            + (fx[i+1,2]+2*fx[i,2]+fx[i-1,2])/10
     return gx
+
 
 # parameters for plot
 nx = 3
