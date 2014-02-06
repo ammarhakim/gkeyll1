@@ -59,7 +59,8 @@ t2 : subst( slist, abar_1);
 t3 : subst( slist, abar_2);
 
 /** Construct coefficient matrix */
-abar_mat_3 : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+coef_mat_3 : coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+abar_mat_3 : nCoeff. coef_mat_3;
 
 /** Attempt 3-prime:  XXX */
 abar_0(i) := 1/4*(a(0,i-1)+2*a(0,i)+a(0,i+1)) - 1/12*(a(1,i+1)-a(1,i-1));
@@ -77,7 +78,8 @@ t2 : subst( slist, abar_1);
 t3 : subst( slist, abar_2);
 
 /** Construct coefficient matrix */
-abar_mat_3p : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+coef_mat_3p : coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+abar_mat_3p : nCoeff. coef_mat_3p;
 
 /** Attempt 4:
 
@@ -93,7 +95,7 @@ c2 : (c0-2)/(5*(4*c0+8));
 abar_0(i) := 1/(2+c0)*(a(0,i-1)+c0*a(0,i)+a(0,i+1)) - c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)-2*a(2,i)+a(2,i-1));
 abar_0 : abar_0(i);
 abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
-abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i)) -abar_0(i) );
 
 /** Write in terms of shift operator */
 slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
