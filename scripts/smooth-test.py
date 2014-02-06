@@ -85,7 +85,7 @@ def smoothQuad(fx):
 
 
 # parameters for plot
-nx = 3
+nx = 4
 Lx = 2*pi
 dx = Lx/nx
 X = linspace(-0.5*dx, Lx+0.5*dx, nx+2)
