@@ -287,13 +287,44 @@ cyclotron()
   }
 }
 
+void
+cyclotronTime()
+{
+  unsigned npart = 10000;
+  std::vector<StandardParticle<double> > p(npart);
+  for (unsigned i=0; i<npart; ++i)
+  {
+    p[i].setx(0, std::rand());
+    p[i].setx(1, 0.0);
+    p[i].setx(2, 0.0);
+    
+    p[i].setv(0, 0.0);
+    p[i].setv(1, std::rand());
+    p[i].setv(2, 0.0);
+  }
+
+  unsigned ntries = 10000;
+  double qbm = 1.0;
+  double dt = qbm/4.0;
+  double pi = 3.141592654;
+  unsigned c = 0;
+  for (unsigned t=0; t<ntries; ++t)
+    for (unsigned pIdx=0; pIdx<npart; ++pIdx)
+    {
+      borisPush(1.0, 1.0, dt, p[pIdx]);
+      c++;
+    }
+  std::cout << "Total pushes " << c << std::endl;
+}
+
 int
 main(int argc, char *argv[])
 {
   LC_BEGIN_TESTS("lcparticleideas");
-  test_ptcl_classes();
-  test_ptcl_copy_delete();
+  //test_ptcl_classes();
+  //test_ptcl_copy_delete();
   //cyclotron();
+  cyclotronTime();
 
   LC_END_TESTS;
 }
