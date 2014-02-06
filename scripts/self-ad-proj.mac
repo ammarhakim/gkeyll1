@@ -82,12 +82,15 @@ abar_mat_3p : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
 /** Attempt 4:
 
 c0 : (1+20*c2)/4;
-*/
-c1 : 1/12;
-c0 : (1+20*c2)/4;
-alp : 2/5;
 
-abar_0(i) := c0*(a(0,i-1)+2*a(0,i)+a(0,i+1)) - c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)-2*a(2,i)+a(2,i-1));
+c0 : (1+20*c2)/4;
+*/
+
+c1 : 1/12;
+alp : 2/5;
+c2 : (c0-2)/(5*(4*c0+8));
+
+abar_0(i) := 1/(2+c0)*(a(0,i-1)+c0*a(0,i)+a(0,i+1)) - c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)-2*a(2,i)+a(2,i-1));
 abar_0 : abar_0(i);
 abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
 abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i))-abar_0(i) );
@@ -102,5 +105,5 @@ t2 : subst( slist, abar_1);
 t3 : subst( slist, abar_2);
 
 /** Construct coefficient matrix */
-abar_mat_4 : nCoeff. coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
 coef_mat_4 : coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+abar_mat_4 : nCoeff. coef_mat_4;
