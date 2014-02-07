@@ -90,7 +90,6 @@ def smoothQuad(fx, c0=2, beta=1.0):
     gx = 0.0*fx
     alpha = 1.0/5.0*(3*beta-1)
 
-
     a = (5*alpha-1)*c0+10*alpha+2
     b = (10*alpha+2)*c0+20*alpha-4
     for i in range(1,nx+1):
@@ -127,15 +126,17 @@ Xedge = linspace(-dx, Lx+dx, nx+3)
 figure(1)
 fx = projectSinOnQuadBasis(X)
 plotQuads(Xedge, fx[:,0], fx[:,1], fx[:,2], 'r')
+
+c0 = 15.0
 beta = 0.75
 alpha = 1/5.0*(3*beta-1)
 plotQuads(Xedge, fx[:,0], beta*fx[:,1], alpha*fx[:,2], '--g')
 
-#Xhr = linspace(Xedge[0], Xedge[-1], 100)
-#plot(Xhr, sin(Xhr), 'b-')
+Xhr = linspace(Xedge[0], Xedge[-1], 100)
+plot(Xhr, sin(Xhr), 'b-')
 
 # smooth it
-gx = smoothQuad(fx, 10.0, beta)
+gx = smoothQuad(fx, c0, beta)
 plotQuads(Xedge[1:-1], gx[1:-1,0], gx[1:-1,1], gx[1:-1,2], 'k')
 title('Red: DG. Black: Smooth')
 
@@ -150,7 +151,7 @@ plotQuads(Xedge, fx[:,0], fx[:,1], fx[:,2], 'r')
 plotQuads(Xedge, fx[:,0], beta*fx[:,1], alpha*fx[:,2], 'g--')
 
 # smooth it
-gx = smoothQuad(fx, 20.0)
+gx = smoothQuad(fx, c0, beta)
 plotQuads(Xedge[1:-1], gx[1:-1,0], gx[1:-1,1], gx[1:-1,2], 'k')
 title('Red: DG. Black: Smooth')
 
