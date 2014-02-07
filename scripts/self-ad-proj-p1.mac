@@ -4,6 +4,8 @@ load(diag);
 /** Matrix of Legendre polynomial normalization coefficients (two is taken out) */
 nCoeff : diag([1, 1/3]); 
 
+alp : 1.0;
+
 abar_l(i) := 1/2*(a(0,i-1) + alp*a(1,i-1) + a(0,i) - alp*a(1,i));
 abar_r(i) := 1/2*(a(0,i) + alp*a(1,i) + a(0,i+1) - alp*a(1,i+1));
 
@@ -18,4 +20,5 @@ t1 : subst( slist, abar_0);
 t2 : subst( slist, abar_1);
 
 /** Construct coefficient matrix */
-abar_mat : nCoeff . coefmatrix([t1,t2], [a(0,i),a(1,i)]);
+coef_mat : coefmatrix([t1,t2], [a(0,i),a(1,i)]);
+abar_mat : nCoeff . coef_mat;
