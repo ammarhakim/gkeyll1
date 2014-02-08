@@ -56,7 +56,7 @@ def projectQuadOnQuadBasis(X):
     for i in range(nx):
         xc = X[i]
         fx[i,2] = dx**2/6
-        fx[i,0] = xc**2 - 0.5*fx[i,2]
+        fx[i,0] = xc**2 + 0.5*fx[i,2]
         fx[i,1] = dx*xc
 
     return fx
@@ -149,6 +149,8 @@ fx = projectQuadOnQuadBasis(X)
 figure(3)
 plotQuads(Xedge, fx[:,0], fx[:,1], fx[:,2], 'r')
 plotQuads(Xedge, fx[:,0], beta*fx[:,1], alpha*fx[:,2], 'g--')
+Xhr = linspace(Xedge[0], Xedge[-1], 100)
+plot(Xhr, Xhr**2, 'b-')
 
 # smooth it
 gx = smoothQuad(fx, c0, beta)
