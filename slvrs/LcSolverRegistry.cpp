@@ -22,6 +22,8 @@
 #include <LcElectromagneticAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectromagneticMomentsAtEdgesUpdater.h>
+#include <LcElectromagneticZeroVelocitySource.h>
+#include <LcElectromagneticZeroVelocitySourceProjection.h>
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
@@ -119,6 +121,8 @@ namespace Lucee
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()
+      .append<Lucee::ElectromagneticZeroVelocitySource>()
+      .append<Lucee::ElectromagneticZeroVelocitySourceProjection>()
       .append<Lucee::ElectrostaticPhiUpdater>()
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
