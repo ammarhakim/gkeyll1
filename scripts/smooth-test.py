@@ -1,4 +1,5 @@
 # test smoothing operators
+import random
 from pylab import *
 
 def P0(x):
@@ -116,7 +117,7 @@ def smoothLin(fx):
     return gx
 
 # parameters for plot
-nx = 4
+nx = 8
 Lx = 2*pi
 dx = Lx/nx
 X = linspace(-0.5*dx, Lx+0.5*dx, nx+2)
@@ -127,8 +128,8 @@ figure(1)
 fx = projectSinOnQuadBasis(X)
 plotQuads(Xedge, fx[:,0], fx[:,1], fx[:,2], 'r')
 
-c0 = 15.0
-beta = 0.75
+c0 = 10.0
+beta = 3.0/4.0
 alpha = 1/5.0*(3*beta-1)
 plotQuads(Xedge, fx[:,0], beta*fx[:,1], alpha*fx[:,2], '--g')
 
@@ -175,6 +176,30 @@ title('Red: DG. Black: Smooth')
 axis('tight')
 
 #print ("Area under curve f(x)=x", sum(fx[1:-1,0]), sum(gx[1:-1,0]))
+
+### f(x) = sin(x) with perturbations
+figure(4)
+fx = projectSinOnQuadBasis(X)
+for i in range(fx.shape[0]):
+    fx[i,2] = 2.0*(random()-0.5)*fx[i,2]
+plotQuads(Xedge, fx[:,0], fx[:,1], fx[:,2], 'r')
+
+c0 = 10.0
+beta = 3.0/4.0
+alpha = 1/5.0*(3*beta-1)
+plotQuads(Xedge, fx[:,0], beta*fx[:,1], alpha*fx[:,2], '--g')
+
+Xhr = linspace(Xedge[0], Xedge[-1], 100)
+plot(Xhr, sin(Xhr), 'b-')
+
+# smooth it
+gx = smoothQuad(fx, c0, beta)
+plotQuads(Xedge[1:-1], gx[1:-1,0], gx[1:-1,1], gx[1:-1,2], 'k')
+title('Red: DG. Black: Smooth')
+
+axis('tight')
+
+#print ("Area under curve f(x)=sin(x)", sum(fx[1:-1,0]), sum(gx[1:-1,0]))
 
 # ######################## Linear tests
 # nx = 3
