@@ -67,6 +67,8 @@ namespace Lucee
     private:
 /** Electron collision frequency */
       double elcNu;
+/** Friction factor (zero means no friction) */
+      double fricFact;
   };
 }
 

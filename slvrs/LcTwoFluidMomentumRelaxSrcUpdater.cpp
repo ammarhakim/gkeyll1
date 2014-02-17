@@ -25,6 +25,9 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
     elcNu = tbl.getNumber("electronIonCollisionFrequency");
+    fricFact = 0.5;
+    if (tbl.hasNumber("frictionFactor"))
+      fricFact = tbl.getNumber("frictionFactor");
   }
 
   template <unsigned NDIM>
@@ -59,7 +62,7 @@ namespace Lucee
       ionFluid.setPtr(ionPtr, idx);
 
       double ionNu = elcPtr[0]/ionPtr[0]*elcNu; // ion-electron collision frequency
-      double aNu = 0.5*(ionNu+elcNu);
+      double aNu = fricFact*(ionNu+elcNu);
       double ent = std::exp(-aNu*dt);
 
 // initial velocity difference
@@ -68,10 +71,10 @@ namespace Lucee
 
 // update electron momentum
       for (unsigned d=0; d<3; ++d)
-        elcPtr[1+d] = elcPtr[1+d]-elcNu/(2*aNu)*elcPtr[0]*diffU[d]*(1-ent);
+        elcPtr[1+d] = elcPtr[1+d]-fricFact*elcNu/aNu*elcPtr[0]*diffU[d]*(1-ent);
 // update ion momentum
       for (unsigned d=0; d<3; ++d)
-        ionPtr[1+d] = ionPtr[1+d]+ionNu/(2*aNu)*ionPtr[0]*diffU[d]*(1-ent);
+        ionPtr[1+d] = ionPtr[1+d]+fricFact*ionNu/aNu*ionPtr[0]*diffU[d]*(1-ent);
     }
     
     return Lucee::UpdaterStatus();
