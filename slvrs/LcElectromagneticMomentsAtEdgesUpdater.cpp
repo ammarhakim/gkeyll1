@@ -243,6 +243,7 @@ namespace Lucee
       Eigen::VectorXd hamilAtNodes(numNodes);
       for (int i = 0; i < numNodes; i++)
         hamilAtNodes(i) = gstHamilPtr[i];
+
       Eigen::VectorXd hamilDerivAtNodes = derivativeMatrix*hamilAtNodes;
 
       // Copy nodes on left edge into a vector

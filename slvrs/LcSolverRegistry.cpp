@@ -28,6 +28,7 @@
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
+#include <LcFieldArithmeticUpdater.h>
 #include <LcFieldFunctionBoundaryCondition.h>
 #include <LcFiveMomentNumDensityRelax.h>
 #include <LcFunctionBoundaryCondition.h>
@@ -63,6 +64,7 @@
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSetPhiAtBoundaryUpdater.h>
+#include <LcSOLElectronDensityInitialization.h>
 #include <LcSolverRegistry.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
@@ -127,6 +129,15 @@ namespace Lucee
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
       .append<Lucee::SetPhiAtBoundaryUpdater>()
+
+#ifdef HAVE_GSL
+      .append<Lucee::SOLElectronDensityInitialization>()
+#endif
+
+      // Arbitrary field arithmetic for two fields
+      .append<Lucee::FieldArithmeticUpdater<1> >()
+      .append<Lucee::FieldArithmeticUpdater<2> >()
+      .append<Lucee::FieldArithmeticUpdater<2> >()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
