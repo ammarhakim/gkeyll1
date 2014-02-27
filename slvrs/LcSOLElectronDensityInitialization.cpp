@@ -100,7 +100,7 @@ namespace Lucee
     nElcOutPtr = 0.0;
 
     // Calculate mean ion density
-    double meanIonDensity = 0.0;
+    double avgIonDensity = 0.0;
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       nIonIn.setPtr(nIonInPtr, ix);
@@ -112,9 +112,80 @@ namespace Lucee
       Eigen::VectorXd nIonAtQuadPoints = interpMatrix*nIonVec;
 
       for (int componentIndex = 0; componentIndex < nIonAtQuadPoints.rows(); componentIndex++)
-        meanIonDensity += gaussWeights[componentIndex]*nIonAtQuadPoints(componentIndex);
+        avgIonDensity += gaussWeights[componentIndex]*nIonAtQuadPoints(componentIndex);
+    }
+    // Divide by length of domain
+    avgIonDensity = avgIonDensity/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+    
+    int maxIter = 1000;
+
+    // Solve for z by iteration (store temporary results in output structure)
+    for(int iter = 0; iter < maxIter; iter++)
+    {
+      // Calculate <exp(z)>
+      double avgExpZ = 0.0;
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        nElcOut.setPtr(nElcOutPtr, ix);
+        Eigen::VectorXd expZVec(nlocal);
+
+        for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+          expZVec(componentIndex) = std::exp(nElcOutPtr[componentIndex]);
+       
+        Eigen::VectorXd expZAtQuadPoints = interpMatrix*expZVec;
+        
+        for (int componentIndex = 0; componentIndex < expZAtQuadPoints.rows(); componentIndex++)
+          avgExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
+      }
+      // Divide by length of domain
+      avgExpZ = avgExpZ/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+
+      // Loop over all cells
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        // Set inputs
+        nIonIn.setPtr(nIonInPtr, ix);
+        // Set outputs
+        nElcOut.setPtr(nElcOutPtr, ix);
+
+        for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        {
+          double logArg = nIonInPtr[nodeIndex]/avgIonDensity*
+             (1-kPerpTimesRho*kPerpTimesRho*nElcOutPtr[nodeIndex])*
+             avgExpZ;
+          nElcOutPtr[nodeIndex] = std::log(logArg);
+        }
+      }
     }
 
+    // Calculate <exp(z)>
+    double avgExpZ = 0.0;
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    {
+      nElcOut.setPtr(nElcOutPtr, ix);
+      Eigen::VectorXd expZVec(nlocal);
+
+      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+        expZVec(componentIndex) = std::exp(nElcOutPtr[componentIndex]);
+     
+      Eigen::VectorXd expZAtQuadPoints = interpMatrix*expZVec;
+      
+      for (int componentIndex = 0; componentIndex < expZAtQuadPoints.rows(); componentIndex++)
+        avgExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
+    }
+    // Divide by length of domain
+    avgExpZ = avgExpZ/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
+
+    // Final loop: take z and compute n_e = <n_i>*exp(z)
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+    {
+      nElcOut.setPtr(nElcOutPtr, ix);
+
+      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        nElcOutPtr[nodeIndex] = avgIonDensity*std::exp(nElcOutPtr[nodeIndex])/avgExpZ;
+    }
+
+/*
     // Testing stuff
     const gsl_root_fdfsolver_type *T;
     gsl_root_fdfsolver *s;
@@ -166,7 +237,7 @@ namespace Lucee
       }
     }
     
-    gsl_root_fdfsolver_free (s);
+    gsl_root_fdfsolver_free (s);*/
 
     return Lucee::UpdaterStatus();
   }
