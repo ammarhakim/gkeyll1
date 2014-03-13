@@ -38,6 +38,7 @@ set(lcslvrs_SOURCES
   LcEvalOnBoundaryNodesUpdater.cpp
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
+  LcFieldArithmeticUpdater.cpp
   LcFieldFunctionBoundaryCondition.cpp
   LcFiveMomentNumDensityRelax.cpp
   LcFunctionBoundaryCondition.cpp
@@ -84,6 +85,7 @@ set(lcslvrs_SOURCES
   LcSerendipityElementDiffusionOutput
   LcSerendipityElementHyperDiffusionOutput
   LcSetPhiAtBoundaryUpdater.cpp
+  LcSOLElectronDensityInitialization.cpp
   LcSolverRegistry.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp

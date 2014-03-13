@@ -174,7 +174,7 @@ namespace Lucee
       bool foundCutoffVelocity = false;
 
       // Calculate flux at right-most node
-      mom0In.setPtr(mom1Ptr, ix);
+      mom0In.setPtr(mom0Ptr, ix);
       mom1In.setPtr(mom1Ptr, ix);
       aIn.setPtr(aPtr, ix);
       // Assume that the location of the right-most node in 1-D
@@ -269,7 +269,7 @@ namespace Lucee
       bool foundCutoffVelocity = false;
 
       // Find flux at left-most node
-      mom0In.setPtr(mom1Ptr, ix);
+      mom0In.setPtr(mom0Ptr, ix);
       mom1In.setPtr(mom1Ptr, ix);
       aIn.setPtr(aPtr, ix);
       // Assume that the location of the left-most node in 1-D
@@ -307,7 +307,7 @@ namespace Lucee
         for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
         {
           double physicalP = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*leftEdgeQuadData(quadNodeIndex)*(physicalP - elcCharge*aAtEdge)/(elcMass*elcMass);;
+          fluxInEntireCell += gaussEdgeWeights[quadNodeIndex]*leftEdgeQuadData(quadNodeIndex)*(physicalP - elcCharge*aAtEdge)/(elcMass*elcMass);
         }
 
         if (foundCutoffVelocity == false)
