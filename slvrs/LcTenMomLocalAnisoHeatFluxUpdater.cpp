@@ -65,7 +65,7 @@ namespace Lucee
     int idx[NDIM];
 
     double N[6], T[6], cgl[6], p[6], u[3];
-    eps = 0.0;
+    eps = 1.0e-8;
     double e3 = eps/3.0;
 
     Lucee::Region<NDIM, int> localRgn = tmFluid.getRegion();
