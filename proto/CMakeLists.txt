@@ -26,6 +26,7 @@ set (proto_SOURCES
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateNodalField.cpp
   LcLinEmGke1dHamilPertUpdater.cpp

@@ -18,6 +18,7 @@
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateNodalField.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
@@ -78,6 +79,10 @@ namespace Lucee
       .append<Lucee::IntegrateFieldAlongLine<1> >()
       .append<Lucee::IntegrateFieldAlongLine<2> >()
       .append<Lucee::IntegrateFieldAlongLine<3> >()
+
+      .append<Lucee::IntegrateField<1> >()
+      .append<Lucee::IntegrateField<2> >()
+      .append<Lucee::IntegrateField<3> >()
 
       .append<Lucee::IntegrateNodalField<1> >()
       .append<Lucee::IntegrateNodalField<2> >()
