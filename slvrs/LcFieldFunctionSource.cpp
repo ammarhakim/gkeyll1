@@ -20,7 +20,7 @@
 namespace Lucee
 {
 // set id for creators
-  const char *FieldFunctionSource::id = "Function";
+  const char *FieldFunctionSource::id = "FieldFunction";
 
   FieldFunctionSource::FieldFunctionSource()
     : Lucee::PointSourceIfc(1, 1, true)
