@@ -30,6 +30,7 @@
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFieldArithmeticUpdater.h>
 #include <LcFieldFunctionBoundaryCondition.h>
+#include <LcFieldFunctionSource.h>
 #include <LcFiveMomentNumDensityRelax.h>
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
@@ -61,10 +62,10 @@
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSOLElectronDensityInitialization.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSetPhiAtBoundaryUpdater.h>
-#include <LcSOLElectronDensityInitialization.h>
 #include <LcSolverRegistry.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
@@ -242,7 +243,8 @@ namespace Lucee
       .append<Lucee::LorentzForceSource>()
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
-      .append<Lucee::TenMomentFluidSource>();
+      .append<Lucee::TenMomentFluidSource>()
+      .append<Lucee::FieldFunctionSource>();
 
 // register nodal basis functions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<1> > >
