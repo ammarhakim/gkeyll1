@@ -34,6 +34,7 @@ set(lcslvrs_SOURCES
   LcElectromagneticZeroVelocitySource.cpp
   LcElectromagneticZeroVelocitySourceProjection.cpp
   LcElectrostaticPhiUpdater.cpp
+  LcEulerAxiSource.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp
   LcEvalOnNodesUpdater.cpp

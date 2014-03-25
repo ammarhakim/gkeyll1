@@ -1,0 +1,36 @@
+/** Algebra to determine a self-adjoint projection operator */
+
+load(diag);
+/** Matrix of Legendre polynomial normalization coefficients (two is taken out) */
+nCoeff : diag([1, 1/3, 1/5]); 
+
+abar_l(i) := 1/2*(a(0,i-1) + a(1,i-1) + alp*a(2,i-1) + a(0,i) - a(1,i) + alp*a(2,i));
+abar_r(i) := 1/2*(a(0,i) + a(1,i) + alp*a(2,i) + a(0,i+1) - a(1,i+1) + alp*a(2,i+1));
+
+/*
+c1 : 1/12;
+alp : 2/5;
+c2 : (c0-2)/(5*(4*c0+8));
+*/
+
+c1 : 1/12;
+alp : 2/5;
+c2 : (c0-2)/(5*(4*c0+8));
+
+abar_0(i) := 1/(2+c0)*(a(0,i-1)+c0*a(0,i)+a(0,i+1)) - c1*(a(1,i+1)-a(1,i-1)) + c2*(a(2,i+1)-2*a(2,i)+a(2,i-1));
+abar_0 : abar_0(i);
+abar_1 : fullratsimp( 1/2*(abar_r(i)-abar_l(i)) );
+abar_2 : fullratsimp( 1/2*(abar_r(i)+abar_l(i)) -abar_0(i) );
+
+/** Write in terms of shift operator */
+slist : [a(0,i-1)=Ti*a(0,i), a(0,i+1)=T*a(0,i),
+  a(1,i-1)=Ti*a(1,i), a(1,i+1)=T*a(1,i),
+  a(2,i-1)=Ti*a(2,i), a(2,i+1)=T*a(2,i)];
+
+t1 : subst( slist, abar_0);
+t2 : subst( slist, abar_1);
+t3 : subst( slist, abar_2);
+
+/** Construct coefficient matrix */
+coef_mat_4 : coefmatrix([t1,t2,t3], [a(0,i),a(1,i),a(2,i)]);
+
