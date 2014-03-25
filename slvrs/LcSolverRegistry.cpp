@@ -25,6 +25,7 @@
 #include <LcElectromagneticZeroVelocitySource.h>
 #include <LcElectromagneticZeroVelocitySourceProjection.h>
 #include <LcElectrostaticPhiUpdater.h>
+#include <LcEulerAxiSource.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
@@ -244,7 +245,8 @@ namespace Lucee
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
       .append<Lucee::TenMomentFluidSource>()
-      .append<Lucee::FieldFunctionSource>();
+      .append<Lucee::FieldFunctionSource>()
+      .append<Lucee::EulerAxiSource>();
 
 // register nodal basis functions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<1> > >
