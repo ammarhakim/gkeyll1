@@ -52,6 +52,6 @@ namespace Lucee
     src[1] = -rho*u*u/r + rho*v*v/r;
     src[2] = -2*rho*u*v/r;
     src[3] = -rho*u*w/r;
-    src[5] = -u*(er+pr)/r;
+    src[4] = -u*(er+pr)/r;
   }
 }
