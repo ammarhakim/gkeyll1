@@ -28,6 +28,8 @@ namespace Lucee
   EulerAxiSource::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::PointSourceIfc::readInput(tbl);
+// read out gas gamma
+    gasGamma = tbl.getNumber("gasGamma");
   }
 
   void
@@ -35,17 +37,21 @@ namespace Lucee
   {
 // takes in [rho, rho*u, rho*v, rho*w, Er]
     double rho = this->getData(0);
-    double rhou = this->getData(1);
-    double rhov = this->getData(2);
-    double rhow = this->getData(3);
+    double u = this->getData(1)/rho;
+    double v = this->getData(2)/rho;
+    double w = this->getData(3)/rho;
     double er = this->getData(4);
 
     double r = loc[0]; // radial coordinate
-// computes sources for [rho, rho*u, rho*v, rho*w, Er]
-    src[0] = 0.0;
-    src[1] = 0.0;
-    src[2] = 0.0;
-    src[3] = 0.0;
-    src[5] = 0.0;
+    double pr = (gasGamma-1)*(er - 0.5*rho*(u*u+v*v+w*w));
+
+// computes sources for [rho, rho*u, rho*v, rho*w, Er]. These follow
+// from expanding out the divergence of a vector and tensor in
+// (r,theta,z) coordinates.
+    src[0] = -rho*u/r;
+    src[1] = -rho*u*u/r + rho*v*v/r;
+    src[2] = -2*rho*u*v/r;
+    src[3] = -rho*u*w/r;
+    src[5] = -u*(er+pr)/r;
   }
 }

@@ -49,6 +49,8 @@ namespace Lucee
       inline void getSource(double tm, const double loc[3], std::vector<double>& src);
 
     private:
+/** Gas gamma */
+      double gasGamma;
   };
 }
 
