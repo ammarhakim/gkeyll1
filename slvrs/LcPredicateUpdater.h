@@ -66,6 +66,15 @@ namespace Lucee
 /** Reference to assignment function */
       int fnEvalRef;
 
+/**
+ * Get value at specified time and location.
+ *
+ * @param tm Time at which values are needed.
+ * @param loc Location at which values are needed.
+ * @param red On output, values.
+ * @return True if values should be used, false otherwise.
+ */
+      bool getValue(double tm, const double loc[3], std::vector<double>& res);
   };
 }
 

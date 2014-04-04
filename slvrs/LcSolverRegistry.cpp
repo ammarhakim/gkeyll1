@@ -60,6 +60,7 @@
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
+#include <LcPredicateUpdater.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -221,6 +222,10 @@ namespace Lucee
       .append<FiveMomentNumDensityRelax<1> >()
       .append<FiveMomentNumDensityRelax<2> >()
       .append<FiveMomentNumDensityRelax<3> >()
+
+      .append<PredicateUpdater<1> >()
+      .append<PredicateUpdater<2> >()
+      .append<PredicateUpdater<3> >()
 
       .append<Lucee::VelocitiesFromMomentsUpdater>();
 
