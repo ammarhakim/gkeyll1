@@ -1,7 +1,7 @@
 /**
  * @file	LcEvalOnNodesUpdater.cpp
  *
- * @brief	Project a function of a basis functions.
+ * @brief	Set region based on predicate.
  */
 
 // config stuff
