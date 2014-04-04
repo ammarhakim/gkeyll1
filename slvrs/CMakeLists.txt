@@ -79,6 +79,7 @@ set(lcslvrs_SOURCES
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
+  LcPredicateUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
