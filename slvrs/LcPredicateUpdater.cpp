@@ -40,7 +40,6 @@ namespace Lucee
 // get predicate function 
     fnPredRef = tbl.getFunctionRef("predicate");
     fnEvalRef = tbl.getFunctionRef("evaluate");
-    sharedNodes = false;
   }
 
   template <unsigned NDIM>
