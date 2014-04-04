@@ -50,8 +50,10 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Field<NDIM, double>& q = this->getOut<Lucee::Field<NDIM, double> >(0);
 
+    std::vector<double> res(q.getNumComponents());
+
+    double xc[3];
     int idx[NDIM];
-    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 
     Lucee::FieldPtr<double> ptr = q.createPtr();
     Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
@@ -59,12 +61,80 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-      q.setPtr(ptr, idx);
-// TODO
+// get centroid coordinate
+      grid.setIndex(idx);
+      grid.getCentroid(xc);
+      if (getValue(t, xc, res))
+      {
+// inside region, so set field
+        q.setPtr(ptr, idx);
+        for (unsigned k=0; k<ptr.getNumComponents(); ++k)
+          ptr[k] = res[k];
+      }
     }
 
     return Lucee::UpdaterStatus();
   }
+
+  template <unsigned NDIM>
+  bool
+  PredicateUpdater<NDIM>::getValue(double tm, const double loc[3], std::vector<double>& res)
+  {
+    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
+// push function object on stack
+    lua_rawgeti(*L, LUA_REGISTRYINDEX, fnPredRef);
+// push variables on stack
+    for (unsigned i=0; i<3; ++i)
+      lua_pushnumber(*L, loc[i]);
+    lua_pushnumber(*L, tm);
+// call function
+    if (lua_pcall(*L, 4, 1, 0) != 0)
+    {
+      std::string err(lua_tostring(*L, -1));
+      lua_pop(*L, 1);
+      Lucee::Except lce("PredicateUpdater::getValue: ");
+      lce << "Problem evaluating function supplied as 'predicate' ";
+      lce << std::endl << "[" << err << "]";
+      throw lce;
+    }
+// fetch results
+    if (!lua_isboolean(*L, -1))
+      throw Lucee::Except("PredicateUpdater::getValue: Return value not a bool");
+    bool isTrue = lua_toboolean(*L, -1);
+    lua_pop(*L, 1);
+
+    if (isTrue)
+    {
+// only evaluate function if we are inside region
+// push function object on stack
+      lua_rawgeti(*L, LUA_REGISTRYINDEX, fnEvalRef);
+// push variables on stack
+      for (unsigned i=0; i<3; ++i)
+        lua_pushnumber(*L, loc[i]);
+      lua_pushnumber(*L, tm);
+// call function
+      if (lua_pcall(*L, 4, res.size(), 0) != 0)
+      {
+        std::string err(lua_tostring(*L, -1));
+        lua_pop(*L, 1);
+        Lucee::Except lce("PredicateUpdater::getValue: ");
+        lce << "Problem evaluating function supplied as 'evaluate' ";
+        lce << std::endl << "[" << err << "]";
+        throw lce;
+      }
+// fetch results
+      for (int i=-res.size(); i<0; ++i)
+      {
+        if (!lua_isnumber(*L, i))
+          throw Lucee::Except("FunctionSource::getSource: Return value not a number");
+        res[res.size()+i] = lua_tonumber(*L, i);
+      }
+      lua_pop(*L, 1);
+    }
+
+    return isTrue;
+  }
+
 
   template <unsigned NDIM>
   void
