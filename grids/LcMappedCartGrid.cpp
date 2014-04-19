@@ -39,7 +39,7 @@ namespace Lucee
 // get local extended region and indexer
     localExtBox = vertices.getExtRegion();
     Lucee::Region<NDIM, int> localVBox = vertices.getRegion();
-// ensure there are correct number of vertices (i.e. vertiex
+// ensure there are correct number of vertices (i.e. vertex
 // coordinates of ghost cells have been specified)
     for (unsigned i=0; i<NDIM; ++i)
     {
