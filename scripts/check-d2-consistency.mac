@@ -19,7 +19,7 @@ makeRhsMat(n) := block([RHS],
          RHS),
   return (RHS));
 
-nmax : 5;
+nmax : 8;
 /** Taylor series expansion around x=0 */
 T(y) := df(j,0) + sum(y^k*df(j,k)/factorial(k), k, 1, nmax);
 
