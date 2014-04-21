@@ -23,7 +23,6 @@ namespace Lucee
 
   template <unsigned NDIM>
   NonUniRectCartGrid<NDIM>::NonUniRectCartGrid()
-    : idxr(&Lucee::FixedVector<NDIM, unsigned>(1)[0], &Lucee::FixedVector<NDIM, int>(1)[0])
   {
   }
 
@@ -75,7 +74,7 @@ namespace Lucee
     const std::string& nm)
   {
 // place-holder
-    return ion;
+    return node;
   }
 
   template <unsigned NDIM>
