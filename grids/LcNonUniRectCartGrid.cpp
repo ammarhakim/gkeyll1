@@ -27,12 +27,55 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  NonUniRectCartGrid<NDIM>::~NonUniRectCartGrid()
+  {
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      delete vcoords[d];
+      delete cellSize[d];
+    }
+  }
+
+  template <unsigned NDIM>
   void
   NonUniRectCartGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // call base class method
     StructuredGridBase<NDIM>::readInput(tbl);
 
+// local region indexed by grid
+    typename Lucee::Region<NDIM, int> localRgn = this->getLocalRegion();
+
+// extend it to store approriate number of vertices
+    Lucee::FixedVector<NDIM, int> lvExt(2), uvExt(3);
+    typename Lucee::Region<NDIM, int> extVertRegion = localRgn.extend(&lvExt[0], &uvExt[0]);
+
+// extend it to store approriate number of cells
+    Lucee::FixedVector<NDIM, int> lcExt(2), ucExt(2);
+    typename Lucee::Region<NDIM, int> extCellRegion = localRgn.extend(&lcExt[0], &ucExt[0]);
+
+// allocate memory for storing coordinates of vertex
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      int lower[1], upper[1];
+      lower[0] = extVertRegion.getLower(d);
+      upper[0] = extVertRegion.getUpper(d);
+      Lucee::Region<1, int> rgn(lower, upper);
+      vcoords[d] = new Array<1, double>(rgn);
+    }
+
+// get list of mapping functions
+    Lucee::LuaTable mapTbl = tbl.getTable("mappings");
+
+// allocate memory for storing cell size
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      int lower[1], upper[1];
+      lower[0] = extCellRegion.getLower(d);
+      upper[0] = extCellRegion.getUpper(d);
+      Lucee::Region<1, int> rgn(lower, upper);
+      cellSize[d] = new Array<1, double>(rgn);
+    }
   }
 
   template <unsigned NDIM>

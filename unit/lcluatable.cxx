@@ -296,6 +296,32 @@ test_8(Lucee::LuaState& L)
   LC_ASSERT("Testing function call", out[2] == 3.5);
 }
 
+void
+test_9(Lucee::LuaState& L)
+{
+// string with table with list of functions
+  std::string tblStr = 
+    "funcTbl = {"
+    "  function (x) return 1*x end,"
+    "  function (x) return 2*x end,"
+    "  function (x) return 3*x end,"
+    "  function (x) return 4*x end,"
+    "}";
+// evaluate string as Lua code
+  if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
+    throw Lucee::Except("Unable to parse Lua string");
+
+// fetch table and put on top of stack
+  lua_getglobal(L, "funcTbl");
+
+// construct LuaTable object, and fetch list of function references
+  Lucee::LuaTable tbl(L, "funcTbl");
+  std::vector<int> fnRefs = tbl.getAllFunctionRefs();
+
+  LC_ASSERT("Checking is number of functions is correct", fnRefs.size() == 4);
+  
+}
+
 int
 main(int argc, char **argv)
 {
@@ -309,6 +335,7 @@ main(int argc, char **argv)
   test_6(L);
   test_7(L);
   test_8(L);
+  test_9(L);
 
   LC_END_TESTS;
 }
