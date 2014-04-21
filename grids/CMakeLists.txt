@@ -14,6 +14,7 @@ add_library(lcgrids
   LcGridIfc.cpp
   LcGridRegistry.cpp
   LcMappedCartGrid.cpp
+  LcNonUniRectCartGrid.cpp
   LcRectCartGrid.cpp
   LcStructuredGridBase.cpp
 )
