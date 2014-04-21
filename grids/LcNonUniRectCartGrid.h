@@ -13,10 +13,8 @@
 #endif
 
 // lucee includes
-#include <LcGridGeometry.h>
-#include <LcRowMajorIndexer.h>
+#include <LcArray.h>
 #include <LcStructuredGridBase.h>
-#include <LcVec3.h>
 
 namespace Lucee
 {
@@ -35,6 +33,11 @@ namespace Lucee
  * Default ctor
  */
       NonUniRectCartGrid();
+
+/**
+ * Dtor
+ */
+      virtual ~NonUniRectCartGrid();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -116,6 +119,10 @@ namespace Lucee
       static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
 
     private:
+/** Vertex coordinates of nodes */
+      Lucee::Array<1, double>* vcoords[NDIM];
+/** Cells sizes */
+      Lucee::Array<1, double>* cellSize[NDIM];
   };
 }
 

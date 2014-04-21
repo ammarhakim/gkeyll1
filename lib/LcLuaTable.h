@@ -25,17 +25,17 @@
 #include <string>
 #include <vector>
 
-/*
-#define SHOW_LUA_STACK_SIZE(nm, L) \
-    do { \
-      std::cout << "Stack size in " << nm << " is " << lua_gettop(L) << std::endl; \
-    } while (0);
+// #include <iostream>
 
-#define SHOW_LUA_STACK_SIZE2(L) \
-    do { \
-    std::cout << "End stack size is " << lua_gettop(L) << std::endl; \
-    } while (0);
-*/
+// #define SHOW_LUA_STACK_SIZE(nm, L) \
+//     do { \
+//       std::cout << "Stack size in " << nm << " is " << lua_gettop(L) << std::endl; \
+//     } while (0);
+
+// #define SHOW_LUA_STACK_SIZE2(L) \
+//     do { \
+//     std::cout << "End stack size is " << lua_gettop(L) << std::endl; \
+//     } while (0);
 
 /** Debug macro for tracking Lua stack */
 #define SHOW_LUA_STACK_SIZE(nm, L) \
@@ -101,6 +101,13 @@ namespace Lucee
  * @return strings in table.
  */
       std::vector<std::string> getAllStrings() const;
+
+/**
+ * Get all function references in table.
+ *
+ * @return list of function references in table
+ */
+      std::vector<int> getAllFunctionRefs() const;
 
 /**
  * Get all objects in table as a vector of pointers.

@@ -101,6 +101,25 @@ namespace Lucee
     return res;
   }
 
+  std::vector<int>
+  LuaTable::getAllFunctionRefs() const
+  {
+    SHOW_LUA_STACK_SIZE("getAllFunctionRefs", L);
+    std::vector<int> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if ( lua_isfunction(L, -1) )
+        res.push_back( luaL_ref(L, LUA_REGISTRYINDEX) );
+    }
+    lua_pop(L, 1);
+    SHOW_LUA_STACK_SIZE2(L);
+    return res;
+  }
+
   std::string
   LuaTable::getString(const std::string& key) const
   {
