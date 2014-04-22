@@ -99,26 +99,43 @@ namespace Lucee
   void
   NonUniRectCartGrid<NDIM>::getCentroid(double xc[3]) const
   {
+    for (unsigned d=0; d<NDIM; ++d)
+      xc[d] = 0.5*(vcoords[d](this->currIdx[d]+1) + vcoords[d](this->currIdx[d]));
+    for (unsigned d=NDIM; d<3; ++d)
+      xc[d] = 0.0;
   }
 
   template <unsigned NDIM>
   void
   NonUniRectCartGrid<NDIM>::getVertex(double xc[3]) const
   {
+    for (unsigned d=0; d<NDIM; ++d)
+      xc[d] = vcoords[d](this->currIdx[d]+1);
+    for (unsigned d=NDIM; d<3; ++d)
+      xc[d] = 0.0;
   }
 
   template <unsigned NDIM>
   double
   NonUniRectCartGrid<NDIM>::getVolume() const
   {
-    return 0.0;
+    double vol = 1.0;
+    for (unsigned d=0; d<NDIM; ++d)
+      vol *= cellSize[d](this->currIdx[d]);
+    return vol;
   }
 
   template <unsigned NDIM>
   double
   NonUniRectCartGrid<NDIM>::getSurfArea(unsigned dir) const
   {
-    return 0.0;
+    if (dir==0)
+      return cellSize[1](this->currIdx[1])*cellSize[2](this->currIdx[2]); //dx[1]*dx[2];
+    else if (dir==1)
+      return cellSize[0](this->currIdx[0])*cellSize[2](this->currIdx[2]); //dx[0]*dx[2];
+    else if (dir==2)
+      return cellSize[0](this->currIdx[0])*cellSize[1](this->currIdx[1]); //dx[0]*dx[1];
+    return 1.0;
   }
 
   template <unsigned NDIM>
@@ -126,6 +143,48 @@ namespace Lucee
   NonUniRectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[3],
     double tan1[3], double tan2[3]) const
   {
+    if (dir==0)
+    {
+      norm[0] = 1.0;
+      norm[1] = 0.0;
+      norm[2] = 0.0;
+
+      tan1[0] = 0.0;
+      tan1[1] = 1.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 0.0;
+      tan2[2] = 1.0;
+    }
+    else if (dir==1)
+    {
+      norm[0] = 0.0;
+      norm[1] = 1.0;
+      norm[2] = 0.0;
+
+      tan1[0] = -1.0;
+      tan1[1] = 0.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 0.0;
+      tan2[2] = 1.0;
+    }
+    else if (dir==2)
+    {
+      norm[0] = 0.0;
+      norm[1] = 0.0;
+      norm[2] = 1.0;
+
+      tan1[0] = 1.0;
+      tan1[1] = 0.0;
+      tan1[2] = 0.0;
+
+      tan2[0] = 0.0;
+      tan2[1] = 1.0;
+      tan2[2] = 0.0;
+    }
   }
 
   template <unsigned NDIM>
