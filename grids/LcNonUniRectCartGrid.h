@@ -120,9 +120,20 @@ namespace Lucee
 
     private:
 /** Vertex coordinates of nodes */
-      Lucee::Array<1, double>* vcoords[NDIM];
+      std::vector<Lucee::Array<1, double> > vcoords;
 /** Cells sizes */
-      Lucee::Array<1, double>* cellSize[NDIM];
+      std::vector<Lucee::Array<1, double> > cellSize;
+
+/**
+ * Call a Lua function which takes one parameter and returns a single
+ * value.
+ *
+ * @param L Lua-state for the interpreter
+ * @param fnRef Function reference
+ * @param inp Input parameter
+ * @return Value returned from Lua function
+ */
+      double evalLuaFunc(Lucee::LuaState& L, int fnRef, double inp);
   };
 }
 
