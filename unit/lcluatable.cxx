@@ -296,6 +296,27 @@ test_8(Lucee::LuaState& L)
   LC_ASSERT("Testing function call", out[2] == 3.5);
 }
 
+double
+callLuaFunction(Lucee::LuaState& L, int fnRef, double param)
+{
+// push function object on stack
+  lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
+// push variables on stack
+  lua_pushnumber(L, param);
+  if (lua_pcall(L, 1, 1, 0) != 0)
+  {
+    Lucee::Except lce("lcluatable: ");
+    lce << "Problem evaluating function supplied to 'callLuaFunction' method";
+    throw lce;
+  }
+// fetch results
+  if (!lua_isnumber(L, -1))
+    throw Lucee::Except("lcluatable: Return value not a number");
+  double res = lua_tonumber(L, -1);
+  lua_pop(L, 1);
+  return res;
+}
+
 void
 test_9(Lucee::LuaState& L)
 {
@@ -319,7 +340,11 @@ test_9(Lucee::LuaState& L)
   std::vector<int> fnRefs = tbl.getAllFunctionRefs();
 
   LC_ASSERT("Checking is number of functions is correct", fnRefs.size() == 4);
-  
+// test functions
+  LC_ASSERT("Testing function in list", callLuaFunction(L, fnRefs[0], 2.0) == 2.0);
+  LC_ASSERT("Testing function in list", callLuaFunction(L, fnRefs[1], 2.0) == 4.0);
+  LC_ASSERT("Testing function in list", callLuaFunction(L, fnRefs[2], 2.0) == 6.0);
+  LC_ASSERT("Testing function in list", callLuaFunction(L, fnRefs[3], 2.0) == 8.0);
 }
 
 int
