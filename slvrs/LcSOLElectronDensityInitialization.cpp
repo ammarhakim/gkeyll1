@@ -2,7 +2,6 @@
  * @file	LcSOLElectronDensityInitialization.cpp
  *
  * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
- * NOTE: CLEAN UP CODE
  */
 
 // config stuff
@@ -13,13 +12,13 @@
 // lucee includes
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcMathPhysConstants.h>
+#include <LcGlobals.h>
 
-// gsl includes
-#ifdef HAVE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_roots.h>
-#endif
+// loki includes
+#include <loki/Singleton.h>
+
+// std includes
+#include <vector>
 
 namespace Lucee
 {
@@ -35,6 +34,8 @@ namespace Lucee
   SOLElectronDensityInitialization::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
+    // get function to evaluate
+    fnRef = tbl.getFunctionRef("evaluate");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
@@ -45,6 +46,11 @@ namespace Lucee
       kPerpTimesRho = tbl.getNumber("kPerpTimesRho");
     else
       throw Lucee::Except("SOLElectronDensityInitialization::readInput: Must specify kPerpTimesRho");
+
+    if (tbl.hasNumber("Te0"))
+      Te0 = tbl.getNumber("Te0");
+    else
+      throw Lucee::Except("SOLElectronDensityInitialization::readInput: Must specify Te0");
   }
 
   void 
@@ -99,8 +105,16 @@ namespace Lucee
 
     nElcOutPtr = 0.0;
 
-    // Calculate mean ion density
-    double avgIonDensity = 0.0;
+    // get hold of Lua state object
+    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
+    // to store function evaluation result
+    std::vector<double> resultVector(1);
+
+    int numCells = globalRgn.getUpper(0)-globalRgn.getLower(0);
+    Eigen::VectorXd zPrev(numCells*nlocal);
+
+    // Calculate integrated ion density
+    double intIonDensity = 0.0;
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       nIonIn.setPtr(nIonInPtr, ix);
@@ -112,18 +126,21 @@ namespace Lucee
       Eigen::VectorXd nIonAtQuadPoints = interpMatrix*nIonVec;
 
       for (int componentIndex = 0; componentIndex < nIonAtQuadPoints.rows(); componentIndex++)
-        avgIonDensity += gaussWeights[componentIndex]*nIonAtQuadPoints(componentIndex);
+        intIonDensity += gaussWeights[componentIndex]*nIonAtQuadPoints(componentIndex);
     }
-    // Divide by length of domain
-    avgIonDensity = avgIonDensity/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
     
-    int maxIter = 1000;
+    int maxIter = 10000;
+    // To get the correct position to evaluate temperature function as a position of z
+    Lucee::Matrix<double> nodeCoordsLucee(nlocal, 3);
+
+    int iter = 0;
+    double tol = 1e-14;
+    double relError;
 
     // Solve for z by iteration (store temporary results in output structure)
-    for(int iter = 0; iter < maxIter; iter++)
-    {
+    do {
       // Calculate <exp(z)>
-      double avgExpZ = 0.0;
+      double intExpZ = 0.0;
       for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
       {
         nElcOut.setPtr(nElcOutPtr, ix);
@@ -135,11 +152,11 @@ namespace Lucee
         Eigen::VectorXd expZAtQuadPoints = interpMatrix*expZVec;
         
         for (int componentIndex = 0; componentIndex < expZAtQuadPoints.rows(); componentIndex++)
-          avgExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
+          intExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
       }
-      // Divide by length of domain
-      avgExpZ = avgExpZ/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
+      // For calculating <expZ>
+      double intExpZAgain = 0.0;
       // Loop over all cells
       for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
       {
@@ -148,18 +165,91 @@ namespace Lucee
         // Set outputs
         nElcOut.setPtr(nElcOutPtr, ix);
 
+        // Set nodal basis index
+        nodalBasis->setIndex(ix);
+        // Get nodal coordinates into Lucee matrix
+        nodalBasis->getNodalCoordinates(nodeCoordsLucee);
+
+        Eigen::VectorXd expZVec(nlocal);
+
         for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
         {
-          double logArg = nIonInPtr[nodeIndex]/avgIonDensity*
-             (1-kPerpTimesRho*kPerpTimesRho*nElcOutPtr[nodeIndex])*
-             avgExpZ;
+          // Evaluate supplied temperature function
+          evaluateFunction(*L, t, nodeCoordsLucee(nodeIndex, 0), resultVector);
+          double elcTemp = resultVector[0];
+          double logArg = nIonInPtr[nodeIndex]/intIonDensity*
+             (1-kPerpTimesRho*kPerpTimesRho*nElcOutPtr[nodeIndex]*elcTemp/Te0)*
+             intExpZ;
+          
           nElcOutPtr[nodeIndex] = std::log(logArg);
+
+          // Copy data into vector to perform integral of <expZ>
+          expZVec(nodeIndex) = logArg;
+        }
+
+        Eigen::VectorXd expZAtQuadPoints = interpMatrix*expZVec;
+        for (int componentIndex = 0; componentIndex < expZAtQuadPoints.rows(); componentIndex++)
+          intExpZAgain += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
+      }
+
+      // Compute <(n_i - n_e)*Te0/kPerpRho^2>
+      double convergenceFactor = 0.0;
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        // Set inputs
+        nIonIn.setPtr(nIonInPtr, ix);
+        // Set outputs
+        nElcOut.setPtr(nElcOutPtr, ix);
+
+        Eigen::VectorXd convergenceVec(nlocal);
+
+        for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+          convergenceVec(nodeIndex) = (nIonInPtr[nodeIndex]-intIonDensity*std::exp(nElcOutPtr[nodeIndex])/
+              intExpZAgain)*Te0/(kPerpTimesRho*kPerpTimesRho);
+        
+        Eigen::VectorXd convergenceVecAtQuadPoints = interpMatrix*convergenceVec;
+        for (int quadIndex = 0; quadIndex < convergenceVecAtQuadPoints.rows(); quadIndex++)
+          convergenceFactor += gaussWeights[quadIndex]*convergenceVecAtQuadPoints(quadIndex);
+      }
+
+      // For calculating relative errors
+      double maxRes = 0.0;
+      double maxZ = 0.0;
+      // Go through all output locations and add correcting factor
+      for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
+      {
+        // Set outputs
+        nElcOut.setPtr(nElcOutPtr, ix);
+        // Set nodal basis index
+        nodalBasis->setIndex(ix);
+        // Get nodal coordinates into Lucee matrix
+        nodalBasis->getNodalCoordinates(nodeCoordsLucee);
+
+        for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        {
+          // Evaluate supplied temperature function
+          evaluateFunction(*L, t, nodeCoordsLucee(nodeIndex, 0), resultVector);
+          double elcTemp = resultVector[0];
+          nElcOutPtr[nodeIndex] = nElcOutPtr[nodeIndex] - convergenceFactor/(intIonDensity*elcTemp);
+          
+          if (fabs(nElcOutPtr[nodeIndex]) > maxZ)
+            maxZ = fabs(nElcOutPtr[nodeIndex]);
+          // Calculate and possibly store error
+          double residual = fabs(nElcOutPtr[nodeIndex] - zPrev((ix-globalRgn.getLower(0))*nlocal + nodeIndex));
+          if (residual > maxRes)
+            maxRes = residual;
+          // Store results for comparison
+          zPrev((ix-globalRgn.getLower(0))*nlocal + nodeIndex) = nElcOutPtr[nodeIndex];
         }
       }
-    }
 
-    // Calculate <exp(z)>
-    double avgExpZ = 0.0;
+      relError = maxRes/maxZ;
+      std::cout << "iter " << iter << " relerr = " << relError << std::endl;
+      iter++;
+    } while (iter < maxIter && relError > tol);
+
+    // Calculate <exp(z)> again
+    double intExpZ = 0.0;
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       nElcOut.setPtr(nElcOutPtr, ix);
@@ -171,73 +261,17 @@ namespace Lucee
       Eigen::VectorXd expZAtQuadPoints = interpMatrix*expZVec;
       
       for (int componentIndex = 0; componentIndex < expZAtQuadPoints.rows(); componentIndex++)
-        avgExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
+        intExpZ += gaussWeights[componentIndex]*expZAtQuadPoints(componentIndex);
     }
-    // Divide by length of domain
-    avgExpZ = avgExpZ/(grid.getDx(0)*(globalRgn.getUpper(0)-globalRgn.getLower(0)));
 
-    // Final loop: take z and compute n_e = <n_i>*exp(z)
+    // Final loop: take z and compute n_e = <n_i>*exp(z)/<exp(z)>
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       nElcOut.setPtr(nElcOutPtr, ix);
 
       for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
-        nElcOutPtr[nodeIndex] = avgIonDensity*std::exp(nElcOutPtr[nodeIndex])/avgExpZ;
+        nElcOutPtr[nodeIndex] = intIonDensity*std::exp(nElcOutPtr[nodeIndex])/intExpZ;
     }
-
-/*
-    // Testing stuff
-    const gsl_root_fdfsolver_type *T;
-    gsl_root_fdfsolver *s;
-    gsl_function_fdf FDF;
-
-    T = gsl_root_fdfsolver_newton;
-    s = gsl_root_fdfsolver_alloc (T);
-
-    FDF.f = &Lucee::SOLElectronDensityInitialization::computeF_Wrapper;
-    FDF.df = &Lucee::SOLElectronDensityInitialization::computeFPrime_Wrapper;
-    FDF.fdf = &Lucee::SOLElectronDensityInitialization::computeFAndFPrime_Wrapper;
-
-    // Loop over all cells
-    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
-    {
-      // Set inputs
-      nIonIn.setPtr(nIonInPtr, ix);
-      // Set outputs
-      nElcOut.setPtr(nElcOutPtr, ix);
-
-      // Loop over nodes
-      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
-      {
-        struct fParams params = {meanIonDensity, nIonInPtr[nodeIndex]};
-        FDF.params = &params;
-        double x0;
-        int status;
-        double x = (nIonInPtr[nodeIndex]-meanIonDensity)/(meanIonDensity
-            + nIonInPtr[nodeIndex]*kPerpTimesRho*kPerpTimesRho);
-        double xInit = (nIonInPtr[nodeIndex]-meanIonDensity)/(meanIonDensity
-            + nIonInPtr[nodeIndex]*kPerpTimesRho*kPerpTimesRho);
-        
-        gsl_root_fdfsolver_set (s, &FDF, x);
-
-        int iter = 0;
-        int max_iter = 1000;
-
-        do
-        {
-          iter++;
-          status = gsl_root_fdfsolver_iterate (s);
-          x0 = x;
-          x = gsl_root_fdfsolver_root (s);
-          status = gsl_root_test_delta (x, x0, 0, 1e-14);
-        }
-        while (status == GSL_CONTINUE && iter < max_iter);
-
-        nElcOutPtr[nodeIndex] = meanIonDensity*exp(x);
-      }
-    }
-    
-    gsl_root_fdfsolver_free (s);*/
 
     return Lucee::UpdaterStatus();
   }
@@ -260,55 +294,33 @@ namespace Lucee
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
 
-  double
-  SOLElectronDensityInitialization::computeF(double x, void *params)
-  {
-    struct fParams *p = (struct fParams *) params;
-
-    double ionDensityAtPoint = p->ionDensityAtPoint;
-    double averageIonDensity = p->averageIonDensity;
-    
-    return ionDensityAtPoint - averageIonDensity*exp(x) - ionDensityAtPoint*kPerpTimesRho*kPerpTimesRho*x;
-  }
-
-  double
-  SOLElectronDensityInitialization::computeF_Wrapper(double x, void *params)
-  {
-    return static_cast<SOLElectronDensityInitialization*>(params)->computeF(x,params);
-  }
-
-  double
-  SOLElectronDensityInitialization::computeFPrime(double x, void *params)
-  {
-    struct fParams *p = (struct fParams *) params;
-
-    double ionDensityAtPoint = p->ionDensityAtPoint;
-    double averageIonDensity = p->averageIonDensity;
-    
-    return -averageIonDensity*exp(x) - ionDensityAtPoint*kPerpTimesRho*kPerpTimesRho;
-  }
-
-  double
-  SOLElectronDensityInitialization::computeFPrime_Wrapper(double x, void *params)
-  {
-    return static_cast<SOLElectronDensityInitialization*>(params)->computeFPrime(x,params);
-  }
-
   void
-  SOLElectronDensityInitialization::computeFAndFPrime(double x, void *params, double *y, double *dy)
+  SOLElectronDensityInitialization::evaluateFunction(Lucee::LuaState& L, double tm,
+    double positionValue, std::vector<double>& res)
   {
-    struct fParams *p = (struct fParams *) params;
-
-    double ionDensityAtPoint = p->ionDensityAtPoint;
-    double averageIonDensity = p->averageIonDensity;
-
-    *y = ionDensityAtPoint - averageIonDensity*exp(x) - ionDensityAtPoint*kPerpTimesRho*kPerpTimesRho*x;
-    *dy = -averageIonDensity*exp(x) - ionDensityAtPoint*kPerpTimesRho*kPerpTimesRho;
-  }
-
-  void
-  SOLElectronDensityInitialization::computeFAndFPrime_Wrapper(double x, void *params, double *y, double *dy)
-  {
-    static_cast<SOLElectronDensityInitialization*>(params)->computeFAndFPrime(x,params,y,dy);
+    // push function object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
+    // push variables on stack
+    lua_pushnumber(L, positionValue);
+    lua_pushnumber(L, tm);
+    // call function
+    if (lua_pcall(L, 2, res.size(), 0) != 0)
+    {
+      Lucee::Except lce("SOLElectronDensityInitialization::evaluateFunction: ");
+      lce << "Problem evaluating function supplied as 'evaluate' "
+          << std::endl;
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
+      lce << "[" << err << "]";
+      throw lce;
+    }
+    // fetch results
+    for (int i=-res.size(); i<0; ++i)
+    {
+      if (!lua_isnumber(L, i))
+        throw Lucee::Except("SOLElectronDensityInitialization::evaluateFunction: Return value not a number");
+      res[res.size()+i] = lua_tonumber(L, i);
+    }
+    lua_pop(L, 1);
   }
 }

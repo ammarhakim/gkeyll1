@@ -68,10 +68,14 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Reference to function to project */
+      int fnRef;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
 /** Value of k_perp0*rho_s */
       double kPerpTimesRho;
+/** Value of normalizing Te0 in poisson equation (must be in same units as supplied function */
+      double Te0;
 /** Weights for gaussian quadrature points */
       std::vector<double> gaussWeights;
 /** 
@@ -86,18 +90,17 @@ namespace Lucee
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
 
-      // Testing GSL functions
-      struct fParams {
-        double averageIonDensity;
-        double ionDensityAtPoint;
-      };
-      double computeF(double x, void *params);
-      double computeFPrime(double x, void *params);
-      void computeFAndFPrime(double x, void *params, double *y, double *dy);
-      
-      static double computeF_Wrapper(double x, void *params);
-      static double computeFPrime_Wrapper(double x, void *params);
-      static void computeFAndFPrime_Wrapper(double x, void *params, double *y, double *dy);
+/**
+ * Evaluate function at specified location and fill output array with
+ * result.
+ *
+ * @param L Lua state object to use.
+ * @param tm Time to evaluate function at.
+ * @param positionValue X-value to evaluate the function
+ * @param res On output, result of evaluating function.
+ */
+      void evaluateFunction(Lucee::LuaState& L, double tm,
+        double positionValue, std::vector<double>& res);
   };
 }
 

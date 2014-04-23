@@ -89,6 +89,8 @@ set(lcslvrs_SOURCES
   LcSerendipityElementDiffusionOutput
   LcSerendipityElementHyperDiffusionOutput
   LcSetPhiAtBoundaryUpdater.cpp
+  LcSOLElectronDensityInitialization.cpp
+  LcSOLIonDensityInitialization.cpp
   LcSolverRegistry.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp

@@ -73,11 +73,11 @@ namespace Lucee
     
     std::vector<double> data(3);
     // Total energy at this time step
-    data[0] = ionMass*energyIon[0] + electronMass*energyElc[0];
-    // Energy lost at this time step
+    data[0] = energyIon[0] + energyElc[0];
+    // Power lost at this time step
     data[1] = heatFluxes[0] + heatFluxes[3];
-    // Energy added at this time step
-    data[2] = ionMass*powerSrcIon[0] + electronMass*powerSrcElc[0];
+    // Power added at this time step
+    data[2] = powerSrcIon[0] + powerSrcElc[0];
 
     // Put data into the DynVector
     totalEnergyOut.appendData(t, data);
