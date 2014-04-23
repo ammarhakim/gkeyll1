@@ -203,7 +203,7 @@ namespace Lucee
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        mhdHamiltonianPtr[componentIndex] = -0.5*mhdHamiltonianWeights(componentIndex);
+        mhdHamiltonianPtr[componentIndex] = mhdHamiltonianWeights(componentIndex);
     }
 
     return Lucee::UpdaterStatus();
