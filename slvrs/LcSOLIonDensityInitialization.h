@@ -1,11 +1,12 @@
 /**
- * @file	LcSOLElectronDensityInitialization.h
+ * @file	LcSOLIonDensityInitialization.h
  *
- * @brief	Updater to compute phi using a fixed value of k_perp*rho_s
+ * @brief	Updater to compute an ion density given an electron density in accordance
+ * with force balance
  */
 
-#ifndef LC_SOL_ELECTRON_DENSITY_INITIALIZATION_H
-#define LC_SOL_ELECTRON_DENSITY_INITIALIZATION_H
+#ifndef LC_SOL_ION_DENSITY_INITIALIZATION_H
+#define LC_SOL_ION_DENSITY_INITIALIZATION_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,14 +27,14 @@ namespace Lucee
  * Updater to solve hyperbolic equations using a nodal discontinous
  * Galerkin scheme.
  */
-  class SOLElectronDensityInitialization : public Lucee::UpdaterIfc
+  class SOLIonDensityInitialization : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      SOLElectronDensityInitialization();
+      SOLIonDensityInitialization();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -89,19 +90,7 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-
-/**
- * Evaluate function at specified location and fill output array with
- * result.
- *
- * @param L Lua state object to use.
- * @param tm Time to evaluate function at.
- * @param positionValue X-value to evaluate the function
- * @param res On output, result of evaluating function.
- */
-      void evaluateFunction(Lucee::LuaState& L, double tm,
-        double positionValue, std::vector<double>& res);
   };
 }
 
-#endif // LC_SOL_ELECTRON_DENSITY_INITIALIZATION_H
+#endif // LC_SOL_ION_DENSITY_INITIALIZATION_H
