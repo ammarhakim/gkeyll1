@@ -68,6 +68,8 @@
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSetPhiAtBoundaryUpdater.h>
+#include <LcSOLElectronDensityInitialization.h>
+#include <LcSOLIonDensityInitialization.h>
 #include <LcSolverRegistry.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
@@ -132,10 +134,8 @@ namespace Lucee
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
       .append<Lucee::SetPhiAtBoundaryUpdater>()
-
-#ifdef HAVE_GSL
       .append<Lucee::SOLElectronDensityInitialization>()
-#endif
+      .append<Lucee::SOLIonDensityInitialization>()
 
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()
