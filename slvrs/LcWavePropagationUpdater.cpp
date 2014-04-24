@@ -258,24 +258,25 @@ namespace Lucee
             wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
 
 // get surface area of edge and volumes of two cells attached to edge
-          grid.setIndex(idx);
+          grid.setIndex(idx); // cell right of edge
           double surfArea = grid.getSurfArea(dir);
-          double cellVol = grid.getVolume();
+          double areaVol = surfArea/grid.getVolume();
+
           grid.setIndex(idxl); // cell left of edge
-          double cellVoll = grid.getVolume();
+          double areaVoll = surfArea/grid.getVolume();
 
 // compute first-order Gudonov update
           qNew.setPtr(qNewPtr, idx);
           qNew.setPtr(qNewPtrl, idxl);
           for (unsigned m=0; m<meqn; ++m)
           {
-            qNewPtr[m] += -dtdx*apdqPtr[m];
-            qNewPtrl[m] += -dtdx*amdqPtr[m];
+            qNewPtr[m] += -dt*areaVol*apdqPtr[m]; // contribution to cell right of edge
+            qNewPtrl[m] += -dt*areaVoll*amdqPtr[m]; // contribution to cell left of edge
           }
 
 // compute CFL number used in this step
           for (unsigned mw=0; mw<mwave; ++mw)
-            cfla = Lucee::max3(cfla, dtdx*speedsPtr[mw], -dtdx*speedsPtr[mw]);
+            cfla = Lucee::max3(cfla, std::fabs(dt*areaVol*speedsPtr[mw]), std::fabs(dt*areaVoll*speedsPtr[mw]));
 
         }
 // check if time-step was too large
