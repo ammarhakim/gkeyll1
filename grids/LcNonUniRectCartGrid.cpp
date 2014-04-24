@@ -44,26 +44,14 @@ namespace Lucee
 // call base class method
     StructuredGridBase<NDIM>::readInput(tbl);
 
-// local region indexed by grid
-    typename Lucee::Region<NDIM, int> localRgn = this->getLocalRegion();
-
-// extend it to store approriate number of cells
-    Lucee::FixedVector<NDIM, int> lcExt(2), ucExt(2);
-    typename Lucee::Region<NDIM, int> extCellRegion = localRgn.extend(&lcExt[0], &ucExt[0]);
-
-// allocate memory for storing coordinates of vertex
-    for (unsigned d=0; d<NDIM; ++d)
-    {
-
-    }
-
 // get list of mapping functions
     Lucee::LuaTable mapTbl = tbl.getTable("mappings");
     std::vector<int> mapFnRefs = mapTbl.getAllFunctionRefs();
 
-    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
-
+    typename Lucee::Region<NDIM, int> localRgn = this->getLocalRegion();
     typename Lucee::Region<NDIM, double> compSpace = this->getComputationalSpace();
+
+    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 // compute mappings in each direction
     for (unsigned d=0; d<NDIM; ++d)
     {

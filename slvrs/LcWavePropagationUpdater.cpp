@@ -257,6 +257,13 @@ namespace Lucee
           equation->qFluctuations(coordSys, qLocall, qLocal,
             wavesGlobal, speedsPtr, amdqPtr, apdqPtr);
 
+// get surface area of edge and volumes of two cells attached to edge
+          grid.setIndex(idx);
+          double surfArea = grid.getSurfArea(dir);
+          double cellVol = grid.getVolume();
+          grid.setIndex(idxl); // cell left of edge
+          double cellVoll = grid.getVolume();
+
 // compute first-order Gudonov update
           qNew.setPtr(qNewPtr, idx);
           qNew.setPtr(qNewPtrl, idxl);
