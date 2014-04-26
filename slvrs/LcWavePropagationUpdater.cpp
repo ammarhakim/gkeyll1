@@ -287,9 +287,19 @@ namespace Lucee
 
 // compute second order corrections to flux (we need to go one cell
 // beyond the last cell to ensure the right most edge flux is
-// computed)
+// computed). This loop is over edges.
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
         {
+          idx[dir] = i; // cell right of edge
+          grid.setIndex(idx);
+          double surfArea = grid.getSurfArea(dir);
+          double cellVol = grid.getVolume();
+
+          idx[dir] = i-1; // cell left of edge
+          grid.setIndex(idx);
+          cellVol += grid.getVolume();
+          double areaVol = surfArea/(0.5*cellVol);
+
           fs[dir]->setPtr(fsPtr, i);
           speeds[dir]->setPtr(speedsPtr, i);
           waves[dir]->setPtr(wavesPtr, i);
@@ -301,21 +311,28 @@ namespace Lucee
             fsPtr[m] = 0.0;
             for (unsigned mw=0; mw<mwave; ++mw)
               fsPtr[m] += 0.5*std::abs(speedsPtr[mw])*(1.0 -
-                std::abs(speedsPtr[mw])*dtdx)*wavesMat(m, mw);
+                std::abs(speedsPtr[mw])*dt*areaVol)*wavesMat(m, mw);
           }
         }
 
-// accumulate second order corrections
+// accumulate second order corrections (this loop is over cells)
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
         {
+          idx[dir] = i+1; //  right edge of cell
+          grid.setIndex(idx);
+          double surfArea1 = grid.getSurfArea(dir);
+
           idx[dir] = i; // left edge of cell
+          grid.setIndex(idx);
+          double surfArea = grid.getSurfArea(dir);
+          double cellVol = grid.getVolume();
 
           qNew.setPtr(qNewPtr, idx);
           fs[dir]->setPtr(fsPtr, i);
           fs[dir]->setPtr(fsPtr1, i+1);
 
           for (unsigned m=0; m<meqn; ++m)
-            qNewPtr[m] += -dtdx*(fsPtr1[m] - fsPtr[m]);
+            qNewPtr[m] += -dt/cellVol*(surfArea1*fsPtr1[m] - surfArea*fsPtr[m]);
         }
       }
     }
