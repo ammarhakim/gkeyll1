@@ -196,7 +196,6 @@ namespace Lucee
     for (unsigned d=0; d<updateDims.size(); ++d)
     {
       unsigned dir = updateDims[d]; // direction to update
-      double dtdx = dt/grid.getDx(dir);
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
 
