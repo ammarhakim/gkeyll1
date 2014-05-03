@@ -181,7 +181,7 @@ namespace Lucee
     const std::string& nm)
   {
 // NOTE: Even though VizSchema allows a non-uniform grid, I am writing
-// it out as if it is a general structured (mapped) grid. Make
+// it out as if it is a general structured (mapped) grid. Makes
 // post-processing tools easier to maintain at the expense of a
 // somewhat larger amount of data writen. (Ammar Hakim, April 21st
 // 2014).
