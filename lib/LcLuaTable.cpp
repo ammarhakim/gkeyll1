@@ -254,11 +254,8 @@ namespace Lucee
   {
     SHOW_LUA_STACK_SIZE("getBoolVec", L);
     std::vector<bool> res;
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-// push name of table onto stack
     lua_pushstring(L, key.c_str());
-// now put table of values on stack
     lua_gettable(L, -2);
     int t = lua_gettop(L);
     lua_pushnil(L);
@@ -296,10 +293,8 @@ namespace Lucee
   LuaTable::getFunctionRef(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("getFunctionRef", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     lua_pushstring(L, nm.c_str());
-// get data from table
     lua_gettable(L, -2);
     if (! lua_isfunction(L, -1) )
     {
@@ -318,10 +313,8 @@ namespace Lucee
   LuaTable::hasString(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasString", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     lua_pushstring(L, key.c_str());
-// get data from table
     lua_gettable(L, -2);
     if (lua_type(L, -1) != LUA_TSTRING)
     {
@@ -338,10 +331,8 @@ namespace Lucee
   LuaTable::hasNumber(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasNumber", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     lua_pushstring(L, key.c_str());
-// get data from table
     lua_gettable(L, -2);
     if (lua_type(L, -1) != LUA_TNUMBER)
     {
@@ -358,10 +349,8 @@ namespace Lucee
   LuaTable::hasBool(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasBool", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     lua_pushstring(L, key.c_str());
-// get data from table
     lua_gettable(L, -2);
     if (lua_type(L, -1) != LUA_TBOOLEAN)
     {
@@ -378,11 +367,8 @@ namespace Lucee
   LuaTable::hasStrVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasStrVec", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-// push name of table onto stack
     lua_pushstring(L, key.c_str());
-// now put table of values on stack
     lua_gettable(L, -2);
 
 // check if this is a table in the first place
@@ -413,13 +399,9 @@ namespace Lucee
   LuaTable::hasNumVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasNumVec", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-// push name of table onto stack
     lua_pushstring(L, key.c_str());
-// now put table of values on stack
     lua_gettable(L, -2);
-// check if this is a table in the first place
     if (lua_type(L, -1) != LUA_TTABLE)
     {
       lua_pop(L, 2);
@@ -447,13 +429,9 @@ namespace Lucee
   LuaTable::hasBoolVec(const std::string& key) const
   {
     SHOW_LUA_STACK_SIZE("hasBoolVec", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-// push name of table onto stack
     lua_pushstring(L, key.c_str());
-// now put table of values on stack
     lua_gettable(L, -2);
-// check if this is a table in the first place
     if (lua_type(L, -1) != LUA_TTABLE)
     {
       lua_pop(L, 2);
@@ -499,10 +477,8 @@ namespace Lucee
   LuaTable::hasFunction(const std::string& nm) const
   {
     SHOW_LUA_STACK_SIZE("hasFunction", L);
-// push table object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     lua_pushstring(L, nm.c_str());
-// get data from table
     lua_gettable(L, -2);
     if (! lua_isfunction(L, -1) )
     {
@@ -518,8 +494,7 @@ namespace Lucee
   void
   LuaTable::createTypeMap()
   {
-//    SHOW_LUA_STACK_SIZE("createTypeMap", L);
-// push table object on stack
+    SHOW_LUA_STACK_SIZE("createTypeMap", L);
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     int t = lua_gettop(L);
     lua_pushnil(L);
@@ -538,7 +513,7 @@ namespace Lucee
       }
       lua_pop(L, 1);
     }
-//    SHOW_LUA_STACK_SIZE2(L);
+    SHOW_LUA_STACK_SIZE2(L);
   }
 
   std::vector<std::string>
