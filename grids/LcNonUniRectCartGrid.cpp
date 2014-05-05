@@ -117,13 +117,13 @@ namespace Lucee
   double
   NonUniRectCartGrid<NDIM>::getSurfArea(unsigned dir) const
   {
-    if (dir==0)
-      return cellSize[1](this->currIdx[1])*cellSize[2](this->currIdx[2]); //dx[1]*dx[2];
-    else if (dir==1)
-      return cellSize[0](this->currIdx[0])*cellSize[2](this->currIdx[2]); //dx[0]*dx[2];
-    else if (dir==2)
-      return cellSize[0](this->currIdx[0])*cellSize[1](this->currIdx[1]); //dx[0]*dx[1];
-    return 1.0;
+    double sa = 1.0;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (dir!=d)
+        sa *= cellSize[d](this->currIdx[d]);
+    }
+    return sa;
   }
 
   template <unsigned NDIM>
