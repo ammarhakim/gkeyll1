@@ -275,7 +275,8 @@ namespace Lucee
 
 // compute CFL number used in this step
           for (unsigned mw=0; mw<mwave; ++mw)
-            cfla = Lucee::max3(cfla, std::fabs(dt*areaVol*speedsPtr[mw]), std::fabs(dt*areaVoll*speedsPtr[mw]));
+            cfla = Lucee::max3(cfla, 
+              std::fabs(dt*areaVol*speedsPtr[mw]), std::fabs(dt*areaVoll*speedsPtr[mw]));
 
         }
 // check if time-step was too large
