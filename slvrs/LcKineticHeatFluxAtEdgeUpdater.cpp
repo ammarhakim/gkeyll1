@@ -160,22 +160,25 @@ namespace Lucee
     {
       Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
       
-      std::vector<double> sheathData(3);
+      std::vector<double> sheathData(7);
 
-      double elcParallelTempRight = -elcMass*momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/
-        (momentsAtEdgesElc[4]*momentsAtEdgesElc[4]) + elcMass*momentsAtEdgesElc[6]/momentsAtEdgesElc[4];
-            
-      double kTe0 = 1.0/3.0*elcParallelTempRight + 2.0/3.0*ELEMENTARY_CHARGE*tPerpElc;
+      double kTe0 = elcMass*(momentsAtEdgesElc[6] -
+          momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/momentsAtEdgesElc[4])/
+          momentsAtEdgesElc[4];
       
-      double ionParallelTempRight = -ionMass*momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/
-        (momentsAtEdgesIon[4]*momentsAtEdgesIon[4]) + ionMass*momentsAtEdgesIon[6]/momentsAtEdgesIon[4];
+      double kTi0 = ionMass*(momentsAtEdgesIon[6] - 
+          momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/momentsAtEdgesIon[4])/
+          momentsAtEdgesIon[4];
 
-      double kTi0 = 1.0/3.0*ionParallelTempRight + 2.0/3.0*ELEMENTARY_CHARGE*tPerpElc;
-      
       // Total transmission coefficient
       sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
       sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[5] );
       sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[5] );
+      sheathData[3] = kTi0;
+      sheathData[4] = kTe0;
+      // Diagnostics
+      sheathData[5] = momentsAtEdgesElc[5];
+      sheathData[6] = momentsAtEdgesIon[5];
 
       sheathCoefficientVsTime.appendData(t, sheathData);
     }
@@ -192,7 +195,7 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: dynvector of heat flux at edge vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
-    // optional second output: dynvector of sheat power transmission
+    // optional second output: dynvector of sheath power transmission
     // coefficient vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }

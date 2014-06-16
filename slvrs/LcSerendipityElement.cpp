@@ -1002,6 +1002,30 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  SerendipityElement<NDIM>::getHyperDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat_o,
+    std::vector<Lucee::Matrix<double> >& lowerMat_o, std::vector<Lucee::Matrix<double> >& upperMat_o) const
+  {
+    if (polyOrder > 2)
+      Lucee::Except("SerendipityElement::getHyperDiffusionMatrices: Not implemented for higher than quadratic!");
+    if (NDIM != 2)
+      Lucee::Except("SerendipityElement::getHyperDiffusionMatrices: Only implemented for 2D");
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      for (int rowIndex = 0; rowIndex < iMatHyperDiffusion[dimIndex].rows(); rowIndex++)
+      {
+        for (int colIndex = 0; colIndex < iMatHyperDiffusion[dimIndex].cols(); colIndex++)
+        {
+          iMat_o[dimIndex](rowIndex,colIndex) = iMatHyperDiffusion[dimIndex](rowIndex,colIndex);
+          lowerMat_o[dimIndex](rowIndex,colIndex) = lowerMatHyperDiffusion[dimIndex](rowIndex,colIndex);
+          upperMat_o[dimIndex](rowIndex,colIndex) = upperMatHyperDiffusion[dimIndex](rowIndex,colIndex);
+        }
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
   SerendipityElement<NDIM>::getLowerReflectingBcMapping(unsigned dir,
         std::vector<unsigned>& nodeMap) const
   {
