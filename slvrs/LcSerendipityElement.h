@@ -292,6 +292,21 @@ namespace Lucee
         std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
 
 /**
+ * Get matrices needed to compute hyper-diffusion operator. The
+ * matrices are for the current cell and each of its face neighbors,
+ * stored in "lowerMat" for cells sharing lower faces and "upperMat"
+ * for cells sharing upper faces. A linear combination of these
+ * matrices when multiplied by the nodal data in the corresponding
+ * cells should give the discrete diffusion operator.
+ *
+ * @param iMat Matrix for current cell.
+ * @param lowerMat Matrices for cells sharing lower faces.
+ * @param upperMat Matrices for cells sharing upper faces.
+ */
+      void getHyperDiffusionMatrices(std::vector<Lucee::Matrix<double> >& iMat, 
+        std::vector<Lucee::Matrix<double> >& lowerMat, std::vector<Lucee::Matrix<double> >& upperMat) const;
+
+/**
  * Get coefficients for applying reflecting boundary conditions on
  * lower side in direction 'dir'. The vector nodeMap[i] is the
  * reflected node corresponding to node 'i'.
