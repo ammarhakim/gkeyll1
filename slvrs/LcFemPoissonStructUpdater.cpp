@@ -176,8 +176,18 @@ namespace Lucee
 // map to hold periodicially identified nodes
     std::map<int, int> periodicNodeMap;
 
+// THIS IS NOT CORRECT. WE CAN'T USE THE GLOBAL COMMUNICATOR AS THIS
+// MAY BE DIFFERENT THAN THE ONE USED BY THE GRID. THIS NEEDS TO BE
+// FIXES ASAP
+
 #ifdef HAVE_MPI
-    throw Lucee::Except("FemPoissonStructUpdater does not yet work in parallel!");
+    TxMpiBase *comm = static_cast<TxMpiBase*>(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
+#endif
+
+#ifdef HAVE_MPI
+    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
+    MatCreateSeqAIJ(comm->getMpiComm(), nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #else
 // Explicit initialization of stiffness matrix speeds up
 // initialization tremendously.
@@ -186,10 +196,14 @@ namespace Lucee
 #endif
     MatSetFromOptions(stiffMat);
 
-// create and setup vector (NOTE: ACCORDING TO MIKE MCCOURT ONE SHOULD
-// USE MatGetVecs INSTEAD OF VecCreate. THIS ENSURES THAT THE PARALLEL
-// LAYOUT OF THE MATRIX & VECTOR ARE THE SAME)
-    VecCreate(MPI_COMM_WORLD, &globalSrc);
+// create and setup vector (NOTE: ONE SHOULD USE MatGetVecs INSTEAD OF
+// VecCreate. THIS ENSURES THAT THE PARALLEL LAYOUT OF THE MATRIX &
+// VECTOR ARE THE SAME)
+#ifdef HAVE_MPI
+    VecCreate(comm->getMpiComm(), &globalSrc);
+#else
+    VecCreate(PETSC_COMM_SELF, &globalSrc);
+#endif
     VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
     VecSetFromOptions(globalSrc);
 
