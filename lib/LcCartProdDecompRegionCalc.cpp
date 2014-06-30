@@ -70,7 +70,7 @@ namespace Lucee
       unsigned myCuts[NDIM];
       for (unsigned i=0; i<NDIM; ++i)
         myCuts[i] = (unsigned) dblCuts[i];
-      setCuts(myCuts); // set cuts
+      setCuts(myCuts);
     }
     else
     {
