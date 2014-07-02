@@ -68,7 +68,7 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       int ix = idx[0];
-      a.setPtr(aPtr, ix); 
+      a.setPtr(aPtr, ix);
       b.setPtr(bPtr, ix);
       f.setPtr(fPtr, ix);
 
@@ -95,10 +95,10 @@ namespace Lucee
         acp = (ac-dt*bc*fcp)*fc1;
         bcp = (bc+dt*ac*std::conj(fcp))*fc1;
 // copy back before loop
-        ac = acp; bc = bcp;
+        ac = acp; bc = bcp; fc = fcp;
 
 // check for convergence
-        std::complex<double> fcpp = fcp - dt*ac*std::conj(bc);
+        std::complex<double> fcpp = fc - dt*ac*std::conj(bc);
         if (epsCmp(fcp.real(), fcpp.real(), relTol))
           done = true;
       }
