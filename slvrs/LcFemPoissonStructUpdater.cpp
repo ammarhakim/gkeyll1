@@ -176,9 +176,11 @@ namespace Lucee
 // map to hold periodicially identified nodes
     std::map<int, int> periodicNodeMap;
 
+    std::cout << "[DEB] NGLOBAL " << nglobal << std::endl;
+
 // THIS IS NOT CORRECT. WE CAN'T USE THE GLOBAL COMMUNICATOR AS THIS
 // MAY BE DIFFERENT THAN THE ONE USED BY THE GRID. THIS NEEDS TO BE
-// FIXES ASAP
+// FIXED ASAP
 
 #ifdef HAVE_MPI
     TxMpiBase *comm = static_cast<TxMpiBase*>(Loki::SingletonHolder<Lucee::Globals>
@@ -187,7 +189,10 @@ namespace Lucee
 
 #ifdef HAVE_MPI
     int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
-    MatCreateSeqAIJ(comm->getMpiComm(), nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
+    MatCreateMPIAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal, 
+      nz, PETSC_NULL, 
+      nz, PETSC_NULL,
+      &stiffMat);
 #else
 // Explicit initialization of stiffness matrix speeds up
 // initialization tremendously.
@@ -195,6 +200,8 @@ namespace Lucee
     MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #endif
     MatSetFromOptions(stiffMat);
+
+    std::cout << "[DEB] Matrix created " << std::endl;
 
 // create and setup vector (NOTE: ONE SHOULD USE MatGetVecs INSTEAD OF
 // VecCreate. THIS ENSURES THAT THE PARALLEL LAYOUT OF THE MATRIX &
@@ -206,6 +213,8 @@ namespace Lucee
 #endif
     VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
     VecSetFromOptions(globalSrc);
+
+    std::cout << "[DEB] Vector created " << std::endl;
 
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
     std::vector<int> lgMap(nlocal);
@@ -241,6 +250,8 @@ namespace Lucee
 
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+    
+    std::cout << "[DEB]  Stiffness matrix built " << std::endl;
 
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
@@ -383,6 +394,8 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
+    std::cout << "[DEB] Boundary modifications of stiffness matrix completed " << std::endl;
+
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
 // MatZeroRows and MatSetValues without an intervening calls to
@@ -392,6 +405,8 @@ namespace Lucee
     {
       if (periodicFlgs[d] == true)
       {
+        std::cout << "[DEB] doing periodic direction " << d << std::endl;
+
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
@@ -441,6 +456,8 @@ namespace Lucee
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    std::cout << "[DEB] Boundary modifications (Phase II) of stiffness matrix completed " << std::endl;
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
@@ -500,6 +517,8 @@ namespace Lucee
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
+  
+    std::cout << "[DEB] Initialize completed " << std::endl;
   }
 
   template <unsigned NDIM>
