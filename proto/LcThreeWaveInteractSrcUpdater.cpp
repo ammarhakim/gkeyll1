@@ -33,6 +33,7 @@ namespace Lucee
   ThreeWaveInteractSrcUpdater::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
+    relTol = tbl.getNumber("relativeTol");
   }
 
   void
@@ -57,6 +58,8 @@ namespace Lucee
     Lucee::FieldPtr<double> bPtr = b.createPtr();
     Lucee::FieldPtr<double> fPtr = f.createPtr();
 
+    unsigned maxIter = 0; // for diagnostics
+
     int idx[1];
 // local region to index
     Lucee::Region<1, int> localRgn = grid.getLocalRegion();
@@ -75,6 +78,7 @@ namespace Lucee
 
       std::complex<double> acp, bcp, fcp; // updated values
 
+      unsigned nIter = 0;
 // NOTE: This loop solves the ODE implicitly using an iterative
 // scheme. A backward Euler scheme is used. This may diffusive.
 // Hence, it may be better to use the mid-point rule or even solve the
@@ -82,11 +86,9 @@ namespace Lucee
       bool done = false;
       while (!done)
       {
+        nIter++;
 // first compute predicted value of 'f'
         fcp = fc - dt*ac*std::conj(bc);
-        if (epsCmp(std::norm(fc), std::norm(fcp), 1e-3))
-          done = true;
-
 // update 'a' and 'b' using an implicit update (one can invert system
 // analytically) using predicted value of f
         double fc1 = 1/(1+dt*dt*std::norm(fcp));
@@ -94,13 +96,22 @@ namespace Lucee
         bcp = (bc+dt*ac*std::conj(fcp))*fc1;
 // copy back before loop
         ac = acp; bc = bcp;
+
+// check for convergence
+        std::complex<double> fcpp = fcp - dt*ac*std::conj(bc);
+        if (epsCmp(fcp.real(), fcpp.real(), relTol))
+          done = true;
       }
+      maxIter = nIter > maxIter ? nIter : maxIter;
 
 // copy updated values into appropriate fields
       aPtr[0] = acp.real(); aPtr[1] = acp.imag();
       bPtr[0] = bcp.real(); bPtr[1] = bcp.imag();
       fPtr[0] = fcp.real(); fPtr[1] = fcp.imag();
     }
+
+    if (maxIter>1)
+      std::cout << "Max number of iterations " << maxIter << std::endl;
     
     return Lucee::UpdaterStatus();
   }
