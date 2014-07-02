@@ -70,6 +70,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Relative tolerance for ODE solver */
+      double relTol;
   };
 }
 
