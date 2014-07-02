@@ -1,7 +1,7 @@
 /**
  * @file	LcThreeWaveInteractSrcUpdater.cpp
  *
- * @brief	Implicit updater for 5-moment source terms
+ * @brief	Three wave interaction source updater.
  */
 
 // lucee includes
@@ -16,6 +16,15 @@
 
 namespace Lucee
 {
+
+  static 
+  bool epsCmp(double a, double b, double epsDiff)
+  {
+// The 1e3 seems arbitrary, but prevents a divide by zero
+    if (fabs(a) <= 1e3*std::numeric_limits<double>::epsilon());
+      return fabs(a-b) <= epsDiff;
+    return fabs(1-b/a) <= epsDiff;
+  }
 
 // set ids for module system
   const char *ThreeWaveInteractSrcUpdater::id = "ThreeWaveInteractSrc";
@@ -65,6 +74,27 @@ namespace Lucee
       std::complex<double> fc(fPtr[0], fPtr[1]);
 
       std::complex<double> acp, bcp, fcp; // updated values
+
+// NOTE: This loop solves the ODE implicitly using an iterative
+// scheme. A backward Euler scheme is used. This may diffusive.
+// Hence, it may be better to use the mid-point rule or even solve the
+// system using Boost ODE solvers. Will change if needed.
+      bool done = false;
+      while (!done)
+      {
+// first compute predicted value of 'f'
+        fcp = fc - dt*ac*std::conj(bc);
+        if (epsCmp(std::norm(fc), std::norm(fcp), 1e-3))
+          done = true;
+
+// update 'a' and 'b' using an implicit update (one can invert system
+// analytically) using predicted value of f
+        double fc1 = 1/(1+dt*dt*std::norm(fcp));
+        acp = (ac-dt*bc*fcp)*fc1;
+        bcp = (bc+dt*ac*std::conj(fcp))*fc1;
+// copy back before loop
+        ac = acp; bc = bcp;
+      }
 
 // copy updated values into appropriate fields
       aPtr[0] = acp.real(); aPtr[1] = acp.imag();

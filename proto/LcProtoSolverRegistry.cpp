@@ -42,6 +42,7 @@
 #include <LcRegisteredObjList.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
+#include <LcThreeWaveInteractSrcUpdater.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -126,7 +127,9 @@ namespace Lucee
 
       .append<Lucee::SmoothQuadPhiToC1Updater>()
 
-      .append<Lucee::SheathParticleSource1x1v>();
+      .append<Lucee::SheathParticleSource1x1v>()
+
+      .append<Lucee::ThreeWaveInteractSrcUpdater>();
 
 #ifdef HAVE_PETSC
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >

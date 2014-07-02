@@ -1,7 +1,7 @@
 /**
  * @file	LcThreeWaveInteractSrcUpdater.h
  *
- * @brief	Implicit updater for 5-moment source terms
+ * @brief	Three wave interaction source updater.
  */
 
 #ifndef LC_THREE_WAVE_INTERACT_SRC_UPDATER_H
