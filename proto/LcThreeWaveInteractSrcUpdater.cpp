@@ -33,7 +33,22 @@ namespace Lucee
   ThreeWaveInteractSrcUpdater::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
+
     relTol = tbl.getNumber("relativeTol");
+
+    std::vector<double> clst = tbl.getNumVec("constants");
+    if (clst.size() != 3)
+    {
+      Lucee::Except lce(
+        "ThreeWaveInteractSrcUpdater::readInput: 'constants' should have exactly 3 entries. ");
+      lce << clst.size() << " provided instead";
+      throw lce;
+    }
+
+// for now assume constants are real (should be easy to fix if needed)
+    c[0] = std::complex<double>(clst[0], 0.0);
+    c[1] = std::complex<double>(clst[1], 0.0);
+    c[2] = std::complex<double>(clst[2], 0.0);
   }
 
   void
