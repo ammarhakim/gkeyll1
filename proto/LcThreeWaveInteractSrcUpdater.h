@@ -18,6 +18,7 @@
 
 // std includes
 #include <vector>
+#include <complex>
 
 namespace Lucee
 {
@@ -72,6 +73,8 @@ namespace Lucee
     private:
 /** Relative tolerance for ODE solver */
       double relTol;
+/** List of constants multiplying quadratic */
+    std::complex<double> c[3];
   };
 }
 
