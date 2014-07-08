@@ -102,6 +102,15 @@ namespace Lucee
  */
       unsigned stepRK4(double dt, const std::vector<std::complex<double> >& inp,
         std::vector<std::complex<double> >& out);
+
+/**
+ * Compare two numbers to specified tolerance (set in relTol)
+ *
+ * @param a First number to compare
+ * @param b Second number to compare
+ * @return true if within tolerance, false otherwise
+ */
+      bool epsCmp(double a, double b) const;
   };
 }
 
