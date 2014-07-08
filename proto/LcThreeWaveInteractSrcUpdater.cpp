@@ -19,17 +19,17 @@
 
 namespace Lucee
 {
-  static 
-  bool epsCmp(double a, double b, double epsDiff)
+// set ids for module system
+  const char *ThreeWaveInteractSrcUpdater::id = "ThreeWaveInteractSrc";
+
+  bool
+  ThreeWaveInteractSrcUpdater::epsCmp(double a, double b) const
   {
 // The 1e3 seems arbitrary, but prevents a divide by zero
     if (fabs(a) <= 1e3*std::numeric_limits<double>::epsilon());
-      return fabs(a-b) <= epsDiff;
-    return fabs(1-b/a) <= epsDiff;
+      return fabs(a-b) <= relTol;
+    return fabs(1-b/a) <= relTol;
   }
-
-// set ids for module system
-  const char *ThreeWaveInteractSrcUpdater::id = "ThreeWaveInteractSrc";
 
   void
   ThreeWaveInteractSrcUpdater::readInput(Lucee::LuaTable& tbl)
@@ -134,11 +134,6 @@ namespace Lucee
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
-  unsigned
-  ThreeWaveInteractSrcUpdater::stepImplicit(double dt, const std::vector<std::complex<double> >& inp,
-    std::vector<std::complex<double> >& out)
-  {
-    unsigned nIter = 0;
 // // NOTE: This loop solves the ODE implicitly using an iterative
 // // scheme. A backward Euler scheme is used. This may diffusive.
 // // Hence, it may be better to use the mid-point rule or even solve the
@@ -162,6 +157,38 @@ namespace Lucee
 //         if (epsCmp(fcp.real(), fcpp.real(), relTol))
 //           done = true;
 //       }
+
+
+  unsigned
+  ThreeWaveInteractSrcUpdater::stepImplicit(double dt, const std::vector<std::complex<double> >& inp,
+    std::vector<std::complex<double> >& out)
+  {
+    unsigned nIter = 0;
+// first compute an estimate of e1
+    out[0] = inp[0] + dt*c[0]*std::conj(inp[1])*std::conj(inp[2]);
+    out[0] = 0.5*(out[0]+inp[0]); // half time-step
+
+    bool done = false;
+    while (!done)
+    {
+      nIter++;
+// compute e2 and e3 at half time-steps
+      std::complex<double> t1 = 1.0/(1.0-dt*dt/4.0*c[1]*c[2]*std::norm(out[0]));
+      out[1] = (inp[1] + dt/2*c[1]*std::conj(out[0])*std::conj(inp[2]))*t1;
+      out[2] = (inp[2] + dt/2*c[2]*std::conj(out[0])*std::conj(inp[1]))*t1;
+
+// compute updated value of e1 at half-step
+      std::complex<double> e1Up = inp[0] + dt/2*c[0]*std::conj(out[1])*std::conj(out[2]);
+// check if this is converged
+      if (epsCmp(out[0].real(), e1Up.real()) && epsCmp(out[0].imag(), e1Up.imag()))
+        done = true;
+      out[0] = e1Up;
+    }
+
+// compute values at full time-step
+    for (unsigned c=0; c<3; ++c)
+      out[c] = 2.0*out[c]-inp[c];
+
     return nIter;
   }
 
