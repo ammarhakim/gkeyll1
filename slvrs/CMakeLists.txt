@@ -83,15 +83,16 @@ set(lcslvrs_SOURCES
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
+  LcSOLElectronDensityInitialization.cpp
+  LcSOLIonDensityInitialization.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
   LcSerendipityElement2DDiffusionOutput
   LcSerendipityElementDiffusionOutput
   LcSerendipityElementHyperDiffusionOutput
   LcSetPhiAtBoundaryUpdater.cpp
-  LcSOLElectronDensityInitialization.cpp
-  LcSOLIonDensityInitialization.cpp
   LcSolverRegistry.cpp
+  LcStairSteppedBcUpdater.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp

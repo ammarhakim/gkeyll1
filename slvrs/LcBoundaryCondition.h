@@ -61,9 +61,9 @@ namespace Lucee
  * the skin cell (first/last interior cell) while 'qbc' represents
  * data in the ghost cells.
  *
- * @param tm Time at which source is requested.
- * @param loc Coordinate at which source is requested.
- * @param idx Grid index at which source is requested.
+ * @param tm Time at which BC should be applied.
+ * @param loc Coordinate at which BC is applied.
+ * @param idx Grid index at which BC is applied.
  * @param c Coordinate system to use.
  * @param qin Data in skin cell.
  * @param qbc Data in ghost cell.
