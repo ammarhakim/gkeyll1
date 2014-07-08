@@ -105,12 +105,16 @@ namespace Lucee
       inpE[1] = std::complex<double> (e2Ptr[0], e2Ptr[1]);
       inpE[2] = std::complex<double> (e3Ptr[0], e3Ptr[1]);
 
+      unsigned nIter = 1;
       if (intType == TWI_IMPLICIT)
-        stepImplicit(dt, inpE, outE);
+        nIter = stepImplicit(dt, inpE, outE);
       else if (intType == TWI_RK4)
-        stepRK4(dt, inpE, outE);
+        nIter = stepRK4(dt, inpE, outE);
       else
       { /** Can't happen */ }
+
+// store maximum number of iterations as diagnostic
+      maxIter = nIter > maxIter ? nIter : maxIter;
 
 // copy updated values into appropriate fields
       e1Ptr[0] = outE[0].real(); e1Ptr[1] = outE[0].imag();
@@ -133,31 +137,6 @@ namespace Lucee
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
-
-// // NOTE: This loop solves the ODE implicitly using an iterative
-// // scheme. A backward Euler scheme is used. This may diffusive.
-// // Hence, it may be better to use the mid-point rule or even solve the
-// // system using Boost ODE solvers. Will change if needed.
-//     bool done = false;
-//       while (!done)
-//       {
-//         nIter++;
-// // first compute predicted value of 'f'
-//         fcp = fc - dt*ac*std::conj(bc);
-// // update 'a' and 'b' using an implicit update (one can invert system
-// // analytically) using predicted value of f
-//         double fc1 = 1/(1+dt*dt*std::norm(fcp));
-//         acp = (ac-dt*bc*fcp)*fc1;
-//         bcp = (bc+dt*ac*std::conj(fcp))*fc1;
-// // copy back before loop
-//         ac = acp; bc = bcp; fc = fcp;
-
-// // check for convergence
-//         std::complex<double> fcpp = fc - dt*ac*std::conj(bc);
-//         if (epsCmp(fcp.real(), fcpp.real(), relTol))
-//           done = true;
-//       }
-
 
   unsigned
   ThreeWaveInteractSrcUpdater::stepImplicit(double dt, const std::vector<std::complex<double> >& inp,
