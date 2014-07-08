@@ -122,8 +122,8 @@ namespace Lucee
       e3Ptr[0] = outE[2].real(); e3Ptr[1] = outE[2].imag();
     }
 
-    if (maxIter>1)
-      std::cout << "Max number of iterations " << maxIter << std::endl;
+    // if (maxIter>1)
+    //   std::cout << "Max number of iterations " << maxIter << std::endl;
     
     return Lucee::UpdaterStatus();
   }
