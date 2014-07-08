@@ -22,6 +22,9 @@
 
 namespace Lucee
 {
+/** Integrator type */
+  enum {TWI_RK4, TWI_IMPLICIT};
+
 /**
  * Update source terms needed in three-wave interaction problem. This
  * system is give by the coupled equations
@@ -74,7 +77,31 @@ namespace Lucee
 /** Relative tolerance for ODE solver */
       double relTol;
 /** List of constants multiplying quadratic */
-    std::complex<double> c[3];
+      std::complex<double> c[3];
+/** Integrator type */
+      int intType;
+
+/** 
+ * Integrator using iterative implicit scheme.
+ *
+ * @param dt Time-step to advance ODE by.
+ * @param inp Initial condition.
+ * @param out Updated solution.
+ * @return Number of iterations taken.
+ */
+      unsigned stepImplicit(double dt, const std::vector<std::complex<double> >& inp,
+        std::vector<std::complex<double> >& out);
+
+/** 
+ * Integrator using Runge-Kutta 4th order scheme.
+ *
+ * @param dt Time-step to advance ODE by.
+ * @param inp Initial condition.
+ * @param out Updated solution.
+ * @return Number of iterations (sub-steps) taken.
+ */
+      unsigned stepRK4(double dt, const std::vector<std::complex<double> >& inp,
+        std::vector<std::complex<double> >& out);
   };
 }
 
