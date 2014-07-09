@@ -17,6 +17,9 @@
 
 namespace Lucee
 {
+// right/left flags
+  enum {SSB_UP = 0, SSB_LO = 1};
+
   template <> const char *StairSteppedBcUpdater<1>::id = "StairSteppedBc1D";
   template <> const char *StairSteppedBcUpdater<2>::id = "StairSteppedBc2D";
   template <> const char *StairSteppedBcUpdater<3>::id = "StairSteppedBc3D";
@@ -30,6 +33,7 @@ namespace Lucee
   template <unsigned NDIM>
   StairSteppedBcUpdater<NDIM>::~StairSteppedBcUpdater() 
   {
+    delete ssBnd;
   }
 
   template <unsigned NDIM>
@@ -46,6 +50,9 @@ namespace Lucee
 
     Lucee::LuaTable bcTbl = tbl.getTable("boundaryConditions");
     bcList = bcTbl.template getAllObjects<Lucee::BoundaryCondition>();
+
+// set pointer to in/out field
+    inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
   }
 
   template <unsigned NDIM>
@@ -54,6 +61,70 @@ namespace Lucee
   {
 // call base class method
     UpdaterIfc::initialize();
+
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+
+    int lg[NDIM], ug[NDIM];
+    for (unsigned d=0; d<NDIM; ++d)
+      lg[d] = ug[d] = 1; // just a single layer of ghost cells is needed
+    ssBnd = new Lucee::Field<NDIM, double>(localRgn, NDIM, lg, ug); // to store boundary information
+
+    Lucee::FieldPtr<double> iop = inOut->createPtr();
+    Lucee::FieldPtr<double> iopr = inOut->createPtr();
+
+    (*ssBnd) = -1.0; // clear out field
+
+    Lucee::FieldPtr<double> ssp = ssBnd->createPtr();
+    Lucee::FieldPtr<double> sspr = ssBnd->createPtr();
+
+// loop, figuring out where and how the boundary edge is oriented
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+
+// lower and upper bounds of 1D slice
+      int sliceLower = localRgn.getLower(dir)-1;
+      int sliceUpper = localRgn.getUpper(dir);
+
+      while (seq.step())
+      {
+        int idx[NDIM], idxr[NDIM];
+        seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxr);
+// loop over each slice
+        for (int i=sliceLower; i<sliceUpper; ++i)
+        {
+          idx[dir] = i;
+          idxr[dir] = i+1;
+// set pointers
+          inOut->setPtr(iop, idx);
+          inOut->setPtr(iopr, idxr);
+
+          ssBnd->setPtr(ssp, idx);
+          ssBnd->setPtr(sspr, idxr);
+
+// flags SSB_UP and SSB_LO indicate direction of ghost cell wrt
+// to a skin cell. Note that a cell can "ghost" for left/right AND
+// top/bottom AND up/down cells. CAUTION: The degenerate case in which
+// a ghost cell is shared by two cells in the same sweep direction is
+// not handled. This can occur if the boundary has a very sharp edge,
+// like a sharp wedge like object.
+//
+// (This explanation seems confusing, and should be improved. Ammar
+// Hakim, July 8th 2014)
+
+          if ((iop[0] == 1) and (iopr[0] == 0))
+// going from inside to outside (edge is on right of cell with index idx)
+            ssp[dir] = SSB_UP;
+          else if ((iop[0] == 0) and (iopr[0] == 1))
+// going from outside to inside (edge is on left of cell with index idxr)
+            sspr[dir] = SSB_LO;
+        }
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -68,7 +139,7 @@ namespace Lucee
   StairSteppedBcUpdater<NDIM>::declareTypes() 
   {
 // any number of output fields
-    this->setLastInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
 // instantiations

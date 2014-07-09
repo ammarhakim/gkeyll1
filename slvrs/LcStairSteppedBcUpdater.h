@@ -76,6 +76,10 @@ namespace Lucee
       unsigned dir;
 /** Boundary conditions to apply */
       std::vector<Lucee::BoundaryCondition*> bcList;
+/** Pointer to in/out field */
+      Lucee::Field<NDIM, double> *inOut;
+/** Field to store information about boundary */
+      Lucee::Field<NDIM, double> *ssBnd;
   };
 }
 
