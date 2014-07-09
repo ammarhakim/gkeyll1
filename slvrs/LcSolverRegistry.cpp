@@ -65,12 +65,13 @@
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSOLElectronDensityInitialization.h>
+#include <LcSOLElectronDensityInitialization.h>
+#include <LcSOLIonDensityInitialization.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSetPhiAtBoundaryUpdater.h>
-#include <LcSOLElectronDensityInitialization.h>
-#include <LcSOLIonDensityInitialization.h>
 #include <LcSolverRegistry.h>
+#include <LcStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
@@ -116,6 +117,10 @@ namespace Lucee
       .append<Lucee::BcUpdater<1> >()
       .append<Lucee::BcUpdater<2> >()
       .append<Lucee::BcUpdater<3> >()
+
+      .append<StairSteppedBcUpdater<1> >()
+      .append<StairSteppedBcUpdater<2> >()
+      .append<StairSteppedBcUpdater<3> >()
       
       // Probably used for SOL problem simulations
       .append<Lucee::BoltzmannPhiUpdater>()
