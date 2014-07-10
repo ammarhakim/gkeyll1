@@ -89,14 +89,20 @@ namespace Lucee
       std::vector<Lucee::Field<1, double>* > waves;
 /** Fields to store second order corrections */
       std::vector<Lucee::Field<1, double>* > fs;
-
+/** Flag to indicate if we there is an embedded boundary */
+      bool hasSsBnd;
+/** In/out field */
+      Lucee::Field<NDIM, double> *inOut;
 /**
  * Apply limiters to waves.
  *
+ * @param dir Direction in which limiter is being applied.
+ * @param idx Index of cell (this is only partially valid: idx[dir] is not properly set)
  * @param waves [in/out] On input, waves to be limited. On output, limited waves.
  * @param speeds Wave speeds.
  */
-      void applyLimiters(Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds);
+      void applyLimiters(unsigned dir, int idx[NDIM],
+        Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds);
   };
 }
 

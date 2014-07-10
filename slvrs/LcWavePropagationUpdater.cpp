@@ -32,6 +32,12 @@ namespace Lucee
   template <> const char *WavePropagationUpdater<1>::id = "WavePropagation1D";
   template <> const char *WavePropagationUpdater<2>::id = "WavePropagation2D";
   template <> const char *WavePropagationUpdater<3>::id = "WavePropagation3D";
+
+  static bool isInside(const Lucee::ConstFieldPtr<double>& p)
+  { return p[0]==1; }
+
+  static bool isOutside(const Lucee::ConstFieldPtr<double>& p)
+  { return p[0]!=1; }
   
   static
   void clearFieldVect(std::vector<Lucee::Field<1, double>* >& fldVec)
@@ -126,6 +132,15 @@ namespace Lucee
         throw lce;
       }
     }
+
+    hasSsBnd = false;
+// check if there is an embedded boundary
+    if (tbl.hasBool("hasStairSteppedBoundary"))
+      hasSsBnd = tbl.getBool("hasStairSteppedBoundary");
+
+// fetch pointer to in/out field if there is an embedded boundary
+    if (hasSsBnd)
+      inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
   }
 
   template <unsigned NDIM>
@@ -190,6 +205,11 @@ namespace Lucee
 
     Lucee::FieldPtr<double> jump(meqn);
 
+// this seems a bit strange, but we need to create pointers to the
+// in/out field even working without one. Otherwise compile will
+// fail. (AHH, July 10 2014)
+    Lucee::FieldPtr<double> ioPtr(1), ioPtr1(1);
+
     double cfla = 0.0; // maximum CFL number used
 
 // loop, updating slices in each requested dimension
@@ -226,6 +246,16 @@ namespace Lucee
         {
           idx[dir] = i; // cell right of edge
           idxl[dir] = i-1; // cell left of edge
+
+          if (hasSsBnd)
+          {
+// if both cells attached to this edge are outside the domain, skip it
+            inOut->setPtr(ioPtr, idx);
+            inOut->setPtr(ioPtr1, idxl);
+            if (isOutside(ioPtr) && isOutside(ioPtr1))
+              continue; // skip to next cell
+          }
+
 // get hold of solution in these cells
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
@@ -283,13 +313,25 @@ namespace Lucee
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-        applyLimiters(*waves[dir], *speeds[dir]);
+        applyLimiters(dir, idx, *waves[dir], *speeds[dir]);
 
 // compute second order corrections to flux (we need to go one cell
 // beyond the last cell to ensure the right most edge flux is
 // computed). This loop is over edges.
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
         {
+          if (hasSsBnd)
+          {
+// if both cells attached to this edge are outside the domain, do not
+// compute second order correction
+            idx[dir] = i; // right cell
+            inOut->setPtr(ioPtr, idx);
+            idx[dir] = i-1; // left cell
+            inOut->setPtr(ioPtr1, idx);
+            if (isOutside(ioPtr) && isOutside(ioPtr1))
+              continue; // skip to next cell
+          }
+
           idx[dir] = i; // cell right of edge
           grid.setIndex(idx);
           double surfArea = grid.getSurfArea(dir);
@@ -318,6 +360,15 @@ namespace Lucee
 // accumulate second order corrections (this loop is over cells)
         for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir); ++i)
         {
+          if (hasSsBnd)
+          {
+// if cell is outside domain, do not update solution
+            idx[dir] = i; // cell index
+            inOut->setPtr(ioPtr, idx);
+            if (isOutside(ioPtr))
+              continue; // skip to next cell
+          }
+
           idx[dir] = i+1; //  right edge of cell
           grid.setIndex(idx);
           double surfArea1 = grid.getSurfArea(dir);
@@ -341,7 +392,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  WavePropagationUpdater<NDIM>::applyLimiters(
+  WavePropagationUpdater<NDIM>::applyLimiters(unsigned dir, int cellIdx[NDIM],
     Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
     if (limiter == NO_LIMITER) return;
@@ -357,6 +408,11 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> spPtr = sp.createConstPtr();
 
+// this seems a bit strange, but we need to create pointers to the
+// in/out field even working without one. Otherwise compile will
+// fail. (AHH, July 10 2014)
+    Lucee::FieldPtr<double> ioPtr(1), ioPtr1(1);
+
     int sliceLower = sp.getLower(0);
     int sliceUpper = sp.getUpper(0) + 1;
     for (unsigned mw=0; mw<mwave; ++mw)
@@ -368,6 +424,19 @@ namespace Lucee
 
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
+
+        if (hasSsBnd)
+        {
+// if both cells attached to this edge are outside the domain, do not
+// limit wave
+          cellIdx[dir] = i; // right cell
+          inOut->setPtr(ioPtr, cellIdx);
+          cellIdx[dir] = i-1; // left cell
+          inOut->setPtr(ioPtr1, cellIdx);
+          if (isOutside(ioPtr) && isOutside(ioPtr1))
+            continue; // skip to next cell
+        }
+
         sp.setPtr(spPtr, i);
         wnorm2 = 0.0;
         dotl = dotr;
