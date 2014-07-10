@@ -106,12 +106,15 @@ namespace Lucee
           ssBnd->setPtr(ssp, idx);
           ssBnd->setPtr(sspr, idxr);
 
-// flags SSB_UP and SSB_LO indicate direction of ghost cell wrt
-// to a skin cell. Note that a cell can "ghost" for left/right AND
+// flags SSB_UP and SSB_LO indicate direction of ghost cell wrt to a
+// skin cell. Note that a cell can "ghost" for left/right AND
 // top/bottom AND up/down cells. CAUTION: The degenerate case in which
 // a ghost cell is shared by two cells in the same sweep direction is
 // not handled. This can occur if the boundary has a very sharp edge,
-// like a sharp wedge like object.
+// like a sharp wedge like object. This degenerate can be handled by
+// storing NDIM*2 components in the ssBnd field, but for now I am not
+// doing it. (AHH)
+// 
 //
 // (This explanation seems confusing, and should be improved. Ammar
 // Hakim, July 8th 2014)
@@ -131,6 +134,64 @@ namespace Lucee
   Lucee::UpdaterStatus
   StairSteppedBcUpdater<NDIM>::update(double t) 
   {
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+// get field to update
+    Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(0);
+
+// create coordinate system along this direction (note that this
+// updater only works on Cartesian meshes. Hence, using an aligned CS
+// is perfectly fine)
+    Lucee::AlignedRectCoordSys coordSys(dir);
+
+    Lucee::FieldPtr<double> Aptr = A.createPtr();
+    Lucee::FieldPtr<double> Aptrm = A.createPtr();
+    Lucee::ConstFieldPtr<double> ssp = ssBnd->createConstPtr();
+    double xc[3];
+
+// one needs to loop over all cells as embedded object can be anywhere
+// on grid and not just on bounding-box boundary.
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+
+// lower and upper bounds of 1D slice
+      int sliceLower = localRgn.getLower(dir);
+      int sliceUpper = localRgn.getUpper(dir);
+
+      while (seq.step())
+      {
+        int idx[NDIM], idxm[NDIM];
+        seq.fillWithIndex(idx);
+        seq.fillWithIndex(idxm);
+// loop over each slice
+        for (int i=sliceLower; i<sliceUpper; ++i)
+        {
+          idx[dir] = i;
+// get centroid coordinate
+          grid.setIndex(idx);
+          grid.getCentroid(xc);
+// set pointers
+          A.setPtr(Aptr, idx);
+          ssBnd->setPtr(ssp, idx);
+          
+          if (ssp[dir] != -1)
+          { // we have found a skin cell
+            idxm[dir] = i-1;
+            if (ssp[dir] == SSB_UP)
+              idxm[dir] = i+1;
+// set pointer to right/left cell and apply BC
+            A.setPtr(Aptrm, idxm);
+            for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
+                 bcItr != bcList.end(); ++bcItr)
+              (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptrm);
+          }
+        }
+      }
+    }
+
     return Lucee::UpdaterStatus();
   }
 
