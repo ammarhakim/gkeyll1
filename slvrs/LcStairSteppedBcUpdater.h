@@ -71,15 +71,37 @@ namespace Lucee
  */
       void declareTypes();
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to set direction to update.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSetDir(lua_State *L);
+
     private:
 /** Direction to apply boundary conditon */
-      unsigned dir;
+      unsigned bcDir;
 /** Boundary conditions to apply */
       std::vector<Lucee::BoundaryCondition*> bcList;
 /** Pointer to in/out field */
       Lucee::Field<NDIM, double> *inOut;
 /** Field to store information about boundary */
       Lucee::Field<NDIM, double> *ssBnd;
+
+/**
+ * Set direction to update.
+ *
+ * @param dir Direction to update
+ */
+      void setDir(unsigned dir) { bcDir = dir; }
   };
 }
 
