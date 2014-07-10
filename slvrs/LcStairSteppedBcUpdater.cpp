@@ -41,8 +41,11 @@ namespace Lucee
   StairSteppedBcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl) 
   {
     UpdaterIfc::readInput(tbl);
+
+    bcDir = 0;
 // read direction to apply
-    dir = tbl.getNumber("dir");
+    if (tbl.hasNumber("dir"))
+      bcDir = tbl.getNumber("dir");
 
 // get list of boundary conditions to apply
     if ( !tbl.hasTable("boundaryConditions") )
@@ -134,6 +137,14 @@ namespace Lucee
   Lucee::UpdaterStatus
   StairSteppedBcUpdater<NDIM>::update(double t) 
   {
+// don't do anything if apply direction is not in range
+    if (bcDir>=NDIM)
+    {
+      Lucee::Except lce("StairSteppedBcUpdater::update: Update direction should be less than ");
+      lce << NDIM << ". Provided " << bcDir << " instead";
+      throw lce;
+    }
+
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -143,51 +154,46 @@ namespace Lucee
 // create coordinate system along this direction (note that this
 // updater only works on Cartesian meshes. Hence, using an aligned CS
 // is perfectly fine)
-    Lucee::AlignedRectCoordSys coordSys(dir);
+    Lucee::AlignedRectCoordSys coordSys(bcDir);
 
     Lucee::FieldPtr<double> Aptr = A.createPtr();
     Lucee::FieldPtr<double> Aptrm = A.createPtr();
     Lucee::ConstFieldPtr<double> ssp = ssBnd->createConstPtr();
     double xc[3];
 
-// one needs to loop over all cells as embedded object can be anywhere
-// on grid and not just on bounding-box boundary.
-    for (unsigned dir=0; dir<NDIM; ++dir)
-    {
 // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(bcDir));
 
 // lower and upper bounds of 1D slice
-      int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir);
+    int sliceLower = localRgn.getLower(bcDir);
+    int sliceUpper = localRgn.getUpper(bcDir);
 
-      while (seq.step())
-      {
-        int idx[NDIM], idxm[NDIM];
-        seq.fillWithIndex(idx);
-        seq.fillWithIndex(idxm);
+    while (seq.step())
+    {
+      int idx[NDIM], idxm[NDIM];
+      seq.fillWithIndex(idx);
+      seq.fillWithIndex(idxm);
 // loop over each slice
-        for (int i=sliceLower; i<sliceUpper; ++i)
-        {
-          idx[dir] = i;
+      for (int i=sliceLower; i<sliceUpper; ++i)
+      {
+        idx[bcDir] = i;
 // get centroid coordinate
-          grid.setIndex(idx);
-          grid.getCentroid(xc);
+        grid.setIndex(idx);
+        grid.getCentroid(xc);
 // set pointers
-          A.setPtr(Aptr, idx);
-          ssBnd->setPtr(ssp, idx);
+        A.setPtr(Aptr, idx);
+        ssBnd->setPtr(ssp, idx);
           
-          if (ssp[dir] != -1)
-          { // we have found a skin cell
-            idxm[dir] = i-1;
-            if (ssp[dir] == SSB_UP)
-              idxm[dir] = i+1;
+        if (ssp[bcDir] != -1)
+        { // we have found a skin cell
+          idxm[bcDir] = i-1;
+          if (ssp[bcDir] == SSB_UP)
+            idxm[bcDir] = i+1;
 // set pointer to right/left cell and apply BC
-            A.setPtr(Aptrm, idxm);
-            for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
-                 bcItr != bcList.end(); ++bcItr)
-              (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptrm);
-          }
+          A.setPtr(Aptrm, idxm);
+          for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
+               bcItr != bcList.end(); ++bcItr)
+            (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptrm);
         }
       }
     }
@@ -201,6 +207,28 @@ namespace Lucee
   {
 // any number of output fields
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
+  }
+
+  template <unsigned NDIM>
+  void
+  StairSteppedBcUpdater<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+// call base class Lua methods
+    UpdaterIfc::appendLuaCallableMethods(lfm);
+
+    lfm.appendFunc("setDir", luaSetDir);
+  }
+
+  template <unsigned NDIM>
+  int
+  StairSteppedBcUpdater<NDIM>::luaSetDir(lua_State *L)
+  {
+    StairSteppedBcUpdater<NDIM> *updater
+      = Lucee::PointerHolder<StairSteppedBcUpdater<NDIM> >::getObj(L);
+    int d = (unsigned) lua_tonumber(L, 2); // current time to set
+    updater->setDir(d);
+
+    return 0;
   }
 
 // instantiations
