@@ -122,10 +122,10 @@ namespace Lucee
 // (This explanation seems confusing, and should be improved. Ammar
 // Hakim, July 8th 2014)
 
-          if ((iop[0] == 1) and (iopr[0] == 0))
+          if ((iop[0] > 0) and (iopr[0] < 0))
 // going from inside to outside (edge is on right of cell with index idx)
             ssp[dir] = SSB_UP;
-          else if ((iop[0] == 0) and (iopr[0] == 1))
+          else if ((iop[0] < 0) and (iopr[0] > 0))
 // going from outside to inside (edge is on left of cell with index idxr)
             sspr[dir] = SSB_LO;
         }
