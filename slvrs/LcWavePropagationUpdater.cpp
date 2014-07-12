@@ -33,10 +33,7 @@ namespace Lucee
   template <> const char *WavePropagationUpdater<2>::id = "WavePropagation2D";
   template <> const char *WavePropagationUpdater<3>::id = "WavePropagation3D";
 
-  static bool isInside(const Lucee::ConstFieldPtr<double>& p)
-  { return p[0]==1; }
-
-  static bool isOutside(const Lucee::ConstFieldPtr<double>& p)
+  static bool isOutside(const Lucee::FieldPtr<double>& p)
   { return p[0]!=1; }
   
   static
@@ -250,10 +247,10 @@ namespace Lucee
           if (hasSsBnd)
           {
 // if both cells attached to this edge are outside the domain, skip it
-            inOut->setPtr(ioPtr, idx);
-            inOut->setPtr(ioPtr1, idxl);
-            if (isOutside(ioPtr) && isOutside(ioPtr1))
-              continue; // skip to next cell
+            // inOut->setPtr(ioPtr, idx);
+            // inOut->setPtr(ioPtr1, idxl);
+            // if (isOutside(ioPtr) && isOutside(ioPtr1))
+            //   continue; // skip to next cell
           }
 
 // get hold of solution in these cells
@@ -324,12 +321,12 @@ namespace Lucee
           {
 // if both cells attached to this edge are outside the domain, do not
 // compute second order correction
-            idx[dir] = i; // right cell
-            inOut->setPtr(ioPtr, idx);
-            idx[dir] = i-1; // left cell
-            inOut->setPtr(ioPtr1, idx);
-            if (isOutside(ioPtr) && isOutside(ioPtr1))
-              continue; // skip to next cell
+            // idx[dir] = i; // right cell
+            // inOut->setPtr(ioPtr, idx);
+            // idx[dir] = i-1; // left cell
+            // inOut->setPtr(ioPtr1, idx);
+            // if (isOutside(ioPtr) && isOutside(ioPtr1))
+            //   continue; // skip to next cell
           }
 
           idx[dir] = i; // cell right of edge
@@ -363,10 +360,10 @@ namespace Lucee
           if (hasSsBnd)
           {
 // if cell is outside domain, do not update solution
-            idx[dir] = i; // cell index
-            inOut->setPtr(ioPtr, idx);
-            if (isOutside(ioPtr))
-              continue; // skip to next cell
+            // idx[dir] = i; // cell index
+            // inOut->setPtr(ioPtr, idx);
+            // if (isOutside(ioPtr))
+            //   continue; // skip to next cell
           }
 
           idx[dir] = i+1; //  right edge of cell
@@ -429,12 +426,12 @@ namespace Lucee
         {
 // if both cells attached to this edge are outside the domain, do not
 // limit wave
-          cellIdx[dir] = i; // right cell
-          inOut->setPtr(ioPtr, cellIdx);
-          cellIdx[dir] = i-1; // left cell
-          inOut->setPtr(ioPtr1, cellIdx);
-          if (isOutside(ioPtr) && isOutside(ioPtr1))
-            continue; // skip to next cell
+          // cellIdx[dir] = i; // right cell
+          // inOut->setPtr(ioPtr, cellIdx);
+          // cellIdx[dir] = i-1; // left cell
+          // inOut->setPtr(ioPtr1, cellIdx);
+          // if (isOutside(ioPtr) && isOutside(ioPtr1))
+          //   continue; // skip to next cell
         }
 
         sp.setPtr(spPtr, i);

@@ -71,7 +71,7 @@ namespace Lucee
 
     int lg[NDIM], ug[NDIM];
     for (unsigned d=0; d<NDIM; ++d)
-      lg[d] = ug[d] = 1; // just a single layer of ghost cells is needed
+      lg[d] = ug[d] = 2;
     ssBnd = new Lucee::Field<NDIM, double>(localRgn, NDIM, lg, ug); // to store boundary information
 
     Lucee::FieldPtr<double> iop = inOut->createPtr();
@@ -89,8 +89,8 @@ namespace Lucee
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice
-      int sliceLower = localRgn.getLower(dir)-1;
-      int sliceUpper = localRgn.getUpper(dir);
+      int sliceLower = localRgn.getLower(dir)-2;
+      int sliceUpper = localRgn.getUpper(dir)+1;
 
       while (seq.step())
       {
@@ -165,8 +165,8 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(bcDir));
 
 // lower and upper bounds of 1D slice
-    int sliceLower = localRgn.getLower(bcDir);
-    int sliceUpper = localRgn.getUpper(bcDir);
+    int sliceLower = localRgn.getLower(bcDir)-1;
+    int sliceUpper = localRgn.getUpper(bcDir)+1;
 
     while (seq.step())
     {
