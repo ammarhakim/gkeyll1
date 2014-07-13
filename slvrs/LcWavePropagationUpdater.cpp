@@ -33,8 +33,8 @@ namespace Lucee
   template <> const char *WavePropagationUpdater<2>::id = "WavePropagation2D";
   template <> const char *WavePropagationUpdater<3>::id = "WavePropagation3D";
 
-  static bool isOutside(const Lucee::FieldPtr<double>& p)
-  { return p[0]!=1; }
+  static bool isOutside(const Lucee::ConstFieldPtr<double>& p)
+  { return p[0]<0; }
   
   static
   void clearFieldVect(std::vector<Lucee::Field<1, double>* >& fldVec)
@@ -202,10 +202,12 @@ namespace Lucee
 
     Lucee::FieldPtr<double> jump(meqn);
 
-// this seems a bit strange, but we need to create pointers to the
-// in/out field even working without one. Otherwise compile will
-// fail. (AHH, July 10 2014)
-    Lucee::FieldPtr<double> ioPtr(1), ioPtr1(1);
+// these pointers are to the inOut field, but as it can be NULL, I am
+// using q to make their pointers. The reason this works is a "bug" in
+// the code. I.e. pointers do not check if they are set to their
+// parent fields. (AHH 7/13/2014)
+    Lucee::ConstFieldPtr<double> ioPtr = q.createConstPtr();
+    Lucee::ConstFieldPtr<double> ioPtr1 = q.createConstPtr();
 
     double cfla = 0.0; // maximum CFL number used
 
@@ -247,10 +249,10 @@ namespace Lucee
           if (hasSsBnd)
           {
 // if both cells attached to this edge are outside the domain, skip it
-            // inOut->setPtr(ioPtr, idx);
-            // inOut->setPtr(ioPtr1, idxl);
-            // if (isOutside(ioPtr) && isOutside(ioPtr1))
-            //   continue; // skip to next cell
+            inOut->setPtr(ioPtr, idx);
+            inOut->setPtr(ioPtr1, idxl);
+            if (isOutside(ioPtr) && isOutside(ioPtr1))
+              continue; // skip to next cell
           }
 
 // get hold of solution in these cells
@@ -321,12 +323,12 @@ namespace Lucee
           {
 // if both cells attached to this edge are outside the domain, do not
 // compute second order correction
-            // idx[dir] = i; // right cell
-            // inOut->setPtr(ioPtr, idx);
-            // idx[dir] = i-1; // left cell
-            // inOut->setPtr(ioPtr1, idx);
-            // if (isOutside(ioPtr) && isOutside(ioPtr1))
-            //   continue; // skip to next cell
+            idx[dir] = i; // right cell
+            inOut->setPtr(ioPtr, idx);
+            idx[dir] = i-1; // left cell
+            inOut->setPtr(ioPtr1, idx);
+            if (isOutside(ioPtr) && isOutside(ioPtr1))
+              continue; // skip to next cell
           }
 
           idx[dir] = i; // cell right of edge
@@ -360,10 +362,10 @@ namespace Lucee
           if (hasSsBnd)
           {
 // if cell is outside domain, do not update solution
-            // idx[dir] = i; // cell index
-            // inOut->setPtr(ioPtr, idx);
-            // if (isOutside(ioPtr))
-            //   continue; // skip to next cell
+            idx[dir] = i; // cell index
+            inOut->setPtr(ioPtr, idx);
+            if (isOutside(ioPtr))
+              continue; // skip to next cell
           }
 
           idx[dir] = i+1; //  right edge of cell
@@ -405,10 +407,12 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> spPtr = sp.createConstPtr();
 
-// this seems a bit strange, but we need to create pointers to the
-// in/out field even working without one. Otherwise compile will
-// fail. (AHH, July 10 2014)
-    Lucee::FieldPtr<double> ioPtr(1), ioPtr1(1);
+// these pointers are to the inOut field, but as it can be NULL, I am
+// using q to make their pointers. The reason this works is a "bug" in
+// the code. I.e. pointers do not check if they are set to their
+// parent fields. (AHH 7/13/2014)
+    Lucee::ConstFieldPtr<double> ioPtr = sp.createConstPtr();
+    Lucee::ConstFieldPtr<double> ioPtr1 = sp.createConstPtr();
 
     int sliceLower = sp.getLower(0);
     int sliceUpper = sp.getUpper(0) + 1;
@@ -426,12 +430,12 @@ namespace Lucee
         {
 // if both cells attached to this edge are outside the domain, do not
 // limit wave
-          // cellIdx[dir] = i; // right cell
-          // inOut->setPtr(ioPtr, cellIdx);
-          // cellIdx[dir] = i-1; // left cell
-          // inOut->setPtr(ioPtr1, cellIdx);
-          // if (isOutside(ioPtr) && isOutside(ioPtr1))
-          //   continue; // skip to next cell
+          cellIdx[dir] = i; // right cell
+          inOut->setPtr(ioPtr, cellIdx);
+          cellIdx[dir] = i-1; // left cell
+          inOut->setPtr(ioPtr1, cellIdx);
+          if (isOutside(ioPtr) && isOutside(ioPtr1))
+            continue; // skip to next cell
         }
 
         sp.setPtr(spPtr, i);
