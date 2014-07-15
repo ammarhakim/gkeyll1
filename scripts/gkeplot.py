@@ -17,6 +17,9 @@ parser = OptionParser()
 parser.add_option('-p', '--plot', action = 'store',
                   dest = 'fileName',
                   help = 'Hdf5 file to plot')
+parser.add_option('-m', '--mask', action = 'store',
+                  dest = 'maskField',
+                  help = 'Field to use as mask (embedded BC simulations only)')
 parser.add_option('-c', '--component', action = 'store',
                   dest = 'component', default=0,
                   help = 'Component to plot')
@@ -106,7 +109,6 @@ if options.dgOrder:
 # 1D/2D plots
 if options.fileName:
     gd = gkedata.GkeData(options.fileName)
-
     dims = len(gd.q.shape)-1
 
     if plotDg:

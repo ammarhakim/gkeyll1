@@ -1,4 +1,6 @@
 import pylab
+import numpy
+import gkedata
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 
@@ -104,6 +106,13 @@ class Plot2D:
             data = transformMod.transformRegistry[transformVar](gd.q)
         else:
             data = gd.q[:,:,component]
+
+        maskField = 0.0*data # default mask
+        if options.maskField:
+            # read maskfield
+            maskField = gkedata.GkeData(options.maskField).q[:,:,0]
+
+        data = numpy.ma.masked_where(maskField < 0.0, data)
             
         X = pylab.linspace(gd.lowerBounds[0], gd.upperBounds[0], gd.cells[0]+1)
         Y = pylab.linspace(gd.lowerBounds[1], gd.upperBounds[1], gd.cells[1]+1)

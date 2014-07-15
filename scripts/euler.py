@@ -1,4 +1,5 @@
 import exceptions
+import numpy
 
 class ExtractFluidVars1D(object):
     def __init__(self, offset):
@@ -25,6 +26,11 @@ class ExtractFluidVars1D(object):
         v = self.getV(q)
         w = self.getW(q)
         return (q[:,self.v['p']] - 0.5*r*(u*u+v*v+w*w))*(self.g-1)
+
+    def getMach(self, q):
+        cs = numpy.sqrt(self.g*self.getP(q)/self.getRho(q))
+        uu = numpy.sqrt(self.getU(q)**2 + self.getV(q)**2 + self.getW(q)**2)
+        return uu/cs
 
     def getIe(self, q):
         r = self.getRho(q)
@@ -56,6 +62,11 @@ class ExtractFluidVars2D(object):
         w = self.getW(q)
         return (q[:,:,self.v['p']] - 0.5*r*(u*u+v*v+w*w))*(self.g-1)
 
+    def getMach(self, q):
+        cs = numpy.sqrt(self.g*self.getP(q)/self.getRho(q))
+        uu = numpy.sqrt(self.getU(q)**2 + self.getV(q)**2 + self.getW(q)**2)
+        return uu/cs
+
     def getIe(self, q):
         r = self.getRho(q)
         return self.getP(q)/r/(self.g-1)
@@ -86,6 +97,8 @@ class ExtractFluidVars(object):
         return self.get(q, 'getW')
     def getP(self, q):
         return self.get(q, 'getP')
+    def getMach(self, q):
+        return self.get(q, 'getMach')
     def getIe(self, q):
         return self.get(q, 'getIe')
 
@@ -98,4 +111,5 @@ transformRegistry = {
     'w' : fluidEx.getW,
     'p' : fluidEx.getP,
     'ie' : fluidEx.getIe,
+    'mach' : fluidEx.getMach
 }

@@ -9,7 +9,7 @@ class GkeData:
     r"""GkeData(base: string, frame : int) -> GkeData
 
     Provides an interface to read data stored in a Gkeyll produced
-    HDF5 file, with base name ``base`` and frame ``frame``.
+    HDF5 file
     """
 
     def __init__(self, fName):
