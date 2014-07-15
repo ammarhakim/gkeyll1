@@ -248,7 +248,7 @@ namespace Lucee
 
           if (hasSsBnd)
           {
-// if both cells attached to this edge are outside the domain, skip it
+// if both cells attached to this edge are outside domain, skip it
             inOut->setPtr(ioPtr, idx);
             inOut->setPtr(ioPtr1, idxl);
             if (isOutside(ioPtr) && isOutside(ioPtr1))
@@ -430,12 +430,12 @@ namespace Lucee
         {
 // if both cells attached to this edge are outside the domain, do not
 // limit wave
-          cellIdx[dir] = i; // right cell
-          inOut->setPtr(ioPtr, cellIdx);
-          cellIdx[dir] = i-1; // left cell
-          inOut->setPtr(ioPtr1, cellIdx);
-          if (isOutside(ioPtr) && isOutside(ioPtr1))
-            continue; // skip to next cell
+          // cellIdx[dir] = i; // right cell
+          // inOut->setPtr(ioPtr, cellIdx);
+          // cellIdx[dir] = i-1; // left cell
+          // inOut->setPtr(ioPtr1, cellIdx);
+          // if (isOutside(ioPtr) && isOutside(ioPtr1))
+          //   continue; // skip to next cell
         }
 
         sp.setPtr(spPtr, i);
