@@ -18,6 +18,8 @@ namespace Lucee
   template <> const char *RectCartGrid<1>::id = "RectCart1D";
   template <> const char *RectCartGrid<2>::id = "RectCart2D";
   template <> const char *RectCartGrid<3>::id = "RectCart3D";
+  template <> const char *RectCartGrid<4>::id = "RectCart4D";
+  template <> const char *RectCartGrid<5>::id = "RectCart5D";
 
   template <unsigned NDIM>
   RectCartGrid<NDIM>::RectCartGrid()

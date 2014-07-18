@@ -181,6 +181,8 @@ namespace Lucee
       .append<Lucee::EvalOnNodesUpdater<1> >()
       .append<Lucee::EvalOnNodesUpdater<2> >()
       .append<Lucee::EvalOnNodesUpdater<3> >()
+      .append<Lucee::EvalOnNodesUpdater<4> >()
+      .append<Lucee::EvalOnNodesUpdater<5> >()
 
       .append<Lucee::EvalOnBoundaryNodesUpdater<1> >()
       .append<Lucee::EvalOnBoundaryNodesUpdater<2> >()
