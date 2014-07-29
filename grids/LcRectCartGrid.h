@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcStructuredGridBase.h>
 
 namespace Lucee
@@ -23,6 +24,8 @@ namespace Lucee
   template <unsigned NDIM>
   class RectCartGrid : public Lucee::StructuredGridBase<NDIM>
   {
+// Number of components for coordinate arrays etc.
+      static const unsigned NC = Lucee::CDIM<NDIM>::N;
     public:
 /** Class id: this is used by the registration system */
       static const char *id;
@@ -70,7 +73,7 @@ namespace Lucee
  *
  * @param xc On output, centroid of cell.
  */
-      virtual void getCentroid(double xc[3]) const;
+      virtual void getCentroid(double xc[]) const;
 
 /**
  * Return coordinates in physical space of bottom left node. The
@@ -79,7 +82,7 @@ namespace Lucee
  *
  * @param xc On output, vertex coordinate of cell.
  */
-      virtual void getVertex(double xc[3]) const;
+      virtual void getVertex(double xc[]) const;
 
 /**
  * Return volume of cell. The setIndex() method must be called before
@@ -114,8 +117,8 @@ namespace Lucee
  * @param tan2 On output, second tangent to face.
  * 
  */
-      virtual void getSurfCoordSys(unsigned dir, double norm[3],
-        double tan1[3], double tan2[3]) const;
+      virtual void getSurfCoordSys(unsigned dir, double norm[],
+        double tan1[], double tan2[]) const;
 
 /**
  * Write grid to given node in HDF5 file.
@@ -137,7 +140,7 @@ namespace Lucee
 
     private:
 /** Grid spacing in each direction */
-      double dx[3];
+      double dx[Lucee::CDIM<NDIM>::N];
 /** Volume of each cell */
       double cellVolume;
 /** Number of cells in domain */

@@ -85,7 +85,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NonUniRectCartGrid<NDIM>::getCentroid(double xc[3]) const
+  NonUniRectCartGrid<NDIM>::getCentroid(double xc[]) const
   {
     for (unsigned d=0; d<NDIM; ++d)
       xc[d] = 0.5*(vcoords[d](this->currIdx[d]+1) + vcoords[d](this->currIdx[d]));
@@ -95,7 +95,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NonUniRectCartGrid<NDIM>::getVertex(double xc[3]) const
+  NonUniRectCartGrid<NDIM>::getVertex(double xc[]) const
   {
     for (unsigned d=0; d<NDIM; ++d)
       xc[d] = vcoords[d](this->currIdx[d]+1);
@@ -128,8 +128,8 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  NonUniRectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[3],
-    double tan1[3], double tan2[3]) const
+  NonUniRectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[],
+    double tan1[], double tan2[]) const
   {
     if (dir==0)
     {

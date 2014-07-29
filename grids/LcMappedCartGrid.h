@@ -50,7 +50,7 @@ namespace Lucee
  *
  * @param xc On output, centroid of cell.
  */
-      virtual void getCentroid(double xc[3]) const;
+      virtual void getCentroid(double xc[]) const;
 
 /**
  * Return coordinates in physical space of bottom left node. The
@@ -59,7 +59,7 @@ namespace Lucee
  *
  * @param xc On output, vertex coordinate of cell.
  */
-      virtual void getVertex(double xc[3]) const;
+      virtual void getVertex(double xc[]) const;
 
 /**
  * Return volume of cell. The setIndex() method must be called before
@@ -94,8 +94,8 @@ namespace Lucee
  * @param tan2 On output, second tangent to face.
  * 
  */
-      virtual void getSurfCoordSys(unsigned dir, double norm[3],
-        double tan1[3], double tan2[3]) const;
+      virtual void getSurfCoordSys(unsigned dir, double norm[],
+        double tan1[], double tan2[]) const;
 
 /**
  * Write grid to given node in HDF5 file.
