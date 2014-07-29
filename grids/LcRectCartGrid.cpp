@@ -54,7 +54,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  RectCartGrid<NDIM>::getCentroid(double xc[3]) const
+  RectCartGrid<NDIM>::getCentroid(double xc[]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       xc[i] = this->compSpace.getLower(i) +
@@ -65,7 +65,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  RectCartGrid<NDIM>::getVertex(double xc[3]) const
+  RectCartGrid<NDIM>::getVertex(double xc[]) const
   {
     for (unsigned i=0; i<NDIM; ++i)
       xc[i] = this->compSpace.getLower(i) +
@@ -85,20 +85,21 @@ namespace Lucee
   double
   RectCartGrid<NDIM>::getSurfArea(unsigned dir) const
   {
-    if (dir==0)
-      return dx[1]*dx[2];
-    else if (dir==1)
-      return dx[0]*dx[2];
-    else if (dir==2)
-      return dx[0]*dx[1];
-    return 1.0;
+    double sa = 1.0;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (dir!=d)
+        sa *= dx[d];
+    }
+    return sa;
   }
 
   template <unsigned NDIM>
   void
-  RectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[3],
-    double tan1[3], double tan2[3]) const
+  RectCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[],
+    double tan1[], double tan2[]) const
   {
+// THIS NEEDS TO BE CHANGED
     if (dir==0)
     {
       norm[0] = 1.0;
@@ -189,7 +190,7 @@ namespace Lucee
       return *this;
 
     Lucee::StructuredGridBase<NDIM>::operator=(rg);
-    for (unsigned i=0; i<3; ++i)
+    for (unsigned i=0; i<NC; ++i)
       dx[i] = rg.dx[i];
     cellVolume = rg.cellVolume;
 
@@ -200,7 +201,7 @@ namespace Lucee
   void
   RectCartGrid<NDIM>::calcGeometry()
   {
-    for (unsigned i=0; i<3; ++i)
+    for (unsigned i=0; i<NC; ++i)
       dx[i] = 1.0;
     for (unsigned i=0; i<NDIM; ++i)
       dx[i] = this->compSpace.getShape(i)/this->globalRgn.getShape(i);

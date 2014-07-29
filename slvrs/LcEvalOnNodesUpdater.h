@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
 #include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
@@ -27,6 +28,9 @@ namespace Lucee
   template <unsigned NDIM>
   class EvalOnNodesUpdater : public Lucee::UpdaterIfc
   {
+// Number of components for coordinate arrays etc.
+      static const unsigned NC = Lucee::CDIM<NDIM>::N;
+
     public:
 /** Class id: this is used by registration system */
       static const char *id;

@@ -84,11 +84,7 @@ namespace Lucee
     std::vector<double> res(nc);
     int idx[NDIM];
 
-    int numCoordinates;
-    if (NDIM > 3)
-      numCoordinates = NDIM;
-    else numCoordinates = 3;
-
+    int numCoordinates = NC;
     Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), numCoordinates);
 
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
@@ -127,19 +123,14 @@ namespace Lucee
   EvalOnNodesUpdater<NDIM>::evaluateFunction(Lucee::LuaState& L, double tm,
     const Lucee::Matrix<double> nc, unsigned nn, std::vector<double>& res)
   {
-// figure out how many coordinates to loop over
-    int numCoordinates;
-    if (NDIM > 3)
-      numCoordinates = NDIM;
-    else numCoordinates = 3;
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
 // push variables on stack
-    for (unsigned i=0; i<numCoordinates; ++i)
+    for (unsigned i=0; i<NC; ++i)
       lua_pushnumber(L, nc(nn,i));
     lua_pushnumber(L, tm);
 // call function
-    if (lua_pcall(L, numCoordinates+1, res.size(), 0) != 0)
+    if (lua_pcall(L, NC+1, res.size(), 0) != 0)
     {
       Lucee::Except lce("EvalOnNodesUpdater::evaluateFunction: ");
       lce << "Problem evaluating function supplied as 'evaluate' "

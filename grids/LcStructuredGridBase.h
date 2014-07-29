@@ -118,14 +118,14 @@ namespace Lucee
  *
  * @param xc On output, centroid of cell.
  */
-      virtual void getCentroid(double xc[3]) const = 0;
+      virtual void getCentroid(double xc[]) const = 0;
 
 /**
  * Return coordinates in physical space of bottom left node.
  *
  * @param xc On output, vertex coordinate of cell.
  */
-      virtual void getVertex(double xc[3]) const = 0;
+      virtual void getVertex(double xc[]) const = 0;
 
 /**
  * Return volume of cell.
@@ -157,8 +157,8 @@ namespace Lucee
  * @param tan2 On output, second tangent to face.
  * 
  */
-      virtual void getSurfCoordSys(unsigned dir, double norm[3],
-        double tan1[3], double tan2[3]) const = 0;
+      virtual void getSurfCoordSys(unsigned dir, double norm[],
+        double tan1[], double tan2[]) const = 0;
 
 /**
  * Get neigbors of target region for a given number of ghost cells on

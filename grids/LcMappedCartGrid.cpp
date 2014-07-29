@@ -103,13 +103,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  MappedCartGrid<NDIM>::getCentroid(double xc[3]) const
+  MappedCartGrid<NDIM>::getCentroid(double xc[]) const
   {
   }
 
   template <unsigned NDIM>
   void
-  MappedCartGrid<NDIM>::getVertex(double xc[3]) const
+  MappedCartGrid<NDIM>::getVertex(double xc[]) const
   {
   }
 
@@ -129,8 +129,8 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  MappedCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[3],
-    double tan1[3], double tan2[3]) const
+  MappedCartGrid<NDIM>::getSurfCoordSys(unsigned dir, double norm[],
+    double tan1[], double tan2[]) const
   {
   }
 
