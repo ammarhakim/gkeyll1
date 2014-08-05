@@ -98,9 +98,6 @@ namespace Lucee
 // indices into grid
     int idx[NDIM];
 
-// coordinates of nodes
-    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), 3);
-
 // get hold of Lua state object
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 
@@ -134,8 +131,6 @@ namespace Lucee
       q.setPtr(ptr, idx);
 
       nodalBasis->setIndex(idx);
-// compute node coordinates
-      nodalBasis->getNodalCoordinates(nodeCoords);
 
       // Get the mass matrix and invert it
       nodalBasis->getMassMatrix(localMass);
@@ -152,12 +147,8 @@ namespace Lucee
       grid.setIndex(idx);
       grid.getCentroid(xc);
       for (int gaussPoint = 0; gaussPoint < numVolQuadNodes; gaussPoint++)
-      {
         for (int dimIndex = 0; dimIndex < 3; dimIndex ++)
-        {
           gaussOrdinates(gaussPoint,dimIndex) = xc[dimIndex] + gaussOrdinates(gaussPoint,dimIndex)*coordScales[dimIndex];
-        }
-      }
 
       basisIntegrals.setZero(basisIntegrals.rows(),basisIntegrals.cols());
 
@@ -167,14 +158,11 @@ namespace Lucee
       {
         // Get value of function at each gauss quadrature ordinate
         evaluateFunction(*L, t, gaussOrdinates, gaussPoint, res);
+        
         for (int basisIndex = 0; basisIndex < basisIntegrals.rows(); basisIndex++)
-        {
           for (int component = 0; component < nc; component++)
-          {
             basisIntegrals(basisIndex,component) += gaussWeights[gaussPoint]*interpMatrix(gaussPoint,basisIndex)*
               res[component];
-          }
-        }
       }
 
       // Columns are components of f (can be more than 1)

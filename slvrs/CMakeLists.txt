@@ -18,10 +18,12 @@ set(lcslvrs_SOURCES
   LcASquaredProjectionUpdater.cpp
   LcATimesPUpdater.cpp
   LcAdvectionEquation.cpp
+  LcAdvectionEquationTemplated.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
   LcBoltzmannPhiUpdater.cpp
   LcBoundaryCondition.cpp
+  LcCompletePolynomialElement.cpp
   LcConstBoundaryCondition.cpp
   LcCopyBoundaryCondition.cpp
   LcCopyContToDisContFieldUpdater.cpp

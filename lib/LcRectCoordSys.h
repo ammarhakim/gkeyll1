@@ -89,6 +89,8 @@ namespace Lucee
  */
       virtual void rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const = 0;
 
+      virtual int getAlignmentDirection() const;
+
     protected:
 /**
  * Default ctor create coordinate system that is same as global

@@ -71,6 +71,11 @@ namespace Lucee
  */
       void rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const;
 
+/**
+ * Returns the alignment direction dir for this object
+ */
+      int getAlignmentDirection() const;
+
     private:
 /** Alignment direction */
       unsigned dir;
