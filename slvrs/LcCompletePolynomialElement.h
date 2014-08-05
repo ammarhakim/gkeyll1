@@ -1,11 +1,11 @@
 /**
- * @file	LcSerendipityElement.h
+ * @file	LcCompletePolynomialElement.h
  *
- * @brief Serendipity element implemented so far for 2 and 3 dimensions.
+ * @brief Complete polynomial element
  */
 
-#ifndef LC_SERENDIPITY_ELEMENT_H
-#define LC_SERENDIPITY_ELEMENT_H
+#ifndef LC_COMPLETE_POLYNOMIAL_ELEMENT_H
+#define LC_COMPLETE_POLYNOMIAL_ELEMENT_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -33,11 +33,11 @@
 namespace Lucee
 {
 /**
- * Serendipity Elements in arbitrary dimensions
+ * Complete polynomial elements in arbitrary dimensions
  *
  */
   template <unsigned NDIM>
-  class SerendipityElement : public Lucee::NodalFiniteElementIfc<NDIM>
+  class CompletePolynomialElement : public Lucee::NodalFiniteElementIfc<NDIM>
   {
     // Number of components for coordinate arrays etc.
     static const unsigned NC = Lucee::CDIM<NDIM>::N;
@@ -47,10 +47,10 @@ namespace Lucee
       static const char *id;
 
 /**
- * Create a new serendipity element. This does not create a usable
+ * Create a new complete polynomial element. This does not create a usable
  * object which can only be created from Lua.
  */
-      SerendipityElement();
+      CompletePolynomialElement();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -393,8 +393,6 @@ namespace Lucee
       double dq[NDIM];
 /** Grid spacing squared in various dimensions */
       double dq2[NDIM];
-/** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
-      Eigen::MatrixXd nodeList;
       std::vector<blitz::Array<double,NDIM> > functionVector;
 /** Matrix containing basis functions evaluated at volume gaussian integration locations
     Correspondance between column and gaussian node set is kept track of in gaussNodeList
@@ -447,19 +445,13 @@ namespace Lucee
 /** Face to interior mapping matrices */
       std::vector<Eigen::MatrixXd> lowerFaceToInteriorMapMatrices;
 /**
- *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
- *    Currently only works for 3-D cases.
+ *    Create necessary matrices needed for complete polynomial elements.
  */
       void setupMatrices();
 /**
  *    Resize output matrices computed in setupMatrices()
  */
       void resizeMatrices();
-/**
- *    Populate nodeList with serendipity node locations on reference
- *    element
- */
-      void getNodeList(Eigen::MatrixXd& nodeMatrix);
 /**
  *    Create basis monomials by populating matrix of rows
  *    [a b c] to represent x^a*y^b*z^c monomials
@@ -505,10 +497,10 @@ namespace Lucee
  */
       void setupMomentMatrices();
 /**
- *    Compute the number of degrees of freedom for serendipity element
+ *    Compute the number of degrees of freedom for this element
  *    with degree r and in dimension n
  */
-      int getSerendipityDimension(int degree, int dimension) const;
+      int getCompletePolynomialDimension(int degree, int dimension) const;
 /**
  *    Compute n!
  */
@@ -516,4 +508,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_SERENDIPITY_ELEMENT_H
+#endif // LC_COMPLETE_POLYNOMIAL_ELEMENT_H

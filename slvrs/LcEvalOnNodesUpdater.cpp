@@ -84,8 +84,7 @@ namespace Lucee
     std::vector<double> res(nc);
     int idx[NDIM];
 
-    int numCoordinates = NC;
-    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), numCoordinates);
+    Lucee::Matrix<double> nodeCoords(nodalBasis->getNumNodes(), NC);
 
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 

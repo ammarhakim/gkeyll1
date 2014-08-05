@@ -14,6 +14,7 @@
 #include <LcATimesPUpdater.h>
 #include <LcBcUpdater.h>
 #include <LcBoltzmannPhiUpdater.h>
+#include <LcCompletePolynomialElement.h>
 #include <LcConstBoundaryCondition.h>
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
@@ -197,6 +198,8 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<1> >()
       .append<Lucee::NodalDisContHyperUpdater<2> >()
       .append<Lucee::NodalDisContHyperUpdater<3> >()
+      .append<Lucee::NodalDisContHyperUpdater<4> >()
+      .append<Lucee::NodalDisContHyperUpdater<5> >()
 
       .append<Lucee::CopyContToDisContFieldUpdater<1> >()
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
@@ -276,7 +279,8 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<3> > >
       ::Instance()
       .append<Lucee::LagrangeTensorElement<3> >()
-      .append<Lucee::SerendipityElement<3> >();
+      .append<Lucee::SerendipityElement<3> >()
+      .append<Lucee::CompletePolynomialElement<3> >();
 
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<4> > >
       ::Instance()

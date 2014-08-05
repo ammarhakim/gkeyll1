@@ -11,6 +11,7 @@
 
 // lucee includes
 #include <LcAdvectionEquation.h>
+#include <LcAdvectionEquationTemplated.h>
 #include <LcAuxAdvectionEquation.h>
 #include <LcDivEquation.h>
 #include <LcEulerEquation.h>
@@ -34,6 +35,11 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::HyperEquation> >
       ::Instance()
       .append<Lucee::AdvectionEquation>()
+      .append<Lucee::AdvectionEquationTemplated<1> >()
+      .append<Lucee::AdvectionEquationTemplated<2> >()
+      .append<Lucee::AdvectionEquationTemplated<3> >()
+      .append<Lucee::AdvectionEquationTemplated<4> >()
+      .append<Lucee::AdvectionEquationTemplated<5> >()
       .append<Lucee::EulerEquation>()
       .append<Lucee::IsoThermEulerEquation>()
       .append<Lucee::TenMomentEquation>()

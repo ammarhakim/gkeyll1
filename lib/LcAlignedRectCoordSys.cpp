@@ -53,8 +53,11 @@ namespace Lucee
     }
     else
     {
-      throw Lucee::Except
-        ("AlignedRectCoordSys::AlignedRectCoordSys: Alignment direction must be 0, 1, or 2");
+      // Assume user knows that this coordinate system will only
+      // be used to store a direction and nothing else.
+      xu[0] = 1.0;
+      yu[1] = 1.0;
+      zu[2] = 1.0;
     }
 // call base class method to set vectors
     setUnitVecs(&xu[0], &yu[0], &zu[0]);
@@ -218,5 +221,11 @@ namespace Lucee
       outSM[4] = R1[2];
       outSM[5] = R2[2];
     }
+  }
+
+  int
+  AlignedRectCoordSys::getAlignmentDirection() const
+  {
+    return dir;
   }
 }

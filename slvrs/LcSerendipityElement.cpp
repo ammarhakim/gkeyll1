@@ -286,6 +286,18 @@ namespace Lucee
   SerendipityElement<NDIM>::getSurfLowerNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
   {
+    /*int counter = 0;
+
+    for (int i = 0; i < nodeList.rows(); i++)
+    {
+      if (nodeList(i,dir) == -1)
+      {
+        nodeNum[counter] = i;
+        std::cout << "ldir = " << dir << ", nodeNum[" << counter << "] = " << i << std::endl;
+        counter++;
+      }
+    }*/
+    
     if (NDIM == 1)
       nodeNum[0] = 0;
     else if (NDIM == 2)
@@ -557,6 +569,101 @@ namespace Lucee
           nodeNum[5] = 5;
           nodeNum[6] = 7;
           nodeNum[7] = 6;
+        }
+      }
+      else if (polyOrder == 2)
+      {
+        if (dir == 0)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 7;
+          nodeNum[2] = 6;
+          nodeNum[3] = 8;
+          nodeNum[4] = 11;
+          nodeNum[5] = 12;
+          nodeNum[6] = 19;
+          nodeNum[7] = 18;
+          nodeNum[8] = 20;
+          nodeNum[9] = 23;
+          nodeNum[10] = 24;
+          nodeNum[11] = 27;
+          nodeNum[12] = 28;
+          nodeNum[13] = 35;
+          nodeNum[14] = 34;
+          nodeNum[15] = 36;
+          nodeNum[16] = 39;
+          nodeNum[17] = 40;
+          nodeNum[18] = 47;
+          nodeNum[19] = 46;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 8;
+          nodeNum[4] = 9;
+          nodeNum[5] = 12;
+          nodeNum[6] = 13;
+          nodeNum[7] = 14;
+          nodeNum[8] = 20;
+          nodeNum[9] = 21;
+          nodeNum[10] = 24;
+          nodeNum[11] = 25;
+          nodeNum[12] = 28;
+          nodeNum[13] = 29;
+          nodeNum[14] = 30;
+          nodeNum[15] = 36;
+          nodeNum[16] = 37;
+          nodeNum[17] = 40;
+          nodeNum[18] = 41;
+          nodeNum[19] = 42;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 7;
+          nodeNum[4] = 3;
+          nodeNum[5] = 6;
+          nodeNum[6] = 5;
+          nodeNum[7] = 4;
+          nodeNum[8] = 20;
+          nodeNum[9] = 21;
+          nodeNum[10] = 23;
+          nodeNum[11] = 22;
+          nodeNum[12] = 28;
+          nodeNum[13] = 29;
+          nodeNum[14] = 30;
+          nodeNum[15] = 35;
+          nodeNum[16] = 31;
+          nodeNum[17] = 34;
+          nodeNum[18] = 33;
+          nodeNum[19] = 32;
+        }
+        else if (dir == 3)
+        {
+          nodeNum[0] = 0;
+          nodeNum[1] = 1;
+          nodeNum[2] = 2;
+          nodeNum[3] = 7;
+          nodeNum[4] = 3;
+          nodeNum[5] = 6;
+          nodeNum[6] = 5;
+          nodeNum[7] = 4;
+          nodeNum[8] = 8;
+          nodeNum[9] = 9;
+          nodeNum[10] = 11;
+          nodeNum[11] = 10;
+          nodeNum[12] = 12;
+          nodeNum[13] = 13;
+          nodeNum[14] = 14;
+          nodeNum[15] = 19;
+          nodeNum[16] = 15;
+          nodeNum[17] = 18;
+          nodeNum[18] = 17;
+          nodeNum[19] = 16;
         }
       }
     }
@@ -840,6 +947,101 @@ namespace Lucee
           nodeNum[7] = 14;
         }
       }
+      else if (polyOrder == 2)
+      {
+        if (dir == 0)
+        {
+          nodeNum[0] = 2;
+          nodeNum[1] = 3;
+          nodeNum[2] = 4;
+          nodeNum[3] = 9;
+          nodeNum[4] = 10;
+          nodeNum[5] = 14;
+          nodeNum[6] = 15;
+          nodeNum[7] = 16;
+          nodeNum[8] = 21;
+          nodeNum[9] = 22;
+          nodeNum[10] = 25;
+          nodeNum[11] = 26;
+          nodeNum[12] = 30;
+          nodeNum[13] = 31;
+          nodeNum[14] = 32;
+          nodeNum[15] = 37;
+          nodeNum[16] = 38;
+          nodeNum[17] = 42;
+          nodeNum[18] = 43;
+          nodeNum[19] = 44;
+        }
+        else if (dir == 1)
+        {
+          nodeNum[0] = 6;
+          nodeNum[1] = 5;
+          nodeNum[2] = 4;
+          nodeNum[3] = 11;
+          nodeNum[4] = 10;
+          nodeNum[5] = 18;
+          nodeNum[6] = 17;
+          nodeNum[7] = 16;
+          nodeNum[8] = 23;
+          nodeNum[9] = 22;
+          nodeNum[10] = 27;
+          nodeNum[11] = 26;
+          nodeNum[12] = 34;
+          nodeNum[13] = 33;
+          nodeNum[14] = 32;
+          nodeNum[15] = 39;
+          nodeNum[16] = 38;
+          nodeNum[17] = 46;
+          nodeNum[18] = 45;
+          nodeNum[19] = 44;
+        }
+        else if (dir == 2)
+        {
+          nodeNum[0] = 12;
+          nodeNum[1] = 13;
+          nodeNum[2] = 14;
+          nodeNum[3] = 19;
+          nodeNum[4] = 15;
+          nodeNum[5] = 18;
+          nodeNum[6] = 17;
+          nodeNum[7] = 16;
+          nodeNum[8] = 24;
+          nodeNum[9] = 25;
+          nodeNum[10] = 27;
+          nodeNum[11] = 26;
+          nodeNum[12] = 40;
+          nodeNum[13] = 41;
+          nodeNum[14] = 42;
+          nodeNum[15] = 47;
+          nodeNum[16] = 43;
+          nodeNum[17] = 46;
+          nodeNum[18] = 45;
+          nodeNum[19] = 44;
+        }
+        else if (dir == 3)
+        {
+          nodeNum[0] = 28;
+          nodeNum[1] = 29;
+          nodeNum[2] = 30;
+          nodeNum[3] = 35;
+          nodeNum[4] = 31;
+          nodeNum[5] = 34;
+          nodeNum[6] = 33;
+          nodeNum[7] = 32;
+          nodeNum[8] = 36;
+          nodeNum[9] = 37;
+          nodeNum[10] = 39;
+          nodeNum[11] = 38;
+          nodeNum[12] = 40;
+          nodeNum[13] = 41;
+          nodeNum[14] = 42;
+          nodeNum[15] = 47;
+          nodeNum[16] = 43;
+          nodeNum[17] = 46;
+          nodeNum[18] = 45;
+          nodeNum[19] = 44;
+        }
+      }
     }
   }
 
@@ -851,15 +1053,22 @@ namespace Lucee
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     // Set index and get centroid coordinate
     grid.setIndex(this->currIdx);
-    double xc[3];
+    double xc[NC];
 
     grid.getCentroid(xc);
 
     // Loop over all node locations on reference element and convert them
     // to appropriate coordinates
     for (int i = 0; i < this->getNumNodes(); i++)
-      for (int dim = 0; dim < NDIM; dim++)
-        nodeCoords(i, dim) = xc[dim] + nodeList(i, dim)*0.5*dq[dim];
+    {
+      for (int dim = 0; dim < NC; dim++)
+      {
+        if (dim < NDIM)
+          nodeCoords(i, dim) = xc[dim] + nodeList(i, dim)*0.5*dq[dim];
+        else
+          nodeCoords(i, dim) = 0;
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -1589,7 +1798,7 @@ namespace Lucee
 
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
-      computeFaceMass(functionVector, dimIndex, refFaceMassLower[dimIndex], refFaceMassUpper[dimIndex]);
+      computeFaceMass(dimIndex, refFaceMassLower[dimIndex], refFaceMassUpper[dimIndex]);
       computeGradStiffness(functionDEvaluations, dimIndex, refGradStiffness[dimIndex]);
     }
 
@@ -2155,8 +2364,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeFaceMass(const std::vector<blitz::Array<double,NDIM> >& functionVector, int dir,
-    Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
+  SerendipityElement<NDIM>::computeFaceMass(int dir, Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
     std::vector<int> surfLowerNodeNums(lowerResultMatrix.cols(),0);
     std::vector<int> surfUpperNodeNums(upperResultMatrix.cols(),0);

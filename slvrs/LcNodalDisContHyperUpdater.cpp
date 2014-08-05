@@ -26,6 +26,8 @@ namespace Lucee
   template <> const char *NodalDisContHyperUpdater<1>::id = "NodalDgHyper1D";
   template <> const char *NodalDisContHyperUpdater<2>::id = "NodalDgHyper2D";
   template <> const char *NodalDisContHyperUpdater<3>::id = "NodalDgHyper3D";
+  template <> const char *NodalDisContHyperUpdater<4>::id = "NodalDgHyper4D";
+  template <> const char *NodalDisContHyperUpdater<5>::id = "NodalDgHyper5D";
 
   template <unsigned NDIM>
   NodalDisContHyperUpdater<NDIM>::NodalDisContHyperUpdater()
@@ -290,6 +292,7 @@ namespace Lucee
 
 // compute numerical fluxes on each face
           unsigned nface = lowerNodeNums[dir].nums.size();
+
           for (unsigned s=0; s<nface; ++s)
           {
             unsigned un = upperNodeNums[dir].nums[s];
@@ -387,4 +390,6 @@ namespace Lucee
   template class NodalDisContHyperUpdater<1>;
   template class NodalDisContHyperUpdater<2>;
   template class NodalDisContHyperUpdater<3>;
+  template class NodalDisContHyperUpdater<4>;
+  template class NodalDisContHyperUpdater<5>;
 }

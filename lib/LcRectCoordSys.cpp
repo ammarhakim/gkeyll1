@@ -84,4 +84,11 @@ namespace Lucee
   {
     return true;
   }
+
+  int
+  RectCoordSys::getAlignmentDirection() const
+  {
+    // default
+    return 0;
+  }
 }
