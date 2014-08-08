@@ -175,8 +175,17 @@ namespace Lucee
   ThreeWaveInteractSrcUpdater::stepRK4(double dt, const std::vector<std::complex<double> >& inp,
     std::vector<std::complex<double> >& out)
   {
-    throw Lucee::Except("ThreeWaveInteractSrcUpdater::stepRK4: Not implemented!");
+    boost::numeric::odeint::runge_kutta4<twstate> stepper;
+    stepper.do_step( *this, inp, 0, out, dt);
     return 1;
+  }
+
+  void
+  ThreeWaveInteractSrcUpdater::operator() (const twstate &x, twstate &dxdt, const double t)
+  {
+    dxdt[0] = c[0]*std::conj(x[1])*std::conj(x[2]);
+    dxdt[1] = c[1]*std::conj(x[0])*std::conj(x[2]);
+    dxdt[2] = c[2]*std::conj(x[0])*std::conj(x[1]);
   }
 }
 

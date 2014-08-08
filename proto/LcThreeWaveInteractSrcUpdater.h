@@ -37,6 +37,9 @@ namespace Lucee
  */
   class ThreeWaveInteractSrcUpdater : public Lucee::UpdaterIfc
   {
+/** State of three-wave RHS */
+      typedef std::vector<std::complex<double> > twstate;
+
     public:
 /** Class id: this is used by registration system */
       static const char *id;
@@ -72,6 +75,15 @@ namespace Lucee
  * types.
  */
       void declareTypes();
+
+/**
+ * Functor for use in boost::odeint integrators.
+ *
+ * @param x Input state.
+ * @param dxdt RHS of ODE
+ * @param t Time at which RHS is computed.
+ */
+      void operator() (const twstate &x, twstate &dxdt, const double t);
 
     private:
 /** Relative tolerance for ODE solver */
