@@ -30,6 +30,8 @@ namespace Lucee
   static const unsigned BX = 3;
   static const unsigned BY = 4;
   static const unsigned BZ = 5;
+  static const unsigned PHIE = 6;
+  static const unsigned PHIM = 7;
 
   static const int COL_PIV_HOUSEHOLDER_QR = 0;
   static const int PARTIAL_PIV_LU = 1;
@@ -94,6 +96,24 @@ namespace Lucee
     hasPressure = true;
     if (tbl.hasBool("hasPressure"))
       hasPressure = tbl.getBool("hasPressure");
+
+// electric and magnetic error propagation speeds
+    chi_e = 0.0;
+    if (tbl.hasNumber("elcErrorSpeedFactor"))
+      chi_e = tbl.getNumber("elcErrorSpeedFactor");
+
+    chi_m = 0.0;
+    if (tbl.hasNumber("mgnErrorSpeedFactor"))
+      chi_m = tbl.getNumber("mgnErrorSpeedFactor");
+
+// electric and magnetic dampin factor
+    damp_e = 0.0;
+    if (tbl.hasNumber("elcErrorDampFactor"))
+      damp_e = tbl.getNumber("elcErrorDampFactor");
+
+    damp_m = 0.0;
+    if (tbl.hasNumber("mgnErrorDampFactor"))
+      damp_m = tbl.getNumber("mgnErrorDampFactor");
 
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
@@ -210,11 +230,15 @@ namespace Lucee
       else
       { /* can not happen */ }
 
+      double chargeDens = 0.0;
       double keold = 0.0;
 // update solution for fluids (solution is at half-time step)
       for (unsigned n=0; n<nFluids; ++n)
       {
         fluids[n]->setPtr(fPtr, idx);
+
+// accumulate charge density from this fluid
+        chargeDens += qbym[n]*fPtr[RHO];
 
 // compute old kinetic energy before momenta are over-written
         keold = 0.5*(fPtr[RHOUX]*fPtr[RHOUX] + fPtr[RHOUY]*fPtr[RHOUY] + fPtr[RHOUZ]*fPtr[RHOUZ])/fPtr[RHO];
@@ -238,6 +262,15 @@ namespace Lucee
       emPtr[EX] = 2*sol(eidx(X)) - emPtr[EX];
       emPtr[EY] = 2*sol(eidx(Y)) - emPtr[EY];
       emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
+
+      double crhoc = chi_e*chargeDens/epsilon0;
+// update electric field error potential source
+      if (damp_e > 0)
+        emPtr[PHIE] = (emPtr[PHIE]*damp_e-crhoc)/damp_e*std::exp(-damp_e*dt) + crhoc/damp_e;
+      else
+        emPtr[PHIE] += dt*crhoc;
+// update magnetic field error potential source
+      emPtr[PHIM] = emPtr[PHIM]*std::exp(-damp_m*dt);
     }
     
     return Lucee::UpdaterStatus();

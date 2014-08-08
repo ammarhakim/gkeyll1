@@ -84,6 +84,16 @@ namespace Lucee
       bool hasStatic;
 /** Flag to indicate if to update pressure equation */
       bool hasPressure;
+/** Propagation speed factor for electric field error potential. This
+ * is dimensionless and the actual speed is chi_e*c. */
+      double chi_e;
+/** Propagation speed factor for magnetic field error potential. This
+ * is dimensionless and the actual speed is chi_m*c. */
+      double chi_m;
+/** Electric field error potential damping factor */
+      double damp_e;
+/** Magnetic field error potential damping factor */
+      double damp_m;
 
 /**
  * Compute index for fluid current component.
