@@ -459,16 +459,17 @@ namespace Lucee
  *    Populate nodeList with serendipity node locations on reference
  *    element
  */
-      void getNodeList(Eigen::MatrixXd& nodeMatrix);
+      void getNodeList(Eigen::MatrixXd& nodeMatrix, int degree);
 /**
  *    Create basis monomials by populating matrix of rows
  *    [a b c] to represent x^a*y^b*z^c monomials
  */
-      void setupBasisMatrix(Eigen::MatrixXi& basisMatrix);
+      void setupBasisMatrix(Eigen::MatrixXi& basisMatrix, int degree);
 /**
   *   Compute the basis functions in terms of the basis monomials
   */
-      void computeBasisFunctions(std::vector<blitz::Array<double, NDIM> >& functionVector);
+      void computeBasisFunctions(std::vector<blitz::Array<double, NDIM> >& functionVector,
+        const Eigen::MatrixXd& nodeList, int degree);
  /**
  *    Evaluate a polynomial represented by coefficients in a n-d array at a specific location
  *    defined by a vector nodeCoords
@@ -504,6 +505,10 @@ namespace Lucee
  *    Compute 'cross-dimensional' basis functions
  */
       void setupMomentMatrices();
+/**
+ *     Compute the det(J) factor
+ */
+      void computeTransformationScales();
 /**
  *    Compute the number of degrees of freedom for serendipity element
  *    with degree r and in dimension n
