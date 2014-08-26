@@ -22,9 +22,6 @@
 
 namespace Lucee
 {
-/** Integrator type */
-  enum {TWI_RK4, TWI_IMPLICIT};
-
 /**
  * Update source terms needed in three-wave interaction problem. This
  * system is give by the coupled equations
@@ -37,6 +34,8 @@ namespace Lucee
  */
   class ThreeWaveInteractSrcUpdater : public Lucee::UpdaterIfc
   {
+/** Integrator type */
+      enum {TWI_RK4, TWI_IMPLICIT};
 /** State of three-wave RHS */
       typedef std::vector<std::complex<double> > twstate;
 

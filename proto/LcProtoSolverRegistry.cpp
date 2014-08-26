@@ -130,7 +130,7 @@ namespace Lucee
 
       .append<Lucee::SheathParticleSource1x1v>()
 
-      .append<Lucee::ThreeWaveInteractSrcUpdater>();
+      .append<Lucee::ThreeWaveInteractSrcUpdater>()
       .append<Lucee::ThreeWaveInteractModSrcUpdater>();
 
 #ifdef HAVE_PETSC

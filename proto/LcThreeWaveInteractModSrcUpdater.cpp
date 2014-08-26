@@ -20,7 +20,7 @@
 namespace Lucee
 {
 // set ids for module system
-  const char *ThreeWaveInteractModSrcUpdater::id = "ThreeWaveInteractSrc";
+  const char *ThreeWaveInteractModSrcUpdater::id = "ThreeWaveInteractModSrc";
 
   bool
   ThreeWaveInteractModSrcUpdater::epsCmp(double a, double b) const
@@ -75,17 +75,19 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<1> >();
 
     double dt = t-this->getCurrTime();
-// fetch fields: in order E1, E2, E3
+// fetch fields: in order E1, E2, E3, W
     Lucee::Field<1, double>& e1 = this->getOut<Lucee::Field<1, double> >(0);
     Lucee::Field<1, double>& e2 = this->getOut<Lucee::Field<1, double> >(1);
     Lucee::Field<1, double>& e3 = this->getOut<Lucee::Field<1, double> >(2);
+    Lucee::Field<1, double>& w = this->getOut<Lucee::Field<1, double> >(3);
 
     Lucee::FieldPtr<double> e1Ptr = e1.createPtr();
     Lucee::FieldPtr<double> e2Ptr = e2.createPtr();
     Lucee::FieldPtr<double> e3Ptr = e3.createPtr();
+    Lucee::FieldPtr<double> wPtr = w.createPtr();
 
-    std::vector<std::complex<double> > inpE(3);
-    std::vector<std::complex<double> > outE(3);
+    std::vector<std::complex<double> > inpE(4);
+    std::vector<std::complex<double> > outE(4);
 
     unsigned maxIter = 0; // for diagnostics
 
@@ -100,10 +102,12 @@ namespace Lucee
       e1.setPtr(e1Ptr, ix);
       e2.setPtr(e2Ptr, ix);
       e3.setPtr(e3Ptr, ix);
+      w.setPtr(wPtr, ix);
 
       inpE[0] = std::complex<double> (e1Ptr[0], e1Ptr[1]);
       inpE[1] = std::complex<double> (e2Ptr[0], e2Ptr[1]);
       inpE[2] = std::complex<double> (e3Ptr[0], e3Ptr[1]);
+      inpE[3] = std::complex<double> (wPtr[0], wPtr[1]);
 
       unsigned nIter = 1;
       if (intType == TWI_IMPLICIT)
@@ -120,6 +124,7 @@ namespace Lucee
       e1Ptr[0] = outE[0].real(); e1Ptr[1] = outE[0].imag();
       e2Ptr[0] = outE[1].real(); e2Ptr[1] = outE[1].imag();
       e3Ptr[0] = outE[2].real(); e3Ptr[1] = outE[2].imag();
+      wPtr[0]  = outE[3].real(); wPtr[1]  = outE[3].imag();
     }
 
     // if (maxIter>1)
@@ -136,39 +141,15 @@ namespace Lucee
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
     this->appendOutVarType(typeid(Lucee::Field<1, double>));
+    this->appendOutVarType(typeid(Lucee::Field<1, double>));
   }
 
   unsigned
   ThreeWaveInteractModSrcUpdater::stepImplicit(double dt, const std::vector<std::complex<double> >& inp,
     std::vector<std::complex<double> >& out)
   {
-    unsigned nIter = 0;
-// first compute an estimate of e1
-    out[0] = inp[0] + dt*c[0]*std::conj(inp[1])*std::conj(inp[2]);
-    out[0] = 0.5*(out[0]+inp[0]); // half time-step
-
-    bool done = false;
-    while (!done)
-    {
-      nIter++;
-// compute e2 and e3 at half time-steps
-      std::complex<double> t1 = 1.0/(1.0-dt*dt/4.0*c[1]*c[2]*std::norm(out[0]));
-      out[1] = (inp[1] + dt/2*c[1]*std::conj(out[0])*std::conj(inp[2]))*t1;
-      out[2] = (inp[2] + dt/2*c[2]*std::conj(out[0])*std::conj(inp[1]))*t1;
-
-// compute updated value of e1 at half-step
-      std::complex<double> e1Up = inp[0] + dt/2*c[0]*std::conj(out[1])*std::conj(out[2]);
-// check if this is converged
-      if (epsCmp(out[0].real(), e1Up.real()) && epsCmp(out[0].imag(), e1Up.imag()))
-        done = true;
-      out[0] = e1Up;
-    }
-
-// compute values at full time-step
-    for (unsigned c=0; c<3; ++c)
-      out[c] = 2.0*out[c]-inp[c];
-
-    return nIter;
+    throw Lucee::Except("Lucee::ThreeWaveInteractModSrcUpdater: Implicit update not implemented!");
+    return 0;
   }
 
   unsigned
@@ -185,7 +166,8 @@ namespace Lucee
   {
     dxdt[0] = c[0]*std::conj(x[1])*std::conj(x[2]);
     dxdt[1] = c[1]*std::conj(x[0])*std::conj(x[2]);
-    dxdt[2] = c[2]*std::conj(x[0])*std::conj(x[1]);
+    dxdt[3] = x[3];
+    dxdt[4] = c[2]*std::conj(x[0])*std::conj(x[1]);
   }
 }
 
