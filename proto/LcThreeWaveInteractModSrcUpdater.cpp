@@ -166,8 +166,8 @@ namespace Lucee
   {
     dxdt[0] = c[0]*std::conj(x[1])*std::conj(x[2]);
     dxdt[1] = c[1]*std::conj(x[0])*std::conj(x[2]);
-    dxdt[3] = x[3];
-    dxdt[4] = c[2]*std::conj(x[0])*std::conj(x[1]);
+    dxdt[2] = x[3];
+    dxdt[3] = c[2]*std::conj(x[0])*std::conj(x[1]);
   }
 }
 
