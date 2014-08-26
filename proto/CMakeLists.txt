@@ -49,6 +49,7 @@ set (proto_SOURCES
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcSheathParticleSource1x1v.cpp
   LcSmoothQuadPhiToC1Updater.cpp
+  LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp
 )
 
