@@ -36,19 +36,16 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
 
-    std::vector<double> clst = tbl.getNumVec("constants");
-    if (clst.size() != 3)
-    {
-      Lucee::Except lce(
-        "ThreeWaveInteractModSrcUpdater::readInput: 'constants' should have exactly 3 entries. ");
-      lce << clst.size() << " provided instead";
-      throw lce;
-    }
+    std::vector<double> clst(2);
 
-// for now assume constants are real (should be easy to fix if needed)
-    c[0] = std::complex<double>(clst[0], 0.0);
-    c[1] = std::complex<double>(clst[1], 0.0);
-    c[2] = std::complex<double>(clst[2], 0.0);
+    clst = tbl.getNumVec("c1");
+    c[0] = std::complex<double>(clst[0], clst[1]);
+
+    clst = tbl.getNumVec("c2");
+    c[1] = std::complex<double>(clst[0], clst[1]);
+
+    clst = tbl.getNumVec("c3");
+    c[2] = std::complex<double>(clst[0], clst[1]);
 
     intType = TWI_IMPLICIT; // default integrator
 // get integrator type (if specified)
