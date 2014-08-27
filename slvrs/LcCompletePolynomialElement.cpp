@@ -841,8 +841,8 @@ namespace Lucee
   void
   CompletePolynomialElement<NDIM>::computeFaceMass(int dir, Eigen::MatrixXd& lowerResultMatrix, Eigen::MatrixXd& upperResultMatrix)
   {
-    std::vector<int> surfLowerNodeNums(lowerResultMatrix.cols(),0);
-    std::vector<int> surfUpperNodeNums(upperResultMatrix.cols(),0);
+    std::vector<int> surfLowerNodeNums(getNumSurfLowerNodes(dir),0);
+    std::vector<int> surfUpperNodeNums(getNumSurfLowerNodes(dir),0);
 
     getSurfLowerNodeNums(dir,surfLowerNodeNums);
     getSurfUpperNodeNums(dir,surfUpperNodeNums);
