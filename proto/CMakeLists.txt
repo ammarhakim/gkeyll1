@@ -43,6 +43,7 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcPoissonBracketUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp

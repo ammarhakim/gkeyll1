@@ -1598,10 +1598,10 @@ namespace Lucee
 
     // Populate nodeList according to polyOrder
     nodeList = Eigen::MatrixXd(this->getNumNodes(),NDIM);
-    getNodeList(nodeList);
+    getNodeList(nodeList, polyOrder);
 
     //std::vector<blitz::Array<double,NDIM> > functionVector;
-    computeBasisFunctions(functionVector);
+    computeBasisFunctions(functionVector, nodeList, polyOrder);
 
     // Compute gaussian quadrature weights and locations in 1-D
     numGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
@@ -1819,6 +1819,8 @@ namespace Lucee
         }
       }
     }
+
+    //computeTransformationScales();
   }
 
   template <unsigned NDIM>
@@ -1844,23 +1846,23 @@ namespace Lucee
  
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix)
+  SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix, int degree)
   {
     if (NDIM == 1)
     {
-      if (polyOrder == 1)
+      if (degree == 1)
         nodeMatrix << -1,
                       1;
-      else if (polyOrder == 2)
+      else if (degree == 2)
         nodeMatrix << -1,
                        0,
                        1;
-      else if (polyOrder == 3)
+      else if (degree == 3)
         nodeMatrix << -1,
                       -1/3.0,
                       1/3.0,
                       1;
-      else if (polyOrder == 4)
+      else if (degree == 4)
         nodeMatrix << -1,
                       -0.5,
                       0.5,
@@ -1868,14 +1870,14 @@ namespace Lucee
     }
     else if (NDIM == 2)
     {
-      if (polyOrder == 1)
+      if (degree == 1)
       {
         nodeMatrix << -1,-1,
                       1,-1,
                       1,1,
                       -1,1;
       }
-      else if (polyOrder == 2)
+      else if (degree == 2)
       {
         nodeMatrix << -1,-1,
                     0,-1,
@@ -1886,7 +1888,7 @@ namespace Lucee
                     -1,1,
                     -1,0;
       }
-      else if (polyOrder == 3)
+      else if (degree == 3)
       {
         nodeMatrix << -1,-1,
                     -1/3.0,-1,
@@ -1904,7 +1906,7 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
-      if (polyOrder == 1) {
+      if (degree == 1) {
         nodeMatrix << -1,-1,-1,
                      1,-1,-1,
                      1,1,-1,
@@ -1914,7 +1916,7 @@ namespace Lucee
                      1,1,1,
                      -1,1,1;
       }
-      else if (polyOrder == 2)
+      else if (degree == 2)
       {
         nodeMatrix << -1,-1,-1,
                     0,-1,-1,
@@ -1937,7 +1939,7 @@ namespace Lucee
                     -1,1,1,
                     -1,0,1; // End of Top Layer
       }
-      else if (polyOrder == 3)
+      else if (degree == 3)
       {
         nodeMatrix << -1,-1,-1,
                     -1/3.0,-1,-1,
@@ -1972,7 +1974,7 @@ namespace Lucee
                     -1,1/3.0,1,
                     -1,-1/3.0,1; // End of Top Layer
       }
-      else if (polyOrder == 4)
+      else if (degree == 4)
       {
         nodeMatrix << -1,-1,-1,
                       -0.5,-1,-1,
@@ -2028,7 +2030,7 @@ namespace Lucee
     }
     else if (NDIM == 4)
     {
-      if (polyOrder == 1)
+      if (degree == 1)
       {
         nodeMatrix << -1,-1,-1,-1,
                      1,-1,-1,-1,
@@ -2047,7 +2049,7 @@ namespace Lucee
                      1,1,1,1,
                      -1,1,1,1;
       }
-      else if (polyOrder == 2)
+      else if (degree == 2)
       {
         nodeMatrix << -1,-1,-1,-1,
                     0,-1,-1,-1,
@@ -2098,7 +2100,7 @@ namespace Lucee
                     -1,1,1,1,
                     -1,0,1,1;
       }
-      else if (polyOrder == 3)
+      else if (degree == 3)
       {
         nodeMatrix << -1,-1,-1,-1,
                     -1/3.0,-1,-1,-1,
@@ -2186,14 +2188,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix)
+  SerendipityElement<NDIM>::setupBasisMatrix(Eigen::MatrixXi& basisMatrix, int degree)
   {
     int dataIndex = 0;
     int shape[NDIM];
     int idx[NDIM];
 
     for(int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-      shape[dimIndex] = polyOrder + 1;
+      shape[dimIndex] = degree + 1;
 
     Lucee::Region<NDIM, int> polyRegion(shape);
     Lucee::RowMajorSequencer<NDIM> polySeq = RowMajorSequencer<NDIM>(polyRegion);
@@ -2207,7 +2209,7 @@ namespace Lucee
       for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
         superDegree += (idx[dimIndex] > 1)*idx[dimIndex];
       
-      if (superDegree < polyOrder + 1)
+      if (superDegree < degree + 1)
       {
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
           basisMatrix(dataIndex, dimIndex) = idx[dimIndex];
@@ -2218,14 +2220,16 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,NDIM> >& functionVector)
+  SerendipityElement<NDIM>::computeBasisFunctions(std::vector<blitz::Array<double,NDIM> >& functionVector,
+      const Eigen::MatrixXd& nodeList, int degree)
   {
+    int numNodes = getSerendipityDimension(degree, NDIM);
     // Matrix to represent basis monomials
-    Eigen::MatrixXi basisList = Eigen::MatrixXi::Zero(this->getNumNodes(), NDIM);
+    Eigen::MatrixXi basisList = Eigen::MatrixXi::Zero(numNodes, NDIM);
     // Populate basisList according to polyOrder
-    setupBasisMatrix(basisList);
+    setupBasisMatrix(basisList, degree);
     // Compute coefficients for basis functions
-    MatrixXd coeffMatrix(this->getNumNodes(), this->getNumNodes());
+    MatrixXd coeffMatrix(numNodes, numNodes);
 
     // Compute monomial terms evaluated at each nodal coordinate
     for (int nodeIndex = 0; nodeIndex < nodeList.rows(); nodeIndex++)
@@ -2252,7 +2256,7 @@ namespace Lucee
     // Loop over the coefficient matrix (each column represents a basis function)
     for (int basisIndex = 0; basisIndex < invCoeffMatrix.cols(); basisIndex++)
     {
-      // Reset the polynomial3DArray
+      // Reset the polynomialArray
       polynomialArray = 0;
       // Loop over the monomial terms that make up the basis function
       for (int monomialIndex = 0; monomialIndex < invCoeffMatrix.rows(); monomialIndex++)
@@ -2476,6 +2480,124 @@ namespace Lucee
               lowerSurfaceEvaluations[1](rollingIndex, lowerNodeNum);
           }
         }
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::computeTransformationScales()
+  {
+    // Temporary code for Jacobian calculation:
+    Eigen::MatrixXd refVertexList = Eigen::MatrixXd::Zero(getSerendipityDimension(1,NDIM),NDIM);
+    // Get vertices (nodes of polyOrder 1 element)
+    getNodeList(refVertexList, 1);
+    std::vector<blitz::Array<double,NDIM> > vertexFunctionVector;
+    computeBasisFunctions(vertexFunctionVector, refVertexList, 1);
+
+    Eigen::MatrixXd physicalVertexList = refVertexList;
+    
+    std::vector<blitz::Array<double,NDIM> > transformationVector;
+
+    blitz::TinyVector<int, NDIM> polynomialShape(maxPower);
+    blitz::Array<double, NDIM> polynomialArray(polynomialShape);
+
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      // Reset polynomialArray
+      polynomialArray = 0;
+      for (int nodeIndex = 0; nodeIndex < physicalVertexList.rows(); nodeIndex++)
+      {
+        polynomialArray = polynomialArray + physicalVertexList(nodeIndex, dimIndex)*vertexFunctionVector[nodeIndex];
+      }
+
+      transformationVector.push_back(polynomialArray.copy());
+    }
+
+    std::vector<blitz::Array<double,NDIM> > jacobianVector;
+    Eigen::MatrixXd volQuadJacobian(NDIM*NDIM, gaussNodeList.rows());
+    //Eigen::MatrixXd surfQuadJacobian(NDIM*NDIM, gaussNodeList.rows());
+    std::vector<Eigen::MatrixXd> surfUpperJacobianVector(NDIM);
+    std::vector<Eigen::MatrixXd> surfLowerJacobianVector(NDIM);
+    
+    // Allocate Eigen matrices
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      surfUpperJacobianVector[dimIndex] = Eigen::MatrixXd(NDIM*NDIM, gaussNodeListUpperSurf[dimIndex].rows());
+      surfLowerJacobianVector[dimIndex] = Eigen::MatrixXd(NDIM*NDIM, gaussNodeListLowerSurf[dimIndex].rows());
+    }
+
+    // Evaluate derivatives of basis functions at various vol and surf quadrature points
+    for (int rowIndex = 0; rowIndex < NDIM; rowIndex++)
+    {
+      for (int colIndex = 0; colIndex < NDIM; colIndex++)
+      {
+        // Matrix Element (rowIndex,colIndex) is rowIndex reference coordinate derivative on
+        // colIndex physical coordinate
+        blitz::Array<double, NDIM> polyDeriv = computePolynomialDerivative(transformationVector[colIndex], rowIndex);
+        for (int volIndex = 0; volIndex < gaussNodeList.rows(); volIndex++)
+        {
+          Eigen::VectorXd nodeVec(NDIM);
+          for(int i = 0; i < NDIM; i++)
+            nodeVec(i) = gaussNodeList(volIndex, i);
+          // Evaluate and store basis function derivative at quadrature point
+          volQuadJacobian(rowIndex*NDIM + colIndex, volIndex) = evalPolynomial(polyDeriv, nodeVec);
+        }
+
+        // Jacobian matrices evaluated at surface quadrature points
+        for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        {
+          for (int surfIndex = 0; surfIndex < gaussNodeListUpperSurf[dimIndex].rows(); surfIndex++)
+          {
+            Eigen::VectorXd nodeVec(NDIM);
+            for(int i = 0; i < NDIM; i++)
+              nodeVec(i) = gaussNodeListUpperSurf[dimIndex](surfIndex, i);
+
+            surfUpperJacobianVector[dimIndex](rowIndex*NDIM + colIndex, surfIndex) = evalPolynomial(polyDeriv, nodeVec);
+
+            for(int i = 0; i < NDIM; i++)
+              nodeVec(i) = gaussNodeListLowerSurf[dimIndex](surfIndex, i);
+
+            surfLowerJacobianVector[dimIndex](rowIndex*NDIM + colIndex, surfIndex) = evalPolynomial(polyDeriv, nodeVec);
+          }
+        }
+      }
+    }
+
+    // Compute jacobians of various matrices for volume integrals
+    for (int volIndex = 0; volIndex < gaussNodeList.rows(); volIndex++)
+    {
+      Eigen::MatrixXd jacobianMatrix(NDIM, NDIM);
+      for (int i = 0; i < NDIM; i++)
+        for (int j = 0; j < NDIM; j++)
+          jacobianMatrix(i, j) = volQuadJacobian(i*NDIM + j, volIndex);
+
+      // Multiply corresponding quadrature weight by det(J)
+      gaussNodeList(volIndex, NDIM) *= jacobianMatrix.determinant();
+
+      // Store jacobian or inverse of jacobian matrix for use in computing stiffness matrices
+    }
+
+    // Compute jacobians of various matrices for surface integrals
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+    {
+      for (int surfIndex = 0; surfIndex < gaussNodeListUpperSurf[dimIndex].rows(); surfIndex++)
+      {
+        Eigen::MatrixXd jacobianMatrix(NDIM, NDIM);
+        for (int i = 0; i < NDIM; i++)
+          for (int j = 0; j < NDIM; j++)
+            jacobianMatrix(i, j) = surfUpperJacobianVector[dimIndex](i*NDIM + j, surfIndex);
+
+        // Multiply corresponding quadrature weight by det(J)
+        gaussNodeListUpperSurf[dimIndex](surfIndex, NDIM) *= jacobianMatrix.determinant();
+
+        // Store jacobian or inverse of jacobian matrix for use in computing stiffness matrices
+        
+        // Do the same for the lower surface
+        for (int i = 0; i < NDIM; i++)
+          for (int j = 0; j < NDIM; j++)
+            jacobianMatrix(i, j) = surfLowerJacobianVector[dimIndex](i*NDIM + j, surfIndex);
+        gaussNodeListLowerSurf[dimIndex](surfIndex, NDIM) *= jacobianMatrix.determinant();
       }
     }
   }
