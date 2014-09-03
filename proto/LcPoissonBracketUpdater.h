@@ -128,7 +128,7 @@ namespace Lucee
       bool onlyIncrement;
 /** Flag to indicate if a Jacobian factor is supplied */
       bool hasJacobian;
-/** Field to store optional Jacobian field */
+/** Field to store optional Jacobian field (SHOULD REALLY BE SPATIAL DIM SIZE) */
       Lucee::Field<1, double> *jacobianField;
  /**
  * Compute numerical flux
