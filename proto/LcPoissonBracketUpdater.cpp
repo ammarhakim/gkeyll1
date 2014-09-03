@@ -179,7 +179,7 @@ namespace Lucee
       // Each row is a quadrature point; each column is a basis function with derivative applied
       Eigen::MatrixXd derivMatrix = surfUpperQuad[dir].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
-      // Copy derivatives to different kind type of matrix
+      // Use derivMatrix to create matrices for gradients of basis functions
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
         surfUpperQuad[dir].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
@@ -217,11 +217,10 @@ namespace Lucee
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
     // Testing
-    Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
+    //if (hasJacobian == true)
+    //  Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
 
     aNew = 0.0; // use aNew to store increment initially
-
-    double dx[NDIM];
 
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -264,7 +263,7 @@ namespace Lucee
     for (int dir = 0; dir < NDIM; dir++)
     {
       // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+      Lucee::RowMajorSequencer<NDIM> seq1D(localRgn.deflate(dir));
       // lower and upper bounds of 1D slice. (We need to make sure that flux
       // is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
@@ -274,15 +273,15 @@ namespace Lucee
       int idxl[NDIM];
 
       // loop over each 1D slice
-      while (seq.step())
+      while (seq1D.step())
       {
-        seq.fillWithIndex(idxr);
-        seq.fillWithIndex(idxl);
+        seq1D.fillWithIndex(idxr);
+        seq1D.fillWithIndex(idxl);
         // loop over each edge
-        for (int i = sliceLower; i < sliceUpper; i++)
+        for (int sliceIndex = sliceLower; sliceIndex < sliceUpper; sliceIndex++)
         { 
-          idxr[dir] = i;
-          idxl[dir] = i-1;
+          idxr[dir] = sliceIndex;
+          idxl[dir] = sliceIndex-1;
 
           grid.setIndex(idxl);
           double dxL = grid.getDx(dir);
@@ -296,10 +295,10 @@ namespace Lucee
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
           Eigen::VectorXd leftData(nlocal);
-          for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+          for (int i = 0; i < nlocal; i++)
           {
-            rightData(componentIndex) = aCurrPtr_r[componentIndex];
-            leftData(componentIndex) = aCurrPtr_l[componentIndex];
+            rightData(i) = aCurrPtr_r[i];
+            leftData(i) = aCurrPtr_l[i];
           }
 
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
@@ -312,41 +311,37 @@ namespace Lucee
           
           // Calculate alphaDotN at all quadrature points
           Eigen::VectorXd alphaDotN = normalVec.transpose()*alpha;
-          Eigen::VectorXd leftValsAtQuad = surfUpperQuad[dir].interpMat*leftData;
-          Eigen::VectorXd rightValsAtQuad = surfLowerQuad[dir].interpMat*rightData;
 
           // Compute numerical flux
-          Eigen::VectorXd numericalFlux(nSurfQuad);
-          computeNumericalFlux(alphaDotN, leftValsAtQuad, rightValsAtQuad, numericalFlux);
+          Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
+          computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
+              surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 
-          // Use numericalFlux for cfl number magic
+          // CFL adjustment
           double maxSpeed = alphaDotN.cwiseAbs().maxCoeff();
           cfla = Lucee::max3(cfla, dtdx*maxSpeed, -dtdx*maxSpeed);
           // Check if time-step was too large and return a suggestion with correct time-step
           if (cfla > cflm)
             return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-          // Compute the surface integrals required
-          Eigen::VectorXd upperResultVector = surfUpperQuad[dir].interpMat.transpose()*
-            numericalFlux.cwiseProduct(surfUpperQuad[dir].weights);
-          Eigen::VectorXd lowerResultVector = surfLowerQuad[dir].interpMat.transpose()*
-            numericalFlux.cwiseProduct(surfLowerQuad[dir].weights);
-
-          // Multiply by inverse of mass matrix
-          upperResultVector = massMatrixInv*upperResultVector;
-          lowerResultVector = massMatrixInv*lowerResultVector;
+          // Compute the surface integrals required and multiply by inverse of mass matrix
+          Eigen::VectorXd upperResultVector = massMatrixInv*surfUpperQuad[dir].interpMat.transpose()*
+            numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
+          Eigen::VectorXd lowerResultVector = massMatrixInv*surfLowerQuad[dir].interpMat.transpose()*
+            numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
           // Accumulate to solution
           aNew.setPtr(aNewPtr_l, idxr);
           aNew.setPtr(aNewPtr_r, idxl);
-          for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+          for (int i = 0; i < nlocal; i++)
           {
-            aNewPtr_l[componentIndex] -= upperResultVector(componentIndex);
-            aNewPtr_r[componentIndex] += lowerResultVector(componentIndex);
+            aNewPtr_l[i] -= upperResultVector(i);
+            aNewPtr_r[i] += lowerResultVector(i);
           }
         }
       }
     }
+    
 
     // NOTE: If only calculation of increments are requested, the final
     // update is not performed. This means that the multiplication
@@ -392,13 +387,13 @@ namespace Lucee
       if (fluxType == UPWIND)
       {
         if (alphaDotN(quadIndex) > 0.0)
-          numericalFluxAtQuad.col(quadIndex) = alphaDotN(quadIndex)*leftValsAtQuad.col(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftValsAtQuad(quadIndex);
         else
-          numericalFluxAtQuad.col(quadIndex) = alphaDotN(quadIndex)*rightValsAtQuad.col(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightValsAtQuad(quadIndex);
       }
       else if (fluxType == CENTRAL)
-        numericalFluxAtQuad.col(quadIndex) = alphaDotN(quadIndex)*0.5*
-          (rightValsAtQuad.col(quadIndex) + leftValsAtQuad.col(quadIndex));
+        numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*0.5*
+          (rightValsAtQuad(quadIndex) + leftValsAtQuad(quadIndex));
     }
   }
 
