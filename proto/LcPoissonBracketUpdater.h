@@ -14,12 +14,10 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcHyperEquation.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
 // eigen includes
-#include <Eigen/Dense>
 #include <Eigen/LU>
 
 namespace Lucee
@@ -109,7 +107,7 @@ namespace Lucee
               pDiffMatrix[dir] = Eigen::MatrixXd(NDIM, numQuad);
           }
 
-/** Matrix of ordinates */
+/** Matrix of ordinates (could remove this) */
           Eigen::MatrixXd coordMat;
 /** Vector of weights */
           Eigen::VectorXd weights;
@@ -118,85 +116,29 @@ namespace Lucee
 /** Differentiation matrices, computing derivative of each basis function at quad points */
           std::vector<Eigen::MatrixXd> pDiffMatrix;
       };
-
-/** Differentiation matrices */
-      std::vector<Eigen::MatrixXd> diffMatrix;
-/** Differentiation matrices */
-      std::vector<Eigen::MatrixXd> gradStiffnessMatrix;
 /** Data for volume quadrature */
       GaussQuadData volQuad;
 /** Data for quadrature on each lower face */
       GaussQuadData surfLowerQuad[NDIM];
 /** Data for quadrature on each upper face */
       GaussQuadData surfUpperQuad[NDIM];
-/** Gradients of basis functions at quadrature points */
-      std::vector<Eigen::MatrixXd> mGradPhi;
-/** Basis fucntions at surface quadrature point */
-      std::vector<Eigen::MatrixXd> mSurfLowerPhi;
-/** Basis fucntions at surface quadrature point */
-      std::vector<Eigen::MatrixXd> mSurfUpperPhi;
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
-/** Vector to store lower node numbers */
-      std::vector<std::vector<int> > lowerNodeNums;
-/** Vector to store upper node numbers */
-      std::vector<std::vector<int> > upperNodeNums;
-
-/**
- * Structure to hold speeds at each node.
+/** Flag to indicate if a Jacobian factor is supplied */
+      bool hasJacobian;
+/** Field to store optional Jacobian field */
+      Lucee::Field<1, double> *jacobianField;
+ /**
+ * Compute numerical flux
+ * @param alphaDotN: characteristic velocities at quad points (dot n)
+ * @param leftValsAtQuad: left cell values at quad points
+ * @param rightValsAtQuad: right cell values at quad points
+ * @param numericalFluxAtQuad: resulting numerical flux calculation at quad points
  */
-      struct NodeSpeed
-      {
-/** Speeds at each node */
-          std::vector<double> s;
-      };
-
-/**
- * Calculate speeds in the X and Y directions. The output structure
- * must be pre-allocated.
- * 
- * @param phiK values of potential at nodes.
- * @param speeds On output, speeds in X- and Y-directions.
- */
-      void calcSpeeds(std::vector<double>& phiK,
-        NodeSpeed speeds[NDIM]);
-
-/**
- * Calculate speeds in the X and Y directions at quadrature
- * points. The output structure must be pre-allocated.
- * 
- * @param phiK values of potential at nodes.
- * @param speeds On output, speeds in X- and Y-directions.
- */
-      void calcSpeedsAtQuad(std::vector<double>& phiK,
-        NodeSpeed speeds[NDIM]);
-
-/**
- * Return upwind flux based given speed and nodal values.
- *
- * @param u Speed.
- * @param chil Vorticity on left node.
- * @param chir Vorticity on roght node.
- * @rturn upwind flux.
- */
-      double getUpwindFlux(double u, double chil, double chir);
-
-/**
- * Compute matrix-vector multiply. Output vector must be
- * pre-allocated. Note that the computation performed is
- *
- * out = m*mat*vec + v*out
- *
- * @param m Factor for accumulation.
- * @param mat Matrix for multiplication.
- * @param vec Vector for multiplication.
- * @param v Factor for accumulation.
- * @param out On output, holds the product.
- */
-      void matVec(double m, const Lucee::Matrix<double>& mat,
-        const double* vec, double v, double* out);
+      void computeNumericalFlux(const Eigen::VectorXd& alphaDotN, const Eigen::VectorXd& leftValsAtQuad,
+          const Eigen::VectorXd& rightValsAtQuad, Eigen::VectorXd& numericalFluxAtQuad);
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
