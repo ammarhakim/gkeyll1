@@ -16,6 +16,8 @@
 #include <LcLibRegistry.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcLuceeMod.h>
+#include <LcPoissonBracketEquation.h>
+#include <LcPoissonBracketEquationRegistry.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRegisterModules.h>
 #include <LcRteRegistry.h>
@@ -36,6 +38,7 @@ namespace Lucee
     Lucee::registerProtoSolverObjects(L);
     Lucee::registerSolverObjects(L);
     Lucee::registerHyperEquationsObjects(L);
+    Lucee::registerPoissonBracketEquationObjects(L);
     Lucee::registerRteObjects(L);
     Lucee::registerGridObjects(L);
     Lucee::registerDataStructObjects(L);
@@ -45,6 +48,7 @@ namespace Lucee
 // register modules into Lua
     Lucee::LuaModuleRegistry<Lucee::SolverIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::HyperEquation>::registerModule(L);
+    Lucee::LuaModuleRegistry<Lucee::PoissonBracketEquation>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::GridIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::DataStructIfc>::registerModule(L);
     Lucee::LuaModuleRegistry<Lucee::UpdaterIfc>::registerModule(L);
