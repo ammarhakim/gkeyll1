@@ -43,6 +43,14 @@ namespace Lucee
     else
       throw Lucee::Except("PoissonBracketUpdater::readInput: Must specify element to use using 'basis'");
 
+    if (tbl.hasObject<Lucee::PoissonBracketEquation>("equation"))
+      equation = &tbl.getObjectAsBase<Lucee::PoissonBracketEquation>("equation");
+    else
+    {
+      Lucee::Except lce("PoissonBracketUpdater::readInput: Must specify an equation to solve!");
+      throw lce;
+    }
+
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
@@ -194,10 +202,12 @@ namespace Lucee
   Lucee::UpdaterStatus 
   PoissonBracketUpdater<NDIM>::update(double t)
   {
+    std::cout << "update" << std::endl;
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
     const Lucee::Field<NDIM, double>& aCurr = this->getInp<Lucee::Field<NDIM, double> >(0);
+    const Lucee::Field<NDIM, double>& hamil = this->getInp<Lucee::Field<NDIM, double> >(1);
     Lucee::Field<NDIM, double>& aNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -213,6 +223,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilPtr = hamil.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
@@ -230,10 +241,17 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
+      hamil.setPtr(hamilPtr, idx);
       aNew.setPtr(aNewPtr, idx);
+
+      // Compute gradient of hamiltonian
+      Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
+      for (int i = 0; i < nlocal; i++)
+        hamilDerivAtQuad += hamilPtr[i]*volQuad.pDiffMatrix[i];
 
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
       // TODO: get alpha from appropriate function
+      equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);
@@ -272,6 +290,9 @@ namespace Lucee
       int idxr[NDIM];
       int idxl[NDIM];
 
+      std::cout << "NDIM = " << NDIM << std::endl;
+      std::cout << "sliceLower = " << sliceLower << std::endl << "sliceUpper = " << sliceUpper << std::endl;
+
       // loop over each 1D slice
       while (seq1D.step())
       {
@@ -292,6 +313,8 @@ namespace Lucee
 
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
+          // Hamiltonian is continuous, so use left always
+          hamil.setPtr(hamilPtr, idxl);
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
           Eigen::VectorXd leftData(nlocal);
@@ -301,9 +324,15 @@ namespace Lucee
             leftData(i) = aCurrPtr_l[i];
           }
 
+          // Compute gradient of hamiltonian at surface nodes
+          Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+          for (int i = 0; i < nlocal; i++)
+            hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
           // TODO: get alpha from appropriate function
+          equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
+          //std::cout << "rows = " << surfUpperQuad[dir].interpMat.rows() << std::endl;
 
           // Construct normal vector
           Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
@@ -319,10 +348,16 @@ namespace Lucee
 
           // CFL adjustment
           double maxSpeed = alphaDotN.cwiseAbs().maxCoeff();
-          cfla = Lucee::max3(cfla, dtdx*maxSpeed, -dtdx*maxSpeed);
-          // Check if time-step was too large and return a suggestion with correct time-step
-          if (cfla > cflm)
-            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+          if (dtdx*maxSpeed > cfla)
+          {
+            cfla = dtdx*maxSpeed;
+            // Check if time-step was too large and return a suggestion with correct time-step
+            if (cfla > cflm)
+            {
+              std::cout << "break" << std::endl;
+              return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+            }
+          }
 
           // Compute the surface integrals required and multiply by inverse of mass matrix
           Eigen::VectorXd upperResultVector = massMatrixInv*surfUpperQuad[dir].interpMat.transpose()*
@@ -369,7 +404,8 @@ namespace Lucee
   void
   PoissonBracketUpdater<NDIM>::declareTypes()
   {
-    // takes one input (aCurr)
+    // takes two inputs (aCurr, hamil)
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     // returns one output, (aNew)
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));

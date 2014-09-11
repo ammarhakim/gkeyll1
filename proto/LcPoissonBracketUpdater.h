@@ -16,6 +16,7 @@
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
+#include <LcPoissonBracketEquation.h>
 
 // eigen includes
 #include <Eigen/LU>
@@ -78,6 +79,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Equation to solve */
+      Lucee::PoissonBracketEquation *equation;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number allowed */
@@ -103,8 +106,8 @@ namespace Lucee
             pDiffMatrix.resize(nlocal);
             interpMat = Eigen::MatrixXd(numQuad, nlocal);
 
-            for (int dir = 0; dir < NDIM; dir++)
-              pDiffMatrix[dir] = Eigen::MatrixXd(NDIM, numQuad);
+            for (int i = 0; i < nlocal; i++)
+              pDiffMatrix[i] = Eigen::MatrixXd(NDIM, numQuad);
           }
 
 /** Matrix of ordinates (could remove this) */
@@ -131,7 +134,7 @@ namespace Lucee
 /** Field to store optional Jacobian field (SHOULD REALLY BE SPATIAL DIM SIZE) */
       Lucee::Field<1, double> *jacobianField;
  /**
- * Compute numerical flux
+ * CompsurfLowerQuad[dir].interpMat*rightDatasurfLowerQuad[dir].interpMat*rightDataute numerical flux
  * @param alphaDotN: characteristic velocities at quad points (dot n)
  * @param leftValsAtQuad: left cell values at quad points
  * @param rightValsAtQuad: right cell values at quad points
