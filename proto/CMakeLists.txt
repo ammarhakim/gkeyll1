@@ -43,6 +43,7 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketEquation.cpp
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp

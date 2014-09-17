@@ -86,6 +86,8 @@ namespace Lucee
     }
     else if (NDIM == 4)
     {
+      // Set maxPower = 2*polyOrder for testing purposes!
+      maxPower = 3*polyOrder;
       if (polyOrder < 3)
         this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
       else
