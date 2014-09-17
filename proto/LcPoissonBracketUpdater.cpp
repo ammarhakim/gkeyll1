@@ -124,12 +124,14 @@ namespace Lucee
       copyLuceeToEigen(tempMatrix, gradStiffnessMatrix[dir]);
     }
 
+    // get number of surface quadrature points
+    int nSurfQuad = nodalBasis->getNumSurfGaussNodes();
     // get data needed for Gaussian quadrature
     int nVolQuad = nodalBasis->getNumGaussNodes();
     std::vector<double> volWeights(nVolQuad);
     Lucee::Matrix<double> tempVolQuad(nVolQuad, nlocal);
-    Lucee::Matrix<double> tempVolCoords(nVolQuad, NDIM);
-    volQuad.reset(nVolQuad, nlocal);
+    Lucee::Matrix<double> tempVolCoords(nVolQuad, NC);
+    volQuad.reset(nVolQuad, nlocal, NC);
 
     nodalBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
     for (int volIndex = 0; volIndex < nVolQuad; volIndex++)
@@ -144,23 +146,23 @@ namespace Lucee
       // Each row is a quadrature point; each column is a basis function with derivative applied
       Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
-      // Copy derivatives to different kind type of matrix
+      // Store gradients of the same basis function at various quadrature points
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
         volQuad.pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
     }
 
     // Get data for surface quadrature
-    int nSurfQuad = nodalBasis->getNumSurfGaussNodes();
     
     for (int dir = 0; dir < NDIM; dir++)
     {
       // temporary variables
       std::vector<double> tempSurfWeights(nSurfQuad);
       Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
-      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, NDIM);
+      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, NC);
 
-      surfLowerQuad[dir].reset(nSurfQuad, nlocal);
-      surfUpperQuad[dir].reset(nSurfQuad, nlocal);
+      // Reset surface quadrature structures
+      surfLowerQuad[dir].reset(nSurfQuad, nlocal, NC);
+      surfUpperQuad[dir].reset(nSurfQuad, nlocal, NC);
       
       // lower surface data
       nodalBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
@@ -202,7 +204,6 @@ namespace Lucee
   Lucee::UpdaterStatus 
   PoissonBracketUpdater<NDIM>::update(double t)
   {
-    std::cout << "update" << std::endl;
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
@@ -242,15 +243,14 @@ namespace Lucee
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
       hamil.setPtr(hamilPtr, idx);
-      aNew.setPtr(aNewPtr, idx);
 
       // Compute gradient of hamiltonian
       Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
         hamilDerivAtQuad += hamilPtr[i]*volQuad.pDiffMatrix[i];
 
+      // Get alpha from appropriate function
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
-      // TODO: get alpha from appropriate function
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
 
       // Get a vector of f at quad points
@@ -273,6 +273,8 @@ namespace Lucee
       // Multiply resultVector with massMatrixInv to calculate aNew updates
       resultVector = massMatrixInv*resultVector;
 
+      // Accumulate to solution
+      aNew.setPtr(aNewPtr, idx);
       for (int i = 0; i < nlocal; i++)
         aNewPtr[i] += resultVector(i);
     }
@@ -289,9 +291,6 @@ namespace Lucee
 
       int idxr[NDIM];
       int idxl[NDIM];
-
-      std::cout << "NDIM = " << NDIM << std::endl;
-      std::cout << "sliceLower = " << sliceLower << std::endl << "sliceUpper = " << sliceUpper << std::endl;
 
       // loop over each 1D slice
       while (seq1D.step())
@@ -330,9 +329,7 @@ namespace Lucee
             hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
-          // TODO: get alpha from appropriate function
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
-          //std::cout << "rows = " << surfUpperQuad[dir].interpMat.rows() << std::endl;
 
           // Construct normal vector
           Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
@@ -353,10 +350,7 @@ namespace Lucee
             cfla = dtdx*maxSpeed;
             // Check if time-step was too large and return a suggestion with correct time-step
             if (cfla > cflm)
-            {
-              std::cout << "break" << std::endl;
               return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-            }
           }
 
           // Compute the surface integrals required and multiply by inverse of mass matrix
@@ -366,8 +360,8 @@ namespace Lucee
             numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
           // Accumulate to solution
-          aNew.setPtr(aNewPtr_l, idxr);
-          aNew.setPtr(aNewPtr_r, idxl);
+          aNew.setPtr(aNewPtr_r, idxr);
+          aNew.setPtr(aNewPtr_l, idxl);
           for (int i = 0; i < nlocal; i++)
           {
             aNewPtr_l[i] -= upperResultVector(i);

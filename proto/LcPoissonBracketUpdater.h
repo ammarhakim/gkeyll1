@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
@@ -40,6 +41,8 @@ namespace Lucee
     public:
 /** Class id: this is used by registration system */
       static const char *id;
+/** Number of components for coordinate arrays etc. */
+      static const unsigned NC = Lucee::CDIM<NDIM>::N;
 
 /** Create new nodal DG solver */
       PoissonBracketUpdater();
@@ -98,10 +101,10 @@ namespace Lucee
  * @param numQuad Numer of quadrature points.
  * @param nlocal Total number of local nodes.
  */
-          void reset(int numQuad, int nlocal)
+          void reset(int numQuad, int nlocal, int numCoords)
           {
             // allocate memory for various matrices
-            coordMat = Eigen::MatrixXd(numQuad, NDIM);
+            coordMat = Eigen::MatrixXd(numQuad, numCoords);
             weights = Eigen::VectorXd(numQuad);
             pDiffMatrix.resize(nlocal);
             interpMat = Eigen::MatrixXd(numQuad, nlocal);
