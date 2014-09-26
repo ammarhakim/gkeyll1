@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcPoissonBracketEquationRegistry.h>
 #include <LcPoissonBracketAdvectionEquation4D.h>
+#include <LcPoissonBracketCanonical2D.h>
 #include <LcPoissonBracketGyroEquation4D.h>
 #include <LcRegisteredObjList.h>
 
@@ -26,6 +27,7 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PoissonBracketEquation> >
       ::Instance()
       .append<Lucee::PoissonBracketAdvectionEquation4D >()
+      .append<Lucee::PoissonBracketCanonical2D >()
       .append<Lucee::PoissonBracketGyroEquation4D >();
   }
 }

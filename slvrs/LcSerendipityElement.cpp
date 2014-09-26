@@ -86,8 +86,6 @@ namespace Lucee
     }
     else if (NDIM == 4)
     {
-      // Set maxPower = 2*polyOrder for testing purposes!
-      maxPower = 3*polyOrder;
       if (polyOrder < 3)
         this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
       else
@@ -1600,7 +1598,7 @@ namespace Lucee
 
     // Populate nodeList according to polyOrder
     nodeList = Eigen::MatrixXd(this->getNumNodes(),NDIM);
-    getNodeList(nodeList, polyOrder);
+    getNodeList(nodeList, polyOrder, NDIM);
 
     //std::vector<blitz::Array<double,NDIM> > functionVector;
     computeBasisFunctions(functionVector, nodeList, polyOrder);
@@ -1748,7 +1746,7 @@ namespace Lucee
           functionDEvaluations(nodeNumber, basisIndex, dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[basisIndex],dimIndex),gaussNodeVec);
       }
     }
- 
+
     // Resize+Initialize (most of) the output matrices we need
     resizeMatrices();
 
@@ -1848,9 +1846,9 @@ namespace Lucee
  
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix, int degree)
+  SerendipityElement<NDIM>::getNodeList(Eigen::MatrixXd& nodeMatrix, int degree, int dimension)
   {
-    if (NDIM == 1)
+    if (dimension == 1)
     {
       if (degree == 1)
         nodeMatrix << -1,
@@ -1870,7 +1868,7 @@ namespace Lucee
                       0.5,
                       1;
     }
-    else if (NDIM == 2)
+    else if (dimension == 2)
     {
       if (degree == 1)
       {
@@ -1906,7 +1904,7 @@ namespace Lucee
                     -1,-1/3.0;
       }
     }
-    else if (NDIM == 3)
+    else if (dimension == 3)
     {
       if (degree == 1) {
         nodeMatrix << -1,-1,-1,
@@ -2030,7 +2028,7 @@ namespace Lucee
                       0,0,1;
       }
     }
-    else if (NDIM == 4)
+    else if (dimension == 4)
     {
       if (degree == 1)
       {
@@ -2493,7 +2491,7 @@ namespace Lucee
     // Temporary code for Jacobian calculation:
     Eigen::MatrixXd refVertexList = Eigen::MatrixXd::Zero(getSerendipityDimension(1,NDIM),NDIM);
     // Get vertices (nodes of polyOrder 1 element)
-    getNodeList(refVertexList, 1);
+    getNodeList(refVertexList, 1, NDIM);
     std::vector<blitz::Array<double,NDIM> > vertexFunctionVector;
     computeBasisFunctions(vertexFunctionVector, refVertexList, 1);
 

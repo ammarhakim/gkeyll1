@@ -184,19 +184,28 @@ namespace Lucee
     }
 
     // Compute gradients of basis functions evaluated at surface quadrature points
-    for (int dir = 0; dir < NDIM; dir++)
+    // surf keeps track of surfaces to evaluate derivatives on
+    for (int surf = 0; surf < NDIM; surf++)
     {
-      // Each row is a quadrature point; each column is a basis function with derivative applied
-      Eigen::MatrixXd derivMatrix = surfUpperQuad[dir].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+      // dir is direction gradient is taken in
+      for (int dir = 0; dir < NDIM; dir++)
+      {
+        // Each row is a quadrature point; each column is a basis function with derivative applied
+        Eigen::MatrixXd derivMatrix = surfUpperQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
-      // Use derivMatrix to create matrices for gradients of basis functions
-      for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
-        surfUpperQuad[dir].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+        // Use derivMatrix to create matrices for gradients of basis functions
+        for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+          surfUpperQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
-      // Do the same for the lower surface
-      derivMatrix = surfLowerQuad[dir].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
-      for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
-        surfLowerQuad[dir].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+        //for (int i = 0; i < nlocal; i++)
+        //std::cout << "surfUpperQuad[" << dir << "].pDiffMatrix[" << i << "]" << std::endl
+        //        << surfUpperQuad[dir].pDiffMatrix[i] << std::endl;
+
+        // Do the same for the lower surface
+        derivMatrix = surfLowerQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+        for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+          surfLowerQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+      }
     }
   }
 
@@ -252,6 +261,24 @@ namespace Lucee
       // Get alpha from appropriate function
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
+      
+      // Computing maximum cfla
+      grid.setIndex(idx);
+      Eigen::VectorXd dtdqVec(NDIM);
+      for (int i = 0; i < NDIM; i++)
+        dtdqVec(i) = dt/grid.getDx(i);
+
+      Eigen::VectorXd cflaVec(NDIM);
+      for (int i = 0; i < alpha.cols(); i++)
+      {
+        double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff();
+        if (maxCflaInCol > cfla)
+        {
+          cfla = maxCflaInCol;
+          if (cfla > cflm)
+            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+        }
+      }
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);
@@ -303,13 +330,6 @@ namespace Lucee
           idxr[dir] = sliceIndex;
           idxl[dir] = sliceIndex-1;
 
-          grid.setIndex(idxl);
-          double dxL = grid.getDx(dir);
-          grid.setIndex(idxr);
-          double dxR = grid.getDx(dir);
-
-          double dtdx = 2*dt/(dxL+dxR);
-
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
           // Hamiltonian is continuous, so use left always
@@ -327,6 +347,15 @@ namespace Lucee
           Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
           for (int i = 0; i < nlocal; i++)
             hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+
+          Eigen::VectorXd tempPrint(nlocal);
+          for (int i = 0; i < nlocal; i++)
+          {
+            //std::cout << "surfUpperQuad[" << dir << "].pDiffMatrix[" << i << "]" << std::endl
+            //  << surfUpperQuad[dir].pDiffMatrix[i] << std::endl;
+            tempPrint(i) = hamilPtr[i];
+          }
+          //std::cout << "hamilDerivAtQuad" << std::endl << hamilDerivAtQuad << std::endl;
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
@@ -342,16 +371,6 @@ namespace Lucee
           Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
-
-          // CFL adjustment
-          double maxSpeed = alphaDotN.cwiseAbs().maxCoeff();
-          if (dtdx*maxSpeed > cfla)
-          {
-            cfla = dtdx*maxSpeed;
-            // Check if time-step was too large and return a suggestion with correct time-step
-            if (cfla > cflm)
-              return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-          }
 
           // Compute the surface integrals required and multiply by inverse of mass matrix
           Eigen::VectorXd upperResultVector = massMatrixInv*surfUpperQuad[dir].interpMat.transpose()*
