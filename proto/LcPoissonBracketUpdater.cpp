@@ -197,10 +197,6 @@ namespace Lucee
         for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
           surfUpperQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
-        //for (int i = 0; i < nlocal; i++)
-        //std::cout << "surfUpperQuad[" << dir << "].pDiffMatrix[" << i << "]" << std::endl
-        //        << surfUpperQuad[dir].pDiffMatrix[i] << std::endl;
-
         // Do the same for the lower surface
         derivMatrix = surfLowerQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
         for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
@@ -348,14 +344,6 @@ namespace Lucee
           for (int i = 0; i < nlocal; i++)
             hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
 
-          Eigen::VectorXd tempPrint(nlocal);
-          for (int i = 0; i < nlocal; i++)
-          {
-            //std::cout << "surfUpperQuad[" << dir << "].pDiffMatrix[" << i << "]" << std::endl
-            //  << surfUpperQuad[dir].pDiffMatrix[i] << std::endl;
-            tempPrint(i) = hamilPtr[i];
-          }
-          //std::cout << "hamilDerivAtQuad" << std::endl << hamilDerivAtQuad << std::endl;
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
