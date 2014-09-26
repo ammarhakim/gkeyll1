@@ -14,6 +14,7 @@
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
+#include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
@@ -71,6 +72,7 @@ namespace Lucee
 
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
+      .append<Lucee::DistFuncMomentCalc2D>()
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()

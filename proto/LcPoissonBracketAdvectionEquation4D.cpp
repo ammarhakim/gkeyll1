@@ -35,7 +35,8 @@ namespace Lucee
   PoissonBracketAdvectionEquation4D::computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
           const int idx[], Eigen::MatrixXd& alpha)
   {
-    alpha.setZero(alpha.rows(), alpha.cols());
-    alpha.row(0).setOnes();
+    //alpha.setZero(alpha.rows(), alpha.cols());
+    //alpha.row(0).setOnes();
+    alpha = hamiltonian;
   }
 }

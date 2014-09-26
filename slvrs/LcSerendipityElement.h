@@ -459,7 +459,7 @@ namespace Lucee
  *    Populate nodeList with serendipity node locations on reference
  *    element
  */
-      void getNodeList(Eigen::MatrixXd& nodeMatrix, int degree);
+      void getNodeList(Eigen::MatrixXd& nodeMatrix, int degree, int dimension);
 /**
  *    Create basis monomials by populating matrix of rows
  *    [a b c] to represent x^a*y^b*z^c monomials
