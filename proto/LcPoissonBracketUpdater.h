@@ -13,9 +13,11 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
+#include <LcPoissonBracketEquation.h>
 
 // eigen includes
 #include <Eigen/LU>
@@ -39,6 +41,8 @@ namespace Lucee
     public:
 /** Class id: this is used by registration system */
       static const char *id;
+/** Number of components for coordinate arrays etc. */
+      static const unsigned NC = Lucee::CDIM<NDIM>::N;
 
 /** Create new nodal DG solver */
       PoissonBracketUpdater();
@@ -78,6 +82,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Equation to solve */
+      Lucee::PoissonBracketEquation *equation;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number allowed */
@@ -95,16 +101,16 @@ namespace Lucee
  * @param numQuad Numer of quadrature points.
  * @param nlocal Total number of local nodes.
  */
-          void reset(int numQuad, int nlocal)
+          void reset(int numQuad, int nlocal, int numCoords)
           {
             // allocate memory for various matrices
-            coordMat = Eigen::MatrixXd(numQuad, NDIM);
+            coordMat = Eigen::MatrixXd(numQuad, numCoords);
             weights = Eigen::VectorXd(numQuad);
             pDiffMatrix.resize(nlocal);
             interpMat = Eigen::MatrixXd(numQuad, nlocal);
 
-            for (int dir = 0; dir < NDIM; dir++)
-              pDiffMatrix[dir] = Eigen::MatrixXd(NDIM, numQuad);
+            for (int i = 0; i < nlocal; i++)
+              pDiffMatrix[i] = Eigen::MatrixXd(NDIM, numQuad);
           }
 
 /** Matrix of ordinates (could remove this) */
@@ -131,7 +137,7 @@ namespace Lucee
 /** Field to store optional Jacobian field (SHOULD REALLY BE SPATIAL DIM SIZE) */
       Lucee::Field<1, double> *jacobianField;
  /**
- * Compute numerical flux
+ * CompsurfLowerQuad[dir].interpMat*rightDatasurfLowerQuad[dir].interpMat*rightDataute numerical flux
  * @param alphaDotN: characteristic velocities at quad points (dot n)
  * @param leftValsAtQuad: left cell values at quad points
  * @param rightValsAtQuad: right cell values at quad points
