@@ -43,6 +43,14 @@ namespace Lucee
     else
       throw Lucee::Except("PoissonBracketUpdater::readInput: Must specify element to use using 'basis'");
 
+    if (tbl.hasObject<Lucee::PoissonBracketEquation>("equation"))
+      equation = &tbl.getObjectAsBase<Lucee::PoissonBracketEquation>("equation");
+    else
+    {
+      Lucee::Except lce("PoissonBracketUpdater::readInput: Must specify an equation to solve!");
+      throw lce;
+    }
+
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
@@ -116,12 +124,14 @@ namespace Lucee
       copyLuceeToEigen(tempMatrix, gradStiffnessMatrix[dir]);
     }
 
+    // get number of surface quadrature points
+    int nSurfQuad = nodalBasis->getNumSurfGaussNodes();
     // get data needed for Gaussian quadrature
     int nVolQuad = nodalBasis->getNumGaussNodes();
     std::vector<double> volWeights(nVolQuad);
     Lucee::Matrix<double> tempVolQuad(nVolQuad, nlocal);
-    Lucee::Matrix<double> tempVolCoords(nVolQuad, NDIM);
-    volQuad.reset(nVolQuad, nlocal);
+    Lucee::Matrix<double> tempVolCoords(nVolQuad, NC);
+    volQuad.reset(nVolQuad, nlocal, NC);
 
     nodalBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
     for (int volIndex = 0; volIndex < nVolQuad; volIndex++)
@@ -136,23 +146,23 @@ namespace Lucee
       // Each row is a quadrature point; each column is a basis function with derivative applied
       Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
-      // Copy derivatives to different kind type of matrix
+      // Store gradients of the same basis function at various quadrature points
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
         volQuad.pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
     }
 
     // Get data for surface quadrature
-    int nSurfQuad = nodalBasis->getNumSurfGaussNodes();
     
     for (int dir = 0; dir < NDIM; dir++)
     {
       // temporary variables
       std::vector<double> tempSurfWeights(nSurfQuad);
       Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
-      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, NDIM);
+      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, NC);
 
-      surfLowerQuad[dir].reset(nSurfQuad, nlocal);
-      surfUpperQuad[dir].reset(nSurfQuad, nlocal);
+      // Reset surface quadrature structures
+      surfLowerQuad[dir].reset(nSurfQuad, nlocal, NC);
+      surfUpperQuad[dir].reset(nSurfQuad, nlocal, NC);
       
       // lower surface data
       nodalBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
@@ -174,19 +184,24 @@ namespace Lucee
     }
 
     // Compute gradients of basis functions evaluated at surface quadrature points
-    for (int dir = 0; dir < NDIM; dir++)
+    // surf keeps track of surfaces to evaluate derivatives on
+    for (int surf = 0; surf < NDIM; surf++)
     {
-      // Each row is a quadrature point; each column is a basis function with derivative applied
-      Eigen::MatrixXd derivMatrix = surfUpperQuad[dir].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+      // dir is direction gradient is taken in
+      for (int dir = 0; dir < NDIM; dir++)
+      {
+        // Each row is a quadrature point; each column is a basis function with derivative applied
+        Eigen::MatrixXd derivMatrix = surfUpperQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
-      // Use derivMatrix to create matrices for gradients of basis functions
-      for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
-        surfUpperQuad[dir].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+        // Use derivMatrix to create matrices for gradients of basis functions
+        for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+          surfUpperQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
-      // Do the same for the lower surface
-      derivMatrix = surfLowerQuad[dir].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
-      for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
-        surfLowerQuad[dir].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+        // Do the same for the lower surface
+        derivMatrix = surfLowerQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+        for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
+          surfLowerQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
+      }
     }
   }
 
@@ -198,6 +213,7 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
     const Lucee::Field<NDIM, double>& aCurr = this->getInp<Lucee::Field<NDIM, double> >(0);
+    const Lucee::Field<NDIM, double>& hamil = this->getInp<Lucee::Field<NDIM, double> >(1);
     Lucee::Field<NDIM, double>& aNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -213,6 +229,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilPtr = hamil.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
@@ -230,10 +247,34 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
-      aNew.setPtr(aNewPtr, idx);
+      hamil.setPtr(hamilPtr, idx);
 
+      // Compute gradient of hamiltonian
+      Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
+      for (int i = 0; i < nlocal; i++)
+        hamilDerivAtQuad += hamilPtr[i]*volQuad.pDiffMatrix[i];
+
+      // Get alpha from appropriate function
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
-      // TODO: get alpha from appropriate function
+      equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
+      
+      // Computing maximum cfla
+      grid.setIndex(idx);
+      Eigen::VectorXd dtdqVec(NDIM);
+      for (int i = 0; i < NDIM; i++)
+        dtdqVec(i) = dt/grid.getDx(i);
+
+      Eigen::VectorXd cflaVec(NDIM);
+      for (int i = 0; i < alpha.cols(); i++)
+      {
+        double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff();
+        if (maxCflaInCol > cfla)
+        {
+          cfla = maxCflaInCol;
+          if (cfla > cflm)
+            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+        }
+      }
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);
@@ -255,6 +296,8 @@ namespace Lucee
       // Multiply resultVector with massMatrixInv to calculate aNew updates
       resultVector = massMatrixInv*resultVector;
 
+      // Accumulate to solution
+      aNew.setPtr(aNewPtr, idx);
       for (int i = 0; i < nlocal; i++)
         aNewPtr[i] += resultVector(i);
     }
@@ -283,15 +326,10 @@ namespace Lucee
           idxr[dir] = sliceIndex;
           idxl[dir] = sliceIndex-1;
 
-          grid.setIndex(idxl);
-          double dxL = grid.getDx(dir);
-          grid.setIndex(idxr);
-          double dxR = grid.getDx(dir);
-
-          double dtdx = 2*dt/(dxL+dxR);
-
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
+          // Hamiltonian is continuous, so use left always
+          hamil.setPtr(hamilPtr, idxl);
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
           Eigen::VectorXd leftData(nlocal);
@@ -301,9 +339,14 @@ namespace Lucee
             leftData(i) = aCurrPtr_l[i];
           }
 
+          // Compute gradient of hamiltonian at surface nodes
+          Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+          for (int i = 0; i < nlocal; i++)
+            hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
-          // TODO: get alpha from appropriate function
+          equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
 
           // Construct normal vector
           Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
@@ -317,13 +360,6 @@ namespace Lucee
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 
-          // CFL adjustment
-          double maxSpeed = alphaDotN.cwiseAbs().maxCoeff();
-          cfla = Lucee::max3(cfla, dtdx*maxSpeed, -dtdx*maxSpeed);
-          // Check if time-step was too large and return a suggestion with correct time-step
-          if (cfla > cflm)
-            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-
           // Compute the surface integrals required and multiply by inverse of mass matrix
           Eigen::VectorXd upperResultVector = massMatrixInv*surfUpperQuad[dir].interpMat.transpose()*
             numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
@@ -331,8 +367,8 @@ namespace Lucee
             numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
           // Accumulate to solution
-          aNew.setPtr(aNewPtr_l, idxr);
-          aNew.setPtr(aNewPtr_r, idxl);
+          aNew.setPtr(aNewPtr_r, idxr);
+          aNew.setPtr(aNewPtr_l, idxl);
           for (int i = 0; i < nlocal; i++)
           {
             aNewPtr_l[i] -= upperResultVector(i);
@@ -369,7 +405,8 @@ namespace Lucee
   void
   PoissonBracketUpdater<NDIM>::declareTypes()
   {
-    // takes one input (aCurr)
+    // takes two inputs (aCurr, hamil)
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     // returns one output, (aNew)
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));

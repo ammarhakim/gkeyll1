@@ -270,7 +270,7 @@ namespace Lucee
         double dtdx = dt/grid.getDx(0);
         double dtdy = dt/grid.getDx(1);
 // compute CFL number.
-        for (unsigned n=0; n<nlocal; ++n)
+        for (unsigned n=0; n<nVolQuad; ++n)
         {
           cfla = Lucee::max3(cfla, dtdx*std::fabs(quadSpeeds[0].s[n]),
             dtdy*std::fabs(quadSpeeds[1].s[n]));
