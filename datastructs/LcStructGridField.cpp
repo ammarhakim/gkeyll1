@@ -589,6 +589,13 @@ namespace Lucee
       new Lucee::StructGridField<NDIM, T>(
         sgf->duplicate(), *sgf->grid);
 
+    aliasSgf->dataLoc = sgf->dataLoc;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      aliasSgf->lowerWriteGhost[d] = sgf->lowerWriteGhost[d];
+      aliasSgf->upperWriteGhost[d] = sgf->upperWriteGhost[d];
+    }
+
     size_t nbytes = sizeof(Lucee::PointerHolder<StructGridField<NDIM, T> >);
     Lucee::PointerHolder<StructGridField<NDIM, T> > *ph =
       (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_newuserdata(L, nbytes);
