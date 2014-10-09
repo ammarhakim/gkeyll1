@@ -59,6 +59,7 @@ set (proto_SOURCES
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcSheathParticleSource1x1v.cpp
+  LcSimpleSmoothToC0Updater.cpp
   LcSmoothQuadPhiToC1Updater.cpp
   LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp

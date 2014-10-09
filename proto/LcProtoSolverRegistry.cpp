@@ -45,6 +45,7 @@
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSheathParticleSource1x1v.h>
+#include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
@@ -141,6 +142,12 @@ namespace Lucee
     
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
       .append<Lucee::NonLinEmGke1dHamilUpdater>()
+
+      .append<Lucee::SimpleSmoothToC0Updater<1> >()
+      .append<Lucee::SimpleSmoothToC0Updater<2> >()
+      .append<Lucee::SimpleSmoothToC0Updater<3> >()
+      .append<Lucee::SimpleSmoothToC0Updater<4> >()
+      .append<Lucee::SimpleSmoothToC0Updater<5> >()
 
       .append<Lucee::SmoothQuadPhiToC1Updater>()
 
