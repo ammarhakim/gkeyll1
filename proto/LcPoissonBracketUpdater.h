@@ -135,7 +135,7 @@ namespace Lucee
 /** Flag to indicate if a Jacobian factor is supplied */
       bool hasJacobian;
 /** Field to store optional Jacobian field (SHOULD REALLY BE SPATIAL DIM SIZE) */
-      Lucee::Field<1, double> *jacobianField;
+      Lucee::Field<NDIM, double> *jacobianField;
  /**
  * CompsurfLowerQuad[dir].interpMat*rightDatasurfLowerQuad[dir].interpMat*rightDataute numerical flux
  * @param alphaDotN: characteristic velocities at quad points (dot n)

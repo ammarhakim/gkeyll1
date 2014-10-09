@@ -1,11 +1,13 @@
 /**
- * @file	LcIntegrateNodalField.h
+ * @file	LcNodalCopy2DTo4DFieldUpdater.h
  *
- * @brief	Updater to integrate nodal DG/CG field over complete domain
+ * @brief	Updater to copy data from a 2D field onto a 4D field using the same basis functions.
+ * Currently only works assuming 2D field lies on the (0,1) surface
+ * Currently hard-coded to assume Serendipity element.
  */
 
-#ifndef LC_INTEGRATE_NODAL_FIELD_H
-#define LC_INTEGRATE_NODAL_FIELD_H
+#ifndef LC_NODAL_COPY_2D_TO_4D_FIELD_UPDATER_H
+#define LC_NODAL_COPY_2D_TO_4D_FIELD_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,28 +15,25 @@
 #endif
 
 // lucee includes
-#include <LcDynVector.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
-// std includes
-#include <vector>
+// eigen includes
+#include <Eigen/Dense>
 
 namespace Lucee
 {
 /**
- * Updater to integrate nodal DG/CG field over complete domain.
+ * Updater to copy a 2D nodal field to a 4D nodal field
  */
-  template <unsigned NDIM>
-  class IntegrateNodalField : public Lucee::UpdaterIfc
+  class NodalCopy2DTo4DFieldUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new modal DG solver in 1D */
-      IntegrateNodalField();
+      NodalCopy2DTo4DFieldUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -69,13 +68,15 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
-/** Flag to indicate if common nodes are shared */
-      bool sharedNodes;
-/** Weights for quadrature */
-      std::vector<double> weights;
+/** Pointer to 4d nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
+/** Pointer to 2d nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** Matrix that maps the 2-D nodes to 4-D */
+      Eigen::MatrixXd mappingMatrix;
+/** Temporary flag to keep track of what polynomial order of element we are copying */
+      int polyOrder;
   };
 }
 
-#endif // LC_INTEGRATE_NODAL_FIELD_H
+#endif // LC_NODAL_COPY_2D_TO_4D_FIELD_UPDATER_H

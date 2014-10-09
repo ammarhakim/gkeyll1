@@ -194,6 +194,8 @@ namespace Lucee
       .append<Lucee::ProjectOnNodalBasisUpdater<1> >()
       .append<Lucee::ProjectOnNodalBasisUpdater<2> >()
       .append<Lucee::ProjectOnNodalBasisUpdater<3> >()
+      .append<Lucee::ProjectOnNodalBasisUpdater<4> >()
+      .append<Lucee::ProjectOnNodalBasisUpdater<5> >()
 
       .append<Lucee::NodalDisContHyperUpdater<1> >()
       .append<Lucee::NodalDisContHyperUpdater<2> >()

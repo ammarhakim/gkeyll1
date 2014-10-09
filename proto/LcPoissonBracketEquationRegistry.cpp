@@ -13,6 +13,7 @@
 #include <LcPoissonBracketEquationRegistry.h>
 #include <LcPoissonBracketAdvectionEquation4D.h>
 #include <LcPoissonBracketCanonical2D.h>
+#include <LcPoissonBracketCanonical4D.h>
 #include <LcPoissonBracketGyroEquation4D.h>
 #include <LcRegisteredObjList.h>
 
@@ -28,6 +29,7 @@ namespace Lucee
       ::Instance()
       .append<Lucee::PoissonBracketAdvectionEquation4D >()
       .append<Lucee::PoissonBracketCanonical2D >()
+      .append<Lucee::PoissonBracketCanonical4D >()
       .append<Lucee::PoissonBracketGyroEquation4D >();
   }
 }
