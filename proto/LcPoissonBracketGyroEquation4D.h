@@ -41,8 +41,11 @@ namespace Lucee
       virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
           const int idx[], Eigen::MatrixXd& alpha);
     private:
-      //std::vector<Eigen::MatrixXd> poissonTensor;
-      Lucee::Field<4, double> *bParallelYField;
+      Lucee::Field<4, double> *bStarYField;
+      // Mass of species we are updating
+      double speciesMass;
+      // Charge of species we are updating
+      double speciesCharge;
   };
 }
 

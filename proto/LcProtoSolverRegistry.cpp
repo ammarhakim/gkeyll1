@@ -36,6 +36,7 @@
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
+#include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcPoissonBracketUpdater.h>
@@ -123,6 +124,8 @@ namespace Lucee
       .append<Lucee::PoissonBracketUpdater<5> >()
       
       .append<Lucee::NodalPoissonBracketUpdater>()
+
+      .append<Lucee::NodalCopy2DTo4DFieldUpdater>()
 
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
