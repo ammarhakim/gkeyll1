@@ -32,10 +32,20 @@ namespace Lucee
     // call base class method
     Lucee::PoissonBracketEquation::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::Field<4, double> >("bParallelY"))
-      bParallelYField = &tbl.getObject<Lucee::Field<4, double> >("bParallelY");
+    if (tbl.hasObject<Lucee::Field<4, double> >("bStarY"))
+      bStarYField = &tbl.getObject<Lucee::Field<4, double> >("bStarY");
     else
-      throw Lucee::Except("LcPoissonBracketGyroEquation4D: Must provide bParallelY.");
+      throw Lucee::Except("LcPoissonBracketGyroEquation4D: Must provide bStarY.");
+
+    if (tbl.hasNumber("speciesCharge"))
+      speciesCharge = tbl.getNumber("speciesCharge");
+    else
+      throw Lucee::Except("LcPoissonBracketGyroEquation4D: Must provide speciesCharge.");
+
+    if (tbl.hasNumber("speciesMass"))
+      speciesMass = tbl.getNumber("speciesMass");
+    else
+      throw Lucee::Except("LcPoissonBracketGyroEquation4D: Must provide speciesMass.");
   }
 
   void
@@ -43,24 +53,20 @@ namespace Lucee
           const int idx[], Eigen::MatrixXd& alpha)
   {
     int nlocal = interpMat.cols();
-    Lucee::ConstFieldPtr<double> bParallelYPtr = bParallelYField->createConstPtr();
-    bParallelYField->setPtr(bParallelYPtr, idx);
-    
-    double ionMass = 1.0;
-    double c = 1.0;
-    double elementaryCharge = 1.0;
+    Lucee::ConstFieldPtr<double> bStarYPtr = bStarYField->createConstPtr();
+    bStarYField->setPtr(bStarYPtr, idx);
 
-    // Copy bParallelYField to an Eigen::VectorXd
-    Eigen::VectorXd bParallelYVec(nlocal);
+    // Copy bStarYField to an Eigen::VectorXd
+    Eigen::VectorXd bStarYVec(nlocal);
     for (int i = 0; i < nlocal; i++)
-      bParallelYVec(i) = bParallelYPtr[i];
-    
+      bStarYVec(i) = bStarYPtr[i];
+
     alpha.setZero(alpha.rows(), alpha.cols());
     
     Eigen::Matrix4d poissonTensor = Eigen::Matrix4d::Zero();
 
     // (0, 1)
-    Eigen::VectorXd poissonElement = -ionMass*ionMass*c/elementaryCharge*interpMat.rowwise().sum();
+    Eigen::VectorXd poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
 
     alpha.row(0) += poissonElement.cwiseProduct(hamiltonian.row(1));
 
@@ -68,8 +74,8 @@ namespace Lucee
     alpha.row(1) -= poissonElement.cwiseProduct(hamiltonian.row(0));
 
     // (1,2)
-    // Get a vector of bParallelYVec*ionMass at all quadrature points
-    poissonElement = ionMass*interpMat*bParallelYVec;
+    // Get a vector of bStarYVec*speciesMass at all quadrature points
+    poissonElement = speciesMass*interpMat*bStarYVec;
     alpha.row(1) += poissonElement.cwiseProduct(hamiltonian.row(2));
 
     // (2,1)

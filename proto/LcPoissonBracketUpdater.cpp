@@ -291,16 +291,16 @@ namespace Lucee
         dtdqVec(i) = dt/grid.getDx(i);
 
       Eigen::VectorXd cflaVec(NDIM);
-      for (int i = 0; i < alpha.cols(); i++)
+      // Loop over each alpha vector evaluated at a quadrature point
+      for (int i = 0; i < nVolQuad; i++)
       {
         double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff()/fabs(jacobianAtQuad(i));
         if (maxCflaInCol > cfla)
-        {
           cfla = maxCflaInCol;
-          if (cfla > cflm)
-            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-        }
       }
+      
+      if (cfla > cflm)
+        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);

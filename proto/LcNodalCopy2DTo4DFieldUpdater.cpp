@@ -52,6 +52,8 @@ namespace Lucee
     Lucee::UpdaterIfc::initialize();
 
     if (polyOrder == 1)
+    {
+      mappingMatrix = Eigen::MatrixXd(16,4);
       mappingMatrix << 1,0,0,0,
                        0,1,0,0,
                        0,0,1,0,
@@ -68,7 +70,10 @@ namespace Lucee
                        0,1,0,0,
                        0,0,1,0,
                        0,0,0,1;
+    }
     else if (polyOrder == 2)
+    {
+      mappingMatrix = Eigen::MatrixXd(20,8);
       mappingMatrix << 1,0,0,0,0,0,0,0,
                        0,1,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
@@ -89,6 +94,7 @@ namespace Lucee
                        0,0,0,0,0,1,0,0,
                        0,0,0,0,0,0,1,0,
                        0,0,0,0,0,0,0,1;
+    }
   }
 
   Lucee::UpdaterStatus
