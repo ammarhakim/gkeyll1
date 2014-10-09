@@ -68,6 +68,7 @@ namespace Lucee
     alpha.row(1) -= poissonElement.cwiseProduct(hamiltonian.row(0));
 
     // (1,2)
+    // Get a vector of bParallelYVec*ionMass at all quadrature points
     poissonElement = ionMass*interpMat*bParallelYVec;
     alpha.row(1) += poissonElement.cwiseProduct(hamiltonian.row(2));
 

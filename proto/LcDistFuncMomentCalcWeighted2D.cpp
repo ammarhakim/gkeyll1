@@ -1,7 +1,7 @@
 /**
- * @file	LcDistFuncMomentCalc2D.cpp
+ * @file	LcDistFuncMomentCalcWeighted2D.cpp
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function.
+ * @brief	Updater to compute 2d moments of a 4d distribution function with an additional weighting function.
  * Currently only works for 0th moment
  */
 
@@ -11,7 +11,7 @@
 #endif
 
 // lucee includes
-#include <LcDistFuncMomentCalc2D.h>
+#include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcGlobals.h>
 #include <LcLinAlgebra.h>
 
@@ -24,15 +24,15 @@
 
 namespace Lucee
 {
-  const char *DistFuncMomentCalc2D::id = "DistFuncMomentCalc2D";
+  const char *DistFuncMomentCalcWeighted2D::id = "DistFuncMomentCalcWeighted2D";
 
-  DistFuncMomentCalc2D::DistFuncMomentCalc2D()
+  DistFuncMomentCalcWeighted2D::DistFuncMomentCalcWeighted2D()
     : Lucee::UpdaterIfc()
   {
   }
   
   void
-  DistFuncMomentCalc2D::readInput(Lucee::LuaTable& tbl)
+  DistFuncMomentCalcWeighted2D::readInput(Lucee::LuaTable& tbl)
   {
     // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
@@ -42,32 +42,32 @@ namespace Lucee
       nodalBasis4d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<4> >("basis4d");
     else
       throw Lucee::Except(
-        "DistFuncMomentCalc2D::readInput: Must specify 4D element to use using 'basis4d'");
+        "DistFuncMomentCalcWeighted2D::readInput: Must specify 4D element to use using 'basis4d'");
 
     // get hold of 2D element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
       throw Lucee::Except(
-        "DistFuncMomentCalc2D::readInput: Must specify 2D element to use using 'basis1d'");
+        "DistFuncMomentCalcWeighted2D::readInput: Must specify 2D element to use using 'basis1d'");
 
     // get moment to compute
     if (tbl.hasNumber("moment"))
     calcMom = (unsigned) tbl.getNumber("moment");
     else
       throw Lucee::Except(
-        "DistFuncMomentCalc2D::readInput: Must specify moment using 'moment'");
+        "DistFuncMomentCalcWeighted2D::readInput: Must specify moment using 'moment'");
 
-    if (calcMom > 3)
+    if (calcMom > 0)
     {
-      Lucee::Except lce("DistFuncMomentCalc2D::readInput: Only 'moment' 0, 1 2, or 3 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalcWeighted2D::readInput: Only 'moment' 0 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }
   }
 
   void
-  DistFuncMomentCalc2D::initialize()
+  DistFuncMomentCalcWeighted2D::initialize()
   {
     // call base class method
     Lucee::UpdaterIfc::initialize();
@@ -111,24 +111,23 @@ namespace Lucee
     Eigen::MatrixXd volCoords4d(nVolQuad4d, 4);
     copyLuceeToEigen(tempVolCoords4d, volCoords4d);
 
-    mom0Matrix = Eigen::MatrixXd(nlocal2d, nlocal4d);
-    // NOTE: be careful when computing these matrices. need to convert
-    // v to physical space v
-    mom1Matrix = Eigen::MatrixXd(nlocal2d, nlocal4d);
-    mom2Matrix = Eigen::MatrixXd(nlocal2d, nlocal4d);
+    mom0MatrixVector = std::vector<Eigen::MatrixXd>(nlocal2d);
 
-    double dV1 = grid.getDx(2);
-    double dV2 = grid.getDx(3);
-
-    for (int i = 0; i < nlocal2d; i++)
+    for (int h = 0; h < nlocal2d; h++)
     {
-      for (int j = 0; j < nlocal4d; j++)
+      mom0MatrixVector[h] = Eigen::MatrixXd::Zero(nlocal2d, nlocal4d);
+
+      for (int i = 0; i < nlocal2d; i++)
       {
-        // Compute integral of phi2d_i * phi4d_j
-        double integralResult = 0.0;
-        for (int gaussIndex = 0; gaussIndex < volWeights4d.size(); gaussIndex++)
-          integralResult += volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
-        mom0Matrix(i, j) = integralResult;
+        for (int j = 0; j < nlocal4d; j++)
+        {
+          // Compute integral of phi2d_h * phi2d_i * phi4d_j
+          double integralResult = 0.0;
+          for (int gaussIndex = 0; gaussIndex < volWeights4d.size(); gaussIndex++)
+            integralResult += volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, h)*
+              volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
+          mom0MatrixVector[h](i, j) = integralResult;
+        }
       }
     }
 
@@ -139,11 +138,12 @@ namespace Lucee
     copyLuceeToEigen(tempMassMatrix2d, massMatrix2d);
 
     // Multiply matrices by inverse of mass matrix
-    mom0Matrix = massMatrix2d.inverse()*mom0Matrix;
+    for (int h = 0; h < nlocal2d; h++)
+      mom0MatrixVector[h] = massMatrix2d.inverse()*mom0MatrixVector[h];
   }
 
   Lucee::UpdaterStatus
-  DistFuncMomentCalc2D::update(double t)
+  DistFuncMomentCalcWeighted2D::update(double t)
   {
     
     // get hold of grid
@@ -152,11 +152,13 @@ namespace Lucee
 
     // get input field (4d)
     const Lucee::Field<4, double>& distF = this->getInp<Lucee::Field<4, double> >(0);
-    // get output field (2D)
+    // get weighting field (2d)
+    const Lucee::Field<2, double>& weightF = this->getInp<Lucee::Field<2, double> >(1);
+    // get output field (2d)
     Lucee::Field<2, double>& moment = this->getOut<Lucee::Field<2, double> >(0);
 
-  // local region to update (This is the 4D region. The 2D region is
-  // assumed to have the same cell layout as the X-direction of the 4D region)
+    // local region to update (This is the 4D region. The 2D region is
+    // assumed to have the same cell layout as the X-direction of the 4D region)
     Lucee::Region<4, int> localRgn = grid.getLocalRegion();
 
     // clear out contents of output field
@@ -164,12 +166,8 @@ namespace Lucee
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
+    Lucee::ConstFieldPtr<double> weightFPtr = weightF.createConstPtr();
     Lucee::FieldPtr<double> momentPtr = moment.createPtr();
-
-    //double dv = grid.getDx(1);
-    //double dv2 = 0.5*dv;
-    //double dv22 = dv2*dv2;
-    //double dv23 = dv2*dv2*dv2;
 
     int idx[4];
     double xc[4];
@@ -186,47 +184,41 @@ namespace Lucee
 
       moment.setPtr(momentPtr, idx[0], idx[1]);
       distF.setPtr(distFPtr, idx);
+      weightF.setPtr(weightFPtr, idx[0], idx[1]);
 
       Eigen::VectorXd distfVec(nlocal4d);
       for (int i = 0; i < nlocal4d; i++)
         distfVec(i) = distFPtr[i];
 
-      // Accumulate contribution to moment from this cell
-      Eigen::VectorXd resultVector(nlocal2d);
-      if (calcMom == 0)
-        resultVector = mom0Matrix*distfVec;
-
-      for (int i = 0; i < nlocal2d; i++)
-        momentPtr[i] = momentPtr[i] + resultVector(i);
+      // Loop over each component of the weighting function
+      for (int h = 0; h < nlocal2d; h++)
+      {
+        Eigen::VectorXd resultVector(nlocal2d);
+        // Calculate contribution to moment
+        if (calcMom == 0)
+          resultVector = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+        // Accumulate contribution to moment from this cell
+        for (int i = 0; i < nlocal2d; i++)
+          momentPtr[i] = momentPtr[i] + resultVector(i);
+      }
     }
 
     return Lucee::UpdaterStatus();
   }
 
   void
-  DistFuncMomentCalc2D::declareTypes()
+  DistFuncMomentCalcWeighted2D::declareTypes()
   {
+    // distribution function (4d)
     this->appendInpVarType(typeid(Lucee::Field<4, double>));
+    // weighting function (2d)
+    this->appendInpVarType(typeid(Lucee::Field<2, double>));
+    // output field (2d)
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
 
-  void 
-  DistFuncMomentCalc2D::matVec(double m, const Lucee::Matrix<double>& mat,
-    const double* vec, double v, double *out)
-  {
-    double tv;
-    unsigned rows = mat.numRows(), cols = mat.numColumns();
-    for (unsigned i=0; i<rows; ++i)
-    {
-      tv = 0.0;
-      for (unsigned j=0; j<cols; ++j)
-        tv += mat(i,j)*vec[j];
-      out[i] = m*tv + v*out[i];
-    }
-  }
-
   void
-  DistFuncMomentCalc2D::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  DistFuncMomentCalcWeighted2D::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)

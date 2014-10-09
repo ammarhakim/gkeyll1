@@ -79,7 +79,7 @@ namespace Lucee
       hasJacobian = tbl.getBool("hasJacobian");
 
     if (hasJacobian == true)
-      jacobianField = &tbl.getObject<Lucee::Field<1, double> >("jacobianField");
+      jacobianField = &tbl.getObject<Lucee::Field<NDIM, double> >("jacobianField");
   }
 
   template <unsigned NDIM>
@@ -152,7 +152,6 @@ namespace Lucee
     }
 
     // Get data for surface quadrature
-    
     for (int dir = 0; dir < NDIM; dir++)
     {
       // temporary variables
@@ -233,9 +232,8 @@ namespace Lucee
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
     Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
-    // Testing
-    //if (hasJacobian == true)
-    //  Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
+    // Testing: see LcWavePropagationUpdater
+    Lucee::ConstFieldPtr<double> jacobianPtr = aCurr.createConstPtr();
 
     aNew = 0.0; // use aNew to store increment initially
 
@@ -248,6 +246,34 @@ namespace Lucee
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
       hamil.setPtr(hamilPtr, idx);
+
+      Eigen::VectorXd jacobianAtQuad = Eigen::VectorXd::Ones(nVolQuad);
+      if (hasJacobian == true)
+      {
+        jacobianField->setPtr(jacobianPtr, idx);
+        Eigen::VectorXd jacobianVec(nlocal);
+        for (int i = 0; i < nlocal; i++)
+          jacobianVec(i) = jacobianPtr[i];
+
+        Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
+        tempJMassMatrix.setZero();
+
+        jacobianAtQuad = volQuad.interpMat*jacobianVec;
+
+        // Use jacobian to compute new massMatrixInv
+        for (int j = 0; j < nlocal; j++)
+        {
+          for (int k = 0; k < nlocal; k++)
+          {
+            tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
+            /*for (int gaussIndex = 0; gaussIndex < volQuad.
+            tempJMassMatrix += volQuad.weights(gaussIndex)*jacobianAtQuad(gaussIndex)*
+              volQuad.interpMat(gaussIndex,j)*volQuad.interpMat(gaussIndex,k);*/
+          }
+        }
+
+        massMatrixInv = tempJMassMatrix.inverse();
+      }
 
       // Compute gradient of hamiltonian
       Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
@@ -267,7 +293,7 @@ namespace Lucee
       Eigen::VectorXd cflaVec(NDIM);
       for (int i = 0; i < alpha.cols(); i++)
       {
-        double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff();
+        double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff()/fabs(jacobianAtQuad(i));
         if (maxCflaInCol > cfla)
         {
           cfla = maxCflaInCol;
@@ -305,9 +331,9 @@ namespace Lucee
     // Contributions from surface integrals
     for (int dir = 0; dir < NDIM; dir++)
     {
-      // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq1D(localRgn.deflate(dir));
-      // lower and upper bounds of 1D slice. (We need to make sure that flux
+      // create sequencer to loop over *each* NDIM-1 slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seqLowerDim(localRgn.deflate(dir));
+      // lower and upper bounds of NDIM-1 slice. (We need to make sure that flux
       // is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
       int sliceUpper = localRgn.getUpper(dir)+1;
@@ -316,10 +342,10 @@ namespace Lucee
       int idxl[NDIM];
 
       // loop over each 1D slice
-      while (seq1D.step())
+      while (seqLowerDim.step())
       {
-        seq1D.fillWithIndex(idxr);
-        seq1D.fillWithIndex(idxl);
+        seqLowerDim.fillWithIndex(idxr);
+        seqLowerDim.fillWithIndex(idxl);
         // loop over each edge
         for (int sliceIndex = sliceLower; sliceIndex < sliceUpper; sliceIndex++)
         { 

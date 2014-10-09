@@ -15,12 +15,14 @@
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc2D.h>
+#include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
+#include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
 #include <LcMaxwellTm2DUpdater.h>
@@ -73,6 +75,7 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncMomentCalc2D>()
+      .append<Lucee::DistFuncMomentCalcWeighted2D>()
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
@@ -88,6 +91,10 @@ namespace Lucee
       .append<Lucee::IntegrateField<1> >()
       .append<Lucee::IntegrateField<2> >()
       .append<Lucee::IntegrateField<3> >()
+      
+      .append<Lucee::IntegrateGeneralField<1> >()
+      .append<Lucee::IntegrateGeneralField<2> >()
+      .append<Lucee::IntegrateGeneralField<3> >()
 
       .append<Lucee::IntegrateNodalField<1> >()
       .append<Lucee::IntegrateNodalField<2> >()

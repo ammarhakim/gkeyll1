@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMatrix.h>
@@ -34,6 +35,9 @@ namespace Lucee
 
 /** Create new projection updater */
       ProjectOnNodalBasisUpdater();
+
+/** Number of components for coordinate arrays etc. */
+      static const unsigned NC = Lucee::CDIM<NDIM>::N;
 
 /**
  * Bootstrap method: Read input from specified table.

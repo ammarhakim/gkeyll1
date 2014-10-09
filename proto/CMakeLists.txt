@@ -23,12 +23,14 @@ set (proto_SOURCES
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncMomentCalc2D.cpp
+  LcDistFuncMomentCalcWeighted2D.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
+  LcIntegrateGeneralField.cpp
   LcIntegrateNodalField.cpp
   LcLinEmGke1dHamilPertUpdater.cpp
   LcMaxwellTm2DUpdater.cpp
@@ -40,12 +42,14 @@ set (proto_SOURCES
   LcModalDgLimiter1DUpdater.cpp
   LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp
+  LcNodalCopy2DTo4DFieldUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketCanonical2D.cpp
+  LcPoissonBracketCanonical4D.cpp
   LcPoissonBracketEquation.cpp
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp

@@ -29,6 +29,8 @@ namespace Lucee
   template <> const char *ProjectOnNodalBasisUpdater<1>::id = "ProjectOnNodalBasis1D";
   template <> const char *ProjectOnNodalBasisUpdater<2>::id = "ProjectOnNodalBasis2D";
   template <> const char *ProjectOnNodalBasisUpdater<3>::id = "ProjectOnNodalBasis3D";
+  template <> const char *ProjectOnNodalBasisUpdater<4>::id = "ProjectOnNodalBasis4D";
+  template <> const char *ProjectOnNodalBasisUpdater<5>::id = "ProjectOnNodalBasis5D";
 
   template <unsigned NDIM>
   ProjectOnNodalBasisUpdater<NDIM>::ProjectOnNodalBasisUpdater()
@@ -115,7 +117,7 @@ namespace Lucee
     Eigen::MatrixXd localMassInv(numLocalNodes,numLocalNodes);
     unsigned numVolQuadNodes = nodalBasis->getNumGaussNodes();
     Lucee::Matrix<double> interpMatrix(numVolQuadNodes,numLocalNodes);
-    Lucee::Matrix<double> gaussOrdinates(numVolQuadNodes,3);
+    Lucee::Matrix<double> gaussOrdinates(numVolQuadNodes,NC);
     std::vector<double> gaussWeights(numVolQuadNodes);
     Eigen::MatrixXd basisIntegrals(numLocalNodes,nc);
     Eigen::MatrixXd projectF(numLocalNodes,nc);
@@ -123,7 +125,7 @@ namespace Lucee
     double coordScales[NDIM];
     for (unsigned d = 0; d < NDIM; d++)
       coordScales[d] = 0.5*grid.getDx(d);
-    double xc[3];
+    double xc[NC];
 
     while (seq.step())
     {
@@ -147,7 +149,7 @@ namespace Lucee
       grid.setIndex(idx);
       grid.getCentroid(xc);
       for (int gaussPoint = 0; gaussPoint < numVolQuadNodes; gaussPoint++)
-        for (int dimIndex = 0; dimIndex < 3; dimIndex ++)
+        for (int dimIndex = 0; dimIndex < NC; dimIndex ++)
           gaussOrdinates(gaussPoint,dimIndex) = xc[dimIndex] + gaussOrdinates(gaussPoint,dimIndex)*coordScales[dimIndex];
 
       basisIntegrals.setZero(basisIntegrals.rows(),basisIntegrals.cols());
@@ -194,11 +196,11 @@ namespace Lucee
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
 // push variables on stack
-    for (unsigned i=0; i<3; ++i)
+    for (unsigned i=0; i<NC; ++i)
       lua_pushnumber(L, nc(nn,i));
     lua_pushnumber(L, tm);
 // call function
-    if (lua_pcall(L, 4, res.size(), 0) != 0)
+    if (lua_pcall(L, NC+1, res.size(), 0) != 0)
     {
       Lucee::Except lce("ProjectOnNodalBasisUpdater::evaluateFunction: ");
       lce << "Problem evaluating function supplied as 'evaluate' "
@@ -222,4 +224,6 @@ namespace Lucee
   template class ProjectOnNodalBasisUpdater<1>;
   template class ProjectOnNodalBasisUpdater<2>;
   template class ProjectOnNodalBasisUpdater<3>;
+  template class ProjectOnNodalBasisUpdater<4>;
+  template class ProjectOnNodalBasisUpdater<5>;
 }
