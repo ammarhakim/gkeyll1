@@ -85,6 +85,7 @@ namespace Lucee
 
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::ConstFieldPtr<double> fInPtr = fIn.createConstPtr();
     Lucee::ConstFieldPtr<double> fInPtr_l = fIn.createConstPtr();
@@ -96,48 +97,65 @@ namespace Lucee
     fOut = 0.0;
 
     int idx[NDIM];
+    int idxl[NDIM];
+    int idxr[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
-    // Loop over edges in each direction
-    for (int dir = 0; dir < NDIM; dir++)
+    // CODE ONLY WORKS WITH POLYORDER = 1 IN DIM = 2
+    while (seq.step())
     {
-      // create sequencer to loop over *each* NDIM-1 slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seqLowerDim(localRgn.deflate(dir));
-      // lower and upper bounds of NDIM-1 slice. (We need to make sure that flux
-      // is computed for one edge outside domain interior)
-      int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir)+1;
+      seq.fillWithIndex(idx);
+      seq.fillWithIndex(idxr);
+      seq.fillWithIndex(idxl);
 
-      int idxr[NDIM];
-      int idxl[NDIM];
+      fIn.setPtr(fInPtr, idx);
+      fOut.setPtr(fOutPtr, idx);
 
-      // loop over each 1D slice
-      while (seqLowerDim.step())
+      nodalBasis->setIndex(idx);
+
+      // First initialize all nodes to 0.25 of current cell nodes
+      for (int nodeIndex = 0; nodeIndex < nodalBasis->getNumNodes(); nodeIndex++)
+        fOutPtr[nodeIndex] = 0.25*fInPtr[nodeIndex];
+
+      // Loop over up,down,left,right neighboring cells
+      for (int dir = 0; dir < NDIM; dir++)
       {
-        seqLowerDim.fillWithIndex(idxr);
-        seqLowerDim.fillWithIndex(idxl);
-        // loop over each edge
-        for (int sliceIndex = sliceLower; sliceIndex < sliceUpper; sliceIndex++)
-        { 
-          idxr[dir] = sliceIndex;
-          idxl[dir] = sliceIndex-1;
+        // Get lower cell relative to this one in direction 'dir'
+        idxl[dir] = idx[dir] - 1;
+        // Get upper cell relative to this one in direction 'dir'
+        idxr[dir] = idx[dir] + 1;
 
-          fIn.setPtr(fInPtr_r, idxr);
-          fIn.setPtr(fInPtr_l, idxl);
+        fIn.setPtr(fInPtr_l, idxl);
+        fIn.setPtr(fInPtr_r, idxr);
 
-          fOut.setPtr(fOutPtr_r, idxr);
-          fOut.setPtr(fOutPtr_l, idxl);
-          // Loop over all nodes on a surface
-          for (int nodeIndex = 0; nodeIndex < lowerNodeNums[dir].nums.size(); nodeIndex++)
-          {
-            int lowerNum = lowerNodeNums[dir].nums[nodeIndex];
-            int upperNum = upperNodeNums[dir].nums[nodeIndex];
+        // Loop over all nodes on a surface
+        for (int nodeIndex = 0; nodeIndex < lowerNodeNums[dir].nums.size(); nodeIndex++)
+        {
+          int lowerNum = lowerNodeNums[dir].nums[nodeIndex];
+          int upperNum = upperNodeNums[dir].nums[nodeIndex];
 
-            fOutPtr_l[upperNum] = 0.25*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
-            fOutPtr_r[lowerNum] = 0.25*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
-          }
+          fOutPtr[lowerNum] = fOutPtr[lowerNum] + 0.25*fInPtr_l[upperNum];
+          fOutPtr[upperNum] = fOutPtr[upperNum] + 0.25*fInPtr_r[lowerNum];
         }
+
+        // Restore indices to their original values before next iteration
+        idxl[dir] = idx[dir];
+        idxr[dir] = idx[dir];
       }
+
+      // Loop over diagonal neighbors
+      // Bottom left
+      fIn.setPtr(fInPtr, idx[0]-1, idx[1]-1);
+      fOutPtr[0] = fOutPtr[0] + 0.25*fInPtr[2];
+      // Bottom right
+      fIn.setPtr(fInPtr, idx[0]+1, idx[1]-1);
+      fOutPtr[1] = fOutPtr[1] + 0.25*fInPtr[3];
+      // Upper right
+      fIn.setPtr(fInPtr, idx[0]+1, idx[1]+1);
+      fOutPtr[2] = fOutPtr[2] + 0.25*fInPtr[0];
+      // Upper left
+      fIn.setPtr(fInPtr, idx[0]-1, idx[1]+1);
+      fOutPtr[3] = fOutPtr[3] + 0.25*fInPtr[1];
     }
 
     return Lucee::UpdaterStatus();
