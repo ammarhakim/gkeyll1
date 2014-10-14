@@ -1,7 +1,7 @@
 /**
  * @file	LcPoissonBracketGyroEquation4D.cpp
  *
- * @brief	
+ * @brief	Jacobian*alpha at all quadrature points
  */
 
 // config stuff
@@ -12,9 +12,6 @@
 // lucee includes
 #include <LcPoissonBracketGyroEquation4D.h>
 
-// std includes
-#include <algorithm>
-
 namespace Lucee
 {
   const char *PoissonBracketGyroEquation4D::id = "GyroEquation4D";
@@ -22,8 +19,6 @@ namespace Lucee
   PoissonBracketGyroEquation4D::PoissonBracketGyroEquation4D()
     : Lucee::PoissonBracketEquation()
   {
-
-    //poissonTensor.resize(16);
   }
 
   void
@@ -54,30 +49,37 @@ namespace Lucee
   {
     int nlocal = interpMat.cols();
     Lucee::ConstFieldPtr<double> bStarYPtr = bStarYField->createConstPtr();
+    
     bStarYField->setPtr(bStarYPtr, idx);
-
     // Copy bStarYField to an Eigen::VectorXd
     Eigen::VectorXd bStarYVec(nlocal);
     for (int i = 0; i < nlocal; i++)
       bStarYVec(i) = bStarYPtr[i];
 
     alpha.setZero(alpha.rows(), alpha.cols());
-    
-    Eigen::Matrix4d poissonTensor = Eigen::Matrix4d::Zero();
 
     // (0, 1)
-    Eigen::VectorXd poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
+    Eigen::RowVectorXd poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
 
     alpha.row(0) += poissonElement.cwiseProduct(hamiltonian.row(1));
-
     // (1, 0)
     alpha.row(1) -= poissonElement.cwiseProduct(hamiltonian.row(0));
+
+    /*for (int i = 0; i < alpha.cols(); i++)
+    {
+      alpha(0, i) = poissonElement(i)*hamiltonian(1,i);
+      alpha(1, i) = -poissonElement(i)*hamiltonian(0,i);
+    }*/
 
     // (1,2)
     // Get a vector of bStarYVec*speciesMass at all quadrature points
     poissonElement = speciesMass*interpMat*bStarYVec;
+    /*for (int i = 0; i < alpha.cols(); i++)
+    {
+      alpha(1, i) += poissonElement(i)*hamiltonian(2,i);
+      alpha(2, i) -= poissonElement(i)*hamiltonian(1,i);
+    }*/
     alpha.row(1) += poissonElement.cwiseProduct(hamiltonian.row(2));
-
     // (2,1)
     alpha.row(2) -= poissonElement.cwiseProduct(hamiltonian.row(1));
   }

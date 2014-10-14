@@ -109,13 +109,13 @@ namespace Lucee
     // get output field (4D)
     Lucee::Field<4, double>& fld4d = this->getOut<Lucee::Field<4, double> >(0);
 
-    // local region to update (This is the 4D region)
-    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    // local exterior region to update (This is the 4D region)
+    Lucee::Region<4, int> localExtRgn = fld4d.getExtRegion();
 
     Lucee::ConstFieldPtr<double> fld2dPtr = fld2d.createConstPtr();
     Lucee::FieldPtr<double> fld4dPtr = fld4d.createPtr();
 
-    Lucee::RowMajorSequencer<4> seq(localRgn);
+    Lucee::RowMajorSequencer<4> seq(localExtRgn);
     int idx[4];
 
     int nlocal2d = nodalBasis2d->getNumNodes();

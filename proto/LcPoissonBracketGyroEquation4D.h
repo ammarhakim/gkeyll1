@@ -1,7 +1,7 @@
 /**
  * @file	LcPoissonBracketGyroEquation4D.h
  *
- * @brief	
+ * @brief	Compute Jacobian*alpha at all quadrature points
  */
 #ifndef LC_POISSON_BRACKET_GYRO_EQUATION_4D_H
 #define LC_POISSON_BRACKET_GYRO_EQUATION_4D_H
