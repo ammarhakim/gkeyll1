@@ -98,7 +98,7 @@ namespace Lucee
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
-    // Contributions from surface integrals
+    // Loop over edges in each direction
     for (int dir = 0; dir < NDIM; dir++)
     {
       // create sequencer to loop over *each* NDIM-1 slice in 'dir' direction
@@ -133,8 +133,8 @@ namespace Lucee
             int lowerNum = lowerNodeNums[dir].nums[nodeIndex];
             int upperNum = upperNodeNums[dir].nums[nodeIndex];
 
-            fOutPtr_l[upperNum] = 0.5*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
-            fOutPtr_r[lowerNum] = 0.5*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
+            fOutPtr_l[upperNum] = 0.25*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
+            fOutPtr_r[lowerNum] = 0.25*(fInPtr_l[upperNum] + fInPtr_r[lowerNum]);
           }
         }
       }

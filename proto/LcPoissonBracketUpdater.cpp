@@ -202,6 +202,9 @@ namespace Lucee
           surfLowerQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
       }
     }
+
+    massMatrixInvUpper = massMatrixInv;
+    massMatrixInvLower = massMatrixInv;
   }
 
   template <unsigned NDIM>
@@ -234,6 +237,8 @@ namespace Lucee
     Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
     // Testing: see LcWavePropagationUpdater
     Lucee::ConstFieldPtr<double> jacobianPtr = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> jacobianPtr_l = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> jacobianPtr_r = aCurr.createConstPtr();
 
     aNew = 0.0; // use aNew to store increment initially
 
@@ -256,21 +261,13 @@ namespace Lucee
           jacobianVec(i) = jacobianPtr[i];
 
         Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
-        tempJMassMatrix.setZero();
 
         jacobianAtQuad = volQuad.interpMat*jacobianVec;
 
         // Use jacobian to compute new massMatrixInv
         for (int j = 0; j < nlocal; j++)
-        {
           for (int k = 0; k < nlocal; k++)
-          {
             tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
-            /*for (int gaussIndex = 0; gaussIndex < volQuad.
-            tempJMassMatrix += volQuad.weights(gaussIndex)*jacobianAtQuad(gaussIndex)*
-              volQuad.interpMat(gaussIndex,j)*volQuad.interpMat(gaussIndex,k);*/
-          }
-        }
 
         massMatrixInv = tempJMassMatrix.inverse();
       }
@@ -296,7 +293,11 @@ namespace Lucee
       {
         double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff()/fabs(jacobianAtQuad(i));
         if (maxCflaInCol > cfla)
+        {
+          Eigen::VectorXd::Index maxIndex;
+          double maxVal = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff(&maxIndex);
           cfla = maxCflaInCol;
+        }
       }
       
       if (cfla > cflm)
@@ -342,6 +343,7 @@ namespace Lucee
       int idxl[NDIM];
 
       // loop over each 1D slice
+      // TODO: use only lower/upper or right/left
       while (seqLowerDim.step())
       {
         seqLowerDim.fillWithIndex(idxr);
@@ -354,8 +356,8 @@ namespace Lucee
 
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
-          // Hamiltonian is continuous, so use left always
-          hamil.setPtr(hamilPtr, idxl);
+          // Hamiltonian is continuous, so use right (lower) always
+          hamil.setPtr(hamilPtr, idxr);
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
           Eigen::VectorXd leftData(nlocal);
@@ -365,21 +367,78 @@ namespace Lucee
             leftData(i) = aCurrPtr_l[i];
           }
 
+          // If there is a jacobian factor, need to account for jacobian in each cell
+          if (hasJacobian == true)
+          {
+            Eigen::VectorXd jacobianVec(nlocal);
+            Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
+
+            // We have already computed massMatrixInvLower and massMatrixInvUpper once
+            // Then just copy the old massMatrixInvLower to massMatrixInvUpper
+            if (sliceIndex > sliceLower)
+              massMatrixInvUpper = massMatrixInvLower;
+            else
+            {
+              // We haven't computed massMatrixInvLower before.
+              // Use jacobian to compute new massMatrixInvUpper
+              jacobianField->setPtr(jacobianPtr_l, idxl);
+              for (int i = 0; i < nlocal; i++)
+                jacobianVec(i) = jacobianPtr_l[i];
+              
+              Eigen::VectorXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
+              
+              for (int j = 0; j < nlocal; j++)
+                for (int k = 0; k < nlocal; k++)
+                  tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
+              massMatrixInvUpper = tempJMassMatrix.inverse();
+            }
+    
+            /*// compute new upper jacobian (left cell)
+            jacobianField->setPtr(jacobianPtr_l, idxl);
+            for (int i = 0; i < nlocal; i++)
+              jacobianVec(i) = jacobianPtr_l[i];
+
+            Eigen::VectorXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
+
+            // Use jacobian to compute new massMatrixInv
+            for (int j = 0; j < nlocal; j++)
+              for (int k = 0; k < nlocal; k++)
+                tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
+
+            massMatrixInvUpper = tempJMassMatrix.inverse();*/
+
+            // Always need to compute new lower jacobian (right cell)
+            jacobianField->setPtr(jacobianPtr_r, idxr);
+            for (int i = 0; i < nlocal; i++)
+              jacobianVec(i) = jacobianPtr_r[i];
+
+            Eigen::MatrixXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
+
+            // Use jacobian to compute new massMatrixInv
+            for (int j = 0; j < nlocal; j++)
+              for (int k = 0; k < nlocal; k++)
+                tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
+
+            massMatrixInvLower = tempJMassMatrix.inverse();
+          }
+
           // Compute gradient of hamiltonian at surface nodes
           Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
           for (int i = 0; i < nlocal; i++)
-            hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+            hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
 
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
-          equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idx, alpha);
+          equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
 
           // Construct normal vector
           Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
           normalVec(dir) = 1.0;
           
           // Calculate alphaDotN at all quadrature points
-          Eigen::VectorXd alphaDotN = normalVec.transpose()*alpha;
+          Eigen::RowVectorXd alphaDotN = normalVec.transpose()*alpha;
+          // TODO: account for jacobian factor, since it has been multiplied into alpha already?
+          // Don't need to do this for now, as long as jacobian factor is > 0
 
           // Compute numerical flux
           Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
@@ -387,9 +446,9 @@ namespace Lucee
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 
           // Compute the surface integrals required and multiply by inverse of mass matrix
-          Eigen::VectorXd upperResultVector = massMatrixInv*surfUpperQuad[dir].interpMat.transpose()*
+          Eigen::VectorXd upperResultVector = massMatrixInvUpper*surfUpperQuad[dir].interpMat.transpose()*
             numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
-          Eigen::VectorXd lowerResultVector = massMatrixInv*surfLowerQuad[dir].interpMat.transpose()*
+          Eigen::VectorXd lowerResultVector = massMatrixInvLower*surfLowerQuad[dir].interpMat.transpose()*
             numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
           // Accumulate to solution

@@ -130,6 +130,8 @@ namespace Lucee
       GaussQuadData surfUpperQuad[NDIM];
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
+      Eigen::MatrixXd massMatrixInvUpper;
+      Eigen::MatrixXd massMatrixInvLower;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
 /** Flag to indicate if a Jacobian factor is supplied */
