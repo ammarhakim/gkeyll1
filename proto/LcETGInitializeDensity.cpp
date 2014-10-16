@@ -166,19 +166,20 @@ namespace Lucee
 
     // get input field (2d)
     const Lucee::Field<2, double>& nIn = this->getInp<Lucee::Field<2, double> >(0);
-    // get output field (2d)
+    // get output field (4d)
     Lucee::Field<4, double>& distF = this->getOut<Lucee::Field<4, double> >(0);
 
     // local region to update (This is the 4D region. The 2D region is
     // assumed to have the same cell layout as the X-direction of the 4D region)
-    Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
+    //Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
+    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> nPtr = nIn.createConstPtr();
     Lucee::FieldPtr<double> distFPtr = distF.createPtr();
 
     int idx[4];
-    Lucee::RowMajorSequencer<4> seq(localExtRgn);
+    Lucee::RowMajorSequencer<4> seq(localRgn);
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
     int nVolQuad2d = nodalBasis2d->getNumGaussNodes();
