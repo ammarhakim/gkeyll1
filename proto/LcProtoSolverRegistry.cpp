@@ -20,6 +20,7 @@
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcETGInitializeDensity.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateGeneralField.h>
@@ -81,6 +82,8 @@ namespace Lucee
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
+      
+      .append<Lucee::ETGInitializeDensity>()
     
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
