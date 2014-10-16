@@ -16,7 +16,6 @@
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
 
 // eigen includes
 #include <Eigen/LU>

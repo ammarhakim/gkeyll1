@@ -12,14 +12,8 @@
 
 // lucee includes
 #include <LcETGInitializeDensity.h>
-#include <LcGlobals.h>
-#include <LcLinAlgebra.h>
-
-// loki includes
-#include <loki/Singleton.h>
 
 // std includes
-#include <cmath>
 #include <vector>
 
 namespace Lucee
