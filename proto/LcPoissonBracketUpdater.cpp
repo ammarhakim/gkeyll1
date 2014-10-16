@@ -73,13 +73,31 @@ namespace Lucee
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
 
-    // Check to see if a jacobian field has been supplied
     hasJacobian = false;
-    if (tbl.hasBool("hasJacobian"))
-      hasJacobian = tbl.getBool("hasJacobian");
-
-    if (hasJacobian == true)
+    if (tbl.hasObject<Lucee::Field<NDIM, double> >("jacobianField"))
+    {
+      hasJacobian = true;
       jacobianField = &tbl.getObject<Lucee::Field<NDIM, double> >("jacobianField");
+    }
+
+    // directions to update
+    if (tbl.hasNumVec("updateDirections"))
+    {
+      std::vector<double> ud = tbl.getNumVec("updateDirections");
+      for (int i = 0; i < std::min<int>(NDIM, ud.size()); i++)
+      {
+        int d = (int) ud[i];
+        if (d < NDIM)
+          updateDirs.push_back(d);
+        else
+          throw Lucee::Except("PoissonBracketUpdater::readInput: updateDirections must be a table with each element < NDIM");
+      }
+    }
+    else
+    {
+      for (int i = 0; i < NDIM; i++)
+        updateDirs.push_back(i);
+    }
   }
 
   template <unsigned NDIM>
@@ -114,9 +132,10 @@ namespace Lucee
     massMatrixInv = massMatrix.inverse();
 
     // Store grad stiffness matrix in each direction
-    std::vector<Eigen::MatrixXd> gradStiffnessMatrix(NDIM);
-    for (int dir = 0; dir < NDIM; dir++)
+    std::vector<Eigen::MatrixXd> gradStiffnessMatrix(updateDirs.size());
+    for (int d = 0; d < updateDirs.size(); d++)
     {
+      int dir = updateDirs[d];
       Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
       nodalBasis->getGradStiffnessMatrix(dir, tempMatrix);
       gradStiffnessMatrix[dir] = Eigen::MatrixXd(nlocal, nlocal);
@@ -141,8 +160,9 @@ namespace Lucee
     copyLuceeToEigen(tempVolCoords, volQuad.coordMat);
 
     // Compute gradients of basis functions evaluated at volume quadrature points
-    for (int dir = 0; dir < NDIM; dir++)
+    for (int d = 0; d < updateDirs.size(); d++)
     {
+      int dir = updateDirs[d];
       // Each row is a quadrature point; each column is a basis function with derivative applied
       Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
@@ -152,8 +172,9 @@ namespace Lucee
     }
 
     // Get data for surface quadrature
-    for (int dir = 0; dir < NDIM; dir++)
+    for (int d = 0; d < updateDirs.size(); d++)
     {
+      int dir = updateDirs[d];
       // temporary variables
       std::vector<double> tempSurfWeights(nSurfQuad);
       Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
@@ -184,11 +205,13 @@ namespace Lucee
 
     // Compute gradients of basis functions evaluated at surface quadrature points
     // surf keeps track of surfaces to evaluate derivatives on
-    for (int surf = 0; surf < NDIM; surf++)
+    for (int s = 0; s < updateDirs.size(); s++)
     {
-      // dir is direction gradient is taken in
-      for (int dir = 0; dir < NDIM; dir++)
+      int surf = updateDirs[s];
+      for (int d = 0; d < updateDirs.size(); d++)
       {
+        // dir is direction gradient is taken in
+        int dir = updateDirs[d];
         // Each row is a quadrature point; each column is a basis function with derivative applied
         Eigen::MatrixXd derivMatrix = surfUpperQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
@@ -327,8 +350,9 @@ namespace Lucee
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     // Contributions from surface integrals
-    for (int dir = 0; dir < NDIM; dir++)
+    for (int d = 0; d < updateDirs.size(); d++)
     {
+      int dir = updateDirs[d];
       // create sequencer to loop over *each* NDIM-1 slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seqLowerDim(localRgn.deflate(dir));
       // lower and upper bounds of NDIM-1 slice. (We need to make sure that flux
@@ -389,20 +413,6 @@ namespace Lucee
                   tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
               massMatrixInvUpper = tempJMassMatrix.inverse();
             }
-    
-            /*// compute new upper jacobian (left cell)
-            jacobianField->setPtr(jacobianPtr_l, idxl);
-            for (int i = 0; i < nlocal; i++)
-              jacobianVec(i) = jacobianPtr_l[i];
-
-            Eigen::VectorXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
-
-            // Use jacobian to compute new massMatrixInv
-            for (int j = 0; j < nlocal; j++)
-              for (int k = 0; k < nlocal; k++)
-                tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
-
-            massMatrixInvUpper = tempJMassMatrix.inverse();*/
 
             // Always need to compute new lower jacobian (right cell)
             jacobianField->setPtr(jacobianPtr_r, idxr);
