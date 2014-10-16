@@ -78,6 +78,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Order of f to calculate e.g. f, f^2, f^3 */
+      int calcMom;
 /**
  * Struct to hold data for Guassian quadrature.
  */
