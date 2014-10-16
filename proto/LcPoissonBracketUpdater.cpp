@@ -293,15 +293,8 @@ namespace Lucee
       {
         double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff()/fabs(jacobianAtQuad(i));
         if (maxCflaInCol > cfla)
-        {
-          Eigen::VectorXd::Index maxIndex;
-          double maxVal = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff(&maxIndex);
           cfla = maxCflaInCol;
-        }
       }
-      
-      if (cfla > cflm)
-        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);
@@ -328,6 +321,10 @@ namespace Lucee
       for (int i = 0; i < nlocal; i++)
         aNewPtr[i] += resultVector(i);
     }
+     
+    // Check to see if we need to retake time step
+    if (cfla > cflm)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     // Contributions from surface integrals
     for (int dir = 0; dir < NDIM; dir++)

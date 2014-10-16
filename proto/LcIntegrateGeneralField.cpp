@@ -39,6 +39,11 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("IntegrateGeneralField::readInput: Must specify element to use using 'basis'");
+
+    calcMom = 1;
+
+    if (tbl.hasNumber("moment"))
+      calcMom = (int) tbl.getNumber("moment");
   }
 
   template <unsigned NDIM>
@@ -111,6 +116,9 @@ namespace Lucee
 
       // Interpolate data to quadrature points
       Eigen::VectorXd fieldAtQuad = volQuad.interpMat*fieldVec;
+
+      if (calcMom == 2)
+        fieldAtQuad = fieldAtQuad.cwiseAbs();
 
       // perform quadrature
       for (int i = 0; i < nVolQuad; i++)
