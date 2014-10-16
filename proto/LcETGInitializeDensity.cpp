@@ -37,6 +37,11 @@ namespace Lucee
     // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
+    if (tbl.hasNumber("polyOrder"))
+      polyOrder = tbl.getNumber("polyOrder");
+    else
+      throw Lucee::Except("ETGInitializeDensity::readInput: Must specify polyOrder");
+
     // get hold of 4D element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<4> >("basis4d"))
       nodalBasis4d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<4> >("basis4d");
@@ -82,6 +87,79 @@ namespace Lucee
       volQuad2d.weights(volIndex) = volWeights2d[volIndex];
     
     copyLuceeToEigen(tempVolQuad2d, volQuad2d.interpMat);
+
+    if (polyOrder == 1)
+    {
+      mappingMatrix = Eigen::MatrixXd(16,4);
+      mappingMatrix << 1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1,
+                       1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1,
+                       1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1,
+                       1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1;
+    }
+    else if (polyOrder == 2)
+    {
+      mappingMatrix = Eigen::MatrixXd(48,8);
+      mappingMatrix << 1,0,0,0,0,0,0,0,
+                       0,1,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,0,0,1,
+                       1,0,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,0,1,0,
+                       1,0,0,0,0,0,0,0,
+                       0,1,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,0,0,1,
+                       1,0,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,0,1,0,
+                       1,0,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,0,1,0,
+                       1,0,0,0,0,0,0,0,
+                       0,1,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,0,0,1,
+                       1,0,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,0,1,0,
+                       1,0,0,0,0,0,0,0,
+                       0,1,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,
+                       0,0,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,0,0,1;
+    }
   }
 
   Lucee::UpdaterStatus
@@ -99,18 +177,17 @@ namespace Lucee
 
     // local region to update (This is the 4D region. The 2D region is
     // assumed to have the same cell layout as the X-direction of the 4D region)
-    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> nPtr = nIn.createConstPtr();
     Lucee::FieldPtr<double> distFPtr = distF.createPtr();
 
     int idx[4];
-    Lucee::RowMajorSequencer<4> seq(localRgn);
+    Lucee::RowMajorSequencer<4> seq(localExtRgn);
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
     int nVolQuad2d = nodalBasis2d->getNumGaussNodes();
-
     // Loop over each cell in 4D space
     while(seq.step())
     {
@@ -121,26 +198,14 @@ namespace Lucee
       nIn.setPtr(nPtr, idx[0], idx[1]);
       distF.setPtr(distFPtr, idx);
 
-      Eigen::VectorXd nVec(nlocal2d);
+      Eigen::VectorXd scaleFactors2d(nlocal2d);
       for (int i = 0; i < nlocal2d; i++)
-        nVec(i) = nPtr[i];
+        scaleFactors2d(i) = constantDensity/nPtr[i];
 
-      // Interpolate data to quadrature points
-      Eigen::VectorXd nAtQuad = volQuad2d.interpMat*nVec;
+      Eigen::VectorXd scaleFactors4d = mappingMatrix*scaleFactors2d;
 
-      double localInt = 0.0;
-      // Perform quadrature
-      for (int i = 0; i < nVolQuad2d; i++)
-        localInt += volQuad2d.weights[i]*nAtQuad(i);
-
-      // Divide by area
-      localInt = localInt/(grid.getDx(0)*grid.getDx(1));
-
-      double scaleFactor = constantDensity/localInt;
-
-      Eigen::VectorXd distfVec(nlocal4d);
       for (int i = 0; i < nlocal4d; i++)
-        distFPtr[i] = scaleFactor*distFPtr[i];
+        distFPtr[i] = scaleFactors4d(i)*distFPtr[i];
     }
 
     return Lucee::UpdaterStatus();

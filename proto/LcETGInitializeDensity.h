@@ -74,6 +74,10 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Desired constant density value */
       double constantDensity;
+/** Matrix that maps the 2-D nodes to 4-D */
+      Eigen::MatrixXd mappingMatrix;
+/** Temporary flag to keep track of what polynomial order of element we are copying */
+      int polyOrder;
 /**
  * Struct to hold data for Guassian quadrature.
  */
