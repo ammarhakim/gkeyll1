@@ -159,7 +159,8 @@ namespace Lucee
 
     // local region to update (This is the 4D region. The 2D region is
     // assumed to have the same cell layout as the X-direction of the 4D region)
-    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    //Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
 
     // clear out contents of output field
     moment = 0.0;
@@ -171,7 +172,7 @@ namespace Lucee
 
     int idx[4];
     double xc[4];
-    Lucee::RowMajorSequencer<4> seq(localRgn);
+    Lucee::RowMajorSequencer<4> seq(localExtRgn);
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
 
