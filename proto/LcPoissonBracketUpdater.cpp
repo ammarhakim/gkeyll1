@@ -83,10 +83,10 @@ namespace Lucee
     // directions to update
     if (tbl.hasNumVec("updateDirections"))
     {
-      std::vector<double> ud = tbl.getNumVec("updateDirections");
-      for (int i = 0; i < std::min<int>(NDIM, ud.size()); i++)
+      std::vector<double> tempDirs = tbl.getNumVec("updateDirections");
+      for (int i = 0; i < std::min<int>(NDIM, tempDirs.size()); i++)
       {
-        int d = (int) ud[i];
+        int d = (int) tempDirs[i];
         if (d < NDIM)
           updateDirs.push_back(d);
         else
@@ -97,6 +97,25 @@ namespace Lucee
     {
       for (int i = 0; i < NDIM; i++)
         updateDirs.push_back(i);
+    }
+
+    zeroFluxFlags = std::vector<bool>(NDIM);
+    // Default is no zero flux bcs in any directions
+    for (int i = 0; i < NDIM; i++)
+      zeroFluxFlags[i] = false;
+
+    if (tbl.hasNumVec("zeroFluxDirections"))
+    {
+      std::vector<double> tempDirs = tbl.getNumVec("zeroFluxDirections");
+      for (int i = 0; i < std::min<int>(NDIM, tempDirs.size()); i++)
+      {
+        int d = (int) tempDirs[i];
+
+        if (d < NDIM)
+          zeroFluxFlags[d] = true;
+        else
+          throw Lucee::Except("PoissonBracketUpdater::readInput: zeroFluxDirections must be a table with each element < NDIM");
+      }
     }
   }
 
@@ -244,6 +263,7 @@ namespace Lucee
     double dt = t-this->getCurrTime();
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> globalRgn = aCurr.getGlobalRegion();
 
     double cfla = 0.0; // maximum CFL number used
 
@@ -359,6 +379,16 @@ namespace Lucee
       // is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
       int sliceUpper = localRgn.getUpper(dir)+1;
+
+      // Check to see if we have zero flux BCs in this direction
+      // If true, then increase/decrease edge index by 1
+      if (zeroFluxFlags[dir] == true)
+      {
+        if (sliceLower == globalRgn.getLower(dir))
+          sliceLower = globalRgn.getLower(dir)+1;
+        if (sliceUpper == globalRgn.getUpper(dir)+1)
+          sliceUpper = globalRgn.getUpper(dir);
+      }
 
       int idxr[NDIM];
       int idxl[NDIM];

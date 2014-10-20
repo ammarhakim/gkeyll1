@@ -138,8 +138,10 @@ namespace Lucee
       bool hasJacobian;
 /** Field to store optional Jacobian field (SHOULD REALLY BE SPATIAL DIM SIZE) */
       Lucee::Field<NDIM, double> *jacobianField;
-/** Optional vector storing direction to update */
+/** Optional vector storing directions to update */
       std::vector<int> updateDirs;
+/** Optional vector keeping track of whether to apply zero flux BCs in each direction */
+      std::vector<bool> zeroFluxFlags;
  /**
  * CompsurfLowerQuad[dir].interpMat*rightDatasurfLowerQuad[dir].interpMat*rightDataute numerical flux
  * @param alphaDotN: characteristic velocities at quad points (dot n)

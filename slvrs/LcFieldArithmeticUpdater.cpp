@@ -25,6 +25,8 @@ namespace Lucee
   template <> const char *FieldArithmeticUpdater<1>::id = "FieldArithmeticUpdater1D";
   template <> const char *FieldArithmeticUpdater<2>::id = "FieldArithmeticUpdater2D";
   template <> const char *FieldArithmeticUpdater<3>::id = "FieldArithmeticUpdater3D";
+  template <> const char *FieldArithmeticUpdater<4>::id = "FieldArithmeticUpdater4D";
+  template <> const char *FieldArithmeticUpdater<5>::id = "FieldArithmeticUpdater5D";
 
   template <unsigned NDIM>
   FieldArithmeticUpdater<NDIM>::FieldArithmeticUpdater()
@@ -184,4 +186,6 @@ namespace Lucee
   template class FieldArithmeticUpdater<1>;
   template class FieldArithmeticUpdater<2>;
   template class FieldArithmeticUpdater<3>;
+  template class FieldArithmeticUpdater<4>;
+  template class FieldArithmeticUpdater<5>;
 }

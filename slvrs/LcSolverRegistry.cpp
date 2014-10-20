@@ -146,7 +146,9 @@ namespace Lucee
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()
       .append<Lucee::FieldArithmeticUpdater<2> >()
-      .append<Lucee::FieldArithmeticUpdater<2> >()
+      .append<Lucee::FieldArithmeticUpdater<3> >()
+      .append<Lucee::FieldArithmeticUpdater<4> >()
+      .append<Lucee::FieldArithmeticUpdater<5> >()
 
       .append<Lucee::GridOdePointIntegratorUpdater<1> >()
       .append<Lucee::GridOdePointIntegratorUpdater<2> >()
