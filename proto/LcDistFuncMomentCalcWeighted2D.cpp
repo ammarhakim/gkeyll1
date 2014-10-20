@@ -159,8 +159,13 @@ namespace Lucee
 
     // local region to update (This is the 4D region. The 2D region is
     // assumed to have the same cell layout as the X-direction of the 4D region)
-    //Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
     Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
+
+    localExtRgn.setLower(2, localRgn.getLower(2));
+    localExtRgn.setUpper(2, localRgn.getUpper(2));
+    localExtRgn.setLower(3, localRgn.getLower(3));
+    localExtRgn.setUpper(3, localRgn.getUpper(3));
 
     // clear out contents of output field
     moment = 0.0;
