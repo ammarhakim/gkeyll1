@@ -28,6 +28,7 @@ set (proto_SOURCES
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcETGAdiabaticPotentialUpdater.cpp
   LcETGInitializeDensity.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp

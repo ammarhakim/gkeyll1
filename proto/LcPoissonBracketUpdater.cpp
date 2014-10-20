@@ -263,7 +263,7 @@ namespace Lucee
     double dt = t-this->getCurrTime();
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    Lucee::Region<NDIM, int> globalRgn = aCurr.getGlobalRegion();
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
 
     double cfla = 0.0; // maximum CFL number used
 
