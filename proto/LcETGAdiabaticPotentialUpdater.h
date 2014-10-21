@@ -93,7 +93,10 @@ namespace Lucee
       GaussQuadData volQuad2d;
 
       double kzfTimesRhoSquared;
+/** Temperature of adiabatic species */
       double adiabaticTemp;
+/** Charge of adiabatic species */
+      double adiabaticCharge;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

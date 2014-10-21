@@ -160,9 +160,9 @@ target_link_libraries(lclagrangetensorcalc lcslvrs lcdatastructs
 add_executable(lcparticleideas lcparticleideas)
 target_link_libraries(lcparticleideas)
 
-add_executable(lcparticlecont lcparticlecont)
-target_link_libraries(lcparticlecont
-  lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+#add_executable(lcparticlecont lcparticlecont)
+#target_link_libraries(lcparticlecont
+#  lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
 
 add_executable(lcmatvec lcmatvec.cxx)
 target_link_libraries(lcmatvec
