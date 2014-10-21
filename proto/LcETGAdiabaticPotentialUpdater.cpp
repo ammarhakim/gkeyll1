@@ -48,6 +48,12 @@ namespace Lucee
     else
       throw Lucee::Except(
         "ETGAdiabaticPotentialUpdater::readInput: Must specify value for 'adiabaticTemp' (in eV)");
+
+    if (tbl.hasNumber("adiabaticCharge"))
+      adiabaticCharge = tbl.getNumber("adiabaticCharge");
+    else
+      throw Lucee::Except(
+        "ETGAdiabaticPotentialUpdater::readInput: Must specify value for 'adiabaticCharge'");
   }
 
   void
@@ -135,7 +141,8 @@ namespace Lucee
 
       Eigen::VectorXd rhoVec(nlocal2d);
       for (int i = 0; i < nlocal2d; i++)
-        rhoVec(i) = (adiabaticTemp/nAdiabaticAtCenter)*(nKineticPtr[i] - nAdiabaticPtr[i]);
+        rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(nAdiabaticAtCenter*adiabaticCharge))
+          *(nKineticPtr[i] - nAdiabaticPtr[i]);
 
       Eigen::VectorXd rhoYAvgVec(nlocal2d);
       // NOTE: ONLY WORKS FOR POLYORDER 1
