@@ -1,7 +1,7 @@
 /**
  * @file	LcPoissonBracketGyroEquation4D.cpp
  *
- * @brief	Jacobian*alpha at all quadrature points
+ * @brief	Compute Jacobian*alpha at all quadrature points
  */
 
 // config stuff
@@ -58,27 +58,15 @@ namespace Lucee
 
     alpha.setZero(alpha.rows(), alpha.cols());
 
-    // (0, 1)
     Eigen::RowVectorXd poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
-
+    // (0, 1)
     alpha.row(0) += poissonElement.cwiseProduct(hamiltonian.row(1));
     // (1, 0)
     alpha.row(1) -= poissonElement.cwiseProduct(hamiltonian.row(0));
-
-    /*for (int i = 0; i < alpha.cols(); i++)
-    {
-      alpha(0, i) = poissonElement(i)*hamiltonian(1,i);
-      alpha(1, i) = -poissonElement(i)*hamiltonian(0,i);
-    }*/
-
-    // (1,2)
+    
     // Get a vector of bStarYVec*speciesMass at all quadrature points
     poissonElement = speciesMass*interpMat*bStarYVec;
-    /*for (int i = 0; i < alpha.cols(); i++)
-    {
-      alpha(1, i) += poissonElement(i)*hamiltonian(2,i);
-      alpha(2, i) -= poissonElement(i)*hamiltonian(1,i);
-    }*/
+    // (1,2)
     alpha.row(1) += poissonElement.cwiseProduct(hamiltonian.row(2));
     // (2,1)
     alpha.row(2) -= poissonElement.cwiseProduct(hamiltonian.row(1));

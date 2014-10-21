@@ -58,9 +58,9 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalcWeighted2D::readInput: Must specify moment using 'moment'");
 
-    if (calcMom > 0)
+    if (calcMom > 2)
     {
-      Lucee::Except lce("DistFuncMomentCalcWeighted2D::readInput: Only 'moment' 0 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalcWeighted2D::readInput: Only 'moment' < 3 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }
@@ -112,6 +112,8 @@ namespace Lucee
     copyLuceeToEigen(tempVolCoords4d, volCoords4d);
 
     mom0MatrixVector = std::vector<Eigen::MatrixXd>(nlocal2d);
+    mom1MatrixVector = std::vector<Eigen::MatrixXd>(nlocal2d);
+    mom2MatrixVector = std::vector<Eigen::MatrixXd>(nlocal2d);
 
     for (int h = 0; h < nlocal2d; h++)
     {
@@ -122,11 +124,20 @@ namespace Lucee
         for (int j = 0; j < nlocal4d; j++)
         {
           // Compute integral of phi2d_h * phi2d_i * phi4d_j
-          double integralResult = 0.0;
+          double integralResult[3] = {};
           for (int gaussIndex = 0; gaussIndex < volWeights4d.size(); gaussIndex++)
-            integralResult += volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, h)*
+          {
+            double baseIntegral = volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, h)*
               volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
-          mom0MatrixVector[h](i, j) = integralResult;
+            integralResult[0] += baseIntegral;
+            // Get coordinate of quadrautre point in direction 2
+            double coord2Val = volCoords4d(gaussIndex, 2)*grid.getDx(2)/2.0;
+            integralResult[1] += coord2Val*baseIntegral;
+            integralResult[2] += coord2Val*coord2Val*baseIntegral;
+          }
+          mom0MatrixVector[h](i, j) = integralResult[0];
+          mom1MatrixVector[h](i, j) = integralResult[1];
+          mom2MatrixVector[h](i, j) = integralResult[2];
         }
       }
     }
@@ -139,7 +150,11 @@ namespace Lucee
 
     // Multiply matrices by inverse of mass matrix
     for (int h = 0; h < nlocal2d; h++)
+    {
       mom0MatrixVector[h] = massMatrix2d.inverse()*mom0MatrixVector[h];
+      mom1MatrixVector[h] = massMatrix2d.inverse()*mom1MatrixVector[h];
+      mom2MatrixVector[h] = massMatrix2d.inverse()*mom2MatrixVector[h];
+    }
   }
 
   Lucee::UpdaterStatus
@@ -186,7 +201,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
 
       grid.setIndex(idx);
-      //grid.getCentroid(xc);
+      grid.getCentroid(xc);
 
       moment.setPtr(momentPtr, idx[0], idx[1]);
       distF.setPtr(distFPtr, idx);
@@ -203,6 +218,13 @@ namespace Lucee
         // Calculate contribution to moment
         if (calcMom == 0)
           resultVector = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+        else if (calcMom == 1)
+          resultVector = weightFPtr[h]*mom1MatrixVector[h]*distfVec + 
+            xc[2]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+        else if (calcMom == 2)
+          resultVector = weightFPtr[h]*mom2MatrixVector[h]*distfVec + 
+            2*xc[2]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
+            xc[2]*xc[2]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         // Accumulate contribution to moment from this cell
         for (int i = 0; i < nlocal2d; i++)
           momentPtr[i] = momentPtr[i] + resultVector(i);

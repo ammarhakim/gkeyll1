@@ -80,6 +80,8 @@ namespace Lucee
 /** Moment to compute */
       unsigned calcMom;
       std::vector<Eigen::MatrixXd> mom0MatrixVector;
+      std::vector<Eigen::MatrixXd> mom1MatrixVector;
+      std::vector<Eigen::MatrixXd> mom2MatrixVector;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

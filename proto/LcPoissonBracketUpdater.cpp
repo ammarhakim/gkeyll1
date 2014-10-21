@@ -394,7 +394,7 @@ namespace Lucee
       int idxl[NDIM];
 
       // loop over each 1D slice
-      // TODO: use only lower/upper or right/left
+      // TODO: use only lower/upper or right/left naming convention
       while (seqLowerDim.step())
       {
         seqLowerDim.fillWithIndex(idxr);
@@ -407,7 +407,7 @@ namespace Lucee
 
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
-          // Hamiltonian is continuous, so use right (lower) always
+          // Hamiltonian is continuous, so use right always
           hamil.setPtr(hamilPtr, idxr);
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
