@@ -118,6 +118,8 @@ namespace Lucee
     for (int h = 0; h < nlocal2d; h++)
     {
       mom0MatrixVector[h] = Eigen::MatrixXd::Zero(nlocal2d, nlocal4d);
+      mom1MatrixVector[h] = Eigen::MatrixXd::Zero(nlocal2d, nlocal4d);
+      mom2MatrixVector[h] = Eigen::MatrixXd::Zero(nlocal2d, nlocal4d);
 
       for (int i = 0; i < nlocal2d; i++)
       {
