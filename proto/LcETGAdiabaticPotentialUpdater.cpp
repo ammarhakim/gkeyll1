@@ -128,31 +128,56 @@ namespace Lucee
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0]-1, idx[1]);
     nAdiabaticAtCenter += 0.25*nAdiabaticPtr[1];
 
+    int NY_TOTAL = globalRgn.getUpper(1) - globalRgn.getLower(1);
+
     // Loop over each cell
-    while(seq.step())
+    for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
-      seq.fillWithIndex(idx);
+      // Loop over cells in y to compute average phi
+      Eigen::VectorXd rhoYAvgVec = Eigen::VectorXd::Zero(nlocal2d);
 
-      grid.setIndex(idx);
+      for (int iy = globalRgn.getLower(1); iy < globalRgn.getUpper(1); iy++)
+      {
+        idx[0] = ix;
+        idx[1] = iy;
 
-      nKineticIn.setPtr(nKineticPtr, idx);
-      nAdiabaticIn.setPtr(nAdiabaticPtr, idx);
-      phiOut.setPtr(phiOutPtr, idx);
+        grid.setIndex(idx);
 
-      Eigen::VectorXd rhoVec(nlocal2d);
-      for (int i = 0; i < nlocal2d; i++)
-        rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(nAdiabaticAtCenter*adiabaticCharge))
-          *(nKineticPtr[i] - nAdiabaticPtr[i]);
+        nKineticIn.setPtr(nKineticPtr, idx);
+        nAdiabaticIn.setPtr(nAdiabaticPtr, idx);
 
-      Eigen::VectorXd rhoYAvgVec(nlocal2d);
-      // NOTE: ONLY WORKS FOR POLYORDER 1
-      rhoYAvgVec(0) = 0.5*(rhoVec(0) + rhoVec(3));
-      rhoYAvgVec(1) = 0.5*(rhoVec(1) + rhoVec(2));
-      rhoYAvgVec(2) = 0.5*(rhoVec(1) + rhoVec(2));
-      rhoYAvgVec(3) = 0.5*(rhoVec(0) + rhoVec(3));
+        Eigen::VectorXd rhoVec(nlocal2d);
+        for (int i = 0; i < nlocal2d; i++)
+          rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(nAdiabaticAtCenter*adiabaticCharge))
+            *(nKineticPtr[i] - nAdiabaticPtr[i]);
 
-      for (int i = 0; i < nlocal2d; i++)
-        phiOutPtr[i] = (1 - kzfTimesRhoSquared)/kzfTimesRhoSquared*rhoYAvgVec(i) + rhoVec(i);
+        phiOut.setPtr(phiOutPtr, idx);
+        for (int i = 0; i < nlocal2d; i++)
+          phiOutPtr[i] = rhoVec(i);
+
+
+        // NOTE: ONLY WORKS FOR POLYORDER 1
+        rhoYAvgVec(0) += (rhoVec(0) + rhoVec(3));
+        rhoYAvgVec(1) += (rhoVec(1) + rhoVec(2));
+        rhoYAvgVec(2) += (rhoVec(1) + rhoVec(2));
+        rhoYAvgVec(3) += (rhoVec(0) + rhoVec(3));
+      }
+
+      rhoYAvgVec /= 2*NY_TOTAL;
+      
+      // Accumulate kzf term contribution
+      if (kzfTimesRhoSquared != 1.0)
+      {
+        for (int iy = globalRgn.getLower(1); iy < globalRgn.getUpper(1); iy++)
+        {
+          idx[0] = ix;
+          idx[1] = iy;
+          phiOut.setPtr(phiOutPtr, idx);
+
+          for (int i = 0; i < nlocal2d; i++)
+            phiOutPtr[i] = (1 - kzfTimesRhoSquared)/kzfTimesRhoSquared*rhoYAvgVec(i) + phiOutPtr[i];
+        }
+      }
     }
 
     return Lucee::UpdaterStatus();

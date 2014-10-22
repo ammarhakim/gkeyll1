@@ -118,7 +118,7 @@ namespace Lucee
       Eigen::VectorXd fieldAtQuad = volQuad.interpMat*fieldVec;
 
       if (calcMom == 2)
-        fieldAtQuad = fieldAtQuad.cwiseAbs();
+        fieldAtQuad = fieldAtQuad.cwiseAbs2();
 
       // perform quadrature
       for (int i = 0; i < nVolQuad; i++)
