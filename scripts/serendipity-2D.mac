@@ -232,6 +232,56 @@ N2_iMat_right_2 : calcInterpMatrix(N2, gOrds2_right);
 N2_iMat_bottom_2 : calcInterpMatrix(N2, gOrds2_bottom);
 N2_iMat_top_2 : calcInterpMatrix(N2, gOrds2_top);
 
+/** Ordinates for interpolation to finer mesh */
+gOrds_24 : [ 
+ [-1/2,-1/2],
+ [1/2,-1/2],
+ [-1/2,1/2],
+ [1/2,1/2]
+];
+N2_iMat_24 : calcInterpMatrix(N2, gOrds_24);
+
+gOrds_29 : [ 
+ [-2/3,-2/3],
+ [0,-2/3],
+ [2/3,-2/3],
+ [-2/3,0],
+ [0,0],
+ [2/3,0],
+ [-2/3,2/3],
+ [0,2/3],
+ [2/3,2/3]
+];
+N2_iMat_29 : calcInterpMatrix(N2, gOrds_29);
+
+gOrds_216 : [ 
+ [-3/4,-3/4],
+ [-1/4,-3/4],
+ [1/4,-3/4],
+ [3/4,-3/4],
+
+ [-3/4,-1/4],
+ [-1/4,-1/4],
+ [1/4,-1/4],
+ [3/4,-1/4],
+
+ [-3/4,1/4],
+ [-1/4,1/4],
+ [1/4,1/4],
+ [3/4,1/4],
+
+ [-3/4,3/4],
+ [-1/4,3/4],
+ [1/4,3/4],
+ [3/4,3/4]
+];
+N2_iMat_216 : calcInterpMatrix(N2, gOrds_216);
+
+/** Write to a file */
+fh : openw("serendipity2D_f216.txt");
+write_data(float(N2_iMat_216), fh, comma);
+close(fh);
+
 /******************** Basis 3 ******************/
 
 /** Ordinates for 3-node Guassian quadrature */
