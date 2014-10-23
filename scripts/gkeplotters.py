@@ -140,7 +140,7 @@ class PlotDg1D:
     is ``True``) to a PNG file.
     """
 
-    def __init__(self, gd, dgOrder=1, component=0, title=None, save=False, transformMod=None,
+    def __init__(self, gd, dgOrder=1, projOrder=-1, component=0, title=None, save=False, transformMod=None,
                  transformVar=None, outNm=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
@@ -235,7 +235,7 @@ class PlotDg2D:
     is ``True``) to a PNG file.
     """
 
-    def __init__(self, gd, dgOrder=1, component=0, title=None, save=False, transformMod=None,
+    def __init__(self, gd, dgOrder=1, projOrder=-1, component=0, title=None, save=False, transformMod=None,
                  transformVar=None, outNm=None, options=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
@@ -253,7 +253,14 @@ class PlotDg2D:
                             gd.upperBounds[1]+0.5*dx[1], gd.cells[1])
 
         if dgOrder == 1:
-            XX, YY, data = self.projectOnFinerGrid_f24(rX, rY, rawData)
+            if projOrder == 2:
+                XX, YY, data = self.projectOnFinerGrid_f24(rX, rY, rawData)
+            elif projOrder == 3:
+                XX, YY, data = self.projectOnFinerGrid_f29(rX, rY, rawData)
+            elif projOrder == 4:
+                XX, YY, data = self.projectOnFinerGrid_f216(rX, rY, rawData)
+            else:
+                raise Exception("ProjOrder of %d not supported!" % projOrder)
         elif dgOrder == 2:
             XX, YY, data = self.projectOnFinerGrid_f39(rX, rY, rawData)
 
@@ -320,6 +327,153 @@ class PlotDg2D:
         # node 4
         c4 = [0.0625,0.1875,0.5625,0.1875]
         qn[1:2*nx:2, 1:2*ny:2] = self.evalSum(c4, vList)
+   
+        return XXn, YYn, qn                
+
+    def projectOnFinerGrid_f29(self, Xc, Yc, q):
+        dx = Xc[1]-Xc[0]
+        dy = Yc[1]-Yc[0]
+        nx = Xc.shape[0]
+        ny = Yc.shape[0]
+
+        # mesh coordinates
+        Xn = pylab.linspace(Xc[0]-0.5*dx, Xc[-1]+0.5*dx, 3*nx+1) # one more
+        Yn = pylab.linspace(Yc[0]-0.5*dy, Yc[-1]+0.5*dy, 3*ny+1) # one more
+        XXn, YYn = pylab.meshgrid(Xn, Yn)
+
+        # data
+        qn = pylab.zeros((3*Xc.shape[0], 3*Yc.shape[0]), float)
+
+        v1 = q[:,:,0]
+        v2 = q[:,:,1]
+        v3 = q[:,:,2]
+        v4 = q[:,:,3]
+
+        vList = [v1,v2,v3,v4]
+
+
+        # node 1
+        c1 = [25.0/36.0,5.0/36.0,1.0/36.0,5.0/36.0]
+        qn[0:3*nx:3, 0:3*ny:3] = self.evalSum(c1, vList)
+
+        # node 2
+        c2 = [5.0/12.0,5.0/12.0,1.0/12.0,1.0/12.0]
+        qn[1:3*nx:3, 0:3*ny:3] = self.evalSum(c2, vList)
+
+        # node 3
+        c3 = [5.0/36.0,25.0/36.0,5.0/36.0,1.0/36.0]
+        qn[2:3*nx:3, 0:3*ny:3] = self.evalSum(c3, vList)
+
+        # node 4
+        c4 = [5.0/12.0,1.0/12.0,1.0/12.0,5.0/12.0]
+        qn[0:3*nx:3, 1:3*ny:3] = self.evalSum(c4, vList)
+
+        # node 5
+        c5 = [1.0/4.0,1.0/4.0,1.0/4.0,1.0/4.0]
+        qn[1:3*nx:3, 1:3*ny:3] = self.evalSum(c5, vList)
+
+        # node 6
+        c6 = [1.0/12.0,5.0/12.0,5.0/12.0,1.0/12.0]
+        qn[2:3*nx:3, 1:3*ny:3] = self.evalSum(c6, vList)
+
+        # node 7
+        c7 = [5.0/36.0,1.0/36.0,5.0/36.0,25.0/36.0]
+        qn[0:3*nx:3, 2:3*ny:3] = self.evalSum(c7, vList)
+
+        # node 8
+        c8 = [1.0/12.0,1.0/12.0,5.0/12.0,5.0/12.0]
+        qn[1:3*nx:3, 2:3*ny:3] = self.evalSum(c8, vList)
+
+        # node 9
+        c9 = [1.0/36.0,5.0/36.0,25.0/36.0,5.0/36.0]
+        qn[2:3*nx:3, 2:3*ny:3] = self.evalSum(c9, vList)
+   
+        return XXn, YYn, qn
+
+    def projectOnFinerGrid_f216(self, Xc, Yc, q):
+        dx = Xc[1]-Xc[0]
+        dy = Yc[1]-Yc[0]
+        nx = Xc.shape[0]
+        ny = Yc.shape[0]
+
+        # mesh coordinates
+        Xn = pylab.linspace(Xc[0]-0.5*dx, Xc[-1]+0.5*dx, 4*nx+1) # one more
+        Yn = pylab.linspace(Yc[0]-0.5*dy, Yc[-1]+0.5*dy, 4*ny+1) # one more
+        XXn, YYn = pylab.meshgrid(Xn, Yn)
+
+        # data
+        qn = pylab.zeros((4*Xc.shape[0], 4*Yc.shape[0]), float)
+
+        v1 = q[:,:,0]
+        v2 = q[:,:,1]
+        v3 = q[:,:,2]
+        v4 = q[:,:,3]
+
+        vList = [v1,v2,v3,v4]
+
+        ##### node 1
+        c1 = [0.765625,0.109375,0.015625,0.109375]
+        qn[0:4*nx:4, 0:4*ny:4] = self.evalSum(c1, vList)
+
+        # node 2
+        c2 = [0.546875,0.328125,0.046875,0.078125]
+        qn[1:4*nx:4, 0:4*ny:4] = self.evalSum(c2, vList)
+
+        # node 3
+        c3 = [0.328125,0.546875,0.078125,0.046875]
+        qn[2:4*nx:4, 0:4*ny:4] = self.evalSum(c3, vList)
+
+        # node 4
+        c4 = [0.109375,0.765625,0.109375,0.015625]
+        qn[3:4*nx:4, 0:4*ny:4] = self.evalSum(c4, vList)
+
+        ###### node 5
+        c5 = [0.546875,0.078125,0.046875,0.328125]
+        qn[0:4*nx:4, 1:4*ny:4] = self.evalSum(c5, vList)
+
+        # node 6
+        c6 = [0.390625,0.234375,0.140625,0.234375]
+        qn[1:4*nx:4, 1:4*ny:4] = self.evalSum(c6, vList)
+
+        # node 7
+        c7 = [0.234375,0.390625,0.234375,0.140625]
+        qn[2:4*nx:4, 1:4*ny:4] = self.evalSum(c7, vList)
+
+        # node 8
+        c8 = [0.078125,0.546875,0.328125,0.046875]
+        qn[3:4*nx:4, 1:4*ny:4] = self.evalSum(c8, vList)
+
+        ###### node 9
+        c9 = [0.328125,0.046875,0.078125,0.546875]
+        qn[0:4*nx:4, 2:4*ny:4] = self.evalSum(c9, vList)
+
+        # node 10
+        c10 = [0.234375,0.140625,0.234375,0.390625]
+        qn[1:4*nx:4, 2:4*ny:4] = self.evalSum(c10, vList)
+
+        # node 11
+        c11 = [0.140625,0.234375,0.390625,0.234375]
+        qn[2:4*nx:4, 2:4*ny:4] = self.evalSum(c11, vList)
+
+        # node 12
+        c12 = [0.046875,0.328125,0.546875,0.078125]
+        qn[3:4*nx:4, 2:4*ny:4] = self.evalSum(c12, vList)
+
+        ###### node 13
+        c13 = [0.109375,0.015625,0.109375,0.765625]
+        qn[0:4*nx:4, 3:4*ny:4] = self.evalSum(c13, vList)
+
+        # node 14
+        c14 = [0.078125,0.046875,0.328125,0.546875]
+        qn[1:4*nx:4, 3:4*ny:4] = self.evalSum(c14, vList)
+
+        # node 15
+        c15 = [0.046875,0.078125,0.546875,0.328125]
+        qn[2:4*nx:4, 3:4*ny:4] = self.evalSum(c15, vList)
+
+        # node 16
+        c16 = [0.015625,0.109375,0.765625,0.109375]
+        qn[3:4*nx:4, 3:4*ny:4] = self.evalSum(c16, vList)
    
         return XXn, YYn, qn                
 

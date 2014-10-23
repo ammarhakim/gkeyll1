@@ -54,6 +54,10 @@ parser.add_option('--dont-show', action = 'store_true',
                   dest = 'dontShow',
                   help = 'Do not show plot',
                   default = False)
+parser.add_option('--project-on', action = 'store',
+                  dest = 'projOrder',
+                  help = 'Project DG data after splitting cell in these many sub-cells in each direction'
+                  'Only makes sense for plotting output from DG schemes')
 parser.add_option('-d', '--nodal-order', action = 'store',
                   dest = 'dgOrder',
                   help = 'Polynomial order of DG scheme. '
@@ -105,6 +109,10 @@ dgOrder = 0
 if options.dgOrder:
     plotDg = True
     dgOrder = int(options.dgOrder)
+
+projOrder = dgOrder + 1
+if options.projOrder:
+    projOrder = int(options.projOrder)
         
 # 1D/2D plots
 if options.fileName:
@@ -114,12 +122,14 @@ if options.fileName:
     if plotDg:
         # plot, depending on dimension
         if dims == 1:
-            gkeplotters.PlotDg1D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
+            gkeplotters.PlotDg1D(gd, save=options.savePng, title=options.title, 
+                                 dgOrder=dgOrder, projOrder=projOrder,
                                  component=int(options.component), transformMod=transformMod,
                                  transformVar=options.transformVariable,
                                  outNm=options.outNm)
         elif dims == 2:
-            gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title, dgOrder=dgOrder,
+            gkeplotters.PlotDg2D(gd, save=options.savePng, title=options.title,
+                                 dgOrder=dgOrder, projOrder=projOrder,
                                  component=int(options.component), transformMod=transformMod,
                                  transformVar=options.transformVariable,
                                  outNm=options.outNm, options=options)
