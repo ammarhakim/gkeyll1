@@ -47,7 +47,7 @@ set(Petsc_LIBRARY_LIST
 #  "${PETSC_LIB_PREFIX}superlu_dist_2.3"
 #  "${PETSC_LIB_PREFIX}superlu_dist_2.4"
 #  "${PETSC_LIB_PREFIX}superlu_dist_3.1"
-#  "${PETSC_LIB_PREFIX}superlu_4.0"
+  "${PETSC_LIB_PREFIX}superlu_4.0"
 #  "${PETSC_LIB_PREFIX}superlu_4.3"
 #  "${PETSC_LIB_PREFIX}superlu"
 #  "${PETSC_LIB_PREFIX}HYPRE"
