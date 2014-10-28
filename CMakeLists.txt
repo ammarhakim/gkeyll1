@@ -8,7 +8,7 @@ set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 set(GKEYLL_VERSION "${PROJECT_VERSION}")
 
 # Required version
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.0.0)
 
 ######################################################################
 #
