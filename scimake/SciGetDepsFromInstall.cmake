@@ -3,19 +3,21 @@
 # SciGetDepsFromInstall: From the installation of one project, find
 #   the installations of other other projects from config.summary.
 #
-# $Id: SciGetDepsFromInstall.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: SciGetDepsFromInstall.cmake 538 2014-03-31 02:00:48Z pletzer $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
-include(${SCICMAKE_DIR}/SciSeparateLibs.cmake)
+include(${SCIMAKE_DIR}/SciSeparateLibs.cmake)
 
 # SciGetDepsFromInstall
 #
 # Args:
-#  name:     cmake name of the dependency to find variables of
+#  cmname:     cmake name of the dependency to find variables of
 #  founddir: directory of the found installation, under which one finds
 #              config.summary
 #  atname:   autotools name of the dependency to find variables of
@@ -43,7 +45,7 @@ function(SciGetDepsFromInstall cmname founddir atname)
   endif ()
 
 # Look for a cmake name in the file
-  foreach (sfx DIR EXECUTABLES FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES STLIBS)
+  foreach (sfx DIR PROGRAMS FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES STLIBS)
     file(STRINGS ${configfile} ${cmname}_${sfx} REGEX ${cmname}_${sfx})
     # message("${cmname}_${sfx} = ${${cmname}_${sfx}}")
     string(REGEX REPLACE "^.*= *" "" ${cmname}_${sfx} "${${cmname}_${sfx}}")
@@ -105,7 +107,7 @@ function(SciGetDepsFromInstall cmname founddir atname)
   endif ()
 
 # Get all vars to parent scope
-  foreach (varpart DIR EXECUTABLES FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES STLIBS)
+  foreach (varpart DIR PROGRAMS FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES STLIBS)
     set(${cmname}_${varpart} "${${cmname}_${varpart}}" PARENT_SCOPE)
   endforeach ()
   SciPrintCMakeResults(${cmname})

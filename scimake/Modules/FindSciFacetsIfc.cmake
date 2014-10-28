@@ -14,8 +14,10 @@
 #
 # FindSciGeom: find includes for FacetsIfc
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -27,7 +29,7 @@ if (FACETSIFC_FOUND)
   message(STATUS "Found FacetsIfc")
   set(HAVE_FACETSIFC 1 CACHE BOOL "Whether have FacetsIfc")
 else ()
-  message(STATUS "Did not find FacetsIfc.  Use _DFACETSIFC_DIR to specify the installation directory.")
+  message(STATUS "Did not find FacetsIfc.  Use -DFacetsIfc_ROOT_DIR to specify the installation directory.")
   if (SciFacetsIfc_FIND_REQUIRED)
     message(FATAL_ERROR "Failed.")
   endif ()

@@ -69,19 +69,21 @@ macro(DETERMINE_VISIT_ARCHITECTURE ARCH)
             set(${ARCH} "ibm-aix-pwr64")
         endif ()
     elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-        if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
-            execute_process(COMMAND uname -r
-               OUTPUT_STRIP_TRAILING_WHITESPACE
-               OUTPUT_VARIABLE _OSX_VERSION)
-            string(SUBSTRING ${_OSX_VERSION} 0 1 _OSX_MAJOR_VERSION)
-            if (${_OSX_MAJOR_VERSION} STREQUAL "1")
-                # This will match 10, 11, 12, ...
-                set(${ARCH} darwin-x86_64)
-            else ()
-                set(${ARCH} darwin-i386)
-            endif ()
+        if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+          set(${ARCH} darwin-x86_64)
+        elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
+          execute_process(COMMAND uname -r
+              OUTPUT_STRIP_TRAILING_WHITESPACE
+              OUTPUT_VARIABLE _OSX_VERSION)
+          string(SUBSTRING ${_OSX_VERSION} 0 1 _OSX_MAJOR_VERSION)
+          if (${_OSX_MAJOR_VERSION} STREQUAL "1")
+            # This will match 10, 11, 12, ...
+            set(${ARCH} darwin-x86_64)
+          else ()
+            set(${ARCH} darwin-i386)
+          endif ()
         else ()
-            set(${ARCH} darwin-ppc)
+          set(${ARCH} darwin-ppc)
         endif ()
     elseif (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
         set(${ARCH} "freebsd-${CMAKE_SYSTEM_VERSION}")

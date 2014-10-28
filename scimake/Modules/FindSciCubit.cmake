@@ -14,7 +14,12 @@
 #
 # Find module for CUBIT
 #
-# $Id: FindSciCubit.cmake 1238 2012-01-30 19:19:13Z mdurant $
+# $Id: FindSciCubit.cmake 259 2013-04-10 19:10:45Z jdelamere $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ##################################################################
 

@@ -14,7 +14,12 @@
 #
 # Find module for VisIt includes and libs from VisIt
 #
-# $Id: FindSciVisIt.cmake 1252 2012-02-07 19:45:49Z mdurant $
+# $Id: FindSciVisIt.cmake 516 2014-02-15 15:12:35Z jrobcary $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 #################################################
 
@@ -22,7 +27,7 @@
 if (WIN32)
   set(VisIt_DIFF_LIBS enginelib_ser guilib viewerlib)
 else ()
-  set(VisIt_DIFF_LIBS engine_ser gui viewer avtpythonfilters_ser)
+  set(VisIt_DIFF_LIBS engine_ser gui viewer )
 endif ()
 
 # Libraries that are only required to support the volume plot
@@ -55,6 +60,7 @@ set(VisIt_LIBRARY_NAMES_SEARCHED
   avtmir_ser
   avtpipeline_ser
   avtplotter_ser
+  avtpythonfilters_ser
   avtqtviswindow
   avtquery_ser
   avtshapelets
@@ -67,6 +73,7 @@ set(VisIt_LIBRARY_NAMES_SEARCHED
   lightweight_visit_vtk
   mdserverproxy
   mdserverrpc
+  tess2
   vclproxy
   vclrpc
   viewerproxy
@@ -125,11 +132,15 @@ endif ()
 # Note that although we want to find the base VisIt include dir,
 # there are no headers in that directory.  So we search for the
 # vtkqt include directory, and then derive the base include dir.
-set(VisIt_INST_SUBDIR visit)
+# Should not set the below, as then how will we ever find visit_trunk?
+# set(VisIt_INST_SUBDIR visit)
+if (NOT VisIt_INSTALL_DIRS)
+  set(VisIt_INSTALL_DIRS visit-cc4py visit-sersh visit)
+endif ()
 SciFindPackage(PACKAGE VisIt
-  INSTALL_DIR "${VisIt_INST_SUBDIR}"
+  INSTALL_DIRS ${VisIt_INSTALL_DIRS}
   HEADERS vtkQtRenderWindow.h
-  LIBRARIES "${VisIt_LIBRARY_NAMES_SEARCHED}"
+  LIBRARIES ${VisIt_LIBRARY_NAMES_SEARCHED} OPTIONAL
   INCLUDE_SUBDIRS "${VisIt_INC_SUBDIR}"
   LIBRARY_SUBDIRS "${VisIt_LIB_SUBDIR}"
 )
@@ -175,23 +186,11 @@ endif ()
 message(STATUS "VisIt_ARCH_DIR = ${VisIt_ARCH_DIR}")
 message(STATUS "VisIt_ARCH_SUBDIR = ${VisIt_ARCH_SUBDIR}.")
 message(STATUS "VisIt_VERSION = ${VisIt_VERSION}.")
-message(STATUS "VisIt_VERSION = ${VisIt_VERSION}.")
 
 # Find the remaining directories
 if (VISIT_FOUND)
 
   message(STATUS "Found VisIt")
-  get_filename_component(VisIt_LIB_DIR "${VisIt_avtdatabase_ser_LIBRARY_DIR}"
-    REALPATH)
-  if (WIN32)
-    message(STATUS "Looking for VisIt_BIN_DIR in ${VisIt_ROOT_DIR}")
-    get_filename_component(VisIt_BIN_DIR "${VisIt_ROOT_DIR}" REALPATH)
-  else ()
-    message(STATUS "Looking for VisIt_BIN_DIR in ${VisIt_ROOT_DIR}/bin")
-    get_filename_component(VisIt_BIN_DIR "${VisIt_ROOT_DIR}/bin" REALPATH)
-  endif ()
-  message(STATUS "VisIt_LIB_DIR is ${VisIt_LIB_DIR}")
-  message(STATUS "VisIt_BIN_DIR is ${VisIt_BIN_DIR}")
   get_filename_component(VisIt_INCLUDE_DIR "${VisIt_vtkQtRenderWindow_h_INCLUDE_DIR}/.." REALPATH)
   set(VisIt_INCLUDE_DIRS
     ${VisIt_INCLUDE_DIR}/
@@ -307,6 +306,7 @@ if (VISIT_FOUND)
     ${VisIt_INCLUDE_DIR}/third_party_builtin/slivr/teem-1.9.0-src/src/unrrdu
     ${VisIt_INCLUDE_DIR}/third_party_builtin/slivr/teem-1.9.0-src/win32/include
     ${VisIt_INCLUDE_DIR}/third_party_builtin/slivr/teem-1.9.0-src/win32/src/pv
+    ${VisIt_INCLUDE_DIR}/third_party_builtin/tess2
     ${VisIt_INCLUDE_DIR}/third_party_builtin/tuvok/tuvok/3rdParty/bzip2
     ${VisIt_INCLUDE_DIR}/third_party_builtin/tuvok/tuvok/3rdParty/jpeglib
     ${VisIt_INCLUDE_DIR}/third_party_builtin/tuvok/tuvok/3rdParty/tiff

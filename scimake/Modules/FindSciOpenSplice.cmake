@@ -8,7 +8,7 @@
 #
 # This module will define the following variables:
 #  HAVE_OPENSPLICE             = Whether have the Cfitsio library
-#  OpenSplice_EXECUTABLES      = Location of OpenSplice's idlpp executable
+#  OpenSplice_PROGRAMS      = Location of OpenSplice's idlpp executable
 #  OpenSplice_INCLUDE_DIRS     = Location of OpenSplice include dir
 #  OpenSplice_LIBRARY_DIRS     = Location of OpenSplice libraries
 #  OpenSplice_LIBRARIES        = List of all the necessary libraries
@@ -23,17 +23,19 @@
 # FindOpenSplice: find includes and libraries for OpenSplice. Complex
 # due to the many libraries that OpenSplice has
 #
-# $Id: FindSciOpenSplice.cmake 1305 2012-04-02 14:49:31Z jdelamere $
+# $Id: FindSciOpenSplice.cmake 401 2013-12-14 16:40:42Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})
 
 SciFindPackage(PACKAGE "OpenSplice"
               INSTALL_DIR "opensplice"
-              EXECUTABLES "idlpp"
+              PROGRAMS "idlpp"
               HEADERS "dcps"
               LIBRARIES "ddsdatabase;dcpsgapi;dcpssacpp;dcpssac;ddsos;ddsutil;ddsserialization;ddskernel;ddsuser;ddsosnet;ddsconf;ddsconfparser"
               )

@@ -14,52 +14,53 @@
 #
 # Find module for VTK
 #
-# $Id: FindSciVtk.cmake 1239 2012-01-30 19:21:06Z mdurant $
+# $Id: FindSciVtk.cmake 316 2013-06-23 18:29:32Z jrobcary $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ##################################################################
 
 set(Vtk_LIBRARY_LIST
-        vtkCommon
-        vtkCommonPythonD
-        vtkDICOMParser
-        vtkFiltering
-        vtkFilteringPythonD
-        vtkGenericFiltering
-        vtkGenericFilteringPythonD
-        vtkGraphics
-        vtkGraphicsPythonD
-        vtkHybrid
-        vtkHybridPythonD
-        vtkIO
-        vtkIOPythonD
-        vtkImaging
-        vtkImagingPythonD
-        vtkPythonCore
-        vtkRendering
-        vtkRenderingPythonD
-        vtkVolumeRendering
-        vtkVolumeRenderingPythonD
-        vtkWidgets
-        vtkWidgetsPythonD
-        vtkalglib
-        vtkexpat
-        vtkfreetype
-        vtkftgl
-        vtklibxml2
-        vtkjpeg
-        vtkpng
-        vtkproj4
-        vtksqlite
-        vtksys
-        vtktiff
-        vtkverdict
-        vtkzlib
+  vtkCommon
+  vtkDICOMParser
+  vtkFiltering
+  vtkGenericFiltering
+  vtkGraphics
+  vtkHybrid
+  vtkIO
+  vtkImaging
+  # vtkPythonCore
+  vtkRendering
+  vtkVolumeRendering
+  vtkWidgets
+  vtkalglib
+  vtkexpat
+  vtkfreetype
+  vtkftgl
+  vtklibxml2
+  vtkjpeg
+  vtkpng
+  vtkproj4
+  vtksqlite
+  vtksys
+  vtktiff
+  vtkverdict
+  vtkzlib
 )
+
+if (NOT Vtk_INSTALL_DIRS)
+  set(Vtk_INSTALL_DIRS vtk-cc4py vtk-sersh vtk)
+endif ()
 
 SciFindPackage(
   PACKAGE Vtk
-  INSTALL_DIR visit_vtk
+  INSTALL_DIRS ${Vtk_INSTALL_DIRS}
+  INCLUDE_SUBDIRS include include/vtk/include # Second for visit installation
   HEADERS vtkObject.h
+  LIBRARY_SUBDIRS lib . # Second for visit installation
   LIBRARIES "${Vtk_LIBRARY_LIST}"
 )
 
@@ -69,7 +70,7 @@ if (VTK_FOUND)
   message(STATUS "[FindSciVtk.cmake] - Vtk_LIBRARIES = ${Vtk_LIBRARIES}")
   set(HAVE_VTK 1 CACHE BOOL "Whether have Vtk.")
 else ()
-  message(STATUS "[FindSciVtk.cmake] - Did not find VTK, use -DVTK_DIR to supply the VTK installation directory.")
+  message(STATUS "[FindSciVtk.cmake] - Did not find VTK, use -DVtk_ROOT_DIR to supply the VTK installation directory.")
   if (SciVtk_FIND_REQUIRED)
     message(FATAL_ERROR "[FindSciVtk.cmake] - Failing.")
   endif ()

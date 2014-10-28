@@ -2,15 +2,31 @@
 #
 # SciFortranFindVersion: Determine compiler version for any compiler
 #
-# $Id: SciFortranFindVersion.cmake 1293 2012-03-15 01:26:36Z swsides $
+# $Id: SciFortranFindVersion.cmake 488 2014-01-29 21:50:30Z krugers $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
+SciPrintString("")
 SciPrintString("CMAKE_Fortran_COMPILER_ID = '${CMAKE_Fortran_COMPILER_ID}'.")
-if ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL GNU)
+if ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL Cray)
+  exec_program(${CMAKE_Fortran_COMPILER}
+    ARGS -V
+    OUTPUT_VARIABLE fc_version_tmp
+  )
+  string(REGEX MATCH
+    "Version [0-9]+\\.[0-9]+\\.[0-9]+"
+    fc_version_tmp
+    ${fc_version_tmp}
+  )
+  # MESSAGE("fc_version_tmp = ${fc_version_tmp}.")
+  string(REPLACE "Version " "" fc_version_tmp ${fc_version_tmp})
+  # MESSAGE("fc_version_tmp = ${fc_version_tmp}.")
+elseif ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL GNU)
 # exec_program is deprecated
   execute_process(
     COMMAND ${CMAKE_Fortran_COMPILER} --version
@@ -171,5 +187,5 @@ else ()
 endif ()
 
 set(Fortran_VERSION ${fc_version_tmp})
-SciPrintString("Fortran_VERSION = '${Fortran_VERSION}'")
+SciPrintString("  Fortran_VERSION = '${Fortran_VERSION}'")
 

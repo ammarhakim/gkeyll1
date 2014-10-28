@@ -17,23 +17,37 @@
 #
 # SciFindNe7ssh: find includes and libraries for Ne7ssh.
 #
-# $Id: FindSciNe7ssh.cmake 1324 2012-04-21 13:31:24Z cary $
+# $Id: FindSciNe7ssh.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
 #
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 ######################################################################
+
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})
 
-SciFindPackage(PACKAGE "Ne7ssh"
-              INSTALL_DIR "ne7ssh"
-              HEADERS "ne7ssh.h"
-              LIBRARIES "net7ssh"
-              )
+if (BUILD_WITH_CC4PY_RUNTIME OR BUILD_WITH_SHARED_RUNTIME)
+  set(instdirs ne7ssh-cc4py ne7ssh-sersh)
+else ()
+  set(instdirs ne7ssh)
+endif ()
+
+SciFindPackage(
+  PACKAGE "Ne7ssh"
+  INSTALL_DIRS ${instdirs}
+  HEADERS "ne7ssh.h"
+  LIBRARIES "net7ssh"
+)
 
 if (NE7SSH_FOUND)
   message(STATUS "Found Ne7ssh")
   set(HAVE_NE7SSH 1 CACHE BOOL "Whether have the NE7SSH library")
+  if (WIN32 AND Ne7ssh_DLLS)
+    set(Ne7ssh_DEFINITIONS ${Ne7ssh_DEFINITIONS} -D_WINDLL)
+  endif ()
+  message(STATUS "Ne7ssh_DEFINITIONS = ${Ne7ssh_DEFINITIONS}.")
 else ()
   message(STATUS "Did not find Ne7ssh.  Use -DNE7SSH_DIR to specify the installation directory.")
   if (SciNe7ssh_FIND_REQUIRED)

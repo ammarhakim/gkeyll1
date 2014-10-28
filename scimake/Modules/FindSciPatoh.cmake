@@ -14,17 +14,19 @@
 #
 # FindMuparser: find includes and libraries for muparser
 #
-# $Id: FindSciPatoh.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciPatoh.cmake 414 2013-12-17 18:47:54Z techxdave $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
 
 SciFindPackage(PACKAGE "Patoh"
               INSTALL_DIR "patoh"
-              EXECUTABLES ""
+              PROGRAMS ""
               HEADERS "patoh.h"
               LIBRARIES "patoh"
               )

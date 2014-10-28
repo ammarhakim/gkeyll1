@@ -1,5 +1,5 @@
 /**
- * $Id: stdabsdbl.cxx 1158 2011-12-17 14:18:42Z cary $
+ * $Id: stdabsdbl.cxx 58 2012-09-15 13:43:53Z jrobcary $
  *
  * Determine whether the compiler knows std::abs<double>.
  */

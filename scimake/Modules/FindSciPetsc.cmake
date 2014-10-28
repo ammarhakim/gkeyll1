@@ -15,46 +15,65 @@
 # SciFindPetsc: find includes and libraries for petsc.  Complex
 # due to the many libraries that petsc builds
 #
-# $Id: FindSciPetsc.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciPetsc.cmake 484 2014-01-26 16:39:04Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
+if (WIN32)
+  set(PETSC_LIB_PREFIX "lib")
+endif (WIN32)
+
 set(Petsc_LIBRARY_LIST
-  petscts
-  petscsnes
-  petscksp
-  petscdm
-  petscmat
-  petscvec
-  petsc
-  cmumps
-  dmumps
-  smumps
-  zmumps
-  mumps_common
-  pord
-  scalapack
-  blacs
-  superlu_dist_2.3
-  superlu_dist_2.4
-  superlu_4.0
-  HYPRE
-  parmetis
-  metis
+  "${PETSC_LIB_PREFIX}petscts"
+  "${PETSC_LIB_PREFIX}petscsnes"
+  "${PETSC_LIB_PREFIX}petscksp"
+  "${PETSC_LIB_PREFIX}petscdm"
+  "${PETSC_LIB_PREFIX}petscmat"
+  "${PETSC_LIB_PREFIX}petscvec"
+  "${PETSC_LIB_PREFIX}petsc"
+  "${PETSC_LIB_PREFIX}cmumps"
+  "${PETSC_LIB_PREFIX}dmumps"
+  "${PETSC_LIB_PREFIX}smumps"
+  "${PETSC_LIB_PREFIX}zmumps"
+  "${PETSC_LIB_PREFIX}mumps_common"
+  "${PETSC_LIB_PREFIX}pord"
+  "${PETSC_LIB_PREFIX}scalapack"
+  "${PETSC_LIB_PREFIX}blacs"
+  "${PETSC_LIB_PREFIX}superlu_dist_2.3"
+  "${PETSC_LIB_PREFIX}superlu_dist_2.4"
+  "${PETSC_LIB_PREFIX}superlu_dist_3.1"
+  "${PETSC_LIB_PREFIX}superlu_4.0"
+  "${PETSC_LIB_PREFIX}superlu_4.3"
+  "${PETSC_LIB_PREFIX}superlu"
+  "${PETSC_LIB_PREFIX}HYPRE"
+  "${PETSC_LIB_PREFIX}parmetis"
+  "${PETSC_LIB_PREFIX}metis"
 )
+
+if (DEFINED PETSC_FIND_VERSION)
+  message(STATUS "--- scimake/Modules/FindSciPetsc, petsc find version logic used ---")
+  set(Petsc_SEARCH "petsc-${PETSC_FIND_VERSION}")
+else ()
+  set(Petsc_SEARCH "petsc")
+endif ()
+
+# Check the petsc search path
+message(STATUS "Petsc_SEARCH = ${Petsc_SEARCH}")
 
 if (ENABLE_PARALLEL)
   SciFindPackage(PACKAGE "Petsc"
-    INSTALL_DIR petsc-par
+    INSTALL_DIR ${Petsc_SEARCH}-par
     HEADERS petsc.h
     LIBRARIES ${Petsc_LIBRARY_LIST}
   )
 else ()
   SciFindPackage(PACKAGE "Petsc"
-    INSTALL_DIR petsc
+    INSTALL_DIR ${Petsc_SEARCH}
     HEADERS petsc.h mpi.h
     INCLUDE_SUBDIRS include include/mpiuni
     LIBRARIES ${Petsc_LIBRARY_LIST}
@@ -91,7 +110,7 @@ find_program(MAKE_EXECUTABLE NAMES make gmake)
 macro(PETSC_GET_TARGET_VARIABLE name var)
   set(${var} "NOTFOUND" CACHE INTERNAL "Cleared" FORCE)
   execute_process(COMMAND ${MAKE_EXECUTABLE} PETSC_DIR=${PETSC_DIR}
-    -f "${SCICMAKE_DIR}/Makefile.show" ${name}
+    -f "${SCIMAKE_DIR}/Makefile.show" ${name}
     OUTPUT_VARIABLE ${var}
     OUTPUT_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE return)
@@ -101,7 +120,7 @@ endmacro(PETSC_GET_TARGET_VARIABLE)
 macro(PETSC_GET_VARIABLE name var)
   set(${var} "NOTFOUND" CACHE INTERNAL "Cleared" FORCE)
   execute_process(COMMAND ${MAKE_EXECUTABLE} PETSC_DIR=${PETSC_DIR}
-    --no-print-directory -f "${SCICMAKE_DIR}/Makefile.show"
+    --no-print-directory -f "${SCIMAKE_DIR}/Makefile.show"
     showvar PKG_VARIABLE=${name}
     OUTPUT_VARIABLE ${var}
     RESULT_VARIABLE return
@@ -152,8 +171,10 @@ foreach (var Petsc_All_FLAGS Petsc_All_LIBRARIES
 endforeach ()
 
 # Separate out the libraries into groups
-set(Petsc_MPI_LIBRARY_NAMES)
+set(Petsc_SUPERLU_LIBRARY_NAMES)
 set(Petsc_LINALG_LIBRARY_NAMES)
+set(Petsc_MPI_LIBRARY_NAMES)
+set(Petsc_DL_LIBRARY_NAMES)
 set(Petsc_SYSTEM_LIBRARY_NAMES)
 foreach (i ${Petsc_All_LIBRARY_NAMES})
   set(libfound FALSE)
@@ -177,8 +198,26 @@ foreach (i ${Petsc_All_LIBRARY_NAMES})
   if (NOT libfound)
     if (${i} STREQUAL "rt" OR ${i} STREQUAL "m" OR
         ${i} STREQUAL "stdc++" OR ${i} STREQUAL "util" OR
-        ${i} STREQUAL "pthread" OR ${i} STREQUAL "dl")
+        ${i} STREQUAL "pthread")
       message(STATUS "${i} is an ignored system library.")
+      set(libfound TRUE)
+    endif ()
+  endif ()
+
+# Pull out the superlu libraries
+  if (NOT libfound)
+    if (${i} MATCHES "^superlu")
+      message(STATUS "${i} is a superlu library.")
+      set(Petsc_SUPERLU_LIBRARY_NAMES ${Petsc_SUPERLU_LIBRARY_NAMES} ${i})
+      set(libfound TRUE)
+    endif ()
+  endif ()
+
+# Pull out the dl library
+  if (NOT libfound)
+    if (${i} STREQUAL "dl")
+      message(STATUS "${i} is a DL library.")
+      set(Petsc_DL_LIBRARY_NAMES ${Petsc_DL_LIBRARY_NAMES} ${i})
       set(libfound TRUE)
     endif ()
   endif ()
@@ -210,7 +249,7 @@ foreach (i ${Petsc_All_LIBRARY_NAMES})
 endforeach ()
 
 # Find the ext libraries
-foreach (vartype MPI LINALG SYSTEM)
+foreach (vartype SUPERLU LINALG MPI DL SYSTEM)
   foreach (lib ${Petsc_${vartype}_LIBRARY_NAMES})
     find_library(${lib}_LIBRARY ${lib} ${Petsc_${vartype}_LIBRARY_DIRS} ${Petsc_ALLEXT_LIBRARY_DIRS} NO_DEFAULT_PATH)
     if (NOT ${lib}_LIBRARY)
@@ -229,7 +268,7 @@ foreach (vartype MPI LINALG SYSTEM)
 endforeach ()
 
 # Print all out
-foreach (vartype MPI LINALG SYSTEM)
+foreach (vartype SUPERLU LINALG MPI DL SYSTEM)
   foreach (var LIBRARY_NAMES LIBRARY_DIRS LIBRARIES STLIBS)
     SciPrintvar(Petsc_${vartype}_${var})
   endforeach ()

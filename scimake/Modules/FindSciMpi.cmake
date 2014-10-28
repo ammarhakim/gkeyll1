@@ -20,16 +20,18 @@
 # MPI_MODULE_DIRS:  the directories containing the Fortran module files
 #                   and the Fortran include files
 # MPI_LIBRARY_DIRS: the directories containing the MPI libraries
-# MPI_EXECUTABLES:  mpiexec
+# MPI_PROGRAMS:  mpiexec
 
 ######################################################################
 #
 # FindSciMpi: check whether the compiler wraps MPI, if not, find MPI
 #
-# $Id: FindSciMpi.cmake 1336 2012-04-27 17:05:37Z dws $
+# $Id: FindSciMpi.cmake 643 2014-10-07 16:55:12Z jhurani-txcorp $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -38,7 +40,7 @@ set(HAVE_MPI 0 CACHE BOOL "Whether have MPI")
 
 # Determine whether mpi is already in the C++ compiler
 try_compile(SCI_HAVE_MPICXX_COMPILER_WRAPPER ${PROJECT_BINARY_DIR}/scimake
-  ${SCICMAKE_DIR}/trycompile/mpi_h.cxx)
+  ${SCIMAKE_DIR}/trycompile/mpi_h.cxx)
 if (SCI_HAVE_MPICXX_COMPILER_WRAPPER)
   message(STATUS "Using C/C++ compiler wrappers.")
 # If so, set that to the compiler
@@ -54,7 +56,7 @@ endif ()
 # If have fortran determine whether mpi is already in the Fortran compiler
 if (CMAKE_Fortran_COMPILER_WORKS)
   try_compile(SCI_HAVE_MPIFC_COMPILER_WRAPPER ${PROJECT_BINARY_DIR}/scimake
-    ${SCICMAKE_DIR}/trycompile/mpi_mod.f90)
+    ${SCIMAKE_DIR}/trycompile/mpi_mod.f90)
   if (SCI_HAVE_MPIFC_COMPILER_WRAPPER)
     message(STATUS "Using Fortran compiler wrapper.")
     set(MPI_Fortran_COMPILER ${CMAKE_Fortran_COMPILER})
@@ -66,9 +68,11 @@ if (CMAKE_Fortran_COMPILER_WORKS)
   endif ()
 endif ()
 
-# If building parallel Fortran on 64 bit Windows and using the MinGW compiler(s), as
-# instructed on https://ice.txcorp.com/trac/bilder/wiki/InstallMinGW, the following
-# code sets the mpi variables directly because find_package(MPI REQUIRED) gets this wrong.
+# If building parallel Fortran on 64 bit Windows
+# and using the MinGW compiler(s), as instructed on
+# https://ice.txcorp.com/trac/bilder/wiki/InstallMinGW, the
+# following sets the mpi variables directly because
+# find_package(MPI REQUIRED) gets this wrong.
 if (WIN32 AND "$ENV{PROCESSOR_ARCHITECTURE}" STREQUAL "AMD64" AND
   ("${CMAKE_Fortran_COMPILER}" STREQUAL "C:/MinGW/bin/mingw32-gfortran.exe"))
   message(STATUS "Using mingw32-gfortran.exe and linking to the MPI libraries distributed with HPC (To get the MPI libraries to link correctly, follow the instructions on https://ice.txcorp.com/trac/bilder/wiki/InstallMinGW exactly).")
@@ -93,7 +97,7 @@ if (WIN32 AND "$ENV{PROCESSOR_ARCHITECTURE}" STREQUAL "AMD64" AND
       message(STATUS "WARNING: CMAKE_CXX_COMPILER is set to ${CMAKE_CXX_COMPILER}.  When setting CMAKE_Fortran_COMPILER to C:/MinGW/bin/mingw32-gfortran.exe for parallel Fortran builds with mixed C++ on 64 bit Windows, set CMAKE_CXX_COMPILER to C:/MinGW/bin/mingw32-g++ and follow the instructions on https://ice.txcorp.com/trac/bilder/wiki/InstallMinGW exactly to ensure the MPI libraries distributed with HPC get linked correctly.")
     endif ()
   endif ()
-  set(MPI_EXECUTABLES C:/winsame/contrib-mingw/microsoft-hpc-mingw/Bin/mpiexec.exe)
+  set(MPI_PROGRAMS C:/winsame/contrib-mingw/microsoft-hpc-mingw/Bin/mpiexec.exe)
   set(MPI_INCLUDE_DIRS C:/winsame/contrib-mingw/microsoft-hpc-mingw/include)
   set(MPI_MODULE_DIRS C:/winsame/contrib-mingw/microsoft-hpc-mingw/include)
   set(MPI_LIBRARIES C:/winsame/contrib-mingw/microsoft-hpc-mingw/Lib/amd64/msmpifec.lib;
@@ -102,12 +106,12 @@ if (WIN32 AND "$ENV{PROCESSOR_ARCHITECTURE}" STREQUAL "AMD64" AND
       C:/winsame/contrib-mingw/microsoft-hpc-mingw/lib/amd64/msmpi.lib)
   set(MPI_DLLS C:/winsame/contrib-mingw/microsoft-hpc-mingw/Lib/amd64/msmpi.dll)
   set(MPI_LINK_FLAGS -L/winsame/contrib-mingw/microsoft-hpc-mingw/Lib/amd64 -lmsmpifec -lmsmpi)
-  set(SCIMPI_FOUND TRUE) 
+  set(SCIMPI_FOUND TRUE)
   set(SEARCH_FOR_MPI FALSE)
   message(STATUS "Enabling MPI")
   SciPrintCMakeResults("MPI")
   SciPrintVar(MPI_LINK_FLAGS)
-endif()
+endif ()
 
 # Pass down the required variable.  This has file name capitalization.
 if (SEARCH_FOR_MPI)
@@ -125,6 +129,7 @@ if (MPI_FOUND OR SCIMPI_FOUND)
 endif ()
 
 # If know more than compiler wrappers, pull out standard values
+set(MPI_IS_OPEN_MPI FALSE)
 if (MPI_FOUND)
 
 # Fix the variables
@@ -194,7 +199,17 @@ if (MPI_FOUND)
   set(MPI_MODULE_DIRS ${MPI_Fortran_INCLUDE_PATH})
 
 # Get the executables
-  set(MPI_EXECUTABLES ${MPIEXEC})
+  get_filename_component(MPI_PROGRAMS ${MPIEXEC} REALPATH)
+
+# set the root directory variable
+  get_filename_component(MPI_ROOT_DIR ${MPIEXEC}/../.. REALPATH)
+
+# determine if openmpi
+  string(FIND "${MPI_ROOT_DIR}" "openmpi"  OPENMPI_SUBSTR_LOC)
+  if (OPENMPI_SUBSTR_LOC GREATER "-1")
+    set(MPI_IS_OPEN_MPI TRUE)
+    message(STATUS "Found open source message passing interface (OpenMpi).")
+  endif ()
 
 # MPI link for flags
 # The string strip line is needed because cmake
@@ -221,3 +236,4 @@ if (NOT SCIMPI_FOUND)
     message(STATUS "MPI not enabled.")
   endif ()
 endif ()
+

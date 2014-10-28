@@ -1,127 +1,88 @@
-# This is scimake's FindOpenSsl with one change: We look for MT libs instead
-# of MD libs.
-
-# - Try to find the OpenSSL encryption library
-# Once done this will define
+# - FindSciOpenSsl: Module to find include directories and
+#   libraries for OpenSsl.
 #
-#  OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+# Module usage:
+#   find_package(SciOpenSsl ...)
 #
-# Read-Only variables:
-#  OPENSSL_FOUND - system has the OpenSSL library
-#  OpenSsl_INCLUDE_DIR - the OpenSSL include directory
-#  OpenSsl_LIBRARIES - The libraries needed to use OpenSSL
+# This module will define the following variables:
+#  HAVE_OPENSSL, OPENSSL_FOUND   = Whether libraries and includes are found
+#  OpenSsl_INCLUDE_DIRS       = Location of OpenSsl includes
+#  OpenSsl_LIBRARY_DIRS       = Location of OpenSsl libraries
+#  OpenSsl_LIBRARIES          = Required libraries
+#  OpenSsl_DLLS               =
 
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2009-2010 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+######################################################################
 #
-# Distributed under the OSI-approved BSD License(the "License");
-# see accompanying file Copyright.txt for details.
+# FindOpenSsl: find includes and libraries for openssl
 #
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-#(To distribute this file outside of scimake, substitute the full
-#  License text for the above reference.)
+# $Id: FindSciOpenSsl.cmake 422 2013-12-19 02:12:32Z techxdave $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
+######################################################################
 
-# http://www.slproweb.com/products/Win32OpenSSL.html
-set(_OPENSSL_ROOT_HINTS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-  )
-set(_OPENSSL_ROOT_PATHS
-  "C:/OpenSSL/"
-  )
-find_path(OPENSSL_ROOT_DIR
-  NAMES include/openssl/ssl.h
-  HINTS ${_OPENSSL_ROOT_HINTS}
-  PATHS ${_OPENSSL_ROOT_PATHS}
-)
-MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
-
-# Re-use the previous path:
-find_path(OpenSsl_INCLUDE_DIR openssl/ssl.h
-  PATHS ${OPENSSL_ROOT_DIR}/include
-)
-
-if (WIN32 AND NOT CYGWIN)
-  # MINGW should go here too
-  if (MSVC)
-    # /MD and /MDd are the standard values - if someone wants to use
-    # others, the libnames have to change here too
-    # use also ssl and ssleay32 in debug as fallback for openssl < 0.9.8b
-    # TODO: handle /MT and static lib
-    # In Visual C++ naming convention each of these four kinds of Windows libraries has it's standard suffix:
-    #   * MD for dynamic-release
-    #   * MDd for dynamic-debug
-    #   * MT for static-release
-    #   * MTd for static-debug
-
-    # Implementation details:
-    # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
-    # libeay32MD.lib is identical to ../libeay32.lib, and
-    # ssleay32MD.lib is identical to ../ssleay32.lib
-    find_library(LIB_EAY_DEBUG NAMES libeay32MTd libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC/static
-      )
-    find_library(LIB_EAY_RELEASE NAMES libeay32MT libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC/static
-      )
-    find_library(SSL_EAY_DEBUG NAMES ssleay32MTd ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC/static
-      )
-    find_library(SSL_EAY_RELEASE NAMES ssleay32MT ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC/static
-      )
-    if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-      set(OpenSsl_LIBRARIES
-        optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
-        optimized ${LIB_EAY_RELEASE} debug ${LIB_EAY_DEBUG}
-        )
-    else ()
-      set(OpenSsl_LIBRARIES ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE} )
-    endif ()
-    MARK_AS_ADVANCED(SSL_EAY_DEBUG SSL_EAY_RELEASE)
-    MARK_AS_ADVANCED(LIB_EAY_DEBUG LIB_EAY_RELEASE)
-  elseif (MINGW)
-    # same player, for MingW
-    find_library(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
-      )
-    find_library(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
-      )
-    MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
-    set(OpenSsl_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
-  else ()
-    # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
-    find_library(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
-    find_library(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
-    MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
-    set(OpenSsl_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+# OpenSSL builds its static libs inside sersh
+if (WIN32)
+  if (NOT OpenSsl_ROOT_DIR)
+    set(OpenSsl_ROOT_DIRS C:/OpenSSL C:/OpenSSL-Win64 C:/OpenSSL-Win32)
+    foreach (rd ${OpenSsl_ROOT_DIRS})
+      if (EXISTS ${rd})
+        set(OpenSsl_ROOT_DIR ${rd})
+        break ()
+      endif ()
+    endforeach ()
   endif ()
+  if (NOT OpenSsl_ROOT_DIR)
+    message(WARNING "OpenSsl_ROOT_DIR not found.")
+  endif ()
+  set(instdirs .)
+  set(ssl_libs ssleay32 libeay32)
 else ()
-
-  find_library(OPENSSL_SSL_LIBRARIES NAMES ssl ssleay32 ssleay32MT)
-  find_library(OPENSSL_CRYPTO_LIBRARIES NAMES crypto)
-  MARK_AS_ADVANCED(OPENSSL_CRYPTO_LIBRARIES OPENSSL_SSL_LIBRARIES)
-
-  set(OpenSsl_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
-
+  # SciGetInstSubdirs(openssl instdirs)
+  set(instdirs openssl openssl-sersh)
+  set(ssl_libs ssl crypto)
 endif ()
 
-#include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-#find_package_handle_standard_args(OpenSsl DEFAULT_MSG
-#  OpenSsl_LIBRARIES
-#  OpenSsl_INCLUDE_DIR
-#)
+SciFindPackage(PACKAGE "OpenSsl"
+  INSTALL_DIRS ${instdirs}
+  PROGRAMS openssl
+  HEADERS openssl/ssl.h
+  LIBRARIES ${ssl_libs}
+)
 
-MARK_AS_ADVANCED(OpenSsl_INCLUDE_DIR OpenSsl_LIBRARIES)
+# Correct static libraries on Windows
+if (WIN32)
+  set(srchlibs ${OpenSsl_LIBRARIES})
+  set(OpenSsl_STLIBS)
+  set(OpenSsl_MDLIBS)
+  foreach (lib ${srchlibs})
+    get_filename_component(openssl_libdir ${lib}/.. REALPATH)
+    get_filename_component(openssl_libname ${lib} NAME_WE)
+    find_library(mdlib ${openssl_libname}MD PATHS ${openssl_libdir}/VC/static
+      NO_DEFAULT_PATH
+    )
+    set(OpenSsl_MDLIBS ${OpenSsl_MDLIBS} ${mdlib})
+    find_library(stlib ${openssl_libname}MT PATHS ${openssl_libdir}/VC/static
+      NO_DEFAULT_PATH
+    )
+    set(OpenSsl_STLIBS ${OpenSsl_STLIBS} ${stlib})
+  endforeach ()
+  message(STATUS "After windows search for static libs:")
+  SciPrintVar(OpenSsl_STLIBS)
+  SciPrintVar(OpenSsl_MDLIBS)
+endif ()
 
-set(OpenSsl_INCLUDE_DIRS "${OpenSsl_INCLUDE_DIR}")
+# Finish up
+if (OPENSSL_FOUND)
+  # message(STATUS "Found OpenSsl")
+  set(HAVE_OPENSSL 1 CACHE BOOL "Whether have the OPENSSL library")
+else ()
+  message(STATUS "Did not find OpenSsl.  Use -DOpenSsl_ROOT_DIR to specify the installation directory.")
+  if (SciOpenSsl_FIND_REQUIRED)
+    message(FATAL_ERROR "Failing.")
+  endif ()
+endif ()
+

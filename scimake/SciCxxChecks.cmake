@@ -2,16 +2,18 @@
 #
 # SciCxxChecks: check various C++ capabilities
 #
-# $Id: SciCxxChecks.cmake 1265 2012-02-18 21:35:12Z cary $
+# $Id: SciCxxChecks.cmake 656 2014-10-25 14:14:53Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
 # Determine compiler version
 SciPrintString("")
-include(${SCICMAKE_DIR}/SciCxxFindVersion.cmake)
+include(${SCIMAKE_DIR}/SciCxxFindVersion.cmake)
 if (CXX_VERSION)
   SciPrintVar(CXX_VERSION)
 else ()
@@ -22,20 +24,17 @@ endif ()
 if (DEBUG_CMAKE)
   SciPrintVar(CMAKE_CXX_COMPILER_ID)
 endif ()
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL GNU)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL GNU OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
   if (NOT USING_MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ansi -pipe")
-    if (${CMAKE_PROJECT_NAME} STREQUAL vorpal)
-# Greg found that this flag reduces a cell update from 47 to 34 ns on verus
-# for either float or double.
-      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --param inline-unit-growth=300")
-    endif ()
   endif ()
   string(SUBSTRING ${CXX_VERSION} 0 1 CXX_MAJOR_VERSION)
   set(CXX_COMP_LIB_SUBDIR gcc${CXX_MAJOR_VERSION})
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Cray)
+  string(REGEX REPLACE "\\.[0-9]+-.*$" "" CXX_MAJOR_VERSION ${CXX_VERSION})
+  set(CXX_COMP_LIB_SUBDIR cray${CXX_MAJOR_VERSION})
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Intel)
   string(REGEX REPLACE "\\.[0-9]+.*$" "" CXX_MAJOR_VERSION ${CXX_VERSION})
-  # string(SUBSTRING ${CXX_VERSION} 0 2 CXX_MAJOR_VERSION) # should match
   set(CXX_COMP_LIB_SUBDIR icpc${CXX_MAJOR_VERSION})
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL PathScale)
   string(SUBSTRING ${CXX_VERSION} 0 1 CXX_MAJOR_VERSION)
@@ -68,46 +67,53 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL XL)
 endif ()
 SciPrintVar(CXX_COMP_LIB_SUBDIR)
 
+# Look for includes
+include(CheckCXXSourceCompiles)
 include(CheckIncludeFileCXX)
-check_include_file_cxx(iostream HAVE_STD_STREAMS)
 check_include_file_cxx(sstream HAVE_SSTREAM)
+check_include_file_cxx(iostream HAVE_IOSTREAM)
 
 # See whether generally declared statics work
 try_compile(HAVE_GENERALLY_DECLARED_STATICS ${PROJECT_BINARY_DIR}/scimake
-  ${SCICMAKE_DIR}/trycompile/gendeclstatics.cxx)
+  ${SCIMAKE_DIR}/trycompile/gendeclstatics.cxx)
+set(HAVE_GENERALLY_DECLARED_STATICS ${HAVE_GENERALLY_DECLARED_STATICS} CACHE BOOL "Whether the C++ compiler allows generally declared templated static variables")
 if (HAVE_GENERALLY_DECLARED_STATICS)
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/gendeclstatics.cxx compiled.")
+    message("${SCIMAKE_DIR}/trycompile/gendeclstatics.cxx compiled.")
   endif ()
-  set(HAVE_GENERALLY_DECLARED_STATICS 1 CACHE BOOL "Whether the C++ compiler allows generally declared templated static variables")
 else ()
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/gendeclstatics.cxx did not compile.")
+    message("${SCIMAKE_DIR}/trycompile/gendeclstatics.cxx did not compile.")
   endif ()
 endif ()
 
 # See whether std::abs<double> known.
 try_compile(HAVE_STD_ABS_DOUBLE ${PROJECT_BINARY_DIR}/scimake
-  ${SCICMAKE_DIR}/trycompile/stdabsdbl.cxx)
+  ${SCIMAKE_DIR}/trycompile/stdabsdbl.cxx)
+set(HAVE_STD_ABS_DOUBLE ${HAVE_STD_ABS_DOUBLE} CACHE BOOL "Whether the C++ compiler understands std::abs with double arg")
 if (HAVE_STD_ABS_DOUBLE)
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/stdabsdbl.cxx compiled.")
+    message("${SCIMAKE_DIR}/trycompile/stdabsdbl.cxx compiled.")
   endif ()
 else ()
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/stdabsdbl.cxx did not compile.")
+    message("${SCIMAKE_DIR}/trycompile/stdabsdbl.cxx did not compile.")
   endif ()
   set(NOT_HAVE_STD_ABS_DOUBLE 1 CACHE BOOL "Define when the C++ compiler does not understand std::abs with double arg")
 endif ()
 
 # See whether compiler RTTI typeid is working properly
-try_run(IS_RTTI_COMPATIBLE DID_RTTI_TEST_COMPILE ${PROJECT_BINARY_DIR}/scimake
-  ${SCICMAKE_DIR}/trycompile/checkCompilerRTTI.cxx)
-if (DID_RTTI_TEST_COMPILE)
+try_run(RTTI_RUN_RESULT RTTI_COMPILES ${PROJECT_BINARY_DIR}/scimake
+  ${SCIMAKE_DIR}/trycompile/checkCompilerRTTI.cxx)
+message(STATUS "RTTI_RUN_RESULT = ${RTTI_RUN_RESULT}.")
+message(STATUS "RTTI_COMPILES = ${RTTI_COMPILES}.")
+set(RTTI_RUN_RESULT ${RTTI_RUN_RESULT} CACHE BOOL "Whether the C++ compiler builds executables that understand run-time type identification.")
+set(RTTI_COMPILES ${RTTI_COMPILES} CACHE BOOL "Whether the C++ compiler compiles source using run-time type identification.")
+if (RTTI_COMPILES)
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/checkCompilerRTTI.cxx compiled.")
+    message("${SCIMAKE_DIR}/trycompile/checkCompilerRTTI.cxx compiled.")
   endif ()
-  if (IS_RTTI_COMPATIBLE EQUAL 0)
+  if (RTTI_RUN_RESULT EQUAL 0)
     set(COMPILER_TYPEID_IS_VALID 1)
     if (DEBUG_CMAKE)
       message(STATUS "Compiler RTTI typeid test passed.")
@@ -119,7 +125,7 @@ if (DID_RTTI_TEST_COMPILE)
   endif ()
 else ()
   if (DEBUG_CMAKE)
-    message("${SCICMAKE_DIR}/trycompile/checkCompilerRTTI.cxx did not compile.")
+    message("${SCIMAKE_DIR}/trycompile/checkCompilerRTTI.cxx did not compile.")
   endif ()
 endif ()
 
@@ -146,12 +152,23 @@ else ()
   set(VECTOR_ITERATOR_IS_NOT_POINTER 1 CACHE BOOL "Whether std::vector<int>::iterator is the same as int*")
 endif ()
 
+# Add in full flags
+set(CMAKE_CXX_FLAGS_FULL "${CMAKE_C_FLAGS_FULL}")
+
+# Remove /MD etc for static builds on Windows
+if (WIN32 AND NOT MINGW AND NOT BUILD_WITH_SHARED_RUNTIME)
+  foreach (flag_var CMAKE_CXX_FLAGS_FULL CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_DEBUG)
+    if (NOT (BUILD_SHARED_LIBS OR BUILD_WITH_SHARED_RUNTIME))
+      string(REPLACE "/MDd" "" ${flag_var} "${${flag_var}}")
+      string(REPLACE "/MD" "" ${flag_var} "${${flag_var}}")
+    endif ()
+    set(${flag_var} "${${flag_var}} /bigobj")
+  endforeach (flag_var)
+endif ()
+
 # Check flags
-set(CMAKE_CXX_FLAGS_FULL ${CMAKE_C_FLAGS_FULL})
-set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-SciPrintVar(CMAKE_CXX_FLAGS_FULL)
-SciPrintVar(CMAKE_CXX_FLAGS_RELEASE)
-SciPrintVar(CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-SciPrintVar(CMAKE_CXX_FLAGS_DEBUG)
+foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
+  SciPrintVar(CMAKE_CXX_FLAGS_${bld})
+endforeach ()
 SciPrintVar(CMAKE_CXX_FLAGS)
 
