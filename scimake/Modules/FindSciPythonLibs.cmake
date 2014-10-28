@@ -30,12 +30,17 @@
 #
 # FindSciPythonLibs.cmake: Wrap cmake's python finder to fix for mingw
 #
-# $Id: FindSciPythonLibs.cmake 1301 2012-03-23 20:14:15Z cary $
+# $Id: FindSciPythonLibs.cmake 623 2014-09-08 13:06:29Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
 #
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 ######################################################################
+
+# Messaged added April 23, 2014.  Remove file on Sep. 31, 2014.
+message(WARNING "This package file deprecated. Please switch to FindSciPython.cmake.")
 
 option(ENABLE_PYTHON "Whether to enable Python" ON)
 
@@ -57,8 +62,10 @@ if (ENABLE_PYTHON)
   if (Python_INCLUDE_DIRS AND Python_LIBRARIES)
     set(PYTHONLIBS_FOUND TRUE)
 # Search for python on unix using path
-  elseif (NOT WIN32)
-    find_program(PYTHON python)
+  else ()
+    find_program(PYTHON python
+      HINTS "${Python_ROOT_DIR}"
+      PATH_SUFFIXES bin)
     if (DEBUG_CMAKE)
       message(STATUS "PYTHON = ${PYTHON}.")
     endif ()
@@ -70,23 +77,31 @@ if (ENABLE_PYTHON)
       string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+"
         Python_VERSION "${Python_VERSION}"
       )
+      string(REGEX MATCH "^[0-9]+\\.[0-9]"
+                Python_MAJMIN "${Python_VERSION}")
+
+      if (WIN32)
+        string(REPLACE "." "" Python_MAJMIN "${Python_MAJMIN}")
+      endif ()
       if (DEBUG_CMAKE)
         message(STATUS "Python_VERSION = ${Python_VERSION}.")
-      endif ()
-      string(REGEX MATCH "^[0-9]+\\.[0-9]"
-        Python_MAJMIN "${Python_VERSION}"
-      )
-      if (DEBUG_CMAKE)
         message(STATUS "Python_MAJMIN = ${Python_MAJMIN}.")
       endif ()
-      set(Python_LIB python${Python_MAJMIN} CACHE STRING "Python library name + major.minor")
+      set(Python_LIB python${Python_MAJMIN} CACHE STRING "Python library name")
+# Synonyms
+      set(Python_LIBRARY_NAME ${Python_LIB})
+      set(Python_LIBRARY_NAMES ${Python_LIB})
 # Should check here that version >2.5.
 # Find includes
       if (NOT Python_INCLUDE_DIRS)
         execute_process(COMMAND ${PYTHON} -c "import os, sys; print os.path.join(sys.prefix, 'include', 'python')"
           OUTPUT_VARIABLE Python_INCDIR)
         string(STRIP "${Python_INCDIR}" Python_INCDIR)
-        set(Python_INCLUDE_DIRS "${Python_INCDIR}${Python_MAJMIN}")
+        if (WIN32)
+          get_filename_component(Python_INCLUDE_DIRS "${Python_INCDIR}/.." REALPATH)
+        else ()
+          set(Python_INCLUDE_DIRS "${Python_INCDIR}${Python_MAJMIN}")
+        endif ()
       endif ()
       if (DEBUG_CMAKE)
         message(STATUS "Python_INCLUDE_DIRS = ${Python_INCLUDE_DIRS}.")
@@ -102,24 +117,43 @@ if (ENABLE_PYTHON)
         if (DEBUG_CMAKE)
           message(STATUS "Looking for library, ${Python_LIB}.")
         endif ()
+        if (WIN32)
+          get_filename_component(Python_TOPLIBDIR "${Python_TOPLIBDIR}/.." REALPATH)
+          file(TO_CMAKE_PATH "${Python_TOPLIBDIR}" Python_TOPLIBDIR)
+        endif ()
+        if (DEBUG_CMAKE)
+          message(STATUS "find_library(Python_LIBRARIES ${Python_LIB}
+              PATHS ${Python_TOPLIBDIR}/config ${Python_TOPLIBDIR}/libs
+              NO_DEFAULT_PATH)"
+          )
+        endif ()
         find_library(Python_LIBRARIES ${Python_LIB}
+          HINTS "${Python_ROOT_DIR}"
+          PATH_SUFFIXES bin lib libs
           PATHS ${Python_TOPLIBDIR}/config ${Python_TOPLIBDIR}/libs
           NO_DEFAULT_PATH)
       endif ()
       if (Python_INCLUDE_DIRS AND Python_LIBRARIES)
         set(PYTHONLIBS_FOUND TRUE)
+        get_filename_component(Python_LIBRARY_NAMES ${Python_LIBRARIES} NAME)
+        foreach (sfx lib a dylib so)
+          string(REGEX REPLACE "\\.${sfx}$" "" Python_LIBRARY_NAMES ${Python_LIBRARY_NAMES})
+        endforeach ()
+        string(REGEX REPLACE "^lib" "" Python_LIBRARY_NAMES ${Python_LIBRARY_NAMES})
       endif ()
     endif ()
-  endif ()
+  endif (Python_INCLUDE_DIRS AND Python_LIBRARIES)
 
 # Python not found so find python using cmake's module
   if (NOT PYTHONLIBS_FOUND)
+    set(PythonLibs_DIR "${Python_ROOT_DIR}")
     find_package(PythonLibs)
 
     if (PYTHONLIBS_FOUND)
       option(HAVE_PYTHON "Python library" ON)
       set (Python_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
       set (Python_LIBRARIES ${PYTHON_LIBRARY})
+      get_filename_component(Python_LIBRARY_NAMES ${Python_LIBRARIES} NAME_WE)
       message(STATUS "Python_LIBRARY = ${Python_LIBRARIES}")
 # MinGW requires one to separate the dir and the lib, and then
 # the library needs to have a possible leading lib removed.
@@ -149,6 +183,14 @@ if (ENABLE_PYTHON)
         set(Python_LIBS ${Python_LIBRARIES})
       endif ()
     endif ()
+# Look for executable
+    if (NOT PYTHON)
+      find_program(PYTHON python
+        HINTS "${Python_ROOT_DIR}"
+        PATH_SUFFIXES bin
+        PATHS ${Python_PYLIBDIR}/bin ${Python_PYLIBDIR}
+      )
+    endif ()
   endif ()
 
 # Print result
@@ -158,29 +200,20 @@ if (ENABLE_PYTHON)
       string(STRIP "${Python_VERSION}" Python_VERSION)
     if (WIN32)
       string(REGEX REPLACE "\\." "" Python_VERSION_WINSTR "${Python_VERSION}")
+
+      file(TO_CMAKE_PATH "${Python_INCLUDE_DIRS}" Python_INCLUDE_DIRS)
     endif ()
     set(HAVE_PYTHON 1 CACHE BOOL "Whether have Python")
-# I think this is not needed, as SciFixDynExec will find needed shared objects
-    if (0)
-    if (NOT Python_LIBRARY AND LINUX)
-      message(STATUS "REALPATH: ${PYTHON}/../../lib/lib${Python_LIB}.so")
-      get_filename_component(Python_LIBRARY_REALPATH "${PYTHON}/../../lib/lib${Python_LIB}.so" REALPATH)
-      set(Python_LIBRARY "${Python_LIBRARY_REALPATH}" CACHE STRING "Path to Python dynamic lib")
-    endif ()
-    endif ()
   endif ()
   set(PYTHON_VERSION ${Python_VERSION})
-  message(STATUS "RESULTS FOR PYTHON:")
-  message(STATUS "  PYTHON              = ${PYTHON}")
-  message(STATUS "  PYTHON_VERSION      = ${PYTHON_VERSION}")
-  message(STATUS "  Python_VERSION      = ${Python_VERSION}")
-  message(STATUS "  Python_INCLUDE_DIRS = ${Python_INCLUDE_DIRS}")
-  message(STATUS "  Python_LIBRARY_DIRS = ${Python_LIBRARY_DIRS}")
-  message(STATUS "  Python_PYLIBDIR     = ${Python_PYLIBDIR}")
-  message(STATUS "  Python_LIBRARIES    = ${Python_LIBRARIES}")
-  message(STATUS "  Python_LIB          = ${Python_LIB}")
-  message(STATUS "  Python_LIBS         = ${Python_LIBS}")
-  message(STATUS "  Python_STLIBS       = ${Python_STLIBS}")
+  SciPrintCMakeResults(Python)
+  SciPrintVar(PYTHON)
+  SciPrintVar(Python_VERSION)
+  SciPrintVar(Python_PYLIBDIR)
+  message(STATUS "Related variables:")
+  SciPrintVar(Python_LIB)
+  SciPrintVar(Python_LIBS)
+  SciPrintVar(Python_LIBRARY_NAME)
 
 endif ()
 

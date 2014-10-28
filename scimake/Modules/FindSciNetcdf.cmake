@@ -16,32 +16,28 @@
 #
 # SciFindNetcdf: find includes and libraries for Netcdf.
 #
-# $Id: FindSciNetcdf.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciNetcdf.cmake 606 2014-08-08 16:48:50Z cperry87 $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
-if (ENABLE_PARALLEL)
-  set(instdirs netcdf-par)
-else ()
-  set(instdirs netcdf)
-endif ()
-
 set(desiredlibs netcdf)
-if (CMAKE_Fortran_COMPILER_WORKS)
-  set(desiredlibs netcdff ${desiredlibs})
-endif ()
-if (CMAKE_CXX_COMPILER_WORKS)
-  set(desiredlibs netcdf_c++ ${desiredlibs})
-endif ()
+#if (CMAKE_Fortran_COMPILER_WORKS)
+#  set(desiredlibs netcdff ${desiredlibs})
+#endif ()
+#if (CMAKE_CXX_COMPILER_WORKS)
+#  set(desiredlibs netcdf_c++ ${desiredlibs})
+#endif ()
 
 SciFindPackage(PACKAGE "Netcdf"
-  INSTALL_DIR ${instdirs}
+  INSTALL_DIR ${NETCDF_BUILDS}
   HEADERS "netcdf.h"
   LIBRARIES ${desiredlibs}
-  MODULES "netcdf"
+  #MODULES "netcdf"
 )
 
 if (NETCDF_FOUND)

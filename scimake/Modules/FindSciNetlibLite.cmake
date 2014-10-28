@@ -14,10 +14,12 @@
 #
 # FindNetlibLite: find includes and libraries for txbase
 #
-# $Id: FindSciNetlibLite.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciNetlibLite.cmake 419 2013-12-18 19:21:10Z jacobrking $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -29,7 +31,7 @@ endif ()
 
 SciFindPackage(PACKAGE "NetlibLite"
   INSTALL_DIRS ${instdirs}
-  MODULES lsode_mod
-  LIBRARIES lsode nlother r8slatec
+  MODULES "lsode_mod"
+  LIBRARIES "lsode;nlother;r8slatec"
 )
 

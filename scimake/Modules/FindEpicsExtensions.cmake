@@ -14,12 +14,14 @@
 
 ######################################################################
 #
-# FindEpicsExtensions: find includes and libraries for Epics Extensions 
+# FindEpicsExtensions: find includes and libraries for Epics Extensions
 #
-# $Id: FindEpicsExtensions.cmake 1324 2012-04-21 13:31:24Z cary $
+# $Id: FindEpicsExtensions.cmake 484 2014-01-26 16:39:04Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -34,11 +36,11 @@ else ()
 endif ()
 
 SciFindPackage(
-	PACKAGE EpicsExtensions
-	INSTALL_DIR "${epicsdir}/extensions"
-	HEADERS "awe.h;gsl/gsl_poly.h"
-	LIBRARIES
+        PACKAGE EpicsExtensions
+        INSTALL_DIR "${epicsdir}/extensions"
+        HEADERS "awe.h;gsl/gsl_poly.h"
+        LIBRARIES
   "mdbcommon;matlib;fftpack;${sddslib};rpnlib;mdbmth;namelist;mdblib;meschach;gsl${pgapacklib}"
-	INCLUDE_SUBDIRS "src/SDDS/include;src/SDDS/gsl"
-	LIBRARY_SUBDIRS "lib/linux-x86_64;lib/linux-x86"
+        INCLUDE_SUBDIRS "src/SDDS/include;src/SDDS/gsl"
+        LIBRARY_SUBDIRS "lib/linux-x86_64;lib/linux-x86"
 )

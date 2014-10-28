@@ -1,5 +1,5 @@
 /**
- * $Id: gendeclstatics.cxx 1158 2011-12-17 14:18:42Z cary $
+ * $Id: gendeclstatics.cxx 58 2012-09-15 13:43:53Z jrobcary $
  */
 
 template <class TYPE> class X {

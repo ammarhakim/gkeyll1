@@ -2,7 +2,12 @@
 #
 # FindPCRE: find includes and libraries for PCRE
 #
-# $Id: FindSciPcre.cmake 1324 2012-04-21 13:31:24Z cary $
+# $Id: FindSciPcre.cmake 259 2013-04-10 19:10:45Z jdelamere $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 

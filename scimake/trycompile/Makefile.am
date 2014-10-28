@@ -4,7 +4,7 @@
 ##
 ## Purpose: Purpose: Needed for cmake in an autotools project
 ##
-## $Id: Makefile.am 1159 2011-12-17 14:19:19Z cary $
+## $Id: Makefile.am 58 2012-09-15 13:43:53Z jrobcary $
 ##
 ## ############################################################
 

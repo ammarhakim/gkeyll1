@@ -1,7 +1,11 @@
-# $Id: SciSvnInfo.cmake 1170 2011-12-31 02:58:47Z cary $
+######################################################################
+#
+# $Id: SciSvnInfo.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
 # For getting the svn revision of a directory
-
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
+######################################################################
 if (0)
 macro(Subversion_GET_VERSION dir var1 var2)
   message(WARNING "Subversion_GET_VERSION is deprecated.  Use SciGetSvnInfo.")
@@ -82,11 +86,17 @@ macro(SciGetSvnInfo dir revvar urlvar usechanged)
     endif ()
   endif ()
   if (EXISTS ${dir}/svninfo.txt)
-      file(READ ${dir}/svninfo.txt SVNINFO)
-      string(REGEX REPLACE "^(.*\n)?URL:([^\n]+).*"
+    file(READ ${dir}/svninfo.txt SVNINFO)
+    string(REGEX REPLACE "^(.*\n)?URL:([^\n]+).*"
         "\\2" ${urlvar} "${SVNINFO}")
   else ()
-      set(${urlvar} "unknown")
+    set(${urlvar} "unknown")
+  endif ()
+  if (NOT ${revvar})
+    set(${revvar} "unknown")
+  endif ()
+  if (NOT ${urlvar})
+    set(${urlvar} "unknown")
   endif ()
 endmacro()
 
@@ -113,10 +123,10 @@ if (SVN_BIN AND SVNVERSION_BIN)
   SciGetSvnInfo(${PROJECT_SOURCE_DIR} PROJECT_REV PROJECT_URL TRUE)
   SciPrintVar(PROJECT_REV)
   SciPrintVar(PROJECT_URL)
-  if (EXISTS ${SCICMAKE_DIR})
-    SciGetSvnInfo(${SCICMAKE_DIR} CMAKEDIR_REV CMAKEDIR_URL TRUE)
-    SciPrintVar(CMAKEDIR_REV)
-    SciPrintVar(CMAKEDIR_URL)
+  if (EXISTS ${SCIMAKE_DIR})
+    SciGetSvnInfo(${SCIMAKE_DIR} SCIMAKE_REV SCIMAKE_URL TRUE)
+    SciPrintVar(SCIMAKE_REV)
+    SciPrintVar(SCIMAKE_URL)
   endif ()
   if (EXISTS ${PROJECT_SOURCE_DIR}/config)
     SciGetSvnInfo(${PROJECT_SOURCE_DIR}/config CONFIG_REV CONFIG_URL TRUE)

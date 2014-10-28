@@ -14,10 +14,12 @@
 #
 # SciFindFftw: find includes and libraries for txbase
 #
-# $Id: FindSciFftw.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciFftw.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -27,7 +29,6 @@ if (ENABLE_PARALLEL)
                 INSTALL_DIR "fftw-par"
                 HEADERS "fftw.h;rfftw.h;fftw_mpi.h;rfftw_mpi.h"
                 LIBRARIES "fftw;rfftw;fftw_mpi;rfftw_mpi"
-                MODULES "fftw"
                 )
 else ()
   message(STATUS "Looking for serial FFTW")
@@ -35,13 +36,12 @@ else ()
                 INSTALL_DIR "fftw"
                 HEADERS "fftw.h;rfftw.h"
                 LIBRARIES "fftw;rfftw"
-                MODULES "fftw"
                 )
 endif ()
 
 if (FFTW_FOUND)
   message(STATUS "Found Fftw")
-  set(HAVE_FFTW 1 CACHE BOOL "Whether have the FFTWlibrary")
+  set(HAVE_FFTW 1 CACHE BOOL "Whether have the FFTW library")
 else ()
   message(STATUS "Did not find Fftw.  Use -DFFTW_DIR to specify the installation directory.")
   if (SciFftw_FIND_REQUIRED)

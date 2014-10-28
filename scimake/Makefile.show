@@ -2,10 +2,12 @@
 #
 # Makefile.show: A PETSc Makefile to get PETSc variables
 #
-# $Id: Makefile.show 1151 2011-12-17 13:51:42Z cary $
+# $Id: Makefile.show 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2011 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 # Makefile to grab PETSc make variables

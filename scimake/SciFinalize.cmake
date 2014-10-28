@@ -2,10 +2,12 @@
 #
 # SciFinalize: Do the final stuff for any package
 #
-# $Id: SciFinalize.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: SciFinalize.cmake 506 2014-02-12 13:10:02Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -15,21 +17,39 @@
 #
 ######################################################################
 
+if (NOT DEFINED INSTALL_CONFIG_HEADERS)
+  set(INSTALL_CONFIG_HEADERS TRUE)
+endif ()
+
 foreach (configfile config configrev)
   if (EXISTS ${CMAKE_SOURCE_DIR}/${configfile}-cmake.h.in)
     configure_file(${CMAKE_SOURCE_DIR}/${configfile}-cmake.h.in ${configfile}.h)
-    install(FILES ${CMAKE_BINARY_DIR}/${configfile}.h DESTINATION include
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                  GROUP_READ ${SCI_GROUP_WRITE} GROUP_EXECUTE
-                  ${SCI_WORLD_PROGRAM_PERMS}
-      RENAME ${CMAKE_PROJECT_NAME}_${configfile}.h
-    )
+    if (INSTALL_CONFIG_HEADERS)
+      install(FILES ${CMAKE_BINARY_DIR}/${configfile}.h DESTINATION include
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ ${SCI_GROUP_WRITE} GROUP_EXECUTE
+                    ${SCI_WORLD_PROGRAM_PERMS}
+        RENAME ${CMAKE_PROJECT_NAME}_${configfile}.h
+      )
+    endif ()
     if (CMAKE_Fortran_COMPILER_WORKS)
       execute_process(
-        COMMAND sed -f ${SCICMAKE_DIR}/rmcomms.sed
+        COMMAND sed -f ${SCIMAKE_DIR}/rmcomms.sed
         INPUT_FILE ${CMAKE_BINARY_DIR}/${configfile}.h
         OUTPUT_FILE ${CMAKE_BINARY_DIR}/${configfile}.f
       )
+      if (INSTALL_CONFIG_HEADERS)
+        install(FILES ${CMAKE_BINARY_DIR}/${configfile}.f DESTINATION include
+          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                      GROUP_READ ${SCI_GROUP_WRITE} GROUP_EXECUTE
+                      ${SCI_WORLD_PROGRAM_PERMS}
+          RENAME ${CMAKE_PROJECT_NAME}_${configfile}.f
+        )
+      endif ()
+    endif ()
+  elseif (EXISTS ${CMAKE_SOURCE_DIR}/${configfile}-cmake.f.in)
+    configure_file(${CMAKE_SOURCE_DIR}/${configfile}-cmake.f.in ${configfile}.f)
+    if (INSTALL_CONFIG_HEADERS)
       install(FILES ${CMAKE_BINARY_DIR}/${configfile}.f DESTINATION include
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ ${SCI_GROUP_WRITE} GROUP_EXECUTE
@@ -37,14 +57,6 @@ foreach (configfile config configrev)
         RENAME ${CMAKE_PROJECT_NAME}_${configfile}.f
       )
     endif ()
-  elseif (EXISTS ${CMAKE_SOURCE_DIR}/${configfile}-cmake.f.in)
-    configure_file(${CMAKE_SOURCE_DIR}/${configfile}-cmake.f.in ${configfile}.f)
-    install(FILES ${CMAKE_BINARY_DIR}/${configfile}.f DESTINATION include
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                  GROUP_READ ${SCI_GROUP_WRITE} GROUP_EXECUTE
-                  ${SCI_WORLD_PROGRAM_PERMS}
-      RENAME ${CMAKE_PROJECT_NAME}_${configfile}.f
-    )
   endif ()
 endforeach ()
 if (EXISTS ${CMAKE_BINARY_DIR}/config.h)
@@ -98,21 +110,31 @@ install(PROGRAMS ${CONFIG_SCRIPTS} DESTINATION ${sharedir}
               ${SCI_WORLD_PROGRAM_PERMS}
 )
 
+# Generate autotools files for inclusion
+# Important for transitioning between autotools and scimake.
+# Used for fciowrappers, ntcc_transport, netlib_lite, fmcfm, facets, etc.
+if (EXISTS ${CMAKE_SOURCE_DIR}/configure.ac)
+  message(STATUS "make dist will generating autotools files for inclusion in distribution.")
+  add_custom_target(cleanconf
+    COMMAND config/cleanconf.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  )
+  add_dependencies(dist cleanconf)
+endif ()
+
 ######################################################################
 #
-# Packaging
+# Package source.  Package is responsible for binary packaging.
 #
 ######################################################################
 
 # CPack version numbers for release tarball name.
-set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH}-r${PROJECT_REV})
-
-if (NOT DEFINED CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CMAKE_PROJECT_NAME}")
+if (NOT CPACK_PACKAGE_VERSION_PATCH)
+  set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
+  set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
+  set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH}-r${PROJECT_REV})
 endif ()
-set(CPACK_PACKAGE_VENDOR "Tech-X Corporation")
+
 if (NOT DEFINED CPACK_SOURCE_PACKAGE_FILE_NAME)
   set(CPACK_SOURCE_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}-${PROJECT_VERSION}-r${PROJECT_REV}"
@@ -122,25 +144,10 @@ endif ()
 set(CPACK_SOURCE_GENERATOR TGZ)
 set(CPACK_SOURCE_IGNORE_FILES
   "/CVS/;/.svn/;.swp$;.#;/#;/build/;/serial/;/ser/;/parallel/;/par/;~;/preconfig.out;/autom4te.cache/;/.config")
-set(CPACK_GENERATOR TGZ)
 include(CPack)
 
 # add make dist target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-# Generate autotools files for inclusion
-# Important for transitioning between autotools and scimake.
-# Used for fciowrappers, ntcc_transport, netlib_lite, fmcfm, facets, etc.
-# Gets a clean distribution for autotools distribution.
-
-if (EXISTS ${CMAKE_SOURCE_DIR}/configure.ac)
-  message(STATUS "make dist will generating autotools files for inclusion in distribution.")
-  add_custom_target(cleanconf
-    COMMAND config/cleanconf.sh
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  )
-  add_dependencies(dist cleanconf)
-endif ()
 
 ######################################################################
 #

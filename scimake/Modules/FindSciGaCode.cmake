@@ -14,10 +14,12 @@
 #
 # FindSciGaCode: find includes and libraries for gacode
 #
-# $Id: FindSciGaCode.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciGaCode.cmake 538 2014-03-31 02:00:48Z pletzer $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -40,9 +42,9 @@ SciFindPackage(PACKAGE GaCode
 if (GACODE_FOUND)
   set(HAVE_GACODE 1 CACHE BOOL "Whether have the gacode library")
   set(HAVE_GaCode 1 CACHE BOOL "Whether have the gacode library")
-  include(${SCICMAKE_DIR}/SciGetDepsFromInstall.cmake)
+  include(${SCIMAKE_DIR}/SciGetDepsFromInstall.cmake)
 # Get fciowrappers libraries
-  SciGetDepsFromInstall(Fciowrappers ${GaCode_DIR} FCIOWRAPPERS)
+#  SciGetDepsFromInstall(Fciowrappers ${GaCode_DIR} FCIOWRAPPERS)
 # Get hdf5 libraries
 #  SciGetDepsFromInstall(Hdf5 ${FcIoWrappers_DIR} HDF5)
 # Get netcdf libraries

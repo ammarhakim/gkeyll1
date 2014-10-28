@@ -14,7 +14,12 @@
 #
 # Find module for Mesa
 #
-# $Id: FindSciMesa.cmake 1161 2011-12-17 15:44:00Z cary $
+# $Id: FindSciMesa.cmake 328 2013-07-03 21:07:34Z jrobcary $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 #################################################
 
@@ -37,7 +42,7 @@ if (MESA_FOUND)
   # message(STATUS "[FindMesa.cmake] - Mesa_LIBRARIES = ${Mesa_LIBRARIES}")
   set(HAVE_Mesa 1 CACHE BOOL "Whether have Vtk.")
 else ()
-  message(STATUS "[FindMesa.cmake] - Did not find Mesa, use -DMesa_DIR to supply the Mesa installation directory.")
+  message(STATUS "[FindMesa.cmake] - Did not find Mesa, use -DMesa_ROOT_DIR to supply the Mesa installation directory.")
   if (SciMesa_FIND_REQUIRED)
     message(FATAL_ERROR "[FindMesa.cmake] - Failed to find Mesa.")
   endif ()

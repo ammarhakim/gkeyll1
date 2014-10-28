@@ -8,7 +8,14 @@
 
 ########################################################################
 #
-# $Id: FindSciMex.cmake 1161 2011-12-17 15:44:00Z cary $
+# FindSciMex
+#
+# $Id: FindSciMex.cmake 259 2013-04-10 19:10:45Z jdelamere $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ########################################################################
 

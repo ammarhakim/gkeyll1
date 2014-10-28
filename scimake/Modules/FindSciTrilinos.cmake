@@ -13,7 +13,7 @@
 # In either case, the following variables get defined.
 #
 # Trilinos_DIR          : root installation directory for Trilinos
-# Trilinos_EXECUTABLES  : any Trilinos executables (empty for trilinos)
+# Trilinos_PROGRAMS     : any Trilinos executables (empty for trilinos)
 # Trilinos_FILES        : any other files (empty for trilinos)
 # Trilinos_INCLUDE_DIRS : include directories needed for compiling C/C++
 # Trilinos_MODULE_DIRS  : include directories needed for compiling fortran
@@ -25,6 +25,7 @@
 # Trilinos_STLIBS       : the full paths to the static libs if found, otherwise
 #                         the same as in the above variable
 # Trilinos_TPL_LIBRARIES: third-party libraries needed for linking to Trilinos
+# Trilinos_SLU_LIBRARIES: libraries specific to SuperLU and SuperLU_Dist
 #
 # and separate those into
 #
@@ -35,108 +36,53 @@
 #
 # FindSciTrilinos: find includes and libraries for Trilinos
 #
-# $Id: FindSciTrilinos.cmake 1347 2012-05-28 12:41:11Z cary $
+# $Id: FindSciTrilinos.cmake 622 2014-09-07 20:32:23Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
-if (ENABLE_PARALLEL)
-  set(trilinosdir trilinos-par)
+if (TRILINOS_BUILD)
+ set(trilinosdir ${TRILINOS_BUILD})
 else ()
-  set(trilinosdir trilinos)
+if (ENABLE_PARALLEL)
+ set(trilinosdir trilinos-parcomm)
+else ()
+ set(trilinosdir trilinos-sercomm)
+endif ()
 endif ()
 
-if (USE_TRILINOS_CONFIG_CMAKE)
+# First get the config file
+SciFindPackage(PACKAGE "Trilinos"
+  INSTALL_DIR ${trilinosdir}
+  FIND_CONFIG_FILE
+  USE_CONFIG_FILE
+  NOPRINT
+  FIND_QUIETLY
+)
 
-  message("---------  Looking for TrilinosConfig.cmake --------- ")
-
-# Look for TrilinosConfig.cmake in our installation directories
-  find_file(TRILINOS_CONFIG_CMAKE TrilinosConfig.cmake
-    PATHS ${SUPRA_SEARCH_PATH}
-    PATH_SUFFIXES ${trilinosdir}/lib/cmake/Trilinos ${trilinosdir}/include
-      ${trilinosdir} lib/cmake/Trilinos include
-    NO_DEFAULT_PATH
-  )
-# If not found, look in system directories
-  if (NOT TRILINOS_CONFIG_CMAKE)
-    find_file(TRILINOS_CONFIG_CMAKE TrilinosConfig.cmake)
-  endif ()
-# Print result
-  if (TRILINOS_CONFIG_CMAKE)
-    get_filename_component(TRILINOS_CONFIG_CMAKE ${TRILINOS_CONFIG_CMAKE} REALPATH)
-    SciPrintString("TRILINOS_CONFIG_CMAKE = ${TRILINOS_CONFIG_CMAKE}.")
-    set(TRILINOS_FOUND TRUE)
-  else ()
-    SciPrintString("TrilinosConfig.cmake not found.")
-  endif ()
-
-# If found, fix some variables
-  if (TRILINOS_CONFIG_CMAKE)
-# Get variables from that file
-    set(TRILINOS_FOUND TRUE)
-    include(${TRILINOS_CONFIG_CMAKE})
-# Get our other variables
-    get_filename_component(Trilinos_DIR ${Trilinos_LIBRARY_DIRS}/.. REALPATH)
-# Translate library variables to our conventions and get static libraries
-    set(Trilinos_LIBRARY_NAMES ${Trilinos_LIBRARIES})
-    set(Trilinos_LIBRARIES)
-    foreach (libname ${Trilinos_LIBRARY_NAMES})
-      find_library(${libname}_LIBRARY ${libname} ${Trilinos_LIBRARY_DIRS} NO_DEFAULT_PATH)
-      if (${libname}_LIBRARY)
-        set(Trilinos_LIBRARIES ${Trilinos_LIBRARIES} ${${libname}_LIBRARY})
-      endif ()
-    endforeach ()
-    SciGetStaticLibs("${Trilinos_LIBRARIES}" Trilinos_STLIBS)
-  endif ()
-
-# Print out the results
-  SciPrintCMakeResults(Trilinos)
-
-else () # Use SciFindPackage
-
-  SciFindPackage(PACKAGE "Trilinos"
-    INSTALL_DIR ${trilinosdir}
-    HEADERS "az_aztec.h"
-    LIBRARIES "aztecoo;ml;zoltan;amesos;ifpack;epetraext;galeri;triutils;epetra;shards;intrepid;komplex;teuchos"
-  )
-# Above sets TRILINOS_FOUND to TRUE?
-
-# Find the blas and lapack used by Trilinos.
-  if (TRILINOS_FOUND)
-    find_file(TRILINOS_CONFIG_CMAKE
-      TrilinosConfig.cmake
-      PATHS ${Trilinos_DIR}/lib/cmake/Trilinos
-            ${Trilinos_az_aztec_h_INCLUDE_DIR} ${Trilinos_DIR}
-    )
-    if (NOT TRILINOS_CONFIG_CMAKE)
-      message(FATAL_ERROR "TRILINOS_CONFIG_CMAKE not found.")
-    endif ()
-    if (DEBUG_CMAKE)
-      message(STATUS "TRILINOS_CONFIG_CMAKE ${TRILINOS_CONFIG_CMAKE}.")
-    endif ()
-# Cannot include ${TRILINOS_CONFIG_CMAKE} as overwrites some definitions,
-# so must parse out the variable.
-    file(STRINGS ${TRILINOS_CONFIG_CMAKE} tritpls
-        REGEX ".*Trilinos_TPL_LIBRARIES.*")
-      # message("tritpls = ${tritpls}")
-# Remove definition line
-    string(REGEX REPLACE "SET.Trilinos_TPL_LIBRARIES ." "" tritpls "${tritpls}")
-      # message("tritpls = ${tritpls}")
-# Remove trailing quote and paren
-    string(REGEX REPLACE ".\\)$" "" tritpls "${tritpls}")
-      # message("tritpls = ${tritpls}")
-# Remove exterior white space
-    string(STRIP ${tritpls} tritpls)
-      # message("tritpls = ${tritpls}")
-# Make this a string list.
-# JRC: No can do.  On Windows, strings have blanks.
-      # separate_arguments(Trilinos_TPL_LIBRARIES)
-    string(REGEX REPLACE "\\\\;" ";" Trilinos_TPL_LIBRARIES "${tritpls}")
-  endif ()
-
+# Cleanup and conform to scimake conventions
+if (Trilinos_INCLUDE_DIRS)
+  get_filename_component(Trilinos_INCLUDE_DIRS ${Trilinos_INCLUDE_DIRS} REALPATH)
 endif ()
+if (Trilinos_LIBRARY_DIRS)
+  get_filename_component(Trilinos_LIBRARY_DIRS ${Trilinos_LIBRARY_DIRS} REALPATH)
+endif ()
+set(Trilinos_LIBRARY_NAMES ${Trilinos_LIBRARIES})
+set(Trilinos_LIBRARIES)
+foreach (trilib ${Trilinos_LIBRARY_NAMES})
+  find_library(Trilinos_${trilib}_LIBRARY ${trilib}
+    PATHS ${Trilinos_LIBRARY_DIRS}
+  )
+  set(Trilinos_LIBRARIES ${Trilinos_LIBRARIES} ${Trilinos_${trilib}_LIBRARY})
+endforeach ()
+SciGetStaticLibs("${Trilinos_LIBRARIES}" Trilinos_STLIBS)
+
+# Print results
+SciPrintCMakeResults(Trilinos)
 
 if (TRILINOS_FOUND)
 # Should now have all standard variables plus Trilinos_TPL_LIBRARIES
@@ -147,29 +93,54 @@ if (TRILINOS_FOUND)
   option(HAVE_TRILINOS "Trilinos libraries" ON)
 
 # Remove duplicates
-  list(REVERSE Trilinos_TPL_LIBRARIES)
-  list(REMOVE_DUPLICATES Trilinos_TPL_LIBRARIES)
-  list(REVERSE Trilinos_TPL_LIBRARIES)
+  if (Trilinos_TPL_LIBRARIES)
+    list(REVERSE Trilinos_TPL_LIBRARIES)
+    list(REMOVE_DUPLICATES Trilinos_TPL_LIBRARIES)
+    list(REVERSE Trilinos_TPL_LIBRARIES)
+  endif ()
 
-# Separate the third-party libraries into blas/lapack and system libraries
+# Separate the third-party libraries into various groups, as only
+# some needed for linking
   set(Trilinos_LINALG_LIBRARIES)
   set(Trilinos_MPI_LIBRARIES)
+  set(Trilinos_SLU_LIBRARIES)
   set(Trilinos_SYSTEM_LIBRARIES)
+  set(Trilinos_WRAPPER_LIBRARIES)
   foreach (lib ${Trilinos_TPL_LIBRARIES})
     get_filename_component(libname ${lib} NAME_WE)
     if (${libname} MATCHES "blas$" OR ${libname} MATCHES "lapack$" OR
         ${libname} MATCHES "acml$" OR ${libname} MATCHES "mkl$" OR
-        ${libname} MATCHES "f2c$" OR ${libname} MATCHES "atlas$"
-    )
-    set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES} ${lib})
+        ${libname} MATCHES "f2c$" OR ${libname} MATCHES "atlas$")
+      set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES} ${lib})
+# Cray wrappers include these, but needed for serial build.
+    elseif (${libname} MATCHES "sci_pgi" OR ${libname} MATCHES "sci_gnu" OR
+        ${libname} MATCHES "sci_intel")
+      set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES} ${lib})
+    elseif (${libname} MATCHES "superlu$" OR ${libname} MATCHES "superlu_dist$")
+      set(Trilinos_SLU_LIBRARIES ${Trilinos_SLU_LIBRARIES} ${lib})
     elseif (${libname} MATCHES "msmpi$")
       set(Trilinos_MPI_LIBRARIES ${Trilinos_MPI_LIBRARIES} ${lib})
     else ()
       set(Trilinos_SYSTEM_LIBRARIES ${Trilinos_SYSTEM_LIBRARIES} ${lib})
     endif ()
   endforeach ()
+
+# Make sure mp library present on Cray
+  string(TOLOWER ${C_COMPILER_ID} cid)
+  list(FIND Trilinos_LINALG_LIBRARIES sci_${cid} idx)
+  if (${idx} EQUAL -1)
+    message(STATUS "sci_${cid} not found in Trilinos_LINALG_LIBRARIES.")
+  else ()
+    message(STATUS "sci_${cid} found at index ${idx} in Trilinos_LINALG_LIBRARIES.")
+    list(FIND Trilinos_LINALG_LIBRARIES sci_${cid}_mp jdx)
+    if (${jdx} EQUAL -1)
+      message(WARNING "Trilinos_LINALG_LIBRARIES contains sci_${cid} but not sci_${cid}_mp.  Appending.")
+      list(APPEND Trilinos_LINALG_LIBRARIES sci_${cid}_mp)
+    endif ()
+  endif ()
+
 # Find the libdirs of all groups
-  foreach (grp TPL LINALG MPI SYSTEM)
+  foreach (grp TPL LINALG SLU MPI SYSTEM)
     set(libs ${Trilinos_${grp}_LIBRARIES})
     unset(Trilinos_${grp}_LIBRARY_DIRS)
     unset(Trilinos_${grp}_LIBRARY_NAMES)
@@ -183,7 +154,6 @@ if (TRILINOS_FOUND)
     if (Trilinos_${grp}_LIBRARY_DIRS)
       list(REMOVE_DUPLICATES Trilinos_${grp}_LIBRARY_DIRS)
     endif ()
-    # message(STATUS "  Trilinos_${grp}_LIBRARY_DIRS = ${Trilinos_${grp}_LIBRARY_DIRS}")
   endforeach ()
 
 # For windows only, find f2c
@@ -202,7 +172,8 @@ if (TRILINOS_FOUND)
     if (BLAS_LIBRARY)
       message(STATUS "  BLAS_LIBRARY found.")
       set(Trilinos_TPL_LIBRARIES ${Trilinos_TPL_LIBRARIES} ${BLAS_LIBRARY})
-      set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES} ${BLAS_LIBRARY})
+      set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES}
+          ${BLAS_LIBRARY})
     else ()
       message(STATUS "  BLAS_LIBRARY not found.")
     endif ()
@@ -212,11 +183,19 @@ if (TRILINOS_FOUND)
     message(STATUS "  F2C_LIBRARY not found.")
   endif ()
 
+# IF Trilinos_LINALG_LIBRARY_NAMES contains blas but not lapack, warn.
+  list(FIND Trilinos_LINALG_LIBRARY_NAMES blas indx)
+  if (NOT ${indx} EQUAL -1)
+    list(FIND Trilinos_LINALG_LIBRARY_NAMES lapack indx)
+    if (${indx} EQUAL -1)
+      message(WARNING "Trilinos_LINALG_LIBRARY_NAMES contains blas but not lapack.  Fixing.")
+    endif ()
+  else ()
+    message(WARNING "Trilinos_LINALG_LIBRARY_NAMES does not contain blas.")
+  endif ()
+
 # Final calculations
-  foreach (grp TPL LINALG MPI SYSTEM)
-    # if (Trilinos_${grp}_LIBRARIES)
-      # list(REMOVE_DUPLICATES Trilinos_TPL_LIBRARIES)
-    # endif ()
+  foreach (grp TPL LINALG MPI SLU SYSTEM WRAPPER)
     SciGetStaticLibs("${Trilinos_${grp}_LIBRARIES}" Trilinos_${grp}_STLIBS)
     SciPrintVar(Trilinos_${grp}_LIBRARY_DIRS)
     SciPrintVar(Trilinos_${grp}_LIBRARY_NAMES)
@@ -224,19 +203,8 @@ if (TRILINOS_FOUND)
     SciPrintVar(Trilinos_${grp}_STLIBS)
   endforeach ()
 
-# Combine
-  if (0)
-  set(Trilinos_LIBS ${Trilinos_LIBRARIES}
-      "${Trilinos_TPL_LIBRARIES}" ${Fortran_IMPLICIT_LIBFLAGS})
-  message(STATUS "[FindSciTrilinos]: Trilinos_LIBS = ${Trilinos_LIBS}")
-
-# Static versions
-  SciGetStaticLibs("${Trilinos_LIBS}" Trilinos_STLIBS)
-  message(STATUS "[FindSciTrilinos]: Trilinos_STLIBS = ${Trilinos_STLIBS}")
-  endif ()
-
 else ()
 
-  message(STATUS "Did not find Trilinos. Use -DTRILINOS_DIR to specify the installation directory.")
+  message(STATUS "Did not find Trilinos. Use -DTrilinos_ROOT_DIR to specify the installation directory.")
 
 endif ()

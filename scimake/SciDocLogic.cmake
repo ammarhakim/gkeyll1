@@ -3,7 +3,7 @@
 # To encourage our software to use the same documentation, moving
 # functionality to a common cmake file
 #
-# $Id: SciDocLogic.cmake 1151 2011-12-17 13:51:42Z cary $
+# $Id: SciDocLogic.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
 # This script sets the following variables which are also options:
 #   ENABLE_DEVELDOCS
@@ -17,6 +17,8 @@
 # Logic can be found in bilder/README/README-docs.txt
 # Reading that document should be done if trying to understand this
 # logic
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 #####################################################################
 

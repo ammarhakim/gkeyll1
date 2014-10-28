@@ -2,10 +2,12 @@
 #
 # SciFuncsMacros: Various functions and macros used by Tech-X scimake
 #
-# $Id: SciFuncsMacros.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: SciFuncsMacros.cmake 558 2014-05-20 20:04:31Z cperry87 $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -29,7 +31,7 @@ endmacro()
 # Args:
 #   var the name of the variable
 #
-macro(SciPrintvar var)
+macro(SciPrintVar var)
   string(LENGTH "${var}" lens)
   math(EXPR lenb "35 - ${lens}")
   if (lenb GREATER 0)
@@ -49,12 +51,16 @@ macro(SciPrintCMakeResults pkg)
   # message("--------- RESULTS FOR ${pkg} ---------")
   SciPrintString("")
   SciPrintString("RESULTS FOR ${pkg}:")
-  foreach (varsfx ROOT_DIR EXECUTABLES FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES STLIBS)
+  set(sfxs ROOT_DIR CONFIG_CMAKE CONFIG_VERSION_CMAKE PROGRAMS FILES INCLUDE_DIRS MODULE_DIRS LIBFLAGS LIBRARY_DIRS LIBRARY_NAMES LIBRARIES PLUGINS STLIBS)
+  if (WIN32)
+    set(sfxs ${sfxs} DLLS)
+  elseif (APPLE)
+    set(sfxs ${sfxs} FRAMEWORK_DIRS FRAMEWORK_NAMES FRAMEWORKS)
+  endif ()
+  set(sfxs ${sfxs} DEFINITIONS)
+  foreach (varsfx ${sfxs})
     SciPrintVar(${pkg}_${varsfx})
   endforeach ()
-  if (WIN32)
-    SciPrintVar(${pkg}_DLLS)
-  endif ()
 endmacro()
 
 #

@@ -16,7 +16,7 @@
 #
 # If the libraries are still not found, we use the following search order
 # Optionally: use whatever trilinos linked against
-#   if trilinos found.(This is the VORPAL preference.)
+#   if trilinos found.
 # Optionally: use whatever PETSc linked against if PETSc
 #   found.(This is the FACETS preference.)
 # System optimized(use FCLIBS or equiv to help link):
@@ -37,14 +37,16 @@
 #
 # FindSciBlasLapack.cmake: find includes and libraries Blas and Lapack
 #
-# $Id: FindSciBlasLapack.cmake 1353 2012-06-01 18:17:27Z veitzer $
+# $Id: FindSciBlasLapack.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
-include(${SCICMAKE_DIR}/SciSeparateLibs.cmake)
+include(${SCIMAKE_DIR}/SciSeparateLibs.cmake)
 # Heading
 message("")
 message("--------- FindSciBlasLapack looking for Blas and Lapack ---------")
@@ -113,9 +115,9 @@ endif ()
 if (APPLE)
   set(BLAS_LIBRARIES ${ACCELERATE_FRAMEWORK})
 elseif (BLAS_LIBRARIES)
-  if (NOT(BLAS_LIBRARY_DIRS AND BLAS_LIBRARY_NAMES))
-    SciSeparateLibs(${BLAS_LIBRARIES} BLAS_LIBFLAGS LAPACK_LIBRARY_LIBRARIES BLAS_LIBRARY_DIRS BLAS_LIBRARY_NAMES)
-  endif ()
+#  if (NOT(BLAS_LIBRARY_DIRS AND BLAS_LIBRARY_NAMES))
+#    SciSeparateLibs(${BLAS_LIBRARIES} BLAS_LIBFLAGS LAPACK_LIBRARY_LIBRARIES BLAS_LIBRARY_DIRS BLAS_LIBRARY_NAMES)
+#  endif ()
 else ()
   if (NOT BLAS_LIBRARY_NAMES)
     set(BLAS_LIBRARY_NAMES_SAV ${BLAS_LIBRARY_NAMES})

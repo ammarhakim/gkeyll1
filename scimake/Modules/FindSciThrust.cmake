@@ -14,21 +14,20 @@
 #
 # FindSciThrust: find includes and libraries for thrust
 #
-# $Id: FindSciThrust.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciThrust.cmake 414 2013-12-17 18:47:54Z techxdave $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
 SciFindPackage(PACKAGE "Thrust"
               INSTALL_DIR "thrust"
               INSTALL_DIRS "."
-#              EXECUTABLES "."
               HEADERS "device_vector.h"
-#              LIBRARIES "."
-#              MODULES "."
-              EXECUTABLE_SUBDIRS "."
+              PROGRAM_SUBDIRS "."
               INCLUDE_SUBDIRS "."
               LIBRARY_SUBDIRS "."
               )

@@ -14,24 +14,33 @@
 #
 # FindCLapackscimake: find includes and libraries for txbase
 #
-# $Id: FindSciCLapackscimake.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciCLapackCMake.cmake 484 2014-01-26 16:39:04Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
-SciFindPackage(PACKAGE "CLapackscimake"
-              INSTALL_DIR "clapack_cmake"
-              HEADERS "clapack.h;f2c.h;blaswrap.h"
-              LIBRARIES "lapack;blas;f2c"
-              )
+set(clapack_libs "lapack;blas;")
+if (BUILD_WITH_SHARED_RUNTIME)
+  set(clapack_libs "${clapack_libs}libf2c")
+else ()
+  set(clapack_libs "${clapack_libs}f2c")
+endif ()
 
-if (CLAPACKCMAKE_FOUND)
+  SciFindPackage(PACKAGE "CLapackscimake"
+                INSTALL_DIR "clapack_cmake"
+                HEADERS "clapack.h;f2c.h;blaswrap.h"
+                LIBRARIES ${clapack_libs}
+                )
+
+if (CLAPACKSCIMAKE_FOUND)
   message(STATUS "CLapackscimake found.")
   set(HAVE_CLAPACKCMAKE 1 CACHE BOOL "Whether have CLapackscimake")
 else ()
-  message(STATUS "Did not find CLapackscimake.  Use -DCLAPACKCMAKE_DIR to specify the installation directory.")
+  message(STATUS "Did not find CLapackscimake.  Use -DCLapackscimake_ROOT_DIR to specify the installation directory.")
   if (SciCLapackscimake_FIND_REQUIRED)
     message(FATAL_ERROR "Failed")
   endif ()

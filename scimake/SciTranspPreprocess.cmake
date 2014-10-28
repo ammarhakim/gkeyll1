@@ -1,12 +1,14 @@
 ######################################################################
 #
 # SciTranspPreprocess:
-#    Macros for handling transp 
+#    Macros for handling transp
 #
-# $Id: SciTranspPreprocess.cmake 1324 2012-04-21 13:31:24Z cary $
+# $Id: SciTranspPreprocess.cmake 484 2014-01-26 16:39:04Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -24,26 +26,26 @@ macro(SciTranspPreprocess)
   set(oneValArgs PACKAGE;SUBDIR)
   set(multValArgs FPPFILES) # e.g., lists
   cmake_parse_arguments(FD "${opts}" "${oneValArgs}" "${multValArgs}" ${ARGN})
-  if(DEFINED FD_SUBDIR)
+  if (DEFINED FD_SUBDIR)
         set(trincdir ${CMAKE_CURRENT_SOURCE_DIR}/${FD_SUBDIR})
-  else()
+  else ()
         set(trincdir ${CMAKE_CURRENT_SOURCE_DIR})
-  endif()
+  endif ()
 
 #preprocess the fpp sources using transp's python script
 set(F_SOURCES)
-foreach(fpfile ${FD_FPPFILES} )
+foreach (fpfile ${FD_FPPFILES} )
   get_filename_component(fbname ${fpfile}
     NAME_WE
   )
   get_filename_component(fext ${fpfile}
     EXT
   )
-  if(fext STREQUAL ".F90")
+  if (fext STREQUAL ".F90")
     set(freeFlag "-free")
-  else()
+  else ()
     set(freeFlag "")
-  endif()
+  endif ()
   string(TOLOWER ${fext} fppfext)
   set(newfilename ${fbname}${fppfext})
   add_custom_command(
@@ -51,8 +53,8 @@ foreach(fpfile ${FD_FPPFILES} )
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/fpreproc/fppfile.py ${fpfile} ${newfilename} ${freeFlag} -I${trincdir} -I${CMAKE_SOURCE_DIR}/incl_cpp/ ${CPPFLAGS}
   )
   set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${newfilename} PROPERTIES GENERATED 1)
-  LIST(APPEND F_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${newfilename})
-endforeach()
+  list(APPEND F_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${newfilename})
+endforeach ()
 set(fsources ${FD_PACKAGE}_F_SOURCES)
 set(${fsources} ${F_SOURCES} )
 

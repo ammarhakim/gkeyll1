@@ -2,10 +2,12 @@
 #
 # FindSciQt4: find includes and libraries for Qt4
 #
-# $Id: FindSciQt4.cmake 1366 2012-06-12 17:32:19Z alexanda $
+# $Id: FindSciQt4.cmake 517 2014-02-15 22:15:44Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 # The cmake find of Qt4 needs cleaning up.
 #
@@ -22,27 +24,38 @@ message("--------- FindSciQt4 looking for Qt4 ---------")
 
 if (SciQt4_FIND_COMPONENTS)
   message(STATUS "Looking for Qt with version greater than 4.7.1 with components: ${SciQt4_FIND_COMPONENTS}")
-  find_package(Qt4 4.7.1 
-    COMPONENTS ${SciQt4_FIND_COMPONENTS}
-    REQUIRED)
+  find_package(Qt4 4.7.1 COMPONENTS ${SciQt4_FIND_COMPONENTS} REQUIRED)
 else ()
   message(STATUS "Looking for Qt with version greater than 4.7.1, components not specified")
-  find_package(Qt4 4.7.1
-    REQUIRED)
+  find_package(Qt4 4.7.1 REQUIRED)
 endif ()
 
+# Use file sets up variables
 if (DEBUG_CMAKE)
   message(STATUS "QT_USE_FILE = ${QT_USE_FILE}")
 endif ()
 include(${QT_USE_FILE})
-set(QT_INCLUDE_DIRS ${QT_INCLUDES}) # Regularize the variable the FindQt4 sets
-message(STATUS "QT_INCLUDE_DIR = ${QT_INCLUDE_DIR}")
-message(STATUS "QT_INCLUDE_DIRS = ${QT_INCLUDE_DIRS}")
-message(STATUS "QT_LIBRARY_DIR = ${QT_LIBRARY_DIR}")
-message(STATUS "QT_EXECUTABLE_DIRS = ${QT_EXECUTABLE_DIRS}")
-message(STATUS "QT_LIBRARIES = ${QT_LIBRARIES}")
+# Regularize the variable the FindQt4 sets
+set(QT_INCLUDE_DIRS ${QT_INCLUDES})
+set(QT_LIBRARY_DIRS ${QT_LIBRARY_DIR})
+if (EXISTS ${QT_BINARY_DIR}/qmake)
+  set(QT_QMAKE_EXECUTABLE ${QT_BINARY_DIR}/qmake)
+endif ()
+set(QT_PROGRAMS
+  ${QT_QMAKE_EXECUTABLE}
+  ${QT_MOC_EXECUTABLE}
+  ${QT_UIC_EXECUTABLE}
+)
+
+# Add in optional libaries to QT_LIBARIES, if they are found
+foreach (qtoptlib ${QT_OPTIONAL_LIBRARIES})
+ string(TOUPPER ${qtoptlib} _uppercaseoptlib )
+ if (QT_${_uppercaseoptlib}_FOUND)
+   set(QT_LIBRARIES ${QT_LIBRARIES} ${QT_${_uppercaseoptlib}_LIBRARY})
+ endif ()
+endforeach ()
+
 get_filename_component(QT_DIR ${QT_LIBRARY_DIR}/.. REALPATH)
-message(STATUS "QT_DIR = ${QT_DIR}")
 
 # The QT_LIBRARIES variable can come back from scimake's FindQt4
 # with a list of libary paths mixed in with the words
@@ -59,23 +72,24 @@ else ()
       set(libtype ${qtlib})
     else ()
       if ("${libtype}" MATCHES "optimized" AND
-("${CMAKE_BUILD_TYPE}" MATCHES "Release" OR
-                                          "${CMAKE_BUILD_TYPE}" MATCHES "RELEASE" OR
-                                          "${CMAKE_BUILD_TYPE}" MATCHES "RelWithDebInfo" OR
-                                          "${CMAKE_BUILD_TYPE}" MATCHES "RELWITHDEBINFO")
-                                 )
+           ("${CMAKE_BUILD_TYPE}" MATCHES "Release" OR
+               "${CMAKE_BUILD_TYPE}" MATCHES "RELEASE" OR
+               "${CMAKE_BUILD_TYPE}" MATCHES "RelWithDebInfo" OR
+               "${CMAKE_BUILD_TYPE}" MATCHES "RELWITHDEBINFO"
+           )
+         )
         set(QT_LIBS ${QT_LIBS} ${qtlib})
       elseif ("${libtype}" MATCHES "debug" AND
-("${CMAKE_BUILD_TYPE}" MATCHES "Debug" OR
-                                                          "${CMAKE_BUILD_TYPE}" MATCHES "DEBUG")
-                                                 )
+               ("${CMAKE_BUILD_TYPE}" MATCHES "Debug" OR
+                 "${CMAKE_BUILD_TYPE}" MATCHES "DEBUG")
+               )
         set(QT_LIBS ${QT_LIBS} ${qtlib})
       endif ()
     endif ()
   endforeach ()
 endif ()
-message(STATUS "QT_LIBS = ${QT_LIBS}")
 
+# Find dlls
 if (WIN32)
   set(QT_DLLS)
   foreach (qtlib ${QT_LIBS})
@@ -86,8 +100,15 @@ if (WIN32)
       message(STATUS "${qtname} has no dll.")
     endif ()
   endforeach ()
-  message(STATUS "QT_DLLS = ${QT_DLLS}")
 endif ()
+
+# Print results
+SciPrintCMakeResults(QT)
+SciPrintVar(QT_LIBS)
+SciPrintVar(QT_QMAKE_EXECUTABLE)
+SciPrintVar(QT_MOC_EXECUTABLE)
+SciPrintVar(QT_UIC_EXECUTABLE)
 
 message("--------- FindSciQt4 done with Qt4 -----------")
 message("")
+

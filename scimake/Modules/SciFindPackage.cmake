@@ -1,82 +1,80 @@
 ######################################################################
 #
-# SciFindPackage: find includes and libraries of a package
+# Variables that change the behavior of this script
 #
-# $Id: SciFindPackage.cmake 1285 2012-03-05 20:50:05Z cary $
-#
-# Copyright 2010-2012 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
-######################################################################
-#
-# Variables which can be used to change the behavior of this script
-#
-# Where "scipkgreg" is the regularized package name
-#(package name with all "." and "-" replaced with "_")
-# Where "scipkguc" is the UPPERCASE regularized package name
+#  Some variables use scipkguc, and some use scipkgreg.  See
+#  http://www.cmake.org/pipermail/cmake/2004-July/005283.html.
+#    "scipkgreg" is the regularized package name
+#      (package name with all "." and "-" replaced with "_")
+#    "scipkguc" is the UPPERCASE regularized package name
 #
 #  DEBUG_CMAKE - if true, outputs verbose debugging information
-#(default false)
+#  (default false)
 #
-#  ENABLE_${scipkguc} - if false, will not search for package
-#(default true)
+#  ENABLE_${scipkguc} (default = true) - if false, will not search for package
 #  DISABLE_${scipkguc} - if true, sets ENABLE_${scipkguc} to false
 #
 #  ${scipkgreg}_FIND_QUIETLY - if true, will succeed silently
-#(default - not defined, which is treated as false)
+#  (default - not defined, which is treated as false)
 #
-#  ${scipkgreg}_FIND_REQUIRED - if true, will issue a fatal error if
-#    package not found
-#(default - not defined, which is treated as false)
+#  ${scipkgreg}_FIND_REQUIRED (default = false) - if true, will issue a
+#    fatal error if #    package not found
 #
 #  ${scipkgreg}_ROOT_DIR - search directory hints
-#    ${scipkguc}_DIR, ${scipkgreg}_DIR: Deprecated search directory hints 
-#    (to be retired in July 2012)
 #
 #  SUPRA_SEARCH_PATH - used to specify various top-level search directories
 #
 ######################################################################
 #
-#  Variables which will be defined by this script
-#  In the event that a variable has no valid value, it will be set to
-#   "${varname}-NOTFOUND"
-#
-#  NOTE: Some variables use scipkguc, and some use scipkgreg.
-#    Caveat emptor.
+#  Variables defined by this script
+#    (In the event that a variable has no valid value, it is set to
+#    "${varname}-NOTFOUND")
 #
 #    ${scipkguc}_FOUND - true if package found
 #
-#  EXECUTABLES:
-#    ${scipkgreg}_EXECUTABLES - list of found executables, including full
+#  PROGRAMS:
+#    ${scipkgreg}_PROGRAMS - list of found executables, including full
 #      path to each.  Only defined for specifically requested executables.
 #    ${scipkgreg}_yyy - full name & path to executable "yyy"
 #      Only defined for specifically requested executables.
-#
-#  FILES:
-#    ${scipkgreg}_FILES - list of found files, including a full path to each
-#    ${scipkgreg}_yyy - full name and path to file "yyy"
-#
-#  MODULES:
-#    ${scipkgreg}_MODULE_DIRS - a list of all module directories found
-#    ${scipkgreg}_yyy_MOD - full path to individual module yyy.{mod,MOD}
-#      Only defined for specifically requested modules
 #
 #  HEADERS:
 #    ${scipkgreg}_INCLUDE_DIRS - a list of all include directories found
 #    ${scipkgreg}_yyy - full path to individual header yyy
 #      Only defined for specifically requested headers
 #
+#  MODULES:
+#    ${scipkgreg}_MODULE_DIRS - a list of all module directories found
+#    ${scipkgreg}_yyy_MOD - full path to individual module yyy.{mod,MOD}
+#      Only defined for specifically requested modules
+#
 #  LIBRARIES:
 #    ${scipkgreg}_{library_name}_LIBRARY - full path to the individual
 #      $library_name library. Only defined for specifically requested libraries.
 #    ${scipkgreg}_LIBRARIES - list of found libraries, including full path to
 #      each.  Only defined for specifically requested libraries.
-#   ${scipkgreg}_STLIBS - list of all found static libraries.
+#    ${scipkgreg}_STLIBS - list of all found static libraries.
 #      Only defined for libraries existing in ${scipkgreg}_LIBRARIES
-#   ${scipkgreg}_DLLS - windows only, list of all found dlls
+#    ${scipkgreg}_DLLS - windows only, list of all found dlls
 #      Only defined for libraries existing in ${scipkgreg}_LIBRARIES
 #
+#  FILES:
+#    ${scipkgreg}_FILES - list of found files, including a full path to each
+#    ${scipkgreg}_yyy - full name and path to file "yyy"
+#
 #######################################################################
+
+######################################################################
+#
+# SciFindPackage: find includes and libraries of a package
+#
+# $Id: SciFindPackage.cmake 544 2014-04-07 20:28:38Z jrobcary $
+#
+# Copyright 2010-2013 Tech-X Corporation.
+# Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 
 # SciGetStaticLibs
 #
@@ -89,7 +87,7 @@
 # origlibs: the original libraries
 # statlibsvar: the variable holding the static libs when found
 #
-FUNCTION(SciGetStaticLibs origlibs statlibsvar)
+function(SciGetStaticLibs origlibs statlibsvar)
   # set(origlibs ${${origlibsvar}})
   set(statlibs)
   if (DEBUG_CMAKE)
@@ -196,7 +194,7 @@ FUNCTION(SciGetStaticLibs origlibs statlibsvar)
     message(STATUS "[SciFindPackage]: static libs = ${statlibs}.")
   endif ()
   set(${statlibsvar} ${statlibs} PARENT_SCOPE)
-ENDFUNCTION()
+endfunction()
 
 # SciGetRealDir
 #
@@ -209,7 +207,8 @@ ENDFUNCTION()
 #  canddir: the variable holding the directory candidate
 #  realdirvar: the variable holding the directory after following any shortcuts
 #
-FUNCTION(SciGetRealDir canddir realdirvar)
+function(SciGetRealDir canddir realdirvar)
+
   # MESSAGE("realdirvar = ${realdirvar}.")
   set(${realdirvar})
   if (canddir)
@@ -234,54 +233,431 @@ FUNCTION(SciGetRealDir canddir realdirvar)
     endif ()
   endif ()
   set(${realdirvar} ${rd} PARENT_SCOPE)
-ENDFUNCTION()
+endfunction()
+
+# SciGetInstSubdirs
+#
+# Given a package name, set the possible installation subdirs
+#
+# Args:
+#  pkgnamelc: the variable holding the package name in lower case
+#  instdirsvar: the variable holding possible installation directories
+#
+function(SciGetInstSubdirs pkgnamelc instdirsvar)
+  if (DEBUG_CMAKE)
+    message(STATUS "SciGetInstSubdirs called with pkgname = ${pkgname} and instdirsvar = ${instdirsvar}.")
+    message(STATUS "${pkgname}_ROOT_DIR = ${${pkgname}_ROOT_DIR}.")
+    message(STATUS "USE_CC4PY_LIBS = ${USE_CC4PY_LIBS}.")
+    message(STATUS "USE_SHARED_LIBS = ${USE_SHARED_LIBS}.")
+  endif ()
+  if (ENABLE_PARALLEL)
+    if (USE_SHARED_LIBS)
+      set(instdirs ${pkgnamelc}-parsh)
+    else ()
+      set(instdirs ${pkgnamelc}-par ${pkgnamelc}-ben)
+    endif ()
+  else ()
+    if (USE_CC4PY_LIBS)
+      set(instdirs ${pkgnamelc}-cc4py ${pkgnamelc}-sersh)
+      if (WIN32)
+        set(instdirs ${instdirs} ${pkgnamelc}-sermd)
+      else ()
+        set(instdirs ${instdirs} ${pkgnamelc})
+      endif ()
+    elseif (USE_SHARED_LIBS)
+      set(instdirs ${pkgnamelc}-sersh)
+      if (WIN32)
+        set(instdirs ${instdirs} ${pkgnamelc}-sermd)
+      else ()
+        set(instdirs ${instdirs} ${pkgnamelc})
+      endif ()
+    elseif (BUILD_WITH_SHARED_RUNTIME)
+      set(instdirs ${pkgnamelc}-sermd ${pkgnamelc})
+    else ()
+      set(instdirs ${pkgnamelc})
+    endif ()
+  endif ()
+  # message(STATUS "SciGetInstSubdirs finds instdirs = ${instdirs}.")
+  set(${instdirsvar} ${instdirs} PARENT_SCOPE)
+endfunction()
+
+# SciGetRootPath
+#
+# Construct a path, collection of directories, that one is to search
+# to find the root dir.
+#
+# Args:
+#  pkgname: the variable holding the package name with regular capitalization
+#  instsubdirs: possible installation subdirs
+#  rootpathvar: on output, holds possible installation directories
+#
+function(SciGetRootPath pkgname instsubdirs rootpathvar)
+
+# Get the installation subdirs
+  # string(TOLOWER ${pkgname} pkgnamelc)
+  # SciGetInstSubdirs(${pkgnamelc} instsubdirs)
+  if (DEBUG_CMAKE)
+    message(STATUS "SciGetRootPath: instsubdirs = ${instsubdirs}.")
+  endif ()
+  string(TOUPPER ${pkgname} pkgnameuc)
+
+# Find the possible directories and put them into path
+# Order: command-line define, environment variable, supra-search-path subdirs,
+# supra-search-path dirs
+  if (DEBUG_CMAKE)
+    message(STATUS "${pkgname}_ROOT_DIR = ${${pkgname}_ROOT_DIR}.")
+    message("[SciFindPackage] SUPRA_SEARCH_PATH = ${SUPRA_SEARCH_PATH}")
+  endif ()
+  set(rootpath)
+
+# Command-line define overrides all.
+  if (${pkgname}_ROOT_DIR)
+    SciGetRealDir(${${pkgname}_ROOT_DIR} rootpath)
+  else ()
+    if (${pkgname}_DIR)
+# JRC 20120617: Remove this July 31, 2012.
+      message(STATUS "${pkgname}_DIR = ${${pkgname}_DIR}.")
+      message(FATAL_ERROR "Use of ${pkgname}_DIR define is removed.  Please use ${pkgname}_ROOT_DIR")
+      # SciGetRealDir(${${pkgname}_DIR} rootpath)
+    endif ()
+# The deprecated variable name is commonly ${scipkguc}_DIR
+# MD 20120619: Remove this July 31, 2012.
+    if (${pkgnameuc}_DIR)
+      message(STATUS "${pkgnameuc}_DIR = ${${pkgnameuc}_DIR}.")
+      message(FATAL_ERROR "Use of ${pkgnameuc}_DIR define is removed.  Please use ${pkgname}_ROOT_DIR")
+      # SciGetRealDir(${${pkgnameuc}_DIR} rootpath)
+    endif ()
+  endif ()
+  if (DEBUG_CMAKE)
+    message(STATUS "${pkgname}_ROOT_DIR = ${${pkgname}_ROOT_DIR}.")
+    message(STATUS "USE_CC4PY_LIBS = ${USE_CC4PY_LIBS}.")
+    message(STATUS "USE_SHARED_LIBS = ${USE_SHARED_LIBS}.")
+  endif ()
+
+# Next try environment variable.  Should this be appended regardless?
+  if (NOT DEFINED ${rootpath})
+    if ($ENV{${pkgname}_ROOT_DIR})
+      SciGetRealDir($ENV{${pkgname}_ROOT_DIR} rootpath)
+    else ()
+      if ($ENV{${pkgname}_DIR})
+# JRC 20120617: Remove this July 31, 2012.
+        message(FATAL_ERROR "Use of ${pkgname}_DIR environment variable is removed .  Please use ${pkgname}_ROOT_DIR")
+        # SciGetRealDir($ENV{${pkgname}_DIR} rootpath)
+      endif ()
+      if ($ENV{${pkgnameuc}_DIR})
+# MD 20120619: Remove this July 31, 2012.
+        message(FATAL_ERROR"Use of ${pkgnameuc}_DIR environment variable is removed.  Please use ${pkgname}_ROOT_DIR")
+        # SciGetRealDir($ENV{${pkgnameuc}_DIR} rootpath)
+      endif ()
+    endif ()
+  endif ()
+  if (DEBUG_CMAKE)
+    message(STATUS "After looking for ${pkgname}_ROOT_DIR in the environment, rootpath = ${rootpath}.")
+  endif ()
+
+# Supra-search-path dirs
+  foreach (instdir ${instsubdirs})
+    foreach (spdir ${SUPRA_SEARCH_PATH})
+      set(idir ${spdir}/${instdir})
+      if (EXISTS ${idir})
+        SciGetRealDir(${idir} scidir)
+        set(rootpath ${rootpath} ${scidir})
+      endif ()
+    endforeach (spdir ${SUPRA_SEARCH_PATH})
+  endforeach ()
+
+# Supra-search-path dirs
+  foreach (spdir ${SUPRA_SEARCH_PATH})
+    set(idir ${spdir})
+    if (EXISTS ${idir})
+      SciGetRealDir(${idir} scidir)
+      set(rootpath ${rootpath} ${scidir})
+    endif ()
+  endforeach (spdir ${SUPRA_SEARCH_PATH})
+
+# Any found?
+  list(LENGTH rootpath rootpathlen)
+  if (DEBUG_CMAKE)
+    if (rootpathlen)
+      list(REMOVE_DUPLICATES rootpath)
+      message(STATUS "rootpath = ${rootpath}")
+    else ()
+      message(FATAL_ERROR "rootpath is empty.")
+    endif ()
+  endif ()
+
+# Return value
+  set(${rootpathvar} ${rootpath} PARENT_SCOPE)
+endfunction()
+
+# SciFindPkgFiles
+#
+# Find the files of a type for a package.
+#
+# Args:
+#  pkgname: the variable holding the package name with regular capitalization
+#  pkgfiles: the files to search for
+#  rootpath: contains possible installation root directories
+#  filesubdirs: possible file subdirs
+#  singularsfx: singular version of the file type
+#  pluralsfx: plural version of the file type
+#  allfoundvar: whether all files were found
+#  allowdups: whether duplicates are allowed in list
+#
+function(SciFindPkgFiles pkgname pkgfiles
+  rootpath filesubdirs
+  singularsfx pluralsfx allfoundvar)
+
+  if (DEBUG_CMAKE)
+    message(STATUS "Looking for files of type, ${singularsfx} under ${rootpath} with filesubdirs = ${filesubdirs}.")
+  endif ()
+
+# Set the package path
+
+# Loop over list of executables and try to find each one
+  set(abspkgfiles)
+  set(pkgdirs)
+  set(allfound TRUE)
+  foreach (pkgfile ${pkgfiles})
+
+# Get real name
+    if (${singularsfx} STREQUAL MODULE)
+      if (NOT SCI_FC_MODULE_SUFFIX)
+        message(FATAL_ERROR "SCI_FC_MODULE_SUFFIX not set.  Fortran compiler defined?")
+      endif ()
+      set(realpkgfile ${pkgfile}.${SCI_FC_MODULE_SUFFIX})
+    elseif (${singularsfx} STREQUAL DLL)
+      set(realpkgfile ${pkgfile}.dll)
+    else ()
+      set(realpkgfile ${pkgfile})
+    endif ()
+
+# Create the variable that's specific to this executable
+    string(REGEX REPLACE "[./-]" "_" pkgfilevar ${realpkgfile})
+    set(pkgfilevar ${pkgname}_${pkgfilevar})
+    set(pkgfilevarfile)
+    if (${singularsfx} STREQUAL LIBRARY)
+      set(pkgfilevar ${pkgfilevar}_LIBRARY)
+    elseif (${singularsfx} STREQUAL INCLUDE)
+      set(pkgfilevarfile ${pkgfilevar})
+      set(pkgfilevar ${pkgfilevar}_INCLUDE_DIR)
+    endif ()
+    if (DEBUG_CMAKE)
+      message(STATUS "Searching for pkgfile = ${pkgfile}.")
+    endif ()
+
+# First look in specified path
+    set(basesrchargs ${pkgfilevar} ${realpkgfile})
+    set(pkgfiledir)
+    set(fullsrchargs "${basesrchargs}"
+      PATHS "${rootpath}"
+      PATH_SUFFIXES "${filesubdirs}"
+      NO_DEFAULT_PATH
+    )
+    if (DEBUG_CMAKE)
+      message(STATUS "fullsrchargs = ${fullsrchargs}.")
+    endif ()
+    if (${singularsfx} STREQUAL PROGRAM)
+      find_program(${fullsrchargs}
+        DOC " The ${realpkgfile} ${singularsfx} file"
+      )
+    elseif (${singularsfx} STREQUAL INCLUDE)
+      find_path(${fullsrchargs}
+        DOC " Directory containing the ${realpkgfile} ${singularsfx}"
+      )
+      if (${pkgfilevar})
+        set(pkgfiledir ${${pkgfilevar}})
+        set(${pkgfilevarfile} ${pkgfiledir}/${realpkgfile})
+      endif ()
+    elseif (${singularsfx} STREQUAL LIBRARY)
+      find_library(${fullsrchargs}
+        DOC " The ${realpkgfile} ${singularsfx} file"
+      )
+    else ()
+      find_file(${fullsrchargs}
+        DOC " The ${realpkgfile} ${singularsfx} file"
+      )
+    endif ()
+    if (DEBUG_CMAKE)
+      message(STATUS "From first search: ${pkgfilevar} = ${${pkgfilevar}}.")
+    endif ()
+
+# If not found, try again with default paths
+    if (NOT ${pkgfilevar})
+      if (DEBUG_CMAKE)
+        message(STATUS "Failed to find ${realpkgfile} in search path, trying default paths.")
+      endif ()
+      if (${singularsfx} STREQUAL PROGRAM)
+        find_program(${basesrchargs}
+          DOC " The ${realpkgfile} ${singularsfx} file"
+        )
+      elseif (${singularsfx} STREQUAL INCLUDE)
+        find_path(${basesrchargs}
+          DOC " Directory containing the ${realpkgfile} ${singularsfx}"
+        )
+        if (${pkgfilevar})
+          set(pkgfiledir ${${pkgfilevar}})
+          set(${pkgfilevarfile} ${pkgfiledir}/${realpkgfile})
+        endif ()
+      elseif (${singularsfx} STREQUAL LIBRARY)
+        find_library(${basesrchargs}
+          DOC " The ${realpkgfile} ${singularsfx} file"
+        )
+      else ()
+        find_file(${basesrchargs}
+          DOC " The ${realpkgfile} ${singularsfx} file"
+        )
+      endif ()
+      if (DEBUG_CMAKE)
+        message(STATUS "From second search: ${pkgfilevar} = ${${pkgfilevar}}.")
+      endif ()
+    endif ()
+
+    if (${pkgfilevar})
+# Add to list of all files of this type for this package
+      set(abspkgfiles ${abspkgfiles} ${${pkgfilevar}})
+      if (NOT pkgfiledir)
+        get_filename_component(pkgfiledir ${${pkgfilevar}}/.. REALPATH)
+      endif ()
+      if (${singularsfx} STREQUAL INCLUDE)
+        set(${pkgfilevar} ${pkgfiledir}
+          CACHE STRING " Directory containing ${pkgfiledir}"
+        )
+        set(${pkgfilevarfile} ${${pkgfilevarfile}}
+          CACHE STRING " Full path to ${realpkgfile}}"
+        )
+      endif ()
+      set(pkgdirs ${pkgdirs} ${pkgfiledir})
+    else ()
+# The WARNING option will actually give a scimake stack trace.
+# Not wanted, so use NO option, and start the string with WARNING
+      message("WARNING - Unable to locate file, ${realpkgfile}.")
+      set(allfound FALSE)
+    endif ()
+  endforeach ()
+
+# Clean up the lists of files and directories
+  list(LENGTH abspkgfiles numpkgfiles)
+  if (${numpkgfiles})
+    if (NOT ${ALLOWDUPS})
+      list(REMOVE_DUPLICATES abspkgfiles)
+    endif ()
+    list(REMOVE_DUPLICATES pkgdirs)
+  endif ()
+
+# For libraries, get names
+  if (${singularsfx} STREQUAL LIBRARY)
+    set(pkgfilenames)
+    foreach (pkgfile ${abspkgfiles})
+      get_filename_component(pkgfilename ${pkgfile} NAME_WE)
+      string(REGEX REPLACE "^lib" "" pkgfilename "${pkgfilename}")
+      set(pkgfilenames ${pkgfilenames} ${pkgfilename})
+    endforeach ()
+  endif ()
+
+# Print results if in debug mode
+  if (DEBUG_CMAKE)
+    message(STATUS "Setting:")
+    message(STATUS "  ${pkgname}_${pluralsfx} = ${abspkgfiles}.")
+    if (${singularsfx} STREQUAL LIBRARY)
+      message(STATUS "  ${pkgname}_${singularsfx}_NAMES = ${pkgfilenames}.")
+    endif ()
+    message(STATUS "  ${pkgname}_${singularsfx}_DIRS = ${pkgdirs}.")
+  endif ()
+
+# Set the return vars
+  set(${pkgname}_${pluralsfx} ${abspkgfiles}
+    CACHE STRING " List of all files of type, ${singularsfx}, for ${pkgname}"
+  )
+  set(${pkgname}_${singularsfx}_DIRS ${pkgdirs}
+    CACHE STRING " List of all directories for files of type, ${singularsfx}, for ${pkgname}"
+  )
+  if (${singularsfx} STREQUAL LIBRARY)
+    set(${pkgname}_${singularsfx}_NAMES ${pkgfilenames}
+      CACHE STRING " List of all file names for files of type, ${singularsfx}, for ${pkgname}"
+    )
+    set(${pkgname}_${singularsfx}_NAMES ${pkgfilenames} PARENT_SCOPE)
+  endif ()
+  set(${pkgname}_${pluralsfx} ${abspkgfiles} PARENT_SCOPE)
+  set(${pkgname}_${singularsfx}_DIRS ${pkgdirs} PARENT_SCOPE)
+  set(${allfoundvar} ${allfound} PARENT_SCOPE)
+
+endfunction()
 
 #
 # SciFindPackage
 #
 # Args:
+# NOPRINT: Do not print the results
 # PACKAGE: the prefix for the defined variables
 # INSTALL_DIRS: the names for the installation subdirectory.  Defaults
 #   to lower cased scipkgname
-# EXECUTABLES: the executables to look for
+# PROGRAMS: the executables to look for
 # HEADERS: the header files to look for.
 # LIBRARIES: the libraries
+# FILES: other files to look for
 # MODULES: Fortran module files
-# EXECUTABLE_SUBDIRS: executable subdirs
+# PROGRAM_SUBDIRS: executable subdirs
 # INCLUDE_SUBDIRS: include subdirectories
 # LIBRARY_SUBDIRS: library subdirectories
+# FILE_SUBDIRS: file subdirectories
 #
 # NOTE: One cannot reset calling variables
 # NOTE: lists should be delimited by semicolons.
 #(which is the default format used by scimake)
 #
+
 include(CMakeParseArguments)
 macro(SciFindPackage)
+# Set default values
+  set(TFP_FIND_QUIETLY)
   CMAKE_PARSE_ARGUMENTS(TFP
-    ""
-    "PACKAGE;INSTALL_DIR"
-    "INSTALL_DIRS;EXECUTABLES;HEADERS;LIBRARIES;FILES;MODULES;EXECUTABLE_SUBDIRS;INCLUDE_SUBDIRS;MODULE_SUBDIRS;LIBRARY_SUBDIRS;FILE_SUBDIRS"
+    "FIND_QUIETLY;ALLOW_LIBRARY_DUPLICATES;FIND_CONFIG_FILE;CONFIG_FILE_ONLY;USE_CONFIG_FILE"
+    "PACKAGE;INSTALL_DIR;CONFIG_FILE_NAME"
+    "INSTALL_DIRS;PROGRAMS;HEADERS;LIBRARIES;FILES;MODULES;CONFIG_SUBDIRS;PROGRAM_SUBDIRS;INCLUDE_SUBDIRS;MODULE_SUBDIRS;LIBRARY_SUBDIRS;FILE_SUBDIRS;ALLOW_LIBRARY_DUPLICATES"
     ${ARGN}
   )
 
-  # This message is purposefully NOT a STATUS message
-  # To provide more readable output
-  message("")
-  message("--------- SciFindPackage looking for ${TFP_PACKAGE} ---------")
+  set(TFP_DLL_SUBDIRS ${TFP_PROGRAM_SUBDIRS} bin lib .)
+
+# This message is purposefully NOT a STATUS message
+# To provide more readable output
+  if (NOT DEBUG_CMAKE AND TFP_FIND_QUIETLY)
+    message(STATUS "Looking for ${TFP_PACKAGE}.")
+  else ()
+    message("")
+    message("--------- SciFindPackage looking for ${TFP_PACKAGE} ---------")
+  endif ()
 
   if (DEBUG_CMAKE)
-    message(STATUS "Using verbose options")
+    message(STATUS "Outputting debug information.")
+    message(STATUS "${TFP_PACKAGE}_ROOT_DIR=${${TFP_PACKAGE}_ROOT_DIR}")
     message(STATUS "SciFindPackage called with arguments:
-    PACKAGE = ${TFP_PACKAGE}
-    INSTALL_DIR = ${TFP_INSTALL_DIR}
-    INSTALL_DIRS = ${TFP_INSTALL_DIRS}
-    EXECUTABLES = ${TFP_EXECUTABLES}
-    HEADERS = ${TFP_HEADERS}
-    LIBRARIES = ${TFP_LIBRARIES}
-    MODULES = ${TFP_MODULES}
-    EXECUTABLE_SUBDIRS = ${TFP_EXECUTABLE_SUBDIRS}
-    INCLUDE_SUBDIRS = ${TFP_INCLUDE_SUBDIRS}
-    LIBRARY_SUBDIRS = ${TFP_LIBRARY_SUBDIRS}")
+      PACKAGE          = ${TFP_PACKAGE}
+      CONFIG_FILE_NAME = ${TFP_CONFIG_FILE_NAME}
+      INSTALL_DIR      = ${TFP_INSTALL_DIR}
+      INSTALL_DIRS     = ${TFP_INSTALL_DIRS}
+      PROGRAMS         = ${TFP_PROGRAMS}
+      HEADERS          = ${TFP_HEADERS}
+      LIBRARIES        = ${TFP_LIBRARIES}
+      MODULES          = ${TFP_MODULES}
+      CONFIG_SUBDIRS   = ${TFP_CONFIG_SUBDIRS}
+      PROGRAM_SUBDIRS  = ${TFP_PROGRAM_SUBDIRS}
+      INCLUDE_SUBDIRS  = ${TFP_INCLUDE_SUBDIRS}
+      LIBRARY_SUBDIRS  = ${TFP_LIBRARY_SUBDIRS}
+      FILE_SUBDIRS     = ${TFP_FILE_SUBDIRS}
+      FIND_QUIETLY     = ${TFP_FIND_QUIETLY}
+      ALLOW_LIBRARY_DUPLICATES = ${TFP_ALLOW_LIBRARY_DUPLICATES}
+      FIND_CONFIG_FILE = ${TFP_USE_CONFIG_FILE}
+      CONFIG_FILE_ONLY = ${TFP_CONFIG_FILE_ONLY}
+      USE_CONFIG_FILE  = ${TFP_USE_CONFIG_FILE}"
+    )
+  endif ()
+
+  if (${TFP_PACKAGE}_FOUND)
+    if (DEBUG_CMAKE)
+      message(STATUS "Already found this package, skipping...")
+    endif ()
   endif ()
 
 # Construct various names(upper/lower case) for package
@@ -305,729 +681,219 @@ macro(SciFindPackage)
     endif ()
     return()
   endif ()
+# Set to true until not something not found
+  set(${scipkguc}_FOUND TRUE)
   string(TOLOWER ${scipkgreg} scipkglc)
   set(scipkginst ${TFP_INSTALL_DIR} ${TFP_INSTALL_DIRS})
   if (NOT scipkginst)
-    set(scipkginst ${scipkginst} ${scipkglc})
+    SciGetInstSubdirs(${scipkglc} scipkginst)
   endif ()
   if (DEBUG_CMAKE)
     message(STATUS "scipkginst = ${scipkginst}.")
   endif ()
 
-# Find the possible directories and put them into path
-# Order: command-line define, environment variable, supra-search-path subdirs,
-# supra-search-path dirs
+# Find the set of possible root installation dirs
+  SciGetRootPath(${scipkgreg} "${scipkginst}" scipath)
   if (DEBUG_CMAKE)
-    message("SciFindPackage] SUPRA_SEARCH_PATH = ${SUPRA_SEARCH_PATH}")
-  endif ()
-  set(scipath)
-# Command-line define overrides all.
-  if (${scipkgreg}_ROOT_DIR)
-    if (DEBUG_CMAKE)
-      message(STATUS "${scipkgreg}_ROOT_DIR = ${${scipkgreg}_ROOT_DIR}.")
-    endif ()
-    SciGetRealDir(${${scipkgreg}_ROOT_DIR} scipath)
-  elseif (${scipkgreg}_DIR)
-# JRC 20120617: Remove this July 31, 2012.
-    message(WARNING "Use of ${scipkgreg}_DIR define is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
-    SciGetRealDir(${${scipkgreg}_DIR} scipath)
-  elseif (${scipkguc}_DIR)
-# The deprecated variable name is commonly ${scipkguc}_DIR, so check for that too
-# MD 20120619: Remove this July 31, 2012.
-    message(WARNING "Use of ${scipkguc}_DIR define is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
-    SciGetRealDir(${${scipkguc}_DIR} scipath)
-  elseif (DEBUG_CMAKE)
-    message(STATUS "Neither ${scipkgreg}_ROOT_DIR, ${scipkgreg}_DIR, nor ${scipkguc}_DIR defined.")
-  endif ()
-  if (NOT DEFINED ${scipath})
-    if ($ENV{${scipkgreg}_ROOT_DIR})
-      SciGetRealDir($ENV{${scipkgreg}_ROOT_DIR} scipath)
-    elseif ($ENV{${scipkgreg}_DIR})
-# JRC 20120617: Remove this July 31, 2012.
-      message(WARNING "Use of ${scipkgreg}_DIR environment variable is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
-      SciGetRealDir($ENV{${scipkgreg}_DIR} scipath)
-    elseif ($ENV{${scipkguc}_DIR})
-# MD 20120619: Remove this July 31, 2012.
-      message(WARNING "Use of ${scipkguc}_DIR environment variable is deprecated.  Please use ${scipkgreg}_ROOT_DIR")
-      SciGetRealDir($ENV{${scipkguc}_DIR} scipath)
-    endif ()
-  endif ()
-# Next try environment variable
-# Supra-search-path dirs
-  foreach (instdir ${scipkginst})
-    foreach (spdir ${SUPRA_SEARCH_PATH})
-      set(idir ${spdir}/${instdir})
-      if (EXISTS ${idir})
-        SciGetRealDir(${idir} scidir)
-        set(scipath ${scipath} ${scidir})
-      endif ()
-    endforeach (spdir ${SUPRA_SEARCH_PATH})
-  endforeach ()
-# Supra-search-path dirs
-  foreach (spdir ${SUPRA_SEARCH_PATH})
-    set(idir ${spdir})
-    if (EXISTS ${idir})
-      SciGetRealDir(${idir} scidir)
-      set(scipath ${scipath} ${scidir})
-    endif ()
-  endforeach (spdir ${SUPRA_SEARCH_PATH})
-# Any found?
-  list(LENGTH scipath scipathlen)
-  if (DEBUG_CMAKE)
-    if (NOT scipathlen)
-      message(FATAL_ERROR "scipath is empty.")
-    else ()
-      message(STATUS "scipath = ${scipath}")
-    endif ()
+    message(STATUS "scipath = ${scipath}")
   endif ()
 
 #######################################################################
 #
-# Look for EXECUTABLES
+# Look for cmake configuration files
 # Variables defined:
-#   XXX_YYY - CACHED
-#     Where to find the YYY tool that comes with XXX.
-#   XXX_EXECUTABLES - CACHED
-#     List of all executables found for package XXX.
+#   Xxx_CONFIG_FILE: path to the PkgConfig.cmake
+#   Xxx_CONFIG_VERSION_FILE: path to the PkgConfigVersion.cmake
 #
 #######################################################################
 
-# Create the search paths
-  string(LENGTH "${TFP_EXECUTABLES}" sciexecslen)
-  if (${sciexecslen})
-    string(LENGTH "${TFP_EXECUTABLE_SUBDIRS}" scilen)
-    if (${scilen})
-      set(sciexecsubdirs ${TFP_EXECUTABLE_SUBDIRS})
+  if (TFP_FIND_CONFIG_FILE OR TFP_USE_CONFIG_FILE OR TFP_CONFIG_FILE_ONLY)
+
+# Get the config file
+    set(sciconfigcmvar "${scipkgreg}_CONFIG_CMAKE")
+    if (CONFIG_FILE_NAMES)
+      set(confnames ${CONFIG_FILE_NAMES})
     else ()
-# Here we use the default search directory "bin"
-      set(sciexecsubdirs bin)
+      set(confnames ${scipkgreg}Config.cmake ${scipkglc}-config.cmake)
     endif ()
-
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for executables under ${scipath} with subdirs, ${sciexecsubdirs}")
-    endif ()
-
-# Clear the list of executable dirs
-# As we loop over the executables, we will add every new directory to the list
-# And afterwards, we'll remove duplicates
-    set(${scipkgreg}_EXECUTABLES)
-    set(${scipkgreg}_FOUND_SOME_EXECUTABLE FALSE)
-
-# Loop over list of executables and try to find each one
-    foreach (sciexec ${TFP_EXECUTABLES})
-
-# Create the variable that's specific to this executable
-      string(REGEX REPLACE "[./-]" "_" sciexecvar ${sciexec})
-      set(sciexecvar ${scipkgreg}_${sciexecvar})
-      if (DEBUG_CMAKE)
-        message(STATUS "Calling FIND_PROGRAM with sciexec = ${sciexec}")
-        message(STATUS "Calling FIND_PROGRAM with paths = ${scipath}")
-        message(STATUS "Calling FIND_PROGRAM with path_suffixes ${sciexecsubdirs}")
-      endif ()
-
-# First look in specified path
-      find_program(${sciexecvar}
-        "${sciexec}"
-        PATHS ${scipath}
-        PATH_SUFFIXES "${sciexecsubdirs}"
-        NO_DEFAULT_PATH
-        DOC "Path to the ${sciexec} executable"
-      )
-
-# If not found, try again with default paths
-      if (NOT ${sciexecvar})
-        if (DEBUG_CMAKE)
-          message(STATUS "Failed to find ${sciexec} in search path, trying default paths.")
-        endif ()
-
-        find_program(${sciexecvar}
-          ${sciexec}
-          PATHS ${scipath}
-          PATH_SUFFIXES "${sciexecsubdirs}"
-          DOC "Path to the ${sciexec} executable"
-        )
-      endif ()
-
-      if (DEBUG_CMAKE)
-        message(STATUS "${sciexecvar} is ${${sciexecvar}}")
-      endif ()
-
-      if (${${sciexecvar}} MATCHES NOTFOUND)
-# The WARNING option will actually give a scimake stack trace
-# And I didn't want that
-# So instead, use NO option, and start the string with WARNING
-        message("WARNING - Unable to locate executable ${sciexec}")
-      else ()
-        set(${scipkgreg}_FOUND_SOME_EXECUTABLE TRUE)
-# Add to list of all executables for this package
-        set(${scipkgreg}_EXECUTABLES
-          ${${scipkgreg}_EXECUTABLES}
-          ${${sciexecvar}}
-        )
-      endif ()
-    endforeach (sciexec ${TFP_EXECUTABLES})
-
-# Clean up the list of all executable directories
-    if (${scipkgreg}_FOUND_SOME_EXECUTABLE)
-      list(REMOVE_DUPLICATES "${scipkgreg}_EXECUTABLES")
-    endif ()
-
-# Print results if in debug mode
-    if (DEBUG_CMAKE)
-      message(STATUS "List of all executables for ${scipkgreg}:")
-      message(STATUS "${scipkgreg}_EXECUTABLES = ${${scipkgreg}_EXECUTABLES}")
-    endif ()
-
-# Cache the completed list
-    set(${scipkgreg}_EXECUTABLES
-      ${${scipkgreg}_EXECUTABLES}
-      CACHE STRING "List of all executables for ${scipkgreg}"
+    set(confdirs ${TFP_CONFIG_SUBDIRS} lib/cmake/${scipkgreg} share/cmake/${scipkglc} cmake/${scipkglc})
+    message(STATUS "Looking for ${confnames} in ${confdirs}.")
+    find_file(${sciconfigcmvar}
+      NAMES ${confnames}
+      PATHS ${scipath}
+      PATH_SUFFIXES ${confdirs}
+      NO_DEFAULT_PATH
+      DOC "Path to the hdf5 config files."
     )
+
+# If not found, look in system directories
+    if (NOT ${scipkgreg}_CONFIG_CMAKE)
+      find_file(${scipkgreg}_CONFIG_CMAKE
+        NAMES ${confnames}
+      )
+    endif ()
+
+# If found, source
+    if (${scipkgreg}_CONFIG_CMAKE)
+      get_filename_component(${scipkgreg}_CONFIG_DIR ${${scipkgreg}_CONFIG_CMAKE}/.. REALPATH)
+      set(confvernames ${scipkgreg}ConfigVersion.cmake ${scipkglc}-config-version.cmake)
+      if (DEBUG_CMAKE)
+        message(STATUS "Looking for ${confvernames} in ${${scipkgreg}_CONFIG_DIR}.")
+      endif ()
+      find_file(${scipkgreg}_CONFIG_VERSION_CMAKE
+        NAMES ${confvernames}
+        PATHS ${${scipkgreg}_CONFIG_DIR}
+      )
+      if (TFP_USE_CONFIG_FILE AND ${scipkgreg}_CONFIG_CMAKE)
+        include(${${scipkgreg}_CONFIG_CMAKE})
+      endif ()
+    endif ()
+    if (DEBUG_CMAKE)
+      SciPrintVar(${scipkgreg}_CONFIG_CMAKE)
+      SciPrintVar(${scipkgreg}_CONFIG_VERSION_CMAKE)
+    endif ()
+    if (TFP_CONFIG_FILE_ONLY)
+      if (DEBUG_CMAKE OR NOT TFP_FIND_QUIETLY)
+        SciPrintCMakeResults(${scipkgreg})
+      endif ()
+    endif ()
+
   endif ()
 
 #######################################################################
 #
-# Look for FILES.
-# Like EXECUTABLES, but using find_file, instead of find_program
+# Look for TYPES = PROGRAM, INCLUDE, MODULE, LIBRARY, FILE
 # Variables defined:
-#   XXX_YYY - CACHED
-#     Where to find the YYY tool that comes with XXX.
-#   XXX_FILES - CACHED
-#     List of all executables found for package XXX.
+#   For PROGRAM, INCLUDE, MODULE, FILE
+#     Xxx_yyy - CACHED
+#       Where to find the yyy file that comes with Xxx.
+#   For LIBRARY
+#     Xxx_yyy_LIBRARY - CACHED
+#       Where to find the yyy file that comes with Xxx.
+#   Xxx_${TYPE_PLURAL} - CACHED
+#     List of all files of that type found for package Xxx.
 #
 #######################################################################
 
+  if (NOT TFP_CONFIG_FILE_ONLY)
 # Create the search paths
-  string(LENGTH "${TFP_FILES}" scifileslen)
-  if (${scifileslen})
-    string(LENGTH "${TFP_FILE_SUBDIRS}" scilen)
-    if (${scilen})
-      set(scifilesubdirs ${TFP_FILE_SUBDIRS})
-    else ()
-# Here we use the default search directory "bin"
-      # set(scifilesubdirs .)
+    set(scitypes PROGRAM INCLUDE MODULE LIBRARY FILE)
+# Not clear what is right here
+    # if (WIN32 AND (BUILD_SHARED_LIBS))
+    if (WIN32)
+      set(scitypes ${scitypes} DLL)
     endif ()
+    foreach (scitype ${scitypes})
 
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for files under ${scipath} with subdirs, ${scifilesubdirs}")
-    endif ()
-
-# Clear the list of file dirs
-# As we loop over the files, we will add every new directory to the list
-# And afterwards, we'll remove duplicates
-    set(${scipkgreg}_FILES)
-    set(${scipkgreg}_FOUND_SOME_FILE FALSE)
-
-# Loop over list of files and try to find each one
-    foreach (scifile ${TFP_FILES})
-
-# Create the variable that's specific to this file
-      string(REGEX REPLACE "[./-]" "_" scifilevar ${scifile})
-      set(scifilevar ${scipkgreg}_${scifilevar})
-      if (DEBUG_CMAKE)
-        message(STATUS "Calling FIND_FILE with scifile = ${scifile}")
-        message(STATUS "Calling FIND_FILE with paths = ${scipath}")
-        message(STATUS "Calling FIND_FILE with path_suffixes ${scifilesubdirs}")
-      endif ()
-
-# First look in specified path
-      find_file(${scifilevar}
-        "${scifile}"
-        PATHS ${scipath}
-        PATH_SUFFIXES ${scifilesubdirs}
-        NO_DEFAULT_PATH
-        DOC "Path to the ${scifile} file"
-      )
-
-# If not found, try again with default paths
-      if (NOT ${scifilevar})
-        if (DEBUG_CMAKE)
-          message(STATUS "Failed to find ${scifile} in search path, trying default paths.")
-        endif ()
-
-        find_file(${scifilevar}
-          ${scifile}
-          PATHS ${scipath}
-          PATH_SUFFIXES ${scifilesubdirs}
-          DOC "Path to the ${scifile} file"
-        )
-      endif ()
-
-      if (DEBUG_CMAKE)
-        message(STATUS "${scifilevar} is ${${scifilevar}}")
-      endif ()
-
-      if (${${scifilevar}} MATCHES NOTFOUND)
-# The WARNING option will actually give a scimake stack trace
-# And I didn't want that
-# So instead, use NO option, and start the string with WARNING
-        message("WARNING - Unable to locate file ${scifile}")
+# Get plural
+      if (${scitype} STREQUAL LIBRARY)
+        set(scitypeplural LIBRARIES)
+      elseif (${scitype} STREQUAL INCLUDE)
+        set(scitypeplural HEADERS)
       else ()
-        set(${scipkgreg}_FOUND_SOME_FILE TRUE)
-# Add to list of all files for this package
-        set(${scipkgreg}_FILES
-          ${${scipkgreg}_FILES}
-          ${${scifilevar}}
-        )
+        set(scitypeplural ${scitype}S)
       endif ()
-    endforeach (scifile ${TFP_FILES})
 
-# Clean up the list of all file directories
-    if (${scipkgreg}_FOUND_SOME_FILE)
-      list(REMOVE_DUPLICATES "${scipkgreg}_FILES")
-    endif ()
-
-# Print results if in debug mode
-    if (DEBUG_CMAKE)
-      message(STATUS "List of all files for ${scipkgreg}:")
-      message(STATUS "${scipkgreg}_FILES = ${${scipkgreg}_FILES}")
-    endif ()
-
-# End of this block
-  endif ()
-
-#######################################################################
-#
-# Look for MODULES
-# Like FILES, but append module suffix
-# Variables defined:
-#   XXX_YYY - CACHED
-#     Where to find the YYY tool that comes with XXX.
-#   XXX_MODULES - CACHED
-#     List of all executables found for package XXX.
-#
-#######################################################################
-
-# Create the search paths
-  string(LENGTH "${TFP_MODULES}" scimoduleslen)
-  if (${scimoduleslen} AND NOT SCI_FC_MODULE_SUFFIX)
-    message(WARNING "[SciFindPackage.cmake] Cannot find Fortran module files, as SCI_FC_MODULE_SUFFIX is not defined with a call to SciFortranChecks.cmake.")
-  elseif (${scimoduleslen})
-    string(LENGTH "${TFP_MODULE_SUBDIRS}" scilen)
-    if (${scilen})
-      set(scimodulesubdirs ${TFP_MODULE_SUBDIRS})
-    else ()
-# Default subdirectory
-      set(scimodulesubdirs include lib)
-    endif ()
-
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for modules under ${scipath} with subdirs, ${scimodulesubdirs}")
-    endif ()
-
-# Clear the list of file dirs
-# As we loop over the files, we will add every new directory to the list
-# And afterwards, we'll remove duplicates
-    set(${scipkgreg}_MODULES)
-    set(${scipkgreg}_MODULE_DIRS)
-    set(${scipkgreg}_FOUND_SOME_MODULE FALSE)
-
-# Loop over list of files and try to find each one
-    foreach (scimodule ${TFP_MODULES})
-
-# Capitalize as needed
-      if (SCI_FC_MODULENAME_CAPITALIZED)
-        string(TOUPPER ${scimodule} scimodfile)
+# Get list containing files to search for
+      if (${scitype} STREQUAL DLL)
+        set(srchfilesvar TFP_LIBRARIES)
       else ()
-        set(scimodfile ${scimodule})
-      endif ()
-      set(scimodfile "${scimodfile}.${SCI_FC_MODULE_SUFFIX}")
-
-# Create the variable that's specific to this file
-      string(REGEX REPLACE "[./-]" "_" scimodulevar ${scimodule})
-      set(scimodulevar ${scipkgreg}_${scimodulevar}_MOD)
-      if (DEBUG_CMAKE)
-        message(STATUS "Calling FIND_FILE with scimodfile = ${scimodfile}")
-        message(STATUS "Calling FIND_FILE with paths = ${scipath}")
-        message(STATUS "Calling FIND_FILE with path_suffixes ${scimodulesubdirs}")
+        set(srchfilesvar TFP_${scitypeplural})
       endif ()
 
-# First look in specified path
-      find_file(${scimodulevar}
-        "${scimodfile}"
-        PATHS ${scipath}
-        PATH_SUFFIXES ${scimodulesubdirs}
-        NO_DEFAULT_PATH
-        DOC "Path to the ${scimodfile} file"
-      )
-
-# If not found, try again with default paths
-      if (NOT ${scimodulevar})
-        if (DEBUG_CMAKE)
-          message(STATUS "Failed to find ${scimodfile} in search path, trying default paths.")
-        endif ()
-
-        find_file(${scimodulevar}
-          ${scimodfile}
-          PATHS ${scipath}
-          PATH_SUFFIXES ${scimodulesubdirs}
-          DOC "Path to the ${scimodfile} file"
-        )
-      endif ()
-
-      if (DEBUG_CMAKE)
-        message(STATUS "${scimodulevar} is ${${scimodulevar}}")
-      endif ()
-
-      if (${${scimodulevar}} MATCHES NOTFOUND)
-# The WARNING option will actually give a scimake stack trace
-# And I didn't want that
-# So instead, use NO option, and start the string with WARNING
-        message("WARNING - Unable to locate file ${scimodule}")
-      else ()
-        set(${scipkgreg}_FOUND_SOME_MODULE TRUE)
-# Add to list of all files for this package
-        set(${scipkgreg}_MODULES
-          ${${scipkgreg}_MODULES}
-          ${${scimodulevar}}
-        )
-        set(${scimodulevar} ${${scimodulevar}}
-          CACHE FILEPATH "${scimodule} file."
-        )
-        get_filename_component(dir ${${scimodulevar}}/.. REALPATH)
-        set(${scipkgreg}_MODULE_DIRS ${${scipkgreg}_MODULE_DIRS} ${dir})
-      endif ()
-    endforeach (scimodule ${TFP_MODULES})
-
-# Clean up the list of all module directories
-    if (${scipkgreg}_FOUND_SOME_MODULE)
-      list(REMOVE_DUPLICATES "${scipkgreg}_MODULES")
-      list(REMOVE_DUPLICATES "${scipkgreg}_MODULE_DIRS")
-    endif ()
-
-# Print results if in debug mode
-    if (DEBUG_CMAKE)
-      message(STATUS "List of all modules for ${scipkgreg}:")
-      message(STATUS "${scipkgreg}_MODULES = ${${scipkgreg}_MODULES}")
-    endif ()
-
-# End of this block
-  endif ()
-
-##########################################################################
-# Look for HEADERS
-# Finding none is okay(e.g. zlib has no headers)
-# Will set:
-#   XXX_INCLUDE_DIRS - NOT CACHED
-#     The final set of include directories listed in one variable.
-#   XXX_yy_h - NOT CACHED
-#     Where to find xxx_yy.h
-##########################################################################
-
-  string(LENGTH "${TFP_HEADERS}" scihdrslen)
-  if (${scihdrslen})
-# Find include subdirs
-    string(LENGTH "${TFP_INCLUDE_SUBDIRS}" scilen)
-    if (${scilen})
-      set(sciincsubdirs ${TFP_INCLUDE_SUBDIRS})
-    else ()
-      set(sciincsubdirs include)
-    endif ()
-
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for headers under ${scipath} with subdirs, ${sciincsubdirs}")
-    endif ()
-
-# Clear the variables
-    set(${scipkgreg}_INCLUDE_DIRS)
-    set(${scipkgreg}_FOUND_SOME_HEADER FALSE)
-
-# Look for each header in turn
-    foreach (scihdr ${TFP_HEADERS})
-
-# Create variable name from cleaned name
-      string(REGEX REPLACE "[./-]" "_" scihdrvar ${scihdr})
-      set(scihdrvar ${scipkgreg}_${scihdrvar})
-      set(scihdrdirvar ${scihdrvar}_INCLUDE_DIR)
-
-# First look in specified path
-      find_path(${scihdrdirvar}
-        ${scihdr}
-        PATHS ${scipath}
-        PATH_SUFFIXES ${sciincsubdirs}
-        NO_DEFAULT_PATH)
-
-# If not found, also look in default paths
-      if (NOT ${scihdrdirvar})
-        find_path(${scihdrdirvar}
-          ${scihdr}
-          PATHS ${scipath}
-          PATH_SUFFIXES ${sciincsubdirs})
-      endif ()
-
-# Found or not?
-      if (${scihdrdirvar})
-# Create header variable and push into cache
-        set(${scihdrdirvar} ${${scihdrdirvar}}
-          CACHE FILEPATH "Directory containing ${scihdr}."
-        )
-        if (DEBUG_CMAKE)
-           message(STATUS "${scihdrdirvar} = ${${scihdrdirvar}}.")
-        endif ()
-        set(${scipkgreg}_FOUND_SOME_HEADER TRUE)
-        set(${scihdrvar} ${${scihdrdirvar}}/${scihdr}
-          CACHE FILEPATH "${scihdr} file."
-        )
-# Add the directory of this header to the list of all include directories
-        set(${scipkgreg}_INCLUDE_DIRS ${${scipkgreg}_INCLUDE_DIRS}
-          ${${scihdrdirvar}}
-        )
-      else ()
-        message("WARNING - Unable to find header: ${scihdr}")
-      endif ()
-
-    endforeach (scihdr ${TFP_HEADERS})
-
-# Clean up and save list of include directories into the cache
-    list(LENGTH ${scipkgreg}_INCLUDE_DIRS sciinclistlen)
-    if (${sciinclistlen})
-      list(REMOVE_DUPLICATES ${scipkgreg}_INCLUDE_DIRS)
-# scimake conventions are that this is not a cache variable
-      # set(${scipkgreg}_INCLUDE_DIRS
-        # ${${scipkgreg}_INCLUDE_DIRS}
-        # CACHE STRING "All include directories for ${scipkgreg}"
-      # )
-    else ()
-      message(WARNING "None of ${TFP_HEADERS} found.  Define ${scipkgreg}_ROOT_DIR to the root directory of the installation.")
-    endif ()
-  endif ()
-
-###########################################################################
-#
-# Look for LIBRARIES
-# Finding none is fatal, but finding a subset is okay as allows us
-# to look for a maximum set, as needed for Trilinos.
-# XXX_LIBRARIES - NOT CACHED
-#   The libraries to link against to use XXX. These should include full paths.
-# XXX_YY_LIBRARY -
-#   Name of YY library that is part of the XXX system.
-#
-###########################################################################
-
-# Build list of search directories
-  string(LENGTH "${TFP_LIBRARIES}" scilibslen)
-  if (${scilibslen})
-# Add in user-supplied subdirs
-    string(LENGTH "${TFP_LIBRARY_SUBDIRS}" scilen)
-    if (${scilen})
-      set(scilibsubdirs ${TFP_LIBRARY_SUBDIRS})
-    else ()
-# Default subdirectory
-      set(scilibsubdirs lib)
-    endif ()
-
-# Does anyone use this?  Should either move to argument list
-# or remove entirely.  TODO - marc
-# If LIBRARY_DIRS specified, add that to the front of the path
-    if (${scipkgreg}_LIBRARY_DIRS)
-      set(scilibsubdirs . ${scilibsubdirs})
-      set(scipath ${${scipkgreg}_LIBRARY_DIRS} ${scipath})
-    endif ()
-
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for libraries under ${scipath} with subdirs, ${scilibsubdirs}")
-    endif ()
-
-# Clear variables
-    set(${scipkgreg}_LIBRARIES)
-    set(${scipkgreg}_LIBRARY_DIRS)
-    set(${scipkgreg}_LIBRARY_NAMES)
-    set(${scipkgreg}_FOUND_SOME_LIBRARY FALSE)
-
-# Look for each requested library
-    foreach (scilib ${TFP_LIBRARIES})
-# Build variable name of the form XXX_yyy_LIBRARY
-      string(REGEX REPLACE "[./-]" "_" scilibvar ${scilib})
-      set(scilibdirvar ${scipkgreg}_${scilibvar}_LIBRARY_DIR)
-      unset(${scilibdirvar})
-      set(scilibvar ${scipkgreg}_${scilibvar}_LIBRARY)
-      unset(${scilibvar})
-
-# First look in defined paths
-      find_library(${scilibvar}
-        ${scilib}
-        PATHS ${scipath}
-        PATH_SUFFIXES ${scilibsubdirs}
-        NO_DEFAULT_PATH
-      )
-      if (DEBUG_CMAKE)
-        message(STATUS "After initial search, ${scilibvar} = ${${scilibvar}}.")
-      endif ()
-
-# If not found, try again in default paths
-      if (NOT ${scilibvar})
-        find_library(${scilibvar}
-          ${scilib}
-          PATHS ${scipath}
-          PATH_SUFFIXES ${scilibsubdirs}
-        )
-        if (DEBUG_CMAKE)
-          message(STATUS "After second search, ${scilibvar} = ${${scilibvar}}.")
+# Set whether optional search
+      set(srchoptional FALSE)
+      if (${scitype} STREQUAL DLL)
+# DLL search always optional
+        set(srchoptional TRUE)
+      elseif (${srchfilesvar})
+# Matters only if there is something to search for
+        list(FIND ${srchfilesvar} OPTIONAL optind)
+        if (NOT ${optind} EQUAL -1)
+# If find OPTIONAL, then remove that from list and set optional true
+          list(REMOVE_AT ${srchfilesvar} ${optind})
+          set(srchoptional TRUE)
         endif ()
       endif ()
 
-# Add to list of all libraries(if found)
-      if (${scilibvar})
-        if (DEBUG_CMAKE)
-          message(STATUS "Found library ${scilib}: ${scilibvar} = ${${scilibvar}}")
-        endif ()
-        set(${scipkgreg}_FOUND_SOME_LIBRARY TRUE)
-        set(${scipkgreg}_LIBRARIES
-            ${${scipkgreg}_LIBRARIES}
-            ${${scilibvar}}
-        )
-        get_filename_component(${scilibdirvar} ${${scilibvar}}/.. REALPATH)
-        if (DEBUG_CMAKE)
-          message(STATUS "${scilibdirvar} = ${${scilibdirvar}}")
-        endif ()
-        list(APPEND ${scipkgreg}_LIBRARY_DIRS ${${scilibdirvar}})
-# NAME_WE removes from first '.'.  We need from last.
-        get_filename_component(libname ${${scilibvar}} NAME)
-        string(REGEX REPLACE "\\.[^\\.]*$" "" libname "${libname}")
-        string(REGEX REPLACE "^lib" "" libname ${libname})
-        list(APPEND ${scipkgreg}_LIBRARY_NAMES ${libname})
-      else ()
-# Yes, this uses the string WARNING instead of the macro argument WARNING
-        message("WARNING - Library ${scilib} not found.")
-      endif ()
-# Add both to the cache
-      # set(${scilibvar}
-        # ${${scilibvar}}
-        # CACHE FILEPATH "Location of ${scilib}"
-      # )
-      set(${scilibdirvar}
-        ${${scilibdirvar}}
-        CACHE PATH "Directory of ${scilib}"
-      )
-    endforeach (scilib ${TFP_LIBRARIES})
-    if (DEBUG_CMAKE)
-      message(STATUS "${scipkgreg}_LIBRARY_DIRS = ${${scipkgreg}_LIBRARY_DIRS}")
-    endif ()
+# If list not empty, search for files
+      list(LENGTH ${srchfilesvar} scisrchlen)
+      if (${scisrchlen})
 
-# Clean up and commit variables to cache
-    list(LENGTH ${scipkgreg}_LIBRARIES sciliblistlen)
-    if (NOT ${sciliblistlen})
-      message("WARNING - None of the libraries, ${TFP_LIBRARIES}, found.  Define ${scipkgreg}_ROOT_DIR to find them.")
-    else ()
-      list(REMOVE_DUPLICATES "${scipkgreg}_LIBRARIES")
-      list(REMOVE_DUPLICATES "${scipkgreg}_LIBRARY_DIRS")
-# The first dir is the library dir
-      list(GET "${scipkgreg}_LIBRARY_DIRS" 0 ${scipkgreg}_LIBRARY_DIR)
-      if (NOT DEFINED ${scipkgreg}_DIR)
-        get_filename_component(${scipkgreg}_DIR ${${scipkgreg}_LIBRARY_DIR}/.. REALPATH)
+# Create lists for search
+        list(LENGTH TFP_${scitype}_SUBDIRS scilen)
+        if (${scilen})
+          set(scifilesubdirs ${TFP_${scitype}_SUBDIRS})
+        else ()
+# Default search subdirectories
+          if (${scitype} STREQUAL PROGRAM)
+            set(scifilesubdirs bin)
+          elseif (${scitype} STREQUAL FILE)
+            set(scifilesubdirs share)
+          elseif (${scitype} STREQUAL INCLUDE)
+            set(scifilesubdirs include)
+          elseif (${scitype} STREQUAL LIBRARY)
+            set(scifilesubdirs lib)
+          elseif (${scitype} STREQUAL DLL)
+            set(scifilesubdirs bin lib .)
+          elseif (${scitype} STREQUAL MODULE)
+            set(scifilesubdirs include)
+          else ()
+            message(WARNING "Default subdir not known for ${scitype}.")
+          endif ()
+        endif ()
+        message(STATUS "Looking for ${scitypeplural}, ${${srchfilesvar}}, in ${scifilesubdirs} with OPTIONAL = ${srchoptional}.")
+
+# Find the files
+        SciFindPkgFiles(${scipkgreg} "${${srchfilesvar}}"
+          "${scipath}" "${scifilesubdirs}"
+          ${scitype} ${scitypeplural} ${scipkgreg}_${scitypeplural}_FOUND
+          ${TFP_ALLOW_LIBRARY_DUPLICATES}
+        )
+# Okay not to find dlls
+        if (NOT ${scipkgreg}_${scitypeplural}_FOUND)
+          message(WARNING "${scipkgreg}_${scitypeplural}_FOUND = ${${scipkgreg}_${scitypeplural}_FOUND}.")
+          if (NOT ${srchoptional})
+            set(${scipkguc}_FOUND FALSE)
+          endif ()
+        endif ()
       endif ()
-      if (DEBUG_CMAKE)
-        message(STATUS "${scipkgreg}_DIR = ${${scipkgreg}_DIR}")
-        message(STATUS "${scipkgreg}_LIBRARIES = ${${scipkgreg}_LIBRARIES}")
-        message(STATUS "${scipkgreg}_LIBRARY_DIRS = ${${scipkgreg}_LIBRARY_DIRS}")
-      endif ()
-    endif ()
+
+    endforeach ()
 
 # Find static libraries
-    SciGetStaticLibs("${${scipkgreg}_LIBRARIES}" ${scipkgreg}_STLIBS)
-
-  endif ()
-
-#################################################################
-#
-# On windows, we want to look for the dlls
-# XXX_DLLS - CACHED
-#   List of all found dlls including full path to each
-# XXX_yyy_DLLS
-#   Path to individual yyy library from XXX package
-#  DOES NOT EXIST YET - TODO
-#
-#################################################################
-
-  if (WIN32)
-    if (DEBUG_CMAKE)
-      message(STATUS "Looking for the DLL counterparts to all found libraries.")
+    if (${scipkgreg}_LIBRARIES)
+      SciGetStaticLibs("${${scipkgreg}_LIBRARIES}" ${scipkgreg}_STLIBS)
     endif ()
 
-# Clear variables
-    set(${scipkgreg}_DLLS)
-    set(${scipkgreg}_FOUND_SOME_DLL FALSE)
+    if (${scipkgreg}_DLLS)
+      set(${scipkgreg}_DEFINITIONS -D${scipkguc}_DLL)
+    endif ()
 
-# Look for a dll for each found library
-    foreach (foundlib ${${scipkgreg}_LIBRARIES})
-      # get_filename_component(librootname ${foundlib} NAME_WE)
-# NAME_WE removes from first '.'.  We need from last.
-      get_filename_component(librootname ${foundlib} NAME)
-      string(REGEX REPLACE "\\.[^\\.]*$" "" librootname "${librootname}")
-# This assumes that dll is in "./lib/../bin"
-      get_filename_component(libdir ${foundlib}/.. REALPATH)
-      get_filename_component(dlldir1 "${libdir}/../bin" REALPATH)
-      get_filename_component(dlldir2 "${libdir}/.." REALPATH)
-      if (DEBUG_CMAKE)
-        message(STATUS "Looking for DLL counterpart to ${foundlib} in ${dlldir1}/${librootname}.dll")
-      endif ()
-      if (EXISTS ${dlldir1}/${librootname}.dll)
-        if (DEBUG_CMAKE)
-          message(STATUS "Found DLL ${dlldir1}/${librootname}.dll")
-        endif ()
-        set(${scipkgreg}_DLLS ${${scipkgreg}_DLLS} ${dlldir1}/${librootname}.dll)
-      else ()
-        if (DEBUG_CMAKE)
-          message(STATUS "Second chance: looking for DLL in ${dlldir2}/${librootname}.dll")
-        endif ()
-        if (EXISTS ${dlldir2}/${librootname}.dll)
-          if (DEBUG_CMAKE)
-            message(STATUS "Found DLL ${dlldir2}/${librootname}.dll")
-          endif ()
-          set(${scipkgreg}_DLLS ${${scipkgreg}_DLLS} ${dlldir2}/${librootname}.dll)
-        else ()
-          if (DEBUG_CMAKE)
-            message(STATUS "Third chance: looking for DLL in ${libdir}/${librootname}.dll")
-          endif ()
-          if (EXISTS ${libdir}/${librootname}.dll)
-            if (DEBUG_CMAKE)
-              message(STATUS "Found DLL ${libdir}/${librootname}.dll")
-            endif ()
-            set(${scipkgreg}_DLLS ${${scipkgreg}_DLLS} ${libdir}/${librootname}.dll)
-          else ()
-            if (DEBUG_CMAKE)
-              message(STATUS "${librootname} has no accompanying dll.")
-            endif ()
-          endif ()
-        endif ()
-      endif ()
-    endforeach ()
   endif ()
 
 ####################################################################
 #
-# Determine if this package should be marked as FOUND or not
-# At the moment, we mark it as found if ANYTHING was found
+# For the package to be marked as found, all requested objects must
+# have been found, as coded above.
 # Per http://www.cmake.org/Wiki/scimake:How_To_Find_Installed_Software,
 # The convention is to capitalize the _FOUND variable.
 #
 ####################################################################
 
-  if (${scipkgreg}_FOUND_SOME_LIBRARY OR ${scipkgreg}_FOUND_SOME_HEADER OR
-       ${scipkgreg}_FOUND_SOME_EXECUTABLE OR ${scipkgreg}_FOUND_SOME_DLL OR
-       ${scipkgreg}_FOUND_SOME_FILE)
-    set(${scipkguc}_FOUND TRUE)
-    if (DEBUG_CMAKE OR NOT ${scipkgreg}_FIND_QUIETLY)
-      message(STATUS "Found ${scipkgreg}.")
-      SciPrintCMakeResults(${scipkgreg})
-    endif ()
-  else ()
-    set(${scipkguc}_FOUND FALSE)
-    if (DEBUG_CMAKE)
-      message(STATUS "Failed to find package ${scipkgreg}")
-      SciPrintCMakeResults(${scipkgreg})
-    endif ()
-# If this was marked as a required package, fail
-    if (${scipkgreg}_FIND_REQUIRED)
-      message(FATAL_ERROR "Unable to find required package ${scipkgreg} - failing")
-    endif ()
+  if (DEBUG_CMAKE OR NOT TFP_FIND_QUIETLY)
+    SciPrintCMakeResults(${scipkgreg})
   endif ()
 
-  message("--------- SciFindPackage done with ${TFP_PACKAGE} -----------")
-  message("")
-  # if (DEBUG_CMAKE)
+# If this was marked as a required package, fail
+  if (${scipkgreg}_FIND_REQUIRED AND NOT ${scipkguc}_FOUND)
+    message(FATAL_ERROR "Unable to find required package ${scipkgreg} - failing")
+  endif ()
+
+  if (DEBUG_CMAKE OR NOT TFP_FIND_QUIETLY)
     message(STATUS "${scipkguc}_FOUND = ${${scipkguc}_FOUND}.")
-  # endif ()
+    message("--------- SciFindPackage done with ${TFP_PACKAGE} -----------")
+  endif ()
 
 endmacro(SciFindPackage)
 

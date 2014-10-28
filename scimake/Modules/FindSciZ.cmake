@@ -14,24 +14,30 @@
 #
 # SciFindZ: find includes and libraries for z(compression)
 #
-# $Id: FindSciZ.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciZ.cmake 510 2014-02-13 18:44:23Z jrobcary $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
+# Need to find paths with standard algorithm
+SciGetInstSubdirs(zlib zinstdirs)
 SciFindPackage(
   PACKAGE "Z"
-  LIBRARIES "z"
+  INSTALL_DIRS ${zinstdirs}
+  LIBRARIES z zlib zlib1 OPTIONAL
 )
 
 if (Z_FOUND)
   # message(STATUS "Found Z(compression library)")
   set(HAVE_Z 1 CACHE BOOL "Whether have the z(compression) library")
 else ()
-  message(STATUS "Did not find Z(compression).  Use -DZ_DIR to specify the installation directory.")
+  message(STATUS "Did not find Z(compression).")
   if (SciZ_FIND_REQUIRED)
     message(FATAL_ERROR "Failed.")
   endif ()
 endif ()
+

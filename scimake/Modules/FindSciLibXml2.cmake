@@ -1,6 +1,6 @@
 # - FindSciLibXml2n: Module to find include directories and libraries
 #   for LibXml2. This module was implemented as there is no stock
-#   CMake module for LibXml2. 
+#   CMake module for LibXml2.
 #
 # This module can be included in CMake builds in find_package:
 #   find_package(SciLibXml2 REQUIRED)
@@ -16,18 +16,21 @@
 #
 # SciFindLibXml2: find includes and libraries for LibXml2.
 #
-# $Id: FindSciLibXml2.cmake 1323 2012-04-19 18:59:43Z dws $
+# $Id: FindSciLibXml2.cmake 484 2014-01-26 16:39:04Z jrobcary $
 #
 # Copyright 2012 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})
 
 SciFindPackage(PACKAGE "LibXml2"
-              INSTALL_DIR "libxml2"
-              HEADERS "include/libxml2"
-              LIBRARIES "libxml2.a"
+               INSTALL_DIR libxml2
+               INCLUDE_SUBDIRS include/libxml2
+               HEADERS libxml/tree.h
+               LIBRARIES "libxml2.a"
               )
 
 if (LIBXML2_FOUND)

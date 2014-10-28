@@ -14,10 +14,12 @@
 #
 # FindSciSz: find includes and libraries for sz(compression)
 #
-# $Id: FindSciSz.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciSz.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -28,16 +30,15 @@ else ()
 endif ()
 
 SciFindPackage(PACKAGE "Sz"
-              HEADERS "szlib.h"
-              LIBRARIES "sz"
-              MODULES ${desiredmods}
-              )
+  HEADERS "szlib.h"
+  LIBRARIES "sz"
+  MODULES ${desiredmods}
+)
 
 if (SZ_FOUND)
   message(STATUS "Found SZ")
   set(HAVE_SZ 1 CACHE BOOL "Whether have the sz(compression) library")
 else ()
-  message(STATUS "Did not find SZ.  Use -DSZ_DIR to specify the installation directory.")
   if (SciSz_FIND_REQUIRED)
     message(FATAL_ERROR "Failed.")
   endif ()

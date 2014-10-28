@@ -14,10 +14,12 @@
 #
 # FindSciFmcfm: find includes and libraries for Fmcfm
 #
-# $Id: FindSciFmcfm.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciFmcfm.cmake 259 2013-04-10 19:10:45Z jdelamere $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -37,7 +39,7 @@ if (FMCFM_FOUND)
   # message(STATUS "Found FMCFM")
   set(HAVE_FMCFM 1 CACHE BOOL "Whether have the FMCFM library")
 # Find gacodes
-  include(${SCICMAKE_DIR}/SciGetDepsFromInstall.cmake)
+  include(${SCIMAKE_DIR}/SciGetDepsFromInstall.cmake)
 # Get gacodes libraries
   SciGetDepsFromInstall(GaCode ${Fmcfm_DIR} GACODE)
 # Get ntcctransport libraries

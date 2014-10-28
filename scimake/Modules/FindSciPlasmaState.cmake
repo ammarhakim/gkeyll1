@@ -16,10 +16,12 @@
 #
 # FindSciPlasmaState: find includes and libraries for PlasmaState
 #
-# $Id: FindSciPlasmaState.cmake 1245 2012-01-31 21:36:22Z dws $
+# $Id: FindSciPlasmaState.cmake 539 2014-04-01 02:19:26Z pletzer $
 #
-# Copyright 2010-2012 Tech-X Corporation.
+# Copyright 2010-2013 Tech-X Corporation.
 # Arbitrary redistribution allowed provided this copyright remains.
+#
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -41,8 +43,8 @@ if (PLASMASTATE_FOUND)
   set(HAVE_PLASMASTATE 1 CACHE BOOL "Whether have the PlasmaState library")
   set(HAVE_PlasmaState 1 CACHE BOOL "Whether have the PlasmaState library")
 # Find gacodes
-  include(${SCICMAKE_DIR}/SciGetDepsFromInstall.cmake)
+  include(${SCIMAKE_DIR}/SciGetDepsFromInstall.cmake)
 # Get dependencies
-  SciGetDepsFromInstall(NetlibLite ${PLASMASTATE_DIR} NETLIB_LITE)
+  #SciGetDepsFromInstall(NetlibLite ${PLASMASTATE_DIR} NETLIB_LITE)
 endif ()
 
