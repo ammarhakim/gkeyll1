@@ -111,7 +111,7 @@ class CreateDg1D:
                 raise Exception("1D ploting not supported for polyOrder %d" % self.dgPolyOrder)
 
     def projectTensorLobatto(self, Xc, q):
-        
+        pass
 
 class  CreateDg2d:
     pass
