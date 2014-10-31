@@ -144,12 +144,21 @@ class PlotDg1D:
                  transformVar=None, outNm=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
-        rawData = gd.q
-        #if transformMod:
-        #    # transform data if needed
-        #    rawData = transformMod.transformRegistry[transformVar](gd.q)
-        #else:
-        #    rawData = gd.q[:,:,component]
+
+        # number of nodes
+        if dgOrder == 1:
+            nNodes = 2
+        elif dgOrder == 2:
+            nNodes = 3
+        elif dgOrder == 3:
+            raise Exception("1D plotting not implemented for DG polyOrder 3!")
+        # number of equations
+        numEqns = gd.q.shape[1]/nNodes
+
+        # create data to be plotted
+        rawData = numpy.zeros((gd.q.shape[0], nNodes), numpy.float)
+        for n in range(nNodes):
+            rawData[:,n] = gd.q[:,component+n*numEqns]
 
         dx = (gd.upperBounds[:]-gd.lowerBounds[:])/gd.cells[:]
         rX = pylab.linspace(gd.lowerBounds[0]+0.5*dx[0],
@@ -239,12 +248,21 @@ class PlotDg2D:
                  transformVar=None, outNm=None, options=None):
 
         mtitle = MakeTitle(gd, component, title, transformMod, transformVar, outNm)
-        rawData = gd.q
-        #if transformMod:
-        #    # transform data if needed
-        #    rawData = transformMod.transformRegistry[transformVar](gd.q)
-        #else:
-        #    rawData = gd.q[:,:,component]
+
+        # number of nodes
+        if dgOrder == 1:
+            nNodes = 4
+        elif dgOrder == 2:
+            nNodes = 8
+        elif dgOrder == 3:
+            raise Exception("1D plotting not implemented for DG polyOrder 3!")
+        # number of equations
+        numEqns = gd.q.shape[2]/nNodes
+
+        # create data to be plotted
+        rawData = numpy.zeros((gd.q.shape[0], gd.q.shape[1], nNodes), numpy.float)
+        for n in range(nNodes):
+            rawData[:,:,n] = gd.q[:,:,component+n*numEqns]
 
         dx = (gd.upperBounds[:]-gd.lowerBounds[:])/gd.cells[:]
         rX = pylab.linspace(gd.lowerBounds[0]+0.5*dx[0],
