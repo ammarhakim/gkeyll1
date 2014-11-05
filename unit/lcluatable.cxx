@@ -11,8 +11,9 @@
 #include <LcTest.h>
 
 void
-test_1(Lucee::LuaState& L)
+test_1()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "background = {"
@@ -94,8 +95,9 @@ test_1(Lucee::LuaState& L)
 }
 
 void
-test_2(Lucee::LuaState& L)
+test_2()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = "coeffs = {1.0, 0.0, 0.5}";
 // evaluate string as Lua code
@@ -116,8 +118,9 @@ test_2(Lucee::LuaState& L)
 }
 
 void
-test_3(Lucee::LuaState& L)
+test_3()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "background = {"
@@ -144,8 +147,9 @@ test_3(Lucee::LuaState& L)
 }
 
 void
-test_4(Lucee::LuaState& L)
+test_4()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "background = {"
@@ -186,8 +190,9 @@ test_4(Lucee::LuaState& L)
 }
 
 void
-test_5(Lucee::LuaState& L)
+test_5()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "background = {"
@@ -205,8 +210,9 @@ test_5(Lucee::LuaState& L)
 }
 
 void
-test_6(Lucee::LuaState& L)
+test_6()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "myNumbers = {1,2,3,4,5}";
@@ -225,8 +231,9 @@ test_6(Lucee::LuaState& L)
 }
 
 void
-test_7(Lucee::LuaState& L)
+test_7()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "myNumbers = {\"a\", \"b\", \"c\"}";
@@ -246,8 +253,9 @@ test_7(Lucee::LuaState& L)
 }
 
 void
-test_8(Lucee::LuaState& L)
+test_8()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
     "funcTbl = {"
@@ -318,8 +326,9 @@ callLuaFunction(Lucee::LuaState& L, int fnRef, double param)
 }
 
 void
-test_9(Lucee::LuaState& L)
+test_9()
 {
+  Lucee::LuaState L;
 // string with table with list of functions
   std::string tblStr = 
     "funcTbl = {"
@@ -348,11 +357,12 @@ test_9(Lucee::LuaState& L)
 }
 
 void
-test_10(Lucee::LuaState& L)
+test_10()
 {
+  Lucee::LuaState L;
 // string with table
   std::string tblStr = 
-    "background = { {100, 50} }";
+    "background = { {100, 50}, {200, 100} }";
 // evaluate string as Lua code
   if (luaL_loadstring(L, tblStr.c_str()) || lua_pcall(L, 0, 0, 0))
     throw Lucee::Except("Unable to parse Lua string");
@@ -362,28 +372,31 @@ test_10(Lucee::LuaState& L)
 
 // construct LuaTable object
   Lucee::LuaTable back(L, "background");
-
-  //Lucee::LuaTable cellsTbl = back.getTable(0);
-  //std::vector<double> cells = cellsTbl.getAllNumbers();
-  //LC_ASSERT("Checking size of table", cells.size() == 2);
+// get first table  
+  Lucee::LuaTable tbl1 = back.getTable(0);
+// check its values
+  std::vector<double> v = tbl1.getAllNumbers();
+  LC_ASSERT("Checking length of list", v.size() == 2);
+  LC_ASSERT("Checking list", v[0] == 100);
+  LC_ASSERT("Checking list", v[1] == 50);
 }
 
 int
 main(int argc, char **argv)
 {
   LC_BEGIN_TESTS("lcluatable");
-  Lucee::LuaState L;
-  test_1(L);
-  test_2(L);
-  test_3(L);
-  test_4(L);
-  test_5(L);
-  test_6(L);
-  test_7(L);
-  test_8(L);
-  test_9(L);
+
+  test_1();
+  test_2();
+  test_3();
+  test_4();
+  test_5();
+  test_6();
+  test_7();
+  test_8();
+  test_9();
 // test_10 is failing. Need to fix
-//  test_10(L); 
+  test_10(); 
 
   LC_END_TESTS;
 }
