@@ -769,6 +769,25 @@ test_17()
         LC_ASSERT("Testing if copy BC on upper side worked", fld(i,j,k) == fld(i,iup,k) );
 }
 
+void
+test_18()
+{
+// zero volume regions
+  int lower[2] = {0, 0};
+  int upper[2] = {0, 0};
+  Lucee::Region<2, int> rgn(lower, upper);
+  Lucee::Field<2, double> elcField(rgn, 3, 10.0);
+
+  LC_ASSERT("Testing if number of components is correct", 
+    elcField.getNumComponents() == 3);
+
+  for (unsigned d=0; d<2; ++d)
+  {
+    LC_ASSERT("Testing bounds of empty field", elcField.getLower(d) == 0);
+    LC_ASSERT("Testing bounds of empty field", elcField.getUpper(d) == 0);
+  }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -790,6 +809,7 @@ main(int argc, char **argv)
   test_15();
   test_16();
   test_17();
+  test_18();
 
   LC_END_TESTS;
 }

@@ -289,6 +289,23 @@ namespace Lucee
     return tbl;
   }
 
+  LuaTable
+  LuaTable::getTable(int idx) const
+  {
+    SHOW_LUA_STACK_SIZE("getTable", L);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushnumber(L, idx+1); // lua tables index from 1
+    lua_gettable(L, -2);
+    if (! lua_istable(L, -1) )
+    {
+      std::cout << "NOT A TABLE" << std::endl;
+    }
+    LuaTable tbl = LuaTable(L, "table");
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return tbl;
+  }
+
   int
   LuaTable::getFunctionRef(const std::string& nm) const
   {
