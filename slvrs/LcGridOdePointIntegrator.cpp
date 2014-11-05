@@ -20,6 +20,7 @@ namespace Lucee
 // constants to define integration method to use
   const static unsigned INT_RK4 = 0;
   const static unsigned INT_SEMI_IMPLICIT = 1;
+  const static unsigned INT_FORWARD_EULER = 2;
 
   template <unsigned NDIM>
   GridOdePointIntegrator<NDIM>::GridOdePointIntegrator(const Lucee::StructuredGridBase<NDIM>& grid)
@@ -56,6 +57,8 @@ namespace Lucee
         intMethod = INT_RK4;
       else if (method == "semi-implicit")
         intMethod = INT_SEMI_IMPLICIT;
+      else if (method == "forward-euler")
+        intMethod = INT_FORWARD_EULER;
       else
       {
         Lucee::Except lde("GridOdePointIntegrator::readInput: Unknown integration method '");
@@ -78,6 +81,10 @@ namespace Lucee
 
       case INT_SEMI_IMPLICIT:
         semiImplicit(t0, t1-t0, sol);
+        break;
+
+      case INT_FORWARD_EULER:
+        forwardEuler(t0, t1-t0, sol);
         break;
 
       default:
@@ -200,6 +207,43 @@ namespace Lucee
         solPtr[i] += dt*rhs(i,0);
     }
 
+  }
+
+  template <unsigned NDIM>
+  void
+  GridOdePointIntegrator<NDIM>::forwardEuler(double t0, double dt, Lucee::Field<NDIM, double>& sol)
+  {
+// number of components to update
+    unsigned n = sol.getNumComponents();
+
+    std::vector<double> ql(n), src(n);
+// get reference to grid
+    const Lucee::StructuredGridBase<NDIM>& grid = this->getGrid();
+
+// create pointers to fields
+    Lucee::FieldPtr<double> solPtr = sol.createPtr();
+    Lucee::ConstFieldPtr<double> inpPtr = sol.createConstPtr();
+
+    int idx[NDIM];
+    double xc[3];
+    Lucee::RowMajorSequencer<NDIM> seq(sol.getRegion());
+// loop over field, updating solution in each cell
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+// get centroid coordinate
+      grid.setIndex(idx);
+      grid.getCentroid(xc);
+// set pointers
+      sol.setPtr(inpPtr, idx);
+
+// compute source
+      calcSource(t0, xc, &inpPtr[0], src);
+// perform final update
+      sol.setPtr(solPtr, idx);
+      for (unsigned i=0; i<n; ++i)
+        solPtr[i] += dt*src[i];
+    }
   }
 
   template <unsigned NDIM>

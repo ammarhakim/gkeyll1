@@ -68,6 +68,17 @@ namespace Lucee
       unsigned intMethod;
 
 /**
+ * Integrate ODEs to time "t" using forward-Euler order method. This
+ * is not a good integrator, however, can be used as a part of a
+ * multi-stage integration scheme.
+ *
+ * @param t0 Initial time
+ * @param dt Time-step to use
+ * @param sol On output, solution of ODEs.
+ */
+      void forwardEuler(double t0, double dt, Lucee::Field<NDIM, double>& sol);
+
+/**
  * Integrate ODEs to time "t" using Runge-Kutta 4th order method.
  *
  * @param t0 Initial time
