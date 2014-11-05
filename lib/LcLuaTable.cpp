@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcLuaTable.h>
 
+// std includes
 #include <iostream>
 
 namespace Lucee
@@ -298,7 +299,10 @@ namespace Lucee
     lua_gettable(L, -2);
     if (! lua_istable(L, -1) )
     {
-      std::cout << "NOT A TABLE" << std::endl;
+      lua_pop(L, 1);
+      Lucee::Except lce("LuaTable::getTable: Element at index ");
+      lce << idx << " is not a Lua table";
+      throw lce;
     }
     LuaTable tbl = LuaTable(L, "table");
     lua_pop(L, 2);
@@ -519,13 +523,18 @@ namespace Lucee
     {
       if ( lua_istable(L, -1) )
       {
-        std::string var = lua_tostring(L, -2);
+        std::string var;
+        if (lua_type(L, -2) == LUA_TSTRING)
+          var = lua_tostring(L, -2);
+        else if (lua_type(L, -2) == LUA_TNUMBER)
+          var = static_cast<std::ostringstream*>( 
+            &(std::ostringstream() << lua_tonumber(L, -1)) )->str();
+        else
+          var = "unknowntype";
         lua_pushstring(L, "__type");
         lua_gettable(L, -2);
         if (lua_type(L, -1) == LUA_TSTRING)
-        {
           addToTypeMap(var, lua_tostring(L, -1));
-        }
         lua_pop(L, 1);
       }
       lua_pop(L, 1);
