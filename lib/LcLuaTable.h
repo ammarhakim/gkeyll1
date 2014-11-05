@@ -287,6 +287,14 @@ namespace Lucee
       LuaTable getTable(const std::string& nm) const;
 
 /**
+ * Get a table inside this table.
+ * 
+ * @param idx Index of table to fetch (zero based)
+ * @return table object.
+ */
+      LuaTable getTable(int idx) const;
+
+/**
  * Get reference to specified Lua function.
  *
  * @param nm Name of function.
