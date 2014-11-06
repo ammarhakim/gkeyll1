@@ -14,6 +14,9 @@
 
 namespace Lucee
 {
+  static const unsigned LC_LOWER_EDGE = 0;
+  static const unsigned LC_UPPER_EDGE = 1;
+
 // set module name
   const char *BoundaryCondition::id = "BoundaryCondition";
 
