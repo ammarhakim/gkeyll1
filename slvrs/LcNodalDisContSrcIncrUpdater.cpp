@@ -76,6 +76,8 @@ namespace Lucee
 
     double xc[3];
     int idx[NDIM];
+
+    qOut = 0.0; // clear out current contents
 // loop over each cell in extended region
     Lucee::Region<NDIM, int> localExtRgn = qIn.getExtRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
