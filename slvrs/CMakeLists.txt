@@ -74,6 +74,7 @@ set(lcslvrs_SOURCES
   LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
+  LcNodalDgZeroNormalBoundaryCondition.cpp
   LcNodalDisContHyperUpdater.cpp
   LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp

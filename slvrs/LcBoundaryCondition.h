@@ -56,6 +56,20 @@ namespace Lucee
       unsigned numComponents() const
       { return components.size(); }
 
+/**
+ * Set direction to apply BC.
+ *
+ * @param d Direction in which BC is being applied.
+ */
+      void setDir(unsigned d) { dir = d; }
+
+/**
+ * Set edge to which BC is being applied.
+ *
+ * @param e Edge to which BC is being applied.
+ */
+      void setEdge(unsigned e) { edge = e; }
+
 /** 
  * Apply boundary conditions. The variable 'qin' represents data in
  * the skin cell (first/last interior cell) while 'qbc' represents
@@ -81,7 +95,25 @@ namespace Lucee
  */
       void setComponents(const std::vector<unsigned>& comps);
 
+/**
+ * Direction in which BC is being applied.
+ *
+ * @return Direction in which BC is being applied.
+ */
+      unsigned getDir() const { return dir; }
+
+/**
+ * Edge to which BC is being applied.
+ *
+ * @return Edge to which BC is being applied.
+ */
+      unsigned getEdge() const { return edge; }
+
     private:
+/** Direction to apply boundary condtion */
+      unsigned dir;
+/** Edge to apply boundary condition */
+      unsigned edge;
 /** Components to apply to */
       std::vector<unsigned> components;
   };
