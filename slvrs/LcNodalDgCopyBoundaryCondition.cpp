@@ -1,5 +1,5 @@
 /**
- * @file	LcNodalDgZeroNormalBoundaryCondition.cpp
+ * @file	LcNodalDgCopyBoundaryCondition.cpp
  *
  * @brief	Class for applying copy boundary conditions.
  */
@@ -12,7 +12,7 @@
 // lucee includes
 #include <LcGlobals.h>
 #include <LcLuaState.h>
-#include <LcNodalDgZeroNormalBoundaryCondition.h>
+#include <LcNodalDgCopyBoundaryCondition.h>
 
 namespace Lucee
 {
@@ -20,25 +20,39 @@ namespace Lucee
   static const unsigned LC_UPPER_EDGE = 1;
 
 // set constructor name
-  template <> const char *NodalDgZeroNormalBoundaryCondition<1>::id = "NodalDgZeroNormal1D";
-  template <> const char *NodalDgZeroNormalBoundaryCondition<2>::id = "NodalDgZeroNormal2D";
-  template <> const char *NodalDgZeroNormalBoundaryCondition<3>::id = "NodalDgZeroNormal3D";
+  template <> const char *NodalDgCopyBoundaryCondition<1>::id = "NodalDgCopy1D";
+  template <> const char *NodalDgCopyBoundaryCondition<2>::id = "NodalDgCopy2D";
+  template <> const char *NodalDgCopyBoundaryCondition<3>::id = "NodalDgCopy3D";
 
   template <unsigned NDIM>
   void
-  NodalDgZeroNormalBoundaryCondition<NDIM>::readInput(Lucee::LuaTable& tbl)
+  NodalDgCopyBoundaryCondition<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     BoundaryCondition::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
-      throw Lucee::Except("NodalDgZeroNormalBoundaryCondition::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("NodalDgCopyBoundaryCondition::readInput: Must specify element to use using 'basis'");
+
+// read out factors for multiplications
+    if (tbl.hasNumVec("fact"))
+    {
+      fact = tbl.getNumVec("fact");
+      if (fact.size() != this->numComponents())
+        throw Lucee::Except(
+          "NodalDgCopyBoundaryCondition::readInput: If 'fact' table is specified it must have same size as 'components' table");
+    }
+    else
+    {
+      fact.resize(this->numComponents());
+      for (unsigned i=0; i<fact.size(); ++i) fact[i] = 1.0;
+    }
   }
 
   template <unsigned NDIM>
   void
-  NodalDgZeroNormalBoundaryCondition<NDIM>::applyBc(double tm, const double loc[3], const int *idx,
+  NodalDgCopyBoundaryCondition<NDIM>::applyBc(double tm, const double loc[3], const int *idx,
     const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
     unsigned numNodes = nodalBasis->getNumNodes();
@@ -62,28 +76,18 @@ namespace Lucee
       nodalBasis->getSurfLowerNodeNums(this->getDir(), ghSurfNodes);
     }
 
-    double vel[3], normVel[3];
     for (unsigned n=0; n<numSurfNodes; ++n)
     {
       int skIdx = skSurfNodes[n]*nc; // start index in skin cell
-// rotate vector to local coordinate system
-      for (unsigned i=0; i<3; ++i)
-        vel[i] = qin[skIdx+this->component(i)];
-      c.rotateVecToLocal(vel, normVel);
-      
-// flip sign of normal component
-      normVel[0] = -normVel[0];
-
       int ghIdx = ghSurfNodes[n]*nc; // start index in ghost cell
-// rotate back to global frame
-      c.rotateVecToGlobal(normVel, vel);
-        for (unsigned i=0; i<3; ++i)
-          qbc[ghIdx+this->component(i)] = vel[i];
+// copy with scaling factors
+      for (unsigned i=0; i<this->numComponents() ; ++i)
+        qbc[ghIdx+this->component(i)] = fact[i]*qin[skIdx+this->component(i)];
     }
   }
 
 // instatiations
-  template class NodalDgZeroNormalBoundaryCondition<1>;
-  template class NodalDgZeroNormalBoundaryCondition<2>;
-  template class NodalDgZeroNormalBoundaryCondition<3>;
+  template class NodalDgCopyBoundaryCondition<1>;
+  template class NodalDgCopyBoundaryCondition<2>;
+  template class NodalDgCopyBoundaryCondition<3>;
 }

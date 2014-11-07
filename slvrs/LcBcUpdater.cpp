@@ -54,14 +54,6 @@ namespace Lucee
 
     Lucee::LuaTable bcTbl = tbl.getTable("boundaryConditions");
     bcList = bcTbl.template getAllObjects<Lucee::BoundaryCondition>();
-
-// tell all BCs which direction and edge we are working on
-    for (std::vector<Lucee::BoundaryCondition*>::iterator bcItr = bcList.begin();
-         bcItr != bcList.end(); ++bcItr)
-    {
-      (*bcItr)->setDir(dir);
-      (*bcItr)->setEdge(edge);
-    }
   }
 
   template <unsigned NDIM>
@@ -130,7 +122,11 @@ namespace Lucee
 // apply boundary conditions
         for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
              bcItr != bcList.end(); ++bcItr)
+        {
+          (*bcItr)->setDir(dir);
+          (*bcItr)->setEdge(edge);
           (*bcItr)->applyBc(t, xc, idxG, coordSys, iPtr, gPtr);
+        }
       }
     }
 
