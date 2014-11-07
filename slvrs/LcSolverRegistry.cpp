@@ -54,6 +54,7 @@
 #include <LcMHDHamiltonianUpdater.h>
 #include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
+#include <LcNodalDgCopyBoundaryCondition.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
 #include <LcNodalDgZeroNormalBoundaryCondition.h>
 #include <LcNodalDisContHyperUpdater.h>
@@ -257,6 +258,10 @@ namespace Lucee
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<1> >()
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<2> >()
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<3> >()
+
+      .append<Lucee::NodalDgCopyBoundaryCondition<1> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<2> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<3> >()
 
       .append<Lucee::NodalDgFunctionBoundaryCondition<1> >()
       .append<Lucee::NodalDgFunctionBoundaryCondition<2> >()
