@@ -39,6 +39,7 @@ set(lcslvrs_SOURCES
   LcEulerAxiSource.cpp
   LcEulerEquation.cpp
   LcEvalOnBoundaryNodesUpdater.cpp
+  LcEvalOnCentroidUpdater.cpp
   LcEvalOnNodesUpdater.cpp
   LcFaceEdgeCurlUpdater.cpp
   LcFieldArithmeticUpdater.cpp
@@ -73,9 +74,9 @@ set(lcslvrs_SOURCES
   LcMaxwellEquation.cpp
   LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
+  LcNodalDgCopyBoundaryCondition.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
   LcNodalDgZeroNormalBoundaryCondition.cpp
-  LcNodalDgCopyBoundaryCondition.cpp
   LcNodalDisContHyperUpdater.cpp
   LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp
