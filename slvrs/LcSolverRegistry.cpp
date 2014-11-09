@@ -28,6 +28,7 @@
 #include <LcElectrostaticPhiUpdater.h>
 #include <LcEulerAxiSource.h>
 #include <LcEvalOnBoundaryNodesUpdater.h>
+#include <LcEvalOnCentroidUpdater.h>
 #include <LcEvalOnNodesUpdater.h>
 #include <LcFaceEdgeCurlUpdater.h>
 #include <LcFieldArithmeticUpdater.h>
@@ -188,6 +189,10 @@ namespace Lucee
       .append<Lucee::EvalOnNodesUpdater<3> >()
       .append<Lucee::EvalOnNodesUpdater<4> >()
       .append<Lucee::EvalOnNodesUpdater<5> >()
+
+      .append<Lucee::EvalOnCentroidUpdater<1> >()
+      .append<Lucee::EvalOnCentroidUpdater<2> >()
+      .append<Lucee::EvalOnCentroidUpdater<3> >()
 
       .append<Lucee::EvalOnBoundaryNodesUpdater<1> >()
       .append<Lucee::EvalOnBoundaryNodesUpdater<2> >()
