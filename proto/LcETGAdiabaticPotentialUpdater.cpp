@@ -160,8 +160,8 @@ namespace Lucee
         // NOTE: ONLY WORKS FOR POLYORDER 1
         rhoYAvgVec(0) += (rhoVec(0) + rhoVec(2));
         rhoYAvgVec(1) += (rhoVec(1) + rhoVec(3));
-        rhoYAvgVec(2) += (rhoVec(1) + rhoVec(3));
-        rhoYAvgVec(3) += (rhoVec(0) + rhoVec(2));
+        rhoYAvgVec(2) += (rhoVec(0) + rhoVec(2));
+        rhoYAvgVec(3) += (rhoVec(1) + rhoVec(3));
       }
 
       rhoYAvgVec /= 2*NY_TOTAL;
@@ -191,7 +191,7 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     // output potential
-    this->appendOutVarType(typeid(Lucee::Field<4, double>));
+    this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
 
   void
