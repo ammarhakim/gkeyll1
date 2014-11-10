@@ -19,17 +19,18 @@ endif (PETSC_FOUND)
 
 set (proto_SOURCES
   LcCenterOfMassUpdater.cpp
+  LcConstGravitySrcUpdater.cpp
   LcCopy1DTo2DNodalField.cpp
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncMomentCalc2D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
   LcDistFuncReflectionBcUpdater.cpp
+  LcETGAdiabaticPotentialUpdater.cpp
+  LcETGInitializeDensity.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
-  LcETGAdiabaticPotentialUpdater.cpp
-  LcETGInitializeDensity.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateGeneralField.cpp

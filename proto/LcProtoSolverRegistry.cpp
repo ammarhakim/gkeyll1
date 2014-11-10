@@ -11,17 +11,18 @@
 
 // lucee includes
 #include <LcCenterOfMassUpdater.h>
+#include <LcConstGravitySrcUpdater.h>
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
+#include <LcETGAdiabaticPotentialUpdater.h>
+#include <LcETGInitializeDensity.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
-#include <LcETGAdiabaticPotentialUpdater.h>
-#include <LcETGInitializeDensity.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateGeneralField.h>
@@ -36,9 +37,9 @@
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
+#include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
-#include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcPoissonBracketUpdater.h>
@@ -50,8 +51,8 @@
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
-#include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
+#include <LcThreeWaveInteractSrcUpdater.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -162,7 +163,9 @@ namespace Lucee
       .append<Lucee::SheathParticleSource1x1v>()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
-      .append<Lucee::ThreeWaveInteractModSrcUpdater>();
+      .append<Lucee::ThreeWaveInteractModSrcUpdater>()
+
+      .append<Lucee::ConstGravitySrcUpdater>();
 
 #ifdef HAVE_PETSC
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
