@@ -120,10 +120,10 @@ namespace Lucee
     nAdiabaticAtCenter += 0.25*nAdiabaticPtr[0];
     // LOWER LEFT
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0], idx[1]-1);
-    nAdiabaticAtCenter += 0.25*nAdiabaticPtr[3];
+    nAdiabaticAtCenter += 0.25*nAdiabaticPtr[2];
     // LOWER RIGHT
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0]-1, idx[1]-1);
-    nAdiabaticAtCenter += 0.25*nAdiabaticPtr[2];
+    nAdiabaticAtCenter += 0.25*nAdiabaticPtr[3];
     // UPPER RIGHT
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0]-1, idx[1]);
     nAdiabaticAtCenter += 0.25*nAdiabaticPtr[1];
@@ -134,6 +134,7 @@ namespace Lucee
     for (int ix = globalRgn.getLower(0); ix < globalRgn.getUpper(0); ix++)
     {
       // Loop over cells in y to compute average phi
+      // TODO: Change inputs in future, compute <rho>_y using a moment updater instead
       Eigen::VectorXd rhoYAvgVec = Eigen::VectorXd::Zero(nlocal2d);
 
       for (int iy = globalRgn.getLower(1); iy < globalRgn.getUpper(1); iy++)
@@ -157,10 +158,10 @@ namespace Lucee
 
 
         // NOTE: ONLY WORKS FOR POLYORDER 1
-        rhoYAvgVec(0) += (rhoVec(0) + rhoVec(3));
-        rhoYAvgVec(1) += (rhoVec(1) + rhoVec(2));
-        rhoYAvgVec(2) += (rhoVec(1) + rhoVec(2));
-        rhoYAvgVec(3) += (rhoVec(0) + rhoVec(3));
+        rhoYAvgVec(0) += (rhoVec(0) + rhoVec(2));
+        rhoYAvgVec(1) += (rhoVec(1) + rhoVec(3));
+        rhoYAvgVec(2) += (rhoVec(1) + rhoVec(3));
+        rhoYAvgVec(3) += (rhoVec(0) + rhoVec(2));
       }
 
       rhoYAvgVec /= 2*NY_TOTAL;
