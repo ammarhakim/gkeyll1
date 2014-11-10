@@ -41,6 +41,8 @@ namespace Lucee
     Lucee::Field<2, double>& fluid = this->getOut<Lucee::Field<2, double> >(0);
     Lucee::FieldPtr<double> fPtr = fluid.createPtr();
 
+    int dirIdx = dir+1; // offset as first index is rho
+
     int idx[2];
     Lucee::Region<2, int> localRgn = fluid.getRegion();
     Lucee::RowMajorSequencer<2> seq(localRgn);
@@ -51,11 +53,11 @@ namespace Lucee
 
       double rho = fPtr[0];
 // old contribution to kinetic energy from momentum in 'dir' direction
-      double keold = 0.5*fPtr[dir]*fPtr[dir]/rho;
+      double keold = 0.5*fPtr[dirIdx]*fPtr[dirIdx]/rho;
 // update momentum
-      fPtr[dir] += gravity*rho*dt;
+      fPtr[dirIdx] += gravity*rho*dt;
 // now update energy to account for updated momentum
-      fPtr[4] = fPtr[4] - keold + 0.5*fPtr[dir]*fPtr[dir]/rho;
+      fPtr[4] = fPtr[4] - keold + 0.5*fPtr[dirIdx]*fPtr[dirIdx]/rho;
     }
     
     return Lucee::UpdaterStatus();
