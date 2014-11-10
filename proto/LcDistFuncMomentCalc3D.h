@@ -1,11 +1,12 @@
 /**
- * @file	LcDistFuncMomentCalcWeighted2D.h
+ * @file	LcDistFuncMomentCalc3D.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function with an additional weighting function.
+ * @brief	Updater to compute 3d moments of a 5d distribution function.
+ * Currently only works for 0th moment
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#ifndef LC_DIST_FUNC_MOMENT_CALC_3D_H
+#define LC_DIST_FUNC_MOMENT_CALC_3D_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,18 +27,18 @@ namespace Lucee
 /**
  * Updater to compute moments of distribution function f(x,v)
  */
-  class DistFuncMomentCalcWeighted2D : public Lucee::UpdaterIfc
+  class DistFuncMomentCalc3D : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 /** Number of components for coordinate arrays etc. */
-      static const unsigned NC4 = Lucee::CDIM<4>::N;
+      static const unsigned NC5 = Lucee::CDIM<5>::N;
 /** Number of components for coordinate arrays etc. */
-      static const unsigned NC2 = Lucee::CDIM<2>::N;
+      static const unsigned NC3 = Lucee::CDIM<3>::N;
 
 /** Create new modal DG solver in 1D */
-      DistFuncMomentCalcWeighted2D();
+      DistFuncMomentCalc3D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,15 +73,32 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
-/** Pointer to 2D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** Pointer to 5D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
+/** Pointer to 3D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** Moment to compute */
       unsigned calcMom;
-      std::vector<Eigen::MatrixXd> mom0MatrixVector;
-      std::vector<Eigen::MatrixXd> mom1MatrixVector;
-      std::vector<Eigen::MatrixXd> mom2MatrixVector;
+/** Zeroth moment matrix */
+      Eigen::MatrixXd mom0Matrix;
+/** First moment matrix */
+      Eigen::MatrixXd mom1Matrix;
+/** Second moment matrix */
+      Eigen::MatrixXd mom2Matrix;
+/**
+ * Compute matrix-vector multiply. Output vector must be
+ * pre-allocated. Note that the computation performed is
+ *
+ * out = m*mat*vec + v*out
+ *
+ * @param m Factor for accumulation.
+ * @param mat Matrix for multiplication.
+ * @param vec Vector for multiplication.
+ * @param v Factor for accumulation.
+ * @param out On output, holds the product.
+ */
+      void matVec(double m, const Lucee::Matrix<double>& mat,
+        const double* vec, double v, double* out);
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -90,4 +108,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#endif // LC_DIST_FUNC_MOMENT_CALC_3D_H

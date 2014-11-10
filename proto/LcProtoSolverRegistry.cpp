@@ -16,10 +16,13 @@
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc2D.h>
+#include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
+#include <LcDistFuncMomentCalcWeighted3D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGInitializeDensity.h>
+#include <LcETGInitializeDensity5D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
@@ -38,11 +41,13 @@
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
+#include <LcNodalCopy3DTo5DFieldUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcPoissonBracketUpdater.h>
+#include <LcPoissonBracketOptUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
@@ -51,6 +56,7 @@
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
+#include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 
@@ -80,13 +86,16 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncMomentCalc2D>()
+      .append<Lucee::DistFuncMomentCalc3D>()
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
+      .append<Lucee::DistFuncMomentCalcWeighted3D>()
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
       
       .append<Lucee::ETGAdiabaticPotentialUpdater>()
       .append<Lucee::ETGInitializeDensity>()
+      .append<Lucee::ETGInitializeDensity5D>()
     
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
@@ -128,10 +137,16 @@ namespace Lucee
       .append<Lucee::PoissonBracketUpdater<3> >()
       .append<Lucee::PoissonBracketUpdater<4> >()
       .append<Lucee::PoissonBracketUpdater<5> >()
+      .append<Lucee::PoissonBracketOptUpdater<1> >()
+      .append<Lucee::PoissonBracketOptUpdater<2> >()
+      .append<Lucee::PoissonBracketOptUpdater<3> >()
+      .append<Lucee::PoissonBracketOptUpdater<4> >()
+      .append<Lucee::PoissonBracketOptUpdater<5> >()
       
       .append<Lucee::NodalPoissonBracketUpdater>()
 
       .append<Lucee::NodalCopy2DTo4DFieldUpdater>()
+      .append<Lucee::NodalCopy3DTo5DFieldUpdater>()
 
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
@@ -152,11 +167,8 @@ namespace Lucee
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
       .append<Lucee::NonLinEmGke1dHamilUpdater>()
 
-      .append<Lucee::SimpleSmoothToC0Updater<1> >()
       .append<Lucee::SimpleSmoothToC0Updater<2> >()
       .append<Lucee::SimpleSmoothToC0Updater<3> >()
-      .append<Lucee::SimpleSmoothToC0Updater<4> >()
-      .append<Lucee::SimpleSmoothToC0Updater<5> >()
 
       .append<Lucee::SmoothQuadPhiToC1Updater>()
 

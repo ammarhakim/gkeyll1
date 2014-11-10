@@ -72,19 +72,7 @@ namespace Lucee
       }
       setupMatrices();
     }
-    else if (NDIM == 3)
-    {
-      if (polyOrder < 5)
-        this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
-      else
-      {
-        Lucee::Except lce("SerendipityElement: Degree must be 1, 2, 3, or 4.");
-        lce << " Provided " << polyOrder << " instead";
-        throw lce;
-      }
-      setupMatrices();
-    }
-    else if (NDIM == 4)
+    else if (NDIM == 3 || NDIM == 4 || NDIM == 5)
     {
       if (polyOrder < 3)
         this->setNumNodes(getSerendipityDimension(polyOrder, NDIM));
@@ -285,385 +273,19 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getSurfLowerNodeNums(unsigned dir,
     std::vector<int>& nodeNum) const
-  {
-    /*int counter = 0;
-
-    for (int i = 0; i < nodeList.rows(); i++)
-    {
-      if (nodeList(i,dir) == -1)
-      {
-        nodeNum[counter] = i;
-        std::cout << "ldir = " << dir << ", nodeNum[" << counter << "] = " << i << std::endl;
-        counter++;
-      }
-    }*/
-    
+  { 
     if (NDIM == 1)
       nodeNum[0] = 0;
-    else if (NDIM == 2)
+    else
     {
-      if (polyOrder == 1)
+      int counter = 0;
+
+      for (int i = 0; i < nodeList.rows(); i++)
       {
-        if (dir == 0)
+        if (nodeList(i,dir) == -1)
         {
-          nodeNum[0] = 0;
-          nodeNum[1] = 3;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 7;
-          nodeNum[2] = 6;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-        }
-      }
-      else if (polyOrder == 3)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 11;
-          nodeNum[2] = 10;
-          nodeNum[3] = 9;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 3;
-        }
-      }
-    }
-    else if (NDIM == 3)
-    {
-      if (polyOrder == 1)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 3;
-          nodeNum[2] = 4;
-          nodeNum[3] = 7;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 4;
-          nodeNum[3] = 5;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 3;
-          nodeNum[3] = 2;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 7;
-          nodeNum[2] = 6;
-          nodeNum[3] = 8;
-          nodeNum[4] = 11;
-          nodeNum[5] = 12;
-          nodeNum[6] = 19;
-          nodeNum[7] = 18;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 8;
-          nodeNum[4] = 9;
-          nodeNum[5] = 12;
-          nodeNum[6] = 13;
-          nodeNum[7] = 14;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 7;
-          nodeNum[4] = 3;
-          nodeNum[5] = 6;
-          nodeNum[6] = 5;
-          nodeNum[7] = 4;
-        }
-      }
-      else if (polyOrder == 3)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 11;
-          nodeNum[2] = 10;
-          nodeNum[3] = 9;
-          nodeNum[4] = 12;
-          nodeNum[5] = 15;
-          nodeNum[6] = 16;
-          nodeNum[7] = 19;
-          nodeNum[8] = 20;
-          nodeNum[9] = 31;
-          nodeNum[10] = 30;
-          nodeNum[11] = 29;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 3;
-          nodeNum[4] = 12;
-          nodeNum[5] = 13;
-          nodeNum[6] = 16;
-          nodeNum[7] = 17;
-          nodeNum[8] = 20;
-          nodeNum[9] = 21;
-          nodeNum[10] = 22;
-          nodeNum[11] = 23;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 3;
-          nodeNum[4] = 11;
-          nodeNum[5] = 4;
-          nodeNum[6] = 10;
-          nodeNum[7] = 5;
-          nodeNum[8] = 9;
-          nodeNum[9] = 8;
-          nodeNum[10] = 7;
-          nodeNum[11] = 6;
-        }
-      }
-      else if (polyOrder == 4)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 15;
-          nodeNum[2] = 14;
-          nodeNum[3] = 13;
-          nodeNum[4] = 12;
-          nodeNum[5] = 17;
-          nodeNum[6] = 20;
-          nodeNum[7] = 21;
-          nodeNum[8] = 28;
-          nodeNum[9] = 27;
-          nodeNum[10] = 29;
-          nodeNum[11] = 32;
-          nodeNum[12] = 33;
-          nodeNum[13] = 48;
-          nodeNum[14] = 47;
-          nodeNum[15] = 46;
-          nodeNum[16] = 45;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 3;
-          nodeNum[4] = 4;
-          nodeNum[5] = 17;
-          nodeNum[6] = 18;
-          nodeNum[7] = 21;
-          nodeNum[8] = 22;
-          nodeNum[9] = 23;
-          nodeNum[10] = 29;
-          nodeNum[11] = 30;
-          nodeNum[12] = 33;
-          nodeNum[13] = 34;
-          nodeNum[14] = 35;
-          nodeNum[15] = 36;
-          nodeNum[16] = 37;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 3;
-          nodeNum[4] = 4;
-          nodeNum[5] = 15;
-          nodeNum[6] = 5;
-          nodeNum[7] = 14;
-          nodeNum[8] = 16;
-          nodeNum[9] = 6;
-          nodeNum[10] = 13;
-          nodeNum[11] = 7;
-          nodeNum[12] = 12;
-          nodeNum[13] = 11;
-          nodeNum[14] = 10;
-          nodeNum[15] = 9;
-          nodeNum[16] = 8;
-        }
-      }
-    }
-    else if (NDIM == 4)
-    {
-      if (polyOrder == 1)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 3;
-          nodeNum[2] = 4;
-          nodeNum[3] = 7;
-          nodeNum[4] = 8;
-          nodeNum[5] = 11;
-          nodeNum[6] = 12;
-          nodeNum[7] = 15;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 4;
-          nodeNum[3] = 5;
-          nodeNum[4] = 8;
-          nodeNum[5] = 9;
-          nodeNum[6] = 12;
-          nodeNum[7] = 13;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 3;
-          nodeNum[3] = 2;
-          nodeNum[4] = 8;
-          nodeNum[5] = 9;
-          nodeNum[6] = 11;
-          nodeNum[7] = 10;
-        }
-        else if (dir == 3)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 3;
-          nodeNum[3] = 2;
-          nodeNum[4] = 4;
-          nodeNum[5] = 5;
-          nodeNum[6] = 7;
-          nodeNum[7] = 6;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 7;
-          nodeNum[2] = 6;
-          nodeNum[3] = 8;
-          nodeNum[4] = 11;
-          nodeNum[5] = 12;
-          nodeNum[6] = 19;
-          nodeNum[7] = 18;
-          nodeNum[8] = 20;
-          nodeNum[9] = 23;
-          nodeNum[10] = 24;
-          nodeNum[11] = 27;
-          nodeNum[12] = 28;
-          nodeNum[13] = 35;
-          nodeNum[14] = 34;
-          nodeNum[15] = 36;
-          nodeNum[16] = 39;
-          nodeNum[17] = 40;
-          nodeNum[18] = 47;
-          nodeNum[19] = 46;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 8;
-          nodeNum[4] = 9;
-          nodeNum[5] = 12;
-          nodeNum[6] = 13;
-          nodeNum[7] = 14;
-          nodeNum[8] = 20;
-          nodeNum[9] = 21;
-          nodeNum[10] = 24;
-          nodeNum[11] = 25;
-          nodeNum[12] = 28;
-          nodeNum[13] = 29;
-          nodeNum[14] = 30;
-          nodeNum[15] = 36;
-          nodeNum[16] = 37;
-          nodeNum[17] = 40;
-          nodeNum[18] = 41;
-          nodeNum[19] = 42;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 7;
-          nodeNum[4] = 3;
-          nodeNum[5] = 6;
-          nodeNum[6] = 5;
-          nodeNum[7] = 4;
-          nodeNum[8] = 20;
-          nodeNum[9] = 21;
-          nodeNum[10] = 23;
-          nodeNum[11] = 22;
-          nodeNum[12] = 28;
-          nodeNum[13] = 29;
-          nodeNum[14] = 30;
-          nodeNum[15] = 35;
-          nodeNum[16] = 31;
-          nodeNum[17] = 34;
-          nodeNum[18] = 33;
-          nodeNum[19] = 32;
-        }
-        else if (dir == 3)
-        {
-          nodeNum[0] = 0;
-          nodeNum[1] = 1;
-          nodeNum[2] = 2;
-          nodeNum[3] = 7;
-          nodeNum[4] = 3;
-          nodeNum[5] = 6;
-          nodeNum[6] = 5;
-          nodeNum[7] = 4;
-          nodeNum[8] = 8;
-          nodeNum[9] = 9;
-          nodeNum[10] = 11;
-          nodeNum[11] = 10;
-          nodeNum[12] = 12;
-          nodeNum[13] = 13;
-          nodeNum[14] = 14;
-          nodeNum[15] = 19;
-          nodeNum[16] = 15;
-          nodeNum[17] = 18;
-          nodeNum[18] = 17;
-          nodeNum[19] = 16;
+          nodeNum[counter] = i;
+          counter++;
         }
       }
     }
@@ -676,370 +298,16 @@ namespace Lucee
   {
     if (NDIM == 1)
       nodeNum[0] = polyOrder;
-    else if (NDIM == 2)
+    else
     {
-      if (polyOrder == 1)
+      int counter = 0;
+
+      for (int i = 0; i < nodeList.rows(); i++)
       {
-        if (dir == 0)
+        if (nodeList(i,dir) == 1)
         {
-          nodeNum[0] = 1;
-          nodeNum[1] = 2;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 3;
-          nodeNum[1] = 2;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 2;
-          nodeNum[1] = 3;
-          nodeNum[2] = 4;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 6;
-          nodeNum[1] = 5;
-          nodeNum[2] = 4;
-        }
-      }
-      else if (polyOrder == 3)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 3;
-          nodeNum[1] = 4;
-          nodeNum[2] = 5;
-          nodeNum[3] = 6;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 9;
-          nodeNum[1] = 8;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-        }
-      }
-    }
-    else if (NDIM == 3)
-    {
-      if (polyOrder == 1)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 1;
-          nodeNum[1] = 2;
-          nodeNum[2] = 5;
-          nodeNum[3] = 6;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 3;
-          nodeNum[1] = 2;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 4;
-          nodeNum[1] = 5;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 2;
-          nodeNum[1] = 3;
-          nodeNum[2] = 4;
-          nodeNum[3] = 9;
-          nodeNum[4] = 10;
-          nodeNum[5] = 14;
-          nodeNum[6] = 15;
-          nodeNum[7] = 16;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 6;
-          nodeNum[1] = 5;
-          nodeNum[2] = 4;
-          nodeNum[3] = 11;
-          nodeNum[4] = 10;
-          nodeNum[5] = 18;
-          nodeNum[6] = 17;
-          nodeNum[7] = 16;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 12;
-          nodeNum[1] = 13;
-          nodeNum[2] = 14;
-          nodeNum[3] = 19;
-          nodeNum[4] = 15;
-          nodeNum[5] = 18;
-          nodeNum[6] = 17;
-          nodeNum[7] = 16;
-        }
-      }
-      else if (polyOrder == 3)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 3;
-          nodeNum[1] = 4;
-          nodeNum[2] = 5;
-          nodeNum[3] = 6;
-          nodeNum[4] = 13;
-          nodeNum[5] = 14;
-          nodeNum[6] = 17;
-          nodeNum[7] = 18;
-          nodeNum[8] = 23;
-          nodeNum[9] = 24;
-          nodeNum[10] = 25;
-          nodeNum[11] = 26;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 9;
-          nodeNum[1] = 8;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-          nodeNum[4] = 15;
-          nodeNum[5] = 14;
-          nodeNum[6] = 19;
-          nodeNum[7] = 18;
-          nodeNum[8] = 29;
-          nodeNum[9] = 28;
-          nodeNum[10] = 27;
-          nodeNum[11] = 26;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 20;
-          nodeNum[1] = 21;
-          nodeNum[2] = 22;
-          nodeNum[3] = 23;
-          nodeNum[4] = 31;
-          nodeNum[5] = 24;
-          nodeNum[6] = 30;
-          nodeNum[7] = 25;
-          nodeNum[8] = 29;
-          nodeNum[9] = 28;
-          nodeNum[10] = 27;
-          nodeNum[11] = 26;
-        }
-      }
-      else if (polyOrder == 4)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 4;
-          nodeNum[1] = 5;
-          nodeNum[2] = 6;
-          nodeNum[3] = 7;
-          nodeNum[4] = 8;
-          nodeNum[5] = 18;
-          nodeNum[6] = 19;
-          nodeNum[7] = 23;
-          nodeNum[8] = 24;
-          nodeNum[9] = 25;
-          nodeNum[10] = 30;
-          nodeNum[11] = 31;
-          nodeNum[12] = 37;
-          nodeNum[13] = 38;
-          nodeNum[14] = 39;
-          nodeNum[15] = 40;
-          nodeNum[16] = 41;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 12;
-          nodeNum[1] = 11;
-          nodeNum[2] = 10;
-          nodeNum[3] = 9;
-          nodeNum[4] = 8;
-          nodeNum[5] = 20;
-          nodeNum[6] = 19;
-          nodeNum[7] = 27;
-          nodeNum[8] = 26;
-          nodeNum[9] = 25;
-          nodeNum[10] = 32;
-          nodeNum[11] = 31;
-          nodeNum[12] = 45;
-          nodeNum[13] = 44;
-          nodeNum[14] = 43;
-          nodeNum[15] = 42;
-          nodeNum[16] = 41;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 33;
-          nodeNum[1] = 34;
-          nodeNum[2] = 35;
-          nodeNum[3] = 36;
-          nodeNum[4] = 37;
-          nodeNum[5] = 48;
-          nodeNum[6] = 38;
-          nodeNum[7] = 47;
-          nodeNum[8] = 49;
-          nodeNum[9] = 39;
-          nodeNum[10] = 46;
-          nodeNum[11] = 40;
-          nodeNum[12] = 45;
-          nodeNum[13] = 44;
-          nodeNum[14] = 43;
-          nodeNum[15] = 42;
-          nodeNum[16] = 41;
-        }
-      }
-    }
-    else if (NDIM == 4)
-    {
-      if (polyOrder == 1)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 1;
-          nodeNum[1] = 2;
-          nodeNum[2] = 5;
-          nodeNum[3] = 6;
-          nodeNum[4] = 9;
-          nodeNum[5] = 10;
-          nodeNum[6] = 13;
-          nodeNum[7] = 14;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 3;
-          nodeNum[1] = 2;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-          nodeNum[4] = 11;
-          nodeNum[5] = 10;
-          nodeNum[6] = 15;
-          nodeNum[7] = 14;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 4;
-          nodeNum[1] = 5;
-          nodeNum[2] = 7;
-          nodeNum[3] = 6;
-          nodeNum[4] = 12;
-          nodeNum[5] = 13;
-          nodeNum[6] = 15;
-          nodeNum[7] = 14;
-        }
-        else if (dir == 3)
-        {
-          nodeNum[0] = 8;
-          nodeNum[1] = 9;
-          nodeNum[2] = 11;
-          nodeNum[3] = 10;
-          nodeNum[4] = 12;
-          nodeNum[5] = 13;
-          nodeNum[6] = 15;
-          nodeNum[7] = 14;
-        }
-      }
-      else if (polyOrder == 2)
-      {
-        if (dir == 0)
-        {
-          nodeNum[0] = 2;
-          nodeNum[1] = 3;
-          nodeNum[2] = 4;
-          nodeNum[3] = 9;
-          nodeNum[4] = 10;
-          nodeNum[5] = 14;
-          nodeNum[6] = 15;
-          nodeNum[7] = 16;
-          nodeNum[8] = 21;
-          nodeNum[9] = 22;
-          nodeNum[10] = 25;
-          nodeNum[11] = 26;
-          nodeNum[12] = 30;
-          nodeNum[13] = 31;
-          nodeNum[14] = 32;
-          nodeNum[15] = 37;
-          nodeNum[16] = 38;
-          nodeNum[17] = 42;
-          nodeNum[18] = 43;
-          nodeNum[19] = 44;
-        }
-        else if (dir == 1)
-        {
-          nodeNum[0] = 6;
-          nodeNum[1] = 5;
-          nodeNum[2] = 4;
-          nodeNum[3] = 11;
-          nodeNum[4] = 10;
-          nodeNum[5] = 18;
-          nodeNum[6] = 17;
-          nodeNum[7] = 16;
-          nodeNum[8] = 23;
-          nodeNum[9] = 22;
-          nodeNum[10] = 27;
-          nodeNum[11] = 26;
-          nodeNum[12] = 34;
-          nodeNum[13] = 33;
-          nodeNum[14] = 32;
-          nodeNum[15] = 39;
-          nodeNum[16] = 38;
-          nodeNum[17] = 46;
-          nodeNum[18] = 45;
-          nodeNum[19] = 44;
-        }
-        else if (dir == 2)
-        {
-          nodeNum[0] = 12;
-          nodeNum[1] = 13;
-          nodeNum[2] = 14;
-          nodeNum[3] = 19;
-          nodeNum[4] = 15;
-          nodeNum[5] = 18;
-          nodeNum[6] = 17;
-          nodeNum[7] = 16;
-          nodeNum[8] = 24;
-          nodeNum[9] = 25;
-          nodeNum[10] = 27;
-          nodeNum[11] = 26;
-          nodeNum[12] = 40;
-          nodeNum[13] = 41;
-          nodeNum[14] = 42;
-          nodeNum[15] = 47;
-          nodeNum[16] = 43;
-          nodeNum[17] = 46;
-          nodeNum[18] = 45;
-          nodeNum[19] = 44;
-        }
-        else if (dir == 3)
-        {
-          nodeNum[0] = 28;
-          nodeNum[1] = 29;
-          nodeNum[2] = 30;
-          nodeNum[3] = 35;
-          nodeNum[4] = 31;
-          nodeNum[5] = 34;
-          nodeNum[6] = 33;
-          nodeNum[7] = 32;
-          nodeNum[8] = 36;
-          nodeNum[9] = 37;
-          nodeNum[10] = 39;
-          nodeNum[11] = 38;
-          nodeNum[12] = 40;
-          nodeNum[13] = 41;
-          nodeNum[14] = 42;
-          nodeNum[15] = 47;
-          nodeNum[16] = 43;
-          nodeNum[17] = 46;
-          nodeNum[18] = 45;
-          nodeNum[19] = 44;
+          nodeNum[counter] = i;
+          counter++;
         }
       }
     }
@@ -1871,162 +1139,65 @@ namespace Lucee
     else if (dimension == 2)
     {
       if (degree == 1)
-      {
         nodeMatrix << -1,-1,
                       1,-1,
-                      1,1,
-                      -1,1;
-      }
+                      -1,1,
+                      1,1;
       else if (degree == 2)
-      {
         nodeMatrix << -1,-1,
                     0,-1,
                     1,-1,
+                    -1,0,
                     1,0,
-                    1,1,
-                    0,1,
                     -1,1,
-                    -1,0;
-      }
+                    0,1,
+                    1,1;
       else if (degree == 3)
-      {
         nodeMatrix << -1,-1,
                     -1/3.0,-1,
                     1/3.0,-1,
                     1,-1,
-                    1,-1/3.0,
-                    1,1/3.0,
-                    1,1,
-                    1/3.0,1,
-                    -1/3.0,1,
-                    -1,1,
-                    -1,1/3.0,
                     -1,-1/3.0;
-      }
+                    1,-1/3.0,
+                    -1,1/3.0,
+                    1,1/3.0,
+                    -1,1,
+                    -1/3.0,1,
+                    1/3.0,1,
+                    1,1;
     }
     else if (dimension == 3)
     {
-      if (degree == 1) {
+      if (degree == 1)
         nodeMatrix << -1,-1,-1,
                      1,-1,-1,
-                     1,1,-1,
                      -1,1,-1,
+                     1,1,-1,
                      -1,-1,1,
                      1,-1,1,
-                     1,1,1,
-                     -1,1,1;
-      }
+                     -1,1,1,
+                     1,1,1;
       else if (degree == 2)
-      {
         nodeMatrix << -1,-1,-1,
                     0,-1,-1,
                     1,-1,-1,
+                    -1,0,-1,
                     1,0,-1,
-                    1,1,-1,
-                    0,1,-1,
                     -1,1,-1,
-                    -1,0,-1,// End of Bottom Layer
+                    0,1,-1,
+                    1,1,-1,
                     -1,-1,0,
                     1,-1,0,
+                    -1,1,0,
                     1,1,0,
-                    -1,1,0, // End of Middle Layer
                     -1,-1,1,
                     0,-1,1,
                     1,-1,1,
+                    -1,0,1,
                     1,0,1,
-                    1,1,1,
+                    -1,1,1,
                     0,1,1,
-                    -1,1,1,
-                    -1,0,1; // End of Top Layer
-      }
-      else if (degree == 3)
-      {
-        nodeMatrix << -1,-1,-1,
-                    -1/3.0,-1,-1,
-                    1/3.0,-1,-1,
-                    1,-1,-1,
-                    1,-1/3.0,-1,
-                    1,1/3.0,-1,
-                    1,1,-1,
-                    1/3.0,1,-1,
-                    -1/3.0,1,-1,
-                    -1,1,-1,
-                    -1,1/3.0,-1,
-                    -1,-1/3.0,-1,// End of Bottom Layer
-                    -1,-1,-1/3.0,
-                    1,-1,-1/3.0,
-                    1,1,-1/3.0,
-                    -1,1,-1/3.0, // End of 2nd Layer
-                    -1,-1,1/3.0,
-                    1,-1,1/3.0,
-                    1,1,1/3.0,
-                    -1,1,1/3.0,  // End of 3rd Layer
-                    -1,-1,1,
-                    -1/3.0,-1,1,
-                    1/3.0,-1,1,
-                    1,-1,1,
-                    1,-1/3.0,1,
-                    1,1/3.0,1,
-                    1,1,1,
-                    1/3.0,1,1,
-                    -1/3.0,1,1,
-                    -1,1,1,
-                    -1,1/3.0,1,
-                    -1,-1/3.0,1; // End of Top Layer
-      }
-      else if (degree == 4)
-      {
-        nodeMatrix << -1,-1,-1,
-                      -0.5,-1,-1,
-                      0,-1,-1,
-                      0.5,-1,-1,
-                      1,-1,-1,
-                      1,-0.5,-1,
-                      1,0,-1,
-                      1,0.5,-1,
-                      1,1,-1,
-                      0.5,1,-1,
-                      0,1,-1,
-                      -0.5,1,-1,
-                      -1,1,-1,
-                      -1,0.5,-1,
-                      -1,0,-1,
-                      -1,-0.5,-1,
-                      0,0,-1,
-                      -1,-1,-0.5,
-                      1,-1,-0.5,
-                      1,1,-0.5,
-                      -1,1,-0.5,
-                      -1,-1,0,
-                      0,-1,0,
-                      1,-1,0,
-                      1,0,0,
-                      1,1,0,
-                      0,1,0,
-                      -1,1,0,
-                      -1,0,0,
-                      -1,-1,0.5,
-                      1,-1,0.5,
-                      1,1,0.5,
-                      -1,1,0.5,
-                      -1,-1,1,
-                      -0.5,-1,1,
-                      0,-1,1,
-                      0.5,-1,1,
-                      1,-1,1,
-                      1,-0.5,1,
-                      1,0,1,
-                      1,0.5,1,
-                      1,1,1,
-                      0.5,1,1,
-                      0,1,1,
-                      -0.5,1,1,
-                      -1,1,1,
-                      -1,0.5,1,
-                      -1,0,1,
-                      -1,-0.5,1,
-                      0,0,1;
-      }
+                    1,1,1;
     }
     else if (dimension == 4)
     {
@@ -2034,154 +1205,109 @@ namespace Lucee
       {
         nodeMatrix << -1,-1,-1,-1,
                      1,-1,-1,-1,
-                     1,1,-1,-1,
                      -1,1,-1,-1,
+                     1,1,-1,-1,
                      -1,-1,1,-1,
                      1,-1,1,-1,
-                     1,1,1,-1,
                      -1,1,1,-1,
+                     1,1,1,-1,
                      -1,-1,-1,1,
                      1,-1,-1,1,
-                     1,1,-1,1,
                      -1,1,-1,1,
+                     1,1,-1,1,
                      -1,-1,1,1,
                      1,-1,1,1,
-                     1,1,1,1,
-                     -1,1,1,1;
+                     -1,1,1,1,
+                     1,1,1,1;
       }
       else if (degree == 2)
       {
         nodeMatrix << -1,-1,-1,-1,
                     0,-1,-1,-1,
                     1,-1,-1,-1,
-                    1,0,-1,-1,
-                    1,1,-1,-1,
-                    0,1,-1,-1,
-                    -1,1,-1,-1,
                     -1,0,-1,-1,
+                    1,0,-1,-1,
+                    -1,1,-1,-1,
+                    0,1,-1,-1,
+                    1,1,-1,-1,
                     -1,-1,0,-1,
                     1,-1,0,-1,
+                    -1,1,0,-1,
                     1,1,0,-1,
-                    -1,1,0, -1,
                     -1,-1,1,-1,
                     0,-1,1,-1,
                     1,-1,1,-1,
-                    1,0,1,-1,
-                    1,1,1,-1,
-                    0,1,1,-1,
-                    -1,1,1,-1,
                     -1,0,1,-1,
+                    1,0,1,-1,
+                    -1,1,1,-1,
+                    0,1,1,-1,
+                    1,1,1,-1,
                     -1,-1,-1,0,
-                     1,-1,-1,0,
-                     1,1,-1,0,
-                     -1,1,-1,0,
-                     -1,-1,1,0,
-                     1,-1,1,0,
-                     1,1,1,0,
-                     -1,1,1,0,
+                    1,-1,-1,0,
+                    -1,1,-1,0,
+                    1,1,-1,0,
+                    -1,-1,1,0,
+                    1,-1,1,0,
+                    -1,1,1,0,
+                    1,1,1,0,
                     -1,-1,-1,1,
                     0,-1,-1,1,
                     1,-1,-1,1,
-                    1,0,-1,1,
-                    1,1,-1,1,
-                    0,1,-1,1,
-                    -1,1,-1,1,
                     -1,0,-1,1,
+                    1,0,-1,1,
+                    -1,1,-1,1,
+                    0,1,-1,1,
+                    1,1,-1,1,
                     -1,-1,0,1,
                     1,-1,0,1,
-                    1,1,0,1,
                     -1,1,0,1,
+                    1,1,0,1,
                     -1,-1,1,1,
                     0,-1,1,1,
                     1,-1,1,1,
+                    -1,0,1,1,
                     1,0,1,1,
-                    1,1,1,1,
+                    -1,1,1,1,
                     0,1,1,1,
-                    -1,1,1,1,
-                    -1,0,1,1;
+                    1,1,1,1;
       }
-      else if (degree == 3)
+    }
+    else if (dimension == 5)
+    {
+      if (degree == 1)
       {
-        nodeMatrix << -1,-1,-1,-1,
-                    -1/3.0,-1,-1,-1,
-                    1/3.0,-1,-1,-1,
-                    1,-1,-1,-1,
-                    1,-1/3.0,-1,-1,
-                    1,1/3.0,-1,-1,
-                    1,1,-1,-1,
-                    1/3.0,1,-1,-1,
-                    -1/3.0,1,-1,-1,
-                    -1,1,-1,-1,
-                    -1,1/3.0,-1,-1,
-                    -1,-1/3.0,-1,-1,
-                    -1,-1,-1/3.0,-1,
-                    1,-1,-1/3.0,-1,
-                    1,1,-1/3.0,-1,
-                    -1,1,-1/3.0,-1,
-                    -1,-1,1/3.0,-1,
-                    1,-1,1/3.0,-1,
-                    1,1,1/3.0,-1,
-                    -1,1,1/3.0,-1,
-                    -1,-1,1,-1,
-                    -1/3.0,-1,1,-1,
-                    1/3.0,-1,1,-1,
-                    1,-1,1,-1,
-                    1,-1/3.0,1,-1,
-                    1,1/3.0,1,-1,
-                    1,1,1,-1,
-                    1/3.0,1,1,-1,
-                    -1/3.0,1,1,-1,
-                    -1,1,1,-1,
-                    -1,1/3.0,1,-1,
-                    -1,-1/3.0,1,-1,
-                    -1,-1,-1,-1/3.0,
-                     1,-1,-1,-1/3.0,
-                     1,1,-1,-1/3.0,
-                     -1,1,-1,-1/3.0,
-                     -1,-1,1,-1/3.0,
-                     1,-1,1,-1/3.0,
-                     1,1,1,-1/3.0,
-                     -1,1,1,-1/3.0,
-                     -1,-1,-1,1/3.0,
-                     1,-1,-1,1/3.0,
-                     1,1,-1,1/3.0,
-                     -1,1,-1,1/3.0,
-                     -1,-1,1,1/3.0,
-                     1,-1,1,1/3.0,
-                     1,1,1,1/3.0,
-                     -1,1,1,1/3.0,
-                    -1,-1,-1,1,
-                    -1/3.0,-1,-1,1,
-                    1/3.0,-1,-1,1,
-                    1,-1,-1,1,
-                    1,-1/3.0,-1,1,
-                    1,1/3.0,-1,1,
-                    1,1,-1,1,
-                    1/3.0,1,-1,1,
-                    -1/3.0,1,-1,1,
-                    -1,1,-1,1,
-                    -1,1/3.0,-1,1,
-                    -1,-1/3.0,-1,1,
-                    -1,-1,-1/3.0,1,
-                    1,-1,-1/3.0,1,
-                    1,1,-1/3.0,1,
-                    -1,1,-1/3.0,1,
-                    -1,-1,1/3.0,1,
-                    1,-1,1/3.0,1,
-                    1,1,1/3.0,1,
-                    -1,1,1/3.0,1,
-                    -1,-1,1,1,
-                    -1/3.0,-1,1,1,
-                    1/3.0,-1,1,1,
-                    1,-1,1,1,
-                    1,-1/3.0,1,1,
-                    1,1/3.0,1,1,
-                    1,1,1,1,
-                    1/3.0,1,1,1,
-                    -1/3.0,1,1,1,
-                    -1,1,1,1,
-                    -1,1/3.0,1,1,
-                    -1,-1/3.0,1,1;
+        nodeMatrix << -1,-1,-1,-1,-1,
+                     1,-1,-1,-1,-1,
+                     -1,1,-1,-1,-1,
+                     1,1,-1,-1,-1,
+                     -1,-1,1,-1,-1,
+                     1,-1,1,-1,-1,
+                     -1,1,1,-1,-1,
+                     1,1,1,-1,-1,
+                     -1,-1,-1,1,-1,
+                     1,-1,-1,1,-1,
+                     -1,1,-1,1,-1,
+                     1,1,-1,1,-1,
+                     -1,-1,1,1,-1,
+                     1,-1,1,1,-1,
+                     -1,1,1,1,-1,
+                     1,1,1,1,-1,
+                     -1,-1,-1,-1,1,
+                     1,-1,-1,-1,1,
+                     -1,1,-1,-1,1,
+                     1,1,-1,-1,1,
+                     -1,-1,1,-1,1,
+                     1,-1,1,-1,1,
+                     -1,1,1,-1,1,
+                     1,1,1,-1,1,
+                     -1,-1,-1,1,1,
+                     1,-1,-1,1,1,
+                     -1,1,-1,1,1,
+                     1,1,-1,1,1,
+                     -1,-1,1,1,1,
+                     1,-1,1,1,1,
+                     -1,1,1,1,1,
+                     1,1,1,1,1;
       }
     }
   }
