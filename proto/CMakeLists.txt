@@ -24,10 +24,13 @@ set (proto_SOURCES
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncMomentCalc2D.cpp
+  LcDistFuncMomentCalc3D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
+  LcDistFuncMomentCalcWeighted3D.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
   LcETGInitializeDensity.cpp
+  LcETGInitializeDensity5D.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
@@ -47,17 +50,21 @@ set (proto_SOURCES
   LcMusclHancock1DUpdater.cpp
   LcNodalCopy2DTo4DFieldUpdater.cpp
   LcNodalDgConstGravitySrcUpdater.cpp
+  LcNodalCopy3DTo5DFieldUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
+  LcPoissonBracketAdvectionEquation5D.cpp
   LcPoissonBracketCanonical2D.cpp
   LcPoissonBracketCanonical4D.cpp
   LcPoissonBracketEquation.cpp
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp
+  LcPoissonBracketGyroEquation5D.cpp
   LcPoissonBracketUpdater.cpp
+  LcPoissonBracketOptUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
