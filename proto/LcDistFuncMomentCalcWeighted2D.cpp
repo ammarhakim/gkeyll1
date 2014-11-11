@@ -2,7 +2,6 @@
  * @file	LcDistFuncMomentCalcWeighted2D.cpp
  *
  * @brief	Updater to compute 2d moments of a 4d distribution function with an additional weighting function.
- * Currently only works for 0th moment
  */
 
 // config stuff
@@ -49,7 +48,7 @@ namespace Lucee
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
       throw Lucee::Except(
-        "DistFuncMomentCalcWeighted2D::readInput: Must specify 2D element to use using 'basis1d'");
+        "DistFuncMomentCalcWeighted2D::readInput: Must specify 2D element to use using 'basis2d'");
 
     // get moment to compute
     if (tbl.hasNumber("moment"))
@@ -79,7 +78,7 @@ namespace Lucee
     // local region to update
     Lucee::Region<4, int> localRgn = grid.getLocalRegion();
 
-    // get number of nodes in 1D and 2D
+    // get number of nodes in 2D and 4D
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
 
@@ -179,6 +178,7 @@ namespace Lucee
     Lucee::Region<4, int> localRgn = grid.getLocalRegion();
     Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
 
+    // Make sure we don't integrate over velocity space ghost cells
     localExtRgn.setLower(2, localRgn.getLower(2));
     localExtRgn.setUpper(2, localRgn.getUpper(2));
     localExtRgn.setLower(3, localRgn.getLower(3));

@@ -1,11 +1,11 @@
 /**
- * @file	LcDistFuncMomentCalcWeighted2D.h
+ * @file	LcETGInitializeDensity5D.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function with an additional weighting function.
+ * @brief	Updater to initialize the distribution function to have a desired constant density
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#ifndef LC_ETG_INITIALIZE_DENSITY_5D_H
+#define LC_ETG_INITIALIZE_DENSITY_5D_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -16,7 +16,6 @@
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
 
 // eigen includes
 #include <Eigen/LU>
@@ -26,18 +25,14 @@ namespace Lucee
 /**
  * Updater to compute moments of distribution function f(x,v)
  */
-  class DistFuncMomentCalcWeighted2D : public Lucee::UpdaterIfc
+  class ETGInitializeDensity5D : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC4 = Lucee::CDIM<4>::N;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC2 = Lucee::CDIM<2>::N;
 
 /** Create new modal DG solver in 1D */
-      DistFuncMomentCalcWeighted2D();
+      ETGInitializeDensity5D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,22 +67,17 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
-/** Pointer to 2D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Moment to compute */
-      unsigned calcMom;
-      std::vector<Eigen::MatrixXd> mom0MatrixVector;
-      std::vector<Eigen::MatrixXd> mom1MatrixVector;
-      std::vector<Eigen::MatrixXd> mom2MatrixVector;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/** Pointer to 5D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
+/** Pointer to 3D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Desired constant density value */
+      double constantDensity;
+/** Matrix that maps the 3D nodes to 5D */
+      Eigen::MatrixXd mappingMatrix;
+/** Temporary flag to keep track of what polynomial order of element we are copying */
+      int polyOrder;
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#endif // LC_ETG_INITIALIZE_DENSITY_5D_H
