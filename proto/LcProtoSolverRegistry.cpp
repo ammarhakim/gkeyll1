@@ -38,6 +38,7 @@
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
+#include <LcNodalDgConstGravitySrcUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
@@ -148,6 +149,10 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+
+      .append<Lucee::NodalDgConstGravitySrcUpdater<1> >()
+      .append<Lucee::NodalDgConstGravitySrcUpdater<2> >()
+      .append<Lucee::NodalDgConstGravitySrcUpdater<3> >()
     
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
       .append<Lucee::NonLinEmGke1dHamilUpdater>()

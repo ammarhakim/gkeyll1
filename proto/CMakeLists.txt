@@ -46,6 +46,7 @@ set (proto_SOURCES
   LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNodalCopy2DTo4DFieldUpdater.cpp
+  LcNodalDgConstGravitySrcUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
