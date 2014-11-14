@@ -62,7 +62,7 @@ namespace Lucee
     // call base class method
     Lucee::UpdaterIfc::initialize();
 
-    // get number of nodes in 1D and 2D
+    // get number of nodes in 2D
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
 
     // get volume interpolation matrices for 2d element

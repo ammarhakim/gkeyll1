@@ -171,10 +171,6 @@ namespace Lucee
     Lucee::Matrix<double> tempVolQuad(nVolQuad, nlocal);
     Lucee::Matrix<double> tempVolCoords(nVolQuad, NC);
     volQuad.reset(nVolQuad, nlocal, NC);
-    // Temporary code to see how much things can speed up
-    storedUpperSurfMatrices.resize(updateDirs.size());
-    storedLowerSurfMatrices.resize(updateDirs.size());
-    storedVolMatrices.resize(updateDirs.size());
 
     nodalBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
     for (int volIndex = 0; volIndex < nVolQuad; volIndex++)
@@ -182,6 +178,8 @@ namespace Lucee
     
     copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
     copyLuceeToEigen(tempVolCoords, volQuad.coordMat);
+
+    std::vector<Eigen::MatrixXd> derivMatrices(NDIM);
 
     // Compute gradients of basis functions evaluated at volume quadrature points
     for (int d = 0; d < updateDirs.size(); d++)
@@ -194,7 +192,7 @@ namespace Lucee
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
         volQuad.pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
-      storedVolMatrices[dir] = massMatrixInv*derivMatrix.transpose();
+      derivMatrices[dir] = derivMatrix;
     }
 
     // Get data for surface quadrature
@@ -255,11 +253,56 @@ namespace Lucee
     massMatrixInvUpper = massMatrixInv;
     massMatrixInvLower = massMatrixInv;
 
-    for (int d = 0; d < updateDirs.size(); d++)
+    int totalSize = 1;
+    for (int dir = 0; dir < NDIM; dir++)
     {
-      int dir = updateDirs[d];
-      storedUpperSurfMatrices[dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-      storedLowerSurfMatrices[dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+      localRgn.setLower(dir, localRgn.getLower(dir)-1);
+      localRgn.setUpper(dir, localRgn.getUpper(dir)+1);
+      totalSize *= localRgn.getUpper(dir) - localRgn.getLower(dir);
+    }
+    
+    Lucee::RowMajorSequencer<NDIM> volSeq = RowMajorSequencer<NDIM>(localRgn);
+    Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(localRgn);
+    
+    bigStoredUpperSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
+    bigStoredLowerSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
+    bigStoredVolMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
+
+    Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
+
+    while(volSeq.step())
+    {
+      volSeq.fillWithIndex(idx);
+      int cellIndex = volIdxr.getIndex(idx);
+
+      // Compute Jacobian-weighted mass matrix inverse
+      if (hasJacobian == true)
+      {
+        jacobianField->setPtr(jacobianPtr, idx);
+        Eigen::VectorXd jacobianVec(nlocal);
+        for (int i = 0; i < nlocal; i++)
+          jacobianVec(i) = jacobianPtr[i];
+
+        Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
+
+        Eigen::VectorXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
+
+        // Use jacobian to compute new massMatrixInv
+        for (int j = 0; j < nlocal; j++)
+          for (int k = 0; k < nlocal; k++)
+            tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
+
+        massMatrixInv = tempJMassMatrix.inverse();
+      }
+
+      // Store three matrices at each cell
+      for (int d = 0; d < updateDirs.size(); d++)
+      {
+        int dir = updateDirs[d];
+        bigStoredUpperSurfMatrices[cellIndex][dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
+        bigStoredLowerSurfMatrices[cellIndex][dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+        bigStoredVolMatrices[cellIndex][dir] = massMatrixInv*derivMatrices[dir].transpose();
+      }
     }
   }
 
@@ -278,6 +321,15 @@ namespace Lucee
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
+
+    Lucee::Region<NDIM, int> effectiveRgn(localRgn);
+    for (int dir = 0; dir < NDIM; dir++)
+    {
+      effectiveRgn.setLower(dir, localRgn.getLower(dir)-1);
+      effectiveRgn.setUpper(dir, localRgn.getUpper(dir)+1);
+    }
+
+    Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(effectiveRgn);
 
     double cfla = 0.0; // maximum CFL number used
 
@@ -308,6 +360,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
       hamil.setPtr(hamilPtr, idx);
+      int cellIndex = volIdxr.getIndex(idx);
 
       Eigen::VectorXd jacobianAtQuad = Eigen::VectorXd::Ones(nVolQuad);
       if (hasJacobian == true)
@@ -317,16 +370,7 @@ namespace Lucee
         for (int i = 0; i < nlocal; i++)
           jacobianVec(i) = jacobianPtr[i];
 
-        Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
-
         jacobianAtQuad = volQuad.interpMat*jacobianVec;
-
-        // Use jacobian to compute new massMatrixInv
-        for (int j = 0; j < nlocal; j++)
-          for (int k = 0; k < nlocal; k++)
-            tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
-
-        massMatrixInv = tempJMassMatrix.inverse();
       }
 
       // Compute gradient of hamiltonian
@@ -386,7 +430,7 @@ namespace Lucee
         for (int i = 0; i < nlocal; i++)
         {
           for (int qp = 0; qp < nVolQuad; qp++)
-            aNewPtr[i] += volQuad.weights(qp)*storedVolMatrices[dir](i,qp)*alpha(dir,qp)*fAtQuad(qp);
+            aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex][dir](i,qp)*alpha(dir,qp)*fAtQuad(qp);
         }
       }
 
@@ -444,6 +488,10 @@ namespace Lucee
 
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
+          
+          int cellIndexRight = volIdxr.getIndex(idxr);
+          int cellIndexLeft = volIdxr.getIndex(idxl);
+          
           // Hamiltonian is continuous, so use right always
           hamil.setPtr(hamilPtr, idxr);
           // Copy data to Eigen vectors
@@ -453,47 +501,6 @@ namespace Lucee
           {
             rightData(i) = aCurrPtr_r[i];
             leftData(i) = aCurrPtr_l[i];
-          }
-
-          // If there is a jacobian factor, need to account for jacobian in each cell
-          if (hasJacobian == true)
-          {
-            Eigen::VectorXd jacobianVec(nlocal);
-            Eigen::MatrixXd tempJMassMatrix(nlocal, nlocal);
-
-            // We have already computed massMatrixInvLower and massMatrixInvUpper once
-            // Then just copy the old massMatrixInvLower to massMatrixInvUpper
-            if (sliceIndex > sliceLower)
-              massMatrixInvUpper = massMatrixInvLower;
-            else
-            {
-              // We haven't computed massMatrixInvLower before.
-              // Use jacobian to compute new massMatrixInvUpper
-              jacobianField->setPtr(jacobianPtr_l, idxl);
-              for (int i = 0; i < nlocal; i++)
-                jacobianVec(i) = jacobianPtr_l[i];
-              
-              Eigen::VectorXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
-              
-              for (int j = 0; j < nlocal; j++)
-                for (int k = 0; k < nlocal; k++)
-                  tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
-              massMatrixInvUpper = tempJMassMatrix.inverse();
-            }
-
-            // Always need to compute new lower jacobian (right cell)
-            jacobianField->setPtr(jacobianPtr_r, idxr);
-            for (int i = 0; i < nlocal; i++)
-              jacobianVec(i) = jacobianPtr_r[i];
-
-            Eigen::MatrixXd jacobianAtQuad = volQuad.interpMat*jacobianVec;
-
-            // Use jacobian to compute new massMatrixInv
-            for (int j = 0; j < nlocal; j++)
-              for (int k = 0; k < nlocal; k++)
-                tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
-
-            massMatrixInvLower = tempJMassMatrix.inverse();
           }
 
           // Compute gradient of hamiltonian at surface nodes
@@ -519,22 +526,15 @@ namespace Lucee
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 
-          // Compute the surface integrals required and multiply by inverse of mass matrix
-          /*Eigen::VectorXd upperResultVector = massMatrixInvUpper*surfUpperQuad[dir].interpMat.transpose()*
-            numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
-          Eigen::VectorXd lowerResultVector = massMatrixInvLower*surfLowerQuad[dir].interpMat.transpose()*
-            numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
-          */
-
           aNew.setPtr(aNewPtr_r, idxr);
           aNew.setPtr(aNewPtr_l, idxl);
           for (int i = 0; i < nlocal; i++)
           {
             for (int qp = 0; qp < nSurfQuad; qp++)
             {
-              aNewPtr_l[i] -= storedUpperSurfMatrices[dir](i,qp)*
+              aNewPtr_l[i] -= bigStoredUpperSurfMatrices[cellIndexLeft][dir](i,qp)*
             numericalFluxAtQuad(qp)*surfUpperQuad[dir].weights(qp);
-              aNewPtr_r[i] += storedLowerSurfMatrices[dir](i,qp)*
+              aNewPtr_r[i] += bigStoredLowerSurfMatrices[cellIndexRight][dir](i,qp)*
             numericalFluxAtQuad(qp)*surfLowerQuad[dir].weights(qp);
             }
           }
