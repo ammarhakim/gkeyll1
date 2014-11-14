@@ -21,6 +21,7 @@
 #include <LcDistFuncMomentCalcWeighted3D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
+#include <LcETGAdiabaticPotentialUpdater3D.h>
 #include <LcETGInitializeDensity.h>
 #include <LcETGInitializeDensity5D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
@@ -95,6 +96,7 @@ namespace Lucee
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
       
       .append<Lucee::ETGAdiabaticPotentialUpdater>()
+      .append<Lucee::ETGAdiabaticPotentialUpdater3D>()
       .append<Lucee::ETGInitializeDensity>()
       .append<Lucee::ETGInitializeDensity5D>()
     

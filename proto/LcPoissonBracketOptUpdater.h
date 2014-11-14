@@ -134,9 +134,9 @@ namespace Lucee
       Eigen::MatrixXd massMatrixInvUpper;
       Eigen::MatrixXd massMatrixInvLower;
 /** Stored matrices for stupid testing */
-      std::vector<Eigen::MatrixXd> storedUpperSurfMatrices;
-      std::vector<Eigen::MatrixXd> storedLowerSurfMatrices;
-      std::vector<Eigen::MatrixXd> storedVolMatrices;
+      std::vector<std::vector<Eigen::MatrixXd> > bigStoredUpperSurfMatrices;
+      std::vector<std::vector<Eigen::MatrixXd> > bigStoredLowerSurfMatrices;
+      std::vector<std::vector<Eigen::MatrixXd> > bigStoredVolMatrices;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
 /** Flag to indicate if a Jacobian factor is supplied */

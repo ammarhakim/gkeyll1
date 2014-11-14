@@ -29,6 +29,7 @@ set (proto_SOURCES
   LcDistFuncMomentCalcWeighted3D.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
+  LcETGAdiabaticPotentialUpdater3D.cpp
   LcETGInitializeDensity.cpp
   LcETGInitializeDensity5D.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
