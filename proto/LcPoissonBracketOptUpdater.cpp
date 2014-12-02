@@ -3,6 +3,7 @@
  *
  * @brief	Updater to solver Poisson bracket operator PDEs.
  * This version is used to test speed improvements to the existing updater.
+ * NOTE: Jacobian must be supplied
  */
 
 // config stuff
@@ -79,6 +80,10 @@ namespace Lucee
     {
       hasJacobian = true;
       jacobianField = &tbl.getObject<Lucee::Field<NDIM, double> >("jacobianField");
+    }
+    else
+    {
+      throw Lucee::Except("PoissonBracketOptUpdater::readInput: A jacobianField MUST be supplied!");
     }
 
     // directions to update
@@ -179,7 +184,7 @@ namespace Lucee
     copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
     copyLuceeToEigen(tempVolCoords, volQuad.coordMat);
 
-    std::vector<Eigen::MatrixXd> derivMatrices(NDIM);
+    std::vector<Eigen::MatrixXd> derivMatrices(updateDirs.size());
 
     // Compute gradients of basis functions evaluated at volume quadrature points
     for (int d = 0; d < updateDirs.size(); d++)
@@ -192,7 +197,7 @@ namespace Lucee
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
         volQuad.pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
-      derivMatrices[dir] = derivMatrix;
+      derivMatrices[d] = derivMatrix;
     }
 
     // Get data for surface quadrature
@@ -253,6 +258,8 @@ namespace Lucee
     massMatrixInvUpper = massMatrixInv;
     massMatrixInvLower = massMatrixInv;
 
+    // TotalSize keeps track of total number of cells we will need to store matrices for
+    // (this is physical domain of region + 1 layer of ghost cells)
     int totalSize = 1;
     for (int dir = 0; dir < NDIM; dir++)
     {
@@ -264,9 +271,10 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> volSeq = RowMajorSequencer<NDIM>(localRgn);
     Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(localRgn);
     
-    bigStoredUpperSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
-    bigStoredLowerSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
-    bigStoredVolMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(NDIM));
+    // CONSIDER: instead of allocating NDIM size vectors, only store those needed in updateDirs
+    bigStoredUpperSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
+    bigStoredLowerSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
+    bigStoredVolMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
 
     Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
 
@@ -299,9 +307,9 @@ namespace Lucee
       for (int d = 0; d < updateDirs.size(); d++)
       {
         int dir = updateDirs[d];
-        bigStoredUpperSurfMatrices[cellIndex][dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-        bigStoredLowerSurfMatrices[cellIndex][dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
-        bigStoredVolMatrices[cellIndex][dir] = massMatrixInv*derivMatrices[dir].transpose();
+        bigStoredUpperSurfMatrices[cellIndex][d] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
+        bigStoredLowerSurfMatrices[cellIndex][d] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+        bigStoredVolMatrices[cellIndex][d] = massMatrixInv*derivMatrices[d].transpose();
       }
     }
   }
@@ -363,6 +371,9 @@ namespace Lucee
       int cellIndex = volIdxr.getIndex(idx);
 
       Eigen::VectorXd jacobianAtQuad = Eigen::VectorXd::Ones(nVolQuad);
+
+      // Figure out Jacobian at quadrature points so its effect can be
+      // accounted for when checking CFL condition
       if (hasJacobian == true)
       {
         jacobianField->setPtr(jacobianPtr, idx);
@@ -402,26 +413,6 @@ namespace Lucee
       for (int i = 0; i < nlocal; i++)
         fVec(i) = aCurrPtr[i];
       Eigen::VectorXd fAtQuad = volQuad.interpMat*fVec;
-/*
-      // Coefficient-wise multiply each row of alpha by fAtQuad
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        for (int quadIndex = 0; quadIndex < fAtQuad.size(); quadIndex++)
-          alpha(dimIndex, quadIndex) *= fAtQuad(quadIndex);
-
-      Eigen::VectorXd resultVector(nlocal);
-      resultVector.setZero(nlocal);
-      // Compute grad of a test function, multiply it with alpha and f, then multiply
-      // with weights and sum to compute integral.
-      /*for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
-        resultVector(basisIndex) = (volQuad.pDiffMatrix[basisIndex].cwiseProduct(alpha)*volQuad.weights).sum();
-      */
-/*
-      for (int d = 0;  d < updateDirs.size(); d++)
-      {
-        int dir = updateDirs[d];
-        //Eigen::VectorXd tempVec = volQuad.weights.cwiseProduct(alpha.row(dir).transpose());
-        resultVector += storedVolMatrices[dir]*volQuad.weights.cwiseProduct(alpha.row(dir).transpose());
-      }*/
 
       aNew.setPtr(aNewPtr, idx);
       for (int d = 0;  d < updateDirs.size(); d++)
@@ -430,20 +421,9 @@ namespace Lucee
         for (int i = 0; i < nlocal; i++)
         {
           for (int qp = 0; qp < nVolQuad; qp++)
-            aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex][dir](i,qp)*alpha(dir,qp)*fAtQuad(qp);
+            aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex][d](i,qp)*alpha(dir,qp)*fAtQuad(qp);
         }
       }
-
-      // Multiply resultVector with massMatrixInv to calculate aNew updates
-      //resultVector = massMatrixInv*resultVector;
-
-      //upperResultVector = storedVolMatrices[dir]*
-      //      numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
-
-      // Accumulate to solution
-      //aNew.setPtr(aNewPtr, idx);
-      //for (int i = 0; i < nlocal; i++)
-      //  aNewPtr[i] += resultVector(i);
     }
      
     // Check to see if we need to retake time step
@@ -532,9 +512,9 @@ namespace Lucee
           {
             for (int qp = 0; qp < nSurfQuad; qp++)
             {
-              aNewPtr_l[i] -= bigStoredUpperSurfMatrices[cellIndexLeft][dir](i,qp)*
+              aNewPtr_l[i] -= bigStoredUpperSurfMatrices[cellIndexLeft][d](i,qp)*
             numericalFluxAtQuad(qp)*surfUpperQuad[dir].weights(qp);
-              aNewPtr_r[i] += bigStoredLowerSurfMatrices[cellIndexRight][dir](i,qp)*
+              aNewPtr_r[i] += bigStoredLowerSurfMatrices[cellIndexRight][d](i,qp)*
             numericalFluxAtQuad(qp)*surfLowerQuad[dir].weights(qp);
             }
           }
