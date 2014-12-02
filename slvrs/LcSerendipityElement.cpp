@@ -117,28 +117,13 @@ namespace Lucee
         ndIds.resize(3);
         ndIds[0] = 0;
         ndIds[1] = 1;
-        ndIds[2] = 7;
+        ndIds[2] = 3;
       }
-      else if (polyOrder == 3)
+      else
       {
-        ndIds.resize(5);
-        ndIds[0] = 0;
-        ndIds[1] = 1;
-        ndIds[2] = 2;
-        ndIds[3] = 11;
-        ndIds[4] = 10;
-      }
-      else if (polyOrder == 4)
-      {
-        ndIds.resize(8);
-        ndIds[0] = 0;
-        ndIds[1] = 1;
-        ndIds[2] = 2;
-        ndIds[3] = 3;
-        ndIds[4] = 15;
-        ndIds[5] = 14;
-        ndIds[6] = 13;
-        ndIds[7] = 16;
+        Lucee::Except lce("SerendipityElement::getExclusiveNodeIndices polyOrder not supported.");
+        lce << " Provided " << polyOrder;
+        throw lce;
       }
     }
     else
@@ -636,32 +621,32 @@ namespace Lucee
         nodeMap[0] = 2;
         nodeMap[1] = 1;
         nodeMap[2] = 0;
-        nodeMap[3] = 7;
-        nodeMap[4] = 6;
-        nodeMap[5] = 5;
-        nodeMap[6] = 4;
-        nodeMap[7] = 3;
+        nodeMap[3] = 4;
+        nodeMap[4] = 3;
+        nodeMap[5] = 7;
+        nodeMap[6] = 6;
+        nodeMap[7] = 5;
       }
     }
     else if (dir == 1)
     {
       if (polyOrder == 1)
       {
-        nodeMap[0] = 3;
-        nodeMap[1] = 2;
-        nodeMap[2] = 1;
-        nodeMap[3] = 0;
+        nodeMap[0] = 2;
+        nodeMap[1] = 3;
+        nodeMap[2] = 0;
+        nodeMap[3] = 1;
       }
       else if (polyOrder == 2)
       {
-        nodeMap[0] = 6;
-        nodeMap[1] = 5;
-        nodeMap[2] = 4;
+        nodeMap[0] = 5;
+        nodeMap[1] = 6;
+        nodeMap[2] = 7;
         nodeMap[3] = 3;
-        nodeMap[4] = 2;
-        nodeMap[5] = 1;
-        nodeMap[6] = 0;
-        nodeMap[7] = 7;
+        nodeMap[4] = 4;
+        nodeMap[5] = 0;
+        nodeMap[6] = 1;
+        nodeMap[7] = 2;
       }
     }
   }
@@ -690,32 +675,32 @@ namespace Lucee
         nodeMap[0] = 2;
         nodeMap[1] = 1;
         nodeMap[2] = 0;
-        nodeMap[3] = 7;
-        nodeMap[4] = 6;
-        nodeMap[5] = 5;
-        nodeMap[6] = 4;
-        nodeMap[7] = 3;
+        nodeMap[3] = 4;
+        nodeMap[4] = 3;
+        nodeMap[5] = 7;
+        nodeMap[6] = 6;
+        nodeMap[7] = 5;
       }
     }
     else if (dir == 1)
     {
       if (polyOrder == 1)
       {
-        nodeMap[0] = 3;
-        nodeMap[1] = 2;
-        nodeMap[2] = 1;
-        nodeMap[3] = 0;
+        nodeMap[0] = 2;
+        nodeMap[1] = 3;
+        nodeMap[2] = 0;
+        nodeMap[3] = 1;
       }
       else if (polyOrder == 2)
       {
-        nodeMap[0] = 6;
-        nodeMap[1] = 5;
-        nodeMap[2] = 4;
+        nodeMap[0] = 5;
+        nodeMap[1] = 6;
+        nodeMap[2] = 7;
         nodeMap[3] = 3;
-        nodeMap[4] = 2;
-        nodeMap[5] = 1;
-        nodeMap[6] = 0;
-        nodeMap[7] = 7;
+        nodeMap[4] = 4;
+        nodeMap[5] = 0;
+        nodeMap[6] = 1;
+        nodeMap[7] = 2;
       }
     }
   }
@@ -764,54 +749,19 @@ namespace Lucee
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr_r[0];
-      data[2] = fldPtr_tr[0];
-      data[3] = fldPtr_t[0];
+      data[2] = fldPtr_t[0];
+      data[3] = fldPtr_tr[0];
     }
     else if (polyOrder == 2)
     {
       data[0] = fldPtr[0];
       data[1] = fldPtr[1];
       data[2] = fldPtr_r[0];
-      data[3] = fldPtr_r[2];
-      data[4] = fldPtr_tr[0];
-      data[5] = fldPtr_t[1];
-      data[6] = fldPtr_t[0];
-      data[7] = fldPtr[2];
-    }
-    else if (polyOrder == 3)
-    {
-      data[0] = fldPtr[0];
-      data[1] = fldPtr[1];
-      data[2] = fldPtr[2];
-      data[3] = fldPtr_r[0];
-      data[4] = fldPtr_r[3];
-      data[5] = fldPtr_r[4];
-      data[6] = fldPtr_tr[0];
-      data[7] = fldPtr_t[2];
-      data[8] = fldPtr_t[1];
-      data[9] = fldPtr_t[0];
-      data[10] = fldPtr[4];
-      data[11] = fldPtr[3];
-    }
-    else if (polyOrder == 4)
-    {
-      data[0] = fldPtr[0];
-      data[1] = fldPtr[1];
-      data[2] = fldPtr[2];
-      data[3] = fldPtr[3];
-      data[4] = fldPtr_r[0];
-      data[5] = fldPtr_r[4];
-      data[6] = fldPtr_r[5];
-      data[7] = fldPtr_r[6];
-      data[8] = fldPtr_tr[0];
-      data[9] = fldPtr_t[3];
-      data[10] = fldPtr_t[2];
-      data[11] = fldPtr_t[1];
-      data[12] = fldPtr_t[0];
-      data[13] = fldPtr[6];
-      data[14] = fldPtr[5];
-      data[15] = fldPtr[4];
-      data[16] = fldPtr[7];
+      data[3] = fldPtr[2];
+      data[4] = fldPtr_r[2];
+      data[5] = fldPtr_t[0];
+      data[6] = fldPtr_t[1];
+      data[7] = fldPtr_tr[0];
     }
     else
     {
