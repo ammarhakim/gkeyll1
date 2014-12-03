@@ -106,7 +106,7 @@ namespace Lucee
     if (tbl.hasNumber("mgnErrorSpeedFactor"))
       chi_m = tbl.getNumber("mgnErrorSpeedFactor");
 
-// electric and magnetic dampin factor
+// electric and magnetic damping factor
     damp_e = 0.0;
     if (tbl.hasNumber("elcErrorDampFactor"))
       damp_e = tbl.getNumber("elcErrorDampFactor");
