@@ -108,6 +108,17 @@ namespace Lucee
   }
 
   template <unsigned NDIM> 
+  std::vector<unsigned>
+  getIntersectingRegions(const Lucee::Region<NDIM, int> box) const
+  {
+    std::vector<unsigned> iRgns;
+    for (unsigned i=0; i<getNumRegions(); ++i)
+      if (box.intersect(rns[i]).getVolume() > 0)
+        iRgns.push_back(i);
+    return iRgns;
+  }
+
+  template <unsigned NDIM> 
   bool
   DecompRegion<NDIM>::checkCovering() const
   {
