@@ -136,6 +136,14 @@ namespace Lucee
         const int lowerExt[NDIM], const int upperExt[NDIM]) const;
 
 /**
+ * Get list of regions that intersect the specified box.
+ *
+ * @param box Box to test intersection with.
+ * @return List of regions that intersect box.
+ */
+      std::vector<unsigned> getIntersectingRegions(const Lucee::Region<NDIM, int> box) const;
+
+/**
  * Check if the decomposition covers global region. Returns true if it
  * does, false otherwise.
  *
