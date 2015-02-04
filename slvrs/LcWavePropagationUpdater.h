@@ -34,7 +34,7 @@ namespace Lucee
       static const char *id;
 
 /** Delete allocated memory */
-      ~WavePropagationUpdater();
+      virtual ~WavePropagationUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.

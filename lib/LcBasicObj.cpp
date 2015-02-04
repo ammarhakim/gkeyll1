@@ -42,6 +42,18 @@ namespace Lucee
   }
 
   void
+  BasicObj::setComm(TxCommBase* ci)
+  {
+    comm = ci;
+  }
+
+  TxCommBase*
+  BasicObj::getComm() const
+  {
+    return comm;
+  }
+
+  void
   BasicObj::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {
   }

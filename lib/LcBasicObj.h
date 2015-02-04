@@ -16,6 +16,10 @@
 #include <LcLuaFuncMap.h>
 #include <LcLuaTable.h>
 
+// txbase includes
+#include <TxCommBase.h>
+#include <TxIoBase.h>
+
 // std includes
 #include <string>
 
@@ -66,6 +70,20 @@ namespace Lucee
  * Initialize object.
  */
       virtual void initialize();
+
+/**
+ * Set the communicator
+ *
+ * @param ci the communicator
+ */
+    virtual void setComm(TxCommBase* ci);
+
+/**
+ * Get the communicator
+ *
+ * @return ci the communicator
+ */
+    virtual TxCommBase* getComm() const;
 
 /**
  * Get type of object.
@@ -136,6 +154,8 @@ namespace Lucee
       std::string baseType;
 /** Derived type of object */
       std::string derivedType;
+/** Communicator */
+    TxCommBase* comm;
   };
 }
 
