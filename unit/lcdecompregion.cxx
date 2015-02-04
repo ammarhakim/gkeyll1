@@ -533,6 +533,39 @@ test_12()
   LC_ASSERT("Checking upper", rgn.getUpper(1) == 20);
 }
 
+void
+test_13()
+{
+  int lower[2] = {0, 0};
+  int upper[2] = {50, 100};
+  Lucee::Region<2, int> globalRgn(lower, upper);
+// create default decomp
+  Lucee::DecompRegion<2> dcomp(globalRgn);
+
+// create product decomposer
+  Lucee::CartGeneralDecompRegionCalc<2> cartDecomp;
+// now decompose domain
+  cartDecomp.calcDecomp(4, dcomp);
+
+// box to check intersection
+  int boxLo[2] = {0, 0};
+  int boxUp[2] = {50, 100};
+  Lucee::Region <2, int> box1(boxLo, boxUp);
+  std::vector<unsigned> iRgns = dcomp.getIntersectingRegions(box1);
+
+  LC_ASSERT("Testing if all regions are intersecting", iRgns.size() == dcomp.getNumRegions());
+
+  boxUp[0] = 25; boxUp[1] = 75;
+  Lucee::Region <2, int> box2(boxLo, boxUp);
+  iRgns = dcomp.getIntersectingRegions(box2);
+
+  for (unsigned i=0; i<iRgns.size(); ++i)
+  {
+    LC_ASSERT("Testing if intersections are correct", 
+      dcomp.getRegion(iRgns[i]).intersect(box2).getVolume() > 0);
+  }
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -550,5 +583,6 @@ main(int argc, char **argv)
   test_10();
   test_11();
   test_12();
+  test_13();
   LC_END_TESTS;
 }
