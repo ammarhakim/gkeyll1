@@ -19,6 +19,7 @@
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
+#include <LcDisContVlasovMaxwellUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcElectromagneticAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
@@ -109,6 +110,13 @@ namespace Lucee
       .append<Lucee::WavePropagationUpdater<1> >()
       .append<Lucee::WavePropagationUpdater<2> >()
       .append<Lucee::WavePropagationUpdater<3> >()
+
+      .append<Lucee::DisContVlasovMaxwellUpdater<1,1> >()
+      .append<Lucee::DisContVlasovMaxwellUpdater<1,2> >()
+      .append<Lucee::DisContVlasovMaxwellUpdater<1,3> >()
+      .append<Lucee::DisContVlasovMaxwellUpdater<2,2> >()
+      .append<Lucee::DisContVlasovMaxwellUpdater<2,3> >()
+      .append<Lucee::DisContVlasovMaxwellUpdater<3,3> >()
 
       .append<Lucee::FaceEdgeCurlUpdater<1> >()
       .append<Lucee::FaceEdgeCurlUpdater<2> >()
