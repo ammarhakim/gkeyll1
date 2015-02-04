@@ -93,7 +93,4 @@
 /* Define if we are using CLAPACK */
 #cmakedefine HAVE_CLAPACKCMAKE
 
-/* Fortran-C macros */
-#define @FC_FUNC@
-#define @FC_FUNC_@
 
