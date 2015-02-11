@@ -63,7 +63,7 @@ Atm[P33,U1] : p33; Atm[P33,U3] : 2*p13; Atm[P33,P33] : u1;
 /**eigVals : eigenvalues(Atm);*/
 
 /** Compute eigensystem. */
-[vals, vects] : eigenvectors(Atm); 
+[vals, vects] : eigenvectors(Atm);
 
 /** Right eigenvectors. This nastiness is needed as the eigesystem is
 returned as a list of nested lists. These nested lists are taken apart
