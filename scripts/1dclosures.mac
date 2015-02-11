@@ -26,6 +26,9 @@ nSol : subst([p0 = m*n0*vt^2], realpart(sol[1][1]));
 /** Taylor expansion */
 nSolTay : taylor(nSol, t, 0, 9)/(alpha*n0);
 
+/** Plot result */
+nSolP_31 : subst([vt=1, k=1, n0=1, alpha=1], nSol);
+
 /** 4+1 closure */
 A41 : matrix( 
   [0, n0*k, 0, 0], 
@@ -51,3 +54,8 @@ nSol : subst([p0 = m*n0*vt^2], realpart(sol[1][1]));
 
 /** Taylor expansion */
 nSolTay : taylor(nSol, t, 0, 9)/(alpha*n0);
+
+/** Plot result */
+nSolP_41 : subst([vt=1, k=1, n0=1, alpha=1], nSol);
+plot2d([exp(-t^2/2), cos(t), nSolP_31, nSolP_41], [t, 0, 10]);
+
