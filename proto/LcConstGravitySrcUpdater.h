@@ -24,6 +24,7 @@ namespace Lucee
 /**
  * Constant gravity source.
  */
+  template <unsigned NDIM>
   class ConstGravitySrcUpdater : public Lucee::UpdaterIfc
   {
     public:
