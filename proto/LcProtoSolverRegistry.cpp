@@ -184,7 +184,11 @@ namespace Lucee
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
       .append<Lucee::ThreeWaveInteractModSrcUpdater>()
 
-      .append<Lucee::ConstGravitySrcUpdater>();
+      .append<Lucee::ConstGravitySrcUpdater<1> >()
+      .append<Lucee::ConstGravitySrcUpdater<2> >()
+      .append<Lucee::ConstGravitySrcUpdater<3> >()
+
+      ;
 
 #ifdef HAVE_PETSC
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >

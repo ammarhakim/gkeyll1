@@ -14,38 +14,43 @@
 namespace Lucee
 {
 // set ids for module system
-  const char *ConstGravitySrcUpdater::id = "ConstGravitySrc";
+  template <> const char *ConstGravitySrcUpdater<1>::id = "ConstGravitySrc1D";
+  template <> const char *ConstGravitySrcUpdater<2>::id = "ConstGravitySrc2D";
+  template <> const char *ConstGravitySrcUpdater<3>::id = "ConstGravitySrc3D";
 
+  template <unsigned NDIM>
   void
-  ConstGravitySrcUpdater::readInput(Lucee::LuaTable& tbl)
+  ConstGravitySrcUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
     dir = (unsigned) tbl.getNumber("dir");
     gravity = tbl.getNumber("gravity");
   }
 
+  template <unsigned NDIM>
   void
-  ConstGravitySrcUpdater::initialize()
+  ConstGravitySrcUpdater<NDIM>::initialize()
   {
     UpdaterIfc::initialize();
   }
 
+  template <unsigned NDIM>
   Lucee::UpdaterStatus
-  ConstGravitySrcUpdater::update(double t)
+  ConstGravitySrcUpdater<NDIM>::update(double t)
   {
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
     double dt = t-this->getCurrTime();
 // get fluid
-    Lucee::Field<2, double>& fluid = this->getOut<Lucee::Field<2, double> >(0);
+    Lucee::Field<NDIM, double>& fluid = this->getOut<Lucee::Field<NDIM, double> >(0);
     Lucee::FieldPtr<double> fPtr = fluid.createPtr();
 
     int dirIdx = dir+1; // offset as first index is rho
 
-    int idx[2];
-    Lucee::Region<2, int> localRgn = fluid.getRegion();
-    Lucee::RowMajorSequencer<2> seq(localRgn);
+    int idx[NDIM];
+    Lucee::Region<NDIM, int> localRgn = fluid.getRegion();
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -64,10 +69,16 @@ namespace Lucee
   }
   
 
+  template <unsigned NDIM>
   void
-  ConstGravitySrcUpdater::declareTypes()
+  ConstGravitySrcUpdater<NDIM>::declareTypes()
   {
-    this->appendOutVarType(typeid(Lucee::Field<2, double>));
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
+
+// instantiations
+  template class ConstGravitySrcUpdater<1>;
+  template class ConstGravitySrcUpdater<2>;
+  template class ConstGravitySrcUpdater<3>;
 }
 
