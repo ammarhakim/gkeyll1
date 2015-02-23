@@ -167,3 +167,13 @@ target_link_libraries(lcparticleideas)
 add_executable(lcmatvec lcmatvec.cxx)
 target_link_libraries(lcmatvec
   lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+
+if (ENABLE_PARALLEL)
+  add_executable(lcmuscladv lcmuscladv.cxx)
+  target_link_libraries(lcmuscladv ${Blitz_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+endif ()
+
+if (ENABLE_PARALLEL)
+  add_executable(lcparsum lcparsum.cxx)
+  target_link_libraries(lcparsum ${Hdf5_Mpi_LIBRARIES})
+endif ()
