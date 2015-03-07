@@ -42,11 +42,11 @@ class Md
 
     inline
     double operator()(unsigned i, unsigned j) const
-    { return data[i+j*r]; }
+    { return data[i*c+j]; }
 
     inline
     double& operator()(unsigned i, unsigned j)
-    { return data[i+j*r]; }
+    { return data[i*c+j]; }
 
   private:
     unsigned r, c;
@@ -64,15 +64,49 @@ handMM(unsigned N)
     {
       a(i,j) = std::rand()/RAND_MAX;
       b(i,j) = std::rand()/RAND_MAX;
-      c(i,j) = 0.0;
     }
 
   clock_t start_t = clock();
 // compute c
   for (unsigned i=0; i<N; ++i)
     for (unsigned j=0; j<N; ++j)
+    {
+      c(i,j) = 0.0;
       for (unsigned k=0; k<N; ++k)
         c(i,j) += a(i,k)*b(k,j);
+    }
+  clock_t end_t = clock();
+
+  return (double) (end_t-start_t)/CLOCKS_PER_SEC;
+}
+
+double
+handMM2(unsigned N)
+{
+  Md a(N,N), b(N,N), c(N,N), tmp(N,N);
+
+// fill a and b with random numbers
+  for (unsigned i=0; i<N; ++i)
+    for (unsigned j=0; j<N; ++j)
+    {
+      a(i,j) = std::rand()/RAND_MAX;
+      b(i,j) = std::rand()/RAND_MAX;
+    }
+
+  clock_t start_t = clock();
+
+  for (unsigned i=0; i<N; ++i)
+    for (unsigned j=0; j<N; ++j)
+      tmp(i,j) = b(j,i);
+
+// compute c
+  for (unsigned i=0; i<N; ++i)
+    for (unsigned j=0; j<N; ++j)
+    {
+      c(i,j) = 0.0;
+      for (unsigned k=0; k<N; ++k)
+        c(i,j) += a(i,k)*tmp(j,k);
+    }
   clock_t end_t = clock();
 
   return (double) (end_t-start_t)/CLOCKS_PER_SEC;
@@ -128,6 +162,8 @@ main(int argc, char *argv[])
 // N = 500
   double ht = handMM(500); // HAND WRITTEN CODE
   std::cout << "Hand-written code took " << ht << "s" << std::endl;
+  double htc = handMM2(500); // HAND WRITTEN CODE
+  std::cout << "Hand-written cache-friendly code took " << htc << "s" << std::endl;
   double bt = blasMM(500); // BLAS
   std::cout << "BLAS code took " << bt << "s" << std::endl;
   double et = eigenMM(500); // EIGEN
@@ -137,6 +173,8 @@ main(int argc, char *argv[])
 // N = 1000
   ht = handMM(1000); // HAND WRITTEN CODE
   std::cout << "Hand-written code took " << ht << "s" << std::endl;
+  htc = handMM2(1000); // HAND WRITTEN CODE
+  std::cout << "Hand-written cache-friendly code took " << htc << "s" << std::endl;
   bt = blasMM(1000); // BLAS
   std::cout << "BLAS code took " << bt << "s" << std::endl;
   et = eigenMM(1000); // EIGEN
