@@ -122,7 +122,7 @@ add_executable(lcgeomprim lcgeomprim.cxx)
 target_link_libraries(lcgeomprim lcgrids lclib lcloki ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES})
 
 add_executable(lcstructgridfield lcstructgridfield.cxx)
-target_link_libraries(lcstructgridfield lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} 
+target_link_libraries(lcstructgridfield  lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} 
   ${Hdf5_Mpi_LIBRARIES} ${Gsl_LIBRARIES})
 
 add_executable(lcgridode lcgridode.cxx)
@@ -173,7 +173,5 @@ if (ENABLE_PARALLEL)
   target_link_libraries(lcparsum ${Hdf5_Mpi_LIBRARIES})
 endif ()
 
-if (ENABLE_PARALLEL)
-  add_executable(lcparsum lcparsum.cxx)
-  target_link_libraries(lcparsum ${Hdf5_Mpi_LIBRARIES})
-endif ()
+add_executable(lcpartests lcpartests.cxx)
+target_link_libraries(lcpartests lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
