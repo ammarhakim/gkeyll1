@@ -53,6 +53,12 @@ namespace Lucee
     return comm;
   }
 
+  bool
+  BasicObj::isValidOnRank() const
+  {
+    return (bool) comm;
+  }
+
   void
   BasicObj::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
   {

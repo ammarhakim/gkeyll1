@@ -76,14 +76,21 @@ namespace Lucee
  *
  * @param ci the communicator
  */
-    virtual void setComm(TxCommBase* ci);
+      virtual void setComm(TxCommBase* ci);
 
 /**
  * Get the communicator
  *
  * @return ci the communicator
  */
-    virtual TxCommBase* getComm() const;
+      TxCommBase* getComm() const;
+
+/**
+ * Check if this object is valid on this rank.
+ *
+ * @return true if object is valid.
+ */
+      bool isValidOnRank() const;
 
 /**
  * Get type of object.
@@ -155,7 +162,7 @@ namespace Lucee
 /** Derived type of object */
       std::string derivedType;
 /** Communicator */
-    TxCommBase* comm;
+      TxCommBase* comm;
   };
 }
 
