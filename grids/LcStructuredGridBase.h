@@ -311,6 +311,21 @@ namespace Lucee
       void setGridData(const Lucee::Region<NDIM, int>& localRgn,
         const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, double>& compSpace);
 
+/**
+ * Create a lower dimensional grid by collecting specified directions
+ * into a new grid. For example, if one has a 3D grid, collecting
+ * directions (0,1) will yield a 2D grid made up of the extents
+ * (lower, upper) and number of cells in directions 0 and 1.
+ *
+ * This method should be called by derived classes to initialize the
+ * base class methods, before filling in derived members.
+ *
+ * @param sg Reference to grid to set
+ * @param collectDirs Directions to collect.
+ */
+      template <unsigned RDIM>
+      void createSubGrid(StructuredGridBase<RDIM>& sg, const std::vector<unsigned>& collectDirs);
+
 /** Index into current cell */
       mutable int currIdx[NDIM];
 /** Local region indexed by grid */
@@ -333,6 +348,31 @@ namespace Lucee
  */
       void setPeriodicDir(unsigned dir);
   };
+
+  
+  template <unsigned NDIM> 
+  template <unsigned RDIM> void
+  StructuredGridBase<NDIM>::createSubGrid(StructuredGridBase<RDIM>& subGrid, const std::vector<unsigned>& collectDirs)
+  {
+    Lucee::Region<RDIM, int> subLocalRgn;
+    Lucee::Region<RDIM, int> subGlobalRgn;
+    Lucee::Region<RDIM, int> subCompSpace;
+
+    if (RDIM>collectDirs.size())
+      throw Lucee::Except("StructuredGridBase::createSubGrid: Improperly specified directions");
+
+    for (unsigned i=0; i<RDIM; ++i)
+    {
+      subLocalRgn[i] = localRgn[collectDirs[i]];
+      subGlobalRgn[i] = globalRgn[collectDirs[i]];
+      subCompSpace[i] = compSpace[collectDirs[i]];
+    }
+    subGrid.setGridData(subLocalRgn, subGrid, subCompSpace);
+
+    for (unsigned i=0; i<RDIM; ++i)
+      if (isPeriodic[collectDirs[i]])
+        subGrid.setPeriodicDir(i);
+  }
 }
 
 #endif //  LC_STRUCTURED_GRID_BASE_H
