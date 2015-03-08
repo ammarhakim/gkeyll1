@@ -318,7 +318,7 @@ namespace Lucee
  * (lower, upper) and number of cells in directions 0 and 1.
  *
  * This method should be called by derived classes to initialize the
- * base class methods, before filling in derived members.
+ * base class, before filling in derived members.
  *
  * @param sg Reference to grid to set
  * @param collectDirs Directions to collect.
