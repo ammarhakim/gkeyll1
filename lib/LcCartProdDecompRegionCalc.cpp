@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcCartProdDecompRegionCalc.h>
 #include <LcMatrix.h>
+#include <LcColMajorIndexer.h>
 
 // std includes
 #include <cmath>
@@ -28,28 +29,29 @@ namespace Lucee
 
   template <unsigned NDIM>
   CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc()
+    : cutIndexer(&Lucee::FixedVector<NDIM, unsigned>( (unsigned) 0)[0], &Lucee::FixedVector<NDIM, int>((int) 1)[0])
   {
 // set some reasonable defaults
+    unsigned c[NDIM];
     for (unsigned i=0; i<NDIM; ++i)
-      cuts[i] = 1;
-    nsub = 1;
+      c[i] = 1;
+    setCuts(c);
   }
 
   template <unsigned NDIM>
   CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc(const unsigned c[NDIM])
+    : cutIndexer(&Lucee::FixedVector<NDIM, unsigned>( (unsigned) 0)[0], &Lucee::FixedVector<NDIM, int>((int) 1)[0])
   {
     setCuts(c);
   }
 
   template <unsigned NDIM>
   CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc(const int c[NDIM])
+    : cutIndexer(&Lucee::FixedVector<NDIM, unsigned>( (unsigned) 0)[0], &Lucee::FixedVector<NDIM, int>((int) 1)[0])
   {
-    nsub = 1;
-    for (unsigned i=0; i<NDIM; ++i)
-    {
-      cuts[i] = c[i];
-      nsub *= cuts[i];
-    }
+    unsigned cc[NDIM];
+    for (unsigned d=0; d<NDIM; ++d) cc[d] = c[d];
+    setCuts(cc);
   }
 
   template <unsigned NDIM>
@@ -77,6 +79,14 @@ namespace Lucee
     {
       throw Lucee::Except("CartProdDecompRegionCalc::readInput: Must provide 'cuts' table.");
     }
+  }
+
+  template <unsigned NDIM>
+  void
+  CartProdDecompRegionCalc<NDIM>::fillWithCuts(int c[NDIM]) const
+  {
+    for (unsigned d=0; d<NDIM; ++d)
+      c[d] = cuts[d];
   }
 
   template <unsigned NDIM>
@@ -152,11 +162,15 @@ namespace Lucee
   CartProdDecompRegionCalc<NDIM>::setCuts(const unsigned c[NDIM])
   {
     nsub = 1;
+    int zeros[NDIM];
     for (unsigned i=0; i<NDIM; ++i)
     {
       cuts[i] = c[i];
       nsub *= cuts[i];
+      zeros[i] = 0;
     }
+// reset indexer
+    cutIndexer = Lucee::ColMajorIndexer<NDIM>(c, zeros);
   }
 
 // instantiations
