@@ -24,6 +24,7 @@ namespace Lucee
   template <> const char *CartProdDecompRegionCalc<3>::id = "CartProd";
   template <> const char *CartProdDecompRegionCalc<4>::id = "CartProd";
   template <> const char *CartProdDecompRegionCalc<5>::id = "CartProd";
+  template <> const char *CartProdDecompRegionCalc<6>::id = "CartProd";
 
   template <unsigned NDIM>
   CartProdDecompRegionCalc<NDIM>::CartProdDecompRegionCalc()
@@ -164,4 +165,5 @@ namespace Lucee
   template class CartProdDecompRegionCalc<3>;
   template class CartProdDecompRegionCalc<4>;
   template class CartProdDecompRegionCalc<5>;
+  template class CartProdDecompRegionCalc<6>;
 }

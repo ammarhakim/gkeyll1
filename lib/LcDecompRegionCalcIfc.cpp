@@ -12,6 +12,10 @@
 // lucee includes
 #include <LcDecompRegionCalcIfc.h>
 #include <LcRowMajorSequencer.h>
+#include <LcGlobals.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // std includes
 #include <iostream>
@@ -24,12 +28,16 @@ namespace Lucee
   template <> const char *DecompRegionCalcIfc<3>::id = "DecompRegionCalc3D";
   template <> const char *DecompRegionCalcIfc<4>::id = "DecompRegionCalc4D";
   template <> const char *DecompRegionCalcIfc<5>::id = "DecompRegionCalc5D";
+  template <> const char *DecompRegionCalcIfc<6>::id = "DecompRegionCalc6D";
 
   template <unsigned NDIM> 
   DecompRegionCalcIfc<NDIM>::DecompRegionCalcIfc()
   {
     for (unsigned d=0; d<NDIM; ++d)
       isPeriodic[d] = false;
+// set communicator to global one
+    this->setComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
   }
 
   template <unsigned NDIM> 
@@ -144,4 +152,5 @@ namespace Lucee
   template class DecompRegionCalcIfc<3>;
   template class DecompRegionCalcIfc<4>;
   template class DecompRegionCalcIfc<5>;
+  template class DecompRegionCalcIfc<6>;
 }

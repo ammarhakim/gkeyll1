@@ -23,6 +23,8 @@ namespace Lucee
   template <> const char *CartGeneralDecompRegionCalc<2>::id = "CartGeneral";
   template <> const char *CartGeneralDecompRegionCalc<3>::id = "CartGeneral";
   template <> const char *CartGeneralDecompRegionCalc<4>::id = "CartGeneral";
+  template <> const char *CartGeneralDecompRegionCalc<5>::id = "CartGeneral";
+  template <> const char *CartGeneralDecompRegionCalc<6>::id = "CartGeneral";
 
   template <unsigned NDIM>
   CartGeneralDecompRegionCalc<NDIM>::CartGeneralDecompRegionCalc()
@@ -175,4 +177,6 @@ namespace Lucee
   template class CartGeneralDecompRegionCalc<2>;
   template class CartGeneralDecompRegionCalc<3>;
   template class CartGeneralDecompRegionCalc<4>;
+  template class CartGeneralDecompRegionCalc<5>;
+  template class CartGeneralDecompRegionCalc<6>;
 }
