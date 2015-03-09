@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcColMajorIndexer.h>
 #include <LcDecompRegionCalcIfc.h>
 
 namespace Lucee
@@ -58,6 +59,13 @@ namespace Lucee
  */
       virtual void readInput(Lucee::LuaTable& tbl);
 
+/**
+ * Get the cuts for this decomposition.
+ *
+ * @param cuts  On output, cuts used in this decomposition.
+ */
+      void fillWithCuts(int cuts[NDIM]) const;
+
     protected:
 
 /**
@@ -73,6 +81,8 @@ namespace Lucee
       int cuts[NDIM];
 /** Number of total sub-regions */
       unsigned nsub;
+/** Indexer for mapping cut-index index to rank */
+      Lucee::ColMajorIndexer<NDIM> cutIndexer;
 
 /**
  * Set number cuts for use in decomposition.

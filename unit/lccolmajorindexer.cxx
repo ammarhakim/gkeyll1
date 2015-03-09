@@ -6,6 +6,7 @@
 
 // lucee includes
 #include <LcColMajorIndexer.h>
+#include <LcColMajorSequencer.h>
 #include <LcTest.h>
 
 void
@@ -508,6 +509,31 @@ test_11()
       LC_ASSERT("Testing reset index indexing", col.getIndex(i,j) == col1.getIndex(ir,jr));
 }
 
+void
+test_12()
+{
+  int zeros[3], ishape[3];
+  unsigned shape[3];
+  for (unsigned d=0; d<3; ++d)
+    zeros[d] = 0;
+  shape[0] = 10; shape[1] = 3; shape[2] = 7;
+  for (unsigned d=0; d<3; ++d)
+    ishape[d] = shape[d]; // I SOMETIMES HATE C++
+
+  Lucee::ColMajorIndexer<3> cIdx(shape, zeros);
+  Lucee::Region<3, int> rgn(ishape);
+  Lucee::ColMajorSequencer<3> cSeq(rgn);
+
+  int idx[3];
+  unsigned count = 0;
+  while (cSeq.step())
+  {
+    cSeq.fillWithIndex(idx);
+    LC_ASSERT("Checking if indexer/sequencer match", cIdx.getIndex(idx) == count);
+    count++;
+  }
+}
+
 int
 main(int argc, char **argv) 
 {
@@ -523,6 +549,7 @@ main(int argc, char **argv)
   test_9();
   test_10();
   test_11();
+  test_12();
 
   test_1_1();
   test_2_2();
