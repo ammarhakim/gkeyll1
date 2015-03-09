@@ -22,6 +22,7 @@
 
 // std includes
 #include <string>
+#include <vector>
 
 namespace Lucee
 {
@@ -74,9 +75,10 @@ namespace Lucee
 /**
  * Set the communicator
  *
- * @param ci the communicator
+ * @param ci global communicator
+ * @param cList List of sub-communicators.
  */
-      virtual void setComm(TxCommBase* ci);
+      void setComm(TxCommBase* ci);
 
 /**
  * Get the communicator
@@ -161,7 +163,8 @@ namespace Lucee
       std::string baseType;
 /** Derived type of object */
       std::string derivedType;
-/** Communicator */
+
+/** Communicator on which object is valid */
       TxCommBase* comm;
   };
 }

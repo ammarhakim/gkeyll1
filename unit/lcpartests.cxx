@@ -32,27 +32,84 @@
 bool isValid(TxCommBase *c)
 { return (bool) c; }
 
-void
-test_0()
+class CommHolder
 {
-// create grid
-  int lo[2] = {0, 0};
-  int up[2] = {10, 15};
-  Lucee::Region<2, int> localBox(lo, up);
+  public:
+    CommHolder(TxCommBase *gc, std::vector<TxCommBase*>& lc)
+      : globalComm(gc)
+    {
+      commList.resize(lc.size());
+      for (unsigned i=0; i<lc.size(); ++i)
+        commList[i] = lc[i];
+      for (unsigned i=0; i<lc.size(); ++i)
+        if (isValid(lc[i]))
+          localComm = lc[i];
+    }
 
-  double plo[2] = {0.0, 0.0};
-  double pup[2] = {1.0, 1.5};
-  Lucee::Region<2, double> physBox(plo, pup);
+    TxCommBase* getComm() const
+    { return localComm; }
 
-  Lucee::RectCartGrid<2> grid(localBox, physBox);
+    unsigned getGlobalRank() const
+    { return globalComm->getRank(); }
 
-  std::vector<unsigned> cdirs(1);
-  cdirs[0] = 0;
-// create sub-grid
-  //Lucee::RectCartGrid<1> subGrid = grid.createSubGrid<1>(cdirs);
-// check it
-  //LC_ASSERT("Testing grid", subGrid.getNumCells(0) == 10);
-  //LC_ASSERT("Testing grid spacing", subGrid.getDx(0) == 1.0/10.0);
+    unsigned getLocalRank() const
+    { return localComm->getRank(); }
+
+  private:
+    TxCommBase *globalComm;
+    std::vector<TxCommBase*> commList;
+    TxCommBase *localComm;
+};
+
+void
+test_0(TxCommBase *comm)
+{
+// split communicator
+  std::vector<int> subRanks(2);
+  std::vector<TxCommBase*> subComm(2);
+
+  subRanks[0] = 0; subRanks[1] = 1;
+  subComm[0] = comm->createSubComm(subRanks);
+
+  subRanks[0] = 2; subRanks[1] = 3;
+  subComm[1] = comm->createSubComm(subRanks);
+
+  if (comm->getRank() == 0)
+    LC_ASSERT("Testing if communicator 0 is valid", isValid(subComm[0]));
+  if (comm->getRank() == 1)
+    LC_ASSERT("Testing if communicator 0 is valid", isValid(subComm[0]));
+
+  if (comm->getRank() == 2)
+    LC_ASSERT("Testing if communicator 0 is valid", !isValid(subComm[0]));
+  if (comm->getRank() == 3)
+    LC_ASSERT("Testing if communicator 0 is valid", !isValid(subComm[0]));
+
+  if (comm->getRank() == 0)
+    LC_ASSERT("Testing if communicator 0 is valid", !isValid(subComm[1]));
+  if (comm->getRank() == 1)
+    LC_ASSERT("Testing if communicator 0 is valid", !isValid(subComm[1]));
+
+  if (comm->getRank() == 2)
+    LC_ASSERT("Testing if communicator 0 is valid", isValid(subComm[1]));
+  if (comm->getRank() == 3)
+    LC_ASSERT("Testing if communicator 0 is valid", isValid(subComm[1]));
+}
+
+void
+test_1(TxCommBase *comm)
+{
+// split communicator
+  std::vector<int> subRanks(2);
+  std::vector<TxCommBase*> subComm(2);
+
+  subRanks[0] = 0; subRanks[1] = 1;
+  subComm[0] = comm->createSubComm(subRanks);
+
+  subRanks[0] = 2; subRanks[1] = 3;
+  subComm[1] = comm->createSubComm(subRanks);
+
+  CommHolder commHolder(comm, subComm);
+  LC_ASSERT("Testing if localComm is always valid", isValid(commHolder.getComm()));
 }
 
 int
@@ -64,20 +121,8 @@ main(int argc, char *argv[])
   TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
     ::Instance().comm;
 
-// create a decomposition
-  int lower[2] = {0, 0};
-  int upper[2] = {64, 128};
-  Lucee::Region<2, int> globalRgn(lower, upper);
-// create default decomp
-  Lucee::DecompRegion<2> dcomp(globalRgn);
-  int cuts[2] = {2, 2};
-// create product decomposer
-  Lucee::CartProdDecompRegionCalc<2> cartDecomp(cuts);
-
-  int numProcs = comm->getNumProcs();
-  cartDecomp.calcDecomp(numProcs, dcomp);
-
-  test_0();
+  test_0(comm);
+  test_1(comm);
 
   LC_END_TESTS;
   return 0;

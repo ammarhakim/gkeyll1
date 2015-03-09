@@ -57,6 +57,16 @@ namespace Lucee
  */
       void calcDecomp(unsigned nrgns, Lucee::DecompRegion<NDIM>& decompRgn);
 
+/**
+ * Split decomposition by collecting along specified directions. Not
+ * all decomposition methods will support this, and those that don't
+ * will throw an exception.
+ *
+ * @param collectDir directions to collect
+ * @return new decomposition calculator
+ */
+      //virtual void collectDirections(const std::vector<unsigned>& collectDir);
+
     protected:
 
 /**

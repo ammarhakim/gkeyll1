@@ -109,6 +109,12 @@ namespace Lucee
       Lucee::DecompRegionCalcIfc<NDIM>& decompCalc
         = tbl.template getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
 
+// reset our communicator to the one stored in decomposition object:
+// note that in most cases this is just the global
+// communicator. However, in some cases this communicator may consist
+// of only a sub-set of the total processors in the system.
+      comm = decompCalc.getComm();
+
       for (unsigned d=0; d<NDIM; ++d)
         decompCalc.setPeriodicDir(d, isPeriodic[d]);
 // compute decomposition

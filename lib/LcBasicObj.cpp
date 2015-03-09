@@ -17,6 +17,9 @@
 
 namespace Lucee
 {
+/** Check if communicator is valid */
+  static bool _isValid(TxCommBase *c) { return (bool) c; }
+
   BasicObj::BasicObj()
     : nm("--NO-NAME--") 
   {
@@ -56,7 +59,8 @@ namespace Lucee
   bool
   BasicObj::isValidOnRank() const
   {
-    return (bool) comm;
+// THIS NEEDS TO CHANGE
+    return true; 
   }
 
   void

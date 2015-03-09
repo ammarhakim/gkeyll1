@@ -13,9 +13,13 @@
 #endif
 
 // lucee includes
+#include <LcBasicObj.h>
 #include <LcExcept.h>
 #include <LcFixedVector.h>
 #include <LcRegion.h>
+
+// txbase includes
+#include <TxCommBase.h>
 
 // std includes
 #include <functional>
@@ -31,7 +35,7 @@ namespace Lucee
  * the global region.
  */
   template <unsigned NDIM> 
-  class DecompRegion
+  class DecompRegion : public BasicObj
   {
     public:
 // forward declare algorithm calculation class so it can access our privates
