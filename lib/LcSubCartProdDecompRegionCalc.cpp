@@ -128,6 +128,9 @@ namespace Lucee
 // comm-split parent communicator
       subComms.push_back(pComm->createSubComm(subRanks));
     }
+
+// finally: set valid communicator for this decomposition
+    setValidComm(subComms);
   }
 
   template <unsigned NDIM, unsigned HDIM>
