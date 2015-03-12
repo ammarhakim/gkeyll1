@@ -54,6 +54,9 @@ namespace Lucee
       .append<Lucee::AuxAdvectionEquation<1> >()
       .append<Lucee::AuxAdvectionEquation<2> >()
       .append<Lucee::AuxAdvectionEquation<3> >()
+      .append<Lucee::AuxAdvectionEquation<4> >()
+      .append<Lucee::AuxAdvectionEquation<5> >()
+      .append<Lucee::AuxAdvectionEquation<6> >()
       .append<Lucee::LenardBernsteinVParEquation >();
   }
 }

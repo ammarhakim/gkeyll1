@@ -246,6 +246,14 @@ namespace Lucee
       static int luaGetGlobalUpper(lua_State *L);
 
 /**
+ * Lua callable method to get global shape
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaGetShape(lua_State *L);
+
+/**
  * Lua callable method to get coordinate of lower corner of domain in
  * computational space.
  *

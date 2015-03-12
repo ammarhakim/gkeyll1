@@ -109,10 +109,10 @@ namespace Lucee
       Lucee::DecompRegionCalcIfc<NDIM>& decompCalc
         = tbl.template getObject<Lucee::DecompRegionCalcIfc<NDIM> >("decomposition");
 
-// reset our communicator to the one stored in decomposition object:
-// note that in most cases this is just the global
-// communicator. However, in some cases this communicator may consist
-// of only a sub-set of the total processors in the system.
+// reset our communicator to one stored in decomposition object: note
+// that in most cases this is just the global communicator. However,
+// in some cases this communicator may consist of only a sub-set of
+// processors in the system.
       comm = decompCalc.getComm();
 
       for (unsigned d=0; d<NDIM; ++d)
@@ -129,11 +129,13 @@ namespace Lucee
 
     Lucee::CartProdDecompRegionCalc<NDIM> decompCalc(cuts);
     for (unsigned d=0; d<NDIM; ++d)
-        decompCalc.setPeriodicDir(d, isPeriodic[d]);
+      decompCalc.setPeriodicDir(d, isPeriodic[d]);
 // compute decomposition
-      decompCalc.calcDecomp(1, *decompRgn);
+    decompCalc.calcDecomp(1, *decompRgn);
 #endif
 
+// set valid communicator for grid
+    this->setComm(comm);
 // compute local region
     localRgn = decompRgn->getRegion(comm->getRank());
   }
@@ -229,6 +231,7 @@ namespace Lucee
     lfm.appendFunc("localUpperIndex", luaGetLocalUpper);
     lfm.appendFunc("globalLowerIndex", luaGetGlobalLower);
     lfm.appendFunc("globalUpperIndex", luaGetGlobalUpper);
+    lfm.appendFunc("shape", luaGetShape);
     lfm.appendFunc("lower", luaGetLowerCoord);
     lfm.appendFunc("upper", luaGetUpperCoord);
   }
@@ -282,6 +285,19 @@ namespace Lucee
     int dir = lua_tonumber(L, 2);
     Lucee::Region<NDIM, int> gb = g->getGlobalRegion();
     lua_pushnumber(L, gb.getUpper(dir));
+    return 1;
+  }
+
+  template <unsigned NDIM>
+  int
+  StructuredGridBase<NDIM>::luaGetShape(lua_State *L)
+  {
+    StructuredGridBase<NDIM> *g
+      = Lucee::PointerHolder<StructuredGridBase<NDIM> >::getObj(L);
+
+    int dir = lua_tonumber(L, 2);
+    Lucee::Region<NDIM, int> gb = g->getGlobalRegion();
+    lua_pushnumber(L, gb.getShape(dir));
     return 1;
   }
 
