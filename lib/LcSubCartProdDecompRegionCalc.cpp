@@ -220,9 +220,14 @@ namespace Lucee
     for (unsigned i=0; i<clist.size(); ++i)
       if (_isValid(clist[i]))
         this->setComm(clist[i]);
-// also set data communicator: this communicator is arbitrary as it is
-// assumed that only one set of processors will do the I/O
-    this->setDataComm(clist[0]);
+
+// set flag to indicate which ranks it is safe to write from: the
+// choice is partly arbitrary. Perhaps a better option would be to
+// somehow let user decide, or even better to write each sub-field to
+// different files.
+    this->setIsSafeToWrite(false);
+    if (_isValid(clist[0]))
+      this->setIsSafeToWrite(true);
   }
 
 // instantiations

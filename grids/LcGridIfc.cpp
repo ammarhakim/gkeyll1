@@ -53,7 +53,8 @@ namespace Lucee
     GridIfc *g
       = Lucee::PointerHolder<GridIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
-    g->write(nm);
+    if (g->isSafeToWrite())
+      g->write(nm);
 
     return 0;
   }
@@ -64,7 +65,7 @@ namespace Lucee
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string outNm = outPrefix + "_" + nm;
-    TxCommBase& comm = *this->getDataComm();
+    TxCommBase& comm = *this->getComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->createFile(outNm);

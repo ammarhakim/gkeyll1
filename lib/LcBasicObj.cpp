@@ -30,8 +30,7 @@ namespace Lucee
 // set communicators to global one
     this->setComm(Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm);
-    this->setDataComm(Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm);
+    setIsSafeToWrite(true);
   }
 
   BasicObj::BasicObj(const std::string& nm)
@@ -40,8 +39,7 @@ namespace Lucee
 // set communicators to global one
     this->setComm(Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm);
-    this->setDataComm(Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm);
+    setIsSafeToWrite(true);
   }
 
   BasicObj::~BasicObj() 
@@ -64,29 +62,22 @@ namespace Lucee
     comm = ci;
   }
 
-  void
-  BasicObj::setDataComm(TxCommBase* ci)
-  {
-    dataComm = ci;
-  }
-
   TxCommBase*
   BasicObj::getComm() const
   {
     return comm;
   }
 
-  TxCommBase*
-  BasicObj::getDataComm() const
+  void
+  BasicObj::setIsSafeToWrite(bool stw)
   {
-    return dataComm;
+    safeToWrite = stw;
   }
 
   bool
-  BasicObj::isValidOnRank() const
+  BasicObj::isSafeToWrite() const
   {
-// THIS NEEDS TO CHANGE
-    return true; 
+    return safeToWrite;
   }
 
   void

@@ -53,7 +53,7 @@ namespace Lucee
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string outNm = outPrefix + "_" + nm;
-    TxCommBase& comm = *this->getDataComm();
+    TxCommBase& comm = *this->getComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->createFile(outNm);
@@ -72,7 +72,7 @@ namespace Lucee
   {
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string inNm = outPrefix + "_" + nm;
-    TxCommBase& comm = *this->getDataComm();
+    TxCommBase& comm = *this->getComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->openFile(inNm, "r");
@@ -128,7 +128,8 @@ namespace Lucee
       }
       tCurr = lua_tonumber(L, 3);
     }
-    d->write(nm, tCurr);
+    if (d->isSafeToWrite())
+      d->write(nm, tCurr);
 
     return 0;
   }
