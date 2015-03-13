@@ -35,7 +35,12 @@ namespace Lucee
   {
 // read in grid if specified (otherwise assume it will be set by setGrid)
     if (tbl.hasObject<Lucee::GridIfc>("onGrid"))
+    {
       grid = &tbl.getObjectAsBase<Lucee::GridIfc>("onGrid");
+// set communicator from grid
+      this->setComm(grid->getComm());
+      this->setIsSafeToWrite(grid->isSafeToWrite());
+    }
   }
 
   void
@@ -60,6 +65,9 @@ namespace Lucee
   UpdaterIfc::setGrid(const Lucee::GridIfc& grd)
   {
     grid = &grd;
+// set communicator from grid
+    this->setComm(grid->getComm());
+    this->setIsSafeToWrite(grid->isSafeToWrite());
   }
 
   void
@@ -129,12 +137,20 @@ namespace Lucee
       = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
     Lucee::UpdaterStatus s = updater->update(t);
+
+    int myLocalStatus = s.status, status;
+    double mySuggestedDt = s.dt, dt;
+// ensure common values on all processors
+    TxCommBase *comm = updater->getComm();
+    comm->allreduce(1, &myLocalStatus, &status, TX_AND);
+    comm->allreduce(1, &mySuggestedDt, &dt, TX_MIN);
+
 // push status and suggested time-step on stack
-    if (s.status)
+    if (status)
       lua_pushboolean(L, 1);
     else
       lua_pushboolean(L, 0);
-    lua_pushnumber(L, s.dt);
+    lua_pushnumber(L, dt);
     lua_pushstring(L, s.message.c_str());
 
     return 3;

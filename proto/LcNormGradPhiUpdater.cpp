@@ -133,8 +133,7 @@ namespace Lucee
 
 // sum across all processors
     double netTotalEnergy = totalEnergy;
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
     comm->allreduce(1, &totalEnergy, &netTotalEnergy, TX_SUM);
 
     std::vector<double> data(1);

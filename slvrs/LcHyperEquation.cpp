@@ -328,8 +328,7 @@ namespace Lucee
       throw Lucee::Except("HyperEquation::luaConserved: Incorrect object in method 'conserved'");
     }
 // make sure all processors return same answer
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = cv->pointer->getComm();
     int globalResult;
     comm->allreduce(1, &result, &globalResult, TX_AND);
 

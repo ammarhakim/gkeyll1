@@ -604,8 +604,7 @@ namespace Lucee
     }
 
 // make sure all processors return same answer
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = fld->getComm();
     int globalResult;
     comm->allreduce(1, &hasNan, &globalResult, TX_AND);
 

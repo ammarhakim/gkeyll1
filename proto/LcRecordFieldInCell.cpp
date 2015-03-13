@@ -94,8 +94,7 @@ namespace Lucee
 // filled up from all reduce across all processors
     std::vector<double> commLocalVals(fld.getNumComponents());
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 // sum across all processors (this works because except for one
 // processor, all others have zeros)
     comm->allreduce(fld.getNumComponents(), localVals, commLocalVals, TX_SUM);

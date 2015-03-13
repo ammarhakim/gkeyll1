@@ -118,8 +118,7 @@ namespace Lucee
     for (unsigned d=0; d<NDIM; ++d) volMom[d] = localMom[d];
 
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
     comm->allreduce(1, &localAvg, &volAvg, TX_SUM);
     comm->allreduce(NDIM, &localMom[0], &volMom[0], TX_SUM);
 

@@ -80,8 +80,7 @@ namespace Lucee
 
     double volInt = localInt;
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
     comm->allreduce(1, &localInt, &volInt, TX_SUM);
 
     std::vector<double> data(1);
