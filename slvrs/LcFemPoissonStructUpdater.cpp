@@ -183,8 +183,7 @@ namespace Lucee
 // FIXED ASAP
 
 #ifdef HAVE_MPI
-    TxMpiBase *comm = static_cast<TxMpiBase*>(Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm);
+    TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
 #endif
 
 #ifdef HAVE_MPI
@@ -801,8 +800,7 @@ namespace Lucee
 
     double netFldInt = fldInt;
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
     comm->allreduce(1, &fldInt, &netFldInt, TX_SUM);
 
     return netFldInt;

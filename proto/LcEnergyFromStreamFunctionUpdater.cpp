@@ -142,8 +142,7 @@ namespace Lucee
 
     double netTotalEnergy = totalEnergy;
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 // sum across all processors
     comm->allreduce(1, &totalEnergy, &netTotalEnergy, TX_SUM);
 

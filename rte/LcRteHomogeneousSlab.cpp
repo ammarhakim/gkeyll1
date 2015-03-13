@@ -245,7 +245,7 @@ namespace Lucee
 // don't write anything at start
       return;
 
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
+    TxCommBase *comm = this->getComm();
 // create HDF5 for storing data
     std::auto_ptr<TxIoBase> io(new TxHdf5Base(comm));
 

@@ -277,8 +277,7 @@ namespace Lucee
   StructGridField<NDIM, T>::sync()
   {
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
     int rank = comm->getRank(); // current rank
     int lg[NDIM], ug[NDIM];
     this->fillWithGhosts(lg, ug); // ghost cells
@@ -299,8 +298,7 @@ namespace Lucee
     if (isReceiving) finishRecv();
 
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 
     Lucee::Region<NDIM, int> localBox = this->getRegion();
 // get neighbor information
@@ -348,8 +346,7 @@ namespace Lucee
   StructGridField<NDIM, T>::send(unsigned rank, int lg[NDIM], int ug[NDIM])
   {
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 
     Lucee::Region<NDIM, int> localBox = this->getRegion();
 
@@ -429,8 +426,7 @@ namespace Lucee
     if (!isReceiving) return; // nothing to receive
 
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 
 // complete receives and copy data into ghost cells
     std::map<int, TxMsgStatus>::iterator i = msgStatus.begin();

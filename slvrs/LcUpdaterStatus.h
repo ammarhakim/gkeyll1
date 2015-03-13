@@ -12,6 +12,9 @@
 # include <config.h>
 #endif
 
+// gkeyll includes
+#include <LcBasicObj.h>
+
 // std includes
 #include <string>
 
@@ -24,7 +27,7 @@ namespace Lucee
  * getSuggestedDt() returns the time-step suggestion for the next
  * time-step.
  */
-  class UpdaterStatus
+  class UpdaterStatus : public BasicObj
   {
     public:
 /**

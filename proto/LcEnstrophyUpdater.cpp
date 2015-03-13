@@ -124,8 +124,7 @@ namespace Lucee
 
     double netTotalEnstrophy = totalEnstrophy;
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 // sum across all processors
     comm->allreduce(1, &totalEnstrophy, &netTotalEnstrophy, TX_SUM);
 

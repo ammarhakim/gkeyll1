@@ -77,8 +77,7 @@ namespace Lucee
 
     double netTotalField = totalField;
 // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm;
+    TxCommBase *comm = this->getComm();
 // sum across all processors
     comm->allreduce(1, &totalField, &netTotalField, TX_SUM);
 
