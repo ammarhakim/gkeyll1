@@ -98,6 +98,7 @@ namespace Lucee
 // get comm pointer
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
+    bool isSafeToWrite = true; // by default, it is safe to write
 
 // create decomposed region
     decompRgn.reset( new Lucee::DecompRegion<NDIM>(globalRgn) );
@@ -114,6 +115,7 @@ namespace Lucee
 // in some cases this communicator may consist of only a sub-set of
 // processors in the system.
       comm = decompCalc.getComm();
+      isSafeToWrite = decompCalc.isSafeToWrite();
 
       for (unsigned d=0; d<NDIM; ++d)
         decompCalc.setPeriodicDir(d, isPeriodic[d]);
@@ -136,6 +138,8 @@ namespace Lucee
 
 // set valid communicator for grid
     this->setComm(comm);
+// set I/O flag for safe ranks
+    this->setIsSafeToWrite(isSafeToWrite);
 // compute local region
     localRgn = decompRgn->getRegion(comm->getRank());
   }
