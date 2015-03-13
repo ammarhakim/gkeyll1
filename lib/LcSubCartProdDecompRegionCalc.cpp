@@ -220,6 +220,9 @@ namespace Lucee
     for (unsigned i=0; i<clist.size(); ++i)
       if (_isValid(clist[i]))
         this->setComm(clist[i]);
+// also set data communicator: this communicator is arbitrary as it is
+// assumed that only one set of processors will do the I/O
+    this->setDataComm(clist[0]);
   }
 
 // instantiations

@@ -66,13 +66,6 @@ namespace Lucee
       virtual DataStructIfc* clone() const;
 
 /**
- * Get communicator object to perform I/O.
- *
- * @param Reference to a communicator.
- */
-      virtual TxCommBase& getDataComm();
-
-/**
  * Write dataStruct to given node in HDF5 file.
  *
  * @param io I/O object for I/O.

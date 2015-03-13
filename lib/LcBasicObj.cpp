@@ -11,6 +11,10 @@
 
 // lucee includes
 #include <LcBasicObj.h>
+#include <LcGlobals.h>
+
+// loki includes
+#include <loki/Singleton.h>
 
 // std includes
 #include <string>
@@ -23,11 +27,21 @@ namespace Lucee
   BasicObj::BasicObj()
     : nm("--NO-NAME--") 
   {
+// set communicators to global one
+    this->setComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
+    this->setDataComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
   }
 
   BasicObj::BasicObj(const std::string& nm)
     : nm(nm) 
   {
+// set communicators to global one
+    this->setComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
+    this->setDataComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
   }
 
   BasicObj::~BasicObj() 
@@ -50,10 +64,22 @@ namespace Lucee
     comm = ci;
   }
 
+  void
+  BasicObj::setDataComm(TxCommBase* ci)
+  {
+    dataComm = ci;
+  }
+
   TxCommBase*
   BasicObj::getComm() const
   {
     return comm;
+  }
+
+  TxCommBase*
+  BasicObj::getDataComm() const
+  {
+    return dataComm;
   }
 
   bool

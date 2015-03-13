@@ -37,6 +37,7 @@ namespace Lucee
   void
   GridIfc::readInput(Lucee::LuaTable& tbl)
   {
+    BasicObj::readInput(tbl);
   }
 
   void
@@ -63,17 +64,11 @@ namespace Lucee
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string outNm = outPrefix + "_" + nm;
-    TxCommBase& comm = this->getDataComm();
+    TxCommBase& comm = *this->getDataComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->createFile(outNm);
     this->writeToFile(*io, fn, this->getName());
     delete io;
-  }
-
-  TxCommBase&
-  GridIfc::getDataComm()
-  {
-    return *Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
   }
 }
