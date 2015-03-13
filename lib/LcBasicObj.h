@@ -80,13 +80,6 @@ namespace Lucee
       void setComm(TxCommBase* ci);
 
 /**
- * Set the communicator
- *
- * @param ci data communicator
- */
-      void setDataComm(TxCommBase* ci);
-
-/**
  * Get the communicator
  *
  * @return ci the communicator
@@ -94,20 +87,18 @@ namespace Lucee
       TxCommBase* getComm() const;
 
 /**
- * Get the communicator for I/O. Note that this communicator IS NOT
- * valid on all processors. Hence, it should be tested to ensure that
- * it is valid before using it.
- *
- * @return ci the communicator
- */
-      TxCommBase* getDataComm() const;
-
-/**
  * Check if this object is valid on this rank.
  *
- * @return true if object is valid.
+ * @para stw Flag to indicate if it is safe to write
  */
-      bool isValidOnRank() const;
+      void setIsSafeToWrite(bool stw);
+
+/**
+ * Check if this object is safe to write on this rank.
+ *
+ * @return true if object is safe to write
+ */
+      bool isSafeToWrite() const;
 
 /**
  * Get type of object.
@@ -181,8 +172,8 @@ namespace Lucee
 
 /** Communicator on which object is valid */
       TxCommBase* comm;
-/** Communicator for performing I/O */
-      TxCommBase* dataComm;
+/** Flag to indicate if object can be safely written out */
+      bool safeToWrite;
   };
 }
 
