@@ -12,10 +12,6 @@
 // lucee includes
 #include <LcDecompRegionCalcIfc.h>
 #include <LcRowMajorSequencer.h>
-#include <LcGlobals.h>
-
-// loki includes
-#include <loki/Singleton.h>
 
 // std includes
 #include <iostream>
@@ -35,9 +31,6 @@ namespace Lucee
   {
     for (unsigned d=0; d<NDIM; ++d)
       isPeriodic[d] = false;
-// set communicator to global one
-    this->setComm(Loki::SingletonHolder<Lucee::Globals>
-      ::Instance().comm);
   }
 
   template <unsigned NDIM> 

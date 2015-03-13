@@ -44,13 +44,6 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
 /**
- * Get communicator object to perform I/O.
- *
- * @param Reference to a communicator.
- */
-      virtual TxCommBase& getDataComm();
-
-/**
  * Write grid to specified HDF5 file.
  *
  * @param nm Name of file to write.

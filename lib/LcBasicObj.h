@@ -75,10 +75,16 @@ namespace Lucee
 /**
  * Set the communicator
  *
- * @param ci global communicator
- * @param cList List of sub-communicators.
+ * @param ci valid communicator
  */
       void setComm(TxCommBase* ci);
+
+/**
+ * Set the communicator
+ *
+ * @param ci data communicator
+ */
+      void setDataComm(TxCommBase* ci);
 
 /**
  * Get the communicator
@@ -86,6 +92,15 @@ namespace Lucee
  * @return ci the communicator
  */
       TxCommBase* getComm() const;
+
+/**
+ * Get the communicator for I/O. Note that this communicator IS NOT
+ * valid on all processors. Hence, it should be tested to ensure that
+ * it is valid before using it.
+ *
+ * @return ci the communicator
+ */
+      TxCommBase* getDataComm() const;
 
 /**
  * Check if this object is valid on this rank.
@@ -166,6 +181,8 @@ namespace Lucee
 
 /** Communicator on which object is valid */
       TxCommBase* comm;
+/** Communicator for performing I/O */
+      TxCommBase* dataComm;
   };
 }
 

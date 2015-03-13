@@ -44,6 +44,7 @@ namespace Lucee
   void
   DataStructIfc::readInput(Lucee::LuaTable& tbl)
   {
+    BasicObj::readInput(tbl);
   }
 
   void
@@ -52,7 +53,7 @@ namespace Lucee
 // output prefix
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string outNm = outPrefix + "_" + nm;
-    TxCommBase& comm = this->getDataComm();
+    TxCommBase& comm = *this->getDataComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->createFile(outNm);
@@ -71,7 +72,7 @@ namespace Lucee
   {
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
     std::string inNm = outPrefix + "_" + nm;
-    TxCommBase& comm = this->getDataComm();
+    TxCommBase& comm = *this->getDataComm();
 
     TxIoBase *io = new TxHdf5Base(&comm);
     TxIoNodeType fn = io->openFile(inNm, "r");
@@ -154,11 +155,5 @@ namespace Lucee
   DataStructIfc::clone() const
   {
     return 0;
-  }
-
-  TxCommBase&
-  DataStructIfc::getDataComm()
-  {
-    return *Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
   }
 }
