@@ -133,6 +133,10 @@ namespace Lucee
     else
       throw Lucee::Except("StructGridField::readInput: must specify 'onGrid', the grid on which field lives");
 
+// set communicators and I/O flag
+    this->setComm(grid->getComm());
+    this->setIsSafeToWrite(grid->isSafeToWrite());
+
 // check where data should be located
     dataLoc = CELL_CENTER_LOC;
     if (tbl.hasString("location"))
