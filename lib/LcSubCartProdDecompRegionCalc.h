@@ -69,8 +69,10 @@ namespace Lucee
  * Set communicator valid for local rank from list of communicators.
  *
  * @param clist List of communicators
+ * @param xclist List of communicators in non-collected directions
  */
-      void setValidComm(const std::vector<TxCommBase*>& clist);
+      void setValidComm(const std::vector<TxCommBase*>& clist, 
+        const std::vector<TxCommBase*>& xclist);
   };
 }
 

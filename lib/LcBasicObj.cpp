@@ -69,6 +69,18 @@ namespace Lucee
   }
 
   void
+  BasicObj::setMomComm(TxCommBase* ci)
+  {
+    momComm = ci;
+  }
+
+  TxCommBase*
+  BasicObj::getMomComm() const
+  {
+    return momComm;
+  }
+
+  void
   BasicObj::setIsSafeToWrite(bool stw)
   {
     safeToWrite = stw;

@@ -87,6 +87,22 @@ namespace Lucee
       TxCommBase* getComm() const;
 
 /**
+ * Set the communicator for moment calculations. This only makes sense
+ * for objects which live on sub-decompositions.
+ *
+ * @param ci valid communicator
+ */
+      void setMomComm(TxCommBase* ci);
+
+/**
+ * Get the communicator for moment calculations. This only makes sense
+ * for objects which live on sub-decompositions.
+ *
+ * @return ci the communicator
+ */
+      TxCommBase* getMomComm() const;
+
+/**
  * Check if this object is valid on this rank.
  *
  * @para stw Flag to indicate if it is safe to write
@@ -172,6 +188,8 @@ namespace Lucee
 
 /** Communicator on which object is valid */
       TxCommBase* comm;
+/** Communicator for moment calculations */
+      TxCommBase* momComm;
 /** Flag to indicate if object can be safely written out */
       bool safeToWrite;
   };
