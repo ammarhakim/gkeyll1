@@ -65,12 +65,6 @@ namespace Lucee
     typename Lucee::CartProdDecompRegionCalc<HDIM>& decompCalc
         = tbl.template getObject<Lucee::CartProdDecompRegionCalc<HDIM> >("decomposition");
 
-// parent cuts
-    int pCuts[HDIM];
-    decompCalc.fillWithCuts(pCuts);
-// parent communicator
-    TxCommBase *pComm = decompCalc.getComm();
-    
 // list of directions to collect
     std::vector<double> fdc = tbl.getNumVec("collectDirections");
     if (fdc.size() != NDIM)
@@ -79,58 +73,23 @@ namespace Lucee
       lce << NDIM << " entries. Specified " << fdc.size() << " instead";
       throw lce;
     }
-    std::vector<unsigned> dc(NDIM);
+    int dc[NDIM];
     for (unsigned d=0; d<NDIM; ++d) dc[d] = (unsigned) fdc[d];
+
+// parent cuts
+    int pCuts[HDIM];
+    decompCalc.fillWithCuts(pCuts);
 
 // determine cuts for sub-decomposition
     int cCuts[NDIM];
     for (unsigned d=0; d<NDIM; ++d) cCuts[d] = pCuts[dc[d]];
     setCuts(cCuts);
 
-    Lucee::Region<HDIM, int> pCutRgn(pCuts); // parent region
-    Lucee::Region<NDIM, int> cCutRgn(cCuts); // child-decomp region
-
-    Lucee::Region<HDIM, int> defRgn(pCutRgn);
-// create new region with collected dimensions deflated
-    for (unsigned d=0; d<NDIM; ++d)
-      defRgn = defRgn.deflate(dc[d]);
-
-    unsigned numSubComms = defRgn.getVolume();
-
-// create two sequencers, one over deflated region, and other over
-// collected directions
-    Lucee::ColMajorSequencer<HDIM> defSeq(defRgn);
-    Lucee::ColMajorSequencer<NDIM> colSeq(cCutRgn);
-// indexer over full parent cuts region
-    Lucee::ColMajorIndexer<HDIM> pIdxr(pCutRgn);
-
-// now build list of child communicators
-    std::vector<TxCommBase*> subComms;
-
-    int defIdx[HDIM], colIdx[NDIM];
-    unsigned count = 0;
-    while (defSeq.step())
-    {
-      defSeq.fillWithIndex(defIdx);
-
-      std::vector<int> subRanks;
-      colSeq.reset();
-      while (colSeq.step())
-      {
-        colSeq.fillWithIndex(colIdx);
-        for (unsigned d=0; d<NDIM; ++d) defIdx[dc[d]] = colIdx[d];
-// This works because CartProdDecompRegionCalc class uses column major
-// order to index region decomposition. If that were to change, all
-// hell would break loose. It may be best to rationalize use of a
-// particular ordering throughout. (Ammar Hakim: 3/11/2015).
-        subRanks.push_back(pIdxr.getIndex(defIdx));
-      }
-// comm-split parent communicator
-      subComms.push_back(pComm->createSubComm(subRanks));
-    }
-
+// parent communicator
+    TxCommBase *pComm = decompCalc.getComm();
+    std::vector<TxCommBase*> subComm = splitParent(decompCalc.getComm(), pCuts, cCuts, dc);
 // finally: set valid communicator for this decomposition
-    setValidComm(subComms);
+    setValidComm(subComm);
   }
 
   template <unsigned NDIM, unsigned HDIM>
@@ -211,6 +170,55 @@ namespace Lucee
       cuts[i] = c[i];
       nsub *= cuts[i];
     }
+  }
+
+  template <unsigned NDIM, unsigned HDIM>
+  std::vector<TxCommBase*>
+  SubCartProdDecompRegionCalc<NDIM, HDIM>::splitParent(
+    TxCommBase *pComm, int pCuts[HDIM], int cCuts[NDIM], int dc[NDIM])
+  {
+    Lucee::Region<HDIM, int> pCutRgn(pCuts); // parent region
+    Lucee::Region<NDIM, int> cCutRgn(cCuts); // child-decomp region
+
+    Lucee::Region<HDIM, int> defRgn(pCutRgn);
+// create new region with collected dimensions deflated
+    for (unsigned d=0; d<NDIM; ++d)
+      defRgn = defRgn.deflate(dc[d]);
+
+    unsigned numSubComms = defRgn.getVolume();
+
+// create two sequencers, one over deflated region, and other over
+// collected directions
+    Lucee::ColMajorSequencer<HDIM> defSeq(defRgn);
+    Lucee::ColMajorSequencer<NDIM> colSeq(cCutRgn);
+// indexer over full parent cuts region
+    Lucee::ColMajorIndexer<HDIM> pIdxr(pCutRgn);
+
+// now build list of child communicators
+    std::vector<TxCommBase*> subComms;
+
+    int defIdx[HDIM], colIdx[NDIM];
+    unsigned count = 0;
+    while (defSeq.step())
+    {
+      defSeq.fillWithIndex(defIdx);
+
+      std::vector<int> subRanks;
+      colSeq.reset();
+      while (colSeq.step())
+      {
+        colSeq.fillWithIndex(colIdx);
+        for (unsigned d=0; d<NDIM; ++d) defIdx[dc[d]] = colIdx[d];
+// This works because CartProdDecompRegionCalc class uses column major
+// order to index region decomposition. If that were to change, all
+// hell would break loose. It may be best to rationalize use of a
+// particular ordering throughout. (Ammar Hakim: 3/11/2015).
+        subRanks.push_back(pIdxr.getIndex(defIdx));
+      }
+// comm-split parent communicator
+      subComms.push_back(pComm->createSubComm(subRanks));
+    }
+    return subComms;
   }
 
   template <unsigned NDIM, unsigned HDIM>
