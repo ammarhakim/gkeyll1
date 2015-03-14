@@ -145,8 +145,27 @@ namespace Lucee
 // parent communicator
     TxCommBase *pComm = decompCalc.getComm();
     std::vector<TxCommBase*> subComm = splitParent<NDIM,HDIM>(decompCalc.getComm(), pCuts, cCuts, dc);
-// finally: set valid communicator for this decomposition
-    setValidComm(subComm);
+
+// create communicators for communicating across collected
+// directions. This is for moment calculations in kinetic schemes.
+
+    bool isCollected[HDIM];
+    for (unsigned d=0; d<HDIM; ++d) isCollected[d] = false;
+    for (unsigned d=0; d<NDIM; ++d) isCollected[dc[d]] = true;
+
+    unsigned XDIM = HDIM-NDIM;
+    int xdc[HDIM-NDIM]; // non-collected directions
+    unsigned xidx = 0;
+    for (unsigned d=0; d<HDIM; ++d)
+      if (!isCollected[d]) xdc[xidx++] = d;
+
+    int xcCuts[HDIM-NDIM]; // cuts along non-collected directions
+    for (unsigned d=0; d<XDIM; ++d) xcCuts[d] = pCuts[xdc[d]];
+
+    std::vector<TxCommBase*> xComm = splitParent<HDIM-NDIM,HDIM>(decompCalc.getComm(), pCuts, xcCuts, xdc);
+
+// set valid communicators and I/O flags
+    setValidComm(subComm, xComm);
   }
 
   template <unsigned NDIM, unsigned HDIM>
@@ -231,11 +250,16 @@ namespace Lucee
 
   template <unsigned NDIM, unsigned HDIM>
   void
-  SubCartProdDecompRegionCalc<NDIM, HDIM>::setValidComm(const std::vector<TxCommBase*>& clist)
+  SubCartProdDecompRegionCalc<NDIM, HDIM>::setValidComm(const std::vector<TxCommBase*>& clist,
+    const std::vector<TxCommBase*>& xclist)
   {
     for (unsigned i=0; i<clist.size(); ++i)
       if (_isValid(clist[i]))
         this->setComm(clist[i]);
+
+    for (unsigned i=0; i<xclist.size(); ++i)
+      if (_isValid(xclist[i]))
+        this->setMomComm(xclist[i]);
 
 // set flag to indicate which ranks it is safe to write from: the
 // choice is partly arbitrary. Perhaps a better option would be to
