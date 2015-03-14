@@ -66,17 +66,6 @@ namespace Lucee
       void setCuts(const int cuts[NDIM]);
 
 /**
- * Create set of sub-communicators given a parent cuts and child cuts.
- *
- * @param pComm Pointer to parent communicator.
- * @param pCuts Parent decomposition cuts in each direction
- * @param cCuts Child decomposition cuts in each direction
- * @param dc Collected directions
- * @return List of sub-communicators.
- */
-      std::vector<TxCommBase*> splitParent(TxCommBase *pComm, int pCuts[HDIM], int cCuts[NDIM], int dc[NDIM]);
-
-/**
  * Set communicator valid for local rank from list of communicators.
  *
  * @param clist List of communicators
