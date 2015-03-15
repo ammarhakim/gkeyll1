@@ -133,20 +133,19 @@ namespace Lucee
     int dc[NDIM];
     for (unsigned d=0; d<NDIM; ++d) dc[d] = (unsigned) fdc[d];
 
+// create communicators for communicating across collected
+// directions. This is for field solves, etc.
+
 // parent cuts
     int pCuts[HDIM];
     decompCalc.fillWithCuts(pCuts);
-
 // determine cuts for sub-decomposition
     int cCuts[NDIM];
     for (unsigned d=0; d<NDIM; ++d) cCuts[d] = pCuts[dc[d]];
     setCuts(cCuts);
-
-// parent communicator
-    TxCommBase *pComm = decompCalc.getComm();
     std::vector<TxCommBase*> subComm = splitParent<NDIM,HDIM>(decompCalc.getComm(), pCuts, cCuts, dc);
 
-// create communicators for communicating across collected
+// create communicators for communicating across non-collected
 // directions. This is for moment calculations in kinetic schemes.
 
     bool isCollected[HDIM];
@@ -161,7 +160,6 @@ namespace Lucee
 
     int xcCuts[HDIM-NDIM]; // cuts along non-collected directions
     for (unsigned d=0; d<XDIM; ++d) xcCuts[d] = pCuts[xdc[d]];
-
     std::vector<TxCommBase*> xComm = splitParent<HDIM-NDIM,HDIM>(decompCalc.getComm(), pCuts, xcCuts, xdc);
 
 // set valid communicators and I/O flags

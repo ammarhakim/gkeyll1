@@ -95,8 +95,10 @@ namespace Lucee
     }
 
 
-// get comm pointer
+// get comm pointers
     TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm;
+    TxCommBase *momComm = Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm;
     bool isSafeToWrite = true; // by default, it is safe to write
 
@@ -115,6 +117,7 @@ namespace Lucee
 // in some cases this communicator may consist of only a sub-set of
 // processors in the system.
       comm = decompCalc.getComm();
+      momComm = decompCalc.getMomComm();
       isSafeToWrite = decompCalc.isSafeToWrite();
 
       for (unsigned d=0; d<NDIM; ++d)
@@ -136,8 +139,8 @@ namespace Lucee
     decompCalc.calcDecomp(1, *decompRgn);
 #endif
 
-// set valid communicator for grid
-    this->setComm(comm);
+// set valid communicators for grid
+    this->setComm(comm); this->setMomComm(momComm);
 // set I/O flag for safe ranks
     this->setIsSafeToWrite(isSafeToWrite);
 // compute local region

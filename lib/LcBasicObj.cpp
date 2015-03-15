@@ -30,6 +30,8 @@ namespace Lucee
 // set communicators to global one
     this->setComm(Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm);
+    this->setMomComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
     setIsSafeToWrite(true);
   }
 
@@ -38,6 +40,8 @@ namespace Lucee
   {
 // set communicators to global one
     this->setComm(Loki::SingletonHolder<Lucee::Globals>
+      ::Instance().comm);
+    this->setMomComm(Loki::SingletonHolder<Lucee::Globals>
       ::Instance().comm);
     setIsSafeToWrite(true);
   }
