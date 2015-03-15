@@ -134,7 +134,7 @@ namespace Lucee
       throw Lucee::Except("StructGridField::readInput: must specify 'onGrid', the grid on which field lives");
 
 // set communicators and I/O flag
-    this->setComm(grid->getComm());
+    this->setComm(grid->getComm()); this->setMomComm(grid->getMomComm());
     this->setIsSafeToWrite(grid->isSafeToWrite());
 
 // check where data should be located

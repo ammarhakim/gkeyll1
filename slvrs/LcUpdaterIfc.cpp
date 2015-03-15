@@ -38,7 +38,7 @@ namespace Lucee
     {
       grid = &tbl.getObjectAsBase<Lucee::GridIfc>("onGrid");
 // set communicator from grid
-      this->setComm(grid->getComm());
+      this->setComm(grid->getComm()); this->setMomComm(grid->getMomComm());
       this->setIsSafeToWrite(grid->isSafeToWrite());
     }
   }
@@ -66,7 +66,7 @@ namespace Lucee
   {
     grid = &grd;
 // set communicator from grid
-    this->setComm(grid->getComm());
+    this->setComm(grid->getComm()); this->setMomComm(grid->getMomComm());
     this->setIsSafeToWrite(grid->isSafeToWrite());
   }
 
