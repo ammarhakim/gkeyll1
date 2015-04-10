@@ -57,6 +57,12 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalcWeighted2D::readInput: Must specify moment using 'moment'");
 
+    // get moment direction to compute
+    if (tbl.hasNumber("momentDirection"))
+      momDir = (unsigned) tbl.getNumber("momentDirection");
+    else
+      momDir = 2;
+
     if (calcMom > 2)
     {
       Lucee::Except lce("DistFuncMomentCalcWeighted2D::readInput: Only 'moment' < 3 is supported. ");
@@ -131,8 +137,8 @@ namespace Lucee
             double baseIntegral = volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, h)*
               volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
             integralResult[0] += baseIntegral;
-            // Get coordinate of quadrautre point in direction 2
-            double coord2Val = volCoords4d(gaussIndex, 2)*grid.getDx(2)/2.0;
+            // Get coordinate of quadrautre point in direction momDir
+            double coord2Val = volCoords4d(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             integralResult[1] += coord2Val*baseIntegral;
             integralResult[2] += coord2Val*coord2Val*baseIntegral;
           }
@@ -222,11 +228,11 @@ namespace Lucee
           resultVector = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         else if (calcMom == 1)
           resultVector = weightFPtr[h]*mom1MatrixVector[h]*distfVec + 
-            xc[2]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+            xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         else if (calcMom == 2)
           resultVector = weightFPtr[h]*mom2MatrixVector[h]*distfVec + 
-            2*xc[2]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
-            xc[2]*xc[2]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+            2*xc[momDir]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
+            xc[momDir]*xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         // Accumulate contribution to moment from this cell
         for (int i = 0; i < nlocal2d; i++)
           momentPtr[i] = momentPtr[i] + resultVector(i);

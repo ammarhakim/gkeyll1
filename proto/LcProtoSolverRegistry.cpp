@@ -22,6 +22,8 @@
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater3D.h>
+#include <LcETGAdjointSource.h>
+#include <LcETGFreeEnergy.h>
 #include <LcETGInitializeDensity.h>
 #include <LcETGInitializeDensity5D.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
@@ -95,8 +97,11 @@ namespace Lucee
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
       
+      .append<Lucee::ETGAdjointSource<4> >()
+      .append<Lucee::ETGAdjointSource<5> >()
       .append<Lucee::ETGAdiabaticPotentialUpdater>()
       .append<Lucee::ETGAdiabaticPotentialUpdater3D>()
+      .append<Lucee::ETGFreeEnergy>()
       .append<Lucee::ETGInitializeDensity>()
       .append<Lucee::ETGInitializeDensity5D>()
     
