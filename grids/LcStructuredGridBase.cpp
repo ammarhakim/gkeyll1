@@ -239,6 +239,7 @@ namespace Lucee
     lfm.appendFunc("globalLowerIndex", luaGetGlobalLower);
     lfm.appendFunc("globalUpperIndex", luaGetGlobalUpper);
     lfm.appendFunc("shape", luaGetShape);
+    lfm.appendFunc("cells", luaGetShape);
     lfm.appendFunc("lower", luaGetLowerCoord);
     lfm.appendFunc("upper", luaGetUpperCoord);
   }
