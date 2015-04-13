@@ -30,6 +30,8 @@ set (proto_SOURCES
   LcDistFuncReflectionBcUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
   LcETGAdiabaticPotentialUpdater3D.cpp
+  LcETGAdjointSource.cpp
+  LcETGFreeEnergy.cpp
   LcETGInitializeDensity.cpp
   LcETGInitializeDensity5D.cpp
   LcEnergyFromStreamAndVortUpdater.cpp

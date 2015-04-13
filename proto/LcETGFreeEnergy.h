@@ -1,11 +1,11 @@
 /**
- * @file	LcDistFuncMomentCalcWeighted2D.h
+ * @file	LcETGFreeEnergy.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function with an additional weighting function.
+ * @brief	Updater to compute the free energy for ETG problem.
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#ifndef LC_ETG_FREE_ENERGY_H
+#define LC_ETG_FREE_ENERGY_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,10 +13,14 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
+#include <LcDynVector.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
+
+// std includes
+#include <vector>
 
 // eigen includes
 #include <Eigen/LU>
@@ -24,20 +28,21 @@
 namespace Lucee
 {
 /**
- * Updater to compute moments of distribution function f(x,v)
+ * Updater to integrate nodal DG field over the entire domain.
  */
-  class DistFuncMomentCalcWeighted2D : public Lucee::UpdaterIfc
+  class ETGFreeEnergy : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
+
 /** Number of components for coordinate arrays etc. */
       static const unsigned NC4 = Lucee::CDIM<4>::N;
 /** Number of components for coordinate arrays etc. */
       static const unsigned NC2 = Lucee::CDIM<2>::N;
 
-/** Create new modal DG solver in 1D */
-      DistFuncMomentCalcWeighted2D();
+/** Create new solver */
+      ETGFreeEnergy();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,17 +77,41 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
+/** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
 /** Pointer to 2D nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Moment to compute */
-      unsigned calcMom;
-/** Direction to compute moment (if higher than 0) */
-      unsigned momDir;
-      std::vector<Eigen::MatrixXd> mom0MatrixVector;
-      std::vector<Eigen::MatrixXd> mom1MatrixVector;
-      std::vector<Eigen::MatrixXd> mom2MatrixVector;
+/** Temperature of adiabatic species (in eV) */
+      double bgAdiabaticTemp;
+/** Mass of kinetic species (in kg) */
+      double kineticMass;
+/**
+ * Struct to hold data for Guassian quadrature.
+ */
+      struct GaussQuadData
+      {
+/**
+ * Reset object.
+ * 
+ * @param numQuad Numer of quadrature points.
+ * @param nlocal Total number of local nodes.
+ */
+          void reset(int numQuad, int nlocal)
+          {
+            // allocate memory for various matrices
+            weights = Eigen::VectorXd(numQuad);
+            interpMat = Eigen::MatrixXd(numQuad, nlocal);
+          }
+
+          /** Vector of weights */
+          Eigen::VectorXd weights;
+          /** Interpolation matrix */
+          Eigen::MatrixXd interpMat;
+      };
+
+      GaussQuadData volQuad2d;
+      GaussQuadData volQuad4d;
+
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -92,4 +121,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_WEIGHTED_2D_H
+#endif // LC_ETG_FREE_ENERGY_H
