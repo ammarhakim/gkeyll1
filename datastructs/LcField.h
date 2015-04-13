@@ -307,6 +307,13 @@ namespace Lucee
       Lucee::ConstFieldPtr<T> createConstPtr() const;
 
 /**
+ * Return reference to first interior element in field.
+ *
+ * @return Reference to first interior element in field.
+ */
+      T& firstInterior();
+
+/**
  * Set pointer to given (i) 1D location.
  *
  * @param ptr Pointer to set.
@@ -562,6 +569,16 @@ namespace Lucee
 /** Upper ghost indices */
       int upperGhost[NDIM];
   };
+
+  template <unsigned NDIM, typename T>
+  T&
+  Field<NDIM, T>::firstInterior()
+  {
+    int myIdx[NDIM+1];
+    for (unsigned i=0; i<NDIM; ++i) myIdx[i] = rgn.getLower(i);
+    myIdx[NDIM] = 0;
+    return this->getRefToLoc(rgnIdx.getIndex(myIdx));
+  }
 
   template <unsigned NDIM, typename T>
   void

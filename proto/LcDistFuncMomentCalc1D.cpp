@@ -113,7 +113,10 @@ namespace Lucee
 // get input field (2d)
     const Lucee::Field<2, double>& distF = this->getInp<Lucee::Field<2, double> >(0);
 // get output field (1D)
-    Lucee::Field<1, double>& moment = this->getOut<Lucee::Field<1, double> >(0);
+    Lucee::Field<1, double>& momentOut = this->getOut<Lucee::Field<1, double> >(0);
+
+// create duplicate to store local moments
+    Lucee::Field<1, double> moment = momentOut.duplicate();
 
 // local region to update (This is the 2D region. The 1D region is
 // assumed to have the same cell layout as the X-direction of the 2D region)
@@ -173,6 +176,18 @@ namespace Lucee
         }
       }
     }
+
+
+// Above loop computes moments on local phase-space domain. We need to
+// sum across velocity space to get total moment on configuration
+// space.
+
+// we need to get moment communicator of field as updater's moment
+// communicator is same as its grid's moment communicator. In this
+// case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentOut.getMomComm();
+    unsigned xsize = momentOut.getNumComponents()*localRgn.getShape(0); // amount to communicate
+    momComm->allreduce(xsize, &moment.firstInterior(), &momentOut.firstInterior(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }
