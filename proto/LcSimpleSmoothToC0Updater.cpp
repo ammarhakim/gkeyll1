@@ -82,7 +82,6 @@ namespace Lucee
 
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::ConstFieldPtr<double> fInPtr = fIn.createConstPtr();
     Lucee::ConstFieldPtr<double> fInPtr_l = fIn.createConstPtr();

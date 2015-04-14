@@ -92,7 +92,8 @@ namespace Lucee
 
       GaussQuadData volQuad2d;
 
-      double kzfTimesRhoSquared;
+/** Kinetic species background density? */
+      double n0;
 /** Temperature of adiabatic species */
       double adiabaticTemp;
 /** Charge of adiabatic species */
