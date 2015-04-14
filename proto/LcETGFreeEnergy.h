@@ -88,7 +88,7 @@ namespace Lucee
 /**
  * Struct to hold data for Guassian quadrature.
  */
-      struct GaussQuadData
+  struct GaussQuadData
       {
 /**
  * Reset object.

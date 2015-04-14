@@ -167,7 +167,6 @@ namespace Lucee
   Lucee::UpdaterStatus
   DistFuncMomentCalcWeighted2D::update(double t)
   {
-    
     // get hold of grid
     const Lucee::StructuredGridBase<4>& grid 
       = this->getGrid<Lucee::StructuredGridBase<4> >();
@@ -177,7 +176,10 @@ namespace Lucee
     // get weighting field (2d)
     const Lucee::Field<2, double>& weightF = this->getInp<Lucee::Field<2, double> >(1);
     // get output field (2d)
-    Lucee::Field<2, double>& moment = this->getOut<Lucee::Field<2, double> >(0);
+    Lucee::Field<2, double>& momentOut = this->getOut<Lucee::Field<2, double> >(0);
+
+    // create duplicate to store local moments
+    Lucee::Field<2, double> moment = momentOut.duplicate();
 
     // local region to update (This is the 4D region. The 2D region is
     // assumed to have the same cell layout as the X-direction of the 4D region)
@@ -185,10 +187,15 @@ namespace Lucee
     Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
 
     // Make sure we don't integrate over velocity space ghost cells
-    localExtRgn.setLower(2, localRgn.getLower(2));
-    localExtRgn.setUpper(2, localRgn.getUpper(2));
-    localExtRgn.setLower(3, localRgn.getLower(3));
-    localExtRgn.setUpper(3, localRgn.getUpper(3));
+    //localExtRgn.setLower(2, localRgn.getLower(2));
+    //localExtRgn.setUpper(2, localRgn.getUpper(2));
+    //localExtRgn.setLower(3, localRgn.getLower(3));
+    //localExtRgn.setUpper(3, localRgn.getUpper(3));
+
+    localRgn.setLower(0, localExtRgn.getLower(0));
+    localRgn.setLower(1, localExtRgn.getLower(1));
+    localRgn.setUpper(0, localExtRgn.getUpper(0));
+    localRgn.setUpper(1, localExtRgn.getUpper(1));
 
     // clear out contents of output field
     moment = 0.0;
@@ -200,14 +207,23 @@ namespace Lucee
 
     int idx[4];
     double xc[4];
-    Lucee::RowMajorSequencer<4> seq(localExtRgn);
+    Lucee::RowMajorSequencer<4> seq(localRgn);
+    //Lucee::RowMajorIndexer<4> idxr(localRgn);
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
+
+    int lower2d[] = {localRgn.getLower(0), localRgn.getLower(1)};
+    int upper2d[] = {localRgn.getUpper(0), localRgn.getUpper(1)};
+    Lucee::Region<2, int> rgn2d(lower2d, upper2d);
+    Lucee::RowMajorIndexer<2> idxr(rgn2d);
+    Lucee::RowMajorSequencer<2> seq2d(rgn2d);
+
+    int localPositionCells = localRgn.getShape(0)*localRgn.getShape(1);
+    std::vector<double> localMoment(localPositionCells*nlocal2d);
 
     while(seq.step())
     {
       seq.fillWithIndex(idx);
-
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
@@ -237,6 +253,43 @@ namespace Lucee
         for (int i = 0; i < nlocal2d; i++)
           momentPtr[i] = momentPtr[i] + resultVector(i);
       }
+    }
+
+    int idx2d[2];
+    // Loop over each 'local' position space cell
+    while(seq2d.step())
+    {
+      seq2d.fillWithIndex(idx2d);
+      int cellIndex = idxr.getIndex(idx2d);
+
+      moment.setPtr(momentPtr, idx2d);
+      // copy data to vector
+      for (int i = 0; i < nlocal2d; i++)
+        localMoment[cellIndex*nlocal2d+i] = momentPtr[i];
+    }
+
+    // Above loop computes moments on local phase-space domain. We need to
+    // sum across velocity space to get total moment on configuration
+    // space.
+    std::vector<double> reducedMoment(localPositionCells*nlocal2d);
+    // we need to get moment communicator of field as updater's moment
+    // communicator is same as its grid's moment communicator. In this
+    // case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentOut.getMomComm();
+    // amount to communicate
+    momComm->allreduce(localPositionCells*nlocal2d, localMoment, reducedMoment, TX_SUM);
+
+    seq2d.reset();
+    Lucee::FieldPtr<double> momentOutPtr = momentOut.createPtr();
+    // Copy reducedMoment to output field
+    while(seq2d.step())
+    {
+      seq2d.fillWithIndex(idx2d);
+      int cellIndex = idxr.getIndex(idx2d);
+      momentOut.setPtr(momentOutPtr, idx2d);
+      // copy data to vector
+      for (int i = 0; i < nlocal2d; i++)
+        momentOutPtr[i] = reducedMoment[cellIndex*nlocal2d+i];
     }
 
     return Lucee::UpdaterStatus();
