@@ -125,6 +125,18 @@ namespace Lucee
 // compute decomposition
       decompCalc.calcDecomp(comm->getNumProcs(), *decompRgn);
     }
+    else
+    {
+      int cuts[NDIM];
+      for (unsigned d=0; d<NDIM; ++d)
+        cuts[d] = 1;
+
+      Lucee::CartProdDecompRegionCalc<NDIM> decompCalc(cuts);
+      for (unsigned d=0; d<NDIM; ++d)
+        decompCalc.setPeriodicDir(d, isPeriodic[d]);
+// compute decomposition
+      decompCalc.calcDecomp(1, *decompRgn);
+    }
 #else
 // In serial create a unitary decomposition: this needs to be done to
 // handle the case of periodic directions.
