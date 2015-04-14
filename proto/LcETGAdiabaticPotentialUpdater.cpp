@@ -128,6 +128,26 @@ namespace Lucee
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0]-1, idx[1]);
     nAdiabaticAtCenter += 0.25*nAdiabaticPtr[1];
 
+    // Loop over each cell
+    while(seq.step())
+    {
+      seq.fillWithIndex(idx);
+      grid.setIndex(idx);
+
+      nKineticIn.setPtr(nKineticPtr, idx);
+      nAdiabaticIn.setPtr(nAdiabaticPtr, idx);
+
+      Eigen::VectorXd rhoVec(nlocal2d);
+      for (int i = 0; i < nlocal2d; i++)
+        rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(nAdiabaticAtCenter*adiabaticCharge))
+          *(nKineticPtr[i] - nAdiabaticPtr[i]);
+
+      phiOut.setPtr(phiOutPtr, idx);
+      for (int i = 0; i < nlocal2d; i++)
+        phiOutPtr[i] = rhoVec(i);
+    }
+
+    /*
     int NY_TOTAL = globalRgn.getUpper(1) - globalRgn.getLower(1);
 
     // Loop over each cell
@@ -179,7 +199,7 @@ namespace Lucee
             phiOutPtr[i] = (1 - kzfTimesRhoSquared)/kzfTimesRhoSquared*rhoYAvgVec(i) + phiOutPtr[i];
         }
       }
-    }
+    }*/
 
     return Lucee::UpdaterStatus();
   }
