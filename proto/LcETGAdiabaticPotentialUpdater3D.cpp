@@ -37,6 +37,12 @@ namespace Lucee
       throw Lucee::Except(
         "ETGAdiabaticPotentialUpdater3D::readInput: Must specify 3D element to use using 'basis'");
 
+    if (tbl.hasNumber("n0"))
+      n0 = tbl.getNumber("n0");
+    else
+      throw Lucee::Except(
+        "ETGAdiabaticPotentialUpdater::readInput: Must specify value for 'n0'");
+
     if (tbl.hasNumber("adiabaticTemp"))
       adiabaticTemp = tbl.getNumber("adiabaticTemp");
     else
@@ -102,6 +108,7 @@ namespace Lucee
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
     int nVolQuad3d = nodalBasis3d->getNumGaussNodes();
 
+    /*
     // Find ion density in center of domain (averaged from corners of four adj. cells)
     double nAdiabaticAtCenter = 0.0;
 
@@ -132,12 +139,11 @@ namespace Lucee
     nAdiabaticAtCenter += 1/8.0*nAdiabaticPtr[7];
     // UPPER LEFT
     nAdiabaticIn.setPtr(nAdiabaticPtr, idx[0]-1, idx[1], idx[2]-1);
-    nAdiabaticAtCenter += 1/8.0*nAdiabaticPtr[5];
+    nAdiabaticAtCenter += 1/8.0*nAdiabaticPtr[5];*/
 
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-
       grid.setIndex(idx);
 
       nKineticIn.setPtr(nKineticPtr, idx);
@@ -145,7 +151,7 @@ namespace Lucee
 
       Eigen::VectorXd rhoVec(nlocal3d);
       for (int i = 0; i < nlocal3d; i++)
-        rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(nAdiabaticAtCenter*adiabaticCharge))
+        rhoVec(i) = -(adiabaticTemp*fabs(adiabaticCharge)/(n0*adiabaticCharge))
           *(nKineticPtr[i] - nAdiabaticPtr[i]);
 
       phiOut.setPtr(phiOutPtr, idx);
