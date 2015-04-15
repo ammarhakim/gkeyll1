@@ -78,6 +78,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** Moment to compute */
       unsigned calcMom;
+/** Direction to compute moment (if higher than 0) */
+      unsigned momDir;
       std::vector<Eigen::MatrixXd> mom0MatrixVector;
       std::vector<Eigen::MatrixXd> mom1MatrixVector;
       std::vector<Eigen::MatrixXd> mom2MatrixVector;

@@ -92,6 +92,8 @@ namespace Lucee
 
       GaussQuadData volQuad3d;
 
+/** Kinetic species background density? */
+      double n0;
 /** Temperature of adiabatic species */
       double adiabaticTemp;
 /** Charge of adiabatic species */

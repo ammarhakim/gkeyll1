@@ -137,7 +137,7 @@ namespace Lucee
             double baseIntegral = volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, h)*
               volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
             integralResult[0] += baseIntegral;
-            // Get coordinate of quadrautre point in direction momDir
+            // Get coordinate of quadrature point in direction momDir
             double coord2Val = volCoords4d(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             integralResult[1] += coord2Val*baseIntegral;
             integralResult[2] += coord2Val*coord2Val*baseIntegral;
@@ -186,12 +186,7 @@ namespace Lucee
     Lucee::Region<4, int> localRgn = grid.getLocalRegion();
     Lucee::Region<4, int> localExtRgn = distF.getExtRegion();
 
-    // Make sure we don't integrate over velocity space ghost cells
-    //localExtRgn.setLower(2, localRgn.getLower(2));
-    //localExtRgn.setUpper(2, localRgn.getUpper(2));
-    //localExtRgn.setLower(3, localRgn.getLower(3));
-    //localExtRgn.setUpper(3, localRgn.getUpper(3));
-
+    // Make sure we integrate over conf. space ghost cells
     localRgn.setLower(0, localExtRgn.getLower(0));
     localRgn.setLower(1, localExtRgn.getLower(1));
     localRgn.setUpper(0, localExtRgn.getUpper(0));

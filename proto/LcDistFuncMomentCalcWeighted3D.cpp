@@ -56,6 +56,12 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalcWeighted3D::readInput: Must specify moment using 'moment'");
 
+    // get moment direction to compute
+    if (tbl.hasNumber("momentDirection"))
+      momDir = (unsigned) tbl.getNumber("momentDirection");
+    else
+      momDir = 2;
+
     if (calcMom > 2)
     {
       Lucee::Except lce("DistFuncMomentCalcWeighted3D::readInput: Only 'moment' < 3 is supported. ");
@@ -130,8 +136,8 @@ namespace Lucee
             double baseIntegral = volWeights5d[gaussIndex]*volQuad3d(gaussIndex % nVolQuad3d, h)*
               volQuad3d(gaussIndex % nVolQuad3d, i)*volQuad5d(gaussIndex, j);
             integralResult[0] += baseIntegral;
-            // Get coordinate of quadrautre point in direction 3 (e.g. vPara moment)
-            double coord3Val = volCoords5d(gaussIndex, 3)*grid.getDx(3)/2.0;
+            // Get coordinate of quadrature point in direction momDir
+            double coord3Val = volCoords5d(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             integralResult[1] += coord3Val*baseIntegral;
             integralResult[2] += coord3Val*coord3Val*baseIntegral;
           }
@@ -170,18 +176,23 @@ namespace Lucee
     // get weighting field (3d)
     const Lucee::Field<3, double>& weightF = this->getInp<Lucee::Field<3, double> >(1);
     // get output field (3d)
-    Lucee::Field<3, double>& moment = this->getOut<Lucee::Field<3, double> >(0);
+    Lucee::Field<3, double>& momentOut = this->getOut<Lucee::Field<3, double> >(0);
+
+    // create duplicate to store local moments
+    Lucee::Field<3, double> moment = momentOut.duplicate();
 
     // local region to update (This is the 5D region. The 3D region is
     // assumed to have the same cell layout as the X-direction of the 5D region)
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     Lucee::Region<5, int> localExtRgn = distF.getExtRegion();
 
-    // Make sure we don't integrate over velocity space ghost cells
-    localExtRgn.setLower(3, localRgn.getLower(3));
-    localExtRgn.setUpper(3, localRgn.getUpper(3));
-    localExtRgn.setLower(4, localRgn.getLower(4));
-    localExtRgn.setUpper(4, localRgn.getUpper(4));
+    // Make sure we integrate over conf. space ghost cells
+    localRgn.setLower(0, localExtRgn.getLower(0));
+    localRgn.setLower(1, localExtRgn.getLower(1));
+    localRgn.setLower(2, localExtRgn.getLower(2));
+    localRgn.setUpper(0, localExtRgn.getUpper(0));
+    localRgn.setUpper(1, localExtRgn.getUpper(1));
+    localRgn.setUpper(2, localExtRgn.getUpper(2));
 
     // clear out contents of output field
     moment = 0.0;
@@ -193,14 +204,22 @@ namespace Lucee
 
     int idx[5];
     double xc[5];
-    Lucee::RowMajorSequencer<5> seq(localExtRgn);
+    Lucee::RowMajorSequencer<5> seq(localRgn);
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
+
+    int lower3d[] = {localRgn.getLower(0), localRgn.getLower(1), localRgn.getLower(2)};
+    int upper3d[] = {localRgn.getUpper(0), localRgn.getUpper(1), localRgn.getUpper(2)};
+    Lucee::Region<3, int> rgn3d(lower3d, upper3d);
+    Lucee::RowMajorIndexer<3> idxr(rgn3d);
+    Lucee::RowMajorSequencer<3> seq3d(rgn3d);
+
+    int localPositionCells = localRgn.getShape(0)*localRgn.getShape(1)*localRgn.getShape(2);
+    std::vector<double> localMoment(localPositionCells*nlocal3d);
 
     while(seq.step())
     {
       seq.fillWithIndex(idx);
-
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
@@ -221,15 +240,52 @@ namespace Lucee
           resultVector = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         else if (calcMom == 1)
           resultVector = weightFPtr[h]*mom1MatrixVector[h]*distfVec + 
-            xc[3]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+            xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         else if (calcMom == 2)
           resultVector = weightFPtr[h]*mom2MatrixVector[h]*distfVec + 
-            2*xc[3]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
-            xc[3]*xc[3]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+            2*xc[momDir]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
+            xc[momDir]*xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         // Accumulate contribution to moment from this cell
         for (int i = 0; i < nlocal3d; i++)
           momentPtr[i] = momentPtr[i] + resultVector(i);
       }
+    }
+
+    int idx3d[3];
+    // Loop over each 'local' position space cell
+    while(seq3d.step())
+    {
+      seq3d.fillWithIndex(idx3d);
+      int cellIndex = idxr.getIndex(idx3d);
+
+      moment.setPtr(momentPtr, idx3d);
+      // copy data to vector
+      for (int i = 0; i < nlocal3d; i++)
+        localMoment[cellIndex*nlocal3d+i] = momentPtr[i];
+    }
+
+    // Above loop computes moments on local phase-space domain. We need to
+    // sum across velocity space to get total moment on configuration
+    // space.
+    std::vector<double> reducedMoment(localPositionCells*nlocal3d);
+    // we need to get moment communicator of field as updater's moment
+    // communicator is same as its grid's moment communicator. In this
+    // case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentOut.getMomComm();
+    // amount to communicate
+    momComm->allreduce(localPositionCells*nlocal3d, localMoment, reducedMoment, TX_SUM);
+
+    seq3d.reset();
+    Lucee::FieldPtr<double> momentOutPtr = momentOut.createPtr();
+    // Copy reducedMoment to output field
+    while(seq3d.step())
+    {
+      seq3d.fillWithIndex(idx3d);
+      int cellIndex = idxr.getIndex(idx3d);
+      momentOut.setPtr(momentOutPtr, idx3d);
+      // copy data to vector
+      for (int i = 0; i < nlocal3d; i++)
+        momentOutPtr[i] = reducedMoment[cellIndex*nlocal3d+i];
     }
 
     return Lucee::UpdaterStatus();
