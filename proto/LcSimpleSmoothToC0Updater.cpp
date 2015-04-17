@@ -31,6 +31,11 @@ namespace Lucee
     // call base class method
     Lucee::UpdaterIfc::readInput(tbl);
 
+    if (tbl.hasNumber("polyOrder"))
+      polyOrder = tbl.getNumber("polyOrder");
+    else
+      throw Lucee::Except("SimpleSmoothToC0Updater::readInput: Must specify polyOrder");
+
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
@@ -111,9 +116,9 @@ namespace Lucee
 
       if (NDIM == 2)
       {
-        // First initialize all nodes to 0.25 of current cell nodes
+        // First initialize all nodes to 0.5 of current cell nodes
         for (int nodeIndex = 0; nodeIndex < nodalBasis->getNumNodes(); nodeIndex++)
-          fOutPtr[nodeIndex] = 0.25*fInPtr[nodeIndex];
+          fOutPtr[nodeIndex] = 0.5*fInPtr[nodeIndex];
 
         // Loop over up,down,left,right neighboring cells
         for (int dir = 0; dir < NDIM; dir++)
@@ -132,8 +137,8 @@ namespace Lucee
             int lowerNum = lowerNodeNums[dir].nums[nodeIndex];
             int upperNum = upperNodeNums[dir].nums[nodeIndex];
 
-            fOutPtr[lowerNum] = fOutPtr[lowerNum] + 0.25*fInPtr_l[upperNum];
-            fOutPtr[upperNum] = fOutPtr[upperNum] + 0.25*fInPtr_r[lowerNum];
+            fOutPtr[lowerNum] = fOutPtr[lowerNum] + 0.5*fInPtr_l[upperNum];
+            fOutPtr[upperNum] = fOutPtr[upperNum] + 0.5*fInPtr_r[lowerNum];
           }
 
           // Restore indices to their original values before next iteration
@@ -142,18 +147,36 @@ namespace Lucee
         }
 
         // Loop over diagonal neighbors
-        // Bottom left
-        fIn.setPtr(fInPtr, idx[0]-1, idx[1]-1);
-        fOutPtr[0] = fOutPtr[0] + 0.25*fInPtr[3];
-        // Bottom right
-        fIn.setPtr(fInPtr, idx[0]+1, idx[1]-1);
-        fOutPtr[1] = fOutPtr[1] + 0.25*fInPtr[2];
-        // Upper right
-        fIn.setPtr(fInPtr, idx[0]+1, idx[1]+1);
-        fOutPtr[3] = fOutPtr[3] + 0.25*fInPtr[0];
-        // Upper left
-        fIn.setPtr(fInPtr, idx[0]-1, idx[1]+1);
-        fOutPtr[2] = fOutPtr[2] + 0.25*fInPtr[1];
+        if (polyOrder == 1)
+        {
+          // Bottom left
+          fIn.setPtr(fInPtr, idx[0]-1, idx[1]-1);
+          fOutPtr[0] = 0.5*fOutPtr[0] + 0.25*fInPtr[3];
+          // Bottom right
+          fIn.setPtr(fInPtr, idx[0]+1, idx[1]-1);
+          fOutPtr[1] = 0.5*fOutPtr[1] + 0.25*fInPtr[2];
+          // Upper left
+          fIn.setPtr(fInPtr, idx[0]-1, idx[1]+1);
+          fOutPtr[2] = 0.5*fOutPtr[2] + 0.25*fInPtr[1]; 
+          // Upper right
+          fIn.setPtr(fInPtr, idx[0]+1, idx[1]+1);
+          fOutPtr[3] = 0.5*fOutPtr[3] + 0.25*fInPtr[0];
+        }
+        else if (polyOrder == 2)
+        {
+          // Bottom left
+          fIn.setPtr(fInPtr, idx[0]-1, idx[1]-1);
+          fOutPtr[0] = 0.5*fOutPtr[0] + 0.25*fInPtr[7];
+          // Bottom right
+          fIn.setPtr(fInPtr, idx[0]+1, idx[1]-1);
+          fOutPtr[2] = 0.5*fOutPtr[2] + 0.25*fInPtr[5];
+          // Upper left
+          fIn.setPtr(fInPtr, idx[0]-1, idx[1]+1);
+          fOutPtr[5] = 0.5*fOutPtr[5] + 0.25*fInPtr[2];
+          // Upper right
+          fIn.setPtr(fInPtr, idx[0]+1, idx[1]+1);
+          fOutPtr[7] = 0.5*fOutPtr[7] + 0.25*fInPtr[0];
+        }
       }
       else if (NDIM == 3)
       {

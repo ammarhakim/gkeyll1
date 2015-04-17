@@ -64,24 +64,6 @@ namespace Lucee
     // call base class method
     Lucee::UpdaterIfc::initialize();
 
-    // get number of nodes in 1D and 2D
-    unsigned nlocal2d = nodalBasis2d->getNumNodes();
-
-    // get volume interpolation matrices for 2d element
-    int nVolQuad2d = nodalBasis2d->getNumGaussNodes();
-    std::vector<double> volWeights2d(nVolQuad2d);
-    Lucee::Matrix<double> tempVolQuad2d(nVolQuad2d, nlocal2d);
-    Lucee::Matrix<double> tempVolCoords2d(nVolQuad2d, 3);
-
-    volQuad2d.reset(nVolQuad2d, nlocal2d);
-
-    // get data needed for Gaussian quadrature
-    nodalBasis2d->getGaussQuadData(tempVolQuad2d, tempVolCoords2d, volWeights2d);
-    for (int volIndex = 0; volIndex < nVolQuad2d; volIndex++)
-      volQuad2d.weights(volIndex) = volWeights2d[volIndex];
-    
-    copyLuceeToEigen(tempVolQuad2d, volQuad2d.interpMat);
-
     if (polyOrder == 1)
     {
       mappingMatrix = Eigen::MatrixXd(16,4);
@@ -115,8 +97,8 @@ namespace Lucee
                        0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
-                       0,0,0,0,1,0,0,0,
-                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,1,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
@@ -127,12 +109,12 @@ namespace Lucee
                        0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
-                       0,0,0,0,1,0,0,0,
-                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
-                       0,0,0,0,1,0,0,0,
-                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,1,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
@@ -143,8 +125,8 @@ namespace Lucee
                        0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,
-                       0,0,0,0,1,0,0,0,
-                       0,0,0,0,0,0,1,0,
+                       0,0,0,0,0,1,0,0,
+                       0,0,0,0,0,0,0,1,
                        1,0,0,0,0,0,0,0,
                        0,1,0,0,0,0,0,0,
                        0,0,1,0,0,0,0,0,

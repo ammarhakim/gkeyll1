@@ -77,6 +77,8 @@ namespace Lucee
       EdgeNodeNums lowerNodeNums[NDIM];
 /** Vector to store upper node numbers */
       EdgeNodeNums upperNodeNums[NDIM];
+/** Temporary flag to keep track of what polynomial order of element we are smoothing */
+      int polyOrder;
   };
 }
 

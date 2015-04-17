@@ -77,31 +77,7 @@ namespace Lucee
       Eigen::MatrixXd mappingMatrix;
 /** Temporary flag to keep track of what polynomial order of element we are copying */
       int polyOrder;
-/**
- * Struct to hold data for Guassian quadrature.
- */
-      struct GaussQuadData
-      {
-/**
- * Reset object.
- * 
- * @param numQuad Numer of quadrature points.
- * @param nlocal Total number of local nodes.
- */
-          void reset(int numQuad, int nlocal)
-          {
-            // allocate memory for various matrices
-            weights = Eigen::VectorXd(numQuad);
-            interpMat = Eigen::MatrixXd(numQuad, nlocal);
-          }
 
-          /** Vector of weights */
-          Eigen::VectorXd weights;
-          /** Interpolation matrix */
-          Eigen::MatrixXd interpMat;
-      };
-
-      GaussQuadData volQuad2d;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
