@@ -34,10 +34,12 @@ namespace Lucee
           const int idx[], Eigen::MatrixXd& alpha)
   {
     Eigen::Matrix4d poissonTensor = Eigen::Matrix4d::Zero();
-    poissonTensor(0,2) = 1;
-    poissonTensor(1,3) = 1;
-    poissonTensor(2,0) = -1;
-    poissonTensor(3,1) = -1;
+    //poissonTensor(0,2) = 1;
+    //poissonTensor(1,3) = 1;
+    //poissonTensor(2,0) = -1;
+    //poissonTensor(3,1) = -1;
+    poissonTensor(0,1) = 1;
+    poissonTensor(1,0) = -1;
     alpha = poissonTensor*hamiltonian;
   }
 }
