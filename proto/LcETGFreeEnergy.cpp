@@ -192,8 +192,7 @@ namespace Lucee
       for (int i = 0; i < nVolQuad4d; i++)
       {
         localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
-          bgKineticTempAtQuad(i % nVolQuad2d)*perturbedDistFAtQuad(i)*
-          perturbedDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+          bgKineticTempAtQuad(i % nVolQuad2d)*perturbedDistFAtQuad(i)*perturbedDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
           bgAdiabaticTemp/(2*bgKineticNumDensityAtQuad(i % nVolQuad2d))*
           perturbedKineticNumDensityAtQuad(i % nVolQuad2d)*
           perturbedKineticNumDensityAtQuad(i % nVolQuad2d) );
