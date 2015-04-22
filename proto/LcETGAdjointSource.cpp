@@ -257,9 +257,10 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
     const Lucee::Field<NDIM, double>& aCurr = this->getInp<Lucee::Field<NDIM, double> >(0);
-    const Lucee::Field<NDIM, double>& adjointPotential = this->getInp<Lucee::Field<NDIM, double> >(1);
-    const Lucee::Field<NDIM, double>& kineticTemp = this->getInp<Lucee::Field<NDIM, double> >(2);
-    const Lucee::Field<NDIM, double>& backgroundF = this->getInp<Lucee::Field<NDIM, double> >(3);
+    const Lucee::Field<NDIM, double>& stdPotential = this->getInp<Lucee::Field<NDIM, double> >(1);
+    const Lucee::Field<NDIM, double>& adjointPotential = this->getInp<Lucee::Field<NDIM, double> >(2);
+    const Lucee::Field<NDIM, double>& kineticTemp = this->getInp<Lucee::Field<NDIM, double> >(3);
+    const Lucee::Field<NDIM, double>& backgroundF = this->getInp<Lucee::Field<NDIM, double> >(4);
     Lucee::Field<NDIM, double>& aNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -283,6 +284,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
+    Lucee::ConstFieldPtr<double> stdPotentialPtr = stdPotential.createConstPtr();
     Lucee::ConstFieldPtr<double> adjointPotentialPtr = adjointPotential.createConstPtr();
     Lucee::ConstFieldPtr<double> kineticTempPtr = kineticTemp.createConstPtr();
     Lucee::ConstFieldPtr<double> backgroundFPtr = backgroundF.createConstPtr();
@@ -306,6 +308,7 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
+      stdPotential.setPtr(stdPotentialPtr, idx);
       adjointPotential.setPtr(adjointPotentialPtr, idx);
       kineticTemp.setPtr(kineticTempPtr, idx);
       backgroundF.setPtr(backgroundFPtr, idx);
@@ -313,11 +316,15 @@ namespace Lucee
       int cellIndex = volIdxr.getIndex(idx);
 
       // NEW CODE:
-      // Compute gradient of adjoint potential evaluated at volume quadrature points
+      // Compute gradient of adjoint and standard potentials evaluated at volume quadrature points
       // Each row is a different component/direction
+      Eigen::MatrixXd stdPotentialDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       Eigen::MatrixXd adjointPotentialDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
+      {
+        stdPotentialDerivAtQuad += stdPotentialPtr[i]*volQuad.pDiffMatrix[i];
         adjointPotentialDerivAtQuad += adjointPotentialPtr[i]*volQuad.pDiffMatrix[i];
+      }
       // Compute gradient of temperature evaluated at volume quadrature points
       // Each row is a different component/direction
       Eigen::MatrixXd kineticTempDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
@@ -345,13 +352,16 @@ namespace Lucee
           double vCoord = volQuad.coordMat(qp,2)*grid.getDx(2)/2.0;
           Eigen::Vector3d bHat(0, 0, 1);
           Eigen::Vector3d gradT(kineticTempDerivAtQuad(0,qp), kineticTempDerivAtQuad(1,qp), 0);
-          Eigen::Vector3d gradPotential(adjointPotentialDerivAtQuad(0,qp),adjointPotentialDerivAtQuad(1,qp),0);
+          Eigen::Vector3d gradStdPotential(stdPotentialDerivAtQuad(0,qp),stdPotentialDerivAtQuad(1,qp),0);
+          Eigen::Vector3d gradAdjointPotential(adjointPotentialDerivAtQuad(0,qp),adjointPotentialDerivAtQuad(1,qp),0);
 
-          double intermediateResult = bHat.cross(gradPotential).dot(gradT);
+          double intermediateResult1 = bHat.cross(gradStdPotential).dot(gradT);
+          double intermediateResult2 = bHat.cross(gradAdjointPotential).dot(gradT);
 
           aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex](i,qp)*
-            backgroundFAtQuad(qp)*(kineticMass*vCoord*vCoord/(2.0*kineticTempAtQuad(qp)*eV)
-              - 1/(1 + tauOverZi))*intermediateResult/(kineticTempAtQuad(qp)*eV);
+            backgroundFAtQuad(qp)*(intermediateResult1*(kineticMass*vCoord*vCoord/(2.0*kineticTempAtQuad(qp)*eV)
+                  -3.0/2.0 + (3.0/2.0)/(1 + tauOverZi))
+              - intermediateResult2*kineticMass/(2.0*kineticTempAtQuad(qp)*eV*(1 + tauOverZi)))/kineticTempAtQuad(qp);
         }
       }
     }
@@ -382,7 +392,8 @@ namespace Lucee
   void
   ETGAdjointSource<NDIM>::declareTypes()
   {
-    // takes two inputs (aCurr, adjointPotential, kineticTemp, backgroundF)
+    // takes two inputs (aCurr, stdPotential, adjointPotential, kineticTemp, backgroundF)
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
