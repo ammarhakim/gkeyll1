@@ -52,7 +52,7 @@ namespace Lucee
 
     // get moment to compute
     if (tbl.hasNumber("moment"))
-    calcMom = (unsigned) tbl.getNumber("moment");
+      calcMom = (unsigned) tbl.getNumber("moment");
     else
       throw Lucee::Except(
         "DistFuncMomentCalcWeighted2D::readInput: Must specify moment using 'moment'");
