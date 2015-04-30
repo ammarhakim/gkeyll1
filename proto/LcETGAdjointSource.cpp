@@ -247,6 +247,8 @@ namespace Lucee
 
       bigStoredVolMatrices[cellIndex] = massMatrixInv*volQuad.interpMat.transpose();
     }
+
+    massMatrixInv = massMatrix.inverse();
   }
 
   template <unsigned NDIM>
@@ -261,6 +263,7 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& adjointPotential = this->getInp<Lucee::Field<NDIM, double> >(2);
     const Lucee::Field<NDIM, double>& kineticTemp = this->getInp<Lucee::Field<NDIM, double> >(3);
     const Lucee::Field<NDIM, double>& backgroundF = this->getInp<Lucee::Field<NDIM, double> >(4);
+    const Lucee::Field<NDIM, double>& bField4d = this->getInp<Lucee::Field<NDIM, double> >(5);
     Lucee::Field<NDIM, double>& aNew = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -282,19 +285,12 @@ namespace Lucee
     int nSurfQuad = nodalBasis->getNumSurfGaussNodes();
 
     Lucee::ConstFieldPtr<double> aCurrPtr = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_l = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> aCurrPtr_r = aCurr.createConstPtr();
     Lucee::ConstFieldPtr<double> stdPotentialPtr = stdPotential.createConstPtr();
     Lucee::ConstFieldPtr<double> adjointPotentialPtr = adjointPotential.createConstPtr();
     Lucee::ConstFieldPtr<double> kineticTempPtr = kineticTemp.createConstPtr();
     Lucee::ConstFieldPtr<double> backgroundFPtr = backgroundF.createConstPtr();
+    Lucee::ConstFieldPtr<double> bField4dPtr = bField4d.createConstPtr();
     Lucee::FieldPtr<double> aNewPtr = aNew.createPtr();
-    Lucee::FieldPtr<double> aNewPtr_l = aNew.createPtr();
-    Lucee::FieldPtr<double> aNewPtr_r = aNew.createPtr();
-    // Testing: see LcWavePropagationUpdater
-    Lucee::ConstFieldPtr<double> jacobianPtr = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> jacobianPtr_l = aCurr.createConstPtr();
-    Lucee::ConstFieldPtr<double> jacobianPtr_r = aCurr.createConstPtr();
 
     aNew = 0.0; // use aNew to store increment initially
 
@@ -308,48 +304,58 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
+      aNew.setPtr(aNewPtr, idx);
       stdPotential.setPtr(stdPotentialPtr, idx);
       adjointPotential.setPtr(adjointPotentialPtr, idx);
       kineticTemp.setPtr(kineticTempPtr, idx);
       backgroundF.setPtr(backgroundFPtr, idx);
+      bField4d.setPtr(bField4dPtr, idx);
 
       int cellIndex = volIdxr.getIndex(idx);
 
-      // NEW CODE:
-      // Compute gradient of adjoint and standard potentials evaluated at volume quadrature points
+      // Compute gradient of adjoint and standard potentials and temperature
+      // evaluated at volume quadrature points
       // Each row is a different component/direction
       Eigen::MatrixXd stdPotentialDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       Eigen::MatrixXd adjointPotentialDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
+      Eigen::MatrixXd kineticTempDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
       {
         stdPotentialDerivAtQuad += stdPotentialPtr[i]*volQuad.pDiffMatrix[i];
         adjointPotentialDerivAtQuad += adjointPotentialPtr[i]*volQuad.pDiffMatrix[i];
-      }
-      // Compute gradient of temperature evaluated at volume quadrature points
-      // Each row is a different component/direction
-      Eigen::MatrixXd kineticTempDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
-      for (int i = 0; i < nlocal; i++)
         kineticTempDerivAtQuad += kineticTempPtr[i]*volQuad.pDiffMatrix[i];
-      // Interpolate kineticTemp to quadrature points
+      }
+
+      // Interpolate various fields to quadrature points
       Eigen::VectorXd kineticTempVec(nlocal);
-      for (int i = 0; i < nlocal; i++)
-        kineticTempVec(i) = kineticTempPtr[i];
-      Eigen::VectorXd kineticTempAtQuad = volQuad.interpMat*kineticTempVec;
-      // Interpolate backgroundF to quadrature points
       Eigen::VectorXd backgroundFVec(nlocal);
+      Eigen::VectorXd bField4dVec(nlocal);
       for (int i = 0; i < nlocal; i++)
+      {
+        kineticTempVec(i) = kineticTempPtr[i];
         backgroundFVec(i) = backgroundFPtr[i];
+        bField4dVec(i) = bField4dPtr[i];
+      }
+      Eigen::VectorXd kineticTempAtQuad = volQuad.interpMat*kineticTempVec;
       Eigen::VectorXd backgroundFAtQuad = volQuad.interpMat*backgroundFVec;
+      Eigen::VectorXd bField4dAtQuad = volQuad.interpMat*bField4dVec;
 
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
+      //Eigen::VectorXd outputVec(nlocal);
+
       for (int i = 0; i < nlocal; i++)
       {
+        //outputVec(i) = 0.0;
         for (int qp = 0; qp < nVolQuad; qp++)
         {
           // Get velocity coordinate of quadrature point
-          double vCoord = volQuad.coordMat(qp,2)*grid.getDx(2)/2.0;
+          double vCoord = xc[2] + volQuad.coordMat(qp,2)*grid.getDx(2)/2.0;
+          double muCoord = xc[3] + volQuad.coordMat(qp,3)*grid.getDx(3)/2.0;
+          //std::cout << "v1 = " << kineticMass*vCoord*vCoord << std::endl;
+          //std::cout << "v2 = " << 2.0*muCoord*bField4dAtQuad(qp) << std::endl << std::endl;
+
           Eigen::Vector3d bHat(0, 0, 1);
           Eigen::Vector3d gradT(kineticTempDerivAtQuad(0,qp), kineticTempDerivAtQuad(1,qp), 0);
           Eigen::Vector3d gradStdPotential(stdPotentialDerivAtQuad(0,qp),stdPotentialDerivAtQuad(1,qp),0);
@@ -359,11 +365,20 @@ namespace Lucee
           double intermediateResult2 = bHat.cross(gradAdjointPotential).dot(gradT);
 
           aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex](i,qp)*
-            backgroundFAtQuad(qp)*(intermediateResult1*(kineticMass*vCoord*vCoord/(2.0*kineticTempAtQuad(qp)*eV)
+            backgroundFAtQuad(qp)*(intermediateResult1*((kineticMass*vCoord*vCoord + 2.0*muCoord*bField4dAtQuad(qp))/(2.0*kineticTempAtQuad(qp)*eV)
                   -3.0/2.0 + (3.0/2.0)/(1 + tauOverZi))
               - intermediateResult2*kineticMass/(2.0*kineticTempAtQuad(qp)*eV*(1 + tauOverZi)))/kineticTempAtQuad(qp);
+
+          //outputVec(i) += volQuad.weights(qp)*volQuad.interpMat(qp, i)*
+          //  backgroundFAtQuad(qp)/bField4dAtQuad(qp)*(intermediateResult1*((kineticMass*vCoord*vCoord + 2.0*muCoord*bField4dAtQuad(qp))/(2.0*kineticTempAtQuad(qp)*eV)
+          //        -3.0/2.0 + (3.0/2.0)/(1 + tauOverZi))
+          //    - intermediateResult2*kineticMass/(2.0*kineticTempAtQuad(qp)*eV*(1 + tauOverZi)))/kineticTempAtQuad(qp);
         }
       }
+
+      //Eigen::VectorXd realOutputVec = massMatrixInv*outputVec;
+      //for (int i = 0; i < nlocal; i++)
+      //  aNewPtr[i] = realOutputVec(i);
     }
 
     // NOTE: If only calculation of increments are requested, the final
@@ -392,7 +407,8 @@ namespace Lucee
   void
   ETGAdjointSource<NDIM>::declareTypes()
   {
-    // takes two inputs (aCurr, stdPotential, adjointPotential, kineticTemp, backgroundF)
+    // takes two inputs (aCurr, stdPotential, adjointPotential, kineticTemp, backgroundF, bField4d)
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));

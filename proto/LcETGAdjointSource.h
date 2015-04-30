@@ -122,8 +122,6 @@ namespace Lucee
       GaussQuadData surfUpperQuad[NDIM];
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
-      Eigen::MatrixXd massMatrixInvUpper;
-      Eigen::MatrixXd massMatrixInvLower;
 /** Stored matrices for stupid testing */
       std::vector<Eigen::MatrixXd> bigStoredVolMatrices;
 /** Flag to indicate if only increments should be computed */
