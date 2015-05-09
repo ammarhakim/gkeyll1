@@ -9,6 +9,7 @@
 #endif
 
 // lucee includes
+#include <LcMathLib.h>
 #include <LcPhMaxwellEquation.h>
 
 namespace Lucee
@@ -51,6 +52,25 @@ namespace Lucee
       chi_m = tbl.getNumber("mgnErrorSpeedFactor");
     else
       chi_m = 0.0;
+
+// store maximum speed for future use
+    maxWaveSpeed = Lucee::max3(lightSpeed, chi_e*lightSpeed, chi_m*lightSpeed);
+
+    numFlux = NF_LAX;
+    if (tbl.hasString("numericalFlux"))
+    {
+      std::string nf = tbl.getString("numericalFlux");
+      if (nf == "central")
+        numFlux = NF_CENTRAL;
+      else if (nf == "lax")
+        numFlux = NF_LAX;
+      else
+      {
+        Lucee::Except lce("PhMaxwellEquation::readInput: 'numericalFlux' ");
+        lce << nf << " not recognized!" << std::endl;
+          throw lce;
+      }
+    }
   }
 
   void
@@ -203,5 +223,43 @@ namespace Lucee
     waves(6,5) = 0.0;
     waves(7,5) = 0.0;
     s[5] = lightSpeed;
+  }
+
+  double
+  PhMaxwellEquation::maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q)
+  {
+    return maxWaveSpeed;
+  }
+
+  double 
+  PhMaxwellEquation::numericalFlux(const Lucee::RectCoordSys& c,
+    const double* ql, const double* qr, 
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+    double* f)
+  {
+    double absMaxs = maxWaveSpeed;
+
+    double fl[8], fr[8];
+    flux(c, ql, auxVarsl, fl);
+    flux(c, qr, auxVarsr, fr);
+
+    if (numFlux == NF_CENTRAL)
+    {
+      for (unsigned i=0; i<8; ++i)
+        f[i] = 0.5*(fr[i]+fl[i]);
+    }
+    else
+    {
+      for (unsigned i=0; i<8; ++i)
+        f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);
+    }
+
+    return absMaxs;
+  }
+
+  bool
+  PhMaxwellEquation::isInvariantDomain(const double* q) const
+  {
+    return true;
   }
 }
