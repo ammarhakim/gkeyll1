@@ -2,12 +2,11 @@
 #
 # SciFinalize: Do the final stuff for any package
 #
-# $Id: SciFinalize.cmake 506 2014-02-12 13:10:02Z jrobcary $
+# $Id: SciFinalize.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

@@ -1,20 +1,23 @@
 #*****************************************************************************
 #
-# Copyright(c) 2000 - 2011, Lawrence Livermore National Security, LLC
+# Copyright(c) 2000 - 2011-2014, Lawrence Livermore National Security, LLC
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 # Produced at the Lawrence Livermore National Laboratory
 # LLNL-CODE-400142
-# All rights reserved.
 #
 # This file is  part of VisIt. For  details, see https://visit.llnl.gov/.  The
-# full copyright notice is contained in the file COPYRIGHT located at the root
+# full Copyright notice is contained in the file COPYRIGHT located at the root
+# full See LICENSE file (EclipseLicense.txt) for conditions of use.
 # of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
 #
 # Redistribution  and  use  in  source  and  binary  forms,  with  or  without
 # modification, are permitted provided that the following conditions are met:
 #
-#  - Redistributions of  source code must  retain the above  copyright notice,
+#  - Redistributions of  source code must  retain the above Copyright notice,
+#  - Redistributions of  source code must  retain the above See LICENSE file (EclipseLicense.txt) for conditions of use.
 #    this list of conditions and the disclaimer below.
-#  - Redistributions in binary form must reproduce the above copyright notice,
+#  - Redistributions in binary form must reproduce the above Copyright notice,
+#  - Redistributions in binary form must reproduce the above See LICENSE file (EclipseLicense.txt) for conditions of use.
 #    this  list of  conditions  and  the  disclaimer(as noted below)  in  the
 #    documentation and/or other materials provided with the distribution.
 #  - Neither the name of  the LLNS/LLNL nor the names of  its contributors may

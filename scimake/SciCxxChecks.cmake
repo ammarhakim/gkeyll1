@@ -2,12 +2,11 @@
 #
 # SciCxxChecks: check various C++ capabilities
 #
-# $Id: SciCxxChecks.cmake 656 2014-10-25 14:14:53Z jrobcary $
+# $Id: SciCxxChecks.cmake 801 2015-04-21 17:07:25Z dmeiser $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -24,12 +23,30 @@ endif ()
 if (DEBUG_CMAKE)
   SciPrintVar(CMAKE_CXX_COMPILER_ID)
 endif ()
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL GNU OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL GNU)
   if (NOT USING_MINGW)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ansi -pipe")
+    if (NOT ("${CMAKE_CXX_FLAGS}" MATCHES "(^| )-pipe($| )"))
+      set(CMAKE_CXX_FLAGS "-pipe ${CMAKE_CXX_FLAGS}")
+    endif ()
   endif ()
+# Enable c++11 whenever possible
+  if (CXX_VERSION VERSION_LESS "4.7.0")
+    set(CMAKE_CXX_FLAGS "-ansi ${CMAKE_CXX_FLAGS}")
+  else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+  endif ()
+# Make it an error not to give the return upe
+  if (CXX_VERSION VERSION_GREATER "4.4")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+  endif ()
+# Obsolete directory installation dir
   string(SUBSTRING ${CXX_VERSION} 0 1 CXX_MAJOR_VERSION)
   set(CXX_COMP_LIB_SUBDIR gcc${CXX_MAJOR_VERSION})
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
+  string(SUBSTRING ${CXX_VERSION} 0 1 CXX_MAJOR_VERSION)
+  set(CXX_COMP_LIB_SUBDIR clang${CXX_MAJOR_VERSION})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Cray)
   string(REGEX REPLACE "\\.[0-9]+-.*$" "" CXX_MAJOR_VERSION ${CXX_VERSION})
   set(CXX_COMP_LIB_SUBDIR cray${CXX_MAJOR_VERSION})
@@ -99,8 +116,8 @@ else ()
   if (DEBUG_CMAKE)
     message("${SCIMAKE_DIR}/trycompile/stdabsdbl.cxx did not compile.")
   endif ()
-  set(NOT_HAVE_STD_ABS_DOUBLE 1 CACHE BOOL "Define when the C++ compiler does not understand std::abs with double arg")
 endif ()
+set(NOT_HAVE_STD_ABS_DOUBLE ${NOT_HAVE_STD_ABS_DOUBLE} CACHE BOOL "Define when the C++ compiler does not understand std::abs with double arg")
 
 # See whether compiler RTTI typeid is working properly
 try_run(RTTI_RUN_RESULT RTTI_COMPILES ${PROJECT_BINARY_DIR}/scimake
@@ -129,8 +146,6 @@ else ()
   endif ()
 endif ()
 
-include(CheckCXXSourceCompiles)
-
 # Check for iterator being same as pointer
 check_cxx_source_compiles(
 "
@@ -149,26 +164,65 @@ else ()
   if (DEBUG_CMAKE)
     message(STATUS "std::vector<int>::iterator and int* are the same.")
   endif ()
-  set(VECTOR_ITERATOR_IS_NOT_POINTER 1 CACHE BOOL "Whether std::vector<int>::iterator is the same as int*")
 endif ()
+set(VECTOR_ITERATOR_IS_NOT_POINTER ${VECTOR_ITERATOR_IS_NOT_POINTER} CACHE BOOL "Whether std::vector<int>::iterator is the same as int*")
+
+# Check for template alias exists
+check_cxx_source_compiles(
+"
+#include <vector>
+using vec_int = std::vector<int>;
+int main(int argc, char** argv) {return 0;}
+"
+HAVE_TEMPLATE_ALIAS
+)
+if (HAVE_TEMPLATE_ALIAS)
+  if (DEBUG_CMAKE)
+    message(STATUS "Template alias with using works.")
+  endif ()
+else ()
+  if (DEBUG_CMAKE)
+    message(STATUS "Template alias with using does not work.")
+  endif ()
+endif ()
+set(HAVE_TEMPLATE_ALIAS ${HAVE_TEMPLATE_ALIAS} CACHE BOOL "Whether template alias with using works")
+
+# Check for C++11 threads
+check_cxx_source_compiles(
+"
+#include <thread>
+int main(int argc, char** argv) {return 0;}
+"
+HAVE_CXX11_THREAD
+)
+if (HAVE_CXX11_THREAD)
+  if (DEBUG_CMAKE)
+    message(STATUS "Have C++11 threads.")
+  endif ()
+else ()
+  if (DEBUG_CMAKE)
+    message(STATUS "C++11 threads not present.")
+  endif ()
+endif ()
+set(HAVE_CXX11_THREAD ${HAVE_CXX11_THREAD} CACHE BOOL "Whether have C++11 threads")
 
 # Add in full flags
 set(CMAKE_CXX_FLAGS_FULL "${CMAKE_C_FLAGS_FULL}")
 
 # Remove /MD etc for static builds on Windows
-if (WIN32 AND NOT MINGW AND NOT BUILD_WITH_SHARED_RUNTIME)
-  foreach (flag_var CMAKE_CXX_FLAGS_FULL CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_DEBUG)
-    if (NOT (BUILD_SHARED_LIBS OR BUILD_WITH_SHARED_RUNTIME))
-      string(REPLACE "/MDd" "" ${flag_var} "${${flag_var}}")
-      string(REPLACE "/MD" "" ${flag_var} "${${flag_var}}")
-    endif ()
-    set(${flag_var} "${${flag_var}} /bigobj")
-  endforeach (flag_var)
+if (WIN32 AND NOT MINGW)
+  foreach (bldtype FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
+    SciRplCompilerFlags(CXX ${bldtype})
+  endforeach ()
 endif ()
 
 # Check flags
+message(STATUS "C++ compiler options:")
 foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
   SciPrintVar(CMAKE_CXX_FLAGS_${bld})
 endforeach ()
 SciPrintVar(CMAKE_CXX_FLAGS)
+set(BUILD_FLAGS_VAR  CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE})
+set(BUILD_FLAGS_VAL "${${BUILD_FLAGS_VAR}}")
+set(CXXFLAGS "${BUILD_FLAGS_VAL} ${CMAKE_CXX_FLAGS}")
 

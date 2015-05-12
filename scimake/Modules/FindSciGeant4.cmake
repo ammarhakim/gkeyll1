@@ -15,19 +15,17 @@
 #
 # FindGeant4: find includes and libraries for hdf5
 #
-# $Id: FindSciGeant4.cmake 557 2014-05-11 20:43:58Z jrobcary $
+# $Id: FindSciGeant4.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation and other contributors.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
 set(Geant4_LIBRARY_LIST
   G4FR
   G4GMocren
-  G4OpenGL
   G4RayTracer
   G4Tree
   G4VRML
@@ -37,9 +35,9 @@ set(Geant4_LIBRARY_LIST
   G4error_propagation
   G4event
   G4geometry
-  G4gl2ps
   G4global
   G4graphics_reps
+  G4intercoms
   G4interfaces
   G4materials
   G4modeling
@@ -57,6 +55,10 @@ set(Geant4_LIBRARY_LIST
   G4vis_management
   G4zlib
 )
+
+# The below should be optional
+  # G4OpenGL
+  # G4gl2ps
 
 SciFindPackage(
   PACKAGE "Geant4"

@@ -14,22 +14,26 @@
 #
 # FindMuparser: find includes and libraries for muparser
 #
-# $Id: FindSciMuparser.cmake 484 2014-01-26 16:39:04Z jrobcary $
+# $Id: FindSciMuparser.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
+set(ALLOW_SERIAL_WITH_PARALLEL_SAV ${ALLOW_SERIAL_WITH_PARALLEL})
+set(ALLOW_SERIAL_WITH_PARALLEL TRUE)
+SciGetInstSubdirs(muparser instdirs)
+# message(STATUS "instdirs = ${instdirs}.")
 SciFindPackage(PACKAGE "Muparser"
-              INSTALL_DIR "muparser"
-              HEADERS "muParser.h"
-              LIBRARIES "muparser"
-                          INCLUDE_SUBDIRS "include"
-              LIBRARY_SUBDIRS "lib"
-              )
+  INSTALL_DIRS ${instdirs}
+  HEADERS "muParser.h"
+  LIBRARIES "muparser"
+  INCLUDE_SUBDIRS "include"
+  LIBRARY_SUBDIRS "lib"
+)
+set(ALLOW_SERIAL_WITH_PARALLEL ${ALLOW_SERIAL_WITH_PARALLEL_SAV})
 
 if (MUPARSER_FOUND)
   message(STATUS "Found Muparser")

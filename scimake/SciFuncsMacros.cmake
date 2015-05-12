@@ -2,12 +2,11 @@
 #
 # SciFuncsMacros: Various functions and macros used by Tech-X scimake
 #
-# $Id: SciFuncsMacros.cmake 558 2014-05-20 20:04:31Z cperry87 $
+# $Id: SciFuncsMacros.cmake 799 2015-04-19 14:32:47Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -77,6 +76,147 @@ macro(SciPrintAutotoolsResults pkg)
   endforeach ()
   if (WIN32)
     SciPrintVar(${pkg}_DLLS)
+  endif ()
+endmacro()
+
+#
+# Install an executable in its own subdir
+#
+# EXECNAME: the name of the executable and also its installation subdir
+# LIBSSFX: ${EXECNAME}_${LIBSSFX} holds the libraries that need to be installed
+#
+macro(SciInstallExecutable)
+  set(oneValArgs EXECNAME LIBSSFX)
+  cmake_parse_arguments(TIE_
+    "${opts}" "${oneValArgs}" "${multiValArgs}" ${ARGN}
+)
+  install(TARGETS ${TIE_EXECNAME}
+    RUNTIME DESTINATION ${TIE_EXECNAME}/bin
+    LIBRARY DESTINATION ${TIE_EXECNAME}/lib
+    ARCHIVE DESTINATION ${TIE_EXECNAME}/lib
+    PERMISSIONS OWNER_READ OWNER_WRITE
+                GROUP_READ ${SCI_GROUP_WRITE}
+                ${SCI_WORLD_FILE_PERMS}
+    COMPONENT ${TIE_EXECNAME}
+)
+  if (BUILD_SHARED_LIBS)
+# Install libraries into each executable installation
+    install(TARGETS txustd ${${TIE_EXECNAME}_${TIE_LIBSSFX}}
+      RUNTIME DESTINATION ${TIE_EXECNAME}/bin
+      LIBRARY DESTINATION ${TIE_EXECNAME}/lib
+      ARCHIVE DESTINATION ${TIE_EXECNAME}/lib
+      PERMISSIONS OWNER_READ OWNER_WRITE
+                  GROUP_READ ${SCI_GROUP_WRITE}
+                  ${SCI_WORLD_FILE_PERMS}
+      COMPONENT ${TIE_EXECNAME}
+)
+  endif ()
+endmacro()
+
+#
+# Replace compiler flags in specified flags variable
+#
+# Required arguments:
+# CMPTYPE: compiler type
+# BLDTYPE: build type
+#
+# Optional arguments:
+# RMVFLG: the flag to be removed
+# ADDFLG: the flag to be added
+#
+macro(SciRplCompilerFlags CMPTYPE BLDTYPE)
+# parse the path argument
+  set(oneValArgs RMVFLG ADDFLG)
+# parse the input argument
+  cmake_parse_arguments(RPLFLGS "${opts}" "${oneValArgs}" "${multiValArgs}" ${ARGN})
+
+  # Determine default values if none specified
+  if (NOT RPLFLGS_RMVFLG)
+    if (WIN32)
+      if (BUILD_WITH_SHARED_RUNTIME OR BUILD_SHARED_LIBS)
+        set(RPLFLGS_RMVFLG "/MT")
+      else ()
+        set(RPLFLGS_RMVFLG "/MD")
+      endif ()
+    endif ()
+  endif ()
+  if (NOT RPLFLGS_ADDFLG)
+    if (WIN32)
+      if (BUILD_WITH_SHARED_RUNTIME OR BUILD_SHARED_LIBS)
+        set(RPLFLGS_ADDFLG "/MD")
+      else ()
+        set(RPLFLGS_ADDFLG " ")
+      endif ()
+    endif ()
+  endif ()
+
+  if (NOT (RPLFLGS_RMVFLG EQUAL RPLFLGS_ADDFLG))
+# Assemble the variable name and copy the associated value
+    set(thisvar "CMAKE_${CMPTYPE}_FLAGS_${BLDTYPE}")
+    set(thisval "${${thisvar}}")
+# check if the remove flag is in the current variable
+    string(FIND "${thisval}" "${RPLFLGS_RMVFLG}" md_found)
+    if (md_found EQUAL -1) # if not just append the desired one
+      string(FIND "${thisval}" "${RPLFLGS_ADDFLG}" des_found)
+      if (des_found EQUAL -1) # only add desired one if not there
+        set(thisval "${thisval} ${RPLFLGS_ADDFLG}")
+      endif ()
+    else () # otherwise replace the unwantedflag with the wanted flag
+      string(REPLACE "${RPLFLGS_RMVFLG}" "${RPLFLGS_ADDFLG}" thisval "${thisval}")
+# removed any dangling d that might have been left behind by for example
+# replacing "/MD" with " " when it was actually "/MDd" leaves behind " d"
+      string(REPLACE " d" " " thisval "${thisval}")
+    endif ()
+# append /bigobj to the current compiler arguments
+# ...but only if it's not already there
+    string(FIND "${thisval}" "/bigobj" bigobj_found)
+    if (bigobj_found EQUAL -1)
+      set(thisval "${thisval} /bigobj")
+    endif ()
+# force the compiler argument to be recached
+    set(${thisvar} "${thisval}" CACHE STRING "Flags used by the ${CMPTYPE} compiler during ${BLDTYPE} builds" FORCE)
+  endif ()
+
+endmacro()
+
+#
+# Add generation of doxygen documentation, generated in doxdir
+# Args:
+#   doxdir: the subdirectory where the documentation is made
+#
+macro(SciAddDox doxdir)
+  if (ENABLE_DEVELDOCS)
+    find_package(SciDoxygen)
+    if (DOXYGEN_FOUND)
+      find_package(SciGraphviz)
+    else ()
+      message(FATAL_ERROR "ENABLE_DEVELDOCS set, but Doxygen not found.")
+    endif ()
+    if (Graphviz_dot)
+      set(HAVE_GRAPHVIZ_DOT YES)
+    else ()
+      set(HAVE_GRAPHVIZ_DOT NO)
+    endif ()
+    message(STATUS "Adding ${doxdir} subdir.")
+    add_subdirectory(${doxdir})
+  else ()
+    message(STATUS "ENABLE_DEVELDOCS not set. Not adding ${doxdir} subdir.")
+  endif ()
+endmacro()
+
+#
+# Add static analysis, when build matches bld
+# Args:
+#   bld: the build that must be matched for cppcheck to be run
+#
+macro(SciAddCppCheck bld)
+  find_package(SciCppCheck)
+  find_package(SciPcre)  # Needed for location of shared libs
+  if (PCRE_FOUND)
+    SciAddSharedLibDirs(ADDPATH ${Pcre_LIBRARY_DIRS})
+    if (CPPCHECK_FOUND)
+      SciCppCheckSource(${bld})
+    endif ()
   endif ()
 endmacro()
 

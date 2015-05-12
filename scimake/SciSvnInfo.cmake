@@ -1,9 +1,11 @@
 ######################################################################
 #
-# $Id: SciSvnInfo.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: SciSvnInfo.cmake 792 2015-04-17 14:07:44Z jrobcary $
+#
+# Copyright &copy; 2012-2015, Tech-X Corporation, Boulder, CO.
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 # For getting the svn revision of a directory
-# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 if (0)
@@ -49,7 +51,7 @@ macro(SciGetSvnInfo dir revvar urlvar usechanged)
     set(usechanged TRUE)
   endif ()
   if (EXISTS ${dir}/.svn)
-    if (${usechanged})
+    if (usechanged)
       # message(STATUS "In ${dir}, executing ${SVNVERSION_BIN} -c")
       execute_process(COMMAND ${SVNVERSION_BIN} -c
         OUTPUT_VARIABLE ${revvar}

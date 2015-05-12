@@ -23,12 +23,11 @@
 # FindOpenSplice: find includes and libraries for OpenSplice. Complex
 # due to the many libraries that OpenSplice has
 #
-# $Id: FindSciOpenSplice.cmake 401 2013-12-14 16:40:42Z jrobcary $
+# $Id: FindSciOpenSplice.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})

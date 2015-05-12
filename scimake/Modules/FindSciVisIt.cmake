@@ -14,12 +14,11 @@
 #
 # Find module for VisIt includes and libs from VisIt
 #
-# $Id: FindSciVisIt.cmake 516 2014-02-15 15:12:35Z jrobcary $
+# $Id: FindSciVisIt.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 #################################################
 
@@ -135,7 +134,7 @@ endif ()
 # Should not set the below, as then how will we ever find visit_trunk?
 # set(VisIt_INST_SUBDIR visit)
 if (NOT VisIt_INSTALL_DIRS)
-  set(VisIt_INSTALL_DIRS visit-cc4py visit-sersh visit)
+  set(VisIt_INSTALL_DIRS visit-pycsh visit-sersh visit)
 endif ()
 SciFindPackage(PACKAGE VisIt
   INSTALL_DIRS ${VisIt_INSTALL_DIRS}

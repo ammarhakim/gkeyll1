@@ -3,12 +3,11 @@
 # SciGetDepsFromInstall: From the installation of one project, find
 #   the installations of other other projects from config.summary.
 #
-# $Id: SciGetDepsFromInstall.cmake 538 2014-03-31 02:00:48Z pletzer $
+# $Id: SciGetDepsFromInstall.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

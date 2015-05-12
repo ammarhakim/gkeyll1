@@ -14,12 +14,11 @@
 #
 # SciFindChombo: find includes and libraries for Chombo.
 #
-# $Id: FindSciChombo.cmake 484 2014-01-26 16:39:04Z jrobcary $
+# $Id: FindSciChombo.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 if (ENABLE_PARALLEL)

@@ -14,12 +14,11 @@
 #
 # FindOce: find includes and libraries for OCE
 #
-# $Id: FindSciOce.cmake 573 2014-06-03 19:09:54Z cperry87 $
+# $Id: FindSciOce.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -145,19 +144,22 @@ foreach (res ${SEARCH_RESULTS})
   set(Oce_${res})
 endforeach ()
 set(OCE_FOUND TRUE)
-# Set the installation search directory for oce woth no component
-# suffix
-if (NOT USE_OCE_SHARED)
-  SciGetInstSubdirs(oce instDirs)
+# Set the installation search directory for oce with no component suffix
+if (USE_OCE_SHARED)
+  if (USE_PYC_LIBS)
+    set(instdirs oce-pycsh oce-sersh)
+  else ()
+    set(instdirs oce-sersh oce-pycsh)
+  endif ()
 else ()
-  set(instDirs oce-sersh oce-cc4py)
+  SciGetInstSubdirs(oce instdirs)
 endif ()
 
 foreach (comp ${SciOce_ALL_COMPONENTS})
   if (Oce${comp}_FIND)
     set(Oce${comp}_ROOT_DIR ${Oce_ROOT_DIR})
     SciFindPackage(PACKAGE Oce${comp}
-      INSTALL_DIRS "${instDirs}"
+      INSTALL_DIRS "${instdirs}"
       HEADERS "${Oce${comp}_SEARCHHDRS}"
       LIBRARIES "${Oce${comp}_SEARCHLIBS}"
       LIBRARY_SUBDIRS "${libsubdir}lib"

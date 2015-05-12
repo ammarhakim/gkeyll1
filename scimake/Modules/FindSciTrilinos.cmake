@@ -36,12 +36,11 @@
 #
 # FindSciTrilinos: find includes and libraries for Trilinos
 #
-# $Id: FindSciTrilinos.cmake 622 2014-09-07 20:32:23Z jrobcary $
+# $Id: FindSciTrilinos.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -104,6 +103,7 @@ if (TRILINOS_FOUND)
   set(Trilinos_LINALG_LIBRARIES)
   set(Trilinos_MPI_LIBRARIES)
   set(Trilinos_SLU_LIBRARIES)
+  set(Trilinos_MUMPS_LIBRARIES)
   set(Trilinos_SYSTEM_LIBRARIES)
   set(Trilinos_WRAPPER_LIBRARIES)
   foreach (lib ${Trilinos_TPL_LIBRARIES})
@@ -118,12 +118,29 @@ if (TRILINOS_FOUND)
       set(Trilinos_LINALG_LIBRARIES ${Trilinos_LINALG_LIBRARIES} ${lib})
     elseif (${libname} MATCHES "superlu$" OR ${libname} MATCHES "superlu_dist$")
       set(Trilinos_SLU_LIBRARIES ${Trilinos_SLU_LIBRARIES} ${lib})
+    elseif (${libname} MATCHES "HYPRE$")
+      set(Trilinos_HYPRE_LIBRARIES ${Trilinos_HYPRE_LIBRARIES} ${lib})
+    elseif (${libname} MATCHES ".*mumps.*" OR ${libname} MATCHES "libpord")
+      set(Trilinos_MUMPS_LIBRARIES ${Trilinos_MUMPS_LIBRARIES} ${lib})
+    elseif (${libname} MATCHES "libseq")
+      set(Trilinos_MUMPS_LIBRARIES ${Trilinos_MUMPS_LIBRARIES} ${lib})
     elseif (${libname} MATCHES "msmpi$")
       set(Trilinos_MPI_LIBRARIES ${Trilinos_MPI_LIBRARIES} ${lib})
     else ()
       set(Trilinos_SYSTEM_LIBRARIES ${Trilinos_SYSTEM_LIBRARIES} ${lib})
     endif ()
   endforeach ()
+# If trilinos does not get the mumps scalapack, add it.
+  if (Trilinos_MUMPS_LIBRARIES)
+    list(GET Trilinos_MUMPS_LIBRARIES 0 mumpslib1)
+    get_filename_component(mumpslibdir ${mumpslib1} PATH)
+    list(FIND Trilinos_MUMPS_LIBRARIES ${mumpslibdir}/libscalapack.so idx)
+    if ((${idx} EQUAL -1) AND (EXISTS ${mumpslibdir}/libscalapack.so))
+      set(Trilinos_MUMPS_LIBRARIES ${Trilinos_MUMPS_LIBRARIES}
+        ${mumpslibdir}/libscalapack.so
+      )
+    endif ()
+  endif ()
 
 # Make sure mp library present on Cray
   string(TOLOWER ${C_COMPILER_ID} cid)
@@ -139,8 +156,8 @@ if (TRILINOS_FOUND)
     endif ()
   endif ()
 
-# Find the libdirs of all groups
-  foreach (grp TPL LINALG SLU MPI SYSTEM)
+  # Find the libdirs of all groups
+  foreach (grp TPL LINALG SLU HYPRE MUMPS MPI SYSTEM)
     set(libs ${Trilinos_${grp}_LIBRARIES})
     unset(Trilinos_${grp}_LIBRARY_DIRS)
     unset(Trilinos_${grp}_LIBRARY_NAMES)
@@ -194,8 +211,8 @@ if (TRILINOS_FOUND)
     message(WARNING "Trilinos_LINALG_LIBRARY_NAMES does not contain blas.")
   endif ()
 
-# Final calculations
-  foreach (grp TPL LINALG MPI SLU SYSTEM WRAPPER)
+  # Final calculations
+  foreach (grp TPL LINALG MPI SLU HYPRE MUMPS SYSTEM WRAPPER)
     SciGetStaticLibs("${Trilinos_${grp}_LIBRARIES}" Trilinos_${grp}_STLIBS)
     SciPrintVar(Trilinos_${grp}_LIBRARY_DIRS)
     SciPrintVar(Trilinos_${grp}_LIBRARY_NAMES)

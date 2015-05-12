@@ -33,12 +33,11 @@
 #
 # SciFindSuperlu: find includes and libraries for Superlu.
 #
-# $Id: FindSciSuperlu.cmake 526 2014-02-24 16:56:43Z jacobrking $
+# $Id: FindSciSuperlu.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})

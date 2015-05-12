@@ -17,19 +17,18 @@
 #
 # SciFindNe7ssh: find includes and libraries for Ne7ssh.
 #
-# $Id: FindSciNe7ssh.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: FindSciNe7ssh.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})
 
-if (BUILD_WITH_CC4PY_RUNTIME OR BUILD_WITH_SHARED_RUNTIME)
-  set(instdirs ne7ssh-cc4py ne7ssh-sersh)
+if (BUILD_WITH_PYCSH_RUNTIME OR BUILD_WITH_SHARED_RUNTIME)
+  set(instdirs ne7ssh-pycsh ne7ssh-sersh)
 else ()
   set(instdirs ne7ssh)
 endif ()

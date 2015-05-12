@@ -16,12 +16,11 @@
 #
 # SciFindNetcdf_cmake: find includes and libraries for Netcdf_cmake.
 #
-# $Id: FindSciNetcdf_cmake.cmake 299 2013-06-15 11:59:21Z jrobcary $
+# $Id: FindSciNetcdf_cmake.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

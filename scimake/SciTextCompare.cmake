@@ -3,14 +3,14 @@
 # SciTextCompare: Run an executable and check for differences between
 #                 current and accepted results.
 #
-# $Id: SciTextCompare.cmake 650 2014-10-09 17:32:46Z chrismdeluca $
+# $Id: SciTextCompare.cmake 803 2015-04-23 21:38:45Z techxdave $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
+#
 ######################################################################
+
 if (NOT SCIMAKE_DIR)
   set(SCIMAKE_DIR "${TEST_SCIMAKE_DIR}")
 endif ()
@@ -26,6 +26,7 @@ if (TEST_DIFFER)
 else ()
   set(TEST_DIFFER diff --strip-trailing-cr)
 endif ()
+message(STATUS "DIFFER SET TO   = ${TEST_DIFFER}")
 if (TEST_MPIEXEC)
   separate_arguments(TEST_MPIEXEC)
 endif (TEST_MPIEXEC)
@@ -36,6 +37,7 @@ endif (TEST_MPIEXEC)
 # more files which are to be compared, while also comparing the stdout
 # of the test.
 
+message(STATUS "EXECUTING ... ${TEST_MPIEXEC} ${TEST_PROG} ${ARGS_LIST}")
 if (TEST_STDOUT_FILE)
   execute_process(COMMAND ${TEST_MPIEXEC} ${TEST_PROG} ${ARGS_LIST}
     RESULT_VARIABLE EXEC_ERROR
@@ -68,7 +70,7 @@ if (TEST_TEST_FILES)
   string(REPLACE " " ";" TEST_FILES_LIST "${TEST_FILES_LIST}")
   string(REPLACE "\"" "" DIFF_FILES_LIST "${TEST_DIFF_FILES}")
   string(REPLACE " " ";" DIFF_FILES_LIST "${DIFF_FILES_LIST}")
-  
+
   list(LENGTH TEST_FILES_LIST tlen)
   list(LENGTH DIFF_FILES_LIST dlen)
   if (NOT ${tlen} MATCHES ${dlen})
@@ -81,7 +83,7 @@ if (TEST_TEST_FILES)
   message(STATUS "DIFF_FILES_LIST = ${DIFF_FILES_LIST}.")
   math(EXPR loopLen "${tlen} - 1")
 
-  foreach(ifile RANGE ${loopLen})
+  foreach (ifile RANGE ${loopLen})
     list(GET TEST_FILES_LIST ${ifile} testFile)
     list(GET DIFF_FILES_LIST ${ifile} diffFile)
     SciDiffFiles("${testFile}" "${diffFile}" ARE_FILES_EQUAL
@@ -94,7 +96,7 @@ if (TEST_TEST_FILES)
     else ()
        message(STATUS "Comparison of ${testFile} succeeded.")
     endif ()
-  endforeach()
+  endforeach ()
   if (diffres)
     message(FATAL_ERROR "Comparison failure: ${diffres} differ.")
   endif ()

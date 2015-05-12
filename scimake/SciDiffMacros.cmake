@@ -2,12 +2,11 @@
 #
 # SciDiffMacros: A collection of macros for diffing files
 #
-# $Id: SciDiffMacros.cmake 610 2014-08-16 21:29:40Z chrismdeluca $
+# $Id: SciDiffMacros.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 include(CMakeParseArguments)
@@ -54,7 +53,7 @@ macro(SciDiffFiles DIFF_TEST_FILE DIFF_DIFF_FILE DIFF_FILES_EQUAL)
   if (NOT DIFF_COMMAND)
     set(DIFF_COMMAND diff --strip-trailing-cr)
   endif ()
-  
+
   # execute the diff process
   execute_process(COMMAND ${DIFF_COMMAND}
     "${DIFF_TEST_FILEPATH}" "${DIFF_DIFF_FILEPATH}"

@@ -68,12 +68,11 @@
 #
 # SciFindPackage: find includes and libraries of a package
 #
-# $Id: SciFindPackage.cmake 544 2014-04-07 20:28:38Z jrobcary $
+# $Id: SciFindPackage.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 
 # SciGetStaticLibs
@@ -104,7 +103,7 @@ function(SciGetStaticLibs origlibs statlibsvar)
       set(havestlib TRUE)
     endif ()
 # If not static, try replacing suffix
-    if (NOT ${havestlib})
+    if (NOT havestlib)
       foreach (sfx so;dylib;dll)
         if (${lib} MATCHES "\\.${sfx}$")
           if (DEBUG_CMAKE)
@@ -128,7 +127,7 @@ function(SciGetStaticLibs origlibs statlibsvar)
       endforeach ()
     endif ()
 # If still do not have static, try pulling out of library flags
-    if (${havestlib})
+    if (havestlib)
       list(APPEND statlibs ${newlib})
     elseif (${lib} MATCHES "^-L")
       if (DEBUG_CMAKE)
@@ -243,26 +242,40 @@ endfunction()
 #  pkgnamelc: the variable holding the package name in lower case
 #  instdirsvar: the variable holding possible installation directories
 #
-function(SciGetInstSubdirs pkgnamelc instdirsvar)
+function(SciGetInstSubdirs pkgname instdirsvar)
+  string(TOLOWER ${pkgname} pkgnamelc)
   if (DEBUG_CMAKE)
     message(STATUS "SciGetInstSubdirs called with pkgname = ${pkgname} and instdirsvar = ${instdirsvar}.")
     message(STATUS "${pkgname}_ROOT_DIR = ${${pkgname}_ROOT_DIR}.")
-    message(STATUS "USE_CC4PY_LIBS = ${USE_CC4PY_LIBS}.")
+    message(STATUS "USE_PYC_LIBS = ${USE_PYC_LIBS}.")
     message(STATUS "USE_SHARED_LIBS = ${USE_SHARED_LIBS}.")
+    message(STATUS "BUILD_WITH_SHARED_RUNTIME = ${BUILD_WITH_SHARED_RUNTIME}")
   endif ()
   if (ENABLE_PARALLEL)
     if (USE_SHARED_LIBS)
-      set(instdirs ${pkgnamelc}-parsh)
+      set(instdirs ${pkgnamelc}-parsh ${pkgnamelc}-sersh)
+      if (ALLOW_SERIAL_WITH_PARALLEL)
+        set(instdirs ${instdirs} ${pkgnamelc}-sersh ${pkgnamelc}-sermd)
+        if (NOT WIN32)
+          set(instdirs ${instdirs} ${pkgnamelc})
+        endif ()
+      endif ()
     else ()
-      set(instdirs ${pkgnamelc}-par ${pkgnamelc}-ben)
+      set(instdirs ${pkgnamelc}-par ${pkgnamelc}-ben ${pkgnamelc})
     endif ()
   else ()
-    if (USE_CC4PY_LIBS)
-      set(instdirs ${pkgnamelc}-cc4py ${pkgnamelc}-sersh)
-      if (WIN32)
-        set(instdirs ${instdirs} ${pkgnamelc}-sermd)
+    if (USE_PYC_LIBS)
+      if (USE_SHARED_LIBS)
+        set(instdirs ${pkgnamelc}-pycsh ${pkgnamelc}-pycmd ${pkgnamelc}-pycst ${pkgnamelc}-sersh ${pkgnamelc}-sermd)
+        if (NOT WIN32)
+          set(instdirs ${instdirs} ${pkgnamelc})
+        endif ()
       else ()
-        set(instdirs ${instdirs} ${pkgnamelc})
+        set(instdirs ${pkgnamelc}-pycmd ${pkgnamelc}-pycst ${pkgnamelc}-pycsh ${pkgnamelc}-sermd)
+        if (NOT WIN32)
+          set(instdirs ${instdirs} ${pkgnamelc})
+        endif ()
+        set(instdirs ${instdirs} ${pkgnamelc}-sersh)
       endif ()
     elseif (USE_SHARED_LIBS)
       set(instdirs ${pkgnamelc}-sersh)
@@ -330,7 +343,7 @@ function(SciGetRootPath pkgname instsubdirs rootpathvar)
   endif ()
   if (DEBUG_CMAKE)
     message(STATUS "${pkgname}_ROOT_DIR = ${${pkgname}_ROOT_DIR}.")
-    message(STATUS "USE_CC4PY_LIBS = ${USE_CC4PY_LIBS}.")
+    message(STATUS "USE_PYC_LIBS = ${USE_PYC_LIBS}.")
     message(STATUS "USE_SHARED_LIBS = ${USE_SHARED_LIBS}.")
   endif ()
 
@@ -362,6 +375,10 @@ function(SciGetRootPath pkgname instsubdirs rootpathvar)
       if (EXISTS ${idir})
         SciGetRealDir(${idir} scidir)
         set(rootpath ${rootpath} ${scidir})
+      else ()
+        if (DEBUG_CMAKE)
+          message(STATUS "${idir} does not exist.")
+        endif ()
       endif ()
     endforeach (spdir ${SUPRA_SEARCH_PATH})
   endforeach ()
@@ -403,10 +420,11 @@ endfunction()
 #  pluralsfx: plural version of the file type
 #  allfoundvar: whether all files were found
 #  allowdups: whether duplicates are allowed in list
+#  rootpathvar: the variable in which the rootpath is stored
 #
 function(SciFindPkgFiles pkgname pkgfiles
   rootpath filesubdirs
-  singularsfx pluralsfx allfoundvar)
+  singularsfx pluralsfx allfoundvar rootpathvar)
 
   if (DEBUG_CMAKE)
     message(STATUS "Looking for files of type, ${singularsfx} under ${rootpath} with filesubdirs = ${filesubdirs}.")
@@ -538,12 +556,13 @@ function(SciFindPkgFiles pkgname pkgfiles
 
 # Clean up the lists of files and directories
   list(LENGTH abspkgfiles numpkgfiles)
-  if (${numpkgfiles})
+  if (numpkgfiles)
     if (NOT ${ALLOWDUPS})
       list(REMOVE_DUPLICATES abspkgfiles)
     endif ()
     list(REMOVE_DUPLICATES pkgdirs)
   endif ()
+  list(LENGTH pkgdirs lenpkgdirs)
 
 # For libraries, get names
   if (${singularsfx} STREQUAL LIBRARY)
@@ -693,10 +712,11 @@ macro(SciFindPackage)
   endif ()
 
 # Find the set of possible root installation dirs
-  SciGetRootPath(${scipkgreg} "${scipkginst}" scipath)
+  SciGetRootPath(${scipkgreg} "${scipkginst}" origscipath)
   if (DEBUG_CMAKE)
     message(STATUS "scipath = ${scipath}")
   endif ()
+  set(scipath "${origscipath}")
 
 #######################################################################
 #
@@ -818,11 +838,11 @@ macro(SciFindPackage)
 
 # If list not empty, search for files
       list(LENGTH ${srchfilesvar} scisrchlen)
-      if (${scisrchlen})
+      if (scisrchlen)
 
 # Create lists for search
         list(LENGTH TFP_${scitype}_SUBDIRS scilen)
-        if (${scilen})
+        if (scilen)
           set(scifilesubdirs ${TFP_${scitype}_SUBDIRS})
         else ()
 # Default search subdirectories
@@ -852,11 +872,34 @@ macro(SciFindPackage)
         )
 # Okay not to find dlls
         if (NOT ${scipkgreg}_${scitypeplural}_FOUND)
-          message(WARNING "${scipkgreg}_${scitypeplural}_FOUND = ${${scipkgreg}_${scitypeplural}_FOUND}.")
+          if (NOT ${scitype} STREQUAL DLL)
+            message(WARNING "${scipkgreg}_${scitypeplural}_FOUND = ${${scipkgreg}_${scitypeplural}_FOUND}.")
+          endif ()
           if (NOT ${srchoptional})
             set(${scipkguc}_FOUND FALSE)
           endif ()
         endif ()
+      endif ()
+
+# At the end of the LIBRARY include, find the rootdir, and use it
+# for further searches
+      if ((${scitype} STREQUAL LIBRARY) AND ${scipkgreg}_INCLUDE_DIRS)
+        list(GET ${scipkgreg}_INCLUDE_DIRS 0 rootdir)
+        get_filename_component(rootdir "${rootdir}" DIRECTORY)
+        get_filename_component(subdir "${rootdir}" NAME)
+        if (${subdir} STREQUAL visit OR ${subdir} MATCHES "^vtk-6.1")
+          get_filename_component(rootdir "${rootdir}" DIRECTORY)
+        endif ()
+        get_filename_component(subdir "${rootdir}" NAME)
+        if (${subdir} STREQUAL include)
+          get_filename_component(rootdir "${rootdir}" DIRECTORY)
+        endif ()
+# We should require rootdir to be a part of all library dirs, removing
+# subdirs until this happens.
+        foreach (libdir ${${scipkgreg}_LIBRARY_DIRS})
+        endforeach ()
+        set(scipath ${rootdir})
+        message(STATUS "scipath = ${scipath}.")
       endif ()
 
     endforeach ()

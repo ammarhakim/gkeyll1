@@ -13,12 +13,11 @@
 #
 # Find module for Python
 #
-# $Id: FindSciPython.cmake 623 2014-09-08 13:06:29Z jrobcary $
+# $Id: FindSciPython.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ##################################################################
 
@@ -82,7 +81,7 @@ if (Python_EXE)
   endif ()
   set(Python_LIBRARY_NAMES python${Python_MAJMIN})
 
-# Library
+# Shared library
   find_library(Python_LIBRARY
     NAMES ${Python_LIBRARY_NAMES}
     PATHS ${Python_ROOT_DIR}
@@ -103,6 +102,18 @@ if (Python_EXE)
     set(PYTHON_FOUND FALSE)
   endif ()
 
+# Static library
+  find_library(Python_STLIBS
+    NAMES ${Python_LIBRARY_NAMES}
+    PATHS ${Python_ROOT_DIR}
+    PATH_SUFFIXES lib/python${Python_MAJMIN}/config
+    NO_DEFAULT_PATH
+  )
+  # SciPrintVar(Python_STLIB)
+  if (Python_STLIBS)
+    get_filename_component(Python_STLIB_DIRS ${Python_STLIBS}/.. REALPATH)
+  endif ()
+
 # Modules
   if (Python_SITE)
     get_filename_component(Python_MODULES_DIR ${Python_SITE}/.. REALPATH)
@@ -117,7 +128,7 @@ endif ()
 
 foreach (var Python_ROOT_DIR Python_BINDIR Python_EXE Python_NAME Python_NAME_WE
     Python_INCLUDE_DIRS Python_MAJMIN Python_LIBRARY Python_LIBRARY_NAME
-    Python_LIBRARIES Python_LIBRARY_DIRS Python_DLLS Python_MODULES_DIR
+    Python_LIBRARIES Python_LIBRARY_DIRS Python_STLIBS Python_STLIB_DIRS Python_DLLS Python_MODULES_DIR
     Python_MODULES_SUBDIR Python_SITE)
   SciPrintVar(${var})
 endforeach ()

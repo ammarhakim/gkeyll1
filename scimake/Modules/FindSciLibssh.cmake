@@ -21,24 +21,30 @@
 #
 # SciFindLibssh: find includes and libraries for Libssh.
 #
-# $Id: FindSciLibssh.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: FindSciLibssh.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
+set(CMAKE_FIND_LIBRARY_SUFFIXES_SAV ${CMAKE_FIND_LIBRARY_SUFFIXES})
 set(libsubdirs lib)
-if (USE_CC4PY_LIBS)
+if (USE_PYC_LIBS)
 # Shared libs in ser for libssh
-  set(instdirs libssh-cc4py libssh)
+  set(instdirs libssh-pycsh libssh)
 else ()
   set(instdirs libssh)
 endif ()
-if (NOT (USE_SHARED_LIBS OR BUILD_SHARED_LIBS))
+if (NOT (USE_SHARED_LIBS OR BUILD_SHARED_LIBS OR
+    (WIN32 AND BUILD_WITH_SHARED_RUNTIME)))
   set(libsubdirs lib/static ${libsubdirs})
+  if (WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib)
+  else ()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  endif ()
 endif ()
 # message(STATUS "libsubdirs = ${libsubdirs}.")
 
@@ -49,6 +55,7 @@ SciFindPackage(
   LIBRARY_SUBDIRS ${libsubdirs}
   LIBRARIES "ssh"
 )
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_SAV})
 
 if (LIBSSH_FOUND)
   message(STATUS "Found Libssh")

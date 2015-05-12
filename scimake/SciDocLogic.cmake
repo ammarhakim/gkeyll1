@@ -3,7 +3,10 @@
 # To encourage our software to use the same documentation, moving
 # functionality to a common cmake file
 #
-# $Id: SciDocLogic.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: SciDocLogic.cmake 792 2015-04-17 14:07:44Z jrobcary $
+#
+# Copyright &copy; 2012-2015, Tech-X Corporation, Boulder, CO.
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 # This script sets the following variables which are also options:
 #   ENABLE_DEVELDOCS
@@ -18,7 +21,6 @@
 # Reading that document should be done if trying to understand this
 # logic
 #
-# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 #####################################################################
 
