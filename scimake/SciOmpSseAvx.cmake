@@ -3,12 +3,11 @@
 # SciSseAvx: Determine sse and avx capabilities to processor and add
 #            to appropriate flags.
 #
-# $Id: SciOmpSseAvx.cmake 641 2014-10-02 23:35:02Z jrobcary $
+# $Id: SciOmpSseAvx.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -109,10 +108,10 @@ include(CheckCXXSourceRuns)
 
 message(STATUS "Checking vector capabilities.  CMAKE_REQUIRED_FLAGS = ${CMAKE_REQUIRED_FLAGS}.")
 
-message(STATUS "Checking sse2 capabilities.")
+# message(STATUS "Checking sse2 capabilities.")
 set(CMAKE_REQUIRED_FLAGS_SAV "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${SSE2_FLAG}")
-message("SSE2_FLAG = ${SSE2_FLAG}.")
+# message(STATUS "SSE2_FLAG = ${SSE2_FLAG}.")
 check_c_source_compiles(
 "
 #include <emmintrin.h>
@@ -142,10 +141,10 @@ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAV}")
 SciPrintVar(SSE2_RUNS)
 
 # Check whether have avx.
-message("Checking avx capabilities.")
+# message(STATUS "Checking avx capabilities.")
 set(CMAKE_REQUIRED_FLAGS_SAV "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${AVX_FLAG}")
-message("AVX_FLAG = ${AVX_FLAG}.")
+# message(STATUS "AVX_FLAG = ${AVX_FLAG}.")
 check_c_source_compiles(
 "
 #include <immintrin.h>
@@ -175,10 +174,10 @@ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAV}")
 SciPrintVar(AVX_RUNS)
 
 # Check whether have avx2.
-message("Checking avx2 capabilities.")
+# message(STATUS "Checking avx2 capabilities.")
 set(CMAKE_REQUIRED_FLAGS_SAV "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${AVX_FLAG} ${AVX2_FLAG}")
-message("AVX2_FLAG = ${AVX2_FLAG}.")
+# message(STATUS "AVX2_FLAG = ${AVX2_FLAG}.")
 check_cxx_source_compiles(
 "
 #include <immintrin.h>
@@ -210,10 +209,10 @@ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAV}")
 SciPrintVar(AVX2_RUNS)
 
 # Check whether have avx512.
-message("Checking avx512 capabilities.")
+# message(STATUS "Checking avx512 capabilities.")
 set(CMAKE_REQUIRED_FLAGS_SAV "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${AVX_FLAG} ${AVX512_FLAG}")
-message("AVX512_FLAG = ${AVX512_FLAG}.")
+# message(STATUS "AVX512_FLAG = ${AVX512_FLAG}.")
 check_cxx_source_compiles(
 "
 #include <immintrin.h>
@@ -304,8 +303,23 @@ if (USE_OPENMP)
     endif ()
   endif ()
   if (HAVE_OPENMP)
+    message(STATUS "OPENMP_FLAGS = ${OPENMP_FLAGS}.")
+# To test for openmp4, need to add openmp flags for compilation
+    set(CMAKE_CXX_FLAGS_SAV "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_FLAGS}")
+    try_compile(HAVE_PRAGMA_OMP_SIMD ${PROJECT_BINARY_DIR}/scimake
+      ${SCIMAKE_DIR}/trycompile/pragma_omp_simd.cxx
+      # OUTPUT_VARIABLE BUILD_OUT
+    )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAV}")
+    # message(STATUS "Build result = \n ${BUILD_OUT}")
+    if (HAVE_PRAGMA_OMP_SIMD)
+      message(STATUS "OpenMP 4 pragma omp simd available")
+    else ()
+      message(STATUS "OpenMP 4 pragma omp simd NOT available")
+    endif ()
     foreach (cmp C CXX)
-      foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL)
+      foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
         set(CMAKE_${cmp}_FLAGS_${bld} "${CMAKE_${cmp}_FLAGS_${bld}} ${OPENMP_FLAGS}")
       endforeach ()
     endforeach ()
@@ -316,7 +330,7 @@ endif ()
 # Print results
 ######################################################################
 
-SciPrintString(" After analyzing vector and thread capabilities:")
+SciPrintString("After analyzing vector and thread capabilities:")
 foreach (cmp C CXX)
   foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
     SciPrintVar(CMAKE_${cmp}_FLAGS_${bld})

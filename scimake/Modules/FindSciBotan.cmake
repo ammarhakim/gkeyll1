@@ -21,29 +21,28 @@
 #
 # Botan_ROOT_DIR           Specifies the root dir of the Botan installation
 #
-# BUILD_WITH_CC4PY_RUNTIME Specifies to look for installation dirs,
-#                          botan-cc4py or botan-sersh
+# BUILD_WITH_PYCSH_RUNTIME Specifies to look for installation dirs,
+#                          botan-pycsh or botan-sersh
 # ENABLE_SHARED OR BUILD_WITH_SHARED_RUNTIME OR BUILD_SHARED_LIBS
-#                          operative if BUILD_WITH_CC4PY_RUNTIME not set
+#                          operative if BUILD_WITH_PYCSH_RUNTIME not set
 #                          Specify to look for installation dir, botan-sersh.
 
 ######################################################################
 #
 # SciFindBotan: find includes and libraries for Botan.
 #
-# $Id: FindSciBotan.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: FindSciBotan.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})
 
-if (BUILD_WITH_CC4PY_RUNTIME)
-  set(instdirs botan-cc4py botan-sersh)
+if (BUILD_WITH_PYCSH_RUNTIME)
+  set(instdirs botan-pycsh botan-sersh)
 elseif (ENABLE_SHARED OR BUILD_WITH_SHARED_RUNTIME OR BUILD_SHARED_LIBS)
   set(instdirs botan-sersh)
 else ()

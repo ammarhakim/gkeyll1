@@ -22,12 +22,11 @@
 #
 # FindTxBase: find includes and libraries for txbase
 #
-# $Id: FindSciTxBase.cmake 472 2014-01-18 15:17:49Z jrobcary $
+# $Id: FindSciTxBase.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -37,16 +36,10 @@ else ()
   set(txbasefindlibs txbase)
 endif ()
 
-# SERMD is as static as possible consistent with shared libraries
-if (USE_TXBASE_SERMD)
-  if (WIN32)
-    set(instdirargs INSTALL_DIRS txbase-sermd)
-  else ()
-    set(instdirargs INSTALL_DIRS txbase)
-  endif ()
-endif ()
+SciGetInstSubdirs(txbase instdirs)
+
 SciFindPackage(PACKAGE "TxBase"
-  ${instdirargs}
+  INSTALL_DIRS ${instdirs}
   HEADERS "txbase_version.h"
   LIBRARIES "${txbasefindlibs}"
   LIBRARY_SUBDIRS lib/${CXX_COMP_LIB_SUBDIR} lib

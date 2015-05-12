@@ -25,44 +25,22 @@
 #
 # FindSciBoost: find includes and libraries for boost
 #
-# $Id: FindSciBoost.cmake 626 2014-09-10 16:04:55Z jrobcary $
+# $Id: FindSciBoost.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
 # Default: libraries have boost_ prepended.
 set(BOOST_LIB_PREFIX boost_)
-if (USE_CC4PY_LIBS)
-  set(instdirs boost-cc4py boost-sersh)
-# Shared windows boost has libboost_ prepended to the name
-  set(BOOST_LIB_PREFIX boost_)
-elseif (USE_SHARED_LIBS OR BUILD_SHARED_LIBS OR ENABLE_SHARED)
-  set(instdirs boost-sersh)
-  set(BOOST_LIB_PREFIX boost_)
-elseif (BUILD_WITH_SHARED_RUNTIME)
-  set(instdirs boost-sermd boost-sersh)
-  if (WIN32)
-    set(BOOST_LIB_PREFIX libboost_)
-  endif ()
-else ()
-  message(STATUS "Setting boost up for static linking")
-  set(Boost_USE_STATIC_RUNTIME OFF)
-  set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_MULTITHREADED ON)
-  set(instdirs boost)
-# Static cases Windows has libboost_ prepended to the name
-  if (WIN32)
-    set(BOOST_LIB_PREFIX libboost_)
-  endif ()
+# But Windows static have libboost_ prepended.
+if (WIN32 AND NOT(USE_SHARED_LIBS OR BUILD_SHARED_LIBS OR ENABLE_SHARED))
+  set(BOOST_LIB_PREFIX libboost_)
 endif ()
-message(STATUS "instdirs = ${instdirs}.")
+message(STATUS "BOOST_LIB_PREFIX = ${BOOST_LIB_PREFIX}.")
 
-include(FindPackageHandleStandardArgs)
-# Set names and dirs for finding boost
+# Set boost libraries to find
 if (DEBUG_CMAKE)
   message(STATUS "SciBoost_FIND_COMPONENTS = ${SciBoost_FIND_COMPONENTS}.")
   message(STATUS "SciBoost_FIND_REQUIRED = ${SciBoost_FIND_REQUIRED}.")
@@ -75,23 +53,44 @@ if (DEBUG_CMAKE)
   message(STATUS "SciBoost_LIBRARY_LIST = ${SciBoost_LIBRARY_LIST}.")
 endif ()
 
+SciGetInstSubdirs(Boost instdirs)
+message(STATUS "Boost instdirs = ${instdirs}.")
 SciFindPackage(PACKAGE "Boost"
   INSTALL_DIRS ${instdirs}
-  HEADERS "boost/thread.hpp"
+  HEADERS boost/thread.hpp OPTIONAL boost/align/aligned_allocator.hpp
   LIBRARIES "${SciBoost_LIBRARY_LIST}"
 )
 unset(SciBoost_LIBRARY_LIST CACHE)
 if (DEBUG_CMAKE)
   message(STATUS "Boost_DLLS = ${Boost_DLLS}.")
 endif ()
-if (Boost_DLLS)
-  message(STATUS "Correcting Boost DLL definition")
-  set(Boost_DEFINITIONS -DBOOST_ALL_DYN_LINK)
-endif ()
 
-set(Boost_DEFINITIONS ${Boost_DEFINITIONS} -DBOOST_ALL_NO_LIB)  # Disable auto-linking
+# Determine whether Boost libs are shared
+set(Boost_LIBS_ARE_SHARED FALSE)
+if (Boost_DLLS)
+  set(Boost_LIBS_ARE_SHARED TRUE)
+else ()
+  list(GET Boost_LIBRARIES 0 blib0)
+  message(STATUS "blib0 = ${blib0}.")
+  if ((blib0 MATCHES "\\.dylib$") OR (blib0 MATCHES "\\.so$") OR (blib0 MATCHES "\\.so\\."))
+    set(Boost_LIBS_ARE_SHARED TRUE)
+  endif ()
+endif ()
+message(STATUS "Boost_LIBS_ARE_SHARED = ${Boost_LIBS_ARE_SHARED}.")
+
+# If Boost libs are shared, one must have different defines
+# http://boost.2283326.n4.nabble.com/Undefined-reference-to-main-with-Boost-Test -Why-td2576147.html
+if (Boost_LIBS_ARE_SHARED)
+  message(STATUS "Setting Boost shared library definitions")
+  set(Boost_DEFINITIONS -DBOOST_ALL_DYN_LINK)
+  if (WIN32 AND NOT Boost_boost_unit_test_framework_LIBRARY)
+# This reverses DYN_LINK for tests.  See boost/test/included/unit_test.hpp.
+    set(Boost_DEFINITIONS ${Boost_DEFINITIONS} -DBOOST_TEST_INCLUDED)
+  endif ()
+endif ()
 message(STATUS "Boost_DEFINITIONS = ${Boost_DEFINITIONS}.")
 
+# Final check
 if (BOOST_FOUND AND NOT Boost_INCLUDE_DIRS)
   set(BOOST_FOUND FALSE)
   message(STATUS "Reversing Boost found as Boost_INCLUDE_DIRS is empty.")
@@ -107,11 +106,10 @@ else ()
   endif ()
 endif ()
 
+# Set names for all the libs
 if ("${BOOST_LIB_PREFIX}" STREQUAL "libboost_")
   foreach (COMPONENT ${SciBoost_FIND_COMPONENTS})
     set(Boost_boost_${COMPONENT}_LIBRARY ${Boost_${BOOST_LIB_PREFIX}${COMPONENT}_LIBRARY})
   endforeach ()
 endif ()
-
-
 

@@ -3,7 +3,7 @@
 # looks for MPI using the standard CMake module, unless the compilers
 # have the Cray names, in which case we know that this will fail.
 #
-# The following varialbes are set:
+# The following variables are set:
 #
 # SCI_HAVE_MPICXX_COMPILER_WRAPPER: TRUE if the C++ compiler automatically
 #   includes and links to MPI.  If this is named 'CC', then no further MPI
@@ -26,12 +26,11 @@
 #
 # FindSciMpi: check whether the compiler wraps MPI, if not, find MPI
 #
-# $Id: FindSciMpi.cmake 643 2014-10-07 16:55:12Z jhurani-txcorp $
+# $Id: FindSciMpi.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -123,14 +122,48 @@ if (SEARCH_FOR_MPI)
   find_package(MPI ${mpireq})
 endif ()
 
-# Either gives MPI
-if (MPI_FOUND OR SCIMPI_FOUND)
-  set(HAVE_MPI 1)
-endif ()
-
 # If know more than compiler wrappers, pull out standard values
 set(MPI_IS_OPEN_MPI FALSE)
 if (MPI_FOUND)
+  # Fix up problems with the stock find_package(MPI)
+  if (NOT MPI_INCLUDE_DIRS OR NOT MPI_LIBRARIES OR NOT MPIEXEC)
+    if (${CMAKE_C_COMPILER_ID} MATCHES "Intel")
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} -show
+        OUTPUT_VARIABLE mpiiccOutput
+      )
+      string(REPLACE " " ";" mpiiccOutputList "${mpiiccOutput}")
+      foreach (arg ${mpiiccOutputList})
+        if (${arg} MATCHES "^-I")
+          string(REGEX REPLACE "^-I" "" idir ${arg})
+          list(APPEND MPI_INCLUDE_DIRS ${idir})
+        elseif (${arg} MATCHES "^-L")
+          string(REGEX REPLACE "^-L" "" ldir ${arg})
+          list(APPEND MPI_LIBRARY_DIRS ${ldir})
+        elseif (${arg} MATCHES "^-l")
+          string(REGEX REPLACE "^-l" "" lib ${arg})
+          list(APPEND MPI_LIBRARIES ${lib})
+        endif ()
+      endforeach ()
+      # Try to find both static and dynamic
+      set(MPI_DYLIBS)
+      if (WIN32)
+        set(libsuffix "lib")
+      else ()
+        set(libsuffix "a")
+      endif ()
+      foreach (flib ${MPI_LIBRARIES})
+        set(libfile "lib${flib}.${libsuffix}")
+        find_file(libst ${libfile}
+          PATHS ${MPI_LIBRARY_DIRS} NO_DEFAULT_PATH)
+        find_library(libdyn ${flib} lib${flib}
+          PATHS ${MPI_LIBRARY_DIRS} NO_DEFAULT_PATH)
+        list(APPEND MPI_DYLIBS ${libdyn})
+        list(APPEND MPI_STLIBS ${libst})
+      endforeach ()
+    endif ()
+    set(MPI_LIBRARY ${MPI_DYLIBS})
+  endif ()
 
 # Fix the variables
   set(MPI_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
@@ -227,6 +260,11 @@ if (MPI_FOUND)
 # Pass up the found variable.  This is all caps.
   set(SCIMPI_FOUND TRUE)
 
+endif ()
+
+# Either gives MPI
+if (MPI_FOUND OR SCIMPI_FOUND)
+  set(HAVE_MPI 1 CACHE BOOL "Whether MPI was found" FORCE)
 endif ()
 
 if (NOT SCIMPI_FOUND)

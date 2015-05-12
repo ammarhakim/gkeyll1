@@ -2,14 +2,13 @@
 #
 # SciFortranChecks: check various Fortran capabilities
 #
-# $Id: SciFortranChecks.cmake 620 2014-09-07 14:31:32Z jrobcary $
+# $Id: SciFortranChecks.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 # THIS FILE NEEDS ALOT OF WORK.  JUST STARTING WITH GNU.
 #
-# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 
@@ -36,16 +35,8 @@ elseif ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL GNU)
 elseif ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL Intel)
   string(REGEX REPLACE "\\.[0-9]+.*$" "" Fortran_MAJOR_VERSION ${Fortran_VERSION})
   set(Fortran_COMP_LIB_SUBDIR icpc${Fortran_MAJOR_VERSION})
-  if (WIN32)
-# add openMP library, another possibility is libiomp5mt on Windows (Pletzer)
-    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} libiomp5md)
-    # This was causing undefined references on windows (Pletzer)
-    #set(CMAKE_EXE_LINKER_FLAGS
-    #  "${CMAKE_EXE_LINKER_FLAGS} -NODEFAULTLIB:MSVCRT")
-  else ()
-# unix
-    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} iomp5)
-  endif ()
+  # CMake sets it to i_dynamic by default but that's debateable
+  set(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "")
   set(FC_DOUBLE_FLAGS "-autodouble")
 elseif ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL PathScale)
   string(SUBSTRING ${Fortran_VERSION} 0 1 Fortran_MAJOR_VERSION)
@@ -106,7 +97,9 @@ foreach (scilib ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
     endif ()
     set(Fortran_IGNORED_LIBRARIES ${Fortran_IGNORED_LIBRARIES} ${scilib})
     set(libprocessed TRUE)
-  elseif (${scilib} MATCHES "^open-" OR ${scilib} MATCHES "^libmpi")
+  elseif (${scilib} MATCHES "^open-" OR ${scilib} MATCHES "^mpi$" OR
+        ${scilib} MATCHES "^mpi_usempi")
+# mpi_mpifh needed for fortran messaging
     if (DEBUG_CMAKE)
       message("${scilib} is an OpenMPI library.  Ignoring.")
     endif ()
@@ -114,7 +107,7 @@ foreach (scilib ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
     set(libprocessed TRUE)
   elseif (${scilib} MATCHES "^darshan-" OR ${scilib} MATCHES "^libmpi")
     if (DEBUG_CMAKE)
-      message("${scilib} is an OpenMPI library.  Ignoring.")
+      message("${scilib} is an MPI library.  Ignoring.")
     endif ()
     set(Fortran_IGNORED_LIBRARIES ${Fortran_IGNORED_LIBRARIES} ${scilib})
     set(libprocessed TRUE)

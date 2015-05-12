@@ -2,12 +2,11 @@
 #
 # SciCChecks: check various C capabilities
 #
-# $Id: SciCChecks.cmake 646 2014-10-08 19:06:07Z jacobrking $
+# $Id: SciCChecks.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -18,6 +17,17 @@ message(STATUS "C_COMPILER_ID = ${C_COMPILER_ID}.")
 SciPrintVar(C_COMPILER)
 SciPrintVar(C_COMPILER_ID)
 
+# Type checks
+include(CheckTypeSize)
+
+# Check for ssize_t
+check_type_size(ssize_t SIZE_OF_SSIZE_T)
+if (HAVE_SIZE_OF_SSIZE_T)
+  message(STATUS "ssize_t available.")
+else ()
+  message(STATUS "ssize_t not available.")
+  set(ssize_t SSIZE_T)
+endif ()
 
 # Check whether time and sys/time can both be included
 include(CheckCSourceCompiles)
@@ -114,55 +124,44 @@ endif ()
 # Determine flags by compiler
 
 set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_RELEASE}")
-if (${C_COMPILER_ID} STREQUAL GNU OR ${C_COMPILER_ID} STREQUAL Clang)
+if (${C_COMPILER_ID} STREQUAL GNU)
 
   set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -ffast-math")
   if (SSE_CAPABILITY)
     set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -m${SSE_CAPABILITY}")
   endif ()
-# Apple automatically sets mtune
-  # IF(LINUX)
-    if ("${SCIC_CPU}" MATCHES ".*Athlon.*MP.*")
-      set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -march=athlon-mp")
-    elseif (${SCIC_CPU} MATCHES ".*Athlon.*XP.*")
-      set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -march=athlon-xp")
-    elseif (${SCIC_CPU} MATCHES ".*Athlon.*")
-      set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -march=athlon")
-    elseif (${SCIC_CPU} MATCHES ".*Opteron.*")
-      set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -mtune=amdfam10")
-    endif ()
-  # ENDIF()
-  set(SSE2_FLAG -msse2)
+  set(SSE2_FLAG "-msse2")
   set(AVX_FLAG "-mavx")
   if (APPLE)
 # On OS X direct to use clang assembler
     set(AVX_FLAG "${AVX_FLAG} -Wa,-q")
   endif ()
-# Either flag works on hasry
   set(AVX2_FLAG "-mavx2")
-  # set(AVX2_FLAG "-march=core-avx2")
-  if (APPLE)
-# On OS X direct to use clang assembler.  Not needed since avx implied?
-    # set(AVX2_FLAG "${AVX2_FLAG} -Wa,-q")
+  set(OPENMP_FLAGS -fopenmp)
+
+elseif (${C_COMPILER_ID} STREQUAL Clang)
+
+  if (SSE_CAPABILITY)
+    set(CMAKE_C_FLAGS_FULL "${CMAKE_C_FLAGS_FULL} -m${SSE_CAPABILITY}")
   endif ()
-  if (${C_COMPILER_ID} STREQUAL GNU)
-    set(OPENMP_FLAGS -fopenmp)
-  endif ()
+  set(SSE2_FLAG "-msse2")
+  set(AVX_FLAG "-mavx")
+  set(AVX2_FLAG "-mavx2")
 
 elseif (${C_COMPILER_ID} STREQUAL Cray)
-  
+
   set(OPENMP_FLAGS "-h omp")
 
 elseif (${C_COMPILER_ID} STREQUAL Intel)
 
-  set(SSE2_FLAG -msse2)
+  set(SSE2_FLAG "-msse2")
   set(AVX_FLAG "-mavx")
   if (APPLE)
 # On OS X direct to use clang assembler.  Needs testing.
     set(AVX_FLAG "${AVX_FLAG} -Wa,-q")
   endif ()
   set(AVX2_FLAG "-march=core-avx2")
-  set(OPENMP_FLAGS -openmp)
+  set(OPENMP_FLAGS "-openmp")
 
 elseif (${C_COMPILER_ID} STREQUAL MSVC)
 
@@ -175,11 +174,10 @@ elseif (${C_COMPILER_ID} STREQUAL PGI)
 # (no inline).
   set(CMAKE_C_FLAGS_FULL
       "-fast -O3 -DNDEBUG -Munroll -Minline=levels:5 -Mipa=fast,inline -Mmovnt")
-  set(SSE2_FLAG -Mvect=simd:128)
-  # set(SSE2_FLAG -h intrinsics)
-  set(AVX_FLAG -Mvect=simd:256)
+  set(SSE2_FLAG "-Mvect=simd:128")
+  set(AVX_FLAG "-Mvect=simd:256")
   # set(AVX_FLAG -h intrinsics)
-  set(OPENMP_FLAGS -mp)
+  set(OPENMP_FLAGS "-mp")
 
 elseif (${C_COMPILER_ID} STREQUAL XL)
 
@@ -189,18 +187,23 @@ else ()
   message(STATUS "FULL flags not known for ${C_COMPILER_ID}")
 endif ()
 
+# Print the performance flags
+message(STATUS "Performance flags:")
+SciPrintVar(SSE2_FLAG)
+SciPrintVar(AVX_FLAG)
+SciPrintVar(AVX2_FLAG)
+SciPrintVar(AVX512_FLAG)
+SciPrintVar(OPENMP_FLAGS)
+
 # Remove /MD etc for static builds on Windows, Add /bigobj.
 if (WIN32 AND NOT MINGW)
-  foreach (flag_var CMAKE_C_FLAGS_FULL CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_DEBUG)
-    if (NOT (BUILD_SHARED_LIBS OR BUILD_WITH_SHARED_RUNTIME))
-      string(REPLACE "/MDd" "" ${flag_var} "${${flag_var}}")
-      string(REPLACE "/MD" "" ${flag_var} "${${flag_var}}")
-    endif ()
-    set(${flag_var} "${${flag_var}} /bigobj")
-  endforeach (flag_var)
+  foreach (bldtype FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
+    SciRplCompilerFlags(C ${bldtype})
+  endforeach ()
 endif ()
 
 # Print results
+message(STATUS "C compiler options:")
 foreach (bld FULL RELEASE RELWITHDEBINFO MINSIZEREL DEBUG)
   SciPrintVar(CMAKE_C_FLAGS_${bld})
 endforeach ()

@@ -15,12 +15,11 @@
 #
 # FindOpenSsl: find includes and libraries for openssl
 #
-# $Id: FindSciOpenSsl.cmake 422 2013-12-19 02:12:32Z techxdave $
+# $Id: FindSciOpenSsl.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -44,6 +43,10 @@ else ()
   # SciGetInstSubdirs(openssl instdirs)
   set(instdirs openssl openssl-sersh)
   set(ssl_libs ssl crypto)
+  if (LINUX)
+# gssapi_krb5 required for libssh-0.6.4
+    set(ssl_libs ${ssl_libs} gssapi_krb5)
+  endif ()
 endif ()
 
 SciFindPackage(PACKAGE "OpenSsl"

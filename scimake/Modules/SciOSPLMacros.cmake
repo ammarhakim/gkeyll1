@@ -1,12 +1,11 @@
 ##############################################################################
 # Adding OpenSplics DDS Data Model related files to the build.
 #
-# $Id: SciOSPLMacros.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: SciOSPLMacros.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ##############################################################################
 #

@@ -15,12 +15,11 @@
 # SciFindPetsc: find includes and libraries for petsc.  Complex
 # due to the many libraries that petsc builds
 #
-# $Id: FindSciPetsc.cmake 484 2014-01-26 16:39:04Z jrobcary $
+# $Id: FindSciPetsc.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -29,30 +28,30 @@ if (WIN32)
 endif (WIN32)
 
 set(Petsc_LIBRARY_LIST
-#  "${PETSC_LIB_PREFIX}petscts"
-#  "${PETSC_LIB_PREFIX}petscsnes"
-#  "${PETSC_LIB_PREFIX}petscksp"
-#  "${PETSC_LIB_PREFIX}petscdm"
-#  "${PETSC_LIB_PREFIX}petscmat"
-#  "${PETSC_LIB_PREFIX}petscvec"
+  "${PETSC_LIB_PREFIX}petscts"
+  "${PETSC_LIB_PREFIX}petscsnes"
+  "${PETSC_LIB_PREFIX}petscksp"
+  "${PETSC_LIB_PREFIX}petscdm"
+  "${PETSC_LIB_PREFIX}petscmat"
+  "${PETSC_LIB_PREFIX}petscvec"
   "${PETSC_LIB_PREFIX}petsc"
-#  "${PETSC_LIB_PREFIX}cmumps"
-#  "${PETSC_LIB_PREFIX}dmumps"
-#  "${PETSC_LIB_PREFIX}smumps"
-#  "${PETSC_LIB_PREFIX}zmumps"
-#  "${PETSC_LIB_PREFIX}mumps_common"
-#  "${PETSC_LIB_PREFIX}pord"
-#  "${PETSC_LIB_PREFIX}scalapack"
-#  "${PETSC_LIB_PREFIX}blacs"
-#  "${PETSC_LIB_PREFIX}superlu_dist_2.3"
-#  "${PETSC_LIB_PREFIX}superlu_dist_2.4"
-#  "${PETSC_LIB_PREFIX}superlu_dist_3.1"
+  "${PETSC_LIB_PREFIX}cmumps"
+  "${PETSC_LIB_PREFIX}dmumps"
+  "${PETSC_LIB_PREFIX}smumps"
+  "${PETSC_LIB_PREFIX}zmumps"
+  "${PETSC_LIB_PREFIX}mumps_common"
+  "${PETSC_LIB_PREFIX}pord"
+  "${PETSC_LIB_PREFIX}scalapack"
+  "${PETSC_LIB_PREFIX}blacs"
+  "${PETSC_LIB_PREFIX}superlu_dist_2.3"
+  "${PETSC_LIB_PREFIX}superlu_dist_2.4"
+  "${PETSC_LIB_PREFIX}superlu_dist_3.1"
   "${PETSC_LIB_PREFIX}superlu_4.0"
-#  "${PETSC_LIB_PREFIX}superlu_4.3"
-#  "${PETSC_LIB_PREFIX}superlu"
-#  "${PETSC_LIB_PREFIX}HYPRE"
-#  "${PETSC_LIB_PREFIX}parmetis"
-#  "${PETSC_LIB_PREFIX}metis"
+  "${PETSC_LIB_PREFIX}superlu_4.3"
+  "${PETSC_LIB_PREFIX}superlu"
+  "${PETSC_LIB_PREFIX}HYPRE"
+  "${PETSC_LIB_PREFIX}parmetis"
+  "${PETSC_LIB_PREFIX}metis"
 )
 
 if (DEFINED PETSC_FIND_VERSION)

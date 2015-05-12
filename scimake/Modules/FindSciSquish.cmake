@@ -15,12 +15,11 @@
 #
 # SciFindSquish: find includes and libraries for Squish.
 #
-# $Id: FindSciSquish.cmake 414 2013-12-17 18:47:54Z techxdave $
+# $Id: FindSciSquish.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 set(SUPRA_SEARCH_PATH ${SUPRA_SEARCH_PATH})

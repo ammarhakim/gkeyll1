@@ -14,12 +14,11 @@
 #
 # Find module for VTK
 #
-# $Id: FindSciVtk.cmake 316 2013-06-23 18:29:32Z jrobcary $
+# $Id: FindSciVtk.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ##################################################################
 
@@ -52,7 +51,7 @@ set(Vtk_LIBRARY_LIST
 )
 
 if (NOT Vtk_INSTALL_DIRS)
-  set(Vtk_INSTALL_DIRS vtk-cc4py vtk-sersh vtk)
+  set(Vtk_INSTALL_DIRS vtk-pycsh vtk-sersh vtk)
 endif ()
 
 SciFindPackage(

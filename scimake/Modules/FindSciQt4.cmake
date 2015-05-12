@@ -2,12 +2,11 @@
 #
 # FindSciQt4: find includes and libraries for Qt4
 #
-# $Id: FindSciQt4.cmake 517 2014-02-15 22:15:44Z jrobcary $
+# $Id: FindSciQt4.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 # The cmake find of Qt4 needs cleaning up.
 #

@@ -10,10 +10,9 @@
 #  OpenCL_LIBRARY_DIRS       = Location of OpenCL libraries
 #  OpenCL_LIBRARIES          = Required libraries
 #
-# Copyright 2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2013-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

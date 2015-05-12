@@ -16,12 +16,11 @@
 #
 # FindSciMathJax
 #
-# $Id: FindSciMathJax.cmake 534 2014-03-04 22:45:45Z krugers $
+# $Id: FindSciMathJax.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

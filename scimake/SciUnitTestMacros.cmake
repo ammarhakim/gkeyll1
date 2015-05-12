@@ -2,29 +2,30 @@
 #
 # SciUnitTestMacros: Macros for adding unit tests of various types.
 #
-# $Id: SciUnitTestMacros.cmake 650 2014-10-09 17:32:46Z chrismdeluca $
+# $Id: SciUnitTestMacros.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2014 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2014-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
 # Add the specified directories to the shared libraries path
 macro(SciAddSharedLibDirs)
-  # parse the path argument
+# parse the path argument
   set(multiValArgs ADDPATH)
   cmake_parse_arguments(SHLIB_DIRS "${opts}" "${oneValArgs}" "${multiValArgs}" ${ARGN})
-  # if 1+ directories were specified add it/them to the path in the parent scope
+# if 1+ directories were specified add it/them to the path in the parent scope
   if (SHLIB_DIRS_ADDPATH)
     set(SHLIB_CMAKE_PATH_VAL ${SHLIB_DIRS_ADDPATH} ${SHLIB_CMAKE_PATH_VAL})
     if (NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
-      # it only makes sense to set the variable in the parent scope if not in the top level directory
+# it only makes sense to set the variable in the parent scope if not
+# in the top level directory
       set(SHLIB_CMAKE_PATH_VAL "${SHLIB_CMAKE_PATH_VAL}" PARENT_SCOPE)
     endif (NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
-    # make a system native path var containing all of the shared libraries directories
+# make a system native path var containing all of the shared libraries
+# directories
     makeNativePath(INPATH "${SHLIB_CMAKE_PATH_VAL}" OUTPATH SCIMAKE_SHLIB_NATIVE_PATH_VAL)
   endif (SHLIB_DIRS_ADDPATH)
 endmacro()
@@ -147,8 +148,28 @@ macro(SciAddUnitTest)
   endif ()
   set_tests_properties(${TEST_NAME}
     PROPERTIES ENVIRONMENT
-            "${SHLIB_PATH_VAR}=${SCIMAKE_SHLIB_NATIVE_PATH_VAL}" ${TEST_PROPERTIES}
+      "${SHLIB_PATH_VAR}=${SCIMAKE_SHLIB_NATIVE_PATH_VAL}" ${TEST_PROPERTIES}
     ATTACHED_FILES_ON_FAIL "${FILES_TO_ATTACH}"
   )
+endmacro()
+
+#
+# Check the source with cppcheck
+#
+macro(SciCppCheckSource build)
+  if (("${build}" STREQUAL "") OR (CppCheck_cppcheck AND ${CMAKE_INSTALL_PREFIX} MATCHES "${build}$"))
+    message(STATUS "Source code checking enabled.")
+    add_test(NAME cppcheck COMMAND ${CMAKE_COMMAND}
+      -DCppCheck_cppcheck:FILEPATH=${CppCheck_cppcheck}
+      -DCPPCHECK_SOURCE_DIR:PATH=${CMAKE_SOURCE_DIR}
+      -P ${SCIMAKE_DIR}/SciCppCheck.cmake
+    )
+    set_tests_properties(cppcheck
+      PROPERTIES ENVIRONMENT
+        "${SHLIB_PATH_VAR}=${SCIMAKE_SHLIB_NATIVE_PATH_VAL}"
+    )
+  else ()
+    message(STATUS "Source code checking not enabled.")
+  endif ()
 endmacro()
 

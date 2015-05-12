@@ -13,14 +13,13 @@
 
 ######################################################################
 #
-# FindHdf5: find includes and libraries for hdf5
+# FindSciHdf5: find includes and libraries for hdf5
 #
-# $Id: FindSciHdf5.cmake 623 2014-09-08 13:06:29Z jrobcary $
+# $Id: FindSciHdf5.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -30,18 +29,13 @@
 message("")
 message(STATUS "Initial search for Hdf5 components")
 
-set(instdirargs "")
-if (USE_HDF5_SERMD)
-  if (WIN32)
-    set(instdirargs INSTALL_DIRS hdf5-sermd)
-  endif ()
-endif ()
+SciGetInstSubdirs(Hdf5 instdirs)
 
 SciFindPackage(PACKAGE "Hdf5"
+  INSTALL_DIRS ${instdirs}
   HEADERS hdf5.h H5pubconf.h
 # Last in list is for finding within VisIt installation
   INCLUDE_SUBDIRS include include/hdf5/include
-  ${instdirargs}
   FIND_QUIETLY
 )
 
@@ -122,6 +116,7 @@ else ()
   set(desiredlibs)
   foreach (nm hdf5_tools hdf5_toolsdll hdf5_hl_fortran hdf5_hl_f90cstub
     hdf5_fortran hdf5_f90cstub hdf5_hl hdf5_hldll hdf5 hdf5dll
+    hdf5_debug
   )
     list(FIND hlnms ${nm} indx)
     if (NOT(${indx} EQUAL -1))
@@ -160,7 +155,7 @@ SciFindPackage(PACKAGE "Hdf5"
 )
 
 if (FALSE)
-# The executables are not always found, so we will hdf5 to found
+# The executables are not always found, so we set hdf5 to found
 # if includes and libraries found.
 if (NOT HDF5_FOUND)
   if (Hdf5_hdf5_h AND Hdf5_hdf5_LIBRARY AND Hdf5_hdf5_hl_LIBRARY)
@@ -179,6 +174,12 @@ if (HDF5_FOUND)
     set(Hdf5_DEFINITIONS ${Hdf5_DEFINITIONS} -DH5_BUILT_AS_DYNAMIC_LIB)
     message(STATUS "Adding to Hdf5_DEFINITIONS that H5 build dynamic.")
     SciPrintVar(Hdf5_DEFINITIONS)
+  endif ()
+# if linux add dl to the libraries variable
+# JRC: Cannot do this here as interferes with static linking of vorpal.
+# Must be done in the CMakeLists.txt where the executable is being linked.
+  if (LINUX)
+    # set(Hdf5_LIBRARIES ${Hdf5_LIBRARIES} dl)
   endif ()
 else ()
   message(STATUS "Did not find Hdf5.  Use -DHdf5_ROOT_DIR to specify the installation directory.")

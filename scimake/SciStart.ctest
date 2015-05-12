@@ -2,10 +2,10 @@
 #
 # Start.ctest for any scimake project
 #
-# $Id: SciStart.ctest 598 2014-06-27 21:52:30Z jrobcary $
+# $Id: SciStart.ctest 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright &copy; 2005-2013 Tech-X Corporation, Boulder, CO
-# See LICENSE file for conditions of use.
+# Copyright &copy; 2008-2015, Tech-X Corporation, Boulder, CO.
+# See LICENSE file (EclipseLicense.txt) for conditions of use.
 #
 ######################################################################
 

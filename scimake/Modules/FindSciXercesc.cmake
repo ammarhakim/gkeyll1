@@ -15,12 +15,11 @@
 #
 # SciFindXercesc.cmake: find includes and libraries for Xercesc
 #
-# $Id: FindSciXercesc.cmake 484 2014-01-26 16:39:04Z jrobcary $
+# $Id: FindSciXercesc.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2012 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2012-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

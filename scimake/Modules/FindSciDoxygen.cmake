@@ -12,12 +12,11 @@
 #
 # SciDoxygen: Find Doxygen and set up apidocs target
 #
-# $Id: FindSciDoxygen.cmake 407 2013-12-14 19:04:56Z jrobcary $
+# $Id: FindSciDoxygen.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2011 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2011-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 

@@ -1,4 +1,9 @@
-// $Id: shared_ptr.cxx 195 2013-02-03 18:18:39Z jrobcary $
+/**
+ * $Id: shared_ptr.cxx 792 2015-04-17 14:07:44Z jrobcary $
+ *
+ * Copyright &copy; 2013-2015, Tech-X Corporation, Boulder, CO.
+ * See LICENSE file (EclipseLicense.txt) for conditions of use.
+ */
 
 #include <sci_shared_ptr>
 
@@ -10,3 +15,4 @@ int main(int argc, char** argv) {
   sci_shared_ptr<S> sptr;
   return 0;
 }
+

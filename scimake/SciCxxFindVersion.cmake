@@ -2,12 +2,11 @@
 #
 # SciCxxFindVersion: Determine compiler version for any compiler
 #
-# $Id: SciCxxFindVersion.cmake 259 2013-04-10 19:10:45Z jdelamere $
+# $Id: SciCxxFindVersion.cmake 792 2015-04-17 14:07:44Z jrobcary $
 #
-# Copyright 2010-2013 Tech-X Corporation.
-# Arbitrary redistribution allowed provided this copyright remains.
-#
+# Copyright 2010-2015, Tech-X Corporation, Boulder, CO.
 # See LICENSE file (EclipseLicense.txt) for conditions of use.
+#
 #
 ######################################################################
 
@@ -122,7 +121,7 @@ elseif (CMAKE_CXX_COMPILER MATCHES "cl")
     OUTPUT_VARIABLE cxx_version_tmp
   )
   string(REGEX MATCH
-    "Version [0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+ for"
+    "Version [0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)? for"
     cxx_version_tmp
     ${cxx_version_tmp}
   )
@@ -173,6 +172,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL XL)
 else ()
   message(FATAL_ERROR "Unknown compiler ID, ${CMAKE_CXX_COMPILER_ID}.")
 endif ()
-
+set(CXX ${CMAKE_CXX_COMPILER})
 set(CXX_VERSION ${cxx_version_tmp})
 
