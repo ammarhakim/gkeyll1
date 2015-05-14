@@ -139,6 +139,9 @@ namespace Lucee
       return 2;
     else if (polyOrder == 2)
       return 3;
+
+    //Need a return value so it doesn't complain
+    return 0;
   }
 
   unsigned
@@ -148,6 +151,9 @@ namespace Lucee
       return 2;
     else if (polyOrder == 2)
       return 3;
+
+    //Need a return value so it doesn't complain
+    return 0;
   }
 
   unsigned
@@ -453,6 +459,9 @@ namespace Lucee
       return 4;
     else if (polyOrder == 2)
       return 9;
+
+    //Need a return value so doesn't complain
+    return 0;
   }
 
   unsigned
@@ -462,6 +471,9 @@ namespace Lucee
       return 2;
     else if (polyOrder == 2)
       return 3;
+
+    //Need a return value so doesn't complain
+    return 0;
   }
 
   void
