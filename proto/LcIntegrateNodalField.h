@@ -75,6 +75,20 @@ namespace Lucee
       bool sharedNodes;
 /** Weights for quadrature */
       std::vector<double> weights;
+
+/** Reference to Lua function */
+      int fnRef;
+/** Flag to indicate if Lua function was specified */
+      bool hasFunction;
+
+/** 
+ * Compute quantity to integrate.
+ *
+ * @param nc Number of components.
+ * @param inp Input vector of data.
+ * @return value of integrand given data.
+ */
+      double getIntegrand(unsigned nc, const double inp[]);
   };
 }
 
