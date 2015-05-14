@@ -64,6 +64,8 @@ namespace Lucee
         numFlux = NF_CENTRAL;
       else if (nf == "lax")
         numFlux = NF_LAX;
+      else if (nf == "upwind")
+        numFlux = NF_UPWIND;
       else
       {
         Lucee::Except lce("PhMaxwellEquation::readInput: 'numericalFlux' ");
@@ -248,7 +250,7 @@ namespace Lucee
       for (unsigned i=0; i<8; ++i)
         f[i] = 0.5*(fr[i]+fl[i]);
     }
-    else
+    else if (numFlux == NF_LAX)
     {
       for (unsigned i=0; i<8; ++i)
         f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);

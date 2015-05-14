@@ -167,7 +167,7 @@ namespace Lucee
       double maxWaveSpeed;
 
 /** Enum for flux types */
-      enum NumFlux { NF_CENTRAL, NF_LAX };
+      enum NumFlux { NF_CENTRAL, NF_LAX, NF_UPWIND };
 
 /** Flag to indicate type of numerical flux to use */
       NumFlux numFlux;
