@@ -111,6 +111,45 @@ namespace Lucee
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
+/**
+ * Compute the absolute maximum wave speed
+ *
+ * @param c Coordinate system in which to compute speeds.
+ * @param q Conserved variables for which to compute speeds.
+ * @return maxium absolute speed.
+ */
+      double maxAbsSpeed(const Lucee::RectCoordSys& c, const double* q);
+
+
+/**
+ * Compute numerical flux for this equation system. Numerical flux
+ * depends on left and right states. This method should also return
+ * the maximum wave speed computed from the states. The states are
+ * already in the normal-tangent space and so for isotropic systems
+ * the coordinate systems can be ignored.
+ *
+ * @param c Coordinate system in which to compute flux.
+ * @param ql Left conserved variable state.
+ * @param qr Right conserved variable state.
+ * @param auxVarsl Left auxillary variables needed to compute fluxes.
+ * @param auxVarsr Right auxillary variables needed to compute fluxes.
+ * @param f On output, this contains the numerical flux.
+ * @return Maximum wave speed from left/right state.
+ */
+      virtual double numericalFlux(const Lucee::RectCoordSys& c,
+        const double* ql, const double* qr, 
+        const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+        double* f);
+
+/**
+ * Check if conserved variables satisfies invariant domains of the
+ * system. Return true if it does, false otherwise.
+ *
+ * @param q Conserved variables.
+ * @return true if invariant domains are satisfied, false otherwise.
+ */
+      virtual bool isInvariantDomain(const double* q) const;
+
     protected:
 
     private:
@@ -124,6 +163,16 @@ namespace Lucee
 /** Propagation speed factor for magnetic field error potential. This
  * is dimensionless and the actual speed is chi_m*c. */
       double chi_m;
+/** Maximum wave speed */
+      double maxWaveSpeed;
+
+/** Enum for flux types */
+      enum NumFlux { NF_CENTRAL, NF_LAX, NF_UPWIND };
+
+/** Flag to indicate type of numerical flux to use */
+      NumFlux numFlux;
+/** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
+      bool useIntermediateWave;
   };
 }
 
