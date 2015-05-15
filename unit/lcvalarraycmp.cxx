@@ -53,6 +53,8 @@ int test_1()
       valfloat[i] = (valfloat[i+1]-2*valfloat[i]+valfloat[i-1])/2.25;
   end = clock();
   cout << right << fixed << difftime(end,start)  << " (valarray diff.)" << endl;
+
+  return 0;
 }
 
 int test_2()
@@ -93,6 +95,8 @@ int test_2()
       lvecfloat[i] = (lvecfloat[i+1]-2*lvecfloat[i]+lvecfloat[i-1])/2.25;
   end = clock();
   cout << right << fixed << difftime(end,start)  << " (Lucee::Vector diff.)" << endl;
+
+  return 0;
 }
 
 void rndm(float& a)

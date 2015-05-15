@@ -65,6 +65,8 @@ doMatVec(unsigned N, int p, int nloop)
         matVec(1.0, m, &fInPtr[0], 0.0, &fOutPtr[0]);
       }
   }
+
+  return 0;
 }
 
 int
@@ -91,4 +93,6 @@ main(int argc, char **argv)
   doMatVec(25, 16, 10000);
   end = clock();
   cout << right << fixed << difftime(end,start)  << " (25x25 p=16)" << endl;
+
+  return 0;
 }

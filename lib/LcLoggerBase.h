@@ -102,6 +102,10 @@ namespace Lucee
         return *l;
       }
     }
+
+    //Needs a return value so it builds.
+    T* dummy;
+    return *dummy;
   }
 
   template<class T>
@@ -122,6 +126,9 @@ namespace Lucee
     Lucee::Except ex("LoggerBase::get: Logger with name ");
     ex << nm << " not found";
     throw ex;
+
+    //Needs a return value so it builds.
+    return *i->second;
   }
 
   template<class T>

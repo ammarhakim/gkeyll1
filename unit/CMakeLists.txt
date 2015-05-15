@@ -33,9 +33,9 @@ ENDIF (APPLE)
 # Create test executables
 
 if (ENABLE_PARALLEL)
-  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${MPI_STLIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES})
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${MPI_STLIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES} -ldl)
 else ()
-  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES})
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES} -ldl)
 endif ()
 
 add_executable(lcarray lcarray.cxx)
