@@ -54,6 +54,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Prerequisites for finding packages
 include(${CMAKE_SOURCE_DIR}/scimake/Modules/SciFindPackage.cmake)
 
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl -lc")
+
 # find txbase
 find_package(SciTxBase REQUIRED)
 if (TXBASE_FOUND)
