@@ -56,7 +56,7 @@ namespace Lucee
 // store maximum speed for future use
     maxWaveSpeed = Lucee::max3(lightSpeed, chi_e*lightSpeed, chi_m*lightSpeed);
 
-    numFlux = NF_LAX;
+    numFlux = NF_UPWIND;
     if (tbl.hasString("numericalFlux"))
     {
       std::string nf = tbl.getString("numericalFlux");
@@ -239,24 +239,48 @@ namespace Lucee
     const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
     double* f)
   {
-    double absMaxs = maxWaveSpeed;
+#define AVG(a,b) 0.5*(a+b)
+#define JMP(a,b) 0.5*(a-b)
 
-    double fl[8], fr[8];
-    flux(c, ql, auxVarsl, fl);
-    flux(c, qr, auxVarsr, fr);
+    double absMaxs = maxWaveSpeed;
+    double qu[8], fl[8], fr[8];
 
     if (numFlux == NF_CENTRAL)
     {
+      flux(c, ql, auxVarsl, fl);
+      flux(c, qr, auxVarsr, fr);
       for (unsigned i=0; i<8; ++i)
         f[i] = 0.5*(fr[i]+fl[i]);
     }
     else if (numFlux == NF_LAX)
     {
+      flux(c, ql, auxVarsl, fl);
+      flux(c, qr, auxVarsr, fr);
       for (unsigned i=0; i<8; ++i)
         f[i] = 0.5*(fr[i]+fl[i]) - 0.5*absMaxs*(qr[i]-ql[i]);
     }
+    else if (numFlux == NF_UPWIND)
+    {
+// first compute upwinded field at interface
+      qu[EX] = AVG(qr[EX],ql[EX]) - lightSpeed*JMP(qr[PHI],ql[PHI]);
+      qu[EY] = AVG(qr[EY],ql[EY]) - lightSpeed*JMP(qr[BZ],ql[BZ]);
+      qu[EZ] = AVG(qr[EZ],ql[EZ]) + lightSpeed*JMP(qr[BY],ql[BY]);
+
+      qu[BX] = AVG(qr[BX],ql[BX]) - JMP(qr[PSI],ql[PSI])/lightSpeed;
+      qu[BY] = AVG(qr[BY],ql[BY]) + JMP(qr[EZ],ql[EZ])/lightSpeed;
+      qu[BZ] = AVG(qr[BZ],ql[BZ]) - JMP(qr[EY],ql[EY])/lightSpeed;
+
+      qu[PHI] = AVG(qr[PHI],ql[PHI]) - JMP(qr[EX],ql[EX])/lightSpeed;
+      qu[PSI] = AVG(qr[PSI],ql[PSI]) - lightSpeed*JMP(qr[BX],ql[BX]);
+
+// now compute interface flux: this is numerical flux
+      flux(c, qu, auxVarsr, f);
+    }
+    else{ /* Can't happen */ }
 
     return absMaxs;
+#undef AVG
+#undef JMP
   }
 
   bool
