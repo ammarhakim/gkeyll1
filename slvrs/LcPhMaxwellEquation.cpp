@@ -276,7 +276,7 @@ namespace Lucee
 // now compute interface flux: this is numerical flux
       flux(c, qu, auxVarsr, f);
     }
-    else{ /* Can't happen */ }
+    else { /* Can't happen */ }
 
     return absMaxs;
 #undef AVG
