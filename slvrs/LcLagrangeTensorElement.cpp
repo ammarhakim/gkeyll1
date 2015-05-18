@@ -236,11 +236,16 @@ namespace Lucee
         localNodeCoords(i,d) = (eta[d]+1)*0.5*dx[d];
     }
 
-// figure out how many quadrature points needed to do 4*polyOrder integration
     unsigned maxNodes = 0;
     for (unsigned d=0; d<NDIM; ++d)
       maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
     unsigned polyOrder = maxNodes - 1;
+    // figure out how many quadrature points needed to do 4*polyOrder integration
+    // (or 3*polyOrder integration if polyOrder > 1 for some reason)
+    unsigned maxPower;
+    if (polyOrder == 1)
+      maxPower = 4;
+    else maxPower = 3*polyOrder;
     unsigned num1DGaussPoints = (unsigned)((4*polyOrder+1)/2.0 + 0.5);
     numGaussVolNodes = 1;
     for(int d=0; d<NDIM; d++)

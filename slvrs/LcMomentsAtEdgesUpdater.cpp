@@ -45,14 +45,6 @@ namespace Lucee
     UpdaterIfc::initialize();
 
     unsigned numNodes = nodalBasis->getNumNodes();
-    std::vector<unsigned> yRef(numNodes), xRef(numNodes);
-
-    // reflection mapping
-    rotMap.resize(numNodes);
-    nodalBasis->getUpperReflectingBcMapping(0, yRef);
-    nodalBasis->getLowerReflectingBcMapping(1, xRef);
-    for (unsigned i=0; i<numNodes; ++i)
-      rotMap[i] = xRef[yRef[i]];
 
     // Figure out what nodes are on the right edge
     int numEdgeQuadNodes = nodalBasis->getNumSurfGaussNodes();
@@ -113,7 +105,7 @@ namespace Lucee
     const Lucee::Field<2, double>& distfIn = this->getInp<Lucee::Field<2, double> >(0);
     // Hamiltonian
     const Lucee::Field<2, double>& hamilIn = this->getInp<Lucee::Field<2, double> >(1);
-    // Output velocity moments (1 and 3) vs time
+    // Output velocity moments (0, 1, 2, 3) vs time
     Lucee::DynVector<double>& velocityMoments = this->getOut<Lucee::DynVector<double> >(0);
 
     Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();

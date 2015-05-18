@@ -73,8 +73,6 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Mapping for 180 degree rotations */
-      std::vector<unsigned> rotMap;
 /** Contains the right edge node numbers */
       std::vector<int> rightEdgeNodeNums;
 /** Contains the left edge node numbers */

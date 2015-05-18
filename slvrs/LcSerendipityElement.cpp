@@ -1001,7 +1001,7 @@ namespace Lucee
       #include <LcSerendipityElementDiffusionOutput>
       #include <LcSerendipityElementHyperDiffusionOutput>
 
-      // Set up 1D to 2D mapping matrix
+      // Set up face-to-interior mapping matrix
       lowerFaceToInteriorMapMatrices = std::vector<Eigen::MatrixXd>(NDIM);
       
       for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
@@ -1009,6 +1009,18 @@ namespace Lucee
 
       // Explicitly assign values to matrix elements (somewhat long)
       #include <LcSerendipityElement2DFaceToInteriorOutput>
+    }
+    else if (NDIM == 3)
+    {
+      // Set up face-to-interior mapping matrix
+      lowerFaceToInteriorMapMatrices = std::vector<Eigen::MatrixXd>(NDIM);
+      
+      // Assumes that all faces have same number of nodes
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+        lowerFaceToInteriorMapMatrices[dimIndex] = Eigen::MatrixXd::Zero(functionVector.size(), getNumSurfLowerNodes(0));
+
+      // Explicitly assign values to matrix elements (somewhat long)
+      #include <LcSerendipityElement3DFaceToInteriorOutput>
     }
 
     computeMass(refMass);

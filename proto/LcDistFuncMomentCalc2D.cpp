@@ -124,8 +124,8 @@ namespace Lucee
     {
       for (int j = 0; j < nlocal4d; j++)
       {
-        // Compute integral of phi2d_i * phi4d_j
         double integralResult = 0.0;
+        // Compute integral of phi2d_i * phi4d_j
         for (int gaussIndex = 0; gaussIndex < volWeights4d.size(); gaussIndex++)
           integralResult += volWeights4d[gaussIndex]*volQuad2d(gaussIndex % nVolQuad2d, i)*volQuad4d(gaussIndex, j);
         mom0Matrix(i, j) = integralResult;
