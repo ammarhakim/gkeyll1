@@ -26,6 +26,9 @@
 
 namespace Lucee
 {
+  template<> const char *UnstructuredGrid<2>::id = "Unstructured2D";
+  template<> const char *UnstructuredGrid<3>::id = "Unstructured3D";
+
   template<unsigned NDIM>
   UnstructuredGrid<NDIM>::~UnstructuredGrid()
   {
@@ -57,6 +60,12 @@ namespace Lucee
     this->setIsSafeToWrite(true);
 // compute local region
     //localRgn = decompRgn->getRegion(comm->getRank());
+  }
+
+  template<unsigned NDIM>
+  TxIoNodeType UnstructuredGrid<NDIM>::writeToFile(TxIoBase& io, TxIoNodeType& node,
+      const std::string& nm) {
+    return node;
   }
 
   template<unsigned NDIM>
@@ -92,9 +101,7 @@ namespace Lucee
   }
 
 // instantiations
-  template class UnstructuredGrid<1> ;
+
   template class UnstructuredGrid<2> ;
   template class UnstructuredGrid<3> ;
-  template class UnstructuredGrid<4> ;
-  template class UnstructuredGrid<5> ;
 }
