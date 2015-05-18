@@ -59,6 +59,7 @@
 #include <LcNodalDgCopyBoundaryCondition.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
 #include <LcNodalDgZeroNormalBoundaryCondition.h>
+#include <LcNodalDgZeroTangentBoundaryCondition.h>
 #include <LcNodalDisContHyperUpdater.h>
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
@@ -271,6 +272,10 @@ namespace Lucee
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<1> >()
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<2> >()
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<3> >()
+
+      .append<Lucee::NodalDgZeroTangentBoundaryCondition<1> >()
+      .append<Lucee::NodalDgZeroTangentBoundaryCondition<2> >()
+      .append<Lucee::NodalDgZeroTangentBoundaryCondition<3> >()
 
       .append<Lucee::NodalDgCopyBoundaryCondition<1> >()
       .append<Lucee::NodalDgCopyBoundaryCondition<2> >()
