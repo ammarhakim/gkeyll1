@@ -100,21 +100,21 @@ namespace Lucee
     Eigen::MatrixXd volQuad1d(nVolQuad1d, nlocal1d);
     copyLuceeToEigen(tempVolQuad1d, volQuad1d);
     // TESTING STUFF
-    Eigen::MatrixXd volCoords1d(nVolQuad1d, NC1);
+    Eigen::MatrixXd volCoords1d(nVolQuad1d, (unsigned) NC1);
     copyLuceeToEigen(tempVolCoords1d, volCoords1d);
 
     // get volume interpolation matrices for 3d element
     int nVolQuad3d = nodalBasis3d->getNumGaussNodes();
     std::vector<double> volWeights3d(nVolQuad3d);
     Lucee::Matrix<double> tempVolQuad3d(nVolQuad3d, nlocal3d);
-    Lucee::Matrix<double> tempVolCoords3d(nVolQuad3d, NC3);
+    Lucee::Matrix<double> tempVolCoords3d(nVolQuad3d, (unsigned) NC3);
 
     nodalBasis3d->getGaussQuadData(tempVolQuad3d, tempVolCoords3d, volWeights3d);
 
     Eigen::MatrixXd volQuad3d(nVolQuad3d, nlocal3d);
     copyLuceeToEigen(tempVolQuad3d, volQuad3d);
     // TESTING STUFF
-    Eigen::MatrixXd volCoords3d(nVolQuad3d, NC3);
+    Eigen::MatrixXd volCoords3d(nVolQuad3d, (unsigned) NC3);
     copyLuceeToEigen(tempVolCoords3d, volCoords3d);
 
     mom0Matrix = Eigen::MatrixXd::Zero(nlocal1d, nlocal3d);
