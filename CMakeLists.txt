@@ -116,6 +116,14 @@ endif (EIGEN_FOUND)
 # Math packages
 find_package(SciPetsc REQUIRED)
 
+find_package(SciMoab REQUIRED)
+MESSAGE("MOAB_FOUND IS: ${MOAB_FOUND}")
+MESSAGE("Moab Includes are : ${Moab_INCLUDE_DIRS}")
+
+if (MOAB_FOUND)
+  include_directories(${Moab_INCLUDE_DIRS})
+endif (MOAB_FOUND)
+
 IF(APPLE)
    # add the Accelerate framework on Mac OS X
    FIND_LIBRARY(ACCELERATE_LIB Accelerate)
