@@ -22,6 +22,10 @@
 // std includes
 #include <string>
 
+#include <moab/Core.hpp>
+#include <moab/ProgOptions.hpp>
+#include <moab/ReadUtilIface.hpp>
+
 namespace Lucee
 {
 /**
