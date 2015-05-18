@@ -13,6 +13,7 @@
 #include <LcGridRegistry.h>
 #include <LcMappedCartGrid.h>
 #include <LcNonUniRectCartGrid.h>
+#include <LcUnstructuredGrid.h>
 #include <LcRectCartGrid.h>
 #include <LcRegisteredObjList.h>
 
@@ -39,6 +40,9 @@ namespace Lucee
 
       .append<Lucee::MappedCartGrid<1> >()
       .append<Lucee::MappedCartGrid<2> >()
-      .append<Lucee::MappedCartGrid<3> >();
+      .append<Lucee::MappedCartGrid<3> >()
+
+      .append<Lucee::UnstructuredGrid<2> > ()
+      .append<Lucee::UnstructuredGrid<3> > ();
   }
 }
