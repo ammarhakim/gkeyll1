@@ -174,7 +174,7 @@ namespace Lucee
       {
         // Copy result into field
         for (unsigned component = 0; component < nc; component++)
-          ptr[nc*component+nodeIndex] = projectF(nodeIndex,component);
+          ptr[nc*nodeIndex+component] = projectF(nodeIndex,component);
       }
     }
 
