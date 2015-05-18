@@ -15,6 +15,7 @@
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
+#include <LcDistFuncMomentCalc1DFrom3D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
@@ -43,9 +44,10 @@
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
+#include <LcNodalCopy1DTo3DFieldUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
-#include <LcNodalDgConstGravitySrcUpdater.h>
 #include <LcNodalCopy3DTo5DFieldUpdater.h>
+#include <LcNodalDgConstGravitySrcUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
@@ -89,6 +91,7 @@ namespace Lucee
 
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
+      .append<Lucee::DistFuncMomentCalc1DFrom3D>()
       .append<Lucee::DistFuncMomentCalc2D>()
       .append<Lucee::DistFuncMomentCalc3D>()
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
@@ -153,6 +156,7 @@ namespace Lucee
       
       .append<Lucee::NodalPoissonBracketUpdater>()
 
+      .append<Lucee::NodalCopy1DTo3DFieldUpdater>()
       .append<Lucee::NodalCopy2DTo4DFieldUpdater>()
       .append<Lucee::NodalCopy3DTo5DFieldUpdater>()
 

@@ -17,6 +17,7 @@
 #include <LcPoissonBracketCanonical4D.h>
 #include <LcPoissonBracketGyroEquation4D.h>
 #include <LcPoissonBracketGyroEquation5D.h>
+#include <LcPoissonBracketSOL3D.h>
 #include <LcRegisteredObjList.h>
 
 // loki includes
@@ -34,6 +35,7 @@ namespace Lucee
       .append<Lucee::PoissonBracketCanonical2D >()
       .append<Lucee::PoissonBracketCanonical4D >()
       .append<Lucee::PoissonBracketGyroEquation4D >()
-      .append<Lucee::PoissonBracketGyroEquation5D >();
+      .append<Lucee::PoissonBracketGyroEquation5D >()
+      .append<Lucee::PoissonBracketSOL3D >();
   }
 }

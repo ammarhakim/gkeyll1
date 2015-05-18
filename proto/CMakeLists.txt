@@ -23,6 +23,7 @@ set (proto_SOURCES
   LcCopy1DTo2DNodalField.cpp
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
+  LcDistFuncMomentCalc1DFrom3D.cpp
   LcDistFuncMomentCalc2D.cpp
   LcDistFuncMomentCalc3D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
@@ -51,9 +52,10 @@ set (proto_SOURCES
   LcModalDgLimiter1DUpdater.cpp
   LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp
+  LcNodalCopy1DTo3DFieldUpdater.cpp
   LcNodalCopy2DTo4DFieldUpdater.cpp
-  LcNodalDgConstGravitySrcUpdater.cpp
   LcNodalCopy3DTo5DFieldUpdater.cpp
+  LcNodalDgConstGravitySrcUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
@@ -66,6 +68,7 @@ set (proto_SOURCES
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp
   LcPoissonBracketGyroEquation5D.cpp
+  LcPoissonBracketSOL3D.cpp
   LcPoissonBracketUpdater.cpp
   LcPoissonBracketOptUpdater.cpp
   LcProtoSolverRegistry.cpp
