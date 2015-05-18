@@ -19,7 +19,11 @@
 namespace Lucee
 {
 /**
- * Lagrange tensor-product element.
+ * Lagrange tensor-product element. The nodes are laid out in
+ * row-major order. Optionally, each direction can have a different
+ * polynomial order, and node location can be uniform, Lobatto (both
+ * including the element faces) or Gaussian. In the last, there are no
+ * nodes on faces, and this should be kept in mind.
  */
   template <unsigned NDIM>
   class LagrangeTensorElement : public Lucee::NodalFiniteElementIfc<NDIM>

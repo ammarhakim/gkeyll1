@@ -24,7 +24,13 @@ namespace Lucee
   enum Node_t { LOBATTO, GAUSSIAN, UNIFORM };
 
 /**
- * Class to calculate data needed for Lagrange tensor basis functions.
+ * Class to calculate data needed for Lagrange tensor basis
+ * functions. The algorithm here is pretty complicated as the code
+ * works in arbitrary dimension, with arbitrary polynomial order in
+ * each direction. The basic idea of the algorithm is to first
+ * generate the basis functions in terms of Legendre polynomials. Once
+ * that is done, then various properties of Legendre polynomials are
+ * systematically used to compute various needed matrices etc.
  */
   template <unsigned NDIM>
   class LagrangeTensorBasisCalc
