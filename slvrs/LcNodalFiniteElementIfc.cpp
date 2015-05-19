@@ -338,6 +338,7 @@ namespace Lucee
   {
     lfm.appendFunc("numExclusiveNodes", luaNumExclusiveNodes);
     lfm.appendFunc("numNodes", luaNumNodes);
+    lfm.appendFunc("quadWeights", luaQuadWeights);
   }
 
   template <unsigned NDIM>
@@ -361,6 +362,24 @@ namespace Lucee
       = Lucee::PointerHolder<NodalFiniteElementIfc<NDIM> >::getObj(L);
     std::vector<unsigned> ids;
     lua_pushnumber(L, f->getNumNodes());
+    return 1;
+  }
+
+  template <unsigned NDIM>
+  int
+  NodalFiniteElementIfc<NDIM>::luaQuadWeights(lua_State *L)
+  {
+    NodalFiniteElementIfc<NDIM> *f
+      = Lucee::PointerHolder<NodalFiniteElementIfc<NDIM> >::getObj(L);
+    std::vector<double> w(f->getNumNodes());
+    f->getWeights(w);
+    lua_newtable(L);
+    for (int i=0; i<f->getNumNodes(); ++i)
+    {
+      lua_pushnumber(L,i+1);
+      lua_pushnumber(L, w[i]);
+      lua_settable(L, -3);
+    }
     return 1;
   }
 
