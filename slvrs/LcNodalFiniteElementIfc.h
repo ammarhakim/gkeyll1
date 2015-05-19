@@ -444,6 +444,14 @@ namespace Lucee
  */
       static int luaNumNodes(lua_State *L);
 
+/**
+ * Lua callable method to get qudrature weights.
+ *
+ * @param L Lua state to work with.
+ * @return number of return values.
+ */
+      static int luaQuadWeights(lua_State *L);
+
     protected:
 /** Index into current cell */
       mutable int currIdx[NDIM];
