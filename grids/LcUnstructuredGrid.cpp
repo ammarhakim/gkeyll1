@@ -38,15 +38,21 @@ namespace Lucee
   void UnstructuredGrid<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
 // read number of cells in global region
-    std::string filename = tbl.getString("filename");
+    filename = tbl.getString("filename");
+    //outFilename = tbl.getString("outFilename");
 
     mb = new (std::nothrow) moab::Core;
 
-    moab::ErrorCode rval = mb->load_mesh(filename.c_str());
+    mb->create_meshset(moab::MESHSET_SET, set);
+    moab::ErrorCode rval = mb->load_file(filename.c_str(), &set, readOpts);
 
     mb->get_entities_by_dimension(0, NDIM - 1, faces);
     mb->get_entities_by_dimension(0, NDIM, cells);
     mb->get_entities_by_type(0, moab::MBVERTEX, vertices);
+
+    std::cout << "numCells " << cells.size() << "\n";
+    std::cout << "numFaces " << faces.size() << "\n";
+    std::cout << "numVertices " << vertices.size() << "\n";
 
 // get comm pointers
     TxCommBase * comm = Loki::SingletonHolder<Lucee::Globals>::Instance().comm;
@@ -63,8 +69,12 @@ namespace Lucee
   }
 
   template<unsigned NDIM>
-  TxIoNodeType UnstructuredGrid<NDIM>::writeToFile(TxIoBase& io, TxIoNodeType& node,
-      const std::string& nm) {
+  TxIoNodeType UnstructuredGrid<NDIM>::writeToFile(TxIoBase& io,
+      TxIoNodeType& node, const std::string& nm)
+  {
+
+    mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
+
     return node;
   }
 
@@ -90,6 +100,8 @@ namespace Lucee
   UnstructuredGrid<NDIM>::UnstructuredGrid()
   {
     mb = NULL;
+    readOpts = NULL;
+    writeOpts = NULL;
   }
 
   template<unsigned NDIM>
