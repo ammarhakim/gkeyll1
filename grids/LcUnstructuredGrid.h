@@ -22,13 +22,7 @@
 
 namespace Lucee
 {
-  /**
-   * A base class to represent a single-block rectangular body-fitted
-   * grid. The indexing scheme is designed such that the cell owns the
-   * faces on the "left", "bottom" and "back" (0, 1, 2
-   * directions). I.e. the cell index also can be used to get surface
-   * variables on these faces using the proper direction index.
-   */
+
   template<unsigned NDIM>
   class UnstructuredGrid: public Lucee::GridIfc
   {
@@ -173,7 +167,12 @@ namespace Lucee
 
     private:
 
-      //Not sure if these belong here or in geometry.
+      std::string filename;
+      std::string outFilename;
+
+      moab::EntityHandle set;
+      char* readOpts;
+      char* writeOpts;
       moab::Interface* mb;
 
       moab::Range faces;
