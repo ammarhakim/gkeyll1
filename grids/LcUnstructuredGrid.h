@@ -20,6 +20,8 @@
 // boost includes
 #include <boost/shared_ptr.hpp>
 
+#include <moab/WriteCGNS.hpp>
+
 namespace Lucee
 {
 

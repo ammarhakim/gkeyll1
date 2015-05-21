@@ -73,7 +73,11 @@ namespace Lucee
       TxIoNodeType& node, const std::string& nm)
   {
 
-    mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
+    moab::WriteCGNS wCGNS(mb);
+    wCGNS.write_file (nm.c_str(), true, writeOpts, NULL,
+        0, NULL, NULL, 0, NDIM);
+
+    //mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
 
     return node;
   }
