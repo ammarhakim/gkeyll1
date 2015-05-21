@@ -31,6 +31,36 @@ namespace Lucee
  * generate the basis functions in terms of Legendre polynomials. Once
  * that is done, then various properties of Legendre polynomials are
  * systematically used to compute various needed matrices etc.
+ *
+ *
+ * The nodes are numbered in row-major order. One needs to be careful
+ * when interpreting what this means. Basically, the nodes are
+ * labelled (0,0), (0,1), (0,2), ... (1,0), (1,1), (1,2), ....
+ *
+ * The thing to keep in mind is that this is used to index the grid,
+ * with lower index (-1,-1) and upper index (1,1). Hence for a
+ * piecwise linear element the nodes are.
+ *
+ *             1          3
+ *             o----------o
+ *             |          |
+ *             |          |
+ *             |          |
+ *             |          |
+ *             o----------o
+ *             0          2
+ *
+ * Piecewise quadratic elements is
+ *
+ *             2     5     8
+ *             o-----o-----o
+ *             |           |
+ *             |           |
+ *           1 o     o 4   o 7
+ *             |           |
+ *             |           |
+ *             o-----o-----o
+ *             0     3     6
  */
   template <unsigned NDIM>
   class LagrangeTensorBasisCalc
