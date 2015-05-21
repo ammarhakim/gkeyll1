@@ -215,6 +215,7 @@ calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
 		         return (iMat)
 );
 
+/***********************************************************/
 
 /** Order 1 */
 lord1 : makeRowMajorList([0,1]);
