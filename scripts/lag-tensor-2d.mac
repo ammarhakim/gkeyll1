@@ -14,6 +14,24 @@ makeRowMajorList(blist) := block([n],
 	        return (rml)
 );
 
+/** Make a (i,j) list by looping in col major order */
+makeColMajorList(blist) := block([n],
+                n : length(blist),
+		rml : (rml : [], for j from 1 thru n
+		         do (for i from 1 thru n
+			   do (rml : endcons([blist[i],blist[j]], rml)
+			     )),
+			   rml),
+	        return (rml)
+);
+
+/** Split interval [-1,1] into specified number of intervals */
+splitInterval(num) := block([dx, cc],
+              dx : 2/num,
+	      cc : (cc : [-1+dx/2], for i from 1 thru num-1
+	              do (cc : endcons(cc[i]+dx, cc)), cc)
+);
+
 /** Funciton to create coefficient matrix */
 makePmat(lord, ord) := block([n, Pmat],
           /** Determine size of matrix */
@@ -208,7 +226,7 @@ basis1 : makeBasisSet(lord1, ord1);
 /** Order 2 */
 lord2 : makeRowMajorList([0,1,2]);
 ord2 : makeRowMajorList([-1,0,1]);
-basis2 : makeBasisSet(lord2, ord2);
+basis2 : fullratsimp( makeBasisSet(lord2, ord2) );
 
 /***********************************************************/
 
