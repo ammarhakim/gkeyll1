@@ -116,7 +116,7 @@ p2on3 : calcInterpMatrix(basis2, makeColMajorList(splitInterval(3)));
 lord3 : makeRowMajorList([0, 1, 2, 3]);
 ord3 : makeRowMajorList([-1, -sqrt(1/5), sqrt(1/5), 1]);
 basis3 : fullratsimp( makeBasisSet(lord3, ord3) );
-p3on4 : calcInterpMatrix(basis3, makeColMajorList(splitInterval(4)));
+p3on4 : float(calcInterpMatrix(basis3, makeColMajorList(splitInterval(4))));
 
 /***********************************************************/
 
@@ -124,4 +124,4 @@ p3on4 : calcInterpMatrix(basis3, makeColMajorList(splitInterval(4)));
 lord4 : makeRowMajorList([0, 1, 2, 3, 4]);
 ord4 : makeRowMajorList([-1, -sqrt(3/7), 0, sqrt(3/7), 1]);
 basis4 : fullratsimp( makeBasisSet(lord4, ord4) );
-p4on5 : calcInterpMatrix(basis4, makeColMajorList(splitInterval(5)));
+p4on5 : float(calcInterpMatrix(basis4, makeColMajorList(splitInterval(5))));

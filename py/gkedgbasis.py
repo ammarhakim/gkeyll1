@@ -1,6 +1,8 @@
 import gkedata
+import gkedginterpdat as gid
 import pylab
 import numpy
+import math
 
 ## Below are a set of helper functions used in the DG classes
 
@@ -44,14 +46,16 @@ def interpOnMesh1D(cMat, qIn):
     return qout
 
 def interpOnMesh2D(cMat, qIn):
-    nInterp, nNodes = cMat.shape[0], cMat.shape[1]
+    nInterp, nNodes = int(math.sqrt(cMat.shape[0])), cMat.shape[1]
     nx = qIn.shape[0]
     ny = qIn.shape[1]
     qout = pylab.zeros((nInterp*nx,nInterp*ny), numpy.float)
     vList = [qIn[:,:,i] for i in range(nNodes)]
+    n = 0
     for j in range(nInterp):
         for i in range(nInterp):
-            qout[i:nInterp*nx:nInterp, j:nInterp*ny:nInterp] = evalSum(cMat[i,:], vList)
+            qout[i:nInterp*nx:nInterp, j:nInterp*ny:nInterp] = evalSum(cMat[n,:], vList)
+            n = n+1
     return qout
 
 class GkeDgBasis:
@@ -109,6 +113,12 @@ class GkeDgBasis:
         """
         return 0, 0
 
+## Some notes: The interpolation coefficients are generated in Maxima
+## and cut-paste here. Perhaps it may be easier and more compact to
+## actually write the Python code to generate these on the
+## fly. However, in higher dimensions it may be pretty slow to
+## generate these every time.
+
 #################
 class GkeDgPolyOrder0Basis(GkeDgBasis):
     r"""This is provided to allow treating finite-volume data as DG
@@ -128,7 +138,7 @@ class GkeDgLobatto1DPolyOrder1Basis(GkeDgBasis):
 
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 2)
-        self.cMat_i2 = makeMatrix([0.75,0.25],[0.25,0.75])
+        self.cMat_i2 = gid.GkeDgLobatto1DPolyOrder1Basis.cMat_i2
 
     def project(self, c):
         qn = self._getRaw(c)
@@ -141,7 +151,7 @@ class GkeDgLobatto1DPolyOrder2Basis(GkeDgBasis):
 
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 3)
-        self.cMat_i3 = makeMatrix([.5555555555555556,.5555555555555556,-.1111111111111111],[0.0,1.0,0.0],[-.1111111111111111,.5555555555555556,.5555555555555556])
+        self.cMat_i3 = gid.GkeDgLobatto1DPolyOrder2Basis.cMat_i3
 
     def project(self, c):
         qn = self._getRaw(c)
@@ -154,7 +164,7 @@ class GkeDgLobatto1DPolyOrder3Basis(GkeDgBasis):
 
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 4)
-        self.cMat_i4 = makeMatrix([.3964843749999999,.7320061281981992,-.1851311281981993,.05664062500000011],[-0.107421875,.9134865201415714,.2583884798584289,-.06445312499999978],[-.06445312500000017,.2583884798584296,.9134865201415707,-.1074218749999999],[.05664062499999961,-.1851311281981994,.7320061281981994,.3964843749999998])
+        self.cMat_i4 = gid.GkeDgLobatto1DPolyOrder3Basis.cMat_i4
 
     def project(self, c):
         qn = self._getRaw(c)
@@ -167,7 +177,7 @@ class GkeDgLobatto1DPolyOrder4Basis(GkeDgBasis):
 
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 5)
-        self.cMat_i5 = makeMatrix([.2663999999999975,.8553363583762964,-0.177600000000006,.08546364162371375,-.02960000000000157],[-.1316000000000021,.7234924181056768,.5263999999999952,-.1746924181056689,.05639999999999855],[2.775557561562891e-17,1.110223024625157e-16,1.0,-5.551115123125783e-16,-1.110223024625157e-16],[.05640000000000095,-.1746924181056717,.5264000000000018,.7234924181056706,-.1315999999999997],[-.02959999999999938,0.0854636416237109,-.1775999999999993,.8553363583762902,.2663999999999995])
+        self.cMat_i5 = gid.GkeDgLobatto1DPolyOrder4Basis.cMat_i5
 
     def project(self, c):
         qn = self._getRaw(c)
@@ -180,8 +190,55 @@ class GkeDgLobatto2DPolyOrder1Basis(GkeDgBasis):
 
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 4)
-        self.cMat_i2 = makeMatrix([0.5625,0.1875,0.1875,0.0625],[0.1875,0.0625,0.5625,0.1875],[0.1875,0.5625,0.0625,0.1875],[0.0625,0.1875,0.1875,0.5625])
+        self.cMat_i2 = gid.GkeDgLobatto2DPolyOrder1Basis.cMat_i2
 
     def project(self, c):
         qn = self._getRaw(c)
-        return makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1]), interpOnMesh2D(self.cMat_i2, qn)
+        X, Y = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i2, qn)
+
+#################
+class GkeDgLobatto2DPolyOrder2Basis(GkeDgBasis):
+    r"""Lobatto, polyOrder = 2 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 9)
+        self.cMat_i3 = gid.GkeDgLobatto2DPolyOrder2Basis.cMat_i3
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i3, qn)
+
+#################
+class GkeDgLobatto2DPolyOrder3Basis(GkeDgBasis):
+    r"""Lobatto, polyOrder = 3 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 16)
+        self.cMat_i4 = gid.GkeDgLobatto2DPolyOrder3Basis.cMat_i4
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(4, self.Xc[0]), makeMesh2(4, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i4, qn)
+
+#################
+class GkeDgLobatto2DPolyOrder4Basis(GkeDgBasis):
+    r"""Lobatto, polyOrder = 4 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 5*5)
+        self.cMat_i5 = gid.GkeDgLobatto2DPolyOrder4Basis.cMat_i5
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(5, self.Xc[0]), makeMesh2(5, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i5, qn)
