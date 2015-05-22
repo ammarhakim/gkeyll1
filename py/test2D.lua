@@ -3,8 +3,8 @@
 -- grid on which equations are to be solved
 grid = Grid.RectCart2D {
    lower = {0, 0},
-   upper = {1, 2},
-   cells = {8, 16},
+   upper = {1, 1},
+   cells = {16, 16},
 }
 
 function pulse(x,y,z)
