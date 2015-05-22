@@ -82,127 +82,6 @@ calcMassMatrix(basis) := block([n, mass],
 	        return (mass)
 );
 
-/** Function to compute "face" mass matrix */
-calcFaceMassMatrix(basis) := block([n, mass],
-                n : length(basis),
-		mass : (mass : zeromatrix(n,n), for i from 1 thru n
-		         do (for j from 1 thru n
-			   do (mass[i,j] : 
-			   integrate(
-			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
-			   +
-			   integrate(
-			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
-			   +
-			   integrate(
-			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
-			   +
-			   integrate(
-			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
-			    )),
-			   mass),
-	        return (mass)
-);
-
-/** Function to compute "face" mass matrix */
-calcFaceMassMatrix_xl(basis) := block([n, mass],
-                n : length(basis),
-		mass : (mass : zeromatrix(n,n), for i from 1 thru n
-		         do (for j from 1 thru n
-			   do (mass[i,j] : 
-			   integrate(
-			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
-			     )),
-			   mass),
-	        return (mass)
-);
-
-/** Function to compute "face" mass matrix */
-calcFaceMassMatrix_xu(basis) := block([n, mass],
-                n : length(basis),
-		mass : (mass : zeromatrix(n,n), for i from 1 thru n
-		         do (for j from 1 thru n
-			   do (mass[i,j] : 
-			   integrate(
-			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
-			    )),
-			   mass),
-	        return (mass)
-);
-
-/** Function to compute "face" mass matrix */
-calcFaceMassMatrix_yl(basis) := block([n, mass],
-                n : length(basis),
-		mass : (mass : zeromatrix(n,n), for i from 1 thru n
-		         do (for j from 1 thru n
-			   do (mass[i,j] : 
-			   integrate(
-			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
-			    )),
-			   mass),
-	        return (mass)
-);
-
-/** Function to compute "face" mass matrix */
-calcFaceMassMatrix_yu(basis) := block([n, mass],
-                n : length(basis),
-		mass : (mass : zeromatrix(n,n), for i from 1 thru n
-		         do (for j from 1 thru n
-			   do (mass[i,j] : 
-			   integrate(
-			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
-			    )),
-			   mass),
-	        return (mass)
-);
-
-/** Return a small matrix */
-shaveCols(Abig, cols) := block([nx,ny,nc,Asmall],
-		[nx,ny] : matrix_size(Abig),
-		nc : length(cols),
-		Asmall : (Asmall : matrix([]), for i from 1 thru nc
-		           do (Asmall : addcol(Asmall, col(Abig, cols[i]))),
-			  Asmall),
-	        return (Asmall)
-);
-
-/** Function to compute stiffness matrix */
-calcStiffMatrix(basis) := block([n, stiff],
-                n : length(basis),
-		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
-		          do (for j from 1 thru n
-			    do (stiff[i,j] : integrate(integrate(
-                             4/dx2*diff(basis[i],x)*diff(basis[j],x) + 
-			     4/dy2*diff(basis[i],y)*diff(basis[j],y),
-                               x, -1,1), y, -1,1))),
-	                  stiff),
-	        return (stiff)
-);
-
-/** Function to compute gradient stiffness matrix */
-calcGradStiffMatrix_x(basis) := block([n, stiff],
-                n : length(basis),
-		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
-		          do (for j from 1 thru n
-			    do (stiff[i,j] : integrate(
-                              integrate(2/dx*diff(basis[i],x)*basis[j], x, -1,1), 
-                             y, -1,1))),
-	                  stiff),
-	        return (stiff)
-);
-
-/** Function to compute gradient stiffness matrix */
-calcGradStiffMatrix_y(basis) := block([n, stiff],
-                n : length(basis),
-		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
-		          do (for j from 1 thru n
-			    do (stiff[i,j] : integrate(
-                              integrate(2/dy*diff(basis[i],y)*basis[j], x, -1,1),
-                             y, -1,1))),
-	                  stiff),
-	        return (stiff)
-);
-
 /** Function to compute the interpolation matrix */
 calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
     			nbasis : length(basis),
@@ -236,4 +115,9 @@ lord3 : makeRowMajorList([0, 1, 2, 3]);
 ord3 : makeRowMajorList([-1, -sqrt(1/5), sqrt(1/5), 1]);
 basis3 : fullratsimp( makeBasisSet(lord3, ord3) );
 
+/** Interpolation matrix for 5 cells in each direction */
+xc5Interp : calcInterpMatrix(basis3, makeColMajorList(splitInterval(5)));
 
+fh : openw("lagrange-tensor-2D_p3xc5.txt");
+write_data(float(xc5Interp), fh, comma);
+close(fh);
