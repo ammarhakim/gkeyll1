@@ -47,4 +47,27 @@ axis('image')
 title('Lagrange 2D, lobatto polyOrder 4')
 savefig('L2d_p4.png')
 
+# Serendip 2D, polyOrder 1
+d = gkedata.GkeData("test2D_ser-2D-p1.h5")
+S2d_p1 = gkedgbasis.GkeDgSerendip2DPolyOrder1Basis(d)
+Xc, Yc, c0 = S2d_p1.project(0)
+
+figure(5)
+pcolormesh(Xc, Yc, transpose(c0))
+axis('image')
+title('Serendip 2D, polyOrder 1')
+savefig('S2d_p1.png')
+
+# Serendip 2D, polyOrder 2
+d = gkedata.GkeData("test2D_ser-2D-p2.h5")
+S2d_p2 = gkedgbasis.GkeDgSerendip2DPolyOrder2Basis(d)
+Xc, Yc, c0 = S2d_p2.project(0)
+
+figure(6)
+pcolormesh(Xc, Yc, transpose(c0))
+axis('image')
+title('Serendip 2D, polyOrder 2')
+savefig('S2d_p2.png')
+
+
 show()

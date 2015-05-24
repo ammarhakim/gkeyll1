@@ -101,7 +101,7 @@ lord1 : makeRowMajorList([0,1]);
 ord1 : makeRowMajorList([-1,1]);
 basis1 : makeBasisSet(lord1, ord1);
 p1on2 : calcInterpMatrix(basis1, makeColMajorList(splitInterval(2)));
-
+      
 /***********************************************************/
 
 /** Order 2 */

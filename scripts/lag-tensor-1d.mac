@@ -1,0 +1,72 @@
+/** Nodal basis function in 1D on a reference element */
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Split interval [-1,1] into specified number of intervals */
+splitInterval(num) := block([dx, cc],
+              dx : 2/num,
+	      cc : (cc : [-1+dx/2], for i from 1 thru num-1
+	              do (cc : endcons(cc[i]+dx, cc)), cc)
+);
+
+/** Funciton to create coefficient matrix */
+makePmat(ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(ord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(j-1, ord[i]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Construct basis set */
+makeBasisSet(ord) := block([n, d, invPmat, u, a, basis],
+             n : length(ord),
+	     invPmat : invert( makePmat(ord) ),
+	     u : ident(n),
+	     a : (a : matrix([]), for i from 1 thru n
+	            do (a : addcol(a, invPmat.col(u,i))), a),
+             leg_x : (leg_x : matrix([]), for i from 1 thru n
+                        do (leg_x : addcol( leg_x, [legendre_p(i-1,x)]) ), leg_x),
+	     basis : (basis : [], for i from 1 thru n
+                        do (basis : endcons( leg_x . col(a,i), basis)), basis)
+);
+
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
+/***********************************************************/
+
+/** Order 1 */
+basis1 : makeBasisSet([-1,1]);
+p1on2 : calcInterpMatrix(basis1, splitInterval(2));
+
+/***********************************************************/
+
+/** Order 2 */
+basis2 : makeBasisSet([-1, 0, 1]);
+p2on3 : calcInterpMatrix(basis2, splitInterval(3));
+
+/***********************************************************/
+
+/** Order 3: ordinates are Legendre-Lobatto points */
+basis3 : makeBasisSet([-1, -sqrt(1/5), sqrt(1/5), 1]);
+p3on4 : calcInterpMatrix(basis3, splitInterval(4));
+
+/***********************************************************/
+
+/** Order 4: ordinates are Legendre-Lobatto points */
+basis4 : makeBasisSet([-1, -sqrt(3/7), 0, sqrt(3/7), 1]);
+p5on5 : calcInterpMatrix(basis4, splitInterval(5));
