@@ -1,0 +1,13 @@
+/** Define inner product and norm */
+inner(f,g) := integrate( integrate(f*g, x,-1,1), y,-1,1 );
+norm(f) := sqrt(inner(f,f));
+
+a(i,j,u,phi) := -inner(u[i],phi[j]);
+/** Use Gram-Schmidt procedure to make a set of orthonormal basis set */
+gsOrthoNorm(u) := block([nbasis, phi, v],
+  nbasis : length(u),
+  phi : (phi : [u[1]/norm(u[1])], for i from 2 thru nbasis
+          do (v : u[i] + sum( a(i,j,u,phi)*phi[j], j, 1, i-1 ),
+              phi : endcons(v/norm(v), phi)),
+          phi)
+);

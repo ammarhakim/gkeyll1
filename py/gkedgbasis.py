@@ -59,7 +59,7 @@ def interpOnMesh2D(cMat, qIn):
     return qout
 
 class GkeDgBasis:
-    r"""__init__(dat : GkeData, numNodes : int) -> GkeData
+    r"""__init__(dat : GkeData, numNodes : int) -> GkeDgData
 
     Base class for post-processing DG data. The derived class should
     set the number of nodes in the element.
@@ -242,3 +242,33 @@ class GkeDgLobatto2DPolyOrder4Basis(GkeDgBasis):
         X, Y = makeMesh2(5, self.Xc[0]), makeMesh2(5, self.Xc[1])
         XX, YY = pylab.meshgrid(X, Y)
         return XX, YY, interpOnMesh2D(self.cMat_i5, qn)
+
+#################
+class GkeDgSerendip2DPolyOrder1Basis(GkeDgBasis):
+    r"""Serendipity basis (Hakim layout), polyOrder = 1 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 4)
+        self.cMat_i2 = gid.GkeDgSerendip2DPolyOrder1Basis.cMat_i2
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i2, qn)
+
+#################
+class GkeDgSerendip2DPolyOrder2Basis(GkeDgBasis):
+    r"""Serendipity basis (Hakim layout), polyOrder = 2 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 8)
+        self.cMat_i3 = gid.GkeDgSerendip2DPolyOrder2Basis.cMat_i3
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i3, qn)

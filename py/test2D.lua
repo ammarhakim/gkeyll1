@@ -100,3 +100,47 @@ initField4 = Updater.ProjectOnNodalBasis2D {
 initField4:setOut( {q4} )
 initField4:advance(0.0)
 q4:write("lag-2D-p4.h5")
+
+--- Serendip basis
+
+basis1s = NodalFiniteElement2D.Serendipity {
+   onGrid = grid,
+   polyOrder = 1,
+}
+q1s = DataStruct.Field2D {
+   onGrid = grid,
+   numComponents = basis1s:numNodes(),
+   ghost = {2, 2},
+}
+initField1s = Updater.ProjectOnNodalBasis2D {
+   onGrid = grid,
+   basis = basis1s,
+   shareCommonNodes = false,
+   evaluate = function (x,y,z,t)
+		 return pulse(x,y,z)
+	      end
+}
+initField1s:setOut( {q1s} )
+initField1s:advance(0.0)
+q1s:write("ser-2D-p1.h5")
+
+basis2s = NodalFiniteElement2D.Serendipity {
+   onGrid = grid,
+   polyOrder = 2,
+}
+q2s = DataStruct.Field2D {
+   onGrid = grid,
+   numComponents = basis2s:numNodes(),
+   ghost = {2, 2},
+}
+initField2s = Updater.ProjectOnNodalBasis2D {
+   onGrid = grid,
+   basis = basis2s,
+   shareCommonNodes = false,
+   evaluate = function (x,y,z,t)
+		 return pulse(x,y,z)
+	      end
+}
+initField2s:setOut( {q2s} )
+initField2s:advance(0.0)
+q2s:write("ser-2D-p2.h5")
