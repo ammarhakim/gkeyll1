@@ -11,3 +11,21 @@ gsOrthoNorm(u) := block([nbasis, phi, v],
               phi : endcons(v/norm(v), phi)),
           phi)
 );
+
+/** Serendipity polyOrder 2 deg2(b) <= p */
+u : [1, x, x^2, y, y^2, x*y, x*y^2, x^2*y];
+/** Orthogonalize them */
+modalBasis_s2 : gsOrthoNorm(u);
+
+/** Min-order polyOrder 2 deg(b) <= p */
+u : [1, x, x^2, y, y^2, x*y];
+/** Orthogonalize them */
+modalBasis_m2 : gsOrthoNorm(u);
+
+/** Serendipity polyOrder 3 */
+u : [1, y, y^2, y^3, 
+     x, x*y, x*y^2, x*y^3,
+     x^2, x^2*y,
+     x^3, x^3*y];
+/** Orthogonalize them */
+modalBasis_s3 : gsOrthoNorm(u);
