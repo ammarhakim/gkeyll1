@@ -23,6 +23,9 @@
 
 // loki includes
 #include <loki/Singleton.h>
+#include <moab/FileOptions.hpp>
+
+//using namespace moab;
 
 namespace Lucee
 {
@@ -73,9 +76,15 @@ namespace Lucee
       TxIoNodeType& node, const std::string& nm)
   {
 
-    moab::WriteCGNS wCGNS(mb);
-    wCGNS.write_file (nm.c_str(), true, writeOpts, NULL,
-        0, NULL, NULL, 0, NDIM);
+    std::vector<std::basic_string<char>> dummy;
+
+    moab::ReaderWriterSet tSet(dynamic_cast<moab::Core*>(mb));
+    moab::WriterIface* wCGNS = tSet.get_file_extension_writer(nm);
+
+    moab::FileOptions writeOpts(NULL);
+
+    wCGNS->write_file(nm.c_str(), true, writeOpts, NULL,
+        0, dummy, NULL, 0, NDIM);
 
     //mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
 
@@ -105,7 +114,7 @@ namespace Lucee
   {
     mb = NULL;
     readOpts = NULL;
-    writeOpts = NULL;
+    //writeOpts = NULL;
   }
 
   template<unsigned NDIM>
