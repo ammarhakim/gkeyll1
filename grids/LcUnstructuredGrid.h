@@ -20,7 +20,9 @@
 // boost includes
 #include <boost/shared_ptr.hpp>
 
-#include <moab/WriteCGNS.hpp>
+#include <MBCore.hpp>
+#include <MBReaderWriterSet.hpp>
+#include <MBReadUtilIface.hpp>
 
 namespace Lucee
 {
@@ -174,7 +176,7 @@ namespace Lucee
 
       moab::EntityHandle set;
       char* readOpts;
-      char* writeOpts;
+      //moab::FileOptions writeOpts;
       moab::Interface* mb;
 
       moab::Range faces;

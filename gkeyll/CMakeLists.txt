@@ -166,8 +166,12 @@ add_executable(${LUCEE_STATIC} gkeyll.cxx LcRegisterModules.cpp)
 set_target_properties(${LUCEE_STATIC} PROPERTIES
   LINK_FLAGS "${FC_EXTERNAL_FLAGS}"
 )
-target_link_libraries(${LUCEE_STATIC} ${lucee_LIBRARIES})
-target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS})
+target_link_libraries(${LUCEE_STATIC}  ${lucee_LIBRARIES})
+target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS} )
+#${Moab_LIBRARIES}
+
+message("The xlibraries are : " ${Moab_LIBRARIES})
+
 if (USE_STATIC_SYSLIBS)
   message(STATUS "Using static system libraries: ${FC_SYS_STLIBS}")
   target_link_libraries(${LUCEE_STATIC} ${FC_SYS_STLIBS})
