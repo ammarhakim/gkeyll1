@@ -48,7 +48,7 @@ namespace Lucee
  *
  * @param nm Name of file to write.
  */
-      void write(const std::string& nm);
+      virtual void write(const std::string& nm);
 
 /**
  * Write grid to given node in HDF5 file.

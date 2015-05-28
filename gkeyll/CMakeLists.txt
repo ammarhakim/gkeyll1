@@ -75,6 +75,14 @@ if (MOAB_FOUND)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Moab_STLIBS})
 endif ()
 
+if (CGNS_FOUND)
+  set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Cgns_INCLUDE_DIRS})
+  set(FC_EXTERNAL_FLAGS "${FC_EXTERNAL_FLAGS} ${Cgns_FLAGS}")
+  set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${Cgns_LIBRARIES})
+  set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Cgns_LIBRARY_DIRS})
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Cgns_STLIBS})
+endif ()
+
 # Required base directories
 set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS}
   ${Lua_INCLUDE_DIRS}
@@ -170,7 +178,7 @@ target_link_libraries(${LUCEE_STATIC}  ${lucee_LIBRARIES})
 target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS} )
 #${Moab_LIBRARIES}
 
-message("The xlibraries are : " ${Moab_LIBRARIES})
+message("The libraries are : " ${Moab_LIBRARIES})
 
 if (USE_STATIC_SYSLIBS)
   message(STATUS "Using static system libraries: ${FC_SYS_STLIBS}")

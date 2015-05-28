@@ -25,8 +25,6 @@
 #include <loki/Singleton.h>
 #include <moab/FileOptions.hpp>
 
-//using namespace moab;
-
 namespace Lucee
 {
   template<> const char *UnstructuredGrid<2>::id = "Unstructured2D";
@@ -42,6 +40,8 @@ namespace Lucee
   {
 // read number of cells in global region
     filename = tbl.getString("filename");
+    writeExtension = tbl.getString("writeExtension");
+
     //outFilename = tbl.getString("outFilename");
 
     mb = new (std::nothrow) moab::Core;
@@ -72,24 +72,78 @@ namespace Lucee
   }
 
   template<unsigned NDIM>
-  TxIoNodeType UnstructuredGrid<NDIM>::writeToFile(TxIoBase& io,
-      TxIoNodeType& node, const std::string& nm)
+  void UnstructuredGrid<NDIM>::write(const std::string& nm)
   {
+    // output prefix
+    std::string outPrefix =
+        Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
+    std::string outNm = outPrefix + "_" + nm;
 
-    std::vector<std::basic_string<char>> dummy;
+    //std::string newName = nm;
+    outNm.append(".").append(writeExtension);
 
-    moab::ReaderWriterSet tSet(dynamic_cast<moab::Core*>(mb));
-    moab::WriterIface* wCGNS = tSet.get_file_extension_writer(nm);
+    std::cout << "newName is " << outNm << "\n";
 
-    moab::FileOptions writeOpts(NULL);
+    if (writeExtension == "cgns")
+    {
+      mb->write_file(outNm.c_str(), "CGNS");
+    } else if (writeExtension == "vtk")
+    {
+      mb->write_file(outNm.c_str(), "VTK");
+    } else if (writeExtension == "gmv")
+    {
+      mb->write_file(outNm.c_str(), "GMV");
+    } else
+    {
+      std::cout << "No file was written!\n";
+    }
 
-    wCGNS->write_file(nm.c_str(), true, writeOpts, NULL,
-        0, dummy, NULL, 0, NDIM);
-
-    //mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
-
-    return node;
   }
+
+  //TODO: this actually isn't used now
+  template<unsigned NDIM>
+   TxIoNodeType UnstructuredGrid<NDIM>::writeToFile(TxIoBase& io,
+   TxIoNodeType& node, const std::string& nm)
+   {
+   std::cout << "writing output\n";
+
+   std::vector<std::basic_string<char>> dummy;
+
+
+   //moab::ReaderWriterSet tSet(dynamic_cast<moab::Core*>(mb));
+   //moab::WriterIface* wCGNS = tSet.get_file_extension_writer(nm);
+
+   std::cout << "setting file options\n";
+
+   //moab::FileOptions writeOpts(NULL);
+
+   std::cout << "finally writing\n";
+
+   std::cout << "writeExtension " << writeExtension << "\n";
+
+   std::string newName = nm;
+   newName.append(".").append(writeExtension);
+
+   std::cout << "newName is " << newName << "\n";
+
+   if(writeExtension=="cgns") {
+   mb->write_file(newName.c_str(),"CGNS");
+   } else if(writeExtension=="vtk") {
+   mb->write_file(newName.c_str(),"VTK");
+   } else if(writeExtension=="gmv") {
+   mb->write_file(newName.c_str(),"GMV");
+   } else {
+   std::cout << "No file was written!\n";
+   }
+
+   //mb->write_file(nm.c_str());
+
+   std::cout << "exiting this thing\n";
+
+   //mb->write_file(nm.c_str(), 0, writeOpts, &set, 1);
+
+   return node;
+   }
 
   template<unsigned NDIM>
   unsigned UnstructuredGrid<NDIM>::getNumCells(unsigned dir) const
