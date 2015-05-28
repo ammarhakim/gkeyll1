@@ -33,5 +33,8 @@ docs/tech-notes/*.snm
 docs/tech-notes/*.toc
 docs/tech-notes/*.mov
 scripts/*.pyc
+py/*.pyc
+py/*.png
+py/*.h5
 BROWSE
 doxyerrors
