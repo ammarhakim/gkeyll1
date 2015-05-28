@@ -52,6 +52,13 @@ namespace Lucee
       virtual void readInput(Lucee::LuaTable& tbl);
 
       /**
+       * Write grid to specified HDF5 file.
+       *
+       * @param nm Name of file to write.
+       */
+            virtual void write(const std::string& nm);
+#if 1
+      /**
        * Write grid to given node in HDF5 file.
        *
        * @param io I/O object for I/O.
@@ -61,6 +68,7 @@ namespace Lucee
        */
       virtual TxIoNodeType writeToFile(TxIoBase& io, TxIoNodeType& node,
           const std::string& nm);
+#endif
 
       /**
        * Get number of cells in given direction.
@@ -173,6 +181,7 @@ namespace Lucee
 
       std::string filename;
       std::string outFilename;
+      std::string writeExtension;
 
       moab::EntityHandle set;
       char* readOpts;

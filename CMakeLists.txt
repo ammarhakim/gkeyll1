@@ -116,6 +116,8 @@ endif (EIGEN_FOUND)
 # Math packages
 find_package(SciPetsc REQUIRED)
 
+find_package(SciCgns REQUIRED)
+
 find_package(SciMoab REQUIRED)
 MESSAGE("MOAB_FOUND IS: ${MOAB_FOUND}")
 MESSAGE("Moab Includes are : ${Moab_INCLUDE_DIRS}")
