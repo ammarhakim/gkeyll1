@@ -83,6 +83,7 @@ set(lcslvrs_SOURCES
   LcNodalDisContSrcIncrUpdater.cpp
   LcNodalFiniteElementIfc.cpp
   LcNodalHyperDiffusionUpdater.cpp
+  LcNodalPositiveFilterUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
