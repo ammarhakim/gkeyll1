@@ -59,7 +59,7 @@ namespace Lucee
       {
         Lucee::Except lce("EulerEquation::readInput: 'numericalFlux' ");
         lce << nf << " not recognized!" << std::endl;
-          throw lce;
+        throw lce;
       }
     }
 
