@@ -70,21 +70,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
-
-/**
- * Matrix holder: this class is needed as the Matrix class does not
- * have a default constructor.
- */
-      struct MatrixHolder
-      {
-/** Ctor */
-          MatrixHolder() : m(1, 1) {}
-/** Matrix data */
-          Lucee::Matrix<double> m;
-      };
-
-/** Stiffness matrices */
-      MatrixHolder stiffMatrix[NDIM];
+/** Weights for quadrature */
+      std::vector<double> weights;
 
 /**
  * Compute matrix-vector multiply. Output vector must be

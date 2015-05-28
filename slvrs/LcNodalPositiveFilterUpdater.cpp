@@ -58,25 +58,9 @@ namespace Lucee
   NodalPositiveFilterUpdater<NDIM>::initialize()
   {
     Lucee::UpdaterIfc::initialize();
-
-// get hold of grid
-    const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-// local region to update
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
-    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-    seq.step(); // just to get to first index
-    int idx[NDIM];
-    seq.fillWithIndex(idx);
-    nodalBasis->setIndex(idx);
-    
-    unsigned nlocal = nodalBasis->getNumNodes();
-
-// get node numbers on each lower and upper edges
-    for (unsigned dir=0; dir<NDIM; ++dir)
-    {
-    }
+// get weights for quadrature
+    weights.resize(nodalBasis->getNumNodes());
+    nodalBasis->getWeights(weights);
   }
 
   template <unsigned NDIM>

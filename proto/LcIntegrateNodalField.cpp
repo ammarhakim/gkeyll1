@@ -65,7 +65,6 @@ namespace Lucee
   IntegrateNodalField<NDIM>::initialize()
   {
     Lucee::UpdaterIfc::initialize();
-
 // get weights for quadrature
     weights.resize(nodalBasis->getNumNodes());
     nodalBasis->getWeights(weights);
