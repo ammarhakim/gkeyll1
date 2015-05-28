@@ -1,11 +1,11 @@
 /**
- * @file	LcNodalDisContHyperUpdater.h
+ * @file	LcNodalPositiveFilterUpdater.h
  *
- * @brief	Updater to solve hyperbolic equations with nodal DG scheme.
+ * @brief	Updater to solver Poisson bracket operator PDEs.
  */
 
-#ifndef LC_NODAL_DIS_CONT_HYPER_UPDATER_H
-#define LC_NODAL_DIS_CONT_HYPER_UPDATER_H
+#ifndef LC_NODAL_POSITIVE_FILTER_UPDATER_H
+#define LC_NODAL_POSITIVE_FILTER_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -21,18 +21,17 @@
 namespace Lucee
 {
 /**
- * Updater to solve hyperbolic equations using a nodal discontinous
- * Galerkin scheme.
+ * Updater to apply positivity filer to DG solution.
  */
   template <unsigned NDIM>
-  class NodalDisContHyperUpdater : public Lucee::UpdaterIfc
+  class NodalPositiveFilterUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new nodal DG solver */
-      NodalDisContHyperUpdater();
+      NodalPositiveFilterUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -67,18 +66,10 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Directions to update */
-      std::vector<unsigned> updateDims;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
-/** CFL number to use */
-      double cfl;
-/** Maximum CFL number allowed */
-      double cflm;
-/** Flag (one per equation) to indicate if to only compute increments */
-      std::vector<bool> onlyIncrement;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -94,24 +85,6 @@ namespace Lucee
 
 /** Stiffness matrices */
       MatrixHolder stiffMatrix[NDIM];
-/** Lifting matrices for lower surface */
-      MatrixHolder lowerLift[NDIM];
-/** Lifting matrices for upper surface */
-      MatrixHolder upperLift[NDIM];
-
-/**
- * Structure to store node numbers on edges.
- */
-      struct EdgeNodeNums
-      {
-/** Node numbers */
-          std::vector<int> nums;
-      };
-
-/** Vector to store lower node numbers */
-      EdgeNodeNums lowerNodeNums[NDIM];
-/** Vector to store upper node numbers */
-      EdgeNodeNums upperNodeNums[NDIM];
 
 /**
  * Compute matrix-vector multiply. Output vector must be
@@ -131,4 +104,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_NODAL_DIS_CONT_HYPER_UPDATER_H
+#endif // LC_NODAL_POSITIVE_FILTER_UPDATER_H

@@ -64,6 +64,7 @@
 #include <LcNodalDisContSrcIncrUpdater.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
+#include <LcNodalPositiveFilterUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -220,6 +221,10 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<3> >()
       .append<Lucee::NodalDisContHyperUpdater<4> >()
       .append<Lucee::NodalDisContHyperUpdater<5> >()
+
+      .append<Lucee::NodalPositiveFilterUpdater<1> >()
+      .append<Lucee::NodalPositiveFilterUpdater<2> >()
+      .append<Lucee::NodalPositiveFilterUpdater<3> >()
 
       .append<Lucee::CopyContToDisContFieldUpdater<1> >()
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
