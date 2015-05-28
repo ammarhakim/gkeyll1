@@ -65,29 +65,45 @@ namespace Lucee
  */
       void declareTypes();
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      //static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+/** Number of local nodes */
+      unsigned nlocal;
+/** Number of equations */
+      unsigned meqn;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
 /** Weights for quadrature */
       std::vector<double> weights;
 
+/** Enum for operation type */
+      enum Operation { OP_FLATTEN, OP_FILTER };
+/** Operation to perform */
+      Operation opType;
+
 /**
- * Compute matrix-vector multiply. Output vector must be
- * pre-allocated. Note that the computation performed is
+ * Compute cell averages from nodal values.
  *
- * out = m*mat*vec + v*out
- *
- * @param m Factor for accumulation.
- * @param mat Matrix for multiplication.
- * @param meqn Number of equations.
- * @param vec Vector for multiplication.
- * @param v Factor for accumulation.
- * @param out On output, holds the product.
+ * @param [in] qIn Input nodal values.
+ * @param [out] qAvg On output, average values.
  */
-      void matVec(double m, const Lucee::Matrix<double>& mat,
-        unsigned meqn, const double* vec, double v, double* out);
+      void calcAverage(const Lucee::ConstFieldPtr<double>& qIn, std::vector<double>& qAvg);
+
+/**
+ * Reset nodal values to specified values.
+ *
+ * @param q On output, all nodal values in this will be replace.
+ * @param qAvg Input values to reset to.
+ */
+      void resetAllNodes(Lucee::FieldPtr<double>& q, const std::vector<double>& qAvg);
   };
 }
 

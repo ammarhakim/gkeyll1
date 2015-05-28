@@ -51,6 +51,33 @@ namespace Lucee
       Lucee::Except lce("NodalPositiveFilterUpdater::readInput: Must specify an equation to solve!");
       throw lce;
     }
+
+    if (tbl.hasString("operation"))
+    {
+// "flatten" checks cell averages and flattens the cell and its
+// neighbors. "filter" checks nodal values and flattens the cell (but
+// not its neighbors).
+      std::string op = tbl.getString("operation");
+      if (op == "flatten")
+        opType = OP_FLATTEN;
+      else if (op == "filter")
+        opType = OP_FILTER;
+      else
+      {
+        Lucee::Except lce("NodalPositiveFilterUpdater::readInput: 'operation' ");
+        lce << op << " not recognized!" << std::endl;
+        throw lce;
+      }
+    }
+    else
+    {
+      Lucee::Except lce(
+        "NodalPositiveFilterUpdater::readInput: Must specify an operation (one of \"filter\" or \" flatten\") ");
+      throw lce;
+    }
+
+    nlocal = nodalBasis->getNumNodes();
+    meqn = equation->getNumEqns();
   }
 
   template <unsigned NDIM>
@@ -61,6 +88,13 @@ namespace Lucee
 // get weights for quadrature
     weights.resize(nodalBasis->getNumNodes());
     nodalBasis->getWeights(weights);
+// get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    double vol = grid.getVolume();
+// normalize weights as we are computing averages and not integrals over cell
+    for (unsigned i=0; i<nodalBasis->getNumNodes(); ++i)
+      weights[i] = weights[i]/vol;
   }
 
   template <unsigned NDIM>
@@ -70,13 +104,84 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
+// This may be a bit confusing: qNew is the updated DG solution, which
+// is what we check for positivity violation. qOld is the old solution
+// which we want to fix (if needed) if positivity is violated.
     const Lucee::Field<NDIM, double>& qNew = this->getInp<Lucee::Field<NDIM, double> >(0);
     Lucee::Field<NDIM, double>& qOld = this->getOut<Lucee::Field<NDIM, double> >(0);
 
-    unsigned nlocal = nodalBasis->getNumNodes();
-    unsigned meqn = equation->getNumEqns();
+    Lucee::FieldPtr<double> qOldPtr = qOld.createPtr();
+    Lucee::ConstFieldPtr<double> qNewPtr = qNew.createConstPtr();
 
-    return Lucee::UpdaterStatus();
+    std::vector<double> qAvg(meqn);
+    int idx[NDIM], idx1[NDIM];
+
+    bool isPositive = true; // positive unless otherwise found
+    Lucee::Region<NDIM, int> localRgn = qNew.getRegion();
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      qNew.setPtr(qNewPtr, idx);
+
+      if (opType == OP_FLATTEN)
+      {
+// compute average from nodal values
+        calcAverage(qNewPtr, qAvg);
+// check if positivity is violated
+        bool isPos = equation->isInvariantDomain(&qAvg[0]);
+
+        if (isPos == false)
+        { 
+          isPositive = false;
+// positivity is violated, flatten cell ..
+          qOld.setPtr(qOldPtr, idx);
+          calcAverage(qOldPtr, qAvg);
+          resetAllNodes(qOldPtr, qAvg);
+
+// ..  and its neighbors. First, reset "right" cell ...
+          for (unsigned d=0; d<NDIM; ++d)
+          {
+            seq.fillWithIndex(idx1);
+            idx1[d] = idx1[d]+1; // right cell
+            qOld.setPtr(qOldPtr, idx1);
+            calcAverage(qOldPtr, qAvg);
+            resetAllNodes(qOldPtr, qAvg);
+          }
+// ... and then reset "left" cell.
+          for (unsigned d=0; d<NDIM; ++d)
+          {
+            seq.fillWithIndex(idx1);
+            idx1[d] = idx1[d]-1;
+            qOld.setPtr(qOldPtr, idx1);
+            calcAverage(qOldPtr, qAvg);
+            resetAllNodes(qOldPtr, qAvg);
+          }
+        }
+      }
+      else
+      {
+        bool isPos = true;
+// check if positivity at any node is violated
+        for (unsigned k=0; k<nlocal; ++k)
+        {
+          if (equation->isInvariantDomain(&qNewPtr[k*meqn]) == false)
+          { 
+            isPos = false; 
+            break; 
+          }
+        }
+        if (isPos == false)
+        {
+          isPositive = false;
+// reset this cell
+          calcAverage(qOldPtr, qAvg);
+          resetAllNodes(qOldPtr, qAvg);     
+        }
+      }
+    }
+
+    return Lucee::UpdaterStatus(isPositive, std::numeric_limits<double>::max());
   }
 
   template <unsigned NDIM>  
@@ -90,22 +195,26 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
-  void 
-  NodalPositiveFilterUpdater<NDIM>::matVec(double mc, const Lucee::Matrix<double>& mat,
-    unsigned meqn, const double* vec, double v, double *out)
+  void
+  NodalPositiveFilterUpdater<NDIM>::calcAverage(const Lucee::ConstFieldPtr<double>& qIn, std::vector<double>& qAvg)
   {
-    double tv;
-    unsigned rows = mat.numRows(), cols = mat.numColumns();
     for (unsigned m=0; m<meqn; ++m)
     {
-      for (unsigned i=0; i<rows; ++i)
-      {
-        tv = 0.0;
-        for (unsigned j=0; j<cols; ++j)
-          tv += mat(i,j)*vec[meqn*j+m];
-        out[meqn*i+m] = mc*tv + v*out[meqn*i+m];
-      }
+      qAvg[m] = 0.0;
+      for (unsigned k=0; k<nlocal; ++k)
+        qAvg[m] += weights[k]*qIn[k*meqn+m];
     }
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalPositiveFilterUpdater<NDIM>::resetAllNodes(Lucee::FieldPtr<double>& q, const std::vector<double>& qAvg)
+  {
+    for (unsigned k=0; k<nlocal; ++k)
+    {
+      for (unsigned m=0; m<meqn; ++m)
+        q[k*meqn+m] = qAvg[m];
+    } 
   }
 
 // instantiations
