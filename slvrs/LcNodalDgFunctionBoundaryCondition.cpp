@@ -34,7 +34,7 @@ namespace Lucee
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
-      throw Lucee::Except("NodalDisContHyperUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("NodalDgFunctionBoundaryCondition::readInput: Must specify element to use using 'basis'");
 // matrix to store coordinates of nodes
     nodeCoords = Lucee::Matrix<double>(nodalBasis->getNumNodes(), 3);
 // create unit mapping
