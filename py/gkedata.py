@@ -51,12 +51,12 @@ class GkeHistoryData:
     frame can be specified and the history will be loaded starting
     from that frame.
 
-    Once the class is constructed the time mesh can be accessed using
-    the ``history`` field and the times when these were taken using
-    the ``time`` field.
+    Once the class is constructed the time series can be accessed
+    using the ``history`` field and the times when these were taken
+    using the ``time`` field.
     """
 
-    def __init__(self, base, start=1):
+    def __init__(self, base, start=0):
         self.base = base
 
         # read in first history file
