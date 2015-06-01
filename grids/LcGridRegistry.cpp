@@ -42,6 +42,7 @@ namespace Lucee
       .append<Lucee::MappedCartGrid<2> >()
       .append<Lucee::MappedCartGrid<3> >()
 
+      .append<Lucee::UnstructuredGrid<1> > ()
       .append<Lucee::UnstructuredGrid<2> > ()
       .append<Lucee::UnstructuredGrid<3> > ();
   }
