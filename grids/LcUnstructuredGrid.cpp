@@ -27,6 +27,7 @@
 
 namespace Lucee
 {
+  template<> const char *UnstructuredGrid<1>::id = "Unstructured1D";
   template<> const char *UnstructuredGrid<2>::id = "Unstructured2D";
   template<> const char *UnstructuredGrid<3>::id = "Unstructured3D";
 
@@ -180,7 +181,7 @@ namespace Lucee
   }
 
 // instantiations
-
+  template class UnstructuredGrid<1> ;
   template class UnstructuredGrid<2> ;
   template class UnstructuredGrid<3> ;
 }
