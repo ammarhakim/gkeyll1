@@ -30,8 +30,7 @@ namespace Lucee
 
     if (tbl.hasNumber("speciesMass"))
       speciesMass = tbl.getNumber("speciesMass");
-    else
-      throw Lucee::Except("LcPoissonBracketSOL3D: Must provide speciesMass.");
+    else speciesMass = 1.0;
   }
 
   void
@@ -39,8 +38,8 @@ namespace Lucee
           const int idx[], Eigen::MatrixXd& alpha)
   {
     Eigen::Matrix3d poissonTensor = Eigen::Matrix3d::Zero();
-    poissonTensor(0,1) = 1/speciesMass;
-    poissonTensor(1,0) = -1/speciesMass;
+    poissonTensor(0,1) = 1.0/speciesMass;
+    poissonTensor(1,0) = -1.0/speciesMass;
     alpha = poissonTensor*hamiltonian;
   }
 }

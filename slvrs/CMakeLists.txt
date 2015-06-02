@@ -54,6 +54,7 @@ set(lcslvrs_SOURCES
   LcGridOdePointIntegrator.cpp
   LcGridOdePointIntegratorUpdater.cpp
   LcHeatFluxAtEdgeUpdater.cpp
+  LcHeatFluxAtEdge3DUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
@@ -62,11 +63,14 @@ set(lcslvrs_SOURCES
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdgeUpdater.cpp
+  LcKineticHeatFluxAtEdge3DUpdater.cpp
   LcKineticTotalEnergyUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiffUpdater.cpp
+  LcLenardBernsteinDiff3DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
+  LcLenardBernsteinDrag3DUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
@@ -74,6 +78,7 @@ set(lcslvrs_SOURCES
   LcMHDHamiltonianUpdater.cpp
   LcMaxwellEquation.cpp
   LcMomentsAtEdgesUpdater.cpp
+  LcMomentsAtEdges3DUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgCopyBoundaryCondition.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
@@ -90,6 +95,7 @@ set(lcslvrs_SOURCES
   LcPredicateUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
+  LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLIonDensityInitialization.cpp
@@ -109,6 +115,7 @@ set(lcslvrs_SOURCES
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMomentsUpdater.cpp
+  LcVelocitiesFromMoments3DUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp

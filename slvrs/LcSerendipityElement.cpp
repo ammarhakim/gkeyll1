@@ -556,8 +556,8 @@ namespace Lucee
   {
     if (polyOrder > 2)
       Lucee::Except("SerendipityElement::getDiffusionMatrices: Not implemented for higher than quadratic!");
-    if (NDIM != 2)
-      Lucee::Except("SerendipityElement::getDiffusionMatrices: Only implemented for 2D");
+    if (NDIM != 2 && NDIM != 3)
+      Lucee::Except("SerendipityElement::getDiffusionMatrices: Only implemented for 2D and 3D");
 
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
@@ -604,49 +604,129 @@ namespace Lucee
   {
     if (polyOrder > 2)
       Lucee::Except("SerendipityElement::getLowerReflectingBcMapping: Not implemented for higher than quadratic!");
-    if (NDIM != 2)
+    if (NDIM != 2 && NDIM != 3)
       Lucee::Except("SerendipityElement::getLowerReflectingBcMapping: Only implemented for 2D");
 
-    if(dir == 0)
+    if (NDIM == 2)
     {
-      if (polyOrder == 1)
+      if(dir == 0)
       {
-        nodeMap[0] = 1;
-        nodeMap[1] = 0;
-        nodeMap[2] = 3;
-        nodeMap[3] = 2;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 1;
+          nodeMap[1] = 0;
+          nodeMap[2] = 3;
+          nodeMap[3] = 2;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 1;
+          nodeMap[2] = 0;
+          nodeMap[3] = 4;
+          nodeMap[4] = 3;
+          nodeMap[5] = 7;
+          nodeMap[6] = 6;
+          nodeMap[7] = 5;
+        }
       }
-      else if (polyOrder == 2)
+      else if (dir == 1)
       {
-        nodeMap[0] = 2;
-        nodeMap[1] = 1;
-        nodeMap[2] = 0;
-        nodeMap[3] = 4;
-        nodeMap[4] = 3;
-        nodeMap[5] = 7;
-        nodeMap[6] = 6;
-        nodeMap[7] = 5;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 3;
+          nodeMap[2] = 0;
+          nodeMap[3] = 1;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 5;
+          nodeMap[1] = 6;
+          nodeMap[2] = 7;
+          nodeMap[3] = 3;
+          nodeMap[4] = 4;
+          nodeMap[5] = 0;
+          nodeMap[6] = 1;
+          nodeMap[7] = 2;
+        }
       }
     }
-    else if (dir == 1)
+    else if (NDIM == 3)
     {
-      if (polyOrder == 1)
+      if (dir == 0)
       {
-        nodeMap[0] = 2;
-        nodeMap[1] = 3;
-        nodeMap[2] = 0;
-        nodeMap[3] = 1;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 1;
+          nodeMap[1] = 0;
+          nodeMap[2] = 3;
+          nodeMap[3] = 2;
+          nodeMap[4] = 5;
+          nodeMap[5] = 4;
+          nodeMap[6] = 7;
+          nodeMap[7] = 6;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 1;
+          nodeMap[2] = 0;
+          nodeMap[3] = 4;
+          nodeMap[4] = 3;
+          nodeMap[5] = 7;
+          nodeMap[6] = 6;
+          nodeMap[7] = 5;
+          nodeMap[8] = 9;
+          nodeMap[9] = 8;
+          nodeMap[10] = 11;
+          nodeMap[11] = 10;
+          nodeMap[12] = 14;
+          nodeMap[13] = 13;
+          nodeMap[14] = 12;
+          nodeMap[15] = 16;
+          nodeMap[16] = 15;
+          nodeMap[17] = 19;
+          nodeMap[18] = 18;
+          nodeMap[19] = 17;
+        }
       }
-      else if (polyOrder == 2)
+      else if (dir == 1)
       {
-        nodeMap[0] = 5;
-        nodeMap[1] = 6;
-        nodeMap[2] = 7;
-        nodeMap[3] = 3;
-        nodeMap[4] = 4;
-        nodeMap[5] = 0;
-        nodeMap[6] = 1;
-        nodeMap[7] = 2;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 3;
+          nodeMap[2] = 0;
+          nodeMap[3] = 1;
+          nodeMap[4] = 6;
+          nodeMap[5] = 7;
+          nodeMap[6] = 4;
+          nodeMap[7] = 5;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 5;
+          nodeMap[1] = 6;
+          nodeMap[2] = 7;
+          nodeMap[3] = 3;
+          nodeMap[4] = 4;
+          nodeMap[5] = 0;
+          nodeMap[6] = 1;
+          nodeMap[7] = 2;
+          nodeMap[8] = 10;
+          nodeMap[9] = 11;
+          nodeMap[10] = 8;
+          nodeMap[11] = 9;
+          nodeMap[12] = 17;
+          nodeMap[13] = 18;
+          nodeMap[14] = 19;
+          nodeMap[15] = 15;
+          nodeMap[16] = 16;
+          nodeMap[17] = 12;
+          nodeMap[18] = 13;
+          nodeMap[19] = 14;
+        }
       }
     }
   }
@@ -658,49 +738,129 @@ namespace Lucee
   {
     if (polyOrder > 2)
       Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Not implemented for higher than quadratic!");
-    if (NDIM != 2)
-      Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Only implemented for 2D");
+    if (NDIM != 2 && NDIM != 3)
+      Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Only implemented for 2D and 3D");
 
-    if(dir == 0)
+    if (NDIM == 2)
     {
-      if (polyOrder == 1)
+      if(dir == 0)
       {
-        nodeMap[0] = 1;
-        nodeMap[1] = 0;
-        nodeMap[2] = 3;
-        nodeMap[3] = 2;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 1;
+          nodeMap[1] = 0;
+          nodeMap[2] = 3;
+          nodeMap[3] = 2;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 1;
+          nodeMap[2] = 0;
+          nodeMap[3] = 4;
+          nodeMap[4] = 3;
+          nodeMap[5] = 7;
+          nodeMap[6] = 6;
+          nodeMap[7] = 5;
+        }
       }
-      else if (polyOrder == 2)
+      else if (dir == 1)
       {
-        nodeMap[0] = 2;
-        nodeMap[1] = 1;
-        nodeMap[2] = 0;
-        nodeMap[3] = 4;
-        nodeMap[4] = 3;
-        nodeMap[5] = 7;
-        nodeMap[6] = 6;
-        nodeMap[7] = 5;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 3;
+          nodeMap[2] = 0;
+          nodeMap[3] = 1;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 5;
+          nodeMap[1] = 6;
+          nodeMap[2] = 7;
+          nodeMap[3] = 3;
+          nodeMap[4] = 4;
+          nodeMap[5] = 0;
+          nodeMap[6] = 1;
+          nodeMap[7] = 2;
+        }
       }
     }
-    else if (dir == 1)
+    else if (NDIM == 3)
     {
-      if (polyOrder == 1)
+      if (dir == 0)
       {
-        nodeMap[0] = 2;
-        nodeMap[1] = 3;
-        nodeMap[2] = 0;
-        nodeMap[3] = 1;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 1;
+          nodeMap[1] = 0;
+          nodeMap[2] = 3;
+          nodeMap[3] = 2;
+          nodeMap[4] = 5;
+          nodeMap[5] = 4;
+          nodeMap[6] = 7;
+          nodeMap[7] = 6;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 1;
+          nodeMap[2] = 0;
+          nodeMap[3] = 4;
+          nodeMap[4] = 3;
+          nodeMap[5] = 7;
+          nodeMap[6] = 6;
+          nodeMap[7] = 5;
+          nodeMap[8] = 9;
+          nodeMap[9] = 8;
+          nodeMap[10] = 11;
+          nodeMap[11] = 10;
+          nodeMap[12] = 14;
+          nodeMap[13] = 13;
+          nodeMap[14] = 12;
+          nodeMap[15] = 16;
+          nodeMap[16] = 15;
+          nodeMap[17] = 19;
+          nodeMap[18] = 18;
+          nodeMap[19] = 17;
+        }
       }
-      else if (polyOrder == 2)
+      else if (dir == 1)
       {
-        nodeMap[0] = 5;
-        nodeMap[1] = 6;
-        nodeMap[2] = 7;
-        nodeMap[3] = 3;
-        nodeMap[4] = 4;
-        nodeMap[5] = 0;
-        nodeMap[6] = 1;
-        nodeMap[7] = 2;
+        if (polyOrder == 1)
+        {
+          nodeMap[0] = 2;
+          nodeMap[1] = 3;
+          nodeMap[2] = 0;
+          nodeMap[3] = 1;
+          nodeMap[4] = 6;
+          nodeMap[5] = 7;
+          nodeMap[6] = 4;
+          nodeMap[7] = 5;
+        }
+        else if (polyOrder == 2)
+        {
+          nodeMap[0] = 5;
+          nodeMap[1] = 6;
+          nodeMap[2] = 7;
+          nodeMap[3] = 3;
+          nodeMap[4] = 4;
+          nodeMap[5] = 0;
+          nodeMap[6] = 1;
+          nodeMap[7] = 2;
+          nodeMap[8] = 10;
+          nodeMap[9] = 11;
+          nodeMap[10] = 8;
+          nodeMap[11] = 9;
+          nodeMap[12] = 17;
+          nodeMap[13] = 18;
+          nodeMap[14] = 19;
+          nodeMap[15] = 15;
+          nodeMap[16] = 16;
+          nodeMap[17] = 12;
+          nodeMap[18] = 13;
+          nodeMap[19] = 14;
+        }
       }
     }
   }
@@ -1012,6 +1172,21 @@ namespace Lucee
     }
     else if (NDIM == 3)
     {
+      // Set up diffusion matrices
+      iMatDiffusion          = std::vector<Eigen::MatrixXd>(NDIM);
+      lowerMatDiffusion      = std::vector<Eigen::MatrixXd>(NDIM);
+      upperMatDiffusion      = std::vector<Eigen::MatrixXd>(NDIM);
+
+      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      {
+        iMatDiffusion[dimIndex]          = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        lowerMatDiffusion[dimIndex]      = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+        upperMatDiffusion[dimIndex]      = Eigen::MatrixXd::Zero(functionVector.size(),functionVector.size());
+      }
+
+      // Explicity assign values to matrix elements (very long)
+      #include <LcSerendipityElement3DDiffusionOutput>
+
       // Set up face-to-interior mapping matrix
       lowerFaceToInteriorMapMatrices = std::vector<Eigen::MatrixXd>(NDIM);
       

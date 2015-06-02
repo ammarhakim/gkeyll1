@@ -2,6 +2,10 @@
  * @file	LcPoissonBracketUpdater.cpp
  *
  * @brief	Updater to solver Poisson bracket operator PDEs.
+ * 5-19-2015: This file has the original code written in 2014 for the
+ * generalized poisson bracket solver. It is slower than PoissonBracketOpt
+ * but I like to keep it around because it's easier to read due to its use of
+ * Eigen operations. Should figure out why Eigen operations are slower some day.
  */
 
 // config stuff

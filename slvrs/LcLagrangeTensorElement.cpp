@@ -246,7 +246,7 @@ namespace Lucee
     if (polyOrder == 1)
       maxPower = 4;
     else maxPower = 3*polyOrder;
-    unsigned num1DGaussPoints = (unsigned)((4*polyOrder+1)/2.0 + 0.5);
+    unsigned num1DGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
     numGaussVolNodes = 1;
     for(int d=0; d<NDIM; d++)
       numGaussVolNodes = numGaussVolNodes*num1DGaussPoints;

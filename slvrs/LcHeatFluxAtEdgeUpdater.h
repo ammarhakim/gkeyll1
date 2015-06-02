@@ -100,8 +100,6 @@ namespace Lucee
  *
  * @param L Lua state object to use.
  * @param tm Time to evaluate function at.
- * @param nc Matrix with nodal cooridates.
- * @param nn Node number
  * @param res On output, result of evaluating function.
  */
       void evaluateFunction(Lucee::LuaState& L, double tm, 

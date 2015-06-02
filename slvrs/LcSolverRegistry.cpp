@@ -40,21 +40,26 @@
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
 #include <LcHeatFluxAtEdgeUpdater.h>
+#include <LcHeatFluxAtEdge3DUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
+#include <LcKineticHeatFluxAtEdge3DUpdater.h>
 #include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiffUpdater.h>
+#include <LcLenardBernsteinDiff3DUpdater.h>
 #include <LcLenardBernsteinDragUpdater.h>
+#include <LcLenardBernsteinDrag3DUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcMHDHamiltonianUpdater.h>
 #include <LcMomentsAtEdgesUpdater.h>
+#include <LcMomentsAtEdges3DUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgCopyBoundaryCondition.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
@@ -71,6 +76,7 @@
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
@@ -84,6 +90,7 @@
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
+#include <LcVelocitiesFromMoments3DUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -139,11 +146,14 @@ namespace Lucee
       // Probably used for SOL problem simulations
       .append<Lucee::BoltzmannPhiUpdater>()
       .append<Lucee::HeatFluxAtEdgeUpdater>()
+      .append<Lucee::HeatFluxAtEdge3DUpdater>()
       .append<Lucee::KineticEnergyUpdater>()
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
+      .append<Lucee::KineticHeatFluxAtEdge3DUpdater>()
       .append<Lucee::KineticTotalEnergyUpdater>()
       .append<Lucee::MHDHamiltonianUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
+      .append<Lucee::MomentsAtEdges3DUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()
@@ -153,6 +163,7 @@ namespace Lucee
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
       .append<Lucee::SetPhiAtBoundaryUpdater>()
+      .append<Lucee::SOL3DElectrostaticDistFuncReflectionBCUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLIonDensityInitialization>()
 
@@ -168,7 +179,9 @@ namespace Lucee
       .append<Lucee::GridOdePointIntegratorUpdater<3> >()
 
       .append<Lucee::LenardBernsteinDragUpdater>()
+      .append<Lucee::LenardBernsteinDrag3DUpdater>()
       .append<Lucee::LenardBernsteinDiffUpdater>()
+      .append<Lucee::LenardBernsteinDiff3DUpdater>()
       
       .append<Lucee::NodalCopyFaceToInteriorUpdater>()
 
@@ -262,7 +275,8 @@ namespace Lucee
       .append<PredicateUpdater<2> >()
       .append<PredicateUpdater<3> >()
 
-      .append<Lucee::VelocitiesFromMomentsUpdater>();
+      .append<Lucee::VelocitiesFromMomentsUpdater>()
+      .append<Lucee::VelocitiesFromMoments3DUpdater>();
 
 // register boundary conditions
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::BoundaryCondition> >

@@ -1,12 +1,11 @@
 /**
- * @file	LcMomentsAtEdgesUpdater.h
+ * @file	LcDistFuncReflectionBcUpdater.h
  *
- * @brief	Computes several parallel velocity moments of the distribution function at both edges.
- * Used for 1D/1V SOL Problem (Adiabatic Electrons)
+ * @brief	Applies particle refection BCs to (electron) distribution function
  */
 
-#ifndef LC_MOMENTS_AT_EDGES_UPDATER_H
-#define LC_MOMENTS_AT_EDGES_UPDATER_H
+#ifndef LC_SOL_3D_ELECTROSTATIC_DIST_FUNC_REFLECTION_BC_UPDATER
+#define LC_SOL_3D_ELECTROSTATIC_DIST_FUNC_REFLECTION_BC_UPDATER
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -30,14 +29,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class MomentsAtEdgesUpdater : public Lucee::UpdaterIfc
+  class SOL3DElectrostaticDistFuncReflectionBCUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      MomentsAtEdgesUpdater();
+      SOL3DElectrostaticDistFuncReflectionBCUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -73,11 +72,23 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
+/** Pointer to 1D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
+/** Flag to indicate if BCs should be applied to left edge */
+      bool applyLeftEdge;
+/** Flag to indicate if BCs should be applied to right edge */
+      bool applyRightEdge;
+/** Mapping for 180 degree rotations */
+      std::vector<unsigned> rotMap;
 /** Contains the right edge node numbers */
       std::vector<int> rightEdgeNodeNums;
 /** Contains the left edge node numbers */
       std::vector<int> leftEdgeNodeNums;
+/** Tolerance to which cutoff velocities should be found */
+      double cutoffTolerance;
+/** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
+      double scaleFactor;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
@@ -94,10 +105,6 @@ namespace Lucee
  * gaussSurfWeights.
  */
       Eigen::MatrixXd edgeNodeInterpMatrix;
-/**
- * Multiplies vector of nodal values to get derivatives at nodes
- */
-      Eigen::MatrixXd derivativeMatrix;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
@@ -108,4 +115,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_MOMENTS_AT_EDGES_UPDATER_H
+#endif // LC_SOL_3D_ELECTROSTATIC_DIST_FUNC_REFLECTION_BC_UPDATER

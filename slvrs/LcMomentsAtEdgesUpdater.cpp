@@ -1,7 +1,8 @@
 /**
  * @file	LcMomentsAtEdgesUpdater.cpp
  *
- * @brief	Computes first and third moments of the distribution function at both edges.
+ * @brief	Computes several parallel velocity moments of the distribution function at both edges.
+ * Used for 1D/1V SOL Problem (Adiabatic Electrons)
  */
 
 // config stuff
