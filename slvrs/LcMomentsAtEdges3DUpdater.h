@@ -1,12 +1,12 @@
 /**
- * @file	LcMomentsAtEdgesUpdater.h
+ * @file	LcMomentsAtEdges3DUpdater.h
  *
  * @brief	Computes several parallel velocity moments of the distribution function at both edges.
- * Used for 1D/1V SOL Problem (Adiabatic Electrons)
+ * Used for 3D SOL problem (Adiabatic Electrons).
  */
 
-#ifndef LC_MOMENTS_AT_EDGES_UPDATER_H
-#define LC_MOMENTS_AT_EDGES_UPDATER_H
+#ifndef LC_MOMENTS_AT_EDGES_3D_UPDATER_H
+#define LC_MOMENTS_AT_EDGES_3D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -30,14 +30,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class MomentsAtEdgesUpdater : public Lucee::UpdaterIfc
+  class MomentsAtEdges3DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      MomentsAtEdgesUpdater();
+      MomentsAtEdges3DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -73,27 +73,22 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Contains the right edge node numbers */
-      std::vector<int> rightEdgeNodeNums;
-/** Contains the left edge node numbers */
-      std::vector<int> leftEdgeNodeNums;
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
+/** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
+      double scaleFactor;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
  * and each row is a different quadrature point for doing surface integrals.
  */
-      Eigen::MatrixXd gaussEdgeOrdinates;
+      Eigen::MatrixXd gaussEdgeOrdinatesLower;
+      Eigen::MatrixXd gaussEdgeOrdinatesUpper;
 /** Weights for edge gaussian quadrature points */
-      std::vector<double> gaussEdgeWeights;
-/** 
- * Interpolation matrix for bringing data that lives on the left or right edge
- * to quadrature points on same surface. It is constructed from the right edge
- * basis function evaluations but should work for the left edge as well.
- * The quadrature locations for these nodes are also in gaussSurfOrdinates and
- * gaussSurfWeights.
- */
-      Eigen::MatrixXd edgeNodeInterpMatrix;
+      std::vector<double> gaussEdgeWeightsLower;
+      std::vector<double> gaussEdgeWeightsUpper;
+/** Surface interpolation matrices */
+      Eigen::MatrixXd interpEdgeMatrixLower;
+      Eigen::MatrixXd interpEdgeMatrixUpper;
 /**
  * Multiplies vector of nodal values to get derivatives at nodes
  */
@@ -108,4 +103,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_MOMENTS_AT_EDGES_UPDATER_H
+#endif // LC_MOMENTS_AT_EDGES_3D_UPDATER_H

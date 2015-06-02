@@ -71,6 +71,7 @@ set (proto_SOURCES
   LcPoissonBracketSOL3D.cpp
   LcPoissonBracketUpdater.cpp
   LcPoissonBracketOptUpdater.cpp
+  LcPoissonBracketSimpleUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp

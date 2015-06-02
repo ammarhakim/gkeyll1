@@ -1,12 +1,12 @@
 /**
- * @file	LcMomentsAtEdgesUpdater.h
+ * @file	LcVelocitiesFromMoments3DUpdater.h
  *
- * @brief	Computes several parallel velocity moments of the distribution function at both edges.
- * Used for 1D/1V SOL Problem (Adiabatic Electrons)
+ * @brief	Updater to compute parallel drift velocity and thermal velocity squared
+ * given certain moments of the distribution function. Used for 3D SOL problem.
  */
 
-#ifndef LC_MOMENTS_AT_EDGES_UPDATER_H
-#define LC_MOMENTS_AT_EDGES_UPDATER_H
+#ifndef LC_VELOCITIES_FROM_MOMENTS_3D_UPDATER_H
+#define LC_VELOCITIES_FROM_MOMENTS_3D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -15,11 +15,11 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcVector.h>
-#include <LcDynVector.h>
+
+// std includes
+#include <vector>
 
 // eigen includes
 #include <Eigen/Dense>
@@ -28,16 +28,17 @@
 namespace Lucee
 {
 /**
- * Applies particle refection BCs to distribution function
+ * Updater to solve hyperbolic equations using a nodal discontinous
+ * Galerkin scheme.
  */
-  class MomentsAtEdgesUpdater : public Lucee::UpdaterIfc
+  class VelocitiesFromMoments3DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new projection updater */
-      MomentsAtEdgesUpdater();
+/** Create new nodal DG solver */
+      VelocitiesFromMoments3DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -73,32 +74,24 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis;
-/** Contains the right edge node numbers */
-      std::vector<int> rightEdgeNodeNums;
-/** Contains the left edge node numbers */
-      std::vector<int> leftEdgeNodeNums;
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
 /**
- * Matrix of surface gaussian quadrature locations on bottom face..
+ * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)
- * and each row is a different quadrature point for doing surface integrals.
+ * and each row is a different quadrature point for doing integrals.
  */
-      Eigen::MatrixXd gaussEdgeOrdinates;
-/** Weights for edge gaussian quadrature points */
-      std::vector<double> gaussEdgeWeights;
+      Eigen::MatrixXd gaussOrdinates;
+/** Weights for gaussian quadrature points */
+      std::vector<double> gaussWeights;
 /** 
- * Interpolation matrix for bringing data that lives on the left or right edge
- * to quadrature points on same surface. It is constructed from the right edge
- * basis function evaluations but should work for the left edge as well.
- * The quadrature locations for these nodes are also in gaussSurfOrdinates and
- * gaussSurfWeights.
+ * Interpolation matrix for bringing quantities from nodal locations to
+ * gaussian quadrature points.
  */
-      Eigen::MatrixXd edgeNodeInterpMatrix;
-/**
- * Multiplies vector of nodal values to get derivatives at nodes
- */
-      Eigen::MatrixXd derivativeMatrix;
-
+      Eigen::MatrixXd interpMatrix;
+/** Transpose of interpolation matrix */
+      Eigen::MatrixXd interpMatrixTranspose;
+/** Inverse of mass matrix */
+      Eigen::MatrixXd massMatrixInv;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -108,4 +101,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_MOMENTS_AT_EDGES_UPDATER_H
+#endif // LC_VELOCITIES_FROM_MOMENTS_3D_UPDATER_H

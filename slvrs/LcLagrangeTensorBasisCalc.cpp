@@ -593,10 +593,15 @@ namespace Lucee
     for (unsigned d=0; d<NDIM; ++d)
       maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
 
-// figure out how many quadrature points needed to do 4*polyOrder integration
     numGaussVolNodes = 1;
     unsigned polyOrder = maxNodes - 1;
-    unsigned num1DGaussPoints = (unsigned)((4*polyOrder+1)/2.0 + 0.5);
+    // figure out how many quadrature points needed to do 4*polyOrder integration
+    // (or 3*polyOrder integration if polyOrder > 1 for some reason)
+    unsigned maxPower;
+    if (polyOrder == 1)
+      maxPower = 4;
+    else maxPower = 3*polyOrder;
+    unsigned num1DGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
     maxNodes = num1DGaussPoints;
 
     blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
