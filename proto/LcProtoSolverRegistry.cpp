@@ -12,6 +12,7 @@
 // lucee includes
 #include <LcCenterOfMassUpdater.h>
 #include <LcConstGravitySrcUpdater.h>
+#include <LcConstructLinearOperatorMatrix.h>
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
@@ -27,6 +28,7 @@
 #include <LcETGFreeEnergy.h>
 #include <LcETGInitializeDensity.h>
 #include <LcETGInitializeDensity5D.h>
+#include <LcETGInnerProduct.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
@@ -60,6 +62,7 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
@@ -90,6 +93,12 @@ namespace Lucee
       .append<Lucee::CenterOfMassUpdater<2> >()
       .append<Lucee::CenterOfMassUpdater<3> >()
 
+      .append<Lucee::ConstructLinearOperatorMatrix<1> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<2> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<3> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<4> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<5> >()
+
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncMomentCalc1DFrom3D>()
@@ -108,6 +117,7 @@ namespace Lucee
       .append<Lucee::ETGFreeEnergy>()
       .append<Lucee::ETGInitializeDensity>()
       .append<Lucee::ETGInitializeDensity5D>()
+      .append<Lucee::ETGInnerProduct>()
     
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
@@ -202,6 +212,12 @@ namespace Lucee
       .append<Lucee::ConstGravitySrcUpdater<1> >()
       .append<Lucee::ConstGravitySrcUpdater<2> >()
       .append<Lucee::ConstGravitySrcUpdater<3> >()
+
+      .append<Lucee::SetSingleNodeToOneUpdater<1> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<2> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<3> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<4> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<5> >()
 
       ;
 
