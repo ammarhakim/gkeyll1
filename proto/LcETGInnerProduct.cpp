@@ -198,7 +198,7 @@ namespace Lucee
 
         // Figure out if element is a ghost cell
         double isGhost = false;
-        for (int d = 0; d < NDIM; d++)
+        for (int d = 0; d < 4; d++)
         {
           if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
             isGhost = true;
