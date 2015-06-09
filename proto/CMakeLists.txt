@@ -40,6 +40,7 @@ set (proto_SOURCES
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcInitNodesFromMatrixMarketUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateGeneralField.cpp

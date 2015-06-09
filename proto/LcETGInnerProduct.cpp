@@ -157,7 +157,8 @@ namespace Lucee
 
     Lucee::Region<4, int> localRgn = grid.getLocalRegion();
     Lucee::Region<4, int> globalRgn = grid.getGlobalRegion();
-    Lucee::RowMajorSequencer<4> seq(localRgn);
+    Lucee::Region<4, int> localExtRgn = gDistFIn.getExtRegion();
+    Lucee::RowMajorSequencer<4> seq(localExtRgn);
 
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
