@@ -185,6 +185,7 @@ namespace Lucee
     int colIndex = (int) res[1];
 
     double localInt = 0.0;
+    double ghostScale = 1.0e-14;
 
     if (std::abs(rowIndex-colIndex) < nodesPerPosition)
     {
@@ -247,10 +248,21 @@ namespace Lucee
         // perform quadrature
         for (int i = 0; i < nVolQuad4d; i++)
         {
-          localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
-            bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
-            bgAdiabaticTemp/(2*bgKineticDensity)*
-            gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
+          if (isGhost == true)
+          {
+            // diminish ghost cell contribution to free energy
+            localInt += ghostScale*volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+              bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+              bgAdiabaticTemp/(2*bgKineticDensity)*
+              gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
+          }
+          else
+          {
+            localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+              bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+              bgAdiabaticTemp/(2*bgKineticDensity)*
+              gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
+          }
         }
       }
     }
