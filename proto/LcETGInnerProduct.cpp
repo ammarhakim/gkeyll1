@@ -52,11 +52,11 @@ namespace Lucee
       throw Lucee::Except(
         "ETGInnerProduct::readInput: Must specify temperature of adiabatic species using 'adiabaticTemp'");
 
-    if (tbl.hasNumber("adiabaticDensity"))
-      bgAdiabaticDensity = tbl.getNumber("adiabaticDensity");
+    if (tbl.hasNumber("n0"))
+      bgKineticDensity = tbl.getNumber("n0");
     else
       throw Lucee::Except(
-        "ETGInnerProduct::readInput: Must specify density of adiabatic species using 'adiabaticDensity'");
+        "ETGInnerProduct::readInput: Must specify background density of kinetic species using 'n0'");
 
     // For now, assume Z_i*q_i = elementary charge
     if (tbl.hasNumber("eV"))
@@ -76,6 +76,12 @@ namespace Lucee
     else
       throw Lucee::Except(
         "ETGInnerProduct::readInput: Must specify total number of nodes in system using 'totalNodes'");
+
+    if (tbl.hasNumber("nodesPerPosition"))
+      nodesPerPosition = tbl.getNumber("nodesPerPosition");
+    else
+      throw Lucee::Except(
+        "ETGInnerProduct::readInput: Must specify nodes per position using 'nodesPerPosition'");
 
     // get function to evaluate
     fnRef = tbl.getFunctionRef("evaluate");
@@ -141,8 +147,8 @@ namespace Lucee
     const Lucee::Field<2, double>& bFieldIn = this->getInp<Lucee::Field<2, double> >(0);
     const Lucee::Field<2, double>& bgKineticTempIn = this->getInp<Lucee::Field<2, double> >(1);
     const Lucee::Field<4, double>& bgDistFIn = this->getInp<Lucee::Field<4, double> >(2);
-    const Lucee::Field<2, double>& gPotentialIn = this->getInp<Lucee::Field<2, double> >(3);
-    const Lucee::Field<2, double>& hPotentialIn = this->getInp<Lucee::Field<2, double> >(4);
+    const Lucee::Field<2, double>& gNumDensityIn = this->getInp<Lucee::Field<2, double> >(3);
+    const Lucee::Field<2, double>& hNumDensityIn = this->getInp<Lucee::Field<2, double> >(4);
     const Lucee::Field<4, double>& gDistFIn = this->getInp<Lucee::Field<4, double> >(5);
     const Lucee::Field<4, double>& hDistFIn = this->getInp<Lucee::Field<4, double> >(6);
 
@@ -150,8 +156,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> bFieldPtr = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bgKineticTempPtr = bgKineticTempIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bgDistFPtr = bgDistFIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> gPotentialPtr = gPotentialIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> hPotentialPtr = hPotentialIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> gNumDensityPtr = gNumDensityIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> hNumDensityPtr = hNumDensityIn.createConstPtr();
     Lucee::ConstFieldPtr<double> gDistFPtr = gDistFIn.createConstPtr();
     Lucee::ConstFieldPtr<double> hDistFPtr = hDistFIn.createConstPtr();
 
@@ -173,64 +179,79 @@ namespace Lucee
     // Get write location
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
     std::vector<double> res(2);
-    evaluateFunction(*L, t, res);
+    evaluateFunction(*L, t, res); 
+
+    int rowIndex = (int) res[0];
+    int colIndex = (int) res[1];
 
     double localInt = 0.0;
-    // loop, performing integration
-    while (seq.step())
+
+    if (std::abs(rowIndex-colIndex) < nodesPerPosition)
     {
-      seq.fillWithIndex(idx);
-      // set index into element basis
-      nodalBasis4d->setIndex(idx);
-      nodalBasis2d->setIndex(idx[0], idx[1]);
-
-      bFieldIn.setPtr(bFieldPtr, idx[0], idx[1]);
-      bgKineticTempIn.setPtr(bgKineticTempPtr, idx[0], idx[1]);
-      bgDistFIn.setPtr(bgDistFPtr, idx);
-      gPotentialIn.setPtr(gPotentialPtr, idx[0], idx[1]);
-      hPotentialIn.setPtr(hPotentialPtr, idx[0], idx[1]);
-      gDistFIn.setPtr(gDistFPtr, idx);
-      hDistFIn.setPtr(hDistFPtr, idx);
-      
-      Eigen::VectorXd bFieldVec(nlocal2d);
-      Eigen::VectorXd bgKineticTempVec(nlocal2d);
-      Eigen::VectorXd bgDistFVec(nlocal4d);
-      Eigen::VectorXd gPotentialVec(nlocal2d);
-      Eigen::VectorXd hPotentialVec(nlocal2d);
-      Eigen::VectorXd gDistFVec(nlocal4d);
-      Eigen::VectorXd hDistFVec(nlocal4d);
-
-      for (int i = 0; i < nlocal2d; i++)
+      // loop, performing integration
+      while (seq.step())
       {
-        bFieldVec(i) = bFieldPtr[i];
-        bgKineticTempVec(i) = bgKineticTempPtr[i];
-        gPotentialVec(i) = gPotentialPtr[i];
-        hPotentialVec(i) = hPotentialPtr[i];
-      }
+        seq.fillWithIndex(idx);
+        // set index into element basis
+        nodalBasis4d->setIndex(idx);
+        nodalBasis2d->setIndex(idx[0], idx[1]);
 
-      for (int i = 0; i < nlocal4d; i++)
-      {
-        bgDistFVec(i) = bgDistFPtr[i];
-        gDistFVec(i) = gDistFPtr[i];
-        hDistFVec(i) = hDistFPtr[i];
-      }
+        // Figure out if element is a ghost cell
+        double isGhost = false;
+        for (int d = 0; d < NDIM; d++)
+        {
+          if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
+            isGhost = true;
+        }
 
-      // Interpolate data to quadrature points
-      Eigen::VectorXd bFieldAtQuad = volQuad2d.interpMat*bFieldVec;
-      Eigen::VectorXd bgKineticTempAtQuad = volQuad2d.interpMat*bgKineticTempVec;
-      Eigen::VectorXd bgDistFAtQuad = volQuad4d.interpMat*bgDistFVec;
-      Eigen::VectorXd gPotentialAtQuad = volQuad2d.interpMat*gPotentialVec;
-      Eigen::VectorXd hPotentialAtQuad = volQuad2d.interpMat*hPotentialVec;
-      Eigen::VectorXd gDistFAtQuad = volQuad4d.interpMat*gDistFVec;
-      Eigen::VectorXd hDistFAtQuad = volQuad4d.interpMat*hDistFVec;
+        bFieldIn.setPtr(bFieldPtr, idx[0], idx[1]);
+        bgKineticTempIn.setPtr(bgKineticTempPtr, idx[0], idx[1]);
+        bgDistFIn.setPtr(bgDistFPtr, idx);
+        gNumDensityIn.setPtr(gNumDensityPtr, idx[0], idx[1]);
+        hNumDensityIn.setPtr(hNumDensityPtr, idx[0], idx[1]);
+        gDistFIn.setPtr(gDistFPtr, idx);
+        hDistFIn.setPtr(hDistFPtr, idx);
+        
+        Eigen::VectorXd bFieldVec(nlocal2d);
+        Eigen::VectorXd bgKineticTempVec(nlocal2d);
+        Eigen::VectorXd bgDistFVec(nlocal4d);
+        Eigen::VectorXd gNumDensityVec(nlocal2d);
+        Eigen::VectorXd hNumDensityVec(nlocal2d);
+        Eigen::VectorXd gDistFVec(nlocal4d);
+        Eigen::VectorXd hDistFVec(nlocal4d);
 
-      // perform quadrature
-      for (int i = 0; i < nVolQuad4d; i++)
-      {
-        localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
-          bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
-          bgAdiabaticDensity/(2*bgAdiabaticTemp)*
-          gPotentialAtQuad(i % nVolQuad2d)*hPotentialAtQuad(i % nVolQuad2d) );
+        for (int i = 0; i < nlocal2d; i++)
+        {
+          bFieldVec(i) = bFieldPtr[i];
+          bgKineticTempVec(i) = bgKineticTempPtr[i];
+          gNumDensityVec(i) = gNumDensityPtr[i];
+          hNumDensityVec(i) = hNumDensityPtr[i];
+        }
+
+        for (int i = 0; i < nlocal4d; i++)
+        {
+          bgDistFVec(i) = bgDistFPtr[i];
+          gDistFVec(i) = gDistFPtr[i];
+          hDistFVec(i) = hDistFPtr[i];
+        }
+
+        // Interpolate data to quadrature points
+        Eigen::VectorXd bFieldAtQuad = volQuad2d.interpMat*bFieldVec;
+        Eigen::VectorXd bgKineticTempAtQuad = volQuad2d.interpMat*bgKineticTempVec;
+        Eigen::VectorXd bgDistFAtQuad = volQuad4d.interpMat*bgDistFVec;
+        Eigen::VectorXd gNumDensityAtQuad = volQuad2d.interpMat*gNumDensityVec;
+        Eigen::VectorXd hNumDensityAtQuad = volQuad2d.interpMat*hNumDensityVec;
+        Eigen::VectorXd gDistFAtQuad = volQuad4d.interpMat*gDistFVec;
+        Eigen::VectorXd hDistFAtQuad = volQuad4d.interpMat*hDistFVec;
+
+        // perform quadrature
+        for (int i = 0; i < nVolQuad4d; i++)
+        {
+          localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+            bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+            bgAdiabaticTemp/(2*bgKineticDensity)*
+            gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
+        }
       }
     }
 
@@ -238,9 +259,6 @@ namespace Lucee
     // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = this->getComm();
     comm->allreduce(1, &localInt, &volInt, TX_SUM);
-    
-    int rowIndex = (int) res[0];
-    int colIndex = (int) res[1];
  
     if (volInt != 0.0)
     {
@@ -279,9 +297,9 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     // Background kinetic distribution function
     this->appendInpVarType(typeid(Lucee::Field<4, double>));
-    // Smoothed potential from distribution function g
+    // Smoothed NumDensity from distribution function g
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
-    // Smoothed potential from distribution function h
+    // Smoothed NumDensity from distribution function h
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     // Entire distribution function g
     this->appendInpVarType(typeid(Lucee::Field<4, double>));

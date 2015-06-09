@@ -84,14 +84,16 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Total number of nodes in system */
       int totalNodes;
+/** Total number of nodes at a fixed x and y */
+      int nodesPerPosition;
 /** Reference to function providing write location */
       int fnRef;
 /** Temperature of adiabatic species (in eV) */
       double bgAdiabaticTemp;
 /** Conversion factor of joules to eV */
       double eV;
-/** Density of adiabatic species (in 1/m^3) */
-      double bgAdiabaticDensity;
+/** Density of kinetic species (in 1/m^3) */
+      double bgKineticDensity;
 /** Mass of kinetic species (in kg) */
       double kineticMass;
 /** Stores list of entries to insert into sparse matrix */
