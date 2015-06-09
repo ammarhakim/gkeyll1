@@ -82,8 +82,8 @@ namespace Lucee
     
     Lucee::Region<NDIM, int> localExtRgn = fldIn.getExtRegion();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-    Lucee::RowMajorIndexer<NDIM> volIdxr(localRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
+    Lucee::RowMajorIndexer<NDIM> volIdxr(localExtRgn);
 
     // Figure out what column to write to
     evaluateFunction(*L, t, res);
