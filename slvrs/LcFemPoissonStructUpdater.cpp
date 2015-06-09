@@ -660,6 +660,16 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
+    if (writeMatrix)
+    {
+      std::string outName = Loki::SingletonHolder<Lucee::Globals>
+        ::Instance().outPrefix + "-poisson-globalSrc";
+      PetscViewer lab;
+      PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      VecView(globalSrc, lab);
+    }
+
 // copy solution for use as initial guess in KSP solve
     PetscScalar *ptGuess;
     unsigned count = 0;
@@ -676,6 +686,16 @@ namespace Lucee
     KSPGetIterationNumber(ksp, &itNum);
     double resNorm;
     KSPGetResidualNorm(ksp, &resNorm);
+
+    if (writeMatrix)
+    {
+      std::string outName = Loki::SingletonHolder<Lucee::Globals>
+        ::Instance().outPrefix + "-poisson-solution";
+      PetscViewer lab;
+      PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      VecView(initGuess, lab);
+    }
 
 // construct message to send back to Lua
     std::ostringstream msgStrm;
