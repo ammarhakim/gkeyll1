@@ -42,6 +42,15 @@ namespace Lucee
   {
     // call base class method
     UpdaterIfc::readInput(tbl);
+
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
+    else
+      throw Lucee::Except("DisContVlasovMaxwellUpdater::readInput: Must specify element to use using 'basis'");
+
+    cfl = tbl.getNumber("cfl");
+    cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
+
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -50,6 +59,64 @@ namespace Lucee
   {
     // call base class method
     UpdaterIfc::initialize();
+
+    // get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    // local region to update
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+
+    Lucee::RowMajorSequencer<CDIM> seq(localRgn);
+    seq.step(); // just to get to first index
+    int cidx[CDIM];
+    seq.fillWithIndex(cidx);
+    nodalBasis->setIndex(cidx);
+
+    Lucee::RowMajorSequencer<VDIM> seq(localRgn);
+    seq.step(); // just to get to first index
+    int vidx[VDIM];
+    seq.fillWithIndex(vidx);
+    nodalBasis->setIndex(vidx);
+    
+    unsigned nlocal = nodalBasis->getNumNodes();
+
+// get node numbers on each lower and upper edges
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+      lowerNodeNums[dir].nums.resize(nodalBasis->getNumSurfLowerNodes(dir));
+      nodalBasis->getSurfLowerNodeNums(dir, lowerNodeNums[dir].nums);
+
+      upperNodeNums[dir].nums.resize(nodalBasis->getNumSurfUpperNodes(dir));
+      nodalBasis->getSurfUpperNodeNums(dir, upperNodeNums[dir].nums);
+    }
+
+    Lucee::Matrix<double> massMatrix(nlocal, nlocal);
+
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+      // get stiffness matrix
+      stiffMatrix[dir].m = Lucee::Matrix<double>(nlocal, nlocal);
+      nodalBasis->getGradStiffnessMatrix(dir, stiffMatrix[dir].m);
+
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, stiffMatrix[dir].m); // pre-multiply by inverse mass matrix
+
+      // compute lift matrices
+      lowerLift[dir].m = Lucee::Matrix<double>(nlocal, 
+        nodalBasis->getNumSurfLowerNodes(dir));
+
+      nodalBasis->getLowerFaceMassMatrix(dir, lowerLift[dir].m);
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, lowerLift[dir].m);  // pre-multiply by inverse mass matrix
+
+      upperLift[dir].m = Lucee::Matrix<double>(nlocal, 
+        nodalBasis->getNumSurfUpperNodes(dir));
+
+      nodalBasis->getUpperFaceMassMatrix(dir, upperLift[dir].m);
+      nodalBasis->getMassMatrix(massMatrix);
+      Lucee::solve(massMatrix, upperLift[dir].m);  // pre-multiply by inverse mass matrix
+    }
+
   }
 
   template <unsigned CDIM, unsigned VDIM> 
