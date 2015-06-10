@@ -49,6 +49,11 @@ namespace Lucee
     else
       throw Lucee::Except("KineticHeatFluxAtEdge3DUpdater::readInput: Must specify electronMass");
 
+    if (tbl.hasNumber("B0"))
+      B0 = tbl.getNumber("B0");
+    else
+      throw Lucee::Except("KineticHeatFluxAtEdge3DUpdater::readInput: Must specify B0 using 'B0'");
+
     // Check to see if we need to compute the sheat power transmission coefficient
     computeSheathCoefficient = false;
     if (tbl.hasBool("computeSheathCoefficient"))
@@ -109,36 +114,18 @@ namespace Lucee
     // momentsAtEdges[0 to 3] mom 0 to 3 on right edge
     // momentsAtEdges[4 to 7] mom 0 to 3 on left edge
     
-    double ionParallelHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[7] + 
-      momentsAtEdgesIon[5]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
-    double ionHeatFluxRight = ionParallelHeatFluxRight +
-      momentsAtEdgesIon[5]*ELEMENTARY_CHARGE*tPerpIon;
+    double ionHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[1] + 
+      momentsAtEdgesIon[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] +
+      momentsAtEdgesIon[2]*B0;
 
-    double elcParallelHeatFluxRight = 0.5*elcMass*momentsAtEdgesElc[7] - 
-      momentsAtEdgesElc[5]*ELEMENTARY_CHARGE*phiPtr[nlocal-1];
-    double elcHeatFluxRight = elcParallelHeatFluxRight + 
-      momentsAtEdgesElc[5]*ELEMENTARY_CHARGE*tPerpElc;
+    double elcHeatFluxRight = 0.5*elcMass*momentsAtEdgesElc[1] - 
+      momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] +
+      momentsAtEdgesElc[2]*B0;
 
-    // Find value of the following input fields at the left-most edge of the domain
-    phiIn.setPtr(phiPtr, globalRgn.getLower(0));
-
-    double ionParallelHeatFluxLeft = 0.5*ionMass*momentsAtEdgesIon[3] + 
-      momentsAtEdgesIon[1]*ELEMENTARY_CHARGE*phiPtr[0];
-    double ionHeatFluxLeft = ionParallelHeatFluxLeft +
-      momentsAtEdgesIon[1]*ELEMENTARY_CHARGE*tPerpIon;
-
-    double elcParallelHeatFluxLeft = 0.5*elcMass*momentsAtEdgesElc[3] - 
-      momentsAtEdgesElc[1]*ELEMENTARY_CHARGE*phiPtr[0];
-    double elcHeatFluxLeft = elcParallelHeatFluxLeft + 
-      momentsAtEdgesElc[1]*ELEMENTARY_CHARGE*tPerpElc;
-
-    std::vector<double> data(6);
+    std::vector<double> data(3);
     data[0] = ionHeatFluxRight + elcHeatFluxRight;
     data[1] = ionHeatFluxRight;
     data[2] = elcHeatFluxRight;
-    data[3] = -(ionHeatFluxLeft + elcHeatFluxLeft);
-    data[4] = -ionHeatFluxLeft;
-    data[5] = -elcHeatFluxLeft;
     
     qVsTime.appendData(t, data);
 

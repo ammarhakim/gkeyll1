@@ -64,6 +64,8 @@ namespace Lucee
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis;
+/** Backgroud magnetic field value (needed to relate v_perp to mu)  */
+      double B0;
 /** Mass of ions in system */
       double ionMass;
 /** Mass of electrons in the system */
