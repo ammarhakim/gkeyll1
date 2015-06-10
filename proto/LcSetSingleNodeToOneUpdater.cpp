@@ -78,7 +78,7 @@ namespace Lucee
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
 
-    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
     
     Lucee::RowMajorIndexer<NDIM> volIdxr(localRgn);
     // Figure out what cell index to set to zero
@@ -87,7 +87,7 @@ namespace Lucee
     int targetIndex = (int) res[0];
     // This is the actual index of the node within a cell
     int targetNode = targetIndex % nlocal;
-    
+
     while (seq.step())
     {
       seq.fillWithIndex(idx);

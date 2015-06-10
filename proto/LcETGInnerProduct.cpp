@@ -187,82 +187,79 @@ namespace Lucee
     double localInt = 0.0;
     double ghostScale = 1.0e-14;
 
-    if (std::abs(rowIndex-colIndex) < nodesPerPosition)
+    // loop, performing integration
+    while (seq.step())
     {
-      // loop, performing integration
-      while (seq.step())
+      seq.fillWithIndex(idx);
+      // set index into element basis
+      nodalBasis4d->setIndex(idx);
+      nodalBasis2d->setIndex(idx[0], idx[1]);
+
+      // Figure out if element is a ghost cell
+      double isGhost = false;
+      for (int d = 0; d < 4; d++)
       {
-        seq.fillWithIndex(idx);
-        // set index into element basis
-        nodalBasis4d->setIndex(idx);
-        nodalBasis2d->setIndex(idx[0], idx[1]);
+        if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
+          isGhost = true;
+      }
 
-        // Figure out if element is a ghost cell
-        double isGhost = false;
-        for (int d = 0; d < 4; d++)
+      bFieldIn.setPtr(bFieldPtr, idx[0], idx[1]);
+      bgKineticTempIn.setPtr(bgKineticTempPtr, idx[0], idx[1]);
+      bgDistFIn.setPtr(bgDistFPtr, idx);
+      gNumDensityIn.setPtr(gNumDensityPtr, idx[0], idx[1]);
+      hNumDensityIn.setPtr(hNumDensityPtr, idx[0], idx[1]);
+      gDistFIn.setPtr(gDistFPtr, idx);
+      hDistFIn.setPtr(hDistFPtr, idx);
+      
+      Eigen::VectorXd bFieldVec(nlocal2d);
+      Eigen::VectorXd bgKineticTempVec(nlocal2d);
+      Eigen::VectorXd bgDistFVec(nlocal4d);
+      Eigen::VectorXd gNumDensityVec(nlocal2d);
+      Eigen::VectorXd hNumDensityVec(nlocal2d);
+      Eigen::VectorXd gDistFVec(nlocal4d);
+      Eigen::VectorXd hDistFVec(nlocal4d);
+
+      for (int i = 0; i < nlocal2d; i++)
+      {
+        bFieldVec(i) = bFieldPtr[i];
+        bgKineticTempVec(i) = bgKineticTempPtr[i];
+        gNumDensityVec(i) = gNumDensityPtr[i];
+        hNumDensityVec(i) = hNumDensityPtr[i];
+      }
+
+      for (int i = 0; i < nlocal4d; i++)
+      {
+        bgDistFVec(i) = bgDistFPtr[i];
+        gDistFVec(i) = gDistFPtr[i];
+        hDistFVec(i) = hDistFPtr[i];
+      }
+
+      // Interpolate data to quadrature points
+      Eigen::VectorXd bFieldAtQuad = volQuad2d.interpMat*bFieldVec;
+      Eigen::VectorXd bgKineticTempAtQuad = volQuad2d.interpMat*bgKineticTempVec;
+      Eigen::VectorXd bgDistFAtQuad = volQuad4d.interpMat*bgDistFVec;
+      Eigen::VectorXd gNumDensityAtQuad = volQuad2d.interpMat*gNumDensityVec;
+      Eigen::VectorXd hNumDensityAtQuad = volQuad2d.interpMat*hNumDensityVec;
+      Eigen::VectorXd gDistFAtQuad = volQuad4d.interpMat*gDistFVec;
+      Eigen::VectorXd hDistFAtQuad = volQuad4d.interpMat*hDistFVec;
+
+      // perform quadrature
+      for (int i = 0; i < nVolQuad4d; i++)
+      {
+        if (isGhost == true)
         {
-          if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
-            isGhost = true;
+          // diminish ghost cell contribution to free energy
+          localInt += ghostScale*volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+            bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+            bgAdiabaticTemp/(2*bgKineticDensity)*
+            gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
         }
-
-        bFieldIn.setPtr(bFieldPtr, idx[0], idx[1]);
-        bgKineticTempIn.setPtr(bgKineticTempPtr, idx[0], idx[1]);
-        bgDistFIn.setPtr(bgDistFPtr, idx);
-        gNumDensityIn.setPtr(gNumDensityPtr, idx[0], idx[1]);
-        hNumDensityIn.setPtr(hNumDensityPtr, idx[0], idx[1]);
-        gDistFIn.setPtr(gDistFPtr, idx);
-        hDistFIn.setPtr(hDistFPtr, idx);
-        
-        Eigen::VectorXd bFieldVec(nlocal2d);
-        Eigen::VectorXd bgKineticTempVec(nlocal2d);
-        Eigen::VectorXd bgDistFVec(nlocal4d);
-        Eigen::VectorXd gNumDensityVec(nlocal2d);
-        Eigen::VectorXd hNumDensityVec(nlocal2d);
-        Eigen::VectorXd gDistFVec(nlocal4d);
-        Eigen::VectorXd hDistFVec(nlocal4d);
-
-        for (int i = 0; i < nlocal2d; i++)
+        else
         {
-          bFieldVec(i) = bFieldPtr[i];
-          bgKineticTempVec(i) = bgKineticTempPtr[i];
-          gNumDensityVec(i) = gNumDensityPtr[i];
-          hNumDensityVec(i) = hNumDensityPtr[i];
-        }
-
-        for (int i = 0; i < nlocal4d; i++)
-        {
-          bgDistFVec(i) = bgDistFPtr[i];
-          gDistFVec(i) = gDistFPtr[i];
-          hDistFVec(i) = hDistFPtr[i];
-        }
-
-        // Interpolate data to quadrature points
-        Eigen::VectorXd bFieldAtQuad = volQuad2d.interpMat*bFieldVec;
-        Eigen::VectorXd bgKineticTempAtQuad = volQuad2d.interpMat*bgKineticTempVec;
-        Eigen::VectorXd bgDistFAtQuad = volQuad4d.interpMat*bgDistFVec;
-        Eigen::VectorXd gNumDensityAtQuad = volQuad2d.interpMat*gNumDensityVec;
-        Eigen::VectorXd hNumDensityAtQuad = volQuad2d.interpMat*hNumDensityVec;
-        Eigen::VectorXd gDistFAtQuad = volQuad4d.interpMat*gDistFVec;
-        Eigen::VectorXd hDistFAtQuad = volQuad4d.interpMat*hDistFVec;
-
-        // perform quadrature
-        for (int i = 0; i < nVolQuad4d; i++)
-        {
-          if (isGhost == true)
-          {
-            // diminish ghost cell contribution to free energy
-            localInt += ghostScale*volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
-              bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
-              bgAdiabaticTemp/(2*bgKineticDensity)*
-              gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
-          }
-          else
-          {
-            localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
-              bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
-              bgAdiabaticTemp/(2*bgKineticDensity)*
-              gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
-          }
+          localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+            bgKineticTempAtQuad(i % nVolQuad2d)*gDistFAtQuad(i)*hDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+            bgAdiabaticTemp/(2*bgKineticDensity)*
+            gNumDensityAtQuad(i % nVolQuad2d)*hNumDensityAtQuad(i % nVolQuad2d) );
         }
       }
     }
