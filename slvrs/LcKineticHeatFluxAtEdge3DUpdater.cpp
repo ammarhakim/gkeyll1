@@ -77,12 +77,6 @@ namespace Lucee
     // parallel velocity moments at left and right edges
     const Lucee::DynVector<double>& momentsAtEdgesElcIn = this->getInp<Lucee::DynVector<double> >(1);
     const Lucee::DynVector<double>& momentsAtEdgesIonIn = this->getInp<Lucee::DynVector<double> >(2);
-    // number densities of both species
-    const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(3);
-    const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(4);
-    // tPerp*n fields of both species
-    const Lucee::Field<1, double>& tPerpElcIn = this->getInp<Lucee::Field<1, double> >(5);
-    const Lucee::Field<1, double>& tPerpIonIn = this->getInp<Lucee::Field<1, double> >(6);
     // Returns heat flux vs time as a dynvector
     Lucee::DynVector<double>& qVsTime = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -91,28 +85,15 @@ namespace Lucee
     Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::ConstFieldPtr<double> phiPtr = phiIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> tPerpElcPtr = tPerpElcIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> tPerpIonPtr = tPerpIonIn.createConstPtr();
 
     std::vector<double> momentsAtEdgesElc = momentsAtEdgesElcIn.getLastInsertedData();
     std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
     
     // Find value of the following input fields at the right-most edge of the domain
     phiIn.setPtr(phiPtr, globalRgn.getUpper(0)-1);
-    nElcIn.setPtr(nElcPtr, globalRgn.getUpper(0)-1);
-    nIonIn.setPtr(nIonPtr, globalRgn.getUpper(0)-1);
-    tPerpElcIn.setPtr(tPerpElcPtr, globalRgn.getUpper(0)-1);
-    tPerpIonIn.setPtr(tPerpIonPtr, globalRgn.getUpper(0)-1);
-
-    // Perpendicular electron and ion temperatures (in eV)
-    double tPerpElc = tPerpElcPtr[nlocal-1]/nElcPtr[nlocal-1];
-    double tPerpIon = tPerpIonPtr[nlocal-1]/nIonPtr[nlocal-1];
 
     // Guide:
-    // momentsAtEdges[0 to 3] mom 0 to 3 on right edge
-    // momentsAtEdges[4 to 7] mom 0 to 3 on left edge
+    // momentsAtEdges[0 to 2] = <vPara>,<vPara^3>,<mu*vPara> moments of f on right edge only
     
     double ionHeatFluxRight = 0.5*ionMass*momentsAtEdgesIon[1] + 
       momentsAtEdgesIon[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] +
@@ -131,27 +112,25 @@ namespace Lucee
 
     if (computeSheathCoefficient == true)
     {
+      // tPerp*n fields of both species
+      const Lucee::Field<1, double>& tElcIn = this->getInp<Lucee::Field<1, double> >(3);
+      const Lucee::Field<1, double>& tIonIn = this->getInp<Lucee::Field<1, double> >(4);
       Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
+       
+      Lucee::ConstFieldPtr<double> tElcPtr = tElcIn.createConstPtr();
+      Lucee::ConstFieldPtr<double> tIonPtr = tIonIn.createConstPtr();
+    
+      tElcIn.setPtr(tElcPtr, globalRgn.getUpper(0)-1);
+      tIonIn.setPtr(tIonPtr, globalRgn.getUpper(0)-1);
       
-      std::vector<double> sheathData(7);
+      std::vector<double> sheathData(3);
 
-      double kTe0 = elcMass*(momentsAtEdgesElc[6] -
-          momentsAtEdgesElc[5]*momentsAtEdgesElc[5]/momentsAtEdgesElc[4])/
-          momentsAtEdgesElc[4];
-      
-      double kTi0 = ionMass*(momentsAtEdgesIon[6] - 
-          momentsAtEdgesIon[5]*momentsAtEdgesIon[5]/momentsAtEdgesIon[4])/
-          momentsAtEdgesIon[4];
-
+      double kTe0 = tElcPtr[nlocal-1]*ELEMENTARY_CHARGE;
+      double kTi0 = tIonPtr[nlocal-1]*ELEMENTARY_CHARGE;
       // Total transmission coefficient
-      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[5] );
-      sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[5] );
-      sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[5] );
-      sheathData[3] = kTi0;
-      sheathData[4] = kTe0;
-      // Diagnostics
-      sheathData[5] = momentsAtEdgesElc[5];
-      sheathData[6] = momentsAtEdgesIon[5];
+      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[0] );
+      sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[0] );
+      sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[0] );
 
       sheathCoefficientVsTime.appendData(t, sheathData);
     }
@@ -167,10 +146,7 @@ namespace Lucee
     // inputs: elc and ion dynvectors containing moments at edges of domain
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
-    // inputs: elc and ion number densitites
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    // inputs: elc and ion perpendicular temperature * number densities
+    // inputs: elc and ion temperatures
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     // returns one output: dynvector of heat flux at edge vs time
