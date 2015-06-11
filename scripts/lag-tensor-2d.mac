@@ -32,7 +32,7 @@ splitInterval(num) := block([dx, cc],
 	              do (cc : endcons(cc[i]+dx, cc)), cc)
 );
 
-/** Funciton to create coefficient matrix */
+/** Function to create coefficient matrix */
 makePmat(lord, ord) := block([n, Pmat],
           /** Determine size of matrix */
 	  n : length(lord),
