@@ -34,7 +34,7 @@ def makeMesh2(nInterp, Xc):
     xlo = Xc[0]-0.5*dx
     xup = Xc[-1]+0.5*dx
     dx2 = dx/nInterp
-    return pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, nInterp*nx+1)
+    return pylab.linspace(xlo, xup, nInterp*nx+1)
 
 def interpOnMesh1D(cMat, qIn):
     nInterp, nNodes = cMat.shape[0], cMat.shape[1]
