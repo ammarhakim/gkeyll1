@@ -232,15 +232,6 @@ namespace Lucee
         bgDistFVec(i) = bgDistFPtr[i];
         gDistFVec(i) = gDistFPtr[i];
         hDistFVec(i) = hDistFPtr[i];
-
-        if (gDistFVec(i) > 0.0)
-        {
-          std::cout << "gDistFVec(" << i << ") = " << gDistFVec(i) << std::endl;
-        }
-        if (hDistFVec(i) > 0.0)
-        {
-          std::cout << "hDistFVec(" << i << ") = " << hDistFVec(i) << std::endl;
-        }
       }
 
       // Interpolate data to quadrature points
@@ -286,7 +277,6 @@ namespace Lucee
       //if (rowIndex != colIndex)
       //  innerProductMatrix.insert(colIndex, rowIndex) = volInt;
       tripletList.push_back(Eigen::Triplet<double>(rowIndex,colIndex,volInt));
-      std::cout << "nonzero = " << volInt << std::endl;
       //if (rowIndex != colIndex)
       //  tripletList.push_back(Eigen::Triplet<double>(colIndex,rowIndex,volInt));
     }
