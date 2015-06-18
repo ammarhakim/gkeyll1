@@ -123,15 +123,23 @@ namespace Lucee
       tElcIn.setPtr(tElcPtr, globalRgn.getUpper(0)-1);
       tIonIn.setPtr(tIonPtr, globalRgn.getUpper(0)-1);
       
-      std::vector<double> sheathData(3);
+      std::vector<double> sheathData(5);
+      
+      double ionHeatFluxPresheath = 0.5*ionMass*momentsAtEdgesIon[1] + 
+        momentsAtEdgesIon[2]*B0;
 
+      double elcHeatFluxPresheath = 0.5*elcMass*momentsAtEdgesElc[1] + 
+        momentsAtEdgesElc[2]*B0;
       double kTe0 = tElcPtr[nlocal-1]*ELEMENTARY_CHARGE;
       double kTi0 = tIonPtr[nlocal-1]*ELEMENTARY_CHARGE;
       // Total transmission coefficient
-      sheathData[0] = data[0]/( kTe0*momentsAtEdgesElc[0] );
-      sheathData[1] = data[1]/( kTi0*momentsAtEdgesIon[0] );
-      sheathData[2] = data[2]/( kTe0*momentsAtEdgesElc[0] );
-
+      sheathData[0] = (ionHeatFluxPresheath+elcHeatFluxPresheath)/( kTe0*momentsAtEdgesElc[0] );
+      // Ion transmission coefficient
+      sheathData[1] = ionHeatFluxPresheath/( kTi0*momentsAtEdgesIon[0] );
+      // Elc transmission coefficient
+      sheathData[2] = elcHeatFluxPresheath/( kTe0*momentsAtEdgesElc[0] );
+      sheathData[3] = tElcPtr[nlocal-1];
+      sheathData[4] = tIonPtr[nlocal-1];
       sheathCoefficientVsTime.appendData(t, sheathData);
     }
 
