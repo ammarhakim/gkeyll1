@@ -87,11 +87,10 @@ namespace Lucee
 
     Lucee::FieldPtr<double> ptr = q.createPtr();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    //Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
-
-    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-    
-    Lucee::RowMajorIndexer<NDIM> volIdxr(localRgn);
+    //Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
+    Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
+    Lucee::RowMajorIndexer<NDIM> volIdxr(localExtRgn);
     // Figure out what cell index to set to zero
     //evaluateFunction(*L, t, res);
     // This will be a number from 0 to NodesPerCell*TotalCells

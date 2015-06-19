@@ -2927,7 +2927,8 @@ namespace Lucee
         monomialTerm = polyCoeffs(polyCoord);
         // Compute monomial term associated with polyCoord
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-          monomialTerm *= pow(nodeCoords(dimIndex), idx[dimIndex]);
+          for (int powIndex = 0; powIndex < idx[dimIndex]; powIndex++)
+            monomialTerm *= nodeCoords(dimIndex);
         totalSum += monomialTerm;
       }
     }

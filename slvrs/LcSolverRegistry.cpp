@@ -74,6 +74,7 @@
 #include <LcPredicateUpdater.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
+#include <LcReflectionBoundaryCondition.h>
 #include <LcRegisteredObjList.h>
 #include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
@@ -154,6 +155,7 @@ namespace Lucee
       .append<Lucee::ElectrostaticPhiUpdater>()
       .append<Lucee::ASquaredProjectionUpdater>()
       .append<Lucee::ATimesPUpdater>()
+      .append<Lucee::ReflectionBoundaryCondition>()
       .append<Lucee::SetPhiAtBoundaryUpdater>()
       .append<Lucee::SOL3DElectrostaticDistFuncReflectionBCUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
