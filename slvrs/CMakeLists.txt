@@ -94,6 +94,7 @@ set(lcslvrs_SOURCES
   LcPredicateUpdater.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
+  LcReflectionBoundaryCondition.cpp
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp

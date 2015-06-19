@@ -77,6 +77,7 @@ namespace Lucee
     Lucee::FieldPtr<double> ptr = q.createPtr();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     Lucee::Region<NDIM, int> localExtRgn = q.getExtRegion();
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
 
     Lucee::RowMajorSequencer<NDIM> seq(localExtRgn);
     
@@ -96,11 +97,24 @@ namespace Lucee
 
       int cellIndex = volIdxr.getIndex(idx);
 
-      // If the target node is in this cell, then set its value to 1.0
+      // Figure out if element is a ghost cell
+      /*bool isGhost = false;
+      for (int d = 0; d < NDIM; d++)
+      {
+        if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
+          isGhost = true;
+      }*/
+
+      // First, set all nodes to 0.0
+      for (int i = 0; i < nlocal; i++)
+        ptr[i] = 0.0;
+
+      //if (isGhost == false)
+      //{
+        // If the target node is in this cell, then set its value to 1.0
       if (targetIndex < (cellIndex+1)*nlocal && targetIndex >= cellIndex*nlocal)
         ptr[targetNode] = scaleFactor;
-      else
-        ptr[targetNode] = 0.0;
+      //}
     }
 
     return Lucee::UpdaterStatus();

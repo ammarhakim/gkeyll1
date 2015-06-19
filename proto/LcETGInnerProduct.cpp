@@ -196,7 +196,7 @@ namespace Lucee
       nodalBasis2d->setIndex(idx[0], idx[1]);
 
       // Figure out if element is a ghost cell
-      double isGhost = false;
+      bool isGhost = false;
       for (int d = 0; d < 4; d++)
       {
         if (idx[d] < globalRgn.getLower(d) || idx[d] >= globalRgn.getUpper(d))
