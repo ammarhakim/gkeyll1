@@ -125,7 +125,7 @@ namespace Lucee
     {
       for (int j = 0; j < nlocal3d; j++)
       {
-        // Compute integral of phi2d_i * phi4d_j
+        // Compute integral of phi1d_i * phi3d_j
         double integralResult[3] = {};
         for (int gaussIndex = 0; gaussIndex < volWeights3d.size(); gaussIndex++)
         {
