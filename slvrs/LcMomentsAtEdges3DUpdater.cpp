@@ -132,7 +132,7 @@ namespace Lucee
     int ix = globalRgn.getUpper(0)-1; // right skin cell x index
     
     // Integrate along skin cell (right edge)
-    for (int js = globalRgn.getUpper(1)-1; js >= 0; js--)
+    for (int js = globalRgn.getLower(1); js < globalRgn.getUpper(1); js++)
     {
       for (int iMu = globalRgn.getLower(2); iMu < globalRgn.getUpper(2); iMu++)
       {
@@ -165,7 +165,7 @@ namespace Lucee
         {
           double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*grid.getDx(1)/2.0;
           double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*grid.getDx(2)/2.0;
-          
+
           vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
           vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
           vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
@@ -177,7 +177,6 @@ namespace Lucee
       }
     }
 
-    
     // Integrate along ghost cell (right edge)
     for (int jg = globalRgn.getLower(1); jg < globalRgn.getUpper(1); jg++)
     {

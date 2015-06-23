@@ -116,7 +116,7 @@ namespace Lucee
     }
 
     // Tolerance for finding cutoff velocities
-    cutoffTolerance = 1.0e-10;
+    cutoffTolerance = 1.0e-4;
   }
 
   Lucee::UpdaterStatus
@@ -165,6 +165,7 @@ namespace Lucee
       // Assume that the location of the right-most node in 1-D
       // is the number of nodes along an edge in 2-D minus 1
       double totalIonFlux = mom1Ptr[nlocal1d-1];
+      //std::cout << "totalIonFlux = " << totalIonFlux << std::endl;
 
       // start with cell at maximum v_para, looping down to zero until desired flux is reached
       for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
@@ -217,8 +218,8 @@ namespace Lucee
             {
               distf.setPtr(gstPtr, ix+1, jg, muIndex);
               
-              for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-                gstPtr[componentIndex] = 0.0;
+              for (int k = 0; k < nlocal; k++)
+                gstPtr[k] = 0.0;
             }
           }
           else
@@ -302,12 +303,7 @@ namespace Lucee
                   std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
                   std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
                 }
-                double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-
-                // cutoffGuess is between -dV/2 and +dV/2
-                double initialCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
-
-                // 
+                
                 if (relError < 0)
                   upperBound = cutoffGuess;
                 else
@@ -333,14 +329,12 @@ namespace Lucee
               for (int k = 0; k < nlocal; k++)
                 gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
             }
-            
           }
         }
         else
         {
           // We have already iterated past and found the cutoff velocity.
           // Copy data into ghost after rotating skin cell data by 180 degrees
-          // Set to no inflow condition then go on to next cell
           for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
           {
             distf.setPtr(gstPtr, ix+1, jg, muIndex);
@@ -499,10 +493,6 @@ namespace Lucee
                   std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
                   std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
                 }
-                double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-
-                // cutoffGuess is between -dV/2 and +dV/2
-                double initialCutoffGuess = grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
 
                 if (relError > 0)
                   upperBound = cutoffGuess;

@@ -103,10 +103,20 @@ namespace Lucee
       momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] +
       momentsAtEdgesElc[2]*B0;
 
+    /*if (elcHeatFluxRight < 0.0)
+    {
+      std::cout << "term1 = " << 0.5*elcMass*momentsAtEdgesElc[1] << std::endl;
+      std::cout << "term2 = " << -momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] << std::endl;
+      std::cout << "term3 = " << momentsAtEdgesElc[2]*B0 << std::endl;
+    }*/
+
     std::vector<double> data(3);
     data[0] = ionHeatFluxRight + elcHeatFluxRight;
     data[1] = ionHeatFluxRight;
     data[2] = elcHeatFluxRight;
+
+    //std::cout << "momentsAtEdgesElc[0] = " << momentsAtEdgesElc[0] << std::endl;
+    //std::cout << "momentsAtEdgesIon[0] = " << momentsAtEdgesIon[0] << std::endl;
     
     qVsTime.appendData(t, data);
 
