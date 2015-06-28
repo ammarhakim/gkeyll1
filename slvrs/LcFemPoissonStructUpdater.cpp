@@ -169,7 +169,10 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::initialize()
   {
+#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
+
     Lucee::UpdaterIfc::initialize();
+    DMSG("Inside initialize");
 
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
@@ -197,6 +200,8 @@ namespace Lucee
 // parallel layout is the same as the stiffness matrix.
     MatGetVecs(stiffMat, &globalSrc, PETSC_NULL);
     VecSetFromOptions(globalSrc);
+
+    DMSG("Matrix and vector created");
 
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
     std::vector<int> lgMap(nlocal);
@@ -232,6 +237,8 @@ namespace Lucee
 
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    DMSG("Basic stiffness matrix created, now modifying for Dirichlet BCs");
     
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
@@ -240,6 +247,8 @@ namespace Lucee
       {
         if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
         { // we do not need to do anything for Neumann BCs
+          std::ostringstream so;
+          so << "Direction " << d << " Side " << side;
 
 // fetch number of nodes on face of element
           unsigned nsl = side==0 ?
@@ -256,8 +265,10 @@ namespace Lucee
 // only update if we are on the correct ranks
           Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
+          so << " Volume " << defRgnG.getVolume();
+          DMSG(so.str());
 // loop, modifying stiffness matrix
-          Lucee::RowMajorSequencer<NDIM> seq(defRgn);
+          Lucee::RowMajorSequencer<NDIM> seq(defRgnG); // seq(defRgn)
           while (seq.step())
           {
             seq.fillWithIndex(idx);
@@ -270,7 +281,10 @@ namespace Lucee
 
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
-// setup phase a bit slower).
+// setup phase a bit slower).  
+
+/// NOTE THIS THIS IS A PROBLEM: ONE HAS TO CALL THIS FROM ALL RANKS
+// IRRESPECTIVE OF WHICH RANKS ZERO 
             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
 
 // now insert row numbers with corresponding values into map for use
@@ -281,6 +295,8 @@ namespace Lucee
         }
       }
     }
+
+    DMSG("Modification for Dirichlet BCs done");
 
 // Begin process of modification to handle periodic BCs. The code in
 // the following two loops basically does the following. It modifies
