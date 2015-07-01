@@ -96,6 +96,7 @@ set(lcslvrs_SOURCES
   LcProjectOnNodalBasisUpdater.cpp
   LcReflectionBoundaryCondition.cpp
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
+  LcSOL3DElectronTempAtWallCalc.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLIonDensityInitialization.cpp
