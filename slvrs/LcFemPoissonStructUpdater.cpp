@@ -23,6 +23,7 @@
 #include <loki/Singleton.h>
 
 // std includes
+#include <set>
 #include <sstream>
 #include <vector>
 #include <limits>
@@ -59,6 +60,8 @@ namespace Lucee
       MatDestroy(stiffMat);
       VecDestroy(globalSrc);
       VecDestroy(initGuess);
+      //VecDestroy(localData);
+      //ISDestroy(is);
     }
   }
 
@@ -78,6 +81,11 @@ namespace Lucee
     srcNodesShared = true;
     if (tbl.hasBool("sourceNodesShared"))
       srcNodesShared = tbl.getBool("sourceNodesShared");
+
+// check if solution nodes are shared
+    solNodesShared = true;
+    if (tbl.hasBool("solutionNodesShared"))
+      solNodesShared = tbl.getBool("solutionNodesShared");
 
     for (unsigned i=0; i<NDIM; ++i) 
       periodicFlgs[i] = false;
@@ -169,6 +177,8 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::initialize()
   {
+#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
+
     Lucee::UpdaterIfc::initialize();
 
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
@@ -232,7 +242,7 @@ namespace Lucee
 
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-    
+
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
     {
@@ -240,7 +250,6 @@ namespace Lucee
       {
         if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
         { // we do not need to do anything for Neumann BCs
-
 // fetch number of nodes on face of element
           unsigned nsl = side==0 ?
             nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
@@ -253,11 +262,11 @@ namespace Lucee
           Lucee::Region<NDIM, int> defRgnG = side==0 ?
             globalRgn.resetBounds(d, globalRgn.getLower(d), globalRgn.getLower(d)+1) :
             globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
-// only update if we are on the correct ranks
-          Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
-// loop, modifying stiffness matrix
-          Lucee::RowMajorSequencer<NDIM> seq(defRgn);
+// loop, modifying stiffness matrix NOTE: We need are running this
+// loop on all processors, even those that don't own the boundary
+// nodes. The reason is that PetSc expects this.
+          Lucee::RowMajorSequencer<NDIM> seq(defRgnG);
           while (seq.step())
           {
             seq.fillWithIndex(idx);
@@ -270,7 +279,7 @@ namespace Lucee
 
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
-// setup phase a bit slower).
+// setup phase a bit slower).  
             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
 
 // now insert row numbers with corresponding values into map for use
@@ -484,8 +493,41 @@ namespace Lucee
     VecAssemblyBegin(globalSrc);
     VecAssemblyEnd(globalSrc);
 
-// create duplicate to store initial guess
+// create duplicate to store initial guess (this will also contain
+// solution)
     VecDuplicate(globalSrc, &initGuess);
+
+// Create index set to copy data from parallel Petsc vector to locally
+// required data. 
+//
+// NOTE: This is required to ensure that the solution is available
+// with same parallel layout as expected by Gkeyll. Otherwise, things
+// go hay-wire as Gkeyll and Petsc use slightly different parallel
+// layouts, causing mayhem and chaos.
+    std::vector<PetscInt> vecIs;
+    Lucee::RowMajorSequencer<NDIM> seqIs(localRgn);
+    while (seqIs.step())
+    {
+      seqIs.fillWithIndex(idx);
+      nodalBasis->setIndex(idx);
+      nodalBasis->getLocalToGlobal(lgMap);
+      for (unsigned k=0; k<nlocal; ++k)
+        vecIs.push_back(lgMap[k]);
+    }
+
+    PetscInt numIs = vecIs.size();
+#ifdef HAVE_MPI
+    /*Petsc 3.2+ ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], PETSC_COPY_VALUES, &is);*/
+    ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], &is);
+    VecCreateMPI(comm->getMpiComm(), numIs, PETSC_DETERMINE, &localData);
+#else
+    /*Petsc 3.2+ ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], PETSC_COPY_VALUES, &is);*/
+    ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], &is);
+    VecCreateSeq(PETSC_COMM_SELF, numIs, &localData);
+#endif
+
+// create a scatter context to get data onto local processors
+    VecScatterCreate(initGuess, is, localData, PETSC_NULL, &vecSctr);
 
     KSPCreate(MPI_COMM_WORLD, &ksp);
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
@@ -671,11 +713,7 @@ namespace Lucee
     }
 
 // copy solution for use as initial guess in KSP solve
-    PetscScalar *ptGuess;
-    unsigned count = 0;
-    VecGetArray(initGuess, &ptGuess);
-    nodalBasis->copyAllDataFromField(sol, ptGuess);
-    VecRestoreArray(initGuess, &ptGuess);
+    copyFromGkeyllField(sol, initGuess);
 
 // now solve linear system (initGuess will contain solution)
     KSPSolve(ksp, globalSrc, initGuess);
@@ -714,10 +752,7 @@ namespace Lucee
             << ". Final residual norm was " << resNorm;
 
 // copy solution from PetSc array to solution field
-    PetscScalar *ptSol;
-    VecGetArray(initGuess, &ptSol);
-    nodalBasis->copyAllDataToField(ptSol, sol);
-    VecRestoreArray(initGuess, &ptSol);
+    copyFromPetscField(initGuess, sol);
 
     return Lucee::UpdaterStatus(status, std::numeric_limits<double>::max(),
       msgStrm.str());
@@ -799,8 +834,100 @@ namespace Lucee
     return netFldInt;
   }
 
+  template <unsigned NDIM>
+  void
+  FemPoissonStructUpdater<NDIM>::copyFromPetscField(Vec ptFld, Lucee::Field<NDIM, double>& gkFld)
+  {
+    PetscScalar *ptFldPtr;
+    if (solNodesShared)
+    {
+      VecGetArray(ptFld, &ptFldPtr);
+      nodalBasis->copyAllDataToField(ptFldPtr, gkFld);
+      VecRestoreArray(ptFld, &ptFldPtr);
+    }
+    else
+    {
+// get data local to this processor (this is needed as Petsc parallel
+// layout is slightly different than Gkeyll layout. Most data is
+// already local and does not require communication.)
+      VecScatterBegin(vecSctr, ptFld, localData, INSERT_VALUES, SCATTER_FORWARD);
+      VecScatterEnd(vecSctr, ptFld, localData, INSERT_VALUES, SCATTER_FORWARD);
+
+// copy data over to Gkeyll field
+      const Lucee::StructuredGridBase<NDIM>& grid 
+        = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+      unsigned count = 0;
+      unsigned nlocal = nodalBasis->getNumNodes();
+      Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+      Lucee::FieldPtr<double> gkPtr = gkFld.createPtr();
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+      int idx[NDIM];
+
+      VecGetArray(localData, &ptFldPtr);
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        gkFld.setPtr(gkPtr, idx);
+        for (unsigned k=0; k<nlocal; ++k)
+          gkPtr[k] = ptFldPtr[count++];
+      }
+      VecRestoreArray(localData, &ptFldPtr);
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  FemPoissonStructUpdater<NDIM>::copyFromGkeyllField(const Lucee::Field<NDIM, double>& gkFld, Vec ptFld)
+  {
+    PetscScalar *ptFldPtr;
+    if (solNodesShared)
+    {
+      VecGetArray(ptFld, &ptFldPtr);
+      nodalBasis->copyAllDataFromField(gkFld, ptFldPtr);
+      VecRestoreArray(ptFld, &ptFldPtr);
+    }
+    else
+    {
+// copy data from Gkeyll field
+      const Lucee::StructuredGridBase<NDIM>& grid 
+        = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+      unsigned count = 0;
+      unsigned nlocal = nodalBasis->getNumNodes();
+      Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+      Lucee::ConstFieldPtr<double> gkPtr = gkFld.createConstPtr();
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+      int idx[NDIM];
+
+      VecGetArray(localData, &ptFldPtr);
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        gkFld.setPtr(gkPtr, idx);
+        for (unsigned k=0; k<nlocal; ++k)
+          ptFldPtr[count++] = gkPtr[k];
+      }
+      VecRestoreArray(localData, &ptFldPtr);
+
+// get data local to this processor (this is needed as Petsc parallel
+// layout is slightly different than Gkeyll layout. Most data is
+// already local and does not require communication.)
+      VecScatterBegin(vecSctr, localData, ptFld, INSERT_VALUES, SCATTER_REVERSE);
+      VecScatterEnd(vecSctr, localData, ptFld, INSERT_VALUES, SCATTER_REVERSE);
+    }
+  }
+
 // instantiations
   template class FemPoissonStructUpdater<1>;
   template class FemPoissonStructUpdater<2>;
   template class FemPoissonStructUpdater<3>;
 }
+
+// The only place solution appears is when setting an initial
+// condition for iterative solver and when copying solution back to
+// Gkeyll fields. This is now the remaining problem in getting the
+// correct solution in parallel.
+//
+// One thing I don't understand is how the local->global mapping can
+// work.

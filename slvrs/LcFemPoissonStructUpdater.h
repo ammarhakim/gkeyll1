@@ -84,12 +84,20 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Flag to indicate if nodes in source are shared or not */
       bool srcNodesShared;
+/** Flag to indicate if nodes in solution are shared or not */
+      bool solNodesShared; 
 /** Petsc matrices to store linear operator */
       Mat stiffMat;
 /** Petsc vectors for source and initial guess */
       Vec globalSrc, initGuess;
 /** Krylov subspace method context */
       KSP ksp;
+/** Index set for making copies of solution */
+      IS is;
+/** Petsc vectors for local copy of data */
+      Vec localData;
+/** Scatter object to get data onto local processor */
+      VecScatter vecSctr;
 
 /** Structure to store BC data. */
       struct FemPoissonBcData
@@ -138,6 +146,22 @@ namespace Lucee
  * @return integral of field over domain.
  */
       double getFieldIntegral(const Lucee::Field<NDIM, double>& fld, bool shareFlag);
+
+/**
+ * Copy data from Petsc field to Gkeyll fields.
+ *
+ * @param ptFld Input Petsc field.
+ * @param gkFld Output Gkeyll field.
+ */
+      void copyFromPetscField(Vec ptFld, Lucee::Field<NDIM, double>& gkFld);
+
+/**
+ * Copy data from Gkeyll to Petsc fields.
+ *
+ * @param gkFld Input Gkeyll field.
+ * @param ptFld Output Petsc field.
+ */
+      void copyFromGkeyllField(const Lucee::Field<NDIM, double>& gkFld, Vec ptFld);
   };
 }
 
