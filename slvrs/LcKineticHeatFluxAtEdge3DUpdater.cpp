@@ -125,6 +125,7 @@ namespace Lucee
       // tPerp*n fields of both species
       const Lucee::Field<1, double>& tElcIn = this->getInp<Lucee::Field<1, double> >(3);
       const Lucee::Field<1, double>& tIonIn = this->getInp<Lucee::Field<1, double> >(4);
+      const Lucee::DynVector<double>& wallTElcIn = this->getInp<Lucee::DynVector<double> >(5);
       Lucee::DynVector<double>& sheathCoefficientVsTime = this->getOut<Lucee::DynVector<double> >(1);
        
       Lucee::ConstFieldPtr<double> tElcPtr = tElcIn.createConstPtr();
@@ -132,6 +133,8 @@ namespace Lucee
     
       tElcIn.setPtr(tElcPtr, globalRgn.getUpper(0)-1);
       tIonIn.setPtr(tIonPtr, globalRgn.getUpper(0)-1);
+
+      std::vector<double> wallTElc = wallTElcIn.getLastInsertedData();
       
       std::vector<double> sheathData(5);
       
@@ -141,6 +144,7 @@ namespace Lucee
       double elcHeatFluxPresheath = 0.5*elcMass*momentsAtEdgesElc[1] + 
         momentsAtEdgesElc[2]*B0;
       double kTe0 = tElcPtr[nlocal-1]*ELEMENTARY_CHARGE;
+      //double kTe0 = wallTElc[0]*ELEMENTARY_CHARGE;
       double kTi0 = tIonPtr[nlocal-1]*ELEMENTARY_CHARGE;
       // Total transmission coefficient
       sheathData[0] = (ionHeatFluxPresheath+elcHeatFluxPresheath)/( kTe0*momentsAtEdgesElc[0] );
@@ -167,6 +171,8 @@ namespace Lucee
     // inputs: elc and ion temperatures
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
     this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // input: dynvector of wall electron temp in eV
+    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: dynvector of heat flux at edge vs time
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
     // optional second output: dynvector of sheath power transmission

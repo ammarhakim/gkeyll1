@@ -422,6 +422,17 @@ namespace Lucee
       virtual void evalBasis(double xc[NDIM], std::vector<double>& vals) const;
 
 /**
+ * Evaluate only certain basis functions at location. The results should be stored
+ * in the pre-allocated 'vals' vector.
+ *
+ * @param xc Coordinates in element.
+ * @param vals Values of basis functions. Pre-allocated.
+ * @param nodeNum list of basis function indices to evaluate at point
+ */
+      virtual void evalBasis(double xc[NDIM], std::vector<double>& vals,
+        std::vector<int>& nodeNum) const;
+
+/**
  * Method that performs registration of Lua functions.
  *
  * @param lfm Lua function map object.
