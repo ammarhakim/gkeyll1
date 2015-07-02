@@ -485,7 +485,7 @@ namespace Lucee
         ::Instance().outPrefix + "-poisson-stiffnessMatrix";
       PetscViewer lab;
       PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
-      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_MATLAB);
       MatView(stiffMat, lab);
     }
 
@@ -708,7 +708,7 @@ namespace Lucee
         ::Instance().outPrefix + "-poisson-globalSrc";
       PetscViewer lab;
       PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
-      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_MATLAB);
       VecView(globalSrc, lab);
     }
 
@@ -731,7 +731,7 @@ namespace Lucee
         ::Instance().outPrefix + "-poisson-solution";
       PetscViewer lab;
       PetscViewerASCIIOpen(PETSC_COMM_WORLD, outName.c_str(), &lab);
-      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_DENSE);
+      PetscViewerSetFormat(lab, PETSC_VIEWER_ASCII_MATLAB);
       VecView(initGuess, lab);
     }
 
