@@ -962,6 +962,20 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  SerendipityElement<NDIM>::evalBasis(double xc[NDIM], std::vector<double>& vals,
+    std::vector<int>& nodeNum) const
+  {
+    // Create vector from xc
+    Eigen::VectorXd nodeVec(NDIM);
+    for (int componentIndex = 0; componentIndex < NDIM; componentIndex++)
+      nodeVec(componentIndex) = xc[componentIndex];
+
+    for (int basisIndex = 0; basisIndex < nodeNum.size(); basisIndex++)
+      vals[basisIndex] = evalPolynomial(functionVector[nodeNum[basisIndex]], nodeVec);
+  }
+
+  template <unsigned NDIM>
+  void
   SerendipityElement<NDIM>::setupMatrices()
   {
     // Get hold of grid

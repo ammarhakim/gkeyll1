@@ -231,8 +231,6 @@ namespace Lucee
             
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
 
-            // cutoffGuess is between -dV/2 and +dV/2
-            double initialCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             // desired result for integrating from flux vCutoff to vUpper in this cell
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
@@ -243,11 +241,13 @@ namespace Lucee
               double refCoord[2];
               refCoord[0] = 1;
 
-              std::vector<double> basisAtPoint(nodalBasis->getNumNodes());
+              std::vector<double> basisAtPoint(rightEdgeNodeNums.size());
 
               // upper boundary for integration
               double b = grid.getDx(1)/2.0;
-              double nextCutoffGuess = initialCutoffGuess;
+              // cutoffGuess is between -dV/2 and +dV/2
+              double nextCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+              //double nextCutoffGuess = -grid.getDx(1)/fluxInEntireCell*( totalIonFlux - totalFluxAlongEdge - fluxInEntireCell/2.0 );
               
               double upperBound = grid.getDx(1)/2.0;
               double lowerBound = -grid.getDx(1)/2.0;
@@ -256,7 +256,6 @@ namespace Lucee
 
               int iterCount = 0;
 
-              //cutoffGuess = findRightCutoffVelocity(sknPtr, cutoffGuess, exactResult, cellWidth, cellCentroid, aAtEdge, cutoffTolerance);
               do
               {
                 cutoffGuess = nextCutoffGuess;
@@ -266,25 +265,25 @@ namespace Lucee
 
                 double integralResult = 0.0;
                 // Integrate flux from vCutoff to vUpper
-                for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
                 {
-                  distf.setPtr(sknPtr, ix, js, muIndex);
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+                  // physicalCoord (vParallel) is between -deltaV/2 and +deltaV/2
+                  double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+                    + 0.5*(b + cutoffGuess);
+                  // refCoord is between -1 and +1
+                  refCoord[1] = physicalCoord/(grid.getDx(1)/2.0);
+                  refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
+                  // Evaluate all basis functions at coordinate
+                  nodalBasis->evalBasis(refCoord, basisAtPoint, rightEdgeNodeNums);
+                  
+                  for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
                   {
-                    // physicalCoord is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(b + cutoffGuess);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/cellWidth;
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
-                    
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint);
+                    distf.setPtr(sknPtr, ix, js, muIndex);
                     // Evaluate f at this quadrature point
                     double fAtPoint = 0.0;
                     // Loop over 2D basis functions
                     for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
-                      fAtPoint += sknPtr[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[rightEdgeNodeNums[nodeIndex]];
+                      fAtPoint += sknPtr[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
 
                     // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
                     // integration width
@@ -313,6 +312,8 @@ namespace Lucee
                 iterCount++;
               }
               while (fabs(relError) > cutoffTolerance);
+
+              //std::cout << "Iterations (Right) = " << iterCount << std::endl;
             }
 
             foundCutoffVelocity = true;
@@ -422,8 +423,6 @@ namespace Lucee
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
 
-            // cutoffGuess is between -dV/2 and +dV/2
-            double initialCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
             // desired result for integrating from flux vCutoff to vUpper in this cell
             double exactResult = totalIonFlux - totalFluxAlongEdge;
             double cellWidth = grid.getDx(1)/2.0;
@@ -434,11 +433,15 @@ namespace Lucee
               double refCoord[2];
               refCoord[0] = -1;
 
-              std::vector<double> basisAtPoint(nodalBasis->getNumNodes());
+              std::vector<double> basisAtPoint(leftEdgeNodeNums.size());
 
               // upper boundary for integration
               double b = -grid.getDx(1)/2.0;
-              double nextCutoffGuess = initialCutoffGuess;
+              // cutoffGuess is between -dV/2 and +dV/2
+              double nextCutoffGuess = grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
+              // Initial guess will be negative of cutoff velocity found on right edge
+              if(applyRightEdge == true)
+                nextCutoffGuess = -data[1] - cellCentroid[1];
               
               double upperBound = grid.getDx(1)/2.0;
               double lowerBound = -grid.getDx(1)/2.0;
@@ -456,25 +459,25 @@ namespace Lucee
 
                 double integralResult = 0.0;
                 // Integrate flux from vCutoff to vUpper
-                for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
                 {
-                  distf.setPtr(sknPtr, ix, js, muIndex);
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+                  // physicalCoord is between -deltaV/2 and +deltaV/2
+                  double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+                    + 0.5*(cutoffGuess + b);
+                  // refCoord is between -1 and +1
+                  refCoord[1] = physicalCoord/cellWidth;
+                  refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
+                  
+                  // Evaluate all basis functions at coordinate
+                  nodalBasis->evalBasis(refCoord, basisAtPoint, leftEdgeNodeNums);
+                  for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
                   {
-                    // physicalCoord is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(cutoffGuess + b);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/cellWidth;
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
-                    
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint);
+                    distf.setPtr(sknPtr, ix, js, muIndex);
                     // Evaluate f at this quadrature point
                     double fAtPoint = 0.0;
                     // Loop over 2D basis functions
-                    for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
-                      fAtPoint += sknPtr[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[leftEdgeNodeNums[nodeIndex]];
+                    for (int nodeIndex = 0; nodeIndex < leftEdgeNodeNums.size(); nodeIndex++)
+                      fAtPoint += sknPtr[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
 
                     // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
                     // integration width
@@ -503,9 +506,12 @@ namespace Lucee
                 iterCount++;
               }
               while (fabs(relError) > cutoffTolerance);
+            
+              //std::cout << "Iterations (Left) = " << iterCount << std::endl;
             }
 
             foundCutoffVelocity = true;
+
             // store cutoff velocity
             data[0] = cellCentroid[1] + cutoffGuess;
             
