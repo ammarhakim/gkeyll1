@@ -177,7 +177,10 @@ namespace Lucee
   void
   FemPoissonStructUpdater<NDIM>::initialize()
   {
-#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
+//#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
+#define DMSG(s) ;
+
+    DMSG("Inside initialize");
 
     Lucee::UpdaterIfc::initialize();
 
@@ -207,6 +210,8 @@ namespace Lucee
 // parallel layout is the same as the stiffness matrix.
     MatGetVecs(stiffMat, &globalSrc, PETSC_NULL);
     VecSetFromOptions(globalSrc);
+
+    DMSG("Matrix and vectors allocated");
 
     Lucee::Matrix<double> localStiff(nlocal, nlocal);
     std::vector<int> lgMap(nlocal);
@@ -242,6 +247,8 @@ namespace Lucee
 
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    DMSG("Basic stiffness matrix computed");
 
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
@@ -291,6 +298,8 @@ namespace Lucee
       }
     }
 
+    DMSG("Modification for Dirichlet BCs completed");
+
 // Begin process of modification to handle periodic BCs. The code in
 // the following two loops basically does the following. It modifies
 // the stiffness matrix so that the nodes on the upper boundary in
@@ -313,10 +322,11 @@ namespace Lucee
         std::vector<double> modVals(nlocal*nlocal);
 
 // create region to loop over side
-        Lucee::Region<NDIM, int> defRgnG = 
+        Lucee::Region<NDIM, int> defRgn = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
-// only update if we are on the correct ranks
-        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
+// region for ensuring that we only update the stiffness matrix on
+// appropriate rank
+        Lucee::Region<NDIM, int> defRgnUp = defRgn.intersect(localRgn);
 
 // loop, modifying stiffness matrix
         Lucee::RowMajorSequencer<NDIM> seq(defRgn);
@@ -324,6 +334,9 @@ namespace Lucee
         {
           seq.fillWithIndex(idx);
           nodalBasis->setIndex(idx);
+
+// this flag is needed to ensure we don't update the stiffness matrix twice
+          bool isIdxLocal = defRgnUp.isInside(idx);
 
           nodalBasis->getStiffnessMatrix(localStiff);
 // construct arrays for passing into Petsc
@@ -358,17 +371,24 @@ namespace Lucee
             lgMapMod[lgLocalNodeNum[k]] = lgLowerSurfMap[k];
 
 // zero out contribution
-          for (unsigned k=0; k<nlocal; ++k) modVals[k] = 0.0;
+          //for (unsigned k=0; k<nlocal; ++k) modVals[k] = 0.0;
+          for (unsigned k=0; k<nlocal*nlocal; ++k) modVals[k] = 0.0;
+
+// the following check is needed to ensure that the periodic BC
+// modifications to stiffness matrix are not applied twice
+          if (isIdxLocal)
+          {
 // only make contributions to those rows which correspond to those
 // nodes on the lower edge
-          for (unsigned k=0; k<nlocal; ++k)
-          {
-            for (unsigned m=0; m<nlocal; ++m)
+            for (unsigned k=0; k<nlocal; ++k)
             {
-              if (lgMapMod[k] == lgMap[k])
-                modVals[nlocal*k+m] = 0.0;
-              else
-                modVals[nlocal*k+m] = vals[nlocal*k+m];
+              for (unsigned m=0; m<nlocal; ++m)
+              {
+                if (lgMapMod[k] == lgMap[k])
+                  modVals[nlocal*k+m] = 0.0;
+                else
+                  modVals[nlocal*k+m] = vals[nlocal*k+m];
+              }
             }
           }
 
@@ -382,6 +402,8 @@ namespace Lucee
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    DMSG("Phase I of periodic BCs completed");
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
@@ -402,7 +424,7 @@ namespace Lucee
         Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
 // only update if we are on the correct ranks
-        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
+        Lucee::Region<NDIM, int> defRgn = defRgnG;//.intersect(localRgn);
 
 // loop, modifying stiffness matrix
         Lucee::RowMajorSequencer<NDIM> seq(defRgn);
@@ -441,6 +463,8 @@ namespace Lucee
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+
+    DMSG("Phase II of periodic BCs completed");
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
