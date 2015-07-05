@@ -75,6 +75,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<3> *nodalBasis;
 /** Pointer to 1D nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
+/** Flag to indicate if cutoff velocities need to be computed */
+      bool computeCutoffVelocities;
 /** Flag to indicate if BCs should be applied to left edge */
       bool applyLeftEdge;
 /** Flag to indicate if BCs should be applied to right edge */
