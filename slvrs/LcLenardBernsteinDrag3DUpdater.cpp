@@ -123,7 +123,7 @@ namespace Lucee
     interpVolMatrix1d = Eigen::MatrixXd(numVolQuadNodes1d, nlocal1d);
     nodalBasis1d->getGaussQuadData(interpVolMatrix1dLucee, gaussVolOrdinates1dLucee, gaussVolWeights1d);
     copyLuceeToEigen(interpVolMatrix1dLucee, interpVolMatrix1d);
- 
+
     interpSurfMatrixLower.resize(2, Eigen::MatrixXd(numSurfQuadNodes, nlocal));
     interpSurfMatrixUpper.resize(2, Eigen::MatrixXd(numSurfQuadNodes, nlocal));
     gaussSurfOrdinates.resize(2, Eigen::MatrixXd(numSurfQuadNodes, 3));
@@ -332,11 +332,14 @@ namespace Lucee
           if (paraCoord - uAtQuad(quadIndex % nVolQuad1d) > 0)
             numFlux = (paraCoord - uAtQuad(quadIndex % nVolQuad1d))*fRightSurfEvals(quadIndex);
           else numFlux = (paraCoord - uAtQuad(quadIndex % nVolQuad1d))*fLeftSurfEvals(quadIndex);
+
+          //numFlux = 0.5*((paraCoord - uAtQuad(quadIndex % nVolQuad1d))*fRightSurfEvals(quadIndex) +
+          //  (paraCoord - uAtQuad(quadIndex % nVolQuad1d))*fLeftSurfEvals(quadIndex));
           // Store result of weight*(v-u)*f at this location in a vector
           surfIntegralFluxes(quadIndex) = gaussSurfWeights[0][quadIndex]*numFlux;
 
           // Keep track of max CFL number
-          cfla = std::max(cfla, std::abs(alpha*paraCoord*dt/grid.getDx(1)));
+          cfla = std::max(cfla, std::abs(alpha*(paraCoord-uAtQuad(quadIndex % nVolQuad1d))*dt/grid.getDx(1)));
           //cfla = std::max(cfla, std::abs(alpha*(paraCoord-uAtQuad(quadIndex % nVolQuad1d))*dt/(0.5*(dxL+dxR))));
           // Time-step was too large: return a suggestion with correct time-step
           if (cfla > cflm)
@@ -425,6 +428,8 @@ namespace Lucee
           if (muCoord > 0)
             numFlux = 2*muCoord*fRightSurfEvals(quadIndex);
           else numFlux = 2*muCoord*fLeftSurfEvals(quadIndex);
+
+          //numFlux = 0.5*(2*muCoord*fRightSurfEvals(quadIndex)+2*muCoord*fLeftSurfEvals(quadIndex));
           // Store result of weight*mu*f at this location in a vector
           surfIntegralFluxes(quadIndex) = gaussSurfWeights[1][quadIndex]*numFlux;
 

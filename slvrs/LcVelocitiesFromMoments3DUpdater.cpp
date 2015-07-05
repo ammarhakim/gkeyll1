@@ -166,7 +166,7 @@ namespace Lucee
       for (int componentIndex = 0; componentIndex < uAtQuadPointsSq.rows(); componentIndex++)
         uAtQuadPointsSq(componentIndex) = gaussWeights[componentIndex]*uAtQuadPoints(componentIndex)*uAtQuadPoints(componentIndex)/3.0;
 
-      Eigen::VectorXd uSqWeights = interpMatrixTranspose*uAtQuadPoints;
+      Eigen::VectorXd uSqWeights = interpMatrixTranspose*uAtQuadPointsSq;
 
       // Fill in second part of vt(x)^2
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)

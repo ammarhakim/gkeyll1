@@ -1036,8 +1036,8 @@ namespace Lucee
 
       Lucee::Region<NDIM-1, int> surfRegion(surfShape);
 
-      Lucee::RowMajorSequencer<NDIM-1> surfSeq = RowMajorSequencer<NDIM-1>(surfRegion);
-      Lucee::RowMajorIndexer<NDIM-1> surfIdxr = RowMajorIndexer<NDIM-1>(surfRegion);
+      Lucee::ColMajorSequencer<NDIM-1> surfSeq = ColMajorSequencer<NDIM-1>(surfRegion);
+      Lucee::ColMajorIndexer<NDIM-1> surfIdxr = ColMajorIndexer<NDIM-1>(surfRegion);
 
       
       // Find all quadrature locations on a NDIM-1 surface
