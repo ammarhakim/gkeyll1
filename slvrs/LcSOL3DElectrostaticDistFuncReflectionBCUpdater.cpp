@@ -129,7 +129,7 @@ namespace Lucee
     const Lucee::StructuredGridBase<3>& grid 
       = this->getGrid<Lucee::StructuredGridBase<3> >();
 
-    const Lucee::Field<1, double>& mom1In = this->getInp<Lucee::Field<1, double> >(0);
+    const Lucee::DynVector<double>& momentsAtEdgesIonIn = this->getInp<Lucee::DynVector<double> >(0);
     // Output distribution function
     Lucee::Field<3, double>& distf = this->getOut<Lucee::Field<3, double> >(0);
     // Output cutoff velocities vs time
@@ -144,7 +144,7 @@ namespace Lucee
 #endif
 
     Lucee::Region<3, int> globalRgn = grid.getGlobalRegion();
-    Lucee::ConstFieldPtr<double> mom1Ptr = mom1In.createConstPtr();
+    std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
 
@@ -164,11 +164,8 @@ namespace Lucee
       bool foundCutoffVelocity = false;
       double totalFluxAlongEdge = 0.0; 
 
-      // Calculate flux at right-most node
-      mom1In.setPtr(mom1Ptr, ix);
-      // Assume that the location of the right-most node in 1-D
-      // is the number of nodes along an edge in 2-D minus 1
-      double totalIonFlux = mom1Ptr[nlocal1d-1];
+      // Get ion flux at right edge
+      double totalIonFlux = momentsAtEdgesIon[0];
 
       // start with cell at maximum v_para, looping down to zero until desired flux is reached
       for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
@@ -363,9 +360,8 @@ namespace Lucee
       bool foundCutoffVelocity = false;
       double totalFluxAlongEdge = 0.0; 
 
-      // Find flux at left-most node
-      mom1In.setPtr(mom1Ptr, ix);
-      double totalIonFlux = mom1Ptr[0];
+      // Find flux at left edge
+      double totalIonFlux = momentsAtEdgesIon[3];
 
       for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
       {
@@ -563,8 +559,8 @@ namespace Lucee
   void
   SOL3DElectrostaticDistFuncReflectionBCUpdater::declareTypes()
   {
-    // v-parallel first moment of ion distribution function
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    // Moments of the ion distribution function on both edges
+    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // Distribution function output (electrons)
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
     // Output cutoff velocities

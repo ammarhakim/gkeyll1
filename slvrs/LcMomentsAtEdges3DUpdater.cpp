@@ -100,8 +100,6 @@ namespace Lucee
 
     // Distribution function
     const Lucee::Field<3, double>& distfIn = this->getInp<Lucee::Field<3, double> >(0);
-    // Hamiltonian
-    const Lucee::Field<3, double>& hamilIn = this->getInp<Lucee::Field<3, double> >(1);
     // Output velocity moments (0, 1, 2, 3) vs time
     Lucee::DynVector<double>& velocityMoments = this->getOut<Lucee::DynVector<double> >(0);
 
@@ -109,8 +107,6 @@ namespace Lucee
     
     Lucee::ConstFieldPtr<double> sknPtr = distfIn.createConstPtr(); // for skin-cell
     Lucee::ConstFieldPtr<double> gstPtr = distfIn.createConstPtr(); // for ghost-cell
-    Lucee::ConstFieldPtr<double> sknHamilPtr = hamilIn.createConstPtr(); // for skin-cell
-    Lucee::ConstFieldPtr<double> gstHamilPtr = hamilIn.createConstPtr(); // for ghost-cell
 
     unsigned numNodes = nodalBasis->getNumNodes();
 
@@ -148,7 +144,6 @@ namespace Lucee
           break;
 
         distfIn.setPtr(sknPtr, ix, js, iMu);
-        hamilIn.setPtr(sknHamilPtr, ix, js, iMu);
 
         // Interpolate f to surface quadrature points
         Eigen::VectorXd fAtNodes(numNodes);
@@ -194,7 +189,6 @@ namespace Lucee
           break;
 
         distfIn.setPtr(gstPtr, ix+1, jg, iMu);
-        hamilIn.setPtr(gstHamilPtr, ix, jg, iMu);
 
         // Interpolate f to surface quadrature points
         Eigen::VectorXd fAtNodes(numNodes);
@@ -223,11 +217,17 @@ namespace Lucee
       }
     }
 
-    /*
-    ix = globalRgn.getLower(0); // left skin cell x index
+    //<vPara*f>
+    double vParaMom_l = 0.0;
+    //<vPara^3*f>
+    double vPara3Mom_l = 0.0;
+    //<vPara*mu*f>
+    double vParaMuMom_l = 0.0;
 
+    ix = globalRgn.getLower(0); // left skin cell x index
+    
     // Integrate along skin cell (left edge)
-    for (int js = 0; js < globalRgn.getUpper(1); js++)
+    for (int js = globalRgn.getLower(1); js < globalRgn.getUpper(1); js++)
     {
       for (int iMu = globalRgn.getLower(2); iMu < globalRgn.getUpper(2); iMu++)
       {
@@ -238,12 +238,11 @@ namespace Lucee
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
 
-        // Don't want skin cell contributions for v > 0.0 (upwinding)
+        // Don't want skin cell contributions for vPara > 0.0 (upwinding)
         if (cellCentroid[1] > 0.0)
           break;
 
         distfIn.setPtr(sknPtr, ix, js, iMu);
-        hamilIn.setPtr(sknHamilPtr, ix, js, iMu);
 
         // Interpolate f to surface quadrature points
         Eigen::VectorXd fAtNodes(numNodes);
@@ -252,33 +251,28 @@ namespace Lucee
         Eigen::VectorXd edgeQuadData = interpEdgeMatrixLower*fAtNodes;
 
         // Integrate v*f over entire cell using gaussian quadrature
-        double mom0InEntireCell = 0.0;
-        double mom1InEntireCell = 0.0;
-        double mom2InEntireCell = 0.0;
-        double mom3InEntireCell = 0.0;
+        double vParaMom_cell = 0.0;
+        double vPara3Mom_cell = 0.0;
+        double vParaMuMom_cell = 0.0;
 
         for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
         {
           double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLower(quadNodeIndex,1)*grid.getDx(1)/2.0;
-          
-          mom0InEntireCell += gaussEdgeWeightsLower[quadNodeIndex]*edgeQuadData(quadNodeIndex);
-          
-          mom1InEntireCell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+          double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesLower(quadNodeIndex,2)*grid.getDx(2)/2.0;
 
-          mom2InEntireCell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalV*edgeQuadData[quadNodeIndex];
-
-          mom3InEntireCell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData[quadNodeIndex];
+          vParaMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+          vPara3Mom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+          vParaMuMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
         }
-
-        mom0AlongLeftEdge += mom0InEntireCell;
-        mom1AlongLeftEdge += mom1InEntireCell;
-        mom2AlongLeftEdge += mom2InEntireCell;
-        mom3AlongLeftEdge += mom3InEntireCell;
+        
+        vParaMom_l += vParaMom_cell;
+        vPara3Mom_l += vPara3Mom_cell;
+        vParaMuMom_l += vParaMuMom_cell;
       }
     }
 
     // Integrate along ghost cell (left edge)
-    for (int jg = globalRgn.getUpper(1)-1; jg > 0; jg--)
+    for (int jg = globalRgn.getLower(1); jg < globalRgn.getUpper(1); jg++)
     {
       for (int iMu = globalRgn.getLower(2); iMu < globalRgn.getUpper(2); iMu++)
       {
@@ -293,8 +287,7 @@ namespace Lucee
         if (cellCentroid[1] < 0.0)
           break;
 
-        distfIn.setPtr(gstPtr, ix-1, jg, iMu);
-        hamilIn.setPtr(gstHamilPtr, ix, jg, iMu);
+        distfIn.setPtr(gstPtr, ix+1, jg, iMu);
 
         // Interpolate f to surface quadrature points
         Eigen::VectorXd fAtNodes(numNodes);
@@ -303,35 +296,35 @@ namespace Lucee
         Eigen::VectorXd edgeQuadData = interpEdgeMatrixUpper*fAtNodes;
 
         // Integrate v*f over entire cell using gaussian quadrature
-        double mom0InEntireCell = 0.0;
-        double mom1InEntireCell = 0.0;
-        double mom2InEntireCell = 0.0;
-        double mom3InEntireCell = 0.0;
+        double vParaMom_cell = 0.0;
+        double vPara3Mom_cell = 0.0;
+        double vParaMuMom_cell = 0.0;
 
         for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
         {
           double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*grid.getDx(1)/2.0;
+          double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*grid.getDx(2)/2.0;
           
-          mom0InEntireCell += gaussEdgeWeightsUpper[quadNodeIndex]*edgeQuadData(quadNodeIndex);
-          
-          mom1InEntireCell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
-
-          mom2InEntireCell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*edgeQuadData[quadNodeIndex];
-
-          mom3InEntireCell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData[quadNodeIndex];
+          vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
+          vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+          vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
         }
-
-        mom0AlongLeftEdge += mom0InEntireCell;
-        mom1AlongLeftEdge += mom1InEntireCell;
-        mom2AlongLeftEdge += mom2InEntireCell;
-        mom3AlongLeftEdge += mom3InEntireCell;
+        
+        vParaMom_l += vParaMom_cell;
+        vPara3Mom_l += vPara3Mom_cell;
+        vParaMuMom_l += vParaMuMom_cell;
       }
-    }*/
+    }
 
-    std::vector<double> data(3);
+
+
+    std::vector<double> data(6);
     data[0] = scaleFactor*vParaMom_r;
     data[1] = scaleFactor*vPara3Mom_r;
     data[2] = scaleFactor*vParaMuMom_r;
+    data[3] = scaleFactor*vParaMom_l;
+    data[4] = scaleFactor*vPara3Mom_l;
+    data[5] = scaleFactor*vParaMuMom_l;
 
     // Put data into the DynVector
     velocityMoments.appendData(t, data);
@@ -344,9 +337,7 @@ namespace Lucee
   {
     // A distribution function
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
-    // A hamiltonian
-    this->appendInpVarType(typeid(Lucee::Field<3, double>));
-    // Moments 0-3 at left and right edges
+    // Moments 0-3 at right and left edges
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
