@@ -98,6 +98,8 @@ namespace Lucee
       double kineticMass;
 /** Stores list of entries to insert into sparse matrix */
       std::vector<Eigen::Triplet<double> > tripletList;
+/** Name of output file */
+      std::string filename;
 /**
  * Struct to hold data for Guassian quadrature.
  */

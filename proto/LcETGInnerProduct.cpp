@@ -83,6 +83,11 @@ namespace Lucee
       throw Lucee::Except(
         "ETGInnerProduct::readInput: Must specify nodes per position using 'nodesPerPosition'");
 
+    if (tbl.hasString("filename"))
+      filename = tbl.getString("filename");
+    else
+      throw Lucee::Except("ETGInnerProduct::readInput: Must specify output filename");
+
     // get function to evaluate
     fnRef = tbl.getFunctionRef("evaluate");
   }
@@ -286,7 +291,7 @@ namespace Lucee
     {
       Eigen::SparseMatrix<double> innerProductMatrix(totalNodes, totalNodes);
       innerProductMatrix.setFromTriplets(tripletList.begin(), tripletList.end());
-      Eigen::saveMarket(innerProductMatrix,"innerProductMatrix.mtx");
+      Eigen::saveMarket(innerProductMatrix,filename);
       // Perform a Cholesky decomposition of innerProductMatrix
       //Eigen::SimplicialLLT<Eigen::SparseMatrix<double> > choleskyDecomp(innerProductMatrix);
       // Retrieve U (A = U^* U)
