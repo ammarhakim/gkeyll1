@@ -53,6 +53,11 @@ namespace Lucee
       totalNodes = tbl.getNumber("totalNodes");
     else
       throw Lucee::Except("ConstructLinearOperatorMatrix::readInput: Must specify totalNodes");
+
+    if (tbl.hasString("filename"))
+      filename = tbl.getString("filename");
+    else
+      throw Lucee::Except("ConstructLinearOperatorMatrix::readInput: Must specify output filename");
   }
 
   template <unsigned NDIM>
@@ -112,7 +117,7 @@ namespace Lucee
       Eigen::SparseMatrix<double> linearOperatorMatrix(totalNodes, totalNodes);
       linearOperatorMatrix.setFromTriplets(tripletList.begin(), tripletList.end());
       // Save matrix to disk
-      Eigen::saveMarket(linearOperatorMatrix,"linearOperatorMatrix.mtx");
+      Eigen::saveMarket(linearOperatorMatrix,filename);
     }
 
     return Lucee::UpdaterStatus();

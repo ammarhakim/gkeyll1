@@ -83,6 +83,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Stores list of entries to insert into sparse matrix */
       std::vector<Eigen::Triplet<double> > tripletList;
+/** Name of output file */
+      std::string filename;
 /**
  * Evaluate function at specified location and fill output array with
  * result.
