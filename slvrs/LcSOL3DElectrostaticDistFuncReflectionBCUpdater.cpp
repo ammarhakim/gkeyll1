@@ -369,7 +369,7 @@ namespace Lucee
         idx[1] = js;
         idx[2] = globalRgn.getLower(2);
 
-        nodalBasis->setIndex(ix, js);
+        nodalBasis->setIndex(idx);
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
 
