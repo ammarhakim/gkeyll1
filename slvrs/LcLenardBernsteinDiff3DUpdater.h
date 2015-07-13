@@ -101,6 +101,20 @@ namespace Lucee
       Eigen::MatrixXd iMatDiffusionTimesMu;
       Eigen::MatrixXd lowerMatDiffusionTimesMu;
       Eigen::MatrixXd upperMatDiffusionTimesMu;
+/** Vectors to store eigen matrices for testing */
+      std::vector<Eigen::MatrixXd> upperCenter;
+      std::vector<Eigen::MatrixXd> selfCenter;
+      std::vector<Eigen::MatrixXd> lowerCenter;
+      Eigen::MatrixXd upperCenterTimesMu;
+      Eigen::MatrixXd selfCenterTimesMu;
+      Eigen::MatrixXd lowerCenterTimesMu;
+/** Weights for volume gaussian quadrature points */
+      std::vector<double> gaussVolWeights;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to volume
+ * gaussian quadrature points.
+ */
+      Eigen::MatrixXd interpVolMatrix;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)
