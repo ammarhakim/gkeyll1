@@ -144,7 +144,7 @@ namespace Lucee
 #endif
 
     Lucee::Region<3, int> globalRgn = grid.getGlobalRegion();
-    std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
+    const std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
 
@@ -240,7 +240,7 @@ namespace Lucee
 
               if (exactResult != 0.0 && totalIonFlux != 0.0)
               {
-                double refCoord[2];
+                double refCoord[3];
                 refCoord[0] = 1;
 
                 std::vector<double> basisAtPoint(rightEdgeNodeNums.size());
@@ -435,7 +435,7 @@ namespace Lucee
 
               if (exactResult != 0.0 && totalIonFlux != 0.0)
               {
-                double refCoord[2];
+                double refCoord[3];
                 refCoord[0] = -1;
 
                 std::vector<double> basisAtPoint(leftEdgeNodeNums.size());
