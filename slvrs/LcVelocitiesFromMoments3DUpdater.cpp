@@ -138,39 +138,79 @@ namespace Lucee
       uOut.setPtr(uPtr, ix);
       vtSqOut.setPtr(vtSqPtr, ix);
 
-
-      Eigen::VectorXd uVec(nlocal);
-      // Compute u(x) naively by dividing weights of n*u by n(x)
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+      Eigen::VectorXd mom1ParaVec(nlocal);
+      Eigen::VectorXd mom0Vec(nlocal);
+      // Project u
+      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
       {
-        if (mom0Ptr[componentIndex] == 0.0)
+        mom1ParaVec(nodeIndex) = mom1ParaPtr[nodeIndex];
+        mom0Vec(nodeIndex) = mom0Ptr[nodeIndex];
+      }
+      Eigen::VectorXd uAtQuadPoints = Eigen::VectorXd(interpMatrix.rows());
+      Eigen::VectorXd mom1ParaAtQuadPoints = interpMatrix*mom1ParaVec;
+      Eigen::VectorXd mom0AtQuadPoints = interpMatrix*mom0Vec;
+
+      // Compute u*weight at each quadrature point
+      for (int gaussIndex = 0; gaussIndex < uAtQuadPoints.rows(); gaussIndex++)
+        uAtQuadPoints(gaussIndex) = gaussWeights[gaussIndex]*mom1ParaAtQuadPoints(gaussIndex)/mom0AtQuadPoints(gaussIndex);
+      Eigen::VectorXd uWeights = interpMatrixTranspose*uAtQuadPoints;
+
+      // Compute u(x) naively by dividing weights of n*u by n(x)
+      /*for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+      {
+        if (mom0Ptr[nodeIndex] == 0.0)
         {
-          uPtr[componentIndex] = 0.0;
-          vtSqPtr[componentIndex] = 0.0;
+          uPtr[nodeIndex] = 0.0;
+          vtSqPtr[nodeIndex] = 0.0;
         }
         else 
         {
-          uPtr[componentIndex] = mom1ParaPtr[componentIndex]/mom0Ptr[componentIndex];
+          uPtr[nodeIndex] = uWeights(nodeIndex); //mom1ParaPtr[nodeIndex]/mom0Ptr[nodeIndex];
           // Fill in first part of vt(x)^2
-          vtSqPtr[componentIndex] = (mom1MuPtr[componentIndex] + mom2ParaPtr[componentIndex])/
-            (3.0*mom0Ptr[componentIndex]);
+          vtSqPtr[nodeIndex] = (mom1MuPtr[nodeIndex] + mom2ParaPtr[nodeIndex])/
+            (3.0*mom0Ptr[nodeIndex]);
         }
-        uVec(componentIndex) = uPtr[componentIndex];
+      }*/
+      
+      // Project vThermSq
+      Eigen::VectorXd mom1MuVec(nlocal);
+      Eigen::VectorXd mom2ParaVec(nlocal);
+      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+      {
+        mom1MuVec(nodeIndex) = mom1MuPtr[nodeIndex];
+        mom2ParaVec(nodeIndex) = mom2ParaPtr[nodeIndex];
+      }
+      Eigen::VectorXd mom1MuAtQuadPoints = interpMatrix*mom1MuVec;
+      Eigen::VectorXd mom2ParaAtQuadPoints = interpMatrix*mom2ParaVec;
+      Eigen::VectorXd vThermSqAtQuadPoints = Eigen::VectorXd(interpMatrix.rows());
+      uAtQuadPoints = interpMatrix*uWeights;
+
+      for (int gaussIndex = 0; gaussIndex < uAtQuadPoints.rows(); gaussIndex++)
+        vThermSqAtQuadPoints(gaussIndex) = gaussWeights[gaussIndex]/3.0*(
+          (mom1MuAtQuadPoints(gaussIndex) + mom2ParaAtQuadPoints(gaussIndex))/
+            mom0AtQuadPoints(gaussIndex) - uAtQuadPoints(gaussIndex)*uAtQuadPoints(gaussIndex));
+
+      Eigen::VectorXd vThermSqWeights = interpMatrixTranspose*vThermSqAtQuadPoints;
+
+      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+      {
+        vtSqPtr[nodeIndex] = vThermSqWeights(nodeIndex);
+        uPtr[nodeIndex] = uWeights(nodeIndex);
       }
 
+      /*
       // Compute projection of u(x)^2/3.0
-      Eigen::VectorXd uAtQuadPoints = interpMatrix*uVec;
       Eigen::VectorXd uAtQuadPointsSq = Eigen::VectorXd(interpMatrix.rows());
 
       // Compute u^2*weight/3.0 at each quadrature point
-      for (int componentIndex = 0; componentIndex < uAtQuadPointsSq.rows(); componentIndex++)
-        uAtQuadPointsSq(componentIndex) = gaussWeights[componentIndex]*uAtQuadPoints(componentIndex)*uAtQuadPoints(componentIndex)/3.0;
+      for (int gaussIndex = 0; gaussIndex < uAtQuadPointsSq.rows(); gaussIndex++)
+        uAtQuadPointsSq(gaussIndex) = gaussWeights[gaussIndex]*uAtQuadPoints(gaussIndex)*uAtQuadPoints(gaussIndex)/3.0;
 
       Eigen::VectorXd uSqWeights = interpMatrixTranspose*uAtQuadPointsSq;
 
       // Fill in second part of vt(x)^2
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-        vtSqPtr[componentIndex] -= uSqWeights(componentIndex);
+      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        vtSqPtr[nodeIndex] -= uSqWeights(nodeIndex);*/
     }
 
     return Lucee::UpdaterStatus();
