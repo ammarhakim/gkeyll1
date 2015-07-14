@@ -12,9 +12,11 @@
 // lucee includes
 #include <LcCenterOfMassUpdater.h>
 #include <LcConstGravitySrcUpdater.h>
+#include <LcConstructLinearOperatorMatrix.h>
 #include <LcCopy1DTo2DNodalField.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
+#include <LcDistFuncMomentCalc1DFrom3D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
@@ -26,9 +28,11 @@
 #include <LcETGFreeEnergy.h>
 #include <LcETGInitializeDensity.h>
 #include <LcETGInitializeDensity5D.h>
+#include <LcETGInnerProduct.h>
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
 #include <LcIntegrateGeneralField.h>
@@ -43,20 +47,23 @@
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
+#include <LcNodalCopy1DTo3DFieldUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
-#include <LcNodalDgConstGravitySrcUpdater.h>
 #include <LcNodalCopy3DTo5DFieldUpdater.h>
+#include <LcNodalDgConstGravitySrcUpdater.h>
 #include <LcNodalGradientUpdater.h>
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
 #include <LcPoissonBracketUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
+#include <LcPoissonBracketSimpleUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
@@ -87,8 +94,15 @@ namespace Lucee
       .append<Lucee::CenterOfMassUpdater<2> >()
       .append<Lucee::CenterOfMassUpdater<3> >()
 
+      .append<Lucee::ConstructLinearOperatorMatrix<1> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<2> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<3> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<4> >()
+      .append<Lucee::ConstructLinearOperatorMatrix<5> >()
+
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
+      .append<Lucee::DistFuncMomentCalc1DFrom3D>()
       .append<Lucee::DistFuncMomentCalc2D>()
       .append<Lucee::DistFuncMomentCalc3D>()
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
@@ -104,10 +118,17 @@ namespace Lucee
       .append<Lucee::ETGFreeEnergy>()
       .append<Lucee::ETGInitializeDensity>()
       .append<Lucee::ETGInitializeDensity5D>()
+      .append<Lucee::ETGInnerProduct>()
     
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
       .append<Lucee::EnstrophyUpdater<3> >()
+
+      .append<Lucee::InitNodesFromMatrixMarketUpdater<1> >()
+      .append<Lucee::InitNodesFromMatrixMarketUpdater<2> >()
+      .append<Lucee::InitNodesFromMatrixMarketUpdater<3> >()
+      .append<Lucee::InitNodesFromMatrixMarketUpdater<4> >()
+      .append<Lucee::InitNodesFromMatrixMarketUpdater<5> >()
 
       .append<Lucee::IntegrateFieldAlongLine<1> >()
       .append<Lucee::IntegrateFieldAlongLine<2> >()
@@ -150,9 +171,15 @@ namespace Lucee
       .append<Lucee::PoissonBracketOptUpdater<3> >()
       .append<Lucee::PoissonBracketOptUpdater<4> >()
       .append<Lucee::PoissonBracketOptUpdater<5> >()
+      .append<Lucee::PoissonBracketSimpleUpdater<1> >()
+      .append<Lucee::PoissonBracketSimpleUpdater<2> >()
+      .append<Lucee::PoissonBracketSimpleUpdater<3> >()
+      .append<Lucee::PoissonBracketSimpleUpdater<4> >()
+      .append<Lucee::PoissonBracketSimpleUpdater<5> >()
       
       .append<Lucee::NodalPoissonBracketUpdater>()
 
+      .append<Lucee::NodalCopy1DTo3DFieldUpdater>()
       .append<Lucee::NodalCopy2DTo4DFieldUpdater>()
       .append<Lucee::NodalCopy3DTo5DFieldUpdater>()
 
@@ -192,6 +219,12 @@ namespace Lucee
       .append<Lucee::ConstGravitySrcUpdater<1> >()
       .append<Lucee::ConstGravitySrcUpdater<2> >()
       .append<Lucee::ConstGravitySrcUpdater<3> >()
+
+      .append<Lucee::SetSingleNodeToOneUpdater<1> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<2> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<3> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<4> >()
+      .append<Lucee::SetSingleNodeToOneUpdater<5> >()
 
       ;
 

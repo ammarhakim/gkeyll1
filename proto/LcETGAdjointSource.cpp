@@ -207,8 +207,8 @@ namespace Lucee
     int totalSize = 1;
     for (int dir = 0; dir < NDIM; dir++)
     {
-      localRgn.setLower(dir, localRgn.getLower(dir)-1);
-      localRgn.setUpper(dir, localRgn.getUpper(dir)+1);
+      //localRgn.setLower(dir, localRgn.getLower(dir)-1);
+      //localRgn.setUpper(dir, localRgn.getUpper(dir)+1);
       totalSize *= localRgn.getUpper(dir) - localRgn.getLower(dir);
     }
     
@@ -274,11 +274,12 @@ namespace Lucee
     Lucee::Region<NDIM, int> effectiveRgn(localRgn);
     for (int dir = 0; dir < NDIM; dir++)
     {
-      effectiveRgn.setLower(dir, localRgn.getLower(dir)-1);
-      effectiveRgn.setUpper(dir, localRgn.getUpper(dir)+1);
+      //effectiveRgn.setLower(dir, localRgn.getLower(dir)-1);
+      //effectiveRgn.setUpper(dir, localRgn.getUpper(dir)+1);
     }
 
-    Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(effectiveRgn);
+    //Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(effectiveRgn);
+    Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(localRgn);
 
     int nlocal = nodalBasis->getNumNodes();
     int nVolQuad = nodalBasis->getNumGaussNodes();
