@@ -196,6 +196,12 @@ namespace Lucee
           bgAdiabaticTemp/(2*bgKineticNumDensityAtQuad(i % nVolQuad2d))*
           perturbedKineticNumDensityAtQuad(i % nVolQuad2d)*
           perturbedKineticNumDensityAtQuad(i % nVolQuad2d) );
+
+        /*
+        localInt += volQuad4d.weights[i]/(LX*LY)*( 2*Lucee::PI*bFieldAtQuad(i % nVolQuad2d)/kineticMass*
+          bgKineticTempAtQuad(i % nVolQuad2d)*perturbedDistFAtQuad(i)*perturbedDistFAtQuad(i)/(2*bgDistFAtQuad(i)) +
+          bgAdiabaticDensity/(2*bgAdiabaticTemp)*
+          gPotentialAtQuad(i % nVolQuad2d)*hPotentialAtQuad(i % nVolQuad2d) );*/
       }
     }
 

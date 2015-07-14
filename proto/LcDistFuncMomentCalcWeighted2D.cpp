@@ -188,8 +188,8 @@ namespace Lucee
 
     // Make sure we integrate over conf. space ghost cells
     localRgn.setLower(0, localExtRgn.getLower(0));
-    localRgn.setLower(1, localExtRgn.getLower(1));
     localRgn.setUpper(0, localExtRgn.getUpper(0));
+    localRgn.setLower(1, localExtRgn.getLower(1));
     localRgn.setUpper(1, localExtRgn.getUpper(1));
 
     // clear out contents of output field

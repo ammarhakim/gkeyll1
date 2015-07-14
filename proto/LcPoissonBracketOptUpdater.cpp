@@ -19,6 +19,7 @@ namespace Lucee
 {
   static const unsigned UPWIND = 0;
   static const unsigned CENTRAL = 1;
+  static const unsigned DOWNWIND = 2;
 
 // set id for module system
   template <> const char *PoissonBracketOptUpdater<1>::id = "PoissonBracketOpt1D";
@@ -63,6 +64,8 @@ namespace Lucee
         fluxType = UPWIND;
       else if (tbl.getString("fluxType") == "central")
         fluxType = CENTRAL;
+      else if (tbl.getString("fluxType") == "downwind")
+        fluxType = DOWNWIND;
       else
       {
         Lucee::Except lce("PoissonBracketOptUpdater::readInput: 'fluxType' ");
@@ -589,6 +592,13 @@ namespace Lucee
       else if (fluxType == CENTRAL)
         numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*0.5*
           (rightValsAtQuad(quadIndex) + leftValsAtQuad(quadIndex));
+      else if (fluxType == DOWNWIND)
+      {
+        if (alphaDotN(quadIndex) > 0.0)
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightValsAtQuad(quadIndex);
+        else
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftValsAtQuad(quadIndex);
+      }
     }
   }
 

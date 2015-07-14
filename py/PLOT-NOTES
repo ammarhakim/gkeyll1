@@ -1,4 +1,5 @@
-Options should be of two types: data options and plotting options.
+Options should be of two types: data options and plotting
+options. Treat FV data just like a piecewise constant DG data.
 
 Data options
 ------------

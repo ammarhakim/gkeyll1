@@ -20,9 +20,11 @@ endif (PETSC_FOUND)
 set (proto_SOURCES
   LcCenterOfMassUpdater.cpp
   LcConstGravitySrcUpdater.cpp
+  LcConstructLinearOperatorMatrix.cpp
   LcCopy1DTo2DNodalField.cpp
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
+  LcDistFuncMomentCalc1DFrom3D.cpp
   LcDistFuncMomentCalc2D.cpp
   LcDistFuncMomentCalc3D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
@@ -32,11 +34,13 @@ set (proto_SOURCES
   LcETGAdiabaticPotentialUpdater3D.cpp
   LcETGAdjointSource.cpp
   LcETGFreeEnergy.cpp
+  LcETGInnerProduct.cpp
   LcETGInitializeDensity.cpp
   LcETGInitializeDensity5D.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
+  LcInitNodesFromMatrixMarketUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateGeneralField.cpp
@@ -51,9 +55,10 @@ set (proto_SOURCES
   LcModalDgLimiter1DUpdater.cpp
   LcModalL2NormUpdater.cpp
   LcMusclHancock1DUpdater.cpp
+  LcNodalCopy1DTo3DFieldUpdater.cpp
   LcNodalCopy2DTo4DFieldUpdater.cpp
-  LcNodalDgConstGravitySrcUpdater.cpp
   LcNodalCopy3DTo5DFieldUpdater.cpp
+  LcNodalDgConstGravitySrcUpdater.cpp
   LcNodalGradientUpdater.cpp
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
@@ -66,12 +71,15 @@ set (proto_SOURCES
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp
   LcPoissonBracketGyroEquation5D.cpp
+  LcPoissonBracketSOL3D.cpp
   LcPoissonBracketUpdater.cpp
   LcPoissonBracketOptUpdater.cpp
+  LcPoissonBracketSimpleUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
+  LcSetSingleNodeToOneUpdater.cpp
   LcSheathParticleSource1x1v.cpp
   LcSimpleSmoothToC0Updater.cpp
   LcSmoothQuadPhiToC1Updater.cpp
