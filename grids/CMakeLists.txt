@@ -19,3 +19,7 @@ add_library(lcgrids
   LcStructuredGridBase.cpp
   LcUnstructuredGrid.cpp
 )
+
+#if (MOAB_FOUND)
+  include_directories(${Moab_INCLUDE_DIRS})
+#endif ()
