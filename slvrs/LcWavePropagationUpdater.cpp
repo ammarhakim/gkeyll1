@@ -135,17 +135,17 @@ namespace Lucee
       hasLowerFluxBc[d] = hasUpperFluxBc[d] = false;
     }
 // check if any direction has a flux BCs
-    if (tbl.hasBoolVec("lowerFluxDirs"))
+    if (tbl.hasNumVec("lowerFluxDirs"))
     {
-      std::vector<bool> v = tbl.getBoolVec("lowerFluxDirs");
+      std::vector<double> v = tbl.getNumVec("lowerFluxDirs");
       for (unsigned i=0; i<v.size(); ++i)
-        hasLowerFluxBc[v[i]] = true;
+        hasLowerFluxBc[(int) v[i]] = true;
     }
-    if (tbl.hasBoolVec("upperFluxDirs"))
+    if (tbl.hasNumVec("upperFluxDirs"))
     {
-      std::vector<bool> v = tbl.getBoolVec("upperFluxDirs");
+      std::vector<double> v = tbl.getNumVec("upperFluxDirs");
       for (unsigned i=0; i<v.size(); ++i)
-        hasUpperFluxBc[v[i]] = true;
+        hasUpperFluxBc[(int) v[i]] = true;
     }
 
     hasSsBnd = false;
