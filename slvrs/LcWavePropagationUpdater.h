@@ -79,6 +79,12 @@ namespace Lucee
       double cfl;
 /** Maximum CFL number */
       double cflm;
+/** Flag to indicate if a lower in boundary a direction has flux
+ * boundaries specified */
+      bool hasLowerFluxBc[NDIM];
+/** Flag to indicate if a upper in boundary a direction has flux
+ * boundaries specified */
+      bool hasUpperFluxBc[NDIM];
 /** Fields to store positive fluctuations */
       std::vector<Lucee::Field<1, double>* > apdq;
 /** Fields to store negative fluctuations */

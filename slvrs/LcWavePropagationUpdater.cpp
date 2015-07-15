@@ -130,6 +130,24 @@ namespace Lucee
       }
     }
 
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      hasLowerFluxBc[d] = hasUpperFluxBc[d] = false;
+    }
+// check if any direction has a flux BCs
+    if (tbl.hasBoolVec("lowerFluxDirs"))
+    {
+      std::vector<bool> v = tbl.getBoolVec("lowerFluxDirs");
+      for (unsigned i=0; i<v.size(); ++i)
+        hasLowerFluxBc[v[i]] = true;
+    }
+    if (tbl.hasBoolVec("upperFluxDirs"))
+    {
+      std::vector<bool> v = tbl.getBoolVec("upperFluxDirs");
+      for (unsigned i=0; i<v.size(); ++i)
+        hasUpperFluxBc[v[i]] = true;
+    }
+
     hasSsBnd = false;
 // check if there is an embedded boundary
     if (tbl.hasBool("hasStairSteppedBoundary"))
@@ -218,6 +236,10 @@ namespace Lucee
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
 
+// clear out second-order correction (this is needed in order not to
+// mess with flux boundaries, if any)
+      (*fs[dir]) = 0.0;
+
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
@@ -233,6 +255,12 @@ namespace Lucee
 // interior. This is needed to limit the waves on the domain boundary)
       int sliceLower = localRgn.getLower(dir)-1;
       int sliceUpper = localRgn.getUpper(dir)+2;
+
+// adjust lower/upper bounds if flux boundaries are specified
+      if (hasLowerFluxBc[dir])
+        sliceLower = localRgn.getLower(dir)+1;
+      if (hasUpperFluxBc[dir])
+        sliceUpper = localRgn.getUpper(dir);
 
 // loop over each 1D slice
       while (seq.step())
@@ -314,10 +342,18 @@ namespace Lucee
 
         applyLimiters(dir, idx, *waves[dir], *speeds[dir]);
 
-// compute second order corrections to flux (we need to go one cell
-// beyond the last cell to ensure the right most edge flux is
-// computed). This loop is over edges.
-        for (int i=localRgn.getLower(dir); i<localRgn.getUpper(dir)+1; ++i)
+// We need to go one cell beyond the last cell to ensure the right
+// most edge flux is computed
+      int sliceLower = localRgn.getLower(dir);
+      int sliceUpper = localRgn.getUpper(dir)+1;
+// adjust lower/upper bounds if flux boundaries are specified
+      if (hasLowerFluxBc[dir])
+        sliceLower = localRgn.getLower(dir)+1;
+      if (hasUpperFluxBc[dir])
+        sliceUpper = localRgn.getUpper(dir);
+
+// compute second order corrections to flux This loop is over edges.
+        for (int i=sliceLower; i<sliceUpper; ++i)
         {
           if (hasSsBnd)
           {
