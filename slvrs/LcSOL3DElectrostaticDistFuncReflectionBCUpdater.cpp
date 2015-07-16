@@ -103,9 +103,7 @@ namespace Lucee
     // Copy matrices to eigen objects
     copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
     copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinates);
-
     edgeNodeInterpMatrix = Eigen::MatrixXd(numEdgeQuadNodes, rightEdgeNodeNums.size());
-    copyLuceeToEigen(interpEdgeMatrixLucee, edgeNodeInterpMatrix);
     
     // Create a lower dimension (2D) interpolation matrix
     for (int nodeIndex = 0; nodeIndex < numEdgeQuadNodes; nodeIndex++)
@@ -116,6 +114,26 @@ namespace Lucee
       {
         edgeNodeInterpMatrix(nodeIndex, basisIndex) = interpEdgeMatrix(nodeIndex, 
           rightEdgeNodeNums[basisIndex]);
+      }
+    }
+
+    // Temporary testing code
+    gaussEdgeWeightsLeftEdge = std::vector<double>(numEdgeQuadNodes);
+    gaussEdgeOrdinatesLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, 3);
+    nodalBasis->getSurfLowerGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
+      gaussEdgeWeightsLeftEdge);
+    copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
+    copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinatesLeftEdge);
+    edgeNodeInterpMatrixLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, leftEdgeNodeNums.size());
+    // Create a lower dimension (2D) interpolation matrix
+    for (int nodeIndex = 0; nodeIndex < numEdgeQuadNodes; nodeIndex++)
+    {
+      // At each quadrature node, copy basis function evaluations for
+      // those basis functions associated with the nodes on the (right) edge
+      for (int basisIndex = 0; basisIndex < leftEdgeNodeNums.size(); basisIndex++)
+      {
+        edgeNodeInterpMatrixLeftEdge(nodeIndex, basisIndex) = interpEdgeMatrix(nodeIndex, 
+          leftEdgeNodeNums[basisIndex]);
       }
     }
 
@@ -229,7 +247,7 @@ namespace Lucee
             // Figure out fraction of cell that contains the excess flux
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-
+            //std::cout << "excessFraction (L) = " << excessFraction << std::endl;
             // Search for cutoff velocity if needed
             if (computeCutoffVelocities == true)
             {
@@ -391,13 +409,13 @@ namespace Lucee
             leftEdgeData(edgeNodeIndex) = sknPtr[leftEdgeNodeNums[edgeNodeIndex]]; 
           
           // Interpolate nodal data to quadrature points on the edge
-          Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrix*leftEdgeData;
+          Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrixLeftEdge*leftEdgeData;
         
           // Integrate v*f over entire cell using gaussian quadrature
           for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
           {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*physicalV*
+            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*grid.getDx(1)/2.0;
+            fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*physicalV*
               leftEdgeQuadData(quadNodeIndex);
           }
         }
@@ -424,6 +442,7 @@ namespace Lucee
             // Figure out fraction of cell that contains the excess flux
             // (Flux over what is needed for equivalence with Gamma_i)
             double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+            //std::cout << "excessFraction (R) = " << excessFraction << std::endl;
 
             // Search for cutoff velocity if needed
             if (computeCutoffVelocities == true)
