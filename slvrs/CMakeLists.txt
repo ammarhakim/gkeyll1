@@ -28,7 +28,7 @@ set(lcslvrs_SOURCES
   LcCopyBoundaryCondition.cpp
   LcCopyContToDisContFieldUpdater.cpp
   LcCurrentSource.cpp
-  LcDisContVlasovMaxwellUpdater.cpp
+#  LcDisContVlasovMaxwellUpdater.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcElectromagneticAUpdater.cpp

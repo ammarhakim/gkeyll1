@@ -18,8 +18,10 @@ add_library(lcgrids
   LcRectCartGrid.cpp
   LcStructuredGridBase.cpp
   LcUnstructuredGrid.cpp
+  LcWriteCGNS.cpp
 )
 
 #if (MOAB_FOUND)
+  include_directories(${Cgns_INCLUDE_DIRS})
   include_directories(${Moab_INCLUDE_DIRS})
 #endif ()
