@@ -99,6 +99,8 @@ namespace Lucee
       bool hasSsBnd;
 /** In/out field */
       Lucee::Field<NDIM, double> *inOut;
+/** Flux boundary field */
+      Lucee::Field<NDIM, double> *fluxBc;
 /**
  * Apply limiters to waves.
  *
