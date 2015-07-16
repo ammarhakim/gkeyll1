@@ -287,7 +287,7 @@ namespace Lucee
         if (cellCentroid[1] < 0.0)
           break;
 
-        distfIn.setPtr(gstPtr, ix+1, jg, iMu);
+        distfIn.setPtr(gstPtr, ix-1, jg, iMu);
 
         // Interpolate f to surface quadrature points
         Eigen::VectorXd fAtNodes(numNodes);
@@ -309,7 +309,7 @@ namespace Lucee
           vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
           vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
         }
-        
+
         vParaMom_l += vParaMom_cell;
         vPara3Mom_l += vPara3Mom_cell;
         vParaMuMom_l += vParaMuMom_cell;

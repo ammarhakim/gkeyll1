@@ -97,8 +97,10 @@ namespace Lucee
  * and each row is a different quadrature point for doing surface integrals.
  */
       Eigen::MatrixXd gaussEdgeOrdinates;
+      Eigen::MatrixXd gaussEdgeOrdinatesLeftEdge;
 /** Weights for edge gaussian quadrature points */
       std::vector<double> gaussEdgeWeights;
+      std::vector<double> gaussEdgeWeightsLeftEdge;
 /** 
  * Interpolation matrix for bringing data that lives on the left or right edge
  * to quadrature points on same surface. It is constructed from the right edge
@@ -107,6 +109,7 @@ namespace Lucee
  * gaussSurfWeights.
  */
       Eigen::MatrixXd edgeNodeInterpMatrix;
+      Eigen::MatrixXd edgeNodeInterpMatrixLeftEdge;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
