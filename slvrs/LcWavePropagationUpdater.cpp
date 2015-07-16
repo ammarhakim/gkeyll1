@@ -364,9 +364,9 @@ namespace Lucee
       int sliceLower = localRgn.getLower(dir);
       int sliceUpper = localRgn.getUpper(dir)+1;
 // adjust lower/upper bounds if flux boundaries are specified
-      if (hasLowerFluxBc[dir])
+      if (hasLowerFluxBc[dir] && (q.getLower(dir) == q.getGlobalLower(dir)))
         sliceLower = localRgn.getLower(dir)+1;
-      if (hasUpperFluxBc[dir])
+      if (hasUpperFluxBc[dir] && (q.getUpper(dir) == q.getGlobalUpper(dir)))
         sliceUpper = localRgn.getUpper(dir);
 
 // compute second order corrections to flux This loop is over edges.
