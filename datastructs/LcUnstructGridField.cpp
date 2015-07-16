@@ -124,7 +124,7 @@ namespace Lucee
       upperGhost[i] = 0;
     }
 // read number of ghost cells
-    if (tbl.hasNumVec("ghost"))
+    /*if (tbl.hasNumVec("ghost"))
     {
       std::vector<double> gstDbl = tbl.getNumVec("ghost");
       if (gstDbl.size() != 2)
@@ -153,7 +153,7 @@ namespace Lucee
       isPar = tbl.getBool("decompose");
 
     //TODO: Fields are never set up
-
+*/
 #if 0
 
 // global region for field

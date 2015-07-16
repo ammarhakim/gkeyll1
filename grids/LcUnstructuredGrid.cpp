@@ -85,7 +85,9 @@ namespace Lucee
 
     std::cout << "newName is " << outNm << "\n";
 
-    if (writeExtension == "cgns")
+    mb->write_file(outNm.c_str());
+
+    /*if (writeExtension == "cgns")
     {
       mb->write_file(outNm.c_str(), "CGNS");
     } else if (writeExtension == "vtk")
@@ -94,10 +96,12 @@ namespace Lucee
     } else if (writeExtension == "gmv")
     {
       mb->write_file(outNm.c_str(), "GMV");
+    } else if (writeExtension =="gmsh") {
+      mb->write_file(outNm.c_str(), "GMSH");
     } else
     {
       std::cout << "No file was written!\n";
-    }
+    }*/
 
   }
 
