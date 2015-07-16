@@ -130,6 +130,7 @@ namespace Lucee
       }
     }
 
+    bool hasFluxBc = false;
     for (unsigned d=0; d<NDIM; ++d)
     {
       hasLowerFluxBc[d] = hasUpperFluxBc[d] = false;
@@ -137,12 +138,14 @@ namespace Lucee
 // check if any direction has a flux BCs
     if (tbl.hasNumVec("lowerFluxDirs"))
     {
+      hasFluxBc = true;
       std::vector<double> v = tbl.getNumVec("lowerFluxDirs");
       for (unsigned i=0; i<v.size(); ++i)
         hasLowerFluxBc[(int) v[i]] = true;
     }
     if (tbl.hasNumVec("upperFluxDirs"))
     {
+      hasFluxBc = true;
       std::vector<double> v = tbl.getNumVec("upperFluxDirs");
       for (unsigned i=0; i<v.size(); ++i)
         hasUpperFluxBc[(int) v[i]] = true;
@@ -156,6 +159,10 @@ namespace Lucee
 // fetch pointer to in/out field if there is an embedded boundary
     if (hasSsBnd)
       inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
+
+// fetch pointer to flux bc field (if any)
+    if (hasFluxBc)
+      fluxBc = &tbl.getObject<Lucee::Field<NDIM, double> >("boundaryFluxField");
   }
 
   template <unsigned NDIM>
@@ -207,7 +214,7 @@ namespace Lucee
     double dt = t-this->getCurrTime();
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
+    
     unsigned meqn = equation->getNumEqns();
     unsigned mwave = equation->getNumWaves();
 
@@ -236,10 +243,6 @@ namespace Lucee
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
 
-// clear out second-order correction (this is needed in order not to
-// mess with flux boundaries, if any)
-      (*fs[dir]) = 0.0;
-
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
@@ -256,10 +259,11 @@ namespace Lucee
       int sliceLower = localRgn.getLower(dir)-1;
       int sliceUpper = localRgn.getUpper(dir)+2;
 
-// adjust lower/upper bounds if flux boundaries are specified
-      if (hasLowerFluxBc[dir])
+// adjust lower/upper bounds if flux boundaries are specified, and we
+// are on the proper ranks
+      if (hasLowerFluxBc[dir] && (q.getLower(dir) == q.getGlobalLower(dir)))
         sliceLower = localRgn.getLower(dir)+1;
-      if (hasUpperFluxBc[dir])
+      if (hasUpperFluxBc[dir] && (q.getUpper(dir) == q.getGlobalUpper(dir)))
         sliceUpper = localRgn.getUpper(dir);
 
 // loop over each 1D slice
@@ -268,6 +272,19 @@ namespace Lucee
         int idx[NDIM], idxl[NDIM];
         seq.fillWithIndex(idx);
         seq.fillWithIndex(idxl);
+
+// if we have flux BC, fill them into the "corrected" flux array
+        if (hasLowerFluxBc[dir])
+        {
+          int idxB[NDIM];
+          seq.fillWithIndex(idxB);
+        }
+        if (hasUpperFluxBc[dir])
+        {
+          int idxB[NDIM];
+          seq.fillWithIndex(idxB);          
+        }
+        
 // loop over each edge in slice
         for (int i=sliceLower; i<sliceUpper; ++i)
         {
@@ -421,7 +438,7 @@ namespace Lucee
             qNewPtr[m] += -dt/cellVol*(surfArea1*fsPtr1[m] - surfArea*fsPtr[m]);
         }
       }
-    }
+    }  
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
@@ -466,6 +483,9 @@ namespace Lucee
         {
 // if both cells attached to this edge are outside the domain, do not
 // limit wave
+//
+// (I no longer recall why the following lines have been commented
+// out. AHH July 2015)
           // cellIdx[dir] = i; // right cell
           // inOut->setPtr(ioPtr, cellIdx);
           // cellIdx[dir] = i-1; // left cell
