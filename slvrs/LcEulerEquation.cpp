@@ -28,7 +28,6 @@ namespace Lucee
   void
   EulerEquation::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     Lucee::HyperEquation::readInput(tbl);
     if (tbl.hasNumber("gasGamma"))
       gas_gamma = tbl.getNumber("gasGamma");
@@ -176,10 +175,10 @@ namespace Lucee
 
     double rhol = getSafeRho(ql[0]), rhor = getSafeRho(qr[0]);
 // compute Roe averages for use in Riemann solver
-    double rhsqrtl = std::sqrt(rhol); // left sqrt(rho)
-    double rhsqrtr = std::sqrt(rhor); // right sqrt(rho)
-    double pl = pressure(&ql[0]); // left pressure
-    double pr = pressure(&qr[0]); // right pressure
+    double rhsqrtl = std::sqrt(rhol);
+    double rhsqrtr = std::sqrt(rhor);
+    double pl = pressure(&ql[0]);
+    double pr = pressure(&qr[0]);
 
     double rhsq2 = rhsqrtl + rhsqrtr;
 // compute Roe averaged velocity components

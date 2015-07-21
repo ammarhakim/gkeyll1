@@ -27,7 +27,6 @@ namespace Lucee
   void
   AdvectionEquation::readInput(Lucee::LuaTable& tbl)
   {
-// call base class method
     Lucee::HyperEquation::readInput(tbl);
     std::vector<double> s;
     u[0] = u[1] = u[2] = 0.0; // by default set speeds to 0.0

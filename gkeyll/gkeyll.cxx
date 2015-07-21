@@ -50,12 +50,10 @@ main(int argc, char **argv)
   MPI_Init(&argc, &argv);
 #endif
 
-// get hold of global communicator
   TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>
     ::Instance().comm;
 
   Lucee::CmdLineArgs cmdParser("lucee");
-// add command line options
   cmdParser.addArg("i", "INPUT", "Input file");
   cmdParser.addArg("o", "OUTPUT-PREFIX", "Prefix for all output files");
   cmdParser.addArg("p", "PETSC-OPTIONS", "Options database file for PetSc");
@@ -65,16 +63,13 @@ main(int argc, char **argv)
     " Should be one of disabled,\n   debug, info, error. Defaults to debug.");
   cmdParser.addArg("r", "RESTART-FRAME", "Frame to restart from.");
 
-// parse command line
   cmdParser.parse(argc, argv);
-// show help if requested
   if (cmdParser.hasSwitch("h")) 
   {
     cmdParser.showHelp();
     exit(1);
   }
 
-// determine input file
   std::string inpFile;
   if (cmdParser.hasArg("i"))
     inpFile = cmdParser.getArg("i");
@@ -118,7 +113,6 @@ main(int argc, char **argv)
   }
 #endif
 
-// check if input file exist
   std::ifstream inp(inpFile.c_str());
   if (! inp )
   {

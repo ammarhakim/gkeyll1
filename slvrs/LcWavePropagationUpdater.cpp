@@ -227,12 +227,13 @@ namespace Lucee
 
     Lucee::FieldPtr<double> jump(meqn);
 
-// these pointers are to the inOut field, but as it can be NULL, I am
-// using q to make their pointers. The reason this works is a "bug" in
-// the code. I.e. pointers do not check if they are set to their
-// parent fields. (AHH 7/13/2014)
+// these pointers are to the inOut and fluxBc fields, but as it can be
+// NULL, I am using q to make their pointers. The reason this works is
+// a "bug" in the code. I.e. pointers do not check if they are set to
+// their parent fields. (AHH 7/13/2014)
     Lucee::ConstFieldPtr<double> ioPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> ioPtr1 = q.createConstPtr();
+    Lucee::ConstFieldPtr<double> fluxBcPtr = q.createConstPtr();
 
     double cfla = 0.0; // maximum CFL number used
 
@@ -273,18 +274,6 @@ namespace Lucee
         seq.fillWithIndex(idx);
         seq.fillWithIndex(idxl);
 
-// if we have flux BC, fill them into the "corrected" flux array
-        if (hasLowerFluxBc[dir])
-        {
-          int idxB[NDIM];
-          seq.fillWithIndex(idxB);
-        }
-        if (hasUpperFluxBc[dir])
-        {
-          int idxB[NDIM];
-          seq.fillWithIndex(idxB);          
-        }
-        
 // loop over each edge in slice
         for (int i=sliceLower; i<sliceUpper; ++i)
         {
@@ -407,6 +396,25 @@ namespace Lucee
               fsPtr[m] += 0.5*std::abs(speedsPtr[mw])*(1.0 -
                 std::abs(speedsPtr[mw])*dt*areaVol)*wavesMat(m, mw);
           }
+        }
+
+// if we have flux BC, fill them into the "corrected" flux array, so
+// that they are accounted for in following loop over cells
+        if (hasLowerFluxBc[dir] && (q.getLower(dir) == q.getGlobalLower(dir)))
+        {
+          idx[dir] = q.getLower(dir);
+          fluxBc->setPtr(fluxBcPtr, idx);
+          fs[dir]->setPtr(fsPtr, q.getLower(dir));
+          for (unsigned m=0; m<meqn; ++m)
+            fsPtr[m] = fluxBcPtr[m];
+        }
+        if (hasUpperFluxBc[dir] && (q.getUpper(dir) == q.getGlobalUpper(dir)))
+        {
+          idx[dir] = q.getUpper(dir);
+          fluxBc->setPtr(fluxBcPtr, idx);
+          fs[dir]->setPtr(fsPtr, q.getUpper(dir));
+          for (unsigned m=0; m<meqn; ++m)
+            fsPtr[m] = fluxBcPtr[m];
         }
 
 // accumulate second order corrections (this loop is over cells)
