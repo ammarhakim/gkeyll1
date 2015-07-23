@@ -18,4 +18,13 @@ add_library(lcrte
   LcRteRegistry.cpp
 )
 
-
+if (NOT ${ENABLE_PARALLEL})
+  install(DIRECTORY ./
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+  )
+  
+  install(TARGETS lcrte
+    ARCHIVE DESTINATION lib
+  )
+endif ()

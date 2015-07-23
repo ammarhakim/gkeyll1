@@ -21,4 +21,13 @@ add_library(lcpic
   LcParticleSpecies.cpp
 )
 
-
+if (NOT ${ENABLE_PARALLEL})
+  install(DIRECTORY ./
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+  )
+  
+  install(TARGETS lcpic
+    ARCHIVE DESTINATION lib
+  )
+endif ()

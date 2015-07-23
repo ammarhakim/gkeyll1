@@ -18,3 +18,14 @@ add_library(lcgrids
   LcRectCartGrid.cpp
   LcStructuredGridBase.cpp
 )
+
+if (NOT ${ENABLE_PARALLEL})
+  install(DIRECTORY ./
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+  )
+  
+  install(TARGETS lcgrids
+    ARCHIVE DESTINATION lib
+  )
+endif ()
