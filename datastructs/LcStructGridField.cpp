@@ -124,6 +124,60 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   void
+  StructGridField<NDIM, T>::copyFromCptr(T *cptr)
+  {
+    Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
+    Lucee::Region<NDIM, int> extRgn = this->getExtRegion(); // loop over extended region
+    Lucee::ColMajorSequencer<NDIM> seq(extRgn);
+    int idx[NDIM];
+    double xc[3];
+    unsigned numOut = this->getNumComponents();
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      this->setPtr(ptr, idx);
+      grid->setIndex(idx);
+      if (dataLoc == VERTEX_LOC)
+        grid->getVertex(xc); // vertex coordinate
+      else
+        grid->getCentroid(xc); // cell center coordinate
+      for (int i=0; i<numOut; ++i)
+      {
+        ptr[i] = cptr[i];
+      }
+      cptr += numOut;
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  void
+  StructGridField<NDIM, T>::copyToCptr(T *cptr)
+  {
+    Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
+    Lucee::Region<NDIM, int> extRgn = this->getExtRegion(); // loop over extended region
+    Lucee::ColMajorSequencer<NDIM> seq(extRgn);
+    int idx[NDIM];
+    double xc[3];
+    unsigned numOut = this->getNumComponents();
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      this->setPtr(ptr, idx);
+      grid->setIndex(idx);
+      if (dataLoc == VERTEX_LOC)
+        grid->getVertex(xc); // vertex coordinate
+      else
+        grid->getCentroid(xc); // cell center coordinate
+      for (int i=0; i<numOut; ++i)
+      {
+        cptr[i] = ptr[i];
+      }
+      cptr += numOut;
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  void
   StructGridField<NDIM, T>::readInput(Lucee::LuaTable& tbl)
   {
 // get name of grid on which field lives
@@ -465,6 +519,8 @@ namespace Lucee
     lfm.appendFunc("duplicate", luaDuplicate);
     lfm.appendFunc("div", luaDivergence);
     lfm.appendFunc("applyFuncBc", luaSetGhost);
+    lfm.appendFunc("copy_from_cptr", luaCopyFromCptr);
+    lfm.appendFunc("copy_to_cptr", luaCopyToCptr);
   }
 
   template <unsigned NDIM, typename T>
@@ -626,6 +682,38 @@ namespace Lucee
     sgf->divergence(*fldPtr->pointer);
 
     return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaCopyFromCptr(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
+    if (!lua_isuserdata(L, 2)) {
+      Lucee::Except lce(
+        "StructGridField::luaCopyFromCptr: Must provide userdata");
+      throw lce;
+    }
+    
+    sgf->copyFromCptr((T*) lua_touserdata(L, 2));
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaCopyToCptr(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
+    if (!lua_isuserdata(L, 2)) {
+      Lucee::Except lce(
+        "StructGridField::luaCopyFromCptr: Must provide userdata");
+      throw lce;
+    }
+    
+    sgf->copyToCptr((T*) lua_touserdata(L, 2));
   }
 
   template <unsigned NDIM, typename T>
