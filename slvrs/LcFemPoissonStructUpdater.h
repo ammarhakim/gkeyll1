@@ -98,6 +98,8 @@ namespace Lucee
       Vec localData;
 /** Scatter object to get data onto local processor */
       VecScatter vecSctr;
+/** Constant term for solving a modified Poisson equation */
+      double modifierConstant;
 
 /** Structure to store BC data. */
       struct FemPoissonBcData
