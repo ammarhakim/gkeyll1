@@ -167,6 +167,11 @@ namespace Lucee
       }
     }
 
+    modifierConstant = 0.0;
+// read in modifier constant (if any)
+    if (tbl.hasNumber("modifierConstant"))
+      modifierConstant = tbl.getNumber("modifierConstant");
+
 // check if stiffness matrix should be written out
     writeMatrix = false;
     if (tbl.hasBool("writeStiffnessMatrix"))
@@ -213,7 +218,7 @@ namespace Lucee
 
     DMSG("Matrix and vectors allocated");
 
-    Lucee::Matrix<double> localStiff(nlocal, nlocal);
+    Lucee::Matrix<double> localStiff(nlocal, nlocal), localMass(nlocal, nlocal);
     std::vector<int> lgMap(nlocal);
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
@@ -232,11 +237,12 @@ namespace Lucee
       nodalBasis->setIndex(idx);
 
       nodalBasis->getStiffnessMatrix(localStiff);
+      nodalBasis->getMassMatrix(localMass);
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
+          vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); //  // Default PetSc layout is row-major
       }
 
       nodalBasis->getLocalToGlobal(lgMap);
@@ -339,11 +345,12 @@ namespace Lucee
           bool isIdxLocal = defRgnUp.isInside(idx);
 
           nodalBasis->getStiffnessMatrix(localStiff);
+          nodalBasis->getMassMatrix(localMass);          
 // construct arrays for passing into Petsc
           for (unsigned k=0; k<nlocal; ++k)
           {
             for (unsigned m=0; m<nlocal; ++m)
-              vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
+              vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
           }
 
 // Now compute correct locations in global stiffness matrix to add
