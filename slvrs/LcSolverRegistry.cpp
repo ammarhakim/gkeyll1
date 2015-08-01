@@ -38,27 +38,27 @@
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
-#include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcHeatFluxAtEdge3DUpdater.h>
+#include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcKineticEnergyUpdater.h>
-#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
+#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
-#include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDiff3DUpdater.h>
-#include <LcLenardBernsteinDragUpdater.h>
+#include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDrag3DUpdater.h>
+#include <LcLenardBernsteinDragUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcMHDHamiltonianUpdater.h>
-#include <LcMomentsAtEdgesUpdater.h>
 #include <LcMomentsAtEdges3DUpdater.h>
+#include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgCopyBoundaryCondition.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
@@ -69,6 +69,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcNodalPositiveFilterUpdater.h>
+#include <LcNodalVlasovUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -76,8 +77,8 @@
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcReflectionBoundaryCondition.h>
 #include <LcRegisteredObjList.h>
-#include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOL3DElectronTempAtWallCalc.cpp>
+#include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
@@ -90,8 +91,8 @@
 #include <LcTenMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
-#include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
+#include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -230,6 +231,13 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<3> >()
       .append<Lucee::NodalDisContHyperUpdater<4> >()
       .append<Lucee::NodalDisContHyperUpdater<5> >()
+
+      .append<Lucee::NodalVlasovUpdater<1,1> >()
+      .append<Lucee::NodalVlasovUpdater<1,2> >()
+      .append<Lucee::NodalVlasovUpdater<1,3> >()
+      .append<Lucee::NodalVlasovUpdater<2,2> >()
+      .append<Lucee::NodalVlasovUpdater<2,3> >()
+      .append<Lucee::NodalVlasovUpdater<3,3> >()
 
       .append<Lucee::NodalPositiveFilterUpdater<1> >()
       .append<Lucee::NodalPositiveFilterUpdater<2> >()
