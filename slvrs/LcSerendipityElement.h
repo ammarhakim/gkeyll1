@@ -117,7 +117,7 @@ namespace Lucee
  *
  * @param lgMap Local node number to global node number mapping.
  */
-      virtual void getSurfUpperLocalToGlobal(unsigned dim,
+      virtual void getSurfUpperLocalToGlobal(unsigned dir,
         std::vector<int>& lgMap) const;
 
 /**
@@ -404,6 +404,8 @@ namespace Lucee
       double dq[NDIM];
 /** Grid spacing squared in various dimensions */
       double dq2[NDIM];
+/** Local-to-global mapping for polyOrder = 1 in 2d */
+      Lucee::RowMajorIndexer<2> idxr;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
       std::vector<blitz::Array<double,NDIM> > functionVector;
@@ -457,6 +459,16 @@ namespace Lucee
       std::vector<Eigen::MatrixXd> upperMatHyperDiffusion;
 /** Face to interior mapping matrices */
       std::vector<Eigen::MatrixXd> lowerFaceToInteriorMapMatrices;
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 3 nodes (bottom).
+ */
+      unsigned F_func(unsigned nx, unsigned ny, int ix, int iy);
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 2 nodes (middle).
+ */
+      unsigned G_func(unsigned nx, unsigned ny, int ix, int iy);
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
