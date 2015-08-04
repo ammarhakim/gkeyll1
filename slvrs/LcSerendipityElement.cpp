@@ -27,9 +27,12 @@ namespace Lucee
 
   template <unsigned NDIM>
   SerendipityElement<NDIM>::SerendipityElement()
-    : NodalFiniteElementIfc<NDIM>(1)
+    : NodalFiniteElementIfc<NDIM>(1), idxr(
+        &Lucee::FixedVector<2, unsigned>((unsigned)0)[0], &Lucee::FixedVector<2, int>(1)[0])
   {
-
+    // notice funcky initialization of indexer: this is just so code
+    // compiles as indexers do not have default ctors. It gets reset in
+    // the readInput() method anyway.
   }
   
   template <unsigned NDIM>
@@ -71,6 +74,20 @@ namespace Lucee
         throw lce;
       }
       setupMatrices();
+      
+      // Local-to-global mapping valid for polyOrder = 1 in 2d
+      const Lucee::StructuredGridBase<NDIM>& grid 
+          = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+      Lucee::Region<NDIM, int> grgn = grid.getGlobalRegion();
+    
+      int nx = grgn.getShape(0);
+      int ny = grgn.getShape(1);
+
+      int shape[2];
+      shape[0] = nx + 1;
+      shape[1] = ny + 1;
+      Lucee::Region<2, int> lgRgn(shape);
+      idxr = RowMajorIndexer<2>(lgRgn);
     }
     else if (NDIM == 3 || NDIM == 4 || NDIM == 5)
     {
@@ -148,18 +165,51 @@ namespace Lucee
     return getSerendipityDimension(polyOrder, NDIM-1);
   }
 
+
+  template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::F_func(unsigned nx, unsigned ny, int ix, int iy)
+  {
+    return (2*nx+1)*iy + (nx+1)*iy + 2*ix;
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::G_func(unsigned nx, unsigned ny, int ix, int iy)
+  {
+    return (2*nx+1)*iy + (nx+1)*iy + (2*nx+1) + ix;
+  }
+
   template <unsigned NDIM>
   unsigned
   SerendipityElement<NDIM>::getNumGlobalNodes() const
   {
-    if (NDIM != 1)
-      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 1!");
+    if (NDIM > 2)
+      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 2!");
     // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
     Lucee::Region<NDIM, int> gridRgn = grid.getGlobalRegion();
+    int numGlobalNodes = 0;
 
-    int numGlobalNodes = 1 + polyOrder*gridRgn.getShape(0);
+    if (NDIM == 1)
+    {
+      numGlobalNodes = 1 + polyOrder*gridRgn.getShape(0);
+    }
+    else if (NDIM == 2)
+    {
+      int nx = gridRgn.getShape(0);
+      int ny = gridRgn.getShape(1);
+
+      if (polyOrder == 1)
+        numGlobalNodes = (nx+1)*(ny+1);
+      else if (polyOrder ==2)
+        // there are 3 owned nodes per cell, 2*nx and 2*ny edge nodes along
+        // the top and right edges and the 1 accounts for the node on the
+        // top-right corner.
+        numGlobalNodes = 3*nx*ny + 2*nx + 2*ny + 1;
+    }
+
     return numGlobalNodes;
   }
 
@@ -167,91 +217,91 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
-    std::cout << "this->currIdx[0] = " << this->currIdx[0] << std::endl;
-
     if (NDIM == 1)
     {
-    // Loop over excusive nodes
-    for (int nodeIndex = 0; nodeIndex < polyOrder; nodeIndex++)
-      lgMap[nodeIndex] = this->currIdx[0]*polyOrder + nodeIndex;
+      // Loop over excusive nodes
+      for (int nodeIndex = 0; nodeIndex < polyOrder; nodeIndex++)
+        lgMap[nodeIndex] = this->currIdx[0]*polyOrder + nodeIndex;
     }
-    else throw Lucee::Except("SerendipityElement::getLocalToGlobal: Not implemented!");
-    /*
-    // TODO: untested, not sure what this does anymore.
-    // determine number of global degrees of freedom
-    const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
-    Lucee::Region<NDIM, int> grgn = grid.getGlobalRegion();
-    unsigned cellsPerDim[NDIM];
-    unsigned currIndex[NDIM];
+    else if (NDIM == 2)
+    {
+      int ix = this->currIdx[0];
+      int iy = this->currIdx[1];
 
-    for (unsigned dimIndex = 0; dimIndex < NDIM; dimIndex++)
-    {
-      cellsPerDim[dimIndex] = grgn.getShape(dimIndex);
-      // Get global index of current cell, too
-      currIndex[dimIndex]   = this->currIdx[dimIndex];
+      if (polyOrder == 1)
+      {
+        lgMap[0] = idxr.getIndex(ix, iy); // 0
+        lgMap[1] = idxr.getIndex(ix+1, iy); // 1
+        lgMap[2] = idxr.getIndex(ix, iy+1); // 2
+        lgMap[3] = idxr.getIndex(ix+1, iy+1); // 3
+      }
+      else if (polyOrder == 2)
+      {
+      }
+      else throw Lucee::Except("SerendipityElement::getLocalToGlobal: polyOrder not implemented!");
     }
+    else throw Lucee::Except("SerendipityElement::getLocalToGlobal: Dimension not implemented!");
 
-    // Number of nodes on an edge
-    unsigned nodesPerSide = polyOrder + 1;
-    // Number of nodes on a 2-D serendipity element of same degree
-    unsigned nodesPerCell2D;
-    // Figure out number of nodes per row
-    std::vector<unsigned> nodesPerRow2D(nodesPerSide);
-    std::vector<unsigned> globalNodesPerRow2D(nodesPerSide);
-    if (polyOrder == 1)
-    {
-      nodesPerCell2D = 4;
-      nodesPerRow2D[0] = 2;
-      nodesPerRow2D[1] = 2;
-    }
-    else if (polyOrder == 2)
-    {
-      nodesPerCell2D = 8;
-      nodesPerRow2D[0] = 3;
-      nodesPerRow2D[1] = 2;
-      nodesPerRow2D[2] = 3;
-    }
-    else if (polyOrder == 3)
-    {
-      nodesPerCell2D = 12;
-      nodesPerRow2D[0] = 4;
-      nodesPerRow2D[1] = 2;
-      nodesPerRow2D[2] = 2;
-      nodesPerRow2D[3] = 4;
-    }
-
-    // Total number of nodes in one cell row of the mesh, minus the 'top row'
-    // Type A nodes are those on the top and bottom rows of an element
-    unsigned typeAPad = 0;
-    for (unsigned rowIndex = 0; rowIndex < nodesPerSide; rowIndex++)
-    {
-      globalNodesPerRow2D[rowIndex] = (nodesPerRow2D[rowIndex]-1)*cellsPerDim[0] + 1;
-      if (rowIndex != nodesPerSide-1)
-        typeAPad += globalNodesPerRow2D[rowIndex];
-    }
-
-    std::vector<unsigned> nodeIndices(nodesPerCell2D);*/
   }
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::getSurfLowerLocalToGlobal(unsigned dim,
+  SerendipityElement<NDIM>::getSurfLowerLocalToGlobal(unsigned dir,
     std::vector<int>& lgMap) const
   {
     if (NDIM == 1)
       lgMap[0] = this->currIdx[0]*polyOrder;
-    else throw Lucee::Except("SerendipityElement::getSurfLowerLocalToGlobal: Not implemented!");
+    else if (NDIM == 2)
+    {
+      int ix = this->currIdx[0];
+      int iy = this->currIdx[1];
+
+      if (polyOrder == 1)
+      {
+        if (dir == 0)
+        {
+          lgMap[0] = idxr.getIndex(ix, iy); // 0
+          lgMap[1] = idxr.getIndex(ix, iy+1); // 2
+        }
+        else if (dir == 1)
+        {
+          lgMap[0] = idxr.getIndex(ix, iy); // 0
+          lgMap[1] = idxr.getIndex(ix+1, iy); // 1
+        }
+      }
+      else throw Lucee::Except("SerendipityElement::getSurfLowerLocalToGlobal: polyOrder not implemented!");
+    }
+    else throw Lucee::Except("SerendipityElement::getSurfLowerLocalToGlobal: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
   void
-  SerendipityElement<NDIM>::getSurfUpperLocalToGlobal(unsigned dim,
+  SerendipityElement<NDIM>::getSurfUpperLocalToGlobal(unsigned dir,
     std::vector<int>& lgMap) const
   {
     if (NDIM == 1)
       lgMap[0] = (this->currIdx[0]+1)*polyOrder;
-    else throw Lucee::Except("SerendipityElement::getSurfUpperLocalToGlobal: Not implemented!");
+    else if (NDIM == 2)
+    {
+      int ix = this->currIdx[0];
+      int iy = this->currIdx[1];
+
+      if (polyOrder == 1)
+      {
+        if (dir == 0)
+        {
+          lgMap[0] = idxr.getIndex(ix+1, iy); // 1
+          lgMap[1] = idxr.getIndex(ix+1, iy+1); // 3
+        }
+        else if (dir == 1)
+        {
+          lgMap[0] = idxr.getIndex(ix, iy+1); // 2
+          lgMap[1] = idxr.getIndex(ix+1, iy+1); // 3
+        }
+      }
+      else throw Lucee::Except("SerendipityElement::getSurfUpperLocalToGlobal: polyOrder not implemented!");
+    }
+    else throw Lucee::Except("SerendipityElement::getSurfUpperLocalToGlobal: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
@@ -328,24 +378,55 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getWeights(std::vector<double>& w)
   {
-    // Todo (2)
-    throw Lucee::Except("SerendipityElement::getWeights: Not implemented!");
+    if (NDIM == 2)
+    {
+      unsigned nn = this->getNumNodes();
+      for (int k = 0; k < nn; k++)
+        w[k] = 0.5*dq[0]*0.5*dq[1];
+    }
+    else throw Lucee::Except("SerendipityElement::getWeights: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getSurfUpperWeights(unsigned dir, std::vector<double>& w)
   {
-    // Todo (2)
-    throw Lucee::Except("SerendipityElement::getSurfUpperWeights: Not implemented!");
+    if (NDIM == 2)
+    {
+      unsigned nn = this->getNumSurfUpperNodes(dir);
+      if (dir == 0)
+      {
+        for (int k = 0; k < nn; k++) 
+          w[k] = 0.5*dq[1];
+      }
+      else if (dir == 1)
+      {
+        for (int k = 0; k < nn; k++) 
+          w[k] = 0.5*dq[0];
+      }
+    }
+    else throw Lucee::Except("SerendipityElement::getSurfUpperWeights: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getSurfLowerWeights(unsigned dir, std::vector<double>& w)
   {
-    // Todo (2)
-    throw Lucee::Except("SerendipityElement::getSurfLowerWeights: Not implemented!");
+    if (NDIM == 2)
+    {
+      unsigned nn = this->getNumSurfUpperNodes(dir);
+      if (dir == 0)
+      {
+        for (int k = 0; k < nn; k++) 
+          w[k] = 0.5*dq[1];
+      }
+      else if (dir == 1)
+      {
+        for (int k = 0; k < nn; k++) 
+          w[k] = 0.5*dq[0];
+      }
+    }
+    else throw Lucee::Except("SerendipityElement::getSurfLowerWeights: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
@@ -936,7 +1017,41 @@ namespace Lucee
   SerendipityElement<NDIM>::copyAllDataFromField(const Lucee::Field<NDIM, double>& fld,
     double *data)
   {
-    throw Lucee::Except("SerendipityElement::copyAllDataFromField: Not implemented!");
+    if (NDIM == 2)
+    {
+      // region to copy
+      Lucee::Region<2, int> rgn =
+        this->template getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
+
+      Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
+      if (polyOrder == 1)
+      {
+        unsigned count = 0;
+        for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+          for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+          {
+            fld.setPtr(fldPtr, i, j);
+            data[count++] = fldPtr[0];
+          }
+      }
+      else throw Lucee::Except("SerendipityElement::copyAllDataFromField: polyOrder implemented!");
+      /*else if (polyOrder == 2)
+      {
+        std::vector<int> glob, loc;
+        for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+          for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+          {
+            fld.setPtr(fldPtr, i, j);
+            // determine mapping of exclusively owned nodes
+            getGlobalIndices(i, j, glob, loc);
+            for (unsigned n=0; n<glob.size(); ++n)
+            {
+              data[glob[n]] = fldPtr[loc[n]];
+            }
+          }
+      }*/
+    }
+    else throw Lucee::Except("SerendipityElement::copyAllDataFromField: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
@@ -944,7 +1059,43 @@ namespace Lucee
   SerendipityElement<NDIM>::copyAllDataToField(const double *data, 
     Lucee::Field<NDIM, double>& fld)
   {
-    throw Lucee::Except("SerendipityElement::copyAllDataToField: Not implemented!");
+    if (NDIM == 2)
+    {
+      // region to copy
+      Lucee::Region<2, int> rgn =
+        this->template getGrid<Lucee::StructuredGridBase<2> >().getLocalRegion();
+
+      Lucee::FieldPtr<double> fldPtr = fld.createPtr();
+
+      if (polyOrder == 1)
+      {
+        unsigned count = 0;
+        for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+          for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+          {
+            fld.setPtr(fldPtr, i, j);
+            fldPtr[0] = data[count++];
+          }
+      }
+      else throw Lucee::Except("SerendipityElement::copyAllDataToField: polyOrder not implemented!");
+        /*
+      else if (polyOrder == 2)
+      {
+        std::vector<int> glob, loc;
+        for (int i=rgn.getLower(0); i<rgn.getUpper(0)+1; ++i)
+          for (int j=rgn.getLower(1); j<rgn.getUpper(1)+1; ++j)
+          {
+            fld.setPtr(fldPtr, i, j);
+            // determine mapping of exclusively owned nodes
+            getGlobalIndices(i, j, glob, loc);
+            for (unsigned n=0; n<glob.size(); ++n)
+            {
+              fldPtr[loc[n]] = data[glob[n]];
+            }
+          }
+      }*/
+    }
+    else throw Lucee::Except("SerendipityElement::copyAllDataToField: Dimension not implemented!");
   }
 
   template <unsigned NDIM>
