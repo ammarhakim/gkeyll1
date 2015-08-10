@@ -69,7 +69,9 @@ namespace Lucee
 /** Directions to update */
       std::vector<unsigned> updateDims;
 /** Pointer to phase-space basis functions to use */
-      Lucee::NodalFiniteElementIfc<CDIM+VDIM> *nodalBasis;
+      Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
+/** Pointer to configuration-space basis functions to use */
+      Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number allowed */

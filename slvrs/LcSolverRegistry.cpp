@@ -237,7 +237,7 @@ namespace Lucee
       .append<Lucee::NodalVlasovUpdater<1,3> >()
       .append<Lucee::NodalVlasovUpdater<2,2> >()
       .append<Lucee::NodalVlasovUpdater<2,3> >()
-      .append<Lucee::NodalVlasovUpdater<3,3> >()
+      //.append<Lucee::NodalVlasovUpdater<3,3> >()
 
       .append<Lucee::NodalPositiveFilterUpdater<1> >()
       .append<Lucee::NodalPositiveFilterUpdater<2> >()
