@@ -13,6 +13,7 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
@@ -26,6 +27,10 @@ namespace Lucee
   template <unsigned CDIM, unsigned VDIM>
   class NodalVlasovUpdater : public Lucee::UpdaterIfc
   {
+// Number of components for coordinate arrays etc.
+      static const unsigned PNC = Lucee::CDIM<CDIM+VDIM>::N;
+      static const unsigned CNC = Lucee::CDIM<CDIM>::N;
+      
     public:
 /** Class id: this is used by registration system */
       static const char *id;
@@ -78,6 +83,8 @@ namespace Lucee
       double cflm;
 /** Flag to indicate if to only compute increments */
       bool onlyIncrement;
+/** Mapping of node in phase-space to node in configuration space */
+      std::vector<unsigned> phaseConfMap;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -127,6 +134,13 @@ namespace Lucee
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
         unsigned meqn, const double* vec, double v, double* out);
+
+/**
+ * Check if coordinates of phase-space node and configuration-space
+ * node are the same.
+ */
+      bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+        const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);      
   };
 }
 
