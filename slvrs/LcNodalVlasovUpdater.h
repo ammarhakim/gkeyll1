@@ -85,6 +85,10 @@ namespace Lucee
       bool onlyIncrement;
 /** Mapping of node in phase-space to node in configuration space */
       std::vector<unsigned> phaseConfMap;
+/** Species charge */
+      double charge;
+/** Species mass */
+      double mass;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -120,6 +124,35 @@ namespace Lucee
       EdgeNodeNums upperNodeNums[CDIM+VDIM];
 
 /**
+ * Compute physical flux at all nodes in direction 'dir'.
+ *
+ * @param dir Direction in which flux is needed.
+ * @param pc Coordinates of each node in phase-space.
+ * @param distf Distribution function at each node.
+ * @param EM Electromagnetic field at each configuration space node.
+ * @param flux On output, the flux in direction 'dir' at each node.
+ */
+      void calcFlux(unsigned dir, const Lucee::Matrix<double>& pc,
+        const Lucee::ConstFieldPtr<double>& distf, const Lucee::ConstFieldPtr<double>& EM,
+        std::vector<double>& flux);
+
+/**
+ * Compute numerical flux in direction 'dir'.
+ *
+ * @param dir Direction in which flux is needed.
+ * @param vCoord Velocity coordinate of node.
+ * @param distfl Distribution function at left of node.
+ * @param distf Distribution function at right of node.
+ * @param eml Electromagnetic field at left of node.
+ * @param em Electromagnetic field at right of node.
+ * @param flux On output, the flux in direction 'dir'.
+ * @return Wave speed.
+ */
+      double numericalFlux(unsigned dir, double vCoord[],
+        double distfl, double distf, const double* eml, const double* em,
+        double& flux);
+
+/**
  * Compute matrix-vector multiply. Output vector must be
  * pre-allocated. Note that the computation performed is
  *
@@ -127,13 +160,12 @@ namespace Lucee
  *
  * @param m Factor for accumulation.
  * @param mat Matrix for multiplication.
- * @param meqn Number of equations.
  * @param vec Vector for multiplication.
  * @param v Factor for accumulation.
  * @param out On output, holds the product.
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
-        unsigned meqn, const double* vec, double v, double* out);
+        const double* vec, double v, double* out);
 
 /**
  * Check if coordinates of phase-space node and configuration-space
