@@ -25,6 +25,7 @@ set (proto_SOURCES
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncMomentCalc1DFrom3D.cpp
+  LcDistFuncMomentCalc1DFrom4D.cpp
   LcDistFuncMomentCalc2D.cpp
   LcDistFuncMomentCalc3D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp

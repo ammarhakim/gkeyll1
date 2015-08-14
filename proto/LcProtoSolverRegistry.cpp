@@ -17,6 +17,7 @@
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc1DFrom3D.h>
+#include <LcDistFuncMomentCalc1DFrom4D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
@@ -103,6 +104,7 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncMomentCalc1DFrom3D>()
+      .append<Lucee::DistFuncMomentCalc1DFrom4D>()
       .append<Lucee::DistFuncMomentCalc2D>()
       .append<Lucee::DistFuncMomentCalc3D>()
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
