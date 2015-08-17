@@ -463,12 +463,24 @@ namespace Lucee
  * This function maps the index (ix,iy) into the global index space in
  * the row having 3 nodes (bottom).
  */
-      unsigned F_func(unsigned nx, unsigned ny, int ix, int iy);
+      unsigned F_func(unsigned nx, unsigned ny, int ix, int iy) const;
 /**
  * This function maps the index (ix,iy) into the global index space in
  * the row having 2 nodes (middle).
  */
-      unsigned G_func(unsigned nx, unsigned ny, int ix, int iy);
+      unsigned G_func(unsigned nx, unsigned ny, int ix, int iy) const;
+/**
+ * Helper function to copy data from/to a flat array, given a Lucee
+ * field. This method also takes into account the numbering of nodes
+ * in the "ghost" cells. Only valid for 2nd order elements in 2d
+ *
+ * @param i I-th index into field.
+ * @param j J-th index into field.
+ * @param glob On output, these are the exclusive global indices in cell (i,j)
+ * @param loc On output, these are the local owned indices (offset 0).
+ */
+      void getGlobalIndices(int i, int j, std::vector<int>& glob, 
+        std::vector<int>& loc);
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
