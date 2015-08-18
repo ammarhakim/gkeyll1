@@ -229,7 +229,7 @@ namespace Lucee
     unsigned nlocal = phaseBasis->getNumNodes();
 
     double dt = t-this->getCurrTime();
-    double cfla = 0.0; // maximum CFL number used    
+    double cfla = 0.0; // maximum CFL number used
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
@@ -325,6 +325,11 @@ namespace Lucee
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }
 
+          std::cout << "** Dir: " << dir << " idx: " << idxl[0] << " " << idx[1] << std::endl;
+          for (unsigned s=0; s<nface; ++s)
+            std::cout << flux[s] << " ";
+          std::cout << std::endl;
+            
 // update left cell connected to edge with flux on face
           qNew.setPtr(qNewPtrl, idxl);
           matVec(-1.0, upperLift[dir].m, &flux[0], 1.0, &qNewPtrl[0]);
@@ -440,6 +445,13 @@ namespace Lucee
       double ar = qbym*(emr[IEX] + vy*emr[IBZ]-vz*emr[IBY]);
       maxs = std::max(std::fabs(al),std::fabs(ar));
       flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
+      std::cout << "Dir: " << dir
+                << " qnym " << qbym 
+                << " Ex = (" << eml[IEX] << ", " << emr[IEX] << ")"
+                << " By = (" << eml[IBY] << ", " << emr[IBY] << ")"
+                << " Bz = (" << eml[IBZ] << ", " << emr[IBZ] << ")"
+                << " a = (" << al << "," << ar << ")"
+                << " F(" << distfl << "," << distfr << ") =" << flux << std::endl;
     }
     else if (dir==(CDIM+1))
     { // VY flux
