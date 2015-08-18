@@ -172,6 +172,11 @@ namespace Lucee
     if (tbl.hasNumber("modifierConstant"))
       modifierConstant = tbl.getNumber("modifierConstant");
 
+// Adjust source if doing periodic BCs and no modifier constant specified
+    adjustSource = false;
+    if (allPeriodic && (modifierConstant==0) )
+      adjustSource = true;
+
 // check if stiffness matrix should be written out
     writeMatrix = false;
     if (tbl.hasBool("writeStiffnessMatrix"))
@@ -497,7 +502,7 @@ namespace Lucee
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
-    if (allPeriodic)
+    if (adjustSource) //if (allPeriodic)
     {
 // lower-left
       int zeroRow[1] = {0};
@@ -594,7 +599,7 @@ namespace Lucee
     double intSrcVol = 0.0;
 // if all directions are periodic, we need to adjust source to ensure
 // solvability of the equations
-    if (allPeriodic)
+    if (adjustSource) //if (allPeriodic)
       intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;
 
 // clear out existing stuff in source vector: this is required
