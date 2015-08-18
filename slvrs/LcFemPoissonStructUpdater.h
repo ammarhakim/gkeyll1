@@ -100,6 +100,8 @@ namespace Lucee
       VecScatter vecSctr;
 /** Constant term for solving a modified Poisson equation */
       double modifierConstant;
+/** Should source be adjusted? */
+      bool adjustSource;
 
 /** Structure to store BC data. */
       struct FemPoissonBcData
