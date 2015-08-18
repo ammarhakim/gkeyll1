@@ -30,6 +30,21 @@ namespace Lucee
   template <> const char *NodalVlasovUpdater<2,3>::id = "NodalVlasov2X3V";
   //template <> const char *NodalVlasovUpdater<3,3>::id = "NodalVlasov3X3V";
 
+// makes indexing a little more sane
+  static const unsigned IX = 0;
+  static const unsigned IY = 1;
+  static const unsigned IZ = 3;
+
+  static const unsigned IEX = 0;
+  static const unsigned IEY = 1;
+  static const unsigned IEZ = 2;
+  static const unsigned IBX = 3;
+  static const unsigned IBY = 4;
+  static const unsigned IBZ = 5;
+
+  // helper to index EM fields at nodes
+  unsigned emidx(unsigned n, unsigned i) { return n*6+i; }
+
   template <unsigned CDIM, unsigned VDIM>
   bool
   NodalVlasovUpdater<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
@@ -95,6 +110,9 @@ namespace Lucee
 // input field, i.e. only increment is computed
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
+
+    charge = tbl.getNumber("charge");
+    mass = tbl.getNumber("mass");
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -211,15 +229,19 @@ namespace Lucee
     unsigned nlocal = phaseBasis->getNumNodes();
 
     double dt = t-this->getCurrTime();
-    double cfla = 0.0; // maximum CFL number used    
+    double cfla = 0.0; // maximum CFL number used
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     Lucee::ConstFieldPtr<double> qPtr = q.createConstPtr();
     Lucee::ConstFieldPtr<double> qPtrl = q.createConstPtr();
     Lucee::FieldPtr<double> qNewPtr = qNew.createPtr();
     Lucee::FieldPtr<double> qNewPtrl = qNew.createPtr();
+    Lucee::ConstFieldPtr<double> emPtr = EM.createConstPtr();
+    Lucee::ConstFieldPtr<double> emPtrl = EM.createConstPtr();
     std::vector<double> flux(nlocal);
     double localQ, localQl, localF;
+
+    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
 
     qNew = 0.0; // use qNew to store increment initially    
     
@@ -231,26 +253,29 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       q.setPtr(qPtr, idx);
+      EM.setPtr(emPtr, idx); // only CDIM indices will be used
       qNew.setPtr(qNewPtr, idx);
+
+      phaseBasis->setIndex(idx);      
+      phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
-        for (unsigned n=0; n<nlocal; ++n)
-        {
-        }
+        calcFlux(dir, phaseNodeCoords, qPtr, emPtr, flux);
+        matVec(1.0, stiffMatrix[dir].m, &flux[0], 1.0, &qNewPtr[0]);
       }
     }
 
 // contributions from surface integrals
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
-
 // lower and upper bounds of 1D slice. (We need to make sure that flux
 // is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
       int sliceUpper = localRgn.getUpper(dir)+1;
 
       int idx[NDIM], idxl[NDIM];
+      double vCoord[VDIM];
 // loop over each 1D slice
       while (seq.step())
       {
@@ -262,6 +287,11 @@ namespace Lucee
           idx[dir] = i; // cell right of edge
           idxl[dir] = i-1; // cell left of edge
 
+// set to cell right of edge (which means we need to use *left* face
+// node numbers below to get coordinates)
+          phaseBasis->setIndex(idx);
+          phaseBasis->getNodalCoordinates(phaseNodeCoords);
+
           grid.setIndex(idxl);
           double dxL = grid.getDx(dir);
           grid.setIndex(idx);
@@ -271,6 +301,8 @@ namespace Lucee
 
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
+          EM.setPtr(emPtr, idx);
+          EM.setPtr(emPtrl, idxl);
 
 // compute numerical fluxes on each face
           unsigned nface = lowerNodeNums[dir].nums.size();
@@ -279,26 +311,32 @@ namespace Lucee
           {
             unsigned un = upperNodeNums[dir].nums[s];
             unsigned ln = lowerNodeNums[dir].nums[s];
+            double localQl = qPtrl[un];
+            double localQ = qPtr[ln];
+            for (unsigned vd=0; vd<VDIM; ++vd)
+              vCoord[vd] = phaseNodeCoords(ln, CDIM+vd); // v coordinate of node
 
-            //equation->rotateToLocal(coordSys, &qPtrl[meqn*un], &localQl[0]);
-            //equation->rotateToLocal(coordSys, &qPtr[meqn*ln], &localQ[0]);
-
-            double maxs = 0; //equation->numericalFlux(coordSys,
-            //   &localQl[0], &localQ[0], inAuxQl, inAuxQr, &localF[0]);
-
-            //equation->rotateToGlobal(coordSys, &localF[0], &flux[meqn*s]);
-
-// compute actual CFL number to control time-stepping
+// NOTE: I wonder if the calcFlux method signature should be more
+// closely aligned to numercialFlux method below? Essentially, the
+// loop over nodes here is in the update() method, while the loop over
+// nodes is in the calcFlux() method above. (Ammar Hakim)
+            double maxs = numericalFlux(dir, vCoord, localQl, localQ,
+              &emPtrl[emidx(phaseConfMap[un],IEX)] , &emPtr[emidx(phaseConfMap[ln],IEX)], flux[s]);
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }
 
+          std::cout << "** Dir: " << dir << " idx: " << idxl[0] << " " << idx[1] << std::endl;
+          for (unsigned s=0; s<nface; ++s)
+            std::cout << flux[s] << " ";
+          std::cout << std::endl;
+            
 // update left cell connected to edge with flux on face
           qNew.setPtr(qNewPtrl, idxl);
-          matVec(-1.0, upperLift[dir].m, 1, &flux[0], 1.0, &qNewPtrl[0]);
+          matVec(-1.0, upperLift[dir].m, &flux[0], 1.0, &qNewPtrl[0]);
 
 // update right cell connected to edge with flux on face
           qNew.setPtr(qNewPtr, idx);
-          matVec(1.0, lowerLift[dir].m, 1, &flux[0], 1.0, &qNewPtr[0]);
+          matVec(1.0, lowerLift[dir].m, &flux[0], 1.0, &qNewPtr[0]);
         }
       }
       if (cfla > cflm)
@@ -341,21 +379,112 @@ namespace Lucee
   }
 
   template <unsigned CDIM, unsigned VDIM>
+  void
+  NodalVlasovUpdater<CDIM,VDIM>::calcFlux(unsigned dir, const Lucee::Matrix<double>& pc,
+    const Lucee::ConstFieldPtr<double>& distf, const Lucee::ConstFieldPtr<double>& EM,
+    std::vector<double>& flux)
+  {
+    unsigned nlocal = flux.size();
+    double qbym = charge/mass;
+    if (dir<CDIM)
+    { // configuration space flux
+      for (unsigned n=0; n<nlocal; ++n)
+        flux[n] = distf[n]*pc(n,CDIM+dir);
+    }
+    else if (dir==(CDIM+0))
+    { // VX flux
+      for (unsigned n=0; n<nlocal; ++n)
+      {
+        double vy = pc(n,CDIM+IY), vz = pc(n,CDIM+IZ);
+        double Ex = EM[emidx(phaseConfMap[n],IEX)];
+        double Bz = EM[emidx(phaseConfMap[n],IBZ)];
+        double By = EM[emidx(phaseConfMap[n],IBY)];
+        flux[n] = qbym*distf[n]*(Ex + vy*Bz-vz*By);
+      }
+    }
+    else if (dir==(CDIM+1))
+    { // VY flux
+      for (unsigned n=0; n<nlocal; ++n)
+      {
+        double vx = pc(n,CDIM+IX), vz = pc(n,CDIM+IZ);
+        double Ey = EM[emidx(phaseConfMap[n],IEY)];
+        double Bx = EM[emidx(phaseConfMap[n],IBX)];
+        double Bz = EM[emidx(phaseConfMap[n],IBZ)];
+        flux[n] = qbym*distf[n]*(Ey + vz*Bx-vx*Bz);
+      }
+    }
+    else if (dir==(CDIM+2))
+    { // VZ flux
+      for (unsigned n=0; n<nlocal; ++n)
+      {
+        double vx = pc(n,CDIM+IX), vy = pc(n,CDIM+IY);
+        double Ez = EM[emidx(phaseConfMap[n],IEY)];
+        double By = EM[emidx(phaseConfMap[n],IBY)];
+        double Bx = EM[emidx(phaseConfMap[n],IBX)];
+        flux[n] = qbym*distf[n]*(Ez + vx*By-vy*Bx);
+      }
+    }    
+  }
+
+  template <unsigned CDIM, unsigned VDIM>
+  double
+  NodalVlasovUpdater<CDIM,VDIM>::numericalFlux(unsigned dir, double vCoord[],
+    double distfl, double distfr, const double* eml, const double* emr,
+    double& flux)
+  {
+    double maxs, qbym = charge/mass;
+    if (dir<CDIM)
+    {
+      maxs = vCoord[dir];
+      flux = maxs>0 ? distfl*maxs : distfr*maxs;
+    }
+    else if (dir==(CDIM+0))
+    { // VX flux
+      double vy = vCoord[IY], vz = vCoord[IZ];
+      double al = qbym*(eml[IEX] + vy*eml[IBZ]-vz*eml[IBY]);
+      double ar = qbym*(emr[IEX] + vy*emr[IBZ]-vz*emr[IBY]);
+      maxs = std::max(std::fabs(al),std::fabs(ar));
+      flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
+      std::cout << "Dir: " << dir
+                << " qnym " << qbym 
+                << " Ex = (" << eml[IEX] << ", " << emr[IEX] << ")"
+                << " By = (" << eml[IBY] << ", " << emr[IBY] << ")"
+                << " Bz = (" << eml[IBZ] << ", " << emr[IBZ] << ")"
+                << " a = (" << al << "," << ar << ")"
+                << " F(" << distfl << "," << distfr << ") =" << flux << std::endl;
+    }
+    else if (dir==(CDIM+1))
+    { // VY flux
+      double vx = vCoord[IX], vz = vCoord[IZ];
+      double al = qbym*(eml[IEY] + vz*eml[IBX]-vx*eml[IBZ]);
+      double ar = qbym*(emr[IEY] + vz*emr[IBX]-vx*emr[IBZ]);
+      maxs = std::max(std::fabs(al),std::fabs(ar));
+      flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
+    }
+    else if (dir==(CDIM+2))
+    { // VZ flux
+      double vx = vCoord[IX], vy = vCoord[IY];
+      double al = qbym*(eml[IEZ] + vx*eml[IBY]-vy*eml[IBX]);
+      double ar = qbym*(emr[IEZ] + vx*emr[IBY]-vy*emr[IBX]);
+      maxs = std::max(std::fabs(al),std::fabs(ar));
+      flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
+    }        
+    return maxs;
+  }
+
+  template <unsigned CDIM, unsigned VDIM>
   void 
-  NodalVlasovUpdater<CDIM,VDIM>::matVec(double mc, const Lucee::Matrix<double>& mat,
-    unsigned meqn, const double* vec, double v, double *out)
+  NodalVlasovUpdater<CDIM,VDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
+    const double* vec, double v, double *out)
   {
     double tv;
     unsigned rows = mat.numRows(), cols = mat.numColumns();
-    for (unsigned m=0; m<meqn; ++m)
+    for (unsigned i=0; i<rows; ++i)
     {
-      for (unsigned i=0; i<rows; ++i)
-      {
-        tv = 0.0;
-        for (unsigned j=0; j<cols; ++j)
-          tv += mat(i,j)*vec[meqn*j+m];
-        out[meqn*i+m] = mc*tv + v*out[meqn*i+m];
-      }
+      tv = 0.0;
+      for (unsigned j=0; j<cols; ++j)
+        tv += mat(i,j)*vec[j];
+      out[i] = m*tv + v*out[i];
     }
   }
 
