@@ -786,6 +786,7 @@ namespace Lucee
     }
     msgStrm << " Number of iterations " << itNum
             << ". Final residual norm was " << resNorm;
+    //std::cout << msgStrm.str() << std::endl;
 
 // copy solution from PetSc array to solution field
     copyFromPetscField(initGuess, sol);
