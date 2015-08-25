@@ -193,7 +193,7 @@ namespace Lucee
     for (unsigned n=0; n<nlocal; ++n)
     {
       bool pcFound = false;
-      for (unsigned cn=0; cn<nlocal; ++cn)
+      for (unsigned cn=0; cn<confBasis->getNumNodes(); ++cn)
         if (sameConfigCoords(n, cn, dxMin, phaseNodeCoords, confNodeCoords))
         {
           phaseConfMap[n] = cn;

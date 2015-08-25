@@ -28,61 +28,62 @@ namespace Lucee
   template <> const char *CopyNodalFieldsUpdater<1,4>::id = "CopyNodalFields1D_4V";
   template <> const char *CopyNodalFieldsUpdater<2,4>::id = "CopyNodalFields2D_4D";
   template <> const char *CopyNodalFieldsUpdater<2,5>::id = "CopyNodalFields2D_5D";
+  template <> const char *CopyNodalFieldsUpdater<3,5>::id = "CopyNodalFields3D_5D";
 
-  template <unsigned CDIM, unsigned PDIM>
+  template <unsigned SDIM, unsigned TDIM>
   bool
-  CopyNodalFieldsUpdater<CDIM,PDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+  CopyNodalFieldsUpdater<SDIM,TDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
     const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
-    for (unsigned d=0; d<CDIM; ++d)
+    for (unsigned d=0; d<SDIM; ++d)
       if (! (std::fabs(phaseC(n,d)-confC(cn,d))<1e-4*dxMin) )
         return false;
     return true;
   }
 
-  template <unsigned CDIM, unsigned PDIM>
-  CopyNodalFieldsUpdater<CDIM,PDIM>::CopyNodalFieldsUpdater()
+  template <unsigned SDIM, unsigned TDIM>
+  CopyNodalFieldsUpdater<SDIM,TDIM>::CopyNodalFieldsUpdater()
     : UpdaterIfc()
   {
   }
 
-  template <unsigned CDIM, unsigned PDIM>  
+  template <unsigned SDIM, unsigned TDIM>  
   void 
-  CopyNodalFieldsUpdater<CDIM,PDIM>::readInput(Lucee::LuaTable& tbl)
+  CopyNodalFieldsUpdater<SDIM,TDIM>::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<PDIM> >("targetBasis"))
-      phaseBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<PDIM> >("targetBasis");
-    else
-      throw Lucee::Except("CopyNodalFieldsUpdater::readInput: Must specify target-basis using 'targetBasis'");
-
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<CDIM> >("sourceBasis"))
-      confBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<CDIM> >("sourceBasis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<SDIM> >("sourceBasis"))
+      sourceBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<SDIM> >("sourceBasis");
     else
       throw Lucee::Except("CopyNodalFieldsUpdater::readInput: Must specify source-space basis using 'sourceBasis'");
+
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<TDIM> >("targetBasis"))
+      targetBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<TDIM> >("targetBasis");
+    else
+      throw Lucee::Except("CopyNodalFieldsUpdater::readInput: Must specify target-basis using 'targetBasis'");
   }
 
-  template <unsigned CDIM, unsigned PDIM>
+  template <unsigned SDIM, unsigned TDIM>
   void 
-  CopyNodalFieldsUpdater<CDIM,PDIM>::initialize()
+  CopyNodalFieldsUpdater<SDIM,TDIM>::initialize()
   {
     Lucee::UpdaterIfc::initialize();
 
 // get hold of grid
-    const Lucee::StructuredGridBase<PDIM>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<PDIM> >();
+    const Lucee::StructuredGridBase<TDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<TDIM> >();
 // local region to update
-    Lucee::Region<PDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<TDIM, int> localRgn = grid.getLocalRegion();
 
-    Lucee::RowMajorSequencer<PDIM> seq(localRgn);
+    Lucee::RowMajorSequencer<TDIM> seq(localRgn);
     seq.step(); // just to get to first index
-    int idx[PDIM];
+    int idx[TDIM];
     seq.fillWithIndex(idx);
-    phaseBasis->setIndex(idx);
-    confBasis->setIndex(idx); // only first CDIM elements are used
+    targetBasis->setIndex(idx);
+    sourceBasis->setIndex(idx); // only first SDIM elements are used
     
-    unsigned nlocal = phaseBasis->getNumNodes();
+    unsigned nlocal = targetBasis->getNumNodes();
 
 // compute mapping of phase-space nodes to configuration space
 // nodes. The assumption here is that the node layout in phase-space
@@ -90,23 +91,23 @@ namespace Lucee
 // exactly one node co-located with it in configuration space. No
 // "orphan" phase-space node are allowed, and an exception is thrown
 // if that occurs.
-    phaseConfMap.resize(nlocal);
-    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
-    Lucee::Matrix<double> confNodeCoords(confBasis->getNumNodes(), CNC);
+    tarSrcMap.resize(nlocal);
+    Lucee::Matrix<double> tarNodeCoords(targetBasis->getNumNodes(), PNC);
+    Lucee::Matrix<double> srcNodeCoords(sourceBasis->getNumNodes(), CNC);
 
     double dxMin = grid.getDx(0);
-    for (unsigned d=1; d<CDIM; ++d)
+    for (unsigned d=1; d<SDIM; ++d)
       dxMin = std::min(dxMin, grid.getDx(d));
 
-    phaseBasis->getNodalCoordinates(phaseNodeCoords);
-    confBasis->getNodalCoordinates(confNodeCoords);
+    targetBasis->getNodalCoordinates(tarNodeCoords);
+    sourceBasis->getNodalCoordinates(srcNodeCoords);
     for (unsigned n=0; n<nlocal; ++n)
     {
       bool pcFound = false;
-      for (unsigned cn=0; cn<nlocal; ++cn)
-        if (sameConfigCoords(n, cn, dxMin, phaseNodeCoords, confNodeCoords))
+      for (unsigned cn=0; cn<sourceBasis->getNumNodes(); ++cn)
+        if (sameConfigCoords(n, cn, dxMin, tarNodeCoords, srcNodeCoords))
         {
-          phaseConfMap[n] = cn;
+          tarSrcMap[n] = cn;
           pcFound = true;
           break;
         }
@@ -120,28 +121,45 @@ namespace Lucee
     }
   }
 
-  template <unsigned CDIM, unsigned PDIM>
+  template <unsigned SDIM, unsigned TDIM>
   Lucee::UpdaterStatus 
-  CopyNodalFieldsUpdater<CDIM,PDIM>::update(double t)
+  CopyNodalFieldsUpdater<SDIM,TDIM>::update(double t)
   {
-    const Lucee::StructuredGridBase<PDIM>& grid
-      = this->getGrid<Lucee::StructuredGridBase<PDIM> >();
+    const Lucee::StructuredGridBase<TDIM>& grid
+      = this->getGrid<Lucee::StructuredGridBase<TDIM> >();
 
-    const Lucee::Field<CDIM, double>& q = this->getInp<Lucee::Field<CDIM, double> >(0);
-    Lucee::Field<PDIM, double>& qNew = this->getOut<Lucee::Field<PDIM, double> >(0);
+    const Lucee::Field<SDIM, double>& qSrc = this->getInp<Lucee::Field<SDIM, double> >(0);
+    Lucee::Field<TDIM, double>& qTar = this->getOut<Lucee::Field<TDIM, double> >(0);
+
+    Lucee::ConstFieldPtr<double> qSrcPtr = qSrc.createConstPtr();
+    Lucee::FieldPtr<double> qTarPtr = qTar.createPtr();
+
+    unsigned nlocal = targetBasis->getNumNodes();
+    Lucee::Region<TDIM, int> localRgn = grid.getLocalRegion();
+    int idx[TDIM];
+    Lucee::RowMajorSequencer<TDIM> seq(localRgn);
+
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      qSrc.setPtr(qSrcPtr, idx);
+      qTar.setPtr(qTarPtr, idx);
+
+      for (unsigned k=0; k<nlocal; ++k)
+        qTarPtr[k] = qSrcPtr[tarSrcMap[k]];
+    }
 
     return Lucee::UpdaterStatus();
   }
 
-  template <unsigned CDIM, unsigned PDIM>  
+  template <unsigned SDIM, unsigned TDIM>  
   void
-  CopyNodalFieldsUpdater<CDIM,PDIM>::declareTypes()
+  CopyNodalFieldsUpdater<SDIM,TDIM>::declareTypes()
   {
-    const unsigned NDIM = CDIM+PDIM;    
 // distribution function
-    this->appendInpVarType(typeid(Lucee::Field<CDIM, double>));
+    this->appendInpVarType(typeid(Lucee::Field<SDIM, double>));
 // returns one output: updated distribution function
-    this->appendOutVarType(typeid(Lucee::Field<PDIM, double>));
+    this->appendOutVarType(typeid(Lucee::Field<TDIM, double>));
   }
 
 // instantiations
@@ -150,4 +168,5 @@ namespace Lucee
   template class CopyNodalFieldsUpdater<1,4>;
   template class CopyNodalFieldsUpdater<2,4>;
   template class CopyNodalFieldsUpdater<2,5>;
+  template class CopyNodalFieldsUpdater<3,5>;
 }
