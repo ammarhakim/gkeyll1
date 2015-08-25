@@ -22,15 +22,15 @@ namespace Lucee
 {
 /**
  * Copy one nodal field to another. The fields can be of different
- * dimensions. Input file is of dimension CDIM and output field of
- * dimension PDIM.
+ * dimensions. Source (input) field is of dimension SDIM and target
+ * (output) field of dimension TDIM.
  */
-  template <unsigned CDIM, unsigned PDIM>
+  template <unsigned SDIM, unsigned TDIM>
   class CopyNodalFieldsUpdater : public Lucee::UpdaterIfc
   {
 // Number of components for coordinate arrays etc.
-      static const unsigned PNC = Lucee::CDIM<PDIM>::N;
-      static const unsigned CNC = Lucee::CDIM<CDIM>::N;
+      static const unsigned PNC = Lucee::CDIM<TDIM>::N;
+      static const unsigned CNC = Lucee::CDIM<SDIM>::N;
       
     public:
 /** Class id: this is used by registration system */
@@ -73,11 +73,11 @@ namespace Lucee
 
     private:
 /** Pointer to phase-space basis functions to use */
-      Lucee::NodalFiniteElementIfc<PDIM> *phaseBasis;
+      Lucee::NodalFiniteElementIfc<TDIM> *targetBasis;
 /** Pointer to configuration-space basis functions to use */
-      Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
-/** Mapping of node in phase-space to node in configuration space */
-      std::vector<unsigned> phaseConfMap;      
+      Lucee::NodalFiniteElementIfc<SDIM> *sourceBasis;
+/** Mapping of node in target-space to node in source space */
+      std::vector<unsigned> tarSrcMap;
 
 /**
  * Check if coordinates of phase-space node and configuration-space
