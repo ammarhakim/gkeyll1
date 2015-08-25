@@ -14,6 +14,7 @@
 #include <LcConstGravitySrcUpdater.h>
 #include <LcConstructLinearOperatorMatrix.h>
 #include <LcCopy1DTo2DNodalField.h>
+#include <LcCopyNodalFields.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc1DFrom3D.h>
@@ -56,9 +57,9 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
-#include <LcPoissonBracketUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
 #include <LcPoissonBracketSimpleUpdater.h>
+#include <LcPoissonBracketUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
@@ -68,8 +69,8 @@
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
-#include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
+#include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 
 // loki includes

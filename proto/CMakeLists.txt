@@ -22,6 +22,7 @@ set (proto_SOURCES
   LcConstGravitySrcUpdater.cpp
   LcConstructLinearOperatorMatrix.cpp
   LcCopy1DTo2DNodalField.cpp
+  LcCopyNodalFields.cpp
   LcDGDiffusionUpdater1D.cpp
   LcDistFuncMomentCalc1D.cpp
   LcDistFuncMomentCalc1DFrom3D.cpp
@@ -35,9 +36,9 @@ set (proto_SOURCES
   LcETGAdiabaticPotentialUpdater3D.cpp
   LcETGAdjointSource.cpp
   LcETGFreeEnergy.cpp
-  LcETGInnerProduct.cpp
   LcETGInitializeDensity.cpp
   LcETGInitializeDensity5D.cpp
+  LcETGInnerProduct.cpp
   LcEnergyFromStreamAndVortUpdater.cpp
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
@@ -72,11 +73,11 @@ set (proto_SOURCES
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp
   LcPoissonBracketGyroEquation5D.cpp
+  LcPoissonBracketOptUpdater.cpp
   LcPoissonBracketSOL3D.cpp
+  LcPoissonBracketSimpleUpdater.cpp
   LcPoissonBracketUpdater.cpp
   LcPoissonBracketVlasovPoissonEquation3D.cpp
-  LcPoissonBracketOptUpdater.cpp
-  LcPoissonBracketSimpleUpdater.cpp
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
