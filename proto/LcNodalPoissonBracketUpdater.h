@@ -144,6 +144,12 @@ namespace Lucee
       MatrixHolder mSurfUpperPhi[2];
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
+/** Flag to indicate if Hamiltonian nodes are shared */
+      bool hamilNodesShared;
+/** Offsets for zero-flux directions along lower edges */
+      int lowerZeroFluxOffset[2];
+/** Offsets for zero-flux directions  along upper edges */
+      int upperZeroFluxOffset[2];
 
 /**
  * Structure to store node numbers on edges.

@@ -59,6 +59,28 @@ namespace Lucee
     onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
+
+    hamilNodesShared = true;
+    if (tbl.hasBool("hamilNodesShared"))
+      hamilNodesShared = tbl.getBool("hamilNodesShared");
+
+// zeroFluxOffset allows implementation of zero-flux BCs in specified
+// directions. This is needed to avoid "leakage" of particles when
+// doing Vlasov solves, as velocity space direction is bounded.
+     
+    lowerZeroFluxOffset[0] = 0; lowerZeroFluxOffset[1] = 0; // by default no offsets
+    upperZeroFluxOffset[0] = 0; upperZeroFluxOffset[1] = 0; // by default no offsets
+
+    std::vector<double> zfd; // zero-flux directions
+    if (tbl.hasNumVec("zeroFluxDirections"))
+      zfd = tbl.getNumVec("zeroFluxDirections");
+    for (unsigned i=0; i<zfd.size(); ++i)
+    {
+      if ((int)zfd[i]>1)
+        throw Lucee::Except("NodalPoissonBracketUpdater::readInput: Directions in 'zeroFluxDirections' should be 0 or 1");
+      lowerZeroFluxOffset[(int)zfd[i]] = 1;
+      upperZeroFluxOffset[(int)zfd[i]] = 1;
+    }
   }
 
   void 
@@ -73,6 +95,7 @@ namespace Lucee
 
 // local region to update
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
+    
 
 // set index to first location in grid (this is okay as in this
 // updater we are assuming grid is uniform)
@@ -187,6 +210,17 @@ namespace Lucee
       nodalBasis->getMassMatrix(massMatrix);
       Lucee::solve(massMatrix, mSurfUpperPhi[dir].m);
     }
+
+// ensure that zero-flux BCs are applied only if local rank owns the
+// skin cell
+    Lucee::Region<2, int> globalRgn = grid.getGlobalRegion();
+    for (unsigned d=0; d<2; ++d)
+    {
+      if (localRgn.getLower(d) != globalRgn.getLower(d))
+        lowerZeroFluxOffset[d] = 0; // not owned by us, so ignore
+      if (localRgn.getUpper(d) != globalRgn.getUpper(d))
+        upperZeroFluxOffset[d] = 0; // not owned by us, so ignore
+    }      
   }
 
   Lucee::UpdaterStatus 
@@ -243,10 +277,18 @@ namespace Lucee
       {
         aCurr.setPtr(aCurrPtr, ix, iy);
         aNew.setPtr(aNewPtr, ix, iy);
-        nodalBasis->setIndex(ix, iy);
 
 // extract potential at this location
-        nodalBasis->extractFromField(phi, phiK);
+        if (hamilNodesShared)
+        {
+          nodalBasis->setIndex(ix, iy);        
+          nodalBasis->extractFromField(phi, phiK);
+        }
+        else
+        {
+          phi.setPtr(phiPtr, ix, iy);
+          for (unsigned k=0; k<nlocal; ++k) phiK[k] = phiPtr[k];
+        }
 
 // compute speeds
         calcSpeedsAtQuad(phiK, quadSpeeds);
@@ -295,10 +337,12 @@ namespace Lucee
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<2> seq(localRgn.deflate(dir));
 
-// lower and upper bounds of 1D slice. (We need to make sure that the
-// flux is computed for one edge outside the domain interior)
-      int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir)+1;
+// lower and upper bounds of 1D slice. (We need to make sure that flux
+// is computed for one edge outside the domain interior, accounting
+// for the fact that we may not want to compute fluxes from the
+// outermost edges [zero-flux BCs])
+      int sliceLower = localRgn.getLower(dir)+lowerZeroFluxOffset[dir];
+      int sliceUpper = localRgn.getUpper(dir)+1-upperZeroFluxOffset[dir];
 
       int idx[2], idxl[2];
       int ix, iy;
@@ -322,9 +366,19 @@ namespace Lucee
 // continous. However, the right cell on the upper domain boundary
 // does not have complete data due to the strange way in which the
 // nodal data is stored for continous FE fields. This is a very subtle
-// issue and eventually needs to be fixed.
-          nodalBasis->setIndex(idxl);
-          nodalBasis->extractFromField(phi, phiK);
+// issue and eventually needs to be fixed. (This is not a problem if
+// the Hamiltonian is in a DG field (even if it is continuous), which
+// should be the prefered way to do things now. AH: 8/25/2015)
+          if (hamilNodesShared)
+          {
+            nodalBasis->setIndex(idxl);
+            nodalBasis->extractFromField(phi, phiK);
+          }
+          else
+          {
+            phi.setPtr(phiPtr, idxl);
+            for (unsigned k=0; k<nlocal; ++k) phiK[k] = phiPtr[k];
+          }
 
 // now compute u.nhat on this edge (it is the upper edge of the cell
 // left of the edge)

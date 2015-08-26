@@ -1,0 +1,37 @@
+/** Moments of half-Maxwellian */
+assume(vt>0);
+assume(ux>0);
+gamma_expand : true; /* Gamma function should be expanded in Error function */
+
+/* Maxwellian and shifted Maxwellian */
+f(vx,vy,vz) := n/sqrt( (2*%pi*vt^2)^3 )*exp(-(vx^2+vy^2+vz^2)/(2*vt^2));
+fs(vx,vy,vz) := n/sqrt( (2*%pi*vt^2)^3 )*exp(-((vx-ux)^2+(vy-uy)^2+(vz-uz)^2)/(2*vt^2));
+
+/* Various moments */
+halfMom(w) := integrate(integrate(integrate(w*f(vx,vy,vz),vx,0,inf), vy,-inf,inf), vz,-inf,inf);
+halfShiftMom(w) := integrate(integrate(integrate(w*fs(vx,vy,vz),vx,0,inf), vy,-inf,inf), vz,-inf,inf);
+fullShiftMom(w) := integrate(integrate(integrate(w*fs(vx,vy,vz),vx,-inf,inf), vy,-inf,inf), vz,-inf,inf);
+
+/** Compute moments of evaporation */
+e_partFlux : halfMom(vx);
+e_momFlux : m*halfMom(vx^2);
+e_engFlux : 1/2*m*halfMom( (vx^2+vy^2+vz^2)*vx );
+
+/** Compute moments of vapor */
+v_partFlux_x : expand( subst([ux = us*sqrt(2)*vt], halfShiftMom(vx)) );
+
+v_momFlux_xx : expand( subst([ux = us*sqrt(2)*vt], halfShiftMom(vx^2)) );
+v_momFlux_xy : expand( subst([ux = us*sqrt(2)*vt], halfShiftMom(vx*vy)) );
+v_momFlux_xz : expand( subst([ux = us*sqrt(2)*vt], halfShiftMom(vx*vz)) );
+
+v_engFlux_x : expand( 1/2*subst([ux = us*sqrt(2)*vt], halfShiftMom((vx^2+vy^2+vz^2)*vx)) );
+
+/** Simplify somewhat */
+v_partFlux_x_s : expand( fullratsimp(subst([us=-vs], v_partFlux_x)));
+
+v_momFlux_xx_s : expand( fullratsimp(subst([us=-vs], v_momFlux_xx)));
+v_momFlux_xy_s : expand( fullratsimp(subst([us=-vs], v_momFlux_xy)));
+v_momFlux_xz_s : expand( fullratsimp(subst([us=-vs], v_momFlux_xz)));
+
+v_engFlux_x_s : expand( fullratsimp(subst([us=-vs], v_engFlux_x)));
+
