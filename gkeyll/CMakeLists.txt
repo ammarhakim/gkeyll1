@@ -143,10 +143,6 @@ set_target_properties(${LUCEE_STATIC} PROPERTIES
 target_link_libraries(${LUCEE_STATIC} ${lucee_LIBRARIES})
 target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS})
 
-#target_link_libraries(${LUCEE_STATIC} -Wl,-Bstatic)
-set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_START_STATIC ON)
-set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_END_STATIC ON)
-
 install(TARGETS ${LUCEE_STATIC}
   DESTINATION bin
   PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
