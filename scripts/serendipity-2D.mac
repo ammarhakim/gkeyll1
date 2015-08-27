@@ -164,6 +164,18 @@ calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
 		         return (iMat)
 );
 
+calcPerpStiffMatrix(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(integrate(
+                             4/dx2*diff(basis[i],x)*diff(basis[j],x) + 
+                             0/dy2*diff(basis[i],y)*diff(basis[j],y),
+                               x, -1,1), y, -1,1))),			    
+	                  stiff),
+	        return (stiff)
+);
+
 /** Ordinates for 2-node Guassian quadrature */
 gOrds2 : [
  [-1/sqrt(3), -1/sqrt(3)], 
