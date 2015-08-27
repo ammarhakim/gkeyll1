@@ -84,10 +84,6 @@ set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS}
   ${TxBase_STLIBS} ${Hdf5_STLIBS}
 )
 
-if (DEBUG_CMAKE)
-  message("nautilus/CMakeLists.txt: Adding ${TxBase_STLIBS} ${Hdf5_STLIBS} to FacetsSt_EXT_LIBS.")
-endif ()
-
 # explicitly add in blas framework if on apple
 if (APPLE)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} "-framework Accelerate")
@@ -146,23 +142,10 @@ set_target_properties(${LUCEE_STATIC} PROPERTIES
 )
 target_link_libraries(${LUCEE_STATIC} ${lucee_LIBRARIES})
 target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS})
-if (USE_STATIC_SYSLIBS)
-  message(STATUS "Using static system libraries: ${FC_SYS_STLIBS}")
-  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_STLIBS})
-# This gets the link line to end with -Wl,-Bstatic, so that subsequent
-# libraries linked by the Cray compiler wrappers are linked static.
-#  target_link_libraries(${LUCEE_STATIC} -Wl,-Bstatic)
-  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_START_STATIC ON)
-  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_END_STATIC ON)
-else ()
-  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_LIBS})
-  message(STATUS "Not using static system libraries: ${FC_SYS_LIBS}")
-  if (WIN32)
-  elseif (APPLE)
-  else ()
-    set_target_properties(${LUCEE_STATIC} PROPERTIES INSTALL_RPATH "\$ORIGIN:\$ORIGIN/../lib")
-  endif ()
-endif ()
+
+#target_link_libraries(${LUCEE_STATIC} -Wl,-Bstatic)
+set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_START_STATIC ON)
+set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_END_STATIC ON)
 
 install(TARGETS ${LUCEE_STATIC}
   DESTINATION bin
