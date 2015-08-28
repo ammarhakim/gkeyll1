@@ -34,6 +34,14 @@ namespace Lucee
       isValidState = true;
   }
 
+  LuaState::LuaState(const Lucee::LuaState& L)
+    : state(L.getState()), isOwner(false)
+  {
+    isValidState = false;
+    if (state)
+      isValidState = true;
+  }
+
   LuaState::~LuaState()
   {
     if (isOwner)
