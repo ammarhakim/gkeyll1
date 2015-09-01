@@ -172,7 +172,11 @@ namespace Lucee
  * node are the same.
  */
       bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
-        const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);      
+        const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);
+
+      double getSafeVx(int n, const Lucee::Matrix<double>& pc);
+      double getSafeVy(int n, const Lucee::Matrix<double>& pc);
+      double getSafeVz(int n, const Lucee::Matrix<double>& pc);
   };
 }
 

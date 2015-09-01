@@ -126,6 +126,7 @@ endif ()
 # System libraries that we can assume always present
 # Python needs these libraries on Hopper, but they have to be at the end.
 set(FC_SYS_LIBS)
+
 SciPrintVar(FC_SYS_LIBS)
 SciGetStaticLibs("${FC_SYS_LIBS}" FC_SYS_STLIBS)
 SciPrintVar(FC_SYS_STLIBS)

@@ -45,6 +45,22 @@ namespace Lucee
   // helper to index EM fields at nodes
   unsigned emidx(unsigned n, unsigned i) { return n*6+i; }
 
+  // helpers that returns 0 if not enough velocity space dimensions
+  template <unsigned CDIM, unsigned VDIM>
+  double
+  NodalVlasovUpdater<CDIM,VDIM>::getSafeVx(int n, const Lucee::Matrix<double>& pc)
+  { return pc(n, CDIM+IX); }
+
+  template <unsigned CDIM, unsigned VDIM>  
+  double
+  NodalVlasovUpdater<CDIM,VDIM>::getSafeVy(int n, const Lucee::Matrix<double>& pc)
+  { return VDIM>1 ? pc(n, CDIM+IY) : 0; }
+
+  template <unsigned CDIM, unsigned VDIM>
+  double
+  NodalVlasovUpdater<CDIM,VDIM>::getSafeVz(int n, const Lucee::Matrix<double>& pc)
+  { return VDIM>2 ? pc(n, CDIM+IZ) : 0; }
+
   template <unsigned CDIM, unsigned VDIM>
   bool
   NodalVlasovUpdater<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
@@ -275,7 +291,7 @@ namespace Lucee
       int sliceUpper = localRgn.getUpper(dir)+1;
 
       int idx[NDIM], idxl[NDIM];
-      double vCoord[VDIM];
+      double vCoord[3];
 // loop over each 1D slice
       while (seq.step())
       {
@@ -313,8 +329,10 @@ namespace Lucee
             unsigned ln = lowerNodeNums[dir].nums[s];
             double localQl = qPtrl[un];
             double localQ = qPtr[ln];
-            for (unsigned vd=0; vd<VDIM; ++vd)
-              vCoord[vd] = phaseNodeCoords(ln, CDIM+vd); // v coordinate of node
+
+            vCoord[0] = getSafeVx(ln, phaseNodeCoords);
+            vCoord[1] = getSafeVy(ln, phaseNodeCoords);
+            vCoord[2] = getSafeVz(ln, phaseNodeCoords);
 
 // NOTE: I wonder if the calcFlux method signature should be more
 // closely aligned to numercialFlux method below? Essentially, the
@@ -325,11 +343,6 @@ namespace Lucee
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }
 
-          std::cout << "** Dir: " << dir << " idx: " << idxl[0] << " " << idx[1] << std::endl;
-          for (unsigned s=0; s<nface; ++s)
-            std::cout << flux[s] << " ";
-          std::cout << std::endl;
-            
 // update left cell connected to edge with flux on face
           qNew.setPtr(qNewPtrl, idxl);
           matVec(-1.0, upperLift[dir].m, &flux[0], 1.0, &qNewPtrl[0]);
@@ -395,7 +408,7 @@ namespace Lucee
     { // VX flux
       for (unsigned n=0; n<nlocal; ++n)
       {
-        double vy = pc(n,CDIM+IY), vz = pc(n,CDIM+IZ);
+        double vy = getSafeVy(n,pc), vz = getSafeVz(n,pc);
         double Ex = EM[emidx(phaseConfMap[n],IEX)];
         double Bz = EM[emidx(phaseConfMap[n],IBZ)];
         double By = EM[emidx(phaseConfMap[n],IBY)];
@@ -406,7 +419,7 @@ namespace Lucee
     { // VY flux
       for (unsigned n=0; n<nlocal; ++n)
       {
-        double vx = pc(n,CDIM+IX), vz = pc(n,CDIM+IZ);
+        double vx = getSafeVx(n,pc), vz = getSafeVz(n,pc);
         double Ey = EM[emidx(phaseConfMap[n],IEY)];
         double Bx = EM[emidx(phaseConfMap[n],IBX)];
         double Bz = EM[emidx(phaseConfMap[n],IBZ)];
@@ -417,7 +430,7 @@ namespace Lucee
     { // VZ flux
       for (unsigned n=0; n<nlocal; ++n)
       {
-        double vx = pc(n,CDIM+IX), vy = pc(n,CDIM+IY);
+        double vx = getSafeVx(n,pc), vy = getSafeVy(n,pc);
         double Ez = EM[emidx(phaseConfMap[n],IEY)];
         double By = EM[emidx(phaseConfMap[n],IBY)];
         double Bx = EM[emidx(phaseConfMap[n],IBX)];
@@ -445,13 +458,13 @@ namespace Lucee
       double ar = qbym*(emr[IEX] + vy*emr[IBZ]-vz*emr[IBY]);
       maxs = std::max(std::fabs(al),std::fabs(ar));
       flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
-      std::cout << "Dir: " << dir
-                << " qnym " << qbym 
-                << " Ex = (" << eml[IEX] << ", " << emr[IEX] << ")"
-                << " By = (" << eml[IBY] << ", " << emr[IBY] << ")"
-                << " Bz = (" << eml[IBZ] << ", " << emr[IBZ] << ")"
-                << " a = (" << al << "," << ar << ")"
-                << " F(" << distfl << "," << distfr << ") =" << flux << std::endl;
+      // std::cout << "Dir: " << dir
+      //           << " qnym " << qbym 
+      //           << " Ex = (" << eml[IEX] << ", " << emr[IEX] << ")"
+      //           << " By = (" << eml[IBY] << ", " << emr[IBY] << ")"
+      //           << " Bz = (" << eml[IBZ] << ", " << emr[IBZ] << ")"
+      //           << " a = (" << al << "," << ar << ")"
+      //           << " F(" << distfl << "," << distfr << ") =" << flux << std::endl;      
     }
     else if (dir==(CDIM+1))
     { // VY flux
