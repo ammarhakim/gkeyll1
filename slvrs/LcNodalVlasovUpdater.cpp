@@ -285,6 +285,9 @@ namespace Lucee
 // contributions from surface integrals
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
+// create sequencer to loop over *each* 1D slice in 'dir' direction
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));      
+
 // lower and upper bounds of 1D slice. (We need to make sure that flux
 // is computed for one edge outside domain interior)
       int sliceLower = localRgn.getLower(dir);
@@ -458,13 +461,6 @@ namespace Lucee
       double ar = qbym*(emr[IEX] + vy*emr[IBZ]-vz*emr[IBY]);
       maxs = std::max(std::fabs(al),std::fabs(ar));
       flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
-      // std::cout << "Dir: " << dir
-      //           << " qnym " << qbym 
-      //           << " Ex = (" << eml[IEX] << ", " << emr[IEX] << ")"
-      //           << " By = (" << eml[IBY] << ", " << emr[IBY] << ")"
-      //           << " Bz = (" << eml[IBZ] << ", " << emr[IBZ] << ")"
-      //           << " a = (" << al << "," << ar << ")"
-      //           << " F(" << distfl << "," << distfr << ") =" << flux << std::endl;      
     }
     else if (dir==(CDIM+1))
     { // VY flux
