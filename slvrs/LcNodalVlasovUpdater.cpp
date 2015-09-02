@@ -33,7 +33,7 @@ namespace Lucee
 // makes indexing a little more sane
   static const unsigned IX = 0;
   static const unsigned IY = 1;
-  static const unsigned IZ = 3;
+  static const unsigned IZ = 2;
 
   static const unsigned IEX = 0;
   static const unsigned IEY = 1;
