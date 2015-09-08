@@ -83,7 +83,6 @@ namespace Lucee
     lowerMatLucee.resize(3);
     upperMatLucee.resize(3);
 
-    iMat.resize(3);
     lowerMat.resize(3);
     upperMat.resize(3);
 
@@ -93,7 +92,6 @@ namespace Lucee
       lowerMatLucee[dir] = Lucee::Matrix<double>(nlocal, nlocal);
       upperMatLucee[dir] = Lucee::Matrix<double>(nlocal, nlocal);
 
-      iMat[dir] = Eigen::MatrixXd(nlocal, nlocal);
       lowerMat[dir] = Eigen::MatrixXd(nlocal, nlocal);
       upperMat[dir] = Eigen::MatrixXd(nlocal, nlocal);
     }
@@ -108,7 +106,6 @@ namespace Lucee
     nodalBasis->getDiffusionMatrices(iMatLucee, lowerMatLucee, upperMatLucee);
     for (int dir = 0; dir < 3; dir ++)
     {
-      copyLuceeToEigen(iMatLucee[dir], iMat[dir]);
       copyLuceeToEigen(lowerMatLucee[dir], lowerMat[dir]);
       copyLuceeToEigen(upperMatLucee[dir], upperMat[dir]);
     }
@@ -124,7 +121,6 @@ namespace Lucee
 
     for (int dir = 0; dir < 3; dir++)
     {
-      iMat[dir] = massMatrixInv*iMat[dir];
       lowerMat[dir] = massMatrixInv*lowerMat[dir];
       upperMat[dir] = massMatrixInv*upperMat[dir];
     }
