@@ -1,7 +1,9 @@
 /**
  * @file	LcSerendipityElement.h
  *
- * @brief Serendipity element implemented so far for 2 and 3 dimensions.
+ * @brief Serendipity element for DG solvers in several dimensions and orders.
+ * Additional code may be required for finite element solves.
+ * Should be able to do any dimension and order as long as nodes are specified in a list.
  */
 
 #ifndef LC_SERENDIPITY_ELEMENT_H
@@ -211,6 +213,14 @@ namespace Lucee
  * @param DNjDNk On output, stiffness matrix of element.
  */
       virtual void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
+
+/**
+ * Get perpendicular stiffness matrix (grad_perp.Nj \dot grad_perp.Nk) for this reference
+ * element. The output matrix should be pre-allocated.
+ *
+ * @param DNjDNk On output, stiffness matrix of element.
+ */
+      virtual void getPerpStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
  * Get partial stiffness matrix (grad.Nj Nk) for this reference
@@ -446,6 +456,8 @@ namespace Lucee
       Eigen::MatrixXd refMass;
 /** Stiffness matrix in reference coordinates */
       Eigen::MatrixXd refStiffness;
+/** Perpendicular stiffness matrix in reference coordinates */
+      Eigen::MatrixXd refPerpStiffness;
 /** Vector of moment matrices indexed by moment value p  */
       std::vector<Eigen::MatrixXd> momMatrix;
 /** List of matrices for current cell */
@@ -529,7 +541,12 @@ namespace Lucee
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      void computeStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
+      void computeStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);
+
+/**
+*     Compute the perpendicular stiffness matrix on the reference element.
+*/
+      void computePerpStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);   
 
 /**
  *     Compute the grad stiffness matrix in direction dir on the reference element.

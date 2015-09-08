@@ -1,7 +1,9 @@
 /**
  * @file	LcSerendipityElement.cpp
  *
- * @brief Serendipity element implemented so far for 2 and 3 dimensions.
+ * @brief Serendipity element for DG solvers in several dimensions and orders.
+ * Additional code may be required for finite element solves.
+ * Should be able to do any dimension and order as long as nodes are specified in a list.
  */
 
 // config stuff
@@ -638,6 +640,15 @@ namespace Lucee
     for (int i = 0; i < refStiffness.rows(); i++)
       for (int j = 0; j < refStiffness.cols(); j++)
         DNjDNk(i, j) = refStiffness(i, j);
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::getPerpStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
+  {
+    for (int i = 0; i < refPerpStiffness.rows(); i++)
+      for (int j = 0; j < refPerpStiffness.cols(); j++)
+        DNjDNk(i, j) = refPerpStiffness(i, j);
   }
 
   template <unsigned NDIM>
@@ -1536,7 +1547,8 @@ namespace Lucee
     }
 
     computeMass(refMass);
-    computeStiffness(functionDEvaluations,refStiffness);
+    computeStiffness(functionDEvaluations, refStiffness);
+    computePerpStiffness(functionDEvaluations, refPerpStiffness);
 
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
@@ -1549,6 +1561,7 @@ namespace Lucee
     {
       refMass   *= 0.5*dq[dimIndex];
       refStiffness *= 0.5*dq[dimIndex];
+      refPerpStiffness *= 0.5*dq[dimIndex];
 
       // Scale face-mass matrices
       for (int matrixIndex = 0; matrixIndex < NDIM; matrixIndex++)
@@ -1573,6 +1586,7 @@ namespace Lucee
 
     refMass          = Eigen::MatrixXd::Zero(numNodes, numNodes);
     refStiffness     = Eigen::MatrixXd::Zero(numNodes, numNodes);
+    refPerpStiffness = Eigen::MatrixXd::Zero(numNodes, numNodes);
 
     refFaceMassLower = std::vector<Eigen::MatrixXd>(NDIM);
     refFaceMassUpper = std::vector<Eigen::MatrixXd>(NDIM);
@@ -3379,7 +3393,34 @@ namespace Lucee
         // Loop over 3d gauss points to evaluate integral using gaussian quadrature
         for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
           for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-            integrationResult += gaussNodeList(gaussIndex,NDIM)*functionDerivative(gaussIndex, kIndex, dimIndex)*functionDerivative(gaussIndex, mIndex, dimIndex)*4.0/dq2[dimIndex];
+            integrationResult += gaussNodeList(gaussIndex,NDIM)*
+              functionDerivative(gaussIndex, kIndex, dimIndex)*
+              functionDerivative(gaussIndex, mIndex, dimIndex)*4.0/dq2[dimIndex];
+        
+        resultMatrix(kIndex,mIndex) = integrationResult;
+      }
+    }
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::computePerpStiffness(const blitz::Array<double, 3>& functionDerivative,
+    Eigen::MatrixXd& resultMatrix)
+  {
+    for (int kIndex = 0; kIndex < resultMatrix.rows(); kIndex++)
+    {
+      for (int mIndex = 0; mIndex < resultMatrix.cols(); mIndex++)
+      {
+        // Reset integration result
+        double integrationResult = 0.0;
+        
+        // Loop over volume gauss points to evaluate integral using gaussian quadrature
+        for (int gaussIndex = 0; gaussIndex < gaussNodeList.rows(); gaussIndex++)
+          // For now, just assume that perp directions are all but the last direction
+          for (int dimIndex = 0; dimIndex < NDIM-1; dimIndex++)
+            integrationResult += gaussNodeList(gaussIndex,NDIM)*
+              functionDerivative(gaussIndex, kIndex, dimIndex)*
+              functionDerivative(gaussIndex, mIndex, dimIndex)*4.0/dq2[dimIndex];
         
         resultMatrix(kIndex,mIndex) = integrationResult;
       }

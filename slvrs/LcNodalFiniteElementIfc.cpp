@@ -196,6 +196,13 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
+  NodalFiniteElementIfc<NDIM>::getPerpStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getPerpStiffnessMatrix: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
   NodalFiniteElementIfc<NDIM>::getGradStiffnessMatrix(
     unsigned dir, Lucee::Matrix<double>& DNjNk) const
   {
