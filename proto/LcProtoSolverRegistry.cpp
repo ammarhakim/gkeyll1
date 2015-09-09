@@ -37,6 +37,7 @@
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
+#include <LcIntegrateFieldProduct.h>
 #include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
@@ -148,6 +149,10 @@ namespace Lucee
       .append<Lucee::IntegrateNodalField<1> >()
       .append<Lucee::IntegrateNodalField<2> >()
       .append<Lucee::IntegrateNodalField<3> >()
+
+      .append<Lucee::IntegrateFieldProduct<1> >()
+      .append<Lucee::IntegrateFieldProduct<2> >()
+      .append<Lucee::IntegrateFieldProduct<3> >()
 
       .append<Lucee::MaxwellTm2DUpdater>()
       .append<Lucee::ModalDg1DDiffusionUpdater>()

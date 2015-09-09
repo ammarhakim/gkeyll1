@@ -47,6 +47,7 @@ set (proto_SOURCES
   LcIntegrateFieldAlongLine.cpp
   LcIntegrateGeneralField.cpp
   LcIntegrateNodalField.cpp
+  LcIntegrateFieldProduct.cpp
   LcLinEmGke1dHamilPertUpdater.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
