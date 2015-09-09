@@ -144,6 +144,7 @@ namespace Lucee
   IntegrateFieldProduct<NDIM>::declareTypes()
   {
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
