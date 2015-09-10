@@ -43,7 +43,10 @@ namespace Lucee
   static const unsigned IBZ = 5;
 
   // helper to index EM fields at nodes
-  unsigned emidx(unsigned n, unsigned i) { return n*6+i; }
+  unsigned emidx(unsigned n, unsigned i)
+  {
+    return n*8+i; // 8 as last two are correction potentials
+  }
 
   // helpers that returns 0 if not enough velocity space dimensions
   template <unsigned CDIM, unsigned VDIM>
@@ -272,7 +275,7 @@ namespace Lucee
       EM.setPtr(emPtr, idx); // only CDIM indices will be used
       qNew.setPtr(qNewPtr, idx);
 
-      phaseBasis->setIndex(idx);      
+      phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
       for (unsigned dir=0; dir<NDIM; ++dir)
@@ -286,7 +289,7 @@ namespace Lucee
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
 // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));      
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice. (We need to make sure that flux
 // is computed for one edge outside domain interior)
@@ -330,8 +333,6 @@ namespace Lucee
           {
             unsigned un = upperNodeNums[dir].nums[s];
             unsigned ln = lowerNodeNums[dir].nums[s];
-            double localQl = qPtrl[un];
-            double localQ = qPtr[ln];
 
             vCoord[0] = getSafeVx(ln, phaseNodeCoords);
             vCoord[1] = getSafeVy(ln, phaseNodeCoords);
@@ -341,7 +342,7 @@ namespace Lucee
 // closely aligned to numercialFlux method below? Essentially, the
 // loop over nodes here is in the update() method, while the loop over
 // nodes is in the calcFlux() method above. (Ammar Hakim)
-            double maxs = numericalFlux(dir, vCoord, localQl, localQ,
+            double maxs = numericalFlux(dir, vCoord, qPtrl[un], qPtr[ln],
               &emPtrl[emidx(phaseConfMap[un],IEX)] , &emPtr[emidx(phaseConfMap[ln],IEX)], flux[s]);
             cfla = Lucee::max3(cfla, dtdx*maxs, -dtdx*maxs);
           }
