@@ -166,7 +166,7 @@ target_link_libraries(lcparticleideas)
 
 add_executable(lcmatvec lcmatvec.cxx)
 target_link_libraries(lcmatvec
-  lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_STLIBS} ${Hdf5_Mpi_LIBRARIES})
+  lcdatastructs lcgrids lclib lcloki ${Lua_STLIBS} ${Gsl_STLIBS} ${EXTRA_LIBS} ${Hdf5_Mpi_LIBRARIES})
 
 if (ENABLE_PARALLEL)
   add_executable(lcparsum lcparsum.cxx)
