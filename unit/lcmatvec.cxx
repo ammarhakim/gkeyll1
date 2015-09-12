@@ -100,12 +100,11 @@ matVec4(double m, int M, int N, const double *mat, const double* vec, double v, 
 int
 doMatVec(unsigned N, int p, int nloop, unsigned mvtype)
 {
-  int lower[2] = {0, 0};
-  int upper[2];
-  upper[0] = upper[1] = N;
-  Lucee::Region<2, int> rgn(lower, upper);
-  Lucee::Field<2, double> elcFieldIn(rgn, p, 1.0);
-  Lucee::Field<2, double> elcFieldOut(rgn, p, 1.0);
+  int lower[1] = {0};
+  int upper[1]; upper[0] = N;
+  Lucee::Region<1, int> rgn(lower, upper);
+  Lucee::Field<1, double> elcFieldIn(rgn, p, 1.0);
+  Lucee::Field<1, double> elcFieldOut(rgn, p, 1.0);
   Lucee::ConstFieldPtr<double> fInPtr = elcFieldIn.createConstPtr();
   Lucee::FieldPtr<double> fOutPtr = elcFieldOut.createPtr();
 
@@ -127,26 +126,82 @@ doMatVec(unsigned N, int p, int nloop, unsigned mvtype)
   for (unsigned nl=0; nl<nloop; ++nl)
   {
     for (unsigned i=0; i<N; ++i)
-      for (unsigned j=0; j<N; ++j)
-      {
-        elcFieldIn.setPtr(fInPtr, i, j);
-        elcFieldOut.setPtr(fOutPtr, i, j);
+    {
+      elcFieldIn.setPtr(fInPtr, i);
+      elcFieldOut.setPtr(fOutPtr, i);
 // do matrix/vector multiply
-        if (mvtype==1)
-          matVec(1.0, m, &fInPtr[0], 0.0, &fOutPtr[0]);
-        else if (mvtype==2)
-          matVec2(1.0, p, p, masv, &fInPtr[0], 0.0, &fOutPtr[0]);
-        else if (mvtype==3)
-          matVec3(1.0, p, p, masv, &fInPtr[0], 0.0, &fOutPtr[0]);
-        else if (mvtype==4)
-          matVec4(1.0, p, p, &m.first(), &fInPtr[0], 0.0, &fOutPtr[0]);
-        else if (mvtype==5)
-        {
-          vecOutEig = matEig*vecInEig;
-          for (unsigned i=0; i<p; ++i) fOutPtr[i] = vecOutEig[p];
-        }
+      if (mvtype==1)
+        matVec(1.0, m, &fInPtr[0], 0.0, &fOutPtr[0]);
+      else if (mvtype==2)
+        matVec2(1.0, p, p, masv, &fInPtr[0], 0.0, &fOutPtr[0]);
+      else if (mvtype==3)
+        matVec3(1.0, p, p, masv, &fInPtr[0], 0.0, &fOutPtr[0]);
+      else if (mvtype==4)
+        matVec4(1.0, p, p, &m.first(), &fInPtr[0], 0.0, &fOutPtr[0]);
+      else if (mvtype==5)
+      {
+        vecOutEig = matEig*vecInEig;
+        for (unsigned i=0; i<p; ++i) fOutPtr[i] = vecOutEig[p];
       }
+    }
   }
+
+  unsigned nops = p*p; // number of operations
+  return nops;
+}
+
+int
+doMatVecAsMatMat(unsigned N, int p, int nloop)
+{
+  int lower[1] = {0};
+  int upper[1]; upper[0] = N;
+  Lucee::Region<1, int> rgn(lower, upper);
+  Lucee::Field<1, double> elcFieldIn(rgn, p, 1.0);
+  Lucee::Field<1, double> elcFieldOut(rgn, p, 1.0);
+  Lucee::ConstFieldPtr<double> fInPtr = elcFieldIn.createConstPtr();
+  Lucee::FieldPtr<double> fOutPtr = elcFieldOut.createPtr();
+
+// allocate a matrix
+  Lucee::Matrix<double> m(p,p);
+  m = 1.0;
+
+  std::vector<double> masv(p*p);
+  for (unsigned i=0; i<p; ++i)
+    for (unsigned j=0; j<p; ++j)
+      masv[p*i+j] = 1.0;
+
+  Eigen::MatrixXd matEig(p,p);
+  for (unsigned i=0; i<p; ++i)
+    for (unsigned j=0; j<p; ++j)
+      matEig(i,j) = 1.0;
+  unsigned chunkSize = p;
+
+  int nchunks = N/chunkSize, nrem = N % chunkSize;
+  std::cout << "nchunks " << nchunks << " nrem " << nrem << std::endl;
+  Eigen::MatrixXd fchunk(p,chunkSize), frem(nrem,nrem);
+  Eigen::MatrixXd fchunkOut(p,chunkSize), fremOut(nrem,nrem);
+
+  unsigned nmul = 0;  
+  for (unsigned nl=0; nl<nloop; ++nl)
+  {
+    for (unsigned c=0; c<nchunks; ++c)
+    {
+      //std::cout << c*chunkSize << std::endl;      
+      for (unsigned j=0; j<chunkSize; ++j)
+      {
+        for (unsigned i=0; i<p; ++i)
+          fchunk(i,j) = elcFieldIn(c*chunkSize+j,i);
+      }
+// multiply to compute vol integral
+      fchunkOut = matEig*fchunk;
+      nmul = nmul+1;
+
+      for (unsigned j=0; j<chunkSize; ++j)
+        for (unsigned i=0; i<p; ++i)
+          elcFieldOut(c*chunkSize+j,i) = fchunkOut(i,j);
+    }
+  }
+  std::cout << "Num of mat-mat muls " << nmul/nloop << std::endl;  
 
   unsigned nops = p*p; // number of operations
   return nops;
@@ -194,127 +249,96 @@ main(int argc, char **argv)
   std::cout << "Number of failed tests (should be 0) " << nFail << std::endl;
   clock_t start, end;
   
-  start = clock();
-  nops = doMatVec(50, 4, 5000, 1);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=4 [1]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 4, 10000, 1);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=4 [Simple]"  << endl;
 
-  start = clock();
-  nops = doMatVec(50, 8, 5000, 1);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=8 [1]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 8, 10000, 1);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=8 [Simple]"  << endl;
 
-  start = clock();
-  nops = doMatVec(50, 27, 1000, 1);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=27 [1]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 27, 10000, 1);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=27 [Simple]"  << endl;
 
-  start = clock();
-  nops = doMatVec(50, 100, 50, 1);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=100 [1]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 100, 1000, 1);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=100 [Simple]"  << endl;
 
-  start = clock();
-  nops = doMatVec(50, 200, 50, 1);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=200 [1]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 200, 1000, 1);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=200 [Simple]"  << endl;
 
   // std::cout << "--------" << std::endl;
   // start = clock();
-  // nops = doMatVec(50, 4, 5000, 2);
+  // nops = doMatVec(50, 4, 10000, 3);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=4 [2]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=4 [++Indexing]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 8, 5000, 2);
+  // nops = doMatVec(50, 8, 10000, 3);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=8 [2]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=8 [++Indexing]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 27, 1000, 2);
+  // nops = doMatVec(50, 27, 10000, 3);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=27 [2]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=27 [++Indexing]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 100, 50, 2);
+  // nops = doMatVec(50, 100, 1000, 3);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=100 [2]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=100 [++Indexing]"  << endl;
 
-  std::cout << "--------" << std::endl;
-  start = clock();
-  nops = doMatVec(50, 4, 5000, 3);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=4 [3]"  << endl;
+  // start = clock();
+  // nops = doMatVec(50, 200, 1000, 3);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=200 [++Indexing]"  << endl;  
 
-  start = clock();
-  nops = doMatVec(50, 8, 5000, 3);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=8 [3]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 27, 1000, 3);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=27 [3]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 100, 50, 3);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=100 [3]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 200, 50, 3);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=200 [3]"  << endl;  
-
-  std::cout << "--------" << std::endl;
-  start = clock();
-  nops = doMatVec(50, 4, 5000, 4);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=4 [4]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 8, 5000, 4);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=8 [4]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 27, 1000, 4);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=27 [4]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 100, 50, 4);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=100 [4]"  << endl;
-
-  start = clock();
-  nops = doMatVec(50, 200, 50, 4);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=200 [4]"  << endl;
-  
   // std::cout << "--------" << std::endl;
   // start = clock();
-  // nops = doMatVec(50, 4, 5000, 5);
+  // nops = doMatVec(50, 4, 10000, 4);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=4 [5]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=4 [BLAS]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 8, 5000, 5);
+  // nops = doMatVec(50, 8, 10000, 4);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=8 [5]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=8 [BLAS]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 27, 1000, 5);
+  // nops = doMatVec(50, 27, 10000, 4);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=27 [5]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=27 [BLAS]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 100, 50, 5);
+  // nops = doMatVec(50, 100, 1000, 4);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=100 [5]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=100 [BLAS]"  << endl;
 
   // start = clock();
-  // nops = doMatVec(50, 200, 50, 5);
+  // nops = doMatVec(50, 200, 1000, 4);
   // end = clock();
-  // cout << right << fixed << difftime(end,start)  << " p=200 [5]"  << endl;
+  // cout << right << fixed << difftime(end,start)  << " p=200 [BLAS]"  << endl;
+
+  start = clock();
+  nops = doMatVec(1200, 100, 1000, 4);
+  end = clock();
+  cout << right << fixed << difftime(end,start)  << " p=100 [BLAS]"  << endl;  
+
+  std::cout << "--------" << std::endl;
+  // start = clock();
+  // nops = doMatVecAsMatMat(50, 4, 10000);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=4 [BLAS: gemm]"  << endl;
+
+  start = clock();
+  nops = doMatVecAsMatMat(1200, 100, 1000);
+  end = clock();
+  cout << right << fixed << difftime(end,start)  << " p=100 [BLAS: gemm]"  << endl;
 }
