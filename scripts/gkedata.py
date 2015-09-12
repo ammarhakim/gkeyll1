@@ -1,4 +1,5 @@
-r"""Read HDF5 files produced by Gkeyll"""
+r"""Read HDF files produced by Gkeyll
+"""
 
 import numpy
 import tables
@@ -6,10 +7,10 @@ import os
 import exceptions
 
 class GkeData:
-    r"""GkeData(base: string, frame : int) -> GkeData
+    r"""GkeData(fName: string) -> GkeData
 
     Provides an interface to read data stored in a Gkeyll produced
-    HDF5 file
+    HDF5 file names 'fName'.
     """
 
     def __init__(self, fName):
@@ -24,6 +25,7 @@ class GkeData:
         self.lowerBounds = grid._v_attrs.vsLowerBounds
         self.upperBounds = grid._v_attrs.vsUpperBounds
         self.cells = grid._v_attrs.vsNumCells
+        self.ndim = len(self.cells)
 
         # read in time data if it exists
         try:
@@ -49,12 +51,12 @@ class GkeHistoryData:
     frame can be specified and the history will be loaded starting
     from that frame.
 
-    Once the class is constructed the time mesh can be accessed using
-    the ``history`` field and the times when these were taken using
-    the ``time`` field.
+    Once the class is constructed the time series can be accessed
+    using the ``history`` field and the times when these were taken
+    using the ``time`` field.
     """
 
-    def __init__(self, base, start=1):
+    def __init__(self, base, start=0):
         self.base = base
 
         # read in first history file
@@ -75,3 +77,4 @@ class GkeHistoryData:
             self.time = numpy.append(self.time, fh.root.DataStruct.timeMesh.read())
             currFrame = currFrame + 1
             fh.close()
+
