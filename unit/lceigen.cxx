@@ -186,12 +186,6 @@ blasMatVec(int shapea[2], double *a, double *x, double *y)
   dgemv_(TRANS, &M, &N, &alpha, a, &LDA, x, &INCX, &beta, y, &INCY);
 }
 
-Eigen::MatrixXd
-eigenMatMat(const Eigen::MatrixXd& a, const Eigen::MatrixXd& b)
-{
-  return a*b;
-}
-
 int
 test_mat_mat_vs_mat_vec(unsigned N, unsigned ntries)
 {
@@ -229,11 +223,27 @@ test_mat_mat_vs_mat_vec(unsigned N, unsigned ntries)
   end_t = clock();
   double tMV = (double) (end_t-start_t)/CLOCKS_PER_SEC;
 
+  Eigen::MatrixXd ea(N,N), eb(N,N), ec(N,N);
+  for (unsigned i=0; i<N; ++i)
+    for (unsigned j=0; j<N; ++j)
+    {
+      ea(i,j) = a[N*j+i];
+      eb(i,j) = b[N*j+i];
+    }
+
+  start_t = clock();
+// time mat-mat  
+  for (unsigned n=0; n<ntries; ++n)
+    ec = ea*eb;
+  end_t = clock();
+  double tEMM = (double) (end_t-start_t)/CLOCKS_PER_SEC;  
+
   // std::cout << "Timing for (N, ntries) = (" << N << ", " << ntries << ") " << std::endl;
-  // std::cout << "   Mat-Mat --> " << tMM << std::endl;
-  // std::cout << "   Mat-Vec --> " << tMV << std::endl;
+  // std::cout << "   Mat-Mat   --> " << tMM << std::endl;
+  // std::cout << "   Mat-Vec   --> " << tMV << std::endl;
+  // std::cout << "   E-Mat-Mat --> " << tEMM << std::endl;
   // std::cout << std::endl;
-  std::cout << N << " " << tMM << " " << tMV << std::endl;
+  std::cout << N << " " << tMM << " " << tMV << " " << tEMM << std::endl;
 }
 
 int
