@@ -415,7 +415,7 @@ namespace Lucee
 /** Grid spacing squared in various dimensions */
       double dq2[NDIM];
 /** Local-to-global mapping for polyOrder = 1 in 2d */
-      Lucee::RowMajorIndexer<2> idxr;
+      Lucee::RowMajorIndexer<NDIM> idxr;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
       std::vector<blitz::Array<double,NDIM> > functionVector;
