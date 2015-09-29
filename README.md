@@ -15,3 +15,11 @@ structures and functions. This gives great flexibility as a powerful
 general-purpose language is available for creating simulations.
 
 For extensive documentation of various problems performed with Gkeyll, please see http://ammar-hakim.org/sj/.
+
+# Getting and Installing Gkeyll
+
+If you are working at PPPL, University of New Hampshire, Virginia Tech or have an account on NERSC or the University of Texas Stampede cluster, you do not need to build Gkeyll. In fact, you should not build your own copy. Gkeyll is installed at these locations and you can use the pre-built versions.
+
+If you must build Gkeyll, please remember that the process may be complicated, although in principle the whole system can be built with a *single command*.
+
+Gkeyll is open source. You need to create a Bitbucket account and then you can clone the repo on you local machine. We use the Mercurial version control system, and you need to download and install that before you clone Gkeyll.
