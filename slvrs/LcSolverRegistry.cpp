@@ -101,9 +101,10 @@
 #include <loki/Singleton.h>
 
 #ifdef HAVE_PETSC
-# include <LcElectrostaticContPhiUpdater.h>
-# include <LcFemPoissonStructUpdater.h>
 # include <LcElectromagneticContAUpdater.h>
+# include <LcElectrostaticContPhiUpdater.h>
+# include <LcFemGKPoissonStructUpdater.h>
+# include <LcFemPoissonStructUpdater.h>
 #endif
 
 namespace Lucee
@@ -198,6 +199,9 @@ namespace Lucee
       .append<Lucee::FemPoissonStructUpdater<1> >()
       .append<Lucee::FemPoissonStructUpdater<2> >()
       .append<Lucee::FemPoissonStructUpdater<3> >()
+
+      .append<Lucee::FemGKPoissonStructUpdater<2> >()
+      .append<Lucee::FemGKPoissonStructUpdater<3> >()
 
       .append<Lucee::ElectrostaticContPhiUpdater>()
 
