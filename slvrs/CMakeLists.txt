@@ -125,9 +125,10 @@ set(lcslvrs_SOURCES
 
 if (PETSC_FOUND)
   set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
-    LcFemPoissonStructUpdater.cpp
     LcElectromagneticContAUpdater.cpp
     LcElectrostaticContPhiUpdater.cpp
+    LcFemGKPoissonStructUpdater.cpp 
+    LcFemPoissonStructUpdater.cpp
   )
 endif (PETSC_FOUND)
 
