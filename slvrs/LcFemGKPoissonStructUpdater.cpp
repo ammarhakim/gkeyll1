@@ -240,7 +240,7 @@ namespace Lucee
       seq.fillWithIndex(idx);
       nodalBasis->setIndex(idx);
 
-      nodalBasis->getStiffnessMatrix(localStiff);
+      nodalBasis->getPerpStiffnessMatrix(localStiff);
       nodalBasis->getMassMatrix(localMass);
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
@@ -348,7 +348,7 @@ namespace Lucee
 // this flag is needed to ensure we don't update the stiffness matrix twice
           bool isIdxLocal = defRgnUp.isInside(idx);
 
-          nodalBasis->getStiffnessMatrix(localStiff);
+          nodalBasis->getPerpStiffnessMatrix(localStiff);
           nodalBasis->getMassMatrix(localMass);          
 // construct arrays for passing into Petsc
           for (unsigned k=0; k<nlocal; ++k)
