@@ -87,6 +87,11 @@ namespace Lucee
     if (tbl.hasBool("solutionNodesShared"))
       solNodesShared = tbl.getBool("solutionNodesShared");
 
+// check if we are actually solving GK Poisson equations
+    isGkPoisson = false;
+    if (tbl.hasBool("isGyroKineticPoisson"))
+      isGkPoisson = tbl.getBool("isGyroKineticPoisson");
+
     for (unsigned i=0; i<NDIM; ++i) 
       periodicFlgs[i] = false;
 
@@ -241,7 +246,10 @@ namespace Lucee
       seq.fillWithIndex(idx);
       nodalBasis->setIndex(idx);
 
-      nodalBasis->getStiffnessMatrix(localStiff);
+      if (isGkPoisson)
+        nodalBasis->getPerpStiffnessMatrix(localStiff);
+      else
+        nodalBasis->getStiffnessMatrix(localStiff);
       nodalBasis->getMassMatrix(localMass);
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
@@ -349,7 +357,10 @@ namespace Lucee
 // this flag is needed to ensure we don't update the stiffness matrix twice
           bool isIdxLocal = defRgnUp.isInside(idx);
 
-          nodalBasis->getStiffnessMatrix(localStiff);
+          if (isGkPoisson)
+            nodalBasis->getPerpStiffnessMatrix(localStiff);
+          else
+            nodalBasis->getStiffnessMatrix(localStiff);
           nodalBasis->getMassMatrix(localMass);          
 // construct arrays for passing into Petsc
           for (unsigned k=0; k<nlocal; ++k)
