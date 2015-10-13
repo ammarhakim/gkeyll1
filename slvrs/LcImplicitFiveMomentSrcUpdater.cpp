@@ -115,6 +115,18 @@ namespace Lucee
     if (tbl.hasNumber("mgnErrorDampFactor"))
       damp_m = tbl.getNumber("mgnErrorDampFactor");
 
+    grvDir = 0;
+    gravity = 0.0;
+    if (tbl.hasNumber("gravity"))
+    {
+      gravity = tbl.getNumber("gravity");
+      if (tbl.hasNumber("dir"))
+        grvDir = (unsigned) tbl.getNumber("dir");
+      else
+        throw Lucee::Except
+          ("ImplicitFiveMomentSrcUpdater::readInput: If \"gravity\" is specified, \"dir\" must also be specified.");
+    }
+
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
     for (unsigned i=0; i<nFluids; ++i)
@@ -205,6 +217,9 @@ namespace Lucee
         rhs(fidx(n,X)) = qbym[n]*fPtr[RHOUX];
         rhs(fidx(n,Y)) = qbym[n]*fPtr[RHOUY];
         rhs(fidx(n,Z)) = qbym[n]*fPtr[RHOUZ];
+
+// add in gravity source term to appropriate current equation
+        rhs(fidx(n,grvDir)) += qbym[n]*fPtr[RHO]*gravity*dt1;
 
 // set current contribution to electric field equation
         lhs(eidx(X), fidx(n,X)) = dt2;

@@ -94,6 +94,10 @@ namespace Lucee
       double damp_e;
 /** Magnetic field error potential damping factor */
       double damp_m;
+/** Direction of gravity */
+      unsigned grvDir;
+/** Gravitational acceleration */
+      double gravity;
 
 /**
  * Compute index for fluid current component.
