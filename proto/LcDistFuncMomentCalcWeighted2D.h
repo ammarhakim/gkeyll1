@@ -38,6 +38,8 @@ namespace Lucee
 
 /** Create new modal DG solver in 1D */
       DistFuncMomentCalcWeighted2D();
+/** Destructor */
+      ~DistFuncMomentCalcWeighted2D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -80,6 +82,8 @@ namespace Lucee
       unsigned calcMom;
 /** Direction to compute moment (if higher than 0) */
       unsigned momDir;
+/** Space to store moment data for on a processor */
+      Lucee::Field<2, double> *moment;
       std::vector<Eigen::MatrixXd> mom0MatrixVector;
       std::vector<Eigen::MatrixXd> mom1MatrixVector;
       std::vector<Eigen::MatrixXd> mom2MatrixVector;
