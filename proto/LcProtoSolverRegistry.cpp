@@ -73,6 +73,7 @@
 #include <LcThreeWaveInteractModSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
+#include <LcZonalAverageCalc3D.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -194,6 +195,7 @@ namespace Lucee
       .append<Lucee::CopyNodalFieldsUpdater<1,2> >()
       .append<Lucee::CopyNodalFieldsUpdater<1,3> >()
       .append<Lucee::CopyNodalFieldsUpdater<1,4> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,3> >()
       .append<Lucee::CopyNodalFieldsUpdater<2,4> >()
       .append<Lucee::CopyNodalFieldsUpdater<2,5> >()
       .append<Lucee::CopyNodalFieldsUpdater<3,5> >()
@@ -241,6 +243,7 @@ namespace Lucee
       .append<Lucee::SetSingleNodeToOneUpdater<4> >()
       .append<Lucee::SetSingleNodeToOneUpdater<5> >()
 
+      .append<Lucee::ZonalAverageCalc3D>()
       ;
 
 #ifdef HAVE_PETSC

@@ -78,6 +78,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<SDIM> *sourceBasis;
 /** Mapping of node in target-space to node in source space */
       std::vector<unsigned> tarSrcMap;
+/** Mapping of target-space directions to source-space directions */
+      std::vector<int> coordinateMap;
 
 /**
  * Check if coordinates of phase-space node and configuration-space

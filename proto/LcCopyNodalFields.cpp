@@ -26,6 +26,7 @@ namespace Lucee
   template <> const char *CopyNodalFieldsUpdater<1,2>::id = "CopyNodalFields1D_2D";
   template <> const char *CopyNodalFieldsUpdater<1,3>::id = "CopyNodalFields1D_3V";
   template <> const char *CopyNodalFieldsUpdater<1,4>::id = "CopyNodalFields1D_4V";
+  template <> const char *CopyNodalFieldsUpdater<2,3>::id = "CopyNodalFields2D_3D";
   template <> const char *CopyNodalFieldsUpdater<2,4>::id = "CopyNodalFields2D_4D";
   template <> const char *CopyNodalFieldsUpdater<2,5>::id = "CopyNodalFields2D_5D";
   template <> const char *CopyNodalFieldsUpdater<3,5>::id = "CopyNodalFields3D_5D";
@@ -36,7 +37,7 @@ namespace Lucee
     const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
     for (unsigned d=0; d<SDIM; ++d)
-      if (! (std::fabs(phaseC(n,d)-confC(cn,d))<1e-4*dxMin) )
+      if (! (std::fabs(phaseC(n,coordinateMap[d])-confC(cn,d))<1e-4*dxMin) )
         return false;
     return true;
   }
@@ -62,6 +63,30 @@ namespace Lucee
       targetBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<TDIM> >("targetBasis");
     else
       throw Lucee::Except("CopyNodalFieldsUpdater::readInput: Must specify target-basis using 'targetBasis'");
+
+    // Optional input for coordinate mapping. Otherwise, creates a vector
+    // of size SDIM, representing the map (0,1,2,..) -> (0,1,2,..)
+    if (tbl.hasNumVec("coordinateMap"))
+    {
+      std::vector<double> tempMap = tbl.getNumVec("coordinateMap");
+
+      if(tempMap.size() != SDIM)
+        throw Lucee::Except("CopyNodalFieldsUpdater::readInput: coordinateMap has an incorrect number of elements (!= SDIM)");
+
+      for (int i = 0; i < SDIM; i++)
+      {
+        int d = (int) tempMap[i];
+        if (d < TDIM)
+          coordinateMap.push_back(d);
+        else
+          throw Lucee::Except("CopyNodalFieldsUpdater::readInput: coordinateMap must be a table with each element < TDIM");
+      }
+    }
+    else
+    {
+      for (int i = 0; i < SDIM; i++)
+        coordinateMap.push_back(i);
+    }
   }
 
   template <unsigned SDIM, unsigned TDIM>
@@ -81,7 +106,10 @@ namespace Lucee
     int idx[TDIM];
     seq.fillWithIndex(idx);
     targetBasis->setIndex(idx);
-    sourceBasis->setIndex(idx); // only first SDIM elements are used
+    int idxSrc[SDIM];
+    for (int sIndex = 0; sIndex < SDIM; sIndex++)
+      idxSrc[sIndex] = idx[coordinateMap[sIndex]];
+    sourceBasis->setIndex(idxSrc); // only first SDIM elements are used
     
     unsigned nlocal = targetBasis->getNumNodes();
 
@@ -101,6 +129,7 @@ namespace Lucee
 
     targetBasis->getNodalCoordinates(tarNodeCoords);
     sourceBasis->getNodalCoordinates(srcNodeCoords);
+
     for (unsigned n=0; n<nlocal; ++n)
     {
       bool pcFound = false;
@@ -137,12 +166,15 @@ namespace Lucee
     unsigned nlocal = targetBasis->getNumNodes();
     Lucee::Region<TDIM, int> localRgn = grid.getLocalRegion();
     int idx[TDIM];
+    int idxSrc[SDIM];
     Lucee::RowMajorSequencer<TDIM> seq(localRgn);
 
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-      qSrc.setPtr(qSrcPtr, idx);
+      for (int sIndex = 0; sIndex < SDIM; sIndex++)
+        idxSrc[sIndex] = idx[coordinateMap[sIndex]];
+      qSrc.setPtr(qSrcPtr, idxSrc);
       qTar.setPtr(qTarPtr, idx);
 
       for (unsigned k=0; k<nlocal; ++k)
@@ -166,6 +198,7 @@ namespace Lucee
   template class CopyNodalFieldsUpdater<1,2>;
   template class CopyNodalFieldsUpdater<1,3>;
   template class CopyNodalFieldsUpdater<1,4>;
+  template class CopyNodalFieldsUpdater<2,3>;
   template class CopyNodalFieldsUpdater<2,4>;
   template class CopyNodalFieldsUpdater<2,5>;
   template class CopyNodalFieldsUpdater<3,5>;

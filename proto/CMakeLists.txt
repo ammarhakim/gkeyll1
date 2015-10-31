@@ -89,6 +89,7 @@ set (proto_SOURCES
   LcSmoothQuadPhiToC1Updater.cpp
   LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp
+  LcZonalAverageCalc3D.cpp
 )
 
 if (FFTW3_FOUND)
