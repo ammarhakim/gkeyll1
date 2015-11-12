@@ -740,7 +740,11 @@ namespace Lucee
 // push variables on stack
       for (unsigned i=0; i<3; ++i)
         lua_pushnumber(L, xc[i]);
-      if (lua_pcall(L, 3, numOut, 0) != 0)
+      for (int i=0; i<numOut; ++i)
+      {
+        lua_pushnumber(L, ptr[i]);
+      }
+      if (lua_pcall(L, 3+numOut, numOut, 0) != 0)
       {
         Lucee::Except lce("StructGridField::setFromLuaFunction: ");
         lce << "Problem evaluating function supplied to 'set' method"
