@@ -440,7 +440,7 @@ namespace Lucee
         double Bx = EM[emidx(phaseConfMap[n],IBX)];
         flux[n] = qbym*distf[n]*(Ez + vx*By-vy*Bx);
       }
-    }    
+    }
   }
 
   template <unsigned CDIM, unsigned VDIM>
