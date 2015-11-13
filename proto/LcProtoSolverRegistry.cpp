@@ -200,6 +200,10 @@ namespace Lucee
       .append<Lucee::CopyNodalFieldsUpdater<2,5> >()
       .append<Lucee::CopyNodalFieldsUpdater<3,5> >()
 
+      .append<Lucee::CopyNodalFieldsUpdater<1,1> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,2> >()
+      .append<Lucee::CopyNodalFieldsUpdater<3,3> >()
+
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
       .append<Lucee::NormGradPhiUpdater<3> >()
