@@ -69,6 +69,30 @@ namespace Lucee
     else
       throw Lucee::Except("CopyNodalFieldsUpdater::readInput: Must specify target-basis using 'targetBasis'");
 
+// read in source and target components
+    if (tbl.hasNumVec("sourceComponents"))
+    {
+      std::vector<double> t = tbl.getNumVec("sourceComponents");
+      for (unsigned i=0; i<t.size(); ++i)
+        srcComponents.push_back( (int) t[i] );
+    }
+    else
+      srcComponents.push_back(0);
+
+    if (tbl.hasNumVec("targetComponents"))
+    {
+      std::vector<double> t = tbl.getNumVec("targetComponents");
+      for (unsigned i=0; i<t.size(); ++i)
+        tarComponents.push_back( (int) t[i] );
+    }
+    else
+      tarComponents.push_back(0);
+
+// number of components should match
+    if (tarComponents.size() != srcComponents.size())
+      throw Lucee::Except(
+        "CopyNodalFieldsUpdater::readInput: source and target components should match.");
+
     // Optional input for coordinate mapping. Otherwise, creates a vector
     // of size SDIM, representing the map (0,1,2,..) -> (0,1,2,..)
     if (tbl.hasNumVec("coordinateMap"))
@@ -168,7 +192,11 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> qSrcPtr = qSrc.createConstPtr();
     Lucee::FieldPtr<double> qTarPtr = qTar.createPtr();
 
-    unsigned nlocal = targetBasis->getNumNodes();
+    unsigned nlocalSrc = sourceBasis->getNumNodes();    
+    unsigned nlocalTar = targetBasis->getNumNodes();
+    unsigned ncSrc = qSrc.getNumComponents()/nlocalSrc;    
+    unsigned ncTar = qTar.getNumComponents()/nlocalTar;
+
     Lucee::Region<TDIM, int> localRgn = grid.getLocalRegion();
     int idx[TDIM];
     int idxSrc[SDIM];
@@ -182,8 +210,14 @@ namespace Lucee
       qSrc.setPtr(qSrcPtr, idxSrc);
       qTar.setPtr(qTarPtr, idx);
 
-      for (unsigned k=0; k<nlocal; ++k)
-        qTarPtr[k] = qSrcPtr[tarSrcMap[k]];
+      for (unsigned k=0; k<nlocalTar; ++k)
+      {
+        for (unsigned m=0; m<srcComponents.size(); ++m)
+        {
+          unsigned sc = srcComponents[m], tc = tarComponents[m];
+          qTarPtr[ncTar*k+tc] = qSrcPtr[ncSrc*tarSrcMap[k]+sc];
+        }
+      }
     }
 
     return Lucee::UpdaterStatus();
