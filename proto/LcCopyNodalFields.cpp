@@ -31,6 +31,11 @@ namespace Lucee
   template <> const char *CopyNodalFieldsUpdater<2,5>::id = "CopyNodalFields2D_5D";
   template <> const char *CopyNodalFieldsUpdater<3,5>::id = "CopyNodalFields3D_5D";
 
+
+  template <> const char *CopyNodalFieldsUpdater<1,1>::id = "CopyNodalFields1D"; 
+  template <> const char *CopyNodalFieldsUpdater<2,2>::id = "CopyNodalFields2D";
+  template <> const char *CopyNodalFieldsUpdater<3,3>::id = "CopyNodalFields3D";
+
   template <unsigned SDIM, unsigned TDIM>
   bool
   CopyNodalFieldsUpdater<SDIM,TDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
@@ -202,4 +207,8 @@ namespace Lucee
   template class CopyNodalFieldsUpdater<2,4>;
   template class CopyNodalFieldsUpdater<2,5>;
   template class CopyNodalFieldsUpdater<3,5>;
+
+  template class CopyNodalFieldsUpdater<1,1>;
+  template class CopyNodalFieldsUpdater<2,2>;
+  template class CopyNodalFieldsUpdater<3,3>;
 }
