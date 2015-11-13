@@ -58,6 +58,8 @@ class MakeTitle:
         self.figName = gd.fName[:-3]
         if transformMod:
             self.figName = self.figName+"_"+transformVar
+        else:
+            self.figName = self.figName + "-c" + str(component)
         self.figName = self.figName+".png"
 
         if outNm:

@@ -80,6 +80,10 @@ namespace Lucee
       std::vector<unsigned> tarSrcMap;
 /** Mapping of target-space directions to source-space directions */
       std::vector<int> coordinateMap;
+/** List of source components to copy */
+      std::vector<int> srcComponents;
+/** List of target components to copy */
+      std::vector<int> tarComponents;
 
 /**
  * Check if coordinates of phase-space node and configuration-space
