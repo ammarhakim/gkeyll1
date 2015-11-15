@@ -117,11 +117,11 @@ namespace Lucee
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
 
-      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,1> >()
-      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,2> >()
-      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,3> >()
-      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<2,2> >()
-      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<2,3> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,1> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,2> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,3> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<2,2> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<2,3> >()
 
       .append<Lucee::ETGAdjointSource<4> >()
       .append<Lucee::ETGAdjointSource<5> >()
