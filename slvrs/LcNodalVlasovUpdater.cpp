@@ -98,28 +98,9 @@ namespace Lucee
     else
       throw Lucee::Except("NodalVlasovUpdater::readInput: Must specify configuration-space basis using 'confBasis'");
 
-// directions to update
-    if (tbl.hasNumVec("updateDirections"))
-    {
-      std::vector<double> ud = tbl.getNumVec("updateDirections");
-      for (unsigned i=0; i<ud.size(); ++i)
-      {
-        unsigned d = (unsigned) ud[i];
-        if (d<NDIM)
-          updateDims.push_back(d);
-        else
-        {
-          Lucee::Except lce("updateDirections must be a table less than ");
-          lce << NDIM;
-          throw lce;
-        }
-      }
-    }
-    else
-    {
-      for (unsigned i=0; i<NDIM; ++i)
-        updateDims.push_back(i);
-    }
+    skipVelocitySweep = false;
+    if (tbl.hasBool("skipVelocitySweep"))
+      skipVelocitySweep = tbl.getBool("skipVelocitySweep");
 
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
@@ -227,6 +208,23 @@ namespace Lucee
         throw lce;
       }
     }
+
+// initialize directions in which zero-flux BCs are applied
+    for (unsigned d=0; d<CDIM; ++d)
+      lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 0; // NO at configuration-space edges
+    for (unsigned d=CDIM; d<NDIM; ++d)
+      lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 1; // YES at velocity-space edges
+
+// ensure that zero-flux BCs are applied only if local rank owns the
+// skin cell    
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
+    for (unsigned d=CDIM; d<NDIM; ++d)
+    {
+      if (localRgn.getLower(d) != globalRgn.getLower(d))
+        lowerZeroFluxOffset[d] = 0; // not owned by us, so ignore
+      if (localRgn.getUpper(d) != globalRgn.getUpper(d))
+        upperZeroFluxOffset[d] = 0; // not owned by us, so ignore
+    }
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -292,9 +290,11 @@ namespace Lucee
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice. (We need to make sure that flux
-// is computed for one edge outside domain interior)
-      int sliceLower = localRgn.getLower(dir);
-      int sliceUpper = localRgn.getUpper(dir)+1;
+// is computed for one edge outside domain interior, accounting for
+// the fact that we may not want to compute fluxes from the outermost
+// edges [zero-flux BCs])
+      int sliceLower = localRgn.getLower(dir)+lowerZeroFluxOffset[dir];
+      int sliceUpper = localRgn.getUpper(dir)+1-upperZeroFluxOffset[dir];
 
       int idx[NDIM], idxl[NDIM];
       double vCoord[3];
