@@ -53,7 +53,7 @@ namespace Lucee
 
     // get hold of configuration space element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis"))
-      confBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("confBasis");
+      confBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis");
     else
       throw Lucee::Except(
         "DistFuncMomentCalcCDIMFromVDIM::readInput: Must specify configuration-space basis using 'confBasis'");
@@ -309,4 +309,11 @@ namespace Lucee
       for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
+
+// instantiations
+  template class DistFuncMomentCalcCDIMFromVDIM<1,1>;
+  template class DistFuncMomentCalcCDIMFromVDIM<1,2>;
+  template class DistFuncMomentCalcCDIMFromVDIM<1,3>;
+  template class DistFuncMomentCalcCDIMFromVDIM<2,2>;
+  template class DistFuncMomentCalcCDIMFromVDIM<2,3>;  
 }
