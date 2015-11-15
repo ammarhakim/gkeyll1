@@ -29,9 +29,9 @@ set (proto_SOURCES
   LcDistFuncMomentCalc1DFrom4D.cpp
   LcDistFuncMomentCalc2D.cpp
   LcDistFuncMomentCalc3D.cpp
+  LcDistFuncMomentCalcCDIMFromVDIM.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
   LcDistFuncMomentCalcWeighted3D.cpp
-  LcDistFuncMomentCalcCDIMFromVDIM.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
   LcETGAdiabaticPotentialUpdater3D.cpp
@@ -46,9 +46,9 @@ set (proto_SOURCES
   LcInitNodesFromMatrixMarketUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
+  LcIntegrateFieldProduct.cpp
   LcIntegrateGeneralField.cpp
   LcIntegrateNodalField.cpp
-  LcIntegrateFieldProduct.cpp
   LcLinEmGke1dHamilPertUpdater.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
