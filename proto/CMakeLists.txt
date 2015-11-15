@@ -31,6 +31,7 @@ set (proto_SOURCES
   LcDistFuncMomentCalc3D.cpp
   LcDistFuncMomentCalcWeighted2D.cpp
   LcDistFuncMomentCalcWeighted3D.cpp
+  LcDistFuncMomentCalcCDIMFromVDIM.cpp
   LcDistFuncReflectionBcUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
   LcETGAdiabaticPotentialUpdater3D.cpp
