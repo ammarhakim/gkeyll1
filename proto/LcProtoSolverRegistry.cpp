@@ -23,6 +23,7 @@
 #include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncMomentCalcWeighted3D.h>
+#include <LcDistFuncMomentCalcCDIMFromVDIM.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater3D.h>
@@ -115,7 +116,13 @@ namespace Lucee
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
-      
+
+      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,1> >()
+      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,2> >()
+      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<1,3> >()
+      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<2,2> >()
+      .append<Lucee::DistFuncMomentCalCDIMFromVDIM<2,3> >()
+
       .append<Lucee::ETGAdjointSource<4> >()
       .append<Lucee::ETGAdjointSource<5> >()
       .append<Lucee::ETGAdiabaticPotentialUpdater>()
