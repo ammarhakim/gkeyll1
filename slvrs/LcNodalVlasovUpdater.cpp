@@ -435,7 +435,7 @@ namespace Lucee
       for (unsigned n=0; n<nlocal; ++n)
       {
         double vx = getSafeVx(n,pc), vy = getSafeVy(n,pc);
-        double Ez = EM[emidx(phaseConfMap[n],IEY)];
+        double Ez = EM[emidx(phaseConfMap[n],IEZ)];
         double By = EM[emidx(phaseConfMap[n],IBY)];
         double Bx = EM[emidx(phaseConfMap[n],IBX)];
         flux[n] = qbym*distf[n]*(Ez + vx*By-vy*Bx);
