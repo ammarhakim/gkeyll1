@@ -40,6 +40,8 @@ namespace Lucee
 /** Create new modal DG solver in CDIM dimensions */
       DistFuncMomentCalcCDIMFromVDIM();
 
+/**  Destructor */
+      virtual ~DistFuncMomentCalcCDIMFromVDIM();
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -79,6 +81,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
 /** Moment to compute */
       unsigned calcMom;
+/** Space to store moment data for on a processor */
+      Lucee::Field<CDIM, double> *momentLocal;
 /** Direction to calcuate moment in */
       unsigned momDir;
 /** Zeroth moment matrix */
