@@ -38,6 +38,8 @@ namespace Lucee
 /** Create new nodal DG solver */
       NodalVlasovUpdater();
 
+// ADD DTOR
+
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -71,8 +73,6 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Directions to update */
-      std::vector<unsigned> updateDims;
 /** Pointer to phase-space basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
 /** Pointer to configuration-space basis functions to use */
@@ -89,6 +89,12 @@ namespace Lucee
       double charge;
 /** Species mass */
       double mass;
+/** Flag to indicate if one should skip the velocity space sweeps */
+      bool skipVelocitySweep;
+/** Offsets for zero-flux directions along lower edges */
+      int lowerZeroFluxOffset[CDIM+VDIM];
+/** Offsets for zero-flux directions  along upper edges */
+      int upperZeroFluxOffset[CDIM+VDIM];
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not
@@ -174,6 +180,10 @@ namespace Lucee
       bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
         const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);
 
+/**
+ * Get velocity coordinates "safely", i.e. if there are not enough
+ * velocity components, these functions return 0.0.
+ */      
       double getSafeVx(int n, const Lucee::Matrix<double>& pc);
       double getSafeVy(int n, const Lucee::Matrix<double>& pc);
       double getSafeVz(int n, const Lucee::Matrix<double>& pc);
