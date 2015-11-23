@@ -36,6 +36,12 @@ namespace Lucee
   {
   }
 
+  template <unsigned CDIM, unsigned VDIM>
+  DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::~DistFuncMomentCalcCDIMFromVDIM()
+  {
+    delete momentLocal;
+  }
+
   template <unsigned CDIM, unsigned VDIM>  
   void
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::readInput(Lucee::LuaTable& tbl)
@@ -169,125 +175,97 @@ namespace Lucee
     mom0Matrix = massMatrixConf.inverse()*mom0Matrix;
     mom1Matrix = massMatrixConf.inverse()*mom1Matrix;
     mom2Matrix = massMatrixConf.inverse()*mom2Matrix;
+
+    int lowerConf[CDIM];
+    int upperConf[CDIM];
+    int lg[CDIM];
+    int ug[CDIM];
+    for (int i=0; i<CDIM; ++i)
+    {
+      lowerConf[i] = localRgn.getLower(i);
+      upperConf[i] = localRgn.getUpper(i);
+      lg[i] = 0;
+      ug[i] = 0;
+    }
+
+    Lucee::Region<CDIM, int> rgnConf(lowerConf, upperConf);
+
+    // allocate space for storing local moment calculation
+    momentLocal = new Lucee::Field<CDIM, double>(rgnConf, nlocalConf, lg, ug);
   }
 
   template <unsigned CDIM, unsigned VDIM>
   Lucee::UpdaterStatus
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::update(double t)
   {
-    // const unsigned NDIM = CDIM+VDIM;
-    // // get hold of grid
-    // const Lucee::StructuredGridBase<NDIM>& grid 
-    //   = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    const unsigned NDIM = CDIM+VDIM;
+    // get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    // // get input field (CDIM + VDIM)
-    // const Lucee::Field<NDIM, double>& distF = this->getInp<Lucee::Field<NDIM, double> >(0);
-    // // get output field (CDIM)
-    // Lucee::Field<CDIM, double>& moment = this->getOut<Lucee::Field<CDIM, double> >(0);
+    // get input field (CDIM + VDIM)
+    const Lucee::Field<NDIM, double>& distF = this->getInp<Lucee::Field<NDIM, double> >(0);
+    // get output field (CDIM)
+    Lucee::Field<CDIM, double>& momentGlobal = this->getOut<Lucee::Field<CDIM, double> >(0);
 
-    // // local region to update (This is the CDIM + VDIM region. The CDIM region is
-    // // assumed to have the same cell layout as the X-direction of the CDIM+VDIM region)
-    // Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    // Lucee::Region<NDIM, int> localExtRgn = distF.getExtRegion();
+    // local region to update (This is the CDIM + VDIM region. The CDIM region is
+    // assumed to have the same cell layout as the X-direction of the CDIM+VDIM region)
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
-    // for (int i =0; i < CDIM; i++){
-    //   // Make sure we integrate over conf. space ghost cells
-    //   localRgn.setLower(i, localExtRgn.getLower(i));
-    //   localRgn.setUpper(i, localExtRgn.getUpper(i));
-    // }
+    int idx[NDIM];
+    double xc[NDIM];
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    unsigned nlocalConf = confBasis->getNumNodes();
+    unsigned nlocalPhase = phaseBasis->getNumNodes();
 
-    // // clear out contents of output field
-    // moment = 0.0;
+    int localPositionCells = localRgn.getVolume();
 
-    // // iterators into fields
-    // Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
-    // Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+    // clear out contents of output field
+    (*momentLocal) = 0.0;
 
-    // int idx[NDIM];
-    // double xc[NDIM];
-    // Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-    // unsigned nlocalConf = confBasis->getNumNodes();
-    // unsigned nlocalPhase = phaseBasis->getNumNodes();
+    // iterators into fields
+    Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
+    Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
 
-    // int lowerConf[CDIM];
-    // int upperConf[CDIM];
-    // for (int i=0; i<CDIM; ++i)
-    // {
-    //   lowerConf[i] = localRgn.getLower(i);
-    //   upperConf[i] = localRgn.getUpper(i);
-    // }
-    // Lucee::Region<CDIM, int> rgnConf(lowerConf, upperConf);
-    // Lucee::RowMajorIndexer<CDIM> idxr(rgnConf);
-    // Lucee::RowMajorSequencer<CDIM> seqConf(rgnConf);
+    while(seq.step())
+    {
+      seq.fillWithIndex(idx);
 
-    // int localPositionCells = localRgn.getVolume();
-    // std::vector<double> localMoment(localPositionCells*nlocalConf);
+      grid.setIndex(idx);
+      grid.getCentroid(xc);
 
-    // while(seq.step())
-    // {
-    //   seq.fillWithIndex(idx);
+      momentLocal->setPtr(momentPtr, idx);
+      distF.setPtr(distFPtr, idx);
 
-    //   grid.setIndex(idx);
-    //   grid.getCentroid(xc);
+      Eigen::VectorXd distfVec(nlocalPhase);
+      for (int i = 0; i < nlocalPhase; i++)
+        distfVec(i) = distFPtr[i];
 
-    //   moment.setPtr(momentPtr, idx);
-    //   distF.setPtr(distFPtr, idx);
+      // Accumulate contribution to moment from this cell
+      Eigen::VectorXd resultVector(nlocalConf);
 
-    //   Eigen::VectorXd distfVec(nlocalPhase);
-    //   for (int i = 0; i < nlocalPhase; i++)
-    //     distfVec(i) = distFPtr[i];
+      if (calcMom == 0)
+        resultVector = mom0Matrix*distfVec;
+      else if (calcMom == 1)
+        resultVector = mom1Matrix*distfVec + xc[momDir]*mom0Matrix*distfVec;
+      else if (calcMom == 2)
+        resultVector = mom2Matrix*distfVec + 2*xc[momDir]*mom1Matrix*distfVec +
+          xc[momDir]*xc[momDir]*mom0Matrix*distfVec;
 
-    //   // Accumulate contribution to moment from this cell
-    //   Eigen::VectorXd resultVector(nlocalConf);
+      for (int i = 0; i < nlocalConf; i++)
+        momentPtr[i] = momentPtr[i] + resultVector(i);
+    }
 
-    //   if (calcMom == 0)
-    //     resultVector = mom0Matrix*distfVec;
-    //   else if (calcMom == 1)
-    //     resultVector = mom1Matrix*distfVec + xc[momDir]*mom0Matrix*distfVec;
-    //   else if (calcMom == 2)
-    //     resultVector = mom2Matrix*distfVec + 2*xc[momDir]*mom1Matrix*distfVec +
-    //       xc[momDir]*xc[momDir]*mom0Matrix*distfVec;
+// Above loop computes moments on local phase-space domain. We need to
+// sum across velocity space to get total moment on configuration
+// space.
 
-    //   for (int i = 0; i < nlocalConf; i++)
-    //     momentPtr[i] = momentPtr[i] + resultVector(i);
-    // }
-
-    // int idxConf[CDIM];
-    // // Loop over each 'local' position space cell
-    // while(seqConf.step())
-    // {
-    //   seqConf.fillWithIndex(idxConf);
-    //   int cellIndex = idxr.getIndex(idxConf);
-
-    //   moment.setPtr(momentPtr, idxConf);
-    //   // copy data to vector
-    //   for (int i = 0; i < nlocalConf; i++)
-    //     localMoment[cellIndex*nlocalConf+i] = momentPtr[i];
-    // }
-
-    // // Above loop computes moments on local phase-space domain. We need to
-    // // sum across velocity space to get total moment on configuration
-    // // space.
-    // std::vector<double> reducedMoment(localPositionCells*nlocalConf);
-    // // we need to get moment communicator of field as updater's moment
-    // // communicator is same as its grid's moment communicator. In this
-    // // case, grid is phase-space grid, which is not what we want.
-    // TxCommBase *momComm = momentOut.getMomComm();
-    // // amount to communicate
-    // momComm->allreduce(localPositionCells*nlocalConf, localMoment, reducedMoment, TX_SUM);
-
-    // seqConf.reset();
-    // Lucee::FieldPtr<double> momentOutPtr = momentOut.createPtr();
-    // // Copy reducedMoment to output field
-    // while(seqConf.step())
-    // {
-    //   seqConf.fillWithIndex(idxConf);
-    //   int cellIndex = idxr.getIndex(idxConf);
-    //   momentOut.setPtr(momentOutPtr, idxConf);
-    //   // copy data to vector
-    //   for (int i = 0; i < nlocalConf; i++)
-    //     momentOutPtr[i] = reducedMoment[cellIndex*nlocalConf+i];
-    // }
+// we need to get moment communicator of field as updater's moment
+// communicator is same as its grid's moment communicator. In this
+// case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentGlobal.getMomComm();
+    unsigned xsize = localPositionCells*nlocalConf; // amount to communicate
+    momComm->allreduce(xsize, &momentLocal->firstInterior(), &momentGlobal.firstInterior(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }
