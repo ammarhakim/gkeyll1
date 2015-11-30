@@ -43,6 +43,7 @@
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
+#include <LcImplicitTwentyMomentSrcUpdater.h>
 #include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
@@ -89,6 +90,7 @@
 #include <LcStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
+#include <LcTwentyMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
@@ -271,6 +273,10 @@ namespace Lucee
       .append<Lucee::ImplicitTenMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitTenMomentSrcUpdater<3> >()
 
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<1> >()
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<2> >()
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<3> >()
+
       .append<TwoFluidMomentumRelaxSrcUpdater<1> >()
       .append<TwoFluidMomentumRelaxSrcUpdater<2> >()
       .append<TwoFluidMomentumRelaxSrcUpdater<3> >()
@@ -319,6 +325,7 @@ namespace Lucee
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
       .append<Lucee::TenMomentFluidSource>()
+      .append<Lucee::TwentyMomentFluidSource>()
       .append<Lucee::FieldFunctionSource>()
       .append<Lucee::EulerAxiSource>();
 
