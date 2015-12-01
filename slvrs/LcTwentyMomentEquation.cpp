@@ -110,6 +110,13 @@ namespace Lucee
         else
             this->setNumWaves(1);
     }
+
+    if (tbl.hasNumber("interpolation")){
+        s = tbl.getNumber("interpolation");
+    } else {
+        s = 0.0;
+    }
+    
   }
 
   void TwentyMomentEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ)
@@ -158,28 +165,27 @@ namespace Lucee
       PInv[3] = (-v[P13]*v[P13] + v[P11]*v[P33])/det;
       PInv[4] = (v[P12]*v[P13] - v[P11]*v[P23])/det;
       PInv[5] = (-v[P12]*v[P12] + v[P11]*v[P22])/det;
-
+      // FIXME s should be a function of p and q.
       // total heat flux flux
-      f[Q111] = q[Q111]*v[U1] + q[Q111]*v[U1] + q[Q111]*v[U1] + q[Q111]*v[U1] + v[P11]*v[P11]/v[RHO] + v[P11]*v[P11]/v[RHO] + v[P11]*v[P11]/v[RHO] - v[U1]*v[U1]*q[P11] - v[U1]*v[U1]*q[P11] - v[U1]*v[U1]*q[P11] - v[U1]*v[U1]*q[P11] - v[U1]*v[U1]*q[P11] - v[U1]*v[U1]*q[P11] + 3*v[RHO]*v[U1]*v[U1]*v[U1]*v[U1] + 2*PInv[1]*v[Q111]*v[Q112] + 2*PInv[2]*v[Q111]*v[Q113] + 2*PInv[4]*v[Q112]*v[Q113] + PInv[0]*(v[Q111]*v[Q111]) + PInv[3]*(v[Q112]*v[Q112]) + PInv[5]*(v[Q113]*v[Q113]);
+    f[Q111] = 4*v[Q111]*v[U1] + (3*(v[P11]*v[P11]))/(v[RHO]) + 6*v[P11]*(v[U1]*v[U1]) + v[RHO]*(v[U1]*v[U1]*v[U1]*v[U1]) + s*(2*PInv[1]*v[Q111]*v[Q112] + 2*PInv[2]*v[Q111]*v[Q113] + 2*PInv[4]*v[Q112]*v[Q113] + PInv[0]*(v[Q111]*v[Q111]) + PInv[3]*(v[Q112]*v[Q112]) + PInv[5]*(v[Q113]*v[Q113]));
 
-      f[Q112] = q[Q112]*v[U1] + q[Q111]*v[U2] + q[Q112]*v[U1] + q[Q112]*v[U1] + v[P11]*v[P12]/v[RHO] + v[P12]*v[P11]/v[RHO] + v[P11]*v[P12]/v[RHO] - v[U1]*v[U1]*q[P12] - v[U1]*v[U1]*q[P12] - v[U2]*v[U1]*q[P11] - v[U1]*v[U2]*q[P11] - v[U1]*v[U1]*q[P12] - v[U2]*v[U1]*q[P11] + 3*v[RHO]*v[U1]*v[U1]*v[U2]*v[U1] + PInv[0]*v[Q111]*v[Q112] + PInv[2]*v[Q112]*v[Q113] + PInv[3]*v[Q112]*v[Q122] + PInv[4]*v[Q113]*v[Q122] + PInv[2]*v[Q111]*v[Q123] + PInv[4]*v[Q112]*v[Q123] + PInv[5]*v[Q113]*v[Q123] + PInv[1]*(v[Q111]*v[Q122] + v[Q112]*v[Q112]);
+    f[Q112] = (3*v[P11]*v[P12])/(v[RHO]) + 3*v[Q112]*v[U1] + v[Q111]*v[U2] + 3*v[P11]*v[U1]*v[U2] + 3*v[P12]*(v[U1]*v[U1]) + v[RHO]*v[U2]*(v[U1]*v[U1]*v[U1]) + s*(PInv[0]*v[Q111]*v[Q112] + PInv[2]*v[Q112]*v[Q113] + PInv[3]*v[Q112]*v[Q122] + PInv[4]*v[Q113]*v[Q122] + PInv[2]*v[Q111]*v[Q123] + PInv[4]*v[Q112]*v[Q123] + PInv[5]*v[Q113]*v[Q123] + PInv[1]*(v[Q111]*v[Q122] + v[Q112]*v[Q112]));
 
-      f[Q113] = q[Q113]*v[U1] + q[Q111]*v[U3] + q[Q113]*v[U1] + q[Q113]*v[U1] + v[P11]*v[P13]/v[RHO] + v[P13]*v[P11]/v[RHO] + v[P11]*v[P13]/v[RHO] - v[U1]*v[U1]*q[P13] - v[U1]*v[U1]*q[P13] - v[U3]*v[U1]*q[P11] - v[U1]*v[U3]*q[P11] - v[U1]*v[U1]*q[P13] - v[U3]*v[U1]*q[P11] + 3*v[RHO]*v[U1]*v[U1]*v[U3]*v[U1] + PInv[0]*v[Q111]*v[Q113] + PInv[1]*v[Q112]*v[Q113] + PInv[1]*v[Q111]*v[Q123] + PInv[3]*v[Q112]*v[Q123] + PInv[4]*v[Q113]*v[Q123] + PInv[2]*v[Q111]*v[Q133] + PInv[4]*v[Q112]*v[Q133] + PInv[5]*v[Q113]*v[Q133] + PInv[2]*(v[Q113]*v[Q113]);
+    f[Q113] = (3*v[P11]*v[P13])/(v[RHO]) + 3*v[Q113]*v[U1] + v[Q111]*v[U3] + 3*v[P11]*v[U1]*v[U3] + 3*v[P13]*(v[U1]*v[U1]) + v[RHO]*v[U3]*(v[U1]*v[U1]*v[U1]) + s*(PInv[0]*v[Q111]*v[Q113] + PInv[1]*v[Q112]*v[Q113] + PInv[1]*v[Q111]*v[Q123] + PInv[3]*v[Q112]*v[Q123] + PInv[4]*v[Q113]*v[Q123] + PInv[2]*v[Q111]*v[Q133] + PInv[4]*v[Q112]*v[Q133] + PInv[5]*v[Q113]*v[Q133] + PInv[2]*(v[Q113]*v[Q113]));
 
-      f[Q122] = q[Q122]*v[U1] + q[Q112]*v[U2] + q[Q112]*v[U2] + q[Q122]*v[U1] + v[P12]*v[P12]/v[RHO] + v[P12]*v[P12]/v[RHO] + v[P11]*v[P22]/v[RHO] - v[U1]*v[U2]*q[P12] - v[U1]*v[U2]*q[P12] - v[U2]*v[U2]*q[P11] - v[U1]*v[U2]*q[P12] - v[U1]*v[U1]*q[P22] - v[U2]*v[U1]*q[P12] + 3*v[RHO]*v[U1]*v[U2]*v[U2]*v[U1] + PInv[0]*v[Q111]*v[Q122] + PInv[1]*v[Q112]*v[Q122] + PInv[2]*v[Q113]*v[Q122] + PInv[1]*v[Q111]*v[Q222] + PInv[3]*v[Q112]*v[Q222] + PInv[4]*v[Q113]*v[Q222] + PInv[2]*v[Q111]*v[Q223] + PInv[4]*v[Q112]*v[Q223] + PInv[5]*v[Q113]*v[Q223];
+    f[Q122] = 2*v[Q122]*v[U1] + 2*v[Q112]*v[U2] + 4*v[P12]*v[U1]*v[U2] + (v[P11]*v[P22] + 2*(v[P12]*v[P12]))/(v[RHO]) + v[P22]*(v[U1]*v[U1]) + v[P11]*(v[U2]*v[U2]) + v[RHO]*(v[U1]*v[U1])*(v[U2]*v[U2]) + (PInv[0]*v[Q111]*v[Q122] + PInv[1]*v[Q112]*v[Q122] + PInv[2]*v[Q113]*v[Q122] + PInv[1]*v[Q111]*v[Q222] + PInv[3]*v[Q112]*v[Q222] + PInv[4]*v[Q113]*v[Q222] + PInv[2]*v[Q111]*v[Q223] + PInv[4]*v[Q112]*v[Q223] + PInv[5]*v[Q113]*v[Q223])*s;
 
-      f[Q123] = q[Q123]*v[U1] + q[Q112]*v[U3] + q[Q113]*v[U2] + q[Q123]*v[U1] + v[P12]*v[P13]/v[RHO] + v[P13]*v[P12]/v[RHO] + v[P11]*v[P23]/v[RHO] - v[U1]*v[U2]*q[P13] - v[U1]*v[U2]*q[P13] - v[U3]*v[U2]*q[P11] - v[U1]*v[U3]*q[P12] - v[U1]*v[U1]*q[P23] - v[U3]*v[U1]*q[P12] + 3*v[RHO]*v[U1]*v[U2]*v[U3]*v[U1] + PInv[0]*v[Q111]*v[Q123] + PInv[1]*v[Q112]*v[Q123] + PInv[2]*v[Q113]*v[Q123] + PInv[1]*v[Q111]*v[Q223] + PInv[3]*v[Q112]*v[Q223] + PInv[4]*v[Q113]*v[Q223] + PInv[2]*v[Q111]*v[Q233] + PInv[4]*v[Q112]*v[Q233] + PInv[5]*v[Q113]*v[Q233];
+    f[Q123] = (2*v[P12]*(v[P13] + v[RHO]*v[U1]*v[U3]) + v[P11]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[RHO]*(2*v[Q123]*v[U1] + v[Q113]*v[U2] + 2*v[P13]*v[U1]*v[U2] + v[Q112]*v[U3] + v[P23]*(v[U1]*v[U1]) + v[RHO]*v[U2]*v[U3]*(v[U1]*v[U1])))/(v[RHO]) + (PInv[0]*v[Q111]*v[Q123] + PInv[1]*v[Q112]*v[Q123] + PInv[2]*v[Q113]*v[Q123] + PInv[1]*v[Q111]*v[Q223] + PInv[3]*v[Q112]*v[Q223] + PInv[4]*v[Q113]*v[Q223] + PInv[2]*v[Q111]*v[Q233] + PInv[4]*v[Q112]*v[Q233] + PInv[5]*v[Q113]*v[Q233])*s;
 
-      f[Q133] = q[Q133]*v[U1] + q[Q113]*v[U3] + q[Q113]*v[U3] + q[Q133]*v[U1] + v[P13]*v[P13]/v[RHO] + v[P13]*v[P13]/v[RHO] + v[P11]*v[P33]/v[RHO] - v[U1]*v[U3]*q[P13] - v[U1]*v[U3]*q[P13] - v[U3]*v[U3]*q[P11] - v[U1]*v[U3]*q[P13] - v[U1]*v[U1]*q[P33] - v[U3]*v[U1]*q[P13] + 3*v[RHO]*v[U1]*v[U3]*v[U3]*v[U1] + PInv[0]*v[Q111]*v[Q133] + PInv[1]*v[Q112]*v[Q133] + PInv[2]*v[Q113]*v[Q133] + PInv[1]*v[Q111]*v[Q233] + PInv[3]*v[Q112]*v[Q233] + PInv[4]*v[Q113]*v[Q233] + PInv[2]*v[Q111]*v[Q333] + PInv[4]*v[Q112]*v[Q333] + PInv[5]*v[Q113]*v[Q333];
+    f[Q133] = 2*v[Q133]*v[U1] + 2*v[Q113]*v[U3] + 4*v[P13]*v[U1]*v[U3] + (v[P11]*v[P33] + 2*(v[P13]*v[P13]))/(v[RHO]) + v[P33]*(v[U1]*v[U1]) + v[P11]*(v[U3]*v[U3]) + v[RHO]*(v[U1]*v[U1])*(v[U3]*v[U3]) + (PInv[0]*v[Q111]*v[Q133] + PInv[1]*v[Q112]*v[Q133] + PInv[2]*v[Q113]*v[Q133] + PInv[1]*v[Q111]*v[Q233] + PInv[3]*v[Q112]*v[Q233] + PInv[4]*v[Q113]*v[Q233] + PInv[2]*v[Q111]*v[Q333] + PInv[4]*v[Q112]*v[Q333] + PInv[5]*v[Q113]*v[Q333])*s;
 
-      f[Q222] = q[Q222]*v[U1] + q[Q122]*v[U2] + q[Q122]*v[U2] + q[Q122]*v[U2] + v[P22]*v[P12]/v[RHO] + v[P22]*v[P12]/v[RHO] + v[P12]*v[P22]/v[RHO] - v[U2]*v[U2]*q[P12] - v[U1]*v[U2]*q[P22] - v[U2]*v[U2]*q[P12] - v[U2]*v[U2]*q[P12] - v[U2]*v[U1]*q[P22] - v[U2]*v[U1]*q[P22] + 3*v[RHO]*v[U2]*v[U2]*v[U2]*v[U1] + PInv[0]*v[Q112]*v[Q122] + PInv[2]*v[Q122]*v[Q123] + PInv[3]*v[Q122]*v[Q222] + PInv[4]*v[Q123]*v[Q222] + PInv[2]*v[Q112]*v[Q223] + PInv[4]*v[Q122]*v[Q223] + PInv[5]*v[Q123]*v[Q223] + PInv[1]*(v[Q112]*v[Q222] + v[Q122]*v[Q122]);
+    f[Q222] = (3*v[P12]*v[P22])/(v[RHO]) + v[Q222]*v[U1] + 3*v[U2]*(v[Q122] + v[P22]*v[U1] + v[P12]*v[U2]) + v[RHO]*v[U1]*(v[U2]*v[U2]*v[U2]) + s*(PInv[0]*v[Q112]*v[Q122] + PInv[2]*v[Q122]*v[Q123] + PInv[3]*v[Q122]*v[Q222] + PInv[4]*v[Q123]*v[Q222] + PInv[2]*v[Q112]*v[Q223] + PInv[4]*v[Q122]*v[Q223] + PInv[5]*v[Q123]*v[Q223] + PInv[1]*(v[Q112]*v[Q222] + v[Q122]*v[Q122]));
 
-      f[Q223] = q[Q223]*v[U1] + q[Q122]*v[U3] + q[Q123]*v[U2] + q[Q123]*v[U2] + v[P22]*v[P13]/v[RHO] + v[P23]*v[P12]/v[RHO] + v[P12]*v[P23]/v[RHO] - v[U2]*v[U2]*q[P13] - v[U1]*v[U2]*q[P23] - v[U3]*v[U2]*q[P12] - v[U2]*v[U3]*q[P12] - v[U2]*v[U1]*q[P23] - v[U3]*v[U1]*q[P22] + 3*v[RHO]*v[U2]*v[U2]*v[U3]*v[U1] + PInv[0]*v[Q112]*v[Q123] + PInv[1]*v[Q122]*v[Q123] + PInv[1]*v[Q112]*v[Q223] + PInv[3]*v[Q122]*v[Q223] + PInv[4]*v[Q123]*v[Q223] + PInv[2]*v[Q112]*v[Q233] + PInv[4]*v[Q122]*v[Q233] + PInv[5]*v[Q123]*v[Q233] + PInv[2]*(v[Q123]*v[Q123]);
+    f[Q223] = (2*v[P12]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[P13]*(v[P22] + v[RHO]*(v[U2]*v[U2])) + v[RHO]*(v[Q223]*v[U1] + 2*v[Q123]*v[U2] + 2*v[P23]*v[U1]*v[U2] + v[Q122]*v[U3] + v[P22]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U3]*(v[U2]*v[U2])))/(v[RHO]) + s*(PInv[0]*v[Q112]*v[Q123] + PInv[1]*v[Q122]*v[Q123] + PInv[1]*v[Q112]*v[Q223] + PInv[3]*v[Q122]*v[Q223] + PInv[4]*v[Q123]*v[Q223] + PInv[2]*v[Q112]*v[Q233] + PInv[4]*v[Q122]*v[Q233] + PInv[5]*v[Q123]*v[Q233] + PInv[2]*(v[Q123]*v[Q123]));
 
-      f[Q233] = q[Q233]*v[U1] + q[Q123]*v[U3] + q[Q123]*v[U3] + q[Q133]*v[U2] + v[P23]*v[P13]/v[RHO] + v[P23]*v[P13]/v[RHO] + v[P12]*v[P33]/v[RHO] - v[U2]*v[U3]*q[P13] - v[U1]*v[U3]*q[P23] - v[U3]*v[U3]*q[P12] - v[U2]*v[U3]*q[P13] - v[U2]*v[U1]*q[P33] - v[U3]*v[U1]*q[P23] + 3*v[RHO]*v[U2]*v[U3]*v[U3]*v[U1] + PInv[0]*v[Q112]*v[Q133] + PInv[1]*v[Q122]*v[Q133] + PInv[2]*v[Q123]*v[Q133] + PInv[1]*v[Q112]*v[Q233] + PInv[3]*v[Q122]*v[Q233] + PInv[4]*v[Q123]*v[Q233] + PInv[2]*v[Q112]*v[Q333] + PInv[4]*v[Q122]*v[Q333] + PInv[5]*v[Q123]*v[Q333];
+    f[Q233] = (2*v[P13]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[P12]*(v[P33] + v[RHO]*(v[U3]*v[U3])) + v[RHO]*(v[Q233]*v[U1] + v[Q133]*v[U2] + v[P33]*v[U1]*v[U2] + 2*v[Q123]*v[U3] + 2*v[P23]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U2]*(v[U3]*v[U3])))/(v[RHO]) + (PInv[0]*v[Q112]*v[Q133] + PInv[1]*v[Q122]*v[Q133] + PInv[2]*v[Q123]*v[Q133] + PInv[1]*v[Q112]*v[Q233] + PInv[3]*v[Q122]*v[Q233] + PInv[4]*v[Q123]*v[Q233] + PInv[2]*v[Q112]*v[Q333] + PInv[4]*v[Q122]*v[Q333] + PInv[5]*v[Q123]*v[Q333])*s;
 
-      f[Q333] = q[Q333]*v[U1] + q[Q133]*v[U3] + q[Q133]*v[U3] + q[Q133]*v[U3] + v[P33]*v[P13]/v[RHO] + v[P33]*v[P13]/v[RHO] + v[P13]*v[P33]/v[RHO] - v[U3]*v[U3]*q[P13] - v[U1]*v[U3]*q[P33] - v[U3]*v[U3]*q[P13] - v[U3]*v[U3]*q[P13] - v[U3]*v[U1]*q[P33] - v[U3]*v[U1]*q[P33] + 3*v[RHO]*v[U3]*v[U3]*v[U3]*v[U1] + PInv[0]*v[Q113]*v[Q133] + PInv[1]*v[Q123]*v[Q133] + PInv[1]*v[Q113]*v[Q233] + PInv[3]*v[Q123]*v[Q233] + PInv[4]*v[Q133]*v[Q233] + PInv[2]*v[Q113]*v[Q333] + PInv[4]*v[Q123]*v[Q333] + PInv[5]*v[Q133]*v[Q333] + PInv[2]*(v[Q133]*v[Q133]);
-
+    f[Q333] = (3*v[P13]*v[P33])/(v[RHO]) + v[Q333]*v[U1] + 3*v[U3]*(v[Q133] + v[P33]*v[U1] + v[P13]*v[U3]) + v[RHO]*v[U1]*(v[U3]*v[U3]*v[U3]) + s*(PInv[0]*v[Q113]*v[Q133] + PInv[1]*v[Q123]*v[Q133] + PInv[1]*v[Q113]*v[Q233] + PInv[3]*v[Q123]*v[Q233] + PInv[4]*v[Q133]*v[Q233] + PInv[2]*v[Q113]*v[Q333] + PInv[4]*v[Q123]*v[Q333] + PInv[5]*v[Q133]*v[Q333] + PInv[2]*(v[Q133]*v[Q133]));
   }
 
   void TwentyMomentEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s [2])

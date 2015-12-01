@@ -191,6 +191,10 @@ public:
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
+ private:
+      /** interpolation parameter */
+      double s;
+
 };
 
 }
