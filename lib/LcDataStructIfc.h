@@ -56,7 +56,7 @@ namespace Lucee
  *
  * @param nm Name of file to read.
  */
-      void read(const std::string& nm);
+      double read(const std::string& nm);
 
 /**
  * Clone data and return pointer to cloned object.

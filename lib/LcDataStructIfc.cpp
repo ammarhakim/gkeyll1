@@ -67,7 +67,7 @@ namespace Lucee
     delete io;
   }
 
-  void
+  double
   DataStructIfc::read(const std::string& nm)
   {
     std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
@@ -78,7 +78,13 @@ namespace Lucee
     TxIoNodeType fn = io->openFile(inNm, "r");
     TxIoNodeType rootGrp = io->openGroup(fn, "/");
     this->readFromFile(*io, rootGrp, this->getName());
+
+    double tCurr;
+    TxIoNodeType td = io->openGroup(rootGrp, "timeData");
+    io->readAttribute(td, "vsTime", tCurr);
+
     delete io;
+    return tCurr;
   }
 
   TxIoNodeType
@@ -139,9 +145,10 @@ namespace Lucee
   {
     DataStructIfc *d = Lucee::PointerHolder<DataStructIfc>::getObj(L);
     std::string nm = lua_tostring(L, 2);
-    d->read(nm);
+    double tCurr = d->read(nm);
+    lua_pushnumber(L, tCurr);
 
-    return 0;
+    return 1;
   }
 
   int
