@@ -218,13 +218,10 @@ namespace Lucee
     unsigned nlocalConf = confBasis->getNumNodes();
     unsigned nlocalPhase = phaseBasis->getNumNodes();
 
-    int localPositionCells;
-    if(CDIM == 1)
-      localPositionCells = localRgn.getShape(0);
-    else if(CDIM == 2)
-      localPositionCells = localRgn.getShape(0)*localRgn.getShape(1);
-    else
-      localPositionCells = localRgn.getShape(0)*localRgn.getShape(1)*localRgn.getShape(2);
+    // calculate total number of local configuration space cells
+    int localPositionCells = 1;
+    for (unsigned d=0; d<CDIM; ++d)
+      localPositionCells *= localRgn.getShape(d);
 
     // clear out contents of output field
     (*momentLocal) = 0.0;
