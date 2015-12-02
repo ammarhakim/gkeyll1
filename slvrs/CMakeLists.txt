@@ -59,6 +59,7 @@ set(lcslvrs_SOURCES
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
+  LcImplicitTwentyMomentSrcUpdater.cpp
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdge3DUpdater.cpp
@@ -112,6 +113,8 @@ set(lcslvrs_SOURCES
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
+  LcTwentyMomentEquation.cpp
+  LcTwentyMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
   LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
