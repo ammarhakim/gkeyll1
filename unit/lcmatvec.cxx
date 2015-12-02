@@ -140,7 +140,7 @@ doMatVec(unsigned N, int p, int nloop, unsigned mvtype)
         matVec4(1.0, p, p, &m.first(), &fInPtr[0], 0.0, &fOutPtr[0]);
       else if (mvtype==5)
       {
-        vecOutEig = matEig*vecInEig;
+        vecOutEig.noalias() = matEig*vecInEig;
         for (unsigned i=0; i<p; ++i) fOutPtr[i] = vecOutEig[p];
       }
     }
@@ -329,7 +329,12 @@ main(int argc, char **argv)
   start = clock();
   nops = doMatVec(1200, 100, 1000, 4);
   end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=100 [BLAS]"  << endl;  
+  cout << right << fixed << difftime(end,start)  << " p=100 [BLAS]"  << endl;
+
+  start = clock();
+  nops = doMatVec(1200, 100, 1000, 5);
+  end = clock();
+  cout << right << fixed << difftime(end,start)  << " p=100 [EIGEN]"  << endl;
 
   std::cout << "--------" << std::endl;
   // start = clock();
@@ -337,8 +342,8 @@ main(int argc, char **argv)
   // end = clock();
   // cout << right << fixed << difftime(end,start)  << " p=4 [BLAS: gemm]"  << endl;
 
-  start = clock();
-  nops = doMatVecAsMatMat(1200, 100, 1000);
-  end = clock();
-  cout << right << fixed << difftime(end,start)  << " p=100 [BLAS: gemm]"  << endl;
+  // start = clock();
+  // nops = doMatVecAsMatMat(1200, 100, 1000);
+  // end = clock();
+  // cout << right << fixed << difftime(end,start)  << " p=100 [BLAS: gemm]"  << endl;
 }
