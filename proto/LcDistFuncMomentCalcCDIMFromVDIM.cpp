@@ -232,7 +232,9 @@ namespace Lucee
     // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
     Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
-
+    Eigen::VectorXd distfVec(nlocalPhase);
+    // Accumulate contribution to moment from this cell
+    Eigen::VectorXd resultVector(nlocalConf);
     while(seq.step())
     {
       seq.fillWithIndex(idx);
@@ -243,20 +245,16 @@ namespace Lucee
       momentLocal->setPtr(momentPtr, idx);
       distF.setPtr(distFPtr, idx);
 
-      Eigen::VectorXd distfVec(nlocalPhase);
       for (int i = 0; i < nlocalPhase; i++)
         distfVec(i) = distFPtr[i];
 
-      // Accumulate contribution to moment from this cell
-      Eigen::VectorXd resultVector(nlocalConf);
 
       if (calcMom == 0)
-        resultVector = mom0Matrix*distfVec;
+        resultVector.noalias() = mom0Matrix*distfVec;
       else if (calcMom == 1)
-        resultVector = mom1Matrix*distfVec + xc[momDir]*mom0Matrix*distfVec;
+        resultVector.noalias() = (mom1Matrix + xc[momDir]*mom0Matrix)*distfVec;
       else if (calcMom == 2)
-        resultVector = mom2Matrix*distfVec + 2*xc[momDir]*mom1Matrix*distfVec +
-          xc[momDir]*xc[momDir]*mom0Matrix*distfVec;
+        resultVector.noalias() = (mom2Matrix + 2*xc[momDir]*mom1Matrix + xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
 
       for (int i = 0; i < nlocalConf; i++)
         momentPtr[i] = momentPtr[i] + resultVector(i);
