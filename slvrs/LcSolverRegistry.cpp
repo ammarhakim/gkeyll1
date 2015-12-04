@@ -43,6 +43,7 @@
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
+#include <LcImplicitTwentyMomentCollisionUpdater.h>
 #include <LcImplicitTwentyMomentSrcUpdater.h>
 #include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
@@ -276,6 +277,10 @@ namespace Lucee
       .append<Lucee::ImplicitTwentyMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitTwentyMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitTwentyMomentSrcUpdater<3> >()
+
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<1> >()
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<2> >()
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<3> >()
 
       .append<TwoFluidMomentumRelaxSrcUpdater<1> >()
       .append<TwoFluidMomentumRelaxSrcUpdater<2> >()
