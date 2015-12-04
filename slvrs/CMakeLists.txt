@@ -60,6 +60,7 @@ set(lcslvrs_SOURCES
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
   LcImplicitTwentyMomentSrcUpdater.cpp
+  LcImplicitTwentyMomentCollisionUpdater.cpp
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdge3DUpdater.cpp
