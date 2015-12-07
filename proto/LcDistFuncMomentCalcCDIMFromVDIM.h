@@ -83,14 +83,14 @@ namespace Lucee
       unsigned calcMom;
 /** Space to store moment data for on a processor */
       Lucee::Field<CDIM, double> *momentLocal;
-/** Direction to calcuate moment in */
-      unsigned momDir;
 /** Zeroth moment matrix */
       Eigen::MatrixXd mom0Matrix;
 /** First moment matrix */
-      Eigen::MatrixXd mom1Matrix;
+      std::vector<Eigen::MatrixXd> mom1Matrix;
 /** Second moment matrix */
-      Eigen::MatrixXd mom2Matrix;
+      std::vector< std::vector<Eigen::MatrixXd> > mom2Matrix;
+/** Number of moments being computed (vector or tensor) */
+      unsigned nMom;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
