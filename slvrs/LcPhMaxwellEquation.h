@@ -176,6 +176,9 @@ namespace Lucee
       NumFlux numFlux;
 /** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
       bool useIntermediateWave;
+/** Flag to indicate if static EM field is present */
+      bool hasStatic;
+      
   };
 }
 
