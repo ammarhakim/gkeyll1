@@ -144,6 +144,7 @@ namespace Lucee
   IsoThermEulerEquation::waves(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,    
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
     if (numFlux == NF_ROE)
