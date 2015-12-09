@@ -31,6 +31,9 @@ namespace Lucee
 /** Create new modal DG solver in 1D */
       DistFuncMomentCalc1D();
 
+/**  Destructor */
+      virtual ~DistFuncMomentCalc1D();
+
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -70,6 +73,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
 /** Moment to compute */
       unsigned calcMom;
+/** Space to store moment data for on a processor */
+      Lucee::Field<1, double> *moment;
 
 /**
  * Matrix holder: this class is needed as the Matrix class does not

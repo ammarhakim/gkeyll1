@@ -52,32 +52,34 @@ set(lcslvrs_SOURCES
   LcGridOdeIntegrator.cpp
   LcGridOdePointIntegrator.cpp
   LcGridOdePointIntegratorUpdater.cpp
-  LcHeatFluxAtEdgeUpdater.cpp
   LcHeatFluxAtEdge3DUpdater.cpp
+  LcHeatFluxAtEdgeUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
+  LcImplicitTwentyMomentSrcUpdater.cpp
+  LcImplicitTwentyMomentCollisionUpdater.cpp
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
-  LcKineticHeatFluxAtEdgeUpdater.cpp
   LcKineticHeatFluxAtEdge3DUpdater.cpp
+  LcKineticHeatFluxAtEdgeUpdater.cpp
   LcKineticTotalEnergyUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
-  LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDiff3DUpdater.cpp
-  LcLenardBernsteinDragUpdater.cpp
+  LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDrag3DUpdater.cpp
+  LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
   LcLorentzForceSource.cpp
   LcMHDHamiltonianUpdater.cpp
   LcMaxwellEquation.cpp
-  LcMomentsAtEdgesUpdater.cpp
   LcMomentsAtEdges3DUpdater.cpp
+  LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgCopyBoundaryCondition.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
@@ -88,6 +90,7 @@ set(lcslvrs_SOURCES
   LcNodalFiniteElementIfc.cpp
   LcNodalHyperDiffusionUpdater.cpp
   LcNodalPositiveFilterUpdater.cpp
+  LcNodalVlasovUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
@@ -95,8 +98,8 @@ set(lcslvrs_SOURCES
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcReflectionBoundaryCondition.cpp
-  LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOL3DElectronTempAtWallCalc.cpp
+  LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLIonDensityInitialization.cpp
@@ -111,12 +114,14 @@ set(lcslvrs_SOURCES
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
+  LcTwentyMomentEquation.cpp
+  LcTwentyMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
   LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
-  LcVelocitiesFromMomentsUpdater.cpp
   LcVelocitiesFromMoments3DUpdater.cpp
+  LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
@@ -124,9 +129,10 @@ set(lcslvrs_SOURCES
 
 if (PETSC_FOUND)
   set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
-    LcFemPoissonStructUpdater.cpp
     LcElectromagneticContAUpdater.cpp
     LcElectrostaticContPhiUpdater.cpp
+    LcFemGKPoissonStructUpdater.cpp 
+    LcFemPoissonStructUpdater.cpp
   )
 endif (PETSC_FOUND)
 

@@ -119,9 +119,12 @@ namespace Lucee
 
       for (int componentIndex = 0; componentIndex < nElcAtQuadPoints.rows(); componentIndex++)
       {
-        intElcDensity += gaussWeights[componentIndex]*nElcAtQuadPoints(componentIndex);
-        avgLogElcDensity += gaussWeights[componentIndex]*nElcAtQuadPoints(componentIndex)*
-          std::log(nElcAtQuadPoints(componentIndex));
+        if (nElcAtQuadPoints(componentIndex) != 0.0)
+        {
+          intElcDensity += gaussWeights[componentIndex]*nElcAtQuadPoints(componentIndex);
+          avgLogElcDensity += gaussWeights[componentIndex]*nElcAtQuadPoints(componentIndex)*
+            std::log(nElcAtQuadPoints(componentIndex));
+        }
       }
 
       // Initial condition: n_i(z) = n_e(z)

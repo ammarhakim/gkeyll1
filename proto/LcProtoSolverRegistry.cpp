@@ -14,13 +14,16 @@
 #include <LcConstGravitySrcUpdater.h>
 #include <LcConstructLinearOperatorMatrix.h>
 #include <LcCopy1DTo2DNodalField.h>
+#include <LcCopyNodalFields.h>
 #include <LcDGDiffusionUpdater1D.h>
 #include <LcDistFuncMomentCalc1D.h>
 #include <LcDistFuncMomentCalc1DFrom3D.h>
+#include <LcDistFuncMomentCalc1DFrom4D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalc3D.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncMomentCalcWeighted3D.h>
+#include <LcDistFuncMomentCalcCDIMFromVDIM.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater3D.h>
@@ -35,6 +38,7 @@
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
+#include <LcIntegrateFieldProduct.h>
 #include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
@@ -55,9 +59,9 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
-#include <LcPoissonBracketUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
 #include <LcPoissonBracketSimpleUpdater.h>
+#include <LcPoissonBracketUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
@@ -67,9 +71,10 @@
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
-#include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
+#include <LcThreeWaveInteractSrcUpdater.h>
+#include <LcZonalAverageCalc3D.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -103,6 +108,7 @@ namespace Lucee
       .append<Lucee::Copy1DTo2DNodalField>()
       .append<Lucee::DistFuncMomentCalc1D>()
       .append<Lucee::DistFuncMomentCalc1DFrom3D>()
+      .append<Lucee::DistFuncMomentCalc1DFrom4D>()
       .append<Lucee::DistFuncMomentCalc2D>()
       .append<Lucee::DistFuncMomentCalc3D>()
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
@@ -110,7 +116,13 @@ namespace Lucee
       .append<Lucee::DistFuncReflectionBcUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
-      
+
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,1> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,2> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<1,3> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<2,2> >()
+      .append<Lucee::DistFuncMomentCalcCDIMFromVDIM<2,3> >()
+
       .append<Lucee::ETGAdjointSource<4> >()
       .append<Lucee::ETGAdjointSource<5> >()
       .append<Lucee::ETGAdiabaticPotentialUpdater>()
@@ -145,6 +157,10 @@ namespace Lucee
       .append<Lucee::IntegrateNodalField<1> >()
       .append<Lucee::IntegrateNodalField<2> >()
       .append<Lucee::IntegrateNodalField<3> >()
+
+      .append<Lucee::IntegrateFieldProduct<1> >()
+      .append<Lucee::IntegrateFieldProduct<2> >()
+      .append<Lucee::IntegrateFieldProduct<3> >()
 
       .append<Lucee::MaxwellTm2DUpdater>()
       .append<Lucee::ModalDg1DDiffusionUpdater>()
@@ -182,6 +198,18 @@ namespace Lucee
       .append<Lucee::NodalCopy1DTo3DFieldUpdater>()
       .append<Lucee::NodalCopy2DTo4DFieldUpdater>()
       .append<Lucee::NodalCopy3DTo5DFieldUpdater>()
+
+      .append<Lucee::CopyNodalFieldsUpdater<1,2> >()
+      .append<Lucee::CopyNodalFieldsUpdater<1,3> >()
+      .append<Lucee::CopyNodalFieldsUpdater<1,4> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,3> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,4> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,5> >()
+      .append<Lucee::CopyNodalFieldsUpdater<3,5> >()
+
+      .append<Lucee::CopyNodalFieldsUpdater<1,1> >()
+      .append<Lucee::CopyNodalFieldsUpdater<2,2> >()
+      .append<Lucee::CopyNodalFieldsUpdater<3,3> >()
 
       .append<Lucee::NormGradPhiUpdater<1> >()
       .append<Lucee::NormGradPhiUpdater<2> >()
@@ -226,6 +254,7 @@ namespace Lucee
       .append<Lucee::SetSingleNodeToOneUpdater<4> >()
       .append<Lucee::SetSingleNodeToOneUpdater<5> >()
 
+      .append<Lucee::ZonalAverageCalc3D>()
       ;
 
 #ifdef HAVE_PETSC

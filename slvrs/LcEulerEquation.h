@@ -111,12 +111,15 @@ namespace Lucee
  * @param jump Jump to decompose.
  * @param ql Left state conserved variables.
  * @param qr Right state conserved variables.
+ * @param auxVarsl Left auxillary variables needed to compute waves.
+ * @param auxVarsr Right auxillary variables needed to compute waves.
  * @param waves On output, waves. This matrix has shape (meqn X mwave).
  * @param s On output, wave speeds.
  */
       virtual void waves(const Lucee::RectCoordSys& c,
         const Lucee::ConstFieldPtr<double>& jump,
         const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+        const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
         Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s);
 
 /**

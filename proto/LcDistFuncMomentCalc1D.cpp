@@ -29,6 +29,11 @@ namespace Lucee
     : Lucee::UpdaterIfc()
   {
   }
+
+  DistFuncMomentCalc1D::~DistFuncMomentCalc1D()
+  {
+    delete moment;
+  }
   
   void
   DistFuncMomentCalc1D::readInput(Lucee::LuaTable& tbl)
@@ -101,6 +106,13 @@ namespace Lucee
       nodalBasis1d->getMassMatrix(massMatrix1d);
       Lucee::solve(massMatrix1d, mm[m].m);
     }
+
+    int lower[1], upper[1];
+    lower[0] = localRgn.getLower(0); upper[0] = localRgn.getUpper(0);
+    Lucee::Region<1, int> local1D(lower, upper);
+    int lg[1] = {0}, ug[1] = {0};
+// allocate space for storing local moment calculation
+    moment = new Lucee::Field<1, double>(local1D, nlocal1d, lg, ug);
   }
 
   Lucee::UpdaterStatus
@@ -116,18 +128,18 @@ namespace Lucee
     Lucee::Field<1, double>& momentOut = this->getOut<Lucee::Field<1, double> >(0);
 
 // create duplicate to store local moments
-    Lucee::Field<1, double> moment = momentOut.duplicate();
+    //Lucee::Field<1, double> moment = momentOut.duplicate();
 
 // local region to update (This is the 2D region. The 1D region is
 // assumed to have the same cell layout as the X-direction of the 2D region)
     Lucee::Region<2, int> localRgn = grid.getLocalRegion();
 
 // clear out contents of output field
-    moment = 0.0;
+    (*moment) = 0.0;
 
 // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
-    Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+    Lucee::FieldPtr<double> momentPtr = moment->createPtr();
 
     double xc[3];
     double dv = grid.getDx(1);
@@ -138,7 +150,7 @@ namespace Lucee
 // loop over all X-direction cells
     for (int i=localRgn.getLower(0); i<localRgn.getUpper(0); ++i)
     {
-      moment.setPtr(momentPtr, i); // 1D field
+      moment->setPtr(momentPtr, i); // 1D field
 
 // sum over all Y-direction cells
       for (int j=localRgn.getLower(1); j<localRgn.getUpper(1); ++j)
@@ -187,7 +199,7 @@ namespace Lucee
 // case, grid is phase-space grid, which is not what we want.
     TxCommBase *momComm = momentOut.getMomComm();
     unsigned xsize = momentOut.getNumComponents()*localRgn.getShape(0); // amount to communicate
-    momComm->allreduce(xsize, &moment.firstInterior(), &momentOut.firstInterior(), TX_SUM);
+    momComm->allreduce(xsize, &moment->firstInterior(), &momentOut.firstInterior(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }
