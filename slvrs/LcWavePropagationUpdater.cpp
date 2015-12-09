@@ -310,6 +310,22 @@ namespace Lucee
           equation->rotateToLocal(coordSys, &qPtr[0], &qLocal[0]);
           equation->rotateToLocal(coordSys, &qPtrl[0], &qLocall[0]);
 
+// create input auxiliary variables list
+          for (unsigned a=0; a<numAuxVars; ++a)
+          {
+            Lucee::ConstFieldPtr<double> aPtr = auxVars[a]->createConstPtr();
+            auxVars[a]->setPtr(aPtr, idx);
+            auxQr[a] = &aPtr[0];
+            
+            auxVars[a]->setPtr(aPtr, idxl);
+            auxQl[a] = &aPtr[0];
+
+// NOTE: we do not rotate auxiliary variables as the equation system
+// should do the rotations if needed. This is perhaps inconsistent,
+// but the HyperEquation class interface need not be cluttered with
+// yet another set of rotation functions.
+          }          
+
 // attach pointers to fluctuations, speeds, waves (note these are 1D arrays)
           apdq[dir]->setPtr(apdqPtr, i);
           amdq[dir]->setPtr(amdqPtr, i);
@@ -321,7 +337,7 @@ namespace Lucee
             jump[m] = qLocal[m] - qLocall[m];
 
 // calculate waves and speeds
-          equation->waves(coordSys, jump, qLocall, qLocal, inAuxQl, inAuxQr, wavesLocal, speedsPtr);
+          equation->waves(coordSys, jump, qLocall, qLocal, auxQl, auxQr, wavesLocal, speedsPtr);
 // rotate waves back to global frame (stored in waves[dir] array)
           Lucee::Matrix<double> wavesGlobal(meqn, mwave, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)
