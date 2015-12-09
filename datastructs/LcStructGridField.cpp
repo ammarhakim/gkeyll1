@@ -309,7 +309,7 @@ namespace Lucee
     {
       int srcrank = grid->getRgnRank(*niter);
       Lucee::Region<NDIM, int> otherBox = grid->getNeighborRgn(*niter);
-      int tag = 1000;
+      int tag = 1000000;
       if (rank == srcrank) 
 //  skip if we're receiving from ourselves
         continue;
@@ -356,7 +356,7 @@ namespace Lucee
     {
       int destrank = grid->getRgnRank(*niter);
       Lucee::Region<NDIM, int> otherBox = grid->getNeighborRgn(*niter);
-      int tag = 1000;
+      int tag = 1000000;
 
       if (rank == destrank) 
       {
