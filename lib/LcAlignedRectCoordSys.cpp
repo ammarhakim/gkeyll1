@@ -28,7 +28,18 @@ namespace Lucee
   static unsigned S31 = 2;
   static unsigned S32 = 4;
   static unsigned S33 = 5;
+  static unsigned Q111 = 0;
+  static unsigned Q112 = 1;
+  static unsigned Q113 = 2;
+  static unsigned Q122 = 3;
+  static unsigned Q123 = 4; 
+  static unsigned Q133 = 5;
+  static unsigned Q222 = 6;
+  static unsigned Q223 = 7;
+  static unsigned Q233 = 8;
+  static unsigned Q333 = 9;
 
+  
   AlignedRectCoordSys::AlignedRectCoordSys(unsigned dir)
     : RectCoordSys(), dir(dir)
   {
@@ -222,7 +233,76 @@ namespace Lucee
       outSM[5] = R2[2];
     }
   }
+  
+  void 
+  AlignedRectCoordSys::rotateSymTensorToLocal(const double inSM [10], double outSM [10]) const
+  {
+    if (dir==0)
+    { // no rotation
+      for (unsigned i=0; i<10; ++i)
+        outSM[i] = inSM[i];
+    }
+    else if (dir == 1)
+    { 
+        // outsm[Qijk] = R[im]R[jn]R[kl] insm[Qijk]
+      outSM[Q111] = inSM[6];
+      outSM[Q112] = -inSM[3];
+      outSM[Q113] = inSM[7];
+      outSM[Q122] = inSM[1];
+      outSM[Q123] = -inSM[4];
+      outSM[Q133] = inSM[8];
+      outSM[Q222] = -inSM[0];
+      outSM[Q223] = inSM[2];
+      outSM[Q233] = -inSM[5];
+      outSM[Q333] = inSM[9];
+    } else {
+      outSM[Q111] = inSM[9];
+      outSM[Q112] = inSM[8];
+      outSM[Q113] = -inSM[5];
+      outSM[Q122] = inSM[7];
+      outSM[Q123] = -inSM[4];
+      outSM[Q133] = inSM[2];
+      outSM[Q222] = inSM[6];
+      outSM[Q223] = -inSM[3];
+      outSM[Q233] = inSM[1];
+      outSM[Q333] = -inSM[0];
+    }
+  }
 
+  void 
+  AlignedRectCoordSys::rotateSymTensorToGlobal(const double inSM [10], double outSM [10]) const
+  {
+    if (dir==0)
+    { // no rotation
+      for (unsigned i=0; i<10; ++i)
+        outSM[i] = inSM[i];
+    }
+    else if (dir==1)
+    { 
+      outSM[Q111] = -inSM[6];
+      outSM[Q112] = inSM[3];
+      outSM[Q113] = inSM[7];
+      outSM[Q122] = -inSM[1];
+      outSM[Q123] = -inSM[4];
+      outSM[Q133] = -inSM[8];
+      outSM[Q222] = inSM[0];
+      outSM[Q223] = inSM[2];
+      outSM[Q233] = inSM[5];
+      outSM[Q333] = inSM[9];
+    } else {
+      outSM[Q111] = -inSM[9];
+      outSM[Q112] = inSM[8];
+      outSM[Q113] = inSM[5];
+      outSM[Q122] = -inSM[7];
+      outSM[Q123] = -inSM[4];
+      outSM[Q133] = -inSM[2];
+      outSM[Q222] = inSM[6];
+      outSM[Q223] = inSM[3];
+      outSM[Q233] = inSM[1];
+      outSM[Q333] = inSM[0];
+
+    }
+  }
   int
   AlignedRectCoordSys::getAlignmentDirection() const
   {

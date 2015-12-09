@@ -85,7 +85,9 @@ namespace Lucee
 /** Flag to indicate if nodes in source are shared or not */
       bool srcNodesShared;
 /** Flag to indicate if nodes in solution are shared or not */
-      bool solNodesShared; 
+      bool solNodesShared;
+/** Flag to indicate if we are solving the GK Poisson equation */
+      bool isGkPoisson;
 /** Petsc matrices to store linear operator */
       Mat stiffMat;
 /** Petsc vectors for source and initial guess */
@@ -98,6 +100,11 @@ namespace Lucee
       Vec localData;
 /** Scatter object to get data onto local processor */
       VecScatter vecSctr;
+/** Constant term for solving a modified Poisson equation */
+      double modifierConstant;
+/** Should source be adjusted? */
+      bool adjustSource;
+
 
 /** Structure to store BC data. */
       struct FemPoissonBcData

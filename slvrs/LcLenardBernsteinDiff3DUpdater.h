@@ -91,8 +91,6 @@ namespace Lucee
       double B0;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis;
-/** List of matrices for current cell */
-      std::vector<Eigen::MatrixXd > iMat;
 /** List of matrices on each lower face */
       std::vector<Eigen::MatrixXd > lowerMat;
 /** List of matrices on each upper face */

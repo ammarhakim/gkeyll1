@@ -73,6 +73,11 @@ namespace Lucee
           throw lce;
       }
     }
+
+// flag to indicate if there is a static field
+    hasStatic = false;
+    if (tbl.hasBool("hasStaticField"))
+      hasStatic = tbl.getBool("hasStaticField");
   }
 
   void
@@ -145,18 +150,33 @@ namespace Lucee
   PhMaxwellEquation::waves(const Lucee::RectCoordSys& c,
     const Lucee::ConstFieldPtr<double>& jump,
     const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,    
     Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
   {
     double c1 = 1/lightSpeed;
+
+// total jump may include static EM fields passed as aux variable    
+    double totalJump[8];
+    for (unsigned i=0; i<8; ++i)
+      totalJump[i] = jump[i];
+// add in extra jump if we have static fields    
+    if (hasStatic)
+    {
+      double emL[8], emR[8];
+      this->rotateToLocal(c, auxVarsl[0], emL);
+      this->rotateToLocal(c, auxVarsr[0], emR);
+      totalJump[BX] += emR[BX]-emL[BX];
+    }
+    
 // project jump onto left eigenvectors (see Tech Note 1012)
-    double a0 = 0.5*(jump[3] - c1*jump[7]);
-    double a1 = 0.5*(jump[3] + c1*jump[7]);
-    double a2 = 0.5*(jump[0] - lightSpeed*jump[6]);
-    double a3 = 0.5*(jump[0] + lightSpeed*jump[6]);
-    double a4 = 0.5*(jump[1] - lightSpeed*jump[5]);
-    double a5 = 0.5*(jump[2] + lightSpeed*jump[4]);
-    double a6 = 0.5*(jump[1] + lightSpeed*jump[5]);
-    double a7 = 0.5*(jump[2] - lightSpeed*jump[4]);
+    double a0 = 0.5*(totalJump[3] - c1*totalJump[7]);
+    double a1 = 0.5*(totalJump[3] + c1*totalJump[7]);
+    double a2 = 0.5*(totalJump[0] - lightSpeed*totalJump[6]);
+    double a3 = 0.5*(totalJump[0] + lightSpeed*totalJump[6]);
+    double a4 = 0.5*(totalJump[1] - lightSpeed*totalJump[5]);
+    double a5 = 0.5*(totalJump[2] + lightSpeed*totalJump[4]);
+    double a6 = 0.5*(totalJump[1] + lightSpeed*totalJump[5]);
+    double a7 = 0.5*(totalJump[2] - lightSpeed*totalJump[4]);
 
 // compute waves (see Tech Note 1012)
 

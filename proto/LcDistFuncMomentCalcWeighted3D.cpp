@@ -28,6 +28,11 @@ namespace Lucee
     : Lucee::UpdaterIfc()
   {
   }
+
+  DistFuncMomentCalcWeighted3D::~DistFuncMomentCalcWeighted3D()
+  {
+    delete moment;
+  }
   
   void
   DistFuncMomentCalcWeighted3D::readInput(Lucee::LuaTable& tbl)
@@ -161,6 +166,15 @@ namespace Lucee
       mom1MatrixVector[h] = massMatrix3d.inverse()*mom1MatrixVector[h];
       mom2MatrixVector[h] = massMatrix3d.inverse()*mom2MatrixVector[h];
     }
+
+    int lower[3], upper[3];
+    lower[0] = localRgn.getLower(0); upper[0] = localRgn.getUpper(0);
+    lower[1] = localRgn.getLower(1); upper[1] = localRgn.getUpper(1);
+    lower[2] = localRgn.getLower(2); upper[2] = localRgn.getUpper(2);
+    Lucee::Region<3, int> local3D(lower, upper);
+    int lg[3] = {1,1,1}, ug[3] = {1,1,1}; // Assume there is a 1 layer ghost cell
+    // allocate space for storing local moment calculation
+    moment = new Lucee::Field<3, double>(local3D, nlocal3d, lg, ug);
   }
 
   Lucee::UpdaterStatus
@@ -179,7 +193,9 @@ namespace Lucee
     Lucee::Field<3, double>& momentOut = this->getOut<Lucee::Field<3, double> >(0);
 
     // create duplicate to store local moments
-    Lucee::Field<3, double> moment = momentOut.duplicate();
+    //Lucee::Field<3, double> moment = momentOut.duplicate();
+    // clear out contents of output field
+    (*moment) = 0.0;
 
     // local region to update (This is the 5D region. The 3D region is
     // assumed to have the same cell layout as the X-direction of the 5D region)
@@ -195,12 +211,12 @@ namespace Lucee
     localRgn.setUpper(2, localExtRgn.getUpper(2));
 
     // clear out contents of output field
-    moment = 0.0;
+    //moment = 0.0;
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
     Lucee::ConstFieldPtr<double> weightFPtr = weightF.createConstPtr();
-    Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+    Lucee::FieldPtr<double> momentPtr = moment->createPtr();
 
     int idx[5];
     double xc[5];
@@ -223,7 +239,7 @@ namespace Lucee
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
-      moment.setPtr(momentPtr, idx[0], idx[1], idx[2]);
+      moment->setPtr(momentPtr, idx[0], idx[1], idx[2]);
       distF.setPtr(distFPtr, idx);
       weightF.setPtr(weightFPtr, idx[0], idx[1], idx[2]);
 
@@ -258,7 +274,7 @@ namespace Lucee
       seq3d.fillWithIndex(idx3d);
       int cellIndex = idxr.getIndex(idx3d);
 
-      moment.setPtr(momentPtr, idx3d);
+      moment->setPtr(momentPtr, idx3d);
       // copy data to vector
       for (int i = 0; i < nlocal3d; i++)
         localMoment[cellIndex*nlocal3d+i] = momentPtr[i];

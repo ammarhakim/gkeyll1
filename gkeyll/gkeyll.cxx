@@ -193,7 +193,7 @@ main(int argc, char **argv)
 
   lua_pop(L, 1); // done adding command line stuff
 
-  infoStrm << "** Welcome to Lucee!" << std::endl;
+  infoStrm << "** This is Gkeyll!" << std::endl;
   time_t start = time(0); // time at start of main loop
   clock_t start_t = clock();
   struct tm * timeinfo;

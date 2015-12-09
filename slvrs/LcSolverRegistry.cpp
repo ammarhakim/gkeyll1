@@ -38,27 +38,29 @@
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
 #include <LcGridOdePointIntegratorUpdater.h>
-#include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcHeatFluxAtEdge3DUpdater.h>
+#include <LcHeatFluxAtEdgeUpdater.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
 #include <LcImplicitTenMomentSrcUpdater.h>
+#include <LcImplicitTwentyMomentCollisionUpdater.h>
+#include <LcImplicitTwentyMomentSrcUpdater.h>
 #include <LcKineticEnergyUpdater.h>
-#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
+#include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
-#include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDiff3DUpdater.h>
-#include <LcLenardBernsteinDragUpdater.h>
+#include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDrag3DUpdater.h>
+#include <LcLenardBernsteinDragUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcMHDHamiltonianUpdater.h>
-#include <LcMomentsAtEdgesUpdater.h>
 #include <LcMomentsAtEdges3DUpdater.h>
+#include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgCopyBoundaryCondition.h>
 #include <LcNodalDgFunctionBoundaryCondition.h>
@@ -69,6 +71,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcNodalPositiveFilterUpdater.h>
+#include <LcNodalVlasovUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -76,8 +79,8 @@
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcReflectionBoundaryCondition.h>
 #include <LcRegisteredObjList.h>
-#include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOL3DElectronTempAtWallCalc.cpp>
+#include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
@@ -88,10 +91,11 @@
 #include <LcStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
+#include <LcTwentyMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
-#include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
+#include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -100,9 +104,10 @@
 #include <loki/Singleton.h>
 
 #ifdef HAVE_PETSC
-# include <LcElectrostaticContPhiUpdater.h>
-# include <LcFemPoissonStructUpdater.h>
 # include <LcElectromagneticContAUpdater.h>
+# include <LcElectrostaticContPhiUpdater.h>
+# include <LcFemGKPoissonStructUpdater.h>
+# include <LcFemPoissonStructUpdater.h>
 #endif
 
 namespace Lucee
@@ -198,6 +203,9 @@ namespace Lucee
       .append<Lucee::FemPoissonStructUpdater<2> >()
       .append<Lucee::FemPoissonStructUpdater<3> >()
 
+      .append<Lucee::FemGKPoissonStructUpdater<2> >()
+      .append<Lucee::FemGKPoissonStructUpdater<3> >()
+
       .append<Lucee::ElectrostaticContPhiUpdater>()
 
       .append<Lucee::ElectromagneticContAUpdater>()
@@ -231,6 +239,13 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<4> >()
       .append<Lucee::NodalDisContHyperUpdater<5> >()
 
+      .append<Lucee::NodalVlasovUpdater<1,1> >()
+      .append<Lucee::NodalVlasovUpdater<1,2> >()
+      .append<Lucee::NodalVlasovUpdater<1,3> >()
+      .append<Lucee::NodalVlasovUpdater<2,2> >()
+      .append<Lucee::NodalVlasovUpdater<2,3> >()
+      //.append<Lucee::NodalVlasovUpdater<3,3> >()
+
       .append<Lucee::NodalPositiveFilterUpdater<1> >()
       .append<Lucee::NodalPositiveFilterUpdater<2> >()
       .append<Lucee::NodalPositiveFilterUpdater<3> >()
@@ -258,6 +273,14 @@ namespace Lucee
       .append<Lucee::ImplicitTenMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitTenMomentSrcUpdater<2> >()
       .append<Lucee::ImplicitTenMomentSrcUpdater<3> >()
+
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<1> >()
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<2> >()
+      .append<Lucee::ImplicitTwentyMomentSrcUpdater<3> >()
+
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<1> >()
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<2> >()
+      .append<Lucee::ImplicitTwentyMomentCollisionUpdater<3> >()
 
       .append<TwoFluidMomentumRelaxSrcUpdater<1> >()
       .append<TwoFluidMomentumRelaxSrcUpdater<2> >()
@@ -307,6 +330,7 @@ namespace Lucee
       .append<Lucee::CurrentSource>()
       .append<Lucee::FunctionSource>()
       .append<Lucee::TenMomentFluidSource>()
+      .append<Lucee::TwentyMomentFluidSource>()
       .append<Lucee::FieldFunctionSource>()
       .append<Lucee::EulerAxiSource>();
 

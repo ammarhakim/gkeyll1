@@ -23,6 +23,7 @@
 #include <LcPhMaxwellEquation.h>
 #include <LcRegisteredObjList.h>
 #include <LcTenMomentEquation.h>
+#include <LcTwentyMomentEquation.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -43,6 +44,7 @@ namespace Lucee
       .append<Lucee::EulerEquation>()
       .append<Lucee::IsoThermEulerEquation>()
       .append<Lucee::TenMomentEquation>()
+      .append<Lucee::TwentyMomentEquation>()
       .append<Lucee::MaxwellEquation>()
       .append<Lucee::PhMaxwellEquation>()
       .append<Lucee::DivEquation<1> >()

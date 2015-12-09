@@ -87,6 +87,11 @@ namespace Lucee
     if (tbl.hasBool("solutionNodesShared"))
       solNodesShared = tbl.getBool("solutionNodesShared");
 
+// check if we are actually solving GK Poisson equations
+    isGkPoisson = false;
+    if (tbl.hasBool("isGyroKineticPoisson"))
+      isGkPoisson = tbl.getBool("isGyroKineticPoisson");
+
     for (unsigned i=0; i<NDIM; ++i) 
       periodicFlgs[i] = false;
 
@@ -167,6 +172,16 @@ namespace Lucee
       }
     }
 
+    modifierConstant = 0.0;
+// read in modifier constant (if any)
+    if (tbl.hasNumber("modifierConstant"))
+      modifierConstant = tbl.getNumber("modifierConstant");
+
+// Adjust source if doing periodic BCs and no modifier constant specified
+    adjustSource = false;
+    if (allPeriodic && (modifierConstant==0) )
+      adjustSource = true;
+
 // check if stiffness matrix should be written out
     writeMatrix = false;
     if (tbl.hasBool("writeStiffnessMatrix"))
@@ -213,7 +228,7 @@ namespace Lucee
 
     DMSG("Matrix and vectors allocated");
 
-    Lucee::Matrix<double> localStiff(nlocal, nlocal);
+    Lucee::Matrix<double> localStiff(nlocal, nlocal), localMass(nlocal, nlocal);
     std::vector<int> lgMap(nlocal);
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
@@ -231,12 +246,16 @@ namespace Lucee
       seq.fillWithIndex(idx);
       nodalBasis->setIndex(idx);
 
-      nodalBasis->getStiffnessMatrix(localStiff);
+      if (isGkPoisson)
+        nodalBasis->getPerpStiffnessMatrix(localStiff);
+      else
+        nodalBasis->getStiffnessMatrix(localStiff);
+      nodalBasis->getMassMatrix(localMass);
 // construct arrays for passing into Petsc
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
+          vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); //  // Default PetSc layout is row-major
       }
 
       nodalBasis->getLocalToGlobal(lgMap);
@@ -338,12 +357,16 @@ namespace Lucee
 // this flag is needed to ensure we don't update the stiffness matrix twice
           bool isIdxLocal = defRgnUp.isInside(idx);
 
-          nodalBasis->getStiffnessMatrix(localStiff);
+          if (isGkPoisson)
+            nodalBasis->getPerpStiffnessMatrix(localStiff);
+          else
+            nodalBasis->getStiffnessMatrix(localStiff);
+          nodalBasis->getMassMatrix(localMass);          
 // construct arrays for passing into Petsc
           for (unsigned k=0; k<nlocal; ++k)
           {
             for (unsigned m=0; m<nlocal; ++m)
-              vals[nlocal*k+m] = -localStiff(k,m); // Default PetSc layout is row-major
+              vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
           }
 
 // Now compute correct locations in global stiffness matrix to add
@@ -490,7 +513,7 @@ namespace Lucee
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
-    if (allPeriodic)
+    if (adjustSource) //if (allPeriodic)
     {
 // lower-left
       int zeroRow[1] = {0};
@@ -587,7 +610,7 @@ namespace Lucee
     double intSrcVol = 0.0;
 // if all directions are periodic, we need to adjust source to ensure
 // solvability of the equations
-    if (allPeriodic)
+    if (adjustSource) //if (allPeriodic)
       intSrcVol = getFieldIntegral(src, srcNodesShared)/vol;
 
 // clear out existing stuff in source vector: this is required
@@ -774,6 +797,7 @@ namespace Lucee
     }
     msgStrm << " Number of iterations " << itNum
             << ". Final residual norm was " << resNorm;
+    //std::cout << msgStrm.str() << std::endl;
 
 // copy solution from PetSc array to solution field
     copyFromPetscField(initGuess, sol);

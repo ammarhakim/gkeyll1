@@ -58,6 +58,8 @@ class MakeTitle:
         self.figName = gd.fName[:-3]
         if transformMod:
             self.figName = self.figName+"_"+transformVar
+        else:
+            self.figName = self.figName + "-c" + str(component)
         self.figName = self.figName+".png"
 
         if outNm:
@@ -151,7 +153,11 @@ class PlotDg1D:
         elif dgOrder == 2:
             nNodes = 3
         elif dgOrder == 3:
-            raise Exception("1D plotting not implemented for DG polyOrder 3!")
+            nNodes = 4
+        elif dgOrder == 4:
+            nNodes = 5
+        elif dgOrder > 4:
+            raise Exception("1D plotting not implemented for DG polyOrder greater than 4!")
         # number of equations
         numEqns = gd.q.shape[1]/nNodes
 
@@ -169,7 +175,11 @@ class PlotDg1D:
         elif dgOrder == 2:
             X, data = self.projectOnFinerGrid_f_p2(rX, rawData)
         elif dgOrder == 3:
-            raise Exception("1D plotting not implemented for DG polyOrder 3!")
+            X, data = self.projectOnFinerGrid_f_p3(rX, rawData)
+        elif dgOrder == 4:
+            X, data = self.projectOnFinerGrid_f_p4(rX, rawData)
+        elif dgOrder > 4:            
+            raise Exception("1D plotting not implemented for DG polyOrder greater than 4!")
 
         # store
         self.X = X
@@ -235,7 +245,70 @@ class PlotDg1D:
         c3 = [-1.0/9.0, 5.0/9.0, 5.0/9.0]
         qn[2:3*nx:3] = self.evalSum(c3, vList)
 
-        return Xn, qn    
+        return Xn, qn
+
+    def projectOnFinerGrid_f_p3(self, Xc, q):
+        dx = Xc[1]-Xc[0]
+        nx = Xc.shape[0]
+
+        # mesh coordinates
+        xlo = Xc[0]-0.5*dx
+        xup = Xc[-1]+0.5*dx
+        dx2 = dx/4.0
+        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 4*nx)
+
+        # data
+        qn = pylab.zeros((4*Xc.shape[0],), float)
+        vList = [q[:,0], q[:,1], q[:,2], q[:,3]]
+
+        c1 = [0.4443359375, 0.7998046875,-0.3076171875, 0.0634765625]
+        qn[0:4*nx:4] = self.evalSum(c1, vList)
+        # node 2
+        c2 = [-0.0341796875, 0.9228515625, 0.1318359375, -0.0205078125]
+        qn[1:4*nx:4] = self.evalSum(c2, vList)
+        # node 3
+        c3 = [-0.0205078125, 0.1318359375, 0.9228515625, -0.0341796875]
+        qn[2:4*nx:4] = self.evalSum(c3, vList)
+        # node 4
+        c4 = [0.0634765625, -0.3076171875, 0.7998046875, 0.4443359375]
+        qn[3:4*nx:4] = self.evalSum(c4, vList)
+
+        return Xn, qn
+
+    def projectOnFinerGrid_f_p4(self, Xc, q):
+        dx = Xc[1]-Xc[0]
+        nx = Xc.shape[0]
+
+        # mesh coordinates
+        xlo = Xc[0]-0.5*dx
+        xup = Xc[-1]+0.5*dx
+        dx2 = dx/5.0
+        Xn = pylab.linspace(xlo+0.5*dx2, xup-0.5*dx2, 5*nx)
+        # data
+        qn = pylab.zeros((5*Xc.shape[0],), float)
+        vList = [q[:,0], q[:,1], q[:,2], q[:,3], q[:,4]]
+
+        #c1 = [0.3744, 0.9984, -0.5616, 0.2304, -0.0416]
+        c1 = [.2663999999999975,.8553363583762964,-0.177600000000006,.08546364162371375,-.02960000000000157]
+        qn[0:5*nx:5] = self.evalSum(c1, vList)
+        # node 2
+        #c2 = [-0.0336, 0.8064, 0.3024, -0.0896, 0.0144]
+        c2 = [-.1316000000000021,.7234924181056768,.5263999999999952,-.1746924181056689,.05639999999999855]
+        qn[1:5*nx:5] = self.evalSum(c2, vList)
+        # node 3
+        #c3 = [0.0, 0.0, 1.0, 0.0, 0.0]
+        c3 = [2.775557561562891e-17,1.110223024625157e-16,1.0,-5.551115123125783e-16,-1.110223024625157e-16]
+        qn[2:5*nx:5] = self.evalSum(c3, vList)
+        # node 4
+        #c4 = [0.0144, -0.0896, 0.3024, 0.8064, -0.0336]
+        c4 = [.05640000000000095,-.1746924181056717,.5264000000000018,.7234924181056706,-.1315999999999997]
+        qn[3:5*nx:5] = self.evalSum(c4, vList)
+        # node 5
+        #c5 = [-0.0416, 0.2304, -0.5616, 0.9984, 0.3744]
+        c5 = [-.02959999999999938,0.0854636416237109,-.1775999999999993,.8553363583762902,.2663999999999995]
+        qn[4:5*nx:5] = self.evalSum(c5, vList)
+
+        return Xn, qn
 
 class PlotDg2D:
     r"""PlotDg2D(gkeh : GkeHistoryData, [comp : int, save : bool]) -> Plot2D

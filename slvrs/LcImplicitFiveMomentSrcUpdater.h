@@ -80,7 +80,7 @@ namespace Lucee
       std::vector<double> qbym2;
 /** Type of linear solver to use */
       int linSolType;
-/** Flag to indicate if static magnetic field is present */
+/** Flag to indicate if static EM field is present */
       bool hasStatic;
 /** Flag to indicate if to update pressure equation */
       bool hasPressure;
@@ -94,6 +94,10 @@ namespace Lucee
       double damp_e;
 /** Magnetic field error potential damping factor */
       double damp_m;
+/** Direction of gravity */
+      unsigned grvDir;
+/** Gravitational acceleration */
+      double gravity;
 
 /**
  * Compute index for fluid current component.

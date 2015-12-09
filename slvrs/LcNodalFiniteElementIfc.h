@@ -240,6 +240,14 @@ namespace Lucee
       virtual void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
+ * Get perpendicular stiffness matrix (grad_perp.Nj \dot grad_perp.Nk),
+ * for this reference element. The output matrix should be pre-allocated.
+ *
+ * @param DNjDNk On output, perpendicular stiffness matrix of element.
+ */
+      virtual void getPerpStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
+
+/**
  * Get partial stiffness matrix (grad.Nj Nk) for this reference
  * element. The output matrix should be pre-allocated.
  *

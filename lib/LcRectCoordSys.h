@@ -89,6 +89,26 @@ namespace Lucee
  */
       virtual void rotateSymMatrixToGlobal(const double inSM[6], double outSM[6]) const = 0;
 
+/**
+ * Rotate symmetric 3x3x3 tensor from local coordinate system (defined
+ * by this object) to global coordinate system.  The matrix is stored
+ * as an array of 10 components [A111, A112, A113, A122, A123, A133, A222, A223, A233, A333].
+ *
+ * @param inSM Symmetric tensor to rotate.
+ * @param outSM Rotated tensor.
+ */
+      virtual void rotateSymTensorToGlobal(const double inSM[10], double outSM[10]) const = 0;
+
+/**
+ * Rotate symmetric 3x3x3 matrix to local coordinate system (defined by
+ * this object) from global coordinate system. The matrix is stored as
+ * an array of 10 components [A111, A112, A113, A122, A123, A133, A222, A223, A233, A333].
+ *
+ * @param inSM Symmetric tensor to rotate.
+ * @param outSM Rotated tensor.
+ */
+      virtual void rotateSymTensorToLocal(const double inSM[10], double outSM[10]) const = 0;
+
       virtual int getAlignmentDirection() const;
 
     protected:

@@ -1,7 +1,7 @@
 /**
  * @file	LcDynVector.cpp
  *
- * @brief	Hold a set of global time-depent values.
+ * @brief	Hold a set of global time-dependent values.
  */
 
 // config stuff

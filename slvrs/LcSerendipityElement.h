@@ -1,7 +1,9 @@
 /**
  * @file	LcSerendipityElement.h
  *
- * @brief Serendipity element implemented so far for 2 and 3 dimensions.
+ * @brief Serendipity element for DG solvers in several dimensions and orders.
+ * Additional code may be required for finite element solves.
+ * Should be able to do any dimension and order as long as nodes are specified in a list.
  */
 
 #ifndef LC_SERENDIPITY_ELEMENT_H
@@ -117,7 +119,7 @@ namespace Lucee
  *
  * @param lgMap Local node number to global node number mapping.
  */
-      virtual void getSurfUpperLocalToGlobal(unsigned dim,
+      virtual void getSurfUpperLocalToGlobal(unsigned dir,
         std::vector<int>& lgMap) const;
 
 /**
@@ -211,6 +213,14 @@ namespace Lucee
  * @param DNjDNk On output, stiffness matrix of element.
  */
       virtual void getStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
+
+/**
+ * Get perpendicular stiffness matrix (grad_perp.Nj \dot grad_perp.Nk) for this reference
+ * element. The output matrix should be pre-allocated.
+ *
+ * @param DNjDNk On output, stiffness matrix of element.
+ */
+      virtual void getPerpStiffnessMatrix(Lucee::Matrix<double>& DNjDNk) const;
 
 /**
  * Get partial stiffness matrix (grad.Nj Nk) for this reference
@@ -404,6 +414,8 @@ namespace Lucee
       double dq[NDIM];
 /** Grid spacing squared in various dimensions */
       double dq2[NDIM];
+/** Local-to-global mapping for polyOrder = 1 in 2d */
+      Lucee::RowMajorIndexer<NDIM> idxr;
 /** Matrix containing coordinates of node on reference element. Rows = nodes, Cols = dim */
       Eigen::MatrixXd nodeList;
       std::vector<blitz::Array<double,NDIM> > functionVector;
@@ -444,6 +456,8 @@ namespace Lucee
       Eigen::MatrixXd refMass;
 /** Stiffness matrix in reference coordinates */
       Eigen::MatrixXd refStiffness;
+/** Perpendicular stiffness matrix in reference coordinates */
+      Eigen::MatrixXd refPerpStiffness;
 /** Vector of moment matrices indexed by moment value p  */
       std::vector<Eigen::MatrixXd> momMatrix;
 /** List of matrices for current cell */
@@ -457,6 +471,28 @@ namespace Lucee
       std::vector<Eigen::MatrixXd> upperMatHyperDiffusion;
 /** Face to interior mapping matrices */
       std::vector<Eigen::MatrixXd> lowerFaceToInteriorMapMatrices;
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 3 nodes (bottom).
+ */
+      unsigned F_func(unsigned nx, unsigned ny, int ix, int iy) const;
+/**
+ * This function maps the index (ix,iy) into the global index space in
+ * the row having 2 nodes (middle).
+ */
+      unsigned G_func(unsigned nx, unsigned ny, int ix, int iy) const;
+/**
+ * Helper function to copy data from/to a flat array, given a Lucee
+ * field. This method also takes into account the numbering of nodes
+ * in the "ghost" cells. Only valid for 2nd order elements in 2d
+ *
+ * @param i I-th index into field.
+ * @param j J-th index into field.
+ * @param glob On output, these are the exclusive global indices in cell (i,j)
+ * @param loc On output, these are the local owned indices (offset 0).
+ */
+      void getGlobalIndices(int i, int j, std::vector<int>& glob, 
+        std::vector<int>& loc);
 /**
  *    Create necessary matrices needed for 1,2,3rd order serendipity elements.
  *    Currently only works for 3-D cases.
@@ -505,7 +541,12 @@ namespace Lucee
 /**
 *     Compute the stiffness matrix on the reference element.
 */
-      void computeStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);     
+      void computeStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);
+
+/**
+*     Compute the perpendicular stiffness matrix on the reference element.
+*/
+      void computePerpStiffness(const blitz::Array<double, 3>& functionDerivative, Eigen::MatrixXd& resultMatrix);   
 
 /**
  *     Compute the grad stiffness matrix in direction dir on the reference element.
