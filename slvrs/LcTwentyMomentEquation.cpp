@@ -263,7 +263,12 @@ namespace Lucee
   }
 
 
-  void TwentyMomentEquation::waves(const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& jump, const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr, Lucee::Matrix<double>& waves, Lucee::FieldPtr<double>& s)
+  void TwentyMomentEquation::waves(const Lucee::RectCoordSys& c,
+    const Lucee::ConstFieldPtr<double>& jump,
+    const Lucee::ConstFieldPtr<double>& ql, const Lucee::ConstFieldPtr<double>& qr,
+    const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
+    Lucee::Matrix<double>& waves,    
+    Lucee::FieldPtr<double>& s)
   {
     if (numFlux == NF_ROE)
       wavesRoe(c, jump, ql, qr, waves, s);

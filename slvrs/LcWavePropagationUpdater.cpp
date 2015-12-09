@@ -225,6 +225,20 @@ namespace Lucee
     Lucee::FieldPtr<double> qLocal(meqn), qLocall(meqn);
     Lucee::Matrix<double> wavesLocal(meqn, mwave);
 
+// determine number of auxillary variables
+    unsigned numAuxVars = this->getNumInpVars()-1; // first is always conserved variable
+// store them
+    std::vector<const Lucee::Field<NDIM, double>* > auxVars;
+    for (unsigned i=0; i<numAuxVars; ++i)
+      auxVars.push_back( &this->getInp<Lucee::Field<NDIM, double> >(i+1) );
+// compute number of equations in each auxillary variable
+    std::vector<unsigned> numAuxEqns;
+    for (unsigned i=0; i<numAuxVars; ++i)
+      numAuxEqns.push_back( auxVars[i]->getNumComponents() );
+
+    std::vector<const double *> auxQl(numAuxVars), auxQr(numAuxVars);
+    std::vector<const double *> inAuxQl(numAuxVars), inAuxQr(numAuxVars);    
+
     Lucee::FieldPtr<double> jump(meqn);
 
 // these pointers are to the inOut and fluxBc fields, but as it can be
@@ -307,7 +321,7 @@ namespace Lucee
             jump[m] = qLocal[m] - qLocall[m];
 
 // calculate waves and speeds
-          equation->waves(coordSys, jump, qLocall, qLocal, wavesLocal, speedsPtr);
+          equation->waves(coordSys, jump, qLocall, qLocal, inAuxQl, inAuxQr, wavesLocal, speedsPtr);
 // rotate waves back to global frame (stored in waves[dir] array)
           Lucee::Matrix<double> wavesGlobal(meqn, mwave, wavesPtr);
           for (unsigned mw=0; mw<mwave; ++mw)

@@ -336,6 +336,11 @@ main(int argc, char **argv)
   end = clock();
   cout << right << fixed << difftime(end,start)  << " p=100 [EIGEN]"  << endl;
 
+  start = clock();
+  nops = doMatVec(1200, 100, 1000, 1);
+  end = clock();
+  cout << right << fixed << difftime(end,start)  << " p=100 [matVec]"  << endl;
+
   std::cout << "--------" << std::endl;
   // start = clock();
   // nops = doMatVecAsMatMat(50, 4, 10000);
