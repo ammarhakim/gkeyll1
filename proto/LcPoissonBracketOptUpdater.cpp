@@ -433,6 +433,14 @@ namespace Lucee
     if (cfla > cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
+    // Potentially costly Eigen structures for surface integral calculations  
+    // Components of solution on left and right of boundary
+    Eigen::VectorXd rightData(nlocal);
+    Eigen::VectorXd leftData(nlocal);
+    Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+    Eigen::MatrixXd alpha(NDIM, nSurfQuad);
+    Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
+    Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
     // Contributions from surface integrals
     for (int d = 0; d < updateDirs.size(); d++)
     {
@@ -457,8 +465,9 @@ namespace Lucee
       int idxr[NDIM];
       int idxl[NDIM];
 
-      // loop over each 1D slice
+      // Loop over each 1D slice
       // TODO: use only lower/upper or right/left naming convention
+      
       while (seqLowerDim.step())
       {
         seqLowerDim.fillWithIndex(idxr);
@@ -474,12 +483,9 @@ namespace Lucee
           
           int cellIndexRight = volIdxr.getIndex(idxr);
           int cellIndexLeft = volIdxr.getIndex(idxl);
-          
-          // Hamiltonian is continuous, so use right always
+          // Hamiltonian is continuous, so use right value always
           hamil.setPtr(hamilPtr, idxr);
           // Copy data to Eigen vectors
-          Eigen::VectorXd rightData(nlocal);
-          Eigen::VectorXd leftData(nlocal);
           for (int i = 0; i < nlocal; i++)
           {
             rightData(i) = aCurrPtr_r[i];
@@ -487,16 +493,15 @@ namespace Lucee
           }
 
           // Compute gradient of hamiltonian at surface nodes
-          Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+          hamilDerivAtQuad.setZero(NDIM, nSurfQuad);
           for (int i = 0; i < nlocal; i++)
             hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
 
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
-          Eigen::MatrixXd alpha(NDIM, nSurfQuad);
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
 
           // Construct normal vector
-          Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
+          normalVec.setZero(NDIM);
           normalVec(dir) = 1.0;
           
           // Calculate alphaDotN at all quadrature points
@@ -505,7 +510,6 @@ namespace Lucee
           // Don't need to do this for now, as long as jacobian factor is > 0
 
           // Compute numerical flux
-          Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 

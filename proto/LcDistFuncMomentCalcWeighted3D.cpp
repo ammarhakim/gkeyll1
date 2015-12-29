@@ -233,6 +233,10 @@ namespace Lucee
     int localPositionCells = localRgn.getShape(0)*localRgn.getShape(1)*localRgn.getShape(2);
     std::vector<double> localMoment(localPositionCells*nlocal3d);
 
+
+    Eigen::VectorXd distfVec(nlocal5d);
+    Eigen::VectorXd resultVector(nlocal3d);
+    
     while(seq.step())
     {
       seq.fillWithIndex(idx);
@@ -243,24 +247,22 @@ namespace Lucee
       distF.setPtr(distFPtr, idx);
       weightF.setPtr(weightFPtr, idx[0], idx[1], idx[2]);
 
-      Eigen::VectorXd distfVec(nlocal5d);
       for (int i = 0; i < nlocal5d; i++)
         distfVec(i) = distFPtr[i];
 
       // Loop over each component of the weighting function
       for (int h = 0; h < nlocal3d; h++)
       {
-        Eigen::VectorXd resultVector(nlocal3d);
         // Calculate contribution to moment
         if (calcMom == 0)
-          resultVector = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+          resultVector.noalias() = weightFPtr[h]*mom0MatrixVector[h]*distfVec;
         else if (calcMom == 1)
-          resultVector = weightFPtr[h]*mom1MatrixVector[h]*distfVec + 
-            xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+          resultVector.noalias() = (weightFPtr[h]*mom1MatrixVector[h] + 
+            xc[momDir]*weightFPtr[h]*mom0MatrixVector[h])*distfVec;
         else if (calcMom == 2)
-          resultVector = weightFPtr[h]*mom2MatrixVector[h]*distfVec + 
-            2*xc[momDir]*weightFPtr[h]*mom1MatrixVector[h]*distfVec +
-            xc[momDir]*xc[momDir]*weightFPtr[h]*mom0MatrixVector[h]*distfVec;
+          resultVector.noalias() = (weightFPtr[h]*mom2MatrixVector[h] + 
+            2*xc[momDir]*weightFPtr[h]*mom1MatrixVector[h] +
+            xc[momDir]*xc[momDir]*weightFPtr[h]*mom0MatrixVector[h])*distfVec;
         // Accumulate contribution to moment from this cell
         for (int i = 0; i < nlocal3d; i++)
           momentPtr[i] = momentPtr[i] + resultVector(i);
