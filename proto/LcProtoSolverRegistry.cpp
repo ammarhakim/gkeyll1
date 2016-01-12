@@ -21,9 +21,9 @@
 #include <LcDistFuncMomentCalc1DFrom4D.h>
 #include <LcDistFuncMomentCalc2D.h>
 #include <LcDistFuncMomentCalc3D.h>
+#include <LcDistFuncMomentCalcCDIMFromVDIM.h>
 #include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncMomentCalcWeighted3D.h>
-#include <LcDistFuncMomentCalcCDIMFromVDIM.h>
 #include <LcDistFuncReflectionBcUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater3D.h>
@@ -42,6 +42,7 @@
 #include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
+#include <LcMaxwellDistInit.h>
 #include <LcMaxwellTm2DUpdater.h>
 #include <LcModalDg1DDiffusionUpdater.h>
 #include <LcModalDg1DHyperDiffusionUpdater.h>
