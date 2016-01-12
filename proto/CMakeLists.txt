@@ -50,6 +50,7 @@ set (proto_SOURCES
   LcIntegrateGeneralField.cpp
   LcIntegrateNodalField.cpp
   LcLinEmGke1dHamilPertUpdater.cpp
+  LcMaxwellDistInit.cpp
   LcMaxwellTm2DUpdater.cpp
   LcModalDg1DDiffusionUpdater.cpp
   LcModalDg1DHyperDiffusionUpdater.cpp
