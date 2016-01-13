@@ -179,7 +179,7 @@ namespace Lucee
     for (int h = 0; h < nMom; ++h)
     {
       mom1Matrix[h] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-      momDir = h+1;
+      momDir = h+CDIM;
       // Compute integral of phiConf_i * phiPhase_j
       for (int i = 0; i < nlocalConf; ++i)
       {
@@ -317,7 +317,7 @@ namespace Lucee
         int momDir;
         for (int h = 0; h < nMom; h++)
         {
-          momDir = h+1;
+          momDir = CDIM+h;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
         }
       }
