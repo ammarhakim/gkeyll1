@@ -13,6 +13,11 @@
 #include <LcExcept.h>
 #include <LcUpdaterIfc.h>
 
+// boost includes
+#ifdef HAVE_BOOST
+//# include <boost/timer/timer.hpp>
+#endif
+
 // std includes
 #include <limits>
 
@@ -24,6 +29,7 @@ namespace Lucee
   UpdaterIfc::UpdaterIfc()
     : Lucee::BasicObj(UpdaterIfc::id), grid(0)
   {
+    totAdvanceWallTime = totAdvanceCpuTime = 0.0;
   }
 
   UpdaterIfc::~UpdaterIfc()
@@ -136,7 +142,16 @@ namespace Lucee
     UpdaterIfc *updater
       = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
+
+#ifdef HAVE_BOOST
+    //boost::timer::cpu_timer timer;
+#endif
     Lucee::UpdaterStatus s = updater->update(t);
+#ifdef HAVE_BOOST
+    //boost::timer::cpu_times times = timer.elapsed();
+    //updater->totAdvanceWallTime += times.wall/1.0e9; // time is computed in nano-seconds
+    //updater->totAdvanceCpuTime += times.system/1.0e9;
+#endif
 
     int myLocalStatus = s.status, status;
     double mySuggestedDt = s.dt, dt;
