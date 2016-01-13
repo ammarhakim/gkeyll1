@@ -13,13 +13,10 @@
 #include <LcExcept.h>
 #include <LcUpdaterIfc.h>
 
-// boost includes
-#ifdef HAVE_BOOST
-//# include <boost/timer/timer.hpp>
-#endif
 
 // std includes
 #include <limits>
+#include <ctime>
 
 namespace Lucee
 {
@@ -123,6 +120,7 @@ namespace Lucee
     lfm.appendFunc("advance", luaAdvance);
     lfm.appendFunc("setIn", luaSetInpVars);
     lfm.appendFunc("setOut", luaSetOutVars);
+    lfm.appendFunc("totalAdvanceTime", luaGetTime);
   }
 
   int
@@ -143,15 +141,10 @@ namespace Lucee
       = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
 
-#ifdef HAVE_BOOST
-    //boost::timer::cpu_timer timer;
-#endif
+    clock_t tmStart = clock();
     Lucee::UpdaterStatus s = updater->update(t);
-#ifdef HAVE_BOOST
-    //boost::timer::cpu_times times = timer.elapsed();
-    //updater->totAdvanceWallTime += times.wall/1.0e9; // time is computed in nano-seconds
-    //updater->totAdvanceCpuTime += times.system/1.0e9;
-#endif
+    clock_t tmEnd = clock();
+    updater->totAdvanceWallTime += (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
 
     int myLocalStatus = s.status, status;
     double mySuggestedDt = s.dt, dt;
@@ -209,5 +202,15 @@ namespace Lucee
     std::vector<DataStructIfc*> out = tbl.getAllObjects<DataStructIfc>();
     updater->setOutVars(out);
     return 0;
+  }
+
+  int
+  UpdaterIfc::luaGetTime(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
+    lua_pushnumber(L, updater->totAdvanceWallTime);
+
+    return 1;
   }
 }

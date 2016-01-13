@@ -198,7 +198,7 @@ namespace Lucee
       static int luaSetOutVars(lua_State *L);
 
 /**
- * Lua callable method to get wall-clock and CPU times for updater
+ * Lua callable method to get wall-clock time for updater
  *
  * @param L Lua state to use.
  * @return number of output parameters.
