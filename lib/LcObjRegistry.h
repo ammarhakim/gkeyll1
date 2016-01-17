@@ -21,6 +21,7 @@
 #include <loki/Singleton.h>
 
 // std includes
+#include <ctime>
 #include <iostream>
 #include <typeinfo>
 
@@ -85,8 +86,9 @@ namespace Lucee
 
         dbgStrm << "Setting up object of type " << B::id << "::"
                 << D::id 
-                << " ..."
-                << std::endl;
+                << " ...";
+
+        clock_t tmStart = clock(); // time initialization
         size_t nbytes = sizeof(Lucee::PointerHolder<D>);
         Lucee::PointerHolder<D> *ph =
           (Lucee::PointerHolder<D>*) lua_newuserdata(L, nbytes);
@@ -110,6 +112,11 @@ namespace Lucee
 // get a meta-table for this object and set it
         luaL_getmetatable(L, typeid(D).name());
         lua_setmetatable(L, -2);
+
+        clock_t tmEnd = clock();
+
+        dbgStrm << "  took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << " seconds"
+                << std::endl;
 
         return 1;
       }
