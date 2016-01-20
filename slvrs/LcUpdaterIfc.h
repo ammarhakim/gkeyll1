@@ -197,6 +197,14 @@ namespace Lucee
  */
       static int luaSetOutVars(lua_State *L);
 
+/**
+ * Lua callable method to get wall-clock time for updater
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaGetTime(lua_State *L);
+
     protected:
 /**
  * Set type information for an input data structure. This method must
@@ -294,6 +302,10 @@ namespace Lucee
       std::vector<const Lucee::DataStructIfc*> inpVars;
 /** List of output data structures */
       std::vector<Lucee::DataStructIfc*> outVars;
+/** Cumulative wall-clock time spent in the advance method */
+      double totAdvanceWallTime;
+/** Cumulative CPU time spent in the advance method */
+      double totAdvanceCpuTime;
   };
 }
 

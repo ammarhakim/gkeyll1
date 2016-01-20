@@ -13,8 +13,10 @@
 #include <LcExcept.h>
 #include <LcUpdaterIfc.h>
 
+
 // std includes
 #include <limits>
+#include <ctime>
 
 namespace Lucee
 {
@@ -24,6 +26,7 @@ namespace Lucee
   UpdaterIfc::UpdaterIfc()
     : Lucee::BasicObj(UpdaterIfc::id), grid(0)
   {
+    totAdvanceWallTime = totAdvanceCpuTime = 0.0;
   }
 
   UpdaterIfc::~UpdaterIfc()
@@ -117,6 +120,7 @@ namespace Lucee
     lfm.appendFunc("advance", luaAdvance);
     lfm.appendFunc("setIn", luaSetInpVars);
     lfm.appendFunc("setOut", luaSetOutVars);
+    lfm.appendFunc("totalAdvanceTime", luaGetTime);
   }
 
   int
@@ -136,7 +140,11 @@ namespace Lucee
     UpdaterIfc *updater
       = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
     double t = lua_tonumber(L, 2); // time to advance to
+
+    clock_t tmStart = clock();
     Lucee::UpdaterStatus s = updater->update(t);
+    clock_t tmEnd = clock();
+    updater->totAdvanceWallTime += (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
 
     int myLocalStatus = s.status, status;
     double mySuggestedDt = s.dt, dt;
@@ -194,5 +202,15 @@ namespace Lucee
     std::vector<DataStructIfc*> out = tbl.getAllObjects<DataStructIfc>();
     updater->setOutVars(out);
     return 0;
+  }
+
+  int
+  UpdaterIfc::luaGetTime(lua_State *L)
+  {
+    UpdaterIfc *updater
+      = Lucee::PointerHolder<UpdaterIfc>::getObj(L);
+    lua_pushnumber(L, updater->totAdvanceWallTime);
+
+    return 1;
   }
 }

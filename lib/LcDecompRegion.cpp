@@ -122,7 +122,10 @@ namespace Lucee
   bool
   DecompRegion<NDIM>::checkCovering() const
   {
-// create array over global region
+// NEED TO FIX THIS AS THE ARRAY IS A MONSTER: ONE WAY AROUND THIS TO
+// CONVERT THE CHECK TO PER-DOMAIN AND NOT PER-CELL
+
+//    create array over global region
     Lucee::Array<NDIM, int> check(globalRgn, 0);
 // loop over each sub-region
     for (unsigned i=0; i<getNumRegions(); ++i)
