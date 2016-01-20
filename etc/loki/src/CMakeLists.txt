@@ -9,3 +9,14 @@ add_library(lcloki
   SmallObj.cpp
   SmartPtr.cpp
   StrongPtr.cpp)
+
+if (NOT ${ENABLE_PARALLEL})
+  install(DIRECTORY
+    ${PROJECT_SOURCE_DIR}/etc/loki/include/loki
+    DESTINATION include
+  )
+  
+  install(TARGETS lcloki
+    ARCHIVE DESTINATION lib
+  )
+endif ()

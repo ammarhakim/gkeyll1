@@ -34,6 +34,13 @@ namespace Lucee
  */
       LuaState(lua_State *L);
 
+/**
+ * Create a new Lua state from given state.
+ *
+ * @param L LuaState state to use
+ */
+      LuaState(const LuaState& L);
+
 /** Destroy state */
       virtual ~LuaState();
 
@@ -42,7 +49,7 @@ namespace Lucee
  *
  * @return lua_state object.
  */
-      lua_State* getState() 
+      lua_State* getState() const
       {
         return state;
       }
