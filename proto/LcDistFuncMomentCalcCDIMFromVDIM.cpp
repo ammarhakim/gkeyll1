@@ -269,7 +269,7 @@ namespace Lucee
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     int idx[NDIM];
-    double xc[NDIM];
+    double xc[PNC];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     unsigned nlocalConf = confBasis->getNumNodes();
     unsigned nlocalPhase = phaseBasis->getNumNodes();
