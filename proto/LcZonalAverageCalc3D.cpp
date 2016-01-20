@@ -206,6 +206,29 @@ namespace Lucee
     int idx2d[2];
     int localPositionCells = localRgn.getShape(0)*localRgn.getShape(2);
     std::vector<double> localMoment(localPositionCells*nlocal2d);
+
+    // DEBUG: Print each (x,z) cell contents before accumulate
+    // Loop over each 'local' position space cell
+    /*while(seq2d.step())
+    {
+      seq2d.fillWithIndex(idx2d);
+      int cellIndex = idxr.getIndex(idx2d);
+
+      moment->setPtr(momentPtr, idx2d);
+
+      Eigen::VectorXd printData(nlocal2d);
+
+      // copy data to vector
+      for (int i = 0; i < nlocal2d; i++)
+      {
+        printData(i) = momentPtr[i];
+        localMoment[cellIndex*nlocal2d+i] = momentPtr[i];
+      }
+      std::cout << "(ix,iz) = " << "(" << idx2d[0] << "," << idx2d[1] << ")" << std::endl;
+      std::cout << printData << std::endl;
+    }
+    seq2d.reset();*/
+
     // Loop over each 'local' position space cell
     while(seq2d.step())
     {

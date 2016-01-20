@@ -152,7 +152,7 @@ namespace Lucee
     // momDir2 is direction of other moment, 1 = X, 2 = Y, 3 = Z, for computing second rank tensor components
     int momDir2;
     double integralResultZerothMoment;
-    double integralResultFirstMoment[VDIM];
+    double integralResultFirstMoment;
     // number of components in a symmetric second rank tensor
     double integralResultSecondMoment[VDIM*(VDIM+1)/2];
     // counter needed for indexing since tensor is symmetric
@@ -179,22 +179,22 @@ namespace Lucee
     for (int h = 0; h < nMom; ++h)
     {
       mom1Matrix[h] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-      momDir = h+1;
+      momDir = h+CDIM;
       // Compute integral of phiConf_i * phiPhase_j
       for (int i = 0; i < nlocalConf; ++i)
       {
         for (int j = 0; j < nlocalPhase; ++j)
         {
-          integralResultFirstMoment[h] = 0.0;
+          integralResultFirstMoment = 0.0;
           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           {
             double baseIntegral = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*
               volQuadPhase(gaussIndex, j);
             // Get coordinate of quadrature point in direction momDir
             double coord2Val = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
-            integralResultFirstMoment[h] += coord2Val*baseIntegral;
+            integralResultFirstMoment += coord2Val*baseIntegral;
           }
-          mom1Matrix[h](i, j) = integralResultFirstMoment[h];
+          mom1Matrix[h](i, j) = integralResultFirstMoment;
         }
       }
       // Multiply matrices by inverse of mass matrix
@@ -269,7 +269,7 @@ namespace Lucee
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     int idx[NDIM];
-    double xc[NDIM];
+    double xc[PNC];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     unsigned nlocalConf = confBasis->getNumNodes();
     unsigned nlocalPhase = phaseBasis->getNumNodes();
@@ -317,7 +317,7 @@ namespace Lucee
         int momDir;
         for (int h = 0; h < nMom; h++)
         {
-          momDir = h+1;
+          momDir = CDIM+h;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
         }
       }
