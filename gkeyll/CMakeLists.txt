@@ -38,6 +38,7 @@ unset(FacetsSt_EXT_LIBS)
 if (FFTW3_FOUND)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Fftw3_INCLUDE_DIRS})
   set(FC_EXTERNAL_FLAGS "${FC_EXTERNAL_FLAGS} ${Fftw3_FLAGS}")
+  set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${Fftw3_LIBRARIES})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Fftw3_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fftw3_STLIBS})
 endif ()
@@ -45,6 +46,7 @@ endif ()
 if (GSL_FOUND)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Gsl_INCLUDE_DIRS})
   set(FC_EXTERNAL_FLAGS "${FC_EXTERNAL_FLAGS} ${Gsl_FLAGS}")
+  set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${Gsl_LIBRARIES})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Gsl_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Gsl_STLIBS})
 endif ()
@@ -53,12 +55,14 @@ if (PETSC_FOUND)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Petsc_INCLUDE_DIRS})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Petsc_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Petsc_STLIBS})
+  set(FacetsDl_EXT_LIBS ${FacetsDl_EXT_LIBS} ${Petsc_STLIBS})
 endif ()
 
 # clapack only on non-Mac platforms
 if (LAPACK_FOUND AND (NOT APPLE))
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${Lapack_INCLUDE_DIRS})
   set(FC_EXTERNAL_FLAGS "${FC_EXTERNAL_FLAGS} ${Lapack_FLAGS}")
+  set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${Lapack_LIBRARIES})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${Lapack_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Lapack_STLIBS})
 endif ()
@@ -94,14 +98,15 @@ if (APPLE)
 endif ()
 
 # Add in fortran libraries
-if (APPLE)
-  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
-else ()
+if (USE_STATIC_SYSLIBS)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_STLIBS})
+else ()
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
 endif ()
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPICXX_COMPILER_WRAPPER)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${MPI_INCLUDE_DIRS})
+  set(FC_EXTERNAL_LIBS ${FC_EXTERNAL_LIBS} ${MPI_LIBRARIES})
   set(FC_EXTERNAL_LIBDIRS ${FC_EXTERNAL_LIBDIRS} ${MPI_LIBRARY_DIRS})
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${MPI_STLIBS})
 endif ()
@@ -126,7 +131,19 @@ endif ()
 # System libraries that we can assume always present
 # Python needs these libraries on Hopper, but they have to be at the end.
 set(FC_SYS_LIBS)
-
+if (WIN32)
+  set(FC_SYS_LIBS ws2_32 winmm)
+else ()
+  # if (PYTHONLIBS_FOUND)
+# These are not needed if one is using the openmpi compiler wrappers.
+# But on a Cray or elsewhere these must be added.
+    set(FC_SYS_LIBS ${FC_SYS_LIBS} pthread util dl)
+  # endif ()
+# pgi-11.2 is getting some implementations from the system runtime library
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL PGI OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL XL)
+    set(FC_SYS_LIBS ${FC_SYS_LIBS} rt)
+  endif ()
+endif ()
 SciPrintVar(FC_SYS_LIBS)
 SciGetStaticLibs("${FC_SYS_LIBS}" FC_SYS_STLIBS)
 SciPrintVar(FC_SYS_STLIBS)
@@ -170,3 +187,4 @@ install(TARGETS ${LUCEE_STATIC}
   PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
               GROUP_READ GROUP_EXECUTE ${TX_GROUP_WRITE}
 )
+

@@ -88,6 +88,20 @@ namespace Lucee
       void divergence(Lucee::StructGridField<NDIM, T>& div) const;
 
 /**
+ * Copy from an external data block specified by a C pointer.
+ *
+ * @param cptr Address of the data block.
+ */
+      void copyFromCptr(T *cptr);
+
+/**
+ * Copy to an external data block specified by a C pointer.
+ *
+ * @param cptr Address of the data block.
+ */
+      void copyToCptr(T *cptr);
+
+/**
  * Write dataStruct to given node in HDF5 file.
  *
  * @param io I/O object for I/O.
@@ -171,6 +185,24 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaDivergence(lua_State *L);
+
+/**
+ * Lua callable method to copy from an external data block specified by
+ * a C pointer.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaCopyFromCptr(lua_State *L);
+
+/**
+ * Lua callable method to copy to an external data block specified by
+ * a C pointer.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaCopyToCptr(lua_State *L);
 
 /**
  * Set field from Lua function. The function itself is specified using

@@ -138,3 +138,14 @@ endif (PETSC_FOUND)
 
 # Create the library
 add_library(lcslvrs ${lcslvrs_SOURCES})
+
+if (NOT ${ENABLE_PARALLEL})
+  install(DIRECTORY ./
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h"
+  )
+  
+  install(TARGETS lcslvrs
+    ARCHIVE DESTINATION lib
+  )
+endif ()
