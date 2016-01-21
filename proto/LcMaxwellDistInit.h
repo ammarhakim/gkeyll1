@@ -13,25 +13,40 @@
 #endif
 
 // lucee includes
+#include <LcCDIM.h>
 #include <LcField.h>
+#include <LcLinAlgebra.h>
+#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
 // std includes
 #include <vector>
 
+// math include
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace Lucee
 {
 /**
  * Maxwellian distribution.
  */
-  template <unsigned NDIM>
+  template <unsigned CDIM, unsigned VDIM>
   class MaxwellDistInit : public Lucee::UpdaterIfc
   {
+    // Number of components for coordinate arrays etc.
+    static const unsigned PNC = Lucee::CDIM<CDIM+VDIM>::N;
+    static const unsigned CNC = Lucee::CDIM<CDIM>::N;
     public:
-/** Class id: this is used by registration system */
+      /** Class id: this is used by registration system */
       static const char *id;
 
+      /** Constructor */
+      MaxwellDistInit();
+      /** Destructor */
+      virtual ~MaxwellDistInit();
+     
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -64,9 +79,19 @@ namespace Lucee
  */
       void declareTypes();
 
+      double evaluateMaxwell(double v[VDIM], double n, double vTerm);
+
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
+      /** Pointer to phase space basis functions */
+      Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
+      /** Pointer to configuration space basis functions */
+      Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
+
+      bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+        const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);
+
+      /** Mapping of node in phase-space to node in configuration space */
+      std::vector<unsigned> phaseConfMap;
   };
 }
 
