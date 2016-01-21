@@ -6,63 +6,220 @@
 
 // lucee includes
 #include <LcMaxwellDistInit.h>
-#include <LcStructGridField.h>
 
-// eigen inlcudes
-#include <Eigen/Eigen>
+#include <fstream>
+#include <iostream>
+using namespace std;
 
 namespace Lucee
 {
 // set ids for module system
-  template <> const char *MaxwellDistInit<1>::id = "MaxwellDistInit1D";
-  template <> const char *MaxwellDistInit<2>::id = "MaxwellDistInit2D";
-  template <> const char *MaxwellDistInit<3>::id = "MaxwellDistInit3D";
+  template <> const char *MaxwellDistInit<1, 1>::id = "MaxwellDistInit1X1V";
+  template <> const char *MaxwellDistInit<1, 2>::id = "MaxwellDistInit1X2V";
+  template <> const char *MaxwellDistInit<1, 3>::id = "MaxwellDistInit1X3V";
+  template <> const char *MaxwellDistInit<2, 2>::id = "MaxwellDistInit2X2V";
+  template <> const char *MaxwellDistInit<2, 3>::id = "MaxwellDistInit2X3V";
+  //template <> const char *MaxwellDistInit<3, 3>::id = "MaxwellDistInit3X3V";
 
-  template <unsigned NDIM>
-  void
-  MaxwellDistInit<NDIM>::readInput(Lucee::LuaTable& tbl)
+  template <unsigned CDIM, unsigned VDIM>
+  bool
+  MaxwellDistInit<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+    const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
+    for (unsigned d=0; d<CDIM; ++d)
+      if (! (std::fabs(phaseC(n,d)-confC(cn,d))<1e-4*dxMin) )
+        return false;
+    return true;
+  }
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  MaxwellDistInit<CDIM,VDIM>::MaxwellDistInit()
+    : UpdaterIfc()
+  {
+  }
+  template <unsigned CDIM, unsigned VDIM>
+  MaxwellDistInit<CDIM, VDIM>::~MaxwellDistInit()
+  {
+  }
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  void
+  MaxwellDistInit<CDIM, VDIM>::readInput(Lucee::LuaTable& tbl)
+  {
+    const unsigned NDIM = CDIM+VDIM;
+    // call base class method
     UpdaterIfc::readInput(tbl);
     // dir = (unsigned) tbl.getNumber("dir");
     // gravity = tbl.getNumber("gravity");
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
+    // get hold on the basis
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("phaseBasis"))
+      phaseBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("phaseBasis");
     else
-      throw Lucee::Except("NodalDisContSrcIncrUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("MaxwellDistInit::readInput: Must specify phase space basis to use using 'phaseBasis'");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis"))
+      confBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis");
+    else
+      throw Lucee::Except("MaxwellDistInit::readInput: Must specify configuration space basis to use using 'confBasis'");
   }
-
-  template <unsigned NDIM>
-  void
-  MaxwellDistInit<NDIM>::initialize()
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  void 
+  MaxwellDistInit<CDIM, VDIM>::initialize()
   {
     UpdaterIfc::initialize();
-  }
+ 
+    const unsigned NDIM = CDIM+VDIM;
+    unsigned nlocal = phaseBasis->getNumNodes();
 
-  template <unsigned NDIM>
-  Lucee::UpdaterStatus
-  MaxwellDistInit<NDIM>::update(double t)
-  {
-    const Lucee::StructuredGridBase<2>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<2> >();
-
-    double dt = t-this->getCurrTime();
-    //    Lucee::Field<2, double>& fluid = this->getOut<Lucee::Field<2, double> >(0);
-    //    Lucee::FieldPtr<double> fPtr = fluid.createPtr();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
     
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    seq.step(); // just to get to first index
+    int idx[NDIM];
+    seq.fillWithIndex(idx);
+    phaseBasis->setIndex(idx);
+    confBasis->setIndex(idx); // only first CDIM elements are used
+
+    // compute mapping of phase-space nodes to configuration space
+    // nodes. The assumption here is that the node layout in phase-space
+    // and configuration space are such that each node in phase-space has
+    // exactly one node co-located with it in configuration space. No
+    // "orphan" phase-space node are allowed, and an exception is thrown
+    // if that occurs.
+    phaseConfMap.resize(nlocal);
+    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
+    Lucee::Matrix<double> confNodeCoords(confBasis->getNumNodes(), CNC);
+
+    double dxMin = grid.getDx(0);
+    for (unsigned d=1; d<CDIM; ++d)
+      dxMin = std::min(dxMin, grid.getDx(d));
+
+    phaseBasis->getNodalCoordinates(phaseNodeCoords);
+    confBasis->getNodalCoordinates(confNodeCoords);
+    for (unsigned n=0; n<nlocal; ++n)
+    {
+      bool pcFound = false;
+      for (unsigned cn=0; cn<confBasis->getNumNodes(); ++cn)
+        if (sameConfigCoords(n, cn, dxMin, phaseNodeCoords, confNodeCoords))
+        {
+          phaseConfMap[n] = cn;
+          pcFound = true;
+          break;
+        }
+      if (!pcFound)
+      {
+        Lucee::Except lce(
+          "MaxwellDistInit::initialize: No matching configuration space node for phase-space node ");
+        lce << n;
+        throw lce;
+      }
+    }
+  }
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  Lucee::UpdaterStatus 
+  MaxwellDistInit<CDIM, VDIM>::update(double t)
+  {
+    const unsigned NDIM = CDIM+VDIM;
+
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+    const Lucee::Field<CDIM, double>& zerothMoment = this->getInp<Lucee::Field<CDIM, double> >(0);
+    const Lucee::Field<CDIM, double>& firstMoment = this->getInp<Lucee::Field<CDIM, double> >(1);
+    const Lucee::Field<CDIM, double>& secondMoment = this->getInp<Lucee::Field<CDIM, double> >(2);
+    // For compatibility with NodalDisContHyperUpdater I am retaining the
+    // names "q" for the distribution function.
+    Lucee::Field<NDIM, double>& q = this->getOut<Lucee::Field<NDIM, double> >(0);
+
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+
+    Lucee::FieldPtr<double> qPtr = q.createPtr();
+    Lucee::ConstFieldPtr<double> zerothMomentPtr = zerothMoment.createConstPtr();
+    Lucee::ConstFieldPtr<double> firstMomentPtr = firstMoment.createConstPtr();
+    Lucee::ConstFieldPtr<double> secondMomentPtr = secondMoment.createConstPtr();
+
+    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
+
+    q = 0.0; // use qNew to store increment initially    
+    
+    int idx[NDIM];
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+
+    unsigned numNodesPhase = phaseBasis->getNumNodes();
+    unsigned numNodesConf = confBasis->getNumNodes();
+    
+    double dens[numNodesConf], densInv[CDIM];
+    double densIn;
+    double vTerm2[numNodesConf];
+    double vTerm2In;
+    double vDrift[numNodesConf][VDIM];
+    double v[VDIM];
+
+
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      q.setPtr(qPtr, idx);
+      zerothMoment.setPtr(zerothMomentPtr, idx);
+      firstMoment.setPtr(firstMomentPtr, idx);
+      secondMoment.setPtr(secondMomentPtr, idx);
+
+      phaseBasis->setIndex(idx);
+      phaseBasis->getNodalCoordinates(phaseNodeCoords);
+      
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; nodeIdx++)
+      {
+	dens[nodeIdx] = zerothMomentPtr[nodeIdx];
+	densInv[nodeIdx] = 1/dens[nodeIdx];
+	vTerm2[nodeIdx] = densInv[nodeIdx]*secondMomentPtr[nodeIdx];
+	for (unsigned dim = 0; dim<VDIM; dim++)
+	{
+	  vDrift[nodeIdx][dim] =0;// densInv[nodeIdx]*
+	  //firstMomentPtr[nodeIdx*numNodesConf+dim];
+	  vTerm2[nodeIdx] = vTerm2[nodeIdx]-pow(vDrift[nodeIdx][dim], 2);
+	}  	
+      }
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; nodeIdx++) 
+      {
+	for (unsigned dim = 0; dim<VDIM; dim++)
+	  v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-vDrift[phaseConfMap[nodeIdx]][dim];
+	densIn = dens[phaseConfMap[nodeIdx]];
+	vTerm2In = vTerm2[phaseConfMap[nodeIdx]];
+	qPtr[nodeIdx] = evaluateMaxwell(v, densIn, vTerm2In);
+      }
+    }
+
     return Lucee::UpdaterStatus();
   }
-  
-  template <unsigned NDIM>
-  void
-  MaxwellDistInit<NDIM>::declareTypes()
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  void MaxwellDistInit<CDIM, VDIM>::declareTypes()
   {
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
-
-// instantiations
-  template class MaxwellDistInit<1>;
-  template class MaxwellDistInit<2>;
-  template class MaxwellDistInit<3>;
+  //----------------------------------------------------------------------------
+  template <unsigned CDIM, unsigned VDIM>
+  double MaxwellDistInit<CDIM, VDIM>::evaluateMaxwell(double v[VDIM], double n, 
+    double vTerm2)
+  {
+    double result = 0;
+    for (unsigned dim = 0; dim < VDIM; dim++)
+      result += pow(v[dim], 2);
+    result = n/sqrt(2*M_PI*vTerm2)*exp(-0.5*result/vTerm2);
+    return result;
+  }
+  //----------------------------------------------------------------------------
+  // instantiations
+  template class MaxwellDistInit<1, 1>;
+  template class MaxwellDistInit<1, 2>;
+  template class MaxwellDistInit<1, 3>;
+  template class MaxwellDistInit<2, 2>;
+  template class MaxwellDistInit<2, 3>;
+  //template class MaxwellDistInit<3, 3>;
 }
 
