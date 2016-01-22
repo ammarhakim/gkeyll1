@@ -210,7 +210,7 @@ namespace Lucee
     double result = 0;
     for (unsigned dim = 0; dim < VDIM; dim++)
       result += pow(v[dim], 2);
-    result = n/sqrt(2*M_PI*vTerm2)*exp(-0.5*result/vTerm2);
+    result = n*pow(2*M_PI*vTerm2, -0.5*VDIM)*exp(-0.5*result/vTerm2);
     return result;
   }
   //----------------------------------------------------------------------------
