@@ -7,10 +7,6 @@
 // lucee includes
 #include <LcMaxwellDistInit.h>
 
-#include <fstream>
-#include <iostream>
-using namespace std;
-
 namespace Lucee
 {
 // set ids for module system
@@ -26,8 +22,8 @@ namespace Lucee
   MaxwellDistInit<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
     const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
-    for (unsigned d=0; d<CDIM; ++d)
-      if (! (std::fabs(phaseC(n,d)-confC(cn,d))<1e-4*dxMin) )
+    for (unsigned dim = 0; dim<CDIM; ++dim)
+      if (! (std::fabs(phaseC(n, dim)-confC(cn, dim))<1e-4*dxMin) )
         return false;
     return true;
   }
@@ -49,8 +45,6 @@ namespace Lucee
     const unsigned NDIM = CDIM+VDIM;
     // call base class method
     UpdaterIfc::readInput(tbl);
-    // dir = (unsigned) tbl.getNumber("dir");
-    // gravity = tbl.getNumber("gravity");
 
     // get hold on the basis
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("phaseBasis"))
@@ -145,7 +139,7 @@ namespace Lucee
 
     Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
 
-    q = 0.0; // use qNew to store increment initially    
+    q = 0.0; // use q to store increment initially    
     
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -153,13 +147,13 @@ namespace Lucee
     unsigned numNodesPhase = phaseBasis->getNumNodes();
     unsigned numNodesConf = confBasis->getNumNodes();
     
-    double dens[numNodesConf], densInv[CDIM];
+    std::vector<double> dens(numNodesConf);
+    std::vector<double> densInv(numNodesConf);
     double densIn;
-    double vTerm2[numNodesConf];
+    std::vector<double> vTerm2(numNodesConf);
     double vTerm2In;
-    double vDrift[numNodesConf][VDIM];
+    Lucee::Matrix<double> vDrift(numNodesConf, VDIM);
     double v[VDIM];
-
 
     while (seq.step())
     {
@@ -172,22 +166,22 @@ namespace Lucee
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       
-      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; nodeIdx++)
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
       {
 	dens[nodeIdx] = zerothMomentPtr[nodeIdx];
 	densInv[nodeIdx] = 1/dens[nodeIdx];
 	vTerm2[nodeIdx] = densInv[nodeIdx]*secondMomentPtr[nodeIdx];
-	for (unsigned dim = 0; dim<VDIM; dim++)
+	for (unsigned dim = 0; dim<VDIM; ++dim)
 	{
-	  vDrift[nodeIdx][dim] =0;// densInv[nodeIdx]*
-	  //firstMomentPtr[nodeIdx*numNodesConf+dim];
-	  vTerm2[nodeIdx] = vTerm2[nodeIdx]-pow(vDrift[nodeIdx][dim], 2);
+	  vDrift(nodeIdx, dim) = densInv[nodeIdx]*
+	    firstMomentPtr[nodeIdx*VDIM+dim];
+	  vTerm2[nodeIdx] = vTerm2[nodeIdx]-vDrift(nodeIdx, dim)*vDrift(nodeIdx, dim);
 	}  	
       }
-      for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; nodeIdx++) 
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
       {
-	for (unsigned dim = 0; dim<VDIM; dim++)
-	  v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-vDrift[phaseConfMap[nodeIdx]][dim];
+	for (unsigned dim = 0; dim<VDIM; ++dim)
+	  v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-vDrift(phaseConfMap[nodeIdx], dim);
 	densIn = dens[phaseConfMap[nodeIdx]];
 	vTerm2In = vTerm2[phaseConfMap[nodeIdx]];
 	qPtr[nodeIdx] = evaluateMaxwell(v, densIn, vTerm2In);
@@ -208,9 +202,12 @@ namespace Lucee
     double vTerm2)
   {
     double result = 0;
-    for (unsigned dim = 0; dim < VDIM; dim++)
-      result += pow(v[dim], 2);
-    result = n*pow(2*M_PI*vTerm2, -0.5*VDIM)*exp(-0.5*result/vTerm2);
+    double factor = 1/sqrt(2*M_PI*vTerm2);
+    for (unsigned dim = 0; dim<VDIM; ++dim)
+      result += v[dim]*v[dim];
+    result = n*exp(-0.5*result/vTerm2);
+    for (unsigned dim = 0; dim<VDIM; ++dim)
+      result *= factor;
     return result;
   }
   //----------------------------------------------------------------------------
