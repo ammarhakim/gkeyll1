@@ -163,6 +163,13 @@ namespace Lucee
       .append<Lucee::IntegrateFieldProduct<2> >()
       .append<Lucee::IntegrateFieldProduct<3> >()
 
+      .append<Lucee::MaxwellDistInit<1, 1> >()
+      .append<Lucee::MaxwellDistInit<1, 2> >()
+      .append<Lucee::MaxwellDistInit<1, 3> >()
+      .append<Lucee::MaxwellDistInit<2, 2> >()
+      .append<Lucee::MaxwellDistInit<2, 3> >()
+      //.append<Lucee::MaxwellDistInit<3, 3> >()
+
       .append<Lucee::MaxwellTm2DUpdater>()
       .append<Lucee::ModalDg1DDiffusionUpdater>()
       .append<Lucee::ModalDg1DHyperDiffusionUpdater>()

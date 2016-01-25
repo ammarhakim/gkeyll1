@@ -415,17 +415,17 @@ namespace Lucee
       Eigen::VectorXd fVec(nlocal);
       for (int i = 0; i < nlocal; i++)
         fVec(i) = aCurrPtr[i];
-      Eigen::VectorXd fAtQuad = volQuad.interpMat*fVec;
+      // Compute distribution function at quadrature points cwise multiplied by quadrature weights
+      Eigen::VectorXd fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
 
       aNew.setPtr(aNewPtr, idx);
       for (int d = 0;  d < updateDirs.size(); d++)
       {
         int dir = updateDirs[d];
+        Eigen::VectorXd resultVector = bigStoredVolMatrices[cellIndex][d]*alpha.row(dir).transpose().cwiseProduct(fAtQuad);
+
         for (int i = 0; i < nlocal; i++)
-        {
-          for (int qp = 0; qp < nVolQuad; qp++)
-            aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[cellIndex][d](i,qp)*alpha(dir,qp)*fAtQuad(qp);
-        }
+          aNewPtr[i] += resultVector(i);
       }
     }
      
@@ -512,7 +512,7 @@ namespace Lucee
           // Compute numerical flux
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
-
+/*
           aNew.setPtr(aNewPtr_r, idxr);
           aNew.setPtr(aNewPtr_l, idxl);
           for (int i = 0; i < nlocal; i++)
@@ -524,11 +524,11 @@ namespace Lucee
               aNewPtr_r[i] += bigStoredLowerSurfMatrices[cellIndexRight][d](i,qp)*
             numericalFluxAtQuad(qp)*surfLowerQuad[dir].weights(qp);
             }
-          }
-/*
-          Eigen::VectorXd upperResultVector = storedUpperSurfMatrices[dir]*
+          }*/
+
+          Eigen::VectorXd upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
             numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
-          Eigen::VectorXd lowerResultVector = storedLowerSurfMatrices[dir]*
+          Eigen::VectorXd lowerResultVector = bigStoredLowerSurfMatrices[cellIndexRight][d]*
             numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
           // Accumulate to solution
@@ -538,7 +538,7 @@ namespace Lucee
           {
             aNewPtr_l[i] -= upperResultVector(i);
             aNewPtr_r[i] += lowerResultVector(i);
-          }*/
+          }
         }
       }
     }
