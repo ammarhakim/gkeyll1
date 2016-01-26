@@ -114,12 +114,6 @@ namespace Lucee
         else
             this->setNumWaves(1);
     }
-
-    if (tbl.hasNumber("interpolation")){
-        s = tbl.getNumber("interpolation");
-    } else {
-        s = 0.0;
-    }
     
   }
 
@@ -144,7 +138,6 @@ namespace Lucee
   void TwentyMomentEquation::flux(const Lucee::RectCoordSys& c, const double* q, const std::vector<const double*>& auxVars, double* f)
   {
       Lucee::FieldPtr<double> v(20);
-      double eps = 1e-6;
       // compute primitive variables first
       primitive(q, v);
       // density flux
@@ -161,35 +154,36 @@ namespace Lucee
       f[P23] = v[RHO] * v[U1] * v[U2] * v[U3] + v[U1] * v[P23] + v[U2] * v[P13] + v[U3] * v[P12] + v[Q123];
       f[P33] = v[RHO] * v[U1] * v[U3] * v[U3] + v[U1] * v[P33] + 2 * v[U3] * v[P13] + v[Q133];
       // make the inverse of the pressure tensor
-      double det = -v[P13]*v[P13]*v[P22] + 2*v[P12]*v[P13]*v[P23] -v[P11]*v[P23]*v[P23] - v[P12]*v[P12]*v[P33] + v[P11]*v[P22]*v[P33];
+      /*      double det = -v[P13]*v[P13]*v[P22] + 2*v[P12]*v[P13]*v[P23] -v[P11]*v[P23]*v[P23] - v[P12]*v[P12]*v[P33] + v[P11]*v[P22]*v[P33];
       double PInv[6];
       PInv[0] = (-v[P23]*v[P23] + v[P22]*v[P33])/det;
       PInv[1] = (v[P13]*v[P23] - v[P12]*v[P33])/det;
       PInv[2] = (-v[P13]*v[P22] + v[P12]*v[P23])/det;
       PInv[3] = (-v[P13]*v[P13] + v[P11]*v[P33])/det;
       PInv[4] = (v[P12]*v[P13] - v[P11]*v[P23])/det;
-      PInv[5] = (-v[P12]*v[P12] + v[P11]*v[P22])/det;
-      // FIXME s should be a function of p and q.
+      PInv[5] = (-v[P12]*v[P12] + v[P11]*v[P22])/det; */
       // total heat flux flux
-    f[Q111] = 4*v[Q111]*v[U1] + (3*(v[P11]*v[P11]))/(v[RHO]) + 6*v[P11]*(v[U1]*v[U1]) + v[RHO]*(v[U1]*v[U1]*v[U1]*v[U1]) + s*(2*PInv[1]*v[Q111]*v[Q112] + 2*PInv[2]*v[Q111]*v[Q113] + 2*PInv[4]*v[Q112]*v[Q113] + PInv[0]*(v[Q111]*v[Q111]) + PInv[3]*(v[Q112]*v[Q112]) + PInv[5]*(v[Q113]*v[Q113]));
+      double k; // parameter which measures deviation from maxwellian (sort of Levermore, sort of Pearson). Totally not rigourous 
+      k = (1 + (v[RHO]*(v[Q111]*v[Q111]/(v[P11]*v[P11]*v[P11]) + v[Q222]*v[Q222]/(v[P22]*v[P22]*v[P22]) + v[Q333]*v[Q333]/(v[P33]*v[P33]*v[P33])))/2 );
+      f[Q111] = 4*v[Q111]*v[U1] + (3*k*(v[P11]*v[P11]))/(v[RHO]) + 6*v[P11]*(v[U1]*v[U1]) + v[RHO]*(v[U1]*v[U1]*v[U1]*v[U1]);
 
-    f[Q112] = (3*v[P11]*v[P12])/(v[RHO]) + 3*v[Q112]*v[U1] + v[Q111]*v[U2] + 3*v[P11]*v[U1]*v[U2] + 3*v[P12]*(v[U1]*v[U1]) + v[RHO]*v[U2]*(v[U1]*v[U1]*v[U1]) + s*(PInv[0]*v[Q111]*v[Q112] + PInv[2]*v[Q112]*v[Q113] + PInv[3]*v[Q112]*v[Q122] + PInv[4]*v[Q113]*v[Q122] + PInv[2]*v[Q111]*v[Q123] + PInv[4]*v[Q112]*v[Q123] + PInv[5]*v[Q113]*v[Q123] + PInv[1]*(v[Q111]*v[Q122] + v[Q112]*v[Q112]));
+      f[Q112] = (3*k*v[P11]*v[P12])/(v[RHO]) + 3*v[Q112]*v[U1] + v[Q111]*v[U2] + 3*v[P11]*v[U1]*v[U2] + 3*v[P12]*(v[U1]*v[U1]) + v[RHO]*v[U2]*(v[U1]*v[U1]*v[U1]);
 
-    f[Q113] = (3*v[P11]*v[P13])/(v[RHO]) + 3*v[Q113]*v[U1] + v[Q111]*v[U3] + 3*v[P11]*v[U1]*v[U3] + 3*v[P13]*(v[U1]*v[U1]) + v[RHO]*v[U3]*(v[U1]*v[U1]*v[U1]) + s*(PInv[0]*v[Q111]*v[Q113] + PInv[1]*v[Q112]*v[Q113] + PInv[1]*v[Q111]*v[Q123] + PInv[3]*v[Q112]*v[Q123] + PInv[4]*v[Q113]*v[Q123] + PInv[2]*v[Q111]*v[Q133] + PInv[4]*v[Q112]*v[Q133] + PInv[5]*v[Q113]*v[Q133] + PInv[2]*(v[Q113]*v[Q113]));
+      f[Q113] = (3*k*v[P11]*v[P13])/(v[RHO]) + 3*v[Q113]*v[U1] + v[Q111]*v[U3] + 3*v[P11]*v[U1]*v[U3] + 3*v[P13]*(v[U1]*v[U1]) + v[RHO]*v[U3]*(v[U1]*v[U1]*v[U1]);
 
-    f[Q122] = 2*v[Q122]*v[U1] + 2*v[Q112]*v[U2] + 4*v[P12]*v[U1]*v[U2] + (v[P11]*v[P22] + 2*(v[P12]*v[P12]))/(v[RHO]) + v[P22]*(v[U1]*v[U1]) + v[P11]*(v[U2]*v[U2]) + v[RHO]*(v[U1]*v[U1])*(v[U2]*v[U2]) + (PInv[0]*v[Q111]*v[Q122] + PInv[1]*v[Q112]*v[Q122] + PInv[2]*v[Q113]*v[Q122] + PInv[1]*v[Q111]*v[Q222] + PInv[3]*v[Q112]*v[Q222] + PInv[4]*v[Q113]*v[Q222] + PInv[2]*v[Q111]*v[Q223] + PInv[4]*v[Q112]*v[Q223] + PInv[5]*v[Q113]*v[Q223])*s;
+      f[Q122] = 2*v[Q122]*v[U1] + 2*v[Q112]*v[U2] + 4*v[P12]*v[U1]*v[U2] + k*(v[P11]*v[P22] + 2*(v[P12]*v[P12]))/(v[RHO]) + v[P22]*(v[U1]*v[U1]) + v[P11]*(v[U2]*v[U2]) + v[RHO]*(v[U1]*v[U1])*(v[U2]*v[U2]);
 
-    f[Q123] = (2*v[P12]*(v[P13] + v[RHO]*v[U1]*v[U3]) + v[P11]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[RHO]*(2*v[Q123]*v[U1] + v[Q113]*v[U2] + 2*v[P13]*v[U1]*v[U2] + v[Q112]*v[U3] + v[P23]*(v[U1]*v[U1]) + v[RHO]*v[U2]*v[U3]*(v[U1]*v[U1])))/(v[RHO]) + (PInv[0]*v[Q111]*v[Q123] + PInv[1]*v[Q112]*v[Q123] + PInv[2]*v[Q113]*v[Q123] + PInv[1]*v[Q111]*v[Q223] + PInv[3]*v[Q112]*v[Q223] + PInv[4]*v[Q113]*v[Q223] + PInv[2]*v[Q111]*v[Q233] + PInv[4]*v[Q112]*v[Q233] + PInv[5]*v[Q113]*v[Q233])*s;
+      f[Q123] = (2*v[P12]*(k*v[P13] + v[RHO]*v[U1]*v[U3]) + v[P11]*(k*v[P23] + v[RHO]*v[U2]*v[U3]) + v[RHO]*(2*v[Q123]*v[U1] + v[Q113]*v[U2] + 2*v[P13]*v[U1]*v[U2] + v[Q112]*v[U3] + v[P23]*(v[U1]*v[U1]) + v[RHO]*v[U2]*v[U3]*(v[U1]*v[U1])))/(v[RHO]);
 
-    f[Q133] = 2*v[Q133]*v[U1] + 2*v[Q113]*v[U3] + 4*v[P13]*v[U1]*v[U3] + (v[P11]*v[P33] + 2*(v[P13]*v[P13]))/(v[RHO]) + v[P33]*(v[U1]*v[U1]) + v[P11]*(v[U3]*v[U3]) + v[RHO]*(v[U1]*v[U1])*(v[U3]*v[U3]) + (PInv[0]*v[Q111]*v[Q133] + PInv[1]*v[Q112]*v[Q133] + PInv[2]*v[Q113]*v[Q133] + PInv[1]*v[Q111]*v[Q233] + PInv[3]*v[Q112]*v[Q233] + PInv[4]*v[Q113]*v[Q233] + PInv[2]*v[Q111]*v[Q333] + PInv[4]*v[Q112]*v[Q333] + PInv[5]*v[Q113]*v[Q333])*s;
+      f[Q133] = 2*v[Q133]*v[U1] + 2*v[Q113]*v[U3] + 4*v[P13]*v[U1]*v[U3] + k*(v[P11]*v[P33] + 2*(v[P13]*v[P13]))/(v[RHO]) + v[P33]*(v[U1]*v[U1]) + v[P11]*(v[U3]*v[U3]) + v[RHO]*(v[U1]*v[U1])*(v[U3]*v[U3]);
 
-    f[Q222] = (3*v[P12]*v[P22])/(v[RHO]) + v[Q222]*v[U1] + 3*v[U2]*(v[Q122] + v[P22]*v[U1] + v[P12]*v[U2]) + v[RHO]*v[U1]*(v[U2]*v[U2]*v[U2]) + s*(PInv[0]*v[Q112]*v[Q122] + PInv[2]*v[Q122]*v[Q123] + PInv[3]*v[Q122]*v[Q222] + PInv[4]*v[Q123]*v[Q222] + PInv[2]*v[Q112]*v[Q223] + PInv[4]*v[Q122]*v[Q223] + PInv[5]*v[Q123]*v[Q223] + PInv[1]*(v[Q112]*v[Q222] + v[Q122]*v[Q122]));
+      f[Q222] = (3*k*v[P12]*v[P22])/(v[RHO]) + v[Q222]*v[U1] + 3*v[U2]*(v[Q122] + v[P22]*v[U1] + v[P12]*v[U2]) + v[RHO]*v[U1]*(v[U2]*v[U2]*v[U2]);
 
-    f[Q223] = (2*v[P12]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[P13]*(v[P22] + v[RHO]*(v[U2]*v[U2])) + v[RHO]*(v[Q223]*v[U1] + 2*v[Q123]*v[U2] + 2*v[P23]*v[U1]*v[U2] + v[Q122]*v[U3] + v[P22]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U3]*(v[U2]*v[U2])))/(v[RHO]) + s*(PInv[0]*v[Q112]*v[Q123] + PInv[1]*v[Q122]*v[Q123] + PInv[1]*v[Q112]*v[Q223] + PInv[3]*v[Q122]*v[Q223] + PInv[4]*v[Q123]*v[Q223] + PInv[2]*v[Q112]*v[Q233] + PInv[4]*v[Q122]*v[Q233] + PInv[5]*v[Q123]*v[Q233] + PInv[2]*(v[Q123]*v[Q123]));
+      f[Q223] = (2*v[P12]*(k*v[P23] + v[RHO]*v[U2]*v[U3]) + v[P13]*(k*v[P22] + v[RHO]*(v[U2]*v[U2])) + v[RHO]*(v[Q223]*v[U1] + 2*v[Q123]*v[U2] + 2*v[P23]*v[U1]*v[U2] + v[Q122]*v[U3] + v[P22]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U3]*(v[U2]*v[U2])))/(v[RHO]);
 
-    f[Q233] = (2*v[P13]*(v[P23] + v[RHO]*v[U2]*v[U3]) + v[P12]*(v[P33] + v[RHO]*(v[U3]*v[U3])) + v[RHO]*(v[Q233]*v[U1] + v[Q133]*v[U2] + v[P33]*v[U1]*v[U2] + 2*v[Q123]*v[U3] + 2*v[P23]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U2]*(v[U3]*v[U3])))/(v[RHO]) + (PInv[0]*v[Q112]*v[Q133] + PInv[1]*v[Q122]*v[Q133] + PInv[2]*v[Q123]*v[Q133] + PInv[1]*v[Q112]*v[Q233] + PInv[3]*v[Q122]*v[Q233] + PInv[4]*v[Q123]*v[Q233] + PInv[2]*v[Q112]*v[Q333] + PInv[4]*v[Q122]*v[Q333] + PInv[5]*v[Q123]*v[Q333])*s;
+      f[Q233] = (2*v[P13]*(k*v[P23] + v[RHO]*v[U2]*v[U3]) + v[P12]*(k*v[P33] + v[RHO]*(v[U3]*v[U3])) + v[RHO]*(v[Q233]*v[U1] + v[Q133]*v[U2] + v[P33]*v[U1]*v[U2] + 2*v[Q123]*v[U3] + 2*v[P23]*v[U1]*v[U3] + v[RHO]*v[U1]*v[U2]*(v[U3]*v[U3])))/(v[RHO]);
 
-    f[Q333] = (3*v[P13]*v[P33])/(v[RHO]) + v[Q333]*v[U1] + 3*v[U3]*(v[Q133] + v[P33]*v[U1] + v[P13]*v[U3]) + v[RHO]*v[U1]*(v[U3]*v[U3]*v[U3]) + s*(PInv[0]*v[Q113]*v[Q133] + PInv[1]*v[Q123]*v[Q133] + PInv[1]*v[Q113]*v[Q233] + PInv[3]*v[Q123]*v[Q233] + PInv[4]*v[Q133]*v[Q233] + PInv[2]*v[Q113]*v[Q333] + PInv[4]*v[Q123]*v[Q333] + PInv[5]*v[Q133]*v[Q333] + PInv[2]*(v[Q133]*v[Q133]));
+      f[Q333] = (3*k*v[P13]*v[P33])/(v[RHO]) + v[Q333]*v[U1] + 3*v[U3]*(v[Q133] + v[P33]*v[U1] + v[P13]*v[U3]) + v[RHO]*v[U1]*(v[U3]*v[U3]*v[U3]);
   }
 
   void TwentyMomentEquation::speeds(const Lucee::RectCoordSys& c, const double* q, double s [2])
@@ -197,7 +191,7 @@ namespace Lucee
     double rho = q[RHO];
     double u1 = q[U1]/rho;
     double p11 = q[P11] - rho*u1*u1;
-    double v = sqrt((3 + sqrt(6))*p11/rho);
+    double v = sqrt((3 + sqrt(6))*p11/rho)*1.5;
     s[0] = u1 - v;
     s[1] = u1 + v;
   }
@@ -207,7 +201,7 @@ namespace Lucee
     double rho = q[RHO];
     double u1 = q[U1]/rho;
     double p11 = q[P11] - rho*u1*u1;
-    return std::fabs(u1) + sqrt((3 + sqrt(6))*p11/rho); 
+    return std::fabs(u1) + sqrt((3 + sqrt(6))*p11/rho)*1.5; 
   }
 
   void TwentyMomentEquation::primitive(const double* q, double* v) const
@@ -314,12 +308,14 @@ namespace Lucee
     double q233 = 0.5*(vl[Q233]+vr[Q233]);
     double q333 = 0.5*(vl[Q333]+vr[Q333]);
 
+
 // multiply jumps by (phi')^-1 matrix first (this is because the left
 // eigenvectors are computed from the quasilinear form and not the
 // primitive form of the equations)
     
 // this was generated by mathematica and cleaned up.
-/* FIXME eigen
+/*  eigen code which does not seem to work numerically though it solves the same equation
+
     Eigen::VectorXd phiJump(20);
     phiJump(0) = jump[0];
     phiJump(1) = (-(u1*jump[0]) + jump[1])/p0;
@@ -342,6 +338,7 @@ namespace Lucee
     phiJump(18) =  (p33*(u2*jump[0] - jump[2]) + 2*p23*(u3*jump[0] - jump[3]) +    p0*(u3*u3*jump[2] - 2*u3*jump[8] - u2*(u3*u3*jump[0] - 2*u3*jump[3] + jump[9]) + jump[18]))/p0;
     phiJump(19) = -(u3*u3*u3*jump[0]) + (3*p33*(u3*jump[0] - jump[3]))/p0 + 3*u3*u3*jump[3] - 3*u3*jump[9] + jump[19];
 */
+
     Lucee::Matrix<double> phiJump(20,1);
     phiJump(0,0) = jump[0];
     phiJump(1,0) = (-(u1*jump[0]) + jump[1])/p0;
@@ -365,36 +362,43 @@ namespace Lucee
     phiJump(19,0) = -(u3*u3*u3*jump[0]) + (3*p33*(u3*jump[0] - jump[3]))/p0 + 3*u3*u3*jump[3] - 3*u3*jump[9] + jump[19];
 
 
-    // powers of quantities
     Lucee::Matrix<double> A(20,20); // quasilinear flux matrix
     Lucee::Matrix<double> phiprime(20,20);
-    /* FIXME eigen
+    /* eigen code
     Eigen::MatrixXd A; // quasilinear flux matrix
     Eigen::MatrixXd phiprime;
     A = Eigen::MatrixXd::Constant(20,20,0.0);
     phiprime = Eigen::MatrixXd::Constant(20,20,0.0);
     */
 
+    double k; // parameter which measures deviation from maxwellian (sort of Levermore, sort of Pearson). Totally not rigourous 
+    // here I will attempt this using k as the heat-flux deviation from a maxwellian.
+
+    k = (1 + (p0*q111*q111/(p11*p11*p11) + p0*q222*q222/(p22*p22*p22) + p0*q333*q333/(p33*p33*p33))/2 );
+    /*    if (k > 5) {
+      std::cout << "k = " << k << "\n";
+      }*/
     A(0,0) = u1; A(0,1) = p0; 
-    A(1,1) = u1; A(1,4) = 1/p0; 
-    A(2,2) = u1; A(2,5) = 1/p0; 
-    A(3,3) = u1; A(3,6) = 1/p0; 
-    A(4,1) = 3*p11; A(4,4) = u1; A(4,10) = 1; 
-    A(5,1) = 2*p12; A(5,2) = p11; A(5,5) = u1; A(5,11) = 1; 
-    A(6,1) = 2*p13; A(6,3) = p11; A(6,6) = u1; A(6,12) = 1; 
-    A(7,1) = p22; A(7,2) = 2*p12; A(7,7) = u1; A(7,13) = 1; 
-    A(8,1) = p23; A(8,2) = p13; A(8,3) = p12; A(8,8) = u1; A(8,14) = 1; 
-    A(9,1) = p33; A(9,3) = 2*p13; A(9,9) = u1; A(9,15) = 1; 
-    A(10,0) = (-3*p11*p11)/(p0*p0); A(10,1) = 4*q111; A(10,4) = (3*p11)/p0; A(10,10) = u1; 
-    A(11,0) = (-3*p11*p12)/(p0*p0); A(11,1) = 3*q112; A(11,2) = q111; A(11,4) = p12/p0; A(11,5) = (2*p11)/p0; A(11,11) = u1; 
-    A(12,0) = (-3*p11*p13)/(p0*p0); A(12,1) = 3*q113; A(12,3) = q111; A(12,4) = p13/p0; A(12,6) = (2*p11)/p0; A(12,12) = u1; 
-    A(13,0) = (-2*p12*p12 - p11*p22)/(p0*p0); A(13,1) = 2*q122; A(13,2) = 2*q112; A(13,5) = (2*p12)/p0; A(13,7) = p11/p0; A(13,13) = u1; 
-    A(14,0) = (-2*p12*p13 - p11*p23)/(p0*p0); A(14,1) = 2*q123; A(14,2) = q113; A(14,3) = q112; A(14,5) = p13/p0; A(14,6) = p12/p0; A(14,8) = p11/p0; A(14,14) = u1; 
-    A(15,0) = (-2*p13*p13 - p11*p33)/(p0*p0); A(15,1) = 2*q133; A(15,3) = 2*q113; A(15,6) = (2*p13)/p0; A(15,9) = p11/p0; A(15,15) = u1; 
-    A(16,0) = (-3*p12*p22)/(p0*p0); A(16,1) = q222; A(16,2) = 3*q122; A(16,7) = (3*p12)/p0; A(16,16) = u1; 
-    A(17,0) = (-(p13*p22) - 2*p12*p23)/(p0*p0); A(17,1) = q223; A(17,2) = 2*q123; A(17,3) = q122; A(17,7) = p13/p0; A(17,8) = (2*p12)/p0; A(17,17) = u1; 
-    A(18,0) = (-2*p13*p23 - p12*p33)/(p0*p0); A(18,1) = q233; A(18,2) = q133; A(18,3) = 2*q123; A(18,8) = (2*p13)/p0; A(18,9) = p12/p0; A(18,18) = u1; 
-    A(19,0) = (-3*p13*p33)/(p0*p0); A(19,1) = q333; A(19,3) = 3*q133; A(19,9) = (3*p13)/p0; A(19,19) = u1; 
+    A(1,4) = 1/p0; A(1,1) = u1; 
+    A(2,5) = 1/p0; A(2,2) = u1; 
+    A(3,6) = 1/p0; A(3,3) = u1; 
+    A(4,4) = u1; A(4,10) = 1; A(4,1) = 3*p11; 
+    A(5,5) = u1; A(5,11) = 1; A(5,1) = 2*p12; A(5,2) = p11; 
+    A(6,6) = u1; A(6,12) = 1; A(6,1) = 2*p13; A(6,3) = p11; 
+    A(7,7) = u1; A(7,13) = 1; A(7,1) = p22; A(7,2) = 2*p12; 
+    A(8,8) = u1; A(8,14) = 1; A(8,1) = p23; A(8,2) = p13; A(8,3) = p12; 
+    A(9,9) = u1; A(9,15) = 1; A(9,1) = p33; A(9,3) = 2*p13; 
+    A(10,0) = (-3*k*(p11*p11))/(p0*p0); A(10,4) = (-3*p11)/p0 + (6*k*p11)/p0; A(10,10) = u1; A(10,1) = 4*q111; 
+    A(11,0) = (-3*k*p11*p12)/(p0*p0); A(11,4) = (-2*p12)/p0 + (3*k*p12)/p0; A(11,5) = -(p11/p0) + (3*k*p11)/p0; A(11,11) = u1; A(11,1) = 3*q112; A(11,2) = q111; 
+    A(12,0) = (-3*k*p11*p13)/(p0*p0); A(12,4) = (-2*p13)/p0 + (3*k*p13)/p0; A(12,6) = -(p11/p0) + (3*k*p11)/p0; A(12,12) = u1; A(12,1) = 3*q113; A(12,3) = q111; 
+    A(13,0) = (-2*k*(p12*p12))/(p0*p0) - (k*p11*p22)/(p0*p0); A(13,4) = -(p22/p0) + (k*p22)/p0; A(13,5) = (-2*p12)/p0 + (4*k*p12)/p0; A(13,7) = (k*p11)/p0; A(13,13) = u1; A(13,1) = 2*q122; A(13,2) = 2*q112; 
+    A(14,0) = (-2*k*p12*p13)/(p0*p0) - (k*p11*p23)/(p0*p0); A(14,4) = -(p23/p0) + (k*p23)/p0; A(14,5) = -(p13/p0) + (2*k*p13)/p0; A(14,6) = -(p12/p0) + (2*k*p12)/p0; A(14,8) = (k*p11)/p0; A(14,14) = u1; A(14,1) = 2*q123; A(14,2) = q113; A(14,3) = q112; 
+    A(15,0) = (-2*k*(p13*p13))/(p0*p0) - (k*p11*p33)/(p0*p0); A(15,4) = -(p33/p0) + (k*p33)/p0; A(15,6) = (-2*p13)/p0 + (4*k*p13)/p0; A(15,9) = (k*p11)/p0; A(15,15) = u1; A(15,1) = 2*q133; A(15,3) = 2*q113; 
+    A(16,0) = (-3*k*p12*p22)/(p0*p0); A(16,5) = (-3*p22)/p0 + (3*k*p22)/p0; A(16,7) = (3*k*p12)/p0; A(16,16) = u1; A(16,1) = q222; A(16,2) = 3*q122; 
+    A(17,0) = -((k*p13*p22)/(p0*p0)) - (2*k*p12*p23)/(p0*p0); A(17,5) = (-2*p23)/p0 + (2*k*p23)/p0; A(17,6) = -(p22/p0) + (k*p22)/p0; A(17,7) = (k*p13)/p0; A(17,8) = (2*k*p12)/p0; A(17,17) = u1; A(17,1) = q223; A(17,2) = 2*q123; A(17,3) = q122; 
+    A(18,0) = (-2*k*p13*p23)/(p0*p0) - (k*p12*p33)/(p0*p0); A(18,5) = -(p33/p0) + (k*p33)/p0; A(18,6) = (-2*p23)/p0 + (2*k*p23)/p0; A(18,8) = (2*k*p13)/p0; A(18,9) = (k*p12)/p0; A(18,18) = u1; A(18,1) = q233; A(18,2) = q133; A(18,3) = 2*q123; 
+    A(19,0) = (-3*k*p13*p33)/(p0*p0); A(19,6) = (-3*p33)/p0 + (3*k*p33)/p0; A(19,9) = (3*k*p13)/p0; A(19,19) = u1; A(19,1) = q333; A(19,3) = 3*q133; 
+ 
 
     phiprime(0,0) = 1; 
     phiprime(1,0) = u1; phiprime(1,1) = p0; 
@@ -417,36 +421,14 @@ namespace Lucee
     phiprime(18,0) = u2*(u3*u3); phiprime(18,8) = 2*u3; phiprime(18,9) = u2; phiprime(18,18) = 1; phiprime(18,2) = p33 + p0*(u3*u3); phiprime(18,3) = 2*p23 + 2*p0*u2*u3; 
     phiprime(19,0) = (u3*u3*u3); phiprime(19,9) = 3*u3; phiprime(19,19) = 1; phiprime(19,3) = 3*p33 + 3*p0*(u3*u3); 
 
-    /*
-    Eigen::EigenSolver<Eigen::MatrixXd> eigensolver(A); 
-    if (eigensolver.info() != Eigen::Success) {
-      Lucee::Except lce("TwentyMomentEquation:: wavesRoe: Eigensolver failed!");
-      throw lce;      
-    }
-    Eigen::MatrixXd eigvals = eigensolver.eigenvalues().real();
-    Eigen::MatrixXd reigs = eigensolver.eigenvectors().real();
-
-    // solve for projection of jumps on left.
-    Eigen::VectorXd lp;
-    lp = reigs.partialPivLu().solve(phiJump);
-    
-    Eigen::MatrixXd w = phiprime * reigs; 
-
-    for (int i = 0; i < 20; i++) {
-      for (int j = 0; j < 20; j++) {
-        waves(j,i) = lp[i]*w(j,i);
-      }
-    }
-    */
     Lucee::Matrix<double> reigs(20,20);
     Lucee::Vector<double> evi(20);
-    //    Lucee::Matrix<double> leigs(20,20), lt(sz);
     Lucee::Matrix<double> w(20,20);
     Lucee::Vector<double> eigvals(20);
 
     eigRight(A, eigvals, evi, reigs); 
     w = accumulate(w, phiprime, reigs); 
-    solve(reigs, phiJump);    
+    solve(reigs, phiJump); // phiJump now contains the left eigenvector projection    
     for (int i = 0; i < 20; i++) {
       for (int j = 0; j < 20; j++) {
         waves(j,i) = phiJump(i)*w(j,i);
@@ -456,9 +438,9 @@ namespace Lucee
     // output speeds: 
     for (int i = 0; i < 20; ++i) { 
       s[i] = eigvals(i);
-      if (fabs(evi(i)) > 1e-5) {
-        std::cout << i <<"'th imaginary part: " << evi(i) << "\n";
-      }
+      /*      if (fabs(evi(i)) > 1e-3) {
+        std::cout << i <<"'th imaginary part in terms of thermal speed : " << evi(i)/sqrt(p11/p0) << "\n";
+        }*/
     }
 
   }
@@ -540,20 +522,27 @@ namespace Lucee
   bool TwentyMomentEquation::isInvariantDomain(const double* q) const
   {
       double rho = q[RHO];
-      if(rho <= 0.0)
+      if(rho <= 0.0){
+        std::cout <<"neg density \n";
           return false;
+      }
 
       double u = q[U1] / rho;
       double v = q[U2] / rho;
       double w = q[U3] / rho;
 
-      if((q[P11] - rho * u * u) <= 0)
+      if((q[P11] - rho * u * u) <= 0) {
+        //        std::cout << "neg p11\n";
           return false;
-      if((q[P22] - rho * v * v) <= 0)
+      }
+      if((q[P22] - rho * v * v) <= 0){
+        //        std::cout << "neg p22 \n";
           return false;
-      if((q[P33] - rho * w * w) <= 0)
+      }
+      if((q[P33] - rho * w * w) <= 0) {
+        //        std::cout << "neg p33\n";
           return false;
-
+      }
       return true;
   }
 }
