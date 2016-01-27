@@ -737,9 +737,12 @@ namespace Lucee
         grid->getCentroid(xc); // cell center coordinate
 // push function object on stack
       lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+// ensure enough space on stack
+      lua_checkstack(L, numOut+3);
 // push variables on stack
-      for (unsigned i=0; i<3; ++i)
+      for (unsigned i=0; i<3; ++i){
         lua_pushnumber(L, xc[i]);
+      }
       for (int i=0; i<numOut; ++i)
       {
         lua_pushnumber(L, ptr[i]);
