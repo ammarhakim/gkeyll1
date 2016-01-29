@@ -174,7 +174,9 @@ namespace Lucee
   AdvectionEquationTemplated<NDIM>::isInvariantDomain(const double* q) const
   {
     if (Lucee::isNan(q[0]) || q[0] <= 0.0)
+    {
       return false;
+    }
     return true;
   }
 
