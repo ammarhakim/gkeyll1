@@ -173,6 +173,7 @@ namespace Lucee
         }
         if (isPos == false)
         {
+          qOld.setPtr(qOldPtr, idx);          
           isPositive = false;
 // reset this cell
           calcAverage(qOldPtr, qAvg);
