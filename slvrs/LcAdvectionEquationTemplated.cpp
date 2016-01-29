@@ -12,17 +12,18 @@
 
 // lucee includes
 #include <LcAdvectionEquationTemplated.h>
+#include <LcMathLib.h>
 
 // std includes
 #include <algorithm>
 
 namespace Lucee
 {
-  template <> const char *AdvectionEquationTemplated<1>::id = "AdvectionTemplated1D";
-  template <> const char *AdvectionEquationTemplated<2>::id = "AdvectionTemplated2D";
-  template <> const char *AdvectionEquationTemplated<3>::id = "AdvectionTemplated3D";
-  template <> const char *AdvectionEquationTemplated<4>::id = "AdvectionTemplated4D";
-  template <> const char *AdvectionEquationTemplated<5>::id = "AdvectionTemplated5D";
+  template <> const char *AdvectionEquationTemplated<1>::id = "Advection1D";
+  template <> const char *AdvectionEquationTemplated<2>::id = "Advection2D";
+  template <> const char *AdvectionEquationTemplated<3>::id = "Advection3D";
+  template <> const char *AdvectionEquationTemplated<4>::id = "Advection4D";
+  template <> const char *AdvectionEquationTemplated<5>::id = "Advection5D";
 
   template <unsigned NDIM>
   AdvectionEquationTemplated<NDIM>::AdvectionEquationTemplated()
@@ -166,6 +167,15 @@ namespace Lucee
     const double* q, const double* coeff, double* vec)
   { // right eigenmatrix is unit matrix
     vec[0] = coeff[0];
+  }
+
+  template <unsigned NDIM>
+  bool
+  AdvectionEquationTemplated<NDIM>::isInvariantDomain(const double* q) const
+  {
+    if (Lucee::isNan(q[0]) || q[0] <= 0.0)
+      return false;
+    return true;
   }
 
   // instantiations

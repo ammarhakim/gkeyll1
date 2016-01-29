@@ -478,7 +478,7 @@ namespace Lucee
       double ar = qbym*(emr[IEZ] + vx*emr[IBY]-vy*emr[IBX]);
       maxs = std::max(std::fabs(al),std::fabs(ar));
       flux = 0.5*(distfl*al+distfr*ar) - 0.5*maxs*(distfr-distfl);
-    }        
+    }
     return maxs;
   }
 

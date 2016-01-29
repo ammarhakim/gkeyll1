@@ -167,6 +167,15 @@ namespace Lucee
       void reconWithRightEigenvectors(const Lucee::RectCoordSys& c,
         const double* q, const double* coeff, double* vec);
 
+/**
+ * Check if conserved variables satisfies invariant domains of the
+ * system. Return true if it does, false otherwise.
+ *
+ * @param q Conserved variables.
+ * @return true if invariant domains are satisfied, false otherwise.
+ */
+      bool isInvariantDomain(const double* q) const;
+
     private:
 /** advection speeds */
       double u[NDIM];
