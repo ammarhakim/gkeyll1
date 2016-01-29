@@ -67,6 +67,10 @@ namespace Lucee
         throw lce;
       }
     }
+
+    lowerBound = 0.0; // by default ensure positive solutions
+    if (tbl.hasNumber("lowerBound"))
+      lowerBound = tbl.getNumber("lowerBound");
   }
 
   template <unsigned NDIM>
@@ -173,10 +177,8 @@ namespace Lucee
   bool
   AdvectionEquationTemplated<NDIM>::isInvariantDomain(const double* q) const
   {
-    if (Lucee::isNan(q[0]) || q[0] <= 0.0)
-    {
+    if (Lucee::isNan(q[0]) || q[0] <= lowerBound)
       return false;
-    }
     return true;
   }
 

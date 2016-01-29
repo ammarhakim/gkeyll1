@@ -181,6 +181,8 @@ namespace Lucee
       double u[NDIM];
 /** Type of numerical flux to use */
       NumFluxType fluxType;
+/** Lower bound on advected quantity for positivity preservation */
+      double lowerBound;
   };
 }
 
