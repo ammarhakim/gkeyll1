@@ -15,6 +15,8 @@
 #include <LcMathLib.h>
 #include <LcPoissonBracketOptUpdater.h>
 
+#include <ctime>
+
 namespace Lucee
 {
   static const unsigned UPWIND = 0;
@@ -32,7 +34,35 @@ namespace Lucee
   PoissonBracketOptUpdater<NDIM>::PoissonBracketOptUpdater()
     : UpdaterIfc()
   {
+    totalVolTime = totalSurfTime = jacAtQuad = 0.0;
+    computeVolAlphaAtQuadNodesTime = computeSurfAlphaAtQuadNodesTime = 0.0;
+    vol_loop1 = vol_loop2 = vol_loop3 = vol_loop4 = 0.0;
+    surf_loop1 = surf_loop2 = surf_loop3 = surf_loop4 = 0.0;
   }
+
+  template <unsigned NDIM>
+  PoissonBracketOptUpdater<NDIM>::~PoissonBracketOptUpdater()
+  {
+    std::cout << "Total volume integral time = " << totalVolTime << std::endl;
+    std::cout << "Total surface integral time = " << totalSurfTime << std::endl;
+    std::cout << "Total alpha for volume integral time = " << computeVolAlphaAtQuadNodesTime << std::endl;
+    std::cout << "Total alpha for surface integral time = " << computeSurfAlphaAtQuadNodesTime << std::endl;
+    std::cout << "Vol loops  = "
+              << vol_loop1 << " + "
+              << vol_loop2 << " + "
+              << vol_loop3 << " + "
+              << vol_loop4 << " = "
+              << (vol_loop1+vol_loop2+vol_loop3+vol_loop4)
+              << std::endl;
+
+    std::cout << "Surf loops  = "
+              << surf_loop1 << " + "
+              << surf_loop2 << " + "
+              << surf_loop3 << " + "
+              << surf_loop4 << " = "
+              << (surf_loop1+surf_loop2+surf_loop3+surf_loop4)
+              << std::endl;    
+  }  
   
   template <unsigned NDIM>
   void 
@@ -365,6 +395,7 @@ namespace Lucee
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
+    clock_t tm_totalVolTime_s = clock();
     // Contributions from volume integrals
     while(seq.step())
     {
@@ -375,6 +406,7 @@ namespace Lucee
 
       Eigen::VectorXd jacobianAtQuad = Eigen::VectorXd::Ones(nVolQuad);
 
+      clock_t tm_1_s = clock();
       // Figure out Jacobian at quadrature points so its effect can be
       // accounted for when checking CFL condition
       if (hasJacobian == true)
@@ -386,15 +418,22 @@ namespace Lucee
 
         jacobianAtQuad = volQuad.interpMat*jacobianVec;
       }
+      vol_loop1 += (double) (clock() - tm_1_s)/CLOCKS_PER_SEC;
 
+      clock_t tm_2_s = clock();      
       // Compute gradient of hamiltonian
       Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
         hamilDerivAtQuad += hamilPtr[i]*volQuad.pDiffMatrix[i];
+      vol_loop2 += (double) (clock() - tm_2_s)/CLOCKS_PER_SEC;
 
+      clock_t tm_computeAlphaAtQuadNodesTime_s = clock();
       // Get alpha from appropriate function
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
+      clock_t tm_computeAlphaAtQuadNodesTime_e = clock();
+      computeVolAlphaAtQuadNodesTime +=
+        (double) (tm_computeAlphaAtQuadNodesTime_e-tm_computeAlphaAtQuadNodesTime_s)/CLOCKS_PER_SEC;
       
       // Computing maximum cfla
       grid.setIndex(idx);
@@ -402,6 +441,7 @@ namespace Lucee
       for (int i = 0; i < NDIM; i++)
         dtdqVec(i) = dt/grid.getDx(i);
 
+      clock_t tm_3_s = clock();
       Eigen::VectorXd cflaVec(NDIM);
       // Loop over each alpha vector evaluated at a quadrature point
       for (int i = 0; i < nVolQuad; i++)
@@ -410,6 +450,7 @@ namespace Lucee
         if (maxCflaInCol > cfla)
           cfla = maxCflaInCol;
       }
+      vol_loop3 += (double) (clock() - tm_3_s)/CLOCKS_PER_SEC;
 
       // Get a vector of f at quad points
       Eigen::VectorXd fVec(nlocal);
@@ -418,6 +459,7 @@ namespace Lucee
       // Compute distribution function at quadrature points cwise multiplied by quadrature weights
       Eigen::VectorXd fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
 
+      clock_t tm_4_s = clock();
       aNew.setPtr(aNewPtr, idx);
       for (int d = 0;  d < updateDirs.size(); d++)
       {
@@ -427,7 +469,10 @@ namespace Lucee
         for (int i = 0; i < nlocal; i++)
           aNewPtr[i] += resultVector(i);
       }
+      vol_loop4 += (double) (clock() - tm_4_s)/CLOCKS_PER_SEC;
     }
+    clock_t tm_totalVolTime_e = clock();
+    totalVolTime += (double) (tm_totalVolTime_e - tm_totalVolTime_s)/CLOCKS_PER_SEC;
      
     // Check to see if we need to retake time step
     if (cfla > cflm)
@@ -441,6 +486,8 @@ namespace Lucee
     Eigen::MatrixXd alpha(NDIM, nSurfQuad);
     Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
     Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
+
+    clock_t tm_totalSurfTime_s = clock();
     // Contributions from surface integrals
     for (int d = 0; d < updateDirs.size(); d++)
     {
@@ -492,13 +539,19 @@ namespace Lucee
             leftData(i) = aCurrPtr_l[i];
           }
 
+          clock_t tm_1_s = clock();
           // Compute gradient of hamiltonian at surface nodes
           hamilDerivAtQuad.setZero(NDIM, nSurfQuad);
           for (int i = 0; i < nlocal; i++)
             hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
+          surf_loop1 += (double) (clock()-tm_1_s)/CLOCKS_PER_SEC;
 
+          clock_t tm_computeAlphaAtQuadNodesTime_s = clock();          
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
+          clock_t tm_computeAlphaAtQuadNodesTime_e = clock();
+          computeSurfAlphaAtQuadNodesTime +=
+            (double) (tm_computeAlphaAtQuadNodesTime_e-tm_computeAlphaAtQuadNodesTime_s)/CLOCKS_PER_SEC;
 
           // Construct normal vector
           normalVec.setZero(NDIM);
@@ -509,9 +562,12 @@ namespace Lucee
           // TODO: account for jacobian factor, since it has been multiplied into alpha already?
           // Don't need to do this for now, as long as jacobian factor is > 0
 
+          clock_t tm_2_s = clock();
           // Compute numerical flux
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
+          surf_loop2 += (double) (clock()-tm_2_s)/CLOCKS_PER_SEC;
+          
 /*
           aNew.setPtr(aNewPtr_r, idxr);
           aNew.setPtr(aNewPtr_l, idxl);
@@ -526,10 +582,12 @@ namespace Lucee
             }
           }*/
 
+          clock_t tm_3_s = clock();          
           Eigen::VectorXd upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
             numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
           Eigen::VectorXd lowerResultVector = bigStoredLowerSurfMatrices[cellIndexRight][d]*
             numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
+          surf_loop3 += (double) (clock()-tm_3_s)/CLOCKS_PER_SEC;
 
           // Accumulate to solution
           aNew.setPtr(aNewPtr_r, idxr);
@@ -542,6 +600,8 @@ namespace Lucee
         }
       }
     }
+    clock_t tm_totalSurfTime_e = clock();
+    totalSurfTime += (double) (tm_totalSurfTime_e - tm_totalSurfTime_s)/CLOCKS_PER_SEC;
     
 
     // NOTE: If only calculation of increments are requested, the final

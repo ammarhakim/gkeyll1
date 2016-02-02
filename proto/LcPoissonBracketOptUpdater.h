@@ -48,6 +48,9 @@ namespace Lucee
 /** Create new nodal DG solver */
       PoissonBracketOptUpdater();
 
+/** Dtor */
+      virtual ~PoissonBracketOptUpdater();      
+
 /**
  * Bootstrap method: Read input from specified table.
  *
@@ -162,6 +165,12 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+
+// Stuff for timing studies
+      double totalVolTime, totalSurfTime, jacAtQuad;
+      double computeVolAlphaAtQuadNodesTime, computeSurfAlphaAtQuadNodesTime;
+      double vol_loop1, vol_loop2, vol_loop3, vol_loop4;
+      double surf_loop1, surf_loop2, surf_loop3, surf_loop4;
   };
 }
 
