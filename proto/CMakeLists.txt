@@ -76,6 +76,7 @@ set (proto_SOURCES
   LcPoissonBracketEquationRegistry.cpp
   LcPoissonBracketGyroEquation4D.cpp
   LcPoissonBracketGyroEquation5D.cpp
+  LcPoissonBracketImpUpdater.cpp
   LcPoissonBracketOptUpdater.cpp
   LcPoissonBracketSOL3D.cpp
   LcPoissonBracketSimpleUpdater.cpp

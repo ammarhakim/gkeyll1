@@ -1167,11 +1167,25 @@ namespace Lucee
   SerendipityElement<NDIM>::getUpperReflectingBcMapping(unsigned dir,
         std::vector<unsigned>& nodeMap) const
   {
+    /*
     if (polyOrder > 2)
       Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Not implemented for higher than quadratic!");
     if (NDIM != 2 && NDIM != 3)
       Lucee::Except("SerendipityElement::getUpperReflectingBcMapping: Only implemented for 2D and 3D");
+      */
 
+    for (int srcNodeIndex = 0; srcNodeIndex < nodeList.rows(); srcNodeIndex++)
+    {
+      for (int refNodeIndex = 0; refNodeIndex < nodeList.rows(); refNodeIndex++)
+      {
+        if (isReflectionNode(srcNodeIndex, refNodeIndex, dir) == true)
+        {
+          nodeMap[srcNodeIndex] = refNodeIndex;
+          break;
+        }
+      }
+    }
+/*
     if (NDIM == 2)
     {
       if(dir == 0)
@@ -1293,7 +1307,7 @@ namespace Lucee
           nodeMap[19] = 14;
         }
       }
-    }
+    }*/
   }
 
   template <unsigned NDIM>
@@ -3874,6 +3888,24 @@ namespace Lucee
   SerendipityElement<NDIM>::factorial(int n) const
   {
     return (n == 1 || n == 0) ? 1 : factorial(n-1)*n;
+  }
+
+  template <unsigned NDIM>
+  bool
+  SerendipityElement<NDIM>::isReflectionNode(int srcIndex, int tarIndex, int reflectDim) const
+  {
+    // Check to see if all coordinates match, with the reflectDim coordinate reversed in sign
+    for (int d = 0; d < NDIM; d++)
+    {
+      if (reflectDim == d)
+      {
+        if (std::fabs( -nodeList(srcIndex,d) - nodeList(tarIndex,d)) > 1e-4)
+          return false;
+      }
+      else if (std::fabs( nodeList(srcIndex,d) - nodeList(tarIndex,d)) > 1e-4)
+        return false;
+    }
+    return true;
   }
   
   // instantiations

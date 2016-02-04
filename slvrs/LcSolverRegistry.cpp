@@ -56,10 +56,12 @@
 #include <LcLenardBernsteinDragUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
+#include <LcLogicalSheath5DUpdater.h>
 #include <LcLorentzForceSource.h>
 #include <LcLuaModuleRegistry.h>
 #include <LcMHDHamiltonianUpdater.h>
 #include <LcMomentsAtEdges3DUpdater.h>
+#include <LcMomentsAtEdges5DUpdater.h>
 #include <LcMomentsAtEdgesUpdater.h>
 #include <LcNodalCopyFaceToInteriorUpdater.h>
 #include <LcNodalDgCopyBoundaryCondition.h>
@@ -150,9 +152,11 @@ namespace Lucee
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticHeatFluxAtEdge3DUpdater>()
       .append<Lucee::KineticTotalEnergyUpdater>()
+      .append<Lucee::LogicalSheath5DUpdater>()
       .append<Lucee::MHDHamiltonianUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()
       .append<Lucee::MomentsAtEdges3DUpdater>()
+      .append<Lucee::MomentsAtEdges5DUpdater>()
       .append<Lucee::ElectromagneticAUpdater>()
       .append<Lucee::ElectromagneticDistFuncReflectionBcUpdater>()
       .append<Lucee::ElectromagneticMomentsAtEdgesUpdater>()

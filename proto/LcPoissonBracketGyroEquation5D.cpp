@@ -91,4 +91,57 @@ namespace Lucee
     // (3,2)
     alpha.row(3) -= poissonElement.cwiseProduct(hamiltonian.row(2));
   }
+
+  void
+  PoissonBracketGyroEquation5D::computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
+          const int idx[], Eigen::RowVectorXd& alphaDotN, const int component)
+  {
+    int nlocal = interpMat.cols();
+
+    Lucee::ConstFieldPtr<double> bStarYPtr = bStarYField->createConstPtr();
+    Lucee::ConstFieldPtr<double> bStarZPtr = bStarZField->createConstPtr();
+    
+    bStarYField->setPtr(bStarYPtr, idx);
+    bStarZField->setPtr(bStarZPtr, idx);
+    // Copy bStarYField and bStarZField to an Eigen::VectorXd
+    Eigen::VectorXd bStarYVec(nlocal);
+    Eigen::VectorXd bStarZVec(nlocal);
+
+    for (int i = 0; i < nlocal; i++)
+    {
+      bStarYVec(i) = bStarYPtr[i];
+      bStarZVec(i) = bStarZPtr[i];
+    }
+
+    alphaDotN.setZero(alphaDotN.size());
+
+    Eigen::RowVectorXd poissonElement(interpMat.rows());
+
+    // Only return a single row of the complete alpha matrix (gives a single component of alpha
+    // evaluated at requested quadrature points)
+    if (component == 0)
+    {
+      poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
+      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(1));
+    }
+    else if (component == 1)
+    {
+      poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
+      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(0));
+      poissonElement = speciesMass*interpMat*bStarYVec;
+      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(3));
+    }
+    else if (component == 2)
+    {
+      poissonElement = speciesMass*interpMat*bStarZVec;
+      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(3));
+    }
+    else if (component == 3)
+    {
+      poissonElement = speciesMass*interpMat*bStarYVec;
+      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(1));
+      poissonElement = speciesMass*interpMat*bStarZVec;
+      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(2));
+    }
+  }
 }

@@ -75,10 +75,12 @@ set(lcslvrs_SOURCES
   LcLenardBernsteinVParEquation.cpp
   LcLinCombiner.cpp
   LcLobattoElement1D.cpp
+  LcLogicalSheath5DUpdater.cpp
   LcLorentzForceSource.cpp
   LcMHDHamiltonianUpdater.cpp
   LcMaxwellEquation.cpp
   LcMomentsAtEdges3DUpdater.cpp
+  LcMomentsAtEdges5DUpdater.cpp
   LcMomentsAtEdgesUpdater.cpp
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgCopyBoundaryCondition.cpp

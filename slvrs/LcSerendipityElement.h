@@ -570,6 +570,12 @@ namespace Lucee
  *    Compute n!
  */
       int factorial(int n) const;
+
+/**
+ *    Check to see if node srcIndex is the reflection node for node tarIndex in direction
+ *    refectDim
+ */
+      bool isReflectionNode(int srcIndex, int tarIndex, int reflectDim) const;
   };
 }
 
