@@ -94,9 +94,10 @@ namespace Lucee
 
   void
   PoissonBracketGyroEquation5D::computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
-          const int idx[], Eigen::RowVectorXd& alphaDotN, const int component)
+    const std::vector<int>& nodeNums, const int idx[], Eigen::RowVectorXd& alphaDotN, const int component)
   {
-    int nlocal = interpMat.cols();
+    int nlocal = nodeNums.size();
+    //interpMat.cols();
 
     Lucee::ConstFieldPtr<double> bStarYPtr = bStarYField->createConstPtr();
     Lucee::ConstFieldPtr<double> bStarZPtr = bStarZField->createConstPtr();
@@ -109,8 +110,8 @@ namespace Lucee
 
     for (int i = 0; i < nlocal; i++)
     {
-      bStarYVec(i) = bStarYPtr[i];
-      bStarZVec(i) = bStarZPtr[i];
+      bStarYVec(i) = bStarYPtr[nodeNums[i]];
+      bStarZVec(i) = bStarZPtr[nodeNums[i]];
     }
 
     alphaDotN.setZero(alphaDotN.size());

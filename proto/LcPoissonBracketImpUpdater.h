@@ -111,6 +111,7 @@ namespace Lucee
             coordMat = Eigen::MatrixXd(numQuad, numCoords);
             weights = Eigen::VectorXd(numQuad);
             interpMat = Eigen::MatrixXd(numQuad, nlocal);
+            nodeNums.resize(nlocal);
           }
 
 /** Matrix of ordinates (could remove this) */
@@ -119,6 +120,8 @@ namespace Lucee
           Eigen::VectorXd weights;
 /** Interpolation matrix */
           Eigen::MatrixXd interpMat;
+/** Vector of node numbers (only needed for surface structures) */
+          std::vector<int> nodeNums;
       };
 /** Data for volume quadrature */
       GaussQuadData volQuad;

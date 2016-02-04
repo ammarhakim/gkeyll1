@@ -40,7 +40,7 @@ namespace Lucee
 
   void
   PoissonBracketEquation::computeAlphaAtQuadNodes(const Eigen::MatrixXd& gradHamiltonian, const Eigen::MatrixXd& interpMat,
-    const int idx[], Eigen::RowVectorXd& alphaDotN, const int component)
+    const std::vector<int>& nodeNums, const int idx[], Eigen::RowVectorXd& alphaDotN, const int component)
   {
     throw Lucee::Except("PoissonBracketEquation::computeAlphaAtQuadNodes: Method not implemented");
   }
