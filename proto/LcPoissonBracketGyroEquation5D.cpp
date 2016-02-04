@@ -73,23 +73,23 @@ namespace Lucee
 
     Eigen::RowVectorXd poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
     // (0, 1)
-    alpha.row(0) += poissonElement.cwiseProduct(hamiltonian.row(1));
+    alpha.row(0) = poissonElement.cwiseProduct(hamiltonian.row(1));
     // (1, 0)
-    alpha.row(1) -= poissonElement.cwiseProduct(hamiltonian.row(0));
+    alpha.row(1) = -poissonElement.cwiseProduct(hamiltonian.row(0));
     
     // Get a vector of bStarYVec*speciesMass at all quadrature points
     poissonElement = speciesMass*interpMat*bStarYVec;
     // (1,3)
-    alpha.row(1) += poissonElement.cwiseProduct(hamiltonian.row(3));
+    alpha.row(1).noalias() += poissonElement.cwiseProduct(hamiltonian.row(3));
     // (3,1)
-    alpha.row(3) -= poissonElement.cwiseProduct(hamiltonian.row(1));
+    alpha.row(3) = -poissonElement.cwiseProduct(hamiltonian.row(1));
 
     // Get a vector of bStarZVec*speciesMass at all quadrature points
     poissonElement = speciesMass*interpMat*bStarZVec;
     // (2,3)
-    alpha.row(2) += poissonElement.cwiseProduct(hamiltonian.row(3));
+    alpha.row(2) = poissonElement.cwiseProduct(hamiltonian.row(3));
     // (3,2)
-    alpha.row(3) -= poissonElement.cwiseProduct(hamiltonian.row(2));
+    alpha.row(3).noalias() -= poissonElement.cwiseProduct(hamiltonian.row(2));
   }
 
   void
@@ -123,26 +123,26 @@ namespace Lucee
     if (component == 0)
     {
       poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
-      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(1));
+      alphaDotN = poissonElement.cwiseProduct(hamiltonian.row(1));
     }
     else if (component == 1)
     {
       poissonElement = -speciesMass*speciesMass/speciesCharge*interpMat.rowwise().sum();
-      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(0));
+      alphaDotN = -poissonElement.cwiseProduct(hamiltonian.row(0));
       poissonElement = speciesMass*interpMat*bStarYVec;
-      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(3));
+      alphaDotN.noalias() += poissonElement.cwiseProduct(hamiltonian.row(3));
     }
     else if (component == 2)
     {
       poissonElement = speciesMass*interpMat*bStarZVec;
-      alphaDotN += poissonElement.cwiseProduct(hamiltonian.row(3));
+      alphaDotN = poissonElement.cwiseProduct(hamiltonian.row(3));
     }
     else if (component == 3)
     {
       poissonElement = speciesMass*interpMat*bStarYVec;
-      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(1));
+      alphaDotN = -poissonElement.cwiseProduct(hamiltonian.row(1));
       poissonElement = speciesMass*interpMat*bStarZVec;
-      alphaDotN -= poissonElement.cwiseProduct(hamiltonian.row(2));
+      alphaDotN.noalias() -= poissonElement.cwiseProduct(hamiltonian.row(2));
     }
   }
 }
