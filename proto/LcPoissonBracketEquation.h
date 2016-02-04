@@ -62,7 +62,7 @@ namespace Lucee
  * @param component flag to indicate which single row of the poisson tensor to return
  */
       virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& gradHamiltonian, const Eigen::MatrixXd& interpMat,
-          const int idx[], Eigen::RowVectorXd& alphaDotN, const int component);
+          const std::vector<int>& nodeNums, const int idx[], Eigen::RowVectorXd& alphaDotN, const int component);
   };
 }
 
