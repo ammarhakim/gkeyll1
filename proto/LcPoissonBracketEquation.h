@@ -50,6 +50,19 @@ namespace Lucee
  */
       virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& gradHamiltonian, const Eigen::MatrixXd& interpMat,
           const int idx[], Eigen::MatrixXd& alpha);
+
+/**
+ * Compute the components of the alpha vector at various quadrature points
+ * @param gradHamiltonian gradient of Hamiltonian evaluated at various quadrature points
+ *  each row is a different direction, each column is a different quadrature point
+ * @param interpMat interpolation matrix for surface or volume. each column is a different
+ *  basis function, each row is a different quadrature point
+ * @param idx index of aux field
+ * @param alpha each row is a different direction, each column is a different quadrature point
+ * @param component flag to indicate which single row of the poisson tensor to return
+ */
+      virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& gradHamiltonian, const Eigen::MatrixXd& interpMat,
+          const int idx[], Eigen::RowVectorXd& alphaDotN, const int component);
   };
 }
 

@@ -60,6 +60,7 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
+#include <LcPoissonBracketImpUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
 #include <LcPoissonBracketSimpleUpdater.h>
 #include <LcPoissonBracketUpdater.h>
@@ -190,6 +191,11 @@ namespace Lucee
       .append<Lucee::PoissonBracketUpdater<3> >()
       .append<Lucee::PoissonBracketUpdater<4> >()
       .append<Lucee::PoissonBracketUpdater<5> >()
+      .append<Lucee::PoissonBracketImpUpdater<1> >()
+      .append<Lucee::PoissonBracketImpUpdater<2> >()
+      .append<Lucee::PoissonBracketImpUpdater<3> >()
+      .append<Lucee::PoissonBracketImpUpdater<4> >()
+      .append<Lucee::PoissonBracketImpUpdater<5> >()
       .append<Lucee::PoissonBracketOptUpdater<1> >()
       .append<Lucee::PoissonBracketOptUpdater<2> >()
       .append<Lucee::PoissonBracketOptUpdater<3> >()

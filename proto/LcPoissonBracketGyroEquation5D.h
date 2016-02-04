@@ -40,6 +40,9 @@ namespace Lucee
 
       virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
           const int idx[], Eigen::MatrixXd& alpha);
+
+      virtual void computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
+          const int idx[], Eigen::RowVectorXd& alphaDotN, const int component);
     private:
       Lucee::Field<5, double> *bStarYField;
       Lucee::Field<5, double> *bStarZField;
