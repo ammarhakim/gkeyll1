@@ -132,8 +132,6 @@ namespace Lucee
       std::vector<Eigen::MatrixXd> gradMatrices;
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
-      Eigen::MatrixXd massMatrixInvUpper;
-      Eigen::MatrixXd massMatrixInvLower;
 /** Stored matrices for stupid testing */
       std::vector<std::vector<Eigen::MatrixXd> > bigStoredUpperSurfMatrices;
       std::vector<std::vector<Eigen::MatrixXd> > bigStoredLowerSurfMatrices;

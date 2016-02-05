@@ -269,12 +269,12 @@ namespace Lucee
     gradMatrices.resize(updateDirs.size());
     for (int d = 0; d < updateDirs.size(); d++)
     {
+      // column 'k' of gradMatrices[d] contains the basis set expansion
+      // of the dth direction derivative of basis function k
       gradMatrices[d] = massMatrixInv*gradStiffnessMatrix[d].transpose();
+      // Each row is a quadrature point, each column is a basis function derivative
       derivMatrices[d] = volQuad.interpMat*gradMatrices[d];
     }
-
-    massMatrixInvUpper = massMatrixInv;
-    massMatrixInvLower = massMatrixInv;
 
     // TotalSize keeps track of total number of cells we will need to store matrices for
     // (this is physical domain of region + 1 layer of ghost cells)
@@ -343,6 +343,18 @@ namespace Lucee
 
         bigStoredUpperSurfMatrices[cellIndex][d] = massMatrixInv*tempInterpMatUpper.transpose();
         bigStoredLowerSurfMatrices[cellIndex][d] = massMatrixInv*tempInterpMatLower.transpose();
+        // Multiply each row of the surface matrices by quadrature weights so we only need to multiply
+        // this matrix with the numerical flux vector to get update weights
+        for (int rowIndex = 0; rowIndex < bigStoredUpperSurfMatrices[cellIndex][d].rows(); rowIndex++)
+        {
+          bigStoredUpperSurfMatrices[cellIndex][d].row(rowIndex) = 
+            bigStoredUpperSurfMatrices[cellIndex][d].row(rowIndex).
+            cwiseProduct(surfUpperQuad[dir].weights.transpose());
+          bigStoredLowerSurfMatrices[cellIndex][d].row(rowIndex) = 
+            bigStoredLowerSurfMatrices[cellIndex][d].row(rowIndex).
+            cwiseProduct(surfLowerQuad[dir].weights.transpose());
+        }
+        // Each row is a basis function derivative, each column is a quadrature point location
         bigStoredVolMatrices[cellIndex][d] = massMatrixInv*derivMatrices[d].transpose();
       }
     }
@@ -397,10 +409,8 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     // Potentially costly Eigen structures for surface integral calculations  
     // Components of solution on left and right of boundary
-    Eigen::VectorXd rightData(nlocal);
-    Eigen::VectorXd leftData(nlocal);
     Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd(NDIM, nSurfQuad);
-    Eigen::MatrixXd hamilDeriv = Eigen::MatrixXd(NDIM, nlocal);
+    Eigen::MatrixXd hamilDeriv = Eigen::MatrixXd::Zero(NDIM, nlocal);
     Eigen::MatrixXd alpha(NDIM, nVolQuad);
     Eigen::RowVectorXd alphaDotN(nSurfQuad);
     Eigen::MatrixXd alphaSurf(NDIM, nSurfQuad);
@@ -428,8 +438,6 @@ namespace Lucee
       int cellIndex = volIdxr.getIndex(idx);
 
       jacobianAtQuad = Eigen::VectorXd::Ones(nVolQuad);
-
-      clock_t tm_1_s = clock();
       // Figure out Jacobian at quadrature points so its effect can be
       // accounted for when checking CFL condition
       if (hasJacobian == true)
@@ -440,20 +448,19 @@ namespace Lucee
 
         jacobianAtQuad = volQuad.interpMat*jacobianVec;
       }
-      vol_loop1 += (double) (clock() - tm_1_s)/CLOCKS_PER_SEC;
 
-      clock_t tm_2_s = clock();      
-      
       // Store hamiltonian as eigen vector
       for (int i = 0; i < nlocal; i++)
         hamilVec(i) = hamilPtr[i];
       // Loop through all directions
       // Compute gradient of hamiltonian
+      clock_t tm_1_s = clock();
       for (int dir = 0; dir < updateDirs.size(); dir++)
         hamilDeriv.row(updateDirs[dir]) = gradMatrices[dir]*hamilVec;
+      vol_loop1 += (double) (clock() - tm_1_s)/CLOCKS_PER_SEC;
       // Compute gradient of hamiltonian at all volume quadrature points
-      hamilDerivAtQuadVol = hamilDeriv*volQuad.interpMat.transpose();
-
+      clock_t tm_2_s = clock();
+      hamilDerivAtQuadVol.noalias() = hamilDeriv*volQuad.interpMat.transpose();
       vol_loop2 += (double) (clock() - tm_2_s)/CLOCKS_PER_SEC;
 
       clock_t tm_computeAlphaAtQuadNodesTime_s = clock();
@@ -490,8 +497,8 @@ namespace Lucee
       // Compute distribution function at quadrature points cwise multiplied by quadrature weights
       fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
 
-      clock_t tm_4_s = clock();
       aNew.setPtr(aNewPtr, idx);
+      clock_t tm_4_s = clock();
       for (int d = 0;  d < updateDirs.size(); d++)
       {
         int dir = updateDirs[d];
@@ -511,7 +518,6 @@ namespace Lucee
       {
         for (int d = 0; d < updateDirs.size(); d++)
         {
-          clock_t tm_1_s = clock();
           int dir = updateDirs[d];
           int idxl[NDIM];
           int idxr[NDIM];
@@ -528,6 +534,8 @@ namespace Lucee
 
           int nSurfNodes = nodalBasis->getNumSurfLowerNodes(dir);
           // Copy data to Eigen vectors
+          Eigen::VectorXd leftData(nSurfNodes);
+          Eigen::VectorXd rightData(nSurfNodes);
           for (int i = 0; i < nSurfNodes; i++)
           {
             leftData(i) = aCurrPtr_l[ surfUpperQuad[dir].nodeNums[i] ];
@@ -540,7 +548,8 @@ namespace Lucee
           for (int i = 0; i < nSurfNodes; i++)
             hamilDerivSmall.col(i) = hamilDeriv.col( surfLowerQuad[dir].nodeNums[i] );
           // Compute gradient of hamiltonian at all (lower) surface quadrature points
-          hamilDerivAtQuad = hamilDerivSmall*surfLowerQuad[dir].interpMat.transpose();
+          clock_t tm_1_s = clock();
+          hamilDerivAtQuad.noalias() = hamilDerivSmall*surfLowerQuad[dir].interpMat.transpose();
           surf_loop1 += (double) (clock()-tm_1_s)/CLOCKS_PER_SEC;
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           clock_t tm_computeAlphaAtQuadNodesTime_s = clock();    
@@ -567,10 +576,8 @@ namespace Lucee
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
           
           clock_t tm_2_s = clock();
-          upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
-            numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
-          lowerResultVector = bigStoredLowerSurfMatrices[cellIndex][d]*
-            numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
+          upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*numericalFluxAtQuad;
+          lowerResultVector = bigStoredLowerSurfMatrices[cellIndex][d]*numericalFluxAtQuad;
           surf_loop2 += (double) (clock()-tm_2_s)/CLOCKS_PER_SEC;
 
           clock_t tm_3_s = clock();
@@ -603,7 +610,7 @@ namespace Lucee
             aCurr.setPtr(aCurrPtr_l, idxl);
             aCurr.setPtr(aCurrPtr_r, idxr);
             // Copy data to Eigen vectors
-            for (int i = 0; i < nlocal; i++)
+            for (int i = 0; i < nSurfNodes; i++)
             {
               leftData(i) = aCurrPtr_l[ surfUpperQuad[dir].nodeNums[i] ];
               rightData(i) = aCurrPtr_r[ surfLowerQuad[dir].nodeNums[i] ];
@@ -614,7 +621,7 @@ namespace Lucee
             for (int i = 0; i < nSurfNodes; i++)
               hamilDerivSmall.col(i) = hamilDeriv.col( surfUpperQuad[dir].nodeNums[i] );
 
-            hamilDerivAtQuad = hamilDerivSmall*surfUpperQuad[dir].interpMat.transpose();
+            hamilDerivAtQuad.noalias() = hamilDerivSmall*surfUpperQuad[dir].interpMat.transpose();
             
             // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
             equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, 
@@ -630,9 +637,9 @@ namespace Lucee
                 surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
             
             upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
-              numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
+              numericalFluxAtQuad;
             lowerResultVector = bigStoredLowerSurfMatrices[cellIndexRight][d]*
-              numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
+              numericalFluxAtQuad;
 
             // Accumulate to solution
             aNew.setPtr(aNewPtr_r, idxr);

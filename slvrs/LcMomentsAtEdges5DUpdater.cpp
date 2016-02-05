@@ -211,6 +211,17 @@ namespace Lucee
     {
     }
 
+    // TESTING: Print out outputMomentPtr
+    for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+      for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
+      {
+        outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getLower(2));
+        for (int configNode = 0; configNode < 4; configNode++)
+        {
+          std::cout << "config " << configNode << " = " << outputMomentPtr[ lowerEdgeNodeNums[configNode] ] << std::endl;
+        }
+      }
+
     return Lucee::UpdaterStatus();
   }
 
