@@ -35,6 +35,8 @@
 namespace Lucee
 {
   template <> const char *ContFromDisContUpdater<1>::id = "ContFromDisCont1D";
+  template <> const char *ContFromDisContUpdater<2>::id = "ContFromDisCont2D";
+  template <> const char *ContFromDisContUpdater<3>::id = "ContFromDisCont3D";
 
   template <unsigned NDIM>
   ContFromDisContUpdater<NDIM>::ContFromDisContUpdater()
@@ -608,4 +610,6 @@ namespace Lucee
 
 // instantiations
   template class ContFromDisContUpdater<1>;
+  template class ContFromDisContUpdater<2>;
+  template class ContFromDisContUpdater<3>;
 }

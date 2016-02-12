@@ -47,6 +47,11 @@ namespace Lucee
     else
       throw Lucee::Except("MomentsAtEdges5DUpdater::readInput: Must specify element to use using 'basis3d'");
 
+    if (tbl.hasNumber("polyOrder"))
+      polyOrder = tbl.getNumber("polyOrder");
+    else
+      throw Lucee::Except("MomentsAtEdges5DUpdater::readInput: Must specify basis function order using 'polyOrder'");
+
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
     else scaleFactor = 1.0;
@@ -69,11 +74,12 @@ namespace Lucee
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
+    // Used to figure out which nodes share the same location in configuration space
     double dxMin = grid.getDx(0);
     for (int d = 1; d < 3; d++)
       dxMin = std::min(dxMin, grid.getDx(d));
 
-    // Find all nodes that share the same location as node zero
+    // Find all nodes that share the same location as node zero in configuration space
     nodalStencil = std::vector<int>(nlocal);
     int stencilIndex = 0;
     for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
@@ -87,7 +93,7 @@ namespace Lucee
     nodalStencil.resize(stencilIndex);
 
     // Construct a quadrature matrix to integrate over entire (v,mu) cell
-    int integrationDegree = 2; // (standard linear basis function times one degree in v)
+    int integrationDegree = polyOrder + 1; // (need to integrate basis function times one degree in v)
     unsigned numGaussPoints1d = (unsigned)((integrationDegree+1)/2.0 + 0.5);
     std::vector<double> gaussPoints1d(numGaussPoints1d);
     std::vector<double> gaussWeights1d(numGaussPoints1d);
@@ -97,6 +103,8 @@ namespace Lucee
     Eigen::MatrixXd gaussSurf(totalSurfQuadPoints, nodalStencil.size());
     Eigen::MatrixXd gaussSurfCoords(totalSurfQuadPoints, 2);
     Eigen::VectorXd gaussSurfWeights(totalSurfQuadPoints);
+
+    // refCoord[0,1,2] are fixed to an arbitrary node to construct 2d integration matrix
     double refCoord[5];
     refCoord[0] = -1;
     refCoord[1] = -1;
@@ -114,7 +122,7 @@ namespace Lucee
         gaussSurfCoords.row(linIndex) << refCoord[3], refCoord[4];
         // Store integration weight of quadrature point (real space)
         gaussSurfWeights(linIndex) = weightScale*gaussWeights1d[gaussIndexOuter]*gaussWeights1d[gaussIndexInner];
-        // Evaluate relevant basis functions at quadrautre point
+        // Evaluate relevant basis functions at quadrature point
         nodalBasis5d->evalBasis(refCoord, basisAtPoint, nodalStencil);
         // Store results in matrix
         for (int nodeIndex = 0; nodeIndex < basisAtPoint.size(); nodeIndex++)
@@ -188,40 +196,82 @@ namespace Lucee
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
 
-        //for (int i = 0; i < 5; i++)
-        //  std::cout << idx[i] << ",";
-        //std::cout << std::endl;
+        // only want to calculate outward flux
+        if (cellCentroid[3] > 0.0)
+          continue;
 
         // Loop over the four configuration space vertices in this cell (specific to linear elements)
         Eigen::VectorXd distfReduced(nodalStencil.size());
-        for (int configNode = 0; configNode < 4; configNode++)
+        for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
         {
+          int configNodeIndex = lowerEdgeNodeNums[configNode];
           // At this particular configuration space vertix, copy all
           // nodes that occupy this location to a vector
           for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-            distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNode];
+            distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
           // Compute zeroth and first parallel velocity moments in this cell
           Eigen::VectorXd momentVector = momentMatrix*distfReduced;
           // Accumulate results (v = v_c*<1> + <v'>)
-          outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(1) + momentVector(2);
+          outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
         }
       }
-    }
-    else if (localRgn.getUpper(3) == globalRgn.getUpper(3))
-    {
-    }
-
-    // TESTING: Print out outputMomentPtr
-    for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
-      for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
-      {
-        outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getLower(2));
-        for (int configNode = 0; configNode < 4; configNode++)
+      // TESTING: Print out outputMomentPtr
+      /*
+      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+        for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
         {
-          std::cout << "config " << configNode << " = " << outputMomentPtr[ lowerEdgeNodeNums[configNode] ] << std::endl;
+          outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getLower(2));
+          for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
+            std::cout << "config " << lowerEdgeNodeNums[configNode] << " = " << outputMomentPtr[ lowerEdgeNodeNums[configNode] ] << std::endl;
+        }*/
+    }
+    
+    // Same as above loop, but done for upper edge in z
+    if (localRgn.getUpper(2) == globalRgn.getUpper(2))
+    {
+      // Create a sequencer to loop over (x,y,z=Z_UPPER,v,mu) plane
+      Lucee::RowMajorSequencer<5> seqLowerDim(localRgn.deflate(2));
+      while (seqLowerDim.step())
+      {
+        seqLowerDim.fillWithIndex(idx);
+        // Set the deflated index to the proper valuea
+        // the "-1" is because getUpper() gives index one beyond last domain cell
+        idx[2] = localRgn.getUpper(2)-1;
+        distfIn.setPtr(distfInPtr, idx);
+        outputMoment.setPtr(outputMomentPtr, idx[0], idx[1], idx[2]);
+        // Get the coordinates of cell center
+        grid.setIndex(idx);
+        grid.getCentroid(cellCentroid);
+
+        // only want to calculate outward flux
+        if (cellCentroid[3] < 0.0)
+          continue;
+
+        // Loop over the four configuration space vertices in this cell (specific to linear elements)
+        Eigen::VectorXd distfReduced(nodalStencil.size());
+        for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+        {
+          int configNodeIndex = upperEdgeNodeNums[configNode];
+          // At this particular configuration space vertix, copy all
+          // nodes that occupy this location to a vector
+          for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+            distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+          // Compute zeroth and first parallel velocity moments in this cell
+          Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+          // Accumulate results (v = v_c*<1> + <v'>)
+          outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
         }
       }
-
+      // TESTING: Print out outputMomentPtr
+      /*
+      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+        for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
+        {
+          outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getUpper(2)-1);
+          for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+            std::cout << "config " << upperEdgeNodeNums[configNode] << " = " << outputMomentPtr[ upperEdgeNodeNums[configNode] ] << std::endl;
+        }*/
+    }
     return Lucee::UpdaterStatus();
   }
 

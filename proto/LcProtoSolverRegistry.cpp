@@ -274,7 +274,9 @@ namespace Lucee
 #ifdef HAVE_PETSC
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
-      .append<Lucee::ContFromDisContUpdater<1> >();
+      .append<Lucee::ContFromDisContUpdater<1> >()
+      .append<Lucee::ContFromDisContUpdater<2> >()
+      .append<Lucee::ContFromDisContUpdater<3> >();
 #endif
 
 #ifdef HAVE_FFTW3
