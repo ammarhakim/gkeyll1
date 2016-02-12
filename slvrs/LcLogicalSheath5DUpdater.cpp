@@ -37,15 +37,42 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
+      nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
     else
-      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify element to use using 'basis5d'");
+
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
+      nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify element to use using 'basis3d'");
+
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
+      nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify element to use using 'basis2d'");
+
+    if (tbl.hasNumber("polyOrder"))
+      polyOrder = tbl.getNumber("polyOrder");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify basis function order using 'polyOrder'");
  
     // Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
     else scaleFactor = 1.0;
+
+    // Mass of electrons
+    if (tbl.hasNumber("elcMass"))
+      elcMass = tbl.getNumber("elcMass");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify electron mass using 'elcMass'");
+
+    // Mass of ions
+    if (tbl.hasNumber("ionMass"))
+      ionMass = tbl.getNumber("ionMass");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify ion mass using 'ionMass'");
 
     // Setting this to false will avoid a costly computation, but no sheath potential data will be available
     if (tbl.hasBool("computeCutoffVelocities"))
@@ -58,19 +85,19 @@ namespace Lucee
   {
     UpdaterIfc::initialize();
 
-    unsigned nlocal = nodalBasis->getNumNodes();
+    unsigned nlocal = nodalBasis5d->getNumNodes();
     std::vector<unsigned> zRef(nlocal), vRef(nlocal);
 
     // Get reflection mapping after element has been reflected in z and v_para
     rotMap.resize(nlocal);
-    nodalBasis->getUpperReflectingBcMapping(2, zRef);
-    nodalBasis->getUpperReflectingBcMapping(3, vRef);
+    nodalBasis5d->getUpperReflectingBcMapping(2, zRef);
+    nodalBasis5d->getUpperReflectingBcMapping(3, vRef);
     for (int i = 0; i < nlocal; i++)
       rotMap[i] = vRef[zRef[i]];
 
     // Get a copy of the nodal coordinates
     Lucee::Matrix<double> nodeCoordsLucee(nlocal, 5);
-    nodalBasis->getNodalCoordinates(nodeCoordsLucee);
+    nodalBasis5d->getNodalCoordinates(nodeCoordsLucee);
     Eigen::MatrixXd nodeCoords(nlocal, 5);
     copyLuceeToEigen(nodeCoordsLucee, nodeCoords);
 
@@ -82,7 +109,9 @@ namespace Lucee
       dxMin = std::min(dxMin, grid.getDx(d));
 
     // Find all nodes that share the same location as node zero
-    std::vector<int> nodalStencil(nlocal);
+    // Will eventually need to do this at all nodes on lower surface
+    // but can get away with doing this at one point for linear element
+    nodalStencil = std::vector<int>(nlocal);
     int stencilIndex = 0;
     for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
     {
@@ -95,7 +124,7 @@ namespace Lucee
     nodalStencil.resize(stencilIndex);
 
     // Construct a quadrature matrix to integrate over entire (v,mu) cell
-    int integrationDegree = 2; // (standard linear basis function times one degree in v)
+    int integrationDegree = polyOrder + 1; // (standard linear basis function times one degree in v)
     unsigned numGaussPoints1d = (unsigned)((integrationDegree+1)/2.0 + 0.5);
     std::vector<double> gaussPoints1d(numGaussPoints1d);
     std::vector<double> gaussWeights1d(numGaussPoints1d);
@@ -103,14 +132,13 @@ namespace Lucee
 
     int totalSurfQuadPoints = numGaussPoints1d*numGaussPoints1d;
     Eigen::MatrixXd gaussSurf(totalSurfQuadPoints, nodalStencil.size());
-    Eigen::MatrixXd gaussSurfCoords(totalSurfQuadPoints, 2);
-    Eigen::VectorXd gaussSurfWeights(totalSurfQuadPoints);
+    gaussSurfCoords = Eigen::MatrixXd(totalSurfQuadPoints, 2);
+    gaussSurfWeights = Eigen::VectorXd(totalSurfQuadPoints);
     double refCoord[5];
     refCoord[0] = -1;
     refCoord[1] = -1;
     refCoord[2] = -1;
     std::vector<double> basisAtPoint(nodalStencil.size());
-    double weightScale = 0.5*grid.getDx(3)*0.5*grid.getDx(4);
     for (int gaussIndexOuter = 0; gaussIndexOuter < numGaussPoints1d; gaussIndexOuter++)
     {
       refCoord[3] = gaussPoints1d[gaussIndexOuter];
@@ -121,9 +149,9 @@ namespace Lucee
         // Store coordinate of quadrature point (on ref. element)
         gaussSurfCoords.row(linIndex) << refCoord[3], refCoord[4];
         // Store integration weight of quadrature point (real space)
-        gaussSurfWeights(linIndex) = weightScale*gaussWeights1d[gaussIndexOuter]*gaussWeights1d[gaussIndexInner];
-        // Evaluate relevant basis functions at quadrautre point
-        nodalBasis->evalBasis(refCoord, basisAtPoint, nodalStencil);
+        gaussSurfWeights(linIndex) = gaussWeights1d[gaussIndexOuter]*gaussWeights1d[gaussIndexInner];
+        // Evaluate relevant basis functions at quadrature point
+        nodalBasis5d->evalBasis(refCoord, basisAtPoint, nodalStencil);
         // Store results in matrix
         for (int nodeIndex = 0; nodeIndex < basisAtPoint.size(); nodeIndex++)
           gaussSurf(linIndex, nodeIndex) = basisAtPoint[nodeIndex];
@@ -133,7 +161,8 @@ namespace Lucee
     // Compute integration matrices (zeroth and first moments)
     // First element of output is the zeroth moment over the cell
     // Second element of output is the first v_para moment over the cell
-    Eigen::MatrixXd momentMatrix(2, nodalStencil.size());
+    momentMatrix = Eigen::MatrixXd(2, nodalStencil.size());
+    double weightScale = 0.5*grid.getDx(3)*0.5*grid.getDx(4);
 
     for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
     {
@@ -142,505 +171,338 @@ namespace Lucee
       for (int quadIndex = 0; quadIndex < totalSurfQuadPoints; quadIndex++)
       {
         double vVal = 0.5*grid.getDx(3)*gaussSurfCoords(quadIndex,0);
-        mom0Val += gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex);
-        mom1Val += gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex)*vVal;
+        mom0Val += weightScale*gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex);
+        mom1Val += weightScale*gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex)*vVal;
       }
       momentMatrix(0,nodeIndex) = mom0Val;
       momentMatrix(1,nodeIndex) = mom1Val;
     }
 
-    /*
-    // Figure out what nodes are on the right edge
-    int numEdgeQuadNodes = nodalBasis->getNumSurfGaussNodes();
-    Lucee::Matrix<double> interpEdgeMatrixLucee(numEdgeQuadNodes, nlocal);
-    Lucee::Matrix<double> gaussEdgeOrdinatesLucee(numEdgeQuadNodes, 3);
-    // Allocate Eigen matrices
-    Eigen::MatrixXd interpEdgeMatrix(numEdgeQuadNodes, nlocal);
-    gaussEdgeOrdinates = Eigen::MatrixXd(numEdgeQuadNodes, 3);
-    gaussEdgeWeights = std::vector<double>(numEdgeQuadNodes);
-    // Get the interpolation matrix for the right edge quadrature points.
-    nodalBasis->getSurfUpperGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
-      gaussEdgeWeights);
+    // Fill out the node numbers on lower and upper surfaces in z
+    lowerEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfLowerNodes(2));
+    upperEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfUpperNodes(2));
+    nodalBasis3d->getSurfLowerNodeNums(2, lowerEdgeNodeNums);
+    nodalBasis3d->getSurfUpperNodeNums(2, upperEdgeNodeNums);
 
-    rightEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfUpperNodes(0));
-    leftEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfLowerNodes(0));
-    nodalBasis->getSurfUpperNodeNums(0, rightEdgeNodeNums);
-    nodalBasis->getSurfLowerNodeNums(0, leftEdgeNodeNums);
-
-    // Copy matrices to eigen objects
-    copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
-    copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinates);
-    edgeNodeInterpMatrix = Eigen::MatrixXd(numEdgeQuadNodes, rightEdgeNodeNums.size());
-    
-    // Create a lower dimension (2D) interpolation matrix
-    for (int nodeIndex = 0; nodeIndex < numEdgeQuadNodes; nodeIndex++)
-    {
-      // At each quadrature node, copy basis function evaluations for
-      // those basis functions associated with the nodes on the (right) edge
-      for (int basisIndex = 0; basisIndex < rightEdgeNodeNums.size(); basisIndex++)
-      {
-        edgeNodeInterpMatrix(nodeIndex, basisIndex) = interpEdgeMatrix(nodeIndex, 
-          rightEdgeNodeNums[basisIndex]);
-      }
-    }
-
-    // Temporary testing code
-    gaussEdgeWeightsLeftEdge = std::vector<double>(numEdgeQuadNodes);
-    gaussEdgeOrdinatesLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, 3);
-    nodalBasis->getSurfLowerGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
-      gaussEdgeWeightsLeftEdge);
-    copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
-    copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinatesLeftEdge);
-    edgeNodeInterpMatrixLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, leftEdgeNodeNums.size());
-    // Create a lower dimension (2D) interpolation matrix
-    for (int nodeIndex = 0; nodeIndex < numEdgeQuadNodes; nodeIndex++)
-    {
-      // At each quadrature node, copy basis function evaluations for
-      // those basis functions associated with the nodes on the (right) edge
-      for (int basisIndex = 0; basisIndex < leftEdgeNodeNums.size(); basisIndex++)
-      {
-        edgeNodeInterpMatrixLeftEdge(nodeIndex, basisIndex) = interpEdgeMatrix(nodeIndex, 
-          leftEdgeNodeNums[basisIndex]);
-      }
-    }
-
-    // Tolerance for finding cutoff velocities
-    cutoffTolerance = 1.0e-4;*/
+    cutoffTolerance = 1e-2;
   }
 
   Lucee::UpdaterStatus
   LogicalSheath5DUpdater::update(double t)
   {
-    /*
-    const Lucee::StructuredGridBase<3>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<3> >();
+    const Lucee::StructuredGridBase<5>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<5> >();
 
-    const Lucee::DynVector<double>& momentsAtEdgesIonIn = this->getInp<Lucee::DynVector<double> >(0);
+    const Lucee::Field<3, double>& ionFluxIn = this->getInp<Lucee::Field<3, double> >(0);
     // Output distribution function
-    Lucee::Field<3, double>& distf = this->getOut<Lucee::Field<3, double> >(0);
-    // Output cutoff velocities vs time
-    Lucee::DynVector<double>& cutoffVelocities = this->getOut<Lucee::DynVector<double> >(1);
+    Lucee::Field<5, double>& distf = this->getOut<Lucee::Field<5, double> >(0);
+    // Output sheath potential
+    Lucee::Field<2, double>& phiSLower = this->getOut<Lucee::Field<2, double> >(1);
 
-#ifdef HAVE_MPI
-// This updater presently will not work in parallel. Eventually, we
-// need to fix this, but it requires some MPI-fu to collect the values
-// and put them on the appropriate processors. (Ammar Hakim,
-// 8/06/2013)
-    throw Lucee::Except("LogicalSheath5DUpdater does not work in parallel!");
-#endif
+    Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
+    Lucee::Region<5, int> localRgn = grid.getLocalRegion();
 
-    Lucee::Region<3, int> globalRgn = grid.getGlobalRegion();
-    const std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
+    Lucee::ConstFieldPtr<double> ionFluxPtr = ionFluxIn.createConstPtr();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
+    Lucee::FieldPtr<double> phiSLowerPtr = phiSLower.createPtr(); // for lower sheath potential
 
-    unsigned nlocal = nodalBasis->getNumNodes();
-    unsigned nlocal1d = nodalBasis1d->getNumNodes();
+    unsigned nlocal = nodalBasis5d->getNumNodes();
+    unsigned nlocal3d = nodalBasis3d->getNumNodes();
+    double cellCentroid[5];
+    int idx[5];
+    int gstIdx[5];
 
-    std::vector<double> data(2);
-    // Initialize data to 0's. Convention: 0 = left edge, 1 = right edge
-    data[0] = 0.0;
-    data[1] = 0.0;
-
-    if (applyRightEdge)
+    // Need to find phiS on lower z plane if it is contained in the localRegion
+    if (localRgn.getLower(2) == globalRgn.getLower(2))
     {
-      int ix = globalRgn.getUpper(0)-1; // right skin cell x index
-      double cellCentroid[3];
-      int idx[3];
-      bool foundCutoffVelocity = false;
-      double totalFluxAlongEdge = 0.0; 
-
-      // Get ion flux at right edge
-      double totalIonFlux = momentsAtEdgesIon[0];
-
-      // start with cell at maximum v_para, looping down to zero until desired flux is reached
-      for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      // Outer loops are over the position cells
+      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
       {
-        idx[0] = ix;
-        idx[1] = js;
-        idx[2] = globalRgn.getLower(2);
-        
-        nodalBasis->setIndex(idx);
-        grid.setIndex(idx);
-        grid.getCentroid(cellCentroid);
-        
-        // Don't need to loop over left-moving cells
-        if (cellCentroid[1] < 0.0)
-          break;
-        
-        double fluxInEntireCell = 0.0;
-        // At this value of v_parallel, need to integrate flux over all mu
-        for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+        for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
         {
-          idx[2] = muIndex;
-          distf.setPtr(sknPtr, ix, js, muIndex);
-
-          // Copy nodes on right edge into a vector
-          Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());
+          idx[0] = ix;
+          idx[1] = iy;
+          idx[2] = localRgn.getLower(2);
+          ionFluxIn.setPtr(ionFluxPtr, idx[0], idx[1], idx[2]);
+          // Set output pointer for sheath potential
+          phiSLower.setPtr(phiSLowerPtr, idx[0], idx[1]);
           
-          for (int edgeNodeIndex = 0; edgeNodeIndex < rightEdgeData.rows(); edgeNodeIndex++)
-            rightEdgeData(edgeNodeIndex) = sknPtr[rightEdgeNodeNums[edgeNodeIndex]];
-          
-          // Interpolate nodal data to quadrature points on the edge
-          Eigen::VectorXd rightEdgeQuadData = edgeNodeInterpMatrix*rightEdgeData;
-        
-          // Integrate v*f over entire cell using gaussian quadrature
-          for (int quadNodeIndex = 0; quadNodeIndex < rightEdgeQuadData.rows(); quadNodeIndex++)
+          gstIdx[0] = ix;
+          gstIdx[1] = iy;
+          gstIdx[2] = idx[2]-1;
+          // Loop over all configuration space nodes contained in this element
+          for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*physicalV*
-              rightEdgeQuadData(quadNodeIndex);
-          }
-        }
+            int configNodeIndex = lowerEdgeNodeNums[configNode];
+            // This is the flux we want to match at this point
+            double totalIonFluxAtNode = elcMass/ionMass*ionFluxPtr[configNodeIndex];
+            double runningElcFluxAtNode = 0.0;
+            bool foundCutoffCell = false;
+            std::cout << "target = " << totalIonFluxAtNode << std::endl;
 
-        if (foundCutoffVelocity == false)
-        {
-          if (totalFluxAlongEdge + fluxInEntireCell < totalIonFlux)
-          {
-            // Accumulate to total since cutoff velocity is not in this cell
-            totalFluxAlongEdge += fluxInEntireCell;
-            // Set to no inflow condition then go on to next cell
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+            // Need to loop over velocity space in this specific manner
+            for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
+                ivSkin < localRgn.getUpper(3); ivSkin++, ivGhost--)
             {
-              distf.setPtr(gstPtr, ix+1, jg, muIndex);
-              
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = 0.0;
-            }
-          }
-          else
-          {
-            // This is the cell that contains the cutoff velocity
-            
-            // Figure out fraction of cell that contains the excess flux
-            // (Flux over what is needed for equivalence with Gamma_i)
-            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-            //std::cout << "excessFraction (L) = " << excessFraction << std::endl;
-            // Search for cutoff velocity if needed
-            if (computeCutoffVelocities == true)
-            {
-              // desired result for integrating from flux vCutoff to vUpper in this cell
-              double exactResult = totalIonFlux - totalFluxAlongEdge;
-              double cellWidth = grid.getDx(1)/2.0;
-              double cutoffGuess;
+              std::cout << "skin " << ivSkin << " = " << runningElcFluxAtNode << std::endl;
+              idx[3] = ivSkin;
+              gstIdx[3] = ivGhost;
 
-              if (exactResult != 0.0 && totalIonFlux != 0.0)
+              if (foundCutoffCell == false)
               {
-                double refCoord[3];
-                refCoord[0] = 1;
-
-                std::vector<double> basisAtPoint(rightEdgeNodeNums.size());
-
-                // upper boundary for integration
-                double b = grid.getDx(1)/2.0;
-                // cutoffGuess is between -dV/2 and +dV/2
-                double nextCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
-
-                //double nextCutoffGuess = -grid.getDx(1)/fluxInEntireCell*( totalIonFlux - totalFluxAlongEdge - fluxInEntireCell/2.0 );
-                
-                double upperBound = grid.getDx(1)/2.0;
-                double lowerBound = -grid.getDx(1)/2.0;
-                
-                double relError; 
-
-                int iterCount = 0;
-
-                do
+                // Need to check if this is the parallel velocity cutoff cell
+                double elcFluxAtIv = 0.0;
+                // At every velocity space index, need to compute flux over all cells in mu
+                for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
                 {
-                  cutoffGuess = nextCutoffGuess;
+                  idx[4] = iMu;
+                  distf.setPtr(sknPtr, idx);
+                  // Get the coordinates of cell center
+                  grid.setIndex(idx);
+                  grid.getCentroid(cellCentroid);
+                  // At this particular configuration space vertix, copy all
+                  // nodes that occupy this location to a vector
+                  Eigen::VectorXd distfReduced(nodalStencil.size());
+                  for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
+                  // Compute zeroth and first parallel velocity moments in this cell
+                  Eigen::VectorXd momentVector = momentMatrix*distfReduced;
 
-                  if (upperBound == lowerBound || iterCount > 100)
-                    break;
+                  elcFluxAtIv += cellCentroid[3]*momentVector(0) + momentVector(1);
+                }
+                std::cout << "elcFluxAtIv = " << elcFluxAtIv << std::endl;
+                // Check if we have exceed the total ion flux
+                if (runningElcFluxAtNode + elcFluxAtIv < totalIonFluxAtNode)
+                {
+                  foundCutoffCell = true;
+                  // Get the coordinates of cell center
+                  idx[4] = localRgn.getLower(4);
+                  grid.setIndex(idx);
+                  grid.getCentroid(cellCentroid);
+                  std::cout << "cutoff between " << cellCentroid[3]-0.5*grid.getDx(3) << " and " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
+                  // Figure out fraction of cell that contains the excess flux
+                  // (Flux over what is needed for equivalence with Gamma_i)
+                  double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; // the flux contribution up to v_c
+                  double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
+                  // Search for the cutoff velocity ('b' here)
+                  double a = -0.5*grid.getDx(3);
+                  double b;
+                  double relError;
+                  int iterCount = 0;
+                  std::vector<double> basisAtPoint(nodalStencil.size());
+                  double lowerBound = -0.5*grid.getDx(3);
+                  double upperBound = 0.5*grid.getDx(3);
+                  double fl = 0.0-exactResult;
+                  double fh = elcFluxAtIv-exactResult;
+                  double ans = -9.99e99;
 
-                  double integralResult = 0.0;
-                  // Integrate flux from vCutoff to vUpper
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+                  // Ridders' Method (See Press 2007, page 453)
+                  for (int iter = 0; iter < 60; iter++)
                   {
-                    // physicalCoord (vParallel) is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(b + cutoffGuess);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/(grid.getDx(1)/2.0);
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint, rightEdgeNodeNums);
+                    double xm = 0.5*(lowerBound + upperBound);
+                    // Calculate function at xm
+                    double fm = 0.0;
+                    b = xm;
+                    // Integration weight scale for this modified integral
+                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    double refCoord[2];
                     
-                    for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
                     {
-                      distf.setPtr(sknPtr, ix, js, muIndex);
-                      // Evaluate f at this quadrature point
-                      double fAtPoint = 0.0;
-                      // Loop over 2D basis functions
-                      for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
-                        fAtPoint += sknPtr[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
 
-                      // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
-                      // integration width
-                      integralResult += scaleFactor*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        fm += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    fm -= exactResult;
+
+                    double s = sqrt(fm*fm - fl*fh);
+                    if (s == 0)
+                    {
+                      // Error
+                    }
+                    // Updating formula
+                    double xNew = xm + (xm-lowerBound)*( (fl >= fh ? 1.0 : -1.0)*fm/s );
+                    double fNew = 0.0;
+
+                    b = xNew;
+                    // Integration weight scale for this modified integral
+                    weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                    {
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        fNew += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    fNew-=exactResult;
+
+                    relError = fNew/exactResult;
+
+                    if (fabs(relError) < cutoffTolerance )
+                    {
+                      std::cout << "rFinal relError = " << relError << std::endl;
+                      std::cout << "rFinal b = " << cellCentroid[3] + b << std::endl;
+                      std::cout << "rexactResult = " << exactResult << std::endl;
+                      std::cout << "riterCount = " << iter << std::endl;
+                      break;
+                    }
+
+                    // Update root brackets, making use of monotonicity of function
+                    if (relError > 0)
+                    {
+                      upperBound = b;
+                      fh = fNew;
+                    }
+                    else
+                    {
+                      lowerBound = b;
+                      fl = fNew;
                     }
                   }
-                  
-                  relError = (integralResult - exactResult)/exactResult;
 
-                  if (iterCount > 50)
+                  // This is a search for the exact 'b', keeping 'a' fixed
+                  do
                   {
-                    std::cout << "iterCount = " << iterCount << std::endl;
-                    std::cout << "relError = " << fabs(relError) << std::endl;
-                    std::cout << "integralResult = " << integralResult << std::endl;
-                    std::cout << "exactResult = " << exactResult << std::endl;
-                    std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
-                    std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
-                  }
-
-                  if (relError < 0)
-                    upperBound = cutoffGuess;
-                  else
-                    lowerBound = cutoffGuess;
-
-                  nextCutoffGuess = 0.5*(lowerBound + upperBound);
-                  iterCount++;
-                }
-                while (fabs(relError) > cutoffTolerance);
-                //std::cout << "Iterations (R) = " << iterCount << std::endl;
-              }
-
-              // store cutoff velocity
-              data[1] = cellCentroid[1] + cutoffGuess;
-            }
-            
-            foundCutoffVelocity = true;
-            // Scale all values by appropriate fraction to conserve flux
-            // Copy data into ghost after rotating skin cell data by 180 degrees
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-            {
-              distf.setPtr(sknPtr, ix, js, muIndex);
-              distf.setPtr(gstPtr, ix+1, jg, muIndex);
-
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
-            }
-          }
-        }
-        else
-        {
-          // We have already iterated past and found the cutoff velocity.
-          // Copy data into ghost after rotating skin cell data by 180 degrees
-          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-          {
-            distf.setPtr(gstPtr, ix+1, jg, muIndex);
-            distf.setPtr(sknPtr, ix, js, muIndex);
-
-            for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-              gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
-          }
-        }
-      }
-    }
-    
-    
-    if (applyLeftEdge)
-    {
-      int ix = globalRgn.getLower(0); // left skin cell x index
-      double cellCentroid[3];
-      int idx[3];
-      bool foundCutoffVelocity = false;
-      double totalFluxAlongEdge = 0.0; 
-
-      // Find flux at left edge
-      double totalIonFlux = momentsAtEdgesIon[3];
-
-      for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
-      {
-        idx[0] = ix;
-        idx[1] = js;
-        idx[2] = globalRgn.getLower(2);
-
-        nodalBasis->setIndex(idx);
-        grid.setIndex(idx);
-        grid.getCentroid(cellCentroid);
-
-        // Don't need to loop over right-moving cells
-        if (cellCentroid[1] > 0.0)
-          break;
-
-        double fluxInEntireCell = 0.0;
-        // At this value of v_parallel, need to integrate flux over all mu
-        for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-        {
-          idx[2] = muIndex;
-          distf.setPtr(sknPtr, ix, js, muIndex);
-          
-          // Copy nodes on left edge into a vector
-          Eigen::VectorXd leftEdgeData(leftEdgeNodeNums.size());
-          
-          for (int edgeNodeIndex = 0; edgeNodeIndex < leftEdgeData.rows(); edgeNodeIndex++)
-            leftEdgeData(edgeNodeIndex) = sknPtr[leftEdgeNodeNums[edgeNodeIndex]]; 
-          
-          // Interpolate nodal data to quadrature points on the edge
-          Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrixLeftEdge*leftEdgeData;
-        
-          // Integrate v*f over entire cell using gaussian quadrature
-          for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
-          {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*physicalV*
-              leftEdgeQuadData(quadNodeIndex);
-          }
-        }
-
-        if (foundCutoffVelocity == false)
-        {
-          if (totalFluxAlongEdge + fluxInEntireCell > totalIonFlux)
-          {
-            totalFluxAlongEdge += fluxInEntireCell;
-
-            // Set to no inflow condition then go on to next cell
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-            {
-              distf.setPtr(gstPtr, ix-1, jg, muIndex);
-              
-              for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-                gstPtr[componentIndex] = 0.0;
-            }
-          }
-          else
-          {
-            // This is the cell that contains the cutoff velocity
-            
-            // Figure out fraction of cell that contains the excess flux
-            // (Flux over what is needed for equivalence with Gamma_i)
-            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-            //std::cout << "excessFraction (R) = " << excessFraction << std::endl;
-
-            // Search for cutoff velocity if needed
-            if (computeCutoffVelocities == true)
-            {
-              // desired result for integrating from flux vCutoff to vUpper in this cell
-              double exactResult = totalIonFlux - totalFluxAlongEdge;
-              double cellWidth = grid.getDx(1)/2.0;
-              double cutoffGuess;
-
-              if (exactResult != 0.0 && totalIonFlux != 0.0)
-              {
-                double refCoord[3];
-                refCoord[0] = -1;
-
-                std::vector<double> basisAtPoint(leftEdgeNodeNums.size());
-
-                // upper boundary for integration
-                double b = -grid.getDx(1)/2.0;
-                // cutoffGuess is between -dV/2 and +dV/2
-                double nextCutoffGuess = grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
-                // Initial guess will be negative of cutoff velocity found on right edge
-                if(applyRightEdge == true)
-                  nextCutoffGuess = -data[1] - cellCentroid[1];
-                
-                double upperBound = grid.getDx(1)/2.0;
-                double lowerBound = -grid.getDx(1)/2.0;
-                
-                double relError; 
-
-                int iterCount = 0;
-
-                do
-                {
-                  cutoffGuess = nextCutoffGuess;
-
-                  if (upperBound == lowerBound || iterCount > 100)
-                    break;
-
-                  double integralResult = 0.0;
-                  // Integrate flux from vCutoff to vUpper
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
-                  {
-                    // physicalCoord is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(cutoffGuess + b);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/cellWidth;
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
+                    b = 0.5*(upperBound + lowerBound);
+                    // Integration weight scale for this modified integral
+                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    double integralResult = 0.0;
+                    double refCoord[2];
                     
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint, leftEdgeNodeNums);
-                    for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
                     {
-                      distf.setPtr(sknPtr, ix, js, muIndex);
-                      // Evaluate f at this quadrature point
-                      double fAtPoint = 0.0;
-                      // Loop over 2D basis functions
-                      for (int nodeIndex = 0; nodeIndex < leftEdgeNodeNums.size(); nodeIndex++)
-                        fAtPoint += sknPtr[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
 
-                      // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
-                      // integration width
-                      integralResult += scaleFactor*(cutoffGuess-b)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    relError = (integralResult - exactResult)/exactResult;
+
+                    if (relError > 0)
+                      upperBound = b;
+                    else
+                      lowerBound = b;
+
+                    iterCount++;
+
+                  } while ( fabs(relError) > cutoffTolerance );
+
+                  // Store result in the appropriate 2d field
+                  phiSLowerPtr[configNode] = cellCentroid[3] + b;
+                  
+                  std::cout << "Final relError = " << relError << std::endl;
+                  std::cout << "Final b = " << cellCentroid[3] + b << std::endl;
+                  std::cout << "exactResult = " << exactResult << std::endl;
+                  std::cout << "iterCount = " << iterCount << std::endl;
+
+                  // Scale (only for cutoff cells) and reflect distribution function by copying into ghost cell
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    // It's important not to reflect every node in the cell!
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = excessFraction*sknPtr[sknNode];
                     }
                   }
-                  
-                  relError = (integralResult - exactResult)/exactResult;
-
-                  if (iterCount > 50)
-                  {
-                    std::cout << "iterCount = " << iterCount << std::endl;
-                    std::cout << "relError = " << fabs(relError) << std::endl;
-                    std::cout << "integralResult = " << integralResult << std::endl;
-                    std::cout << "exactResult = " << exactResult << std::endl;
-                    std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
-                    std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
-                  }
-
-                  if (relError > 0)
-                    upperBound = cutoffGuess;
-                  else
-                    lowerBound = cutoffGuess;
-
-                  nextCutoffGuess = 0.5*(lowerBound + upperBound);
-                  iterCount++;
                 }
-                while (fabs(relError) > cutoffTolerance);
-                //std::cout << "Iterations (L) = " << iterCount << std::endl;
+                else runningElcFluxAtNode += elcFluxAtIv;
               }
-
-              // store cutoff velocity
-              data[0] = cellCentroid[1] + cutoffGuess;
-            }
-
-            foundCutoffVelocity = true;
-            
-            // Scale all values by appropriate fraction to conserve flux
-            // Copy data into ghost after rotating skin cell data by 180 degrees
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-            {
-              distf.setPtr(sknPtr, ix, js, muIndex);
-              distf.setPtr(gstPtr, ix-1, jg, muIndex);
-
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+              else
+              {
+                idx[4] = localRgn.getLower(4);
+                // Get the coordinates of cell center
+                grid.setIndex(idx);
+                grid.getCentroid(cellCentroid);
+                // Check to see if we need to do any copying and reflecting
+                if (cellCentroid[3] < 0.0)
+                {
+                  // We've already found the cutoff velocity at this config node.
+                  // Reflect distribution function by copying into ghost cell
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    // It's important not to reflect every node in the cell! Just the ones
+                    // at this particular configNode
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = sknPtr[sknNode];
+                    }
+                  }
+                }
+              }
             }
           }
-        }
-        else
-        {
-          // We have already iterated past and found the cutoff velocity.
-          // Copy data into ghost after rotating skin cell data by 180 degrees
-          // Set to no inflow condition then go on to next cell
-          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-          {
-            distf.setPtr(sknPtr, ix, js, muIndex);
-            distf.setPtr(gstPtr, ix-1, jg, muIndex);
 
-            for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-              gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
-          }
         }
       }
     }
 
-    // Put data into the DynVector
-    if (computeCutoffVelocities == true)
-      cutoffVelocities.appendData(t, data);
-
-    */
     return Lucee::UpdaterStatus();
   }
 
@@ -648,11 +510,13 @@ namespace Lucee
   LogicalSheath5DUpdater::declareTypes()
   {
     // Moments of the ion distribution function on both edges
-    this->appendInpVarType(typeid(Lucee::DynVector<double>));
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Distribution function output (electrons)
     this->appendOutVarType(typeid(Lucee::Field<5, double>));
-    // Output cutoff velocities
-    this->appendOutVarType(typeid(Lucee::DynVector<double>));
+    // Output sheath potential (lower z surface)
+    this->appendOutVarType(typeid(Lucee::Field<2, double>));
+    // Output sheath potential (upper z surface)
+    this->appendOutVarType(typeid(Lucee::Field<2, double>));
   }
 
   void

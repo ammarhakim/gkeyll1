@@ -71,43 +71,38 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<5> *nodalBasis;
+/** Pointer to 5d nodal basis functions */
+      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
+/** Pointer to 3d nodal basis functions */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Pointer to 2d nodal basis functions */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Flag to indicate if cutoff velocities need to be computed */
       bool computeCutoffVelocities;
-/** Flag to indicate if BCs should be applied to left edge */
-      bool applyLeftEdge;
-/** Flag to indicate if BCs should be applied to right edge */
-      bool applyRightEdge;
 /** Mapping for 180 degree rotations */
       std::vector<unsigned> rotMap;
-/** Contains the right edge node numbers */
-      std::vector<int> rightEdgeNodeNums;
-/** Contains the left edge node numbers */
-      std::vector<int> leftEdgeNodeNums;
+/** Contains the lower edge node numbers */
+      std::vector<int> lowerEdgeNodeNums;
+/** Contains the upper edge node numbers */
+      std::vector<int> upperEdgeNodeNums;
+/** Order of basis functions used */
+      int polyOrder;
+/** Keeps track of the offsets needed to get all nodes that share the same config. space location */
+      std::vector<int> nodalStencil;
+/** Used to compute zeroth and first parallel velocity moments at a particular (x,y,z) */
+      Eigen::MatrixXd momentMatrix;
+/** Mass of ions */
+      double ionMass;
+/** Mass of electrons */
+      double elcMass;
 /** Tolerance to which cutoff velocities should be found */
       double cutoffTolerance;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
       double scaleFactor;
-/**
- * Matrix of surface gaussian quadrature locations on bottom face..
- * There are three columns by default for (x,y,z)
- * and each row is a different quadrature point for doing surface integrals.
- */
-      Eigen::MatrixXd gaussEdgeOrdinates;
-      Eigen::MatrixXd gaussEdgeOrdinatesLeftEdge;
-/** Weights for edge gaussian quadrature points */
-      std::vector<double> gaussEdgeWeights;
-      std::vector<double> gaussEdgeWeightsLeftEdge;
-/** 
- * Interpolation matrix for bringing data that lives on the left or right edge
- * to quadrature points on same surface. It is constructed from the right edge
- * basis function evaluations but should work for the left edge as well.
- * The quadrature locations for these nodes are also in gaussSurfOrdinates and
- * gaussSurfWeights.
- */
-      Eigen::MatrixXd edgeNodeInterpMatrix;
-      Eigen::MatrixXd edgeNodeInterpMatrixLeftEdge;
+/** Stores location of gaussian quadrature points (on [-1,1]) for integration over entire 2d element */
+      Eigen::MatrixXd gaussSurfCoords;
+/** Stores gaussian quadrature weights for integration over 2d [-1,1]x[-1,1] element */
+      Eigen::VectorXd gaussSurfWeights;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.

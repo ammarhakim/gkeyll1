@@ -78,6 +78,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
       double scaleFactor;
+/** Order of basis polynomials */
+      int polyOrder;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
 /**
