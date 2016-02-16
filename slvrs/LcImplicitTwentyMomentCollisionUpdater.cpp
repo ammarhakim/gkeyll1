@@ -51,6 +51,17 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
     nu = tbl.getNumber("collisionFrequency");
+    if (tbl.hasBool("qLim")){
+        lim = tbl.getBool("qLim");
+    } else {
+        lim = false;
+    }
+    if (tbl.hasNumber("frac")){
+        frac = tbl.getNumber("frac");
+    } else {
+        frac = 1.0;
+    }
+
   }
 
   template <unsigned NDIM>
@@ -124,7 +135,29 @@ namespace Lucee
       ptr[Q233] = edt*qyzz + pzz*v + 2*pyz*w + r*v*w*w;
       ptr[Q333] = edt*qzzz + 3*pzz*w + r*w*w*w;
 
-      
+      if (lim){
+
+        double boundx = sqrt(r)*qxxx/sqrt(pxx)/pxx;
+        double boundy = sqrt(r)*qyyy/sqrt(pyy)/pyy;
+        double boundz = sqrt(r)*qzzz/sqrt(pzz)/pzz;
+        double boundmax = std::max(std::max(fabs(boundx),fabs(boundy)),fabs(boundz));
+
+        if (boundmax > frac) { 
+          // set offending q = 1/normalised_q*frac
+          double reduction = frac/boundmax;
+          ptr[Q111] = reduction*qxxx + 3*pxx*u + r*u*u*u;
+          ptr[Q222] = reduction*qyyy + 3*pyy*v + r*v*v*v;
+          ptr[Q333] = reduction*qzzz + 3*pzz*w + r*w*w*w;
+          ptr[Q112] = reduction*qxxy + 2*pxy*u + pxx*v + r*u*u*v;
+          ptr[Q113] = reduction*qxxz + 2*pxz*u + pxx*w + r*u*u*w;
+          ptr[Q122] = reduction*qxyy + pyy*u + 2*pxy*v + r*u*v*v;
+          ptr[Q123] = reduction*qxyz + pyz*u + pxz*v + pxy*w + r*u*v*w;
+          ptr[Q133] = reduction*qxzz + pzz*u + 2*pxz*w + r*u*w*w;
+          ptr[Q223] = reduction*qyyz + 2*pyz*v + pyy*w + r*v*v*w;
+          ptr[Q233] = reduction*qyzz + pzz*v + 2*pyz*w + r*v*w*w;
+          
+        }        
+      } 
     }
     
     return Lucee::UpdaterStatus();
