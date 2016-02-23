@@ -274,7 +274,7 @@ namespace Lucee
 	    for (unsigned dim = 0; dim<VDIM; ++dim)
 	      v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-
 		vDrift(phaseConfMap[nodeIdx], dim);
-	  densIn = 1/zerothMomentOutPtr[phaseConfMap[nodeIdx]];
+	  densIn = zerothMomentOutPtr[phaseConfMap[nodeIdx]];
 
 	  vTerm2In = vTerm2[phaseConfMap[nodeIdx]];
 	  if (vTerm2In >= 0) 
