@@ -77,6 +77,18 @@ namespace Lucee
       virtual void speeds(const Lucee::RectCoordSys& c, const double* q, double s[2]);
 
 /**
+ * Compute the minimum and maximum wave speeds in the system. s[0] is
+ * the minimum wave speed and s[1] is the maximum wave speed.
+ * Following Einfeldt [1988], motivated by Roe eigenvalues.
+ *
+ * @param c Coordinate system in which to compute speeds.
+ * @param ql Left state conserved variables.
+ * @param qr Right state conserved variables.
+ * @param s On output, s[0] is the minimum speed and s[1] the maximum speed.
+ */
+      virtual void speedsDirect(const Lucee::RectCoordSys& c, const double* ql, const double*qr, double s[2]);
+
+/**
  * Compute primitive variables given conserved variables.
  *
  * @param q Conserved variables for which to compute primitive variables.
@@ -187,6 +199,12 @@ namespace Lucee
       NumFlux numFlux;
 /** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
       bool useIntermediateWave;
+
+/** Enum for wave speed estimation types */
+      enum SpeedEst { SPEED_REGULAR, SPEED_DIRECT };
+
+/** Flag to indicate type of wave estimation to use */
+      SpeedEst speedEst;
 
 /**
  * Compute pressure from conserved variables.

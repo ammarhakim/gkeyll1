@@ -76,6 +76,23 @@ namespace Lucee
         this->setNumWaves(2);
       else
         this->setNumWaves(1);
+
+      speedEst = SPEED_REGULAR;
+     if (tbl.hasString("speedEstimate"))
+    {
+      std::string se = tbl.getString("speedEstimate");
+      if (se == "regular")
+        speedEst = SPEED_REGULAR;
+      else if (se == "direct")
+        speedEst = SPEED_DIRECT;
+      else
+      {
+        Lucee::Except lce("EulerEquation::readInput: 'speedEstimate' ");
+        lce << se << " not recognized!" << std::endl;
+        throw lce;
+      }
+    }
+     
     }
   }
 
@@ -118,6 +135,31 @@ namespace Lucee
     double u = q[1]/rho; // fluid velocity
     s[0] = u-cs;
     s[1] = u+cs;
+  }
+
+  void
+  EulerEquation::speedsDirect(const Lucee::RectCoordSys& c, const double*ql, const double* qr, double s[2])
+  {
+    double rhol = getSafeRho(ql[0]);
+    double rhsqrtl = std::sqrt(rhol);
+    double ul = ql[1]/rhol;
+    double pl = pressure(&ql[0]);
+
+    double rhor = getSafeRho(qr[0]);
+    double rhsqrtr = std::sqrt(rhor);
+    double ur = qr[1]/rhor;
+    double pr = pressure(&qr[0]);
+
+    double rhsq2 = rhsqrtl + rhsqrtr;
+    double u = (rhsqrtl*ul  + rhsqrtr*ur)/rhsq2;
+
+    double eta = 0.5*rhsqrtl*rhsqrtr/rhsq2/rhsq2;
+    double deltau2 = (ur - ul)*(ur-ul);
+    double d2 = gas_gamma*(pl/rhsqrtl + pr/rhsqrtr)/rhsq2 + eta*deltau2;
+    double d = std::sqrt(d2);
+
+    s[0] = u-d;
+    s[1] = u+d;
   }
 
   double
@@ -248,11 +290,16 @@ namespace Lucee
       flux(c, &ql[0], auxVars, fl);
       flux(c, &qr[0], auxVars, fr);
 
-      double sl[2], sr[2];
-      speeds(c, &ql[0], sl);
-      speeds(c, &qr[0], sr);
-      s[0] = 0.5*(sl[0]+sr[0]);
-      s[1] = 0.5*(sl[1]+sr[1]);
+      if (speedEst == SPEED_REGULAR)
+      {
+        double sl[2], sr[2];
+        speeds(c, &ql[0], sl);
+        speeds(c, &qr[0], sr);
+        s[0] = 0.5*(sl[0]+sr[0]);
+        s[1] = 0.5*(sl[1]+sr[1]);
+      } else if (speedEst == SPEED_DIRECT)
+        speedsDirect(c, &ql[0], &qr[0], s);
+      else { /* this can't happen */ }
 
 // compute intermediate HLLE state
       double sdiff1 = 1/(s[1]-s[0]);
