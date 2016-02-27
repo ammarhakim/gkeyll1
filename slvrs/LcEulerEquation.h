@@ -199,6 +199,8 @@ namespace Lucee
       NumFlux numFlux;
 /** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
       bool useIntermediateWave;
+/** Flag to indicate use of HLLC scheme (makes sense only if using intermediate wave) */
+      bool useHLLC;
 
 /** Enum for wave speed estimation types */
       enum SpeedEst { SPEED_REGULAR, SPEED_DIRECT };
