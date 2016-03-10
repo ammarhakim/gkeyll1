@@ -49,9 +49,9 @@ namespace Lucee
 
   ElectrostaticContPhiUpdater::~ElectrostaticContPhiUpdater()
   {
-    MatDestroy(stiffMat);
-    VecDestroy(globalSrc);
-    VecDestroy(initGuess);
+    MatDestroy(&stiffMat);
+    VecDestroy(&globalSrc);
+    VecDestroy(&initGuess);
   }
 
   void 
@@ -422,7 +422,7 @@ namespace Lucee
           // reset corresponding rows (Note that some rows may be reset more
           // than once. This should not be a problem, though might make the
           // setup phase a bit slower).
-          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
+          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0, PETSC_NULL, PETSC_NULL);
 
           // now insert row numbers with a 0.0 as corresponding source to ensure
           // this point is identified with its periodic image on the lower
@@ -626,7 +626,7 @@ namespace Lucee
     nodalBasis->copyAllDataFromField(phiOut, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
-    KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
+    KSPSetOperators(ksp, stiffMat, stiffMat);
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
     // now solve linear system (initGuess will contain solution)
