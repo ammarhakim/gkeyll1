@@ -99,7 +99,7 @@ if (ENABLE_PARALLEL)
     INSTALL_DIR ${Petsc_SEARCH}-par
     HEADERS petsc.h
 # NRM: requiring that this list of libraries be found is too restrictive, especially on Edison. finding petsc.h is sufficient
-    #LIBRARIES ${Petsc_LIBRARY_LIST}
+    LIBRARIES ${Petsc_LIBRARY_LIST} OPTIONAL
   )
 else ()
   SciFindPackage(PACKAGE "Petsc"
@@ -116,7 +116,7 @@ if (PETSC_FOUND)
   set(HAVE_PETSC 1 CACHE BOOL "Whether have the PETSC library")
 else ()
   message(STATUS "Did not find Petsc.  Use -DPETSC_DIR to specify the installation directory.")
-  if (Petsc_FIND_REQUIRED)
+  if (SciPetsc_FIND_REQUIRED)
     message(FATAL_ERROR "Failed.")
   endif ()
 endif ()
