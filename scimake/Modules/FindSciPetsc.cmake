@@ -98,7 +98,7 @@ if (ENABLE_PARALLEL)
   SciFindPackage(PACKAGE "Petsc"
     INSTALL_DIR ${Petsc_SEARCH}-par
     HEADERS petsc.h
-# NRM: requiring that this list of libraries be found is too restrictive, especially on Edison. finding petsc.h is sufficient
+# NRM: requiring that this list of libraries be found is too restrictive, especially on Edison. finding petsc.h is usually sufficient
     LIBRARIES ${Petsc_LIBRARY_LIST} OPTIONAL
   )
 else ()
@@ -106,8 +106,8 @@ else ()
     INSTALL_DIR ${Petsc_SEARCH}
     HEADERS petsc.h mpi.h
     INCLUDE_SUBDIRS include include/mpiuni
-# NRM: requiring that this list of libraries be found is too restrictive, especially on Edison. finding petsc.h is sufficient
-    #LIBRARIES ${Petsc_LIBRARY_LIST}
+# NRM: requiring that this list of libraries be found is too restrictive, especially on Edison. finding petsc.h is usually sufficient
+    LIBRARIES ${Petsc_LIBRARY_LIST} OPTIONAL
   )
 endif ()
 
