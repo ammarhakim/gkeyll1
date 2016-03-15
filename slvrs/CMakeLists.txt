@@ -125,6 +125,7 @@ set(lcslvrs_SOURCES
   LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
+  LcAbsorbBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
 )
 

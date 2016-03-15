@@ -99,6 +99,7 @@
 #include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
+#include <LcAbsorbBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
 
 // loki includes
@@ -308,6 +309,7 @@ namespace Lucee
       .append<Lucee::CopyBoundaryCondition>()
       .append<Lucee::ConstBoundaryCondition>()
       .append<Lucee::ZeroNormalBoundaryCondition>()
+      .append<Lucee::AbsorbBoundaryCondition>()
       .append<Lucee::ZeroTangentBoundaryCondition>()
       .append<Lucee::FieldFunctionBoundaryCondition>()
       .append<Lucee::FunctionBoundaryCondition>()
