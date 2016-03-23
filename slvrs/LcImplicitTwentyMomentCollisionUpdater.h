@@ -68,6 +68,10 @@ namespace Lucee
     private:
 /** Collision frequency */
       double nu;
+/** Limit the heat flux */
+      bool lim;
+/** Heat flux limiting threshold */
+      double frac;
   };
 }
 

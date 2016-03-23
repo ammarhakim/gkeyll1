@@ -155,7 +155,10 @@ public:
       NumFlux numFlux;
 /** Flag to indicate use of intermediate wave (makes sense only if using Lax fluxes) */
       bool useIntermediateWave;
-
+/** Enum for closure types */
+      enum Closure { CL_GAUSS, CL_TAIL };
+/** Flag to indicate type of closure to use */
+      Closure closure; 
 /**
  * Decompose jump into waves and wave-speeds using right and left
  * states using Roe decomposition. The states and jump are already in
