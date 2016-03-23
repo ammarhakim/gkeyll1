@@ -74,6 +74,12 @@ namespace Lucee
     else
       throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify ion mass using 'ionMass'");
 
+    // Elementary charge
+    if (tbl.hasNumber("eV"))
+      eV = tbl.getNumber("eV");
+    else
+      throw Lucee::Except("LogicalSheath5DUpdater::readInput: Must specify electronvolt value using 'eV'");
+
     // Setting this to false will avoid a costly computation, but no sheath potential data will be available
     if (tbl.hasBool("computeCutoffVelocities"))
       computeCutoffVelocities = tbl.getBool("computeCutoffVelocities");
@@ -184,7 +190,7 @@ namespace Lucee
     nodalBasis3d->getSurfLowerNodeNums(2, lowerEdgeNodeNums);
     nodalBasis3d->getSurfUpperNodeNums(2, upperEdgeNodeNums);
 
-    cutoffTolerance = 1e-2;
+    cutoffTolerance = 1e-4;
   }
 
   Lucee::UpdaterStatus
@@ -198,6 +204,7 @@ namespace Lucee
     Lucee::Field<5, double>& distf = this->getOut<Lucee::Field<5, double> >(0);
     // Output sheath potential
     Lucee::Field<2, double>& phiSLower = this->getOut<Lucee::Field<2, double> >(1);
+    Lucee::Field<2, double>& phiSUpper = this->getOut<Lucee::Field<2, double> >(2);
 
     Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
@@ -206,12 +213,16 @@ namespace Lucee
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
     Lucee::FieldPtr<double> phiSLowerPtr = phiSLower.createPtr(); // for lower sheath potential
+    Lucee::FieldPtr<double> phiSUpperPtr = phiSUpper.createPtr(); // for upper sheath potential
 
     unsigned nlocal = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
     double cellCentroid[5];
+    // index of skin cell
     int idx[5];
+    // index of ghost cell
     int gstIdx[5];
+    bool foundAllVc = true;
 
     // Need to find phiS on lower z plane if it is contained in the localRegion
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -239,13 +250,11 @@ namespace Lucee
             double totalIonFluxAtNode = elcMass/ionMass*ionFluxPtr[configNodeIndex];
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
-            std::cout << "target = " << totalIonFluxAtNode << std::endl;
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
                 ivSkin < localRgn.getUpper(3); ivSkin++, ivGhost--)
             {
-              std::cout << "skin " << ivSkin << " = " << runningElcFluxAtNode << std::endl;
               idx[3] = ivSkin;
               gstIdx[3] = ivGhost;
 
@@ -271,7 +280,6 @@ namespace Lucee
 
                   elcFluxAtIv += cellCentroid[3]*momentVector(0) + momentVector(1);
                 }
-                std::cout << "elcFluxAtIv = " << elcFluxAtIv << std::endl;
                 // Check if we have exceed the total ion flux
                 if (runningElcFluxAtNode + elcFluxAtIv < totalIonFluxAtNode)
                 {
@@ -280,10 +288,10 @@ namespace Lucee
                   idx[4] = localRgn.getLower(4);
                   grid.setIndex(idx);
                   grid.getCentroid(cellCentroid);
-                  std::cout << "cutoff between " << cellCentroid[3]-0.5*grid.getDx(3) << " and " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
                   // Figure out fraction of cell that contains the excess flux
                   // (Flux over what is needed for equivalence with Gamma_i)
-                  double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; // the flux contribution up to v_c
+                  // exactResult is the the flux contribution integrated from lower edge of cell to v_c, a negative value
+                  double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; 
                   double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
                   // Search for the cutoff velocity ('b' here)
                   double a = -0.5*grid.getDx(3);
@@ -291,13 +299,19 @@ namespace Lucee
                   double relError;
                   int iterCount = 0;
                   std::vector<double> basisAtPoint(nodalStencil.size());
+                  // Root bracket values
                   double lowerBound = -0.5*grid.getDx(3);
                   double upperBound = 0.5*grid.getDx(3);
+                  // Gamma - Gamma_exact evaluated at bracketed values
                   double fl = 0.0-exactResult;
                   double fh = elcFluxAtIv-exactResult;
-                  double ans = -9.99e99;
 
-                  // Ridders' Method (See Press 2007, page 453)
+                  //std::cout << "elcFluxAtIv = " << elcFluxAtIv << std::endl;
+                  //std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl;
+                  //std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
+                  // Ridders' Method (See Press 2007, page 453). Removed some of checks that
+                  // the version in Numerical Recipes has because they appear to be unnecessary.
+                  // Consider using Brent's method in the future (more complicated to implement).
                   for (int iter = 0; iter < 60; iter++)
                   {
                     double xm = 0.5*(lowerBound + upperBound);
@@ -334,12 +348,9 @@ namespace Lucee
                     fm -= exactResult;
 
                     double s = sqrt(fm*fm - fl*fh);
-                    if (s == 0)
-                    {
-                      // Error
-                    }
                     // Updating formula
                     double xNew = xm + (xm-lowerBound)*( (fl >= fh ? 1.0 : -1.0)*fm/s );
+                    // Evaluate f at xNew
                     double fNew = 0.0;
 
                     b = xNew;
@@ -371,14 +382,17 @@ namespace Lucee
 
                     fNew-=exactResult;
 
+                    // fNew already is the difference between Gamma_tar and Gamma_exact
                     relError = fNew/exactResult;
 
+                    
                     if (fabs(relError) < cutoffTolerance )
                     {
-                      std::cout << "rFinal relError = " << relError << std::endl;
-                      std::cout << "rFinal b = " << cellCentroid[3] + b << std::endl;
-                      std::cout << "rexactResult = " << exactResult << std::endl;
-                      std::cout << "riterCount = " << iter << std::endl;
+                      //std::cout << "lFinal relError = " << relError << std::endl;
+                      //std::cout << "lFinal b = " << cellCentroid[3] + b << std::endl;
+                      //std::cout << "lexactResult = " << exactResult << std::endl;
+                      //std::cout << "literCount = " << iter << std::endl;
+                      //std::cout << "lExcessFraction = " << excessFraction << std::endl;
                       break;
                     }
 
@@ -393,58 +407,16 @@ namespace Lucee
                       lowerBound = b;
                       fl = fNew;
                     }
+
+                    if (iter == 59)
+                      foundAllVc = false;
                   }
 
-                  // This is a search for the exact 'b', keeping 'a' fixed
-                  do
-                  {
-                    b = 0.5*(upperBound + lowerBound);
-                    // Integration weight scale for this modified integral
-                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
-                    double integralResult = 0.0;
-                    double refCoord[2];
-                    
-                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
-                    {
-                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
-                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
-                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
-
-                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
-                      {
-                        idx[4] = iMu;
-                        distf.setPtr(sknPtr, idx);
-                        // Get the coordinates of cell center
-                        grid.setIndex(idx);
-                        grid.getCentroid(cellCentroid);
-                        // Compute distribution function at quadrature point
-                        double fAtPoint = 0.0;
-                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-
-                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
-                      }
-                    }
-
-                    relError = (integralResult - exactResult)/exactResult;
-
-                    if (relError > 0)
-                      upperBound = b;
-                    else
-                      lowerBound = b;
-
-                    iterCount++;
-
-                  } while ( fabs(relError) > cutoffTolerance );
 
                   // Store result in the appropriate 2d field
-                  phiSLowerPtr[configNode] = cellCentroid[3] + b;
-                  
-                  std::cout << "Final relError = " << relError << std::endl;
-                  std::cout << "Final b = " << cellCentroid[3] + b << std::endl;
-                  std::cout << "exactResult = " << exactResult << std::endl;
-                  std::cout << "iterCount = " << iterCount << std::endl;
+                  phiSLowerPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + b)*(cellCentroid[3] + b)/eV;
+                  //std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                  //std::cout << "phiSLowerPtr[" << configNode << "] = " << phiSLowerPtr[configNode] << std::endl;
 
                   // Scale (only for cutoff cells) and reflect distribution function by copying into ghost cell
                   for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
@@ -464,10 +436,30 @@ namespace Lucee
                     }
                   }
                 }
-                else runningElcFluxAtNode += elcFluxAtIv;
+                else 
+                {
+                  runningElcFluxAtNode += elcFluxAtIv;
+                  // Make sure electron distribution function in ghost cell is zeroed out
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = 0.0;
+                    }
+                  }
+                }
               }
               else
               {
+                // Cutoff cell has already been found
                 idx[4] = localRgn.getLower(4);
                 // Get the coordinates of cell center
                 grid.setIndex(idx);
@@ -503,7 +495,274 @@ namespace Lucee
       }
     }
 
-    return Lucee::UpdaterStatus();
+    // The following code is essentially the same as the above, with some subtle changes
+    // in indexing and conditionals.
+    // Need to find phiS on upper z plane if it is contained in the localRegion
+    if (localRgn.getUpper(2) == globalRgn.getUpper(2))
+    {
+      // Outer loops are over the position cells
+      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+      {
+        for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
+        {
+          idx[0] = ix;
+          idx[1] = iy;
+          idx[2] = localRgn.getUpper(2)-1;
+          ionFluxIn.setPtr(ionFluxPtr, idx[0], idx[1], idx[2]);
+          // Set output pointer for sheath potential
+          phiSUpper.setPtr(phiSUpperPtr, idx[0], idx[1]);
+          
+          gstIdx[0] = ix;
+          gstIdx[1] = iy;
+          gstIdx[2] = idx[2]+1;
+          // Loop over all configuration space nodes contained in this element
+          for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+          {
+            int configNodeIndex = upperEdgeNodeNums[configNode];
+            // This is the flux we want to match at this point
+            double totalIonFluxAtNode = elcMass/ionMass*ionFluxPtr[configNodeIndex];
+            double runningElcFluxAtNode = 0.0;
+            bool foundCutoffCell = false;
+
+            // Need to loop over velocity space in this specific manner
+            for (int ivSkin = localRgn.getUpper(3)-1, ivGhost = localRgn.getLower(3);
+                ivSkin >= localRgn.getLower(3); ivSkin--, ivGhost++)
+            {
+              idx[3] = ivSkin;
+              gstIdx[3] = ivGhost;
+
+              if (foundCutoffCell == false)
+              {
+                // Need to check if this is the parallel velocity cutoff cell
+                double elcFluxAtIv = 0.0;
+                // At every velocity space index, need to compute flux over all cells in mu
+                for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                {
+                  idx[4] = iMu;
+                  distf.setPtr(sknPtr, idx);
+                  // Get the coordinates of cell center
+                  grid.setIndex(idx);
+                  grid.getCentroid(cellCentroid);
+                  // At this particular configuration space vertix, copy all
+                  // nodes that occupy this location to a vector
+                  Eigen::VectorXd distfReduced(nodalStencil.size());
+                  for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
+                  // Compute zeroth and first parallel velocity moments in this cell
+                  Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+
+                  elcFluxAtIv += cellCentroid[3]*momentVector(0) + momentVector(1);
+                }
+                // Check if we have exceed the total ion flux
+                if (runningElcFluxAtNode + elcFluxAtIv > totalIonFluxAtNode)
+                {
+                  foundCutoffCell = true;
+                  // Get the coordinates of cell center
+                  idx[4] = localRgn.getLower(4);
+                  grid.setIndex(idx);
+                  grid.getCentroid(cellCentroid);
+                  // (Flux over what is needed for equivalence with Gamma_i)
+                  double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; // the flux contribution up to v_c
+                  // Figure out fraction of cell is excess, above what is needed for equivalent
+                  double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
+                  // Search for the cutoff velocity ('a' here)
+                  double a = -0.5*grid.getDx(3);
+                  double b = 0.5*grid.getDx(3);
+                  double relError;
+                  int iterCount = 0;
+                  std::vector<double> basisAtPoint(nodalStencil.size());
+                  // Root bracket values
+                  double lowerBound = -0.5*grid.getDx(3);
+                  double upperBound = 0.5*grid.getDx(3);
+                  // Gamma - Gamma_exact evaluated at bracketed values
+                  double fl = elcFluxAtIv-exactResult;
+                  double fh = -exactResult;
+
+                  // Ridders' Method (See Press 2007, page 453). Removed some of checks that
+                  // the version in Numerical Recipes has because they appear to be unnecessary.
+                  // Consider using Brent's method in the future (more complicated to implement).
+                  for (int iter = 0; iter < 60; iter++)
+                  {
+                    double xm = 0.5*(lowerBound + upperBound);
+                    // Calculate function at xm
+                    double fm = 0.0;
+                    a = xm;
+                    // Integration weight scale for this modified integral
+                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    double refCoord[2];
+                    
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                    {
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        fm += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    fm -= exactResult;
+
+                    double s = sqrt(fm*fm - fl*fh);
+                    // Updating formula
+                    double xNew = xm + (xm-lowerBound)*( (fl >= fh ? 1.0 : -1.0)*fm/s );
+                    // Evaluate f at xNew
+                    double fNew = 0.0;
+
+                    a = xNew;
+                    // Integration weight scale for this modified integral
+                    weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                    {
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        fNew += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    fNew-=exactResult;
+
+                    // fNew already is the difference between Gamma_tar and Gamma_exact
+                    relError = fNew/exactResult;
+
+                    
+                    if (fabs(relError) < cutoffTolerance )
+                    {
+                      //std::cout << "uFinal relError = " << relError << std::endl;
+                      //std::cout << "uFinal b = " << cellCentroid[3] + a << std::endl;
+                      //std::cout << "uexactResult = " << exactResult << std::endl;
+                      //std::cout << "uiterCount = " << iter << std::endl;
+                      break;
+                    }
+
+                    // Update root brackets, making use of monotonicity of function
+                    if (relError < 0)
+                    {
+                      upperBound = a;
+                      fh = fNew;
+                    }
+                    else
+                    {
+                      lowerBound = a;
+                      fl = fNew;
+                    }
+
+                    // check to see if we are at the last iteration
+                    if (iter == 59)
+                      foundAllVc = false;
+                  }
+
+                  // Store result in the appropriate 2d field
+                  phiSUpperPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + a)*(cellCentroid[3] + a)/eV;
+
+                  // Scale (only for cutoff cells) and reflect distribution function by copying into ghost cell
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    // It's important not to reflect every node in the cell!
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = excessFraction*sknPtr[sknNode];
+                    }
+                  }
+                }
+                else
+                {
+                  runningElcFluxAtNode += elcFluxAtIv;
+                  // Make sure electron distribution function in ghost cell is zeroed out
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = 0.0;
+                    }
+                  }
+                }
+              }
+              else
+              {
+                idx[4] = localRgn.getLower(4);
+                // Get the coordinates of cell center
+                grid.setIndex(idx);
+                grid.getCentroid(cellCentroid);
+                // Check to see if we need to do any copying and reflecting
+                if (cellCentroid[3] > 0.0)
+                {
+                  // We've already found the cutoff velocity at this config node.
+                  // Reflect distribution function by copying into ghost cell
+                  for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                  {
+                    idx[4] = iMu;
+                    distf.setPtr(sknPtr, idx);
+                    gstIdx[4] = iMu;
+                    distf.setPtr(gstPtr, gstIdx);
+                    // It's important not to reflect every node in the cell! Just the ones
+                    // at this particular configNode
+                    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    {
+                      // rotMap[k] tells you what sknPtr node to get data to put into 'k'
+                      // Equivalently, it tells you what gstPtr node to put data from sknPtr node 'k'
+                      int sknNode = nodalStencil[nodeIndex] + configNodeIndex;
+                      int gstNode = rotMap[sknNode];
+                      gstPtr[gstNode] = sknPtr[sknNode];
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    //return foundAllVc;
+    if (foundAllVc == false)
+      return Lucee::UpdaterStatus(false, 0.0);
+    else return Lucee::UpdaterStatus();
   }
 
   void

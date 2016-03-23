@@ -38,6 +38,7 @@ namespace Lucee
   static const unsigned NO_BC = 0;
   static const unsigned DIRICHLET_BC = 1;
   static const unsigned NEUMANN_BC = 2;
+  static const unsigned DIRICHLET_VARIABLE_BC = 3;
 
   template <> const char *FemPoissonStructUpdater<1>::id = "FemPoisson1D";
   template <> const char *FemPoissonStructUpdater<2>::id = "FemPoisson2D";
@@ -177,6 +178,11 @@ namespace Lucee
     if (tbl.hasNumber("modifierConstant"))
       modifierConstant = tbl.getNumber("modifierConstant");
 
+    laplacianWeight = 1.0;
+// read in laplacian weight (if any)
+    if (tbl.hasNumber("laplacianWeight"))
+      laplacianWeight = tbl.getNumber("laplacianWeight");
+
 // Adjust source if doing periodic BCs and no modifier constant specified
     adjustSource = false;
     if (allPeriodic && (modifierConstant==0) )
@@ -255,7 +261,7 @@ namespace Lucee
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); //  // Default PetSc layout is row-major
+          vals[nlocal*k+m] = -laplacianWeight*localStiff(k,m)+modifierConstant*localMass(k,m); //  // Default PetSc layout is row-major
       }
 
       nodalBasis->getLocalToGlobal(lgMap);
@@ -269,12 +275,14 @@ namespace Lucee
 
     DMSG("Basic stiffness matrix computed");
 
+
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
     {
       for (unsigned side=0; side<2; ++side)
       {
-        if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
+        if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC ||
+            bc[d][side].isSet && bc[d][side].type == DIRICHLET_VARIABLE_BC)
         { // we do not need to do anything for Neumann BCs
 // fetch number of nodes on face of element
           unsigned nsl = side==0 ?
@@ -292,10 +300,10 @@ namespace Lucee
 // loop, modifying stiffness matrix NOTE: We need are running this
 // loop on all processors, even those that don't own the boundary
 // nodes. The reason is that PetSc expects this.
-          Lucee::RowMajorSequencer<NDIM> seq(defRgnG);
-          while (seq.step())
+          Lucee::RowMajorSequencer<NDIM> seqDirichlet(defRgnG);
+          while (seqDirichlet.step())
           {
-            seq.fillWithIndex(idx);
+            seqDirichlet.fillWithIndex(idx);
             nodalBasis->setIndex(idx);
 // get surface nodes -> global mapping
             if (side == 0)
@@ -310,13 +318,15 @@ namespace Lucee
 
 // now insert row numbers with corresponding values into map for use
 // in the update method
-            for (unsigned r=0; r<nsl; ++r)
-              rowBcValues[lgSurfMap[r]] = dv;
+            if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
+            {
+              for (unsigned r=0; r<nsl; ++r)
+                rowBcValues[lgSurfMap[r]] = dv;
+            }
           }
         }
       }
     }
-
     DMSG("Modification for Dirichlet BCs completed");
 
 // Begin process of modification to handle periodic BCs. The code in
@@ -348,10 +358,10 @@ namespace Lucee
         Lucee::Region<NDIM, int> defRgnUp = defRgn.intersect(localRgn);
 
 // loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
-        while (seq.step())
+        Lucee::RowMajorSequencer<NDIM> seqPeriodic(defRgn);
+        while (seqPeriodic.step())
         {
-          seq.fillWithIndex(idx);
+          seqPeriodic.fillWithIndex(idx);
           nodalBasis->setIndex(idx);
 
 // this flag is needed to ensure we don't update the stiffness matrix twice
@@ -366,7 +376,7 @@ namespace Lucee
           for (unsigned k=0; k<nlocal; ++k)
           {
             for (unsigned m=0; m<nlocal; ++m)
-              vals[nlocal*k+m] = -localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
+              vals[nlocal*k+m] = -laplacianWeight*localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
           }
 
 // Now compute correct locations in global stiffness matrix to add
@@ -447,13 +457,13 @@ namespace Lucee
         Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
 // only update if we are on the correct ranks
-        Lucee::Region<NDIM, int> defRgn = defRgnG;//.intersect(localRgn);
+        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
 // loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<NDIM> seq(defRgn);
-        while (seq.step())
+        Lucee::RowMajorSequencer<NDIM> seqPeriodic(defRgn);
+        while (seqPeriodic.step())
         {
-          seq.fillWithIndex(idx);
+          seqPeriodic.fillWithIndex(idx);
           nodalBasis->setIndex(idx);
 // get surface nodes -> global mapping
           nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
@@ -483,6 +493,7 @@ namespace Lucee
       }
     }
     
+    DMSG("Phase IIa of periodic BCs completed");
 // reassemble matrix after modification
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
@@ -735,6 +746,69 @@ namespace Lucee
 
     int resetRow[1];
     double resetVal[1];
+    // modify values in stiffness matrix based on Dirichlet Bcs
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      for (unsigned side=0; side<2; ++side)
+      {
+        // only do anything here if variable dirichlet bc's used
+        if (bc[d][side].type == DIRICHLET_VARIABLE_BC)
+        {
+          // fetch number of nodes on face of element
+          unsigned nsl = side==0 ?
+            nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
+
+          // create global region to loop over side
+          Lucee::Region<NDIM, int> defRgnG = side==0 ?
+            globalRgn.resetBounds(d, globalRgn.getLower(d), globalRgn.getLower(d)+1) :
+            globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
+
+          // intersection with the local region
+          Lucee::Region<NDIM, int> commonRgn = defRgnG.intersect(localRgn);
+
+          // allocate space for mapping
+          std::vector<int> lgSurfMap(nsl);
+          std::vector<int> localSurfNums(nsl);
+          // vector of values passed into Petsc
+          std::vector<double> dirichletVals(nsl);
+
+          // loop, modifying source vector. this needs to run on the local region
+          // due to local ownership of dirchletField values
+          Lucee::RowMajorSequencer<NDIM> seqDirchlet(commonRgn);
+          while (seqDirchlet.step())
+          {
+            seqDirchlet.fillWithIndex(idx);
+            nodalBasis->setIndex(idx);
+            // get surface nodes -> global mapping
+            if (side == 0)
+            {
+              nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
+              nodalBasis->getSurfLowerNodeNums(d, localSurfNums);
+            }
+            else
+            {
+              nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+              nodalBasis->getSurfUpperNodeNums(d, localSurfNums);
+            }
+            // insert row numbers with corresponding values into map for use
+            // in the update method
+            const Lucee::Field<NDIM, double>& dirichletField = this->getInp<Lucee::Field<NDIM, double> >(1);
+            Lucee::ConstFieldPtr<double> dirichletFieldPtr = dirichletField.createConstPtr();
+            dirichletField.setPtr(dirichletFieldPtr, idx);
+
+            // Set RHS vector to dirchlet value
+            // Nodes occupying the same location will be overwritten
+            for (unsigned r=0; r<nsl; ++r)
+              dirichletVals[r] = dirichletFieldPtr[localSurfNums[r]];
+
+            // Accumulate Dirchlet BC values from this cell into the Petsc vector
+            VecSetValues(globalSrc, nsl, &lgSurfMap[0], &dirichletVals[0], INSERT_VALUES);
+          }
+        }
+      }
+    }
+
+    DMSG("Modification for Dirichlet BCs completed");
 // reset source to apply boundary conditions
     std::map<int, double>::const_iterator rItr
       = rowBcValues.begin();
@@ -811,6 +885,7 @@ namespace Lucee
   FemPoissonStructUpdater<NDIM>::declareTypes()
   {
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>)); // optional, for variable dirichlet
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
@@ -823,10 +898,12 @@ namespace Lucee
       bcData.type = DIRICHLET_BC;
     else if ((bct.getString("T") == "N"))
       bcData.type = NEUMANN_BC;
+    else if (bct.getString("T") == "D_VAR")
+      bcData.type = DIRICHLET_VARIABLE_BC;
     else
     {
       Lucee::Except lce(
-        "FemPoissonStructUpdater::readInput: Must specify one of \"D\" or \"N\". ");
+        "FemPoissonStructUpdater::readInput: Must specify one of \"D\", \"D_VAR\", or \"N\". ");
       lce << "Specified \"" << bct.getString("T") << " instead";
       throw lce;
     }

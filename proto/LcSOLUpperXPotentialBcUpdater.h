@@ -1,12 +1,11 @@
 /**
- * @file	LcMomentsAtEdges5DUpdater.h
+ * @file	LcSOLUpperXPotentialBcUpdater.h
  *
- * @brief	Computes several parallel velocity moments of the distribution function at both edges.
- * Used for 5D SOL problem.
+ * @brief	
  */
 
-#ifndef LC_MOMENTS_AT_EDGES_5D_UPDATER_H
-#define LC_MOMENTS_AT_EDGES_5D_UPDATER_H
+#ifndef LC_SOL_UPPER_X_POTENTIAL_BC_UPDATER_H
+#define LC_SOL_UPPER_X_POTENTIAL_BC_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -15,29 +14,28 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcVector.h>
 #include <LcDynVector.h>
 
 // eigen includes
-#include <Eigen/Dense>
 #include <Eigen/LU>
 
 namespace Lucee
 {
 /**
- * Applies particle refection BCs to distribution function
+ * Updater to compute zonal average of phi(x,y,z)
  */
-  class MomentsAtEdges5DUpdater : public Lucee::UpdaterIfc
+  class SOLUpperXPotentialBcUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new projection updater */
-      MomentsAtEdges5DUpdater();
+/** Create new solver */
+      SOLUpperXPotentialBcUpdater();
+/** Destructor */
+      virtual ~SOLUpperXPotentialBcUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,43 +70,19 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to phase space basis functions to use */
-      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
-/** Pointer to configuration space basis functions */
-      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
-      double scaleFactor;
-/** Order of basis polynomials */
-      int polyOrder;
-/** Keeps track of the offsets needed to get all nodes that share the same config. space location */
-      std::vector<int> nodalStencil;
-/** Flag indicating whether or not to integrate in ghost cells */
-      bool integrateGhosts;
-/**
- * Used to compute zeroth and first parallel velocity moments at a particular (x,y,z)
- */
-      Eigen::MatrixXd momentMatrix;
-/**
- *  Keeps track of nodes to write data to on lower surface in z
- */
-      std::vector<int> lowerEdgeNodeNums;
-/**
- *  Keeps track of nodes to write data to on upper surface in z
- */
+/** Pointer to 2D nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** When multiplied with vector of solution in a cell, gives y-integrated value on upper x surface */
+      Eigen::VectorXd integrationMatrix;
+/** Keeps track of nodes to write data to on upper surface in z */
       std::vector<int> upperEdgeNodeNums;
-
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-
-/**
- * Determines if two nodes have the same configuration space coordinates
- */
-      bool sameConfigCoords(int srcIndex, int tarIndex, double dxMin, const Eigen::MatrixXd& nodeList);
   };
 }
 
-#endif // LC_MOMENTS_AT_EDGES_5D_UPDATER_H
+#endif // LC_SOL_UPPER_X_POTENTIAL_BC_UPDATER_H

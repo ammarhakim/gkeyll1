@@ -1,7 +1,8 @@
 /**
  * @file	LcSetPhiAtBoundaryUpdater.cpp
  *
- * @brief	Updater to modify an input phi(z) so that its value at the boundary is some value
+ * @brief	Updater to modify an input phi(z) so that its value at the boundary is some value.
+ * Only used in 1D SOL simulations
  */
 
 // config stuff

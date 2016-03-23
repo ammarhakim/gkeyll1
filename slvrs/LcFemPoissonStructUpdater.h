@@ -102,6 +102,8 @@ namespace Lucee
       VecScatter vecSctr;
 /** Constant term for solving a modified Poisson equation */
       double modifierConstant;
+/** Constant modifier that multiplies the laplacian */
+      double laplacianWeight;
 /** Should source be adjusted? */
       bool adjustSource;
 

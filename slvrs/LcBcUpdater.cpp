@@ -23,6 +23,8 @@ namespace Lucee
   template <> const char *BcUpdater<1>::id = "Bc1D";
   template <> const char *BcUpdater<2>::id = "Bc2D";
   template <> const char *BcUpdater<3>::id = "Bc3D";
+  template <> const char *BcUpdater<4>::id = "Bc4D";
+  template <> const char *BcUpdater<5>::id = "Bc5D";
 
   template <unsigned NDIM>
   BcUpdater<NDIM>::BcUpdater() 
@@ -145,4 +147,6 @@ namespace Lucee
   template class BcUpdater<1>;
   template class BcUpdater<2>;
   template class BcUpdater<3>;
+  template class BcUpdater<4>;
+  template class BcUpdater<5>;
 }

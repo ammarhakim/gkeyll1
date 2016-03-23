@@ -55,6 +55,11 @@ namespace Lucee
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
     else scaleFactor = 1.0;
+
+    // Indicates if we will integrate in ghost cells in position space
+    integrateGhosts = false;
+    if (tbl.hasBool("integrateGhosts"))
+      integrateGhosts = tbl.getBool("integrateGhosts");
   }
 
   void
@@ -196,28 +201,46 @@ namespace Lucee
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
 
-        // only want to calculate outward flux
-        if (cellCentroid[3] > 0.0)
-          continue;
-
         // Loop over the four configuration space vertices in this cell (specific to linear elements)
         Eigen::VectorXd distfReduced(nodalStencil.size());
-        for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
+        // V_PARA < 0.0 and on lower edge, so do the skin cell contribution
+        if (cellCentroid[3] < 0.0)
         {
-          int configNodeIndex = lowerEdgeNodeNums[configNode];
-          // At this particular configuration space vertix, copy all
-          // nodes that occupy this location to a vector
-          for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-            distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-          // Compute zeroth and first parallel velocity moments in this cell
-          Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-          // Accumulate results (v = v_c*<1> + <v'>)
-          outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
+          {
+            int configNodeIndex = lowerEdgeNodeNums[configNode];
+            // At this particular configuration space vertix, copy all
+            // nodes that occupy this location to a vector
+            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+            // Compute zeroth and first parallel velocity moments in this cell
+            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+            // Accumulate results (v = v_c*<1> + <v'>)
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          }
+        }
+        else if (integrateGhosts == true)
+        {
+          // V_PARA > 0.0 and on lower edge, so do the ghost cell contribution only if asked for
+          idx[2] = localRgn.getLower(2)-1;
+          distfIn.setPtr(distfInPtr, idx);
+          for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+          {
+            int configNodeIndex = upperEdgeNodeNums[configNode];
+            // At this particular configuration space vertix, copy all
+            // nodes that occupy this location to a vector
+            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+            // Compute zeroth and first parallel velocity moments in this cell
+            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+            // Accumulate results (v = v_c*<1> + <v'>)
+            // Goes into lowerEdgeNodeNums since we are putting data only in skin cells
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          }
         }
       }
       // TESTING: Print out outputMomentPtr
-      /*
-      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+      /*for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
         for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
         {
           outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getLower(2));
@@ -243,34 +266,53 @@ namespace Lucee
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
 
-        // only want to calculate outward flux
-        if (cellCentroid[3] < 0.0)
-          continue;
-
         // Loop over the four configuration space vertices in this cell (specific to linear elements)
         Eigen::VectorXd distfReduced(nodalStencil.size());
-        for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+        // V_PARA > 0.0 and on upper edge, so do the skin cell contribution
+        if (cellCentroid[3] > 0.0)
         {
-          int configNodeIndex = upperEdgeNodeNums[configNode];
-          // At this particular configuration space vertix, copy all
-          // nodes that occupy this location to a vector
-          for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-            distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-          // Compute zeroth and first parallel velocity moments in this cell
-          Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-          // Accumulate results (v = v_c*<1> + <v'>)
-          outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
+          {
+            int configNodeIndex = upperEdgeNodeNums[configNode];
+            // At this particular configuration space vertix, copy all
+            // nodes that occupy this location to a vector
+            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+            // Compute zeroth and first parallel velocity moments in this cell
+            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+            // Accumulate results (v = v_c*<1> + <v'>)
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          }
+        }
+        else if (integrateGhosts == true)
+        {
+          // V_PARA < 0.0 and on upper edge, so do the ghost cell contribution only if asked for
+          idx[2] = localRgn.getUpper(2);
+          distfIn.setPtr(distfInPtr, idx);
+          for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
+          {
+            int configNodeIndex = lowerEdgeNodeNums[configNode];
+            // At this particular configuration space vertix, copy all
+            // nodes that occupy this location to a vector
+            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+            // Compute zeroth and first parallel velocity moments in this cell
+            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
+            // Accumulate results (v = v_c*<1> + <v'>)
+            // Goes into upperEdgeNodeNums since we are putting data only in skin cells
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+          }
         }
       }
       // TESTING: Print out outputMomentPtr
-      /*
-      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+      /*for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
         for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
         {
           outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getUpper(2)-1);
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
             std::cout << "config " << upperEdgeNodeNums[configNode] << " = " << outputMomentPtr[ upperEdgeNodeNums[configNode] ] << std::endl;
-        }*/
+        }
+      */
     }
     return Lucee::UpdaterStatus();
   }
