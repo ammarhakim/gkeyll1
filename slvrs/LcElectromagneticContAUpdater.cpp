@@ -46,9 +46,15 @@ namespace Lucee
 
   ElectromagneticContAUpdater::~ElectromagneticContAUpdater()
   {
+#ifdef PETSC_36    
     MatDestroy(&stiffMat);
     VecDestroy(&globalSrc);
     VecDestroy(&initGuess);
+#else
+    MatDestroy(stiffMat);
+    VecDestroy(globalSrc);
+    VecDestroy(initGuess);
+#endif
   }
 
   void 
@@ -445,7 +451,11 @@ namespace Lucee
           // reset corresponding rows (Note that some rows may be reset more
           // than once. This should not be a problem, though might make the
           // setup phase a bit slower).
+#ifdef PETSC_36          
           MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0, PETSC_NULL, PETSC_NULL);
+#else
+          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
+#endif
 
           // now insert row numbers with a 0.0 as corresponding source to ensure
           // this point is identified with its periodic image on the lower
@@ -643,7 +653,11 @@ namespace Lucee
     nodalBasis->copyAllDataFromField(aOut, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
+#ifdef PETSC_36
     KSPSetOperators(ksp, stiffMat, stiffMat);
+#else
+    KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
+#endif
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
     // now solve linear system (initGuess will contain solution)

@@ -582,7 +582,7 @@ namespace Lucee
             }
           }*/
 
-          clock_t tm_3_s = clock();          
+          clock_t tm_3_s = clock();
           Eigen::VectorXd upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
             numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
           Eigen::VectorXd lowerResultVector = bigStoredLowerSurfMatrices[cellIndexRight][d]*
