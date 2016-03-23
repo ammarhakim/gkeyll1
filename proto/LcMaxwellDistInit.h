@@ -82,6 +82,11 @@ namespace Lucee
       double evaluateMaxwell(double v[VDIM], double n, double vTerm);
 
     private:
+      /** Flag to output Maxwellian with zero drift velocity */
+      bool zeroDriftOutput;
+      /** Flag to output with different density (code will search for
+	  fourth input field */
+      bool arbitraryDensity;
       /** Pointer to phase space basis functions */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
       /** Pointer to configuration space basis functions */

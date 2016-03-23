@@ -52,9 +52,9 @@ namespace Lucee
   {
     if (runOnce)
     {
-      MatDestroy(stiffMat);
-      VecDestroy(globalSrc);
-      VecDestroy(initGuess);
+      MatDestroy(&stiffMat);
+      VecDestroy(&globalSrc);
+      VecDestroy(&initGuess);
     }
   }
 
@@ -297,7 +297,7 @@ namespace Lucee
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
 // setup phase a bit slower).
-          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
+          MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0, PETSC_NULL, PETSC_NULL);
 
 // now insert row numbers with a 0.0 as corresponding source to ensure
 // this point is identified with its periodic image on the lower
@@ -358,7 +358,7 @@ namespace Lucee
     VecDuplicate(globalSrc, &initGuess);
 
     KSPCreate(MPI_COMM_WORLD, &ksp);
-    KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
+    KSPSetOperators(ksp, stiffMat, stiffMat);
     KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
     KSPSetFromOptions(ksp);
   }

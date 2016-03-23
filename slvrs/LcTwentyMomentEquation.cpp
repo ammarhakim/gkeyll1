@@ -115,6 +115,21 @@ namespace Lucee
             this->setNumWaves(1);
     }
     
+    closure = CL_TAIL;
+    if (tbl.hasString("closure")) {
+      std::string cl = tbl.getString("closure");
+      if (cl == "gaussian") {
+        closure = CL_GAUSS;
+      } else if (cl == "longTail") {
+        closure = CL_TAIL;
+      } else {
+        Lucee::Except lce("TwentyMomentEquation::readInput: 'closure' ");
+        lce << cl << " not recognized!" << std::endl;
+        throw lce;
+
+      }
+    }
+    
   }
 
   void TwentyMomentEquation::rotateToLocal(const Lucee::RectCoordSys& c, const double* inQ, double* outQ)
@@ -164,7 +179,12 @@ namespace Lucee
       PInv[5] = (-v[P12]*v[P12] + v[P11]*v[P22])/det; */
       // total heat flux flux
       double k; // parameter which measures deviation from maxwellian (sort of Levermore, sort of Pearson). Totally not rigourous 
-      k = (1 + (v[RHO]*(v[Q111]*v[Q111]/(v[P11]*v[P11]*v[P11]) + v[Q222]*v[Q222]/(v[P22]*v[P22]*v[P22]) + v[Q333]*v[Q333]/(v[P33]*v[P33]*v[P33])))/2 );
+      if (closure == CL_TAIL) {
+        k = (1 + (v[RHO]*(v[Q111]*v[Q111]/(v[P11]*v[P11]*v[P11]) + v[Q222]*v[Q222]/(v[P22]*v[P22]*v[P22]) + v[Q333]*v[Q333]/(v[P33]*v[P33]*v[P33])))/2 );
+      } else if (closure == CL_GAUSS) {
+        k = 1.0;
+      }
+
       f[Q111] = 4*v[Q111]*v[U1] + (3*k*(v[P11]*v[P11]))/(v[RHO]) + 6*v[P11]*(v[U1]*v[U1]) + v[RHO]*(v[U1]*v[U1]*v[U1]*v[U1]);
 
       f[Q112] = (3*k*v[P11]*v[P12])/(v[RHO]) + 3*v[Q112]*v[U1] + v[Q111]*v[U2] + 3*v[P11]*v[U1]*v[U2] + 3*v[P12]*(v[U1]*v[U1]) + v[RHO]*v[U2]*(v[U1]*v[U1]*v[U1]);
@@ -373,8 +393,11 @@ namespace Lucee
 
     double k; // parameter which measures deviation from maxwellian (sort of Levermore, sort of Pearson). Totally not rigourous 
     // here I will attempt this using k as the heat-flux deviation from a maxwellian.
-
-    k = (1 + (p0*q111*q111/(p11*p11*p11) + p0*q222*q222/(p22*p22*p22) + p0*q333*q333/(p33*p33*p33))/2 );
+    if (closure == CL_TAIL) {
+      k = (1 + (p0*q111*q111/(p11*p11*p11) + p0*q222*q222/(p22*p22*p22) + p0*q333*q333/(p33*p33*p33))/2 );
+    } else if (closure == CL_GAUSS) {
+      k = 1.0;
+    }
     /*    if (k > 5) {
       std::cout << "k = " << k << "\n";
       }*/
