@@ -69,6 +69,8 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcSOLSetPotentialAtBoundary.cpp>
+#include <LcSOLUpperXPotentialBcUpdater.cpp>
 #include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
@@ -254,6 +256,9 @@ namespace Lucee
       .append<Lucee::SmoothQuadPhiToC1Updater>()
 
       .append<Lucee::SheathParticleSource1x1v>()
+
+      .append<Lucee::SOLSetPotentialAtBoundary>()
+      .append<Lucee::SOLUpperXPotentialBcUpdater>()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
       .append<Lucee::ThreeWaveInteractModSrcUpdater>()

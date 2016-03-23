@@ -42,7 +42,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   PoissonBracketImpUpdater<NDIM>::~PoissonBracketImpUpdater()
-  {
+  {/*
     std::cout << "Total volume integral time = " << totalVolTime << std::endl;
     std::cout << "Total surface integral time = " << totalSurfTime << std::endl;
     std::cout << "Total alpha for volume integral time = " << computeVolAlphaAtQuadNodesTime << std::endl;
@@ -61,7 +61,7 @@ namespace Lucee
               << surf_loop3 << " + "
               << surf_loop4 << " = "
               << (surf_loop1+surf_loop2+surf_loop3+surf_loop4)
-              << std::endl;    
+              << std::endl;*/
   }  
   
   template <unsigned NDIM>
@@ -138,22 +138,40 @@ namespace Lucee
         updateDirs.push_back(i);
     }
 
-    zeroFluxFlags = std::vector<bool>(NDIM);
+    zeroFluxFlagsLower = std::vector<bool>(NDIM);
+    zeroFluxFlagsUpper = std::vector<bool>(NDIM);
     // Default is no zero flux bcs in any directions
     for (int i = 0; i < NDIM; i++)
-      zeroFluxFlags[i] = false;
-
-    if (tbl.hasNumVec("zeroFluxDirections"))
     {
-      std::vector<double> tempDirs = tbl.getNumVec("zeroFluxDirections");
+      zeroFluxFlagsLower[i] = false;
+      zeroFluxFlagsUpper[i] = false;
+    }
+
+    if (tbl.hasNumVec("zeroFluxDirectionsUpper"))
+    {
+      std::vector<double> tempDirs = tbl.getNumVec("zeroFluxDirectionsUpper");
       for (int i = 0; i < std::min<int>(NDIM, tempDirs.size()); i++)
       {
         int d = (int) tempDirs[i];
 
         if (d < NDIM)
-          zeroFluxFlags[d] = true;
+          zeroFluxFlagsUpper[d] = true;
         else
-          throw Lucee::Except("PoissonBracketImpUpdater::readInput: zeroFluxDirections must be a table with each element < NDIM");
+          throw Lucee::Except("PoissonBracketImpUpdater::readInput: zeroFluxDirectionsUpper must be a table with each element < NDIM");
+      }
+    }
+
+    if (tbl.hasNumVec("zeroFluxDirectionsLower"))
+    {
+      std::vector<double> tempDirs = tbl.getNumVec("zeroFluxDirectionsLower");
+      for (int i = 0; i < std::min<int>(NDIM, tempDirs.size()); i++)
+      {
+        int d = (int) tempDirs[i];
+
+        if (d < NDIM)
+          zeroFluxFlagsLower[d] = true;
+        else
+          throw Lucee::Except("PoissonBracketImpUpdater::readInput: zeroFluxDirectionsLower must be a table with each element < NDIM");
       }
     }
   }
@@ -527,7 +545,7 @@ namespace Lucee
           idxl[dir] = idx[dir] - 1;
 
           // Don't need to do anything if zeroFluxFlag in this direction and on lower boundary
-          if (idx[dir] == globalRgn.getLower(dir) && zeroFluxFlags[dir] == true )
+          if (idx[dir] == globalRgn.getLower(dir) && zeroFluxFlagsLower[dir] == true )
             continue;
           // Otherwise, need to compute numerical flux. Get data from lower element
           aCurr.setPtr(aCurrPtr_l, idxl);
@@ -597,7 +615,7 @@ namespace Lucee
           if(idx[dir] == localRgn.getUpper(dir)-1)
           {
             // Don't need to do anything only if zeroFluxFlags in this direction and on global boundary
-            if (idx[dir] == globalRgn.getUpper(dir)-1 && zeroFluxFlags[dir] == true)
+            if (idx[dir] == globalRgn.getUpper(dir)-1 && zeroFluxFlagsUpper[dir] == true)
               continue;
 
             for (int i = 0; i < NDIM; i++)

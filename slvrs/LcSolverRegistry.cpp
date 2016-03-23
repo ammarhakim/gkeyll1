@@ -86,6 +86,7 @@
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
+#include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
 #include <LcSetPhiAtBoundaryUpdater.h>
@@ -139,6 +140,8 @@ namespace Lucee
       .append<Lucee::BcUpdater<1> >()
       .append<Lucee::BcUpdater<2> >()
       .append<Lucee::BcUpdater<3> >()
+      .append<Lucee::BcUpdater<4> >()
+      .append<Lucee::BcUpdater<5> >()
 
       .append<StairSteppedBcUpdater<1> >()
       .append<StairSteppedBcUpdater<2> >()
@@ -325,7 +328,9 @@ namespace Lucee
 
       .append<Lucee::NodalDgFunctionBoundaryCondition<1> >()
       .append<Lucee::NodalDgFunctionBoundaryCondition<2> >()
-      .append<Lucee::NodalDgFunctionBoundaryCondition<3> >();
+      .append<Lucee::NodalDgFunctionBoundaryCondition<3> >()
+      
+      .append<Lucee::SOLZeroNormalBoundaryCondition<5> >();
 
 // register point sources
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >

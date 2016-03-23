@@ -95,6 +95,8 @@ namespace Lucee
       double ionMass;
 /** Mass of electrons */
       double elcMass;
+/** Elementary Charge */
+      double eV;
 /** Tolerance to which cutoff velocities should be found */
       double cutoffTolerance;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
