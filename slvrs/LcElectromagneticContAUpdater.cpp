@@ -46,7 +46,7 @@ namespace Lucee
 
   ElectromagneticContAUpdater::~ElectromagneticContAUpdater()
   {
-#ifdef PETSC_36    
+#if PETSC_VERSION_GE(3,6,0)    
     MatDestroy(&stiffMat);
     VecDestroy(&globalSrc);
     VecDestroy(&initGuess);
@@ -451,7 +451,7 @@ namespace Lucee
           // reset corresponding rows (Note that some rows may be reset more
           // than once. This should not be a problem, though might make the
           // setup phase a bit slower).
-#ifdef PETSC_36          
+#if PETSC_VERSION_GE(3,6,0)          
           MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0, PETSC_NULL, PETSC_NULL);
 #else
           MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
@@ -653,7 +653,7 @@ namespace Lucee
     nodalBasis->copyAllDataFromField(aOut, ptGuess);
     VecRestoreArray(initGuess, &ptGuess);
 
-#ifdef PETSC_36
+#if PETSC_VERSION_GE(3,6,0)
     KSPSetOperators(ksp, stiffMat, stiffMat);
 #else
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
