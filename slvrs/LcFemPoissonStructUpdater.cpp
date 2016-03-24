@@ -59,7 +59,7 @@ namespace Lucee
   {
     if (runOnce)
     {
-#ifdef PETSC_36      
+#if PETSC_VERSION_GE(3,6,0)      
       MatDestroy(&stiffMat);
       VecDestroy(&globalSrc);
       VecDestroy(&initGuess);
@@ -224,7 +224,7 @@ namespace Lucee
 
 #ifdef HAVE_MPI
     int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
-#ifdef PETSC_36    
+#if PETSC_VERSION_GE(3,6,0)    
     MatCreateAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal,
 #else
     MatCreateMPIAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal,       
@@ -241,7 +241,7 @@ namespace Lucee
 #endif
     MatSetFromOptions(stiffMat);
 
-#ifdef PETSC_36      
+#if PETSC_VERSION_GE(3,6,0)      
 // NRM 3/10/16:
 // Depending on the type of BCs, we will be modifying stiffMat and adding new nonzero values.
 // In later versions of PETSc, we need to set the following in order for PETSc to not throw errors.
@@ -250,7 +250,7 @@ namespace Lucee
 
 // now create vector to store source: MatGetVecs ensures that the
 // parallel layout is the same as the stiffness matrix.
-#ifdef PETSC_36      
+#if PETSC_VERSION_GE(3,6,0)      
     MatCreateVecs(stiffMat, &globalSrc, PETSC_NULL);
 #else
     MatGetVecs(stiffMat, &globalSrc, PETSC_NULL);
@@ -343,7 +343,7 @@ namespace Lucee
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
 // setup phase a bit slower).
-#ifdef PETSC_36            
+#if PETSC_VERSION_GE(3,6,0)            
             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
 #else
             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
@@ -505,7 +505,7 @@ namespace Lucee
 // reset corresponding rows (Note that some rows may be reset more
 // than once. This should not be a problem, though might make the
 // setup phase a bit slower).
-#ifdef PETSC_36          
+#if PETSC_VERSION_GE(3,6,0)          
           MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0, PETSC_NULL, PETSC_NULL);
 #else
           MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 0.0);
@@ -566,7 +566,7 @@ namespace Lucee
     {
 // lower-left
       int zeroRow[1] = {0};
-#ifdef PETSC_36      
+#if PETSC_VERSION_GE(3,6,0)      
       MatZeroRows(stiffMat, 1, zeroRow, 1.0, PETSC_NULL, PETSC_NULL);
 #else
       MatZeroRows(stiffMat, 1, zeroRow, 1.0);      
@@ -617,7 +617,7 @@ namespace Lucee
 
     PetscInt numIs = vecIs.size();
 #ifdef HAVE_MPI
-# ifdef PETSC_36
+# if PETSC_VERSION_GE(3,6,0)
     ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], PETSC_COPY_VALUES, &is);
 # else
       ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], &is);
@@ -625,7 +625,7 @@ namespace Lucee
     VecCreateMPI(comm->getMpiComm(), numIs, PETSC_DETERMINE, &localData);
       
 #else
-# ifdef PETSC_36      
+# if PETSC_VERSION_GE(3,6,0)      
     ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], PETSC_COPY_VALUES, &is);
 # else
     ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], &is);      
@@ -637,7 +637,7 @@ namespace Lucee
     VecScatterCreate(initGuess, is, localData, PETSC_NULL, &vecSctr);
 
     KSPCreate(MPI_COMM_WORLD, &ksp);
-#ifdef PETSC_36      
+#if PETSC_VERSION_GE(3,6,0)      
     KSPSetOperators(ksp, stiffMat, stiffMat);
 #else
     KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
