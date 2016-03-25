@@ -93,4 +93,7 @@
 /* Define if we are using CLAPACK */
 #cmakedefine HAVE_CLAPACKCMAKE
 
+#ifndef PETSC_VERSION_GE
+# define PETSC_VERSION_GE(X,Y,Z) 0
+#endif
 
