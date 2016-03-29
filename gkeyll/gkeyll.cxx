@@ -230,6 +230,5 @@ main(int argc, char **argv)
 #ifdef HAVE_MPI
   MPI_Finalize();
 #endif
-  exit(0); // PROBABLY NOT A GOOD THING TO DO
   return failed ? 1 : 0;
 }
