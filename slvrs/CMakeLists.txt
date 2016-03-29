@@ -105,6 +105,7 @@ set(lcslvrs_SOURCES
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLIonDensityInitialization.cpp
+  LcSOLPositivityUpdater.cpp
   LcSOLZeroNormalBoundaryCondition.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp

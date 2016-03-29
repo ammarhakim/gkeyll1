@@ -86,6 +86,7 @@
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
+#include <LcSOLPositivityUpdater.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -174,6 +175,7 @@ namespace Lucee
       .append<Lucee::SOL3DElectronTempAtWallCalc>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLIonDensityInitialization>()
+      .append<Lucee::SOLPositivityUpdater>()
 
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()

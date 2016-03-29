@@ -282,6 +282,16 @@ namespace Lucee
             Eigen::VectorXd momentVector = momentMatrix*distfReduced;
             // Accumulate results (v = v_c*<1> + <v'>)
             outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+            double cellIncrement = cellCentroid[3]*momentVector(0) + momentVector(1);
+            if (cellIncrement < 0.0)
+            {
+              for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+              std::cout << "distfReduced = " << distfReduced << std::endl;
+              std::cout << "cellIncrement = " << cellIncrement << std::endl;
+              std::cout << "cell " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << std::endl;
+              std::cout << "outputMoment[" << upperEdgeNodeNums[configNode] << "] new val = " << outputMomentPtr[ upperEdgeNodeNums[configNode] ] << std::endl;
+            }
           }
         }
         else if (integrateGhosts == true)
