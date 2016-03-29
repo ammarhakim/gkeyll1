@@ -223,6 +223,7 @@ namespace Lucee
     // index of ghost cell
     int gstIdx[5];
     bool foundAllVc = true;
+    const int maxIter = 50;
 
     // Need to find phiS on lower z plane if it is contained in the localRegion
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -250,6 +251,9 @@ namespace Lucee
             double totalIonFluxAtNode = elcMass/ionMass*ionFluxPtr[configNodeIndex];
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
+
+            if (totalIonFluxAtNode > 0.0)
+              totalIonFluxAtNode = 0.0;
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
@@ -312,6 +316,7 @@ namespace Lucee
                   // Ridders' Method (See Press 2007, page 453). Removed some of checks that
                   // the version in Numerical Recipes has because they appear to be unnecessary.
                   // Consider using Brent's method in the future (more complicated to implement).
+                  /*
                   for (int iter = 0; iter < 60; iter++)
                   {
                     double xm = 0.5*(lowerBound + upperBound);
@@ -408,10 +413,122 @@ namespace Lucee
                       fl = fNew;
                     }
 
-                    if (iter == 59)
+                    if (iter > 20)
+                    {
+                      //std::cout << "iter = " << iter << std::endl;
+                      //std::cout << "fl = " << fl << std::endl;
+                      //std::cout << "fh = " << fh << std::endl;
+                      //std::cout << "relError = " << relError << std::endl;
                       foundAllVc = false;
-                  }
+                    }
+                  }*/
 
+                  do
+                  {
+                    b = 0.5*(upperBound + lowerBound);
+                    // Integration weight scale for this modified integral
+                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    double integralResult = 0.0;
+                    double refCoord[2];
+                    
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                    {
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    // integralResult will be more negative than exactResult if guess
+                    // is more "left" than true answer
+                    relError = (integralResult - exactResult)/exactResult;
+
+                    if (relError > 0)
+                      upperBound = b;
+                    else
+                      lowerBound = b;
+
+                    iterCount++;
+
+                  } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+
+                  if (iterCount == maxIter)
+                  {
+                    foundAllVc = false;
+                    // do the search again for debug purposes, printing out more information
+                    lowerBound = -0.5*grid.getDx(3);
+                    upperBound = 0.5*grid.getDx(3);
+                    iterCount = 0;
+                    do
+                    {
+                      b = 0.5*(upperBound + lowerBound);
+                      // Integration weight scale for this modified integral
+                      double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                      double integralResult = 0.0;
+                      double refCoord[2];
+                      
+                      for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                      {
+                        refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                        refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                        nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                        for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                        {
+                          idx[4] = iMu;
+                          distf.setPtr(sknPtr, idx);
+                          // Get the coordinates of cell center
+                          grid.setIndex(idx);
+                          grid.getCentroid(cellCentroid);
+                          // Compute distribution function at quadrature point
+                          double fAtPoint = 0.0;
+                          for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                            fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          std::cout << "fAtPoint = " << fAtPoint << std::endl;
+
+                          integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                            (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                        }
+                      }
+                      // integralResult will be more negative than exactResult if guess
+                      // is more "left" than true answer
+                      relError = (integralResult - exactResult)/exactResult;
+
+                      std::cout << "lower iter = " << iterCount << std::endl;
+                      std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                      std::cout << "relError = " << relError << std::endl;
+                      std::cout << "xm = " << b << std::endl;
+                      std::cout << "integralResult = " << integralResult << std::endl;
+                      std::cout << "exactResult = " << exactResult << std::endl;
+                      std::cout << "lowerBound = " << lowerBound << std::endl;
+                      std::cout << "upperBound = " << upperBound << std::endl;
+                      std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
+                      std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
+
+                      if (relError > 0)
+                        upperBound = b;
+                      else
+                        lowerBound = b;
+
+                      iterCount++;
+
+                    } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+                  }
 
                   // Store result in the appropriate 2d field
                   phiSLowerPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + b)*(cellCentroid[3] + b)/eV;
@@ -575,12 +692,19 @@ namespace Lucee
                   double lowerBound = -0.5*grid.getDx(3);
                   double upperBound = 0.5*grid.getDx(3);
                   // Gamma - Gamma_exact evaluated at bracketed values
+                  // Difference between flux contribution from v_c vs exact result for this cell
                   double fl = elcFluxAtIv-exactResult;
                   double fh = -exactResult;
+
+                  //std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                  //std::cout << "fl = " << fl << std::endl; 
+                  //std::cout << "fh = " << fh << std::endl; 
+                  //std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
 
                   // Ridders' Method (See Press 2007, page 453). Removed some of checks that
                   // the version in Numerical Recipes has because they appear to be unnecessary.
                   // Consider using Brent's method in the future (more complicated to implement).
+                  /*
                   for (int iter = 0; iter < 60; iter++)
                   {
                     double xm = 0.5*(lowerBound + upperBound);
@@ -590,7 +714,7 @@ namespace Lucee
                     // Integration weight scale for this modified integral
                     double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
                     double refCoord[2];
-                    
+
                     for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
                     {
                       refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
@@ -676,9 +800,122 @@ namespace Lucee
                       fl = fNew;
                     }
 
+                    std::cout << "upper iter = " << iter << std::endl;
+                    std::cout << "upper fl = " << fl << std::endl;
+                    std::cout << "upper lowerBound = " << lowerBound << std::endl;
+                    std::cout << "upper fh = " << fh << std::endl;
+                    std::cout << "upper upperBound = " << upperBound << std::endl;
+                    std::cout << "upper relError = " << relError << std::endl;
                     // check to see if we are at the last iteration
-                    if (iter == 59)
+                    if (iter > 20)
+                    {
                       foundAllVc = false;
+                    }
+                  }*/
+
+                  // This is a bisection search for the exact 'a', keeping 'b' fixed
+                  do
+                  {
+                    a = 0.5*(upperBound + lowerBound);
+                    // Integration weight scale for this modified integral
+                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                    double integralResult = 0.0;
+                    double refCoord[2];
+                    
+                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                    {
+                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                      {
+                        idx[4] = iMu;
+                        distf.setPtr(sknPtr, idx);
+                        // Get the coordinates of cell center
+                        grid.setIndex(idx);
+                        grid.getCentroid(cellCentroid);
+                        // Compute distribution function at quadrature point
+                        double fAtPoint = 0.0;
+                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+
+                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                      }
+                    }
+
+                    relError = (integralResult - exactResult)/exactResult;
+
+                    if (relError > 0)
+                      lowerBound = a;
+                    else
+                      upperBound = a;
+
+                    iterCount++;
+
+                  } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+
+                  if (iterCount == maxIter)
+                  {
+                    foundAllVc = false;
+                    // do the search again for debug purposes, printing out more information
+                    lowerBound = -0.5*grid.getDx(3);
+                    upperBound = 0.5*grid.getDx(3);
+                    iterCount = 0;
+
+                    do
+                    {
+                      a = 0.5*(upperBound + lowerBound);
+                      // Integration weight scale for this modified integral
+                      double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                      double integralResult = 0.0;
+                      double refCoord[2];
+                      
+                      for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                      {
+                        refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                        refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                        nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                        for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                        {
+                          idx[4] = iMu;
+                          distf.setPtr(sknPtr, idx);
+                          // Get the coordinates of cell center
+                          grid.setIndex(idx);
+                          grid.getCentroid(cellCentroid);
+                          // Compute distribution function at quadrature point
+                          double fAtPoint = 0.0;
+                          for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                            fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          std::cout << "fAtPoint = " << fAtPoint << std::endl;
+                          integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                            (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                        }
+                      }
+
+                      relError = (integralResult - exactResult)/exactResult;
+
+                      std::cout << "upper iter = " << iterCount << std::endl;
+                      std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                      std::cout << "relError = " << relError << std::endl;
+                      std::cout << "xm = " << a << std::endl;
+                      std::cout << "integralResult = " << integralResult << std::endl;
+                      std::cout << "exactResult = " << exactResult << std::endl;
+                      std::cout << "lowerBound = " << lowerBound << std::endl;
+                      std::cout << "upperBound = " << upperBound << std::endl;
+                      std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
+                      std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
+
+                      if (relError > 0)
+                        lowerBound = a;
+                      else
+                        upperBound = a;
+
+                      iterCount++;
+
+                    } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
                   }
 
                   // Store result in the appropriate 2d field

@@ -491,7 +491,6 @@ namespace Lucee
         Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
 // only update if we are on the correct ranks
-        //Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn); // causing problems for 5d ETG
         Lucee::Region<NDIM, int> defRgn = defRgnG;//.intersect(localRgn);
 
 // loop, modifying stiffness matrix
