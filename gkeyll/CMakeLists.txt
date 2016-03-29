@@ -98,11 +98,12 @@ if (APPLE)
 endif ()
 
 # Add in fortran libraries
-if (USE_STATIC_SYSLIBS)
-  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_STLIBS})
-else ()
-  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
-endif ()
+# This is unnecessary, at least on Edison
+#if (USE_STATIC_SYSLIBS)
+#  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_STLIBS})
+#else ()
+#  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
+#endif ()
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPICXX_COMPILER_WRAPPER)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${MPI_INCLUDE_DIRS})
@@ -164,23 +165,25 @@ set_target_properties(${LUCEE_STATIC} PROPERTIES
 )
 target_link_libraries(${LUCEE_STATIC} ${lucee_LIBRARIES})
 target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS})
-if (USE_STATIC_SYSLIBS)
-  message(STATUS "Using static system libraries: ${FC_SYS_STLIBS}")
-  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_STLIBS})
-# This gets the link line to end with -Wl,-Bstatic, so that subsequent
-# libraries linked by the Cray compiler wrappers are linked static.
-#  target_link_libraries(${LUCEE_STATIC} -Wl,-Bstatic)
-  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_START_STATIC ON)
-  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_END_STATIC ON)
-else ()
-  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_LIBS})
-  message(STATUS "Not using static system libraries: ${FC_SYS_LIBS}")
-  if (WIN32)
-  elseif (APPLE)
-  else ()
-    set_target_properties(${LUCEE_STATIC} PROPERTIES INSTALL_RPATH "\$ORIGIN:\$ORIGIN/../lib")
-  endif ()
-endif ()
+
+# This is unnecessary, at least on Edison
+#if (USE_STATIC_SYSLIBS)
+#  message(STATUS "Using static system libraries: ${FC_SYS_STLIBS}")
+#  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_STLIBS})
+## This gets the link line to end with -Wl,-Bstatic, so that subsequent
+## libraries linked by the Cray compiler wrappers are linked static.
+##  target_link_libraries(${LUCEE_STATIC} -Wl,-Bstatic)
+#  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_START_STATIC ON)
+#  set_target_properties(${LUCEE_STATIC} PROPERTIES LINK_SEARCH_END_STATIC ON)
+#else ()
+#  target_link_libraries(${LUCEE_STATIC} ${FC_SYS_LIBS})
+#  message(STATUS "Not using static system libraries: ${FC_SYS_LIBS}")
+#  if (WIN32)
+#  elseif (APPLE)
+#  else ()
+#    set_target_properties(${LUCEE_STATIC} PROPERTIES INSTALL_RPATH "\$ORIGIN:\$ORIGIN/../lib")
+#  endif ()
+#endif ()
 
 install(TARGETS ${LUCEE_STATIC}
   DESTINATION bin
