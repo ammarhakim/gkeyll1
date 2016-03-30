@@ -99,11 +99,11 @@ endif ()
 
 # Add in fortran libraries
 # This is unnecessary, at least on Edison
-#if (USE_STATIC_SYSLIBS)
-#  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_STLIBS})
-#else ()
-#  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
-#endif ()
+if (USE_STATIC_SYSLIBS)
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_STLIBS})
+else ()
+  set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} ${Fortran_IMPLICIT_LIBRARIES})
+endif ()
 
 if (ENABLE_PARALLEL AND MPI_INCLUDE_PATH AND NOT TX_HAVE_MPICXX_COMPILER_WRAPPER)
   set(FC_EXTERNAL_INCDIRS ${FC_EXTERNAL_INCDIRS} ${MPI_INCLUDE_DIRS})
