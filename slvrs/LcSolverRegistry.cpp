@@ -89,6 +89,7 @@
 #include <LcSetPhiAtBoundaryUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcStairSteppedBcUpdater.h>
+#include <LcRadialStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcTwentyMomentFluidSource.h>
@@ -141,6 +142,10 @@ namespace Lucee
       .append<StairSteppedBcUpdater<1> >()
       .append<StairSteppedBcUpdater<2> >()
       .append<StairSteppedBcUpdater<3> >()
+      
+      .append<RadialStairSteppedBcUpdater<1> >()
+      .append<RadialStairSteppedBcUpdater<2> >()
+      .append<RadialStairSteppedBcUpdater<3> >()
       
       // Probably used for SOL problem simulations
       .append<Lucee::BoltzmannPhiUpdater>()
