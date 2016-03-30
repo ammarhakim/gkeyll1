@@ -111,6 +111,7 @@ set(lcslvrs_SOURCES
   LcSetPhiAtBoundaryUpdater.cpp
   LcSolverRegistry.cpp
   LcStairSteppedBcUpdater.cpp
+  LcRadialStairSteppedBcUpdater.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
