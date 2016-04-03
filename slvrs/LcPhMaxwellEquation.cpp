@@ -105,7 +105,7 @@ namespace Lucee
     f[0] = chi_e*lightSpeed2*q[PHI];
     f[1] = lightSpeed2*q[BZ];
     f[2] = -lightSpeed2*q[BY];
-    f[3] = chi_m*q[PHI];
+    f[3] = chi_m*q[PSI];
     f[4] = -q[EZ];
     f[5] = q[EY];
     f[6] = chi_e*q[EX];
