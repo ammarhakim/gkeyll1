@@ -193,7 +193,7 @@ namespace Lucee
           A.setPtr(Aptrm, idxm);
           for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
                bcItr != bcList.end(); ++bcItr)
-            (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptrm);
+            (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptr, Aptrm);
         }
       }
     }
