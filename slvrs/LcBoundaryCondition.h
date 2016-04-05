@@ -73,18 +73,22 @@ namespace Lucee
 /** 
  * Apply boundary conditions. The variable 'qin' represents data in
  * the skin cell (first/last interior cell) while 'qbc' represents
- * data in the ghost cells.
+ * data in the ghost cells. Also passed is the data in the cell "left"
+ * of the skin cell, to allow for linear extrapolation BCs if
+ * needed. Usually, this can be ignored.
  *
  * @param tm Time at which BC should be applied.
  * @param loc Coordinate at which BC is applied.
  * @param idx Grid index at which BC is applied.
  * @param c Coordinate system to use.
+ * @param qin1 Data in cell "left" of skin cell.
  * @param qin Data in skin cell.
  * @param qbc Data in ghost cell.
  */
       virtual void applyBc(double tm, const double loc[3], const int *idx,
         const Lucee::RectCoordSys& c, 
-        const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc) = 0;
+        const Lucee::ConstFieldPtr<double>& qin1, const Lucee::ConstFieldPtr<double>& qin,
+        Lucee::FieldPtr<double>& qbc) = 0;
 
     protected:
 /**
