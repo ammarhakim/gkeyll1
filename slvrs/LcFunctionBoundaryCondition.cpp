@@ -32,7 +32,8 @@ namespace Lucee
 
   void
   FunctionBoundaryCondition::applyBc(double tm, const double loc[3], const int *idx,
-    const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
+    const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin1,
+    const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 // push function object on stack

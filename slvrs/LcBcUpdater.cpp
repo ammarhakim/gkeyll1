@@ -83,7 +83,8 @@ namespace Lucee
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
 // get array
       Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(n);
-      Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr();
+      Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr(); // skin
+      Lucee::ConstFieldPtr<double> iPtr1 = A.createConstPtr(); // "left" of skin
       Lucee::FieldPtr<double> gPtr = A.createPtr();
 
 // create a region to represent ghost layer
@@ -121,13 +122,19 @@ namespace Lucee
         else
           idx[dir] = A.getUpper(dir)-1;
         A.setPtr(iPtr, idx);
+// set pointer to "left" of skin cell
+        if (edge == LC_LOWER_EDGE)
+          idx[dir] = A.getLower(dir)+1;
+        else
+          idx[dir] = A.getUpper(dir)-2;
+        A.setPtr(iPtr1, idx);
 // apply boundary conditions
         for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
              bcItr != bcList.end(); ++bcItr)
         {
           (*bcItr)->setDir(dir);
           (*bcItr)->setEdge(edge);
-          (*bcItr)->applyBc(t, xc, idxG, coordSys, iPtr, gPtr);
+          (*bcItr)->applyBc(t, xc, idxG, coordSys, iPtr1, iPtr, gPtr);
         }
       }
     }

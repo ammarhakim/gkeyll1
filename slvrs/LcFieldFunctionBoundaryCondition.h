@@ -44,7 +44,7 @@ namespace Lucee
  * @param qbc Data in ghost cell.
  */
       void applyBc(double tm, const double loc[3], const int *idx,
-        const Lucee::RectCoordSys& c, 
+        const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin1,
         const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc);
 
     private:

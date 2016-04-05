@@ -38,7 +38,8 @@ namespace Lucee
 
   void
   CopyBoundaryCondition::applyBc(double tm, const double loc[3], const int *idx,
-    const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
+    const Lucee::RectCoordSys& c, const Lucee::ConstFieldPtr<double>& qin1,
+    const Lucee::ConstFieldPtr<double>& qin, Lucee::FieldPtr<double>& qbc)
   {
 // just copy data over
     for (unsigned i=0; i<this->numComponents(); ++i)
