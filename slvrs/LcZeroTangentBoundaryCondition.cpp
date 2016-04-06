@@ -25,6 +25,9 @@ namespace Lucee
     if (this->numComponents() != 3)
       throw Lucee::Except(
         "ZeroTangentBoundaryCondition::readInput: Zero-tangent BCs can be applied only to 3-component vector");
+    useExtrapolation = false;
+    if (tbl.hasBool("useExtrapolation"))
+      useExtrapolation = tbl.getBool("useExtrapolation");
   }
 
   void
@@ -34,8 +37,13 @@ namespace Lucee
   {
 // rotate vector to local coordinate system
     double vel[3], normVel[3];
-    for (unsigned i=0; i<3; ++i)
-      vel[i] = qin[this->component(i)];
+    if (useExtrapolation)
+      for (unsigned i=0; i<3; ++i)
+        vel[i] = 1.5*qin[this->component(i)]-0.5*qin1[this->component(i)];
+    else
+      for (unsigned i=0; i<3; ++i)
+        vel[i] = qin[this->component(i)];
+
     c.rotateVecToLocal(vel, normVel);
 
 // flip sign of tangent components
