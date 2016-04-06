@@ -64,6 +64,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Flag to indicate if end node are to be extrapolated */
+      bool extrapolateNodes;
   };
 }
 
