@@ -35,6 +35,7 @@
 #include <LcEnergyFromStreamAndVortUpdater.h>
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
+#include <LcFiniteVolumeToLinearDGUpdater.h>
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
@@ -139,6 +140,10 @@ namespace Lucee
       .append<Lucee::EnstrophyUpdater<1> >()
       .append<Lucee::EnstrophyUpdater<2> >()
       .append<Lucee::EnstrophyUpdater<3> >()
+
+      .append<Lucee::FiniteVolumeToLinearDGUpdater<1> >()
+      .append<Lucee::FiniteVolumeToLinearDGUpdater<2> >()
+      .append<Lucee::FiniteVolumeToLinearDGUpdater<3> >()
 
       .append<Lucee::InitNodesFromMatrixMarketUpdater<1> >()
       .append<Lucee::InitNodesFromMatrixMarketUpdater<2> >()
