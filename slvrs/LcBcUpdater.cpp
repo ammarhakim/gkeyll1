@@ -116,18 +116,21 @@ namespace Lucee
         grid.getCentroid(xc);
 
         A.setPtr(gPtr, idx);
-// set pointer to skin cell
-        if (edge == LC_LOWER_EDGE)
-          idx[dir] = A.getLower(dir);
-        else
-          idx[dir] = A.getUpper(dir)-1;
-        A.setPtr(iPtr, idx);
+
 // set pointer to "left" of skin cell
         if (edge == LC_LOWER_EDGE)
           idx[dir] = A.getLower(dir)+1;
         else
           idx[dir] = A.getUpper(dir)-2;
         A.setPtr(iPtr1, idx);
+
+// set pointer to skin cell
+        if (edge == LC_LOWER_EDGE)
+          idx[dir] = A.getLower(dir);
+        else
+          idx[dir] = A.getUpper(dir)-1;
+        A.setPtr(iPtr, idx);
+        
 // apply boundary conditions
         for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
              bcItr != bcList.end(); ++bcItr)
