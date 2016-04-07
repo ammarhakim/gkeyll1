@@ -87,6 +87,7 @@
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
 #include <LcSOLPositivityUpdater.h>
+#include <LcSOLTemperatureCalc.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -176,6 +177,7 @@ namespace Lucee
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLIonDensityInitialization>()
       .append<Lucee::SOLPositivityUpdater>()
+      .append<Lucee::SOLTemperatureCalc>()
 
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()

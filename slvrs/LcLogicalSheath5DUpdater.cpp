@@ -252,8 +252,8 @@ namespace Lucee
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
 
-            if (totalIonFluxAtNode > 0.0)
-              totalIonFluxAtNode = 0.0;
+            //if (totalIonFluxAtNode > 0.0)
+            //  totalIonFluxAtNode = 0.0;
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
@@ -297,6 +297,8 @@ namespace Lucee
                   // exactResult is the the flux contribution integrated from lower edge of cell to v_c, a negative value
                   double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; 
                   double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
+                  if (excessFraction < 0.0)
+                    std::cout << "excessFraction negative" << std::endl;
                   // Search for the cutoff velocity ('b' here)
                   double a = -0.5*grid.getDx(3);
                   double b;
@@ -423,57 +425,10 @@ namespace Lucee
                     }
                   }*/
 
-                  do
+                  //if (exactResult == 0.0)
+                  //  b = -0.5*grid.getDx(3);
+                  //else
                   {
-                    b = 0.5*(upperBound + lowerBound);
-                    // Integration weight scale for this modified integral
-                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
-                    double integralResult = 0.0;
-                    double refCoord[2];
-                    
-                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
-                    {
-                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
-                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
-                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
-
-                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
-                      {
-                        idx[4] = iMu;
-                        distf.setPtr(sknPtr, idx);
-                        // Get the coordinates of cell center
-                        grid.setIndex(idx);
-                        grid.getCentroid(cellCentroid);
-                        // Compute distribution function at quadrature point
-                        double fAtPoint = 0.0;
-                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-
-                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
-                      }
-                    }
-
-                    // integralResult will be more negative than exactResult if guess
-                    // is more "left" than true answer
-                    relError = (integralResult - exactResult)/exactResult;
-
-                    if (relError > 0)
-                      upperBound = b;
-                    else
-                      lowerBound = b;
-
-                    iterCount++;
-
-                  } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
-
-                  if (iterCount == maxIter)
-                  {
-                    foundAllVc = false;
-                    // do the search again for debug purposes, printing out more information
-                    lowerBound = -0.5*grid.getDx(3);
-                    upperBound = 0.5*grid.getDx(3);
-                    iterCount = 0;
                     do
                     {
                       b = 0.5*(upperBound + lowerBound);
@@ -499,26 +454,15 @@ namespace Lucee
                           double fAtPoint = 0.0;
                           for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                             fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                          std::cout << "fAtPoint = " << fAtPoint << std::endl;
 
                           integralResult += weightScale*gaussSurfWeights(gaussIndex)*
                             (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
                         }
                       }
+
                       // integralResult will be more negative than exactResult if guess
                       // is more "left" than true answer
                       relError = (integralResult - exactResult)/exactResult;
-
-                      std::cout << "lower iter = " << iterCount << std::endl;
-                      std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
-                      std::cout << "relError = " << relError << std::endl;
-                      std::cout << "xm = " << b << std::endl;
-                      std::cout << "integralResult = " << integralResult << std::endl;
-                      std::cout << "exactResult = " << exactResult << std::endl;
-                      std::cout << "lowerBound = " << lowerBound << std::endl;
-                      std::cout << "upperBound = " << upperBound << std::endl;
-                      std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
-                      std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
 
                       if (relError > 0)
                         upperBound = b;
@@ -528,6 +472,69 @@ namespace Lucee
                       iterCount++;
 
                     } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+
+                    if (iterCount == maxIter)
+                    {
+                      foundAllVc = false;
+                      // do the search again for debug purposes, printing out more information
+                      lowerBound = -0.5*grid.getDx(3);
+                      upperBound = 0.5*grid.getDx(3);
+                      iterCount = 0;
+                      do
+                      {
+                        b = 0.5*(upperBound + lowerBound);
+                        // Integration weight scale for this modified integral
+                        double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                        double integralResult = 0.0;
+                        double refCoord[2];
+                        
+                        for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                        {
+                          refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                          refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                          nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                          for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                          {
+                            idx[4] = iMu;
+                            distf.setPtr(sknPtr, idx);
+                            // Get the coordinates of cell center
+                            grid.setIndex(idx);
+                            grid.getCentroid(cellCentroid);
+                            // Compute distribution function at quadrature point
+                            double fAtPoint = 0.0;
+                            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                              fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                            std::cout << "fAtPoint = " << fAtPoint << std::endl;
+
+                            integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                              (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          }
+                        }
+                        // integralResult will be more negative than exactResult if guess
+                        // is more "left" than true answer
+                        relError = (integralResult - exactResult)/exactResult;
+
+                        std::cout << "lower iter = " << iterCount << std::endl;
+                        std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                        std::cout << "relError = " << relError << std::endl;
+                        std::cout << "xm = " << b << std::endl;
+                        std::cout << "integralResult = " << integralResult << std::endl;
+                        std::cout << "exactResult = " << exactResult << std::endl;
+                        std::cout << "lowerBound = " << lowerBound << std::endl;
+                        std::cout << "upperBound = " << upperBound << std::endl;
+                        std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
+                        std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
+
+                        if (relError > 0)
+                          upperBound = b;
+                        else
+                          lowerBound = b;
+
+                        iterCount++;
+
+                      } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+                    }
                   }
 
                   // Store result in the appropriate 2d field
@@ -682,6 +689,8 @@ namespace Lucee
                   double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; // the flux contribution up to v_c
                   // Figure out fraction of cell is excess, above what is needed for equivalent
                   double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
+                  if (excessFraction < 0.0)
+                    std::cout << "excessFraction negative" << std::endl;
                   // Search for the cutoff velocity ('a' here)
                   double a = -0.5*grid.getDx(3);
                   double b = 0.5*grid.getDx(3);
@@ -814,56 +823,12 @@ namespace Lucee
                   }*/
 
                   // This is a bisection search for the exact 'a', keeping 'b' fixed
-                  do
+                  //if (exactResult == 0.0)
+                  //{
+                  //  a = 0.5*grid.getDx(3);
+                  //}
+                  //else
                   {
-                    a = 0.5*(upperBound + lowerBound);
-                    // Integration weight scale for this modified integral
-                    double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
-                    double integralResult = 0.0;
-                    double refCoord[2];
-                    
-                    for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
-                    {
-                      refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
-                      refCoord[1] = gaussSurfCoords(gaussIndex,1);
-                      nodalBasis2d->evalBasis(refCoord, basisAtPoint);
-
-                      for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
-                      {
-                        idx[4] = iMu;
-                        distf.setPtr(sknPtr, idx);
-                        // Get the coordinates of cell center
-                        grid.setIndex(idx);
-                        grid.getCentroid(cellCentroid);
-                        // Compute distribution function at quadrature point
-                        double fAtPoint = 0.0;
-                        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                          fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-
-                        integralResult += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
-                      }
-                    }
-
-                    relError = (integralResult - exactResult)/exactResult;
-
-                    if (relError > 0)
-                      lowerBound = a;
-                    else
-                      upperBound = a;
-
-                    iterCount++;
-
-                  } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
-
-                  if (iterCount == maxIter)
-                  {
-                    foundAllVc = false;
-                    // do the search again for debug purposes, printing out more information
-                    lowerBound = -0.5*grid.getDx(3);
-                    upperBound = 0.5*grid.getDx(3);
-                    iterCount = 0;
-
                     do
                     {
                       a = 0.5*(upperBound + lowerBound);
@@ -889,24 +854,13 @@ namespace Lucee
                           double fAtPoint = 0.0;
                           for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                             fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                          std::cout << "fAtPoint = " << fAtPoint << std::endl;
+
                           integralResult += weightScale*gaussSurfWeights(gaussIndex)*
                             (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
                         }
                       }
 
                       relError = (integralResult - exactResult)/exactResult;
-
-                      std::cout << "upper iter = " << iterCount << std::endl;
-                      std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
-                      std::cout << "relError = " << relError << std::endl;
-                      std::cout << "xm = " << a << std::endl;
-                      std::cout << "integralResult = " << integralResult << std::endl;
-                      std::cout << "exactResult = " << exactResult << std::endl;
-                      std::cout << "lowerBound = " << lowerBound << std::endl;
-                      std::cout << "upperBound = " << upperBound << std::endl;
-                      std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
-                      std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
 
                       if (relError > 0)
                         lowerBound = a;
@@ -916,6 +870,68 @@ namespace Lucee
                       iterCount++;
 
                     } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+
+                    if (iterCount == maxIter)
+                    {
+                      foundAllVc = false;
+                      // do the search again for debug purposes, printing out more information
+                      lowerBound = -0.5*grid.getDx(3);
+                      upperBound = 0.5*grid.getDx(3);
+                      iterCount = 0;
+
+                      do
+                      {
+                        a = 0.5*(upperBound + lowerBound);
+                        // Integration weight scale for this modified integral
+                        double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                        double integralResult = 0.0;
+                        double refCoord[2];
+                        
+                        for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
+                        {
+                          refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                          refCoord[1] = gaussSurfCoords(gaussIndex,1);
+                          nodalBasis2d->evalBasis(refCoord, basisAtPoint);
+
+                          for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+                          {
+                            idx[4] = iMu;
+                            distf.setPtr(sknPtr, idx);
+                            // Get the coordinates of cell center
+                            grid.setIndex(idx);
+                            grid.getCentroid(cellCentroid);
+                            // Compute distribution function at quadrature point
+                            double fAtPoint = 0.0;
+                            for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                              fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                            std::cout << "fAtPoint = " << fAtPoint << std::endl;
+                            integralResult += weightScale*gaussSurfWeights(gaussIndex)*
+                              (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          }
+                        }
+
+                        relError = (integralResult - exactResult)/exactResult;
+
+                        std::cout << "upper iter = " << iterCount << std::endl;
+                        std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
+                        std::cout << "relError = " << relError << std::endl;
+                        std::cout << "xm = " << a << std::endl;
+                        std::cout << "integralResult = " << integralResult << std::endl;
+                        std::cout << "exactResult = " << exactResult << std::endl;
+                        std::cout << "lowerBound = " << lowerBound << std::endl;
+                        std::cout << "upperBound = " << upperBound << std::endl;
+                        std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
+                        std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl << std::endl;
+
+                        if (relError > 0)
+                          lowerBound = a;
+                        else
+                          upperBound = a;
+
+                        iterCount++;
+
+                      } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
+                    }
                   }
 
                   // Store result in the appropriate 2d field
