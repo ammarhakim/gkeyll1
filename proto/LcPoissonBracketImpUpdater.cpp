@@ -503,37 +503,41 @@ namespace Lucee
         if (maxCflaInCol > cfla)
         {
           cfla = maxCflaInCol;
+          // Don't break here as soon as condition is met in case
+          // a more restrictive point exists but has not been iterated
           if (cfla > cflm)
             needToRetakeStep = true;
         }
       }
       vol_loop3 += (double) (clock() - tm_3_s)/CLOCKS_PER_SEC;
-
-      // Get a vector of f at quad points
-      for (int i = 0; i < nlocal; i++)
-        fVec(i) = aCurrPtr[i];
-      // Compute distribution function at quadrature points cwise multiplied by quadrature weights
-      fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
-
-      aNew.setPtr(aNewPtr, idx);
-      clock_t tm_4_s = clock();
-      for (int d = 0;  d < updateDirs.size(); d++)
-      {
-        int dir = updateDirs[d];
-        resultVector = bigStoredVolMatrices[cellIndex][d]*alpha.row(dir).transpose().cwiseProduct(fAtQuad);
-
-        for (int i = 0; i < nlocal; i++)
-          aNewPtr[i] += resultVector(i);
-      }
-      vol_loop4 += (double) (clock() - tm_4_s)/CLOCKS_PER_SEC;
-
-      clock_t tm_totalVolTime_e = clock();
-      totalVolTime += (double) (tm_totalVolTime_e - tm_totalVolTime_s)/CLOCKS_PER_SEC;
-      // Loop over surfaces on which integrals need to be calculated
-      // Only do this if cfl limit has not been violated yet
-      clock_t tm_totalSurfTime_s = clock();
+ 
+      // Only compute updates if CFL limit not violated already
       if (needToRetakeStep == false)
       {
+        // Get a vector of f at quad points
+        for (int i = 0; i < nlocal; i++)
+          fVec(i) = aCurrPtr[i];
+        // Compute distribution function at quadrature points cwise multiplied by quadrature weights
+        fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
+
+        aNew.setPtr(aNewPtr, idx);
+        clock_t tm_4_s = clock();
+        for (int d = 0;  d < updateDirs.size(); d++)
+        {
+          int dir = updateDirs[d];
+          resultVector = bigStoredVolMatrices[cellIndex][d]*alpha.row(dir).transpose().cwiseProduct(fAtQuad);
+
+          for (int i = 0; i < nlocal; i++)
+            aNewPtr[i] += resultVector(i);
+        }
+        vol_loop4 += (double) (clock() - tm_4_s)/CLOCKS_PER_SEC;
+
+        clock_t tm_totalVolTime_e = clock();
+        totalVolTime += (double) (tm_totalVolTime_e - tm_totalVolTime_s)/CLOCKS_PER_SEC;
+        // Loop over surfaces on which integrals need to be calculated
+        // Only do this if cfl limit has not been violated yet
+        clock_t tm_totalSurfTime_s = clock();
+
         for (int d = 0; d < updateDirs.size(); d++)
         {
           int dir = updateDirs[d];
@@ -670,9 +674,10 @@ namespace Lucee
           }
           surf_loop4 += (double) (clock()-tm_4_s)/CLOCKS_PER_SEC;
         }
+
+        clock_t tm_totalSurfTime_e = clock();
+        totalSurfTime += (double) (tm_totalSurfTime_e - tm_totalSurfTime_s)/CLOCKS_PER_SEC;
       }
-      clock_t tm_totalSurfTime_e = clock();
-      totalSurfTime += (double) (tm_totalSurfTime_e - tm_totalSurfTime_s)/CLOCKS_PER_SEC;
     }
     
     // Check to see if we need to retake time step

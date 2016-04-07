@@ -158,7 +158,7 @@ namespace Lucee
           distfVector(i) = 0.0;
       }
 
-      // Compute modified density
+      // Compute modified density. This will be greater than originalNum
       double modifiedNum = distfVector.dot(densityMatrix*jacobianVector);
 
       // Write modified values to distfOut
