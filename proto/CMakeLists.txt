@@ -44,6 +44,7 @@ set (proto_SOURCES
   LcEnergyFromStreamFunctionUpdater.cpp
   LcEnstrophyUpdater.cpp
   LcFiniteVolumeToLinearDGUpdater.cpp
+  LcGradLinearDGToFiniteVolumeUpdater.cpp
   LcInitNodesFromMatrixMarketUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
