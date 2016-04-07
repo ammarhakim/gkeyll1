@@ -45,6 +45,12 @@ namespace Lucee
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
       throw Lucee::Except("SOLUpperXPotentialBcUpdater::readInput: Must specify 2D element to use using 'basis'");
+
+    // by default, only set potential to a constant on the upper x edge
+    // here is an option to also set potential to a constant lower x edge
+    if (tbl.hasBool("applyLowerEdge"))
+      applyLowerEdge = tbl.getBool("applyLowerEdge");
+    else applyLowerEdge = false;
   }
 
   void
@@ -67,33 +73,46 @@ namespace Lucee
     int nSurfQuad2d = nodalBasis2d->getNumSurfGaussNodes();
     
     std::vector<double> surfWeightsUpper2d(nSurfQuad2d);
+    std::vector<double> surfWeightsLower2d(nSurfQuad2d);
     Lucee::Matrix<double> tempSurfQuad2d(nSurfQuad2d, nlocal2d);
     Lucee::Matrix<double> tempSurfCoords2d(nSurfQuad2d, 3);
 
     nodalBasis2d->getSurfUpperGaussQuadData(0, tempSurfQuad2d, tempSurfCoords2d, surfWeightsUpper2d);
     Eigen::MatrixXd surfInterpUpper2d(nSurfQuad2d, nlocal2d);
     copyLuceeToEigen(tempSurfQuad2d, surfInterpUpper2d);
+
+    nodalBasis2d->getSurfLowerGaussQuadData(0, tempSurfQuad2d, tempSurfCoords2d, surfWeightsLower2d);
+    Eigen::MatrixXd surfInterpLower2d(nSurfQuad2d, nlocal2d);
+    copyLuceeToEigen(tempSurfQuad2d, surfInterpLower2d);
     
     // when multiplied by the solution in an element, gives
     // potential integrated on lower and upper sufaces in x
-    integrationMatrix = Eigen::VectorXd(nlocal2d);
+    integrationMatrixUpper = Eigen::VectorXd(nlocal2d);
+    integrationMatrixLower = Eigen::VectorXd(nlocal2d);
 
     for (int i = 0; i < nlocal2d; i++)
     {
       // Each row of interpolation matrix is a different interpolation point
       // Each column is a different basis function
-
-      double basisIntegral = 0.0;
-      // Calculate upper integral
+      double basisIntegralUpper = 0.0;
+      double basisIntegralLower = 0.0;
+      // Calculate integral on lower and upper surfaces
       for (int quadIndex = 0; quadIndex < surfInterpUpper2d.rows(); quadIndex++)
-        basisIntegral += surfWeightsUpper2d[quadIndex]*surfInterpUpper2d(quadIndex, i);
+      {
+        basisIntegralUpper += surfWeightsUpper2d[quadIndex]*surfInterpUpper2d(quadIndex, i);
+        basisIntegralLower += surfWeightsLower2d[quadIndex]*surfInterpLower2d(quadIndex, i);
+      }
 
       // Store result
-      integrationMatrix(i) = basisIntegral;
+      integrationMatrixUpper(i) = basisIntegralUpper;
+      integrationMatrixLower(i) = basisIntegralLower;
     }
 
     upperEdgeNodeNums = std::vector<int>(nodalBasis2d->getNumSurfUpperNodes(0));
     nodalBasis2d->getSurfUpperNodeNums(0, upperEdgeNodeNums);
+
+    lowerEdgeNodeNums = std::vector<int>(nodalBasis2d->getNumSurfLowerNodes(0));
+    nodalBasis2d->getSurfLowerNodeNums(0, lowerEdgeNodeNums);
   }
 
   Lucee::UpdaterStatus
@@ -126,7 +145,7 @@ namespace Lucee
     Lucee::RowMajorSequencer<2> seq(localRgn);
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
 
-    double localInt = 0.0;
+    double localIntUpper = 0.0;
 
     // Calculate the average value of potential on upper x surface
     while(seq.step())
@@ -142,17 +161,17 @@ namespace Lucee
         for (int i = 0; i < nlocal2d; i++)
           phiAvgVec(i) = phiAvgPtr[i];
 
-        localInt += phiAvgVec.dot(integrationMatrix);
+        localIntUpper += phiAvgVec.dot(integrationMatrixUpper);
       }
     }
 
-    double totalInt = localInt;
+    double totalIntUpper = localIntUpper;
     // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = this->getComm();
     // Every processor has a copy of the average potential
-    comm->allreduce(1, &localInt, &totalInt, TX_SUM);
+    comm->allreduce(1, &localIntUpper, &totalIntUpper, TX_SUM);
 
-    totalInt = totalInt / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
+    totalIntUpper = totalIntUpper / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
 
     seq.reset();
 
@@ -168,15 +187,73 @@ namespace Lucee
 
         for (int nodeIndex = 0; nodeIndex < upperEdgeNodeNums.size(); nodeIndex++)
         {
-          phiLowerPtr[upperEdgeNodeNums[nodeIndex]] = totalInt;
-          phiUpperPtr[upperEdgeNodeNums[nodeIndex]] = totalInt;
+          phiLowerPtr[upperEdgeNodeNums[nodeIndex]] = totalIntUpper;
+          phiUpperPtr[upperEdgeNodeNums[nodeIndex]] = totalIntUpper;
         }
       }
     }
 
-    std::vector<double> writeVal(1);
-    writeVal[0] = totalInt;
-    avgPhiAtEdge.appendData(t, writeVal);
+    // Do the same thing on the lower edge if needed
+    if (applyLowerEdge == true)
+    {
+      double localIntLower = 0.0;
+      // Calculate the average value of potential on lower x surface
+      seq.reset();
+      while(seq.step())
+      {
+        seq.fillWithIndex(idx);
+        grid.setIndex(idx);
+
+        if ( idx[0] == globalRgn.getLower(0) )
+        {
+          phiAvgIn.setPtr(phiAvgPtr, idx);
+
+          Eigen::VectorXd phiAvgVec(nlocal2d);
+          for (int i = 0; i < nlocal2d; i++)
+            phiAvgVec(i) = phiAvgPtr[i];
+
+          localIntLower += phiAvgVec.dot(integrationMatrixLower);
+        }
+      }
+
+      double totalIntLower = localIntLower;
+      // Every processor has a copy of the average potential
+      comm->allreduce(1, &localIntLower, &totalIntLower, TX_SUM);
+
+      totalIntLower = totalIntLower / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
+
+      seq.reset();
+
+      // Only replace potential with average potential if it is an upper surface node
+      while(seq.step())
+      {
+        seq.fillWithIndex(idx);
+
+        if ( idx[0] == globalRgn.getLower(0) )
+        {
+          phiLowerOut.setPtr(phiLowerPtr, idx);
+          phiUpperOut.setPtr(phiUpperPtr, idx);
+
+          for (int nodeIndex = 0; nodeIndex < lowerEdgeNodeNums.size(); nodeIndex++)
+          {
+            phiLowerPtr[lowerEdgeNodeNums[nodeIndex]] = totalIntLower;
+            phiUpperPtr[lowerEdgeNodeNums[nodeIndex]] = totalIntLower;
+          }
+        }
+      }
+
+      std::vector<double> writeVal(2);
+      writeVal[0] = totalIntUpper;
+      writeVal[1] = totalIntLower;
+      avgPhiAtEdge.appendData(t, writeVal);
+    }
+    else
+    {
+      // just write a single value
+      std::vector<double> writeVal(1);
+      writeVal[0] = totalIntUpper;
+      avgPhiAtEdge.appendData(t, writeVal);
+    }
 
     // Average boundary nodes that are not on corners
     seq.reset();
@@ -187,8 +264,8 @@ namespace Lucee
     while(seq.step())
     {
       seq.fillWithIndex(idx);
-      // Average lower 0 surface nodes
-      if (idx[0] == globalRgn.getLower(0) && idx[1] < globalRgn.getUpper(1)-1)
+      // Average lower 0 surface nodes only if applyLowerEdge == false
+      if ((applyLowerEdge == false) && (idx[0] == globalRgn.getLower(0) && idx[1] < globalRgn.getUpper(1)-1 ))
       {
         if(idx[1] == localRgn.getLower(1) && localRgn.getLower(1) != globalRgn.getLower(1))
         {
@@ -206,6 +283,7 @@ namespace Lucee
           phiUpperPtr[2] = avgVal;
           phiUpperPtr_r[0] = avgVal;
         }
+        // Average upper left node of this cell with bottom left node of the cell above it
         phiLowerOut.setPtr(phiLowerPtr, idx);
         phiLowerOut.setPtr(phiLowerPtr_r, idx[0], idx[1]+1);
         double avgVal = 0.5*(phiLowerPtr[2] + phiLowerPtr_r[0]);
@@ -237,6 +315,7 @@ namespace Lucee
           phiUpperPtr[1] = avgVal;
           phiUpperPtr_r[0] = avgVal;
         }
+        // Average bottom right node with bottom left node of adjacent cell
         phiLowerOut.setPtr(phiLowerPtr, idx);
         phiLowerOut.setPtr(phiLowerPtr_r, idx[0]+1, idx[1]);
         double avgVal = 0.5*(phiLowerPtr[1] + phiLowerPtr_r[0]);
@@ -268,6 +347,7 @@ namespace Lucee
           phiUpperPtr[3] = avgVal;
           phiUpperPtr_r[2] = avgVal;
         }
+        // Average upper right node with upper left node of adjacent cell
         phiLowerOut.setPtr(phiLowerPtr, idx);
         phiLowerOut.setPtr(phiLowerPtr_r, idx[0]+1, idx[1]);
         double avgVal = 0.5*(phiLowerPtr[3] + phiLowerPtr_r[2]);

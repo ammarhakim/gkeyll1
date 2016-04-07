@@ -46,6 +46,12 @@ namespace Lucee
       nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis");
     else
       throw Lucee::Except("SOLSetPotentialAtBoundary::readInput: Must specify 3D element to use using 'basis'");
+
+    // by default, only set potential to a constant on the upper x edge
+    // here is an option to also set potential to a constant lower x edge
+    if (tbl.hasBool("applyLowerEdge"))
+      applyLowerEdge = tbl.getBool("applyLowerEdge");
+    else applyLowerEdge = false;
   }
 
   void
@@ -88,7 +94,7 @@ namespace Lucee
 
     // Get value from phiXUpperIn
     std::vector<double> phiXUpperVec = phiXUpperIn.getLastInsertedData();
-    double phiXUpperVal = phiXUpperVec[0];
+    //double phiXUpperVal = phiXUpperVec[0];
 
     // Loop over every cell in the local region
     // Only set a value if it is on a Dirchlet BC surface
@@ -105,7 +111,16 @@ namespace Lucee
         nodalBasis3d->getSurfUpperNodeNums(0, nodeNums);
 
         for (int i = 0; i < nodeNums.size(); i++)
-          phi3dOutPtr[nodeNums[i]] = phiXUpperVal;
+          phi3dOutPtr[nodeNums[i]] = phiXUpperVec[0];
+      }
+
+      if (applyLowerEdge == true && idx[0] == globalRgn.getLower(0))
+      {
+        std::vector<int> nodeNums(nodalBasis3d->getNumSurfLowerNodes(0));
+        nodalBasis3d->getSurfLowerNodeNums(0, nodeNums);
+
+        for (int i = 0; i < nodeNums.size(); i++)
+          phi3dOutPtr[nodeNums[i]] = phiXUpperVec[1];
       }
 
       // Set value on lower 2 surface to phiZLower values

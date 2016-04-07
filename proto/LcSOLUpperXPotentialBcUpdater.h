@@ -73,9 +73,15 @@ namespace Lucee
 /** Pointer to 2D nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** When multiplied with vector of solution in a cell, gives y-integrated value on upper x surface */
-      Eigen::VectorXd integrationMatrix;
-/** Keeps track of nodes to write data to on upper surface in z */
+      Eigen::VectorXd integrationMatrixUpper;
+/** When multiplied with vector of solution in a cell, gives y-integrated value on lower x surface */
+      Eigen::VectorXd integrationMatrixLower;
+/** Keeps track of nodes to write data to on upper surface in x */
       std::vector<int> upperEdgeNodeNums;
+/** Keeps track of nodes to write data to on lower surface in x */
+      std::vector<int> lowerEdgeNodeNums;
+/** Flag indicating whether or not to apply the same bc to lower x edge */
+      bool applyLowerEdge;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

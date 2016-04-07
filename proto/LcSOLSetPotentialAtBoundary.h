@@ -72,6 +72,8 @@ namespace Lucee
     private:
 /** Pointer to 3D nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Flag indicating whether or not to apply the same bc to lower x edge */
+      bool applyLowerEdge;
   };
 }
 
