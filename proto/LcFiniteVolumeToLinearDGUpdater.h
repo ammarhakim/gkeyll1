@@ -64,6 +64,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Component to copy */
+      unsigned component;
 /** Flag to indicate if end node are to be extrapolated */
       bool extrapolateNodes;
   };
