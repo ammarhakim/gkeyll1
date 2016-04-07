@@ -32,10 +32,18 @@ ENDIF (APPLE)
 
 # Create test executables
 
-if (ENABLE_PARALLEL)
-  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${MPI_STLIBS} ${Z_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES})
+if (USE_STATIC_SYSLIBS)
+  set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_STLIBS} ${Fortran_IMPLICIT_STLIBS})
 else ()
   set (Hdf5_Mpi_LIBRARIES ${TxBase_LIBRARIES} ${Hdf5_LIBRARIES} ${Fortran_IMPLICIT_LIBRARIES})
+endif ()
+
+if (ENABLE_PARALLEL)
+  if (USE_STATIC_SYSLIBS)
+    set (Hdf5_Mpi_LIBRARIES ${Hdf5_Mpi_LIBRARIES} ${MPI_STLIBS} ${Z_STLIBS})
+  else ()
+    set (Hdf5_Mpi_LIBRARIES ${Hdf5_Mpi_LIBRARIES} ${MPI_LIBRARIES} ${Z_LIBRARIES})
+  endif ()
 endif ()
 
 add_executable(lcarray lcarray.cxx)
@@ -131,7 +139,7 @@ target_link_libraries(lcgridode lcslvrs lcdatastructs lcgrids lclib lcloki ${Lua
 
 if (FFTW3_FOUND)
   add_executable(lcfftwtest lcfftwtest.cxx)
-  target_link_libraries(lcfftwtest ${Fftw3_LIBRARIES} ${Hdf5_Mpi_LIBRARIES})
+  target_link_libraries(lcfftwtest ${Fftw3_STLIBS} ${Hdf5_Mpi_LIBRARIES})
 endif (FFTW3_FOUND)
 
 add_executable(lcdecompregion lcdecompregion.cxx)
