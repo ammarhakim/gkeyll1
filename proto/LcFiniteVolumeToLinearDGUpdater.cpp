@@ -33,6 +33,13 @@ namespace Lucee
   FiniteVolumeToLinearDGUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
+
+// component to copy    
+    component = 0;
+    if (tbl.hasNumber("component"))
+      component = tbl.getNumber("component");
+
+// should end nodes be extrapolated? (otherwise ghost cells will be used)    
     extrapolateNodes = false;
     if (tbl.hasBool("extrapolateDomainBoundaryNodes"))
       extrapolateNodes = tbl.getBool("extrapolateDomainBoundaryNodes");
@@ -63,8 +70,8 @@ namespace Lucee
       fvFld.setPtr(fvPtr_p, i+1);
       dgFld.setPtr(dgPtr, i);
 // compute values at DG nodes on cell edges by simple averaging
-      dgPtr[0] = 0.5*(fvPtr_m[0] + fvPtr[0]);
-      dgPtr[1] = 0.5*(fvPtr[0] + fvPtr_p[0]);
+      dgPtr[0] = 0.5*(fvPtr_m[component] + fvPtr[component]);
+      dgPtr[1] = 0.5*(fvPtr[component] + fvPtr_p[component]);
     }
 
     if (extrapolateNodes)
@@ -76,7 +83,7 @@ namespace Lucee
         fvFld.setPtr(fvPtr_p, localRgn.getLower(0)+1);
         dgFld.setPtr(dgPtr, localRgn.getLower(0));
 // extrapolate linearly
-        dgPtr[0] = 1.5*fvPtr[0] - 0.5*fvPtr_p[0];
+        dgPtr[0] = 1.5*fvPtr[component] - 0.5*fvPtr_p[component];
       }
       if (localRgn.getUpper(0) == fvFld.getGlobalUpper(0))
       { // on correct processor
@@ -84,7 +91,7 @@ namespace Lucee
         fvFld.setPtr(fvPtr_m, localRgn.getUpper(0)-2);
         dgFld.setPtr(dgPtr, localRgn.getUpper(0)-1);
 // extrapolate linearly
-        dgPtr[1] = 1.5*fvPtr[0] - 0.5*fvPtr_m[0];
+        dgPtr[1] = 1.5*fvPtr[component] - 0.5*fvPtr_m[component];
       }
     }
     
