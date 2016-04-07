@@ -33,9 +33,11 @@ namespace Lucee
   GradLinearDGToFiniteVolumeUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);
-    extrapolateNodes = false;
-    if (tbl.hasBool("extrapolateDomainBoundaryNodes"))
-      extrapolateNodes = tbl.getBool("extrapolateDomainBoundaryNodes");
+
+// component to copy    
+    component = 0;
+    if (tbl.hasNumber("component"))
+      component = tbl.getNumber("component");
   }
 
   template <unsigned NDIM>
@@ -60,7 +62,7 @@ namespace Lucee
     {
       fvFld.setPtr(fvPtr, i);
       dgFld.setPtr(dgPtr, i);
-      fvPtr[0] = dx1*(dgPtr[1]-dgPtr[0]); // simple central differences
+      fvPtr[component] = dx1*(dgPtr[1]-dgPtr[0]); // simple central differences
     }
     return Lucee::UpdaterStatus();
   }
