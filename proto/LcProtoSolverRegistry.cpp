@@ -71,8 +71,9 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
-#include <LcSOLSetPotentialAtBoundary.cpp>
-#include <LcSOLUpperXPotentialBcUpdater.cpp>
+#include <LcSOLFluxAcrossEdgeCalc.h>
+#include <LcSOLSetPotentialAtBoundary.h>
+#include <LcSOLUpperXPotentialBcUpdater.h>
 #include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
@@ -267,6 +268,7 @@ namespace Lucee
 
       .append<Lucee::SheathParticleSource1x1v>()
 
+      .append<Lucee::SOLFluxAcrossEdgeCalc>()
       .append<Lucee::SOLSetPotentialAtBoundary>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()
 
