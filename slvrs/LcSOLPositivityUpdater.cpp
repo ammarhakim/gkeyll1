@@ -59,9 +59,6 @@ namespace Lucee
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
-    // local region to update
-    Lucee::Region<5, int> localRgn = grid.getLocalRegion();
-
     // get number of nodes in 3D and 5D
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
     unsigned nlocal5d = nodalBasis5d->getNumNodes();

@@ -88,6 +88,7 @@ set (proto_SOURCES
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
+  LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLUpperXPotentialBcUpdater.cpp
   LcSetSingleNodeToOneUpdater.cpp
