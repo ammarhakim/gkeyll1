@@ -135,25 +135,32 @@ namespace Lucee
       }
     }
  
-    // Compute integration matrices (zeroth and first moments)
-    // First element of output is the zeroth moment over the cell
-    // Second element of output is the first v_para moment over the cell
-    momentMatrix = Eigen::MatrixXd(2, nodalStencil.size());
+    // Compute a matrix used to calculate the total parallel flux across a surface
+    momentMatrix = Eigen::MatrixXd(nodalStencil.size(), nodalStencil.size());
 
-    for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+    for (int i = 0; i < nodalStencil.size(); i++)
     {
-      double mom0Val = 0.0;
-      double mom1Val = 0.0;
-      for (int quadIndex = 0; quadIndex < totalSurfQuadPoints; quadIndex++)
+      for (int j = 0; j < nodalStencil.size(); j++)
       {
-        double vVal = 0.5*grid.getDx(3)*gaussSurfCoords(quadIndex,0);
-        mom0Val += gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex);
-        mom1Val += gaussSurfWeights(quadIndex)*gaussSurf(quadIndex, nodeIndex)*vVal;
+        double integralResult = 0.0;
+        for (int quadIndex = 0; quadIndex < totalSurfQuadPoints; quadIndex++)
+          integralResult += gaussSurfWeights(quadIndex)*
+            gaussSurf(quadIndex, i)*gaussSurf(quadIndex, j);
+        momentMatrix(i,j) = integralResult;
       }
-      momentMatrix(0,nodeIndex) = mom0Val;
-      momentMatrix(1,nodeIndex) = mom1Val;
     }
 
+    // Store 5d mass matrix inverse
+    Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
+    nodalBasis5d->getMassMatrix(tempMatrix);
+    Eigen::MatrixXd massMatrix(nlocal, nlocal);
+    copyLuceeToEigen(tempMatrix, massMatrix);
+    // Store stiffness matrix
+    nodalBasis5d->getGradStiffnessMatrix(3, tempMatrix);
+    Eigen::MatrixXd gradStiffnessMatrix(nlocal, nlocal);
+    copyLuceeToEigen(tempMatrix, gradStiffnessMatrix);
+    // Compute and store differention matrix
+    gradMatrix = massMatrix.inverse()*gradStiffnessMatrix.transpose();
     // Fill out the node numbers on lower and upper surfaces in z
     lowerEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfLowerNodes(2));
     upperEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfUpperNodes(2));
@@ -169,6 +176,8 @@ namespace Lucee
 
     // Distribution function
     const Lucee::Field<5, double>& distfIn = this->getInp<Lucee::Field<5, double> >(0);
+    // Hamiltonian
+    const Lucee::Field<5, double>& hamilIn = this->getInp<Lucee::Field<5, double> >(1);
     // Output parallel velocity moments (0, 1) vs time
     Lucee::Field<3, double>& outputMoment = this->getOut<Lucee::Field<3, double> >(0);
     
@@ -177,10 +186,11 @@ namespace Lucee
     Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
-    Lucee::ConstFieldPtr<double> distfInPtr = distfIn.createConstPtr(); // for skin-cell
+    Lucee::ConstFieldPtr<double> distfInPtr = distfIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilInPtr = hamilIn.createConstPtr();
     Lucee::FieldPtr<double> outputMomentPtr = outputMoment.createPtr(); // Output pointer
 
-    unsigned numNodes = nodalBasis5d->getNumNodes();
+    unsigned nlocal = nodalBasis5d->getNumNodes();
 
     double cellCentroid[5];
     int idx[5];
@@ -203,20 +213,30 @@ namespace Lucee
 
         // Loop over the four configuration space vertices in this cell (specific to linear elements)
         Eigen::VectorXd distfReduced(nodalStencil.size());
+        Eigen::VectorXd hamilReduced(nodalStencil.size());
         // V_PARA < 0.0 and on lower edge, so do the skin cell contribution
         if (cellCentroid[3] < 0.0)
         {
+          // Store hamiltonian in this cell as an eigen vector
+          hamilIn.setPtr(hamilInPtr, idx);
+          Eigen::VectorXd hamilFull(nlocal);
+          for (int i = 0; i < nlocal; i++)
+            hamilFull(i) = hamilInPtr[i];
+          // Compute derivative of hamiltonian expressed in terms of basis functions
+          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = lowerEdgeNodeNums[configNode];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+            {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-            // Compute zeroth and first parallel velocity moments in this cell
-            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-            // Accumulate results (v = v_c*<1> + <v'>)
-            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+            }
+            // Accumulate results of integration
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
         else if (integrateGhosts == true)
@@ -224,18 +244,25 @@ namespace Lucee
           // V_PARA > 0.0 and on lower edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getLower(2)-1;
           distfIn.setPtr(distfInPtr, idx);
+          hamilIn.setPtr(hamilInPtr, idx);
+          Eigen::VectorXd hamilFull(nlocal);
+          for (int i = 0; i < nlocal; i++)
+            hamilFull(i) = hamilInPtr[i];
+          // Compute derivative of hamiltonian expressed in terms of basis functions
+          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = upperEdgeNodeNums[configNode];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+            {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-            // Compute zeroth and first parallel velocity moments in this cell
-            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-            // Accumulate results (v = v_c*<1> + <v'>)
+              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+            }
             // Goes into lowerEdgeNodeNums since we are putting data only in skin cells
-            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
       }
@@ -268,30 +295,30 @@ namespace Lucee
 
         // Loop over the four configuration space vertices in this cell (specific to linear elements)
         Eigen::VectorXd distfReduced(nodalStencil.size());
+        Eigen::VectorXd hamilReduced(nodalStencil.size());
         // V_PARA > 0.0 and on upper edge, so do the skin cell contribution
         if (cellCentroid[3] > 0.0)
         {
+          // Store hamiltonian in this cell as an eigen vector
+          hamilIn.setPtr(hamilInPtr, idx);
+          Eigen::VectorXd hamilFull(nlocal);
+          for (int i = 0; i < nlocal; i++)
+            hamilFull(i) = hamilInPtr[i];
+          // Compute derivative of hamiltonian expressed in terms of basis functions
+          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = upperEdgeNodeNums[configNode];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-            // Compute zeroth and first parallel velocity moments in this cell
-            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-            // Accumulate results (v = v_c*<1> + <v'>)
-            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
-            double cellIncrement = cellCentroid[3]*momentVector(0) + momentVector(1);
-            if (cellIncrement < 0.0)
             {
-              for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              std::cout << "distfReduced = " << distfReduced << std::endl;
-              std::cout << "cellIncrement = " << cellIncrement << std::endl;
-              std::cout << "cell " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << std::endl;
-              std::cout << "outputMoment[" << upperEdgeNodeNums[configNode] << "] new val = " << outputMomentPtr[ upperEdgeNodeNums[configNode] ] << std::endl;
+              distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
             }
+            // Accumulate results
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
         else if (integrateGhosts == true)
@@ -299,30 +326,39 @@ namespace Lucee
           // V_PARA < 0.0 and on upper edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getUpper(2);
           distfIn.setPtr(distfInPtr, idx);
+          // Store hamiltonian in this cell as an eigen vector
+          hamilIn.setPtr(hamilInPtr, idx);
+          Eigen::VectorXd hamilFull(nlocal);
+          for (int i = 0; i < nlocal; i++)
+            hamilFull(i) = hamilInPtr[i];
+          // Compute derivative of hamiltonian expressed in terms of basis functions
+          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = lowerEdgeNodeNums[configNode];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+            {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-            // Compute zeroth and first parallel velocity moments in this cell
-            Eigen::VectorXd momentVector = momentMatrix*distfReduced;
-            // Accumulate results (v = v_c*<1> + <v'>)
+              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+            }
             // Goes into upperEdgeNodeNums since we are putting data only in skin cells
-            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += cellCentroid[3]*momentVector(0) + momentVector(1);
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
       }
       // TESTING: Print out outputMomentPtr
-      /*for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+      /*
+      for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
         for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
         {
           outputMoment.setPtr(outputMomentPtr, ix, iy, globalRgn.getUpper(2)-1);
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
             std::cout << "config " << upperEdgeNodeNums[configNode] << " = " << outputMomentPtr[ upperEdgeNodeNums[configNode] ] << std::endl;
-        }
-      */
+        }*/
+      
     }
     return Lucee::UpdaterStatus();
   }
@@ -331,6 +367,8 @@ namespace Lucee
   MomentsAtEdges5DUpdater::declareTypes()
   {
     // Input: distribution function
+    this->appendInpVarType(typeid(Lucee::Field<5, double>));
+    // Input: hamiltonian
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
     // Output: Degree 1 parallel velocity moment valid only on
     // upper and lower planes in z

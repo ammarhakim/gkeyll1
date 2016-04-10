@@ -80,12 +80,14 @@ namespace Lucee
       double scaleFactor;
 /** Order of basis polynomials */
       int polyOrder;
+/** Computes parallel velocity derivative of a solution */
+      Eigen::MatrixXd gradMatrix;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
 /** Flag indicating whether or not to integrate in ghost cells */
       bool integrateGhosts;
 /**
- * Used to compute zeroth and first parallel velocity moments at a particular (x,y,z)
+ * Used to compute first parallel velocity moment at a particular (x,y,z)
  */
       Eigen::MatrixXd momentMatrix;
 /**
