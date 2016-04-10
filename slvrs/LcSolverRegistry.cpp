@@ -83,6 +83,7 @@
 #include <LcRegisteredObjList.h>
 #include <LcSOL3DElectronTempAtWallCalc.cpp>
 #include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
+#include <LcSOLDerivativeCalc.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLIonDensityInitialization.h>
@@ -174,6 +175,11 @@ namespace Lucee
       .append<Lucee::SetPhiAtBoundaryUpdater>()
       .append<Lucee::SOL3DElectrostaticDistFuncReflectionBCUpdater>()
       .append<Lucee::SOL3DElectronTempAtWallCalc>()
+      .append<Lucee::SOLDerivativeCalc<1> >()
+      .append<Lucee::SOLDerivativeCalc<2> >()
+      .append<Lucee::SOLDerivativeCalc<3> >()
+      .append<Lucee::SOLDerivativeCalc<4> >()
+      .append<Lucee::SOLDerivativeCalc<5> >()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLIonDensityInitialization>()
       .append<Lucee::SOLPositivityUpdater>()

@@ -102,6 +102,7 @@ set(lcslvrs_SOURCES
   LcReflectionBoundaryCondition.cpp
   LcSOL3DElectronTempAtWallCalc.cpp
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
+  LcSOLDerivativeCalc.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLIonDensityInitialization.cpp
