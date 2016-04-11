@@ -34,15 +34,10 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
-      nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis"))
+      nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis");
     else
-      throw Lucee::Except("SOLFluxAcrossEdgeCalc::readInput: Must specify element to use using 'basis5d'");
-
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
-      nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
-    else
-      throw Lucee::Except("SOLFluxAcrossEdgeCalc::readInput: Must specify element to use using 'basis3d'");
+      throw Lucee::Except("SOLFluxAcrossEdgeCalc::readInput: Must specify element to use using 'basis'");
  
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
@@ -62,83 +57,25 @@ namespace Lucee
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
-    // get number of nodes in 3D and 5D
-    unsigned nlocal3d = nodalBasis3d->getNumNodes();
+    // get number of nodes
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
-
-    // get lower and upper surface quadrature data for 3d element
-    int nSurfQuad3d = nodalBasis3d->getNumSurfGaussNodes();
-    std::vector<double> surfLowerWeights3d(nSurfQuad3d);
-    Lucee::Matrix<double> tempSurfQuad3d(nSurfQuad3d, nlocal3d);
-    Lucee::Matrix<double> tempSurfCoords3d(nSurfQuad3d, 3);
-
-    nodalBasis3d->getSurfLowerGaussQuadData(2, tempSurfQuad3d, tempSurfCoords3d, surfLowerWeights3d);
-    Eigen::MatrixXd surfLowerQuad3d(nSurfQuad3d, nlocal3d);
-    copyLuceeToEigen(tempSurfQuad3d, surfLowerQuad3d);
-    
-    std::vector<double> surfUpperWeights3d(nSurfQuad3d);
-    nodalBasis3d->getSurfUpperGaussQuadData(2, tempSurfQuad3d, tempSurfCoords3d, surfUpperWeights3d);
-    Eigen::MatrixXd surfUpperQuad3d(nSurfQuad3d, nlocal3d);
-    copyLuceeToEigen(tempSurfQuad3d, surfUpperQuad3d);
 
     // get lower and upper surface quadrature data for 5d element
     int nSurfQuad5d = nodalBasis5d->getNumSurfGaussNodes();
-    std::vector<double> surfLowerWeights5d(nSurfQuad5d);
     Lucee::Matrix<double> tempSurfQuad5d(nSurfQuad5d, nlocal5d);
     Lucee::Matrix<double> tempSurfCoords5d(nSurfQuad5d, 5);
 
+    surfLowerWeights5d = std::vector<double>(nSurfQuad5d);
     nodalBasis5d->getSurfLowerGaussQuadData(2, tempSurfQuad5d, tempSurfCoords5d, surfLowerWeights5d);
 
-    Eigen::MatrixXd surfLowerQuad5d(nSurfQuad5d, nlocal5d);
+    surfLowerQuad5d = Eigen::MatrixXd(nSurfQuad5d, nlocal5d);
     copyLuceeToEigen(tempSurfQuad5d, surfLowerQuad5d);
-    Eigen::MatrixXd surfLowerCoords5d(nSurfQuad5d, nlocal5d);
-    copyLuceeToEigen(tempSurfCoords5d, surfLowerCoords5d);
     
-    std::vector<double> surfUpperWeights5d(nSurfQuad5d);
+    surfUpperWeights5d = std::vector<double>(nSurfQuad5d);
     nodalBasis5d->getSurfUpperGaussQuadData(2, tempSurfQuad5d, tempSurfCoords5d, surfUpperWeights5d);
-    Eigen::MatrixXd surfUpperQuad5d(nSurfQuad5d, nlocal5d);
+    
+    surfUpperQuad5d = Eigen::MatrixXd(nSurfQuad5d, nlocal5d);
     copyLuceeToEigen(tempSurfQuad5d, surfUpperQuad5d);
-    Eigen::MatrixXd surfUpperCoords5d(nSurfQuad5d, nlocal5d);
-    copyLuceeToEigen(tempSurfCoords5d, surfUpperCoords5d);
-
-    mom0MatrixLower = Eigen::MatrixXd(nlocal5d, nlocal3d);
-    mom0MatrixUpper = Eigen::MatrixXd(nlocal5d, nlocal3d);
-    mom1MatrixLower = Eigen::MatrixXd(nlocal5d, nlocal3d);
-    mom1MatrixUpper = Eigen::MatrixXd(nlocal5d, nlocal3d);
-    // Each row is a the integral of a single 5d basis function times each 3d basis function over the cell
-    for (int i = 0; i < nlocal5d; i++)
-    {
-      for (int j = 0; j < nlocal3d; j++)
-      {
-        // Compute integral of phi5d_i * phi3d_j on lower and upper surfaces
-        double mom0ResultLower = 0.0;
-        double mom0ResultUpper = 0.0;
-        double mom1ResultLower = 0.0;
-        double mom1ResultUpper = 0.0;
-
-        // Loop over each 5d quadrature point on the fixed z surface
-        for (int gaussIndex = 0; gaussIndex < surfLowerWeights5d.size(); gaussIndex++)
-        {
-          mom0ResultLower += surfLowerWeights5d[gaussIndex]*surfLowerQuad5d(gaussIndex, i)*
-            surfLowerQuad3d(gaussIndex % nSurfQuad3d, j);
-          mom0ResultUpper += surfUpperWeights5d[gaussIndex]*surfUpperQuad5d(gaussIndex, i)*
-            surfUpperQuad3d(gaussIndex % nSurfQuad3d, j);
-
-          // Parallel velocity at this quadrature point
-          double vCoordLower = surfLowerCoords5d(gaussIndex,3)*0.5*grid.getDx(3);
-          double vCoordUpper = surfUpperCoords5d(gaussIndex,3)*0.5*grid.getDx(3);
-
-          mom1ResultLower += surfLowerWeights5d[gaussIndex]*surfLowerQuad5d(gaussIndex, i)*
-            surfLowerQuad3d(gaussIndex % nSurfQuad3d, j)*vCoordLower;
-          mom1ResultUpper += surfUpperWeights5d[gaussIndex]*surfUpperQuad5d(gaussIndex, i)*
-            surfUpperQuad3d(gaussIndex % nSurfQuad3d, j)*vCoordUpper;
-        }
-        mom0MatrixLower(i, j) = mom0ResultLower;
-        mom0MatrixUpper(i, j) = mom0ResultUpper;
-        mom1MatrixLower(i, j) = mom1ResultLower;
-        mom1MatrixUpper(i, j) = mom1ResultUpper;
-      }
-    }
   }
 
   Lucee::UpdaterStatus
@@ -149,7 +86,8 @@ namespace Lucee
 
     // Distribution function
     const Lucee::Field<5, double>& distfIn = this->getInp<Lucee::Field<5, double> >(0);
-    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(1);
+    const Lucee::Field<5, double>& bFieldIn = this->getInp<Lucee::Field<5, double> >(1);
+    const Lucee::Field<5, double>& hamilDerivIn = this->getInp<Lucee::Field<5, double> >(2);
     // Output dynvector containing total flux on an edge
     Lucee::DynVector<double>& fluxVecOut = this->getOut<Lucee::DynVector<double> >(0);
     
@@ -158,18 +96,25 @@ namespace Lucee
     
     Lucee::ConstFieldPtr<double> distfPtr = distfIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bFieldPtr = bFieldIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilDerivPtr = hamilDerivIn.createConstPtr();
 
-    unsigned nlocal3d = nodalBasis3d->getNumNodes();
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
+    int nSurfQuad5d = nodalBasis5d->getNumSurfGaussNodes();
 
     double cellCentroid[5];
     int idx[5];
-    int sknIdx[5];
     int gstIdx[5];
 
     double localLowerSurfaceFlux = 0.0;
     double localUpperSurfaceFlux = 0.0;
 
+    Eigen::VectorXd distfVec(nlocal5d);
+    Eigen::VectorXd bFieldVec(nlocal5d);
+    Eigen::VectorXd hamilDerivVec(nlocal5d);
+
+    Eigen::VectorXd distfAtQuad(nSurfQuad5d);
+    Eigen::VectorXd bFieldAtQuad(nlocal5d);
+    Eigen::VectorXd hamilDerivAtQuad(nlocal5d);
     // Check to see if we should integrate on the lower z plane
     if (localRgn.getLower(2) == globalRgn.getLower(2))
     {
@@ -180,39 +125,56 @@ namespace Lucee
         seqLowerDim.fillWithIndex(idx);
         // Set the deflated index to the proper value
         idx[2] = localRgn.getLower(2);
-        // Set skin and ghost cell indices
-        for (int i = 0; i < 5; i++)
-        {
-          sknIdx[i] = idx[i];
-          gstIdx[i] = idx[i];
-        }
-        gstIdx[2] = idx[2] - 1;
         // Get the coordinates of cell center
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
-        // Fill out solution and magnetic field at this location
-        distfIn.setPtr(distfPtr, idx);
-        bFieldIn.setPtr(bFieldPtr, idx[0], idx[1], idx[2]);
-        Eigen::VectorXd distfVec(nlocal5d);
-        Eigen::VectorXd bFieldVec(nlocal3d);
-        for (int i = 0; i < nlocal5d; i++)
-          distfVec(i) = distfPtr[i];
-        for (int i = 0; i < nlocal3d; i++)
-          bFieldVec(i) = bFieldPtr[i];
 
         // Only want to calculate outward flux on this surface
         if (cellCentroid[3] < 0.0)
-          localLowerSurfaceFlux += distfVec.dot((cellCentroid[3]*mom0MatrixLower + mom1MatrixLower)*bFieldVec);
+        {
+          distfIn.setPtr(distfPtr, idx);
+          bFieldIn.setPtr(bFieldPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
+
+          for (int i = 0; i < nlocal5d; i++)
+          {
+            distfVec(i) = distfPtr[i];
+            bFieldVec(i) = bFieldPtr[i];
+            hamilDerivVec(i) = hamilDerivPtr[i];
+          }
+
+          // Compute three fields at quadrature points
+          distfAtQuad = surfLowerQuad5d*distfVec;
+          bFieldAtQuad = surfLowerQuad5d*bFieldVec;
+          hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
+
+          for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
+            localLowerSurfaceFlux += surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+              bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
+        }
         else if (integrateGhosts == true)
         {
+          idx[2] = localRgn.getLower(2)-1;
           // Need to get ghost cell contribution for inward flux on this surface
-          distfIn.setPtr(distfPtr, gstIdx);
+          distfIn.setPtr(distfPtr, idx);
+          bFieldIn.setPtr(bFieldPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
+
           for (int i = 0; i < nlocal5d; i++)
+          {
             distfVec(i) = distfPtr[i];
-          bFieldIn.setPtr(bFieldPtr, gstIdx[0], gstIdx[1], gstIdx[2]);
-          for (int i = 0; i < nlocal3d; i++)
             bFieldVec(i) = bFieldPtr[i];
-          localLowerSurfaceFlux += distfVec.dot((cellCentroid[3]*mom0MatrixUpper + mom1MatrixUpper)*bFieldVec);
+            hamilDerivVec(i) = hamilDerivPtr[i];
+          }
+
+          // Compute three fields at quadrature points
+          distfAtQuad = surfUpperQuad5d*distfVec;
+          bFieldAtQuad = surfUpperQuad5d*bFieldVec;
+          hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
+
+          for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
+            localLowerSurfaceFlux += surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+              bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
       }
     }
@@ -227,39 +189,56 @@ namespace Lucee
         seqLowerDim.fillWithIndex(idx);
         // Set the deflated index to the proper value
         idx[2] = localRgn.getUpper(2)-1;
-        // Set skin and ghost cell indices
-        for (int i = 0; i < 5; i++)
-        {
-          sknIdx[i] = idx[i];
-          gstIdx[i] = idx[i];
-        }
-        gstIdx[2] = idx[2] + 1;
         // Get the coordinates of cell center
         grid.setIndex(idx);
         grid.getCentroid(cellCentroid);
-        // Fill out solution and magnetic field at this location
-        distfIn.setPtr(distfPtr, idx);
-        bFieldIn.setPtr(bFieldPtr, idx[0], idx[1], idx[2]);
-        Eigen::VectorXd distfVec(nlocal5d);
-        Eigen::VectorXd bFieldVec(nlocal3d);
-        for (int i = 0; i < nlocal5d; i++)
-          distfVec(i) = distfPtr[i];
-        for (int i = 0; i < nlocal3d; i++)
-          bFieldVec(i) = bFieldPtr[i];
 
         // Only want to calculate outward flux on this surface
         if (cellCentroid[3] > 0.0)
-          localUpperSurfaceFlux += distfVec.dot((cellCentroid[3]*mom0MatrixUpper + mom1MatrixUpper)*bFieldVec);
+        {
+          distfIn.setPtr(distfPtr, idx);
+          bFieldIn.setPtr(bFieldPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
+
+          for (int i = 0; i < nlocal5d; i++)
+          {
+            distfVec(i) = distfPtr[i];
+            bFieldVec(i) = bFieldPtr[i];
+            hamilDerivVec(i) = hamilDerivPtr[i];
+          }
+
+          // Compute three fields at quadrature points
+          distfAtQuad = surfUpperQuad5d*distfVec;
+          bFieldAtQuad = surfUpperQuad5d*bFieldVec;
+          hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
+
+          for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
+            localUpperSurfaceFlux += surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+              bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
+        }
         else if (integrateGhosts == true)
         {
+          idx[2] = localRgn.getUpper(2);
           // Need to get ghost cell contribution for inward flux on this surface
-          distfIn.setPtr(distfPtr, gstIdx);
+          distfIn.setPtr(distfPtr, idx);
+          bFieldIn.setPtr(bFieldPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
+
           for (int i = 0; i < nlocal5d; i++)
+          {
             distfVec(i) = distfPtr[i];
-          bFieldIn.setPtr(bFieldPtr, gstIdx[0], gstIdx[1], gstIdx[2]);
-          for (int i = 0; i < nlocal3d; i++)
             bFieldVec(i) = bFieldPtr[i];
-          localUpperSurfaceFlux += distfVec.dot((cellCentroid[3]*mom0MatrixLower + mom1MatrixLower)*bFieldVec);
+            hamilDerivVec(i) = hamilDerivPtr[i];
+          }
+
+          // Compute three fields at quadrature points
+          distfAtQuad = surfLowerQuad5d*distfVec;
+          bFieldAtQuad = surfLowerQuad5d*bFieldVec;
+          hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
+
+          for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
+            localUpperSurfaceFlux += surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+              bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
       }
     }
@@ -285,8 +264,10 @@ namespace Lucee
   {
     // Input: 5d distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
-    // Input: 3d magnetic field
-    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: 5d magnetic field
+    this->appendInpVarType(typeid(Lucee::Field<5, double>));
+    // Input: Numerical parallel velocity derivative of hamiltonian
+    this->appendInpVarType(typeid(Lucee::Field<5, double>));
     // Total moment on lower and upper surfaces
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
