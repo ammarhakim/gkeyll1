@@ -73,23 +73,26 @@ namespace Lucee
     private:
 /** Pointer to phase space basis functions to use */
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
-/** Pointer to configuration space basis functions */
-      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
       double scaleFactor;
 /** Flag indicating whether or not to integrate in ghost cells */
       bool integrateGhosts;
 /**
- * Used to compute zeroth parallel velocity moments at a particular (x,y,z) surface
+ * Interpolation matrix for interpolating on upper z surface
  */
-      Eigen::MatrixXd mom0MatrixLower;
-      Eigen::MatrixXd mom0MatrixUpper;
+      Eigen::MatrixXd surfUpperQuad5d;
 /**
- * Used to compute first parallel velocity moments at a particular (x,y,z) surface
+ * Interpolation matrix for interpolating on lower z surface
  */
-      Eigen::MatrixXd mom1MatrixLower;
-      Eigen::MatrixXd mom1MatrixUpper;
-
+      Eigen::MatrixXd surfLowerQuad5d;
+/**
+ * Quadrature weights for points on the upper z surface
+ */
+      std::vector<double> surfUpperWeights5d;
+/**
+ * Quadrature weights for points on the lower z surface
+ */
+      std::vector<double> surfLowerWeights5d;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

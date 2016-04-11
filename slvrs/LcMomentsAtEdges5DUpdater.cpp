@@ -150,17 +150,6 @@ namespace Lucee
       }
     }
 
-    // Store 5d mass matrix inverse
-    Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
-    nodalBasis5d->getMassMatrix(tempMatrix);
-    Eigen::MatrixXd massMatrix(nlocal, nlocal);
-    copyLuceeToEigen(tempMatrix, massMatrix);
-    // Store stiffness matrix
-    nodalBasis5d->getGradStiffnessMatrix(3, tempMatrix);
-    Eigen::MatrixXd gradStiffnessMatrix(nlocal, nlocal);
-    copyLuceeToEigen(tempMatrix, gradStiffnessMatrix);
-    // Compute and store differention matrix
-    gradMatrix = massMatrix.inverse()*gradStiffnessMatrix.transpose();
     // Fill out the node numbers on lower and upper surfaces in z
     lowerEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfLowerNodes(2));
     upperEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfUpperNodes(2));
@@ -177,7 +166,7 @@ namespace Lucee
     // Distribution function
     const Lucee::Field<5, double>& distfIn = this->getInp<Lucee::Field<5, double> >(0);
     // Hamiltonian
-    const Lucee::Field<5, double>& hamilIn = this->getInp<Lucee::Field<5, double> >(1);
+    const Lucee::Field<5, double>& hamilDerivIn = this->getInp<Lucee::Field<5, double> >(1);
     // Output parallel velocity moments (0, 1) vs time
     Lucee::Field<3, double>& outputMoment = this->getOut<Lucee::Field<3, double> >(0);
     
@@ -187,7 +176,7 @@ namespace Lucee
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
     Lucee::ConstFieldPtr<double> distfInPtr = distfIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> hamilInPtr = hamilIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilDerivInPtr = hamilDerivIn.createConstPtr();
     Lucee::FieldPtr<double> outputMomentPtr = outputMoment.createPtr(); // Output pointer
 
     unsigned nlocal = nodalBasis5d->getNumNodes();
@@ -205,7 +194,6 @@ namespace Lucee
         seqLowerDim.fillWithIndex(idx);
         // Set the deflated index to the proper value
         idx[2] = localRgn.getLower(2);
-        distfIn.setPtr(distfInPtr, idx);
         outputMoment.setPtr(outputMomentPtr, idx[0], idx[1], idx[2]);
         // Get the coordinates of cell center
         grid.setIndex(idx);
@@ -217,13 +205,8 @@ namespace Lucee
         // V_PARA < 0.0 and on lower edge, so do the skin cell contribution
         if (cellCentroid[3] < 0.0)
         {
-          // Store hamiltonian in this cell as an eigen vector
-          hamilIn.setPtr(hamilInPtr, idx);
-          Eigen::VectorXd hamilFull(nlocal);
-          for (int i = 0; i < nlocal; i++)
-            hamilFull(i) = hamilInPtr[i];
-          // Compute derivative of hamiltonian expressed in terms of basis functions
-          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+          distfIn.setPtr(distfInPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
 
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
@@ -233,7 +216,7 @@ namespace Lucee
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+              hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Accumulate results of integration
             outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
@@ -244,12 +227,7 @@ namespace Lucee
           // V_PARA > 0.0 and on lower edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getLower(2)-1;
           distfIn.setPtr(distfInPtr, idx);
-          hamilIn.setPtr(hamilInPtr, idx);
-          Eigen::VectorXd hamilFull(nlocal);
-          for (int i = 0; i < nlocal; i++)
-            hamilFull(i) = hamilInPtr[i];
-          // Compute derivative of hamiltonian expressed in terms of basis functions
-          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
 
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
@@ -259,7 +237,7 @@ namespace Lucee
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+              hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Goes into lowerEdgeNodeNums since we are putting data only in skin cells
             outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
@@ -287,7 +265,6 @@ namespace Lucee
         // Set the deflated index to the proper valuea
         // the "-1" is because getUpper() gives index one beyond last domain cell
         idx[2] = localRgn.getUpper(2)-1;
-        distfIn.setPtr(distfInPtr, idx);
         outputMoment.setPtr(outputMomentPtr, idx[0], idx[1], idx[2]);
         // Get the coordinates of cell center
         grid.setIndex(idx);
@@ -299,13 +276,8 @@ namespace Lucee
         // V_PARA > 0.0 and on upper edge, so do the skin cell contribution
         if (cellCentroid[3] > 0.0)
         {
-          // Store hamiltonian in this cell as an eigen vector
-          hamilIn.setPtr(hamilInPtr, idx);
-          Eigen::VectorXd hamilFull(nlocal);
-          for (int i = 0; i < nlocal; i++)
-            hamilFull(i) = hamilInPtr[i];
-          // Compute derivative of hamiltonian expressed in terms of basis functions
-          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+          distfIn.setPtr(distfInPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
 
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
@@ -315,7 +287,7 @@ namespace Lucee
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+              hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Accumulate results
             outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
@@ -326,13 +298,7 @@ namespace Lucee
           // V_PARA < 0.0 and on upper edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getUpper(2);
           distfIn.setPtr(distfInPtr, idx);
-          // Store hamiltonian in this cell as an eigen vector
-          hamilIn.setPtr(hamilInPtr, idx);
-          Eigen::VectorXd hamilFull(nlocal);
-          for (int i = 0; i < nlocal; i++)
-            hamilFull(i) = hamilInPtr[i];
-          // Compute derivative of hamiltonian expressed in terms of basis functions
-          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
 
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
@@ -342,7 +308,7 @@ namespace Lucee
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+              hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Goes into upperEdgeNodeNums since we are putting data only in skin cells
             outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);

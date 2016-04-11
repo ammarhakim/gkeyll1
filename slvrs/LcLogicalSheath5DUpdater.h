@@ -87,8 +87,6 @@ namespace Lucee
       std::vector<int> upperEdgeNodeNums;
 /** Order of basis functions used */
       int polyOrder;
-/** Computes parallel velocity derivative of a solution */
-      Eigen::MatrixXd gradMatrix;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
 /** Used to compute first parallel velocity moment at a particular (x,y,z) */

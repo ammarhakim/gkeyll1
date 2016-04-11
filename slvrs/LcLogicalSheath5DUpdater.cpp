@@ -180,17 +180,6 @@ namespace Lucee
       }
     }
 
-    // Store 5d mass matrix inverse
-    Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
-    nodalBasis5d->getMassMatrix(tempMatrix);
-    Eigen::MatrixXd massMatrix(nlocal, nlocal);
-    copyLuceeToEigen(tempMatrix, massMatrix);
-    // Store stiffness matrix
-    nodalBasis5d->getGradStiffnessMatrix(3, tempMatrix);
-    Eigen::MatrixXd gradStiffnessMatrix(nlocal, nlocal);
-    copyLuceeToEigen(tempMatrix, gradStiffnessMatrix);
-    // Compute and store differention matrix
-    gradMatrix = massMatrix.inverse()*gradStiffnessMatrix.transpose();
     // Fill out the node numbers on lower and upper surfaces in z
     lowerEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfLowerNodes(2));
     upperEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfUpperNodes(2));
@@ -207,7 +196,7 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
     const Lucee::Field<3, double>& ionFluxIn = this->getInp<Lucee::Field<3, double> >(0);
-    const Lucee::Field<5, double>& hamilIn = this->getInp<Lucee::Field<5, double> >(1);
+    const Lucee::Field<5, double>& hamilDerivIn = this->getInp<Lucee::Field<5, double> >(1);
     // Output distribution function
     Lucee::Field<5, double>& distf = this->getOut<Lucee::Field<5, double> >(0);
     // Output sheath potential
@@ -218,7 +207,7 @@ namespace Lucee
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
 
     Lucee::ConstFieldPtr<double> ionFluxPtr = ionFluxIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> hamilPtr = hamilIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> hamilDerivInPtr = hamilDerivIn.createConstPtr();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
     Lucee::FieldPtr<double> phiSLowerPtr = phiSLower.createPtr(); // for lower sheath potential
@@ -261,15 +250,20 @@ namespace Lucee
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
 
-            //if (totalIonFluxAtNode > 0.0)
-            //  totalIonFluxAtNode = 0.0;
-
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
                 ivSkin < localRgn.getUpper(3); ivSkin++, ivGhost--)
             {
               idx[3] = ivSkin;
               gstIdx[3] = ivGhost;
+
+              // Check to see if there is no chance of matching the ion flux anymore
+              idx[4] = localRgn.getLower(4);
+              grid.setIndex(idx);
+              grid.getCentroid(cellCentroid);
+              // Skip everything if skin cell now has a positive parallel velocity
+              if (cellCentroid[3] > 0.0)
+                continue;
 
               if (foundCutoffCell == false)
               {
@@ -280,13 +274,7 @@ namespace Lucee
                 {
                   idx[4] = iMu;
                   distf.setPtr(sknPtr, idx);
-                  hamilIn.setPtr(hamilPtr, idx);
-                  // First compute entire hamiltonian derivative
-                  Eigen::VectorXd hamilFull(nlocal);
-                  for (int i = 0; i < nlocal; i++)
-                    hamilFull(i) = hamilPtr[i];
-                  // Compute derivative of hamiltonian expressed in terms of basis functions
-                  Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+                  hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                   // Get the coordinates of cell center
                   grid.setIndex(idx);
                   grid.getCentroid(cellCentroid);
@@ -297,25 +285,20 @@ namespace Lucee
                   for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                   {
                     distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
-                    hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+                    hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
                   }
                   elcFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                 }
+
                 // Check if we have exceed the total ion flux
                 if (runningElcFluxAtNode + elcFluxAtIv < totalIonFluxAtNode)
                 {
                   foundCutoffCell = true;
-                  // Get the coordinates of cell center
-                  idx[4] = localRgn.getLower(4);
-                  grid.setIndex(idx);
-                  grid.getCentroid(cellCentroid);
                   // Figure out fraction of cell that contains the excess flux
                   // (Flux over what is needed for equivalence with Gamma_i)
                   // exactResult is the the flux contribution integrated from lower edge of cell to v_c, a negative value
                   double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; 
                   double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
-                  if (excessFraction < 0.0)
-                    std::cout << "excessFraction negative" << std::endl;
                   // Search for the cutoff velocity ('b' here)
                   double a = -0.5*grid.getDx(3);
                   double b;
@@ -464,23 +447,14 @@ namespace Lucee
                         {
                           idx[4] = iMu;
                           distf.setPtr(sknPtr, idx);
-                          hamilIn.setPtr(hamilPtr, idx);
-                          // First compute entire hamiltonian derivative
-                          Eigen::VectorXd hamilFull(nlocal);
-                          for (int i = 0; i < nlocal; i++)
-                            hamilFull(i) = hamilPtr[i];
-                          // Compute derivative of hamiltonian expressed in terms of basis functions
-                          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
-                          // Get the coordinates of cell center
-                          grid.setIndex(idx);
-                          grid.getCentroid(cellCentroid);
+                          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                           // Compute distribution function at quadrature point
                           double fAtPoint = 0.0;
                           double gradHAtPoint = 0.0;
                           for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                           {
                             fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                            gradHAtPoint += hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex)*basisAtPoint[nodeIndex];
+                            gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
                           }
 
                           integralResult += weightScale*gaussSurfWeights(gaussIndex)*
@@ -526,23 +500,14 @@ namespace Lucee
                           {
                             idx[4] = iMu;
                             distf.setPtr(sknPtr, idx);
-                            hamilIn.setPtr(hamilPtr, idx);
-                            // First compute entire hamiltonian derivative
-                            Eigen::VectorXd hamilFull(nlocal);
-                            for (int i = 0; i < nlocal; i++)
-                              hamilFull(i) = hamilPtr[i];
-                            // Compute derivative of hamiltonian expressed in terms of basis functions
-                            Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
-                            // Get the coordinates of cell center
-                            grid.setIndex(idx);
-                            grid.getCentroid(cellCentroid);
+                            hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                             // Compute distribution function at quadrature point
                             double fAtPoint = 0.0;
                             double gradHAtPoint = 0.0;
                             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                             {
                               fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                              gradHAtPoint += hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex)*basisAtPoint[nodeIndex];
+                              gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
                             }
                             std::cout << "fAtPoint = " << fAtPoint << std::endl;
 
@@ -576,6 +541,10 @@ namespace Lucee
                     }
                   }
 
+                  // Get the coordinates of cell center
+                  idx[4] = localRgn.getLower(4);
+                  grid.setIndex(idx);
+                  grid.getCentroid(cellCentroid);
                   // Store result in the appropriate 2d field
                   phiSLowerPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + b)*(cellCentroid[3] + b)/eV;
                   //std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
@@ -693,6 +662,14 @@ namespace Lucee
               idx[3] = ivSkin;
               gstIdx[3] = ivGhost;
 
+              // Check to see if there is no chance of matching the ion flux anymore
+              idx[4] = localRgn.getLower(4);
+              grid.setIndex(idx);
+              grid.getCentroid(cellCentroid);
+              // Skip everything if skin cell now has a positive parallel velocity
+              if (cellCentroid[3] < 0.0)
+                continue;
+
               if (foundCutoffCell == false)
               {
                 // Need to check if this is the parallel velocity cutoff cell
@@ -702,24 +679,18 @@ namespace Lucee
                 {
                   idx[4] = iMu;
                   distf.setPtr(sknPtr, idx);
-                  hamilIn.setPtr(hamilPtr, idx);
-                  // First compute entire hamiltonian derivative
-                  Eigen::VectorXd hamilFull(nlocal);
-                  for (int i = 0; i < nlocal; i++)
-                    hamilFull(i) = hamilPtr[i];
-                  // Compute derivative of hamiltonian expressed in terms of basis functions
-                  Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
-                  Eigen::VectorXd hamilReduced(nodalStencil.size());
+                  hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                   // Get the coordinates of cell center
                   grid.setIndex(idx);
                   grid.getCentroid(cellCentroid);
                   // At this particular configuration space vertix, copy all
                   // nodes that occupy this location to a vector
                   Eigen::VectorXd distfReduced(nodalStencil.size());
+                  Eigen::VectorXd hamilReduced(nodalStencil.size());
                   for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                   {
                     distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
-                    hamilReduced(nodeIndex) = hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex);
+                    hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
                   }
                   elcFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                 }
@@ -735,8 +706,6 @@ namespace Lucee
                   double exactResult = totalIonFluxAtNode - runningElcFluxAtNode; // the flux contribution up to v_c
                   // Figure out fraction of cell is excess, above what is needed for equivalent
                   double excessFraction = (runningElcFluxAtNode + elcFluxAtIv - totalIonFluxAtNode)/elcFluxAtIv;
-                  if (excessFraction < 0.0)
-                    std::cout << "excessFraction negative" << std::endl;
                   // Search for the cutoff velocity ('a' here)
                   double a = -0.5*grid.getDx(3);
                   double b = 0.5*grid.getDx(3);
@@ -893,13 +862,7 @@ namespace Lucee
                         {
                           idx[4] = iMu;
                           distf.setPtr(sknPtr, idx);
-                          hamilIn.setPtr(hamilPtr, idx);
-                          // First compute entire hamiltonian derivative
-                          Eigen::VectorXd hamilFull(nlocal);
-                          for (int i = 0; i < nlocal; i++)
-                            hamilFull(i) = hamilPtr[i];
-                          // Compute derivative of hamiltonian expressed in terms of basis functions
-                          Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+                          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                           // Get the coordinates of cell center
                           grid.setIndex(idx);
                           grid.getCentroid(cellCentroid);
@@ -909,7 +872,7 @@ namespace Lucee
                           for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                           {
                             fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                            gradHAtPoint += hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex)*basisAtPoint[nodeIndex];
+                            gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
                           }
 
                           integralResult += weightScale*gaussSurfWeights(gaussIndex)*
@@ -954,13 +917,7 @@ namespace Lucee
                           {
                             idx[4] = iMu;
                             distf.setPtr(sknPtr, idx);
-                            hamilIn.setPtr(hamilPtr, idx);
-                            // First compute entire hamiltonian derivative
-                            Eigen::VectorXd hamilFull(nlocal);
-                            for (int i = 0; i < nlocal; i++)
-                              hamilFull(i) = hamilPtr[i];
-                            // Compute derivative of hamiltonian expressed in terms of basis functions
-                            Eigen::VectorXd hamilDerivFull = gradMatrix*hamilFull;
+                            hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                             // Get the coordinates of cell center
                             grid.setIndex(idx);
                             grid.getCentroid(cellCentroid);
@@ -970,7 +927,7 @@ namespace Lucee
                             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                             {
                               fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
-                              gradHAtPoint += hamilDerivFull(nodalStencil[nodeIndex] + configNodeIndex)*basisAtPoint[nodeIndex];
+                              gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
                             }
                             std::cout << "fAtPoint = " << fAtPoint << std::endl;
                             integralResult += weightScale*gaussSurfWeights(gaussIndex)*
