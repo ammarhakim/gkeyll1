@@ -250,6 +250,9 @@ namespace Lucee
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
 
+            if (totalIonFluxAtNode == 0.0)
+              continue;
+
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
                 ivSkin < localRgn.getUpper(3); ivSkin++, ivGhost--)
@@ -654,6 +657,9 @@ namespace Lucee
             double totalIonFluxAtNode = elcMass/ionMass*ionFluxPtr[configNodeIndex];
             double runningElcFluxAtNode = 0.0;
             bool foundCutoffCell = false;
+
+            if (totalIonFluxAtNode == 0.0)
+              continue;
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getUpper(3)-1, ivGhost = localRgn.getLower(3);
