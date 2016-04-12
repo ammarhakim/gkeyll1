@@ -74,6 +74,8 @@ namespace Lucee
       double kmin;
 /** components for gradient computation */
       std::vector<unsigned> components;
+/** multipliers before k obtained */
+      std::vector<double> multipliers;
   };
 }
 

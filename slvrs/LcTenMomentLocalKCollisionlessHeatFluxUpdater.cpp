@@ -50,9 +50,22 @@ namespace Lucee
       for (unsigned i=0; i<NDIM; ++i)
         components.push_back(0);
     }
+
+    // multipliers
+    if (tbl.hasNumVec("multipliers"))
+    {
+      multipliers = tbl.getNumVec("multipliers");
+      if (multipliers.size() != NDIM)
+        throw Lucee::Except(
+          "TenMomentLocalKCollisionlessHeatFluxUpdater::readInput: 'multipliers' table size incorrect");
+    } else {
+      for (unsigned i=0; i<NDIM; ++i)
+        multipliers.push_back(1.);
+    }
+
   }
 
-#define xDISPLAY_K_RANGE
+#define DISPLAY_K_RANGE
 
   template <unsigned NDIM>
   void
@@ -141,6 +154,7 @@ namespace Lucee
           if (k_d > k_max_found) k_max_found = k_d;
           if (k_d < k_min_found) k_min_found = k_d;
 #endif
+          k_d *= multipliers[d];
 
           if (kmax > 0. && k_d > kmax)
             k_d = kmax; // TODO: physics based kmax (e.g., 1/d_e)
