@@ -94,7 +94,7 @@
 #include <LcTenMomentFluidSource.h>
 #include <LcTwentyMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
-#include <LcTenMomentLocalKCollisionlessHeatFluxUpdater.h>
+#include <LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
@@ -269,9 +269,9 @@ namespace Lucee
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<2> >()
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<3> >()
 
-      .append<Lucee::TenMomentLocalKCollisionlessHeatFluxUpdater<1> >()
-      .append<Lucee::TenMomentLocalKCollisionlessHeatFluxUpdater<2> >()
-      .append<Lucee::TenMomentLocalKCollisionlessHeatFluxUpdater<3> >()
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<1> >()
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<2> >()
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<3> >()
 
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<1> >()
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<2> >()

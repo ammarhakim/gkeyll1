@@ -1,11 +1,11 @@
 /**
- * @file	LcTenMomentLocalKCollisionlessHeatFluxUpdater.h
+ * @file	LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.h
  *
  * @brief	Implicit updater for 10-moment collisional source terms
  */
 
-#ifndef LC_TEN_MOMENT_LOCAL_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
-#define LC_TEN_MOMENT_LOCAL_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#ifndef LC_TEN_MOMENT_ADAPTIVE_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#define LC_TEN_MOMENT_ADPATIVE_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -27,7 +27,7 @@ namespace Lucee
  * collision frequency is large.
  */
   template <unsigned NDIM>
-  class TenMomentLocalKCollisionlessHeatFluxUpdater : public Lucee::UpdaterIfc
+  class TenMomentAdaptiveKCollisionlessHeatFluxUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
