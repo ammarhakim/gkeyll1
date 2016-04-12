@@ -72,6 +72,8 @@ namespace Lucee
       double kmax;
 /** minimum wave number */
       double kmin;
+/** components for gradient computation */
+      std::vector<unsigned> components;
   };
 }
 
