@@ -90,12 +90,12 @@ namespace Lucee
       {
         // k vector
         double k[3];
-        // compoonents used to be compute local length scale
+        // components used to compute local gradient length scale
         unsigned components[3];
         for (unsigned d = 0; d < 3; ++d)
         {
           k[d] = 0.;
-          components[d] = 0; // FIXME using rho to compute gradient for all direction/tensor component
+          components[d] = 0; // FIXME now using rho to compute gradient for all direction/tensor component
         }
 
         // compute k[d]   
@@ -103,7 +103,6 @@ namespace Lucee
         {
           unsigned c = components[d];
 
-          // FIXME ghost cell might not have a neighbor cell
           idx[d] = idx[d]+1;
           tmFluid.setPtr(rPtr, idx); // right cell
           grid.setIndex(idx);
@@ -148,7 +147,7 @@ namespace Lucee
       ptr[8] = pyz*edt + r*v*w;
       ptr[9] = (pzz-p)*edt+p + r*w*w;
     }
-    std::cout << "k range [" << k_min_used << ", " << k_max_used << "]" << std::endl;
+    //std::cout << "k range [" << k_min_used << ", " << k_max_used << "]" << std::endl;
     
     return Lucee::UpdaterStatus();
   }
