@@ -1,11 +1,11 @@
 /**
- * @file	LcTenMomentLocalKCollisionlessHeatFluxUpdater.cpp
+ * @file	LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.cpp
  *
  * @brief	Implicit updater for 10-moment collisional source terms
  */
 
 // gkeyll includes
-#include <LcTenMomentLocalKCollisionlessHeatFluxUpdater.h>
+#include <LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.h>
 #include <LcStructuredGridBase.h>
 
 // std includes
@@ -15,13 +15,13 @@ namespace Lucee
 {
 
 // set ids for module system
-  template <> const char *TenMomentLocalKCollisionlessHeatFluxUpdater<1>::id = "TenMomentLocalKCollisionlessHeatFlux1D";
-  template <> const char *TenMomentLocalKCollisionlessHeatFluxUpdater<2>::id = "TenMomentLocalKCollisionlessHeatFlux2D";
-  template <> const char *TenMomentLocalKCollisionlessHeatFluxUpdater<3>::id = "TenMomentLocalKCollisionlessHeatFlux3D";
+  template <> const char *TenMomentAdaptiveKCollisionlessHeatFluxUpdater<1>::id = "TenMomentAdaptiveKCollisionlessHeatFlux1D";
+  template <> const char *TenMomentAdaptiveKCollisionlessHeatFluxUpdater<2>::id = "TenMomentAdaptiveKCollisionlessHeatFlux2D";
+  template <> const char *TenMomentAdaptiveKCollisionlessHeatFluxUpdater<3>::id = "TenMomentAdaptiveKCollisionlessHeatFlux3D";
 
   template <unsigned NDIM>
   void
-  TenMomentLocalKCollisionlessHeatFluxUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
+  TenMomentAdaptiveKCollisionlessHeatFluxUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
 
@@ -43,7 +43,7 @@ namespace Lucee
       std::vector<double> cd = tbl.getNumVec("components");
       if (cd.size() != NDIM)
         throw Lucee::Except(
-          "TenMomentLocalKCollisionlessHeatFluxUpdater::readInput: 'components' table size incorrect");
+          "TenMomentAdaptiveKCollisionlessHeatFluxUpdater::readInput: 'components' table size incorrect");
       for (unsigned i=0; i<NDIM; ++i)
         components.push_back( (int) cd[i] );
     } else {
@@ -57,7 +57,7 @@ namespace Lucee
       multipliers = tbl.getNumVec("multipliers");
       if (multipliers.size() != NDIM)
         throw Lucee::Except(
-          "TenMomentLocalKCollisionlessHeatFluxUpdater::readInput: 'multipliers' table size incorrect");
+          "TenMomentAdaptiveKCollisionlessHeatFluxUpdater::readInput: 'multipliers' table size incorrect");
     } else {
       for (unsigned i=0; i<NDIM; ++i)
         multipliers.push_back(1.);
@@ -69,14 +69,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  TenMomentLocalKCollisionlessHeatFluxUpdater<NDIM>::initialize()
+  TenMomentAdaptiveKCollisionlessHeatFluxUpdater<NDIM>::initialize()
   {
     UpdaterIfc::initialize();
   }
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  TenMomentLocalKCollisionlessHeatFluxUpdater<NDIM>::update(double t)
+  TenMomentAdaptiveKCollisionlessHeatFluxUpdater<NDIM>::update(double t)
   {
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -194,14 +194,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  TenMomentLocalKCollisionlessHeatFluxUpdater<NDIM>::declareTypes()
+  TenMomentAdaptiveKCollisionlessHeatFluxUpdater<NDIM>::declareTypes()
   {
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
 // instantiations
-  template class TenMomentLocalKCollisionlessHeatFluxUpdater<1>;
-  template class TenMomentLocalKCollisionlessHeatFluxUpdater<2>;
-  template class TenMomentLocalKCollisionlessHeatFluxUpdater<3>;
+  template class TenMomentAdaptiveKCollisionlessHeatFluxUpdater<1>;
+  template class TenMomentAdaptiveKCollisionlessHeatFluxUpdater<2>;
+  template class TenMomentAdaptiveKCollisionlessHeatFluxUpdater<3>;
 }
 

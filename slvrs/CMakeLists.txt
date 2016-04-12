@@ -118,7 +118,7 @@ set(lcslvrs_SOURCES
   LcTwentyMomentEquation.cpp
   LcTwentyMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
-  LcTenMomentLocalKCollisionlessHeatFluxUpdater.cpp
+  LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.cpp
   LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
