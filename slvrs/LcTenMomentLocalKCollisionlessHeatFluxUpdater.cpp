@@ -36,7 +36,23 @@ namespace Lucee
     kmin = -1.;
     if (tbl.hasNumber("minWaveNumber"))
       kmin = tbl.getNumber("minWaveNumber");
+
+    // components used to compute local gradient length scale
+    if (tbl.hasNumVec("components"))
+    {
+      std::vector<double> cd = tbl.getNumVec("components");
+      if (cd.size() != NDIM)
+        throw Lucee::Except(
+          "TenMomentLocalKCollisionlessHeatFluxUpdater::readInput: 'components' table size incorrect");
+      for (unsigned i=0; i<NDIM; ++i)
+        components.push_back( (int) cd[i] );
+    } else {
+      for (unsigned i=0; i<NDIM; ++i)
+        components.push_back(0);
+    }
   }
+
+#define xDISPLAY_K_RANGE
 
   template <unsigned NDIM>
   void
@@ -61,8 +77,12 @@ namespace Lucee
 
     Lucee::Region<NDIM, int> localRgn = tmFluid.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+#ifdef DISPLAY_K_RANGE        
     double k_max_used = 0;
     double k_min_used = 1e10;
+    double k_max_found = 0;
+    double k_min_found = 1e10;
+#endif
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -89,14 +109,7 @@ namespace Lucee
       if (kA < 0.)
       {
         // k vector
-        double k[3];
-        // components used to compute local gradient length scale
-        unsigned components[3];
-        for (unsigned d = 0; d < 3; ++d)
-        {
-          k[d] = 0.;
-          components[d] = 0; // FIXME now using rho to compute gradient for all direction/tensor component
-        }
+        double k[3] = {0., 0., 0.};
 
         // compute k[d]   
         for (unsigned d = 0; d < NDIM; ++d)
@@ -115,10 +128,19 @@ namespace Lucee
           double xcl[3];
           grid.getCentroid(xcl);
         
-          double dx1 = 1./(xcr[d]-xcl[d]);
+          double dx1 = .5/(xcr[d]-xcl[d]);
           idx[d] = idx[d]+1; // restore idx
           
-          double k_d = std::fabs(dx1*(rPtr[c] - lPtr[c])/ptr[c]);
+          double k_d_ctr = std::fabs(dx1*0.5*(rPtr[c] - lPtr[c])/ptr[c]);
+          double k_d_fwd = std::fabs(dx1*(rPtr[c] - ptr[c])/ptr[c]);
+          double k_d_bwd = std::fabs(dx1*(ptr[c] - lPtr[c])/ptr[c]);
+          double k_d = std::max(k_d_ctr, k_d_fwd);
+          k_d = std::max(k_d, k_d_bwd);
+
+#ifdef DISPLAY_K_RANGE        
+          if (k_d > k_max_found) k_max_found = k_d;
+          if (k_d < k_min_found) k_min_found = k_d;
+#endif
 
           if (kmax > 0. && k_d > kmax)
             k_d = kmax; // TODO: physics based kmax (e.g., 1/d_e)
@@ -134,8 +156,10 @@ namespace Lucee
           k2 += k[d]*k[d];
         kThis = std::sqrt(k2);
       }
+#ifdef DISPLAY_K_RANGE        
       if (kThis > k_max_used) k_max_used = kThis;
       if (kThis < k_min_used) k_min_used = kThis;
+#endif
 
       double edt = std::exp(-vt*kThis*dt);
 
@@ -147,7 +171,9 @@ namespace Lucee
       ptr[8] = pyz*edt + r*v*w;
       ptr[9] = (pzz-p)*edt+p + r*w*w;
     }
-    //std::cout << "k range [" << k_min_used << ", " << k_max_used << "]" << std::endl;
+#ifdef DISPLAY_K_RANGE        
+    std::cout << "k used range [" << k_min_used << ", " << k_max_used << "] k computed range [" << k_min_found << ", " << k_max_found << "]" << std::endl;
+#endif
     
     return Lucee::UpdaterStatus();
   }
