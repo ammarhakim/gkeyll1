@@ -66,8 +66,6 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Average wave number */
-      double kA;
   };
 }
 
