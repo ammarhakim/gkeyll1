@@ -51,6 +51,7 @@
 #include <LcKineticTotalEnergyUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiff3DUpdater.h>
+#include <LcLenardBernsteinDiff5DUpdater.h>
 #include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDrag3DUpdater.h>
 #include <LcLenardBernsteinDragUpdater.h>
@@ -86,6 +87,7 @@
 #include <LcSOLDerivativeCalc.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
+#include <LcSOLHeatFluxCalc.h>
 #include <LcSOLIonDensityInitialization.h>
 #include <LcSOLPositivityUpdater.h>
 #include <LcSOLTemperatureCalc.h>
@@ -181,6 +183,7 @@ namespace Lucee
       .append<Lucee::SOLDerivativeCalc<4> >()
       .append<Lucee::SOLDerivativeCalc<5> >()
       .append<Lucee::SOLElectronDensityInitialization>()
+      .append<Lucee::SOLHeatFluxCalc>()
       .append<Lucee::SOLIonDensityInitialization>()
       .append<Lucee::SOLPositivityUpdater>()
       .append<Lucee::SOLTemperatureCalc>()
@@ -200,6 +203,7 @@ namespace Lucee
       .append<Lucee::LenardBernsteinDrag3DUpdater>()
       .append<Lucee::LenardBernsteinDiffUpdater>()
       .append<Lucee::LenardBernsteinDiff3DUpdater>()
+      .append<Lucee::LenardBernsteinDiff5DUpdater>()
       
       .append<Lucee::NodalCopyFaceToInteriorUpdater>()
 

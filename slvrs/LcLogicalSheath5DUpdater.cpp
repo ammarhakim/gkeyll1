@@ -186,7 +186,7 @@ namespace Lucee
     nodalBasis3d->getSurfLowerNodeNums(2, lowerEdgeNodeNums);
     nodalBasis3d->getSurfUpperNodeNums(2, upperEdgeNodeNums);
 
-    cutoffTolerance = 1e-4;
+    cutoffTolerance = 1e-3;
   }
 
   Lucee::UpdaterStatus
@@ -221,7 +221,7 @@ namespace Lucee
     // index of ghost cell
     int gstIdx[5];
     bool foundAllVc = true;
-    const int maxIter = 50;
+    const int maxIter = 100;
 
     // Need to find phiS on lower z plane if it is contained in the localRegion
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -312,17 +312,13 @@ namespace Lucee
                   double lowerBound = -0.5*grid.getDx(3);
                   double upperBound = 0.5*grid.getDx(3);
                   // Gamma - Gamma_exact evaluated at bracketed values
-                  double fl = 0.0-exactResult;
+                  /*double fl = 0.0-exactResult;
                   double fh = elcFluxAtIv-exactResult;
 
-                  //std::cout << "elcFluxAtIv = " << elcFluxAtIv << std::endl;
-                  //std::cout << "runningElcFluxAtNode = " << runningElcFluxAtNode << std::endl;
-                  //std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
                   // Ridders' Method (See Press 2007, page 453). Removed some of checks that
                   // the version in Numerical Recipes has because they appear to be unnecessary.
                   // Consider using Brent's method in the future (more complicated to implement).
-                  /*
-                  for (int iter = 0; iter < 60; iter++)
+                  for (int iter = 0; iter < maxIter; iter++)
                   {
                     double xm = 0.5*(lowerBound + upperBound);
                     // Calculate function at xm
@@ -342,16 +338,18 @@ namespace Lucee
                       {
                         idx[4] = iMu;
                         distf.setPtr(sknPtr, idx);
-                        // Get the coordinates of cell center
-                        grid.setIndex(idx);
-                        grid.getCentroid(cellCentroid);
+                        hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                         // Compute distribution function at quadrature point
                         double fAtPoint = 0.0;
+                        double gradHAtPoint = 0.0;
                         for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                        {
                           fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                        }
 
                         fm += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          scaleFactor*gradHAtPoint*fAtPoint;
                       }
                     }
 
@@ -377,16 +375,18 @@ namespace Lucee
                       {
                         idx[4] = iMu;
                         distf.setPtr(sknPtr, idx);
-                        // Get the coordinates of cell center
-                        grid.setIndex(idx);
-                        grid.getCentroid(cellCentroid);
+                        hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                         // Compute distribution function at quadrature point
                         double fAtPoint = 0.0;
+                        double gradHAtPoint = 0.0;
                         for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                        {
                           fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                        }
 
                         fNew += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          scaleFactor*gradHAtPoint*fAtPoint;
                       }
                     }
 
@@ -397,14 +397,7 @@ namespace Lucee
 
                     
                     if (fabs(relError) < cutoffTolerance )
-                    {
-                      //std::cout << "lFinal relError = " << relError << std::endl;
-                      //std::cout << "lFinal b = " << cellCentroid[3] + b << std::endl;
-                      //std::cout << "lexactResult = " << exactResult << std::endl;
-                      //std::cout << "literCount = " << iter << std::endl;
-                      //std::cout << "lExcessFraction = " << excessFraction << std::endl;
                       break;
-                    }
 
                     // Update root brackets, making use of monotonicity of function
                     if (relError > 0)
@@ -418,19 +411,14 @@ namespace Lucee
                       fl = fNew;
                     }
 
-                    if (iter > 20)
+                    if (iter == maxIter-1)
                     {
-                      //std::cout << "iter = " << iter << std::endl;
-                      //std::cout << "fl = " << fl << std::endl;
-                      //std::cout << "fh = " << fh << std::endl;
-                      //std::cout << "relError = " << relError << std::endl;
+                      std::cout << "max iterations reached" << std::endl;
+                      std::cout << "relError = " << relError << std::endl;
                       foundAllVc = false;
                     }
                   }*/
 
-                  //if (exactResult == 0.0)
-                  //  b = -0.5*grid.getDx(3);
-                  //else
                   {
                     do
                     {
@@ -478,6 +466,8 @@ namespace Lucee
 
                     } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
 
+                    /*
+                    // diagnostic loop
                     if (iterCount == maxIter)
                     {
                       foundAllVc = false;
@@ -541,7 +531,7 @@ namespace Lucee
                         iterCount++;
 
                       } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
-                    }
+                    }*/
                   }
 
                   // Get the coordinates of cell center
@@ -721,21 +711,16 @@ namespace Lucee
                   // Root bracket values
                   double lowerBound = -0.5*grid.getDx(3);
                   double upperBound = 0.5*grid.getDx(3);
-                  // Gamma - Gamma_exact evaluated at bracketed values
-                  // Difference between flux contribution from v_c vs exact result for this cell
-                  double fl = elcFluxAtIv-exactResult;
-                  double fh = -exactResult;
-
-                  //std::cout << "idx = " << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << std::endl;
-                  //std::cout << "fl = " << fl << std::endl; 
-                  //std::cout << "fh = " << fh << std::endl; 
-                  //std::cout << "totalIonFluxAtNode = " << totalIonFluxAtNode << std::endl;
 
                   // Ridders' Method (See Press 2007, page 453). Removed some of checks that
                   // the version in Numerical Recipes has because they appear to be unnecessary.
                   // Consider using Brent's method in the future (more complicated to implement).
                   /*
-                  for (int iter = 0; iter < 60; iter++)
+                  // Gamma - Gamma_exact evaluated at bracketed values
+                  // Difference between flux contribution from v_c vs exact result for this cell
+                  double fl = elcFluxAtIv-exactResult;
+                  double fh = -exactResult;
+                  for (int iter = 0; iter < maxIter; iter++)
                   {
                     double xm = 0.5*(lowerBound + upperBound);
                     // Calculate function at xm
@@ -755,16 +740,21 @@ namespace Lucee
                       {
                         idx[4] = iMu;
                         distf.setPtr(sknPtr, idx);
+                        hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                         // Get the coordinates of cell center
                         grid.setIndex(idx);
                         grid.getCentroid(cellCentroid);
                         // Compute distribution function at quadrature point
                         double fAtPoint = 0.0;
+                        double gradHAtPoint = 0.0;
                         for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                        {
                           fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                        }
 
                         fm += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          scaleFactor*gradHAtPoint*fAtPoint;
                       }
                     }
 
@@ -790,16 +780,21 @@ namespace Lucee
                       {
                         idx[4] = iMu;
                         distf.setPtr(sknPtr, idx);
+                        hamilDerivIn.setPtr(hamilDerivInPtr, idx);
                         // Get the coordinates of cell center
                         grid.setIndex(idx);
                         grid.getCentroid(cellCentroid);
                         // Compute distribution function at quadrature point
                         double fAtPoint = 0.0;
+                        double gradHAtPoint = 0.0;
                         for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                        {
                           fAtPoint += sknPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                          gradHAtPoint += hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex]*basisAtPoint[nodeIndex];
+                        }
 
                         fNew += weightScale*gaussSurfWeights(gaussIndex)*
-                          (cellCentroid[3] + refCoord[0]*0.5*grid.getDx(3))*fAtPoint;
+                          scaleFactor*gradHAtPoint*fAtPoint;
                       }
                     }
 
@@ -830,25 +825,22 @@ namespace Lucee
                       fl = fNew;
                     }
 
-                    std::cout << "upper iter = " << iter << std::endl;
-                    std::cout << "upper fl = " << fl << std::endl;
-                    std::cout << "upper lowerBound = " << lowerBound << std::endl;
-                    std::cout << "upper fh = " << fh << std::endl;
-                    std::cout << "upper upperBound = " << upperBound << std::endl;
-                    std::cout << "upper relError = " << relError << std::endl;
+                    //std::cout << "upper iter = " << iter << std::endl;
+                    //std::cout << "upper fl = " << fl << std::endl;
+                    //std::cout << "upper lowerBound = " << lowerBound << std::endl;
+                    //std::cout << "upper fh = " << fh << std::endl;
+                    //std::cout << "upper upperBound = " << upperBound << std::endl;
+                    //std::cout << "upper relError = " << relError << std::endl;
                     // check to see if we are at the last iteration
-                    if (iter > 20)
+                    if (iter == maxIter-1)
                     {
+                      std::cout << "max iterations reached" << std::endl;
+                      std::cout << "relError = " << relError << std::endl;
                       foundAllVc = false;
                     }
                   }*/
 
                   // This is a bisection search for the exact 'a', keeping 'b' fixed
-                  //if (exactResult == 0.0)
-                  //{
-                  //  a = 0.5*grid.getDx(3);
-                  //}
-                  //else
                   {
                     do
                     {
@@ -896,7 +888,8 @@ namespace Lucee
                       iterCount++;
 
                     } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
-
+                    /*
+                    // diagnostic loop
                     if (iterCount == maxIter)
                     {
                       foundAllVc = false;
@@ -962,7 +955,7 @@ namespace Lucee
                         iterCount++;
 
                       } while ( fabs(relError) > cutoffTolerance && iterCount < maxIter);
-                    }
+                    }*/
                   }
 
                   // Store result in the appropriate 2d field

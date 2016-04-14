@@ -69,6 +69,7 @@ set(lcslvrs_SOURCES
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiff3DUpdater.cpp
+  LcLenardBernsteinDiff5DUpdater.cpp
   LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDrag3DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
@@ -105,6 +106,7 @@ set(lcslvrs_SOURCES
   LcSOLDerivativeCalc.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
+  LcSOLHeatFluxCalc.cpp
   LcSOLIonDensityInitialization.cpp
   LcSOLPositivityUpdater.cpp
   LcSOLTemperatureCalc.cpp
