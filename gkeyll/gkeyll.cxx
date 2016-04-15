@@ -24,6 +24,9 @@
 // txbase includes
 #ifdef HAVE_MPI
 # include <TxMpiBase.h>
+#ifdef HAVE_FFTW3
+# include <fftw3-mpi.h>
+#endif
 #else
 # include <TxSelfBase.h>
 #endif
@@ -48,6 +51,9 @@ main(int argc, char **argv)
 // initialize MPI if building in parallel
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
+#ifdef HAVE_FFTW3
+  fftw_mpi_init();
+#endif
 #endif
 
   TxCommBase *comm = Loki::SingletonHolder<Lucee::Globals>

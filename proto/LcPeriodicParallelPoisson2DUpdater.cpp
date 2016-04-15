@@ -48,11 +48,9 @@ namespace Lucee
     const ptrdiff_t NY = grid.getNumCells(1); 
     // fftw variables for local use
     ptrdiff_t alloc_local, local_n0;
-    // move this to gkyell.cxx later.
-    fftw_mpi_init();
-    // create the fft local data size (hopefully grid.getComm() actually does something.
+    // create the fft local data size .
     alloc_local = fftw_mpi_local_size_2d(NX , NY, MPI_COMM_WORLD, &local_n0, &local_0_start);
-    // FFTW may want more tha nx*ny 
+    // FFTW may want more than nx*ny of memory
     src_in_out.resize(alloc_local);
     sol_in_out.resize(alloc_local);
 
