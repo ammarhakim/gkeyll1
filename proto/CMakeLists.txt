@@ -102,6 +102,9 @@ set (proto_SOURCES
 
 if (FFTW3_FOUND)
   set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp)
+  if (ENABLE_PARALLEL)
+    set (proto_SOURCES ${proto_SOURCES} LcPeriodicParallelPoisson2DUpdater.cpp)
+  endif (ENABLE_PARALLEL)
 endif (FFTW3_FOUND)
 
 if (PETSC_FOUND)

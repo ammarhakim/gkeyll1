@@ -92,6 +92,9 @@
 
 #ifdef HAVE_FFTW3
 # include <LcPeriodicPoisson2DUpdater.h>
+#ifdef HAVE_MPI
+# include <LcPeriodicParallelPoisson2DUpdater.h>
+#endif
 #endif
 
 namespace Lucee
@@ -300,6 +303,11 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
       .append<Lucee::PeriodicPoisson2DUpdater>();
+#ifdef HAVE_MPI
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
+      ::Instance()
+      .append<Lucee::PeriodicParallelPoisson2DUpdater>();
+#endif
 #endif
   }
 }
