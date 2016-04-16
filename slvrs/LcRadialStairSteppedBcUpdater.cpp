@@ -291,8 +291,7 @@ namespace Lucee
 
     Lucee::FieldPtr<double> Aptr = A.createPtr();
     Lucee::FieldPtr<double> Aptrm = A.createPtr();
-    Lucee::ConstFieldPtr<double> rssp = rssBnd->createConstPtr();
-    Lucee::ConstFieldPtr<double> rsspm = rssBnd->createConstPtr();
+    Lucee::ConstFieldPtr<double> iop = inOut->createPtr();
     Lucee::ConstFieldPtr<double> iopm = inOut->createPtr();
     double xc[3], xcm[3];
 
@@ -312,9 +311,9 @@ namespace Lucee
       {
 // set current cell index
         idx[bcDir] = i;
-        rssBnd->setPtr(rssp, idx);
+        inOut->setPtr(iop, idx);
           
-        if (rssp[0] == RSSB_SKINGHOST)
+        if (iop[0] <= 0)
         { // found a skin ghost cell
 // get current centroid coordinates
           grid.setIndex(idx);
@@ -348,7 +347,6 @@ namespace Lucee
 // set adjacent cell index
             adjSeq.fillWithIndex(idxm);
 // set pointers for adjacent cell
-            rssBnd->setPtr(rsspm, idxm);
             inOut->setPtr(iopm, idxm);
 
             if (iopm[0] > 0)
