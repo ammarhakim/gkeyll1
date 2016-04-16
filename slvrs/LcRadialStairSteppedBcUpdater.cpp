@@ -25,8 +25,6 @@
 namespace Lucee
 {
 // right/left flags
-  enum {RSSB_REAL = -1, RSSB_SKINGHOST = 0, RSSB_MIDDLE = 1};
-
   template <> const char *RadialStairSteppedBcUpdater<1>::id = "RadialStairSteppedBc1D";
   template <> const char *RadialStairSteppedBcUpdater<2>::id = "RadialStairSteppedBc2D";
   template <> const char *RadialStairSteppedBcUpdater<3>::id = "RadialStairSteppedBc3D";
@@ -40,8 +38,6 @@ namespace Lucee
   template <unsigned NDIM>
   RadialStairSteppedBcUpdater<NDIM>::~RadialStairSteppedBcUpdater() 
   {
-    delete rssBnd;
-    isSafeToWrite = false;
   }
 
   template <unsigned NDIM>
@@ -160,109 +156,6 @@ namespace Lucee
   {
 // call base class method
     UpdaterIfc::initialize();
-
-    const Lucee::StructuredGridBase<NDIM>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
-    int lg[NDIM], ug[NDIM];
-    for (unsigned d=0; d<NDIM; ++d)
-      lg[d] = ug[d] = 2;
-    rssBnd = new Lucee::Field<NDIM, double>(localRgn, 1, lg, ug); // to store boundary information
-    isSafeToWrite = false;
-
-    Lucee::FieldPtr<double> iop = inOut->createPtr();
-    Lucee::FieldPtr<double> iopm = inOut->createPtr();
-
-    (*rssBnd) = RSSB_MIDDLE; // clear out field
-
-    Lucee::FieldPtr<double> rssp = rssBnd->createPtr();
-
-// loop, figuring out where and how the boundary edge is oriented
-    for (unsigned dir=0; dir<NDIM; ++dir)
-    {
-// create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
-
-// lower and upper bounds of 1D slice
-      int sliceLower = localRgn.getLower(dir)-1;
-      int sliceUpper = localRgn.getUpper(dir)+1;
-
-      while (seq.step())
-      {
-        int idx[NDIM], idxm[NDIM];
-        seq.fillWithIndex(idx);
-        seq.fillWithIndex(idxm);
-// loop over each slice
-        for (int i=sliceLower; i<sliceUpper; ++i)
-        {
-          idx[dir] = i;
-          inOut->setPtr(iop, idx);
-          rssBnd->setPtr(rssp, idx);
-
-          if (iop[0] >0)
-          {
-// if current cell is real, mark it and skip to next cell
-            rssp[0] = RSSB_REAL;
-            continue;
-          }
-
-// now find skin ghost cells by finding if any adjacent cell is inside domain
-// lower and upper bounds of adjacent cells
-          int adjLower[NDIM], adjUpper[NDIM];
-          for (unsigned d = 0; d < NDIM; ++d)
-          {
-            adjLower[d] = idx[d] - 1;
-            adjUpper[d] = idx[d] + 2;
-          }
-          Lucee::Region<NDIM, int> adjRgn(adjLower, adjUpper);
-          Lucee::RowMajorSequencer<NDIM> adjSeq(adjRgn);
-
-          bool foundSkin = false;
-          while (adjSeq.step() && !foundSkin)
-          {
-            adjSeq.fillWithIndex(idxm);
-            inOut->setPtr(iopm, idxm);
-// if any one of the adjacent cells is inside the domain, the current cell is a skin ghost cell
-            if (iopm[0] > 0)
-            {
-              rssp[0] = RSSB_SKINGHOST;
-              foundSkin = true;
-              break;
-            }
-          } // while adjSeq.step
-
-        } // for i sliceLower to sliceUpper
-      } // while seq.step
-    } // for dir dim
-    isSafeToWrite = true;
-  }
-
-  template <unsigned NDIM>
-  int
-  RadialStairSteppedBcUpdater<NDIM>::luaWrite(lua_State *L)
-  {
-    RadialStairSteppedBcUpdater<NDIM> *updater
-      = Lucee::PointerHolder<RadialStairSteppedBcUpdater<NDIM> >::getObj(L);
-    std::string nm = lua_tostring(L, 2);
-    if (updater->isSafeToWrite)
-      updater->write(nm);
-
-    return 0;
-  }
-
-  template <unsigned NDIM>
-  void
-  RadialStairSteppedBcUpdater<NDIM>::write(const std::string& nm)
-  { 
-    std::string outPrefix = Loki::SingletonHolder<Lucee::Globals>::Instance().outPrefix;
-    std::string outNm = outPrefix + "_" + nm;
-    TxCommBase& comm = *this->getComm();
-
-    TxIoBase *io = new TxHdf5Base(&comm);
-    TxIoNodeType fn = io->createFile(outNm);
-    rssBnd->writeToFile(*io, fn, this->getName());
-    delete io;
   }
 
   template <unsigned NDIM>
@@ -370,6 +263,8 @@ namespace Lucee
             }
             cnt = cnt + 1;
           }
+          if (sum == 0)
+            break;
           for (unsigned i = 0; i < numComponents; ++i)
 // compute the weighted average
             qFromAll[i] /= sum;
@@ -507,7 +402,6 @@ namespace Lucee
     UpdaterIfc::appendLuaCallableMethods(lfm);
 
     lfm.appendFunc("setDir", luaSetDir);
-    lfm.appendFunc("write", luaWrite);
   }
 
   template <unsigned NDIM>
