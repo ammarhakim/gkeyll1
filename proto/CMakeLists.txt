@@ -18,6 +18,7 @@ if (PETSC_FOUND)
 endif (PETSC_FOUND)
 
 set (proto_SOURCES
+  LcBGKCollUpdater.cpp	
   LcCenterOfMassUpdater.cpp
   LcConstGravitySrcUpdater.cpp
   LcConstructLinearOperatorMatrix.cpp

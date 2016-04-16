@@ -10,6 +10,7 @@
 #endif
 
 // lucee includes
+#include <LcBGKCollUpdater.h>
 #include <LcCenterOfMassUpdater.h>
 #include <LcConstGravitySrcUpdater.h>
 #include <LcConstructLinearOperatorMatrix.h>
@@ -105,6 +106,12 @@ namespace Lucee
 // register updaters
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
+      .append<Lucee::BGKCollUpdater<1, 1> >()
+      .append<Lucee::BGKCollUpdater<1, 2> >()
+      .append<Lucee::BGKCollUpdater<1, 3> >()
+      .append<Lucee::BGKCollUpdater<2, 2> >()
+      .append<Lucee::BGKCollUpdater<2, 3> >()
+      
       .append<Lucee::CenterOfMassUpdater<1> >()
       .append<Lucee::CenterOfMassUpdater<2> >()
       .append<Lucee::CenterOfMassUpdater<3> >()
