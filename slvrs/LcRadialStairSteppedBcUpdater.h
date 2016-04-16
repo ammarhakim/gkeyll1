@@ -126,10 +126,6 @@ namespace Lucee
       std::vector<unsigned> zeroTransComponents;
 /** Pointer to in/out field */
       Lucee::Field<NDIM, double> *inOut;
-/** Field to store information about boundary */
-      Lucee::Field<NDIM, double> *rssBnd;
-/** Flag */
-      bool isSafeToWrite;
 
 /**
  * Set direction to update.
