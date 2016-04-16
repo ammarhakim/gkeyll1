@@ -293,6 +293,7 @@ namespace Lucee
     Lucee::FieldPtr<double> Aptrm = A.createPtr();
     Lucee::ConstFieldPtr<double> rssp = rssBnd->createConstPtr();
     Lucee::ConstFieldPtr<double> rsspm = rssBnd->createConstPtr();
+    Lucee::ConstFieldPtr<double> iopm = inOut->createPtr();
     double xc[3], xcm[3];
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
@@ -348,8 +349,9 @@ namespace Lucee
             adjSeq.fillWithIndex(idxm);
 // set pointers for adjacent cell
             rssBnd->setPtr(rsspm, idxm);
+            inOut->setPtr(iopm, idxm);
 
-            if (rsspm[0] == RSSB_REAL)
+            if (iopm[0] > 0)
             { // found an adjacent cell inside the domain
 // get centroid coordinate for adjacent cell
               grid.setIndex(idxm);
