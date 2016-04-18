@@ -259,7 +259,7 @@ namespace Lucee
             cnt = cnt + 1;
           }
           if (sum == 0)
-            break;
+            continue;
           for (unsigned i = 0; i < numComponents; ++i)
 // compute the weighted average
             qFromAll[i] /= sum;
