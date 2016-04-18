@@ -177,11 +177,6 @@ namespace Lucee
     Lucee::Field<NDIM, double>& A = this->getOut<Lucee::Field<NDIM, double> >(0);
     unsigned numComponents = A.getNumComponents();
 
-// create coordinate system along this direction (note that this
-// updater only works on Cartesian meshes. Hence, using an aligned CS
-// is perfectly fine)
-    Lucee::AlignedRectCoordSys coordSys(bcDir);
-
     Lucee::FieldPtr<double> Aptr = A.createPtr();
     Lucee::FieldPtr<double> Aptrm = A.createPtr();
     Lucee::ConstFieldPtr<double> iop = inOut->createPtr();
