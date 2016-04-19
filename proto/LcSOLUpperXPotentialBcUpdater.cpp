@@ -171,7 +171,9 @@ namespace Lucee
     // Every processor has a copy of the average potential
     comm->allreduce(1, &localIntUpper, &totalIntUpper, TX_SUM);
 
+    // 4-16-16: To match torpex, set potential to zero
     totalIntUpper = totalIntUpper / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
+    totalIntUpper = 0.0;
 
     seq.reset();
 
@@ -220,7 +222,8 @@ namespace Lucee
       // Every processor has a copy of the average potential
       comm->allreduce(1, &localIntLower, &totalIntLower, TX_SUM);
 
-      totalIntLower = totalIntLower / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
+      // 4-16-16 to match TORPEX, set potential at edges to zero
+      totalIntLower = 0.0;//totalIntLower / (grid.getDx(1)*(globalRgn.getUpper(1)-globalRgn.getLower(1)));
 
       seq.reset();
 
