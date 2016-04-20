@@ -251,7 +251,16 @@ namespace Lucee
             bool foundCutoffCell = false;
 
             if (totalIonFluxAtNode == 0.0)
-              continue;
+            {
+              // Don't do a search. Just reflect everything.
+              idx[3] = localRgn.getUpper(3);
+              idx[4] = localRgn.getLower(4);
+              grid.setIndex(idx);
+              grid.getCentroid(cellCentroid);
+              phiSLowerPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + 0.5*grid.getDx(3))*
+                (cellCentroid[3] + 0.5*grid.getDx(3))/eV;
+              foundCutoffCell = true;
+            }
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
@@ -266,7 +275,7 @@ namespace Lucee
               grid.getCentroid(cellCentroid);
               // Skip everything if skin cell now has a positive parallel velocity
               if (cellCentroid[3] > 0.0)
-                continue;
+                break;
 
               if (foundCutoffCell == false)
               {
@@ -649,7 +658,16 @@ namespace Lucee
             bool foundCutoffCell = false;
 
             if (totalIonFluxAtNode == 0.0)
-              continue;
+            {
+              // Don't do a search. Just reflect everything.
+              idx[3] = localRgn.getUpper(3);
+              idx[4] = localRgn.getLower(4);
+              grid.setIndex(idx);
+              grid.getCentroid(cellCentroid);
+              phiSUpperPtr[configNode] = 0.5*elcMass*(cellCentroid[3] + 0.5*grid.getDx(3))*
+                (cellCentroid[3] + 0.5*grid.getDx(3))/eV;
+              foundCutoffCell = true;
+            }
 
             // Need to loop over velocity space in this specific manner
             for (int ivSkin = localRgn.getUpper(3)-1, ivGhost = localRgn.getLower(3);
@@ -664,7 +682,7 @@ namespace Lucee
               grid.getCentroid(cellCentroid);
               // Skip everything if skin cell now has a positive parallel velocity
               if (cellCentroid[3] < 0.0)
-                continue;
+                break;
 
               if (foundCutoffCell == false)
               {
