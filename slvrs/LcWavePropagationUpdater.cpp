@@ -512,6 +512,7 @@ namespace Lucee
 // parent fields. (AHH 7/13/2014)
     Lucee::ConstFieldPtr<double> ioPtr = sp.createConstPtr();
     Lucee::ConstFieldPtr<double> ioPtr1 = sp.createConstPtr();
+    Lucee::ConstFieldPtr<double> lmtPtr = sp.createConstPtr();
 
     int sliceLower = sp.getLower(0);
     int sliceUpper = sp.getUpper(0) + 1;
@@ -544,7 +545,6 @@ namespace Lucee
         if (hasLimiterField && limiterField)
         {
           cellIdx[dir] = i;
-          Lucee::ConstFieldPtr<double> lmtPtr = limiterField->createConstPtr();
           limiterField->setPtr(lmtPtr, cellIdx);
           myLimiter = lmtPtr[0];
         }
