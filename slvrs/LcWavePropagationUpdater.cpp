@@ -379,14 +379,7 @@ namespace Lucee
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-        unsigned myLimiter = limiter;
-        if (limiterField)
-        {
-          Lucee::ConstFieldPtr<double> lmtPtr = limiterField->createConstPtr();
-          limiterField->setPtr(lmtPtr, idx);
-          myLimiter = lmtPtr[0];
-        }
-        applyLimiters(dir, idx, *waves[dir], *speeds[dir], myLimiter);
+        applyLimiters(dir, idx, *waves[dir], *speeds[dir]);
 
 // We need to go one cell beyond the last cell to ensure the right
 // most edge flux is computed
@@ -493,9 +486,9 @@ namespace Lucee
   template <unsigned NDIM>
   void
   WavePropagationUpdater<NDIM>::applyLimiters(unsigned dir, int cellIdx[NDIM],
-    Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp, unsigned limiter)
+    Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
-    if (limiter == NO_LIMITER) return;
+    if (limiter == NO_LIMITER and !limiterField) return;
 
     double c, r, dotr, dotl, wnorm2, wlimitr=1;
 
@@ -542,6 +535,15 @@ namespace Lucee
           //   continue; // skip to next cell
         }
 
+        unsigned myLimiter = limiter;
+        if (limiterField)
+        {
+          cellIdx[dir] = i;
+          Lucee::ConstFieldPtr<double> lmtPtr = limiterField->createConstPtr();
+          limiterField->setPtr(lmtPtr, cellIdx);
+          myLimiter = lmtPtr[0];
+        }
+
         sp.setPtr(spPtr, i);
         wnorm2 = 0.0;
         dotl = dotr;
@@ -558,7 +560,7 @@ namespace Lucee
           else
             r = dotr/wnorm2;
 
-          switch (limiter)
+          switch (myLimiter)
           {
             case NO_LIMITER:
                 wlimitr = 1.0;

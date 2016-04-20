@@ -112,8 +112,7 @@ namespace Lucee
  * @param speeds Wave speeds.
  */
       void applyLimiters(unsigned dir, int idx[NDIM],
-        Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds,
-        unsigned limiter);
+        Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds);
   };
 }
 
