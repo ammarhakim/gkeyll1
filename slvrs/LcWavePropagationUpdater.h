@@ -73,6 +73,8 @@ namespace Lucee
       std::vector<unsigned> updateDims;
 /** Limiter to use */
       unsigned limiter;
+/** Flag to indicate if we there is a limiter field */
+      bool hasLimiterField;
 /** Location-based limiter field */
       Lucee::Field<NDIM, double> *limiterField;
 /** Equation to solve */

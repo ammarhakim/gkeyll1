@@ -129,8 +129,13 @@ namespace Lucee
         throw lce;
       }
     }
+    hasLimiterField = false;
+// check if there is an embedded boundary
+    if (tbl.hasBool("hasLimiterField"))
+      hasLimiterField = tbl.getBool("hasLimiterField");
+
 // fetch pointer to location-based limiter
-    if (tbl.hasObject<Lucee::Field<NDIM, double> >("limiterField"))
+    if (hasLimiterField)
       limiterField = &tbl.getObject<Lucee::Field<NDIM, double> >("limiterField");
 
     bool hasFluxBc = false;
@@ -536,7 +541,7 @@ namespace Lucee
         }
 
         unsigned myLimiter = limiter;
-        if (limiterField)
+        if (hasLimiterField && limiterField)
         {
           cellIdx[dir] = i;
           Lucee::ConstFieldPtr<double> lmtPtr = limiterField->createConstPtr();
