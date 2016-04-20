@@ -73,6 +73,8 @@ namespace Lucee
       std::vector<unsigned> updateDims;
 /** Limiter to use */
       unsigned limiter;
+/** Location-based limiter field */
+      Lucee::Field<NDIM, double> *limiterField;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
 /** CFL number to use */
@@ -110,7 +112,8 @@ namespace Lucee
  * @param speeds Wave speeds.
  */
       void applyLimiters(unsigned dir, int idx[NDIM],
-        Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds);
+        Lucee::Field<1, double>& waves, const Lucee::Field<1, double>& speeds,
+        unsigned limiter);
   };
 }
 

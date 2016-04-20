@@ -129,6 +129,9 @@ namespace Lucee
         throw lce;
       }
     }
+// fetch pointer to location-based limiter
+    if (tbl.hasObject<Lucee::Field<NDIM, double> >("limiterField"))
+      limiterField = &tbl.getObject<Lucee::Field<NDIM, double> >("limiterField");
 
     bool hasFluxBc = false;
     for (unsigned d=0; d<NDIM; ++d)
@@ -376,7 +379,14 @@ namespace Lucee
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-        applyLimiters(dir, idx, *waves[dir], *speeds[dir]);
+        unsigned myLimiter = limiter;
+        if (limiterField)
+        {
+          Lucee::ConstFieldPtr<double> lmtPtr = limiterField->createConstPtr();
+          limiterField->setPtr(lmtPtr, idx);
+          myLimiter = lmtPtr[0];
+        }
+        applyLimiters(dir, idx, *waves[dir], *speeds[dir], myLimiter);
 
 // We need to go one cell beyond the last cell to ensure the right
 // most edge flux is computed
@@ -483,7 +493,7 @@ namespace Lucee
   template <unsigned NDIM>
   void
   WavePropagationUpdater<NDIM>::applyLimiters(unsigned dir, int cellIdx[NDIM],
-    Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
+    Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp, unsigned limiter)
   {
     if (limiter == NO_LIMITER) return;
 
