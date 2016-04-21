@@ -77,6 +77,8 @@ namespace Lucee
       bool hasLimiterField;
 /** Location-based limiter field */
       Lucee::Field<NDIM, double> *limiterField;
+/** Flag to indicate if we force to apply zero limiter at stair stepped boundary */
+      bool zeroLimiterSsBnd;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
 /** CFL number to use */
