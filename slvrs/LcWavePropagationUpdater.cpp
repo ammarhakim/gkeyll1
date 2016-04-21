@@ -168,6 +168,10 @@ namespace Lucee
     if (hasSsBnd)
       inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
 
+    zeroLimiterSsBnd = false;
+    if (hasSsBnd && tbl.hasBool("zeroLimiterSsBnd"))
+      zeroLimiterSsBnd = tbl.getBool("zeroLimiterSsBnd");
+
 // fetch pointer to flux bc field (if any)
     if (hasFluxBc)
       fluxBc = &tbl.getObject<Lucee::Field<NDIM, double> >("boundaryFluxField");
@@ -526,6 +530,14 @@ namespace Lucee
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
 
+        unsigned myLimiter = limiter;
+        if (hasLimiterField && limiterField)
+        {
+          cellIdx[dir] = i;
+          limiterField->setPtr(lmtPtr, cellIdx);
+          myLimiter = lmtPtr[0];
+        }
+
         if (hasSsBnd)
         {
 // if both cells attached to this edge are outside the domain, do not
@@ -533,20 +545,16 @@ namespace Lucee
 //
 // (I no longer recall why the following lines have been commented
 // out. AHH July 2015)
-          // cellIdx[dir] = i; // right cell
-          // inOut->setPtr(ioPtr, cellIdx);
-          // cellIdx[dir] = i-1; // left cell
-          // inOut->setPtr(ioPtr1, cellIdx);
-          // if (isOutside(ioPtr) && isOutside(ioPtr1))
+           cellIdx[dir] = i; // right cell
+           inOut->setPtr(ioPtr, cellIdx);
+           cellIdx[dir] = i-1; // left cell
+           inOut->setPtr(ioPtr1, cellIdx);
+           if (isOutside(ioPtr) && isOutside(ioPtr1))
+           {
           //   continue; // skip to next cell
-        }
-
-        unsigned myLimiter = limiter;
-        if (hasLimiterField && limiterField)
-        {
-          cellIdx[dir] = i;
-          limiterField->setPtr(lmtPtr, cellIdx);
-          myLimiter = lmtPtr[0];
+           }
+           else if (zeroLimiterSsBnd && (isOutside(ioPtr) || isOutside(ioPtr1)))
+             myLimiter = ZERO_LIMITER;
         }
 
         sp.setPtr(spPtr, i);
