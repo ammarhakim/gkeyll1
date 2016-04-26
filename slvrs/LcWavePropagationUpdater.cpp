@@ -168,6 +168,18 @@ namespace Lucee
     if (hasSsBnd)
       inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
 
+    if (hasSsBnd)
+    {
+      applySsBc = false;
+// check if we apply stair stepped Bc
+      if (tbl.hasBool("applySsBc"))
+        applySsBc = tbl.getBool("applySsBc");
+
+// fetch pointer to stair stepped Bc updater if we apply stair stepped Bc
+      if (applySsBc)
+        ssBcUpdater = &tbl.getObject<Lucee::StairSteppedBcUpdater<NDIM> >("ssBcUpdater");
+    }
+
     zeroLimiterSsBnd = false;
     if (hasSsBnd && tbl.hasBool("zeroLimiterSsBnd"))
       zeroLimiterSsBnd = tbl.getBool("zeroLimiterSsBnd");
@@ -269,6 +281,18 @@ namespace Lucee
       unsigned dir = updateDims[d]; // direction to update
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
+
+// apply stair-stepped Bc along dir before sweep along dir
+      if (hasSsBnd && applySsBc)
+      {
+        ssBcUpdater->setDir(dir);
+        std::vector<Lucee::DataStructIfc*> dsl;
+// ssBc has to be applied on q, right now we just cast away the constness of q
+        dsl.push_back(const_cast<Lucee::Field<NDIM, double>*>(&q));
+        ssBcUpdater->setOutVars(dsl);
+// TODO: handling errors from ssBcUpater
+        Lucee::UpdaterStatus s = ssBcUpdater->update(t);
+      }
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));

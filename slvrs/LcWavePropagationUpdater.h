@@ -16,6 +16,7 @@
 #include <LcField.h>
 #include <LcHyperEquation.h>
 #include <LcUpdaterIfc.h>
+#include <LcStairSteppedBcUpdater.h>
 
 // std includes
 #include <vector>
@@ -105,6 +106,10 @@ namespace Lucee
       bool hasSsBnd;
 /** In/out field */
       Lucee::Field<NDIM, double> *inOut;
+/** Flag to indicate if we apply embedded boundary */
+      bool applySsBc;
+/** Stair-stepped BC updater */
+      Lucee::StairSteppedBcUpdater<NDIM> *ssBcUpdater;
 /** Flux boundary field */
       Lucee::Field<NDIM, double> *fluxBc;
 /**
