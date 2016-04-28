@@ -1,7 +1,7 @@
 /**
  * @file	LcPeriodicCollisionlessHeatFluxUpdater.h
  *
- * @brief	Updater to solve Poisson equations with periodic BCs
+ * @brief	Updater for collisionless relaxation of the pressure tensor with periodic BCs
  */
 
 #ifndef LC_PERIODIC_COLLISIONLESS_HEAT_FLUX_UPDATER_H
@@ -93,7 +93,9 @@ namespace Lucee
       fftw_plan f_plan;
 /** FFTW-Plan for inverse transform */
       fftw_plan b_plan;
+/** Local memory offset for parallel version */
+      ptrdiff_t local_0_start;
   };
 }
 
-#endif // LC_PERIODIC_POISSON_2D_UPDATER_H
+#endif // LC_PERIODIC_COLLISIONLESS_HEAT_FLUX_UPDATER_H
