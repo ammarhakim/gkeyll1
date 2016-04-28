@@ -288,7 +288,8 @@ namespace Lucee
         ssBcUpdater->setDir(dir);
         std::vector<Lucee::DataStructIfc*> dsl;
 // ssBc has to be applied on q, right now we just cast away the constness of q
-        dsl.push_back(const_cast<Lucee::Field<NDIM, double>*>(&q));
+        Lucee::Field<NDIM, double>* q_ = const_cast<Lucee::Field<NDIM, double>*>(&q);
+        dsl.push_back(q_);
         ssBcUpdater->setOutVars(dsl);
         Lucee::UpdaterStatus s = ssBcUpdater->update(t);
 
@@ -302,6 +303,9 @@ namespace Lucee
           lce << dir << "." << std::endl;
           throw lce;
         }
+
+// exchange/fill ghost cell values
+        q_->sync();
       }
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
