@@ -290,8 +290,18 @@ namespace Lucee
 // ssBc has to be applied on q, right now we just cast away the constness of q
         dsl.push_back(const_cast<Lucee::Field<NDIM, double>*>(&q));
         ssBcUpdater->setOutVars(dsl);
-// TODO: handling errors from ssBcUpater
         Lucee::UpdaterStatus s = ssBcUpdater->update(t);
+
+// handle errors from ssBcUpater
+        int myLocalStatus = s.status, status;
+        TxCommBase *comm = ssBcUpdater->getComm();
+        comm->allreduce(1, &myLocalStatus, &status, TX_AND);
+        if (!status)
+        {
+          Lucee::Except lce("WavePropagationUpdater::update: Error occurred when applying StairStappedBcUpdater along ");
+          lce << dir << "." << std::endl;
+          throw lce;
+        }
       }
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
