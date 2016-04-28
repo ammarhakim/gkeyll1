@@ -71,7 +71,7 @@ namespace Lucee
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
-    alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK, grid.getComm()->getMpiComm(), &local_n0, &local_0_start);
+    alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK,MPI_COMM_WORLD, &local_n0, &local_0_start);
 #else
     int N[NDIM]; // Global grid size for parallel version
     for (unsigned i = 0; i < NDIM; ++i){
@@ -147,14 +147,18 @@ namespace Lucee
     int istride = howmany; // distance between elements in memory. For the parallel version we need stride = howmany.
     int ostride = howmany; 
     int idist = 1; // distance between first element of array -- interleaved data
+  
     int odist = 1; 
+#ifdef HAVE_MPI
+  //  f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
+  //  b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
+#else
     f_plan = fftw_plan_many_dft(
              NDIM, N, howmany, f_src_in_out, NULL, istride, idist, f_src_in_out, NULL, ostride, odist, FFTW_FORWARD, FFTW_MEASURE); 
     b_plan = fftw_plan_many_dft(
              NDIM, N, howmany, f_sol_in_out, NULL, istride, idist, f_sol_in_out, NULL, ostride, odist, FFTW_BACKWARD, FFTW_MEASURE);
+#endif
 
-  //  f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
-  //  b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
   }
 
   template <unsigned NDIM>
