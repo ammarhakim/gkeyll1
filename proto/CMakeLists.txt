@@ -102,7 +102,8 @@ set (proto_SOURCES
 )
 
 if (FFTW3_FOUND)
-  set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp)
+  set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp
+  LcPeriodicCollisionlessHeatFluxUpdater.cpp )
   if (ENABLE_PARALLEL)
     set (proto_SOURCES ${proto_SOURCES} LcPeriodicParallelPoisson2DUpdater.cpp)
   endif (ENABLE_PARALLEL)
