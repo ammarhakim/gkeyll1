@@ -291,18 +291,7 @@ namespace Lucee
         Lucee::Field<NDIM, double>* q_ = const_cast<Lucee::Field<NDIM, double>*>(&q);
         dsl.push_back(q_);
         ssBcUpdater->setOutVars(dsl);
-        Lucee::UpdaterStatus s = ssBcUpdater->update(t);
-
-// handle errors from ssBcUpater
-        int myLocalStatus = s.status, status;
-        TxCommBase *comm = ssBcUpdater->getComm();
-        comm->allreduce(1, &myLocalStatus, &status, TX_AND);
-        if (!status)
-        {
-          Lucee::Except lce("WavePropagationUpdater::update: Error occurred when applying StairStappedBcUpdater along ");
-          lce << dir << "." << std::endl;
-          throw lce;
-        }
+        ssBcUpdater->update(t);
 
 // exchange/fill ghost cell values
         q_->sync();
