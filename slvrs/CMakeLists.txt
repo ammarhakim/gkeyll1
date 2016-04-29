@@ -106,9 +106,16 @@ set(lcslvrs_SOURCES
   LcSOLDerivativeCalc.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
+  LcSOLEnergyAtCellCalc.cpp
+  LcSOLEnergyAtNodeCalc.cpp
   LcSOLHeatFluxCalc.cpp
   LcSOLIonDensityInitialization.cpp
+  LcSOLLocalPositivityUpdater.cpp
   LcSOLPositivityUpdater.cpp
+  LcSOLPositivityDragCellUpdater.cpp
+  LcSOLPositivityDragNodeUpdater.cpp
+  LcSOLPositivityScaleCellUpdater.cpp
+  LcSOLPositivityScaleNodeUpdater.cpp
   LcSOLTemperatureCalc.cpp
   LcSOLZeroNormalBoundaryCondition.cpp
   LcSerendipityElement.cpp

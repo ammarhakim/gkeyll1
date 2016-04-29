@@ -126,7 +126,7 @@ namespace Lucee
 
     Lucee::RowMajorSequencer<5> seq(localRgn);
     
-    // Used to sequencer
+    // Used in sequencer
     Eigen::VectorXd jacobianVector(nlocal3d);
     Eigen::VectorXd distfVector(nlocal5d);
 
@@ -147,6 +147,12 @@ namespace Lucee
 
       // Compute density
       double originalNum = distfVector.dot(densityMatrix*jacobianVector);
+      if (originalNum < 0.0)
+      {
+        std::cout << "originalNum = " << originalNum << std::endl;
+        std::cout << distfVector << std::endl;
+        return Lucee::UpdaterStatus(false, 0.0);
+      }
 
       // Zero out distfVector entries that are negative
       for (int i = 0; i < nlocal5d; i++)
@@ -159,7 +165,6 @@ namespace Lucee
       double modifiedNum = distfVector.dot(densityMatrix*jacobianVector);
 
       // Write modified values to distfOut
-
       for (int i = 0; i < nlocal5d; i++)
         distfPtr[i] = (originalNum/modifiedNum)*distfVector(i);
     }
