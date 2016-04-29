@@ -24,7 +24,6 @@ namespace Lucee
   TenMomentLocalCollisionlessHeatFluxUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
-    kA = tbl.getNumber("averageWaveNumber");
   }
 
   template <unsigned NDIM>
@@ -45,6 +44,9 @@ namespace Lucee
     Lucee::Field<NDIM, double>& tmFluid = this->getOut<Lucee::Field<NDIM, double> >(0);
     Lucee::FieldPtr<double> ptr = tmFluid.createPtr();
     int idx[NDIM];
+    
+    const Lucee::Field<NDIM, double>& kFld = this->getInp<Lucee::Field<NDIM, double> >(0);
+    Lucee::ConstFieldPtr<double> kPtr = kFld.createConstPtr();
 
     Lucee::Region<NDIM, int> localRgn = tmFluid.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -52,6 +54,8 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       tmFluid.setPtr(ptr, idx);
+      kFld.setPtr(kPtr, idx);
+      double kA = kPtr[0];
 
       double r = ptr[0];
       double u = ptr[1]/r;

@@ -129,6 +129,14 @@ namespace Lucee
         throw lce;
       }
     }
+    hasLimiterField = false;
+// check if there is an embedded boundary
+    if (tbl.hasBool("hasLimiterField"))
+      hasLimiterField = tbl.getBool("hasLimiterField");
+
+// fetch pointer to location-based limiter
+    if (hasLimiterField)
+      limiterField = &tbl.getObject<Lucee::Field<NDIM, double> >("limiterField");
 
     bool hasFluxBc = false;
     for (unsigned d=0; d<NDIM; ++d)
@@ -159,6 +167,22 @@ namespace Lucee
 // fetch pointer to in/out field if there is an embedded boundary
     if (hasSsBnd)
       inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
+
+    if (hasSsBnd)
+    {
+      applySsBc = false;
+// check if we apply stair stepped Bc
+      if (tbl.hasBool("applySsBc"))
+        applySsBc = tbl.getBool("applySsBc");
+
+// fetch pointer to stair stepped Bc updater if we apply stair stepped Bc
+      if (applySsBc)
+        ssBcUpdater = &tbl.getObject<Lucee::StairSteppedBcUpdater<NDIM> >("ssBcUpdater");
+    }
+
+    zeroLimiterSsBnd = false;
+    if (hasSsBnd && tbl.hasBool("zeroLimiterSsBnd"))
+      zeroLimiterSsBnd = tbl.getBool("zeroLimiterSsBnd");
 
 // fetch pointer to flux bc field (if any)
     if (hasFluxBc)
@@ -257,6 +281,21 @@ namespace Lucee
       unsigned dir = updateDims[d]; // direction to update
 // create coordinate system along this direction
       Lucee::AlignedRectCoordSys coordSys(dir);
+
+// apply stair-stepped Bc along dir before sweep along dir
+      if (hasSsBnd && applySsBc)
+      {
+        ssBcUpdater->setDir(dir);
+        std::vector<Lucee::DataStructIfc*> dsl;
+// ssBc has to be applied on q, right now we just cast away the constness of q
+        Lucee::Field<NDIM, double>* q_ = const_cast<Lucee::Field<NDIM, double>*>(&q);
+        dsl.push_back(q_);
+        ssBcUpdater->setOutVars(dsl);
+        ssBcUpdater->update(t);
+
+// exchange/fill ghost cell values
+        q_->sync();
+      }
 
 // create sequencer to loop over *each* 1D slice in 'dir' direction
       Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
@@ -485,7 +524,7 @@ namespace Lucee
   WavePropagationUpdater<NDIM>::applyLimiters(unsigned dir, int cellIdx[NDIM],
     Lucee::Field<1, double>& ws, const Lucee::Field<1, double>& sp)
   {
-    if (limiter == NO_LIMITER) return;
+    if (limiter == NO_LIMITER and !limiterField) return;
 
     double c, r, dotr, dotl, wnorm2, wlimitr=1;
 
@@ -504,6 +543,7 @@ namespace Lucee
 // parent fields. (AHH 7/13/2014)
     Lucee::ConstFieldPtr<double> ioPtr = sp.createConstPtr();
     Lucee::ConstFieldPtr<double> ioPtr1 = sp.createConstPtr();
+    Lucee::ConstFieldPtr<double> lmtPtr = sp.createConstPtr();
 
     int sliceLower = sp.getLower(0);
     int sliceUpper = sp.getUpper(0) + 1;
@@ -517,6 +557,14 @@ namespace Lucee
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
 
+        unsigned myLimiter = limiter;
+        if (hasLimiterField && limiterField)
+        {
+          cellIdx[dir] = i;
+          limiterField->setPtr(lmtPtr, cellIdx);
+          myLimiter = lmtPtr[0];
+        }
+
         if (hasSsBnd)
         {
 // if both cells attached to this edge are outside the domain, do not
@@ -524,12 +572,16 @@ namespace Lucee
 //
 // (I no longer recall why the following lines have been commented
 // out. AHH July 2015)
-          // cellIdx[dir] = i; // right cell
-          // inOut->setPtr(ioPtr, cellIdx);
-          // cellIdx[dir] = i-1; // left cell
-          // inOut->setPtr(ioPtr1, cellIdx);
-          // if (isOutside(ioPtr) && isOutside(ioPtr1))
+           cellIdx[dir] = i; // right cell
+           inOut->setPtr(ioPtr, cellIdx);
+           cellIdx[dir] = i-1; // left cell
+           inOut->setPtr(ioPtr1, cellIdx);
+           if (isOutside(ioPtr) && isOutside(ioPtr1))
+           {
           //   continue; // skip to next cell
+           }
+           else if (zeroLimiterSsBnd && (isOutside(ioPtr) || isOutside(ioPtr1)))
+             myLimiter = ZERO_LIMITER;
         }
 
         sp.setPtr(spPtr, i);
@@ -548,7 +600,7 @@ namespace Lucee
           else
             r = dotr/wnorm2;
 
-          switch (limiter)
+          switch (myLimiter)
           {
             case NO_LIMITER:
                 wlimitr = 1.0;

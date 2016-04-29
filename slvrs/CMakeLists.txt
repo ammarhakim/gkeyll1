@@ -126,12 +126,14 @@ set(lcslvrs_SOURCES
   LcSetPhiAtBoundaryUpdater.cpp
   LcSolverRegistry.cpp
   LcStairSteppedBcUpdater.cpp
+  LcRadialStairSteppedBcUpdater.cpp
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
   LcTwentyMomentEquation.cpp
   LcTwentyMomentFluidSource.cpp
   LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
+  LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.cpp
   LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
@@ -139,6 +141,7 @@ set(lcslvrs_SOURCES
   LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
+  LcAbsorbBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
 )
 

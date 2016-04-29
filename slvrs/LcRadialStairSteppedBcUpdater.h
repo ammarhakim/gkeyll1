@@ -1,11 +1,11 @@
 /**
- * @file	LcStairSteppedBcUpdater.h
+ * @file	LcRadialStairSteppedBcUpdater.h
  *
- * @brief	Base class for boundary conditions for stair-stepped boundaries.
+ * @brief	Base class for boundary conditions for radial stair-stepped boundaries.
  */
 
-#ifndef LC_STAIR_STEPPED_BC_UPDATER_H
-#define LC_STAIR_STEPPED_BC_UPDATER_H
+#ifndef LC_RADIAL_STAIR_STEPPED_BC_UPDATER_H
+#define LC_RADIAL_STAIR_STEPPED_BC_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -19,11 +19,11 @@
 namespace Lucee
 {
 /**
- * Base class for boundary conditions for stair-stepped
+ * Base class for boundary conditions for radial stair-stepped
  * boundaries.
  */
   template <unsigned NDIM>
-  class StairSteppedBcUpdater : public Lucee::UpdaterIfc
+  class RadialStairSteppedBcUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -32,12 +32,12 @@ namespace Lucee
 /**
  * Create new updater.
  */
-      StairSteppedBcUpdater();
+      RadialStairSteppedBcUpdater();
 
 /**
  * Delete updater.
  */
-      virtual ~StairSteppedBcUpdater();
+      virtual ~RadialStairSteppedBcUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -51,6 +51,13 @@ namespace Lucee
  * this call, the solver should be ready for evolving the solution.
  */
       virtual void initialize();
+
+/**
+ * Write grid to specified HDF5 file.
+ *
+ * @param nm Name of file to write.
+ */
+      void write(const std::string& nm);
 
 /**
  * Advance the solution to specified time. Updaters that do not have a
@@ -87,21 +94,45 @@ namespace Lucee
       static int luaSetDir(lua_State *L);
 
 /**
+ * Lua callable method for writing out grid data to HDF5 file.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaWrite(lua_State *L);
+
+
+    private:
+/** Direction to apply boundary conditon */
+      unsigned bcDir;
+/** Origin of stair stepped boundary */
+      Lucee::Vec3<double> origin;
+/** Radius of stair stepped boundary */
+      double radius;
+/** Components to be set constant */
+      std::vector<unsigned> constComponents;
+      std::vector<double> constValues;
+/** Components to be radially copied */
+      std::vector<unsigned> copyComponents;
+/** Components to be radially reflected */
+      std::vector<unsigned> reflectComponents;
+/** Components to be radially absorbed */
+      std::vector<unsigned> absorbComponents;
+/** Components to be transversely reflected */
+      std::vector<unsigned> reflectTransComponents;
+/** Components with zero radial components */
+      std::vector<unsigned> zeroRadialComponents;
+/** Components with zero transverse components */
+      std::vector<unsigned> zeroTransComponents;
+/** Pointer to in/out field */
+      Lucee::Field<NDIM, double> *inOut;
+
+/**
  * Set direction to update.
  *
  * @param dir Direction to update
  */
       void setDir(unsigned dir) { bcDir = dir; }
-
-    private:
-/** Direction to apply boundary conditon */
-      unsigned bcDir;
-/** Boundary conditions to apply */
-      std::vector<Lucee::BoundaryCondition*> bcList;
-/** Pointer to in/out field */
-      Lucee::Field<NDIM, double> *inOut;
-/** Field to store information about boundary */
-      Lucee::Field<NDIM, double> *ssBnd;
   };
 }
 
