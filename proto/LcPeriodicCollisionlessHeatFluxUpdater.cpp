@@ -103,24 +103,24 @@ namespace Lucee
       N[i] = grid.getNumCells(i);
     }
     alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
-    // make sure fftw allocation is same as our allocation
-    if (alloc_local != localRgn.getVolume()*6) {
-      std::cout << "wrong allocation " <<  alloc_local << " " << vol << "\n";
-      Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater has different memory requirements?!");
-      throw lce;
-    }
+    // the parallel allocation can be larger than the volume*6
+    src_in_out.resize(alloc_local); 
+    sol_in_out.resize(alloc_local);
+    
+
 #else
     int N[NDIM]; // Global grid size for parallel version
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
     local_0_start = 0;
+    src_in_out.resize(vol*6);
+    sol_in_out.resize(vol*6);
+
 #endif    
     
 // construct arrays for use in FFTW -- no local allocation in the serial version
 // using the FFTW many interface so allocate memory for all 6 arrays.
-    src_in_out.resize(vol*6); // FIXMEP for parallel use alloc local.
-    sol_in_out.resize(vol*6);
 
 
 // computational space
@@ -179,7 +179,7 @@ namespace Lucee
     int idist = 1; // distance between first element of each array in memory-- interleaved data
     int odist = 1; 
 #ifdef HAVE_MPI
-    // FFTW_MEASURE gives better speed at the cost of setup time. FFTW_PATIENT could be better?
+    // FFTW_MEASURE gives better speed at the cost of setup time. FFTW_PATIENT is supposed to be even better than MEASURE, but it does not seem to have an effect for small systems.
     f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, comm->getMpiComm(), FFTW_FORWARD, FFTW_PATIENT);
     b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, comm->getMpiComm(), FFTW_BACKWARD, FFTW_MEASURE);
 #else
