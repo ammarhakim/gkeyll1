@@ -1,11 +1,13 @@
 /**
- * @file	LcSOLPositivityUpdater.h
+ * @file	LcSOLPositivityScaleNodeUpdater.h
  *
- * @brief	Updater to enforce positivity preservation for 5d SOL simulations.
+ * @brief	Updater used to adjust energy at each node by use of a drag term
+ * Uses result of LcSOLPositivityDragNodeUpdater to add the correct portion to match
+ * the desired energy at each node.
  */
 
-#ifndef LC_SOL_POSITIVITY_UPDATER_H
-#define LC_SOL_POSITIVITY_UPDATER_H
+#ifndef LC_SOL_POSITIVITY_SCALE_NODE_UPDATER_H
+#define LC_SOL_POSITIVITY_SCALE_NODE_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,8 +16,10 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
+#include <LcVector.h>
 
 // eigen includes
 #include <Eigen/Core>
@@ -23,17 +27,16 @@
 namespace Lucee
 {
 /**
- * Updater to solve hyperbolic equations using a nodal discontinous
- * Galerkin scheme.
+ * Applies particle refection BCs to distribution function
  */
-  class SOLPositivityUpdater : public Lucee::UpdaterIfc
+  class SOLPositivityScaleNodeUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new nodal DG solver */
-      SOLPositivityUpdater();
+/** Create new projection updater */
+      SOLPositivityScaleNodeUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -68,19 +71,39 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 5d nodal basis functions to use */
+/** Pointer to phase space basis functions to use */
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
-/** Pointer to 3d nodal basis functions to use */
+/** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** Matrix used to compute total number in a cell */
-      Eigen::MatrixXd densityMatrix;
+/** Pointer to 2d (v,mu) space basis functions */
+      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
+/** Keeps track of the offsets needed to get all nodes that share the same config. space location */
+      std::vector<int> nodalStencil;
+/**
+ * Interpolation matrix used to compute integration in (v,mu) space
+ */
+      Eigen::MatrixXd interpMatrix2d;
+/**
+ * Vector used to compute density of a (v,mu) cell
+ */
+      Eigen::VectorXd mom0Vector;
+/**
+ * Quadrature weights used to compute integration in (v,mu) space
+ */
+      std::vector<double> gaussWeights2d;
+
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+
+/**
+ * Determines if two nodes have the same configuration space coordinates
+ */
+      bool sameConfigCoords(int srcIndex, int tarIndex, double dxMin, const Eigen::MatrixXd& nodeList);
   };
 }
 
-#endif // LC_SOL_POSITIVITY_UPDATER_H
+#endif // LC_SOL_POSITIVITY_SCALE_NODE_UPDATER_H

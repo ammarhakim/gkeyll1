@@ -841,7 +841,7 @@ namespace Lucee
     // Loop through all quadrature points
     for (int quadIndex = 0; quadIndex < numericalFluxAtQuad.size(); quadIndex++)
     {
-      // set distribution function at quad to 0 if value is negative
+      //set distribution function at quad to 0 if value is negative
       //if (leftValsAtQuad(quadIndex) < 0.0)
       //  leftVal = 0.0;
       //else

@@ -74,6 +74,7 @@
 #include <LcRegisteredObjList.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLSetPotentialAtBoundary.h>
+#include <LcSOLTotalEnergyCalc.h>
 #include <LcSOLUpperXPotentialBcUpdater.h>
 #include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
@@ -279,8 +280,10 @@ namespace Lucee
 
       .append<Lucee::SheathParticleSource1x1v>()
 
+      // 5D SOL objects
       .append<Lucee::SOLFluxAcrossEdgeCalc>()
       .append<Lucee::SOLSetPotentialAtBoundary>()
+      .append<Lucee::SOLTotalEnergyCalc>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()

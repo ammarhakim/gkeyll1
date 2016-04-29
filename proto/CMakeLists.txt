@@ -91,6 +91,7 @@ set (proto_SOURCES
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
+  LcSOLTotalEnergyCalc.cpp
   LcSOLUpperXPotentialBcUpdater.cpp
   LcSetSingleNodeToOneUpdater.cpp
   LcSheathParticleSource1x1v.cpp

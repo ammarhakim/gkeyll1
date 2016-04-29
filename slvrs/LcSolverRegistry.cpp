@@ -87,9 +87,16 @@
 #include <LcSOLDerivativeCalc.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
+#include <LcSOLEnergyAtCellCalc.h>
+#include <LcSOLEnergyAtNodeCalc.h>
 #include <LcSOLHeatFluxCalc.h>
 #include <LcSOLIonDensityInitialization.h>
+#include <LcSOLLocalPositivityUpdater.h>
 #include <LcSOLPositivityUpdater.h>
+#include <LcSOLPositivityDragCellUpdater.h>
+#include <LcSOLPositivityDragNodeUpdater.h>
+#include <LcSOLPositivityScaleCellUpdater.h>
+#include <LcSOLPositivityScaleNodeUpdater.h>
 #include <LcSOLTemperatureCalc.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
@@ -183,9 +190,16 @@ namespace Lucee
       .append<Lucee::SOLDerivativeCalc<4> >()
       .append<Lucee::SOLDerivativeCalc<5> >()
       .append<Lucee::SOLElectronDensityInitialization>()
+      .append<Lucee::SOLEnergyAtCellCalc>()
+      .append<Lucee::SOLEnergyAtNodeCalc>()
       .append<Lucee::SOLHeatFluxCalc>()
       .append<Lucee::SOLIonDensityInitialization>()
+      .append<Lucee::SOLLocalPositivityUpdater>()
       .append<Lucee::SOLPositivityUpdater>()
+      .append<Lucee::SOLPositivityDragCellUpdater>()
+      .append<Lucee::SOLPositivityDragNodeUpdater>()
+      .append<Lucee::SOLPositivityScaleCellUpdater>()
+      .append<Lucee::SOLPositivityScaleNodeUpdater>()
       .append<Lucee::SOLTemperatureCalc>()
 
       // Arbitrary field arithmetic for two fields
