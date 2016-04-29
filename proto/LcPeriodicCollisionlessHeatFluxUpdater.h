@@ -95,6 +95,12 @@ namespace Lucee
       fftw_plan b_plan;
 /** Local memory offset for parallel version */
       ptrdiff_t local_0_start;
+/** ad-hoc scaling of damping parameter */
+      double scale_factor;
+/* enum for closure type */
+      enum Closure { CL_LOCAL, CL_GLOBAL };
+/* indicate which closure to use */      
+      Closure closure; 
   };
 }
 

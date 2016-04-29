@@ -9,6 +9,12 @@
 # include <config.h>
 #endif
 
+// txbase includes
+#include <TxCommBase.h>
+#ifdef HAVE_MPI
+#include <TxMpiBase.h>
+#endif
+
 // lucee includes
 #include <LcMathPhysConstants.h>
 #include <LcPeriodicCollisionlessHeatFluxUpdater.h>
@@ -42,6 +48,25 @@ namespace Lucee
   {
 // call base class method
     UpdaterIfc::readInput(tbl);
+    if (tbl.hasNumber("factor")){
+      scale_factor = tbl.getNumber("factor");
+    } else {
+      scale_factor = 1.0;
+    }
+    if (tbl.hasString("closure")){
+      std::string cl = tbl.getString("closure");
+      if (cl == "local"){
+        closure = CL_LOCAL;
+      } else if (cl == "global"){
+        closure = CL_GLOBAL;
+      } else {
+        Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater::readInput: 'closure' ");
+        lce << cl << " not recognized!" << std::endl;
+        throw lce;
+      }
+    } else {
+      closure = CL_GLOBAL;
+    }
   }
 
   template <unsigned NDIM>
@@ -50,28 +75,40 @@ namespace Lucee
   {
 // call base class method
     UpdaterIfc::initialize();
-
 // get hold of grid
     const Lucee::RectCartGrid<NDIM>& grid 
       = this->getGrid<Lucee::RectCartGrid<NDIM> >();
 
+// local region to index
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    int vol = grid.getGlobalRegion().getVolume();
+    std::cout<< "volume is " << vol << "\n";
+
+    // temporary restriction of number of processors due to interfacing with FFTW.
     int mpi_size = grid.getComm()->getNumProcs();
     int mpi_rank = grid.getComm()->getRank();
     std::cout<< "rank is " << mpi_rank << "\n"; // serial returns zero
     // for now disallow odd num procs
-    if (mpi_rank%2 != 0 && mpi_rank != 1) {
+    if (mpi_size%2 != 0 && mpi_size != 1) {
       Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater needs even number of processors");
       throw lce;
     }
 
 #ifdef HAVE_MPI
+    TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
     ptrdiff_t N[NDIM]; // Global grid size for parallel version
     ptrdiff_t alloc_local, local_n0; 
     // here we only implement the 2-d version.
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
-    alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK,MPI_COMM_WORLD, &local_n0, &local_0_start);
+    alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
+    // make sure fftw allocation is same as our allocation
+    if (alloc_local != localRgn.getVolume()*6) {
+      std::cout << "wrong allocation " <<  alloc_local << " " << vol << "\n";
+      Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater has different memory requirements?!");
+      throw lce;
+    }
 #else
     int N[NDIM]; // Global grid size for parallel version
     for (unsigned i = 0; i < NDIM; ++i){
@@ -79,15 +116,7 @@ namespace Lucee
     }
     local_0_start = 0;
 #endif    
-// local region to index
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    int vol = grid.getGlobalRegion().getVolume();
-    std::cout<< "volume is " << vol << "\n";
     
-    /*    if (alloc_local != vol*6) {
-      Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater has different memory requirements?!");
-      throw lce;
-      }*/
 // construct arrays for use in FFTW -- no local allocation in the serial version
 // using the FFTW many interface so allocate memory for all 6 arrays.
     src_in_out.resize(vol*6); // FIXMEP for parallel use alloc local.
@@ -125,6 +154,7 @@ namespace Lucee
     for (unsigned i=ny/2; i>0; --i)
       ky[ny-i] = -2*Lucee::PI/Ly*i;
 
+    // store |k| for collisionless relaxation.
     kabs.resize(nx*ny); 
     for (unsigned i=0; i<nx; ++i){
       for (unsigned j=0; j<ny; ++j){
@@ -140,18 +170,18 @@ namespace Lucee
 // problems if some C++ compiler does not support this.
     f_src_in_out = reinterpret_cast<fftw_complex*> (&src_in_out[0]);
     f_sol_in_out = reinterpret_cast<fftw_complex*> (&sol_in_out[0]);
-
+  
 // now create plans for forward and inverse FFTs
 // fft_plan_many_dft(int rank, const int *n, int howmany, fftw_complex *in, const int *inembed, int istride, int idist, fftw_complex * out, const int *oembed, int ostride, int odist, int sign, unsigned flags); 
     int howmany = PSIZE; // transform all 6 components
-    int istride = howmany; // distance between elements in memory. For the parallel version we need stride = howmany.
+    int istride = howmany; // distance between elements in memory. For the parallel version we need stride = howmany. Thus the serial version has the same format.
     int ostride = howmany; 
-    int idist = 1; // distance between first element of array -- interleaved data
-  
+    int idist = 1; // distance between first element of each array in memory-- interleaved data
     int odist = 1; 
 #ifdef HAVE_MPI
-  //  f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
-  //  b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFT_MPI_DEFAULT_BLOCK, FFT_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, grid.getComm()->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
+    // FFTW_MEASURE gives better speed at the cost of setup time. FFTW_PATIENT could be better?
+    f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, comm->getMpiComm(), FFTW_FORWARD, FFTW_PATIENT);
+    b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, comm->getMpiComm(), FFTW_BACKWARD, FFTW_MEASURE);
 #else
     f_plan = fftw_plan_many_dft(
              NDIM, N, howmany, f_src_in_out, NULL, istride, idist, f_src_in_out, NULL, ostride, odist, FFTW_FORWARD, FFTW_MEASURE); 
@@ -227,11 +257,29 @@ namespace Lucee
     while (seq.step()) {
       seq.fillWithIndex(idx); 
       tmFluid.setPtr(ptr, idx);
-      // only subtract from the diagonal parts. There should be a "correct" way to do this in 3d. FIXME
+      // only subtract from the diagonal parts. There should be a "correct" way to do this in 3d. FIXME: this requires deciding what physical model to use
       // interleaved data
-      src_in_out[idxr.getIndex(idx)*PSIZE ] -= avgvT;
-      src_in_out[idxr.getIndex(idx)*PSIZE + 3] -= avgvT;
-      src_in_out[idxr.getIndex(idx)*PSIZE + 5] -= avgvT;
+      if (closure == CL_GLOBAL) {
+        // relax to the global isotropic temperature
+        src_in_out[idxr.getIndex(idx)*PSIZE ] -= avgvT;
+        src_in_out[idxr.getIndex(idx)*PSIZE + 3] -= avgvT;
+        src_in_out[idxr.getIndex(idx)*PSIZE + 5] -= avgvT;
+      } else if (closure == CL_LOCAL){
+        double r = ptr[0];
+        double u = ptr[1]/r;
+        double v = ptr[2]/r;
+        double w = ptr[3]/r;
+        double vTxx = (ptr[4]-r*u*u)/r;
+        double vTyy = (ptr[7]-r*v*v)/r;
+        double vTzz = (ptr[9]-r*w*w)/r;
+        // in principle we could have done this earlier for efficiency, but for now leave this step here so the code is less confusing. 
+        double isoT = (vTxx + vTyy + vTzz)/3.0;
+        src_in_out[idxr.getIndex(idx)*PSIZE ] -= isoT;
+        src_in_out[idxr.getIndex(idx)*PSIZE + 3] -= isoT;
+        src_in_out[idxr.getIndex(idx)*PSIZE + 5] -= isoT;
+      } else {
+        // cannot reach here
+      }
     }
     seq.reset();
     // compute forward transform
@@ -239,15 +287,15 @@ namespace Lucee
 
     double vt = std::sqrt(avgvT);
     double edt;
-    // do relaxation    
+    // do relaxation proportional to wavenumber
     while (seq.step()) {
       seq.fillWithIndex(idx); 
-      edt = std::exp(-kabs[idxr.getIndex(idx)]*vt*dt/2.0/Lucee::PI);
+      edt = std::exp(-kabs[idxr.getIndex(idx)]*vt*dt*scale_factor);
       // should there be a factor of 2*PI here?
       for (unsigned i = 0; i < PSIZE; ++i){
-        /// hammett perkins says dP/dt = -n0 2 sqrt(2/pi) * k*vt T_k. Assume n0 is constant lah. 
-        // so the Linear solution is T_new = T_old*exp(-k v factor dt)
-        // then we need to add this back to the real solution
+        // hammett perkins says dP/dt = -n0 2 sqrt(2/pi) * k*vt T_k. Assume n0 is constant. 
+        // so the linear solution is T_new = T_old*exp(-k v factor dt)
+        // after which we need to add this back to the real solution
         // we are working in units of T/m, but since m is constant the solution is the same
         sol_in_out[idxr.getIndex(idx)*PSIZE + i] = src_in_out[idxr.getIndex(idx)*PSIZE + i]*edt;
       }
@@ -257,23 +305,38 @@ namespace Lucee
 
     seq.reset();
 
+    // update the pressure by adding the damped fluctuations
     while (seq.step()) {
       seq.fillWithIndex(idx); 
       tmFluid.setPtr(ptr, idx);
-      // only subtract from the diagonal parts. There should be a "correct" way to do this in 3d. FIXME
       double r = ptr[0];
       double u = ptr[1]/r;
       double v = ptr[2]/r;
       double w = ptr[3]/r;
-
       // update the pressure. P_ij = p_0 d_ij + n_0*T_ij_fluctuating + n m v v
       // division by volume due to FFTW not normalising output
-      ptr[4] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE].real()/vol + r*u*u;
-      ptr[5] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 1].real()/vol + r*u*v;
-      ptr[6] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 2].real()/vol + r*u*w;
-      ptr[7] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 3].real()/vol + r*v*v;
-      ptr[8] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 4].real()/vol + r*v*w;
-      ptr[9] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 5].real()/vol + r*w*w;
+      if (closure == CL_GLOBAL) {
+        ptr[4] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE].real()/vol + r*u*u;
+        ptr[5] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 1].real()/vol + r*u*v;
+        ptr[6] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 2].real()/vol + r*u*w;
+        ptr[7] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 3].real()/vol + r*v*v;
+        ptr[8] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 4].real()/vol + r*v*w;
+        ptr[9] = avgvT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 5].real()/vol + r*w*w;
+      } else if (closure == CL_LOCAL) {
+        // Here we relax the fluctuaions from local isotropy rather than global isotropy
+        double vTxx = (ptr[4]-r*u*u)/r;
+        double vTyy = (ptr[7]-r*v*v)/r;
+        double vTzz = (ptr[9]-r*w*w)/r;
+        double isoT = (vTxx + vTyy + vTzz)/3.0;
+        ptr[4] = isoT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE].real()/vol + r*u*u;
+        ptr[5] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 1].real()/vol + r*u*v;
+        ptr[6] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 2].real()/vol + r*u*w;
+        ptr[7] = isoT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 3].real()/vol + r*v*v;
+        ptr[8] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 4].real()/vol + r*v*w;
+        ptr[9] = isoT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 5].real()/vol + r*w*w;
+      } else {
+        //cannot reach here
+      }
     }
     seq.reset();
 
