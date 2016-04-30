@@ -15,10 +15,6 @@
 // loki includes
 #include <loki/Singleton.h>
 
-// std includes
-#include <limits>
-#include <vector>
-
 namespace Lucee
 {
   const char *SOLTemperatureCalc::id = "SOLTemperatureCalc";
@@ -101,6 +97,39 @@ namespace Lucee
         double tPerp = bFieldPtr[i]*mom1dir4Ptr[i]/numDensPtr[i];
 
         temperaturePtr[i] = (tPara + 2.0*tPerp)/3.0;
+      }
+    }
+
+    // If there are three output fields, we need to 
+    if (this->getNumOutVars() == 3)
+    {
+      Lucee::Field<3, double>& temperatureParaOut = this->getOut<Lucee::Field<3, double> >(1);
+      Lucee::Field<3, double>& temperaturePerpOut = this->getOut<Lucee::Field<3, double> >(2);
+      Lucee::FieldPtr<double> temperatureParaPtr = temperatureParaOut.createPtr();
+      Lucee::FieldPtr<double> temperaturePerpPtr = temperaturePerpOut.createPtr();
+      
+      seq.reset();
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        numDensIn.setPtr(numDensPtr, idx);
+        mom1dir3In.setPtr(mom1dir3Ptr, idx);
+        mom2dir3In.setPtr(mom2dir3Ptr, idx);
+        mom1dir4In.setPtr(mom1dir4Ptr, idx);
+        bFieldIn.setPtr(bFieldPtr, idx);
+
+        temperatureParaOut.setPtr(temperatureParaPtr, idx);
+        temperaturePerpOut.setPtr(temperaturePerpPtr, idx);
+
+        for (int i = 0; i < nlocal; i++)
+        {
+          double tPara = speciesMass*(mom2dir3Ptr[i]/numDensPtr[i] - 
+              mom1dir3Ptr[i]*mom1dir3Ptr[i]/(numDensPtr[i]*numDensPtr[i]));
+          double tPerp = bFieldPtr[i]*mom1dir4Ptr[i]/numDensPtr[i];
+
+          temperatureParaPtr[i] = tPara;
+          temperaturePerpPtr[i] = tPerp;
+        }
       }
     }
    
