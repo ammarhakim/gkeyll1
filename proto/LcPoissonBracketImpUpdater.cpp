@@ -842,14 +842,14 @@ namespace Lucee
     for (int quadIndex = 0; quadIndex < numericalFluxAtQuad.size(); quadIndex++)
     {
       //set distribution function at quad to 0 if value is negative
-      //if (leftValsAtQuad(quadIndex) < 0.0)
-      //  leftVal = 0.0;
-      //else
+      if (leftValsAtQuad(quadIndex) < 0.0)
+        leftVal = 0.0;
+      else
         leftVal = leftValsAtQuad(quadIndex);
 
-      //if (rightValsAtQuad(quadIndex) < 0.0)
-      //  rightVal = 0.0;
-      //else
+      if (rightValsAtQuad(quadIndex) < 0.0)
+        rightVal = 0.0;
+      else
         rightVal = rightValsAtQuad(quadIndex);
       
       if (fluxType == UPWIND)
