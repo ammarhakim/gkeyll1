@@ -101,8 +101,8 @@ namespace Lucee
         // Make sure scaleFactor is less than one
         if (scaleFactor > 1.0)
         {
-          std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
-            << ") Drag term is larger than possible = " << scaleFactor << std::endl;
+          //std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+          //  << ") Drag term is larger than possible = " << scaleFactor << std::endl;
           scaleFactor = 1.0;
         }
 
