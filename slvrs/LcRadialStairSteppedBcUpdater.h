@@ -114,6 +114,8 @@ namespace Lucee
       std::vector<double> constValues;
 /** Components to be radially copied */
       std::vector<unsigned> copyComponents;
+/** factor to multiply while copying */
+      std::vector<double> copyFact;
 /** Components to be radially reflected */
       std::vector<unsigned> reflectComponents;
 /** Components to be radially absorbed */
