@@ -104,6 +104,20 @@ namespace Lucee
       std::vector<double> cd = tbl.getNumVec("copyComponents");
       for (unsigned i=0; i<cd.size(); ++i)
         copyComponents.push_back( (int) cd[i] );
+
+      if (tbl.hasNumVec("copyFact"))
+      {
+        copyFact = tbl.getNumVec("copyFact");
+        if (copyFact.size() != cd.size())
+          throw Lucee::Except(
+            "RadialStairSteppedBcUpdater::readInput: If 'copyFact' table is specified it must have same size as 'copyComponents' table");
+      }
+      else
+      {
+        copyFact.resize(cd.size());
+        for (unsigned i=0; i<copyFact.size(); ++i) copyFact[i] = 1.0;
+      }
+
     }
 
     if (tbl.hasNumVec("reflectComponents"))
