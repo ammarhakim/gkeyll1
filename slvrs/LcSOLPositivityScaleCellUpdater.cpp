@@ -111,9 +111,16 @@ namespace Lucee
         // Set fOut to give the right energy at this node
         for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
         {
+          double startVal = distfOutPtr[nodeIndex];
           distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + scaleFactor*distfDeltaPtr[nodeIndex];
           if (distfOutPtr[nodeIndex] < 0.0)
-            std::cout << "distfOutPtr = " << distfOutPtr[nodeIndex] << std::endl;
+          {
+            std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+            << ") distfOutPtr[" << nodeIndex << "] = " << distfOutPtr[nodeIndex] << std::endl <<
+            "scaleFactor = " << scaleFactor << ", distf = " << startVal << std::endl <<
+            "delta = " << distfDeltaPtr[nodeIndex] << std::endl;
+            distfOutPtr[nodeIndex] = 0.0;
+          }
         }
       }
     }
