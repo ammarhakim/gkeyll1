@@ -24,6 +24,16 @@ namespace Lucee
   TenMomentLocalCollisionlessHeatFluxUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
+    kA = 0.;
+    if (tbl.hasNumber("averageWaveNumber"))
+      kA = tbl.getNumber("averageWaveNumber");
+    
+    hasKAFld = false;
+    if (tbl.hasBool("hasAverageWaveNumberField"))
+      hasKAFld = tbl.getBool("hasAverageWaveNumberField");
+
+    if (hasKAFld)
+      kAFld = &tbl.getObject<Lucee::Field<NDIM, double> >("averageWaveNumberField");
   }
 
   template <unsigned NDIM>
@@ -45,8 +55,8 @@ namespace Lucee
     Lucee::FieldPtr<double> ptr = tmFluid.createPtr();
     int idx[NDIM];
     
-    const Lucee::Field<NDIM, double>& kFld = this->getInp<Lucee::Field<NDIM, double> >(0);
-    Lucee::ConstFieldPtr<double> kPtr = kFld.createConstPtr();
+    // creating pointer using tmFluid since kAFld might be NULL
+    Lucee::ConstFieldPtr<double> kAPtr = tmFluid.createConstPtr();
 
     Lucee::Region<NDIM, int> localRgn = tmFluid.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -54,8 +64,12 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
       tmFluid.setPtr(ptr, idx);
-      kFld.setPtr(kPtr, idx);
-      double kA = kPtr[0];
+      double myKA = kA;
+      if (hasKAFld)
+      {
+        kAFld->setPtr(kAPtr, idx);
+        myKA = kAPtr[0];
+      }
 
       double r = ptr[0];
       double u = ptr[1]/r;
@@ -70,7 +84,7 @@ namespace Lucee
 
       double p = (pxx+pyy+pzz)/3.0;
       double vt = std::sqrt(p/r);
-      double edt = std::exp(-vt*kA*dt);
+      double edt = std::exp(-vt*myKA*dt);
 
 // compute updated pressure tensor component
       ptr[4] = (pxx-p)*edt+p + r*u*u;

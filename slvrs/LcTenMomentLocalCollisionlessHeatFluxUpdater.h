@@ -66,6 +66,12 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Average wave number */
+      double kA;
+/** Flag to indicate if there is a average wave number field */
+      bool hasKAFld;
+/** Location-based wave number field */
+      Lucee::Field<NDIM, double> *kAFld;
   };
 }
 
