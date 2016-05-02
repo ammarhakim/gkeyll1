@@ -290,7 +290,7 @@ namespace Lucee
     // do relaxation proportional to wavenumber
     while (seq.step()) {
       seq.fillWithIndex(idx); 
-      edt = std::exp(-kabs[idxr.getIndex(idx)]*vt*dt*scale_factor);
+      edt = std::exp(-kabs[idxr.getIndex(idx)]*vt*dt*scale_factor*std::sqrt(8/Lucee::PI));
       // should there be a factor of 2*PI here?
       for (unsigned i = 0; i < PSIZE; ++i){
         // hammett perkins says dP/dt = -n0 2 sqrt(2/pi) * k*vt T_k. Assume n0 is constant. 
