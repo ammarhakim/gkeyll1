@@ -77,7 +77,7 @@ namespace Lucee
     if (tbl.hasNumVec("constComponents"))
     {
 // get list of components to apply this boundary condition
-      std::vector<double> cd = tbl.getNumVec("constyComponents");
+      std::vector<double> cd = tbl.getNumVec("constComponents");
       for (unsigned i=0; i<cd.size(); ++i)
         constComponents.push_back( (int) cd[i] );
     }
