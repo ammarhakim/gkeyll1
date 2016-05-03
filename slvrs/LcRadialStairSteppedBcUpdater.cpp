@@ -160,6 +160,24 @@ namespace Lucee
         zeroTransComponents.push_back( (int) cd[i] );
     }
 
+    if (tbl.hasNumVec("fieldFunctionComponents"))
+    {
+// get list of components to apply this boundary condition
+      std::vector<double> cd = tbl.getNumVec("fieldFunctionComponents");
+      for (unsigned i=0; i<cd.size(); ++i)
+        fieldFunctionComponents.push_back( (int) cd[i] );
+
+// get list of input components to use in this boundary condition
+      cd = tbl.getNumVec("fieldFunctionInpComponents");
+      for (unsigned i=0; i<cd.size(); ++i)
+        fieldFunctionInpComponents.push_back( (int) cd[i] );
+
+// get reference to function
+      fnRef = tbl.getFunctionRef("fieldFunction");
+    }
+
+
+
 // set pointer to in/out field
     inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
   }
@@ -176,6 +194,7 @@ namespace Lucee
   Lucee::UpdaterStatus
   RadialStairSteppedBcUpdater<NDIM>::update(double t) 
   {
+    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 // don't do anything if apply direction is not in range
     if (bcDir>=NDIM)
     {
@@ -388,6 +407,42 @@ namespace Lucee
             }
           }
 
+          if (fieldFunctionComponents.size() > 0)
+          {
+// push function object on stack
+            lua_rawgeti(*L, LUA_REGISTRYINDEX, fnRef);
+// push variables on stack
+            for (unsigned i=0; i<3; ++i)
+              lua_pushnumber(*L, xc[i]);
+            lua_pushnumber(*L, t);
+// push
+            for (unsigned i=0; i<fieldFunctionInpComponents.size(); ++i)
+               lua_pushnumber(*L, qFromAll[fieldFunctionInpComponents[i]]);
+
+            unsigned numInp = 4+fieldFunctionInpComponents.size();
+            unsigned numOut = fieldFunctionComponents.size();
+
+// call function
+            if (lua_pcall(*L, numInp, numOut, 0) != 0)
+            {
+              std::string err(lua_tostring(*L, -1));
+              lua_pop(*L, 1);
+              Lucee::Except lce("RadialStairSteppedBcUpdater::update: ");
+              lce << "Problem evaluating function supplied as 'fieldFunction' ";
+              lce << std::endl << "[" << err << "]";
+              throw lce;
+            }
+// fetch results
+
+
+            for (int i=-numOut; i<0; ++i)
+            {
+              if (!lua_isnumber(*L, i))
+                throw Lucee::Except("RadialStairSteppedBcUpdater::update: Return value from fieldFunction not a number");
+              Aptr[fieldFunctionComponents[numOut+i]] = lua_tonumber(*L, i);
+            }
+            lua_pop(*L, 1);
+          }
         } // if current cell is skin ghost
       }
     }

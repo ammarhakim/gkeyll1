@@ -126,6 +126,12 @@ namespace Lucee
       std::vector<unsigned> zeroRadialComponents;
 /** Components with zero transverse components */
       std::vector<unsigned> zeroTransComponents;
+/** Components to be computed using a function */
+      std::vector<unsigned> fieldFunctionComponents;
+/** Input components for the field function BC*/
+      std::vector<unsigned> fieldFunctionInpComponents;
+/** Reference to Lua function for field function BC */
+      int fnRef;
 /** Pointer to in/out field */
       Lucee::Field<NDIM, double> *inOut;
 
