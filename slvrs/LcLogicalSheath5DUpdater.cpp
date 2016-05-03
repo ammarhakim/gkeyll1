@@ -1,7 +1,7 @@
 /**
- * @file	LcDistFuncReflectionBcUpdater.cpp
+ * @file	LcLogicalSheath5DUpdater.cpp
  *
- * @brief	Applies electrostatic logical sheath BCs to a 5D (electron) distribution function
+ * @brief	Applies electrostatic logical sheath BCs to a 5D distribution function
  */
 
 // config stuff
@@ -11,15 +11,6 @@
 
 // lucee includes
 #include <LcLogicalSheath5DUpdater.h>
-#include <LcGlobals.h>
-//#include <LcMathLib.h>
-
-// loki includes
-#include <loki/Singleton.h>
-
-// std includes
-#include <limits>
-#include <vector>
 
 //etc includes
 #include <quadrule.hpp>

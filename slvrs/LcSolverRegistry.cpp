@@ -13,6 +13,7 @@
 #include <LcASquaredProjectionUpdater.h>
 #include <LcATimesPUpdater.h>
 #include <LcBcUpdater.h>
+#include <LcBiasedSheath5DUpdater.h>
 #include <LcBoltzmannPhiUpdater.h>
 #include <LcCompletePolynomialElement.h>
 #include <LcConstBoundaryCondition.h>
@@ -160,6 +161,7 @@ namespace Lucee
       .append<StairSteppedBcUpdater<3> >()
       
       // Probably used for SOL problem simulations
+      .append<Lucee::BiasedSheath5DUpdater>()
       .append<Lucee::BoltzmannPhiUpdater>()
       .append<Lucee::HeatFluxAtEdgeUpdater>()
       .append<Lucee::HeatFluxAtEdge3DUpdater>()
