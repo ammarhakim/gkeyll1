@@ -216,8 +216,8 @@ namespace Lucee
           {
             int configNodeIndex = lowerEdgeNodeNums[configNode];
 
-            // Do not do anything at this node if phi*charge > 0
-            if ( phiInPtr[configNodeIndex]*speciesCharge > 0.0 )
+            // Do not do anything at this node if phi*charge >= 0
+            if ( phiInPtr[configNodeIndex]*speciesCharge >= 0.0 )
               continue;
 
             // Cutoff velocity at this node
@@ -236,8 +236,18 @@ namespace Lucee
               grid.setIndex(idx);
               grid.getCentroid(cellCentroid);
               // Skip everything if skin cell now has a positive parallel velocity
-              if (cellCentroid[3] > 0.0)
+              if (cellCentroid[3] >= 0.0)
+              {
+                if (foundCutoffCell == false)
+                {
+                  std::cout << "(L) Unable to find a match to cutoff velocity" << std::endl;
+                  std::cout << "charge = " << speciesCharge << std::endl;
+                  std::cout << "cutoffV = " << cutoffV << std::endl;
+                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
+                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
+                }
                 break;
+              }
 
               if (foundCutoffCell == false)
               {
@@ -406,7 +416,7 @@ namespace Lucee
             int configNodeIndex = upperEdgeNodeNums[configNode];
 
             // Do not do anything at this node if phi*charge > 0
-            if ( phiInPtr[configNodeIndex]*speciesCharge > 0.0 )
+            if ( phiInPtr[configNodeIndex]*speciesCharge >= 0.0 )
               continue;
 
             // Cutoff velocity at this node
@@ -414,8 +424,8 @@ namespace Lucee
             bool foundCutoffCell = false;
 
             // Need to loop over velocity space in this specific manner
-            for (int ivSkin = localRgn.getLower(3), ivGhost = localRgn.getUpper(3)-1;
-                ivSkin < localRgn.getUpper(3); ivSkin++, ivGhost--)
+            for (int ivSkin = localRgn.getUpper(3)-1, ivGhost = localRgn.getLower(3);
+                ivSkin >= localRgn.getLower(3); ivSkin--, ivGhost++)
             {
               idx[3] = ivSkin;
               gstIdx[3] = ivGhost;
@@ -426,7 +436,17 @@ namespace Lucee
               grid.getCentroid(cellCentroid);
               // Skip everything if skin cell now has a negative parallel velocity
               if (cellCentroid[3] < 0.0)
+              {
+                if (foundCutoffCell == false)
+                {
+                  std::cout << "(U) Unable to find a match to cutoff velocity" << std::endl;
+                  std::cout << "charge = " << speciesCharge << std::endl;
+                  std::cout << "cutoffV = " << cutoffV << std::endl;
+                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
+                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
+                }
                 break;
+              }
 
               if (foundCutoffCell == false)
               {
