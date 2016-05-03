@@ -21,6 +21,7 @@ set(lcslvrs_SOURCES
   LcAdvectionEquationTemplated.cpp
   LcAuxAdvectionEquation.cpp
   LcBcUpdater.cpp
+  LcBiasedSheath5DUpdater.cpp
   LcBoltzmannPhiUpdater.cpp
   LcBoundaryCondition.cpp
   LcCompletePolynomialElement.cpp

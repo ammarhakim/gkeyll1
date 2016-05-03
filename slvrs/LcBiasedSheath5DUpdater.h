@@ -1,11 +1,11 @@
 /**
- * @file	LcLogicalSheath5DUpdater.h
+ * @file	LcBiasedSheath5DUpdater.h
  *
  * @brief	Applies electrostatic logical sheath BCs to a 5D distribution function
  */
 
-#ifndef LC_LOGICAL_SHEATH_5D_UPDATER
-#define LC_LOGICAL_SHEATH_5D_UPDATER
+#ifndef LC_BIASED_SHEATH_5D_UPDATER
+#define LC_BIASED_SHEATH_5D_UPDATER
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,14 +26,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class LogicalSheath5DUpdater : public Lucee::UpdaterIfc
+  class BiasedSheath5DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      LogicalSheath5DUpdater();
+      BiasedSheath5DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -74,8 +74,6 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** Pointer to 2d nodal basis functions */
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Flag to indicate if cutoff velocities need to be computed */
-      bool computeCutoffVelocities;
 /** Mapping for 180 degree rotations */
       std::vector<unsigned> rotMap;
 /** Contains the lower edge node numbers */
@@ -88,14 +86,10 @@ namespace Lucee
       std::vector<int> nodalStencil;
 /** Used to compute first parallel velocity moment at a particular (x,y,z) */
       Eigen::MatrixXd momentMatrix;
-/** Mass of ions */
-      double ionMass;
-/** Mass of electrons */
-      double elcMass;
-/** Elementary Charge */
-      double eV;
-/** Tolerance to which cutoff velocities should be found */
-      double cutoffTolerance;
+/** Mass of species */
+      double speciesMass;
+/** Species charge */
+      double speciesCharge;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
       double scaleFactor;
 /** Stores location of gaussian quadrature points (on [-1,1]) for integration over entire 2d element */
@@ -117,4 +111,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_LOGICAL_SHEATH_5D_UPDATER
+#endif // LC_BIASED_SHEATH_5D_UPDATER

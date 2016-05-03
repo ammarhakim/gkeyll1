@@ -118,8 +118,11 @@ namespace Lucee
             std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
             << ") distfOutPtr[" << nodeIndex << "] = " << distfOutPtr[nodeIndex] << std::endl <<
             "scaleFactor = " << scaleFactor << ", distf = " << startVal << std::endl <<
-            "delta = " << distfDeltaPtr[nodeIndex] << std::endl;
-            distfOutPtr[nodeIndex] = 0.0;
+            "delta = " << distfDeltaPtr[nodeIndex] << std::endl <<
+            "energyOrigInPtr = " << energyOrigInPtr[0] << std::endl <<
+            "energyPosInPtr = " << energyPosInPtr[0] << std::endl << 
+            "energyDragInPtr = " << energyDragInPtr[0] << std::endl;
+            distfOutPtr[nodeIndex] = startVal;
           }
         }
       }
