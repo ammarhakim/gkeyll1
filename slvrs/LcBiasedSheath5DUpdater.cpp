@@ -248,6 +248,12 @@ namespace Lucee
                 }
                 break;
               }
+              // Check to see if cutoff v is above vmax
+              if (cutoffV < -0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+              {
+                // Reflect everything
+                foundCutoffCell = true;
+              }
 
               if (foundCutoffCell == false)
               {
@@ -446,6 +452,12 @@ namespace Lucee
                   std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
                 }
                 break;
+              }
+              // Check to see if cutoff v is above vmax
+              if (cutoffV > 0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+              {
+                // Reflect everything
+                foundCutoffCell = true;
               }
 
               if (foundCutoffCell == false)
