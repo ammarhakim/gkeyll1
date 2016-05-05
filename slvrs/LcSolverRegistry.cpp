@@ -91,6 +91,7 @@
 #include <LcSOLEnergyAtCellCalc.h>
 #include <LcSOLEnergyAtNodeCalc.h>
 #include <LcSOLHeatFluxCalc.h>
+#include <LcSOLInitializeDensity.h>
 #include <LcSOLIonDensityInitialization.h>
 #include <LcSOLLocalPositivityUpdater.h>
 #include <LcSOLPositivityUpdater.h>
@@ -195,6 +196,7 @@ namespace Lucee
       .append<Lucee::SOLEnergyAtCellCalc>()
       .append<Lucee::SOLEnergyAtNodeCalc>()
       .append<Lucee::SOLHeatFluxCalc>()
+      .append<Lucee::SOLInitializeDensity>()
       .append<Lucee::SOLIonDensityInitialization>()
       .append<Lucee::SOLLocalPositivityUpdater>()
       .append<Lucee::SOLPositivityUpdater>()

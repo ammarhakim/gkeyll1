@@ -110,6 +110,7 @@ set(lcslvrs_SOURCES
   LcSOLEnergyAtCellCalc.cpp
   LcSOLEnergyAtNodeCalc.cpp
   LcSOLHeatFluxCalc.cpp
+  LcSOLInitializeDensity.cpp
   LcSOLIonDensityInitialization.cpp
   LcSOLLocalPositivityUpdater.cpp
   LcSOLPositivityUpdater.cpp
