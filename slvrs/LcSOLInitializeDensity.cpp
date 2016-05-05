@@ -166,7 +166,7 @@ namespace Lucee
               }
             }
             numericalDensity = numericalDensity*scaleFactor*bFieldPtr[configNode];
-            std::cout << "target = " << result[0] << ", num = " << numericalDensity << std::endl;
+            //std::cout << "target = " << result[0] << ", num = " << numericalDensity << std::endl;
 
             // Loop through nodes a second time to scale to correct value
             for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
