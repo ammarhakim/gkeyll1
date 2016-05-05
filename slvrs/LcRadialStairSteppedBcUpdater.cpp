@@ -176,7 +176,14 @@ namespace Lucee
       fnRef = tbl.getFunctionRef("fieldFunction");
     }
 
+// flag if we pre-process contribution from each cell before accumulating 
+    preProcess = false;
+    if (tbl.hasBool("preProcess"))
+      preProcess = tbl.getBool("preProcess");
 
+    if (preProcess)
+// get reference to pre-process function
+      preProcessFnRef = tbl.getFunctionRef("preProcessFieldFunction");
 
 // set pointer to in/out field
     inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
@@ -263,6 +270,7 @@ namespace Lucee
           double wt; // weight of each cell
           double sum = 0.; // sum of weights
           std::vector<double> qFromAll (numComponents, 0.); // container for contribution from all cells
+          std::vector<double> qFromThis (numComponents, 0.); // container for contribution real cell being stepped over
           while (adjSeq.step())
           {
 // set adjacent cell index
@@ -285,9 +293,50 @@ namespace Lucee
 // use equal weights for now; might depend on xcm
               wt = 1.;
               sum = sum + wt;
+
+              if (preProcess)
+              {
               for (unsigned i = 0; i < numComponents; ++i)
+                qFromThis[i] = Aptrm[i] * wt;
+
+// push function object on stack
+                lua_rawgeti(*L, LUA_REGISTRYINDEX, preProcessFnRef);
+// push variables on stack
+                for (unsigned i=0; i<numComponents; ++i)
+                  lua_pushnumber(*L, qFromThis[i]);
+
+// call function
+                if (lua_pcall(*L, numComponents, numComponents, 0) != 0)
+                {
+                  std::string err(lua_tostring(*L, -1));
+                  lua_pop(*L, 1);
+                  Lucee::Except lce("RadialStairSteppedBcUpdater::update: ");
+                  lce << "Problem evaluating function supplied as 'preProcessFieldFunction' ";
+                  lce << std::endl << "[" << err << "]";
+                  throw lce;
+                }
+            
+// fetch results
+                for (int i=-numComponents; i<0; ++i)
+                {
+                  if (!lua_isnumber(*L, i))
+                    throw Lucee::Except("RadialStairSteppedBcUpdater::update: Return value from pre-process fieldFunction not a number");
+                  qFromThis[numComponents+i] = lua_tonumber(*L, i);
+
+                }
+                lua_pop(*L, 1);
+              
+                for (unsigned i = 0; i < numComponents; ++i)
 // accumulate contributions from all adjacent cells inside the domain
-                qFromAll[i] += Aptrm[i] * wt;
+                  qFromAll[i] += qFromThis[i];
+
+              } else {
+
+                for (unsigned i = 0; i < numComponents; ++i)
+// accumulate contributions from all adjacent cells inside the domain
+                  qFromAll[i] += Aptrm[i] * wt;
+
+              }
             }
             cnt = cnt + 1;
           }

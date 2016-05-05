@@ -132,6 +132,10 @@ namespace Lucee
       std::vector<unsigned> fieldFunctionInpComponents;
 /** Reference to Lua function for field function BC */
       int fnRef;
+/** Flag if we pre-process single cell contribution before accumulating **/
+      bool preProcess;
+/** Reference to Lua function for pre-processing field function*/
+      int preProcessFnRef;
 /** Pointer to in/out field */
       Lucee::Field<NDIM, double> *inOut;
 
