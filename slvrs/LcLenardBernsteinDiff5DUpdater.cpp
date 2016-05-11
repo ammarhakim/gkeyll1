@@ -69,7 +69,7 @@ namespace Lucee
     // local region to update
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
 
-    unsigned nlocal = nodalBasis->getNumNodes();
+    unsigned nlocal = 32;//nodalBasis->getNumNodes();
 
     Lucee::RowMajorSequencer<5> seq(localRgn);
     seq.step(); // just to get to first index
@@ -78,13 +78,13 @@ namespace Lucee
     nodalBasis->setIndex(idx);
 
     // pre-multiply each of the matrices by inverse matrix
-    Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
+    Lucee::Matrix<double> massMatrixLucee(32, 32);
     // NOTE: mass matrix is fetched repeatedly as the solve() method
     // destroys it during the inversion process
     nodalBasis->getMassMatrix(massMatrixLucee);
-    Eigen::MatrixXd massMatrix(nlocal, nlocal);
+    Eigen::Matrix<double, 32, 32> massMatrix;
     copyLuceeToEigen(massMatrixLucee, massMatrix);
-    Eigen::MatrixXd massMatrixInv = massMatrix.inverse();
+    Eigen::Matrix<double, 32, 32> massMatrixInv = massMatrix.inverse();
 
     // Get the interpolation matrix for the volume quadrature points
     int numVolQuadNodes = nodalBasis->getNumGaussNodes();
@@ -95,19 +95,19 @@ namespace Lucee
     nodalBasis->getGaussQuadData(interpVolMatrixLucee, gaussVolOrdinatesLucee, gaussVolWeights);
 
     // Allocate diffusion matrices
-    lowerMat.resize(5, Eigen::MatrixXd::Zero(nlocal, nlocal));
-    upperMat.resize(5, Eigen::MatrixXd::Zero(nlocal, nlocal));
-    upperCenter.resize(5, Eigen::MatrixXd::Zero(nlocal, nlocal));
-    selfCenter.resize(5, Eigen::MatrixXd::Zero(nlocal, nlocal));
-    lowerCenter.resize(5, Eigen::MatrixXd::Zero(nlocal, nlocal));
+    lowerMat.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
+    upperMat.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
+    upperCenter.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
+    selfCenter.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
+    lowerCenter.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
     // Multiplied by current cell to find solution in current cell
-    upperCenterTimesMu = Eigen::MatrixXd(nlocal, nlocal);
-    selfCenterTimesMu = Eigen::MatrixXd(nlocal, nlocal);
-    lowerCenterTimesMu = Eigen::MatrixXd(nlocal, nlocal);
+    upperCenterTimesMu = Eigen::Matrix<double, 32, 32>::Zero();
+    selfCenterTimesMu = Eigen::Matrix<double, 32, 32>::Zero();
+    lowerCenterTimesMu = Eigen::Matrix<double, 32, 32>::Zero();
     // Additional matrices weighted by mu multiplied by neighbor cell to
     // find solution in current cell
-    lowerMatDiffusionTimesMu = Eigen::MatrixXd(nlocal, nlocal);
-    upperMatDiffusionTimesMu = Eigen::MatrixXd(nlocal, nlocal);
+    lowerMatDiffusionTimesMu = Eigen::Matrix<double, 32, 32>::Zero();
+    upperMatDiffusionTimesMu = Eigen::Matrix<double, 32, 32>::Zero();
 
     double dq[5];
     for (int i = 0; i < 5; i++)
@@ -13652,6 +13652,19 @@ namespace Lucee
   void
   LenardBernsteinDiff5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
+  {
+    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
+    {
+      for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
+      {
+        destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
+      }
+    }
+  }
+
+	void
+  LenardBernsteinDiff5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+    Eigen::Matrix<double, 32, 32>& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
     {
