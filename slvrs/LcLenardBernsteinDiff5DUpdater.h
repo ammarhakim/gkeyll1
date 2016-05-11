@@ -119,6 +119,7 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::Matrix<double, 32, 32>& destinationMatrix);
 /**
  * Evaluate function at specified location and fill output array with
  * result.

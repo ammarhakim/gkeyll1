@@ -170,9 +170,18 @@ namespace Lucee
       // Compute modified density. This will be greater than originalNum
       double modifiedNum = distfVector.dot(densityMatrix*jacobianVector);
 
-      // Write modified values to distfOut
-      for (int i = 0; i < nlocal5d; i++)
-        distfPtr[i] = (originalNum/modifiedNum)*distfVector(i);
+      if (modifiedNum == 0.0)
+      {
+        std::cout << "New cell is all zero" << std::endl;
+        for (int i = 0; i < nlocal5d; i++)
+          distfPtr[i] = 0.0;
+      }
+      else
+      {
+        // Write modified values to distfOut
+        for (int i = 0; i < nlocal5d; i++)
+          distfPtr[i] = (originalNum/modifiedNum)*distfVector(i);
+      }
     }
 
     return Lucee::UpdaterStatus();
