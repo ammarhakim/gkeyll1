@@ -82,12 +82,13 @@ namespace Lucee
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     int vol = grid.getGlobalRegion().getVolume();
-    std::cout<< "volume is " << vol << "\n";
+    //    std::cout<< "volume is " << vol << "\n";
 
     // temporary restriction of number of processors due to interfacing with FFTW.
     int mpi_size = grid.getComm()->getNumProcs();
     int mpi_rank = grid.getComm()->getRank();
-    std::cout<< "rank is " << mpi_rank << "\n"; // serial returns zero
+    //    std::cout<< "rank is " << mpi_rank << "\n"; // serial returns zero
+    //    std::cout<< "size is " << mpi_size << "\n";
     // for now disallow odd num procs
     if (mpi_size%2 != 0 && mpi_size != 1) {
       Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater needs even number of processors");
@@ -102,21 +103,18 @@ namespace Lucee
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
-    alloc_local = fftw_mpi_local_size_many(NDIM, N, 6, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
-    // the parallel allocation can be larger than the volume*6
+    alloc_local = fftw_mpi_local_size_many(NDIM, N, PSIZE, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
+    // the parallel allocation can be larger than the volume*PSIZE
     src_in_out.resize(alloc_local); 
     sol_in_out.resize(alloc_local);
-    
-
 #else
     int N[NDIM]; // Global grid size for parallel version
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
     local_0_start = 0;
-    src_in_out.resize(vol*6);
-    sol_in_out.resize(vol*6);
-
+    src_in_out.resize(vol*PSIZE);
+    sol_in_out.resize(vol*PSIZE);
 #endif    
     
 // construct arrays for use in FFTW -- no local allocation in the serial version
@@ -126,13 +124,25 @@ namespace Lucee
 // computational space
     Lucee::Region<NDIM, double> compRgn = grid.getComputationalSpace();
     double Lx = compRgn.getShape(0);
-    double Ly = compRgn.getShape(1);
+    //    double Ly = compRgn.getShape(1);
 
 // construct wave-number arrays. Funkyness is needed as DC component
-// is stored in location [0]. FIXMEP for 3 dimensions.
-    int nx = localRgn.getShape(0);
+// is stored in location [0].
+
+    int nLoc[3];
+    double lGlobal[3]; // global physical dimensions
+    for (unsigned i = 0; i < NDIM; ++i){
+      nLoc[i] = localRgn.getShape(i);
+      lGlobal[i] = compRgn.getShape(i);
+    } 
+    for (unsigned i = NDIM; i < 3; ++i){
+      nLoc[i] = 1; // fill in the rest of the dims with 1
+      lGlobal[i] = 1.0; //doesn't matter but not zero
+    }
+
+    int nx = nLoc[0];
     kx.resize(nx);
-    if (mpi_rank <= 1) {
+    if (mpi_size == 1) {
       for (unsigned i=0; i<nx/2; ++i)
         kx[i] = 2*Lucee::PI/Lx*i;
       for (unsigned i=nx/2; i>0; --i)
@@ -143,22 +153,35 @@ namespace Lucee
           kx[i] = 2*Lucee::PI/Lx*(i+local_0_start);
       } else {
         for (unsigned i=0; i<nx; ++i)
-        kx[i] = -2*Lucee::PI/Lx*(N[0] - local_0_start - i);
+          kx[i] = -2*Lucee::PI/Lx*(N[0] - local_0_start - i);
       }
     }
+    //    int ny;
     // there is no decomposition in the y direction
-    int ny = localRgn.getShape(1);
+
+    double Ly = lGlobal[1];
+    int ny = nLoc[1];
     ky.resize(ny);
     for (unsigned i=0; i<ny/2; ++i)
       ky[i] = 2*Lucee::PI/Ly*i;
     for (unsigned i=ny/2; i>0; --i)
       ky[ny-i] = -2*Lucee::PI/Ly*i;
 
+    double Lz = lGlobal[2];
+    int nz = nLoc[2];
+    kz.resize(nz);
+    for (unsigned i=0; i < nz/2; ++i)
+      kz[i] = 2*Lucee::PI/Lz*i;
+    for (unsigned i=nz/2; i > 0; --i)
+      kz[nz-i] = -2*Lucee::PI/Lz*i;
+    kz[0] = 0;
     // store |k| for collisionless relaxation.
-    kabs.resize(nx*ny); 
+    kabs.resize(nx*ny*nz); 
     for (unsigned i=0; i<nx; ++i){
       for (unsigned j=0; j<ny; ++j){
-        kabs[j+ny*i] = std::sqrt(kx[i]*kx[i] + ky[j]*ky[j]);
+        for (unsigned k=0; k<nz; ++k) {
+          kabs[k + nz*(j+ny*i)] = std::sqrt(kx[i]*kx[i] + ky[j]*ky[j]);
+        }
       }
     }
 // no need to reset DC component since it's a multiply by |k|
@@ -188,7 +211,6 @@ namespace Lucee
     b_plan = fftw_plan_many_dft(
              NDIM, N, howmany, f_sol_in_out, NULL, istride, idist, f_sol_in_out, NULL, ostride, odist, FFTW_BACKWARD, FFTW_MEASURE);
 #endif
-
   }
 
   template <unsigned NDIM>
