@@ -83,6 +83,8 @@ namespace Lucee
       std::vector<double> kx;
 /** Y-direction wave-numbers */
       std::vector<double> ky;
+/** Z-direction wave-numbers */
+      std::vector<double> kz;
 /** array to store abs(k) */
       std::vector<double> kabs;
 /** Pointers for use in FFTW for source */
