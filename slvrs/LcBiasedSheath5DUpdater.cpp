@@ -286,6 +286,10 @@ namespace Lucee
                     speciesFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                   }
 
+                  // If flux is zero in this cell, then don't need to reflect anything
+                  if (speciesFluxAtIv == 0.0)
+                    continue;
+
                   // Then compute outward flux only above cutoff velocity
                   double a = -0.5*grid.getDx(3);
                   double b = cutoffV - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
@@ -490,6 +494,9 @@ namespace Lucee
                     }
                     speciesFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                   }
+                  // If flux is zero in this cell, then don't need to reflect anything
+                  if (speciesFluxAtIv == 0.0)
+                    continue;
 
                   // Then compute outward flux only above cutoff velocity
                   double a = cutoffV - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
