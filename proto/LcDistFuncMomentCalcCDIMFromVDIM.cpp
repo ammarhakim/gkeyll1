@@ -38,6 +38,7 @@ namespace Lucee
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::DistFuncMomentCalcCDIMFromVDIM()
     : Lucee::UpdaterIfc()
   {
+    momentLocal = 0;
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -88,7 +89,6 @@ namespace Lucee
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::initialize()
   {
     const unsigned NDIM = CDIM+VDIM;
-    // call base class method
     Lucee::UpdaterIfc::initialize();
 
     // get hold of grid
@@ -112,7 +112,6 @@ namespace Lucee
 
     Eigen::MatrixXd volQuadConf(nVolQuadConf, nlocalConf);
     copyLuceeToEigen(tempVolQuadConf, volQuadConf);
-    // TESTING STUFF
     Eigen::MatrixXd volCoordsConf(nVolQuadConf, (unsigned) CNC);
     copyLuceeToEigen(tempVolCoordsConf, volCoordsConf);
 
@@ -126,11 +125,10 @@ namespace Lucee
 
     Eigen::MatrixXd volQuadPhase(nVolQuadPhase, nlocalPhase);
     copyLuceeToEigen(tempVolQuadPhase, volQuadPhase);
-    // TESTING STUFF
     Eigen::MatrixXd volCoordsPhase(nVolQuadPhase, (unsigned) PNC);
     copyLuceeToEigen(tempVolCoordsPhase, volCoordsPhase);
 
-    // Get configuration space Mass Matrix
+    // Get configuration space mass matrix
     Lucee::Matrix<double> tempMassMatrixConf(nlocalConf, nlocalConf);
     confBasis->getMassMatrix(tempMassMatrixConf);
     Eigen::MatrixXd massMatrixConf(nlocalConf, nlocalConf);
@@ -143,33 +141,24 @@ namespace Lucee
       nMom = VDIM*(VDIM+1)/2;
 
     mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-    // matrices needed to compute the first moment
     mom1Matrix = std::vector<Eigen::MatrixXd>(VDIM);
-    // matrices needed to compute the second moment
     mom2Matrix = std::vector< std::vector<Eigen::MatrixXd> >(VDIM*(VDIM+1)/2);
     // momDir is direction of moment, 1 = X, 2 = Y, 3 = Z
     int momDir;
     // momDir2 is direction of other moment, 1 = X, 2 = Y, 3 = Z, for computing second rank tensor components
     int momDir2;
-    double integralResultZerothMoment;
-    double integralResultFirstMoment;
-    // number of components in a symmetric second rank tensor
-    double integralResultSecondMoment[VDIM*(VDIM+1)/2];
-    // counter needed for indexing since tensor is symmetric
-    int ctr = 0;
+    double integralResultZerothMoment, integralResultFirstMoment, integralResultSecondMoment[VDIM*(VDIM+1)/2];
+    int ctr = 0; // counter needed for indexing since tensor is symmetric
 
-    for (int i = 0; i < nlocalConf; ++i)
+    for (int i=0; i<nlocalConf; ++i)
     {
-      for (int j = 0; j < nlocalPhase; ++j)
+      for (int j=0; j<nlocalPhase; ++j)
       {
         integralResultZerothMoment = 0;
         // Compute integral of phiConf_i * phiPhase_j
         for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
-        {
-          double baseIntegral = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*
-          volQuadPhase(gaussIndex, j);
-          integralResultZerothMoment += baseIntegral;
-        }
+          integralResultZerothMoment
+            += volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf,i)*volQuadPhase(gaussIndex,j);
         mom0Matrix(i, j) = integralResultZerothMoment;
       }
     }
@@ -180,7 +169,6 @@ namespace Lucee
     {
       mom1Matrix[h] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
       momDir = h+CDIM;
-      // Compute integral of phiConf_i * phiPhase_j
       for (int i = 0; i < nlocalConf; ++i)
       {
         for (int j = 0; j < nlocalPhase; ++j)
@@ -188,16 +176,16 @@ namespace Lucee
           integralResultFirstMoment = 0.0;
           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           {
-            double baseIntegral = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*
-              volQuadPhase(gaussIndex, j);
-            // Get coordinate of quadrature point in direction momDir
+            double baseIntegral
+              = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf,i)*volQuadPhase(gaussIndex,j);
+            // get coordinate of quadrature point in direction momDir
             double coord2Val = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             integralResultFirstMoment += coord2Val*baseIntegral;
           }
-          mom1Matrix[h](i, j) = integralResultFirstMoment;
+          mom1Matrix[h](i,j) = integralResultFirstMoment;
         }
       }
-      // Multiply matrices by inverse of mass matrix
+      // multiply matrices by inverse of mass matrix
       mom1Matrix[h] = massMatrixConf.inverse()*mom1Matrix[h];
     }
 
@@ -232,22 +220,6 @@ namespace Lucee
     //   }
     // }
 
-    int lowerConf[CDIM];
-    int upperConf[CDIM];
-    int lg[CDIM];
-    int ug[CDIM];
-    for (int i=0; i<CDIM; ++i)
-    {
-      lowerConf[i] = localRgn.getLower(i);
-      upperConf[i] = localRgn.getUpper(i);
-      lg[i] = 0;
-      ug[i] = 0;
-    }
-
-    Lucee::Region<CDIM, int> rgnConf(lowerConf, upperConf);
-
-    // allocate space for storing local moment calculation
-    momentLocal = new Lucee::Field<CDIM, double>(rgnConf, nlocalConf*nMom, lg, ug);
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -264,8 +236,25 @@ namespace Lucee
     // get output field (CDIM)
     Lucee::Field<CDIM, double>& momentGlobal = this->getOut<Lucee::Field<CDIM, double> >(0);
 
-    // local region to update (This is the CDIM + VDIM region. The CDIM region is
-    // assumed to have the same cell layout as the X-direction of the CDIM+VDIM region)
+    if (!momentLocal)
+    {
+// allocate memory for local moment calculation if not already done
+      Lucee::Region<CDIM, int> localRgn = momentGlobal.getRegion();
+      Lucee::Region<CDIM, int> localExtRgn = momentGlobal.getExtRegion();
+      
+      int lowerConf[CDIM], upperConf[CDIM], lg[CDIM], ug[CDIM];
+      for (int i=0; i<CDIM; ++i)
+      {
+        lowerConf[i] = localRgn.getLower(i);
+        upperConf[i] = localRgn.getUpper(i);
+        lg[i] = localRgn.getLower(i) - localExtRgn.getLower(i);
+        ug[i] = localExtRgn.getUpper(i) - localRgn.getUpper(i);
+      }
+      Lucee::Region<CDIM, int> rgnConf(lowerConf, upperConf);
+      momentLocal = new Lucee::Field<CDIM, double>(rgnConf, momentGlobal.getNumComponents(), lg, ug);
+    }
+    
+    // local phase-space region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     int idx[NDIM];
@@ -287,31 +276,22 @@ namespace Lucee
     Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
     Eigen::VectorXd distfVec(nlocalPhase);
 
-    // Accumulate contribution to moment from this cell
-    
     std::vector<Eigen::VectorXd> resultVector = std::vector<Eigen::VectorXd>(nMom);
     for (int i = 0; i< nMom; ++i)
-    {
-      resultVector[i] = Eigen::VectorXd::Zero(nlocalConf);
-    }
+      resultVector[i] = Eigen::VectorXd::Zero(nlocalConf);    
+    // accumulate contribution to moment from this cell
     while(seq.step())
     {
       seq.fillWithIndex(idx);
-
       grid.setIndex(idx);
       grid.getCentroid(xc);
-
       momentLocal->setPtr(momentPtr, idx);
       distF.setPtr(distFPtr, idx);
 
-      for (int i = 0; i < nlocalPhase; i++)
-        distfVec(i) = distFPtr[i];
-
+      for (int i = 0; i < nlocalPhase; i++) distfVec(i) = distFPtr[i];
 
       if (calcMom == 0)
-      {
         resultVector[0].noalias() = mom0Matrix*distfVec;
-      }
       else if (calcMom == 1)
       {
         int momDir;
@@ -337,8 +317,8 @@ namespace Lucee
       //   }
       // }
 
-      for (int i = 0; i < nlocalConf; i++)
-        for (int j = 0; j < nMom; ++j)
+      for (int i=0; i<nlocalConf; ++i)
+        for (int j=0; j<nMom; ++j)
           momentPtr[i*nMom+j] += resultVector[j](i);
     }
 
