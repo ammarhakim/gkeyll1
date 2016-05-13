@@ -189,36 +189,35 @@ namespace Lucee
       mom1Matrix[h] = massMatrixConf.inverse()*mom1Matrix[h];
     }
 
-    // for (int h = 0; h < VDIM; h++)
-    // {
-    //   for (int g = h; g < VDIM; g++)
-    //   {
-    //   mom2Matrix[h][g] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-    //   momDir = g+1;
-    //   momDir2 = h+1;
-    //   // Compute integral of phiConf_i * phiPhase_j
-    //   for (int i = 0; i < nlocalConf; i++)
-    //   {
-    //     for (int j = 0; j < nlocalPhase; j++)
-    //     {
-    //       for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); gaussIndex++)
-    //       {
-    //         integralResultSecondMoment[ctr] = 0.0;
-    //         double baseIntegral = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*
-    //           volQuadPhase(gaussIndex, j);
-    //         // Get coordinate of quadrature point in direction momDir
-    //         double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
-    //         double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
-    //         integralResultSecondMoment[ctr] += coord2Val1*coord2Val2*baseIntegral;
-    //       }
-    //       mom2Matrix[h][g](i, j) = integralResultSecondMoment[ctr];
-    //     }
-    //   }
-    //   ctr = ctr + 1;
-    //   // Multiply matrices by inverse of mass matrix
-    //   mom2Matrix[h][g] = massMatrixConf.inverse()*mom2Matrix[h][g];
-    //   }
-    // }
+//     for (int h = 0; h < VDIM; h++)
+//     {
+//       for (int g = h; g < VDIM; g++)
+//       {
+//       mom2Matrix[h][g] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
+//       momDir = g+CDIM;
+//       momDir2 = h+CDIM;
+//       // Compute integral of phiConf_i * phiPhase_j
+//       for (int i = 0; i < nlocalConf; i++)
+//       {
+//         for (int j = 0; j < nlocalPhase; j++)
+//         {
+//           integralResultSecondMoment = 0.0;
+//           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); gaussIndex++)
+//           {
+//             double baseIntegral = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*
+//               volQuadPhase(gaussIndex, j);
+//             // Get coordinate of quadrature point in direction momDir
+//             double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
+//             double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
+//             integralResultSecondMoment += coord2Val1*coord2Val2*baseIntegral;
+//           }
+//           mom2Matrix[h][g](i, j) = integralResultSecondMoment;
+//         }
+//       }
+//       // Multiply matrices by inverse of mass matrix
+//       mom2Matrix[h][g] = massMatrixConf.inverse()*mom2Matrix[h][g];
+//       }
+//     }
 
   }
 
