@@ -2,7 +2,7 @@ function interpMatrix = ComputeSerendipityMatricesGeneral(dim, order)
 % ComputeSerendipityMatrices3D.m
 % James Juno (08-15-2015)
 % Computes the serendipity basis functions for polynomial order up to 4
-% in up to 3D. Then evaluates the interpoltion matrix.
+% in up to 4D. Then evaluates the interpoltion matrix.
 %
 % Inputs:   dim = dimension of the space you want to project to
 %           order = polynomial order of the basis set
