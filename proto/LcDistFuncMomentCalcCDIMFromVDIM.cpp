@@ -263,10 +263,8 @@ namespace Lucee
     unsigned nlocalConf = confBasis->getNumNodes();
     unsigned nlocalPhase = phaseBasis->getNumNodes();
 
-    // calculate total number of local configuration space cells
-    int localPositionCells = 1;
-    for (unsigned d=0; d<CDIM; ++d)
-      localPositionCells *= localRgn.getShape(d);
+    // total number of local configuration space cells
+    int localPositionCells = momentGlobal.getExtRegion().getVolume();
 
     // clear out contents of output field
     (*momentLocal) = 0.0;
@@ -288,14 +286,15 @@ namespace Lucee
       momentLocal->setPtr(momentPtr, idx);
       distF.setPtr(distFPtr, idx);
 
-      for (int i = 0; i < nlocalPhase; i++) distfVec(i) = distFPtr[i];
+      for (int i=0; i<nlocalPhase; ++i)
+        distfVec(i) = distFPtr[i];
 
       if (calcMom == 0)
         resultVector[0].noalias() = mom0Matrix*distfVec;
       else if (calcMom == 1)
       {
         int momDir;
-        for (int h = 0; h < nMom; h++)
+        for (int h = 0; h < nMom; ++h)
         {
           momDir = CDIM+h;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
@@ -308,7 +307,7 @@ namespace Lucee
       //   int ctr = 0;
       //   for (int h = 0; h < VDIM; h++)
       //   {
-      //     for (int g = h; g < VDIM; g++)
+      //     for (int g=h; g<VDIM; g++)
       //     {
       //       momDir = g+1;
       //       momDir2 = h+1;
