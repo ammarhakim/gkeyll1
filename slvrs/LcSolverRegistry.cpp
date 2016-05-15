@@ -90,6 +90,7 @@
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLEnergyAtCellCalc.h>
 #include <LcSOLEnergyAtNodeCalc.h>
+#include <LcSOLGeneralIntegralAtNodeCalc.h>
 #include <LcSOLHeatFluxCalc.h>
 #include <LcSOLInitializeDensity.h>
 #include <LcSOLIonDensityInitialization.h>
@@ -100,6 +101,7 @@
 #include <LcSOLPositivityScaleCellUpdater.h>
 #include <LcSOLPositivityScaleNodeUpdater.h>
 #include <LcSOLTemperatureCalc.h>
+#include <LcSOLTemperatureAtNodeCalc.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -195,6 +197,7 @@ namespace Lucee
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLEnergyAtCellCalc>()
       .append<Lucee::SOLEnergyAtNodeCalc>()
+      .append<Lucee::SOLGeneralIntegralAtNodeCalc>()
       .append<Lucee::SOLHeatFluxCalc>()
       .append<Lucee::SOLInitializeDensity>()
       .append<Lucee::SOLIonDensityInitialization>()
@@ -205,6 +208,7 @@ namespace Lucee
       .append<Lucee::SOLPositivityScaleCellUpdater>()
       .append<Lucee::SOLPositivityScaleNodeUpdater>()
       .append<Lucee::SOLTemperatureCalc>()
+      .append<Lucee::SOLTemperatureAtNodeCalc>()
 
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()
