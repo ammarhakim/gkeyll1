@@ -88,8 +88,10 @@ namespace Lucee
       int fnRef;
 /** species mass for vPerp to mu transformation */
       double speciesMass;
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<5> *nodalBasis;
+/** Pointer to 5d basis functions */
+      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
+/** Pointer to 3d basis functions */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
 /** List of matrices on each lower face */
       std::vector<Eigen::MatrixXd > lowerMat;
 /** List of matrices on each upper face */
@@ -106,13 +108,18 @@ namespace Lucee
       Eigen::MatrixXd upperCenterTimesMu;
       Eigen::MatrixXd selfCenterTimesMu;
       Eigen::MatrixXd lowerCenterTimesMu;
-/** Weights for volume gaussian quadrature points */
+/** Weights for 3D volume gaussian quadrature points */
       std::vector<double> gaussVolWeights;
 /** 
- * Interpolation matrix for bringing quantities from nodal locations to volume
+ * 3D interpolation matrix for bringing quantities from nodal locations to volume
  * gaussian quadrature points.
  */
       Eigen::MatrixXd interpVolMatrix;
+/**
+ * When multiplied by the solution in a 3d cell, returns the integrated cell quantity
+ * To get average, one should divide by the volume of the cell
+ */
+      Eigen::VectorXd mom0Vector;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

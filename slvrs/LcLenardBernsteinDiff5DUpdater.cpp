@@ -1,7 +1,7 @@
 /**
  * @file	LcLenardBernsteinDiff5DUpdater.cpp
  *
- * @brief	Updater to evaluate the diffusion term in the L-B collision operator for 1D2V problems.
+ * @brief	Updater to evaluate the diffusion term in the L-B collision operator for 3D2V problems.
  */
 
 // config stuff
@@ -34,11 +34,16 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
+      nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
     else
-      throw Lucee::Except("LenardBernsteinDiff5DUpdater::readInput: Must specify element to use using 'basis'");
+      throw Lucee::Except("LenardBernsteinDiff5DUpdater::readInput: Must specify element to use using 'basis5d'");
  
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
+      nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
+    else
+      throw Lucee::Except("LenardBernsteinDiff5DUpdater::readInput: Must specify element to use using 'basis3d'");
+
     // CFL number to control time-step
     cfl = tbl.getNumber("cfl"); // CFL number
     // should only increments be computed?
@@ -69,30 +74,38 @@ namespace Lucee
     // local region to update
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
 
-    unsigned nlocal = 32;//nodalBasis->getNumNodes();
+    unsigned nlocal5d = 32;//nodalBasis->getNumNodes();
 
     Lucee::RowMajorSequencer<5> seq(localRgn);
     seq.step(); // just to get to first index
     int idx[5];
     seq.fillWithIndex(idx);
-    nodalBasis->setIndex(idx);
+    nodalBasis5d->setIndex(idx);
 
     // pre-multiply each of the matrices by inverse matrix
     Lucee::Matrix<double> massMatrixLucee(32, 32);
     // NOTE: mass matrix is fetched repeatedly as the solve() method
     // destroys it during the inversion process
-    nodalBasis->getMassMatrix(massMatrixLucee);
+    nodalBasis5d->getMassMatrix(massMatrixLucee);
     Eigen::Matrix<double, 32, 32> massMatrix;
     copyLuceeToEigen(massMatrixLucee, massMatrix);
     Eigen::Matrix<double, 32, 32> massMatrixInv = massMatrix.inverse();
 
-    // Get the interpolation matrix for the volume quadrature points
-    int numVolQuadNodes = nodalBasis->getNumGaussNodes();
+    // Get the interpolation matrix for the 3d volume quadrature points
+    nodalBasis3d->setIndex(idx[1], idx[2], idx[3]);
+    unsigned nlocal3d = nodalBasis3d->getNumNodes();
+    int numVolQuadNodes = nodalBasis3d->getNumGaussNodes();
     Lucee::Matrix<double> gaussVolOrdinatesLucee(numVolQuadNodes, 3);
-    Lucee::Matrix<double> interpVolMatrixLucee(numVolQuadNodes, nlocal);
+    Lucee::Matrix<double> interpVolMatrixLucee(numVolQuadNodes, nlocal3d);
     gaussVolWeights = std::vector<double>(numVolQuadNodes);
-    interpVolMatrix = Eigen::MatrixXd(numVolQuadNodes, nlocal);
-    nodalBasis->getGaussQuadData(interpVolMatrixLucee, gaussVolOrdinatesLucee, gaussVolWeights);
+    interpVolMatrix = Eigen::MatrixXd(numVolQuadNodes, nlocal3d);
+    nodalBasis3d->getGaussQuadData(interpVolMatrixLucee, gaussVolOrdinatesLucee, gaussVolWeights);
+    // Improved calculation
+    Lucee::Matrix<double> massMatrix3dLucee(nlocal3d, nlocal3d);
+    nodalBasis3d->getMassMatrix(massMatrix3dLucee);
+    Eigen::MatrixXd massMatrix3d(nlocal3d, nlocal3d);
+    copyLuceeToEigen(massMatrix3dLucee, massMatrix3d);
+    mom0Vector = massMatrix3d.colwise().sum();
 
     // Allocate diffusion matrices
     lowerMat.resize(5, Eigen::Matrix<double, 32, 32>::Zero());
@@ -13464,8 +13477,9 @@ namespace Lucee
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
     const Lucee::Field<5, double>& distfIn = this->getInp<Lucee::Field<5, double> >(0);
-    const Lucee::Field<5, double>& vThermSqIn = this->getInp<Lucee::Field<5, double> >(1);
-    const Lucee::Field<5, double>& bFieldIn = this->getInp<Lucee::Field<5, double> >(2);
+    const Lucee::Field<3, double>& temperatureIn = this->getInp<Lucee::Field<3, double> >(1);
+    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(2);
+    const Lucee::Field<3, double>& nIn = this->getInp<Lucee::Field<3, double> >(3);
     Lucee::Field<5, double>& distfOut = this->getOut<Lucee::Field<5, double> >(0);
 
     double dt = t-this->getCurrTime();
@@ -13474,8 +13488,9 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> distfUpperPtr  = distfIn.createConstPtr();
     Lucee::ConstFieldPtr<double> distfLowerPtr  = distfIn.createConstPtr();
 
-    Lucee::ConstFieldPtr<double> vThermSqPtr  = vThermSqIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> temperaturePtr  = temperatureIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bFieldPtr  = bFieldIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> nPtr  = nIn.createConstPtr();
     Lucee::FieldPtr<double> distfOutPtr = distfOut.createPtr();
 
     // check time-step
@@ -13494,7 +13509,8 @@ namespace Lucee
     int idxUpper[5];
     int idxLower[5];
     double xc[5];
-    unsigned nlocal = nodalBasis->getNumNodes(); 
+    unsigned nlocal5d = nodalBasis5d->getNumNodes(); 
+    unsigned nlocal3d = nodalBasis3d->getNumNodes(); 
 
     // Get alpha (collision frequency)
     Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
@@ -13506,60 +13522,55 @@ namespace Lucee
     {
       seq.fillWithIndex(idx);
 
-      nodalBasis->setIndex(idx);
+      nodalBasis5d->setIndex(idx);
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
       distfOut.setPtr(distfOutPtr, idx);
       distfIn.setPtr(distfPtr, idx);
 
-      bFieldIn.setPtr(bFieldPtr, idx);
-      vThermSqIn.setPtr(vThermSqPtr, idx);
-      // Find average vt^2 and B in this cell
-      // Calculate average vThermSq in cell
-      Eigen::VectorXd vThermSqVec(nlocal);
-      Eigen::VectorXd bFieldVec(nlocal);
+      temperatureIn.setPtr(temperaturePtr, idx[0], idx[1], idx[2]);
+      bFieldIn.setPtr(bFieldPtr, idx[0], idx[1], idx[2]);
+      nIn.setPtr(nPtr, idx[0], idx[1], idx[2]);
+      // Find average temperature, magnetic field, and density in this cell
+      Eigen::VectorXd temperatureVec(nlocal3d);
+      Eigen::VectorXd bFieldVec(nlocal3d);
+      Eigen::VectorXd nVec(nlocal3d);
 
-      for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
       {
-        vThermSqVec(nodeIndex) = vThermSqPtr[nodeIndex];
+        temperatureVec(nodeIndex) = temperaturePtr[nodeIndex];
         bFieldVec(nodeIndex) = bFieldPtr[nodeIndex];
+        nVec(nodeIndex) = nPtr[nodeIndex];
       }
 
-      Eigen::VectorXd vThermSqAtQuadPoints = interpVolMatrix*vThermSqVec;
-      Eigen::VectorXd bFieldAtQuadPoints = interpVolMatrix*bFieldVec;
-
-      // Integrate vThermSq
-      double averageVThermSq = 0.0;
-      double averageB = 0.0;
-      for (int quadIndex = 0; quadIndex < vThermSqAtQuadPoints.rows(); quadIndex++)
-      {
-        averageVThermSq += gaussVolWeights[quadIndex]*vThermSqAtQuadPoints(quadIndex)/
-          (grid.getDx(0)*grid.getDx(1)*grid.getDx(2)*grid.getDx(3)*grid.getDx(4));
-        averageB += gaussVolWeights[quadIndex]*bFieldAtQuadPoints(quadIndex)/
-          (grid.getDx(0)*grid.getDx(1)*grid.getDx(2)*grid.getDx(3)*grid.getDx(4));
-      }
+      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
+      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
+      double averageB = mom0Vector.dot(bFieldVec)/volume;
+      double averageN = mom0Vector.dot(nVec)/volume;
 
       // Keep track of maximum cfla (v-parallel diffusion)
-      cfla = std::max(cfla, alpha*averageVThermSq*dt/(grid.getDx(3)*grid.getDx(3)) );
+      cfla = std::max(cfla, alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
+          averageTemperature/speciesMass*dt/(grid.getDx(3)*grid.getDx(3)) );
       // Keep track of maximum cfla (mu diffusion)
       double muUpper = xc[4] + 0.5*grid.getDx(4);
-      cfla = std::max(cfla, alpha*speciesMass*averageVThermSq/averageB*dt/muUpper*
-          std::max(1.0, 4*muUpper*muUpper/(grid.getDx(4)*grid.getDx(4))) );
+      double muTherm = averageTemperature/averageB;
+      cfla = std::max(cfla, 8.0*alpha*averageN/(averageTemperature*sqrt(averageTemperature))
+          *muTherm*muUpper*dt/(grid.getDx(4)*grid.getDx(4)));
       
       if (cfla > cflm)
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
-      Eigen::VectorXd fAtNodes(nlocal);
+      Eigen::VectorXd fAtNodes(nlocal5d);
 
-      for (int i = 0; i < nlocal; i++)
+      for (int i = 0; i < nlocal5d; i++)
         fAtNodes(i) = distfPtr[i];
 
       Eigen::VectorXd updateF = ( selfCenter[3] + 
-        2*speciesMass/averageB*(xc[4]*selfCenter[4] + selfCenterTimesMu) )*fAtNodes;
+        2*speciesMass/averageB*(xc[4]*selfCenter[4] + selfCenterTimesMu))*fAtNodes;
       
-      Eigen::VectorXd fLowerAtNodes(nlocal);
-      Eigen::VectorXd fUpperAtNodes(nlocal);
+      Eigen::VectorXd fLowerAtNodes(nlocal5d);
+      Eigen::VectorXd fUpperAtNodes(nlocal5d);
 
       // add in contribution from cells attached to lower/upper faces in vPara
       if (idx[3] > globalRgn.getLower(3))
@@ -13569,7 +13580,7 @@ namespace Lucee
         seq.fillWithIndex(idxLower);
         idxLower[3] = idxLower[3] - 1;
         distfIn.setPtr(distfLowerPtr, idxLower); // cell attached to lower face
-        for (int i = 0; i < nlocal; i++)
+        for (int i = 0; i < nlocal5d; i++)
           fLowerAtNodes(i) = distfLowerPtr[i];
 
         updateF = updateF + lowerMat[3]*fLowerAtNodes;
@@ -13582,12 +13593,13 @@ namespace Lucee
         seq.fillWithIndex(idxUpper);
         idxUpper[3] = idxUpper[3] + 1;
         distfIn.setPtr(distfUpperPtr, idxUpper); // cell attached to upper face
-        for (int i = 0; i < nlocal; i++)
+        for (int i = 0; i < nlocal5d; i++)
           fUpperAtNodes(i) = distfUpperPtr[i];
 
         updateF = updateF + upperMat[3]*fUpperAtNodes;
       }
 
+      
       // add in contribution from cells attached to lower/upper faces in mu
       if (idx[4] > globalRgn.getLower(4))
       {
@@ -13596,7 +13608,7 @@ namespace Lucee
         seq.fillWithIndex(idxLower);
         idxLower[4] = idxLower[4] - 1;
         distfIn.setPtr(distfPtr, idxLower); // cell attached to lower face
-        for (int i = 0; i < nlocal; i++)
+        for (int i = 0; i < nlocal5d; i++)
           fLowerAtNodes(i) = distfPtr[i];
 
         updateF = updateF + 2*speciesMass/averageB*(xc[4]*lowerMat[4] + lowerMatDiffusionTimesMu)*fLowerAtNodes;
@@ -13609,15 +13621,16 @@ namespace Lucee
         seq.fillWithIndex(idxUpper);
         idxUpper[4] = idxUpper[4] + 1;
         distfIn.setPtr(distfPtr, idxUpper); // cell attached to upper face
-        for (int i = 0; i < nlocal; i++)
+        for (int i = 0; i < nlocal5d; i++)
           fUpperAtNodes(i) = distfPtr[i];
 
         updateF = updateF + 2*speciesMass/averageB*(xc[4]*upperMat[4] + upperMatDiffusionTimesMu)*fUpperAtNodes;
       }
 
       // Accumulate updateF to output
-      for (int i = 0; i < nlocal; i++)
-        distfOutPtr[i] = distfOutPtr[i] + alpha*averageVThermSq*updateF(i);
+      for (int i = 0; i < nlocal5d; i++)
+        distfOutPtr[i] = distfOutPtr[i] + alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
+          averageTemperature/speciesMass*updateF(i);
     }
     
     if (onlyIncrement == false)
@@ -13630,7 +13643,7 @@ namespace Lucee
         distfIn.setPtr(distfPtr, idx);
         distfOut.setPtr(distfOutPtr, idx);
         
-        for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
           distfOutPtr[nodeIndex] = distfPtr[nodeIndex] + dt*distfOutPtr[nodeIndex];
       }
     }
@@ -13643,8 +13656,12 @@ namespace Lucee
   {
     // Input: distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
-    // Input: vThermSq field
-    this->appendInpVarType(typeid(Lucee::Field<5, double>));
+    // Input: temperature field (in JOULES)
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: magnetic field
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: number density
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Output: distribution function
     this->appendOutVarType(typeid(Lucee::Field<5, double>));
   }

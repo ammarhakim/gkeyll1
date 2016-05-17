@@ -73,6 +73,7 @@ set(lcslvrs_SOURCES
   LcLenardBernsteinDiff5DUpdater.cpp
   LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDrag3DUpdater.cpp
+  LcLenardBernsteinDrag5DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
   LcLinCombiner.cpp
