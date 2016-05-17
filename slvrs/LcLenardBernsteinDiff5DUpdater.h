@@ -1,7 +1,8 @@
 /**
  * @file	LcLenardBernsteinDiff5DUpdater.h
  *
- * @brief	Updater to evaluate the diffusion term in the L-B collision operator for 3D2V problems.
+ * @brief	Updater to compute the diffusion term in the L-B collision operator.
+ * Used for 3D2V SOL problem.
  */
 
 #ifndef LC_LENARD_BERNSTEIN_DIFF_5D_UPDATER_H
@@ -13,8 +14,8 @@
 #endif
 
 // lucee includes
+#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
-#include <LcStructGridField.h>
 #include <LcUpdaterIfc.h>
 
 // std includes
@@ -26,8 +27,8 @@
 namespace Lucee
 {
 /**
- * Updater to evaluate the diffusion term in the Lenard-Bernstein
- * collision operator.
+ * Updater to solve hyperbolic equations using a nodal discontinous
+ * Galerkin scheme.
  */
   class LenardBernsteinDiff5DUpdater : public Lucee::UpdaterIfc
   {
@@ -35,15 +36,8 @@ namespace Lucee
 /** Class id: this is used by registration system */
       static const char *id;
 
-/**
- * Create new updater.
- */
+/** Create new nodal DG solver */
       LenardBernsteinDiff5DUpdater();
-
-/**
- * Destroy updater.
- */
-      ~LenardBernsteinDiff5DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -80,41 +74,68 @@ namespace Lucee
     private:
 /** Diffusion coefficient */
       double alpha;
-/** CFL number */
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** CFL number to use */
       double cfl;
-/** Flag to indicate if to compute only increments */
+/** Maximum CFL number allowed */
+      double cflm;
+/** Flag to indicate if to only compute increments */
       bool onlyIncrement;
 /** Reference to function specifying alpha */
       int fnRef;
-/** species mass for vPerp to mu transformation */
-      double speciesMass;
-/** Pointer to 5d basis functions */
-      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
-/** Pointer to 3d basis functions */
-      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** List of matrices on each lower face */
-      std::vector<Eigen::MatrixXd > lowerMat;
-/** List of matrices on each upper face */
-      std::vector<Eigen::MatrixXd > upperMat;
-/** Precomputed matrices accounting for how mu is a radial coordinate */
-      Eigen::MatrixXd iMatDiffusionTimesMu;
-      Eigen::MatrixXd lowerMatDiffusionTimesMu;
-      Eigen::MatrixXd upperMatDiffusionTimesMu;
-/** Vectors to store eigen matrices */
-      std::vector<Eigen::MatrixXd> upperCenter;
-      std::vector<Eigen::MatrixXd> selfCenter;
-      std::vector<Eigen::MatrixXd> lowerCenter;
-/** Additional matrices needed for diffusion in mu coordinate */
-      Eigen::MatrixXd upperCenterTimesMu;
-      Eigen::MatrixXd selfCenterTimesMu;
-      Eigen::MatrixXd lowerCenterTimesMu;
-/** Weights for 3D volume gaussian quadrature points */
-      std::vector<double> gaussVolWeights;
+/**
+ * Matrix of surface gaussian quadrature locations on bottom face..
+ * There are three columns by default for (x,y,z)
+ * and each row is a different quadrature point for doing surface integrals.
+ */
+      std::vector<Eigen::MatrixXd> gaussSurfOrdinates5d;
+/** Weights for surface gaussian quadrature points */
+      std::vector<std::vector<double> > gaussSurfWeights5d;
+/**
+ * Matrix of volume gaussian quadrature locations.
+ * There are three columns by default for (x,y,z)
+ * and each row is a different quadrature point for doing volume integrals.
+ */
+      Eigen::MatrixXd gaussVolOrdinates5d;
+/** Weights for volume gaussian quadrature points */
+      std::vector<double> gaussVolWeights5d;
 /** 
- * 3D interpolation matrix for bringing quantities from nodal locations to volume
+ * Derivative of basis functions in drag direction evaluated at
+ * volume gaussian quadrature points. Rows correspond to different
+ * quadrature points specified in gaussVolOrdinates and columns 
+ * correspond to different basis functions
+ */
+      std::vector<Eigen::MatrixXd> basisDerivAtVolQuad;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to volume
  * gaussian quadrature points.
  */
-      Eigen::MatrixXd interpVolMatrix;
+      Eigen::MatrixXd interpVolMatrix5d;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to volume
+ * gaussian quadrature points for a 3d field.
+ */
+      Eigen::MatrixXd interpVolMatrix3d;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to surface
+ * gaussian quadrature points on lower face in dragDir.
+ */
+      std::vector<Eigen::MatrixXd> interpSurfMatrixLower5d;
+/** 
+ * Interpolation matrix for bringing quantities from nodal locations to surface
+ * gaussian quadrature points on upper face in dragDir.
+ */
+      std::vector<Eigen::MatrixXd> interpSurfMatrixUpper5d;
+/** 
+ * Mass matrix inverse times tranpose of interpSurfMatrixLower precomputed.
+ */
+      std::vector<Eigen::MatrixXd> surfIntegralMatrixLower5d;
+/** 
+ * Mass matrix inverse times tranpose of interpSurfMatrixUpper5d precomputed.
+ */
+      std::vector<Eigen::MatrixXd> surfIntegralMatrixUpper5d;
 /**
  * When multiplied by the solution in a 3d cell, returns the integrated cell quantity
  * To get average, one should divide by the volume of the cell
@@ -126,7 +147,6 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::Matrix<double, 32, 32>& destinationMatrix);
 /**
  * Evaluate function at specified location and fill output array with
  * result.

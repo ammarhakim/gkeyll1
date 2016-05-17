@@ -1,5 +1,5 @@
 /**
- * @file	LcLenardBernsteinDrag3DUpdater.h
+ * @file	LcLenardBernsteinDrag5DUpdater.h
  *
  * @brief	Updater to compute the drag term in the L-B collision operator.
  * df/dt = alpha*d[(v-u)f]/dv where u is a function of (x,y,z) (drift velocity)
