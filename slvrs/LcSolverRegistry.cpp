@@ -55,6 +55,7 @@
 #include <LcLenardBernsteinDiff5DUpdater.h>
 #include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDrag3DUpdater.h>
+#include <LcLenardBernsteinDrag5DUpdater.h>
 #include <LcLenardBernsteinDragUpdater.h>
 #include <LcLinCombiner.h>
 #include <LcLobattoElement1D.h>
@@ -223,6 +224,7 @@ namespace Lucee
 
       .append<Lucee::LenardBernsteinDragUpdater>()
       .append<Lucee::LenardBernsteinDrag3DUpdater>()
+      .append<Lucee::LenardBernsteinDrag5DUpdater>()
       .append<Lucee::LenardBernsteinDiffUpdater>()
       .append<Lucee::LenardBernsteinDiff3DUpdater>()
       .append<Lucee::LenardBernsteinDiff5DUpdater>()
