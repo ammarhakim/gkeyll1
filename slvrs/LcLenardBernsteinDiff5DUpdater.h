@@ -85,6 +85,8 @@ namespace Lucee
       bool onlyIncrement;
 /** Reference to function specifying alpha */
       int fnRef;
+/** Mass of particles */
+      double speciesMass;
 /**
  * Matrix of surface gaussian quadrature locations on bottom face..
  * There are three columns by default for (x,y,z)

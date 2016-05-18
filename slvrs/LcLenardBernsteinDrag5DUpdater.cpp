@@ -226,7 +226,6 @@ namespace Lucee
     std::vector<double> resultVector(1);
     evaluateFunction(*L, t, resultVector);
     alpha = resultVector[0];
-    std::cout << "alpha = " << alpha << std::endl;
 
     // Volume integral contribution for both v-parallel and mu directions
     while(seq.step())

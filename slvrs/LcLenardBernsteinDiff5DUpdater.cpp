@@ -51,6 +51,11 @@ namespace Lucee
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
 
+    if (tbl.hasNumber("speciesMass"))
+      speciesMass = tbl.getNumber("speciesMass");
+    else
+      throw Lucee::Except("LenardBernsteinDiff5DUpdater::readInput: Must specify speciesMass");
+
     if (tbl.hasFunction("alpha"))
       fnRef = tbl.getFunctionRef("alpha");
     else
@@ -183,16 +188,18 @@ namespace Lucee
 
     // Distribution function
     const Lucee::Field<5, double>& fIn = this->getInp<Lucee::Field<5, double> >(0);
-    // Drift velocity uIn(x).
-    const Lucee::Field<3, double>& uIn = this->getInp<Lucee::Field<3, double> >(1);
-    // Number density at node
-    const Lucee::Field<3, double>& nIn = this->getInp<Lucee::Field<3, double> >(2);
     // Temperature in joules
-    const Lucee::Field<3, double>& temperatureIn = this->getInp<Lucee::Field<3, double> >(3);
+    const Lucee::Field<3, double>& temperatureIn = this->getInp<Lucee::Field<3, double> >(1);
+    // Magnetic field
+    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(2);
     // Dimensionally correct number density from weighted moment calculation
-    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(4);
+    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(3);
     // Output distribution function
     Lucee::Field<5, double>& fOut = this->getOut<Lucee::Field<5, double> >(0);
+    // Auxiliary field for v-parallel term
+    Lucee::Field<5, double>& gVParOut = this->getOut<Lucee::Field<5, double> >(1);
+    // Auxiliary field for mu term
+    Lucee::Field<5, double>& gMuOut = this->getOut<Lucee::Field<5, double> >(2);
 
     int nlocal5d = nodalBasis5d->getNumNodes();
     int nlocal3d = nodalBasis3d->getNumNodes();
@@ -206,16 +213,25 @@ namespace Lucee
 
     double cfla = 0.0; // maximum CFL number
 
+    // Input fields
     Lucee::ConstFieldPtr<double> fInPtr = fIn.createConstPtr();
     Lucee::ConstFieldPtr<double> fInPtrLeft = fIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> uInPtr = uIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> nInPtr = nIn.createConstPtr();
     Lucee::ConstFieldPtr<double> temperatureInPtr = temperatureIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> numDensityInPtr = numDensityIn.createConstPtr();
+    // Writeable fields
     Lucee::FieldPtr<double> fOutPtr = fOut.createPtr();
     Lucee::FieldPtr<double> fOutPtrLeft = fOut.createPtr();
+    Lucee::FieldPtr<double> gVParOutPtr = gVParOut.createPtr();
+    Lucee::FieldPtr<double> gVParOutPtrLeft = gVParOut.createPtr();
+    Lucee::FieldPtr<double> gMuOutPtr = gMuOut.createPtr();
+    Lucee::FieldPtr<double> gMuOutPtrLeft = gMuOut.createPtr();
+
 
     fOut = 0.0; // use fOut to store increment initially
+    gVParOut = 0.0;
+    gMuOut = 0.0;
+
     int idx[5];
     double cellCentroid[5];
     Lucee::RowMajorSequencer<5> seq(localRgn);
@@ -225,9 +241,8 @@ namespace Lucee
     std::vector<double> resultVector(1);
     evaluateFunction(*L, t, resultVector);
     alpha = resultVector[0];
-    std::cout << "alpha = " << alpha << std::endl;
 
-    // Volume integral contribution for both v-parallel and mu directions
+    // First compute solution in auxillary fields (volume integral)
     while(seq.step())
     {
       seq.fillWithIndex(idx);
@@ -235,23 +250,8 @@ namespace Lucee
       grid.getCentroid(cellCentroid);
       
       fIn.setPtr(fInPtr, idx);
-      uIn.setPtr(uInPtr, idx[0], idx[1], idx[2]);
-      nIn.setPtr(nInPtr, idx[0], idx[1], idx[2]);
-      temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
-      numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
-      fOut.setPtr(fOutPtr, idx);
-      
-      Eigen::VectorXd uVals(nlocal3d);
-      Eigen::VectorXd nVals(nlocal3d);
-      // Copy values of uIn into uVals vector
-      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-      {
-        uVals(nodeIndex) = uInPtr[nodeIndex];
-        nVals(nodeIndex) = nInPtr[nodeIndex];
-      }
-      // Interpolate uIn to 3D quadrature points 
-      Eigen::VectorXd uAtQuad = interpVolMatrix3d*uVals;
-      Eigen::VectorXd nAtQuad = interpVolMatrix3d*nVals;
+      gVParOut.setPtr(gVParOutPtr, idx);
+      gMuOut.setPtr(gMuOutPtr, idx);
        
       // Compute distribution function at quadrature points
       Eigen::VectorXd fVals(nlocal5d);
@@ -263,27 +263,26 @@ namespace Lucee
       Eigen::VectorXd paraQuad(nVolQuad5d);
       Eigen::VectorXd muQuad(nVolQuad5d);
       // Compute integrands for gaussian quadrature excluding basis function derivatives
+      // Consider storing and using grad stiffness matrices here
       for (int quadIndex = 0; quadIndex < nVolQuad5d; quadIndex++)
       {
-        double paraCoord = cellCentroid[3] + 0.5*grid.getDx(3)*gaussVolOrdinates5d(quadIndex,3);
-        double muCoord = cellCentroid[4] + 0.5*grid.getDx(4)*gaussVolOrdinates5d(quadIndex,4);
-        paraQuad(quadIndex) = gaussVolWeights5d[quadIndex]*fVolQuad(quadIndex)*
-          (paraCoord - uAtQuad(quadIndex % nVolQuad3d)/nAtQuad(quadIndex % nVolQuad3d));
-        muQuad(quadIndex) = gaussVolWeights5d[quadIndex]*fVolQuad(quadIndex)*2*muCoord;
+        paraQuad(quadIndex) = gaussVolWeights5d[quadIndex]*fVolQuad(quadIndex);
+        muQuad(quadIndex) = gaussVolWeights5d[quadIndex]*fVolQuad(quadIndex);
       }
 
       // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
-      Eigen::VectorXd volIntegralResult = (basisDerivAtVolQuad[0]*paraQuad +
-        basisDerivAtVolQuad[1]*muQuad);
+      Eigen::VectorXd volIntegralResultVPar = basisDerivAtVolQuad[0]*paraQuad;
+      Eigen::VectorXd volIntegralResultMu = basisDerivAtVolQuad[1]*muQuad;
       
       for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
-        fOutPtr[nodeIndex] -= volIntegralResult(nodeIndex);
+      {
+        gVParOutPtr[nodeIndex] -= volIntegralResultVPar(nodeIndex);
+        gMuOutPtr[nodeIndex] -= volIntegralResultMu(nodeIndex);
+      }
     }
-
-    // Contributions from surface integrals
-    // Create sequencer to loop over *each* 4D slice in '3' direction
+    
+    // V-Par surface integral for auxiliary variable
     Lucee::RowMajorSequencer<5> seqLowerDim(localRgn.deflate(3));
-
     // To set indices on left and right cells of a boundary
     int idxr[5];
     int idxl[5];
@@ -304,37 +303,6 @@ namespace Lucee
     {
       seqLowerDim.fillWithIndex(idxr);
       seqLowerDim.fillWithIndex(idxl);
-
-      // Compute alpha scale factor n/Te^(3/2)
-      temperatureIn.setPtr(temperatureInPtr, idxr[0], idxr[1], idxr[2]);
-      numDensityIn.setPtr(numDensityInPtr, idxr[0], idxr[1], idxr[2]);
-      Eigen::VectorXd temperatureVec(nlocal3d);
-      Eigen::VectorXd numDensityVec(nlocal3d);
-      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-      {
-        temperatureVec(nodeIndex) = temperatureInPtr[nodeIndex];
-        numDensityVec(nodeIndex) = numDensityInPtr[nodeIndex];
-      }
-      grid.setIndex(idxr);
-      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
-      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
-      double averageN = mom0Vector.dot(numDensityVec)/volume;
-
-      // Compute uIn at volume quadrature points (again)
-      uIn.setPtr(uInPtr, idxr[0], idxr[1], idxr[2]);
-      nIn.setPtr(nInPtr, idxr[0], idxr[1], idxr[2]);
-      Eigen::VectorXd uVals(nlocal3d);
-      Eigen::VectorXd nVals(nlocal3d);
-      // Copy values of uIn into uVals vector
-      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-      {
-        uVals(nodeIndex) = uInPtr[nodeIndex];
-        nVals(nodeIndex) = nInPtr[nodeIndex];
-      }
-      // Interpolate uIn to 3D quadrature points 
-      Eigen::VectorXd uAtQuad = interpVolMatrix3d*uVals;
-      Eigen::VectorXd nAtQuad = interpVolMatrix3d*nVals;
-
       // Loop over each edge in vParallel
       for (int i = ivLower; i < ivUpper; i++)
       {
@@ -360,36 +328,13 @@ namespace Lucee
 
         // Evaluate fLeft and fRight at quadrature nodes on surface
         Eigen::VectorXd fLeftSurfEvals = interpSurfMatrixUpper5d[0]*fLeft;
-        Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower5d[0]*fRight;
+        //Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower5d[0]*fRight;
 
         // Loop over quadrature points on the edge
         Eigen::VectorXd surfIntegralFluxes(gaussSurfWeights5d[0].size());
-
-        // Need to know center of right cell to figure out the global velocity coordinate
-        grid.getCentroid(cellCentroid);
-        double paraCoord = cellCentroid[3] - 0.5*grid.getDx(3);
-        
+        // Use right value for auxilliary numerical flux (arbitrary choice)
         for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[0].size(); quadIndex++)
-        {
-          // Compute Lax flux at each surface quadrature point
-          double numFlux;
-          if (paraCoord - uAtQuad(quadIndex % nVolQuad3d)/nAtQuad(quadIndex % nVolQuad3d) > 0)
-            numFlux = (paraCoord - uAtQuad(quadIndex % nVolQuad3d)/nAtQuad(quadIndex % nVolQuad3d))*
-              fRightSurfEvals(quadIndex);
-          else numFlux = (paraCoord - uAtQuad(quadIndex % nVolQuad3d)/nAtQuad(quadIndex % nVolQuad3d))*
-            fLeftSurfEvals(quadIndex);
-
-          // Keep track of max CFL number
-          cfla = std::max(cfla, std::abs(alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
-                (paraCoord-uAtQuad(quadIndex % nVolQuad3d)/nAtQuad(quadIndex % nVolQuad3d))*dt/grid.getDx(3)));
-          //cfla = std::max(cfla, std::abs(alpha*(paraCoord-uAtQuad(quadIndex % nVolQuad3d))*dt/(0.5*(dxL+dxR))));
-          // Time-step was too large: return a suggestion with correct time-step
-          if (cfla > cflm)
-            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-
-          // Store result of weight*(v-uIn)*f at this location in a vector
-          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[0][quadIndex]*numFlux;
-        }
+          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[0][quadIndex]*fLeftSurfEvals(quadIndex);
 
         // Compute all surface integrals using a matrix multiply.
         // Each row in result is a basis function times flux projection
@@ -398,23 +343,22 @@ namespace Lucee
         Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower5d[0]*surfIntegralFluxes;
 
         // Update left cell connected to edge with flux on face
-        fOut.setPtr(fOutPtrLeft, idxl);
+        gVParOut.setPtr(gVParOutPtrLeft, idxl);
         // Update right cell connected to edge with flux on face
-        fOut.setPtr(fOutPtr, idxr);
+        gVParOut.setPtr(gVParOutPtr, idxr);
 
         for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
         {
           // Plus sign for left cell since outward normal is in +v direction
-          fOutPtrLeft[nodeIndex] += leftSurfIntegralResult(nodeIndex);
+          gVParOutPtrLeft[nodeIndex] += leftSurfIntegralResult(nodeIndex);
           // Minus sign for right cell since outward normal is in -v direction
-          fOutPtr[nodeIndex]  -= rightSurfIntegralResult(nodeIndex);
+          gVParOutPtr[nodeIndex]  -= rightSurfIntegralResult(nodeIndex);
         }
       }
     }
 
-    // Contributions from surface integrals
-    // Create sequencer to loop over *each* 4D slice in '4' direction
-    seqLowerDim = Lucee::RowMajorSequencer<5>(localRgn.deflate(4));
+    // Mu surface integral for auxiliary variable
+    seqLowerDim = localRgn.deflate(4);
 
     int iMuLower = localRgn.getLower(4);
     // Need one edge outside domain interior
@@ -425,28 +369,12 @@ namespace Lucee
       iMuLower = globalRgn.getLower(4)+1;
     if (iMuUpper == globalRgn.getUpper(4)+1)
       iMuUpper = globalRgn.getUpper(4);
-  
+
     // Loop over each 4D slice in (x,y,z,v)
     while (seqLowerDim.step())
     {
       seqLowerDim.fillWithIndex(idxr);
       seqLowerDim.fillWithIndex(idxl);
-
-      // Compute alpha scale factor n/Te^(3/2)
-      temperatureIn.setPtr(temperatureInPtr, idxr[0], idxr[1], idxr[2]);
-      numDensityIn.setPtr(numDensityInPtr, idxr[0], idxr[1], idxr[2]);
-      Eigen::VectorXd temperatureVec(nlocal3d);
-      Eigen::VectorXd numDensityVec(nlocal3d);
-      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-      {
-        temperatureVec(nodeIndex) = temperatureInPtr[nodeIndex];
-        numDensityVec(nodeIndex) = numDensityInPtr[nodeIndex];
-      }
-      grid.setIndex(idxr);
-      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
-      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
-      double averageN = mom0Vector.dot(numDensityVec)/volume;
-
       // Loop over each edge in mu
       for (int i = iMuLower; i < iMuUpper; i++)
       {
@@ -472,6 +400,239 @@ namespace Lucee
 
         // Evaluate fLeft and fRight at quadrature nodes on surface
         Eigen::VectorXd fLeftSurfEvals = interpSurfMatrixUpper5d[1]*fLeft;
+        //Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower5d[1]*fRight;
+
+        // Loop over quadrature points on the edge
+        Eigen::VectorXd surfIntegralFluxes(gaussSurfWeights5d[1].size());
+        // Use right value for auxilliary numerical flux (arbitrary choice)
+        for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[1].size(); quadIndex++)
+          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[1][quadIndex]*fLeftSurfEvals(quadIndex);
+
+        // Compute all surface integrals using a matrix multiply.
+        // Each row in result is a basis function times flux projection
+        // Then inverse of mass matrix is multiplied to find appropriate increments
+        Eigen::VectorXd leftSurfIntegralResult = surfIntegralMatrixUpper5d[1]*surfIntegralFluxes;
+        Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower5d[1]*surfIntegralFluxes;
+
+        // Update left cell connected to edge with flux on face
+        gMuOut.setPtr(gMuOutPtrLeft, idxl);
+        // Update right cell connected to edge with flux on face
+        gMuOut.setPtr(gMuOutPtr, idxr);
+
+        for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+        {
+          // Plus sign for left cell since outward normal is in +v direction
+          gMuOutPtrLeft[nodeIndex] += leftSurfIntegralResult(nodeIndex);
+          // Minus sign for right cell since outward normal is in -v direction
+          gMuOutPtr[nodeIndex] -= rightSurfIntegralResult(nodeIndex);
+        }
+      }
+    }
+
+    seq.reset();
+    // Using auxiliary variables, compute final terms, doing volume integral first
+    while(seq.step())
+    {
+      seq.fillWithIndex(idx);
+      grid.setIndex(idx);
+      grid.getCentroid(cellCentroid);
+      
+      gVParOut.setPtr(gVParOutPtr, idx);
+      gMuOut.setPtr(gMuOutPtr, idx);
+
+      temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
+      bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
+      numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
+
+      fOut.setPtr(fOutPtr, idx);
+
+      // Find average temperature, magnetic field, and density in this cell
+      Eigen::VectorXd temperatureVec(nlocal3d);
+      Eigen::VectorXd bFieldVec(nlocal3d);
+      Eigen::VectorXd nVec(nlocal3d);
+
+      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
+      {
+        temperatureVec(nodeIndex) = temperatureInPtr[nodeIndex];
+        bFieldVec(nodeIndex) = bFieldInPtr[nodeIndex];
+        nVec(nodeIndex) = numDensityInPtr[nodeIndex];
+      }
+
+      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
+      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
+      double averageB = mom0Vector.dot(bFieldVec)/volume;
+      double averageN = mom0Vector.dot(nVec)/volume;
+
+      // Compute auxiliary variables at quadrature points
+      Eigen::VectorXd gVParVals(nlocal5d);
+      Eigen::VectorXd gMuVals(nlocal5d);
+      for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+      {
+        gVParVals(nodeIndex) = gVParOutPtr[nodeIndex];
+        gMuVals(nodeIndex) = gMuOutPtr[nodeIndex];
+      }
+      
+      Eigen::VectorXd gVParQuad = interpVolMatrix5d*gVParVals;
+      Eigen::VectorXd gMuQuad = interpVolMatrix5d*gMuVals;
+
+      Eigen::VectorXd paraQuad(nVolQuad5d);
+      Eigen::VectorXd muQuad(nVolQuad5d);
+      // Compute integrands for gaussian quadrature excluding basis function derivatives
+      for (int quadIndex = 0; quadIndex < nVolQuad5d; quadIndex++)
+      {
+        paraQuad(quadIndex) = gaussVolWeights5d[quadIndex]*gVParQuad(quadIndex);
+        double muCoord = cellCentroid[4] + 0.5*grid.getDx(4)*gaussVolOrdinates5d(quadIndex,4);
+        muQuad(quadIndex) = gaussVolWeights5d[quadIndex]*gMuQuad(quadIndex)*2*speciesMass*muCoord/averageB;
+      }
+
+      // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
+      Eigen::VectorXd volIntegralResult = (basisDerivAtVolQuad[0]*paraQuad +
+        basisDerivAtVolQuad[1]*muQuad);
+      
+      for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+        fOutPtr[nodeIndex] -= volIntegralResult(nodeIndex);
+    }
+
+    // Contributions from surface integrals
+    // Create sequencer to loop over *each* 4D slice in '3' direction
+    seqLowerDim = localRgn.deflate(3);
+
+    // Loop over each 4D cell in (x,y,z,mu) space
+    while (seqLowerDim.step())
+    {
+      seqLowerDim.fillWithIndex(idxr);
+      seqLowerDim.fillWithIndex(idxl);
+
+      // Compute alpha scale factor n/Te^(3/2)
+      temperatureIn.setPtr(temperatureInPtr, idxr[0], idxr[1], idxr[2]);
+      numDensityIn.setPtr(numDensityInPtr, idxr[0], idxr[1], idxr[2]);
+      Eigen::VectorXd temperatureVec(nlocal3d);
+      Eigen::VectorXd numDensityVec(nlocal3d);
+      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
+      {
+        temperatureVec(nodeIndex) = temperatureInPtr[nodeIndex];
+        numDensityVec(nodeIndex) = numDensityInPtr[nodeIndex];
+      }
+      grid.setIndex(idxr);
+      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
+      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
+      double averageN = mom0Vector.dot(numDensityVec)/volume;
+      // Keep track of max CFL number
+      cfla = std::max( cfla, std::abs(alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
+        averageTemperature/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
+      // Time-step was too large: return a suggestion with correct time-step
+      if (cfla > cflm)
+        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+
+      // Loop over each edge in vParallel
+      for (int i = ivLower; i < ivUpper; i++)
+      {
+        idxr[3] = i; // cell right of edge
+        idxl[3] = i-1; // cell left of edge
+        
+        gVParOut.setPtr(gVParOutPtr, idxr);
+        gVParOut.setPtr(gVParOutPtrLeft, idxl);
+        
+        grid.setIndex(idxl);
+        double dxL = grid.getDx(3);
+        grid.setIndex(idxr);
+        double dxR = grid.getDx(3);
+
+        // Copy fIn data to Eigen vectors for matrix multiplications
+        Eigen::VectorXd fLeft(nlocal5d);
+        Eigen::VectorXd fRight(nlocal5d);
+        for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+        {
+          fLeft(nodeIndex) = gVParOutPtrLeft[nodeIndex];
+          fRight(nodeIndex) = gVParOutPtr[nodeIndex];
+        }
+
+        // Evaluate fLeft and fRight at quadrature nodes on surface
+        //Eigen::VectorXd fLeftSurfEvals = interpSurfMatrixUpper5d[0]*fLeft;
+        Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower5d[0]*fRight;
+
+        // Loop over quadrature points on the edge
+        Eigen::VectorXd surfIntegralFluxes(gaussSurfWeights5d[0].size());
+        // Use left value for auxilliary numerical flux (arbitrary choice)
+        for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[0].size(); quadIndex++)
+          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[0][quadIndex]*fRightSurfEvals(quadIndex);
+
+        // Compute all surface integrals using a matrix multiply.
+        // Each row in result is a basis function times flux projection
+        // Then inverse of mass matrix is multiplied to find appropriate increments
+        Eigen::VectorXd leftSurfIntegralResult = surfIntegralMatrixUpper5d[0]*surfIntegralFluxes;
+        Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower5d[0]*surfIntegralFluxes;
+
+        // Update left cell connected to edge with flux on face
+        fOut.setPtr(fOutPtrLeft, idxl);
+        // Update right cell connected to edge with flux on face
+        fOut.setPtr(fOutPtr, idxr);
+
+        for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+        {
+          // Plus sign for left cell since outward normal is in +v direction
+          fOutPtrLeft[nodeIndex] += leftSurfIntegralResult(nodeIndex);
+          // Minus sign for right cell since outward normal is in -v direction
+          fOutPtr[nodeIndex]  -= rightSurfIntegralResult(nodeIndex);
+        }
+      }
+    }
+
+    // Contributions from surface integrals
+    // Create sequencer to loop over *each* 4D slice in '4' direction
+    seqLowerDim = localRgn.deflate(4);
+  
+    // Loop over each 4D slice in (x,y,z,v)
+    while (seqLowerDim.step())
+    {
+      seqLowerDim.fillWithIndex(idxr);
+      seqLowerDim.fillWithIndex(idxl);
+
+      temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
+      bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
+      numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
+      // Find average temperature, magnetic field, and density in this cell
+      Eigen::VectorXd temperatureVec(nlocal3d);
+      Eigen::VectorXd bFieldVec(nlocal3d);
+      Eigen::VectorXd nVec(nlocal3d);
+
+      for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
+      {
+        temperatureVec(nodeIndex) = temperatureInPtr[nodeIndex];
+        bFieldVec(nodeIndex) = bFieldInPtr[nodeIndex];
+        nVec(nodeIndex) = numDensityInPtr[nodeIndex];
+      }
+
+      double volume = grid.getDx(0)*grid.getDx(1)*grid.getDx(2);
+      double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
+      double averageB = mom0Vector.dot(bFieldVec)/volume;
+      double averageN = mom0Vector.dot(nVec)/volume;
+
+      // Loop over each edge in mu
+      for (int i = iMuLower; i < iMuUpper; i++)
+      {
+        idxr[4] = i; // cell right of edge
+        idxl[4] = i-1; // cell left of edge
+        
+        gMuOut.setPtr(gMuOutPtr, idxr);
+        gMuOut.setPtr(gMuOutPtrLeft, idxl);
+        
+        grid.setIndex(idxl);
+        double dxL = grid.getDx(4);
+        grid.setIndex(idxr);
+        double dxR = grid.getDx(4);
+
+        // Copy fIn data to Eigen vectors for matrix multiplications
+        Eigen::VectorXd fLeft(nlocal5d);
+        Eigen::VectorXd fRight(nlocal5d);
+        for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+        {
+          fLeft(nodeIndex) = gMuOutPtrLeft[nodeIndex];
+          fRight(nodeIndex) = gMuOutPtr[nodeIndex];
+        }
+
+        // Evaluate fLeft and fRight at quadrature nodes on surface
+        //Eigen::VectorXd fLeftSurfEvals = interpSurfMatrixUpper5d[1]*fLeft;
         Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower5d[1]*fRight;
 
         // Loop over quadrature points on the edge
@@ -480,22 +641,17 @@ namespace Lucee
         // Need to know center of right cell to figure out the global velocity coordinate
         grid.getCentroid(cellCentroid);
         double muCoord = cellCentroid[4] - 0.5*grid.getDx(4);
-        
-        // Keep track of max CFL number
-        cfla = std::max(cfla, std::abs(alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
-          2*muCoord*dt/grid.getDx(4)));
+        double muTherm = averageTemperature/averageB;
+        cfla = std::max(cfla, 8.0*alpha*averageN/(averageTemperature*sqrt(averageTemperature))
+          *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
         // Time-step was too large: return a suggestion with correct time-step
         if (cfla > cflm)
           return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-
+        
+        // Use left value for auxilliary numerical flux (arbitrary choice)
         for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[1].size(); quadIndex++)
-        {
-          // Compute upwind flux at each surface quadrature point (mu will always be positive)
-          double numFlux = 2*muCoord*fRightSurfEvals(quadIndex);
-
-          // Store result of weight*mu*f at this location in a vector
-          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[1][quadIndex]*numFlux;
-        }
+          surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[1][quadIndex]*2*muCoord*speciesMass/averageB*
+            fRightSurfEvals(quadIndex);
 
         // Compute all surface integrals using a matrix multiply.
         // Each row in result is a basis function times flux projection
@@ -544,13 +700,13 @@ namespace Lucee
         fIn.setPtr(fInPtr, idx);
         for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
           fOutPtr[nodeIndex] = fInPtr[nodeIndex] + dt*alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
-            fOutPtr[nodeIndex];
+            averageTemperature/speciesMass*fOutPtr[nodeIndex];
       }
       else
       {
         for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
           fOutPtr[nodeIndex] = alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
-            fOutPtr[nodeIndex];
+            averageTemperature/speciesMass*fOutPtr[nodeIndex];
       }
     }
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
@@ -561,15 +717,17 @@ namespace Lucee
   {
     // Input: Distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
-    // Input: <v> mean velocity, need to divide by <1>
-    this->appendInpVarType(typeid(Lucee::Field<3, double>));
-    // Input: <1> number density
-    this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: Temperature in joules
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: Magnetic field
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: dimensionally correct number density
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // returns one output (fNew)
+    this->appendOutVarType(typeid(Lucee::Field<5, double>));
+    // Auxiliary field for v-parallel
+    this->appendOutVarType(typeid(Lucee::Field<5, double>));
+    // Auxiliary field for mu
     this->appendOutVarType(typeid(Lucee::Field<5, double>));
   }
 
