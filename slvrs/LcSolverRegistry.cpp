@@ -45,6 +45,7 @@
 #include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcImplicitTwentyMomentCollisionUpdater.h>
 #include <LcImplicitTwentyMomentSrcUpdater.h>
+#include <LcFieldFunctionUpdater.h>
 #include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
@@ -295,6 +296,10 @@ namespace Lucee
       .append<Lucee::CopyContToDisContFieldUpdater<1> >()
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
       .append<Lucee::CopyContToDisContFieldUpdater<3> >()
+
+      .append<Lucee::FieldFunctionUpdater<1> >()
+      .append<Lucee::FieldFunctionUpdater<2> >()
+      .append<Lucee::FieldFunctionUpdater<3> >()
 
       .append<Lucee::ImplicitTenMomentCollisionUpdater<1> >()
       .append<Lucee::ImplicitTenMomentCollisionUpdater<2> >()
