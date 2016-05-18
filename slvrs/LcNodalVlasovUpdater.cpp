@@ -102,6 +102,10 @@ namespace Lucee
     if (tbl.hasBool("skipVelocitySweep"))
       skipVelocitySweep = tbl.getBool("skipVelocitySweep");
 
+    applyZeroFluxBc = true;
+    if (tbl.hasBool("applyZeroFluxBc"))
+      applyZeroFluxBc = tbl.getBool("applyZeroFluxBc");
+
     cfl = tbl.getNumber("cfl");
     cflm = 1.1*cfl; // use slightly large max CFL to avoid thrashing around
 
@@ -209,21 +213,30 @@ namespace Lucee
       }
     }
 
+    if (applyZeroFluxBc)
+    {
 // initialize directions in which zero-flux BCs are applied
-    for (unsigned d=0; d<CDIM; ++d)
-      lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 0; // NO at configuration-space edges
-    for (unsigned d=CDIM; d<NDIM; ++d)
-      lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 1; // YES at velocity-space edges
+      for (unsigned d=0; d<CDIM; ++d)
+        lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 0; // NO at configuration-space edges
+      for (unsigned d=CDIM; d<NDIM; ++d)
+        lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 1; // YES at velocity-space edges
 
 // ensure that zero-flux BCs are applied only if local rank owns the
 // skin cell    
-    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
-    for (unsigned d=CDIM; d<NDIM; ++d)
+      Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
+      for (unsigned d=CDIM; d<NDIM; ++d)
+      {
+        if (localRgn.getLower(d) != globalRgn.getLower(d))
+          lowerZeroFluxOffset[d] = 0; // not owned by us, so ignore
+        if (localRgn.getUpper(d) != globalRgn.getUpper(d))
+          upperZeroFluxOffset[d] = 0; // not owned by us, so ignore
+      }
+    }
+    else
     {
-      if (localRgn.getLower(d) != globalRgn.getLower(d))
-        lowerZeroFluxOffset[d] = 0; // not owned by us, so ignore
-      if (localRgn.getUpper(d) != globalRgn.getUpper(d))
-        upperZeroFluxOffset[d] = 0; // not owned by us, so ignore
+// requested NOT to apply zero-flux BCs
+      for (unsigned d=0; d<NDIM; ++d)
+        lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 0;
     }
   }
 
