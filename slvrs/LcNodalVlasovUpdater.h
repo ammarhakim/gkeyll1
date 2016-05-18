@@ -91,6 +91,8 @@ namespace Lucee
       double mass;
 /** Flag to indicate if one should skip the velocity space sweeps */
       bool skipVelocitySweep;
+/** Flag to indicate if we should appky zero-flux BCs in velocity space */
+      bool applyZeroFluxBc;
 /** Offsets for zero-flux directions along lower edges */
       int lowerZeroFluxOffset[CDIM+VDIM];
 /** Offsets for zero-flux directions  along upper edges */
