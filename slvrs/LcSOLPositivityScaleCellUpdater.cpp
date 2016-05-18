@@ -99,12 +99,12 @@ namespace Lucee
           (energyDragInPtr[0]-energyPosInPtr[0]);
         
         // Make sure scaleFactor is less than one
-        if (scaleFactor > 1.0)
-        {
-          //std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
-          //  << ") Drag term is larger than possible = " << scaleFactor << std::endl;
-          scaleFactor = 1.0;
-        }
+        //if (scaleFactor > 1.0)
+        //{
+        //  std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+        //    << ") Drag term is larger than possible = " << scaleFactor << std::endl;
+        //  scaleFactor = 1.0;
+        //}
 
         distfDelta.setPtr(distfDeltaPtr, idx);
         distfOut.setPtr(distfOutPtr, idx);
@@ -113,7 +113,7 @@ namespace Lucee
         {
           double startVal = distfOutPtr[nodeIndex];
           distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + scaleFactor*distfDeltaPtr[nodeIndex];
-          if (distfOutPtr[nodeIndex] < 0.0)
+          /*if (distfOutPtr[nodeIndex] < 0.0)
           {
             std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
             << ") distfOutPtr[" << nodeIndex << "] = " << distfOutPtr[nodeIndex] << std::endl <<
@@ -123,7 +123,7 @@ namespace Lucee
             "energyPosInPtr = " << energyPosInPtr[0] << std::endl << 
             "energyDragInPtr = " << energyDragInPtr[0] << std::endl;
             distfOutPtr[nodeIndex] = startVal;
-          }
+          }*/
         }
       }
     }

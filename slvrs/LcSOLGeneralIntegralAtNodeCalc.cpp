@@ -99,6 +99,8 @@ namespace Lucee
     const Lucee::Field<5, double>& distfIn = this->getInp<Lucee::Field<5, double> >(0);
     // Field to multiply distribution function by before integrating
     const Lucee::Field<5, double>& productIn = this->getInp<Lucee::Field<5, double> >(1);
+    // Magnetic field in 3d
+    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(2);
     // Output field
     Lucee::Field<3, double>& integratedField = this->getOut<Lucee::Field<3, double> >(0);
     
@@ -109,6 +111,7 @@ namespace Lucee
     
     Lucee::ConstFieldPtr<double> distfInPtr = distfIn.createConstPtr();
     Lucee::ConstFieldPtr<double> productInPtr = productIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::FieldPtr<double> integratedFieldPtr = integratedField.createPtr(); // Output pointer
 
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
@@ -130,6 +133,7 @@ namespace Lucee
 
       distfIn.setPtr(distfInPtr, idx);
       productIn.setPtr(productInPtr, idx);
+      bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
 
       // Loop over the  configuration space vertices in this cell
       for (int configNode = 0; configNode < nlocal3d; configNode++)
@@ -143,7 +147,8 @@ namespace Lucee
         }
 
         // Accumulate results of integration
-        integratedFieldPtr[configNode] += scaleFactor*distfReduced.dot(integrationMatrix*productReduced);
+        integratedFieldPtr[configNode] += bFieldInPtr[configNode]*scaleFactor*
+          distfReduced.dot(integrationMatrix*productReduced);
       }
     }
    
@@ -155,8 +160,10 @@ namespace Lucee
   {
     // Input: distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
-    // Input: optional field to multiply with the distribution function
+    // Input: field to multiply with the distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
+    // Input: 3d field of magnetic field
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Output: 3d field containing mean energy at each node
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
   }
