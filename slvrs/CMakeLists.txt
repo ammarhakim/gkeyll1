@@ -56,6 +56,7 @@ set(lcslvrs_SOURCES
   LcHeatFluxAtEdgeUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
+  LcFieldFunctionUpdater.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
