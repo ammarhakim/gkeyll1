@@ -88,7 +88,7 @@ namespace Lucee
 /** First moment matrix */
       std::vector<Eigen::MatrixXd> mom1Matrix;
 /** Second moment matrix */
-      std::vector< std::vector<Eigen::MatrixXd> > mom2Matrix;
+      std::vector<Eigen::MatrixXd> mom2Matrix;
 /** Number of moments being computed (vector or tensor) */
       unsigned nMom;
 /**
