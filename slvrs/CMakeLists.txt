@@ -122,6 +122,7 @@ set(lcslvrs_SOURCES
   LcSOLPositivityScaleNodeUpdater.cpp
   LcSOLTemperatureCalc.cpp
   LcSOLTemperatureAtNodeCalc.cpp
+  LcSOLWeightedProjectionCalc.cpp
   LcSOLZeroNormalBoundaryCondition.cpp
   LcSerendipityElement.cpp
   LcSerendipityElement2D.cpp
