@@ -75,6 +75,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Default true. If true, limits will be set on scale factors and positivity checks will be made */
+      bool positivityChecks;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
