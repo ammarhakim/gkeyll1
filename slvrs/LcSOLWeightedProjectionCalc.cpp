@@ -51,7 +51,7 @@ namespace Lucee
     UpdaterIfc::initialize();
 
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
-    unsigned nlocal3d = nodalBasis5d->getNumNodes();
+    unsigned nlocal3d = nodalBasis3d->getNumNodes();
 
     // get volume interpolation matrices for 3d element
     int nVolQuad3d = nodalBasis3d->getNumGaussNodes();
@@ -181,19 +181,12 @@ namespace Lucee
         {
           integrationResult += gaussWeights5d[quadIndex]*interpMatrix3d(quadIndex % nVolQuad3d, basisIndex)*
             scaleFactor*distfAtQuad(quadIndex)*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
-          std::cout << "integrationResult = " << integrationResult << std::endl;
-          std::cout << "bField = " << bFieldAtQuad(quadIndex % nVolQuad3d) << std::endl;
-          std::cout << "interpMatrix3d = " << interpMatrix3d(quadIndex % nVolQuad3d, basisIndex) << std::endl;
-          std::cout << "gaussWeight = " << gaussWeights5d[quadIndex] << std::endl;
-          std::cout << "g = " << distgAtQuad(quadIndex) << std::endl;
-          std::cout << "f = " << distfAtQuad(quadIndex) << std::endl << std::endl;
         }
         rhsIntegrals(basisIndex) = integrationResult;
       }
       // Calculate solution
       solutionVec = massMatrixInv3d*rhsIntegrals;
-
-
+      
       for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
         resultPtr[nodeIndex] += solutionVec(nodeIndex);
     }
