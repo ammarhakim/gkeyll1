@@ -57,15 +57,12 @@ namespace Lucee
     const Lucee::Field<3, double>& energyIn = this->getInp<Lucee::Field<3, double> >(1);
     // Input: <dH/dv*f> weighted by 2*pi/m
     const Lucee::Field<3, double>& meanVelocityIn = this->getInp<Lucee::Field<3, double> >(2);
-    // Input magnetic field profile
-    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(3);
     // Output dynvector of electron temperatures at wall
     Lucee::Field<3, double>& temperatureOut = this->getOut<Lucee::Field<3, double> >(0);
 
     Lucee::ConstFieldPtr<double> numDensPtr = numDensIn.createConstPtr();
     Lucee::ConstFieldPtr<double> energyPtr = energyIn.createConstPtr();
     Lucee::ConstFieldPtr<double> meanVelocityPtr = meanVelocityIn.createConstPtr();
-    Lucee::ConstFieldPtr<double> bFieldPtr = bFieldIn.createConstPtr();
     
     Lucee::FieldPtr<double> temperaturePtr = temperatureOut.createPtr();
 
@@ -84,14 +81,12 @@ namespace Lucee
       numDensIn.setPtr(numDensPtr, idx);
       energyIn.setPtr(energyPtr, idx);
       meanVelocityIn.setPtr(meanVelocityPtr, idx);
-      bFieldIn.setPtr(bFieldPtr, idx);
       
       temperatureOut.setPtr(temperaturePtr, idx);
 
       for (int i = 0; i < nlocal; i++)
         temperaturePtr[i] = 2.0/3.0*(energyPtr[i]/numDensPtr[i] - 
-          0.5*speciesMass*meanVelocityPtr[i]*meanVelocityPtr[i]/(numDensPtr[i]*numDensPtr[i]*numDensPtr[i]*
-            bFieldPtr[i]));
+          0.5*speciesMass*meanVelocityPtr[i]*meanVelocityPtr[i]/(numDensPtr[i]*numDensPtr[i]));
     }
     
     return Lucee::UpdaterStatus();
@@ -105,8 +100,6 @@ namespace Lucee
     // Input: <H*f> weighted by 2*pi/m
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: <dH/dv*f> weighted by 2*pi/m
-    this->appendInpVarType(typeid(Lucee::Field<3, double>));
-    // Input: magnetic field profile
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Output: Total temperature of species
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
