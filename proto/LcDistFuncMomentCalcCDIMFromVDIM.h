@@ -79,6 +79,11 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
 /** Pointer to nodal configuration space (CDIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
+/** Boolean for determining if every configuration space node has a phase space node associated with it */
+      bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+        const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);
+/** Mapping of node in phase-space to node in configuration space */
+      std::vector<unsigned> phaseConfMap;
 /** Moment to compute */
       unsigned calcMom;
 /** Space to store moment data for on a processor */

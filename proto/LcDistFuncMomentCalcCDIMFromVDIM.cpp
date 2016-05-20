@@ -29,10 +29,17 @@ namespace Lucee
   template <> const char *DistFuncMomentCalcCDIMFromVDIM<2,3>::id = "DistFuncMomentCalc2X3V";
   //template <> const char *DistFuncMomentCalcCDIMFromVDIM<3,3>::id = "DistFuncMomentCalc3X3V";
 
-// makes indexing a little more sane
-  static const unsigned IX = 0;
-  static const unsigned IY = 1;
-  static const unsigned IZ = 2;
+
+  template <unsigned CDIM, unsigned VDIM>
+  bool
+  DistFuncMomentCalcCDIMFromVDIM<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+    const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
+  {
+    for (unsigned dim = 0; dim<CDIM; ++dim)
+      if (! (std::fabs(phaseC(n, dim)-confC(cn, dim))<1e-4*dxMin) )
+        return false;
+    return true;
+  }
 
   template <unsigned CDIM, unsigned VDIM>
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::DistFuncMomentCalcCDIMFromVDIM()
@@ -128,6 +135,37 @@ namespace Lucee
     Eigen::MatrixXd volCoordsPhase(nVolQuadPhase, (unsigned) PNC);
     copyLuceeToEigen(tempVolCoordsPhase, volCoordsPhase);
 
+    // compute mapping of phase-space quadrature nodes to configuration space
+    // quadrature nodes. The assumption here is that the node layout in phase-space
+    // and configuration space are such that each node in phase-space has
+    // exactly one node co-located with it in configuration space. No
+    // "orphan" phase-space node are allowed, and an exception is thrown
+    // if that occurs.
+    phaseConfMap.resize(volWeightsPhase.size());
+
+    double dxMin = grid.getDx(0);
+    for (unsigned d = 1; d < CDIM; ++d)
+      dxMin = std::min(dxMin, grid.getDx(d));
+
+    for (unsigned n = 0; n < volWeightsPhase.size(); ++n)
+    {
+      bool pcFound = false;
+      for (unsigned cn = 0; cn < volWeightsConf.size(); ++cn)
+        if (sameConfigCoords(n, cn, dxMin, tempVolCoordsPhase, tempVolCoordsConf))
+        {
+          phaseConfMap[n] = cn;
+          pcFound = true;
+          break;
+        }
+      if (!pcFound)
+      {
+        Lucee::Except lce(
+          "DistFuncMomentCalcCDIMFromVDIM::initialize: No matching configuration space quadrature node for phase-space quadrature node ");
+        lce << n;
+        throw lce;
+      }
+    }
+
     // Get configuration space mass matrix
     Lucee::Matrix<double> tempMassMatrixConf(nlocalConf, nlocalConf);
     confBasis->getMassMatrix(tempMassMatrixConf);
@@ -158,7 +196,7 @@ namespace Lucee
         // Compute integral of phiConf_i * phiPhase_j
         for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           integralResultZerothMoment
-            += volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf,i)*volQuadPhase(gaussIndex,j);
+            += volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex],i)*volQuadPhase(gaussIndex,j);
         mom0Matrix(i, j) = integralResultZerothMoment;
       }
     }
@@ -177,7 +215,7 @@ namespace Lucee
           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           {
             double baseIntegral
-              = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf,i)*volQuadPhase(gaussIndex,j);
+              = volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex],i)*volQuadPhase(gaussIndex,j);
             // get coordinate of quadrature point in direction momDir
             double coord2Val = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             integralResultFirstMoment += coord2Val*baseIntegral;
@@ -205,7 +243,7 @@ namespace Lucee
           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           {
             double baseIntegral 
-              = volWeightsPhase[gaussIndex]*volQuadConf(gaussIndex % nVolQuadConf, i)*volQuadPhase(gaussIndex, j);
+              = volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex], i)*volQuadPhase(gaussIndex, j);
             // Get coordinate of quadrature point in direction momDir
             double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
             double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
