@@ -299,6 +299,10 @@ namespace Lucee
     if (ivUpper == globalRgn.getUpper(3)+1)
       ivUpper = globalRgn.getUpper(3);
 
+    // Flag to keep track of whether or not CFL limit was exceeded.
+    // Don't exit immediately upon false because a more strict limit might appear
+    bool needToRetakeStep = false;
+    
     // Loop over each 4D cell in (x,y,z,mu) space
     while (seqLowerDim.step())
     {
@@ -385,7 +389,7 @@ namespace Lucee
           //cfla = std::max(cfla, std::abs(alpha*(paraCoord-uAtQuad(quadIndex % nVolQuad3d))*dt/(0.5*(dxL+dxR))));
           // Time-step was too large: return a suggestion with correct time-step
           if (cfla > cflm)
-            return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+            needToRetakeStep = true;
 
           // Store result of weight*(v-uIn)*f at this location in a vector
           surfIntegralFluxes(quadIndex) = gaussSurfWeights5d[0][quadIndex]*numFlux;
@@ -486,7 +490,7 @@ namespace Lucee
           2*muCoord*dt/grid.getDx(4)));
         // Time-step was too large: return a suggestion with correct time-step
         if (cfla > cflm)
-          return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+          needToRetakeStep = true;
 
         for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[1].size(); quadIndex++)
         {
@@ -517,6 +521,10 @@ namespace Lucee
         }
       }
     }
+
+    if (needToRetakeStep == true)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+
     
     seq.reset();
     // Final sweep, update solution with forward Euler step
