@@ -165,7 +165,7 @@ namespace Lucee
     // Multiply matrices by inverse of mass matrix
     mom0Matrix = massMatrixConf.inverse()*mom0Matrix;
 
-    for (int h = 0; h < nMom; ++h)
+    for (int h = 0; h < VDIM; ++h)
     {
       mom1Matrix[h] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
       momDir = h+CDIM;
@@ -294,7 +294,7 @@ namespace Lucee
       else if (calcMom == 1)
       {
         int momDir;
-        for (int h = 0; h < nMom; ++h)
+        for (int h = 0; h < VDIM; ++h)
         {
           momDir = CDIM+h;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
