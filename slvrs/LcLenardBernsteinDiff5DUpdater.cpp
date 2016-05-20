@@ -493,6 +493,10 @@ namespace Lucee
         fOutPtr[nodeIndex] -= volIntegralResult(nodeIndex);
     }
 
+    // Flag to keep track of whether or not CFL limit was exceeded.
+    // Don't exit immediately upon false because a more strict limit might appear
+    bool needToRetakeStep = false;
+
     // Contributions from surface integrals
     // Create sequencer to loop over *each* 4D slice in '3' direction
     seqLowerDim = localRgn.deflate(3);
@@ -522,7 +526,7 @@ namespace Lucee
         averageTemperature/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
       // Time-step was too large: return a suggestion with correct time-step
       if (cfla > cflm)
-        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+        needToRetakeStep = true;
 
       // Loop over each edge in vParallel
       for (int i = ivLower; i < ivUpper; i++)
@@ -646,7 +650,7 @@ namespace Lucee
           *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
         // Time-step was too large: return a suggestion with correct time-step
         if (cfla > cflm)
-          return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+          needToRetakeStep = true;
         
         // Use left value for auxilliary numerical flux (arbitrary choice)
         for (int quadIndex = 0; quadIndex < gaussSurfWeights5d[1].size(); quadIndex++)
@@ -673,6 +677,9 @@ namespace Lucee
         }
       }
     }
+
+    if (needToRetakeStep == true)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     
     seq.reset();
     // Final sweep, update solution with forward Euler step
