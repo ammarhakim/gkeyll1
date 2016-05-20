@@ -33,7 +33,7 @@ namespace Lucee
   template <unsigned CDIM, unsigned VDIM>
   bool
   DistFuncMomentCalcCDIMFromVDIM<CDIM,VDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
-    const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
+    const Eigen::MatrixXd& phaseC, const Eigen::MatrixXd& confC)
   {
     for (unsigned dim = 0; dim<CDIM; ++dim)
       if (! (std::fabs(phaseC(n, dim)-confC(cn, dim))<1e-4*dxMin) )
@@ -151,7 +151,7 @@ namespace Lucee
     {
       bool pcFound = false;
       for (unsigned cn = 0; cn < volWeightsConf.size(); ++cn)
-        if (sameConfigCoords(n, cn, dxMin, tempVolCoordsPhase, tempVolCoordsConf))
+        if (sameConfigCoords(n, cn, dxMin, volCoordsPhase, volCoordsConf))
         {
           phaseConfMap[n] = cn;
           pcFound = true;
