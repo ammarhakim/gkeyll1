@@ -58,9 +58,8 @@ namespace Lucee
   void
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::readInput(Lucee::LuaTable& tbl)
   {
+    Lucee::UpdaterIfc::readInput(tbl);    
     const unsigned NDIM = CDIM+VDIM;
-    // call base class method
-    Lucee::UpdaterIfc::readInput(tbl);
 
     // get hold of phase space element to use
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("phaseBasis"))
@@ -95,8 +94,8 @@ namespace Lucee
   void
   DistFuncMomentCalcCDIMFromVDIM<CDIM, VDIM>::initialize()
   {
+    Lucee::UpdaterIfc::initialize();    
     const unsigned NDIM = CDIM+VDIM;
-    Lucee::UpdaterIfc::initialize();
 
     // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
@@ -178,21 +177,12 @@ namespace Lucee
     else if (calcMom == 2)
       nMom = VDIM*(VDIM+1)/2;
 
-    mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-    mom1Matrix = std::vector<Eigen::MatrixXd>(VDIM);
-    mom2Matrix = std::vector<Eigen::MatrixXd>(VDIM*(VDIM+1)/2);
-    // momDir is direction of moment, 1 = X, 2 = Y, 3 = Z
-    int momDir;
-    // momDir2 is direction of other moment, 1 = X, 2 = Y, 3 = Z, for computing second rank tensor components
-    int momDir2;
-    double integralResultZerothMoment, integralResultFirstMoment, integralResultSecondMoment;
-    int ctr = 0; // counter needed for indexing since tensor is symmetric
-
+    mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);    
     for (int i=0; i<nlocalConf; ++i)
     {
       for (int j=0; j<nlocalPhase; ++j)
       {
-        integralResultZerothMoment = 0;
+        double integralResultZerothMoment = 0;
         // Compute integral of phiConf_i * phiPhase_j
         for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           integralResultZerothMoment
@@ -203,15 +193,16 @@ namespace Lucee
     // Multiply matrices by inverse of mass matrix
     mom0Matrix = massMatrixConf.inverse()*mom0Matrix;
 
-    for (int h = 0; h < VDIM; ++h)
+    mom1Matrix = std::vector<Eigen::MatrixXd>(VDIM);    
+    for (int h=0; h<VDIM; ++h)
     {
       mom1Matrix[h] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-      momDir = h+CDIM;
-      for (int i = 0; i < nlocalConf; ++i)
+      int momDir = h+CDIM;
+      for (int i=0; i<nlocalConf; ++i)
       {
-        for (int j = 0; j < nlocalPhase; ++j)
+        for (int j=0; j<nlocalPhase; ++j)
         {
-          integralResultFirstMoment = 0.0;
+          double integralResultFirstMoment = 0.0;
           for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
           {
             double baseIntegral
@@ -227,37 +218,38 @@ namespace Lucee
       mom1Matrix[h] = massMatrixConf.inverse()*mom1Matrix[h];
     }
 
-    for (int h = 0; h < VDIM; ++h)
+    mom2Matrix = std::vector<Eigen::MatrixXd>(VDIM*(VDIM+1)/2);    
+    int ctr = 0; // counter needed for indexing since tensor is symmetric    
+    for (int h=0; h<VDIM; ++h)
     {
-      for (int g = h; g < VDIM; ++g)
+      for (int g=h; g<VDIM; ++g)
       {
-      mom2Matrix[ctr] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
-      momDir = h+CDIM;
-      momDir2 = g+CDIM;
-      // Compute integral of phiConf_i * phiPhase_j
-      for (int i = 0; i < nlocalConf; ++i)
-      {
-        for (int j = 0; j < nlocalPhase; ++j)
+        mom2Matrix[ctr] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
+        int momDir = h+CDIM;
+        int momDir2 = g+CDIM;
+        // Compute integral of phiConf_i * phiPhase_j
+        for (int i=0; i<nlocalConf; ++i)
         {
-          integralResultSecondMoment = 0.0;
-          for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
+          for (int j=0; j<nlocalPhase; ++j)
           {
-            double baseIntegral 
-              = volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex], i)*volQuadPhase(gaussIndex, j);
-            // Get coordinate of quadrature point in direction momDir
-            double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
-            double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
-            integralResultSecondMoment += coord2Val1*coord2Val2*baseIntegral;
+            double integralResultSecondMoment = 0.0;
+            for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
+            {
+              double baseIntegral 
+                = volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex], i)*volQuadPhase(gaussIndex, j);
+              // Get coordinate of quadrature point in direction momDir
+              double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
+              double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
+              integralResultSecondMoment += coord2Val1*coord2Val2*baseIntegral;
+            }
+            mom2Matrix[ctr](i,j) = integralResultSecondMoment;
           }
-          mom2Matrix[ctr](i,j) = integralResultSecondMoment;
         }
-      }
-      // Multiply matrices by inverse of mass matrix
-      mom2Matrix[ctr] = massMatrixConf.inverse()*mom2Matrix[ctr];
-      ctr = ctr + 1;
+        // Multiply matrices by inverse of mass matrix
+        mom2Matrix[ctr] = massMatrixConf.inverse()*mom2Matrix[ctr];
+        ctr = ctr + 1;
       }
     }
-
   }
 
   template <unsigned CDIM, unsigned VDIM>
