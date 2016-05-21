@@ -176,6 +176,23 @@ calcPerpStiffMatrix(basis) := block([n, stiff],
 	        return (stiff)
 );
 
+/******************** Basis 2 ******************/
+
+/** Ordinates */
+ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
+/** Basis function of order 2 */
+N2 : 1/4*[
+ (1+ords[1][1]*x)*(1+ords[1][2]*y), 
+ (1+ords[2][1]*x)*(1+ords[2][2]*y),
+ (1+ords[4][1]*x)*(1+ords[4][2]*y),
+ (1+ords[3][1]*x)*(1+ords[3][2]*y)];
+
+
+/** List of node coordinates for interpolation */
+interp_2x2 : [[-1/2,-1/2], [1/2,-1/2], [-1/2,1/2], [1/2,1/2]];
+/** Compute interpolation to these points */
+interp_2x2_mat : calcInterpMatrix(N2, interp_2x2);
+
 /******************** Basis 3 ******************/
 
 /** Ordinates */
@@ -192,7 +209,6 @@ N3 : [
   1/2*(1-x^2)*(1+ords[7][2]*y),
   1/4*(1+ords[3][1]*x)*(1+ords[3][2]*y)*(-1+ords[3][1]*x+ords[3][2]*y)
 ];  
-
 
 /** List of node coordinates for interpolation */
 interp_3x3 : [[-2/3, -2/3], [0, -2/3], [2/3,-2/3], [-2/3,0], [0,0], [2/3,0], [-2/3,2/3], [0,2/3], [2/3,2/3]];
