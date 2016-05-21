@@ -261,14 +261,14 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    // get input field (CDIM + VDIM)
+    // get input field (CDIM + VDIM) 
     const Lucee::Field<NDIM, double>& distF = this->getInp<Lucee::Field<NDIM, double> >(0);
     // get output field (CDIM)
     Lucee::Field<CDIM, double>& momentGlobal = this->getOut<Lucee::Field<CDIM, double> >(0);
 
     if (!momentLocal)
     {
-// allocate memory for local moment calculation if not already done
+      // allocate memory for local moment calculation if not already done
       Lucee::Region<CDIM, int> localRgn = momentGlobal.getRegion();
       Lucee::Region<CDIM, int> localExtRgn = momentGlobal.getExtRegion();
       
@@ -323,26 +323,24 @@ namespace Lucee
         resultVector[0].noalias() = mom0Matrix*distfVec;
       else if (calcMom == 1)
       {
-        int momDir;
         for (int h = 0; h < VDIM; ++h)
         {
-          momDir = CDIM+h;
+          int momDir = CDIM+h;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
         }
       }
       else if (calcMom == 2)
       {
-        int momDir;
-        int momDir2;
         int ctr = 0;
         for (int h = 0; h < VDIM; ++h)
         {
           for (int g = h; g < VDIM; ++g)
           {
-            momDir = CDIM+h;
-            momDir2 = CDIM+g;
-            resultVector[ctr].noalias() = (mom2Matrix[ctr] + xc[momDir]*mom1Matrix[g] + xc[momDir2]*mom1Matrix[h] + xc[momDir]*xc[momDir2]*mom0Matrix)*distfVec;
-            ctr = ctr + 1;
+            int momDir = CDIM+h;
+            int momDir2 = CDIM+g;
+            resultVector[ctr].noalias() =
+              (mom2Matrix[ctr] + xc[momDir]*mom1Matrix[g] + xc[momDir2]*mom1Matrix[h] + xc[momDir]*xc[momDir2]*mom0Matrix)*distfVec;
+            ctr = ctr+1;
           }
         }
       }
