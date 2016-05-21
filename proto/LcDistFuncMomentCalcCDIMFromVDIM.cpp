@@ -1,7 +1,8 @@
 /**
  * @file	LcDistFuncMomentCalcCDIMFromVDIM.cpp
  *
- * @brief	Updater to compute arbitrary configuration space moments of an arbitrary phase space distribution function
+ * @brief Updater to compute arbitrary configuration space moments of
+ * phase space distribution function
  */
 
 // config stuff

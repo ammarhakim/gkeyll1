@@ -274,6 +274,21 @@ class GkeDgSerendip2DPolyOrder2Basis(GkeDgBasis):
         return XX, YY, interpOnMesh2D(self.cMat_i3, qn)
 
 #################
+class GkeDgSerendipNorm2DPolyOrder1Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 1 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 4)
+        self.cMat_i2 = gid.GkeDgSerendipNorm2DPolyOrder1Basis.cMat_i2
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i2, qn)
+
+#################
 class GkeDgSerendipNorm2DPolyOrder2Basis(GkeDgBasis):
     r"""Serendipity basis (correct, normal layout), polyOrder = 2 basis, in 2D
     """
