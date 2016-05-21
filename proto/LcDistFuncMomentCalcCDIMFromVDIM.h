@@ -75,6 +75,8 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Flag to only calculate total energy instead of all 6 stress tensor components */
+      bool scalarPtclEnergy;
 /** Pointer to nodal phase space (CDIM+VDIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
 /** Pointer to nodal configuration space (CDIM) basis functions to use */

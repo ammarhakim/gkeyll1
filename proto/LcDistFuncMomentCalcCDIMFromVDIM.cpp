@@ -83,6 +83,11 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalcCDIMFromVDIM::readInput: Must specify moment using 'moment'");
 
+    // flag for only calculating total energy instead of all 6 stress tensor components
+    scalarPtclEnergy = false;
+    if (tbl.hasBool("scalarPtclEnergy"))
+      scalarPtclEnergy = tbl.getBool("scalarPtclEnergy");
+
     if (calcMom > 2)
     {
       Lucee::Except lce("DistFuncMomentCalcCDIMFromVDIM::readInput: Only 'moment' 0, 1, or 2 is supported. ");
@@ -144,13 +149,13 @@ namespace Lucee
     phaseConfMap.resize(volWeightsPhase.size());
 
     double dxMin = grid.getDx(0);
-    for (unsigned d = 1; d < CDIM; ++d)
+    for (unsigned d=1; d<CDIM; ++d)
       dxMin = std::min(dxMin, grid.getDx(d));
 
-    for (unsigned n = 0; n < volWeightsPhase.size(); ++n)
+    for (unsigned n=0; n<volWeightsPhase.size(); ++n)
     {
       bool pcFound = false;
-      for (unsigned cn = 0; cn < volWeightsConf.size(); ++cn)
+      for (unsigned cn=0; cn<volWeightsConf.size(); ++cn)
         if (sameConfigCoords(n, cn, dxMin, volCoordsPhase, volCoordsConf))
         {
           phaseConfMap[n] = cn;
@@ -175,8 +180,10 @@ namespace Lucee
     nMom = 1;
     if (calcMom == 1)
       nMom = VDIM;
-    else if (calcMom == 2)
+    else if (calcMom == 2 && scalarPtclEnergy == false)
       nMom = VDIM*(VDIM+1)/2;
+    else if (calcMom == 2 && scalarPtclEnergy == true)
+      nMom = VDIM;
 
     mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);    
     for (int i=0; i<nlocalConf; ++i)
@@ -219,7 +226,7 @@ namespace Lucee
       mom1Matrix[h] = massMatrixConf.inverse()*mom1Matrix[h];
     }
 
-    mom2Matrix = std::vector<Eigen::MatrixXd>(VDIM*(VDIM+1)/2);    
+    mom2Matrix = std::vector<Eigen::MatrixXd>(VDIM*(VDIM+1)/2);  
     int ctr = 0; // counter needed for indexing since tensor is symmetric    
     for (int h=0; h<VDIM; ++h)
     {
@@ -248,7 +255,7 @@ namespace Lucee
         }
         // Multiply matrices by inverse of mass matrix
         mom2Matrix[ctr] = massMatrixConf.inverse()*mom2Matrix[ctr];
-        ctr = ctr + 1;
+        ctr = ctr+1;
       }
     }
   }
@@ -317,37 +324,50 @@ namespace Lucee
       momentLocal->setPtr(momentPtr, idx);
       distF.setPtr(distFPtr, idx);
 
-      for (int i = 0; i < nlocalPhase; ++i)
+      for (int i=0; i<nlocalPhase; ++i)
         distfVec(i) = distFPtr[i];
 
       if (calcMom == 0)
         resultVector[0].noalias() = mom0Matrix*distfVec;
       else if (calcMom == 1)
       {
-        for (int h = 0; h < VDIM; ++h)
+        for (int h=0; h<VDIM; ++h)
         {
-          int momDir = CDIM+h;
+          int momDir = h+CDIM;
           resultVector[h].noalias() = (mom1Matrix[h] + xc[momDir]*mom0Matrix)*distfVec;
         }
       }
       else if (calcMom == 2)
       {
-        int ctr = 0;
-        for (int h = 0; h < VDIM; ++h)
+        if (scalarPtclEnergy == true)
         {
-          for (int g = h; g < VDIM; ++g)
+          int ctr = 0;
+          for (int h=0; h<VDIM; ++h)
           {
-            int momDir = CDIM+h;
-            int momDir2 = CDIM+g;
-            resultVector[ctr].noalias() =
-              (mom2Matrix[ctr] + xc[momDir]*mom1Matrix[g] + xc[momDir2]*mom1Matrix[h] + xc[momDir]*xc[momDir2]*mom0Matrix)*distfVec;
-            ctr = ctr+1;
+            int momDir = h+CDIM;
+            resultVector[h].noalias() = (mom2Matrix[ctr]+ 2*xc[momDir]*mom1Matrix[h] + xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
+            ctr = ctr+VDIM-h;
+          }
+        }
+        else
+        {
+          int ctr = 0;
+          for (int h=0; h<VDIM; ++h)
+          {
+            for (int g=h; g<VDIM; ++g)
+            {
+              int momDir = h+CDIM;
+              int momDir2 = g+CDIM;
+              resultVector[ctr].noalias() =
+                (mom2Matrix[ctr] + xc[momDir]*mom1Matrix[g] + xc[momDir2]*mom1Matrix[h] + xc[momDir]*xc[momDir2]*mom0Matrix)*distfVec;
+              ctr = ctr+1;
+            }
           }
         }
       }
 
-      for (int i = 0; i < nlocalConf; ++i)
-        for (int j = 0; j < nMom; ++j)
+      for (int i=0; i<nlocalConf; ++i)
+        for (int j=0; j<nMom; ++j)
           momentPtr[i*nMom+j] += resultVector[j](i);
     }
 
