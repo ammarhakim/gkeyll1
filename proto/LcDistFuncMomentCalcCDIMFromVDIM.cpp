@@ -183,7 +183,7 @@ namespace Lucee
     else if (calcMom == 2 && scalarPtclEnergy == false)
       nMom = VDIM*(VDIM+1)/2;
     else if (calcMom == 2 && scalarPtclEnergy == true)
-      nMom = VDIM;
+      nMom = 1;
 
     mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);    
     for (int i=0; i<nlocalConf; ++i)
@@ -313,8 +313,14 @@ namespace Lucee
     Eigen::VectorXd distfVec(nlocalPhase);
 
     std::vector<Eigen::VectorXd> resultVector = std::vector<Eigen::VectorXd>(nMom);
-    for (int i = 0; i < nMom; ++i)
+    for (int i=0; i<nMom; ++i)
       resultVector[i] = Eigen::VectorXd::Zero(nlocalConf);    
+   
+    // Temporary array to make computation of particle energy cleaner
+    std::vector<Eigen::VectorXd> resultVectorEnergy = std::vector<Eigen::VectorXd>(VDIM);
+    for (int i=0; i<VDIM; ++i)
+      resultVectorEnergy[i] = Eigen::VectorXd::Zero(nlocalConf);  
+
     // accumulate contribution to moment from this cell
     while(seq.step())
     {
@@ -345,9 +351,11 @@ namespace Lucee
           for (int h=0; h<VDIM; ++h)
           {
             int momDir = h+CDIM;
-            resultVector[h].noalias() = (mom2Matrix[ctr]+ 2*xc[momDir]*mom1Matrix[h] + xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
+            resultVectorEnergy[h].noalias() = (mom2Matrix[ctr]+ 2*xc[momDir]*mom1Matrix[h] + xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
             ctr = ctr+VDIM-h;
+            resultVector[0] += resultVectorEnergy[h];
           }
+          resultVector[0] = 1.0/VDIM*resultVector[0];
         }
         else
         {
