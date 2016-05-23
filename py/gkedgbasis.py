@@ -113,12 +113,6 @@ class GkeDgBasis:
         """
         return 0, 0
 
-## Some notes: The interpolation coefficients are generated in Maxima
-## and cut-paste here. Perhaps it may be easier and more compact to
-## actually write the Python code to generate these on the
-## fly. However, in higher dimensions it may be pretty slow to
-## generate these every time.
-
 #################
 class GkeDgPolyOrder0Basis(GkeDgBasis):
     r"""This is provided to allow treating finite-volume data as DG

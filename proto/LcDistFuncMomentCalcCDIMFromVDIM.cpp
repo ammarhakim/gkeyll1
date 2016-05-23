@@ -347,6 +347,7 @@ namespace Lucee
       {
         if (scalarPtclEnergy == true)
         {
+          resultVector[0] *= 0.0;
           int ctr = 0;
           for (int h=0; h<VDIM; ++h)
           {
@@ -355,7 +356,7 @@ namespace Lucee
             ctr = ctr+VDIM-h;
             resultVector[0] += resultVectorEnergy[h];
           }
-          resultVector[0] = 0.5/VDIM*resultVector[0];
+          resultVector[0] *= 0.5/VDIM;
         }
         else
         {
