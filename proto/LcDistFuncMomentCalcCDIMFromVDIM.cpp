@@ -395,7 +395,7 @@ namespace Lucee
 // case, grid is phase-space grid, which is not what we want.
     TxCommBase *momComm = momentGlobal.getMomComm();
     unsigned xsize = localPositionCells*nlocalConf*nMom; // amount to communicate
-    momComm->allreduce(xsize, &momentLocal->firstInterior(), &momentGlobal.firstInterior(), TX_SUM);
+    momComm->allreduce(xsize, &momentLocal->first(), &momentGlobal.first(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }
