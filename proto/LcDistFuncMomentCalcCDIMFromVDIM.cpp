@@ -355,7 +355,7 @@ namespace Lucee
             ctr = ctr+VDIM-h;
             resultVector[0] += resultVectorEnergy[h];
           }
-          resultVector[0] = 1.0/VDIM*resultVector[0];
+          resultVector[0] = 0.5/VDIM*resultVector[0];
         }
         else
         {
