@@ -276,7 +276,10 @@ namespace Lucee
 
     if (!momentLocal)
     {
-      // allocate memory for local moment calculation if not already done
+      // allocate memory for local moment calculation if not already
+      // done: we need to ensure space is also allocated for the
+      // ghost-cells as otherwise there is a size mis-match in the
+      // allReduce call to sync across velocity space
       Lucee::Region<CDIM, int> localRgn = momentGlobal.getRegion();
       Lucee::Region<CDIM, int> localExtRgn = momentGlobal.getExtRegion();
       
@@ -334,9 +337,12 @@ namespace Lucee
         distfVec(i) = distFPtr[i];
 
       if (calcMom == 0)
-        resultVector[0].noalias() = mom0Matrix*distfVec;
-      else if (calcMom == 1)
       {
+        // density
+        resultVector[0].noalias() = mom0Matrix*distfVec;
+      }
+      else if (calcMom == 1)
+      { // momentum
         for (int h=0; h<VDIM; ++h)
         {
           int momDir = h+CDIM;
@@ -346,7 +352,7 @@ namespace Lucee
       else if (calcMom == 2)
       {
         if (scalarPtclEnergy == true)
-        {
+        { // only particle energy requested
           resultVector[0] *= 0.0;
           int ctr = 0;
           for (int h=0; h<VDIM; ++h)
@@ -359,7 +365,7 @@ namespace Lucee
           resultVector[0] *= 0.5/VDIM;
         }
         else
-        {
+        { // full pressure tensor
           int ctr = 0;
           for (int h=0; h<VDIM; ++h)
           {
