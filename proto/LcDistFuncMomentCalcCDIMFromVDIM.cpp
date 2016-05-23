@@ -362,7 +362,7 @@ namespace Lucee
             ctr = ctr+VDIM-h;
             resultVector[0] += resultVectorEnergy[h];
           }
-          resultVector[0] *= 0.5/VDIM;
+          resultVector[0] *= 0.5;
         }
         else
         { // full pressure tensor
