@@ -122,27 +122,28 @@ namespace Lucee
   bool
   DecompRegion<NDIM>::checkCovering() const
   {
-// NEED TO FIX THIS AS THE ARRAY IS A MONSTER: ONE WAY AROUND THIS TO
-// CONVERT THE CHECK TO PER-DOMAIN AND NOT PER-CELL
+// I am commenting this out for now as it seems mostly a pointless
+// exercise and is consuimg huge amount of memory for large parallel
+// runs. Ammar Hakim. Eventually will need to fix this.
 
-//    create array over global region
-    Lucee::Array<NDIM, int> check(globalRgn, 0);
-// loop over each sub-region
-    for (unsigned i=0; i<getNumRegions(); ++i)
-    {
-      Lucee::ColMajorSequencer<NDIM> seq(rgns[i]);
-// loop over region, incrementing count in 'check' array
-      while (seq.step())
-        check(seq.getIndex()) += 1;
-    }
-// if any location is visited more than once (or not at all) it will
-// have a number other than 1 in it.
-    Lucee::ColMajorSequencer<NDIM> seq(globalRgn);
-    while (seq.step())
-    {
-      if (check(seq.getIndex()) != 1)
-        return false;
-    }
+// // create array over global region
+//     Lucee::Array<NDIM, int> check(globalRgn, 0);
+// // loop over each sub-region
+//     for (unsigned i=0; i<getNumRegions(); ++i)
+//     {
+//       Lucee::ColMajorSequencer<NDIM> seq(rgns[i]);
+// // loop over region, incrementing count in 'check' array
+//       while (seq.step())
+//         check(seq.getIndex()) += 1;
+//     }
+// // if any location is visited more than once (or not at all) it will
+// // have a number other than 1 in it.
+//     Lucee::ColMajorSequencer<NDIM> seq(globalRgn);
+//     while (seq.step())
+//     {
+//       if (check(seq.getIndex()) != 1)
+//         return false;
+//     }
     return true;
   }
 
