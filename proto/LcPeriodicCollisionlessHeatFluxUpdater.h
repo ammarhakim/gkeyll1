@@ -5,7 +5,7 @@
  */
 
 #ifndef LC_PERIODIC_COLLISIONLESS_HEAT_FLUX_UPDATER_H
-#define LC_PERIODIC_COLLISIONLESS_HEAT_FULX_UPDATER_H
+#define LC_PERIODIC_COLLISIONLESS_HEAT_FLUX_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -100,7 +100,7 @@ namespace Lucee
 /** ad-hoc scaling of damping parameter */
       double scale_factor;
 /* enum for closure type */
-      enum Closure { CL_LOCAL, CL_GLOBAL };
+      enum Closure { CL_LOCAL, CL_GLOBAL, CL_GAUSSIAN, CL_2D };
 /* indicate which closure to use */      
       Closure closure; 
   };
