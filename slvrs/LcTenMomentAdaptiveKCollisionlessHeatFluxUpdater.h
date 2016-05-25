@@ -1,11 +1,11 @@
 /**
- * @file	LcTenMomentLocalCollisionlessHeatFluxUpdater.h
+ * @file	LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.h
  *
  * @brief	Implicit updater for 10-moment collisional source terms
  */
 
-#ifndef LC_TEN_MOMENT_LOCAL_COLLISIONLESS_HEAT_FLUX_UPDATER_H
-#define LC_TEN_MOMENT_LOCAL_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#ifndef LC_TEN_MOMENT_ADAPTIVE_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#define LC_TEN_MOMENT_ADPATIVE_K_COLLISIONLESS_HEAT_FLUX_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -27,7 +27,7 @@ namespace Lucee
  * collision frequency is large.
  */
   template <unsigned NDIM>
-  class TenMomentLocalCollisionlessHeatFluxUpdater : public Lucee::UpdaterIfc
+  class TenMomentAdaptiveKCollisionlessHeatFluxUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -68,10 +68,14 @@ namespace Lucee
     private:
 /** Average wave number */
       double kA;
-/** Flag to indicate if there is a average wave number field */
-      bool hasKAFld;
-/** Location-based wave number field */
-      Lucee::Field<NDIM, double> *kAFld;
+/** maximum wave number */
+      double kmax;
+/** minimum wave number */
+      double kmin;
+/** components for gradient computation */
+      std::vector<unsigned> components;
+/** multipliers before k obtained */
+      std::vector<double> multipliers;
   };
 }
 

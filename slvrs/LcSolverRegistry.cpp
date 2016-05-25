@@ -46,6 +46,7 @@
 #include <LcImplicitTenMomentSrcUpdater.h>
 #include <LcImplicitTwentyMomentCollisionUpdater.h>
 #include <LcImplicitTwentyMomentSrcUpdater.h>
+#include <LcFieldFunctionUpdater.h>
 #include <LcKineticEnergyUpdater.h>
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
@@ -110,15 +111,18 @@
 #include <LcSetPhiAtBoundaryUpdater.h>
 #include <LcSolverRegistry.h>
 #include <LcStairSteppedBcUpdater.h>
+#include <LcRadialStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
 #include <LcTwentyMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
+#include <LcTenMomentAdaptiveKCollisionlessHeatFluxUpdater.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
+#include <LcAbsorbBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
 
 // loki includes
@@ -164,6 +168,10 @@ namespace Lucee
       .append<StairSteppedBcUpdater<1> >()
       .append<StairSteppedBcUpdater<2> >()
       .append<StairSteppedBcUpdater<3> >()
+      
+      .append<RadialStairSteppedBcUpdater<1> >()
+      .append<RadialStairSteppedBcUpdater<2> >()
+      .append<RadialStairSteppedBcUpdater<3> >()
       
       // Probably used for SOL problem simulations
       .append<Lucee::BiasedSheath5DUpdater>()
@@ -301,6 +309,10 @@ namespace Lucee
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
       .append<Lucee::CopyContToDisContFieldUpdater<3> >()
 
+      .append<Lucee::FieldFunctionUpdater<1> >()
+      .append<Lucee::FieldFunctionUpdater<2> >()
+      .append<Lucee::FieldFunctionUpdater<3> >()
+
       .append<Lucee::ImplicitTenMomentCollisionUpdater<1> >()
       .append<Lucee::ImplicitTenMomentCollisionUpdater<2> >()
       .append<Lucee::ImplicitTenMomentCollisionUpdater<3> >()
@@ -308,6 +320,10 @@ namespace Lucee
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<1> >()
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<2> >()
       .append<Lucee::TenMomentLocalCollisionlessHeatFluxUpdater<3> >()
+
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<1> >()
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<2> >()
+      .append<Lucee::TenMomentAdaptiveKCollisionlessHeatFluxUpdater<3> >()
 
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<1> >()
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<2> >()
@@ -350,6 +366,7 @@ namespace Lucee
       .append<Lucee::CopyBoundaryCondition>()
       .append<Lucee::ConstBoundaryCondition>()
       .append<Lucee::ZeroNormalBoundaryCondition>()
+      .append<Lucee::AbsorbBoundaryCondition>()
       .append<Lucee::ZeroTangentBoundaryCondition>()
       .append<Lucee::FieldFunctionBoundaryCondition>()
       .append<Lucee::FunctionBoundaryCondition>()
