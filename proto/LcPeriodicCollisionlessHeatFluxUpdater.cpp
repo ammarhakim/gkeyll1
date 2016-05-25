@@ -21,6 +21,9 @@
 #include <LcRectCartGrid.h>
 #include <LcStructGridField.h>
 
+// eigen includes
+#include <Eigen/Eigen>
+
 namespace Lucee
 {
   static const unsigned T11 = 4;
@@ -59,6 +62,10 @@ namespace Lucee
         closure = CL_LOCAL;
       } else if (cl == "global"){
         closure = CL_GLOBAL;
+      } else if (cl == "gaussian"){
+        closure = CL_GAUSSIAN;
+      } else if (cl == "2d") {
+        closure = CL_2D;
       } else {
         Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater::readInput: 'closure' ");
         lce << cl << " not recognized!" << std::endl;
@@ -85,15 +92,16 @@ namespace Lucee
     //    std::cout<< "volume is " << vol << "\n";
 
     // temporary restriction of number of processors due to interfacing with FFTW.
-    int mpi_size = grid.getComm()->getNumProcs();
-    int mpi_rank = grid.getComm()->getRank();
+    //    int mpi_size = grid.getComm()->getNumProcs();
+    //    int mpi_rank = grid.getComm()->getRank();
     //    std::cout<< "rank is " << mpi_rank << "\n"; // serial returns zero
     //    std::cout<< "size is " << mpi_size << "\n";
-    // for now disallow odd num procs
-    if (mpi_size%2 != 0 && mpi_size != 1) {
+
+    // We should be able to use this for an odd # of processors
+    /*    if (mpi_size%2 != 0 && mpi_size != 1) {
       Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater needs even number of processors");
       throw lce;
-    }
+      }*/
 
 #ifdef HAVE_MPI
     TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
@@ -142,48 +150,59 @@ namespace Lucee
 
     int nx = nLoc[0];
     kx.resize(nx);
-    if (mpi_size == 1) {
-      for (unsigned i=0; i<nx/2; ++i)
-        kx[i] = 2*Lucee::PI/Lx*i;
-      for (unsigned i=nx/2; i>0; --i)
-        kx[nx-i] = -2*Lucee::PI/Lx*i;
-    } else {
-      if (2*mpi_rank < mpi_size) {
-        for (unsigned i=0; i<nx; ++i)
-          kx[i] = 2*Lucee::PI/Lx*(i+local_0_start);
-      } else {
-        for (unsigned i=0; i<nx; ++i)
-          kx[i] = -2*Lucee::PI/Lx*(N[0] - local_0_start - i);
+    for (unsigned i=0; i<nx; ++i){
+      if ((i+local_0_start) <= N[0]/2){
+        // positive wavenumber
+        kx[i] = 2*Lucee::PI/Lx*(i+local_0_start);
+      } else { 
+        // negative wavenumber
+        kx[i] = -2*Lucee::PI/Lx*(N[0] - local_0_start - i);
       }
     }
-    //    int ny;
+    //    if (local_0_start == 0){
+      //      kx[0] = 1e-8; // avoid division by zero
+    //    }
+    
     // there is no decomposition in the y direction
-
     double Ly = lGlobal[1];
     int ny = nLoc[1];
     ky.resize(ny);
-    for (unsigned i=0; i<ny/2; ++i)
-      ky[i] = 2*Lucee::PI/Ly*i;
-    for (unsigned i=ny/2; i>0; --i)
-      ky[ny-i] = -2*Lucee::PI/Ly*i;
+    for (unsigned i=0; i<ny; ++i){
+      if (i<= ny/2){
+        ky[i] = 2*Lucee::PI/Ly*i;
+      } else {
+        ky[i] = -2*Lucee::PI/Ly*(ny - i);
+      }
+    }
+    //    for (int i=ny/2-1; i>0; --i)
+    //      ky[ny-i] = -2*Lucee::PI/Ly*i;
+    //    ky[0] = 1e-8; // avoid div by zero
 
     double Lz = lGlobal[2];
     int nz = nLoc[2];
     kz.resize(nz);
-    for (unsigned i=0; i < nz/2; ++i)
-      kz[i] = 2*Lucee::PI/Lz*i;
-    for (unsigned i=nz/2; i > 0; --i)
-      kz[nz-i] = -2*Lucee::PI/Lz*i;
-    kz[0] = 0;
+    for (unsigned i=0; i < nz; ++i) {
+      if (i <= nz/2) {
+        kz[i] = 2*Lucee::PI/Lz*i;
+      } else {
+        kz[i] = -2*Lucee::PI/Lz*(nz-i);
+      }
+    }
+    //    for (int i=nz/2-1; i > 0; --i)
+    //      kz[nz-i] = -2*Lucee::PI/Lz*i;
+    //    kz[0] = 1e-8; // avoid division by zero
+
     // store |k| for collisionless relaxation.
     kabs.resize(nx*ny*nz); 
     for (unsigned i=0; i<nx; ++i){
       for (unsigned j=0; j<ny; ++j){
         for (unsigned k=0; k<nz; ++k) {
-          kabs[k + nz*(j+ny*i)] = std::sqrt(kx[i]*kx[i] + ky[j]*ky[j]);
+          kabs[k + nz*(j+ny*i)] = std::sqrt(kx[i]*kx[i] + ky[j]*ky[j] + kz[k]*kz[k]);
         }
       }
     }
+    // prevent division by zero!
+    kabs[0] = 2*Lucee::PI/Lx*1e-3;
 // no need to reset DC component since it's a multiply by |k|
 
 // these ugly casts are needed so we can pass pointers of correct type
@@ -233,9 +252,8 @@ namespace Lucee
     int vol = grid.getGlobalRegion().getVolume();
     // total isotropic temperature = Sum (Txx+Tyy+Tzz)/3.0
     double intIsovT = 0.0;
-    double intvTxx = 0.0; 
-    double intvTyy = 0.0;
-    double intvTzz = 0.0;
+    double intvT[6] = {0,0,0,0,0,0};
+    
     // do stepping
     while (seq.step()) { 
 
@@ -253,26 +271,27 @@ namespace Lucee
       vTarr[5] = (ptr[9]-r*w*w)/r;
       // find global isotropic temperature and fill matrix
       intIsovT += (vTarr[0]+vTarr[3]+vTarr[5])/3.0;
-      intvTxx += vTarr[0];
-      intvTyy += vTarr[3];
-      intvTzz += vTarr[5];
       // fill the matrix
       for (unsigned i = 0; i < PSIZE; ++i){
+        intvT[i] += vTarr[i];
         // interleaved data
         src_in_out[idxr.getIndex(idx)*PSIZE + i] = vTarr[i];
       }
     }
 
-    double avgvT, avgvTxx, avgvTyy, avgvTzz;
+    double avgvT, avgvTcomp[6];
     TxCommBase *comm = this->getComm();
     comm->allreduce(1, &intIsovT, &avgvT, TX_SUM); 
-    comm->allreduce(1, &intvTxx, &avgvTxx, TX_SUM); 
-    comm->allreduce(1, &intvTyy, &avgvTyy, TX_SUM); 
-    comm->allreduce(1, &intvTzz, &avgvTzz, TX_SUM); 
+    comm->allreduce(PSIZE, &intvT[0], &avgvTcomp[0], TX_SUM); 
+    //        comm->allreduce(1, &intvTyy, &avgvTyy, TX_SUM); 
+    //    comm->allreduce(1, &intvTzz, &avgvTzz, TX_SUM); 
     avgvT = avgvT/vol; 
-    avgvTxx = avgvTxx/vol; 
-    avgvTyy = avgvTyy/vol; 
-    avgvTzz = avgvTzz/vol; 
+    for (unsigned i = 0; i < PSIZE; ++i){
+      avgvTcomp[i] = avgvTcomp[i]/vol;
+    }
+    //    avgvTxx = avgvTxx/vol; 
+    //    avgvTyy = avgvTyy/vol; 
+    //    avgvTzz = avgvTzz/vol; 
     // subtract isotopric temperature from input data
     seq.reset(); // reset the sequencer
       
@@ -299,8 +318,12 @@ namespace Lucee
         src_in_out[idxr.getIndex(idx)*PSIZE ] -= isoT;
         src_in_out[idxr.getIndex(idx)*PSIZE + 3] -= isoT;
         src_in_out[idxr.getIndex(idx)*PSIZE + 5] -= isoT;
-      } else {
+      } else if (closure == CL_GAUSSIAN || closure == CL_2D) {
+        for (unsigned i =0; i<PSIZE; ++i){
+          src_in_out[idxr.getIndex(idx)*PSIZE + i] -= avgvTcomp[i];
+        }
         // cannot reach here
+      } else {
       }
     }
     seq.reset();
@@ -309,17 +332,74 @@ namespace Lucee
 
     double vt = std::sqrt(avgvT);
     double edt;
+
+    // a pressure tensor that needs to be inverted
+    Eigen::MatrixXcd prLhs;
+    prLhs = Eigen::MatrixXcd::Constant(6, 6, 0.0);
+    Eigen::VectorXcd prRhs(6);
+    Eigen::VectorXcd prSol(6);
+    //    double chivtdt = vt*std::sqrt(8.0/Lucee::PI/9.0)*dt;
+    double chivtdt;
+    double chivtdt1;
+    double chivtdt2;
     // do relaxation proportional to wavenumber
     while (seq.step()) {
       seq.fillWithIndex(idx); 
       edt = std::exp(-kabs[idxr.getIndex(idx)]*vt*dt*scale_factor*std::sqrt(8/Lucee::PI));
-      // should there be a factor of 2*PI here?
+      if (closure == CL_2D) {
+        for (unsigned i=0; i <PSIZE; ++i){
+          prRhs(i) = src_in_out[idxr.getIndex(idx)*PSIZE+i];
+        }
+
+        double kxLoc = kx[idx[0]-local_0_start];
+        double kyLoc = ky[idx[1]];
+        double kLoc = kabs[idxr.getIndex(idx)];
+        // chivtdt = C /|k|*sqrt(k_i Tij k_j)
+        // for now we assume the off diagonal components are zero and kz = 0
+        chivtdt = std::sqrt(8.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
+        chivtdt1 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
+        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
+        prLhs(0,0) = 1.0 + chivtdt*(kLoc + 2.0*kxLoc*kxLoc/kLoc);
+        prLhs(0,1) = 2.0*chivtdt*kyLoc*kxLoc/kLoc;
+        prLhs(0,2) = 0; prLhs(0,3) = 0; prLhs(0,4) = 0; prLhs(0,5) = 0;
+        
+        prLhs(1,0) = chivtdt*kxLoc*kyLoc/kLoc; 
+        prLhs(1,1) = 1.0 + 2.0*chivtdt*kLoc;
+        prLhs(1,2) = 0.0; 
+        prLhs(1,3) = chivtdt*kyLoc*kxLoc/kLoc; prLhs(1,4) = 0.0; prLhs(1,5) = 0.0;
+        
+        prLhs(2,0) = 0.0; prLhs(2,1) = 0.0; prLhs(2,2) = 1.0 + chivtdt*(kLoc + kxLoc*kxLoc/kLoc);
+        prLhs(2,3) = 0.0; prLhs(2,4) = chivtdt*kxLoc*kyLoc/kLoc; prLhs(2,5) = 0.0;
+        
+        prLhs(3,0) = 0; prLhs(3,1) = 2.0*chivtdt*kyLoc*kxLoc/kLoc; prLhs(3,2) = 0.0;
+        prLhs(3,3) = 1.0 + chivtdt*(kLoc + 2.0*kyLoc*kyLoc/kLoc); prLhs(3,4) = 0.0; prLhs(3,5) = 0.0;
+        
+        prLhs(4,0) = 0.0; prLhs(4,1) = 0.0; 
+        prLhs(4,2) = kxLoc*kyLoc/kLoc*chivtdt; prLhs(4,3) = 0.0; 
+        prLhs(4,4) = 1.0 + chivtdt*(kLoc + kyLoc*kyLoc/kLoc); prLhs(4,5) = 0.0;
+        
+        prLhs(5,0) = 0; prLhs(5,1) = 0; prLhs(5,2) = 0; prLhs(5,3) = 0; prLhs(5,4) = 0; prLhs(5,5) = 1.0 + chivtdt*(kLoc); 
+        
+        prSol = prLhs.partialPivLu().solve(prRhs);
+      }
+
       for (unsigned i = 0; i < PSIZE; ++i){
         // hammett perkins says dP/dt = -n0 2 sqrt(2/pi) * k*vt T_k. Assume n0 is constant. 
         // so the linear solution is T_new = T_old*exp(-k v factor dt)
         // after which we need to add this back to the real solution
         // we are working in units of T/m, but since m is constant the solution is the same
-        sol_in_out[idxr.getIndex(idx)*PSIZE + i] = src_in_out[idxr.getIndex(idx)*PSIZE + i]*edt;
+
+        // In three dimensions, the heat flux contribution is given by div q = k n_0 \chi k_[i T_jk], where $chi = sqrt(8/pi)/3)/abs(k)$
+        // Thus I think we need to do a matrix inversion here. 
+        // Explicitly in 2-d the solution is chi k_1 T_1j k_i + k_2 T_2j k_i + k^2 T_ij + k_1 T_1i k_j + k_2 T_2i k_j
+
+        // Write the matrix for the 2d-case
+        // idx[0] - local_0_start...
+        if (closure != CL_2D) {
+          sol_in_out[idxr.getIndex(idx)*PSIZE + i] = src_in_out[idxr.getIndex(idx)*PSIZE + i]*edt;
+        } else {
+          sol_in_out[idxr.getIndex(idx)*PSIZE + i] = prSol(i);
+        }
       }
     }
     // compute inverse transform
@@ -356,6 +436,13 @@ namespace Lucee
         ptr[7] = isoT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 3].real()/vol + r*v*v;
         ptr[8] = r*sol_in_out[idxr.getIndex(idx)*PSIZE + 4].real()/vol + r*v*w;
         ptr[9] = isoT*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 5].real()/vol + r*w*w;
+      } else if (closure == CL_GAUSSIAN || closure == CL_2D) {
+        ptr[4] = avgvTcomp[0]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE].real()/vol + r*u*u;
+        ptr[5] = avgvTcomp[1]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 1].real()/vol + r*u*v;
+        ptr[6] = avgvTcomp[2]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 2].real()/vol + r*u*w;
+        ptr[7] = avgvTcomp[3]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 3].real()/vol + r*v*v;
+        ptr[8] = avgvTcomp[4]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 4].real()/vol + r*v*w;
+        ptr[9] = avgvTcomp[5]*r + r*sol_in_out[idxr.getIndex(idx)*PSIZE + 5].real()/vol + r*w*w;
       } else {
         //cannot reach here
       }
