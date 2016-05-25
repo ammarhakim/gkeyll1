@@ -86,6 +86,13 @@ namespace Lucee
  */
       static int luaSetDir(lua_State *L);
 
+/**
+ * Set direction to update.
+ *
+ * @param dir Direction to update
+ */
+      void setDir(unsigned dir) { bcDir = dir; }
+
     private:
 /** Direction to apply boundary conditon */
       unsigned bcDir;
@@ -95,13 +102,6 @@ namespace Lucee
       Lucee::Field<NDIM, double> *inOut;
 /** Field to store information about boundary */
       Lucee::Field<NDIM, double> *ssBnd;
-
-/**
- * Set direction to update.
- *
- * @param dir Direction to update
- */
-      void setDir(unsigned dir) { bcDir = dir; }
   };
 }
 

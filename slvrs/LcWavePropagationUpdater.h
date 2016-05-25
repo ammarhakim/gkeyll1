@@ -16,6 +16,7 @@
 #include <LcField.h>
 #include <LcHyperEquation.h>
 #include <LcUpdaterIfc.h>
+#include <LcStairSteppedBcUpdater.h>
 
 // std includes
 #include <vector>
@@ -73,6 +74,12 @@ namespace Lucee
       std::vector<unsigned> updateDims;
 /** Limiter to use */
       unsigned limiter;
+/** Flag to indicate if we there is a limiter field */
+      bool hasLimiterField;
+/** Location-based limiter field */
+      Lucee::Field<NDIM, double> *limiterField;
+/** Flag to indicate if we force to apply zero limiter at stair stepped boundary */
+      bool zeroLimiterSsBnd;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
 /** CFL number to use */
@@ -99,6 +106,10 @@ namespace Lucee
       bool hasSsBnd;
 /** In/out field */
       Lucee::Field<NDIM, double> *inOut;
+/** Flag to indicate if we apply embedded boundary */
+      bool applySsBc;
+/** Stair-stepped BC updater */
+      Lucee::StairSteppedBcUpdater<NDIM> *ssBcUpdater;
 /** Flux boundary field */
       Lucee::Field<NDIM, double> *fluxBc;
 /**

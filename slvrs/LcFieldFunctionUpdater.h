@@ -1,11 +1,11 @@
 /**
- * @file	LcTenMomentLocalCollisionlessHeatFluxUpdater.h
+ * @file	LcFieldFunctionUpdater.h
  *
- * @brief	Implicit updater for 10-moment collisional source terms
+ * @brief	Field function updater / 'calculator'
  */
 
-#ifndef LC_TEN_MOMENT_LOCAL_COLLISIONLESS_HEAT_FLUX_UPDATER_H
-#define LC_TEN_MOMENT_LOCAL_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#ifndef LC_FIELD_FUNCTION_UPDATER_H
+#define LC_FIELD_FUNCTION_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -22,12 +22,12 @@
 namespace Lucee
 {
 /**
- * Update 10-moment collision sources using an implicit method. This
- * removes the time-step restriction rapidly damped pressures when the
- * collision frequency is large.
+ * Update multi-fluid 5-moment sources using an implicit method. This
+ * removes the time-step restriction from plasma- and
+ * cyclotron-frequency.
  */
   template <unsigned NDIM>
-  class TenMomentLocalCollisionlessHeatFluxUpdater : public Lucee::UpdaterIfc
+  class FieldFunctionUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -66,13 +66,14 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Average wave number */
-      double kA;
-/** Flag to indicate if there is a average wave number field */
-      bool hasKAFld;
-/** Location-based wave number field */
-      Lucee::Field<NDIM, double> *kAFld;
+/** Reference to Lua function */
+      int fnRef;
+/** List of input components to send to Lua function */
+      std::vector<unsigned> inpComponents;
+/** List of output components to get from Lua function */
+      std::vector<unsigned> outComponents;
+
   };
 }
 
-#endif // LC_TEN_MOMENT_LOCAL_COLLISIONLESS_HEAT_FLUX_UPDATER_H
+#endif // LC_FIELD_FUNCTION_UPDATER_H

@@ -73,9 +73,33 @@ namespace Lucee
 
 // adjust number of waves accordingly
       if (useIntermediateWave)
-        this->setNumWaves(2);
-      else
+      {
+         useHLLC = false;
+         if (tbl.hasBool("useHLLC"))
+            useHLLC = tbl.getBool("useHLLC");
+         if (useHLLC)
+            this->setNumWaves(3);
+         else
+            this->setNumWaves(2);
+      } else
         this->setNumWaves(1);
+
+      speedEst = SPEED_REGULAR;
+     if (tbl.hasString("speedEstimate"))
+    {
+      std::string se = tbl.getString("speedEstimate");
+      if (se == "regular")
+        speedEst = SPEED_REGULAR;
+      else if (se == "direct")
+        speedEst = SPEED_DIRECT;
+      else
+      {
+        Lucee::Except lce("EulerEquation::readInput: 'speedEstimate' ");
+        lce << se << " not recognized!" << std::endl;
+        throw lce;
+      }
+    }
+     
     }
   }
 
@@ -118,6 +142,31 @@ namespace Lucee
     double u = q[1]/rho; // fluid velocity
     s[0] = u-cs;
     s[1] = u+cs;
+  }
+
+  void
+  EulerEquation::speedsDirect(const Lucee::RectCoordSys& c, const double*ql, const double* qr, double s[2])
+  {
+    double rhol = getSafeRho(ql[0]);
+    double rhsqrtl = std::sqrt(rhol);
+    double ul = ql[1]/rhol;
+    double pl = pressure(&ql[0]);
+
+    double rhor = getSafeRho(qr[0]);
+    double rhsqrtr = std::sqrt(rhor);
+    double ur = qr[1]/rhor;
+    double pr = pressure(&qr[0]);
+
+    double rhsq2 = rhsqrtl + rhsqrtr;
+    double u = (rhsqrtl*ul  + rhsqrtr*ur)/rhsq2;
+
+    double eta = 0.5*rhsqrtl*rhsqrtr/rhsq2/rhsq2;
+    double deltau2 = (ur - ul)*(ur-ul);
+    double d2 = gas_gamma*(pl/rhsqrtl + pr/rhsqrtr)/rhsq2 + eta*deltau2;
+    double d = std::sqrt(d2);
+
+    s[0] = u-d;
+    s[1] = u+d;
   }
 
   double
@@ -243,28 +292,77 @@ namespace Lucee
     if (useIntermediateWave)
     {
 // this uses the HLLE technique to construct an intermediate state
-      std::vector<const double*> auxVars;
-      double fl[5], fr[5];
-      flux(c, &ql[0], auxVars, fl);
-      flux(c, &qr[0], auxVars, fr);
 
-      double sl[2], sr[2];
-      speeds(c, &ql[0], sl);
-      speeds(c, &qr[0], sr);
-      s[0] = 0.5*(sl[0]+sr[0]);
-      s[1] = 0.5*(sl[1]+sr[1]);
+      if (speedEst == SPEED_REGULAR)
+      {
+        double sl[2], sr[2];
+        speeds(c, &ql[0], sl);
+        speeds(c, &qr[0], sr);
+        s[0] = 0.5*(sl[0]+sr[0]);
+        s[1] = 0.5*(sl[1]+sr[1]);
+      } else if (speedEst == SPEED_DIRECT)
+        speedsDirect(c, &ql[0], &qr[0], s);
+      else { /* this can't happen */ }
 
+      const unsigned mwave = this->getNumWaves();
+      if (mwave == 2) {
 // compute intermediate HLLE state
-      double sdiff1 = 1/(s[1]-s[0]);
-      double qHHLE[5];
-      for (unsigned i=0; i<5; ++i)
-        qHHLE[i] = (s[1]*qr[i]-s[0]*ql[i]+fl[i]-fr[i])*sdiff1;
+        std::vector<const double*> auxVars;
+        double fl[5], fr[5];
+        flux(c, &ql[0], auxVars, fl);
+        flux(c, &qr[0], auxVars, fr);
+        double sdiff1 = 1/(s[1]-s[0]);
+        double qHHLE[5];
+        for (unsigned i=0; i<5; ++i)
+          qHHLE[i] = (s[1]*qr[i]-s[0]*ql[i]+fl[i]-fr[i])*sdiff1;
 
 // compute waves
-      for (unsigned i=0; i<5; ++i)
-      {
-        waves(i,0) = qHHLE[i]-ql[i];
-        waves(i,1) = qr[i]-qHHLE[i];
+        for (unsigned i=0; i<5; ++i)
+        {
+          waves(i,0) = qHHLE[i]-ql[i];
+          waves(i,1) = qr[i]-qHHLE[i];
+        }
+      } else if (mwave == 3) {
+         double sl = s[0], sr = s[1];
+// FIXME reuse rhol, ul, pl
+         double rhol = getSafeRho(ql[0]);
+         double ul = ql[1]/rhol;
+         double pl = pressure(&ql[0]);
+         double rhosudiffl = rhol*(sl - ul);
+
+         double rhor = getSafeRho(qr[0]);
+         double ur = qr[1]/rhor;
+         double pr = pressure(&qr[0]);
+         double rhosudiffr = rhor*(sr - ur);
+
+         double rhosudiff1 = 1./(rhosudiffl - rhosudiffr);
+         double sm = (pr-pl + ul*rhosudiffl - ur*rhosudiffr)*rhosudiff1;
+
+         double qHLLCl[5], qHLLCr[5];
+         double coeffl = rhosudiffl/(sl-sm);
+         double coeffr = rhosudiffr/(sr-sm);
+
+         qHLLCl[0] = coeffl;
+         qHLLCl[1] = coeffl * sm;
+         qHLLCl[2] = coeffl * ql[2]/rhol;
+         qHLLCl[3] = coeffl * ql[3]/rhol;
+         qHLLCl[4] = coeffl * (ql[4]/rhol + (sm-ul)*(sm + pl/rhosudiffl));
+
+         qHLLCr[0] = coeffr;
+         qHLLCr[1] = coeffr * sm;
+         qHLLCr[2] = coeffr * qr[2]/rhor;
+         qHLLCr[3] = coeffr * qr[3]/rhor;
+         qHLLCr[4] = coeffr * (qr[4]/rhor + (sm-ur)*(sm + pr/rhosudiffr));
+
+         s[0] = sl;
+         s[1] = sm;
+         s[2] = sr;
+         for (unsigned i=0; i<5; ++i)
+         {
+            waves(i,0) = qHLLCl[i] - ql[i];
+            waves(i,1) = qHLLCr[i] - qHLLCl[i];
+            waves(i,2) = qr[i] - qHLLCr[i];
+         }
       }
     }
     else
