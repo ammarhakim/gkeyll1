@@ -16,6 +16,12 @@
 #include <LcGridIfc.h>
 #include <LcSerendipityElement.h>
 
+// std includes
+#include <ctime>
+
+//#define TELL(s) s
+#define TELL(s)
+
 namespace Lucee
 {
   using namespace Eigen;
@@ -26,6 +32,12 @@ namespace Lucee
   template <> const char *SerendipityElement<3>::id = "SerendipityElement";
   template <> const char *SerendipityElement<4>::id = "SerendipityElement";
   template <> const char *SerendipityElement<5>::id = "SerendipityElement";
+
+  static
+  double getElapsedTime(clock_t& tmStart, clock_t& tmEnd)
+  {
+    return (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
+  }
 
   template <unsigned NDIM>
   SerendipityElement<NDIM>::SerendipityElement()
@@ -1572,6 +1584,9 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::setupMatrices()
   {
+    clock_t tmStart, tmEnd;
+    tmStart = clock();
+    
     // Get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -1653,6 +1668,10 @@ namespace Lucee
       gaussNodeListSurf(0, 0) = 1.0;
     }
 
+    tmEnd = clock();
+    TELL (std::cout << "Phase I took " << getElapsedTime(tmStart, tmEnd) << std::endl;);
+    tmStart = clock();
+
     // Evaluate quadrature points on all surfaces
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
     {
@@ -1695,6 +1714,10 @@ namespace Lucee
       }
     }
 
+    tmEnd = clock();
+    TELL (std::cout << "Phase II took " << getElapsedTime(tmStart, tmEnd) << std::endl;);
+    tmStart = clock();    
+
     // Evaluate all basis functions and their derivatives in every direction at all gaussian volume nodes
     // First compute all volume gaussian quadrature locations
     int volShape[NDIM];
@@ -1709,6 +1732,7 @@ namespace Lucee
     Lucee::ColMajorSequencer<NDIM> volSeq = ColMajorSequencer<NDIM>(volRegion);
     Lucee::ColMajorIndexer<NDIM> volIdxr = ColMajorIndexer<NDIM>(volRegion);
 
+    clock_t t1, t2, t3, t4; double totalTm = 0.0, totalTmD = 0.0;
     // Find all quadrature locations on a NDIM volume
     while(volSeq.step())
     {
@@ -1726,12 +1750,23 @@ namespace Lucee
 
       for (int basisIndex = 0; basisIndex < functionVector.size(); basisIndex++)
       {
+        t1 = clock();
         functionEvaluations(nodeNumber, basisIndex) = evalPolynomial(functionVector[basisIndex],gaussNodeVec);
-        
+        t2 = clock();
+        totalTm += getElapsedTime(t1, t2);
+
+        t3 = clock();        
         for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
           functionDEvaluations(nodeNumber, basisIndex, dimIndex) = evalPolynomial(computePolynomialDerivative(functionVector[basisIndex],dimIndex),gaussNodeVec);
+        t4 = clock();
+        totalTmD += getElapsedTime(t3, t4);
       }
     }
+
+    tmEnd = clock();
+    TELL (std::cout << "Phase III took " << getElapsedTime(tmStart, tmEnd) << std::endl;);
+    TELL (std::cout << "... with inner loop taking " << totalTm << " " << totalTmD << std::endl;);
+    tmStart = clock();        
 
     // Resize+Initialize (most of) the output matrices we need
     resizeMatrices();
@@ -1835,6 +1870,9 @@ namespace Lucee
       }
     }
 
+    tmEnd = clock();
+    TELL (std::cout << "Phase IV took " << getElapsedTime(tmStart, tmEnd) << std::endl;);
+    tmStart = clock();        
     //computeTransformationScales();
   }
 
