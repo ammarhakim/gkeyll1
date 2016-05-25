@@ -124,7 +124,7 @@ namespace Lucee
   {
 // I am commenting this out for now as it seems mostly a pointless
 // exercise and is consuimg huge amount of memory for large parallel
-// runs. Ammar Hakim. Eventually will need to fix this.
+// runs. Eventually will need to fix this. (Ammar Hakim)
 
 // // create array over global region
 //     Lucee::Array<NDIM, int> check(globalRgn, 0);
