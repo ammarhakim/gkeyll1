@@ -104,6 +104,7 @@
 #include <LcSOLTemperatureCalc.h>
 #include <LcSOLTemperatureAtNodeCalc.h>
 #include <LcSOLWeightedProjectionCalc.h>
+#include <LcSOLWeightedProjectionTestCalc.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
 #include <LcSerendipityElement.h>
 #include <LcSerendipityElement2D.h>
@@ -212,6 +213,7 @@ namespace Lucee
       .append<Lucee::SOLTemperatureCalc>()
       .append<Lucee::SOLTemperatureAtNodeCalc>()
       .append<Lucee::SOLWeightedProjectionCalc>()
+      .append<Lucee::SOLWeightedProjectionTestCalc>()
 
       // Arbitrary field arithmetic for two fields
       .append<Lucee::FieldArithmeticUpdater<1> >()

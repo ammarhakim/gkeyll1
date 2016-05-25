@@ -1,5 +1,5 @@
 /**
- * @file	LcSOLWeightedProjectionCalc.cpp
+ * @file	LcSOLWeightedProjectionTestCalc.cpp
  *
  * @brief	Projects the product of B*g*f onto a 3d field, where g and f are 5d fields and g is a 3d field
  */
@@ -10,35 +10,35 @@
 #endif
 
 // lucee includes
-#include <LcSOLWeightedProjectionCalc.h>
+#include <LcSOLWeightedProjectionTestCalc.h>
 
 namespace Lucee
 {
-  const char *SOLWeightedProjectionCalc::id = "SOLWeightedProjectionCalc";
+  const char *SOLWeightedProjectionTestCalc::id = "SOLWeightedProjectionTestCalc";
 
-  SOLWeightedProjectionCalc::SOLWeightedProjectionCalc()
+  SOLWeightedProjectionTestCalc::SOLWeightedProjectionTestCalc()
   {
   }
 
-  SOLWeightedProjectionCalc::~SOLWeightedProjectionCalc()
+  SOLWeightedProjectionTestCalc::~SOLWeightedProjectionTestCalc()
   {
-    delete result;
+    //delete result;
   }
 
   void
-  SOLWeightedProjectionCalc::readInput(Lucee::LuaTable& tbl)
+  SOLWeightedProjectionTestCalc::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
       nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
     else
-      throw Lucee::Except("SOLWeightedProjectionCalc::readInput: Must specify element to use using 'basis5d'");
+      throw Lucee::Except("SOLWeightedProjectionTestCalc::readInput: Must specify element to use using 'basis5d'");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
       nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
     else
-      throw Lucee::Except("SOLWeightedProjectionCalc::readInput: Must specify element to use using 'basis3d'");
+      throw Lucee::Except("SOLWeightedProjectionTestCalc::readInput: Must specify element to use using 'basis3d'");
 
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
@@ -46,7 +46,7 @@ namespace Lucee
   }
 
   void
-  SOLWeightedProjectionCalc::initialize()
+  SOLWeightedProjectionTestCalc::initialize()
   {
     UpdaterIfc::initialize();
 
@@ -83,6 +83,7 @@ namespace Lucee
 
     massMatrixInv3d = massMatrix3d.inverse();
 
+    /*
     // get hold of grid
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
@@ -97,11 +98,11 @@ namespace Lucee
     Lucee::Region<3, int> local3D(lower, upper);
     int lg[3] = {1,1,1}, ug[3] = {1,1,1}; // Assume there is a 1 layer ghost cell
     // allocate space for storing local result calculation
-    result = new Lucee::Field<3, double>(local3D, nlocal3d, lg, ug);
+    result = new Lucee::Field<3, double>(local3D, nlocal3d, lg, ug);*/
   }
 
   Lucee::UpdaterStatus
-  SOLWeightedProjectionCalc::update(double t)
+  SOLWeightedProjectionTestCalc::update(double t)
   {
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
@@ -118,7 +119,7 @@ namespace Lucee
     // create duplicate to store local moments
     //Lucee::Field<3, double> result = momentOut.duplicate();
     // clear out contents of output field
-    (*result) = 0.0;
+    //(*result) = 0.0;
 
     integratedField= 0.0; // clear out current contents
 
@@ -129,7 +130,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> distgInPtr = distgIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::FieldPtr<double> integratedFieldPtr = integratedField.createPtr(); // Output pointer
-    Lucee::FieldPtr<double> resultPtr = result->createPtr();
+    //Lucee::FieldPtr<double> resultPtr = result->createPtr();
 
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
@@ -150,6 +151,7 @@ namespace Lucee
     
     Eigen::VectorXd rhsIntegrals(nlocal3d);
     Eigen::VectorXd solutionVec(nlocal3d);
+
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -177,11 +179,11 @@ namespace Lucee
       for (int basisIndex = 0; basisIndex < nlocal3d; basisIndex++)
       {
         double integrationResult = 0.0;
-        // Compute 5d integration
+        // Compute 5d integration of 3d test function * f * g * B
         for (int quadIndex = 0; quadIndex < nVolQuad5d; quadIndex++)
         {
           integrationResult += gaussWeights5d[quadIndex]*interpMatrix3d(quadIndex % nVolQuad3d, basisIndex)*
-            scaleFactor*distfAtQuad(quadIndex)*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
+            scaleFactor*distfAtQuad(quadIndex)*0.076;//*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
         }
         rhsIntegrals(basisIndex) = integrationResult;
       }
@@ -192,7 +194,14 @@ namespace Lucee
       //  resultPtr[nodeIndex] += solutionVec(nodeIndex);
 
       for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
+      { 
+        
+        //if (solutionVec(nodeIndex) < 0.0)
+        //{
+        //  std::cout << "solutionVec " << nodeIndex << " = " << solutionVec(nodeIndex) << std::endl;
+        //}
         integratedFieldPtr[nodeIndex] += solutionVec(nodeIndex);
+      }
     }
 
     /*
@@ -244,7 +253,7 @@ namespace Lucee
   }
 
   void
-  SOLWeightedProjectionCalc::declareTypes()
+  SOLWeightedProjectionTestCalc::declareTypes()
   {
     // Input: distribution function (f)
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
@@ -257,7 +266,7 @@ namespace Lucee
   }
 
   void
-  SOLWeightedProjectionCalc::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  SOLWeightedProjectionTestCalc::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)

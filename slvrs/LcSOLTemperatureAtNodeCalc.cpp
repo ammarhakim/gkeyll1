@@ -72,6 +72,7 @@ namespace Lucee
     int idx[3];
     Lucee::Region<3, int> localRgn = grid.getLocalRegion();
     Lucee::RowMajorSequencer<3> seq(localRgn);
+    bool negativeTemperatureStatus = false;
 
     // Loop over local region
     while (seq.step())
@@ -85,11 +86,27 @@ namespace Lucee
       temperatureOut.setPtr(temperaturePtr, idx);
 
       for (int i = 0; i < nlocal; i++)
+      {
         temperaturePtr[i] = 2.0/3.0*(energyPtr[i]/numDensPtr[i] - 
           0.5*speciesMass*meanVelocityPtr[i]*meanVelocityPtr[i]/(numDensPtr[i]*numDensPtr[i]));
+        if (temperaturePtr[i] < 0.0)
+        {
+          negativeTemperatureStatus = true;
+          // Print out information
+          std::cout << "temperaturePtr[" << i << "] = " << temperaturePtr[i] << std::endl;
+          std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
+          std::cout << "n = " << numDensPtr[i] << std::endl;
+          std::cout << "E = " << energyPtr[i] << std::endl;
+          std::cout << "u = " << meanVelocityPtr[i] << std::endl;
+          std::cout << "m = " << speciesMass << std::endl;
+        }
+      }
     }
-    
-    return Lucee::UpdaterStatus();
+
+    if (negativeTemperatureStatus == true)
+      return Lucee::UpdaterStatus(false, 0.0);
+    else
+      return Lucee::UpdaterStatus();
   }
 
   void
