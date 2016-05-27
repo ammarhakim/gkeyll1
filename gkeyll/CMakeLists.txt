@@ -88,10 +88,6 @@ set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS}
   ${TxBase_STLIBS} ${Hdf5_STLIBS}
 )
 
-if (DEBUG_CMAKE)
-  message("nautilus/CMakeLists.txt: Adding ${TxBase_STLIBS} ${Hdf5_STLIBS} to FacetsSt_EXT_LIBS.")
-endif ()
-
 # explicitly add in blas framework if on apple
 if (APPLE)
   set(FacetsSt_EXT_LIBS ${FacetsSt_EXT_LIBS} "-framework Accelerate")
