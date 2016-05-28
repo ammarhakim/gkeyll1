@@ -83,7 +83,7 @@ namespace Lucee
 /** Direction to compute moment (if higher than 0) */
       unsigned momDir;
 /** Space to store moment data for on a processor */
-      Lucee::Field<3, double> *moment;
+      Lucee::Field<3, double> *momentLocal;
       std::vector<Eigen::MatrixXd> mom0MatrixVector;
       std::vector<Eigen::MatrixXd> mom1MatrixVector;
       std::vector<Eigen::MatrixXd> mom2MatrixVector;
