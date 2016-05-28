@@ -12,6 +12,8 @@
 // lucee includes
 #include <LcSOLWeightedProjectionTestCalc.h>
 
+#include <iomanip> 
+
 namespace Lucee
 {
   const char *SOLWeightedProjectionTestCalc::id = "SOLWeightedProjectionTestCalc";
@@ -152,6 +154,14 @@ namespace Lucee
     Eigen::VectorXd rhsIntegrals(nlocal3d);
     Eigen::VectorXd solutionVec(nlocal3d);
 
+    Eigen::IOFormat HeavyFmt(Eigen::FullPrecision);
+
+    int printCounter = 0;
+
+#ifdef EIGEN_NO_DEBUG
+    std::cout << "EIGEN_NO_DEBUG DEFINED" << std::endl;
+#endif
+
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -176,14 +186,20 @@ namespace Lucee
       distgAtQuad = interpMatrix5d*distgVec;
       bFieldAtQuad = interpMatrix3d*bFieldVec;
       
+      //std::cout << std::setprecision(10) << "bFieldAtQuad" << std::endl << bFieldAtQuad.format(HeavyFmt) << std::endl;
+      
       for (int basisIndex = 0; basisIndex < nlocal3d; basisIndex++)
       {
         double integrationResult = 0.0;
         // Compute 5d integration of 3d test function * f * g * B
         for (int quadIndex = 0; quadIndex < nVolQuad5d; quadIndex++)
         {
+          //if (printCounter < 1000)
+            //std::cout << "bFieldAtQuad = " << bFieldAtQuad(quadIndex % nVolQuad3d) << std::endl;
+          //printCounter++;
+
           integrationResult += gaussWeights5d[quadIndex]*interpMatrix3d(quadIndex % nVolQuad3d, basisIndex)*
-            scaleFactor*distfAtQuad(quadIndex)*0.076;//*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
+            scaleFactor*distfAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);//*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
         }
         rhsIntegrals(basisIndex) = integrationResult;
       }

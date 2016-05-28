@@ -1,11 +1,11 @@
 /**
- * @file	LcSOLWeightedProjectionTestCalc.h
+ * @file  LcSOLMaxwellianParameterCalc.h
  *
- * @brief	Projects the product of B*g*f onto a 3d field, where g and f are 5d fields and g is a 3d field
+ * @brief	Extremely basic updater that determines next parameters to use as inputs for SOLMaxwellianAtNodeCalc
  */
 
-#ifndef LC_SOL_WEIGHTED_PROJECTION_TEST_CALC_H
-#define LC_SOL_WEIGHTED_PROJECTION_TEST_CALC_H
+#ifndef LC_SOL_MAXWELLIAN_PARAMETER_CALC
+#define LC_SOL_MAXWELLIAN_PARAMETER_CALC
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,29 +14,22 @@
 
 // lucee includes
 #include <LcField.h>
-#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-
-// eigen includes
-#undef EIGEN_NO_DEBUG
-#include <Eigen/LU>
 
 namespace Lucee
 {
 /**
  * Applies particle refection BCs to distribution function
  */
-  class SOLWeightedProjectionTestCalc : public Lucee::UpdaterIfc
+  class SOLMaxwellianParameterCalc : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      SOLWeightedProjectionTestCalc();
-/**  Destructor */
-      virtual ~SOLWeightedProjectionTestCalc();
+      SOLMaxwellianParameterCalc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -71,37 +64,9 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to phase space basis functions to use */
-      Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
-      double scaleFactor;
-/** Space to store result data for on a processor */
-      //Lucee::Field<3, double> *result;
-/**
- * Interpolation matrix for 5d quadrature
- */
-      Eigen::MatrixXd interpMatrix5d;
-/**
- * Interpolation matrix for 3d quadrature
- */
-      Eigen::MatrixXd interpMatrix3d;
-/**
- * Inverse of 3d mass matrix
- */
-      Eigen::MatrixXd massMatrixInv3d;
-/**
- * Gaussian quadrature weights for 5d integration
- */
-      std::vector<double> gaussWeights5d;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
   };
 }
 
-#endif // LC_SOL_WEIGHTED_PROJECTION_TEST_CALC_H
+#endif // LC_SOL_MAXWELLIAN_PARAMETER_CALC

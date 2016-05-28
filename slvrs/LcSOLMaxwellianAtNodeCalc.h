@@ -1,11 +1,11 @@
 /**
- * @file	LcSOLInitializeDensity.h
+ * @file  LcSOLMaxwellianAtNodeCalc.h
  *
- * @brief	Scale the distribution function at each node to have an exact density
+ * @brief	Initializes a 5d maxwellian based on 3d number density, mean parallel velocity, and total temperature fields
  */
 
-#ifndef LC_SOL_INITIALIZE_DENSITY_H
-#define LC_SOL_INITIALIZE_DENSITY_H
+#ifndef LC_SOL_MAXWELLIAN_AT_NODE_CALC
+#define LC_SOL_MAXWELLIAN_AT_NODE_CALC
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,9 +13,7 @@
 #endif
 
 // lucee includes
-#include <LcCDIM.h>
 #include <LcField.h>
-#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
@@ -27,17 +25,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class SOLInitializeDensity : public Lucee::UpdaterIfc
+  class SOLMaxwellianAtNodeCalc : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      SOLInitializeDensity();
-
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC = Lucee::CDIM<3>::N;
+      SOLMaxwellianAtNodeCalc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -72,8 +67,8 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Reference to function to project */
-      int fnRef;
+/** Species mass */
+      double speciesMass;
 /** Pointer to phase space basis functions to use */
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
@@ -84,6 +79,8 @@ namespace Lucee
       double scaleFactor;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
+/** Coordinates of each node on 5d element in configuration space */
+      Eigen::MatrixXd nodeCoords;
 /**
  * Integration vector used to compute integration in (v,mu) space
  */
@@ -99,20 +96,7 @@ namespace Lucee
  * Determines if two nodes have the same configuration space coordinates
  */
       bool sameConfigCoords(int srcIndex, int tarIndex, double dxMin, const Eigen::MatrixXd& nodeList);
- 
-/**
- * Evaluate function at specified location and fill output array with
- * result.
- *
- * @param L Lua state object to use.
- * @param tm Time to evaluate function at.
- * @param nodeList Matrix with nodal cooridates.
- * @param nn Node number
- * @param res On output, result of evaluating function.
- */
-      void evaluateFunction(Lucee::LuaState& L, double tm, 
-        const Lucee::Matrix<double> nodeList, unsigned nn, std::vector<double>& res);
   };
 }
 
-#endif // LC_SOL_INITIALIZE_DENSITY_H
+#endif // LC_SOL_MAXWELLIAN_AT_NODE_CALC

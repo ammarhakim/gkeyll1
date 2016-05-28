@@ -86,6 +86,7 @@
 #include <LcRegisteredObjList.h>
 #include <LcSOL3DElectronTempAtWallCalc.cpp>
 #include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
+#include <LcSOLBGKCollisionUpdater.h>
 #include <LcSOLDerivativeCalc.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
@@ -96,6 +97,8 @@
 #include <LcSOLInitializeDensity.h>
 #include <LcSOLIonDensityInitialization.h>
 #include <LcSOLLocalPositivityUpdater.h>
+#include <LcSOLMaxwellianAtNodeCalc.h>
+#include <LcSOLMaxwellianParameterCalc.h>
 #include <LcSOLPositivityUpdater.h>
 #include <LcSOLPositivityDragCellUpdater.h>
 #include <LcSOLPositivityDragNodeUpdater.h>
@@ -192,6 +195,7 @@ namespace Lucee
       .append<Lucee::SetPhiAtBoundaryUpdater>()
       .append<Lucee::SOL3DElectrostaticDistFuncReflectionBCUpdater>()
       .append<Lucee::SOL3DElectronTempAtWallCalc>()
+      .append<Lucee::SOLBGKCollisionUpdater>()
       .append<Lucee::SOLDerivativeCalc<1> >()
       .append<Lucee::SOLDerivativeCalc<2> >()
       .append<Lucee::SOLDerivativeCalc<3> >()
@@ -205,6 +209,8 @@ namespace Lucee
       .append<Lucee::SOLInitializeDensity>()
       .append<Lucee::SOLIonDensityInitialization>()
       .append<Lucee::SOLLocalPositivityUpdater>()
+      .append<Lucee::SOLMaxwellianAtNodeCalc>()
+      .append<Lucee::SOLMaxwellianParameterCalc>()
       .append<Lucee::SOLPositivityUpdater>()
       .append<Lucee::SOLPositivityDragCellUpdater>()
       .append<Lucee::SOLPositivityDragNodeUpdater>()
