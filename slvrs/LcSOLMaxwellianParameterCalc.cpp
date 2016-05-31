@@ -75,20 +75,22 @@ namespace Lucee
     Lucee::Region<3, int> localRgn = grid.getLocalRegion();
     Lucee::RowMajorSequencer<3> seq(localRgn);
 
-    const double tol = 1e-4;
+    const double tol = 1e-3;
     bool convergenceStatus = true;
 
     // Loop over local region
     while (seq.step())
     {
       seq.fillWithIndex(idx);
+      //std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
 
       // Set input fields to right location
       mom1dir3TargetIn.setPtr(mom1dir3TargetPtr, idx);
-      temperatureTargetIn.setPtr(temperatureTargetPtr, idx);
       mom1dir3LastGuessIn.setPtr(mom1dir3LastGuessPtr, idx);
-      temperatureLastGuessIn.setPtr(temperatureLastGuessPtr, idx);
       mom1dir3NumericalIn.setPtr(mom1dir3NumericalPtr, idx);
+      
+      temperatureTargetIn.setPtr(temperatureTargetPtr, idx);
+      temperatureLastGuessIn.setPtr(temperatureLastGuessPtr, idx);
       temperatureNumericalIn.setPtr(temperatureNumericalPtr, idx);
       // Set output fields to right location
       mom1dir3Out.setPtr(mom1dir3Ptr, idx);
@@ -96,15 +98,52 @@ namespace Lucee
 
       for (int i = 0; i < nlocal3d; i++)
       {
-        mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]/mom1dir3NumericalPtr[i])*mom1dir3LastGuessPtr[i];
-        temperaturePtr[i] = (temperatureTargetPtr[i]/temperatureNumericalPtr[i])*temperatureLastGuessPtr[i];
+        if (mom1dir3NumericalPtr[i] == 0.0)
+          mom1dir3Ptr[i] = 0.0;
+        else
+          mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]/mom1dir3NumericalPtr[i])*mom1dir3LastGuessPtr[i];
 
+        //if (temperaturePtr[i] == 0.0)
+        //  temperaturePtr[i] = 0.0
+        //else
+          temperaturePtr[i] = (temperatureTargetPtr[i]/temperatureNumericalPtr[i])*temperatureLastGuessPtr[i];
+
+        /*if (std::isnan(mom1dir3NumericalPtr[i]) || std::isinf(mom1dir3NumericalPtr[i]))
+        {
+        std::cout << "mom1dir3TargetPtr " << i << " = " << mom1dir3TargetPtr[i] << std::endl;
+        std::cout << "mom1dir3NumericalPtr " << i << " = " << mom1dir3NumericalPtr[i] << std::endl;
+        std::cout << "mom1dir3LastGuessPtr " << i << " = " << mom1dir3LastGuessPtr[i] << std::endl << std::endl;
+        }
+
+        if (std::isnan(temperatureNumericalPtr[i]) || std::isinf(temperatureNumericalPtr[i]))
+        {
+        std::cout << "temperatureTargetPtr " << i << " = " << temperatureTargetPtr[i] << std::endl;
+        std::cout << "temperatureNumericalPtr " << i << " = " << temperatureNumericalPtr[i] << std::endl;
+        std::cout << "temperatureLastGuessPtr " << i << " = " << temperatureLastGuessPtr[i] << std::endl << std::endl;
+        }
+        */
         // Check convergence
-        if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > mom1dir3TargetPtr[i]*tol)
+        if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(mom1dir3TargetPtr[i]*tol) )
+        {
+          /*if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(mom1dir3TargetPtr[i]) )
+          {
+            std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
+            std::cout << "mom1dir3TargetPtr " << i << " = " << mom1dir3TargetPtr[i] << std::endl;
+            std::cout << "mom1dir3NumericalPtr " << i << " = " << mom1dir3NumericalPtr[i] << std::endl;
+            std::cout << "mom1dir3LastGuessPtr " << i << " = " << mom1dir3LastGuessPtr[i] << std::endl;
+            std::cout << "relError = " << std::fabs( (mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i])/mom1dir3TargetPtr[i] ) << std::endl << std::endl;
+          }*/
           convergenceStatus = false;
+        }
         
-        if (std::fabs(temperatureNumericalPtr[i] - temperatureTargetPtr[i]) > temperatureTargetPtr[i]*tol)
-          convergenceStatus = false;
+        if (std::fabs(temperatureNumericalPtr[i] - temperatureTargetPtr[i]) > std::fabs(temperatureTargetPtr[i]*tol) )
+        {
+          /*std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
+          std::cout << "temperatureTargetPtr " << i << " = " << temperatureTargetPtr[i] << std::endl;
+          std::cout << "temperatureNumericalPtr " << i << " = " << temperatureNumericalPtr[i] << std::endl;
+          std::cout << "temperatureLastGuessPtr " << i << " = " << temperatureLastGuessPtr[i] << std::endl << std::endl;
+          */convergenceStatus = false;
+        }
       }
     }
 

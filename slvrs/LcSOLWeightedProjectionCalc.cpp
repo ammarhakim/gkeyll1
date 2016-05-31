@@ -184,6 +184,15 @@ namespace Lucee
             scaleFactor*distfAtQuad(quadIndex)*distgAtQuad(quadIndex)*bFieldAtQuad(quadIndex % nVolQuad3d);
         }
         rhsIntegrals(basisIndex) = integrationResult;
+
+        /*if (std::isnan(integrationResult))
+        {
+          std::cout << "SOLWeightedProjectionCalc: Integration result nan" << std::endl;
+          for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
+          {
+            std::cout << "distfInPtr[" << nodeIndex << "] = " << distfInPtr[nodeIndex] << std::endl;
+          }
+        }*/
       }
       // Calculate solution
       solutionVec = massMatrixInv3d*rhsIntegrals;
