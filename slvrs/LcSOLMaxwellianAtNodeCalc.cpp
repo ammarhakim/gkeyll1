@@ -174,8 +174,26 @@ namespace Lucee
             std::cout << "number density zero at point" << std::endl;
           }
 
+          if (vThermSq == 0.0)
+          {
+            // This should not happen
+            std::cout << "vThermSq zero at point" << std::endl;
+          }
+
           distfPtr[nodeIndex] = numDensPtr[configNode]/(2*PI*vThermSq*sqrt(2*PI*vThermSq))*exp(-(vVal-uVal)*(vVal-uVal)/(2*vThermSq))*
             exp(-muVal*bFieldPtr[configNode]/temperaturePtr[configNode]);
+
+          if (distfPtr[nodeIndex] == 0.0)
+          {
+            std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
+            std::cout << "exp term = " << exp(-(vVal-uVal)*(vVal-uVal)/(2*vThermSq)) << std::endl;
+            std::cout << "argument = " << -(vVal-uVal)*(vVal-uVal)/(2*vThermSq) << std::endl;
+            std::cout << "vVal = " << vVal << std::endl;
+            std::cout << "uVal = " << uVal << std::endl;
+            std::cout << "nVal = " << numDensPtr[configNode] << std::endl;
+            std::cout << "vThermSq = " << vThermSq << std::endl;
+            std::cout << "T = " << temperaturePtr[configNode]/(1.6e-19) << std::endl;
+          }
         }
       }
     }
@@ -225,8 +243,10 @@ namespace Lucee
                 idx[4] = imu;
                 distfOut.setPtr(distfPtr, idx);
                 for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                {
                   distfPtr[nodalStencil[nodeIndex] + configNode] = (numDensPtr[configNode]/numericalDensity)*
                     distfPtr[nodalStencil[nodeIndex] + configNode];
+                }
               }
             }
           }
