@@ -205,7 +205,6 @@ namespace Lucee
     if (local_0_start == 0){
       kabs[0] = 2*Lucee::PI/Lx*1e-3;
     }
-// no need to reset DC component since it's a multiply by |k|
 
 // these ugly casts are needed so we can pass pointers of correct type
 // to FFTW. This works because for *most* C++ compilers
@@ -359,10 +358,10 @@ namespace Lucee
         // chivtdt = C /|k|*sqrt(k_i Tij k_j)
         // for now we assume the off diagonal components are zero and kz = 0
         chivtdt = std::sqrt(8.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
-        chivtdt1 = std::sqrt(Lucee::PI/18.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
-        //        chivtdt1 = chivtdt;
-        //        chivtdt2 = chivtdt;
-        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        //        chivtdt1 = std::sqrt(Lucee::PI/18.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        chivtdt1 = chivtdt;
+        chivtdt2 = chivtdt;
+        //        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
         prLhs(0,0) = 1.0 + chivtdt*(3.0*kxLoc*kxLoc/kLoc) + chivtdt1*(1.0*kyLoc*kyLoc/kLoc);
         prLhs(0,1) = 2.0*chivtdt1*kyLoc*kxLoc/kLoc;
         prLhs(0,2) = 0; prLhs(0,3) = 0; prLhs(0,4) = 0; prLhs(0,5) = 0;
