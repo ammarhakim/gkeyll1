@@ -98,15 +98,16 @@ namespace Lucee
 
       for (int i = 0; i < nlocal3d; i++)
       {
-        if (mom1dir3NumericalPtr[i] == 0.0)
-          mom1dir3Ptr[i] = 0.0;
-        else
-          mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]/mom1dir3NumericalPtr[i])*mom1dir3LastGuessPtr[i];
 
         //if (temperaturePtr[i] == 0.0)
         //  temperaturePtr[i] = 0.0
         //else
-          temperaturePtr[i] = (temperatureTargetPtr[i]/temperatureNumericalPtr[i])*temperatureLastGuessPtr[i];
+        temperaturePtr[i] = (temperatureTargetPtr[i]-temperatureNumericalPtr[i]) + temperatureLastGuessPtr[i];
+
+        if (mom1dir3NumericalPtr[i] == 0.0)
+          mom1dir3Ptr[i] = 0.0;
+        else
+          mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]-mom1dir3NumericalPtr[i]) + mom1dir3LastGuessPtr[i];
 
         /*if (std::isnan(mom1dir3NumericalPtr[i]) || std::isinf(mom1dir3NumericalPtr[i]))
         {
@@ -125,25 +126,60 @@ namespace Lucee
         // Check convergence
         if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(mom1dir3TargetPtr[i]*tol) )
         {
-          /*if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(mom1dir3TargetPtr[i]) )
-          {
+          //if (mom1dir3NumericalPtr[i] == 0.0)
+          //  mom1dir3Ptr[i] = 0.0;
+          //else
+          //  mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]-mom1dir3NumericalPtr[i]) + mom1dir3LastGuessPtr[i];
+            //mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]/mom1dir3NumericalPtr[i])*mom1dir3LastGuessPtr[i];
+
+          //if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(tol*mom1dir3TargetPtr[i]) )
+          /*{
             std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
             std::cout << "mom1dir3TargetPtr " << i << " = " << mom1dir3TargetPtr[i] << std::endl;
             std::cout << "mom1dir3NumericalPtr " << i << " = " << mom1dir3NumericalPtr[i] << std::endl;
             std::cout << "mom1dir3LastGuessPtr " << i << " = " << mom1dir3LastGuessPtr[i] << std::endl;
-            std::cout << "relError = " << std::fabs( (mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i])/mom1dir3TargetPtr[i] ) << std::endl << std::endl;
+            std::cout << "mom1dirNextGuess " << i << " = " << mom1dir3Ptr[i] << std::endl;
+            std::cout << "temperatureTargetPtr " << i << " = " << temperatureTargetPtr[i] << std::endl;
+            std::cout << "temperatureNumericalPtr " << i << " = " << temperatureNumericalPtr[i] << std::endl;
+            std::cout << "temperatureLastGuessPtr " << i << " = " << temperatureLastGuessPtr[i] << std::endl;
+            std::cout << "temperatureNextGuess " << i << " = " << temperaturePtr[i] << std::endl;
+            std::cout << "relErrorU = " << std::fabs( (mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i])/mom1dir3TargetPtr[i] ) << std::endl;
+            std::cout << "relErrorT = " << std::fabs( (temperatureNumericalPtr[i] - temperatureTargetPtr[i])/temperatureTargetPtr[i] ) << std::endl << std::endl;
           }*/
           convergenceStatus = false;
         }
+        //else 
+        //{
+          // Don't modify guess if we are already converged
+        //  mom1dir3Ptr[i] = mom1dir3LastGuessPtr[i];
+        //}
         
         if (std::fabs(temperatureNumericalPtr[i] - temperatureTargetPtr[i]) > std::fabs(temperatureTargetPtr[i]*tol) )
         {
-          /*std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
-          std::cout << "temperatureTargetPtr " << i << " = " << temperatureTargetPtr[i] << std::endl;
-          std::cout << "temperatureNumericalPtr " << i << " = " << temperatureNumericalPtr[i] << std::endl;
-          std::cout << "temperatureLastGuessPtr " << i << " = " << temperatureLastGuessPtr[i] << std::endl << std::endl;
-          */convergenceStatus = false;
+          //temperaturePtr[i] = (temperatureTargetPtr[i]/temperatureNumericalPtr[i])*temperatureLastGuessPtr[i];
+          //temperaturePtr[i] = (temperatureTargetPtr[i]-temperatureNumericalPtr[i]) + temperatureLastGuessPtr[i];
+          //if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(tol*mom1dir3TargetPtr[i]) )
+          /*{
+            std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
+            std::cout << "mom1dir3TargetPtr " << i << " = " << mom1dir3TargetPtr[i] << std::endl;
+            std::cout << "mom1dir3NumericalPtr " << i << " = " << mom1dir3NumericalPtr[i] << std::endl;
+            std::cout << "mom1dir3LastGuessPtr " << i << " = " << mom1dir3LastGuessPtr[i] << std::endl;
+            std::cout << "mom1dirNextGuess " << i << " = " << mom1dir3Ptr[i] << std::endl;
+            std::cout << "temperatureTargetPtr " << i << " = " << temperatureTargetPtr[i] << std::endl;
+            std::cout << "temperatureNumericalPtr " << i << " = " << temperatureNumericalPtr[i] << std::endl;
+            std::cout << "temperatureLastGuessPtr " << i << " = " << temperatureLastGuessPtr[i] << std::endl;
+            std::cout << "temperatureNextGuess " << i << " = " << temperaturePtr[i] << std::endl;
+            std::cout << "relErrorU = " << std::fabs( (mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i])/mom1dir3TargetPtr[i] ) << std::endl;
+            std::cout << "relErrorT = " << std::fabs( (temperatureNumericalPtr[i] - temperatureTargetPtr[i])/temperatureTargetPtr[i] ) << std::endl << std::endl;
+          }*/
+
+          convergenceStatus = false;
         }
+        //else
+        //{
+          // Don't modify guess if we are already converged
+          //temperaturePtr[i] = temperatureLastGuessPtr[i];
+        //}
       }
     }
 
