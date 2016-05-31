@@ -202,7 +202,9 @@ namespace Lucee
       }
     }
     // prevent division by zero!
-    kabs[0] = 2*Lucee::PI/Lx*1e-3;
+    if (local_0_start == 0){
+      kabs[0] = 2*Lucee::PI/Lx*1e-3;
+    }
 // no need to reset DC component since it's a multiply by |k|
 
 // these ugly casts are needed so we can pass pointers of correct type
@@ -356,29 +358,31 @@ namespace Lucee
         double kLoc = kabs[idxr.getIndex(idx)];
         // chivtdt = C /|k|*sqrt(k_i Tij k_j)
         // for now we assume the off diagonal components are zero and kz = 0
-        chivtdt = std::sqrt(8.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
-        chivtdt1 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
-        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3]);
-        prLhs(0,0) = 1.0 + chivtdt*(kLoc + 2.0*kxLoc*kxLoc/kLoc);
-        prLhs(0,1) = 2.0*chivtdt*kyLoc*kxLoc/kLoc;
+        chivtdt = std::sqrt(8.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        chivtdt1 = std::sqrt(Lucee::PI/18.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        //        chivtdt1 = chivtdt;
+        //        chivtdt2 = chivtdt;
+        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        prLhs(0,0) = 1.0 + chivtdt*(3.0*kxLoc*kxLoc/kLoc) + chivtdt1*(1.0*kyLoc*kyLoc/kLoc);
+        prLhs(0,1) = 2.0*chivtdt1*kyLoc*kxLoc/kLoc;
         prLhs(0,2) = 0; prLhs(0,3) = 0; prLhs(0,4) = 0; prLhs(0,5) = 0;
         
-        prLhs(1,0) = chivtdt*kxLoc*kyLoc/kLoc; 
-        prLhs(1,1) = 1.0 + 2.0*chivtdt*kLoc;
+        prLhs(1,0) = chivtdt1*kxLoc*kyLoc/kLoc; 
+        prLhs(1,1) = 1.0 + 2.0*chivtdt1*kLoc;
         prLhs(1,2) = 0.0; 
-        prLhs(1,3) = chivtdt*kyLoc*kxLoc/kLoc; prLhs(1,4) = 0.0; prLhs(1,5) = 0.0;
+        prLhs(1,3) = chivtdt1*kyLoc*kxLoc/kLoc; prLhs(1,4) = 0.0; prLhs(1,5) = 0.0;
         
-        prLhs(2,0) = 0.0; prLhs(2,1) = 0.0; prLhs(2,2) = 1.0 + chivtdt*(kLoc + kxLoc*kxLoc/kLoc);
-        prLhs(2,3) = 0.0; prLhs(2,4) = chivtdt*kxLoc*kyLoc/kLoc; prLhs(2,5) = 0.0;
+        prLhs(2,0) = 0.0; prLhs(2,1) = 0.0; prLhs(2,2) = 1.0 + chivtdt1*(2.0*kxLoc*kxLoc/kLoc) + chivtdt2*(kyLoc*kyLoc/kLoc);
+        prLhs(2,3) = 0.0; prLhs(2,4) = chivtdt2*kxLoc*kyLoc/kLoc; prLhs(2,5) = 0.0;
         
-        prLhs(3,0) = 0; prLhs(3,1) = 2.0*chivtdt*kyLoc*kxLoc/kLoc; prLhs(3,2) = 0.0;
-        prLhs(3,3) = 1.0 + chivtdt*(kLoc + 2.0*kyLoc*kyLoc/kLoc); prLhs(3,4) = 0.0; prLhs(3,5) = 0.0;
+        prLhs(3,0) = 0; prLhs(3,1) = 2.0*chivtdt1*kyLoc*kxLoc/kLoc; prLhs(3,2) = 0.0;
+        prLhs(3,3) = 1.0 + chivtdt*(3.0*kyLoc*kyLoc/kLoc) + chivtdt1*kxLoc*kxLoc/kLoc; prLhs(3,4) = 0.0; prLhs(3,5) = 0.0;
         
         prLhs(4,0) = 0.0; prLhs(4,1) = 0.0; 
-        prLhs(4,2) = kxLoc*kyLoc/kLoc*chivtdt; prLhs(4,3) = 0.0; 
-        prLhs(4,4) = 1.0 + chivtdt*(kLoc + kyLoc*kyLoc/kLoc); prLhs(4,5) = 0.0;
+        prLhs(4,2) = kxLoc*kyLoc/kLoc*chivtdt2; prLhs(4,3) = 0.0; 
+        prLhs(4,4) = 1.0 + chivtdt2*(kxLoc*kxLoc/kLoc) + chivtdt1*(2.0*kyLoc*kyLoc/kLoc); prLhs(4,5) = 0.0;
         
-        prLhs(5,0) = 0; prLhs(5,1) = 0; prLhs(5,2) = 0; prLhs(5,3) = 0; prLhs(5,4) = 0; prLhs(5,5) = 1.0 + chivtdt*(kLoc); 
+        prLhs(5,0) = 0; prLhs(5,1) = 0; prLhs(5,2) = 0; prLhs(5,3) = 0; prLhs(5,4) = 0; prLhs(5,5) = 1.0 + chivtdt1*(kLoc); 
         
         prSol = prLhs.partialPivLu().solve(prRhs);
       }
