@@ -452,6 +452,7 @@ namespace Lucee
   {
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("scale", luaScale);
+    lfm.appendFunc("abs", luaAbs);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
     lfm.appendFunc("combine", luaCombine);
@@ -489,6 +490,26 @@ namespace Lucee
     }
     T num = (T) lua_tonumber(L, 2);
     (*fld) *= num;
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaAbs(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+
+// loop over field, setting negative values to positive
+    Lucee::FieldPtr<T> ptr = fld->createPtr();
+    Lucee::RowMajorSequencer<NDIM> seq(fld->getExtRegion());
+    while (seq.step())
+    {
+      fld->setPtr(ptr, seq.getIndex());
+      for (unsigned k=0; k<ptr.getNumComponents(); ++k)
+        if (ptr[k] < 0.0) 
+          ptr[k] *= -1.0;
+    }
     return 0;
   }
 

@@ -183,8 +183,10 @@ namespace Lucee
           distfPtr[nodeIndex] = numDensPtr[configNode]/(2*PI*vThermSq*sqrt(2*PI*vThermSq))*exp(-(vVal-uVal)*(vVal-uVal)/(2*vThermSq))*
             exp(-muVal*bFieldPtr[configNode]/temperaturePtr[configNode]);
 
-          if (distfPtr[nodeIndex] == 0.0)
+          if (distfPtr[nodeIndex] == 0.0 || std::isnan(distfPtr[nodeIndex]))
           {
+            return Lucee::UpdaterStatus(false, 0.0);
+            std::cout << "distfPtr[" << nodeIndex << "] = " << distfPtr[nodeIndex] << std::endl;
             std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
             std::cout << "exp term = " << exp(-(vVal-uVal)*(vVal-uVal)/(2*vThermSq)) << std::endl;
             std::cout << "argument = " << -(vVal-uVal)*(vVal-uVal)/(2*vThermSq) << std::endl;
