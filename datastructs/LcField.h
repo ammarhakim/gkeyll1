@@ -489,6 +489,14 @@ namespace Lucee
       static int luaScale(lua_State *L);
 
 /**
+ * Lua callable method for taking the absolute value of a field
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaAbs(lua_State *L);
+
+/**
  * Lua callable method for copying field from supplied one.
  *
  * @param L Lua state to use.

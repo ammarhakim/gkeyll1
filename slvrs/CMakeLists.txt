@@ -118,6 +118,7 @@ set(lcslvrs_SOURCES
   LcSOLLocalPositivityUpdater.cpp
   LcSOLMaxwellianAtNodeCalc.cpp
   LcSOLMaxwellianParameterCalc.cpp
+  LcSOLMaxwellianParameterNewtonCalc.cpp
   LcSOLPositivityUpdater.cpp
   LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp

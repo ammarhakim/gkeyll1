@@ -133,7 +133,7 @@ namespace Lucee
             //mom1dir3Ptr[i] = (mom1dir3TargetPtr[i]/mom1dir3NumericalPtr[i])*mom1dir3LastGuessPtr[i];
 
           //if (std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(tol*mom1dir3TargetPtr[i]) )
-          /*{
+          {
             std::cout << "idx[" << idx[0] << "," << idx[1] << "," << idx[2] << "]" << std::endl;
             std::cout << "mom1dir3TargetPtr " << i << " = " << mom1dir3TargetPtr[i] << std::endl;
             std::cout << "mom1dir3NumericalPtr " << i << " = " << mom1dir3NumericalPtr[i] << std::endl;
@@ -145,7 +145,7 @@ namespace Lucee
             std::cout << "temperatureNextGuess " << i << " = " << temperaturePtr[i] << std::endl;
             std::cout << "relErrorU = " << std::fabs( (mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i])/mom1dir3TargetPtr[i] ) << std::endl;
             std::cout << "relErrorT = " << std::fabs( (temperatureNumericalPtr[i] - temperatureTargetPtr[i])/temperatureTargetPtr[i] ) << std::endl << std::endl;
-          }*/
+          }
           convergenceStatus = false;
         }
         //else 
