@@ -185,7 +185,6 @@ namespace Lucee
 
           if (distfPtr[nodeIndex] == 0.0 || std::isnan(distfPtr[nodeIndex]))
           {
-            return Lucee::UpdaterStatus(false, 0.0);
             std::cout << "distfPtr[" << nodeIndex << "] = " << distfPtr[nodeIndex] << std::endl;
             std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
             std::cout << "exp term = " << exp(-(vVal-uVal)*(vVal-uVal)/(2*vThermSq)) << std::endl;
@@ -195,6 +194,7 @@ namespace Lucee
             std::cout << "nVal = " << numDensPtr[configNode] << std::endl;
             std::cout << "vThermSq = " << vThermSq << std::endl;
             std::cout << "T = " << temperaturePtr[configNode]/(1.6e-19) << std::endl;
+            return Lucee::UpdaterStatus(false, 0.0);
           }
         }
       }

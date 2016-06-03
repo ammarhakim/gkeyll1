@@ -503,12 +503,17 @@ namespace Lucee
 // loop over field, setting negative values to positive
     Lucee::FieldPtr<T> ptr = fld->createPtr();
     Lucee::RowMajorSequencer<NDIM> seq(fld->getExtRegion());
+    
     while (seq.step())
     {
       fld->setPtr(ptr, seq.getIndex());
       for (unsigned k=0; k<ptr.getNumComponents(); ++k)
+      {
         if (ptr[k] < 0.0) 
           ptr[k] *= -1.0;
+        else if (ptr[k] == 0.0 && lua_isnumber(L, 2))
+          ptr[k] = (T) lua_tonumber(L, 2); // Replace fields with 0.0 with another number if supplied
+      }
     }
     return 0;
   }

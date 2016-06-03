@@ -99,8 +99,8 @@ namespace Lucee
     Lucee::Region<3, int> localRgn = grid.getLocalRegion();
     Lucee::RowMajorSequencer<3> seq(localRgn);
 
-    const double functionTol = 1e-3;
-    const double rootTol = 1e-6;
+    const double functionTol = 1e-4;
+    const double rootTol = 1e-8;
     bool rootConvergenceStatus = true;
     bool functionConvergenceStatus = true;
 
@@ -132,9 +132,9 @@ namespace Lucee
       for (int i = 0; i < nlocal3d; i++)
       {
         // Compute jacobian matrix using forward differences
-        jacobianMatrix(0,0) = (mom1dir3IncrementOnePtr[i]-mom1dir3NumericalPtr[i])/(epsilonU*fabs(mom1dir3InputPtr[i]));
-        jacobianMatrix(0,1) = (mom1dir3IncrementTwoPtr[i]-mom1dir3NumericalPtr[i])/(epsilonT*fabs(temperatureInputPtr[i]));
-        jacobianMatrix(1,0) = (temperatureIncrementOnePtr[i]-temperatureNumericalPtr[i])/(epsilonU*fabs(mom1dir3InputPtr[i]));
+        jacobianMatrix(0,0) = (mom1dir3IncrementOnePtr[i]-mom1dir3NumericalPtr[i])/( epsilonU*std::max(fabs(mom1dir3InputPtr[i]), 1.0) );
+        jacobianMatrix(0,1) = 0.0;//(mom1dir3IncrementTwoPtr[i]-mom1dir3NumericalPtr[i])/(epsilonT*fabs(temperatureInputPtr[i]));
+        jacobianMatrix(1,0) = (temperatureIncrementOnePtr[i]-temperatureNumericalPtr[i])/( epsilonU*std::max(fabs(mom1dir3InputPtr[i]), 1.0) );
         jacobianMatrix(1,1) = (temperatureIncrementTwoPtr[i]-temperatureNumericalPtr[i])/(epsilonT*fabs(temperatureInputPtr[i]));
 
         // Fill out fVec with a minus sign
@@ -146,7 +146,11 @@ namespace Lucee
 
         // Set next guess values
         mom1dir3Ptr[i] = mom1dir3InputPtr[i] + solutionVec(0);
+
         temperaturePtr[i] = temperatureInputPtr[i] + solutionVec(1);
+        // If next temperature guess is to be negative, just take half the value
+        if (temperaturePtr[i] <= 0.0)
+          temperaturePtr[i] = temperatureInputPtr[i]*0.5;
 
         //std::cout << "mom1dir3Ptr[" << i << "] = " << mom1dir3Ptr[i] << std::endl;
         //std::cout << "mom1dir3InputPtr[" << i << "] = " << mom1dir3InputPtr[i] << std::endl;
@@ -157,14 +161,14 @@ namespace Lucee
         //std::cout << "solutionVec" << std::endl << solutionVec << std::endl;
         //std::cout << "jacobianMatrix" << std::endl << jacobianMatrix << std::endl;
 
-        // Check convergence in function
+        // Check convergence in increment size
         if (std::fabs(solutionVec(0)) > std::fabs(mom1dir3InputPtr[i]*rootTol))
           rootConvergenceStatus = false;
 
         if (std::fabs(solutionVec(1)) > std::fabs(temperatureInputPtr[i]*rootTol))
           rootConvergenceStatus = false;
 
-        // Check convergence in increment size
+        // Check convergence in function
         if ( std::fabs(mom1dir3NumericalPtr[i] - mom1dir3TargetPtr[i]) > std::fabs(mom1dir3TargetPtr[i]*functionTol)
              || std::fabs(temperatureNumericalPtr[i] - temperatureTargetPtr[i]) > std::fabs(temperatureTargetPtr[i]*functionTol) )
         {
