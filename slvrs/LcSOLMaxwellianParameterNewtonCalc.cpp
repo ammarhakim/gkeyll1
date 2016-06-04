@@ -146,20 +146,14 @@ namespace Lucee
 
         // Set next guess values
         mom1dir3Ptr[i] = mom1dir3InputPtr[i] + solutionVec(0);
+        // Limit next iteration guess on mom1dir3Ptr[i] to 5x the magnitude of mom1dir3Ptr
+        if (std::fabs(solutionVec(0)) > 5*std::fabs(mom1dir3InputPtr[i]))
+          mom1dir3Ptr[i] = mom1dir3InputPtr[i] + 5*solutionVec(0)/std::fabs(solutionVec(0))*mom1dir3InputPtr[i];
 
         temperaturePtr[i] = temperatureInputPtr[i] + solutionVec(1);
         // If next temperature guess is to be negative, just take half the value
         if (temperaturePtr[i] <= 0.0)
           temperaturePtr[i] = temperatureInputPtr[i]*0.5;
-
-        //std::cout << "mom1dir3Ptr[" << i << "] = " << mom1dir3Ptr[i] << std::endl;
-        //std::cout << "mom1dir3InputPtr[" << i << "] = " << mom1dir3InputPtr[i] << std::endl;
-        //std::cout << "mom1dir3NumericalPtr[" << i << "] = " << mom1dir3NumericalPtr[i] << std::endl;
-        //std::cout << "mom1dir3TargetPtr[" << i << "] = " << mom1dir3TargetPtr[i] << std::endl;
-        //std::cout << "temperaturePtr[" << i << "] = " << temperaturePtr[i] << std::endl;
-        //std::cout << "temperatureInputPtr[" << i << "] = " << temperatureInputPtr[i] << std::endl;
-        //std::cout << "solutionVec" << std::endl << solutionVec << std::endl;
-        //std::cout << "jacobianMatrix" << std::endl << jacobianMatrix << std::endl;
 
         // Check convergence in increment size
         if (std::fabs(solutionVec(0)) > std::fabs(mom1dir3InputPtr[i]*rootTol))
