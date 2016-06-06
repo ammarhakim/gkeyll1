@@ -100,6 +100,12 @@ namespace Lucee
           std::cout << "u = " << meanVelocityPtr[i] << std::endl;
           std::cout << "m = " << speciesMass << std::endl;
         }
+        else if (std::isnan(temperaturePtr[i]))
+        {
+          std::cout << "Temperature is zero at node " << i << " in cell "
+            << idx[0] << "," << idx[1] << "," << idx[2] << std::endl;
+          temperaturePtr[i] = 0.0;
+        }
       }
     }
 
