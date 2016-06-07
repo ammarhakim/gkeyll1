@@ -101,8 +101,8 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& inFld, Lucee::Field<NDIM, double>& cdFld)
   {
 // get hold of grid
-    const Lucee::RectCartGrid<2>& grid 
-      = this->getGrid<Lucee::RectCartGrid<2> >();
+    const Lucee::RectCartGrid<3>& grid 
+      = this->getGrid<Lucee::RectCartGrid<3> >();
 
     double dx2 = grid.getDx(0)*grid.getDx(0);
     double dy2 = grid.getDx(1)*grid.getDx(1);
@@ -110,7 +110,7 @@ namespace Lucee
 
     for (int i=inFld.getLower(0); i<inFld.getUpper(0); ++i)
       for (int j=inFld.getLower(1); j<inFld.getUpper(1); ++j)
-        for (int l=inFld.getLower(2); l<inFld.getUpper(1); ++l)
+        for (int l=inFld.getLower(2); l<inFld.getUpper(2); ++l)
           for (unsigned k=0; k<inFld.getNumComponents(); ++k)
             cdFld(i,j,l,k) = (inFld(i-1,j,l,k) - 2.0*inFld(i,j,l,k) + inFld(i+1,j,l,k))/dx2
               + (inFld(i,j-1,l,k) - 2.0*inFld(i,j,l,k) + inFld(i,j+1,l,k))/dy2
