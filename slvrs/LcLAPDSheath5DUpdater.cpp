@@ -1,7 +1,8 @@
 /**
- * @file	LcBiasedSheath5DUpdater.cpp
+ * @file	LcLAPDSheath5DUpdater.cpp
  *
- * @brief	Applies electrostatic logical sheath BCs to a 5D distribution function
+ * @brief	Applies sheath boundary conditions for LAPD simulation.
+ * The cutoff velocities are modified on the boundaries using a projection of a sqrt(phi)
  */
 
 // config stuff
@@ -10,43 +11,43 @@
 #endif
 
 // lucee includes
-#include <LcBiasedSheath5DUpdater.h>
+#include <LcLAPDSheath5DUpdater.h>
 
 //etc includes
 #include <quadrule.hpp>
 
 namespace Lucee
 {
-  const char *BiasedSheath5DUpdater::id = "BiasedSheath5D";
+  const char *LAPDSheath5DUpdater::id = "LAPDSheath5D";
 
-  BiasedSheath5DUpdater::BiasedSheath5DUpdater()
+  LAPDSheath5DUpdater::LAPDSheath5DUpdater()
   {
   }
 
   void
-  BiasedSheath5DUpdater::readInput(Lucee::LuaTable& tbl)
+  LAPDSheath5DUpdater::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
       nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify element to use using 'basis5d'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify element to use using 'basis5d'");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
       nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify element to use using 'basis3d'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify element to use using 'basis3d'");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify element to use using 'basis2d'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify element to use using 'basis2d'");
 
     if (tbl.hasNumber("polyOrder"))
       polyOrder = tbl.getNumber("polyOrder");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify basis function order using 'polyOrder'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify basis function order using 'polyOrder'");
  
     // Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration
     if (tbl.hasNumber("scaleFactor"))
@@ -57,17 +58,17 @@ namespace Lucee
     if (tbl.hasNumber("speciesMass"))
       speciesMass = tbl.getNumber("speciesMass");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify species mass using 'speciesMass'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify species mass using 'speciesMass'");
 
     // Elementary charge
     if (tbl.hasNumber("speciesCharge"))
       speciesCharge = tbl.getNumber("speciesCharge");
     else
-      throw Lucee::Except("BiasedSheath5DUpdater::readInput: Must specify species charge using 'speciesCharge'");
+      throw Lucee::Except("LAPDSheath5DUpdater::readInput: Must specify species charge using 'speciesCharge'");
   }
 
   void
-  BiasedSheath5DUpdater::initialize()
+  LAPDSheath5DUpdater::initialize()
   {
     UpdaterIfc::initialize();
 
@@ -146,6 +147,7 @@ namespace Lucee
     }
 
     // Compute a matrix used to calculate the total parallel flux across a surface
+    // (Really a 2d mass matrix)
     momentMatrix = Eigen::MatrixXd(nodalStencil.size(), nodalStencil.size());
     double weightScale = 0.5*grid.getDx(3)*0.5*grid.getDx(4);
 
@@ -166,10 +168,26 @@ namespace Lucee
     upperEdgeNodeNums = std::vector<int>(nodalBasis3d->getNumSurfUpperNodes(2));
     nodalBasis3d->getSurfLowerNodeNums(2, lowerEdgeNodeNums);
     nodalBasis3d->getSurfUpperNodeNums(2, upperEdgeNodeNums);
+
+    // Get matrices used for interpolation of cutoff velocity
+    int nlocal2d = nodalBasis2d->getNumNodes();
+    int nVolQuad2d = nodalBasis2d->getNumGaussNodes();
+    gaussWeights2d = std::vector<double>(nVolQuad2d);
+    Lucee::Matrix<double> tempVolQuad2d(nVolQuad2d, nlocal2d);
+    Lucee::Matrix<double> tempVolCoords2d(nVolQuad2d, 3);
+    nodalBasis2d->getGaussQuadData(tempVolQuad2d, tempVolCoords2d, gaussWeights2d);
+    interpMatrix2d = Eigen::MatrixXd(nVolQuad2d, nlocal2d);
+    copyLuceeToEigen(tempVolQuad2d, interpMatrix2d);
+
+    Lucee::Matrix<double> tempMassMatrix2d(nlocal2d, nlocal2d);
+    nodalBasis2d->getMassMatrix(tempMassMatrix2d);
+    Eigen::MatrixXd massMatrix2d(nlocal2d, nlocal2d);
+    copyLuceeToEigen(tempMassMatrix2d, massMatrix2d);
+    massMatrix2dInv = massMatrix2d.inverse();
   }
 
   Lucee::UpdaterStatus
-  BiasedSheath5DUpdater::update(double t)
+  LAPDSheath5DUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
@@ -189,11 +207,16 @@ namespace Lucee
 
     unsigned nlocal = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
+    unsigned nlocal2d = nodalBasis2d->getNumNodes();
     double cellCentroid[5];
     // index of skin cell
     int idx[5];
     // index of ghost cell
     int gstIdx[5];
+    // Speed code up by delcaring Eigen data structures outside loop (maybe)
+    Eigen::VectorXd phiAtNodes(nlocal2d);
+    Eigen::VectorXd cutoffV(nlocal2d);
+    Eigen::VectorXd rhsVector(nlocal2d);
 
     // Apply sheath boundary conditions on lower surface
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -211,21 +234,60 @@ namespace Lucee
           gstIdx[0] = ix;
           gstIdx[1] = iy;
           gstIdx[2] = idx[2]-1;
+
+          // Project cutoff velocities if cell is on a boundary
+          bool reflectionValid = true;
+          for (int configNode = 0; configNode < nlocal2d; configNode++)
+          {
+            if ( phiInPtr[ lowerEdgeNodeNums[configNode] ]*speciesCharge > 0.0 )
+            {
+              // Stop projection of cutoff velocities and use nodal values
+              reflectionValid = false;
+              break;
+            }
+            else
+              phiAtNodes(configNode) = phiInPtr[ lowerEdgeNodeNums[configNode] ];
+          }
+
+          if (reflectionValid == true)
+          {
+            Eigen::VectorXd phiAtQuad = interpMatrix2d*phiAtNodes;
+            for (int nodeIndex = 0; nodeIndex < nlocal2d; nodeIndex++)
+            {
+              double integralResult = 0.0;
+              for (int quadIndex = 0; quadIndex < interpMatrix2d.rows(); quadIndex++)
+              {
+                // Calculate integral over 2d cell of 2d basis function times sqrt(-2*q*phi/m)
+                integralResult += gaussWeights2d[quadIndex]*interpMatrix2d(quadIndex, nodeIndex)*
+                  -std::sqrt(-2*phiAtQuad(quadIndex)*speciesCharge/speciesMass);
+              }
+              rhsVector(nodeIndex) = integralResult;
+            }
+            cutoffV = massMatrix2dInv*rhsVector;
+          }
+          else
+          {
+            // Set cutoffV in nodal manner. Will be NaN if argument of sqrt is negative, but should be dealt
+            // with in if statement at beginning of upcoming for-loop
+            for (int nodeIndex = 0; nodeIndex < nlocal2d; nodeIndex++)
+              cutoffV(nodeIndex) = -std::sqrt(-2*phiInPtr[ lowerEdgeNodeNums[nodeIndex] ]*
+                  speciesCharge/speciesMass);
+          }
+
           // Loop over all configuration space nodes contained in this element
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = lowerEdgeNodeNums[configNode];
 
-            // Do not do anything at this node if phi*charge >= 0
-            if ( phiInPtr[configNodeIndex]*speciesCharge >= 0.0 )
+            // Do not do anything at this node if phi*charge > 0
+            if ( phiInPtr[configNodeIndex]*speciesCharge > 0.0 ||
+                (phiInPtr[configNodeIndex] == 0 && reflectionValid == false))
               continue;
 
             // Cutoff velocity at this node
-            double cutoffV = -std::sqrt(-2*phiInPtr[configNodeIndex]*speciesCharge/speciesMass);
             bool foundCutoffCell = false;
-
             // Check to see if cutoff v is above vmax
-            if (cutoffV < -0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+            if (cutoffV(configNode) < -0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
             {
               // Reflect everything
               foundCutoffCell = true;
@@ -249,7 +311,7 @@ namespace Lucee
                 {
                   std::cout << "(L) Unable to find a match to cutoff velocity" << std::endl;
                   std::cout << "charge = " << speciesCharge << std::endl;
-                  std::cout << "cutoffV = " << cutoffV << std::endl;
+                  std::cout << "cutoffV = " << cutoffV(configNode) << std::endl;
                   std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
                   std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
                 }
@@ -259,8 +321,8 @@ namespace Lucee
               if (foundCutoffCell == false)
               {
                 // Check if cutoffV falls in this cell
-                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV && 
-                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV)
+                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV(configNode) && 
+                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV(configNode))
                 {
                   foundCutoffCell = true;
 
@@ -293,7 +355,7 @@ namespace Lucee
 
                   // Then compute outward flux only above cutoff velocity
                   double a = -0.5*grid.getDx(3);
-                  double b = cutoffV - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
+                  double b = cutoffV(configNode) - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
                   // Integration weight scale for this modified integral
                   double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
                   double speciesFluxAboveVc = 0.0;
@@ -421,21 +483,59 @@ namespace Lucee
           gstIdx[0] = ix;
           gstIdx[1] = iy;
           gstIdx[2] = idx[2]+1;
+
+          // Project cutoff velocities if cell is on a boundary
+          bool reflectionValid = true;
+          for (int configNode = 0; configNode < nlocal2d; configNode++)
+          {
+            if ( phiInPtr[ upperEdgeNodeNums[configNode] ]*speciesCharge > 0.0 )
+            {
+              // Stop projection of cutoff velocities and use nodal values
+              reflectionValid = false;
+              break;
+            }
+            else
+              phiAtNodes(configNode) = phiInPtr[ upperEdgeNodeNums[configNode] ];
+          }
+
+          if (reflectionValid == true)
+          {
+            Eigen::VectorXd phiAtQuad = interpMatrix2d*phiAtNodes;
+            for (int nodeIndex = 0; nodeIndex < nlocal2d; nodeIndex++)
+            {
+              double integralResult = 0.0;
+              for (int quadIndex = 0; quadIndex < interpMatrix2d.rows(); quadIndex++)
+              {
+                // Calculate integral over 2d cell of 2d basis function times sqrt(-2*q*phi/m)
+                integralResult += gaussWeights2d[quadIndex]*interpMatrix2d(quadIndex, nodeIndex)*
+                  std::sqrt(-2*phiAtQuad(quadIndex)*speciesCharge/speciesMass);
+              }
+              rhsVector(nodeIndex) = integralResult;
+            }
+            cutoffV = massMatrix2dInv*rhsVector;
+          }
+          else
+          {
+            // Set cutoffV in nodal manner. Will be NaN if argument of sqrt is negative, but should be dealt
+            // with in if statement at beginning of upcoming for-loop
+            for (int nodeIndex = 0; nodeIndex < nlocal2d; nodeIndex++)
+              cutoffV(nodeIndex) = std::sqrt(-2*phiInPtr[ upperEdgeNodeNums[nodeIndex] ]*
+                  speciesCharge/speciesMass);
+          }
+
           // Loop over all configuration space nodes contained in this element
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = upperEdgeNodeNums[configNode];
 
             // Do not do anything at this node if phi*charge > 0
-            if ( phiInPtr[configNodeIndex]*speciesCharge >= 0.0 )
+            if ( phiInPtr[configNodeIndex]*speciesCharge > 0.0 ||
+                (phiInPtr[configNodeIndex] == 0 && reflectionValid == false))
               continue;
 
-            // Cutoff velocity at this node
-            double cutoffV = std::sqrt(-2*phiInPtr[configNodeIndex]*speciesCharge/speciesMass);
             bool foundCutoffCell = false;
-
             // Check to see if cutoff v is above vmax
-            if (cutoffV > 0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+            if (cutoffV(configNode) > 0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
             {
               // Reflect everything
               foundCutoffCell = true;
@@ -459,7 +559,7 @@ namespace Lucee
                 {
                   std::cout << "(U) Unable to find a match to cutoff velocity" << std::endl;
                   std::cout << "charge = " << speciesCharge << std::endl;
-                  std::cout << "cutoffV = " << cutoffV << std::endl;
+                  std::cout << "cutoffV = " << cutoffV(configNode) << std::endl;
                   std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
                   std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
                 }
@@ -469,8 +569,8 @@ namespace Lucee
               if (foundCutoffCell == false)
               {
                 // Check if cutoffV falls in this cell
-                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV && 
-                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV)
+                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV(configNode) && 
+                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV(configNode))
                 {
                   foundCutoffCell = true;
 
@@ -501,7 +601,7 @@ namespace Lucee
                     continue;
 
                   // Then compute outward flux only above cutoff velocity
-                  double a = cutoffV - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
+                  double a = cutoffV(configNode) - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
                   double b = 0.5*grid.getDx(3);
                   // Integration weight scale for this modified integral
                   double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
@@ -616,7 +716,7 @@ namespace Lucee
   }
 
   void
-  BiasedSheath5DUpdater::declareTypes()
+  LAPDSheath5DUpdater::declareTypes()
   {
     // Potential (eV)
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
@@ -627,7 +727,7 @@ namespace Lucee
   }
 
   void
-  BiasedSheath5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  LAPDSheath5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
@@ -640,7 +740,7 @@ namespace Lucee
   }
 
   bool
-  BiasedSheath5DUpdater::sameConfigCoords(int srcIndex, int tarIndex, double dxMin,
+  LAPDSheath5DUpdater::sameConfigCoords(int srcIndex, int tarIndex, double dxMin,
     const Eigen::MatrixXd& nodeList)
   {
     for (int d = 0; d < 3; d++)

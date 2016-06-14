@@ -149,9 +149,9 @@ namespace Lucee
       double originalNum = distfVector.dot(densityMatrix*jacobianVector);
       if (originalNum < 0.0)
       {
-        std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
-          << ") entire cell negative." << std::endl;
-        std::cout << distfVector << std::endl;
+        std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4]
+          << ") entire cell negative (density = " << originalNum << ")" << std::endl;
+        //std::cout << distfVector << std::endl;
         return Lucee::UpdaterStatus(false, 0.0);
       }
       else if (originalNum == 0.0)
