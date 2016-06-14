@@ -50,6 +50,7 @@
 #include <LcKineticHeatFluxAtEdge3DUpdater.h>
 #include <LcKineticHeatFluxAtEdgeUpdater.h>
 #include <LcKineticTotalEnergyUpdater.h>
+#include <LcLAPDSheath5DUpdater.h>
 #include <LcLagrangeTensorElement.h>
 #include <LcLenardBernsteinDiff3DUpdater.h>
 #include <LcLenardBernsteinDiff5DUpdater.h>
@@ -179,6 +180,7 @@ namespace Lucee
       .append<Lucee::KineticHeatFluxAtEdgeUpdater>()
       .append<Lucee::KineticHeatFluxAtEdge3DUpdater>()
       .append<Lucee::KineticTotalEnergyUpdater>()
+      .append<Lucee::LAPDSheath5DUpdater>()
       .append<Lucee::LogicalSheath5DUpdater>()
       .append<Lucee::MHDHamiltonianUpdater>()
       .append<Lucee::MomentsAtEdgesUpdater>()

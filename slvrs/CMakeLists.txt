@@ -67,6 +67,7 @@ set(lcslvrs_SOURCES
   LcKineticHeatFluxAtEdge3DUpdater.cpp
   LcKineticHeatFluxAtEdgeUpdater.cpp
   LcKineticTotalEnergyUpdater.cpp
+  LcLAPDSheath5DUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiff3DUpdater.cpp

@@ -70,6 +70,7 @@ namespace Lucee
     // Output: Next guess increments for SOLMaxwellianAtNodeCalc
     Lucee::Field<3, double>& mom1dir3Out = this->getOut<Lucee::Field<3, double> >(0);
     Lucee::Field<3, double>& temperatureOut = this->getOut<Lucee::Field<3, double> >(1);
+    Lucee::Field<3, double>& slopeOut = this->getOut<Lucee::Field<3, double> >(2);
 
     Lucee::ConstFieldPtr<double> mom1dir3TargetPtr = mom1dir3TargetIn.createConstPtr();
     Lucee::ConstFieldPtr<double> temperatureTargetPtr = temperatureTargetIn.createConstPtr();
@@ -92,6 +93,7 @@ namespace Lucee
     // Output to be used in next maxwellian calculation
     Lucee::FieldPtr<double> mom1dir3Ptr = mom1dir3Out.createPtr();
     Lucee::FieldPtr<double> temperaturePtr = temperatureOut.createPtr();
+    Lucee::FieldPtr<double> slopePtr = slopeOut.createPtr();
 
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
 
@@ -107,6 +109,7 @@ namespace Lucee
     Eigen::Matrix2d jacobianMatrix;
     Eigen::Vector2d fVec;
     Eigen::Vector2d solutionVec;
+    Eigen::Vector2d gradVec;
 
     // Loop over local region
     while (seq.step())
@@ -128,6 +131,7 @@ namespace Lucee
       // Set output fields to right location
       mom1dir3Out.setPtr(mom1dir3Ptr, idx);
       temperatureOut.setPtr(temperaturePtr, idx);
+      slopeOut.setPtr(slopePtr, idx);
 
       for (int i = 0; i < nlocal3d; i++)
       {
@@ -145,15 +149,20 @@ namespace Lucee
         solutionVec = jacobianMatrix.colPivHouseholderQr().solve(fVec);
 
         // Set next guess values
-        mom1dir3Ptr[i] = mom1dir3InputPtr[i] + solutionVec(0);
+        mom1dir3Ptr[i] = solutionVec(0);
         // Limit next iteration guess on mom1dir3Ptr[i] to 5x the magnitude of mom1dir3Ptr
         //if (std::fabs(solutionVec(0)) > 5*std::fabs(mom1dir3InputPtr[i]))
         //  mom1dir3Ptr[i] = mom1dir3InputPtr[i] + 5*solutionVec(0)/std::fabs(solutionVec(0))*mom1dir3InputPtr[i];
 
-        temperaturePtr[i] = temperatureInputPtr[i] + solutionVec(1);
+        temperaturePtr[i] = solutionVec(1);
         // If next temperature guess is to be negative, just take half the value
         //if (temperaturePtr[i] <= 0.0)
         //  temperaturePtr[i] = temperatureInputPtr[i]*0.5;
+        
+        // Compute gradient of 0.5*fVec.dot(fVec)
+        gradVec = jacobianMatrix.transpose()*fVec;
+        // Store "slope" variable gradfVec dot p
+        slopePtr[i] = gradVec.dot(solutionVec);
 
         // Check convergence in increment size
         if (std::fabs(solutionVec(0)) > std::fabs(mom1dir3InputPtr[i]*rootTol))
@@ -218,8 +227,10 @@ namespace Lucee
     // input mom1dir3 for this step to compute numerical mawellian
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // next guess increment <v> = u*n
-    this->appendOutVarType(typeid(Lucee::Field<5, double>));
+    this->appendOutVarType(typeid(Lucee::Field<3, double>));
     // next guess increment temperature (in joules)
-    this->appendOutVarType(typeid(Lucee::Field<5, double>));
+    this->appendOutVarType(typeid(Lucee::Field<3, double>));
+    // slope variable
+    this->appendOutVarType(typeid(Lucee::Field<3, double>));
   }
 }
