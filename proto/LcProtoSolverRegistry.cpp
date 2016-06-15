@@ -71,6 +71,7 @@
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
+#include <LcRectFourthOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLSetPotentialAtBoundary.h>
@@ -265,6 +266,10 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+
+      .append<Lucee::RectFourthOrderCentralDiffUpdater<1> >()
+      .append<Lucee::RectFourthOrderCentralDiffUpdater<2> >()
+      .append<Lucee::RectFourthOrderCentralDiffUpdater<3> >()
 
       .append<Lucee::NodalDgConstGravitySrcUpdater<1> >()
       .append<Lucee::NodalDgConstGravitySrcUpdater<2> >()

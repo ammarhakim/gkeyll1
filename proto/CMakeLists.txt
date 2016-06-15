@@ -89,6 +89,7 @@ set (proto_SOURCES
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
+  LcRectFourthOrderCentralDiffUpdater.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
