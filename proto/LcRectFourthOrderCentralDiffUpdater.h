@@ -67,7 +67,7 @@ namespace Lucee
  * @param inFld Field to compute CD of.
  * @param cdFld Difference output.
  */
-      void computeCentralDifferenceFourth1D(const Lucee::Field<NDIM, double>& inFld, 
+      void computeCentralDifference1D(const Lucee::Field<NDIM, double>& inFld, 
         Lucee::Field<NDIM, double>& cdFld);
 
 /**
@@ -76,7 +76,7 @@ namespace Lucee
  * @param inFld Field to compute CD of.
  * @param cdFld Difference output.
  */
-      void computeCentralDifferenceFourth2D(const Lucee::Field<NDIM, double>& inFld, 
+      void computeCentralDifference2D(const Lucee::Field<NDIM, double>& inFld, 
         Lucee::Field<NDIM, double>& cdFld);
 
 /**
@@ -85,7 +85,7 @@ namespace Lucee
  * @param inFld Field to compute CD of.
  * @param cdFld Difference output.
  */
-      void computeCentralDifferenceFourth3D(const Lucee::Field<NDIM, double>& inFld, 
+      void computeCentralDifference3D(const Lucee::Field<NDIM, double>& inFld, 
         Lucee::Field<NDIM, double>& cdFld);
 
 /** Cell spacing */
