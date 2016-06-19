@@ -79,6 +79,9 @@ endif (GSL_FOUND)
 
 # find FFTW3
 find_package(SciFftw3)
+if (FFTW3_FOUND)
+  include_directories(${Fftw3_INCLUDE_DIRS})
+endif (FFTW3_FOUND)
 
 # find Boost
 find_package(SciBoost REQUIRED)
