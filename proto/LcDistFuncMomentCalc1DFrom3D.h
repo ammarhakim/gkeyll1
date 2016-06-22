@@ -38,6 +38,8 @@ namespace Lucee
 
 /** Create new modal DG solver in 1D */
       DistFuncMomentCalc1DFrom3D();
+/**  Destructor */
+      virtual ~DistFuncMomentCalc1DFrom3D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -86,6 +88,8 @@ namespace Lucee
       Eigen::MatrixXd mom1Matrix;
 /** Second moment matrix */
       Eigen::MatrixXd mom2Matrix;
+/** Space to store moment data for on a processor */
+      Lucee::Field<1, double> *momentLocal;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

@@ -1,12 +1,11 @@
 /**
- * @file	LcDistFuncMomentCalc2D.h
+ * @file	LcProductProjectionCalc1DFrom3D.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function.
- * Currently only works for 0th moment
+ * @brief	Projects the product of g*f onto a 1d field, where g and f are 3d fields and g is a 1d field
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_2D_H
+#ifndef LC_PRODUCT_PROJECTION_CALC_1D_FROM_3D_H
+#define LC_PRODUCT_PROJECTION_CALC_1D_FROM_3D_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -15,9 +14,9 @@
 
 // lucee includes
 #include <LcField.h>
+#include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
 
 // eigen includes
 #include <Eigen/LU>
@@ -25,22 +24,18 @@
 namespace Lucee
 {
 /**
- * Updater to compute moments of distribution function f(x,v)
+ * Applies particle refection BCs to distribution function
  */
-  class DistFuncMomentCalc2D : public Lucee::UpdaterIfc
+  class ProductProjectionCalc1DFrom3D : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC4 = Lucee::CDIM<4>::N;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC2 = Lucee::CDIM<2>::N;
 
-/** Create new modal DG solver in 4D */
-      DistFuncMomentCalc2D();
+/** Create new projection updater */
+      ProductProjectionCalc1DFrom3D();
 /**  Destructor */
-      virtual ~DistFuncMomentCalc2D();
+      virtual ~ProductProjectionCalc1DFrom3D();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -75,20 +70,30 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
-/** Pointer to 2D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Moment to compute */
-      unsigned calcMom;
+/** Pointer to phase space basis functions to use */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Pointer to configuration space basis functions */
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis1d;
+/** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
+      double scaleFactor;
 /** Space to store moment data for on a processor */
-      Lucee::Field<2, double> *momentLocal;
-/** Zeroth moment matrix */
-      Eigen::MatrixXd mom0Matrix;
-/** First moment matrix */
-      Eigen::MatrixXd mom1Matrix;
-/** Second moment matrix */
-      Eigen::MatrixXd mom2Matrix;
+      Lucee::Field<1, double> *resultLocal;
+/**
+ * Interpolation matrix for 3d quadrature
+ */
+      Eigen::MatrixXd interpMatrix3d;
+/**
+ * Interpolation matrix for 1d quadrature
+ */
+      Eigen::MatrixXd interpMatrix1d;
+/**
+ * Inverse of 1d mass matrix
+ */
+      Eigen::MatrixXd massMatrixInv1d;
+/**
+ * Gaussian quadrature weights for 3d integration
+ */
+      std::vector<double> gaussWeights3d;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -98,4 +103,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_2D_H
+#endif // LC_PRODUCT_PROJECTION_CALC_1D_FROM_3D_H

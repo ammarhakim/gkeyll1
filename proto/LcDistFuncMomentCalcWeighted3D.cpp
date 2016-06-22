@@ -198,7 +198,7 @@ namespace Lucee
       int upperConf[3];
       int lg[3];
       int ug[3];
-      for (int i=0; i< 3; ++i)
+      for (int i=0; i < 3; ++i)
       {
         lowerConf[i] = localRgn.getLower(i);
         upperConf[i] = localRgn.getUpper(i);

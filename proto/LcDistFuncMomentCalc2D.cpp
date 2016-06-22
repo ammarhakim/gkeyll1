@@ -29,6 +29,12 @@ namespace Lucee
   DistFuncMomentCalc2D::DistFuncMomentCalc2D()
     : Lucee::UpdaterIfc()
   {
+    momentLocal = 0;
+  }
+
+  DistFuncMomentCalc2D::~DistFuncMomentCalc2D()
+  {
+    delete momentLocal;
   }
   
   void
@@ -51,16 +57,16 @@ namespace Lucee
       throw Lucee::Except(
         "DistFuncMomentCalc2D::readInput: Must specify 2D element to use using 'basis1d'");
 
-    // get moment to compute
+    // get momentGlobal to compute
     if (tbl.hasNumber("moment"))
     calcMom = (unsigned) tbl.getNumber("moment");
     else
       throw Lucee::Except(
-        "DistFuncMomentCalc2D::readInput: Must specify moment using 'moment'");
+        "DistFuncMomentCalc2D::readInput: Must specify momentGlobal using 'moment'");
 
-    if (calcMom > 3)
+    if (calcMom > 0)
     {
-      Lucee::Except lce("DistFuncMomentCalc2D::readInput: Only 'moment' 0, 1 2, or 3 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalc2D::readInput: Only 'moment' 0 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }
@@ -153,18 +159,43 @@ namespace Lucee
     // get input field (4d)
     const Lucee::Field<4, double>& distF = this->getInp<Lucee::Field<4, double> >(0);
     // get output field (2D)
-    Lucee::Field<2, double>& moment = this->getOut<Lucee::Field<2, double> >(0);
-
-  // local region to update (This is the 4D region. The 2D region is
-  // assumed to have the same cell layout as the X-direction of the 4D region)
-    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
+    Lucee::Field<2, double>& momentGlobal = this->getOut<Lucee::Field<2, double> >(0);
 
     // clear out contents of output field
-    moment = 0.0;
+    if (!momentLocal)
+    {
+      // allocate memory for local moment calculation if not already
+      // done: we need to ensure space is also allocated for the
+      // ghost-cells as otherwise there is a size mis-match in the
+      // allReduce call to sync across velocity space
+      Lucee::Region<2, int> localRgn = momentGlobal.getRegion();
+      Lucee::Region<2, int> localExtRgn = momentGlobal.getExtRegion();
+      
+      int lowerConf[2];
+      int upperConf[2];
+      int lg[2];
+      int ug[2];
+      for (int i=0; i< 2; i++)
+      {
+        lowerConf[i] = localRgn.getLower(i);
+        upperConf[i] = localRgn.getUpper(i);
+        lg[i] = localRgn.getLower(i) - localExtRgn.getLower(i);
+        ug[i] = localExtRgn.getUpper(i) - localRgn.getUpper(i);
+      }
+      Lucee::Region<2, int> rgnConf(lowerConf, upperConf);
+      momentLocal = new Lucee::Field<2, double>(rgnConf, momentGlobal.getNumComponents(), lg, ug);
+    }
+
+    // clear out contents of output field
+    (*momentLocal) = 0.0;
+
+    // local region to update (This is the 4D region. The 2D region is
+    // assumed to have the same cell layout as the X-direction of the 4D region)
+    Lucee::Region<4, int> localRgn = grid.getLocalRegion();
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
-    Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+    Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
 
     //double dv = grid.getDx(1);
     //double dv2 = 0.5*dv;
@@ -174,6 +205,8 @@ namespace Lucee
     int idx[4];
     double xc[4];
     Lucee::RowMajorSequencer<4> seq(localRgn);
+
+    int localPositionCells = momentGlobal.getExtRegion().getVolume();
     unsigned nlocal2d = nodalBasis2d->getNumNodes();
     unsigned nlocal4d = nodalBasis4d->getNumNodes();
 
@@ -184,7 +217,7 @@ namespace Lucee
       grid.setIndex(idx);
       //grid.getCentroid(xc);
 
-      moment.setPtr(momentPtr, idx[0], idx[1]);
+      momentLocal->setPtr(momentPtr, idx[0], idx[1]);
       distF.setPtr(distFPtr, idx);
 
       Eigen::VectorXd distfVec(nlocal4d);
@@ -194,11 +227,21 @@ namespace Lucee
       // Accumulate contribution to moment from this cell
       Eigen::VectorXd resultVector(nlocal2d);
       if (calcMom == 0)
-        resultVector = mom0Matrix*distfVec;
+        resultVector.noalias() = mom0Matrix*distfVec;
 
       for (int i = 0; i < nlocal2d; i++)
         momentPtr[i] = momentPtr[i] + resultVector(i);
     }
+    // Above loop computes moments on local phase-space domain. We need to
+    // sum across velocity space to get total momentLocal on configuration
+    // space.
+    
+    // we need to get moment communicator of field as updater's moment
+    // communicator is same as its grid's moment communicator. In this
+    // case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentGlobal.getMomComm();
+    unsigned xsize = localPositionCells*nlocal2d; // amount to communicate
+    momComm->allreduce(xsize, &momentLocal->first(), &momentGlobal.first(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }
@@ -208,21 +251,6 @@ namespace Lucee
   {
     this->appendInpVarType(typeid(Lucee::Field<4, double>));
     this->appendOutVarType(typeid(Lucee::Field<2, double>));
-  }
-
-  void 
-  DistFuncMomentCalc2D::matVec(double m, const Lucee::Matrix<double>& mat,
-    const double* vec, double v, double *out)
-  {
-    double tv;
-    unsigned rows = mat.numRows(), cols = mat.numColumns();
-    for (unsigned i=0; i<rows; ++i)
-    {
-      tv = 0.0;
-      for (unsigned j=0; j<cols; ++j)
-        tv += mat(i,j)*vec[j];
-      out[i] = m*tv + v*out[i];
-    }
   }
 
   void
