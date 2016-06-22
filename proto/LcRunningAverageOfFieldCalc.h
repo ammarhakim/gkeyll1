@@ -1,12 +1,11 @@
 /**
- * @file	LcASquaredProjectionUpdater.h
+ * @file	LcRunningAverageOfFieldCalc.h
  *
- * @brief	Updater to project a product of two fields onto the original basis set using quadrature
- * Inputs and outputs assume DG fields, not CG fields.
+ * @brief	Using the past N inputs, computes average of field at each node
  */
 
-#ifndef LC_A_SQUARED_PROJECTION_UPDATER_H
-#define LC_A_SQUARED_PROJECTION_UPDATER_H
+#ifndef LC_RUNNING_AVERAGE_OF_FIELD_CALC_H
+#define LC_RUNNING_AVERAGE_OF_FIELD_CALC_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,23 +13,27 @@
 #endif
 
 // lucee includes
-#include <LcNodalFiniteElementIfc.h>
+//#include <LcDynVector.h>
+#include <LcField.h>
 #include <LcUpdaterIfc.h>
 
-// eigen includes
-#include <Eigen/LU>
+// std includes
+#include <list>
 
 namespace Lucee
 {
+/**
+ * Updater to record field in a cell
+ */
   template <unsigned NDIM>
-  class ASquaredProjectionUpdater : public Lucee::UpdaterIfc
+  class RunningAverageOfFieldCalc : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new nodal DG solver */
-      ASquaredProjectionUpdater();
+/** Create new modal DG solver in 1D */
+      RunningAverageOfFieldCalc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -65,21 +68,11 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
-/** Interpolation matrix */
-      Eigen::MatrixXd interpMatrix;
-/** Gaussian quadrature weights */
-      std::vector<double> gaussWeights;
-/** Mass matrix inverse */
-      Eigen::MatrixXd massMatrixInv;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/** Size of history to keep at every node in local region */
+      int sampleSize;
+/** Local record */
+      std::vector<std::list<std::vector<double> > > localRecord;
   };
 }
 
-#endif // LC_A_SQUARED_PROJECTION_UPDATER_H
+#endif // LC_RUNNING_AVERAGE_OF_FIELD_CALC_H

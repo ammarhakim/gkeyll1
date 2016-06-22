@@ -36,7 +36,7 @@ namespace Lucee
 /** Number of components for coordinate arrays etc. */
       static const unsigned NC3 = Lucee::CDIM<3>::N;
 
-/** Create new modal DG solver in 1D */
+/** Create new modal DG solver in 5D */
       DistFuncMomentCalcWeighted3D();
 /**  Destructor */
       virtual ~DistFuncMomentCalcWeighted3D();

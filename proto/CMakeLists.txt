@@ -71,9 +71,11 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcPoissonBracketAdvectionEquation1D.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketAdvectionEquation5D.cpp
   LcPoissonBracketCanonical2D.cpp
+  LcPoissonBracketCanonical3D.cpp
   LcPoissonBracketCanonical4D.cpp
   LcPoissonBracketEquation.cpp
   LcPoissonBracketEquationRegistry.cpp
@@ -88,8 +90,10 @@ set (proto_SOURCES
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
+  LcRecoveryDG1DUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRunningAverageOfFieldCalc.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
@@ -101,6 +105,7 @@ set (proto_SOURCES
   LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp
   LcZonalAverageCalc3D.cpp
+  LcZonalVelocity1DUpdater.cpp
 )
 
 if (FFTW3_FOUND)

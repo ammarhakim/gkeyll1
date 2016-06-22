@@ -1,12 +1,12 @@
 /**
- * @file	LcDistFuncMomentCalc2D.h
+ * @file	LcRecoveryDG1DUpdater.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function.
- * Currently only works for 0th moment
+ * @brief	Updater to perform recovery DG calculation for 1d problems.
+ * Currently supports calculation of second and third derivatives of input field
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_2D_H
+#ifndef LC_RECOVERY_DG_1D_UPDATER_H
+#define LC_RECOVERY_DG_1D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,10 +14,12 @@
 #endif
 
 // lucee includes
-#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
+#include <LcStructGridField.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
+
+// std includes
+#include <vector>
 
 // eigen includes
 #include <Eigen/LU>
@@ -25,22 +27,24 @@
 namespace Lucee
 {
 /**
- * Updater to compute moments of distribution function f(x,v)
+ * Updater to evaluate the diffusion term in the Lenard-Bernstein
+ * collision operator.
  */
-  class DistFuncMomentCalc2D : public Lucee::UpdaterIfc
+  class RecoveryDG1DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC4 = Lucee::CDIM<4>::N;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC2 = Lucee::CDIM<2>::N;
 
-/** Create new modal DG solver in 4D */
-      DistFuncMomentCalc2D();
-/**  Destructor */
-      virtual ~DistFuncMomentCalc2D();
+/**
+ * Create new updater.
+ */
+      RecoveryDG1DUpdater();
+
+/**
+ * Destroy updater.
+ */
+      ~RecoveryDG1DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -75,20 +79,24 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
-/** Pointer to 2D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Moment to compute */
-      unsigned calcMom;
-/** Space to store moment data for on a processor */
-      Lucee::Field<2, double> *momentLocal;
-/** Zeroth moment matrix */
-      Eigen::MatrixXd mom0Matrix;
-/** First moment matrix */
-      Eigen::MatrixXd mom1Matrix;
-/** Second moment matrix */
-      Eigen::MatrixXd mom2Matrix;
+/** CFL number */
+      double cfl;
+/** Flag to indicate if to compute only increments */
+      bool onlyIncrement;
+/** if false, we will ignore cfl checks */
+      bool checkTimeStepSize;
+/** Basis function order */
+      int polyOrder;
+/** Order of derivative to calculate */
+      int derivOrder;
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
+/** Eigen matrices for recovery calculation */
+      Eigen::MatrixXd lowerMat;
+      Eigen::MatrixXd upperMat;
+      Eigen::MatrixXd selfCenter;
+      Eigen::MatrixXd lowerCenter;
+      Eigen::MatrixXd upperCenter;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -98,4 +106,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_2D_H
+#endif // LC_RECOVERY_DG_1D_UPDATER_H

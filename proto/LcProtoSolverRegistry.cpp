@@ -70,9 +70,11 @@
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
+#include <LcRecoveryDG1DUpdater.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
+#include <LcRunningAverageOfFieldCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLSetPotentialAtBoundary.h>
 #include <LcSOLTotalEnergyCalc.h>
@@ -85,6 +87,7 @@
 #include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcZonalAverageCalc3D.h>
+#include <LcZonalVelocity1DUpdater.h>
 
 // loki includes
 #include <loki/Singleton.h>
@@ -271,6 +274,10 @@ namespace Lucee
       .append<Lucee::RectFourthOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectFourthOrderCentralDiffUpdater<3> >()
 
+      .append<Lucee::RecoveryDG1DUpdater>()
+
+      .append<Lucee::RunningAverageOfFieldCalc<3> >()
+
       .append<Lucee::NodalDgConstGravitySrcUpdater<1> >()
       .append<Lucee::NodalDgConstGravitySrcUpdater<2> >()
       .append<Lucee::NodalDgConstGravitySrcUpdater<3> >()
@@ -305,6 +312,7 @@ namespace Lucee
       .append<Lucee::SetSingleNodeToOneUpdater<5> >()
 
       .append<Lucee::ZonalAverageCalc3D>()
+      .append<Lucee::ZonalVelocity1DUpdater>()
       ;
 
 #ifdef HAVE_PETSC
