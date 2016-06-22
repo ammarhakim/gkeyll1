@@ -39,6 +39,7 @@ namespace Lucee
 
   static const int COL_PIV_HOUSEHOLDER_QR = 0;
   static const int PARTIAL_PIV_LU = 1;
+  static const int ANALYTIC = 2;
 
 // set ids for module system
   template <> const char *ImplicitTenMomentSrcUpdater<1>::id = "ImplicitTenMomentSrc1D";
@@ -82,6 +83,8 @@ namespace Lucee
         linSolType = PARTIAL_PIV_LU;
       else if (tbl.getString("linearSolver") == "colPivHouseholderQr")
         linSolType = COL_PIV_HOUSEHOLDER_QR;
+      else if (tbl.getString("linearSolver") == "analytic")
+        linSolType = ANALYTIC;
       else
       {
         Lucee::Except lce("ImplicitTenMomentSrcUpdater::readInput: 'linearSolver' must be ");
@@ -216,7 +219,8 @@ namespace Lucee
         sol = lhs.colPivHouseholderQr().solve(rhs);
       else if (linSolType == PARTIAL_PIV_LU)
         sol = lhs.partialPivLu().solve(rhs);
-      else
+      else if (linSolType == ANALYTIC)
+        sol = lhs.partialPivLu().solve(rhs); // placeholder
       { /* can not happen */ }
 
 // compute increments from pressure tensor terms
@@ -224,6 +228,7 @@ namespace Lucee
       {
         fluids[n]->setPtr(fPtr, idx);
 
+        if (linSolType != ANALYTIC) {
 // assemble LHS terms
         prLhs(0,0) = 1;
         prLhs(0,1) = -2*dt1*qbym[n]*emPtr[BZ];
@@ -261,7 +266,7 @@ namespace Lucee
         prLhs(5,3) = 0;
         prLhs(5,4) = 2*dt1*qbym[n]*emPtr[BX];
         prLhs(5,5) = 1;
-
+        }
 // RHS matrix
         prRhs[0] = fPtr[P11] - fPtr[RHOUX]*fPtr[RHOUX]/fPtr[RHO];
         prRhs[1] = fPtr[P12] - fPtr[RHOUX]*fPtr[RHOUY]/fPtr[RHO];
@@ -276,6 +281,32 @@ namespace Lucee
           prSol = prLhs.colPivHouseholderQr().solve(prRhs);
         else if (linSolType == PARTIAL_PIV_LU)
           prSol = prLhs.partialPivLu().solve(prRhs);
+        else if (linSolType == ANALYTIC) {
+          // useful variables
+          double dtsq = dt1*dt1;
+          double dt3 = dtsq*dt1;
+          double dt4 = dt3*dt1;
+          double qb2 = qbym[n]*qbym[n];
+          double qb3 = qbym[n]*qb2;
+          double qb4 = qbym[n]*qb3;
+          double Bx2 = emPtr[BX]*emPtr[BX];
+          double Bx3 = emPtr[BX]*Bx2;
+          double Bx4 = emPtr[BX]*Bx3;
+          double By2 = emPtr[BY]*emPtr[BY];
+          double By3 = emPtr[BY]*By2;
+          double By4 = emPtr[BY]*By3;
+          double Bz2 = emPtr[BZ]*emPtr[BZ];
+          double Bz3 = emPtr[BZ]*Bz2;
+          double Bz4 = emPtr[BZ]*Bz3;
+          double d = 1 + 5*(Bx2 + By2 + Bz2)*dtsq*qb2 + 4*(Bx2 + By2 + Bz2)*(Bx2 + By2 + Bz2)*dt4*qb4;
+          prSol = Eigen::VectorXd(6);
+          prSol[0] = (prRhs[0] + 2*dt1*(emPtr[BZ]*prRhs[1] - emPtr[BY]*prRhs[2])*qbym[n] + dtsq*(5*Bx2*prRhs[0] + 2*emPtr[BX]*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + Bz2*(3*prRhs[0] + 2*prRhs[3]) - 4*emPtr[BY]*emPtr[BZ]*prRhs[4] + By2*(3*prRhs[0] + 2*prRhs[5]))*qb2 + 2*dt3*(4*Bx2*(emPtr[BZ]*prRhs[1] - emPtr[BY]*prRhs[2]) - (By2 + Bz2)*(-(emPtr[BZ]*prRhs[1]) + emPtr[BY]*prRhs[2]) - 3*emPtr[BX]*(By2*prRhs[4] - Bz2*prRhs[4] + emPtr[BY]*emPtr[BZ]*(-prRhs[3] + prRhs[5])))*qb3 + 2*dt4*(2*Bx4*prRhs[0] + 4*Bx3*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) - 2*emPtr[BX]*(By2 + Bz2)*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + (By2 + Bz2)*(Bz2*(prRhs[0] + prRhs[3]) - 2*emPtr[BY]*emPtr[BZ]*prRhs[4] + By2*(prRhs[0] + prRhs[5])) + Bx2*(4*emPtr[BY]*emPtr[BZ]*prRhs[4] + By2*(3*prRhs[3] + prRhs[5]) + Bz2*(prRhs[3] + 3*prRhs[5])))*qb4)/d;
+          prSol[1] =  (prRhs[1] + dt1*(emPtr[BX]*prRhs[2] + emPtr[BZ]*(-prRhs[0] + prRhs[3]) - emPtr[BY]*prRhs[4])*qbym[n] + dtsq*(4*Bx2*prRhs[1] + 4*By2*prRhs[1] + Bz2*prRhs[1] + 3*emPtr[BY]*emPtr[BZ]*prRhs[2] + emPtr[BX]*(3*emPtr[BZ]*prRhs[4] + emPtr[BY]*(prRhs[0] + prRhs[3] - 2*prRhs[5])))*qb2 + dt3*(4*Bx3*prRhs[2] - 2*emPtr[BX]*(By2 + Bz2)*prRhs[2] + Bz3*(-prRhs[0] + prRhs[3]) - 4*By3*prRhs[4] + 2*emPtr[BY]*Bz2*prRhs[4] - By2*emPtr[BZ]*(prRhs[0] - 4*prRhs[3] + 3*prRhs[5]) + Bx2*(2*emPtr[BY]*prRhs[4] + emPtr[BZ]*(-4*prRhs[0] + prRhs[3] + 3*prRhs[5])))*qb3 + 2*emPtr[BX]*emPtr[BY]*dt4*(6*emPtr[BX]*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + 6*emPtr[BY]*emPtr[BZ]*prRhs[4] - Bz2*(prRhs[0] + prRhs[3] - 2*prRhs[5]) + Bx2*(2*prRhs[0] - prRhs[3] - prRhs[5]) - By2*(prRhs[0] - 2*prRhs[3] + prRhs[5]))*qb4)/d;
+          prSol[2] =  (prRhs[2] + dt1*(-(emPtr[BX]*prRhs[1]) + emPtr[BZ]*prRhs[4] + emPtr[BY]*(prRhs[0] - prRhs[5]))*qbym[n] + dtsq*(3*emPtr[BY]*emPtr[BZ]*prRhs[1] + 4*Bx2*prRhs[2] + By2*prRhs[2] + 4*Bz2*prRhs[2] + emPtr[BX]*(3*emPtr[BY]*prRhs[4] + emPtr[BZ]*(prRhs[0] - 2*prRhs[3] + prRhs[5])))*qb2 + dt3*(-4*Bx3*prRhs[1] + 2*emPtr[BX]*(By2 + Bz2)*prRhs[1] - 2*By2*emPtr[BZ]*prRhs[4] + 4*Bz3*prRhs[4] + emPtr[BY]*Bz2*(prRhs[0] + 3*prRhs[3] - 4*prRhs[5]) + By3*(prRhs[0] - prRhs[5]) - Bx2*(2*emPtr[BZ]*prRhs[4] + emPtr[BY]*(-4*prRhs[0] + 3*prRhs[3] + prRhs[5])))*qb3 + 2*emPtr[BX]*emPtr[BZ]*dt4*(6*emPtr[BX]*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + 6*emPtr[BY]*emPtr[BZ]*prRhs[4] - Bz2*(prRhs[0] + prRhs[3] - 2*prRhs[5]) + Bx2*(2*prRhs[0] - prRhs[3] - prRhs[5]) - By2*(prRhs[0] - 2*prRhs[3] + prRhs[5]))*qb4)/d;
+          prSol[3] =  (prRhs[3] + (-2*emPtr[BZ]*dt1*prRhs[1] + 2*emPtr[BX]*dt1*prRhs[4])*qbym[n] + dtsq*(2*emPtr[BX]*emPtr[BY]*prRhs[1] + 5*By2*prRhs[3] + Bz2*(2*prRhs[0] + 3*prRhs[3]) + emPtr[BZ]*(-4*emPtr[BX]*prRhs[2] + 2*emPtr[BY]*prRhs[4]) + Bx2*(3*prRhs[3] + 2*prRhs[5]))*qb2 + 2*dt3*(Bx2*(-(emPtr[BZ]*prRhs[1]) + 3*emPtr[BY]*prRhs[2]) - emPtr[BZ]*(4*By2*prRhs[1] + Bz2*prRhs[1] + 3*emPtr[BY]*emPtr[BZ]*prRhs[2]) + Bx3*prRhs[4] + emPtr[BX]*(4*By2*prRhs[4] + Bz2*prRhs[4] + 3*emPtr[BY]*emPtr[BZ]*(-prRhs[0] + prRhs[5])))*qb3 + 2*dt4*(-2*Bx3*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + 2*emPtr[BX]*(2*By2 - Bz2)*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + 2*By4*prRhs[3] + Bz4*(prRhs[0] + prRhs[3]) + 4*By3*emPtr[BZ]*prRhs[4] - 2*emPtr[BY]*Bz3*prRhs[4] + Bx4*(prRhs[3] + prRhs[5]) + By2*Bz2*(prRhs[0] + 3*prRhs[5]) + Bx2*(-2*emPtr[BY]*emPtr[BZ]*prRhs[4] + By2*(3*prRhs[0] + prRhs[5]) + Bz2*(prRhs[0] + 2*prRhs[3] + prRhs[5])))*qb4)/d;
+          prSol[4] =  (prRhs[4] + dt1*(emPtr[BY]*prRhs[1] - emPtr[BZ]*prRhs[2] + emPtr[BX]*(-prRhs[3] + prRhs[5]))*qbym[n] + dtsq*(3*emPtr[BX]*emPtr[BZ]*prRhs[1] + Bx2*prRhs[4] + 4*By2*prRhs[4] + 4*Bz2*prRhs[4] + emPtr[BY]*(3*emPtr[BX]*prRhs[2] + emPtr[BZ]*(-2*prRhs[0] + prRhs[3] + prRhs[5])))*qb2 + dt3*(4*By3*prRhs[1] - 2*emPtr[BY]*Bz2*prRhs[1] + 2*By2*emPtr[BZ]*prRhs[2] - 4*Bz3*prRhs[2] + Bx2*(-2*emPtr[BY]*prRhs[1] + 2*emPtr[BZ]*prRhs[2]) + Bx3*(-prRhs[3] + prRhs[5]) + emPtr[BX]*(-(Bz2*(3*prRhs[0] + prRhs[3] - 4*prRhs[5])) + By2*(3*prRhs[0] - 4*prRhs[3] + prRhs[5])))*qb3 - 2*emPtr[BY]*emPtr[BZ]*dt4*(-6*emPtr[BX]*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) - 6*emPtr[BY]*emPtr[BZ]*prRhs[4] + Bz2*(prRhs[0] + prRhs[3] - 2*prRhs[5]) + By2*(prRhs[0] - 2*prRhs[3] + prRhs[5]) + Bx2*(-2*prRhs[0] + prRhs[3] + prRhs[5]))*qb4)/d;
+          prSol[5] =  (prRhs[5] + 2*dt1*(emPtr[BY]*prRhs[2] - emPtr[BX]*prRhs[4])*qbym[n] + dtsq*(2*emPtr[BX]*emPtr[BZ]*prRhs[2] + emPtr[BY]*(-4*emPtr[BX]*prRhs[1] + 2*emPtr[BZ]*prRhs[4]) + 5*Bz2*prRhs[5] + By2*(2*prRhs[0] + 3*prRhs[5]) + Bx2*(2*prRhs[3] + 3*prRhs[5]))*qb2 - 2*dt3*(Bx2*(3*emPtr[BZ]*prRhs[1] - emPtr[BY]*prRhs[2]) - emPtr[BY]*(3*emPtr[BY]*emPtr[BZ]*prRhs[1] + By2*prRhs[2] + 4*Bz2*prRhs[2]) + Bx3*prRhs[4] + emPtr[BX]*(3*emPtr[BY]*emPtr[BZ]*(-prRhs[0] + prRhs[3]) + By2*prRhs[4] + 4*Bz2*prRhs[4]))*qb3 + 2*dt4*(-2*Bx3*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) - 2*emPtr[BX]*(By2 - 2*Bz2)*(emPtr[BY]*prRhs[1] + emPtr[BZ]*prRhs[2]) + By2*Bz2*(prRhs[0] + 3*prRhs[3]) - 2*By3*emPtr[BZ]*prRhs[4] + 4*emPtr[BY]*Bz3*prRhs[4] + 2*Bz4*prRhs[5] + By4*(prRhs[0] + prRhs[5]) + Bx4*(prRhs[3] + prRhs[5]) + Bx2*(Bz2*(3*prRhs[0] + prRhs[3]) - 2*emPtr[BY]*emPtr[BZ]*prRhs[4] + By2*(prRhs[0] + prRhs[3] + 2*prRhs[5])))*qb4)/d;
+        }
         else
         { /* can not happen */ }
 
