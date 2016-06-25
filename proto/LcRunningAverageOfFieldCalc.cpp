@@ -69,6 +69,7 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& fld = this->getInp<Lucee::Field<NDIM, double> >(0);
     // get output field
     Lucee::Field<NDIM, double>& fldAvg = this->getOut<Lucee::Field<NDIM, double> >(0);
+    Lucee::Field<NDIM, double>& fldVar = this->getOut<Lucee::Field<NDIM, double> >(1);
     
     // local region
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -77,14 +78,16 @@ namespace Lucee
     // pointers to input and output fields
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
     Lucee::FieldPtr<double> fldAvgPtr = fldAvg.createPtr();
+    Lucee::FieldPtr<double> fldVarPtr = fldVar.createPtr();
     
     Lucee::RowMajorSequencer<NDIM> localSeq = RowMajorSequencer<NDIM>(localRgn);
     Lucee::RowMajorIndexer<NDIM> localIdxr = RowMajorIndexer<NDIM>(localRgn);
 
     int nlocal = fld.getNumComponents();
 
-    // clear out output field
+    // clear out output fields
     fldAvg = 0.0;
+    fldVarPtr = 0.0;
 
     while (localSeq.step())
     {
@@ -93,6 +96,7 @@ namespace Lucee
       
       fld.setPtr(fldPtr, idx);
       fldAvg.setPtr(fldAvgPtr, idx);
+      fldVar.setPtr(fldVarPtr, idx);
 
       std::vector<double> cellValues(nlocal);
 
@@ -106,6 +110,8 @@ namespace Lucee
       if (localRecord[cellIndex].size() > sampleSize)
         localRecord[cellIndex].pop_front();
 
+      int recordSize = localRecord[cellIndex].size();
+
       // Iterate over list to perform a time average
       for (std::list<std::vector<double> >::const_iterator it = localRecord[cellIndex].begin(),
           end = localRecord[cellIndex].end();
@@ -113,12 +119,24 @@ namespace Lucee
       {
         // At this particular time sample, sum all nodes in this cell to output field
         for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
-          fldAvgPtr[nodeIndex] += (*it)[nodeIndex];
+          fldAvgPtr[nodeIndex] += (*it)[nodeIndex]/recordSize;
       }
 
-      // Divide fldAvgPtr by number of samples used in sum
+      // With average known in fldAvgPtr, compute variance of field
+      for (std::list<std::vector<double> >::const_iterator it = localRecord[cellIndex].begin(),
+          end = localRecord[cellIndex].end();
+          it != end; it++)
+      {
+        for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
+        {
+          double delta = (*it)[nodeIndex]-fldAvgPtr[nodeIndex];
+          fldVarPtr[nodeIndex] += delta*delta/recordSize;
+        }
+      }
+
+      // fldVarPtr is currently std deviation, convert to variance
       for (int nodeIndex = 0; nodeIndex < nlocal; nodeIndex++)
-        fldAvgPtr[nodeIndex] = fldAvgPtr[nodeIndex]/localRecord[cellIndex].size();
+        fldVarPtr[nodeIndex] = std::sqrt(fldVarPtr[nodeIndex]);
     }
 
     return Lucee::UpdaterStatus();
@@ -128,7 +146,11 @@ namespace Lucee
   void
   RunningAverageOfFieldCalc<NDIM>::declareTypes()
   {
+    // input field
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    // average field
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
+    // variance field
     this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
