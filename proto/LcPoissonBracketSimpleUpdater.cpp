@@ -477,25 +477,38 @@ namespace Lucee
     const Eigen::VectorXd& leftValsAtQuad, const Eigen::VectorXd& rightValsAtQuad,
     Eigen::VectorXd& numericalFluxAtQuad)
   {
+    double leftVal;
+    double rightVal;
     // Loop through all quadrature points
     for (int quadIndex = 0; quadIndex < numericalFluxAtQuad.size(); quadIndex++)
     {
+      //set distribution function at quad to 0 if value is negative
+      if (leftValsAtQuad(quadIndex) < 0.0)
+        leftVal = 0.0;
+      else
+        leftVal = leftValsAtQuad(quadIndex);
+
+      if (rightValsAtQuad(quadIndex) < 0.0)
+        rightVal = 0.0;
+      else
+        rightVal = rightValsAtQuad(quadIndex);
+      
       if (fluxType == UPWIND)
       {
         if (alphaDotN(quadIndex) > 0.0)
-          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftValsAtQuad(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftVal;
         else
-          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightValsAtQuad(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightVal;
       }
       else if (fluxType == CENTRAL)
         numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*0.5*
-          (rightValsAtQuad(quadIndex) + leftValsAtQuad(quadIndex));
+          (rightVal + leftVal);
       else if (fluxType == DOWNWIND)
       {
         if (alphaDotN(quadIndex) > 0.0)
-          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightValsAtQuad(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*rightVal;
         else
-          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftValsAtQuad(quadIndex);
+          numericalFluxAtQuad(quadIndex) = alphaDotN(quadIndex)*leftVal;
       }
     }
   }

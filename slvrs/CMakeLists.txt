@@ -122,6 +122,7 @@ set(lcslvrs_SOURCES
   LcSOLMaxwellianParameterCalc.cpp
   LcSOLMaxwellianParameterNewtonCalc.cpp
   LcSOLPositivityUpdater.cpp
+  LcSOLPositivity3DUpdater.cpp
   LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp
   LcSOLPositivityScaleCellUpdater.cpp
