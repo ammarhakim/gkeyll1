@@ -388,9 +388,6 @@ namespace Lucee
 
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
-          
-          // Hamiltonian is continuous, so use right always
-          hamil.setPtr(hamilPtr, idxr);
           // Copy data to Eigen vectors
           Eigen::VectorXd rightData(nlocal);
           Eigen::VectorXd leftData(nlocal);
@@ -400,14 +397,31 @@ namespace Lucee
             leftData(i) = aCurrPtr_l[i];
           }
 
-          // Compute gradient of hamiltonian at surface nodes
-          Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
-          for (int i = 0; i < nlocal; i++)
-            hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
-
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
           Eigen::MatrixXd alpha(NDIM, nSurfQuad);
-          equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
+
+          if (sliceIndex != globalRgn.getUpper(dir))
+          {
+            // Hamiltonian is continuous, so use right always
+            // UNLESS left cell is globalRgn.getUpper(dir)
+            hamil.setPtr(hamilPtr, idxr);
+            // Compute gradient of hamiltonian at surface nodes
+            Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+            for (int i = 0; i < nlocal; i++)
+              hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
+            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
+          }
+          else
+          {
+            // Hamiltonian is continuous, so use right always
+            // UNLESS left cell is globalRgn.getUpper(dir)
+            hamil.setPtr(hamilPtr, idxl);
+            // Compute gradient of hamiltonian at surface nodes
+            Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
+            for (int i = 0; i < nlocal; i++)
+              hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idxl, alpha);
+          }
 
           // Construct normal vector
           Eigen::VectorXd normalVec = Eigen::VectorXd::Zero(NDIM);
