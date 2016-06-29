@@ -22,7 +22,7 @@ namespace Lucee
   class AdvectionEquation : public Lucee::HyperEquation
   {
 /** Numerical flux to use */
-      enum NumFluxType { CENTRAL_FLUX, UPWIND_FLUX };
+      enum NumFluxType { CENTRAL_FLUX, UPWIND_FLUX, DOWNWIND_FLUX };
 
     public:
 /** Class id: this is used by registration system */
