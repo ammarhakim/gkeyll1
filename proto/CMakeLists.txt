@@ -17,8 +17,9 @@ if (PETSC_FOUND)
    include_directories(${Petsc_INCLUDE_DIRS})
 endif (PETSC_FOUND)
 
-set (proto_SOURCES
+set (proto_SOURCES	
   LcBGKCollUpdater.cpp	
+  LcBoltzmannCollisionOperator.cpp
   LcCenterOfMassUpdater.cpp
   LcConstGravitySrcUpdater.cpp
   LcConstructLinearOperatorMatrix.cpp
@@ -88,8 +89,8 @@ set (proto_SOURCES
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
-  LcRectSecondOrderCentralDiffUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRectSecondOrderCentralDiffUpdater.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
