@@ -101,6 +101,7 @@ set(lcslvrs_SOURCES
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
   LcPredicateUpdater.cpp
+  LcProductProjectionCalc1DFrom3D.cpp
   LcProjectOnBasisUpdater.cpp
   LcProjectOnNodalBasisUpdater.cpp
   LcReflectionBoundaryCondition.cpp
@@ -121,10 +122,12 @@ set(lcslvrs_SOURCES
   LcSOLMaxwellianParameterCalc.cpp
   LcSOLMaxwellianParameterNewtonCalc.cpp
   LcSOLPositivityUpdater.cpp
+  LcSOLPositivity3DUpdater.cpp
   LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp
   LcSOLPositivityScaleCellUpdater.cpp
   LcSOLPositivityScaleNodeUpdater.cpp
+  LcSOLPressureAtNodeCalc.cpp
   LcSOLTemperatureCalc.cpp
   LcSOLTemperatureAtNodeCalc.cpp
   LcSOLWeightedProjectionCalc.cpp

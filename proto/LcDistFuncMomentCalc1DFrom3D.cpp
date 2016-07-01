@@ -22,6 +22,12 @@ namespace Lucee
   DistFuncMomentCalc1DFrom3D::DistFuncMomentCalc1DFrom3D()
     : Lucee::UpdaterIfc()
   {
+    momentLocal = 0;
+  }
+
+  DistFuncMomentCalc1DFrom3D::~DistFuncMomentCalc1DFrom3D()
+  {
+    delete momentLocal;
   }
   
   void
@@ -158,7 +164,6 @@ namespace Lucee
   Lucee::UpdaterStatus
   DistFuncMomentCalc1DFrom3D::update(double t)
   {
-    
     // get hold of grid
     const Lucee::StructuredGridBase<3>& grid 
       = this->getGrid<Lucee::StructuredGridBase<3> >();
@@ -166,24 +171,51 @@ namespace Lucee
     // get input field (3d)
     const Lucee::Field<3, double>& distF = this->getInp<Lucee::Field<3, double> >(0);
     // get output field (1d)
-    Lucee::Field<1, double>& moment = this->getOut<Lucee::Field<1, double> >(0);
+    Lucee::Field<1, double>& momentGlobal = this->getOut<Lucee::Field<1, double> >(0);
+
+    // clear out contents of output field
+    if (!momentLocal)
+    {
+      // allocate memory for local moment calculation if not already
+      // done: we need to ensure space is also allocated for the
+      // ghost-cells as otherwise there is a size mis-match in the
+      // allReduce call to sync across velocity space
+      Lucee::Region<1, int> localRgn = momentGlobal.getRegion();
+      Lucee::Region<1, int> localExtRgn = momentGlobal.getExtRegion();
+      
+      int lowerConf[1];
+      int upperConf[1];
+      int lg[1];
+      int ug[1];
+      for (int i=0; i < 1; ++i)
+      {
+        lowerConf[i] = localRgn.getLower(i);
+        upperConf[i] = localRgn.getUpper(i);
+        lg[i] = localRgn.getLower(i) - localExtRgn.getLower(i);
+        ug[i] = localExtRgn.getUpper(i) - localRgn.getUpper(i);
+      }
+      Lucee::Region<1, int> rgnConf(lowerConf, upperConf);
+      momentLocal = new Lucee::Field<1, double>(rgnConf, momentGlobal.getNumComponents(), lg, ug);
+    }
 
     // local region to update (This is the 3D region. The 1D region is
     // assumed to have the same cell layout as the X-direction of the 3D region)
     Lucee::Region<3, int> localRgn = grid.getLocalRegion();
 
     // clear out contents of output field
-    moment = 0.0;
+    (*momentLocal) = 0.0;
 
     // iterators into fields
     Lucee::ConstFieldPtr<double> distFPtr = distF.createConstPtr();
-    Lucee::FieldPtr<double> momentPtr = moment.createPtr();
+    Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
 
     int idx[3];
     double xc[3];
     Lucee::RowMajorSequencer<3> seq(localRgn);
     unsigned nlocal1d = nodalBasis1d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
+
+    int localPositionCells = momentGlobal.getExtRegion().getVolume();
 
     while(seq.step())
     {
@@ -192,27 +224,38 @@ namespace Lucee
       grid.setIndex(idx);
       grid.getCentroid(xc);
 
-      moment.setPtr(momentPtr, idx[0]);
+      momentLocal->setPtr(momentPtr, idx[0]);
       distF.setPtr(distFPtr, idx);
 
       Eigen::VectorXd distfVec(nlocal3d);
       for (int i = 0; i < nlocal3d; i++)
         distfVec(i) = distFPtr[i];
 
-      // Accumulate contribution to moment from this cell
+      // Accumulate contribution to momentGlobal from this cell
       Eigen::VectorXd resultVector(nlocal1d);
 
       if (calcMom == 0)
-        resultVector = mom0Matrix*distfVec;
+        resultVector.noalias() = mom0Matrix*distfVec;
       else if (calcMom == 1)
-        resultVector = mom1Matrix*distfVec + xc[momDir]*mom0Matrix*distfVec;
+        resultVector.noalias() = (mom1Matrix + xc[momDir]*mom0Matrix)*distfVec;
       else if (calcMom == 2)
-        resultVector = mom2Matrix*distfVec + 2*xc[momDir]*mom1Matrix*distfVec +
-          xc[momDir]*xc[momDir]*mom0Matrix*distfVec;
+        resultVector.noalias() = (mom2Matrix + 2*xc[momDir]*mom1Matrix +
+          xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
 
       for (int i = 0; i < nlocal1d; i++)
         momentPtr[i] = momentPtr[i] + resultVector(i);
     }
+
+    // Above loop computes moments on local phase-space domain. We need to
+    // sum across velocity space to get total momentLocal on configuration
+    // space.
+    
+    // we need to get moment communicator of field as updater's moment
+    // communicator is same as its grid's moment communicator. In this
+    // case, grid is phase-space grid, which is not what we want.
+    TxCommBase *momComm = momentGlobal.getMomComm();
+    unsigned xsize = localPositionCells*nlocal1d; // amount to communicate
+    momComm->allreduce(xsize, &momentLocal->first(), &momentGlobal.first(), TX_SUM);
 
     return Lucee::UpdaterStatus();
   }

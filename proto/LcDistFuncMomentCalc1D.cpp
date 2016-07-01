@@ -49,7 +49,7 @@ namespace Lucee
         "DistFuncMomentCalc1D::readInput: Must specify 2D element to use using 'basis2d'");
 
 // get hold of 1D element to use
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis1d"))
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis1d"))
       nodalBasis1d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis1d");
     else
       throw Lucee::Except(

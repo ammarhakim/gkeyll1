@@ -1,12 +1,11 @@
 /**
- * @file	LcDistFuncMomentCalc2D.h
+ * @file	LcSOLPositivity3DUpdater.h
  *
- * @brief	Updater to compute 2d moments of a 4d distribution function.
- * Currently only works for 0th moment
+ * @brief	Updater to enforce positivity preservation for 3d SOL simulations.
  */
 
-#ifndef LC_DIST_FUNC_MOMENT_CALC_2D_H
-#define LC_DIST_FUNC_MOMENT_CALC_2D_H
+#ifndef LC_SOL_POSITIVITY_3D_UPDATER_H
+#define LC_SOL_POSITIVITY_3D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -17,30 +16,24 @@
 #include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcCDIM.h>
 
 // eigen includes
-#include <Eigen/LU>
+#include <Eigen/Core>
 
 namespace Lucee
 {
 /**
- * Updater to compute moments of distribution function f(x,v)
+ * Updater to solve hyperbolic equations using a nodal discontinous
+ * Galerkin scheme.
  */
-  class DistFuncMomentCalc2D : public Lucee::UpdaterIfc
+  class SOLPositivity3DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC4 = Lucee::CDIM<4>::N;
-/** Number of components for coordinate arrays etc. */
-      static const unsigned NC2 = Lucee::CDIM<2>::N;
 
-/** Create new modal DG solver in 4D */
-      DistFuncMomentCalc2D();
-/**  Destructor */
-      virtual ~DistFuncMomentCalc2D();
+/** Create new nodal DG solver */
+      SOLPositivity3DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -75,20 +68,13 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to 4D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<4> *nodalBasis4d;
-/** Pointer to 2D nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
-/** Moment to compute */
-      unsigned calcMom;
-/** Space to store moment data for on a processor */
-      Lucee::Field<2, double> *momentLocal;
-/** Zeroth moment matrix */
-      Eigen::MatrixXd mom0Matrix;
-/** First moment matrix */
-      Eigen::MatrixXd mom1Matrix;
-/** Second moment matrix */
-      Eigen::MatrixXd mom2Matrix;
+/** Pointer to 3d nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
+/**
+ * When multiplied by the solution in a 3d cell, returns the integrated cell quantity
+ * To get average, one should divide by the volume of the cell
+ */
+      Eigen::VectorXd mom0Vector;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
@@ -98,4 +84,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_DIST_FUNC_MOMENT_CALC_2D_H
+#endif // LC_SOL_POSITIVITY_3D_UPDATER_H
