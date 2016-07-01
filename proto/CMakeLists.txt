@@ -17,9 +17,8 @@ if (PETSC_FOUND)
    include_directories(${Petsc_INCLUDE_DIRS})
 endif (PETSC_FOUND)
 
-set (proto_SOURCES	
+set (proto_SOURCES
   LcBGKCollUpdater.cpp	
-  LcBoltzmannCollisionOperator.cpp
   LcCenterOfMassUpdater.cpp
   LcConstGravitySrcUpdater.cpp
   LcConstructLinearOperatorMatrix.cpp
@@ -72,9 +71,11 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcPoissonBracketAdvectionEquation1D.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketAdvectionEquation5D.cpp
   LcPoissonBracketCanonical2D.cpp
+  LcPoissonBracketCanonical3D.cpp
   LcPoissonBracketCanonical4D.cpp
   LcPoissonBracketEquation.cpp
   LcPoissonBracketEquationRegistry.cpp
@@ -89,8 +90,10 @@ set (proto_SOURCES
   LcProtoSolverRegistry.cpp
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
-  LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRecoveryDG1DUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
+  LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRunningAverageOfFieldCalc.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
@@ -102,6 +105,7 @@ set (proto_SOURCES
   LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp
   LcZonalAverageCalc3D.cpp
+  LcZonalVelocity1DUpdater.cpp
 )
 
 if (FFTW3_FOUND)
