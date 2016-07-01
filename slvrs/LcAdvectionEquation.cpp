@@ -46,10 +46,12 @@ namespace Lucee
         fluxType = CENTRAL_FLUX;
       else if (tbl.getString("fluxType") == "upwind")
         fluxType = UPWIND_FLUX;
+      else if (tbl.getString("fluxType") == "downwind")
+        fluxType = DOWNWIND_FLUX;
       else
       {
         Lucee::Except lce("AdvectionEquation::readInput: 'flux' must be one of ");
-        lce << " 'central' or 'upwind'. Provided '" << tbl.getString("flux")
+        lce << " 'central', 'upwind', or 'downwind'. Provided '" << tbl.getString("flux")
             << "' instead";
         throw lce;
       }
@@ -126,6 +128,13 @@ namespace Lucee
         f[0] = v[0]*ql[0];
       else
         f[0] = v[0]*qr[0];
+    }
+    else if (fluxType == DOWNWIND_FLUX)
+    {
+      if (v[0] > 0)
+        f[0] = v[0]*qr[0];
+      else
+        f[0] = v[0]*ql[0];
     }
     else
     {

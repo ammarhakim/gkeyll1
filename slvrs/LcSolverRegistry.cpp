@@ -81,6 +81,7 @@
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
+#include <LcProductProjectionCalc1DFrom3D.h>
 #include <LcProjectOnBasisUpdater.h>
 #include <LcProjectOnNodalBasisUpdater.h>
 #include <LcReflectionBoundaryCondition.h>
@@ -102,10 +103,12 @@
 #include <LcSOLMaxwellianParameterCalc.h>
 #include <LcSOLMaxwellianParameterNewtonCalc.h>
 #include <LcSOLPositivityUpdater.h>
+#include <LcSOLPositivity3DUpdater.h>
 #include <LcSOLPositivityDragCellUpdater.h>
 #include <LcSOLPositivityDragNodeUpdater.h>
 #include <LcSOLPositivityScaleCellUpdater.h>
 #include <LcSOLPositivityScaleNodeUpdater.h>
+#include <LcSOLPressureAtNodeCalc.h>
 #include <LcSOLTemperatureCalc.h>
 #include <LcSOLTemperatureAtNodeCalc.h>
 #include <LcSOLWeightedProjectionCalc.h>
@@ -192,7 +195,9 @@ namespace Lucee
       .append<Lucee::ElectromagneticZeroVelocitySource>()
       .append<Lucee::ElectromagneticZeroVelocitySourceProjection>()
       .append<Lucee::ElectrostaticPhiUpdater>()
-      .append<Lucee::ASquaredProjectionUpdater>()
+      .append<Lucee::ASquaredProjectionUpdater<1> >()
+      .append<Lucee::ASquaredProjectionUpdater<2> >()
+      .append<Lucee::ASquaredProjectionUpdater<3> >()
       .append<Lucee::ATimesPUpdater>()
       .append<Lucee::ReflectionBoundaryCondition>()
       .append<Lucee::SetPhiAtBoundaryUpdater>()
@@ -216,10 +221,12 @@ namespace Lucee
       .append<Lucee::SOLMaxwellianParameterCalc>()
       .append<Lucee::SOLMaxwellianParameterNewtonCalc>()
       .append<Lucee::SOLPositivityUpdater>()
+      .append<Lucee::SOLPositivity3DUpdater>()
       .append<Lucee::SOLPositivityDragCellUpdater>()
       .append<Lucee::SOLPositivityDragNodeUpdater>()
       .append<Lucee::SOLPositivityScaleCellUpdater>()
       .append<Lucee::SOLPositivityScaleNodeUpdater>()
+      .append<Lucee::SOLPressureAtNodeCalc>()
       .append<Lucee::SOLTemperatureCalc>()
       .append<Lucee::SOLTemperatureAtNodeCalc>()
       .append<Lucee::SOLWeightedProjectionCalc>()
@@ -252,6 +259,8 @@ namespace Lucee
       .append<Lucee::NodalHyperDiffusionUpdater<1> >()
       .append<Lucee::NodalHyperDiffusionUpdater<2> >()
       .append<Lucee::NodalHyperDiffusionUpdater<3> >()
+
+      .append<Lucee::ProductProjectionCalc1DFrom3D>()
 
       .append<Lucee::ProjectOnBasisUpdater<1> >()
       .append<Lucee::ProjectOnBasisUpdater<2> >()

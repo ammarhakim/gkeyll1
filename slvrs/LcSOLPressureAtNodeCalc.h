@@ -1,12 +1,11 @@
 /**
- * @file	LcASquaredProjectionUpdater.h
+ * @file  LcSOLPressureAtNodeCalc.h
  *
- * @brief	Updater to project a product of two fields onto the original basis set using quadrature
- * Inputs and outputs assume DG fields, not CG fields.
+ * @brief	Simple updater to compute pressure node-by-node for 5D SOL simulations
  */
 
-#ifndef LC_A_SQUARED_PROJECTION_UPDATER_H
-#define LC_A_SQUARED_PROJECTION_UPDATER_H
+#ifndef LC_SOL_PRESSURE_AT_NODE_CALC
+#define LC_SOL_PRESSURE_AT_NODE_CALC
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -14,23 +13,26 @@
 #endif
 
 // lucee includes
+#include <LcField.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
 
 // eigen includes
-#include <Eigen/LU>
+#include <Eigen/Core>
 
 namespace Lucee
 {
-  template <unsigned NDIM>
-  class ASquaredProjectionUpdater : public Lucee::UpdaterIfc
+/**
+ * Applies particle refection BCs to distribution function
+ */
+  class SOLPressureAtNodeCalc : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new nodal DG solver */
-      ASquaredProjectionUpdater();
+/** Create new projection updater */
+      SOLPressureAtNodeCalc();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -66,20 +68,10 @@ namespace Lucee
 
     private:
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
-/** Interpolation matrix */
-      Eigen::MatrixXd interpMatrix;
-/** Gaussian quadrature weights */
-      std::vector<double> gaussWeights;
-/** Mass matrix inverse */
-      Eigen::MatrixXd massMatrixInv;
-/**
- * Copy a Lucee-type matrix to an Eigen-type matrix.
- * No checks are performed to make sure source and destination matrices are
- * of the same size.
- */
-      void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
+/** Species mass */
+      double speciesMass;
   };
 }
 
-#endif // LC_A_SQUARED_PROJECTION_UPDATER_H
+#endif // LC_SOL_PRESSURE_AT_NODE_CALC
