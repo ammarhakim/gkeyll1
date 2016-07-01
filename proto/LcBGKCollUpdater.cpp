@@ -81,7 +81,7 @@ namespace Lucee
 
     // Mass of the other species
     if (tbl.hasNumber("massOther"))
-      massOther = tbl.getNumber("massOther");
+      massSelf = tbl.getNumber("massOther");
     else
       throw Lucee::Except("BGKCollUpdater::readInput: Must specify a mass of the other species to use using 'massOther'");
 
@@ -287,13 +287,10 @@ namespace Lucee
 	      firstMomentOtherPtr[nodeIdx*VDIM+dim];
 	    vTerm2Other[nodeIdx] = vTerm2Other[nodeIdx]-
 	      vDriftOther(nodeIdx, dim)*vDriftOther(nodeIdx, dim);
-	  }  
-	  if (vTerm2Self[nodeIdx] < 0)
-	    vTerm2Self[nodeIdx] = 1;
-	  if (vTerm2Other[nodeIdx] < 0)
-	    vTerm2Other[nodeIdx] = 1;
-	  TSelf[nodeIdx] = vTerm2Self[nodeIdx]*massSelf;
-	  TOther[nodeIdx] = vTerm2Other[nodeIdx]*massOther;	
+
+	    TSelf[nodeIdx] = vTerm2Self[nodeIdx]*massSelf;
+	    TOther[nodeIdx] = vTerm2Other[nodeIdx]*massOther;
+	  }  	
 	}
 
 	// Calculate drift and thermal velocity of the "cross Maxwellian"
@@ -311,8 +308,6 @@ namespace Lucee
 	  vTerm2Cross[nodeIdx] = (massOther*TSelf[nodeIdx]+massSelf*TOther[nodeIdx] - 
 				  beta*massSelf*(TSelf[nodeIdx]-TOther[nodeIdx]) + 
 				  vDriftDiff2[nodeIdx]*precalculation)*invMassSelf*invMassSum;
-	  if (vTerm2Cross[nodeIdx]<0)
-	    int a=0;
 	  /** precalculation = (1-beta*beta)*massSelf*massOther/6+
 	      (1+beta*beta)*massSelf*(massother-massSelf)/12; 
 	      This value is calculated during the initialization of the updater*/

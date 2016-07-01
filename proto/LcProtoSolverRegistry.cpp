@@ -11,7 +11,6 @@
 
 // lucee includes
 #include <LcBGKCollUpdater.h>
-#include <LcBoltzmannCollisionOperator.h>
 #include <LcCenterOfMassUpdater.h>
 #include <LcConstGravitySrcUpdater.h>
 #include <LcConstructLinearOperatorMatrix.h>
@@ -119,12 +118,6 @@ namespace Lucee
       .append<Lucee::BGKCollUpdater<2, 2> >()
       .append<Lucee::BGKCollUpdater<2, 3> >()
       
-      .append<Lucee::BoltzmannCollisionOperator<1, 1> >()
-      .append<Lucee::BoltzmannCollisionOperator<1, 2> >()
-      .append<Lucee::BoltzmannCollisionOperator<1, 3> >()
-      .append<Lucee::BoltzmannCollisionOperator<2, 2> >()
-      .append<Lucee::BoltzmannCollisionOperator<2, 3> >()
-
       .append<Lucee::CenterOfMassUpdater<1> >()
       .append<Lucee::CenterOfMassUpdater<2> >()
       .append<Lucee::CenterOfMassUpdater<3> >()
