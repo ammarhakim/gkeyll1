@@ -19,6 +19,7 @@ endif (PETSC_FOUND)
 
 set (proto_SOURCES
   LcBGKCollUpdater.cpp	
+  LcBoltzmannCollisionOperator.cpp
   LcCenterOfMassUpdater.cpp
   LcConstGravitySrcUpdater.cpp
   LcConstructLinearOperatorMatrix.cpp
@@ -91,8 +92,8 @@ set (proto_SOURCES
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRecoveryDG1DUpdater.cpp
-  LcRectSecondOrderCentralDiffUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRectSecondOrderCentralDiffUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
