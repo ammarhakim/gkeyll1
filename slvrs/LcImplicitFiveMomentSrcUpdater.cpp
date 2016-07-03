@@ -35,7 +35,7 @@ namespace Lucee
 
   static const int COL_PIV_HOUSEHOLDER_QR = 0;
   static const int PARTIAL_PIV_LU = 1;
-
+  static const int ANALYTIC = 2;
 // set ids for module system
   template <> const char *ImplicitFiveMomentSrcUpdater<1>::id = "ImplicitFiveMomentSrc1D";
   template <> const char *ImplicitFiveMomentSrcUpdater<2>::id = "ImplicitFiveMomentSrc2D";
@@ -78,6 +78,12 @@ namespace Lucee
         linSolType = PARTIAL_PIV_LU;
       else if (tbl.getString("linearSolver") == "colPivHouseholderQr")
         linSolType = COL_PIV_HOUSEHOLDER_QR;
+      else if (tbl.getString("linearSolver") == "analytic") {
+        linSolType = ANALYTIC;
+        if (tbl.hasNumber("gravity")){
+        Lucee::Except lce("ImplicitFiveMomentSrcUpdater::readInput: gravity and not implemented in analytic solver "); 
+        }
+      }
       else
       {
         Lucee::Except lce("ImplicitFiveMomentSrcUpdater::readInput: 'linearSolver' must be ");
@@ -189,62 +195,123 @@ namespace Lucee
       emField.setPtr(emPtr, idx);
       if (hasStatic)
         staticField->setPtr(staticEmPtr, idx);
+      std::vector<double> lambda(nFluids);
+      std::vector<double> omega(nFluids);
+      //      std::vector<double> K(3); 
+      //      double wp2 = 0.0;
+      double gamma2 = 0.0;
+      double delta = 0.0;
+      double theta = 0.0; 
+      double bx = (emPtr[BX] + staticEmPtr[BX]);
+      double by = (emPtr[BY] + staticEmPtr[BY]);
+      double bz = (emPtr[BZ] + staticEmPtr[BZ]);
+      Eigen::Vector3d B; 
+      Eigen::Vector3d E;
+      Eigen::Vector3d F(0,0,0); 
+      Eigen::Vector3d K(0,0,0);// the k vector used to update the implicit solution in Smithe(2007)
+      B(0) = bx; B(1) = by; B(2) = bz;
+      E(0) = emPtr[EX]; E(1) = emPtr[EY]; E(2) = emPtr[EZ];
+      double babs = std::sqrt(bx*bx + by*by + bz*bz);
 
 // fill elements corresponding to each fluid
       for (unsigned n=0; n<nFluids; ++n)
       {
         fluids[n]->setPtr(fPtr, idx);
-
+        if (linSolType != ANALYTIC) { 
 // eqn. for X-component of current
-        lhs(fidx(n,X), fidx(n,X)) = 1.0;
-        lhs(fidx(n,X), fidx(n,Y)) = -dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
-        lhs(fidx(n,X), fidx(n,Z)) = dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
-        lhs(fidx(n,X), eidx(X)) = -dt1*qbym2[n]*fPtr[RHO];
-
-// eqn. for Y-component of current
-        lhs(fidx(n,Y), fidx(n,X)) = dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
-        lhs(fidx(n,Y), fidx(n,Y)) = 1.0;
-        lhs(fidx(n,Y), fidx(n,Z)) = -dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
-        lhs(fidx(n,Y), eidx(Y)) = -dt1*qbym2[n]*fPtr[RHO];
-
+          lhs(fidx(n,X), fidx(n,X)) = 1.0;
+          lhs(fidx(n,X), fidx(n,Y)) = -dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
+          lhs(fidx(n,X), fidx(n,Z)) = dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
+          lhs(fidx(n,X), eidx(X)) = -dt1*qbym2[n]*fPtr[RHO];
+          
+          // eqn. for Y-component of current
+          lhs(fidx(n,Y), fidx(n,X)) = dt1*qbym[n]*(emPtr[BZ]+staticEmPtr[BZ]);
+          lhs(fidx(n,Y), fidx(n,Y)) = 1.0;
+          lhs(fidx(n,Y), fidx(n,Z)) = -dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
+          lhs(fidx(n,Y), eidx(Y)) = -dt1*qbym2[n]*fPtr[RHO];
+          
 // eqn. for Z-component of current
-        lhs(fidx(n,Z), fidx(n,X)) = -dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
-        lhs(fidx(n,Z), fidx(n,Y)) = dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
-        lhs(fidx(n,Z), fidx(n,Z)) = 1.0;
-        lhs(fidx(n,Z), eidx(Z)) = -dt1*qbym2[n]*fPtr[RHO];
+          lhs(fidx(n,Z), fidx(n,X)) = -dt1*qbym[n]*(emPtr[BY]+staticEmPtr[BY]);
+          lhs(fidx(n,Z), fidx(n,Y)) = dt1*qbym[n]*(emPtr[BX]+staticEmPtr[BX]);
+          lhs(fidx(n,Z), fidx(n,Z)) = 1.0;
+          lhs(fidx(n,Z), eidx(Z)) = -dt1*qbym2[n]*fPtr[RHO];
 
-// fill corresponding RHS elements
-        rhs(fidx(n,X)) = qbym[n]*fPtr[RHOUX];
-        rhs(fidx(n,Y)) = qbym[n]*fPtr[RHOUY];
-        rhs(fidx(n,Z)) = qbym[n]*fPtr[RHOUZ];
-
+          // fill corresponding RHS elements
+          rhs(fidx(n,X)) = qbym[n]*fPtr[RHOUX];
+          rhs(fidx(n,Y)) = qbym[n]*fPtr[RHOUY];
+          rhs(fidx(n,Z)) = qbym[n]*fPtr[RHOUZ];
+          
 // add in gravity source term to appropriate current equation
-        rhs(fidx(n,grvDir)) += qbym[n]*fPtr[RHO]*gravity*dt1;
+          rhs(fidx(n,grvDir)) += qbym[n]*fPtr[RHO]*gravity*dt1;
+          
+          // set current contribution to electric field equation
+          lhs(eidx(X), fidx(n,X)) = dt2;
+          lhs(eidx(Y), fidx(n,Y)) = dt2;
+          lhs(eidx(Z), fidx(n,Z)) = dt2;
+        } else {
+          // use the analytic solver developed by Smithe (2007)
+          lambda[n] = 1.00; //collisional parameter
+          omega[n] = qbym[n]*dt; // omega/B
+          double wp2 = fPtr[RHO]*qbym2[n]/epsilon0*dt*dt;
+          //          wp2 += fPtr[RHO]*qbym2[n]/epsilon0*dt*dt;
+          gamma2 += wp2*qbym2[n]*dt*dt/(1+0.25*qbym2[n]*babs*babs*dt*dt);
+          delta += wp2*qbym[n]*dt/(1+0.25*qbym2[n]*babs*babs*dt*dt);
+          theta += wp2/(1+qbym2[n]*dt*dt/4*babs*babs);
+          Eigen::Vector3d j(fPtr[RHOUX]*qbym[n], fPtr[RHOUY]*qbym[n], fPtr[RHOUZ]*qbym[n]);
+          double bdotj = B.dot(j);
+          Eigen::Vector3d bcrossj = B.cross(j);
 
-// set current contribution to electric field equation
-        lhs(eidx(X), fidx(n,X)) = dt2;
-        lhs(eidx(Y), fidx(n,Y)) = dt2;
-        lhs(eidx(Z), fidx(n,Z)) = dt2;
+          K -= dt/2.0 *(1.0 + lambda[n])*(1.0*j + 0.25*omega[n]*omega[n]*B * bdotj - 0.5*omega[n]*bcrossj )/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+          F -= dt/2.0*(1/4.0*omega[n]*omega[n]*fPtr[RHO]*qbym2[n]/epsilon0*dt/2.0*B*B.dot(E) + 1/2.0 * fPtr[RHO]*qbym2[n]/epsilon0*dt*E - 1/2.0*omega[n]*fPtr[RHO]*qbym2[n]/epsilon0*dt*B.cross(E)/2.0 )/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+        }
       }
-
+      F = F + E;
 // fill in elements for electric field equations
-      lhs(eidx(EX), eidx(EX)) = 1.0;
-      lhs(eidx(EY), eidx(EY)) = 1.0;
-      lhs(eidx(EZ), eidx(EZ)) = 1.0;
-
-      rhs(eidx(EX)) = emPtr[EX];
-      rhs(eidx(EY)) = emPtr[EY];
-      rhs(eidx(EZ)) = emPtr[EZ];
+      Eigen::VectorXd sol;
+      if (linSolType != ANALYTIC) {
+        lhs(eidx(EX), eidx(EX)) = 1.0;
+        lhs(eidx(EY), eidx(EY)) = 1.0;
+        lhs(eidx(EZ), eidx(EZ)) = 1.0;
+        
+        rhs(eidx(EX)) = emPtr[EX];
+        rhs(eidx(EY)) = emPtr[EY];
+        rhs(eidx(EZ)) = emPtr[EZ];
 
 // invert to find solution
-      Eigen::VectorXd sol;
-      if (linSolType == COL_PIV_HOUSEHOLDER_QR)
-        sol = lhs.colPivHouseholderQr().solve(rhs);
-      else if (linSolType == PARTIAL_PIV_LU)
-        sol = lhs.partialPivLu().solve(rhs);
-      else
-      { /* can not happen */ }
 
+        if (linSolType == COL_PIV_HOUSEHOLDER_QR)
+          sol = lhs.colPivHouseholderQr().solve(rhs);
+        else if (linSolType == PARTIAL_PIV_LU)
+          sol = lhs.partialPivLu().solve(rhs);
+        else
+          { /* can not happen */ }
+      } else {
+        // these are in the paper Smithe 2007 but are incorrect...
+
+        /*        double coeff_e = (1.0 - 0.25*wp2 - 1.0/64.0*det2*babs*babs)/(1.0 + 0.25*wp2 + 1.0/64.0*det2*babs*babs); 
+        double coeff_k = 1.0/(1.0 + 0.25*wp2 + 1.0/64.0*det2*babs*babs);
+        double coeff_dot = (1.0/64.0*det2 - 1.0/16.0*gamma2)/(1.0 + 0.25*wp2 + 1.0/64.0*det2*babs*babs)/(1.0 + 0.25*wp2 + 1.0/16.0*det2*gamma2*babs*babs);
+        double coeff_cross = 0.125*delta/(1.0 + 0.25*wp2 + 1.0/64.0*det2*babs*babs)/(1.0 + 0.25*wp2);     
+        */
+        // this is correct -- or at least I think is correct -- Jonathan Ng 2016
+        double denom = ((1+theta/4)*(1+theta/4) + delta*delta*babs*babs/64.0) * (1 + theta/4 + gamma2/16*babs*babs);        
+        double coeff_e = ((1+theta/4)*(1+theta/4) + gamma2*babs*babs/16*(1+theta/4));
+        //        double coeff_k = 1.0/denom*0; 
+        double coeff_dot = (1.0/64.0*delta*delta - 1.0/16.0*gamma2*(1+theta/4));
+        double coeff_cross = 0.125*delta*(1 + gamma2*babs*babs/16 + theta/4);
+        Eigen::Vector3d fk = 1.0*F + K; // vector holding sum of K + 2 epsilon0 E used in many calculations
+        //        fk(0) = K[0] + emPtr[EX]*2*epsilon0;
+        //        fk(1) = K[1] + emPtr[EY]*2*epsilon0; 
+        //        fk(2) = K[2] + emPtr[EZ]*2*epsilon0; 
+        emPtr[EX] = (coeff_e*fk[EX] + coeff_dot*B(0)*B.dot(fk) + coeff_cross*(B.cross(fk)(0)) )/epsilon0/denom; 
+        emPtr[EY] = (coeff_e*fk[EY] + coeff_dot*B(1)*B.dot(fk) + coeff_cross*(B.cross(fk)(1)) )/epsilon0/denom; 
+        emPtr[EZ] = (coeff_e*fk[EZ] + coeff_dot*B(2)*B.dot(fk) + coeff_cross*(B.cross(fk)(2)) )/epsilon0/denom; 
+        // update the stored E field to E_n+1/2
+        E(0) = (emPtr[EX] + E(0))/2.0;
+        E(1) = (emPtr[EY] + E(1))/2.0;
+        E(2) = (emPtr[EZ] + E(2))/2.0;
+
+      }
       double chargeDens = 0.0;
       double keold = 0.0;
 // update solution for fluids (solution is at half-time step)
@@ -260,10 +327,27 @@ namespace Lucee
 
 // momentum equation (sol has currents, so divide out charge and
 // multiply by mass to give momentum density)
-        fPtr[RHOUX] = 2*sol(fidx(n,X))/qbym[n] - fPtr[RHOUX];
-        fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
-        fPtr[RHOUZ] = 2*sol(fidx(n,Z))/qbym[n] - fPtr[RHOUZ];
+        if (linSolType != ANALYTIC) {
+          fPtr[RHOUX] = 2*sol(fidx(n,X))/qbym[n] - fPtr[RHOUX];
+          fPtr[RHOUY] = 2*sol(fidx(n,Y))/qbym[n] - fPtr[RHOUY];
+          fPtr[RHOUZ] = 2*sol(fidx(n,Z))/qbym[n] - fPtr[RHOUZ];
+        } else {
+          // solve it analytically
+          // there is another error in smithe's paper: all terms must be divided by 1/(1+.25 wc^2 dt^2), not just the first term
+          double j_coeff = (lambda[n] - 0.25*omega[n]*omega[n]*babs*babs)/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+          double f_coeff = fPtr[RHO]*qbym2[n]/epsilon0*dt/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+          
+          double dot_coeff = 0.25*omega[n]*omega[n]/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+          double cross_coeff = omega[n]/2.0/(1.0+0.25*omega[n]*omega[n]*babs*babs);
+          // update E with the new solution
+          Eigen::Vector3d j(fPtr[RHOUX]*qbym[n],fPtr[RHOUY]*qbym[n],fPtr[RHOUZ]*qbym[n]);
+          Eigen::Vector3d jf = (1.0+lambda[n])*j + E*epsilon0*dt*fPtr[RHO]*qbym2[n]/epsilon0; // There is an error in smithe's paper here: F in equation (15) must be multiplied by a factor of wp^2 dt or the units are wrong.
+          Eigen::Vector3d sol = j_coeff*j + f_coeff*E*epsilon0 + dot_coeff*B*B.dot(jf) - cross_coeff*B.cross(jf); 
 
+          fPtr[RHOUX] = sol(0)/qbym[n];
+          fPtr[RHOUY] = sol(1)/qbym[n];
+          fPtr[RHOUZ] = sol(2)/qbym[n];
+        }
         if (hasPressure)
         {
 // energy equation (there is no explicit energy source, so just
@@ -274,10 +358,13 @@ namespace Lucee
       }
 
 // update electric field
-      emPtr[EX] = 2*sol(eidx(X)) - emPtr[EX];
-      emPtr[EY] = 2*sol(eidx(Y)) - emPtr[EY];
-      emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
+      if (linSolType != ANALYTIC){
+        emPtr[EX] = 2*sol(eidx(X)) - emPtr[EX];
+        emPtr[EY] = 2*sol(eidx(Y)) - emPtr[EY];
+        emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
+      } else {
 
+      }
       double crhoc = chi_e*chargeDens/epsilon0;
 // update electric field error potential source
       if (damp_e > 0)
