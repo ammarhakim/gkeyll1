@@ -342,11 +342,11 @@ namespace Lucee
           // update E with the new solution
           Eigen::Vector3d j(fPtr[RHOUX]*qbym[n],fPtr[RHOUY]*qbym[n],fPtr[RHOUZ]*qbym[n]);
           Eigen::Vector3d jf = (1.0+lambda[n])*j + E*epsilon0*dt*fPtr[RHO]*qbym2[n]/epsilon0; // There is an error in smithe's paper here: F in equation (15) must be multiplied by a factor of wp^2 dt or the units are wrong.
-          Eigen::Vector3d sol = j_coeff*j + f_coeff*E*epsilon0 + dot_coeff*B*B.dot(jf) - cross_coeff*B.cross(jf); 
+          Eigen::Vector3d solj = j_coeff*j + f_coeff*E*epsilon0 + dot_coeff*B*B.dot(jf) - cross_coeff*B.cross(jf); 
 
-          fPtr[RHOUX] = sol(0)/qbym[n];
-          fPtr[RHOUY] = sol(1)/qbym[n];
-          fPtr[RHOUZ] = sol(2)/qbym[n];
+          fPtr[RHOUX] = solj(0)/qbym[n];
+          fPtr[RHOUY] = solj(1)/qbym[n];
+          fPtr[RHOUZ] = solj(2)/qbym[n];
         }
         if (hasPressure)
         {
