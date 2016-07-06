@@ -112,6 +112,8 @@ namespace Lucee
 
       int recordSize = localRecord[cellIndex].size();
 
+      std::cout << "recordSize = " << recordSize << std::endl;
+
       // Iterate over list to perform a time average
       for (std::list<std::vector<double> >::const_iterator it = localRecord[cellIndex].begin(),
           end = localRecord[cellIndex].end();

@@ -53,6 +53,11 @@ namespace Lucee
     else
       checkTimeStepSize = false;
 
+    // Factor in front of derivative
+    alpha = 1.0;
+    if (tbl.hasNumber("alpha"))
+      alpha = tbl.getNumber("alpha");
+
     if (tbl.hasNumber("polyOrder"))
       polyOrder = tbl.getNumber("polyOrder");
     else
@@ -65,8 +70,8 @@ namespace Lucee
     else
       throw Lucee::Except("RecoveryDG1DUpdater::readInput: Must specify derivative order using 'derivOrder'");
 
-    if (polyOrder > 2 || derivOrder > 3)
-     throw Lucee::Except("RecoveryDG1DUpdater::readInput: Only polyOrder 1-2 and derivOrder 1-3 supported.");
+    if (polyOrder > 2 || derivOrder > 4)
+     throw Lucee::Except("RecoveryDG1DUpdater::readInput: Only polyOrder 1-2 and derivOrder 1-4 supported.");
   }
 
   void
@@ -175,6 +180,29 @@ namespace Lucee
         lowerMat(0,1)=11/(4*dq[0]*dq[0]);
         lowerMat(1,0)=-1/(2*dq[0]*dq[0]);
         lowerMat(1,1)=-7/(4*dq[0]*dq[0]);
+      }
+      else if (derivOrder == 4)
+      {
+        selfCenter(0,0)=0;
+        selfCenter(0,1)=0;
+        selfCenter(1,0)=0;
+        selfCenter(1,1)=0;
+        upperCenter(0,0)=1/(dq[0]*dq[0]*dq[0]);
+        upperCenter(0,1)=-1/(dq[0]*dq[0]*dq[0]);
+        upperCenter(1,0)=-1/(dq[0]*dq[0]*dq[0]);
+        upperCenter(1,1)=16/(dq[0]*dq[0]*dq[0]);
+        lowerCenter(0,0)=16/(dq[0]*dq[0]*dq[0]);
+        lowerCenter(0,1)=-1/(dq[0]*dq[0]*dq[0]);
+        lowerCenter(1,0)=-1/(dq[0]*dq[0]*dq[0]);
+        lowerCenter(1,1)=1/(dq[0]*dq[0]*dq[0]);
+        upperMat(0,0)=-1/(dq[0]*dq[0]*dq[0]);
+        upperMat(0,1)=1/(dq[0]*dq[0]*dq[0]);
+        upperMat(1,0)=-14/(dq[0]*dq[0]*dq[0]);
+        upperMat(1,1)=-1/(dq[0]*dq[0]*dq[0]);
+        lowerMat(0,0)=-1/(dq[0]*dq[0]*dq[0]);
+        lowerMat(0,1)=-14/(dq[0]*dq[0]*dq[0]);
+        lowerMat(1,0)=1/(dq[0]*dq[0]*dq[0]);
+        lowerMat(1,1)=-1/(dq[0]*dq[0]*dq[0]);
       }
     }
     else if (polyOrder == 2)
@@ -323,6 +351,54 @@ namespace Lucee
         lowerMat(2,1)=19/(20*dq[0]*dq[0]);
         lowerMat(2,2)=77/(80*dq[0]*dq[0]);
       }
+      else if (derivOrder == 4)
+      {
+        selfCenter(0,0)=0;
+        selfCenter(0,1)=0;
+        selfCenter(0,2)=0;
+        selfCenter(1,0)=0;
+        selfCenter(1,1)=0;
+        selfCenter(1,2)=0;
+        selfCenter(2,0)=0;
+        selfCenter(2,1)=0;
+        selfCenter(2,2)=0;
+        upperCenter(0,0)=51/(40*dq[0]*dq[0]*dq[0]);
+        upperCenter(0,1)=-103/(10*dq[0]*dq[0]*dq[0]);
+        upperCenter(0,2)=-239/(40*dq[0]*dq[0]*dq[0]);
+        upperCenter(1,0)=-23/(10*dq[0]*dq[0]*dq[0]);
+        upperCenter(1,1)=138/(5*dq[0]*dq[0]*dq[0]);
+        upperCenter(1,2)=47/(10*dq[0]*dq[0]*dq[0]);
+        upperCenter(2,0)=-319/(40*dq[0]*dq[0]*dq[0]);
+        upperCenter(2,1)=7/(10*dq[0]*dq[0]*dq[0]);
+        upperCenter(2,2)=2691/(40*dq[0]*dq[0]*dq[0]);
+        lowerCenter(0,0)=2691/(40*dq[0]*dq[0]*dq[0]);
+        lowerCenter(0,1)=7/(10*dq[0]*dq[0]*dq[0]);
+        lowerCenter(0,2)=-319/(40*dq[0]*dq[0]*dq[0]);
+        lowerCenter(1,0)=47/(10*dq[0]*dq[0]*dq[0]);
+        lowerCenter(1,1)=138/(5*dq[0]*dq[0]*dq[0]);
+        lowerCenter(1,2)=-23/(10*dq[0]*dq[0]*dq[0]);
+        lowerCenter(2,0)=-239/(40*dq[0]*dq[0]*dq[0]);
+        lowerCenter(2,1)=-103/(10*dq[0]*dq[0]*dq[0]);
+        lowerCenter(2,2)=51/(40*dq[0]*dq[0]*dq[0]);
+        upperMat(0,0)=529/(40*dq[0]*dq[0]*dq[0]);
+        upperMat(0,1)=33/(10*dq[0]*dq[0]*dq[0]);
+        upperMat(0,2)=-61/(40*dq[0]*dq[0]*dq[0]);
+        upperMat(1,0)=-337/(10*dq[0]*dq[0]*dq[0]);
+        upperMat(1,1)=2/(5*dq[0]*dq[0]*dq[0]);
+        upperMat(1,2)=33/(10*dq[0]*dq[0]*dq[0]);
+        upperMat(2,0)=-1821/(40*dq[0]*dq[0]*dq[0]);
+        upperMat(2,1)=-217/(10*dq[0]*dq[0]*dq[0]);
+        upperMat(2,2)=289/(40*dq[0]*dq[0]*dq[0]);
+        lowerMat(0,0)=289/(40*dq[0]*dq[0]*dq[0]);
+        lowerMat(0,1)=-217/(10*dq[0]*dq[0]*dq[0]);
+        lowerMat(0,2)=-1821/(40*dq[0]*dq[0]*dq[0]);
+        lowerMat(1,0)=33/(10*dq[0]*dq[0]*dq[0]);
+        lowerMat(1,1)=2/(5*dq[0]*dq[0]*dq[0]);
+        lowerMat(1,2)=-337/(10*dq[0]*dq[0]*dq[0]);
+        lowerMat(2,0)=-61/(40*dq[0]*dq[0]*dq[0]);
+        lowerMat(2,1)=33/(10*dq[0]*dq[0]*dq[0]);
+        lowerMat(2,2)=529/(40*dq[0]*dq[0]*dq[0]);
+      }
     }
 
     // Multiply relevant matrices by massMatrixInv
@@ -372,9 +448,10 @@ namespace Lucee
       outFld.setPtr(outFldPtr, ix);
       
       // Keep track of maximum cfla (v-parallel diffusion)
-      cfla = std::max(cfla, dt/(grid.getDx(0)*grid.getDx(0)) );
-      if (checkTimeStepSize == true && cfla > cflm)
-        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+      if (derivOrder == 2)
+        cfla = std::max(cfla, std::fabs(alpha)*dt/(grid.getDx(0)*grid.getDx(0)) );
+      else if (derivOrder == 4)
+        cfla = std::max(cfla, std::fabs(alpha)*16*dt/(grid.getDx(0)*grid.getDx(0)*grid.getDx(0)*grid.getDx(0)));
       
       //idx[0] = ix;
       //grid.setIndex(idx);
@@ -412,8 +489,12 @@ namespace Lucee
 
       // Accumulate updateF to output
       for (int i = 0; i < nlocal; i++)
-        outFldPtr[i] = outFldPtr[i] + updateF(i);
+        outFldPtr[i] = outFldPtr[i] + alpha*updateF(i);
     }
+
+    // Check time step criteria
+    if (checkTimeStepSize == true && cfla > cflm)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     seq.reset();
     // Final sweep, update solution with forward Euler step

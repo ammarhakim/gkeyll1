@@ -35,6 +35,7 @@ set (proto_SOURCES
   LcDistFuncMomentCalcWeighted2D.cpp
   LcDistFuncMomentCalcWeighted3D.cpp
   LcDistFuncReflectionBcUpdater.cpp
+  LcDualSymmetry1D2VUpdater.cpp
   LcETGAdiabaticPotentialUpdater.cpp
   LcETGAdiabaticPotentialUpdater3D.cpp
   LcETGAdjointSource.cpp
@@ -92,6 +93,7 @@ set (proto_SOURCES
   LcRecordFieldDerivInCell.cpp
   LcRecordFieldInCell.cpp
   LcRecoveryDG1DUpdater.cpp
+  LcRecoveryDG3DUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp

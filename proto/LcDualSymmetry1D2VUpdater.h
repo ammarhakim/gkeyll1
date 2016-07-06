@@ -1,11 +1,12 @@
 /**
- * @file	LcRunningAverageOfFieldCalc.h
+ * @file	LcDualSymmetry1D2VUpdater.h
  *
- * @brief	Using the past N inputs, computes average of field at each node
+ * @brief	Simple updater that takes in a function W(y,py,px) and returns
+ * and updater with the result W' = 0.5*[W(y,py,px) + W(y,-py,px)]
  */
 
-#ifndef LC_RUNNING_AVERAGE_OF_FIELD_CALC_H
-#define LC_RUNNING_AVERAGE_OF_FIELD_CALC_H
+#ifndef LC_DUAL_SYMMETRY_1D_2V_UPDATER_H
+#define LC_DUAL_SYMMETRY_1D_2V_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -13,27 +14,34 @@
 #endif
 
 // lucee includes
-//#include <LcDynVector.h>
-#include <LcField.h>
+#include <LcNodalFiniteElementIfc.h>
+#include <LcStructGridField.h>
 #include <LcUpdaterIfc.h>
 
 // std includes
-#include <list>
+#include <vector>
 
 namespace Lucee
 {
 /**
- * Updater to record field in a cell
+ * Updater to evaluate the diffusion term in the Lenard-Bernstein
+ * collision operator.
  */
-  template <unsigned NDIM>
-  class RunningAverageOfFieldCalc : public Lucee::UpdaterIfc
+  class DualSymmetry1D2VUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
-/** Create new modal DG solver in 1D */
-      RunningAverageOfFieldCalc();
+/**
+ * Create new updater.
+ */
+      DualSymmetry1D2VUpdater();
+
+/**
+ * Destroy updater.
+ */
+      ~DualSymmetry1D2VUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -68,11 +76,11 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Size of history to keep at every node in local region */
-      int sampleSize;
-/** Local record (cellIndex) -> list of node histories -> vector of node values at a time */
-      std::vector<std::list<std::vector<double> > > localRecord;
+/** Pointer to nodal basis functions to use */
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
+/** Mapping for 180 degree rotations */
+      std::vector<unsigned> rotMap;
   };
 }
 
-#endif // LC_RUNNING_AVERAGE_OF_FIELD_CALC_H
+#endif // LC_DUAL_SYMMETRY_1D_2V_UPDATER_H
