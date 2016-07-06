@@ -27,6 +27,7 @@
 #include <LcDistFuncMomentCalcWeighted2D.h>
 #include <LcDistFuncMomentCalcWeighted3D.h>
 #include <LcDistFuncReflectionBcUpdater.h>
+#include <LcDualSymmetry1D2VUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater.h>
 #include <LcETGAdiabaticPotentialUpdater3D.h>
 #include <LcETGAdjointSource.h>
@@ -72,6 +73,7 @@
 #include <LcRecordFieldDerivInCell.h>
 #include <LcRecordFieldInCell.h>
 #include <LcRecoveryDG1DUpdater.h>
+#include <LcRecoveryDG3DUpdater.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -144,6 +146,7 @@ namespace Lucee
       .append<Lucee::DistFuncMomentCalcWeighted2D>()
       .append<Lucee::DistFuncMomentCalcWeighted3D>()
       .append<Lucee::DistFuncReflectionBcUpdater>()
+      .append<Lucee::DualSymmetry1D2VUpdater>()
       .append<Lucee::EnergyFromStreamAndVortUpdater>()
       .append<Lucee::EnergyFromStreamFunctionUpdater>()
 
@@ -282,6 +285,7 @@ namespace Lucee
       .append<Lucee::RectFourthOrderCentralDiffUpdater<3> >()
 
       .append<Lucee::RecoveryDG1DUpdater>()
+      .append<Lucee::RecoveryDG3DUpdater>()
 
       .append<Lucee::RunningAverageOfFieldCalc<3> >()
 

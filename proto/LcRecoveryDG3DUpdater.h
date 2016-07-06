@@ -1,12 +1,12 @@
 /**
- * @file	LcRecoveryDG1DUpdater.h
+ * @file	LcRecoveryDG3DUpdater.h
  *
- * @brief	Updater to perform recovery DG calculation for 1d problems.
- * Currently supports calculation of second and third derivatives of input field
+ * @brief	Updater to perform recovery DG calculation for 3d problems.
+ * Currently supports calculation of second and fourth derivatives of polyOrder = 1 input field
  */
 
-#ifndef LC_RECOVERY_DG_1D_UPDATER_H
-#define LC_RECOVERY_DG_1D_UPDATER_H
+#ifndef LC_RECOVERY_DG_3D_UPDATER_H
+#define LC_RECOVERY_DG_3D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -30,7 +30,7 @@ namespace Lucee
  * Updater to evaluate the diffusion term in the Lenard-Bernstein
  * collision operator.
  */
-  class RecoveryDG1DUpdater : public Lucee::UpdaterIfc
+  class RecoveryDG3DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -39,12 +39,12 @@ namespace Lucee
 /**
  * Create new updater.
  */
-      RecoveryDG1DUpdater();
+      RecoveryDG3DUpdater();
 
 /**
  * Destroy updater.
  */
-      ~RecoveryDG1DUpdater();
+      ~RecoveryDG3DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -92,7 +92,7 @@ namespace Lucee
 /** Factor in front of derivative */
       double alpha;
 /** Pointer to nodal basis functions to use */
-      Lucee::NodalFiniteElementIfc<1> *nodalBasis;
+      Lucee::NodalFiniteElementIfc<3> *nodalBasis;
 /** Eigen matrices for recovery calculation */
       Eigen::MatrixXd lowerMat;
       Eigen::MatrixXd upperMat;
@@ -108,4 +108,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_RECOVERY_DG_1D_UPDATER_H
+#endif // LC_RECOVERY_DG_3D_UPDATER_H
