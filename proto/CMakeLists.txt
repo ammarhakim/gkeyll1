@@ -100,6 +100,7 @@ set (proto_SOURCES
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
+  LcSOLTotalIntegralCalc.cpp
   LcSOLUpperXPotentialBcUpdater.cpp
   LcSetSingleNodeToOneUpdater.cpp
   LcSheathParticleSource1x1v.cpp

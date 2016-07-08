@@ -81,6 +81,7 @@
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLSetPotentialAtBoundary.h>
 #include <LcSOLTotalEnergyCalc.h>
+#include <LcSOLTotalIntegralCalc.h>
 #include <LcSOLUpperXPotentialBcUpdater.h>
 #include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
@@ -308,6 +309,7 @@ namespace Lucee
       .append<Lucee::SOLSetPotentialAtBoundary>()
       .append<Lucee::SOLTotalEnergyCalc>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()
+      .append<Lucee::SOLTotalIntegralCalc<3> >()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
       .append<Lucee::ThreeWaveInteractModSrcUpdater>()
