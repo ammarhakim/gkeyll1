@@ -134,7 +134,6 @@ namespace Lucee
     std::vector<double> grad(nlocal);
     Lucee::FieldPtr<double> gPtr = gradXY.createPtr();
     Lucee::ConstFieldPtr<double> phiK = phi.createConstPtr();
-    //std::cout << "Number of local nodes " << nlocal << std::endl;
 
     int idx[NDIM];
     while (seq.step())
@@ -150,7 +149,7 @@ namespace Lucee
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
 // compute gradients in dir directions
-        matVec(1.0, pDiffMatrix[dir].m, &phiK[0], 0.0, &grad[0]);
+        matVec(1.0, diffMatrix[dir].m, &phiK[0], 0.0, &grad[0]);
 // copy gradient into output field
         for (unsigned k=0; k<nlocal; ++k)
           gPtr[NDIM*k+dir] = grad[k];
