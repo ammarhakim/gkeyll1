@@ -1402,5 +1402,13 @@ elseif dim == 4
 % elseif dim == 6
 %     syms x y z w v u f
 end
-
+fileID = fopen('interpMatrix.txt','w');
+    for i=1:size(interpMatrix,1)
+        fprintf(fileID,'[');
+        for j=1:size(interpMatrix,2)
+            fprintf(fileID,'%.16f,', interpMatrix(i,j));
+        end
+        fprintf(fileID,'],');
+    end
+    fclose(fileID);
 end
