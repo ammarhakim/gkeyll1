@@ -37,5 +37,3 @@ Evs : (Evs : [], for i from 1 thru length(vals[1])
         do (for j from 1 thru vals[2][i]
 	  do (Evs : append(Evs, [vals[1][i]]))), Evs);
 
-/** Compute waves */
-

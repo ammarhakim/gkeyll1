@@ -131,8 +131,10 @@ namespace Lucee
     unsigned nlocal = nodalBasis->getNumNodes();
 
 // space for various quantities
-    std::vector<double> phiK(nlocal), grad(nlocal);
+    std::vector<double> grad(nlocal);
     Lucee::FieldPtr<double> gPtr = gradXY.createPtr();
+    Lucee::ConstFieldPtr<double> phiK = phi.createConstPtr();
+    std::cout << "Number of local nodes " << nlocal << std::endl;
 
     int idx[NDIM];
     while (seq.step())
@@ -140,14 +142,15 @@ namespace Lucee
       seq.fillWithIndex(idx);
       nodalBasis->setIndex(idx);
       gradXY.setPtr(gPtr, idx);
+      phi.setPtr(phiK, idx);
 
 // extract potential at this location
-      nodalBasis->extractFromField(phi, phiK);
+      //nodalBasis->extractFromField(phi, phiK);
 
       for (unsigned dir=0; dir<NDIM; ++dir)
       {
 // compute gradients in dir directions
-        matVec(1.0, pDiffMatrix[dir].m, phiK, 0.0, &grad[0]);
+        matVec(1.0, pDiffMatrix[dir].m, &phiK[0], 0.0, &grad[0]);
 // copy gradient into output field
         for (unsigned k=0; k<nlocal; ++k)
           gPtr[NDIM*k+dir] = grad[k];
@@ -167,7 +170,7 @@ namespace Lucee
   template <unsigned NDIM>
   void 
   NodalGradientUpdater<NDIM>::matVec(double m, const Lucee::Matrix<double>& mat,
-    const std::vector<double>& vec, double v, double *out)
+    const double* vec, double v, double *out)
   {
     double tv;
     unsigned rows = mat.numRows(), cols = mat.numColumns();
