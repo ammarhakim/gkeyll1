@@ -104,7 +104,7 @@ namespace Lucee
  * @param out On output, holds the product.
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
-        const std::vector<double>& vec, double v, double* out);
+        const double* vec, double v, double* out);
   };
 }
 
