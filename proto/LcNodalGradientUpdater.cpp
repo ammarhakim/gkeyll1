@@ -134,7 +134,7 @@ namespace Lucee
     std::vector<double> grad(nlocal);
     Lucee::FieldPtr<double> gPtr = gradXY.createPtr();
     Lucee::ConstFieldPtr<double> phiK = phi.createConstPtr();
-    std::cout << "Number of local nodes " << nlocal << std::endl;
+    //std::cout << "Number of local nodes " << nlocal << std::endl;
 
     int idx[NDIM];
     while (seq.step())
