@@ -99,8 +99,8 @@ namespace Lucee
         //std::cout << distfVector << std::endl;
         //return Lucee::UpdaterStatus(false, 0.0);
         // Write modified values to distfOut
-        //for (int i = 0; i < nlocal; i++)
-        //  distfPtr[i] = 0.0;
+        for (int i = 0; i < nlocal; i++)
+          distfPtr[i] = 0.0;
         continue;
       }
       else if (originalNum == 0.0)
