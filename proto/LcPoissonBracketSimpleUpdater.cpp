@@ -2,7 +2,7 @@
  * @file	LcPoissonBracketSimpleUpdater.cpp
  *
  * @brief	Updater to solver Poisson bracket operator PDEs.
- * This version assumes there is no transformation jacobian, allowing
+ * This version assumes there is no spatially-varying transformation jacobian, allowing
  * for some speedups (?).
  */
 
@@ -73,6 +73,10 @@ namespace Lucee
         throw lce;
       }
     }
+
+    jacobianFactor = 1.0;
+    if (tbl.hasNumber("jacobianFactor"))
+      jacobianFactor = tbl.getNumber("jacobianFactor");
 
     onlyIncrement = false;
     if (tbl.hasBool("onlyIncrement"))
@@ -256,9 +260,9 @@ namespace Lucee
     for (int d = 0; d < updateDirs.size(); d++)
     {
       int dir = updateDirs[d];
-      bigStoredUpperSurfMatrices[d] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-      bigStoredLowerSurfMatrices[d] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
-      bigStoredVolMatrices[d] = massMatrixInv*derivMatrices[d].transpose();
+      bigStoredUpperSurfMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
+      bigStoredLowerSurfMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+      bigStoredVolMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*derivMatrices[d].transpose();
     }
   }
 
