@@ -81,6 +81,8 @@ namespace Lucee
       double cflm;
 /** Type of interface flux to use */
       unsigned fluxType;
+/** (Optional) Constant Jacobian factor for compatibility with other equations */
+      double jacobianFactor;
 /**
  * Struct to hold data for Guassian quadrature.
  */

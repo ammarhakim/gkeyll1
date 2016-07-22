@@ -309,6 +309,7 @@ namespace Lucee
       .append<Lucee::SOLSetPotentialAtBoundary>()
       .append<Lucee::SOLTotalEnergyCalc>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()
+      .append<Lucee::SOLTotalIntegralCalc<1> >()
       .append<Lucee::SOLTotalIntegralCalc<3> >()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
