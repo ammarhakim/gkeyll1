@@ -98,7 +98,7 @@ if dim == 1
         end
         
     elseif order == 2
-        interpList = {-2/3, 0, 2/3};
+        interpList = {-2.0/3.0, 0.0, 2.0/3.0};
         
         interpMatrix = zeros(length(interpList),length(basisList));
         
@@ -109,7 +109,7 @@ if dim == 1
         end
         
     elseif order == 3
-        interpList = {-3/4, -1/4, 1/4, 3/4};
+        interpList = {-3.0/4.0, -1.0/4.0, 1.0/4.0, 3.0/4.0};
         
         interpMatrix = zeros(length(interpList),length(basisList));
         
@@ -120,7 +120,79 @@ if dim == 1
         end
         
     elseif order == 4
-        interpList = {-4/5, -2/5, 0, 2/5, 4/5};
+        interpList = {-4.0/5.0, -2.0/5.0, 0.0, 2.0/5.0, 4.0/5.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+   elseif order == 5
+
+        interpList = {-5.0/6.0, -3.0/6.0, -1.0/6.0, 1.0/6.0, 3.0/6.0, 5.0/6.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+    elseif order == 6
+
+        interpList = {-6.0/7.0, -4.0/7.0, -2.0/7.0, 0.0, 2.0/7.0, 4.0/7.0, 6.0/7.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+    elseif order == 7
+
+        interpList = {-7.0/8.0, -5.0/8.0, -3.0/8.0, -1.0/8.0, 1.0/8.0, 3.0/8.0, 5.0/8.0, 7.0/8.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+    elseif order == 8
+
+        interpList = {-8.0/9.0, -6.0/9.0, -4.0/9.0, -2.0/9.0, 0.0, 2.0/9.0, 4.0/9.0, 6.0/9.0, 8.0/9.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+    elseif order == 9
+
+        interpList = {-9.0/10.0, -7.0/10.0, -5.0/10.0, -3.0/10.0, -1.0/10.0, 1.0/10.0, 3.0/10.0, 5.0/10.0, 7.0/10.0, 9.0/10.0};
+        
+        interpMatrix = zeros(length(interpList),length(basisList));
+        
+        for i=1:size(interpMatrix, 1)
+            for j =1:size(interpMatrix, 2)
+                interpMatrix(i,j) = subs(functionVector(j), interpList(i));
+            end
+        end
+        
+    elseif order == 10
+
+        interpList = {-10.0/11.0, -8.0/11.0, -6.0/11.0, -4.0/11.0, -2.0/11.0, 0.0, 2.0/11.0, 4.0/11.0, 6.0/11.0, 8.0/11.0, 10.0/11.0};
         
         interpMatrix = zeros(length(interpList),length(basisList));
         
