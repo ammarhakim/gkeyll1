@@ -94,8 +94,8 @@ namespace Lucee
       double originalNum = mom0Vector.dot(distfVector);
       if (originalNum < 0.0)
       {
-        std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << 
-          ") entire cell negative (density = " << originalNum << ")" << std::endl;
+        //std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << 
+        //  ") entire cell negative (density = " << originalNum << ")" << std::endl;
         //std::cout << distfVector << std::endl;
         //return Lucee::UpdaterStatus(false, 0.0);
         // Write modified values to distfOut
