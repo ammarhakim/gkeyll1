@@ -79,6 +79,13 @@ namespace Lucee
  */
       void declareTypes();
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);      
+
     private:
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
@@ -248,7 +255,18 @@ namespace Lucee
  * @param out On output, holds the product.
  */
       void matVec(double m, const Lucee::Matrix<double>& mat,
-        const double* vec, double v, double* out);      
+        const double* vec, double v, double* out);
+
+/**
+ * Lua callable method to get wall-clock time for matrix assembly
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaGetAssemblyTime(lua_State *L);      
+
+/** Timers for various steps */
+      double totAssemblyTime;
   };
 }
 

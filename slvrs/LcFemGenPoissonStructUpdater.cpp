@@ -25,10 +25,11 @@
 #include <loki/Singleton.h>
 
 // std includes
+#include <ctime>
+#include <limits>
 #include <set>
 #include <sstream>
 #include <vector>
-#include <limits>
 
 namespace Lucee
 {
@@ -53,6 +54,7 @@ namespace Lucee
 // this flag is needed to ensure PetSc arrays are only deleted if
 // update() method is called at least once.
     runOnce = false;
+    totAssemblyTime = 0.0;
   }
 
 
@@ -781,7 +783,10 @@ namespace Lucee
     Lucee::Field<NDIM, double>& sol = this->getOut<Lucee::Field<NDIM, double> >(0);
 
 // construct stiffness matrix
+    clock_t tmStart = clock();
     assembleStiffness(src, numDens);
+    clock_t tmEnd = clock();
+    totAssemblyTime += (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
 
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
@@ -1235,6 +1240,24 @@ namespace Lucee
         tv += mat(i,j)*vec[j];
       out[i] = m*tv + v*out[i];
     }
+  }
+
+  template <unsigned NDIM>
+  void
+  FemGenPoissonStructUpdater<NDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("totalAssemblyTime", luaGetAssemblyTime);
+  }
+
+  template <unsigned NDIM>  
+  int
+  FemGenPoissonStructUpdater<NDIM>::luaGetAssemblyTime(lua_State *L)
+  {
+    FemGenPoissonStructUpdater<NDIM> *o
+      = Lucee::PointerHolder<FemGenPoissonStructUpdater<NDIM> >::getObj(L);
+    lua_pushnumber(L, o->totAssemblyTime);
+
+    return 1;
   }  
 
 // instantiations
