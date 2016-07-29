@@ -163,6 +163,7 @@ if (PETSC_FOUND)
     LcElectrostaticContPhiUpdater.cpp
     LcFemGKPoissonStructUpdater.cpp 
     LcFemPoissonStructUpdater.cpp
+    LcFemGenPoissonStructUpdater.cpp
   )
 endif (PETSC_FOUND)
 
