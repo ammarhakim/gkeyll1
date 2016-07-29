@@ -166,7 +166,7 @@ namespace Lucee
             weights.resize(nord);
             interpMat.m = Lucee::Matrix<double>(nord, nlocal);
 
-            for (unsigned dir=0; dir<2; ++dir)
+            for (unsigned dir=0; dir<3; ++dir)
               pDiffMatrix[dir].m = Lucee::Matrix<double>(nord, nlocal);
           }
 
@@ -177,7 +177,7 @@ namespace Lucee
 /** Interpolation matrix */
           MatrixHolder interpMat;
 /** Differentiation matrices, computing derivatives at quadrature nodes */
-          MatrixHolder pDiffMatrix[2];
+          MatrixHolder pDiffMatrix[3];
       };      
 
 /** Data for volume quadrature */
