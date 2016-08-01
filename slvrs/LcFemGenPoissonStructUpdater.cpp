@@ -226,8 +226,9 @@ namespace Lucee
     TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
 #endif
 
+    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);    
 #ifdef HAVE_MPI
-    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
+
 #if PETSC_VERSION_GE(3,6,0)    
     MatCreateAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal,
       nz, PETSC_NULL, 
@@ -243,7 +244,6 @@ namespace Lucee
 #else
 // Explicit initialization of stiffness matrix speeds up
 // initialization tremendously.
-      int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
       MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #endif
       MatSetFromOptions(stiffMat);
@@ -253,7 +253,13 @@ namespace Lucee
 // Depending on the type of BCs, we will be modifying stiffMat and adding new nonzero values.
 // In later versions of PETSc, we need to set the following in order for PETSc to not throw errors.
       MatSetOption(stiffMat, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-#endif      
+#endif
+
+#ifdef HAVE_MPI
+      MatMPIAIJSetPreallocation(stiffMat, nz, NULL, nz, NULL);
+#else
+      MatSeqAIJSetPreallocation(stiffMat, nz, NULL);
+#endif
 
 // now create vector to store source: MatGetVecs ensures that the
 // parallel layout is the same as the stiffness matrix.
@@ -450,8 +456,14 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     int idx[NDIM];
 
+    if (isFirst)
+      isFirst = false;
+    else
+      MatZeroEntries(stiffMat);
+
     Lucee::ConstFieldPtr<double> numDensPtr = numDens.createConstPtr();
 
+    
 // loop, creating global stiffness matrix
     while (seq.step())
     {
@@ -786,7 +798,7 @@ namespace Lucee
     clock_t tmStart = clock();
     assembleStiffness(src, numDens);
     clock_t tmEnd = clock();
-    totAssemblyTime += (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
+    totAssemblyTime = (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
 
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
