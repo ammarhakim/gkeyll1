@@ -46,6 +46,7 @@
 #include <LcIntegrateFieldProduct.h>
 #include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
+#include <LcIonizationSource.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
 #include <LcMaxwellDistInit.h>
 #include <LcMaxwellTm2DUpdater.h>
@@ -74,8 +75,8 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRecoveryDG1DUpdater.h>
 #include <LcRecoveryDG3DUpdater.h>
-#include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
+#include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
@@ -203,6 +204,8 @@ namespace Lucee
       .append<Lucee::IntegrateFieldProduct<1> >()
       .append<Lucee::IntegrateFieldProduct<2> >()
       .append<Lucee::IntegrateFieldProduct<3> >()
+
+      .append<Lucee::IonizationSource>()
 
       .append<Lucee::MaxwellDistInit<1, 1> >()
       .append<Lucee::MaxwellDistInit<1, 2> >()
