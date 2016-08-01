@@ -299,13 +299,14 @@ namespace Lucee
         //        double coeff_k = 1.0/denom*0; 
         double coeff_dot = (1.0/64.0*delta*delta - 1.0/16.0*gamma2*(1+theta/4));
         double coeff_cross = 0.125*delta*(1 + gamma2*babs*babs/16 + theta/4);
-        Eigen::Vector3d fk = 1.0*F + K; // vector holding sum of K + 2 epsilon0 E used in many calculations
+        Eigen::Vector3d fk = 1.0*F + K/epsilon0; // vector holding sum of K + 2 epsilon0 E used in many calculations
         //        fk(0) = K[0] + emPtr[EX]*2*epsilon0;
         //        fk(1) = K[1] + emPtr[EY]*2*epsilon0; 
         //        fk(2) = K[2] + emPtr[EZ]*2*epsilon0; 
-        emPtr[EX] = (coeff_e*fk[EX] + coeff_dot*B(0)*B.dot(fk) + coeff_cross*(B.cross(fk)(0)) )/epsilon0/denom; 
-        emPtr[EY] = (coeff_e*fk[EY] + coeff_dot*B(1)*B.dot(fk) + coeff_cross*(B.cross(fk)(1)) )/epsilon0/denom; 
-        emPtr[EZ] = (coeff_e*fk[EZ] + coeff_dot*B(2)*B.dot(fk) + coeff_cross*(B.cross(fk)(2)) )/epsilon0/denom; 
+        emPtr[EX] = (coeff_e*fk[EX] + coeff_dot*B(0)*B.dot(fk) + coeff_cross*(B.cross(fk)(0)) )/denom; 
+        emPtr[EY] = (coeff_e*fk[EY] + coeff_dot*B(1)*B.dot(fk) + coeff_cross*(B.cross(fk)(1)) )/denom; 
+        emPtr[EZ] = (coeff_e*fk[EZ] + coeff_dot*B(2)*B.dot(fk) + coeff_cross*(B.cross(fk)(2)) )/denom; 
+
         // update the stored E field to E_n+1/2
         E(0) = (emPtr[EX] + E(0))/2.0;
         E(1) = (emPtr[EY] + E(1))/2.0;
