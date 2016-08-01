@@ -31,21 +31,21 @@ namespace Lucee
     Lucee::PointSourceIfc::readInput(tbl);
     // get ionization constant, density and gas gamma
     if (tbl.hasNumber("ionizationConst"))
-      double ionizationConst = tbl.getNumber("ionizationConst");
+      ionizationConst = tbl.getNumber("ionizationConst");
     else
       throw Lucee::Except("IonizationSource::readInput: Must specify ionization constant using 'ionizationConst'");
 
     if (tbl.hasNumber("massElc"))
-      double massElc = tbl.getNumber("massElc");
+      massElc = tbl.getNumber("massElc");
     else
       throw Lucee::Except("IonizationSource::readInput: Must specify electron mass using 'massElc'");
     if (tbl.hasNumber("massIon"))
-      double massIon = tbl.getNumber("massIon");
+      massIon = tbl.getNumber("massIon");
     else
       throw Lucee::Except("IonizationSource::readInput: Must specify ion mass using 'massIon'");
 
     ionizationConstDensityElc = ionizationConst;
-    ionizationConstDensityElc = ionizationConst*massIon/massElc;
+    ionizationConstDensityIon = ionizationConst*massIon/massElc;
     ionizationConstEnergy = 0.5*ionizationConst/massElc;
 
     if (tbl.hasNumber("gasGamma"))

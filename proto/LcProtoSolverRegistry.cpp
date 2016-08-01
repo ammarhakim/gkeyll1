@@ -205,8 +205,6 @@ namespace Lucee
       .append<Lucee::IntegrateFieldProduct<2> >()
       .append<Lucee::IntegrateFieldProduct<3> >()
 
-      .append<Lucee::IonizationSource>()
-
       .append<Lucee::MaxwellDistInit<1, 1> >()
       .append<Lucee::MaxwellDistInit<1, 2> >()
       .append<Lucee::MaxwellDistInit<1, 3> >()
@@ -330,6 +328,11 @@ namespace Lucee
 
       .append<Lucee::ZonalAverageCalc3D>()
       .append<Lucee::ZonalVelocity1DUpdater>()
+      ;
+
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >
+      ::Instance()
+      .append<Lucee::IonizationSource>()
       ;
 
 #ifdef HAVE_PETSC
