@@ -263,10 +263,13 @@ namespace Lucee
  * @param L Lua state to use.
  * @return number of output parameters.
  */
-      static int luaGetAssemblyTime(lua_State *L);      
+      static int luaGetAssemblyTime(lua_State *L);
+
+      void DoPetscAssembly(Mat& mat);
 
 /** Timers for various steps */
       double totAssemblyTime;
+      int assembleCalls;
   };
 }
 
