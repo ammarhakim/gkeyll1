@@ -49,10 +49,18 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  FemGenPoissonStructUpdater<NDIM>::DoPetscAssembly(Mat& mat)
+  FemGenPoissonStructUpdater<NDIM>::DoPetscAssembly(Mat& mat, bool isFinal)
   {
-    MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
+    if (isFinal)
+    {
+      MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
+      MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
+    }
+    else
+    {
+      MatAssemblyBegin(mat, MAT_FLUSH_ASSEMBLY);
+      MatAssemblyEnd(mat, MAT_FLUSH_ASSEMBLY);
+    }
     //std::cout << "Assemble called " << ++assembleCalls << " times!" << std::endl;
   }
 
@@ -490,7 +498,7 @@ namespace Lucee
       for (unsigned k=0; k<nlocal; ++k)
       {
         for (unsigned m=0; m<nlocal; ++m)
-          vals[nlocal*k+m] = -laplacianWeight*localStiff(k,m)+modifierConstant*localMass(k,m); //  // Default PetSc layout is row-major
+          vals[nlocal*k+m] = -laplacianWeight*localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
       }
 
       nodalBasis->getLocalToGlobal(lgMap);

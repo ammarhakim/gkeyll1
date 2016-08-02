@@ -265,7 +265,7 @@ namespace Lucee
  */
       static int luaGetAssemblyTime(lua_State *L);
 
-      void DoPetscAssembly(Mat& mat);
+      void DoPetscAssembly(Mat& mat, bool isFinal = true);
 
 /** Timers for various steps */
       double totAssemblyTime;
