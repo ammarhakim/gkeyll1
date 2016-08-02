@@ -58,6 +58,7 @@
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
+#include <LcNeutralDragForceSource.h>
 #include <LcNodalCopy1DTo3DFieldUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNodalCopy3DTo5DFieldUpdater.h>
@@ -333,6 +334,7 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >
       ::Instance()
       .append<Lucee::IonizationSource>()
+      .append<Lucee::NeutralDragForceSource>()
       ;
 
 #ifdef HAVE_PETSC
