@@ -48,6 +48,15 @@ namespace Lucee
   template <> const char *FemGenPoissonStructUpdater<3>::id = "FemGenPoisson3D";
 
   template <unsigned NDIM>
+  void
+  FemGenPoissonStructUpdater<NDIM>::DoPetscAssembly(Mat& mat)
+  {
+    MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
+    //std::cout << "Assemble called " << ++assembleCalls << " times!" << std::endl;
+  }
+
+  template <unsigned NDIM>
   FemGenPoissonStructUpdater<NDIM>::FemGenPoissonStructUpdater()
     : Lucee::UpdaterIfc()
   {
@@ -55,6 +64,7 @@ namespace Lucee
 // update() method is called at least once.
     runOnce = false;
     totAssemblyTime = 0.0;
+    assembleCalls = 0;
   }
 
 
@@ -260,6 +270,8 @@ namespace Lucee
 #else
       MatSeqAIJSetPreallocation(stiffMat, nz, NULL);
 #endif
+
+      MatSetOption(stiffMat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 
 // now create vector to store source: MatGetVecs ensures that the
 // parallel layout is the same as the stiffness matrix.
@@ -487,15 +499,7 @@ namespace Lucee
         &vals[0], ADD_VALUES);
     }
 
-    DMSG("Before MatAssemblyBegin");
-
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    DMSG("After MatAssemblyBegin");
-
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
-    DMSG("Basic stiffness matrix computed");
-
+    DoPetscAssembly(stiffMat);
 
 // modify values in stiffness matrix based on Dirichlet Bcs
     for (unsigned d=0; d<NDIM; ++d)
@@ -658,16 +662,12 @@ namespace Lucee
     }
     
 // reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
-    DMSG("Phase I of periodic BCs completed");
+    DoPetscAssembly(stiffMat);
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
 // MatZeroRows and MatSetValues without an intervening calls to
-// MatAssemblyBegin/MatAssemblyEnd. So if Petsc was not so annoying
-// this extra mess would not be needed. (Ammar, April 4 2012).
+// MatAssemblyBegin/MatAssemblyEnd.
     for (unsigned d=0; d<NDIM; ++d)
     {
       if (periodicFlgs[d] == true)
@@ -722,12 +722,8 @@ namespace Lucee
       }
     }
     
-    DMSG("Phase IIa of periodic BCs completed");
 // reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
-
-    DMSG("Phase II of periodic BCs completed");
+    DoPetscAssembly(stiffMat);
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
@@ -748,8 +744,7 @@ namespace Lucee
     }
 
 // reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+    DoPetscAssembly(stiffMat);
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
@@ -767,8 +762,7 @@ namespace Lucee
     }
 
 // reassemble matrix after modification
-    MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
+    DoPetscAssembly(stiffMat);
 
     if (writeMatrix)
     {
