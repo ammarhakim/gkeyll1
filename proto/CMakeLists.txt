@@ -54,6 +54,7 @@ set (proto_SOURCES
   LcIntegrateFieldProduct.cpp
   LcIntegrateGeneralField.cpp
   LcIntegrateNodalField.cpp
+  LcIonizationSource.cpp
   LcLinEmGke1dHamilPertUpdater.cpp
   LcMaxwellDistInit.cpp
   LcMaxwellTm2DUpdater.cpp

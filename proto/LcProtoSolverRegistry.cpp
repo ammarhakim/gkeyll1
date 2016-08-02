@@ -46,6 +46,7 @@
 #include <LcIntegrateFieldProduct.h>
 #include <LcIntegrateGeneralField.h>
 #include <LcIntegrateNodalField.h>
+#include <LcIonizationSource.h>
 #include <LcLinEmGke1dHamilPertUpdater.h>
 #include <LcMaxwellDistInit.h>
 #include <LcMaxwellTm2DUpdater.h>
@@ -74,8 +75,8 @@
 #include <LcRecordFieldInCell.h>
 #include <LcRecoveryDG1DUpdater.h>
 #include <LcRecoveryDG3DUpdater.h>
-#include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
+#include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
@@ -327,6 +328,11 @@ namespace Lucee
 
       .append<Lucee::ZonalAverageCalc3D>()
       .append<Lucee::ZonalVelocity1DUpdater>()
+      ;
+
+    Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::PointSourceIfc> >
+      ::Instance()
+      .append<Lucee::IonizationSource>()
       ;
 
 #ifdef HAVE_PETSC
