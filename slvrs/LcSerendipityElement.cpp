@@ -64,6 +64,10 @@ namespace Lucee
       maxPower = 4;
     else
       maxPower = 3*polyOrder;
+    
+    if (tbl.hasNumber("num1DGaussPoints"))
+      numGaussPoints = tbl.getNumber("num1DGaussPoints");
+    else numGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
      
     // Local-to-global mapping valid for polyOrder = 1 in 2d
     const Lucee::StructuredGridBase<NDIM>& grid 
@@ -1605,7 +1609,6 @@ namespace Lucee
     computeBasisFunctions(functionVector, nodeList, polyOrder);
 
     // Compute gaussian quadrature weights and locations in 1-D
-    numGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
     gaussPoints  = std::vector<double>(numGaussPoints);
     gaussWeights = std::vector<double>(numGaussPoints);
     legendre_set(numGaussPoints, &gaussPoints[0], &gaussWeights[0]);

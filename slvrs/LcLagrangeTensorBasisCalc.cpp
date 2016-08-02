@@ -225,6 +225,13 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  void
+  LagrangeTensorBasisCalc<NDIM>::setNum1DGaussNodes(unsigned nodeCount)
+  {
+    num1DGaussPoints = nodeCount;
+  }
+
+  template <unsigned NDIM>
   double
   LagrangeTensorBasisCalc<NDIM>::evalBasis(unsigned bIdx, double xc[NDIM]) const
   {
@@ -589,22 +596,9 @@ namespace Lucee
   void
   LagrangeTensorBasisCalc<NDIM>::calcVolumeQuad()
   {
-    unsigned maxNodes = 0;
-    for (unsigned d=0; d<NDIM; ++d)
-      maxNodes = numNodes[d]>maxNodes ? numNodes[d] : maxNodes;
-
     numGaussVolNodes = 1;
-    unsigned polyOrder = maxNodes - 1;
-    // figure out how many quadrature points needed to do 4*polyOrder integration
-    // (or 3*polyOrder integration if polyOrder > 1 for some reason)
-    unsigned maxPower;
-    if (polyOrder == 1)
-      maxPower = 4;
-    else maxPower = 3*polyOrder;
-    unsigned num1DGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
-    maxNodes = num1DGaussPoints;
 
-    blitz::Array<double, 2> ordinates(NDIM, maxNodes), weights(NDIM, maxNodes);
+    blitz::Array<double, 2> ordinates(NDIM, num1DGaussPoints), weights(NDIM, num1DGaussPoints);
 
 // compute ordinates/weights for 1D integration and store them
     for (int d=0; d<NDIM; ++d)

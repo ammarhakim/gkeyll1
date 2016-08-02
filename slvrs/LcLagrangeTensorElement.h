@@ -299,7 +299,8 @@ namespace Lucee
     private:
 /** Basis function calculator */
       Lucee::LagrangeTensorBasisCalc<NDIM> basisCalc;
-
+/** Number of 1d volume quadrature nodes to compute */
+      unsigned num1DGaussPoints;
 /** Number of nodes in each direction */
       unsigned numNodes[NDIM];
 /** Indices of exclusively owned nodes */
