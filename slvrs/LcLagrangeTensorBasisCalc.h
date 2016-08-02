@@ -250,6 +250,13 @@ namespace Lucee
       }
 
 /**
+ * Set the number of nodes for Gaussian quadrature in 1d
+ *
+ * @param nodeCount number of 1d quadrature nodes
+ */
+      void setNum1DGaussNodes(unsigned nodeCount);
+
+/**
  * Evaluate specified basis function at location. This method is very
  * slow, and so should not be called inside an inner loop. It is
  * provided to allow initialization of data needed in updaters, so its
@@ -348,6 +355,8 @@ namespace Lucee
       unsigned totalNodes;
 /** Total number of volume quadrature nodes */
       unsigned numGaussVolNodes;
+/** Total number of 1d quadrature nodes */
+      unsigned num1DGaussPoints;
 /** Region representing node shape */
       typename Lucee::Region<NDIM, int> nodeRgn;
 
