@@ -57,11 +57,14 @@ set(lcslvrs_SOURCES
   LcHeatFluxAtEdgeUpdater.cpp
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
+  LcHyperTwentyMomentEquation.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
+  LcImplicitHyperTwentyMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
   LcImplicitTwentyMomentSrcUpdater.cpp
   LcImplicitTwentyMomentCollisionUpdater.cpp
+  LcImplicitTwentyMomentHeatFluxLimitUpdater.cpp
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdge3DUpdater.cpp
