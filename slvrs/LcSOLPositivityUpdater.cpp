@@ -151,8 +151,11 @@ namespace Lucee
       {
         std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4]
           << ") entire cell negative (density = " << originalNum << ")" << std::endl;
-        for (int i = 0; i < nlocal; i++)
-          distfPtr[i] = 0.0;
+        for (int i = 0; i < nlocal5d; i++)
+        {
+          if (distfPtr[i] < 0.0)
+            distfPtr[i] = 0.0;
+        }
         continue;
         //std::cout << distfVector << std::endl;
         //return Lucee::UpdaterStatus(false, 0.0);
