@@ -17,6 +17,7 @@
 #include <LcEulerEquation.h>
 #include <LcGradEquation.h>
 #include <LcHyperEquationRegistry.h>
+#include <LcHyperTwentyMomentEquation.h>
 #include <LcIsoThermEulerEquation.h>
 #include <LcLenardBernsteinVParEquation.h>
 #include <LcMaxwellEquation.h>
@@ -45,6 +46,7 @@ namespace Lucee
       .append<Lucee::IsoThermEulerEquation>()
       .append<Lucee::TenMomentEquation>()
       .append<Lucee::TwentyMomentEquation>()
+      .append<Lucee::HyperTwentyMomentEquation>()
       .append<Lucee::MaxwellEquation>()
       .append<Lucee::PhMaxwellEquation>()
       .append<Lucee::DivEquation<1> >()

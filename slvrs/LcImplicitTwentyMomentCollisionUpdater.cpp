@@ -137,9 +137,9 @@ namespace Lucee
 
       if (lim){
 
-        double boundx = sqrt(r)*qxxx/sqrt(pxx)/pxx;
-        double boundy = sqrt(r)*qyyy/sqrt(pyy)/pyy;
-        double boundz = sqrt(r)*qzzz/sqrt(pzz)/pzz;
+        double boundx = sqrt(r)*edt*qxxx/sqrt(pxx)/pxx;
+        double boundy = sqrt(r)*edt*qyyy/sqrt(pyy)/pyy;
+        double boundz = sqrt(r)*edt*qzzz/sqrt(pzz)/pzz;
         double boundmax = std::max(std::max(fabs(boundx),fabs(boundy)),fabs(boundz));
 
         if (boundmax > frac) { 
