@@ -73,8 +73,6 @@ namespace Lucee
     const Lucee::Field<2, double>& phiZLowerIn = this->getInp<Lucee::Field<2, double> >(0);
     // input 2d potential on upper z surface
     const Lucee::Field<2, double>& phiZUpperIn = this->getInp<Lucee::Field<2, double> >(1);
-    // input DynVector containing value to set phi on upper 0 surface
-    const Lucee::DynVector<double>& phiXUpperIn = this->getInp<Lucee::DynVector<double> >(2);
     // output 3d potential
     Lucee::Field<3, double>& phi3dOut = this->getOut<Lucee::Field<3, double> >(0);
 
@@ -92,10 +90,6 @@ namespace Lucee
     Lucee::RowMajorSequencer<3> seq(localRgn);
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
 
-    // Get value from phiXUpperIn
-    std::vector<double> phiXUpperVec = phiXUpperIn.getLastInsertedData();
-    //double phiXUpperVal = phiXUpperVec[0];
-
     // Loop over every cell in the local region
     // Only set a value if it is on a Dirchlet BC surface
     while(seq.step())
@@ -111,7 +105,7 @@ namespace Lucee
         nodalBasis3d->getSurfUpperNodeNums(0, nodeNums);
 
         for (int i = 0; i < nodeNums.size(); i++)
-          phi3dOutPtr[nodeNums[i]] = phiXUpperVec[0];
+          phi3dOutPtr[nodeNums[i]] = 0.0;
       }
 
       if (applyLowerEdge == true && idx[0] == globalRgn.getLower(0))
@@ -120,7 +114,7 @@ namespace Lucee
         nodalBasis3d->getSurfLowerNodeNums(0, nodeNums);
 
         for (int i = 0; i < nodeNums.size(); i++)
-          phi3dOutPtr[nodeNums[i]] = phiXUpperVec[1];
+          phi3dOutPtr[nodeNums[i]] = 0.0;
       }
 
       // Set value on lower 2 surface to phiZLower values
@@ -156,8 +150,6 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
     // Input 2d potential on upper z surface
     this->appendInpVarType(typeid(Lucee::Field<2, double>));
-    // Input DynVector containing value for phi on upper x surface
-    this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // Output 3d potential containing Dirchlet boundary values
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
   }
