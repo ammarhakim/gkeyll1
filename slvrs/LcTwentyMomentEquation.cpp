@@ -78,7 +78,7 @@ namespace Lucee
   TwentyMomentEquation::TwentyMomentEquation()
     : Lucee::HyperEquation(20,20)
     {
-// twenty equations, 9 waves
+// twenty equations, twenty waves
     }
 
   void TwentyMomentEquation::readInput(Lucee::LuaTable& tbl)
@@ -183,6 +183,8 @@ namespace Lucee
         k = (1 + (v[RHO]*(v[Q111]*v[Q111]/(v[P11]*v[P11]*v[P11]) + v[Q222]*v[Q222]/(v[P22]*v[P22]*v[P22]) + v[Q333]*v[Q333]/(v[P33]*v[P33]*v[P33])))/2 );
       } else if (closure == CL_GAUSS) {
         k = 1.0;
+      } else {
+        // cannot happen
       }
 
       f[Q111] = 4*v[Q111]*v[U1] + (3*k*(v[P11]*v[P11]))/(v[RHO]) + 6*v[P11]*(v[U1]*v[U1]) + v[RHO]*(v[U1]*v[U1]*v[U1]*v[U1]);
@@ -211,7 +213,7 @@ namespace Lucee
     double rho = q[RHO];
     double u1 = q[U1]/rho;
     double p11 = q[P11] - rho*u1*u1;
-    double v = sqrt((3 + sqrt(6))*p11/rho)*1.5;
+    double v = sqrt((3 + sqrt(6))*p11/rho)*1.1;
     s[0] = u1 - v;
     s[1] = u1 + v;
   }
@@ -221,7 +223,7 @@ namespace Lucee
     double rho = q[RHO];
     double u1 = q[U1]/rho;
     double p11 = q[P11] - rho*u1*u1;
-    return std::fabs(u1) + sqrt((3 + sqrt(6))*p11/rho)*1.5; 
+    return std::fabs(u1) + sqrt((3 + sqrt(6))*p11/rho)*1.1; 
   }
 
   void TwentyMomentEquation::primitive(const double* q, double* v) const
@@ -397,10 +399,10 @@ namespace Lucee
       k = (1 + (p0*q111*q111/(p11*p11*p11) + p0*q222*q222/(p22*p22*p22) + p0*q333*q333/(p33*p33*p33))/2 );
     } else if (closure == CL_GAUSS) {
       k = 1.0;
+    } else {
+      // cannot happen
     }
-    /*    if (k > 5) {
-      std::cout << "k = " << k << "\n";
-      }*/
+
     A(0,0) = u1; A(0,1) = p0; 
     A(1,4) = 1/p0; A(1,1) = u1; 
     A(2,5) = 1/p0; A(2,2) = u1; 
@@ -421,7 +423,6 @@ namespace Lucee
     A(17,0) = -((k*p13*p22)/(p0*p0)) - (2*k*p12*p23)/(p0*p0); A(17,5) = (-2*p23)/p0 + (2*k*p23)/p0; A(17,6) = -(p22/p0) + (k*p22)/p0; A(17,7) = (k*p13)/p0; A(17,8) = (2*k*p12)/p0; A(17,17) = u1; A(17,1) = q223; A(17,2) = 2*q123; A(17,3) = q122; 
     A(18,0) = (-2*k*p13*p23)/(p0*p0) - (k*p12*p33)/(p0*p0); A(18,5) = -(p33/p0) + (k*p33)/p0; A(18,6) = (-2*p23)/p0 + (2*k*p23)/p0; A(18,8) = (2*k*p13)/p0; A(18,9) = (k*p12)/p0; A(18,18) = u1; A(18,1) = q233; A(18,2) = q133; A(18,3) = 2*q123; 
     A(19,0) = (-3*k*p13*p33)/(p0*p0); A(19,6) = (-3*p33)/p0 + (3*k*p33)/p0; A(19,9) = (3*k*p13)/p0; A(19,19) = u1; A(19,1) = q333; A(19,3) = 3*q133; 
- 
 
     phiprime(0,0) = 1; 
     phiprime(1,0) = u1; phiprime(1,1) = p0; 
@@ -461,9 +462,9 @@ namespace Lucee
     // output speeds: 
     for (int i = 0; i < 20; ++i) { 
       s[i] = eigvals(i);
-      /*      if (fabs(evi(i)) > 1e-3) {
-        std::cout << i <<"'th imaginary part in terms of thermal speed : " << evi(i)/sqrt(p11/p0) << "\n";
-        }*/
+      /*      if (fabs(evi(i)) > 1e-5) {
+              std::cout << i <<"'th imaginary part in terms of thermal speed : " << evi(i)/sqrt(p11/p0) << "\n";
+              }*/
     }
 
   }
