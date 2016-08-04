@@ -57,6 +57,7 @@
 #include <LcModalDg1DUpdater.h>
 #include <LcModalDgLimiter1DUpdater.h>
 #include <LcModalL2NormUpdater.h>
+#include <LcMultiplyFieldsUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNeutralDragForceSource.h>
 #include <LcNodalCopy1DTo3DFieldUpdater.h>
@@ -221,6 +222,11 @@ namespace Lucee
       .append<Lucee::ModalDg1DUpdater>()
       .append<Lucee::ModalDgLimiter1DUpdater>()
       .append<Lucee::ModalL2NormUpdater>()
+
+      .append<Lucee::MultiplyFieldsUpdater<1> >()
+      .append<Lucee::MultiplyFieldsUpdater<2> >()
+      .append<Lucee::MultiplyFieldsUpdater<3> >()
+
       .append<Lucee::MusclHancock1DUpdater>()
       .append<Lucee::DGDiffusionUpdater1D>()
 

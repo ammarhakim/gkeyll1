@@ -65,6 +65,7 @@ set (proto_SOURCES
   LcModalDg1DUpdater.cpp
   LcModalDgLimiter1DUpdater.cpp
   LcModalL2NormUpdater.cpp
+  LcMultiplyFieldsUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNeutralDragForceSource.cpp
   LcNodalCopy1DTo3DFieldUpdater.cpp
