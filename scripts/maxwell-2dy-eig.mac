@@ -1,0 +1,45 @@
+/**
+ * Wave algorithm for Maxwell 2D equations (Bx, By, Ez)
+ */
+
+/** Speed of light is positive */
+assume(c>0);
+
+/** Flux jacobian for y-direction */
+Ay : matrix( [0, 0, 1], [0, 0, 0], [c^2, 0, 0] );
+
+/** Compute eigevectors */
+[vals, vects] : eigenvectors(Ay);
+
+/** Right eigenvectors */
+Rev : transpose( matrix(vects[1][1], vects[2][1], vects[3][1]) );
+
+/** Left eigenvectors */
+Lev : invert(Rev);
+
+/** Jump to split */
+jump : matrix ([dBx, dBy, dEz]);
+
+/** Split it */
+alpha : Lev . jump;
+
+/** Compute waves */
+Waves : (Waves : matrix([]), for i from 1 thru 3 
+          do (Waves : addcol(Waves, alpha[i][1]*col(Rev, i))), Waves);
+
+/** Compute positive and negative speeds */
+sp = (sp : matrix([0,0,0]), for i from 1 thru 3
+       do (sp[1][i] : if (vals[1][i] > 0) then vals[1][i] else 0),
+       sp);
+sm = (sm : matrix([0,0,0]), for i from 1 thru 3
+       do (sm[1][i] : if (vals[1][i] < 0) then vals[1][i] else 0),
+       sm);
+
+/** Compute fluctuations */
+Ap : (Ap : transpose(matrix([0,0,0])), for i from 1 thru 3
+       do (Ap : Ap + sp[1][i]*col(Waves, i)),
+       Ap);
+
+Am : (Am : transpose(matrix([0,0,0])), for i from 1 thru 3
+       do (Am : Am + sm[1][i]*col(Waves, i)),
+       Am);

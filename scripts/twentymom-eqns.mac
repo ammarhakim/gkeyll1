@@ -1,0 +1,116 @@
+/* Generate the 20-moment equations */
+
+/** n below is the mass density */
+
+load(itensor);
+
+/** Declare symmetries */
+decsym(P,2,0,[sym(all)],[]);
+decsym(Q,3,0,[sym(all)],[]);
+
+/** Number density */
+dn : n*D(u(1)) + u(1)*D(n);
+
+/** Velocity */
+du(i) := 1/n*D(P([1,i],[])) + u(1)*D(u(i));
+
+/** Pressure */
+dP(i,j) := P([i,j],[])*D(u(1)) + D(u(i))*P([j,1],[]) + D(u(j))*P([i,1],[]) + u(1)*D(P([i,j],[]))
+     + D(Q([i,j,1],[]));
+
+cDP(i,j) := D(canform(P([i,j],[])));
+
+/** Canonical form of pressure tensor */
+canP(i,j) := canform(P([i,j],[]));
+/** easier to type pressure tensor */
+pP(i,j) := P([i,j],[]);
+
+/** Closure relation is computed from multi-modal Gaussian */
+K(i,j,k,l) := (canP(i,j)*canP(k,l) + canP(i,k)*canP(j,l) + canP(i,l)*canP(j,k))/n;
+
+/** We actually need its divergence */
+DK_t1(i,j,k) := (
+   cDP(i,j)*pP(k,1) + pP(i,j)*cDP(k,1) 
+ + cDP(i,k)*pP(j,1) + pP(i,k)*cDP(j,1)
+ + cDP(i,1)*pP(j,k) + pP(i,1)*cDP(j,k))/n;
+
+DK_t2(i,j,k) := -1/n^2*D(n)*(canP(i,j)*canP(k,1) + canP(i,k)*canP(j,1) + canP(i,1)*canP(j,k));
+  
+/** Heat flux tensor */
+dQ(i,j,k) :=
+ -1/n*(cDP(1,i)*pP(j,k) + cDP(1,j)*pP(k,i) + cDP(1,k)*pP(i,j))
+ + D(u(1))*Q([i,j,k],[])
+ + D(u(i))*Q([j,k,1],[]) + D(u(j))*Q([k,i,1],[]) + D(u(k))*Q([i,j,1],[])
+ + u(1)*D(Q([i,j,k],[]))
+ + DK_t1(i,j,k);
+
+/** Construct list of equations assuming K(i,j,k,l) = 0 */
+eqList : map(canform, [
+  dn, 
+  du(1), du(2), du(3), 
+  dP(1,1), dP(1,2), dP(1,3), dP(2,2), dP(2,3), dP(3,3),
+  dQ(1,1,1), dQ(1,1,2), dQ(1,1,3), dQ(1,2,2), dQ(1,2,3), dQ(1,3,3), dQ(2,2,2), dQ(2,2,3), dQ(2,3,3), dQ(3,3,3)]);
+
+/** Add additional terms from div(K) */
+eqList : eqList + [
+  0, 
+  0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  DK_t2(1,1,1), DK_t2(1,1,2), DK_t2(1,1,3), DK_t2(1,2,2), DK_t2(1,2,3), DK_t2(1,3,3), DK_t2(2,2,2), DK_t2(2,2,3), DK_t2(2,3,3), DK_t2(3,3,3)];
+
+/** List of variables */
+varList : [n,
+  u(1), u(2), u(3), 
+  P([1,1],[]), P([1,2],[]), P([1,3],[]), P([2,2],[]), P([2,3],[]), P([3,3],[]),
+  Q([1,1,1],[]), Q([1,1,2],[]), Q([1,1,3],[]), Q([1,2,2],[]), Q([1,2,3],[]), Q([1,3,3],[]),
+  Q([2,2,2],[]), Q([2,2,3],[]), Q([2,3,3],[]),
+  Q([3,3,3],[])];
+
+/** List of differentials */
+diffList : map(D, [n, 
+  u(1), u(2), u(3), 
+  P([1,1],[]), P([1,2],[]), P([1,3],[]), P([2,2],[]), P([2,3],[]), P([3,3],[]),
+  Q([1,1,1],[]), Q([1,1,2],[]), Q([1,1,3],[]), Q([1,2,2],[]), Q([1,2,3],[]), Q([1,3,3],[]),
+  Q([2,2,2],[]), Q([2,2,3],[]), Q([2,3,3],[]),
+  Q([3,3,3],[])
+]);
+
+/** Construct coefficient matrix */
+Atmp : coefmatrix(eqList, diffList);
+
+/** Perform substitutions to clean up final matrix */
+Atm : subst(
+    [u(1)=u1, u(2)=u2, u(3)=u3,
+     P([1,1],[])=p11, P([1,2],[])=p12, P([1,3],[])=p13, 
+     P([2,2],[])=p22, P([2,3],[])=p23,
+     P([3,3],[])=p33,
+     Q([1,1,1],[])=q111, Q([1,1,2],[])=q112, Q([1,1,3],[])=q113,
+     Q([1,2,2],[])=q122, Q([1,2,3],[])=q123, 
+     Q([1,3,3],[])=q133,
+     Q([2,2,2],[])=q222, Q([2,2,3],[])=q223,
+     Q([2,3,3],[])=q233,
+     Q([3,3,3],[])=q333],
+ Atmp);
+
+/** Derive simplified 1D system (keeping u(1) to be non-zero) */
+
+cEqnsIdx : [1, 2, 5, 11];
+cEqList : 
+  (cEqns : [], 
+    for idx in cEqnsIdx do (cEqns : append(cEqns, [eqList[idx]])), cEqns);
+cDiffList : 
+  (cDiffList : [], 
+    for idx in cEqnsIdx do (cDiffList : append(cDiffList, [diffList[idx]])), cDiffList);
+cAtmp : coefmatrix(cEqList, cDiffList);
+cAtm : subst(
+    [u(1)=u1, u(2)=u2, u(3)=u3,
+     P([1,1],[])=p11, P([1,2],[])=p12, P([1,3],[])=p13, 
+     P([2,2],[])=p22, P([2,3],[])=p23,
+     P([3,3],[])=p33,
+     Q([1,1,1],[])=q111, Q([1,1,2],[])=q112, Q([1,1,3],[])=q113,
+     Q([1,2,2],[])=q122, Q([1,2,3],[])=q123, 
+     Q([1,3,3],[])=q133,
+     Q([2,2,2],[])=q222, Q([2,2,3],[])=q223,
+     Q([2,3,3],[])=q233,
+     Q([3,3,3],[])=q333],
+ cAtmp);

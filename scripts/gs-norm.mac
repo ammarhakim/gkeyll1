@@ -1,0 +1,31 @@
+/** Define inner product and norm */
+inner(f,g) := integrate( integrate(f*g, x,-1,1), y,-1,1 );
+norm(f) := sqrt(inner(f,f));
+
+a(i,j,u,phi) := -inner(u[i],phi[j]);
+/** Use Gram-Schmidt procedure to make a set of orthonormal basis set */
+gsOrthoNorm(u) := block([nbasis, phi, v],
+  nbasis : length(u),
+  phi : (phi : [u[1]/norm(u[1])], for i from 2 thru nbasis
+          do (v : u[i] + sum( a(i,j,u,phi)*phi[j], j, 1, i-1 ),
+              phi : endcons(v/norm(v), phi)),
+          phi)
+);
+
+/** Serendipity polyOrder 2 deg2(b) <= p */
+u : [1, x, x^2, y, y^2, x*y, x*y^2, x^2*y];
+/** Orthogonalize them */
+modalBasis_s2 : gsOrthoNorm(u);
+
+/** Min-order polyOrder 2 deg(b) <= p */
+u : [1, x, x^2, y, y^2, x*y];
+/** Orthogonalize them */
+modalBasis_m2 : gsOrthoNorm(u);
+
+/** Serendipity polyOrder 3 */
+u : [1, y, y^2, y^3, 
+     x, x*y, x*y^2, x*y^3,
+     x^2, x^2*y,
+     x^3, x^3*y];
+/** Orthogonalize them */
+modalBasis_s3 : gsOrthoNorm(u);

@@ -1,0 +1,28 @@
+/* ratcoef to extract coefficients of powers */
+load(orthopoly);
+
+/** Everything is in terms of Radau polynomials */
+rightRadau(k,x) := (-1)^k*(legendre_p(k,x) - legendre_p(k-1,x))/2;
+
+/** DG scheme */
+gDg(k,x) := rightRadau(k,x);
+
+/** Gauss */
+gGa(k,x) := k/(2*k-1)*rightRadau(k,x) + (k-1)/(2*k-1)*rightRadau(k-1,x);
+
+/** Lumped-lobatto */
+gLo(k,x) := (k-1)/(2*k-1)*rightRadau(k,x) + k/(2*k-1)*rightRadau(k-1,x);
+
+/** Function to reconstruct */
+u(k,y) := sum(u[i]*legendre_p(i,y), i, 0, k-1);
+
+/** Reconstructed polynomial with different corrections */
+ubar_gDg(k,y) := u(k,y) + (uL-u(k,-1))*gDg(k,y) + (uR-u(k,1))*gDg(k,-y);
+ubar_gGa(k,y) := u(k,y) + (uL-u(k,-1))*gGa(k,y) + (uR-u(k,1))*gGa(k,-y);
+ubar_gLo(k,y) := u(k,y) + (uL-u(k,-1))*gLo(k,y) + (uR-u(k,1))*gLo(k,-y);
+
+/** Derivatives */
+uprime_gDg(k,y) := diff(ubar_gDg(k,y), y);
+uprime_gGa(k,y) := diff(ubar_gGa(k,y), y);
+uprime_gLo(k,y) := diff(ubar_gLo(k,y), y);
+

@@ -1,0 +1,13 @@
+/** Legendre polynomials */
+load(orthopoly);
+
+eta(x) := 2*x/dx;
+
+/** Expansion in Legendre polynomials */
+u(x,pm) := sum(c(k)*legendre_p(k,eta(x)), k, 0, pm);
+
+/** Expansion in Taylor series */
+fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, pm);
+
+
+

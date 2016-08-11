@@ -1,0 +1,6 @@
+/** Attempt to construct implicit solution to two-fluid source equations */
+
+vmatrix : matrix(
+	[1, -dt/2*Omz, dt/2*Omy],
+	[dt/2*Omz, 1, -dt/2*Omx],
+	[-dt/2*Omy, dt/2*Omx, 1]);

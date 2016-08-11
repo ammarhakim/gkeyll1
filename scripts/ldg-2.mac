@@ -1,0 +1,50 @@
+/** This script computes the explicit update formula for second-order
+ derivatives using local DG scheme. The equation is:
+
+ q = d^f/dx^2
+
+Rewrite this as a system of first-order equations
+
+  q + dw/dx = 0
+  w + df/dx = 0
+
+  c12 : -1/2;
+  c21 : 1/2;
+
+  c12 : 0;
+  c21 : 0;
+
+ */
+
+/** Part 1 */
+
+c12 : 0;
+c21 : 0;
+
+fp(j) := f0(j)-f1(j);
+fm(j) := f0(j-1)+f1(j-1);
+
+ff(j) := 1/2*(fp(j)+fm(j)) - c21*(fp(j)-fm(j));
+
+w0(j) := -(ff(j+1)-ff(j));
+w1(j) := -3*(ff(j+1)+ff(j)) + 6*f0(j);
+
+/** Part 2 */
+
+c12 : 0;
+c21 : 0;
+
+wp(j) := w0(j)-w1(j);
+wm(j) := w0(j-1)+w1(j-1);
+
+ww(j) := 1/2*(wp(j)+wm(j)) - c12*(wp(j)-wm(j));
+
+dq0(j) := -(ww(j+1)-ww(j));
+dq1(j) := -3*(ww(j+1)+ww(j)) + 6*w0(j);
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], dq0(j));
+du1T(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], dq1(j));
+
+/** Collect terms */
+Tmat_1 : coefmatrix([du0T(j), du1T(j)], [f0(j),f1(j)]);

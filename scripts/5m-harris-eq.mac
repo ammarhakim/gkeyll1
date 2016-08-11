@@ -1,0 +1,33 @@
+/** Harris sheet equilibrium in 5-moment model */
+
+/* Magnetic field */
+Bx(y) := B0*tanh(y/L);
+
+/* Current  */
+Jz(y) := -1/mu0*diff(Bx(y),y);
+
+/* Number density */
+n(y) := n0*sech(y/L)^2 + nb;
+
+/* Velocity */
+uez(y) := -Jz(y)/(eC*n(y));
+
+/** Electron pressure */
+pE(y) := Te*n(y);
+
+/** Ion pressure */
+pI(y) := Ti*n(y);
+
+/** Electric field */
+Ey(y) := diff(pI(y),y)/(eC*n(y));
+
+/** Electric field computed from electron pressure */
+Ey_e(y) := -diff(pE(y),y)/(eC*n(y)) - uez(y)*Bx(y);
+
+/** Harris sheet must have beta=1 at current-sheet center */
+B0 : sqrt(2*mu0*(n0*Ti+n0*Te));
+
+/** Verify electric fields determined in two different ways are identical */
+isZero : fullratsimp(Ey_e(y)-Ey(y));
+if isZero=0 then print("Verified") else print("Failed");
+

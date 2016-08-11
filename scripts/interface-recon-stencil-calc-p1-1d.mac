@@ -1,0 +1,136 @@
+/** Diffusion operator for 1D Lobbato element */
+
+etal(x) := (x+dx/2)/(dx/2);
+etar(x) := (x-dx/2)/(dx/2);
+zet(x) := (x-0)/dx;
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Funciton to create coefficient matrix */
+makePmat(ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(ord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(j-1, ord[i]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Order 2 */
+ord : [-1, 1];
+/** Construct matrix of coefficients */
+Pmat2 : makePmat(ord);
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(2);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 2
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Compute explicit form of basis functions */
+leg2_x(x) := matrix([legendre_p(0,x), legendre_p(1,x)]);
+N2(x) := [leg2_x(x).col(a2,1), leg2_x(x).col(a2,2)];
+
+/** Left expansion */
+ul(x,pm) := sum(cl(j)*N2(etal(x))[j], j, 1, 2);
+/** Right expansion */
+ur(x,pm) := sum(cr(j)*N2(etar(x))[j], j, 1, 2);
+
+/** Reconstruction is expressed as Taylor series */
+fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, 2*(pm+1)-1);
+
+/** Reconstruction is expressed as Taylor series */
+eqnl(k,pm) := integrate(fit(x,pm)*legendre_p(k,etal(x)), x, -dx,0) = integrate(ul(x,pm)*legendre_p(k,etal(x)), x, -dx,0);
+eqnr(k,pm) := integrate(fit(x,pm)*legendre_p(k,etar(x)), x, 0,dx) = integrate(ur(x,pm)*legendre_p(k,etar(x)), x, 0,dx);
+
+/** Function to perform reconstruction at interface. The return list
+contains the expansion coefficients in a Taylor series around the cell
+interface. */
+calcRecon(x,pm) := block([eq, un, res],
+  /* Make list of equations to solve */
+  eq : append(makelist(eqnl(i,pm), i, 0, pm), makelist(eqnr(i,pm), i, 0, pm)),
+  /* Make list of unknowns */
+  un : makelist(f(i), i, 0, 2*(pm+1)-1),
+  /* Solve and extract results */
+  res : solve(eq, un),
+  return (map(rhs, res[1]))
+);
+
+/** Makes a list of unknowns */
+un(pm) := makelist(f(i), i, 0, 2*(pm+1)-1);
+
+/** Construct volume integral matrix */
+calcVolMat(basis) := block([n, vMat],
+  n : length(basis),
+  vMat : (vMat : zeromatrix(n,n), for i from 1 thru n
+           do (for j from 1 thru n
+            do (vMat[i,j] : (2/dx)*integrate(diff(diff(basis[i],x),x)*basis[j], x, -1, 1))),
+	    vMat),
+  return (vMat)
+);
+
+/** Construct list of values for testing */
+initVals(dx, func) := block([],
+  return ([func(-1.5*dx), func(-0.5*dx), func(-0.5*dx), func(0.5*dx), func(0.5*dx), func(1.5*dx)])
+);
+
+/** Function to compute mass matrix */
+calcMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(basis[i]*basis[j], x, -1,1))),
+			   mass),
+	        return (mass)
+);
+
+/** Compute reconstruction coefficients */
+c1 : calcRecon(x,1);
+un1 : un(1);
+vVal : subst(append([x=0], makelist(un1[i]=c1[i], i, 1, 4)), fit(x,1));
+vGrad : subst(append([x=0], makelist(un1[i]=c1[i], i, 1, 4)), diff(fit(x,1),x));
+
+/** Value/gradient on left edge */
+leftVal : subst(append(makelist(cl(i)=um(i),i,1,2),makelist(cr(i)=u0(i),i,1,2)), vVal);
+leftGrad : subst(append(makelist(cl(i)=um(i),i,1,2),makelist(cr(i)=u0(i),i,1,2)), vGrad);
+
+/** Value/gradient on right edge */
+rightVal : subst(append(makelist(cl(i)=u0(i),i,1,2),makelist(cr(i)=up(i),i,1,2)), vVal);
+rightGrad : subst(append(makelist(cl(i)=u0(i),i,1,2),makelist(cr(i)=up(i),i,1,2)), vGrad);
+
+/** Compute contibution from volume integral */
+volMat : calcVolMat(N2(x));
+u0col : transpose(makelist(u0(i),i,1,2));
+
+/** Left/right basis values */
+lBasisVals : transpose(N2(-1));
+rBasisVals : transpose(N2(1));
+
+/** Left/right basis gradients */
+lBasisGrads : transpose(subst([x=-1], 2/dx*diff(N2(x),x)));
+rBasisGrads : transpose(subst([x= 1], 2/dx*diff(N2(x),x)));
+
+/** Stencil of update (does not include mass matrix) */
+stencil : (rBasisVals*rightGrad - lBasisVals*leftGrad) - (rBasisGrads*rightVal - lBasisGrads*leftVal) + volMat.u0col;
+stencil_or : stencil;
+
+/** Multiply by inverse mass matrix to get final stencil (this is just for testing) */
+massMatrix : dx/2*calcMassMatrix(N2(x));
+t_stencil : invert(massMatrix) . stencil;
+
+/** Make into a list to make computing matrices easier */
+stencil : list_matrix_entries(stencil);
+
+/** Collect terms, constructing individual matrices */
+Lm : coefmatrix(subst([u0(1)=0,u0(2)=0,up(1)=0,up(2)=0], stencil), [um(1),um(2)]);
+L0 : coefmatrix(subst([um(1)=0,um(2)=0,up(1)=0,up(2)=0], stencil), [u0(1),u0(2)]);
+Lp : coefmatrix(subst([um(1)=0,um(2)=0,u0(1)=0,u0(2)=0], stencil), [up(1),up(2)]);
+
+/** Cross check my multiplying out matrices */
+stencil_xc : Lm.transpose([um(1),um(2)]) + L0.transpose([u0(1),u0(2)]) + Lp.transpose([up(1),up(2)]);
+isZero : fullratsimp( stencil_or - stencil_xc );

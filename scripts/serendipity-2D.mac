@@ -1,0 +1,462 @@
+/** Serendipity basis functions in 2D */
+
+/** Function to make coefficient matrix */
+makeCoeffMatrix(nord, linCoeff) := block([n, m, ajk],
+                 [n,m] : matrix_size(linCoeff),
+		 ajk : (ajk : zeromatrix(nord, nord), for i from 1 thru nord
+		         do (for j from 1 thru nord
+			   do (ajk[i,j] : linCoeff[nord*(i-1)+j][1])), ajk),
+		 return (ajk)
+);
+
+/** Function to compute mass matrix */
+calcMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(integrate(basis[i]*basis[j], x, -1,1), y, -1, 1))),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute cross-mass matrix */
+calcCrossMassMatrix(p, b1d, b2d) := block([n1, n2, mass],
+                n1 : length(b1d),
+		n2 : length(b2d),
+		mass : (mass : zeromatrix(n1,n2), for i from 1 thru n1
+		         do (for j from 1 thru n2
+			   do (mass[i,j] : integrate(integrate(y^p*b1d[i]*b2d[j], x, -1,1), y, -1, 1))),
+			   mass),
+	        return (mass)
+);
+
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
+			   +
+			   integrate(
+			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
+			   +
+			   integrate(
+			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
+			   +
+			   integrate(
+			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_xl(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=-1,basis[i])*subst(x=-1,basis[j]), y, -1,1)
+			     )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_xu(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(x=1,basis[i])*subst(x=1,basis[j]), y, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_yl(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(y=-1,basis[i])*subst(y=-1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute "face" mass matrix */
+calcFaceMassMatrix_yu(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : 
+			   integrate(
+			     subst(y=1,basis[i])*subst(y=1,basis[j]), x, -1,1)
+			    )),
+			   mass),
+	        return (mass)
+);
+
+/** Return a small matrix */
+shaveCols(Abig, cols) := block([nx,ny,nc,Asmall],
+		[nx,ny] : matrix_size(Abig),
+		nc : length(cols),
+		Asmall : (Asmall : matrix([]), for i from 1 thru nc
+		           do (Asmall : addcol(Asmall, col(Abig, cols[i]))),
+			  Asmall),
+	        return (Asmall)
+);
+
+/** Function to compute stiffness matrix */
+calcStiffMatrix(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(integrate(
+                             4/dx2*diff(basis[i],x)*diff(basis[j],x) + 
+                             4/dy2*diff(basis[i],y)*diff(basis[j],y),
+                               x, -1,1), y, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute gradient stiffness matrix */
+calcGradStiffMatrix_x(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(
+                              integrate(2/dx*diff(basis[i],x)*basis[j], x, -1,1), 
+                             y, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute gradient stiffness matrix */
+calcGradStiffMatrix_y(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(
+                              integrate(2/dy*diff(basis[i],y)*basis[j], x, -1,1),
+                             y, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i][1], y=gOrds[i][2]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
+calcPerpStiffMatrix(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(integrate(
+                             4/dx2*diff(basis[i],x)*diff(basis[j],x) + 
+                             0/dy2*diff(basis[i],y)*diff(basis[j],y),
+                               x, -1,1), y, -1,1))),			    
+	                  stiff),
+	        return (stiff)
+);
+
+/** Ordinates for 2-node Guassian quadrature */
+gOrds2 : [
+ [-1/sqrt(3), -1/sqrt(3)], 
+ [1/sqrt(3), -1/sqrt(3)], 
+ [-1/sqrt(3), 1/sqrt(3)],
+ [1/sqrt(3), 1/sqrt(3)]];
+
+gOrds2_left : [
+ [-1, -1/sqrt(3)], 
+ [-1, 1/sqrt(3)]];
+
+gOrds2_right : [
+ [1, -1/sqrt(3)], 
+ [1, 1/sqrt(3)]];
+
+gOrds2_bottom : [
+ [-1/sqrt(3), -1], 
+ [ 1/sqrt(3), -1]];
+
+gOrds2_top : [
+ [-1/sqrt(3), 1], 
+ [ 1/sqrt(3), 1]];
+
+/** Ordinates */
+ords : [[-1,-1], [1,-1], [1,1], [-1,1]];
+/** Basis function of order 2 */
+N2 : 1/4*[
+ (1+ords[1][1]*x)*(1+ords[1][2]*y), 
+ (1+ords[2][1]*x)*(1+ords[2][2]*y), 
+ (1+ords[3][1]*x)*(1+ords[3][2]*y), 
+ (1+ords[4][1]*x)*(1+ords[4][2]*y)];
+
+/** Compute mass matrix */
+N2_mass : calcMassMatrix(N2);
+
+/** Compute face matrices */
+N2_face_mass : calcFaceMassMatrix(N2);
+N2_lift : invert(N2_mass) . N2_face_mass;
+
+N2_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(N2), [1,4]);
+N2_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(N2), [2,3]);
+N2_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(N2), [1,2]);
+N2_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(N2), [4,3]);
+
+/** Compute stiffness matrices */
+N2_stiff : calcStiffMatrix(N2);
+N2_grad_stiff_x : calcGradStiffMatrix_x(N2);
+N2_grad_stiff_y : calcGradStiffMatrix_y(N2);
+
+/** Compute differentiation matrices */
+N2_Diff_x : invert(N2_mass) . transpose(N2_grad_stiff_x);
+N2_Diff_y : invert(N2_mass) . transpose(N2_grad_stiff_y);
+
+/** Compute explicit formulas for derivatives */
+N2_phi_c : transpose(matrix([p0, p1, p2, p3]));
+N2_Explicit_Diff_x : N2_Diff_x . N2_phi_c;
+N2_Explicit_Diff_y : N2_Diff_y . N2_phi_c;
+
+/** Weights */
+N2_weights : integrate(integrate(N2, x, -1, 1), y, -1, 1);
+
+/** Compute interpolation matrices */
+N2_iMat_2 : calcInterpMatrix(N2, gOrds2);
+N2_iMat_left_2 : calcInterpMatrix(N2, gOrds2_left);
+N2_iMat_right_2 : calcInterpMatrix(N2, gOrds2_right);
+N2_iMat_bottom_2 : calcInterpMatrix(N2, gOrds2_bottom);
+N2_iMat_top_2 : calcInterpMatrix(N2, gOrds2_top);
+
+/** Ordinates for interpolation to finer mesh */
+gOrds_24 : [ 
+ [-1/2,-1/2],
+ [1/2,-1/2],
+ [-1/2,1/2],
+ [1/2,1/2]
+];
+N2_iMat_24 : calcInterpMatrix(N2, gOrds_24);
+
+gOrds_29 : [ 
+ [-2/3,-2/3],
+ [0,-2/3],
+ [2/3,-2/3],
+ [-2/3,0],
+ [0,0],
+ [2/3,0],
+ [-2/3,2/3],
+ [0,2/3],
+ [2/3,2/3]
+];
+N2_iMat_29 : calcInterpMatrix(N2, gOrds_29);
+
+gOrds_216 : [ 
+ [-3/4,-3/4],
+ [-1/4,-3/4],
+ [1/4,-3/4],
+ [3/4,-3/4],
+
+ [-3/4,-1/4],
+ [-1/4,-1/4],
+ [1/4,-1/4],
+ [3/4,-1/4],
+
+ [-3/4,1/4],
+ [-1/4,1/4],
+ [1/4,1/4],
+ [3/4,1/4],
+
+ [-3/4,3/4],
+ [-1/4,3/4],
+ [1/4,3/4],
+ [3/4,3/4]
+];
+N2_iMat_216 : calcInterpMatrix(N2, gOrds_216);
+
+/** Write to a file */
+fh : openw("serendipity2D_f216.txt");
+write_data(float(N2_iMat_216), fh, comma);
+close(fh);
+
+/******************** Basis 3 ******************/
+
+/** Ordinates for 3-node Guassian quadrature */
+gOrds3 : [
+ [-sqrt(3/5), -sqrt(3/5)],
+ [0, -sqrt(3/5)],
+ [sqrt(3/5), -sqrt(3/5)],
+ [-sqrt(3/5), 0],
+ [0, 0],
+ [sqrt(3/5), 0],
+ [-sqrt(3/5), sqrt(3/5)],
+ [0, sqrt(3/5)],
+ [sqrt(3/5), sqrt(3/5)]];
+
+gOrds3_left : [
+ [-1, -sqrt(3/5)],
+ [-1, 0],
+ [-1, sqrt(3/5)]];
+
+gOrds3_right : [
+ [1, -sqrt(3/5)],
+ [1, 0],
+ [1, sqrt(3/5)]];
+
+gOrds3_bottom : [
+ [-sqrt(3/5), -1],
+ [0, -1],
+ [sqrt(3/5), -1]];
+
+gOrds3_top : [
+ [-sqrt(3/5), 1],
+ [0, 1],
+ [sqrt(3/5), 1]];
+
+/** Ordinates */
+ords : [[-1,-1], [1,-1], [1,1], [-1,1], [0,-1], [1,0], [0,1], [-1,0]];
+/** Basis functions of order 3 */
+N3 : [
+  1/4*(1+ords[1][1]*x)*(1+ords[1][2]*y)*(-1+ords[1][1]*x+ords[1][2]*y),
+  1/4*(1+ords[2][1]*x)*(1+ords[2][2]*y)*(-1+ords[2][1]*x+ords[2][2]*y),
+  1/4*(1+ords[3][1]*x)*(1+ords[3][2]*y)*(-1+ords[3][1]*x+ords[3][2]*y),
+  1/4*(1+ords[4][1]*x)*(1+ords[4][2]*y)*(-1+ords[4][1]*x+ords[4][2]*y),
+  1/2*(1-x^2)*(1+ords[5][2]*y),
+  1/2*(1-y^2)*(1+ords[6][1]*x),
+  1/2*(1-x^2)*(1+ords[7][2]*y),
+  1/2*(1-y^2)*(1+ords[8][1]*x)];
+
+/** Compute mass matrix */
+N3_mass : calcMassMatrix(N3);
+N3_face_mass : calcFaceMassMatrix(N3);
+N3_lift : invert(N3_mass) . N3_face_mass;
+
+N3_face_mass_xl : shaveCols(calcFaceMassMatrix_xl(N3), [1,8,4]);
+N3_face_mass_xu : shaveCols(calcFaceMassMatrix_xu(N3), [2,6,3]);
+N3_face_mass_yl : shaveCols(calcFaceMassMatrix_yl(N3), [1,5,2]);
+N3_face_mass_yu : shaveCols(calcFaceMassMatrix_yu(N3), [4,7,3]);
+
+/** Compute stiffness matrices */
+N3_stiff : calcStiffMatrix(N3);
+N3_grad_stiff_x : calcGradStiffMatrix_x(N3);
+N3_grad_stiff_y : calcGradStiffMatrix_y(N3);
+
+/** Compute differentiation matrices */
+N3_Diff_x : invert(N3_mass) . transpose(N3_grad_stiff_x);
+N3_Diff_y : invert(N3_mass) . transpose(N3_grad_stiff_y);
+
+/** Compute explicit formulas for derivatives */
+N3_phi_c : transpose(matrix([p0, p1, p2, p3, p4, p5, p6, p7]));
+N3_Explicit_Diff_x : N3_Diff_x . N3_phi_c;
+N3_Explicit_Diff_y : N3_Diff_y . N3_phi_c;
+
+/** Weights */
+N3_weights : integrate(integrate(N3, x, -1, 1), y, -1, 1);
+
+/** Compute interpolation matrices */
+N3_iMat_3 : calcInterpMatrix(N3, gOrds3);
+N3_iMat_left_3 : calcInterpMatrix(N3, gOrds3_left);
+N3_iMat_right_3 : calcInterpMatrix(N3, gOrds3_right);
+N3_iMat_bottom_3 : calcInterpMatrix(N3, gOrds3_bottom);
+N3_iMat_top_3 : calcInterpMatrix(N3, gOrds3_top);
+
+/** List of node coordinates for interpolation */
+interp_3x3 : [[-2/3, -2/3], [0, -2/3], [2/3,-2/3], [-2/3,0], [0,0], [2/3,0], [-2/3,2/3], [0,2/3], [2/3,2/3]];
+/** Compute interpolation to these points */
+interp_3x3_mat : calcInterpMatrix(N3, interp_3x3);
+
+/** List of node coordinates for interpolation */
+interp_2x2 : [[-1/2,-1/2], [1/2,-1/2], [-1/2,1/2], [1/2,1/2]];
+/** Compute interpolation to these points */
+interp_2x2_mat : calcInterpMatrix(N3, interp_2x2);
+
+/** Funciton to create coefficient matrix */
+makePmat(ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(ord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(j-1, ord[i]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Function to compute mass matrix for 1D basis functions */
+calcMassMatrix_1d(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(basis[i]*basis[j], x, -1,1))),
+			   mass),
+	        return (mass)
+);
+
+/** Order 2 */
+ord : [-1, 1];
+/** Construct matrix of coefficients */
+Pmat2 : makePmat(ord);
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(2);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 2
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x)]);
+
+N1_1d : leg_x . col(a2,1);
+N2_1d : leg_x . col(a2,2);
+basis2 : [N1_1d, N2_1d];
+
+N2_mass_1d : calcMassMatrix_1d(basis2);
+
+/** Order 3 */
+ord : [-1, 0, 1];
+/** Construct matrix of coefficients */
+Pmat3 : makePmat(ord);
+/** Invert it */
+invPmat3 : invert(Pmat3);
+/** Identity matrix for use in coefficient calculation */
+u3 : ident(3);
+
+/** Basis function coefficients */
+a3 : (a3 : matrix([]), for i from 1 thru 3
+       do (a3 : addcol(a3, invPmat3.col(u3,i))), a3);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x), legendre_p(2,x)]);
+
+N1_1d : leg_x . col(a3,1);
+N2_1d : leg_x . col(a3,2);
+N3_1d : leg_x . col(a3,3);
+basis3 : [N1_1d, N2_1d, N3_1d];
+
+N3_mass_1d : calcMassMatrix_1d(basis3);
+
+/** Now compute cross-dimension integration matrices */
+N2_1dx2d_p0 : calcCrossMassMatrix(0, basis2, N2);
+N2_1dx2d_p1 : calcCrossMassMatrix(1, basis2, N2);
+N2_1dx2d_p2 : calcCrossMassMatrix(2, basis2, N2);
+
+N3_1dx2d_p0 : calcCrossMassMatrix(0, basis3, N3);
+N3_1dx2d_p1 : calcCrossMassMatrix(1, basis3, N3);
+N3_1dx2d_p2 : calcCrossMassMatrix(2, basis3, N3);

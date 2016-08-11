@@ -1,0 +1,39 @@
+/** Jacobian is 8x8 */
+A : zeromatrix(8, 8);
+
+EX : 1;
+EY : 2;
+EZ : 3;
+BX : 4;
+BY : 5;
+BZ : 6;
+PHI : 7;
+PSI : 8;
+
+/** Set non-zero Jacobian elements */
+assume(c>0);
+assume(chi>0);
+assume(gamma>0);
+A[EX, PHI] : c^2*chi;
+A[EY, BZ] : c^2;
+A[EZ, BY] : -c^2;
+A[BX, PSI] : gamma;
+A[BY, EZ] : -1;
+A[BZ, EY] : 1;
+A[PHI, EX] : chi;
+A[PSI, BX] : gamma*c^2;
+
+/** Compute eigensystem */
+[vals, vects] : eigenvectors(A);
+
+/** Create right and left eigenvector martrices */
+Rev : (Rev : matrix([]), for i from 1 thru length(vals[1])
+        do (for j from 1 thru vals[2][i]
+	  do (Rev : addcol(Rev, transpose(matrix(vects[i][j]))))), Rev);
+Lev : invert (Rev);
+
+/** Create list of eigenvalues, including repeated ones */
+Evs : (Evs : [], for i from 1 thru length(vals[1])
+        do (for j from 1 thru vals[2][i]
+	  do (Evs : append(Evs, [vals[1][i]]))), Evs);
+

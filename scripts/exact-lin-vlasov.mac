@@ -1,0 +1,35 @@
+/**
+
+Script to compute an exact solution to the linearized Valsov equation
+for a specified potential.
+
+*/
+
+assume(vt>0);
+assume(t>0);
+assume(k>0);
+
+/* Maxwellian with vt=1 and n=1 */
+f0(v) := 1/sqrt(2*%pi)*exp(-v^2/2);
+
+/* Electric field */
+E(z,t) := -diff ( phi0*exp(%i*k*z-%i*w*t), z );
+
+/* Perturbed distribution function */
+cf1(z,v,t) := -integrate( E(z,tp)*diff(f0(v),v)*exp(-%i*k*v*(t-tp)), tp, 0, t);
+
+/* Final solution for distribution funcion (jumping through hoops to make expression look nice) */
+f1 : factor(trigreduce(fullratsimp(trigsimp(realpart(cf1(z,v,t))))));
+
+/* Cross check and print message */
+isZero : fullratsimp( diff(f1,t) + v*diff(f1,z) + realpart(E(z,t))*diff(f0(v),v) );
+if isZero=0 then print("Verified") else print("Failed");
+
+f1_w0 : subst([w=0], f1);
+/** Compute current */
+j1 : integrate(v*f1_w0, v, -inf, inf);
+
+/** One needs to take limits as k*v->w to get solution when k*v=w */
+declare(v, noninteger);
+declare(vt, noninteger);
+f1Sin : trigreduce(limit(f1, w, k*v));

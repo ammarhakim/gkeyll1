@@ -1,0 +1,30 @@
+/** Jacobian is 6x6 */
+A : zeromatrix(6, 6);
+
+EX : 1;
+EY : 2;
+EZ : 3;
+BX : 4;
+BY : 5;
+BZ : 6;
+
+/** Set non-zero Jacobian elements */
+assume(c>0);
+A[EY, BZ] : c^2;
+A[EZ, BY] : -c^2;
+A[BY, EZ] : -1;
+A[BZ, EY] : 1;
+
+/** Compute eigensystem */
+[vals, vects] : eigenvectors(A);
+
+/** Create right and left eigenvector martrices */
+Rev : (Rev : matrix([]), for i from 1 thru length(vals[1])
+        do (for j from 1 thru vals[2][i]
+	  do (Rev : addcol(Rev, transpose(matrix(vects[i][j]))))), Rev);
+Lev : invert (Rev);
+
+/** Create list of eigenvalues, including repeated ones */
+Evs : (Evs : [], for i from 1 thru length(vals[1])
+        do (for j from 1 thru vals[2][i]
+	  do (Evs : append(Evs, [vals[1][i]]))), Evs);

@@ -1,0 +1,22 @@
+/** Cold plasma dispersion */
+
+/** vect package is funky, so kill current contents of memory */
+kill(all);
+
+I : %i; /** Makes typing easier */
+
+/** Load vector manipulation library */
+load(vect);
+
+/** Declare vector quantities */
+declare([Ji, Je, Om0, B, k], nonscalar);
+
+Ji_eq : -I*w*Ji + I*(I*k~B)~Om0/mu0;
+B_eq : eps0*wpi^2*w*B - k~(Om0~Je);
+J_eq : mu0*(Ji+Je) - I*k~B; /** Not actually used */
+
+/** Assume B field only has Z component (no loss in generality) */
+Om0[x] : 0;
+Om0[y] : 0;
+
+Bsol : linsolve(express(B_eq), [Je[x], Je[y], Je[z]]);

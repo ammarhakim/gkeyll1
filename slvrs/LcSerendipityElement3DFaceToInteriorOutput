@@ -1,0 +1,46 @@
+if (polyOrder == 1)
+{
+  lowerFaceToInteriorMapMatrices[0] << 1,0,0,0,
+                                       1,0,0,0,
+                                       0,1,0,0,
+                                       0,1,0,0,
+                                       0,0,1,0,
+                                       0,0,1,0,
+                                       0,0,0,1,
+                                       0,0,0,1;
+  lowerFaceToInteriorMapMatrices[1] << 1,0,0,0,
+                                       0,1,0,0,
+                                       1,0,0,0,
+                                       0,1,0,0,
+                                       0,0,1,0,
+                                       0,0,0,1,
+                                       0,0,1,0,
+                                       0,0,0,1;
+  lowerFaceToInteriorMapMatrices[2] << 1,0,0,0,
+                                       0,1,0,0,
+                                       0,0,1,0,
+                                       0,0,0,1,
+                                       1,0,0,0,
+                                       0,1,0,0,
+                                       0,0,1,0,
+                                       0,0,0,1;
+}
+else if (polyOrder == 2)
+{
+  lowerFaceToInteriorMapMatrices[0] << 1,0,0,
+                                       1,0,0,
+                                       1,0,0,
+                                       0,1,0,
+                                       0,1,0,
+                                       0,0,1,
+                                       0,0,1,
+                                       0,0,1;
+  lowerFaceToInteriorMapMatrices[1] << 1,0,0,
+                                       0,1,0,
+                                       0,0,1,
+                                       1,0,0,
+                                       0,0,1,
+                                       1,0,0,
+                                       0,1,0,
+                                       0,0,1;
+}

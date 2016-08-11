@@ -1,0 +1,106 @@
+/** Nodal basis function in 2D on a reference element */
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Make a (i,j) list by looping in row major order */
+makeRowMajorList(blist) := block([n],
+                n : length(blist),
+		rml : (rml : [], for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (rml : endcons([blist[i],blist[j]], rml)
+			     )),
+			   rml),
+	        return (rml)
+);
+
+/** Make a (i,j) list by looping in col major order */
+makeColMajorList(blist) := block([n],
+                n : length(blist),
+		rml : (rml : [], for j from 1 thru n
+		         do (for i from 1 thru n
+			   do (rml : endcons([blist[i],blist[j]], rml)
+			     )),
+			   rml),
+	        return (rml)
+);
+
+/** Split interval [-1,1] into specified number of intervals */
+splitInterval(num) := block([dx, cc],
+              dx : 2/num,
+	      cc : (cc : [-1+dx/2], for i from 1 thru num-1
+	              do (cc : endcons(cc[i]+dx, cc)), cc)
+);
+
+/** Function to create coefficient matrix */
+makePmat(lord, ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(lord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(lord[j][1], ord[i][1])*legendre_p(lord[j][2], ord[i][2]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Function to make coefficient matrix */
+makeCoeffMatrix(nord, linCoeff) := block([n, m, ajk],
+                 [n,m] : matrix_size(linCoeff),
+		 ajk : (ajk : zeromatrix(nord, nord), for i from 1 thru nord
+		         do (for j from 1 thru nord
+			   do (ajk[i,j] : linCoeff[nord*(i-1)+j][1])), ajk),
+		 return (ajk)
+);
+
+/** Function to compute weights for quadrature on nodes */
+calcQuadWeights(basis) := integrate(integrate(basis,x,-1,1), y,-1,1);
+
+/** Construct basis set */
+makeBasisSet(lord, ord) := block([n, d, invPmat, u, a, basis],
+             n : length(lord),
+	     d : sqrt(n),
+	     invPmat : invert( float(makePmat(lord, ord)) ),
+	     u : ident(n),
+	     a : (a : matrix([]), for i from 1 thru n
+	            do (a : addcol(a, invPmat.col(u,i))), a),
+             leg_x : (leg_x : matrix([]), for i from 1 thru d
+                        do (leg_x : addcol( leg_x, [legendre_p(i-1,x)]) ), leg_x),
+             leg_y : transpose ( (leg_y : matrix([]), for i from 1 thru d
+                        do (leg_y : addcol(leg_y, [legendre_p(i-1,y)])), leg_y) ),
+	     basis : (basis : [], for i from 1 thru n
+                        do (basis : endcons( leg_x . makeCoeffMatrix(d, col(a,i)) . leg_y, basis)), basis)
+);
+
+/** Make a list of monomials included in serendipity elements */
+makeSerendipMonoList(pO) := block([n],
+                n : length(blist),
+		rml : (rml : [], for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (rml : endcons([blist[i],blist[j]], rml)
+			     )),
+			   rml),
+	        return (rml)
+);
+
+/** Function to compute mass matrix */
+calcMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(integrate(basis[i]*basis[j], x, -1,1), y, -1, 1))),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i][1], y=gOrds[i][2]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);

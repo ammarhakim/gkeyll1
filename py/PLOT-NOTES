@@ -1,0 +1,37 @@
+Options should be of two types: data options and plotting
+options. Treat FV data just like a piecewise constant DG data.
+
+Data options
+------------
+
+The script should automatically determine 1D/2D data
+
+File(s) to plot
+Component to plot (default 0)
+DG polynomial order
+Type of basis functions
+Transforms file (default none)
+Transforms variable
+List transform variables
+Save data as an HDF5 file?
+
+History(s) to plot
+Save history data to tex file?
+Hdf5 file name (script picks default)
+
+Plotting Options
+----------------
+
+The script should automatically determine 1D/2D plots.
+
+Plot title
+Xlabel
+Ylabel
+For 1D (data and history) should one plot semilogx, semilogy, loglog?
+
+Pcolor or contour plot
+Axis free?
+
+Don't show plots?
+Save plot as PNG file?
+PNG file name (script picks default)

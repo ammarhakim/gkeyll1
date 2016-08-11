@@ -1,0 +1,95 @@
+/** This script computes the SYMMETRIC explicit update formula for
+ second-order derivatives using local DG scheme. The equation is:
+
+ q = d^f/dx^2
+
+Rewrite this as a system of first-order equations
+
+  q + dw/dx = 0
+  w + df/dx = 0
+
+  c12 : -1/2;
+  c21 : 1/2;
+
+  c12 : 0;
+  c21 : 0;
+
+ */
+
+/** Part 1 */
+
+c12_a : -1/2;
+c21_a : 1/2;
+
+fp_a(j) := f0(j)-f1(j);
+fm_a(j) := f0(j-1)+f1(j-1);
+
+ff_a(j) := 1/2*(fp_a(j)+fm_a(j)) - c21_a*(fp_a(j)-fm_a(j));
+
+w0_a(j) := -(ff_a(j+1)-ff_a(j))/dx;
+w1_a(j) := -3/dx*(ff_a(j+1)+ff_a(j)) + 6/dx*f0(j);
+
+wp_a(j) := w0_a(j)-w1_a(j);
+wm_a(j) := w0_a(j-1)+w1_a(j-1);
+
+ww_a(j) := 1/2*(wp_a(j)+wm_a(j)) - c12_a*(wp_a(j)-wm_a(j));
+
+q0_a(j) := -(ww_a(j+1)-ww_a(j))/dx;
+q1_a(j) := -3/dx*(ww_a(j+1)+ww_a(j)) + 6/dx*w0_a(j);
+
+/** Compute matrices */
+l_Tmat_a : coefmatrix([q0_a(j), q1_a(j)], [f0(j-1),f1(j-1)]);
+c_Tmat_a : coefmatrix([q0_a(j), q1_a(j)], [f0(j),f1(j)]);
+r_Tmat_a : coefmatrix([q0_a(j), q1_a(j)], [f0(j+1),f1(j+1)]);
+
+q0_aT(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], q0_a(j));
+q1_aT(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], q1_a(j));
+
+/** Collect terms */
+Tmat_a : coefmatrix([q0_aT(j), q1_aT(j)], [f0(j),f1(j)]);
+
+/** Part 2 */
+c12_b : 1/2;
+c21_b : -1/2;
+
+fp_b(j) := f0(j)-f1(j);
+fm_b(j) := f0(j-1)+f1(j-1);
+
+ff_b(j) := 1/2*(fp_b(j)+fm_b(j)) - c21_b*(fp_b(j)-fm_b(j));
+
+w0_b(j) := -(ff_b(j+1)-ff_b(j))/dx;
+w1_b(j) := -3/dx*(ff_b(j+1)+ff_b(j)) + 6/dx*f0(j);
+
+wp_b(j) := w0_b(j)-w1_b(j);
+wm_b(j) := w0_b(j-1)+w1_b(j-1);
+
+ww_b(j) := 1/2*(wp_b(j)+wm_b(j)) - c12_b*(wp_b(j)-wm_b(j));
+
+q0_b(j) := -(ww_b(j+1)-ww_b(j))/dx;
+q1_b(j) := -3/dx*(ww_b(j+1)+ww_b(j)) + 6/dx*w0_b(j);
+
+/** Compute matrices */
+l_Tmat_b : coefmatrix([q0_b(j), q1_b(j)], [f0(j-1),f1(j-1)]);
+c_Tmat_b : coefmatrix([q0_b(j), q1_b(j)], [f0(j),f1(j)]);
+r_Tmat_b : coefmatrix([q0_b(j), q1_b(j)], [f0(j+1),f1(j+1)]);
+
+q0_bT(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], q0_b(j));
+q1_bT(j) := subst([f0(j+1)=T*f0(j), f1(j+1)=T*f1(j), f0(j-1)=Ti*f0(j), f1(j-1)=Ti*f1(j)], q1_b(j));
+
+/** Collect terms */
+Tmat_b : coefmatrix([q0_bT(j), q1_bT(j)], [f0(j),f1(j)]);
+
+/** Average */
+q0_av(j) := (q0_a(j) + q0_b(j))/2;
+q1_av(j) := (q1_a(j) + q1_b(j))/2;
+
+l_Tmat_av : coefmatrix([q0_av(j), q1_av(j)], [f0(j-1),f1(j-1)]);
+c_Tmat_av : coefmatrix([q0_av(j), q1_av(j)], [f0(j),f1(j)]);
+r_Tmat_av : coefmatrix([q0_av(j), q1_av(j)], [f0(j+1),f1(j+1)]);
+
+Tmat_av : fullratsimp(1/2*(Tmat_a+Tmat_b));
+
+/** Cross-check matrices from Eric */
+A_a : rectform(matrix([4*T-8+4*Ti, -2*T-2+4*Ti], [12*T-6-6*Ti, -6*T-24-6*Ti]));
+A_b : rectform(matrix([4*T-8+4*Ti, -4*T+2+2*Ti], [6*T+6-12*Ti, -6*T-24-6*Ti]));
+A_av : rectform(matrix([4*T-8+4*Ti, -3*T+3*Ti], [9*T-9*Ti, -6*T-24-6*Ti]));

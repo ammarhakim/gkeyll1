@@ -1,0 +1,152 @@
+/** Nodal basis function in 1D on a reference element */
+
+/** Need to load module for Legendre polynomials */
+load(orthopoly);
+
+/** Funciton to create coefficient matrix */
+makePmat(ord) := block([n, Pmat],
+          /** Determine size of matrix */
+	  n : length(ord),
+	  /** Compute matrix */
+	  Pmat : (Pmat : zeromatrix(n,n), for i from 1 thru n
+	     do (for j from 1 thru n
+	       do (Pmat[i,j] : legendre_p(j-1, ord[i]))),
+	       Pmat),
+	  return (Pmat)
+);
+
+/** Function to compute mass matrix */
+calcMassMatrix(basis) := block([n, mass],
+                n : length(basis),
+		mass : (mass : zeromatrix(n,n), for i from 1 thru n
+		         do (for j from 1 thru n
+			   do (mass[i,j] : integrate(basis[i]*basis[j], x, -1,1))),
+			   mass),
+	        return (mass)
+);
+
+/** Function to compute stiffness matrix */
+calcStiffMatrix(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] : integrate(
+			       diff(basis[i],x)*diff(basis[j],x),
+                               x, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute stiffness matrix */
+calcGradStiffMatrix_x(basis) := block([n, stiff],
+                n : length(basis),
+		stiff : (stiff : zeromatrix(n,n), for i from 1 thru n
+		          do (for j from 1 thru n
+			    do (stiff[i,j] :
+                              integrate(2/dx*diff(basis[i],x)*basis[j], x, -1,1))),
+	                  stiff),
+	        return (stiff)
+);
+
+/** Function to compute the interpolation matrix */
+calcInterpMatrix(basis, gOrds) := block([nbasis, nords, iMat, sVals],
+    			nbasis : length(basis),
+			nords  : length(gOrds),
+			iMat : (iMat : zeromatrix(nords, nbasis), for i from 1 thru nords
+			           do (sVals : subst([x=gOrds[i]], basis),
+				     for j from 1 thru nbasis
+				       do (iMat[i][j] : sVals[j])),
+				 iMat),
+		         return (iMat)
+);
+
+/** Order 2 */
+ord : [-1, 1];
+/** Construct matrix of coefficients */
+Pmat2 : makePmat(ord);
+/** Invert it */
+invPmat2 : invert(Pmat2);
+/** Identity matrix for use in coefficient calculation */
+u2 : ident(2);
+
+/** Basis function coefficients */
+a2 : (a2 : matrix([]), for i from 1 thru 2
+       do (a2 : addcol(a2, invPmat2.col(u2,i))), a2);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x)]);
+
+N1 : leg_x . col(a2,1);
+N2 : leg_x . col(a2,2);
+basis2 : [N1, N2];
+
+N2_mass : calcMassMatrix(basis2);
+N2_stiff : calcStiffMatrix(basis2);
+N2_weights : integrate(basis2, x, -1, 1);
+N2_grad_stiff_x : calcGradStiffMatrix_x(basis2);
+
+/** Ordinates for Gaussian quadrature */
+gOrds2 : [-1/sqrt(3), 1/sqrt(3)];
+N2_interp_mat : calcInterpMatrix(basis2, gOrds2);
+
+/** Order 3 */
+ord : [-1, 0, 1];
+/** Construct matrix of coefficients */
+Pmat3 : makePmat(ord);
+/** Invert it */
+invPmat3 : invert(Pmat3);
+/** Identity matrix for use in coefficient calculation */
+u3 : ident(3);
+
+/** Basis function coefficients */
+a3 : (a3 : matrix([]), for i from 1 thru 3
+       do (a3 : addcol(a3, invPmat3.col(u3,i))), a3);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x), legendre_p(2,x)]);
+
+N1 : leg_x . col(a3,1);
+N2 : leg_x . col(a3,2);
+N3 : leg_x . col(a3,3);
+basis3 : [N1, N2, N3];
+
+N3_mass : calcMassMatrix(basis3);
+N3_stiff : calcStiffMatrix(basis3);
+N3_weights : integrate(basis3, x, -1, 1);
+N3_grad_stiff_x : calcGradStiffMatrix_x(basis3);
+
+/** Ordinates for Gaussian quadrature */
+gOrds3 : [-sqrt(3/5), 0, sqrt(3/5)];
+N3_interp_mat : calcInterpMatrix(basis3, gOrds3);
+
+/** Order 4: ordinates are Legendre-Lobatto points */
+ord : [-1, -sqrt(1/5), sqrt(1/5), 1];
+myDx : 2/3;
+/**ord : [-1, -1+myDx, -1+2*myDx, 1];*/
+/** Construct matrix of coefficients */
+Pmat4 : makePmat(ord);
+/** Invert it */
+invPmat4 : invert(Pmat4);
+/** Identity matrix for use in coefficient calculation */
+u4 : ident(4);
+
+/** Basis function coefficients */
+a4 : (a : matrix([]), for i from 1 thru 4
+       do (a : addcol(a, invPmat4.col(u4,i))), a);
+
+/** Compute explicit form of basis functions */
+leg_x : matrix([legendre_p(0,x), legendre_p(1,x), legendre_p(2,x), legendre_p(3,x)]);
+
+N1 : leg_x . col(a4,1);
+N2 : leg_x . col(a4,2);
+N3 : leg_x . col(a4,3);
+N4 : leg_x . col(a4,4);
+basis4 : [N1, N2, N3, N4];
+
+N4_mass : calcMassMatrix(basis4);
+N4_stiff : calcStiffMatrix(basis4);
+N4_weights : integrate(basis4, x, -1, 1);
+N4_grad_stiff_x : calcGradStiffMatrix_x(basis4);
+
+gOrds4 : [-sqrt((3+2*sqrt(6/5))/7), -sqrt((3-2*sqrt(6/5))/7), sqrt((3-2*sqrt(6/5))/7), sqrt((3+2*sqrt(6/5))/7)];
+N4_interp_mat : calcInterpMatrix(basis4, gOrds4);

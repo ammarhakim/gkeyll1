@@ -1,0 +1,29 @@
+For some reason CMake is finding the incorrect compiler suite on Mac
+OS X Lion. To overcome this one needs to explicitly specify the
+compiler to GCC. Below is the command that works on my (Ammar Hakim)
+Lion Mac Book Pro.
+
+# Clear cmake cache to ensure a clean configure.
+rm -rf CMakeFiles CMakeCache.txt
+
+cmake \
+  -DCMAKE_BUILD_TYPE:STRING=Release \
+  -DCMAKE_C_COMPILER:FILEPATH='gcc' \
+  -DCMAKE_CXX_COMPILER:FILEPATH='g++' \
+  -DCMAKE_Fortran_COMPILER:FILEPATH='/usr/local/bin/gfortran' \
+  -DCMAKE_C_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
+  ../gkeyll
+
+For debug debug build do:
+
+cmake \
+  -DCMAKE_BUILD_TYPE:STRING=Debug \
+  -DCMAKE_C_COMPILER:FILEPATH='gcc' \
+  -DCMAKE_CXX_COMPILER:FILEPATH='g++' \
+  -DCMAKE_Fortran_COMPILER:FILEPATH='/usr/local/bin/gfortran' \
+  -DCMAKE_C_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_CXX_FLAGS:STRING='-pipe -fPIC' \
+  -DCMAKE_Fortran_FLAGS:STRING='-fPIC' \
+  ../gkeyll

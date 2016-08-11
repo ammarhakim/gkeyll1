@@ -1,0 +1,119 @@
+/** Script to perform interface reconstruction */
+
+load(orthopoly);
+
+etal(x) := (x+dx/2)/(dx/2);
+etar(x) := (x-dx/2)/(dx/2);
+zet(x) := (x-0)/dx;
+
+/** Solution in left/right cells */
+ul(x,pm) := sum(cl(k)*legendre_p(k,etal(x)), k, 0, pm);
+ur(x,pm) := sum(cr(k)*legendre_p(k,etar(x)), k, 0, pm);
+
+/** Reconstruction is expressed as Taylor series */
+fit(x,pm) := f(0) + sum(f(k)*x^k/factorial(k), k, 1, 2*(pm+1)-1);
+
+/** Reconstruction is expressed as Taylor series */
+eqnl(k,pm) := integrate(fit(x,pm)*legendre_p(k,etal(x)), x, -dx,0) = integrate(ul(x,pm)*legendre_p(k,etal(x)), x, -dx,0);
+eqnr(k,pm) := integrate(fit(x,pm)*legendre_p(k,etar(x)), x, 0,dx) = integrate(ur(x,pm)*legendre_p(k,etar(x)), x, 0,dx);
+
+/** Function to perform reconstruction at interface. The return list
+contains the expansion coefficients in a Taylor series around the cell
+interface. */
+calcRecon(x,pm) := block([eq, un, res],
+  /* Make list of equations to solve */
+  eq : append(makelist(eqnl(i,pm), i, 0, pm), makelist(eqnr(i,pm), i, 0, pm)),
+  /* Make list of unknowns */
+  un : makelist(f(i), i, 0, 2*(pm+1)-1),
+  /* Solve and extract results */
+  res : solve(eq, un),
+  return (map(rhs, res[1]))
+);
+
+/** p=0 case */
+c0 : calcRecon(x,0);
+
+/** Flux at right interface */
+fj1 : subst([cr(0)=u0(j+1), cl(0)=u0(j)], c0[2]);
+
+/** Flux at left interface */
+fj : subst([cr(0)=u0(j), cl(0)=u0(j-1)], c0[2]);
+
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** p=1 case */
+c1 : calcRecon(x,1);
+
+/** Flux at right interface */
+fj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[2]);
+
+/** Flux at left interface */
+fj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[2]);
+
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** Value at right interface */
+fvj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cl(0)=u0(j), cl(1)=u1(j)], c1[1]);
+
+/** Flux at left interface */
+fvj : subst([cr(0)=u0(j), cr(1)=u1(j), cl(0)=u0(j-1), cl(1)=u1(j-1)], c1[1]);
+
+/** Update for second equation */
+du1(j) := fullratsimp( (fj1+fj - 2/dx*(fvj1-fvj))*3/dx );
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du0(j));
+du1T(j) := subst([u0(j+1)=T*u0(j), u1(j+1)=T*u1(j), u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j)], du1(j));
+
+/** Collect terms */
+Tmat_1 : dx^2*coefmatrix([du0T(j), du1T(j)], [u0(j),u1(j)]);
+
+/** Compute eigenmatrix */
+vN_1 : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat_1) );
+
+/** p=2 case */
+c2 : calcRecon(x,2);
+
+/** Flux at right interface */
+fj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cr(2)=u2(j+1), cl(0)=u0(j), cl(1)=u1(j), cl(2)=u2(j)], 
+   c2[2]);
+
+/** Flux at left interface */
+fj : subst([cr(0)=u0(j), cr(1)=u1(j), cr(2)=u2(j), cl(0)=u0(j-1), cl(1)=u1(j-1), cl(2)=u2(j-1)], 
+   c2[2]);
+
+/** Value at right interface */
+fvj1 : subst([cr(0)=u0(j+1), cr(1)=u1(j+1), cr(2)=u2(j+1), cl(0)=u0(j), cl(1)=u1(j), cl(2)=u2(j)], 
+   c2[1]);
+
+/** Flux at left interface */
+fvj : subst([cr(0)=u0(j), cr(1)=u1(j), cr(2)=u2(j), cl(0)=u0(j-1), cl(1)=u1(j-1), cl(2)=u2(j-1)], 
+   c2[1]);
+
+/** Update formula for cell average */
+du0(j) := fullratsimp( (fj1-fj)/dx );
+
+/** Update for second equation */
+du1(j) := fullratsimp( (fj1+fj - 2/dx*(fvj1-fvj) )*3/dx );
+
+/** Update for third equation */
+du2(j) := fullratsimp( (fj1-fj - 6/dx*(fvj1+fvj) + 12/dx*u0(j) )*5/dx );
+
+/** Rewrite in terms of shift operators */
+du0T(j) := subst([u0(j+1)=T*u0(j),  u1(j+1)=T*u1(j),  u2(j+1)=T*u2(j),
+                  u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j), u2(j-1)=Ti*u2(j)], du0(j));
+
+du1T(j) := subst([u0(j+1)=T*u0(j),  u1(j+1)=T*u1(j),  u2(j+1)=T*u2(j),
+                  u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j), u2(j-1)=Ti*u2(j)], du1(j));
+
+du2T(j) := subst([u0(j+1)=T*u0(j),  u1(j+1)=T*u1(j),  u2(j+1)=T*u2(j),
+                  u0(j-1)=Ti*u0(j), u1(j-1)=Ti*u1(j), u2(j-1)=Ti*u2(j)], du2(j));
+
+/** Collect terms */
+Tmat_2 : dx^2*coefmatrix([du0T(j), du1T(j), du2T(j)], [u0(j),u1(j),u2(j)]);
+
+/** Compute eigenmatrix */
+vN_2 : rectform( subst([T=exp(%i*t), Ti=exp(-%i*t)], Tmat_2) );
+

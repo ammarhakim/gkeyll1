@@ -1,0 +1,33 @@
+/** Attempt to construct exact solution to two-fluid source equations */
+
+/** Number of species */
+ns : 2;
+
+/** Equation for current */
+dJeqn(s,nu) := omega(s)*E(nu) - %i*nu*Om(s)*J(s,nu);
+
+/** Equation for electric field */
+dEeqn(nu) := -sum( J(s,nu), s, 1, ns);
+
+eqns : [dJeqn(1,-1), dJeqn(1,0), dJeqn(1,1),
+        dJeqn(2,-1), dJeqn(2,0), dJeqn(2,1),
+	dEeqn(-1), dEeqn(0), dEeqn(1)];
+
+vars : [J(1,-1), J(1,0), J(1,1),
+        J(2,-1), J(2,0), J(2,1),
+	E(-1), E(0), E(1)];
+
+/** Collect terms to create linear matrix */
+Amat : coefmatrix(eqns, vars);
+
+/** collect terms for perpendicular system */
+AmatPerp : coefmatrix([eqns[2],eqns[5],eqns[8]], 
+  	     [vars[2],vars[5],vars[8]]);
+
+/** collect terms for parallel system */
+AmatPar : coefmatrix([eqns[1], eqns[3],
+		eqns[4], eqns[6],
+		eqns[7], eqns[9]],
+             [vars[1], vars[3],
+	      vars[4], vars[6],
+	      vars[7], vars[9]]);
