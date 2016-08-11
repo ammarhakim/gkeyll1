@@ -508,7 +508,7 @@ namespace Lucee
         &vals[0], ADD_VALUES);
     }
     tmEnd = clock();
-    std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    //std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
     
     DoPetscAssembly(stiffMat, true);
 
@@ -718,7 +718,7 @@ namespace Lucee
     }
 
     tmEnd = clock();
-    std::cout << "Assembly Stage Periodic assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    //std::cout << "Assembly Stage Periodic assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
 
     tmStart = clock();
 // modify values in stiffness matrix based on Dirichlet Bcs
@@ -778,7 +778,7 @@ namespace Lucee
     }
     DMSG("Modification for Dirichlet BCs completed");
     tmEnd = clock();
-    std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    //std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
     
     if (writeMatrix)
     {
