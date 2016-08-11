@@ -456,6 +456,7 @@ namespace Lucee
 
     DMSG("Inside assembleStiffness");
 
+    clock_t tmStart, tmEnd;    
     unsigned nglobal = nodalBasis->getNumGlobalNodes();
     unsigned nlocal = nodalBasis->getNumNodes();
 // map to hold periodicially identified nodes
@@ -483,7 +484,7 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> numDensPtr = numDens.createConstPtr();
 
-    
+    tmStart = clock();
 // loop, creating global stiffness matrix
     while (seq.step())
     {
@@ -506,66 +507,13 @@ namespace Lucee
       MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0],
         &vals[0], ADD_VALUES);
     }
+    tmEnd = clock();
+    std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    
+    DoPetscAssembly(stiffMat, true);
 
-    DoPetscAssembly(stiffMat);
 
-// modify values in stiffness matrix based on Dirichlet Bcs
-    for (unsigned d=0; d<NDIM; ++d)
-    {
-      for (unsigned side=0; side<2; ++side)
-      {
-        if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC ||
-          bc[d][side].isSet && bc[d][side].type == DIRICHLET_VARIABLE_BC)
-        { // we do not need to do anything for Neumann BCs
-// fetch number of nodes on face of element
-          unsigned nsl = side==0 ?
-            nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
-
-// allocate space for mapping
-          std::vector<int> lgSurfMap(nsl);
-
-          double dv = bc[d][side].value;
-// create region to loop over side
-          Lucee::Region<NDIM, int> defRgnG = side==0 ?
-            globalRgn.resetBounds(d, globalRgn.getLower(d), globalRgn.getLower(d)+1) :
-            globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
-
-// loop, modifying stiffness matrix NOTE: We need are running this
-// loop on all processors, even those that don't own the boundary
-// nodes. The reason is that PetSc expects this.
-          Lucee::RowMajorSequencer<NDIM> seqDirichlet(defRgnG);
-          while (seqDirichlet.step())
-          {
-            seqDirichlet.fillWithIndex(idx);
-            nodalBasis->setIndex(idx);
-// get surface nodes -> global mapping
-            if (side == 0)
-              nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
-            else
-              nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
-
-// reset corresponding rows (Note that some rows may be reset more
-// than once. This should not be a problem, though might make the
-// setup phase a bit slower).
-#if PETSC_VERSION_GE(3,6,0)            
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
-#else
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
-#endif            
-
-// now insert row numbers with corresponding values into map for use
-// in the update method
-            if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
-            {
-              for (unsigned r=0; r<nsl; ++r)
-                rowBcValues[lgSurfMap[r]] = dv;
-            }
-          }
-        }
-      }
-    }
-    DMSG("Modification for Dirichlet BCs completed");
-
+    tmStart = clock();
 // Begin process of modification to handle periodic BCs. The code in
 // the following two loops basically does the following. It modifies
 // the stiffness matrix so that the nodes on the upper boundary in
@@ -670,7 +618,7 @@ namespace Lucee
     }
     
 // reassemble matrix after modification
-    DoPetscAssembly(stiffMat);
+    DoPetscAssembly(stiffMat, true);
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
@@ -731,7 +679,7 @@ namespace Lucee
     }
     
 // reassemble matrix after modification
-    DoPetscAssembly(stiffMat);
+    DoPetscAssembly(stiffMat, true);
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
@@ -752,7 +700,7 @@ namespace Lucee
     }
 
 // reassemble matrix after modification
-    DoPetscAssembly(stiffMat);
+    DoPetscAssembly(stiffMat, true);
 
 // if all directions are periodic, set bottom left to 0.0 to avoid
 // singular matrix
@@ -769,9 +717,69 @@ namespace Lucee
       rowBcValues[0] = 0.0;
     }
 
-// reassemble matrix after modification
-    DoPetscAssembly(stiffMat);
+    tmEnd = clock();
+    std::cout << "Assembly Stage Periodic assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
 
+    tmStart = clock();
+// modify values in stiffness matrix based on Dirichlet Bcs
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      for (unsigned side=0; side<2; ++side)
+      {
+        if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC ||
+          bc[d][side].isSet && bc[d][side].type == DIRICHLET_VARIABLE_BC)
+        { // we do not need to do anything for Neumann BCs
+// fetch number of nodes on face of element
+          unsigned nsl = side==0 ?
+            nodalBasis->getNumSurfLowerNodes(d) : nodalBasis->getNumSurfUpperNodes(d);
+
+// allocate space for mapping
+          std::vector<int> lgSurfMap(nsl);
+
+          double dv = bc[d][side].value;
+// create region to loop over side
+          Lucee::Region<NDIM, int> defRgnG = side==0 ?
+            globalRgn.resetBounds(d, globalRgn.getLower(d), globalRgn.getLower(d)+1) :
+            globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
+
+// loop, modifying stiffness matrix NOTE: We need are running this
+// loop on all processors, even those that don't own the boundary
+// nodes. The reason is that PetSc expects this.
+          Lucee::RowMajorSequencer<NDIM> seqDirichlet(defRgnG);
+          while (seqDirichlet.step())
+          {
+            seqDirichlet.fillWithIndex(idx);
+            nodalBasis->setIndex(idx);
+// get surface nodes -> global mapping
+            if (side == 0)
+              nodalBasis->getSurfLowerLocalToGlobal(d, lgSurfMap);
+            else
+              nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
+
+// reset corresponding rows (Note that some rows may be reset more
+// than once. This should not be a problem, though might make the
+// setup phase a bit slower).
+#if PETSC_VERSION_GE(3,6,0)            
+            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
+#else
+            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
+#endif            
+
+// now insert row numbers with corresponding values into map for use
+// in the update method
+            if (bc[d][side].isSet && bc[d][side].type == DIRICHLET_BC)
+            {
+              for (unsigned r=0; r<nsl; ++r)
+                rowBcValues[lgSurfMap[r]] = dv;
+            }
+          }
+        }
+      }
+    }
+    DMSG("Modification for Dirichlet BCs completed");
+    tmEnd = clock();
+    std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    
     if (writeMatrix)
     {
       std::string outName = Loki::SingletonHolder<Lucee::Globals>

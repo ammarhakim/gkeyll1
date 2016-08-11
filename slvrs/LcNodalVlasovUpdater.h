@@ -189,6 +189,9 @@ namespace Lucee
       double getSafeVx(int n, const Lucee::Matrix<double>& pc);
       double getSafeVy(int n, const Lucee::Matrix<double>& pc);
       double getSafeVz(int n, const Lucee::Matrix<double>& pc);
+
+// helper to index EM fields at nodes      
+      unsigned emidx(unsigned n, unsigned i);
   };
 }
 

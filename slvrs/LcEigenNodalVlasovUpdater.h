@@ -173,6 +173,9 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+
+// helper to index EM fields at nodes      
+      unsigned emidx(unsigned n, unsigned i);      
   };
 }
 

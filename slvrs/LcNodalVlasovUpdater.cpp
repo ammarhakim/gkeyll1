@@ -42,8 +42,10 @@ namespace Lucee
   static const unsigned IBY = 4;
   static const unsigned IBZ = 5;
 
-  // helper to index EM fields at nodes
-  unsigned emidx(unsigned n, unsigned i)
+
+  template <unsigned CDIM, unsigned VDIM>  
+  unsigned
+  NodalVlasovUpdater<CDIM,VDIM>::emidx(unsigned n, unsigned i)
   {
     return n*8+i; // 8 as last two are correction potentials
   }
