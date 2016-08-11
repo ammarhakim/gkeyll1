@@ -31,6 +31,7 @@ set(lcslvrs_SOURCES
   LcCurrentSource.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
+  LcEigenNodalVlasovUpdater.cpp
   LcElectromagneticAUpdater.cpp
   LcElectromagneticDistFuncReflectionBcUpdater.cpp
   LcElectromagneticMomentsAtEdgesUpdater.cpp
@@ -99,7 +100,6 @@ set(lcslvrs_SOURCES
   LcNodalFiniteElementIfc.cpp
   LcNodalHyperDiffusionUpdater.cpp
   LcNodalPositiveFilterUpdater.cpp
-  LcNodalVlasovUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
