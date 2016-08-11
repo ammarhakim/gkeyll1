@@ -63,9 +63,9 @@ set(lcslvrs_SOURCES
   LcImplicitHyperTwentyMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
   LcImplicitTenMomentSrcUpdater.cpp
-  LcImplicitTwentyMomentSrcUpdater.cpp
   LcImplicitTwentyMomentCollisionUpdater.cpp
   LcImplicitTwentyMomentHeatFluxLimitUpdater.cpp
+  LcImplicitTwentyMomentSrcUpdater.cpp
   LcIsoThermEulerEquation.cpp
   LcKineticEnergyUpdater.cpp
   LcKineticHeatFluxAtEdge3DUpdater.cpp
@@ -100,6 +100,7 @@ set(lcslvrs_SOURCES
   LcNodalFiniteElementIfc.cpp
   LcNodalHyperDiffusionUpdater.cpp
   LcNodalPositiveFilterUpdater.cpp
+  LcNodalVlasovUpdater.cpp 
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
@@ -124,15 +125,15 @@ set(lcslvrs_SOURCES
   LcSOLMaxwellianAtNodeCalc.cpp
   LcSOLMaxwellianParameterCalc.cpp
   LcSOLMaxwellianParameterNewtonCalc.cpp
-  LcSOLPositivityUpdater.cpp
   LcSOLPositivity3DUpdater.cpp
   LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp
   LcSOLPositivityScaleCellUpdater.cpp
   LcSOLPositivityScaleNodeUpdater.cpp
+  LcSOLPositivityUpdater.cpp
   LcSOLPressureAtNodeCalc.cpp
-  LcSOLTemperatureCalc.cpp
   LcSOLTemperatureAtNodeCalc.cpp
+  LcSOLTemperatureCalc.cpp
   LcSOLWeightedProjectionCalc.cpp
   LcSOLWeightedProjectionTestCalc.cpp
   LcSOLZeroNormalBoundaryCondition.cpp
@@ -147,9 +148,9 @@ set(lcslvrs_SOURCES
   LcTenMomLocalAnisoHeatFluxUpdater.cpp
   LcTenMomentEquation.cpp
   LcTenMomentFluidSource.cpp
+  LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
   LcTwentyMomentEquation.cpp
   LcTwentyMomentFluidSource.cpp
-  LcTenMomentLocalCollisionlessHeatFluxUpdater.cpp
   LcTwoFluidMomentumRelaxSrcUpdater.cpp
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp

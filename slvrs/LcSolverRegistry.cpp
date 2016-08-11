@@ -80,7 +80,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcNodalPositiveFilterUpdater.h>
-//#include <LcNodalVlasovUpdater.h>
+#include <LcNodalVlasovUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -105,15 +105,15 @@
 #include <LcSOLMaxwellianAtNodeCalc.h>
 #include <LcSOLMaxwellianParameterCalc.h>
 #include <LcSOLMaxwellianParameterNewtonCalc.h>
-#include <LcSOLPositivityUpdater.h>
 #include <LcSOLPositivity3DUpdater.h>
 #include <LcSOLPositivityDragCellUpdater.h>
 #include <LcSOLPositivityDragNodeUpdater.h>
 #include <LcSOLPositivityScaleCellUpdater.h>
 #include <LcSOLPositivityScaleNodeUpdater.h>
+#include <LcSOLPositivityUpdater.h>
 #include <LcSOLPressureAtNodeCalc.h>
-#include <LcSOLTemperatureCalc.h>
 #include <LcSOLTemperatureAtNodeCalc.h>
+#include <LcSOLTemperatureCalc.h>
 #include <LcSOLWeightedProjectionCalc.h>
 #include <LcSOLWeightedProjectionTestCalc.h>
 #include <LcSOLZeroNormalBoundaryCondition.h>
@@ -124,8 +124,8 @@
 #include <LcStairSteppedBcUpdater.h>
 #include <LcTenMomLocalAnisoHeatFluxUpdater.h>
 #include <LcTenMomentFluidSource.h>
-#include <LcTwentyMomentFluidSource.h>
 #include <LcTenMomentLocalCollisionlessHeatFluxUpdater.h>
+#include <LcTwentyMomentFluidSource.h>
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
@@ -316,13 +316,13 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<4> >()
       .append<Lucee::NodalDisContHyperUpdater<5> >()
 
-      // .append<Lucee::NodalVlasovUpdater<1,1> >()
-      // .append<Lucee::NodalVlasovUpdater<1,2> >()
-      // .append<Lucee::NodalVlasovUpdater<1,3> >()
-      // .append<Lucee::NodalVlasovUpdater<2,2> >()
-      // .append<Lucee::NodalVlasovUpdater<2,3> >()
-      // //.append<Lucee::NodalVlasovUpdater<3,3> >()
-
+      .append<Lucee::NodalVlasovUpdater<1,1> >()
+      .append<Lucee::NodalVlasovUpdater<1,2> >()
+      .append<Lucee::NodalVlasovUpdater<1,3> >()
+      .append<Lucee::NodalVlasovUpdater<2,2> >()
+      .append<Lucee::NodalVlasovUpdater<2,3> >()
+      //.append<Lucee::NodalVlasovUpdater<3,3> >()
+      
       .append<Lucee::EigenNodalVlasovUpdater<1,1> >()
       .append<Lucee::EigenNodalVlasovUpdater<1,2> >()
       .append<Lucee::EigenNodalVlasovUpdater<1,3> >()
