@@ -21,6 +21,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcEdgeFaceCurlUpdater.h>
+#include <LcEigenNodalVlasovUpdater.h>
 #include <LcElectromagneticAUpdater.h>
 #include <LcElectromagneticDistFuncReflectionBcUpdater.h>
 #include <LcElectromagneticMomentsAtEdgesUpdater.h>
@@ -79,7 +80,7 @@
 #include <LcNodalFiniteElementIfc.h>
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcNodalPositiveFilterUpdater.h>
-#include <LcNodalVlasovUpdater.h>
+//#include <LcNodalVlasovUpdater.h>
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -315,12 +316,19 @@ namespace Lucee
       .append<Lucee::NodalDisContHyperUpdater<4> >()
       .append<Lucee::NodalDisContHyperUpdater<5> >()
 
-      .append<Lucee::NodalVlasovUpdater<1,1> >()
-      .append<Lucee::NodalVlasovUpdater<1,2> >()
-      .append<Lucee::NodalVlasovUpdater<1,3> >()
-      .append<Lucee::NodalVlasovUpdater<2,2> >()
-      .append<Lucee::NodalVlasovUpdater<2,3> >()
-      //.append<Lucee::NodalVlasovUpdater<3,3> >()
+      // .append<Lucee::NodalVlasovUpdater<1,1> >()
+      // .append<Lucee::NodalVlasovUpdater<1,2> >()
+      // .append<Lucee::NodalVlasovUpdater<1,3> >()
+      // .append<Lucee::NodalVlasovUpdater<2,2> >()
+      // .append<Lucee::NodalVlasovUpdater<2,3> >()
+      // //.append<Lucee::NodalVlasovUpdater<3,3> >()
+
+      .append<Lucee::EigenNodalVlasovUpdater<1,1> >()
+      .append<Lucee::EigenNodalVlasovUpdater<1,2> >()
+      .append<Lucee::EigenNodalVlasovUpdater<1,3> >()
+      .append<Lucee::EigenNodalVlasovUpdater<2,2> >()
+      .append<Lucee::EigenNodalVlasovUpdater<2,3> >()
+      //.append<Lucee::EigenNodalVlasovUpdater<3,3> >()
 
       .append<Lucee::NodalPositiveFilterUpdater<1> >()
       .append<Lucee::NodalPositiveFilterUpdater<2> >()
