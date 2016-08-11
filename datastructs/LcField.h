@@ -497,6 +497,14 @@ namespace Lucee
       static int luaAbs(lua_State *L);
 
 /**
+ * Lua callable method for squaring the values of a field by node
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaSquare(lua_State *L);
+
+/**
  * Lua callable method for copying field from supplied one.
  *
  * @param L Lua state to use.

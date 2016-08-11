@@ -453,6 +453,7 @@ namespace Lucee
     lfm.appendFunc("clear", luaClear);
     lfm.appendFunc("scale", luaScale);
     lfm.appendFunc("abs", luaAbs);
+    lfm.appendFunc("square", luaSquare);
     lfm.appendFunc("copy", luaCopy);
     lfm.appendFunc("accumulate", luaAccumulate);
     lfm.appendFunc("combine", luaCombine);
@@ -514,6 +515,26 @@ namespace Lucee
         else if (ptr[k] == 0.0 && lua_isnumber(L, 2))
           ptr[k] = (T) lua_tonumber(L, 2); // Replace fields with 0.0 with another number if supplied
       }
+    }
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaSquare(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+
+// loop over field, squaring values by node
+    Lucee::FieldPtr<T> ptr = fld->createPtr();
+    Lucee::RowMajorSequencer<NDIM> seq(fld->getExtRegion());
+    
+    while (seq.step())
+    {
+      fld->setPtr(ptr, seq.getIndex());
+      for (unsigned k=0; k<ptr.getNumComponents(); ++k)
+          ptr[k] = ptr[k]*ptr[k];
     }
     return 0;
   }
