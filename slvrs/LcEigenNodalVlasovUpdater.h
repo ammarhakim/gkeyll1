@@ -192,6 +192,7 @@ namespace Lucee
 // helper to index EM fields at nodes      
       unsigned emidx(unsigned n, unsigned i);
 
+/** Various timers */      
       double tm1, tm2;
   };
 }

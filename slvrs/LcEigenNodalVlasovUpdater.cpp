@@ -491,7 +491,6 @@ namespace Lucee
     }
     t2 = clock();
     tm2 += double (t2-t1)/CLOCKS_PER_SEC;
-    //std::cout << "tm2 " << tm2 << std::endl;
 
 // NOTE: If only calculation of increments are requested, the final
 // Euler update is not performed. This means that the multiplication

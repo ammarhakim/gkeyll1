@@ -72,6 +72,21 @@ namespace Lucee
  */
       void declareTypes();
 
+/**
+ * Method that performs registration of Lua functions.
+ *
+ * @param lfm Lua function map object.
+ */
+      static void appendLuaCallableMethods(Lucee::LuaFuncMap& lfm);
+
+/**
+ * Lua callable method to set current time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaGetTimers(lua_State *L);      
+
     private:
 /** Pointer to phase-space basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
@@ -192,6 +207,9 @@ namespace Lucee
 
 // helper to index EM fields at nodes      
       unsigned emidx(unsigned n, unsigned i);
+
+/** Various timers */      
+      double tm1, tm2, tm3;
   };
 }
 

@@ -240,6 +240,8 @@ namespace Lucee
       for (unsigned d=0; d<NDIM; ++d)
         lowerZeroFluxOffset[d] = upperZeroFluxOffset[d] = 0;
     }
+
+    tm1 = tm2 = tm3 = 0.0;
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -280,6 +282,8 @@ namespace Lucee
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
+    clock_t t1, t2;
+    t1 = clock();
 // loop to compute contribution from volume integrals
     while (seq.step())
     {
@@ -297,7 +301,10 @@ namespace Lucee
         matVec(1.0, stiffMatrix[dir].m, &flux[0], 1.0, &qNewPtr[0]);
       }
     }
+    t2 = clock();
+    tm1 += (double) (t2-t1)/CLOCKS_PER_SEC;
 
+    t1 = clock();    
 // contributions from surface integrals
     for (unsigned dir=0; dir<NDIM; ++dir)
     {
@@ -375,6 +382,8 @@ namespace Lucee
 // time-step was too large: return a suggestion with correct time-step
         return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
+    t2 = clock();
+    tm2 += double (t2-t1)/CLOCKS_PER_SEC;    
 
 // NOTE: If only calculation of increments are requested, the final
 // Euler update is not performed. This means that the multiplication
@@ -512,6 +521,25 @@ namespace Lucee
       out[i] = m*tv + v*out[i];
     }
   }
+
+  template <unsigned CDIM, unsigned VDIM>
+  void
+  NodalVlasovUpdater<CDIM,VDIM>::appendLuaCallableMethods(Lucee::LuaFuncMap& lfm)
+  {
+    lfm.appendFunc("timers", luaGetTimers);
+  }  
+
+  template <unsigned CDIM, unsigned VDIM>
+  int
+  NodalVlasovUpdater<CDIM,VDIM>::luaGetTimers(lua_State *L)
+  {
+    NodalVlasovUpdater<CDIM,VDIM> *s
+      = Lucee::PointerHolder<NodalVlasovUpdater<CDIM,VDIM> >::getObj(L);
+    lua_pushnumber(L, s->tm1);
+    lua_pushnumber(L, s->tm2);
+    lua_pushnumber(L, s->tm3);    
+    return 3;
+  }      
 
 // instantiations
   template class NodalVlasovUpdater<1,1>;
