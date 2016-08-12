@@ -100,7 +100,6 @@ namespace Lucee
 
       num1DGaussPoints = (unsigned)((maxPower+1)/2.0 + 0.5);
     }
-    std::cout << "num1DGaussPoints = " << num1DGaussPoints << std::endl;
     basisCalc.setNum1DGaussNodes(num1DGaussPoints);
 // initialize calculator object
     basisCalc.calc(nodeLoc, numNodes);

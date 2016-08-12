@@ -311,7 +311,7 @@ namespace Lucee
       // Compute gradient of hamiltonian
       Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
-        hamilDerivAtQuad += hamilPtr[i]*volQuad.pDiffMatrix[i];
+        hamilDerivAtQuad.noalias() += hamilPtr[i]*volQuad.pDiffMatrix[i];
 
       // Get alpha from appropriate function
       Eigen::MatrixXd alpha(NDIM, nVolQuad);
@@ -412,7 +412,7 @@ namespace Lucee
             // Compute gradient of hamiltonian at surface nodes
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
-              hamilDerivAtQuad += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
+              hamilDerivAtQuad.noalias() += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
             equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
           }
           else
@@ -423,7 +423,7 @@ namespace Lucee
             // Compute gradient of hamiltonian at surface nodes
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
-              hamilDerivAtQuad += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+              hamilDerivAtQuad.noalias() += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
             equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idxl, alpha);
           }
 
