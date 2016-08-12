@@ -602,7 +602,6 @@ namespace Lucee
 
     blitz::Array<double, 2> ordinates(NDIM, num1DGaussPoints), weights(NDIM, num1DGaussPoints);
 
-    std::cout << "calcVolumeQuad()" << std::endl;
 // compute ordinates/weights for 1D integration and store them
     for (int d=0; d<NDIM; ++d)
     {
