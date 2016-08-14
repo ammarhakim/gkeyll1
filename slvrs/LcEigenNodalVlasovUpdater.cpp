@@ -335,7 +335,7 @@ namespace Lucee
     Eigen::VectorXd flux(nlocal);
     Eigen::VectorXd fVec(nlocal);
 
-    Eigen::MatrixXd alpha(NDIM, nVolQuad);
+    Eigen::VectorXd alpha(nVolQuad);
     Eigen::VectorXd fAtQuad(nVolQuad);
 
     std::vector<Eigen::VectorXd> resultVectorDir = std::vector<Eigen::VectorXd>(NDIM);
@@ -351,6 +351,7 @@ namespace Lucee
     Eigen::VectorXd leftDataAtQuad(nSurfQuad);
     Eigen::VectorXd alphaRight(nSurfQuad);
     Eigen::VectorXd alphaLeft(nSurfQuad);
+    Eigen::VectorXd maxFlux(nSurfQuad);
     Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
 
     double localQ, localQl, localF;
@@ -375,28 +376,6 @@ namespace Lucee
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
-      // Get alpha from appropriate function
-      for (unsigned dir=0; dir<NDIM; ++dir)
-      {
-        calcFlux(dir, phaseNodeCoords, emPtr, flux);
-        alpha.row(dir).noalias() = volQuad.interpMat*flux;
-      }
-
-      // Computing maximum cfla
-      grid.setIndex(idx);
-      Eigen::VectorXd dtdqVec(NDIM);
-      for (int i = 0; i < NDIM; i++)
-        dtdqVec(i) = dt/grid.getDx(i);
-
-      Eigen::VectorXd cflaVec(NDIM);
-      // Loop over each alpha vector evaluated at a quadrature point
-      for (int i = 0; i < nVolQuad; i++)
-      {
-        double maxCflaInCol = alpha.col(i).cwiseAbs().cwiseProduct(dtdqVec).maxCoeff();
-        if (maxCflaInCol > cfla)
-          cfla = maxCflaInCol;
-      }
-
       // Get a vector of f at quad points
       for (int i = 0; i < nlocal; i++)
         fVec(i) = qPtr[i];
@@ -404,7 +383,9 @@ namespace Lucee
 
       for (int dir = 0;  dir < NDIM; dir++)
       {
-        resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(volQuad.weights.cwiseProduct(fAtQuad.cwiseProduct(alpha.row(dir).transpose())));
+        calcFlux(dir, phaseNodeCoords, emPtr, flux);
+        alpha.noalias() = volQuad.interpMat*flux;
+        resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(volQuad.weights.cwiseProduct(fAtQuad.cwiseProduct(alpha)));
       }
 
       for (int i = 0; i < nlocal; i++)
@@ -416,10 +397,6 @@ namespace Lucee
     }
     t2 = clock();
     tm1 += (double) (t2-t1)/CLOCKS_PER_SEC;
-
-    // Check to see if we need to retake time step
-    if (cfla > cflm)
-      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     t1 = clock();
 // contributions from surface integrals
@@ -453,6 +430,13 @@ namespace Lucee
           phaseBasis->setIndex(idx);
           phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
+          grid.setIndex(idxl);
+          double dxL = grid.getDx(dir);
+          grid.setIndex(idx);
+          double dxR = grid.getDx(dir);
+
+          double dtdx = 2*dt/(dxL+dxR);
+
           q.setPtr(qPtr, idx);
           q.setPtr(qPtrl, idxl);
           EM.setPtr(emPtr, idx);
@@ -471,9 +455,13 @@ namespace Lucee
           alphaRight.noalias() = surfLowerQuad[dir].interpMat*flux;
           calcFlux(dir, phaseNodeCoords, emPtrl, flux);
           alphaLeft.noalias() = surfUpperQuad[dir].interpMat*flux;
+          maxFlux = (alphaLeft.cwiseAbs()).cwiseMax(alphaRight.cwiseAbs());
 
           // Compute numerical flux
-          computeNumericalFlux(alphaLeft, alphaRight, leftDataAtQuad, rightDataAtQuad, numericalFluxAtQuad);
+          numericalFluxAtQuad.noalias() = 0.5*(alphaLeft.cwiseProduct(leftDataAtQuad) + alphaRight.cwiseProduct(rightDataAtQuad)) 
+            - 0.5*maxFlux.cwiseProduct(rightDataAtQuad - leftDataAtQuad);
+
+          cfla = Lucee::max3(cfla, dtdx*maxFlux.maxCoeff(), -dtdx*maxFlux.maxCoeff());
 
           qNew.setPtr(qNewPtr, idx);
           qNew.setPtr(qNewPtrl, idxl);
@@ -488,6 +476,9 @@ namespace Lucee
           }
         }
       }
+      // Check to see if we need to retake time step
+      if (cfla > cflm)
+        return Lucee::UpdaterStatus(false, dt*cfl/cfla);
     }
     t2 = clock();
     tm2 += double (t2-t1)/CLOCKS_PER_SEC;
