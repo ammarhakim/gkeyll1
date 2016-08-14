@@ -159,16 +159,6 @@ namespace Lucee
  */
       void calcFlux(unsigned dir, const Lucee::Matrix<double>& pc, const Lucee::ConstFieldPtr<double>& EM, Eigen::VectorXd& flux);
 
-/**
- * @param alphaLeft: characteristic velocities at left edge quad points (dot n)
- * @param alphaRight: characteristic velocities at right edge quad points (dot n)
- * @param leftValsAtQuad: left cell values at quad points
- * @param rightValsAtQuad: right cell values at quad points
- * @param numericalFluxAtQuad: resulting numerical flux calculation at quad points
- */
-      void computeNumericalFlux(const Eigen::VectorXd& alphaLeft, const Eigen::VectorXd& alphaRight, const Eigen::VectorXd& leftValsAtQuad,
-          const Eigen::VectorXd& rightValsAtQuad, Eigen::VectorXd& numericalFluxAtQuad);
-
 /** Boolean for determining if every configuration space node has a phase space node associated with it */
       bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
         const Eigen::MatrixXd& phaseC, const Eigen::MatrixXd& confC);

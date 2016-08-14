@@ -144,92 +144,6 @@ namespace Lucee
     
     unsigned nlocal = phaseBasis->getNumNodes();
 
-    // Store mass matrix inverse
-    Lucee::Matrix<double> tempMass(nlocal, nlocal);
-    phaseBasis->getMassMatrix(tempMass);
-    Eigen::MatrixXd massMatrix(nlocal, nlocal);
-    copyLuceeToEigen(tempMass, massMatrix);
-    massMatrixInv = massMatrix.inverse();
-
-    // Store grad stiffness matrix in each direction
-    std::vector<Eigen::MatrixXd> gradStiffnessMatrix(NDIM);
-    for (int dir = 0; dir < NDIM; dir++)
-    {
-      Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
-      phaseBasis->getGradStiffnessMatrix(dir, tempMatrix);
-      gradStiffnessMatrix[dir] = Eigen::MatrixXd(nlocal, nlocal);
-
-      copyLuceeToEigen(tempMatrix, gradStiffnessMatrix[dir]);
-    }
-
-    // get number of surface quadrature points
-    int nSurfQuad = phaseBasis->getNumSurfGaussNodes();
-    // get data needed for Gaussian quadrature
-    int nVolQuad = phaseBasis->getNumGaussNodes();
-    std::vector<double> volWeights(nVolQuad);
-    Lucee::Matrix<double> tempVolQuad(nVolQuad, nlocal);
-    Lucee::Matrix<double> tempVolCoords(nVolQuad, PNC);
-    volQuad.reset(nVolQuad, nlocal, PNC);
-
-    phaseBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
-    for (int volIndex = 0; volIndex < nVolQuad; volIndex++)
-      volQuad.weights(volIndex) = volWeights[volIndex];
-    
-    copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
-
-    std::vector<Eigen::MatrixXd> derivMatrices(NDIM);
-
-    // Compute gradients of basis functions evaluated at volume quadrature points
-    for (int dir = 0; dir < NDIM; dir++)
-    {
-      // Each row is a quadrature point; each column is a basis function with derivative applied
-      Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
-
-      derivMatrices[dir] = derivMatrix;
-    }
-
-    // Get data for surface quadrature
-    for (int dir = 0; dir < NDIM; dir++)
-    {
-      // temporary variables
-      std::vector<double> tempSurfWeights(nSurfQuad);
-      Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
-      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, PNC);
-
-      // Reset surface quadrature structures
-      surfLowerQuad[dir].reset(nSurfQuad, nlocal, PNC);
-      surfUpperQuad[dir].reset(nSurfQuad, nlocal, PNC);
-      
-      // lower surface data
-      phaseBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
-        tempSurfCoords, tempSurfWeights);
-      // copy data to appropriate structures
-      for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-        surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
-      copyLuceeToEigen(tempSurfQuad, surfLowerQuad[dir].interpMat);
-
-      // upper surface data
-      phaseBasis->getSurfUpperGaussQuadData(dir, tempSurfQuad,
-        tempSurfCoords, tempSurfWeights);
-      // copy data to appropriate structures
-      for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-        surfUpperQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
-      copyLuceeToEigen(tempSurfQuad, surfUpperQuad[dir].interpMat);
-    }
-
-    // CONSIDER: instead of allocating NDIM size vectors, only store those needed in updateDirs
-    bigStoredUpperSurfMatrices.resize(NDIM);
-    bigStoredLowerSurfMatrices.resize(NDIM);
-    bigStoredVolMatrices.resize(NDIM);
-
-    // Store three matrices at each cell
-    for (int dir = 0; dir < NDIM; dir++)
-    {
-      bigStoredUpperSurfMatrices[dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-      bigStoredLowerSurfMatrices[dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
-      bigStoredVolMatrices[dir] = massMatrixInv*derivMatrices[dir].transpose();
-    }
-
 // compute mapping of phase-space nodes to configuration space
 // nodes. The assumption here is that the node layout in phase-space
 // and configuration space are such that each node in phase-space has
@@ -269,6 +183,109 @@ namespace Lucee
           "EigenNodalVlasovUpdater::readInput: No matching configuration space node for phase-space node ");
         lce << n;
         throw lce;
+      }
+    }
+
+    // Store mass matrix inverse
+    Lucee::Matrix<double> tempMass(nlocal, nlocal);
+    phaseBasis->getMassMatrix(tempMass);
+    Eigen::MatrixXd massMatrix(nlocal, nlocal);
+    copyLuceeToEigen(tempMass, massMatrix);
+    massMatrixInv = massMatrix.inverse();
+
+    // Store grad stiffness matrix in each direction
+    std::vector<Eigen::MatrixXd> gradStiffnessMatrix(NDIM);
+    for (int dir=0; dir<NDIM; ++dir)
+    {
+      Lucee::Matrix<double> tempMatrix(nlocal, nlocal);
+      phaseBasis->getGradStiffnessMatrix(dir, tempMatrix);
+      gradStiffnessMatrix[dir] = Eigen::MatrixXd(nlocal, nlocal);
+
+      copyLuceeToEigen(tempMatrix, gradStiffnessMatrix[dir]);
+    }
+
+    // get number of surface quadrature points
+    int nSurfQuad = phaseBasis->getNumSurfGaussNodes();
+    // get data needed for Gaussian quadrature
+    int nVolQuad = phaseBasis->getNumGaussNodes();
+    std::vector<double> volWeights(nVolQuad);
+    Lucee::Matrix<double> tempVolQuad(nVolQuad, nlocal);
+    Lucee::Matrix<double> tempVolCoords(nVolQuad, PNC);
+    volQuad.reset(nVolQuad, nlocal, PNC);
+
+    phaseBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
+    for (int volIndex=0; volIndex<nVolQuad; ++volIndex)
+      volQuad.weights(volIndex) = volWeights[volIndex];
+    
+    copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
+
+    std::vector<Eigen::MatrixXd> derivMatrices(NDIM);
+
+    // Compute gradients of basis functions evaluated at volume quadrature points
+    for (int dir=0; dir<NDIM; ++dir)
+    {
+      // Each row is a quadrature point; each column is a basis function with derivative applied
+      Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+
+      derivMatrices[dir] = derivMatrix;
+    }
+
+    // Get data for surface quadrature
+    for (int dir=0; dir<NDIM; ++dir)
+    {
+      // temporary variables
+      std::vector<double> tempSurfWeights(nSurfQuad);
+      Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
+      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, PNC);
+
+      // Reset surface quadrature structures
+      surfLowerQuad[dir].reset(nSurfQuad, nlocal, PNC);
+      surfUpperQuad[dir].reset(nSurfQuad, nlocal, PNC);
+      
+      // lower surface data
+      phaseBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
+        tempSurfCoords, tempSurfWeights);
+      // copy data to appropriate structures
+      for (int quadIndex=0; quadIndex<nSurfQuad; ++quadIndex)
+        surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
+      copyLuceeToEigen(tempSurfQuad, surfLowerQuad[dir].interpMat);
+
+      // upper surface data
+      phaseBasis->getSurfUpperGaussQuadData(dir, tempSurfQuad,
+        tempSurfCoords, tempSurfWeights);
+      // copy data to appropriate structures
+      for (int quadIndex=0; quadIndex<nSurfQuad; ++quadIndex)
+        surfUpperQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
+      copyLuceeToEigen(tempSurfQuad, surfUpperQuad[dir].interpMat);
+    }
+
+    bigStoredUpperSurfMatrices.resize(NDIM);
+    bigStoredLowerSurfMatrices.resize(NDIM);
+    bigStoredVolMatrices.resize(NDIM);
+
+    // Store three matrices at each cell
+    for (int dir=0; dir<NDIM; ++dir)
+    {
+      bigStoredUpperSurfMatrices[dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
+      bigStoredLowerSurfMatrices[dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+      bigStoredVolMatrices[dir] = massMatrixInv*derivMatrices[dir].transpose();
+      if (dir<CDIM)
+      {
+        for (int i=0; i<nlocal; ++i)
+        {
+          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfUpperQuad[dir].weights.transpose());
+          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfLowerQuad[dir].weights.transpose());
+          bigStoredVolMatrices[dir].row(i) = bigStoredVolMatrices[dir].row(i).cwiseProduct(volQuad.weights.transpose());
+        }
+      }
+      else
+      {
+        for (int i=0; i<nlocal; ++i)
+        {
+          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfUpperQuad[dir].weights.transpose());
+          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfLowerQuad[dir].weights.transpose());
+          bigStoredVolMatrices[dir].row(i) = bigStoredVolMatrices[dir].row(i).cwiseProduct(volQuad.weights.transpose());
+        }
       }
     }
 
@@ -341,9 +358,6 @@ namespace Lucee
     std::vector<Eigen::VectorXd> resultVectorDir = std::vector<Eigen::VectorXd>(NDIM);
     for (int i=0; i<NDIM; ++i)
       resultVectorDir[i] = Eigen::VectorXd::Zero(nlocal);
-    std::vector<Eigen::VectorXd> resultVectorDirLeft = std::vector<Eigen::VectorXd>(NDIM);
-    for (int i=0; i<NDIM; ++i)
-      resultVectorDirLeft[i] = Eigen::VectorXd::Zero(nlocal);    
 
     Eigen::VectorXd rightData(nlocal);
     Eigen::VectorXd leftData(nlocal);
@@ -377,20 +391,29 @@ namespace Lucee
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
       // Get a vector of f at quad points
-      for (int i = 0; i < nlocal; i++)
+      for (int i=0; i<nlocal; ++i)
         fVec(i) = qPtr[i];
       fAtQuad.noalias() = volQuad.interpMat*fVec;
 
-      for (int dir = 0;  dir < NDIM; dir++)
+      for (int dir=0;  dir<NDIM; ++dir)
       {
-        calcFlux(dir, phaseNodeCoords, emPtr, flux);
-        alpha.noalias() = volQuad.interpMat*flux;
-        resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(volQuad.weights.cwiseProduct(fAtQuad.cwiseProduct(alpha)));
+        if (dir<CDIM)
+        {
+          calcFlux(dir, phaseNodeCoords, emPtr, flux);
+          alpha.noalias() = volQuad.interpMat*flux;
+          resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(fAtQuad.cwiseProduct(alpha));
+        }
+        else
+        {
+          calcFlux(dir, phaseNodeCoords, emPtr, flux);
+          alpha.noalias() = volQuad.interpMat*flux;
+          resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(fAtQuad.cwiseProduct(alpha));
+        }
       }
 
-      for (int i = 0; i < nlocal; i++)
+      for (int i=0; i<nlocal; ++i)
       {
-        for (int dir = 0;  dir < NDIM; dir++)
+        for (int dir=0;  dir<NDIM; ++dir)
           qNewPtr[i] += resultVectorDir[dir](i);
       }
 
@@ -443,7 +466,7 @@ namespace Lucee
           EM.setPtr(emPtrl, idxl);
 
           // Copy data to Eigen vectors
-          for (int i = 0; i < nlocal; i++)
+          for (int i=0; i<nlocal; ++i)
           {
             rightData(i) = qPtr[i];
             leftData(i) = qPtrl[i];
@@ -466,13 +489,13 @@ namespace Lucee
           qNew.setPtr(qNewPtr, idx);
           qNew.setPtr(qNewPtrl, idxl);
 
-          resultVectorDirLeft[dir].noalias() = bigStoredUpperSurfMatrices[dir]*(numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights));
-          resultVectorDir[dir].noalias() = bigStoredLowerSurfMatrices[dir]*(numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights));
+          resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuad;
+          resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuad;
 
-          for (int i = 0; i < nlocal; i++)
+          for (int i=0; i<nlocal; ++i)
           {
-            qNewPtrl[i] -= resultVectorDirLeft[dir](i);
-            qNewPtr[i] += resultVectorDir[dir](i);
+            qNewPtrl[i] -= resultVectorDir[0](i);
+            qNewPtr[i] += resultVectorDir[1](i);
           }
         }
       }
@@ -566,28 +589,11 @@ namespace Lucee
 
   template <unsigned CDIM, unsigned VDIM>
   void
-  EigenNodalVlasovUpdater<CDIM,VDIM>::computeNumericalFlux(const Eigen::VectorXd& alphaLeft,
-    const Eigen::VectorXd& alphaRight, const Eigen::VectorXd& leftValsAtQuad, 
-    const Eigen::VectorXd& rightValsAtQuad, Eigen::VectorXd& numericalFluxAtQuad)
-  {
-    double maxs;
-    // Loop through all quadrature points
-    for (int quadIndex = 0; quadIndex < numericalFluxAtQuad.size(); quadIndex++)
-    {
-      maxs = std::max(std::fabs(alphaLeft(quadIndex)),std::fabs(alphaRight(quadIndex)));
-      numericalFluxAtQuad(quadIndex) = 0.5*(alphaLeft(quadIndex)*leftValsAtQuad(quadIndex) + alphaRight(quadIndex)*rightValsAtQuad(quadIndex)) 
-        - 0.5*maxs*(rightValsAtQuad(quadIndex) - leftValsAtQuad(quadIndex));
-
-    }
-  }
-
-  template <unsigned CDIM, unsigned VDIM>
-  void
   EigenNodalVlasovUpdater<CDIM,VDIM>::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
-    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
-      for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
+    for (int rowIndex=0; rowIndex<destinationMatrix.rows(); ++rowIndex)
+      for (int colIndex=0; colIndex<destinationMatrix.cols(); ++colIndex)
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
 
