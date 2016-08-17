@@ -155,6 +155,7 @@ set(lcslvrs_SOURCES
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMoments3DUpdater.cpp
+  LcVlasovPositivityUpdater.cpp
   LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
