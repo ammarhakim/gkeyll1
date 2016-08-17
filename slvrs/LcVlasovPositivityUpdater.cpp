@@ -101,6 +101,7 @@ namespace Lucee
     Eigen::MatrixXd volCoordsConf(nVolQuadConf, (unsigned) CNC);
     copyLuceeToEigen(tempVolCoordsConf, volCoordsConf);
 
+    volWeightsConf = Eigen::VectorXd::Zero(nlocalConf);
     for(int i=0; i<nVolQuadConf; ++i)
       volWeightsConf(i) = tempVolWeightsConf[i];
 
