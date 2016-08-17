@@ -205,7 +205,7 @@ namespace Lucee
       double originalNum = (mom0Matrix*distfVector).sum();
       if (originalNum<0.0)
       {
-        std::cout << "entire cell negative (density = " << originalNum << ")" << std::endl;
+        //std::cout << "entire cell negative (density = " << originalNum << ")" << std::endl;
         for (int i=0; i<nlocalPhase; ++i)
         {
           if (distfPtr[i] < 0.0)
@@ -215,7 +215,7 @@ namespace Lucee
       }
       else if (originalNum==0.0)
       {
-        std::cout << "(positivity) cell is zero. skipping." << std::endl;
+        //std::cout << "(positivity) cell is zero. skipping." << std::endl;
         continue;
       }
       // Zero out distfVector entries that are negative
@@ -230,7 +230,7 @@ namespace Lucee
 
       if (modifiedNum==0.0)
       {
-        std::cout << "New cell is all zero" << std::endl;
+        //std::cout << "New cell is all zero" << std::endl;
         for (int i=0; i<nlocalPhase; ++i)
           distfPtr[i] = 0.0;
       }
