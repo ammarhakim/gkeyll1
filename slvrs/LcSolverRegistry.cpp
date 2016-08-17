@@ -129,6 +129,7 @@
 #include <LcTwoFluidMomentumRelaxSrcUpdater.h>
 #include <LcVelocitiesFromMoments3DUpdater.h>
 #include <LcVelocitiesFromMomentsUpdater.h>
+#include <LcVlasovPositivityUpdater.h>
 #include <LcWavePropagationUpdater.h>
 #include <LcZeroNormalBoundaryCondition.h>
 #include <LcZeroTangentBoundaryCondition.h>
@@ -329,6 +330,13 @@ namespace Lucee
       .append<Lucee::EigenNodalVlasovUpdater<2,2> >()
       .append<Lucee::EigenNodalVlasovUpdater<2,3> >()
       //.append<Lucee::EigenNodalVlasovUpdater<3,3> >()
+
+      .append<Lucee::VlasovPositivityUpdater<1,1> >()
+      .append<Lucee::VlasovPositivityUpdater<1,2> >()
+      .append<Lucee::VlasovPositivityUpdater<1,3> >()
+      .append<Lucee::VlasovPositivityUpdater<2,2> >()
+      .append<Lucee::VlasovPositivityUpdater<2,3> >()
+      //.append<Lucee::VlasovPositivityUpdater<3,3> >()
 
       .append<Lucee::NodalPositiveFilterUpdater<1> >()
       .append<Lucee::NodalPositiveFilterUpdater<2> >()
