@@ -84,6 +84,8 @@ namespace Lucee
       std::vector<unsigned> phaseConfMap;
 /** Zeroth moment (density) matrix */
       Eigen::MatrixXd mom0Matrix;
+/** Vector of configuration space quadrature weights to compute average */
+      Eigen::VectorXd volWeightsConf;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

@@ -90,16 +90,19 @@ namespace Lucee
 
     // get volume interpolation matrices for configuration space element
     int nVolQuadConf = confBasis->getNumGaussNodes();
-    std::vector<double> volWeightsConf(nVolQuadConf);
+    std::vector<double> tempVolWeightsConf(nVolQuadConf);
     Lucee::Matrix<double> tempVolQuadConf(nVolQuadConf, nlocalConf);
     Lucee::Matrix<double> tempVolCoordsConf(nVolQuadConf, CNC);
 
-    confBasis->getGaussQuadData(tempVolQuadConf, tempVolCoordsConf, volWeightsConf);
+    confBasis->getGaussQuadData(tempVolQuadConf, tempVolCoordsConf, tempVolWeightsConf);
 
     Eigen::MatrixXd volQuadConf(nVolQuadConf, nlocalConf);
     copyLuceeToEigen(tempVolQuadConf, volQuadConf);
     Eigen::MatrixXd volCoordsConf(nVolQuadConf, (unsigned) CNC);
     copyLuceeToEigen(tempVolCoordsConf, volCoordsConf);
+
+    for(int i=0; i<nVolQuadConf; ++i)
+      volWeightsConf(i) = tempVolWeightsConf[i];
 
     // get volume interpolation matrices for phase space element
     int nVolQuadPhase = phaseBasis->getNumGaussNodes();
@@ -129,7 +132,7 @@ namespace Lucee
     for (unsigned n=0; n<volWeightsPhase.size(); ++n)
     {
       bool pcFound = false;
-      for (unsigned cn=0; cn<volWeightsConf.size(); ++cn)
+      for (unsigned cn=0; cn<tempVolWeightsConf.size(); ++cn)
         if (sameConfigCoords(n, cn, dxMin, volCoordsPhase, volCoordsConf))
         {
           phaseConfMap[n] = cn;
@@ -190,6 +193,7 @@ namespace Lucee
 
     // Used in the sequencer
     Eigen::VectorXd distfVector(nlocalPhase);
+    Eigen::VectorXd tempNumDensity(nlocalConf);
 
     while (seq.step())
     {
@@ -202,7 +206,8 @@ namespace Lucee
         distfVector(i) = distfPtr[i];
 
       // Compute density
-      double originalNum = (mom0Matrix*distfVector).sum();
+      tempNumDensity.noalias() = mom0Matrix*distfVector;
+      double originalNum = (tempNumDensity.cwiseProduct(volWeightsConf)).sum();
       if (originalNum<0.0)
       {
         //std::cout << "entire cell negative (density = " << originalNum << ")" << std::endl;
@@ -226,7 +231,8 @@ namespace Lucee
       }
 
       // Compute modified density. This will be greater than originalNum
-      double modifiedNum = (mom0Matrix*distfVector).sum();
+      tempNumDensity.noalias() = mom0Matrix*distfVector;
+      double modifiedNum = (tempNumDensity.cwiseProduct(volWeightsConf)).sum();
 
       if (modifiedNum==0.0)
       {
