@@ -10,8 +10,6 @@ function interpMatrix = ComputeSerendipityMatricesGeneral(dim, order)
 % Outputs:  interpMatrix = Interpolation matrix to be used to project
 %           solution vectors on a finer grid
 
-format long
-
 nodeBase = linspace(-1, 1, order+1); %Base from which edge nodes will assigned
 %Only used in 1D and 2D since 3D and beyond the pattern becomes more
 %nontrivial
@@ -85,7 +83,10 @@ if dim == 1
     %Gkeyll for some important quantity (distribution function, moments,
     %etc.) and f_interp is the projected quantity we will use for plotting
     %and data analysis.
-    
+    for i = 1:length(functionVector)
+        functionVector(i);
+        int(functionVector(i), x, -1, 1)
+    end
     if order == 1
         interpList = {-0.5, 0.5};
         
@@ -224,16 +225,16 @@ elseif dim == 2
                     [1,1]};
     elseif order == 3
         nodeList = {[-1,-1],...
-                    [-1/3.0,-1],...
-                    [1/3.0,-1],...
+                    [-1.0/3.0,-1],...
+                    [1.0/3.0,-1],...
                     [1,-1],...
-                    [-1,-1/3.0],...
-                    [1,-1/3.0],...
-                    [-1,1/3.0],...
-                    [1,1/3.0],...
+                    [-1,-1.0/3.0],...
+                    [1,-1.0/3.0],...
+                    [-1,1.0/3.0],...
+                    [1,1.0/3.0],...
                     [-1,1],...
-                    [-1/3.0,1],...
-                    [1/3.0,1],...
+                    [-1.0/3.0,1],...
+                    [1.0/3.0,1],...
                     [1,1]};
     elseif order == 4
         nodeList = {[-1,-1],...
@@ -587,7 +588,23 @@ elseif dim == 2
     %Gkeyll for some important quantity (distribution function, moments,
     %etc.) and f_interp is the projected quantity we will use for plotting
     %and data analysis.
-    
+    if order == 3
+        for i = 1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            result = int(sub, y, -1, 1);
+            numericResult(i) = double(result);
+        end
+        numericResult'
+    else
+        for i=1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            result(i) = int(sub, y, -1, 1);
+        end
+        result'
+    end
+
     if order == 1
         
         order1Range = linspace(-0.5,0.5,2);
@@ -647,7 +664,6 @@ elseif dim == 2
                 interpList = [interpList, {[order4Range(n), order4Range(m)]}];
             end
         end
-        celldisp(interpList)
         
         interpMatrix = zeros(length(interpList), length(basisList));
         
@@ -665,7 +681,6 @@ elseif dim == 2
                 interpList = [interpList, {[order5Range(n), order5Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -683,7 +698,6 @@ elseif dim == 2
                 interpList = [interpList, {[order6Range(n), order6Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -701,7 +715,6 @@ elseif dim == 2
                 interpList = [interpList, {[order7Range(n), order7Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -719,7 +732,6 @@ elseif dim == 2
                 interpList = [interpList, {[order8Range(n), order8Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -737,7 +749,6 @@ elseif dim == 2
                 interpList = [interpList, {[order9Range(n), order9Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -755,7 +766,6 @@ elseif dim == 2
                 interpList = [interpList, {[order10Range(n), order10Range(m)]}];
             end
         end
-        celldisp(interpList)
 
         interpMatrix = zeros(length(interpList), length(basisList));
 
@@ -882,7 +892,7 @@ elseif dim == 3
                     [1,1,1]};
     end
     
-    celldisp(nodeList)
+    %celldisp(nodeList)
     
     % Create basis monomials
     for zIndex = 0:order
@@ -947,7 +957,24 @@ elseif dim == 3
     %Gkeyll for some important quantity (distribution function, moments,
     %etc.) and f_interp is the projected quantity we will use for plotting
     %and data analysis.
-    
+    if order == 3
+        for i = 1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            result = int(sub2, z, -1, 1);
+            numericResult(i) = double(result);
+        end
+        numericResult'
+    else
+        for i=1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            result(i) = int(sub2, z, -1, 1);
+        end
+        result'
+    end
     if order == 1
         
         order1Range = linspace(-0.5,0.5,2);
@@ -1313,7 +1340,7 @@ elseif dim == 4
                     [0.5,1,1,1],...
                     [1,1,1,1]};
         end
-        celldisp(nodeList)
+        %celldisp(nodeList)
     
     % Create basis monomials
     for wIndex = 0:order
@@ -1384,7 +1411,26 @@ elseif dim == 4
     %Gkeyll for some important quantity (distribution function, moments,
     %etc.) and f_interp is the projected quantity we will use for plotting
     %and data analysis.
-    
+    if order == 3
+        for i = 1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            sub3 = int(sub2, z, -1, 1);
+            result = int(sub3, w, -1, 1);
+            numericResult(i) = double(result);
+        end
+        numericResult'
+    else
+        for i=1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            sub3 = int(sub2, z, -1, 1);
+            result(i) = int(sub3, w, -1, 1);
+        end
+        result'
+    end
     if order == 1
         
         order1Range = linspace(-0.5,0.5,2);
@@ -2243,7 +2289,28 @@ elseif dim == 5
     %Gkeyll for some important quantity (distribution function, moments,
     %etc.) and f_interp is the projected quantity we will use for plotting
     %and data analysis.
-    
+    if order == 3
+        for i = 1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            sub3 = int(sub2, z, -1, 1);
+            sub4 = int(sub3, w, -1, 1);
+            result = int(sub4, v, -1, 1);
+            numericResult(i) = double(result);
+        end
+        numericResult'
+    else
+        for i=1:length(functionVector)
+            functionVector(i);
+            sub = int(functionVector(i), x, -1, 1);
+            sub2 = int(sub, y, -1, 1);
+            sub3 = int(sub2, z, -1, 1);
+            sub4 = int(sub3, w, -1, 1);
+            result(i) = int(sub4, v, -1, 1);
+        end
+        result'
+    end
     if order == 1
         
         order1Range = linspace(-0.5,0.5,2);
