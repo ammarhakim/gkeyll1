@@ -279,6 +279,7 @@ namespace Lucee
       MatSeqAIJSetPreallocation(stiffMat, nz, NULL);
 #endif
 
+// Keep non-zero pattern when zero-ing out matrix      
       MatSetOption(stiffMat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 
 // now create vector to store source: MatGetVecs ensures that the
@@ -510,7 +511,7 @@ namespace Lucee
     tmEnd = clock();
     //std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
     
-    DoPetscAssembly(stiffMat, true);
+    DoPetscAssembly(stiffMat, false);
 
 
     tmStart = clock();
@@ -618,7 +619,7 @@ namespace Lucee
     }
     
 // reassemble matrix after modification
-    DoPetscAssembly(stiffMat, true);
+    DoPetscAssembly(stiffMat, false);
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
@@ -679,7 +680,7 @@ namespace Lucee
     }
     
 // reassemble matrix after modification
-    DoPetscAssembly(stiffMat, true);
+    DoPetscAssembly(stiffMat, false);
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
@@ -756,14 +757,14 @@ namespace Lucee
             else
               nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
 
-// reset corresponding rows (Note that some rows may be reset more
-// than once. This should not be a problem, though might make the
-// setup phase a bit slower).
-#if PETSC_VERSION_GE(3,6,0)            
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
-#else
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
-#endif            
+// // reset corresponding rows (Note that some rows may be reset more
+// // than once. This should not be a problem, though might make the
+// // setup phase a bit slower).
+// #if PETSC_VERSION_GE(3,6,0)            
+//             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
+// #else
+//             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
+// #endif
 
 // now insert row numbers with corresponding values into map for use
 // in the update method
@@ -776,6 +777,19 @@ namespace Lucee
         }
       }
     }
+// store list of rows to zero out
+    std::vector<int> zeroRowList(rowBcValues.size());
+    std::map<int, double>::const_iterator itr = rowBcValues.begin();
+    for (unsigned i=0 ; itr != rowBcValues.end(); ++itr, ++i)
+      zeroRowList[i] = itr->first;
+//    std::cout << "Number of rows to be set " << zeroRowList.size() << std::endl;
+// now zero out these rows in one fell swoop
+#if PETSC_VERSION_GE(3,6,0)
+    MatZeroRows(stiffMat, zeroRowList.size(), &zeroRowList[0], 1.0, PETSC_NULL, PETSC_NULL);
+#else
+    MatZeroRows(stiffMat, zeroRowList.size(), &zeroRowList[0], 1.0);
+#endif
+    
     DMSG("Modification for Dirichlet BCs completed");
     tmEnd = clock();
     //std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
