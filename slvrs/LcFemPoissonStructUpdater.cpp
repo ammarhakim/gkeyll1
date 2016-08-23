@@ -246,7 +246,10 @@ namespace Lucee
 // Depending on the type of BCs, we will be modifying stiffMat and adding new nonzero values.
 // In later versions of PETSc, we need to set the following in order for PETSc to not throw errors.
    MatSetOption(stiffMat, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-#endif      
+#endif
+
+// Keep non-zero pattern when zero-ing out matrix
+      MatSetOption(stiffMat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 
 // now create vector to store source: MatGetVecs ensures that the
 // parallel layout is the same as the stiffness matrix.
@@ -340,14 +343,14 @@ namespace Lucee
             else
               nodalBasis->getSurfUpperLocalToGlobal(d, lgSurfMap);
 
-// reset corresponding rows (Note that some rows may be reset more
-// than once. This should not be a problem, though might make the
-// setup phase a bit slower).
-#if PETSC_VERSION_GE(3,6,0)            
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
-#else
-            MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
-#endif            
+// // reset corresponding rows (Note that some rows may be reset more
+// // than once. This should not be a problem, though might make the
+// // setup phase a bit slower).
+// #if PETSC_VERSION_GE(3,6,0)            
+//             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0, PETSC_NULL, PETSC_NULL);
+// #else
+//             MatZeroRows(stiffMat, nsl, &lgSurfMap[0], 1.0);
+// #endif            
 
 // now insert row numbers with corresponding values into map for use
 // in the update method
@@ -360,6 +363,19 @@ namespace Lucee
         }
       }
     }
+
+// store list of rows to zero out
+    std::vector<int> zeroRowList(rowBcValues.size());
+    std::map<int, double>::const_iterator itr = rowBcValues.begin();
+    for (unsigned i=0 ; itr != rowBcValues.end(); ++itr, ++i)
+      zeroRowList[i] = itr->first;
+//    std::cout << "Number of rows to be set " << zeroRowList.size() << std::endl;
+// now zero out these rows in one fell swoop
+#if PETSC_VERSION_GE(3,6,0)
+    MatZeroRows(stiffMat, zeroRowList.size(), &zeroRowList[0], 1.0, PETSC_NULL, PETSC_NULL);
+#else
+    MatZeroRows(stiffMat, zeroRowList.size(), &zeroRowList[0], 1.0);
+#endif      
     DMSG("Modification for Dirichlet BCs completed");
 
 // Begin process of modification to handle periodic BCs. The code in
