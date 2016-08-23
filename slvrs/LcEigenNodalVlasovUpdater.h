@@ -21,6 +21,9 @@
 // eigen includes
 #include <Eigen/LU>
 
+// etc includes
+#include <quadrule.hpp>
+
 namespace Lucee
 {
 /**
@@ -93,6 +96,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
 /** Pointer to configuration-space basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
+/** Polynomial order for determining number of quadrature points with anisotropic quadrature */
+      int polyOrder;
 /** CFL number to use */
       double cfl;
 /** Maximum CFL number allowed */
@@ -111,6 +116,11 @@ namespace Lucee
       int lowerZeroFluxOffset[CDIM+VDIM];
 /** Offsets for zero-flux directions  along upper edges */
       int upperZeroFluxOffset[CDIM+VDIM];
+/** Number of quadrature points for volume integral of streaming term*/
+      int nvolQuadStream;
+/** Number of quadrature points for volume integral of forcing term */
+      int nvolQuadForce;
+
 
 /**
  * Struct to hold data for Guassian quadrature.
@@ -135,8 +145,10 @@ namespace Lucee
 /** Interpolation matrix */
           Eigen::MatrixXd interpMat;
       };
-/** Data for volume quadrature */
-      GaussQuadData volQuad;
+/** Data for volume quadrature for streaming term v dot grad(f) */
+      GaussQuadData volQuadStream;
+/** Data for volume quadrature for forcing term (E + v x B) dot grad_v(f) */
+      GaussQuadData volQuadForce;
 /** Data for quadrature on each lower face */
       GaussQuadData surfLowerQuad[CDIM+VDIM];
 /** Data for quadrature on each upper face */
