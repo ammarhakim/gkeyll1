@@ -221,403 +221,115 @@ namespace Lucee
     std::vector<double> gaussWeights1dField(numGaussPoints1dField);
     legendre_set(numGaussPoints1dField, &gaussPoints1dField[0], &gaussWeights1dField[0]);
 
-    if (CDIM == 1 && VDIM == 1)
+    //Temporary array to evaluate basis functions at quadrature points to
+    std::vector<double> evalBasisTemp(nlocal);
+    //Temporary array to store ordinates of quadrature points
+    double xcTemp[NDIM];
+
+    double weightScale = 1.0;
+    for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
+      weightScale *= 0.5*grid.getDx(dimIndex);
+
+    // Figure out how many gaussian points there are
+    nvolQuadStream = 1;
+    nvolQuadForce = 1;
+
+    for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
     {
-
-      //Temporary array to evaluate basis functions at quadrature points to
-      std::vector<double> evalBasisTemp(nlocal);
-      //Temporary array to store ordinates of quadrature points
-      double xcTemp[NDIM];
-
-      double weightScale = 1.0;
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        weightScale *= 0.5*grid.getDx(dimIndex);
-
-      nvolQuadStream = numGaussPoints1d*numGaussPoints1d;
-      //Temporary arrays for creating the volume interpolation matrix for streaming term
-      std::vector<double> volWeightsStream(nvolQuadStream);
-      Lucee::Matrix<double> tempVolQuadStream(nvolQuadStream, nlocal);
-      volQuadStream.reset(nvolQuadStream, nlocal, PNC);
-
-      nvolQuadForce = numGaussPoints1d*numGaussPoints1dField;
-      //Temporary arrays for creating the volume interpolation matrix for force term
-      std::vector<double> volWeightsForce(nvolQuadForce);
-      Lucee::Matrix<double> tempVolQuadForce(nvolQuadForce, nlocal);
-      volQuadForce.reset(nvolQuadForce, nlocal, PNC);
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      nvolQuadStream *= gaussPoints1d.size();
+      if (dimIndex < CDIM)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          xcTemp[0] = gaussPoints1d[j];
-          xcTemp[1] = gaussPoints1d[i];
-          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-          {
-            tempVolQuadStream(j+i*numGaussPoints1d, basisIndex) = evalBasisTemp[basisIndex];
-          }
-          volWeightsStream[j+i*numGaussPoints1d] = gaussWeights1d[j]*gaussWeights1d[i];
-        }
+        nvolQuadForce *= gaussPoints1dField.size();
       }
-
-      copyLuceeToEigen(tempVolQuadStream, volQuadStream.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadStream; ++volIndex)
-        volQuadStream.weights(volIndex) = weightScale*volWeightsStream[volIndex];
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      else
       {
-        for(int j=0; j<numGaussPoints1dField; ++j)
-        {
-          xcTemp[0] = gaussPoints1dField[j];
-          xcTemp[1] = gaussPoints1d[i];
-          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-          {
-            tempVolQuadForce(j+i*numGaussPoints1dField, basisIndex) = evalBasisTemp[basisIndex];
-          }
-          volWeightsForce[j+i*numGaussPoints1dField] = gaussWeights1dField[j]*gaussWeights1d[i];
-        }
+        nvolQuadForce *= gaussPoints1d.size();
       }
-
-      copyLuceeToEigen(tempVolQuadForce, volQuadForce.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadForce; ++volIndex)
-        volQuadForce.weights(volIndex) = weightScale*volWeightsForce[volIndex];
-
     }
-    else if (CDIM == 1 && VDIM == 2)
+
+    volQuadStream.reset(nvolQuadStream, nlocal, PNC);
+    volQuadForce.reset(nvolQuadForce, nlocal, PNC);
+
+    Eigen::MatrixXd gaussNodeListStream = Eigen::MatrixXd::Zero(nvolQuadStream, NDIM+1);
+    Eigen::MatrixXd gaussNodeListForce = Eigen::MatrixXd::Zero(nvolQuadForce, NDIM+1);
+
+    // Evaluate all basis functions at all gaussian volume nodes
+    // First compute all volume gaussian quadrature locations
+    int volShapeStream[NDIM];
+    int volShapeForce[NDIM];
+    int volIdxStream[NDIM];
+    int volIdxForce[NDIM];
+    
+    for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
     {
-      //Temporary array to evaluate basis functions at quadrature points to
-      std::vector<double> evalBasisTemp(nlocal);
-      //Temporary array to store ordinates of quadrature points
-      double xcTemp[NDIM];
-
-      double weightScale = 1.0;
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        weightScale *= 0.5*grid.getDx(dimIndex);
-
-      nvolQuadStream = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d;
-      //Temporary arrays for creating the volume interpolation matrix for streaming term
-      std::vector<double> volWeightsStream(nvolQuadStream);
-      Lucee::Matrix<double> tempVolQuadStream(nvolQuadStream, nlocal);
-      volQuadStream.reset(nvolQuadStream, nlocal, PNC);
-
-      nvolQuadForce = numGaussPoints1d*numGaussPoints1d*numGaussPoints1dField;
-      //Temporary arrays for creating the volume interpolation matrix for force term
-      std::vector<double> volWeightsForce(nvolQuadForce);
-      Lucee::Matrix<double> tempVolQuadForce(nvolQuadForce, nlocal);
-      volQuadForce.reset(nvolQuadForce, nlocal, PNC);
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      volShapeStream[dimIndex] = gaussPoints1d.size();
+      if (dimIndex < CDIM)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            xcTemp[0] = gaussPoints1d[k];
-            xcTemp[1] = gaussPoints1d[j];
-            xcTemp[2] = gaussPoints1d[i];
-            phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-            for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-            {
-              tempVolQuadStream(k+j*numGaussPoints1d+i*numGaussPoints1d*numGaussPoints1d, basisIndex) = evalBasisTemp[basisIndex];
-            }
-            volWeightsStream[k+j*numGaussPoints1d+i*numGaussPoints1d*numGaussPoints1d] = gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-          }
-        }
+        volShapeForce[dimIndex] = gaussPoints1dField.size();
       }
-
-      copyLuceeToEigen(tempVolQuadStream, volQuadStream.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadStream; ++volIndex)
-        volQuadStream.weights(volIndex) = weightScale*volWeightsStream[volIndex];
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      else
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1dField; ++k)
-          {
-            xcTemp[0] = gaussPoints1dField[k];
-            xcTemp[1] = gaussPoints1d[j];
-            xcTemp[2] = gaussPoints1d[i];
-            phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-            for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-            {
-              tempVolQuadForce(k+j*numGaussPoints1dField+i*numGaussPoints1dField*numGaussPoints1d, basisIndex) = evalBasisTemp[basisIndex];
-            }
-            volWeightsForce[k+j*numGaussPoints1dField+i*numGaussPoints1dField*numGaussPoints1d] = gaussWeights1dField[k]*gaussWeights1d[j]*gaussWeights1d[i];
-          }
-        }
+        volShapeForce[dimIndex] = gaussPoints1d.size();
       }
-
-      copyLuceeToEigen(tempVolQuadForce, volQuadForce.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadForce; ++volIndex)
-        volQuadForce.weights(volIndex) = weightScale*volWeightsForce[volIndex];
-
     }
-    else if (CDIM == 1 && VDIM == 3)
+
+    Lucee::Region<NDIM, int> volRegionStream(volShapeStream);
+    Lucee::ColMajorSequencer<NDIM> volSeqStream = ColMajorSequencer<NDIM>(volRegionStream);
+    Lucee::ColMajorIndexer<NDIM> volIdxrStream = ColMajorIndexer<NDIM>(volRegionStream);
+
+    // Find all quadrature locations on a NDIM volume for streaming term
+    while(volSeqStream.step())
     {
-      //Temporary array to evaluate basis functions at quadrature points to
-      std::vector<double> evalBasisTemp(nlocal);
-      //Temporary array to store ordinates of quadrature points
-      double xcTemp[NDIM];
+      volSeqStream.fillWithIndex(volIdxStream);
+      int nodeNumberStream = volIdxrStream.getIndex(volIdxStream);
 
-      double weightScale = 1.0;
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        weightScale *= 0.5*grid.getDx(dimIndex);
-
-      nvolQuadStream = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d;
-      //Temporary arrays for creating the volume interpolation matrix for streaming term
-      std::vector<double> volWeightsStream(nvolQuadStream);
-      Lucee::Matrix<double> tempVolQuadStream(nvolQuadStream, nlocal);
-      volQuadStream.reset(nvolQuadStream, nlocal, PNC);
-
-      nvolQuadForce = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1dField;
-      //Temporary arrays for creating the volume interpolation matrix for force term
-      std::vector<double> volWeightsForce(nvolQuadForce);
-      Lucee::Matrix<double> tempVolQuadForce(nvolQuadForce, nlocal);
-      volQuadForce.reset(nvolQuadForce, nlocal, PNC);
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      gaussNodeListStream(nodeNumberStream, NDIM) = 1.0;
+      for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            for(int l=0; l<numGaussPoints1d; ++l)
-            {
-              xcTemp[0] = gaussPoints1d[l];
-              xcTemp[1] = gaussPoints1d[k];
-              xcTemp[2] = gaussPoints1d[j];
-              xcTemp[3] = gaussPoints1d[i];
-              phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-              for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-              {
-                tempVolQuadStream(l+(k*numGaussPoints1d)+(j*numGaussPoints1d*numGaussPoints1d)
-                  +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-              }
-              volWeightsStream[l+(k*numGaussPoints1d)+(j*numGaussPoints1d*numGaussPoints1d)
-                  +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d)] = gaussWeights1d[l]*gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-            }
-          }
-        }
+        xcTemp[dimIndex] = gaussPoints1d[volIdxStream[dimIndex]];
+        gaussNodeListStream(nodeNumberStream, dimIndex) = gaussPoints1d[volIdxStream[dimIndex]];
+        gaussNodeListStream(nodeNumberStream, NDIM)    *= gaussWeights1d[volIdxStream[dimIndex]];
       }
-
-      copyLuceeToEigen(tempVolQuadStream, volQuadStream.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadStream; ++volIndex)
-        volQuadStream.weights(volIndex) = weightScale*volWeightsStream[volIndex];
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      volQuadStream.weights(nodeNumberStream) = weightScale*gaussNodeListStream(nodeNumberStream, NDIM);
+      phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+      for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            for(int l=0; l<numGaussPoints1dField; ++l)
-            {
-              xcTemp[0] = gaussPoints1dField[l];
-              xcTemp[1] = gaussPoints1d[k];
-              xcTemp[2] = gaussPoints1d[j];
-              xcTemp[3] = gaussPoints1d[i];
-              phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-              for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-              {
-                tempVolQuadForce(l+(k*numGaussPoints1dField)+(j*numGaussPoints1dField*numGaussPoints1d)
-                  +(i*numGaussPoints1dField*numGaussPoints1d*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-              }
-              volWeightsForce[l+(k*numGaussPoints1dField)+(j*numGaussPoints1dField*numGaussPoints1d)
-                  +(i*numGaussPoints1dField*numGaussPoints1d*numGaussPoints1d)] = gaussWeights1dField[l]*gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-            }
-          }
-        }
+        volQuadStream.interpMat(nodeNumberStream, basisIndex) = evalBasisTemp[basisIndex];
       }
-
-      copyLuceeToEigen(tempVolQuadForce, volQuadForce.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadForce; ++volIndex)
-        volQuadForce.weights(volIndex) = weightScale*volWeightsForce[volIndex];
-
     }
-    else if (CDIM == 2 && VDIM == 2)
+
+    Lucee::Region<NDIM, int> volRegionForce(volShapeForce);
+    Lucee::ColMajorSequencer<NDIM> volSeqForce = ColMajorSequencer<NDIM>(volRegionForce);
+    Lucee::ColMajorIndexer<NDIM> volIdxrForce = ColMajorIndexer<NDIM>(volRegionForce);
+
+    // Find all quadrature locations on a NDIM volume for force term
+    while(volSeqForce.step())
     {
-      //Temporary array to evaluate basis functions at quadrature points to
-      std::vector<double> evalBasisTemp(nlocal);
-      //Temporary array to store ordinates of quadrature points
-      double xcTemp[NDIM];
+      volSeqForce.fillWithIndex(volIdxForce);
+      int nodeNumberForce = volIdxrForce.getIndex(volIdxForce);
 
-      double weightScale = 1.0;
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        weightScale *= 0.5*grid.getDx(dimIndex);
-
-      nvolQuadStream = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d;
-      //Temporary arrays for creating the volume interpolation matrix for streaming term
-      std::vector<double> volWeightsStream(nvolQuadStream);
-      Lucee::Matrix<double> tempVolQuadStream(nvolQuadStream, nlocal);
-      volQuadStream.reset(nvolQuadStream, nlocal, PNC);
-
-      nvolQuadForce = numGaussPoints1d*numGaussPoints1d*numGaussPoints1dField*numGaussPoints1dField;
-      //Temporary arrays for creating the volume interpolation matrix for force term
-      std::vector<double> volWeightsForce(nvolQuadForce);
-      Lucee::Matrix<double> tempVolQuadForce(nvolQuadForce, nlocal);
-      volQuadForce.reset(nvolQuadForce, nlocal, PNC);
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      gaussNodeListForce(nodeNumberForce, NDIM) = 1.0;
+      for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
+        if (dimIndex < CDIM)
         {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            for(int l=0; l<numGaussPoints1d; ++l)
-            {
-              xcTemp[0] = gaussPoints1d[l];
-              xcTemp[1] = gaussPoints1d[k];
-              xcTemp[2] = gaussPoints1d[j];
-              xcTemp[3] = gaussPoints1d[i];
-              phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-              for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-              {
-                tempVolQuadStream(l+(k*numGaussPoints1d)+(j*numGaussPoints1d*numGaussPoints1d)
-                  +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-              }
-              volWeightsStream[l+(k*numGaussPoints1d)+(j*numGaussPoints1d*numGaussPoints1d)
-                  +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d)] = gaussWeights1d[l]*gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-            }
-          }
+          xcTemp[dimIndex] = gaussPoints1dField[volIdxForce[dimIndex]];
+          gaussNodeListForce(nodeNumberForce, dimIndex) = gaussPoints1dField[volIdxForce[dimIndex]];
+          gaussNodeListForce(nodeNumberForce, NDIM)    *= gaussWeights1dField[volIdxForce[dimIndex]];
+        }
+        else
+        {
+          xcTemp[dimIndex] = gaussPoints1d[volIdxForce[dimIndex]];
+          gaussNodeListForce(nodeNumberForce, dimIndex) = gaussPoints1d[volIdxForce[dimIndex]];
+          gaussNodeListForce(nodeNumberForce, NDIM)    *= gaussWeights1d[volIdxForce[dimIndex]];
         }
       }
-
-      copyLuceeToEigen(tempVolQuadStream, volQuadStream.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadStream; ++volIndex)
-        volQuadStream.weights(volIndex) = weightScale*volWeightsStream[volIndex];
-
-      for(int i=0; i<numGaussPoints1d; ++i)
+      volQuadForce.weights(nodeNumberForce) = weightScale*gaussNodeListForce(nodeNumberForce, NDIM);
+      phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+      for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
       {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1dField; ++k)
-          {
-            for(int l=0; l<numGaussPoints1dField; ++l)
-            {
-              xcTemp[0] = gaussPoints1dField[l];
-              xcTemp[1] = gaussPoints1dField[k];
-              xcTemp[2] = gaussPoints1d[j];
-              xcTemp[3] = gaussPoints1d[i];
-              phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-              for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-              {
-                tempVolQuadForce(l+(k*numGaussPoints1dField)+(j*numGaussPoints1dField*numGaussPoints1dField)
-                  +(i*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-              }
-              volWeightsForce[l+(k*numGaussPoints1dField)+(j*numGaussPoints1dField*numGaussPoints1dField)
-                  +(i*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d)] = gaussWeights1dField[l]*gaussWeights1dField[k]*gaussWeights1d[j]*gaussWeights1d[i];
-            }
-          }
-        }
+        volQuadForce.interpMat(nodeNumberForce, basisIndex) = evalBasisTemp[basisIndex];
       }
-
-      copyLuceeToEigen(tempVolQuadForce, volQuadForce.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadForce; ++volIndex)
-        volQuadForce.weights(volIndex) = weightScale*volWeightsForce[volIndex];
-
-    }
-    else if (CDIM == 2 && VDIM == 3)
-    {
-      //Temporary array to evaluate basis functions at quadrature points to
-      std::vector<double> evalBasisTemp(nlocal);
-      //Temporary array to store ordinates of quadrature points
-      double xcTemp[NDIM];
-
-      double weightScale = 1.0;
-      for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-        weightScale *= 0.5*grid.getDx(dimIndex);
-
-      nvolQuadStream = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d;
-      //Temporary arrays for creating the volume interpolation matrix for streaming term
-      std::vector<double> volWeightsStream(nvolQuadStream);
-      Lucee::Matrix<double> tempVolQuadStream(nvolQuadStream, nlocal);
-      volQuadStream.reset(nvolQuadStream, nlocal, PNC);
-
-      nvolQuadForce = numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1dField*numGaussPoints1dField;
-      //Temporary arrays for creating the volume interpolation matrix for force term
-      std::vector<double> volWeightsForce(nvolQuadForce);
-      Lucee::Matrix<double> tempVolQuadForce(nvolQuadForce, nlocal);
-      volQuadForce.reset(nvolQuadForce, nlocal, PNC);
-
-      for(int i=0; i<numGaussPoints1d; ++i)
-      {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            for(int l=0; l<numGaussPoints1d; ++l)
-            {
-              for(int m=0; m<numGaussPoints1d; ++m)
-              {
-                xcTemp[0] = gaussPoints1d[m];
-                xcTemp[1] = gaussPoints1d[l];
-                xcTemp[2] = gaussPoints1d[k];
-                xcTemp[3] = gaussPoints1d[j];
-                xcTemp[4] = gaussPoints1d[i];
-                phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-                for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-                {
-                  tempVolQuadStream(m+(l*numGaussPoints1d)+(k*numGaussPoints1d*numGaussPoints1d)
-                    +(j*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d)
-                    +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-                }
-                volWeightsStream[m+(l*numGaussPoints1d)+(k*numGaussPoints1d*numGaussPoints1d)
-                  +(j*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d)
-                  +(i*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d*numGaussPoints1d)] = gaussWeights1d[m]*gaussWeights1d[l]*gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-              }
-            }
-          }
-        }
-      }
-
-      copyLuceeToEigen(tempVolQuadStream, volQuadStream.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadStream; ++volIndex)
-        volQuadStream.weights(volIndex) = weightScale*volWeightsStream[volIndex];
-
-      for(int i=0; i<numGaussPoints1d; ++i)
-      {
-        for(int j=0; j<numGaussPoints1d; ++j)
-        {
-          for(int k=0; k<numGaussPoints1d; ++k)
-          {
-            for(int l=0; l<numGaussPoints1dField; ++l)
-            {
-              for(int m=0; m<numGaussPoints1dField; ++m)
-              {
-                xcTemp[0] = gaussPoints1dField[m];
-                xcTemp[1] = gaussPoints1dField[l];
-                xcTemp[2] = gaussPoints1d[k];
-                xcTemp[3] = gaussPoints1d[j];
-                xcTemp[4] = gaussPoints1d[i];
-                phaseBasis->evalBasis(xcTemp, evalBasisTemp);
-                for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
-                {
-                  tempVolQuadForce(m+(l*numGaussPoints1dField)+(k*numGaussPoints1dField*numGaussPoints1dField)
-                    +(j*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d)
-                    +(i*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d*numGaussPoints1d), basisIndex) = evalBasisTemp[basisIndex];
-                }
-                volWeightsForce[m+(l*numGaussPoints1dField)+(k*numGaussPoints1dField*numGaussPoints1dField)
-                  +(j*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d)
-                  +(i*numGaussPoints1dField*numGaussPoints1dField*numGaussPoints1d*numGaussPoints1d)] 
-                  = gaussWeights1dField[m]*gaussWeights1dField[l]*gaussWeights1d[k]*gaussWeights1d[j]*gaussWeights1d[i];
-              }
-            }
-          }
-        }
-      }
-
-      copyLuceeToEigen(tempVolQuadForce, volQuadForce.interpMat);
-      for (int volIndex=0; volIndex<nvolQuadForce; ++volIndex)
-        volQuadForce.weights(volIndex) = weightScale*volWeightsForce[volIndex];
-
-    }
-    else
-    {
-      Lucee::Except lce(
-        "EigenNodalVlasovUpdater::initialize: Configuration space and velocity space configuration not supported for anisotropic quadrature");
-      throw lce;
     }
 
     std::vector<Eigen::MatrixXd> derivMatrices(NDIM);
