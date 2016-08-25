@@ -418,6 +418,8 @@ namespace Lucee
       .append<Lucee::NodalDgCopyBoundaryCondition<1> >()
       .append<Lucee::NodalDgCopyBoundaryCondition<2> >()
       .append<Lucee::NodalDgCopyBoundaryCondition<3> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<4> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<5> >()
 
       .append<Lucee::NodalDgFunctionBoundaryCondition<1> >()
       .append<Lucee::NodalDgFunctionBoundaryCondition<2> >()

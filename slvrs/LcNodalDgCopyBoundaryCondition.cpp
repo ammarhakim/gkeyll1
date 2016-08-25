@@ -23,6 +23,8 @@ namespace Lucee
   template <> const char *NodalDgCopyBoundaryCondition<1>::id = "NodalDgCopy1D";
   template <> const char *NodalDgCopyBoundaryCondition<2>::id = "NodalDgCopy2D";
   template <> const char *NodalDgCopyBoundaryCondition<3>::id = "NodalDgCopy3D";
+  template <> const char *NodalDgCopyBoundaryCondition<4>::id = "NodalDgCopy4D";
+  template <> const char *NodalDgCopyBoundaryCondition<5>::id = "NodalDgCopy5D";
 
   template <unsigned NDIM>
   void
@@ -91,4 +93,6 @@ namespace Lucee
   template class NodalDgCopyBoundaryCondition<1>;
   template class NodalDgCopyBoundaryCondition<2>;
   template class NodalDgCopyBoundaryCondition<3>;
+  template class NodalDgCopyBoundaryCondition<4>;
+  template class NodalDgCopyBoundaryCondition<5>;
 }
