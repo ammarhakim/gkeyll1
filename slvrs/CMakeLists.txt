@@ -59,6 +59,7 @@ set(lcslvrs_SOURCES
   LcHyperEquation.cpp
   LcHyperEquationRegistry.cpp
   LcHyperTwentyMomentEquation.cpp
+  LcIdealInnerPlanetBoundaryCondition.cpp
   LcImplicitFiveMomentSrcUpdater.cpp
   LcImplicitHyperTwentyMomentSrcUpdater.cpp
   LcImplicitTenMomentCollisionUpdater.cpp
@@ -155,8 +156,8 @@ set(lcslvrs_SOURCES
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMoments3DUpdater.cpp
-  LcVlasovPositivityUpdater.cpp
   LcVelocitiesFromMomentsUpdater.cpp
+  LcVlasovPositivityUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp

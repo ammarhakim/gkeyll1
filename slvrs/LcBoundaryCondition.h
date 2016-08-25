@@ -70,6 +70,13 @@ namespace Lucee
  */
       void setEdge(unsigned e) { edge = e; }
 
+/**
+ * Set extra input field, if present.
+ *
+ * @param ei Extra input field, if present.
+ */
+      void setExtraInputField(Lucee::ConstFieldPtr<double> *ei) { inpFld = ei; }
+
 /** 
  * Apply boundary conditions. The variable 'qin' represents data in
  * the skin cell (first/last interior cell) while 'qbc' represents
@@ -113,6 +120,13 @@ namespace Lucee
  */
       unsigned getEdge() const { return edge; }
 
+/**
+ * Extra input field, if present.
+ *
+ * @return Extra input field, if present.
+ */
+      const Lucee::ConstFieldPtr<double>* getExtraInputField() const { return inpFld; }
+
     private:
 /** Direction to apply boundary condtion */
       unsigned dir;
@@ -120,6 +134,8 @@ namespace Lucee
       unsigned edge;
 /** Components to apply to */
       std::vector<unsigned> components;
+/** Optional extra input file */
+      Lucee::ConstFieldPtr<double> *inpFld;
   };
 }
 
