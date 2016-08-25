@@ -432,19 +432,7 @@ namespace Lucee
 // accumulate into local stiffness matrix          
           localStiff(i,j) += volQuad.weights[k]*gradgrad*numDensQuad[k];
         }
-      }
-
-    // if (isFirst)
-    // {
-    //   for (unsigned i=0; i<localStiff.numRows(); ++i)
-    //   {
-    //     for (unsigned j=0; j<localStiff.numColumns(); ++j)
-    //       std::cout << localStiff(i,j) << " ";
-    //     std::cout << std::endl;
-    //   }
-    //   isFirst = false;
-    // }
-    
+      }    
   }
 
   template <unsigned NDIM>
@@ -485,6 +473,7 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> numDensPtr = numDens.createConstPtr();
 
+    double tmsv_d = 0.0;
     tmStart = clock();
 // loop, creating global stiffness matrix
     while (seq.step())
@@ -493,6 +482,7 @@ namespace Lucee
       nodalBasis->setIndex(idx);
       numDens.setPtr(numDensPtr, idx); // pointer to local number density
 
+      //clock_t tmsv_1 = clock();      
 // get local stiffness matrix
       calcLocalStiffMatrix(localStiff, numDensPtr);
       nodalBasis->getMassMatrix(localMass);
@@ -502,17 +492,20 @@ namespace Lucee
         for (unsigned m=0; m<nlocal; ++m)
           vals[nlocal*k+m] = -laplacianWeight*localStiff(k,m)+modifierConstant*localMass(k,m); // Default PetSc layout is row-major
       }
+      //clock_t tmsv_2 = clock();
+      //tmsv_d += (double) (tmsv_2-tmsv_1)/CLOCKS_PER_SEC;
 
       nodalBasis->getLocalToGlobal(lgMap);
+
 // insert into global stiffness matrix, adding them to existing value
       MatSetValues(stiffMat, nlocal, &lgMap[0], nlocal, &lgMap[0],
         &vals[0], ADD_VALUES);
     }
     tmEnd = clock();
-    //std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "Assembly Stage I assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "... Petsc took " << tmsv_d  << std::endl;
     
     DoPetscAssembly(stiffMat, false);
-
 
     tmStart = clock();
 // Begin process of modification to handle periodic BCs. The code in
@@ -719,7 +712,7 @@ namespace Lucee
     }
 
     tmEnd = clock();
-    //std::cout << "Assembly Stage Periodic assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "Assembly Stage Periodic assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
 
     tmStart = clock();
 // modify values in stiffness matrix based on Dirichlet Bcs
@@ -792,7 +785,7 @@ namespace Lucee
     
     DMSG("Modification for Dirichlet BCs completed");
     tmEnd = clock();
-    //std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "Assembly Stage Dirichlet assembly took " << (double) (tmEnd-tmStart)/CLOCKS_PER_SEC << std::endl;
     
     if (writeMatrix)
     {
@@ -823,7 +816,7 @@ namespace Lucee
     assembleStiffness(src, numDens);
     clock_t tmEnd = clock();
     totAssemblyTime = (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
-
+    
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     unsigned nlocal = nodalBasis->getNumNodes();
