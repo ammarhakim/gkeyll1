@@ -137,8 +137,8 @@ namespace Lucee
         bVec(componentIndex) = bPtr[componentIndex];
       }
 
-      aAtQuad = interpMatrix*aVec;
-      bAtQuad = interpMatrix*bVec;
+      aAtQuad.noalias() = interpMatrix*aVec;
+      bAtQuad.noalias() = interpMatrix*bVec;
 
       // Compute projection of product A*B onto each basis function
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
@@ -149,7 +149,7 @@ namespace Lucee
             aAtQuad(quadIndex)*bAtQuad(quadIndex);
         projectionVec(basisIndex) = integralResult;
       }
-      solutionVec = massMatrixInv*projectionVec;
+      solutionVec.noalias() = massMatrixInv*projectionVec;
 
       // Copy into output pointer
       for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)

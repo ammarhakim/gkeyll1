@@ -168,7 +168,7 @@ namespace Lucee
       }
 
       // Columns are components of f (can be more than 1)
-      projectF = localMassInv*basisIntegrals;
+      projectF.noalias() = localMassInv*basisIntegrals;
 
       for (unsigned nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
       {
