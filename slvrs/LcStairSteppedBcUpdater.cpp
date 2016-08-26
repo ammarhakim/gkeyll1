@@ -164,7 +164,7 @@ namespace Lucee
     inpFld = 0;
 // check if we have an extra input field
     if (this->getNumInpVars() > 0)
-      inpFld = &this->getOut<Lucee::Field<NDIM, double> >(0);
+      inpFld = &this->getIn<Lucee::Field<NDIM, double> >(0);
 
 // pointer to input field (a hack)
       Lucee::ConstFieldPtr<double> inpFldPtr = A.createConstPtr();
