@@ -92,7 +92,7 @@ namespace Lucee
       Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr(); // skin
       Lucee::ConstFieldPtr<double> iPtr1 = A.createConstPtr(); // "left" of skin
       Lucee::FieldPtr<double> gPtr = A.createPtr();
-// pointer to input file (a hack)
+// pointer to input field (a hack)
       Lucee::ConstFieldPtr<double> inpFldPtr = A.createConstPtr();
       if (inpFld)
         inpFldPtr = inpFld->createConstPtr();
