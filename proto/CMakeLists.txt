@@ -101,6 +101,7 @@ set (proto_SOURCES
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
+  LcSOLFluxAcrossEdgeCalc3D.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
   LcSOLTotalIntegralCalc.cpp

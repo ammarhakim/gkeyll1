@@ -99,10 +99,6 @@ namespace Lucee
     Eigen::VectorXd distfVec(nlocal5d);
     Eigen::VectorXd bFieldVec(nlocal5d);
     Eigen::VectorXd hamilVec(nlocal5d);
-
-    Eigen::VectorXd distfAtQuad(nVolQuad5d);
-    Eigen::VectorXd bFieldAtQuad(nVolQuad5d);
-    Eigen::VectorXd hamilAtQuad(nVolQuad5d);
     
     double regionTotalEnergy = 0.0;
     while (seq.step())
@@ -124,9 +120,9 @@ namespace Lucee
       }
 
       // Compute fields at quadrature points
-      distfAtQuad = volQuad5d*distfVec;
-      hamilAtQuad = volQuad5d*hamilVec;
-      bFieldAtQuad = volQuad5d*bFieldVec;
+      Eigen::VectorXd distfAtQuad = volQuad5d*distfVec;
+      Eigen::VectorXd hamilAtQuad = volQuad5d*hamilVec;
+      Eigen::VectorXd bFieldAtQuad = volQuad5d*bFieldVec;
 
       // Compute energy integral in cell
       double localTotalEnergy = 0.0;

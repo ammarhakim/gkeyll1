@@ -91,8 +91,8 @@ namespace Lucee
     Eigen::VectorXd hamilVec(nlocal5d);
 
     Eigen::VectorXd distfAtQuad(nVolQuad5d);
-    Eigen::VectorXd bFieldAtQuad(nlocal5d);
-    Eigen::VectorXd hamilAtQuad(nlocal5d);
+    Eigen::VectorXd bFieldAtQuad(nVolQuad5d);
+    Eigen::VectorXd hamilAtQuad(nVolQuad5d);
 
     // Create a sequencer to loop over (x,y,v,mu) plane
     Lucee::RowMajorSequencer<5> seq(localRgn);

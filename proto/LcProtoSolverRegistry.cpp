@@ -82,6 +82,7 @@
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
+#include <LcSOLFluxAcrossEdgeCalc3D.h>
 #include <LcSOLSetPotentialAtBoundary.h>
 #include <LcSOLTotalEnergyCalc.h>
 #include <LcSOLTotalIntegralCalc.h>
@@ -314,6 +315,7 @@ namespace Lucee
 
       // 5D SOL objects
       .append<Lucee::SOLFluxAcrossEdgeCalc>()
+      .append<Lucee::SOLFluxAcrossEdgeCalc3D>()
       .append<Lucee::SOLSetPotentialAtBoundary>()
       .append<Lucee::SOLTotalEnergyCalc>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()

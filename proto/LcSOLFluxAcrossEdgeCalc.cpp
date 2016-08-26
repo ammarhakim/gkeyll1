@@ -113,8 +113,8 @@ namespace Lucee
     Eigen::VectorXd hamilDerivVec(nlocal5d);
 
     Eigen::VectorXd distfAtQuad(nSurfQuad5d);
-    Eigen::VectorXd bFieldAtQuad(nlocal5d);
-    Eigen::VectorXd hamilDerivAtQuad(nlocal5d);
+    Eigen::VectorXd bFieldAtQuad(nSurfQuad5d);
+    Eigen::VectorXd hamilDerivAtQuad(nSurfQuad5d);
     // Check to see if we should integrate on the lower z plane
     if (localRgn.getLower(2) == globalRgn.getLower(2))
     {
