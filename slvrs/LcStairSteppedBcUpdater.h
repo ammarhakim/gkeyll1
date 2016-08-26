@@ -95,7 +95,9 @@ namespace Lucee
       Lucee::Field<NDIM, double> *inOut;
 /** Field to store information about boundary */
       Lucee::Field<NDIM, double> *ssBnd;
-
+/** Optional extra input field */
+      Lucee::Field<NDIM, double> *inpFld;
+      
 /**
  * Set direction to update.
  *
