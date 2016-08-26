@@ -161,6 +161,16 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> ssp = ssBnd->createConstPtr();
     double xc[3];
 
+    inpFld = 0;
+// check if we have an extra input field
+    if (this->getNumInpVars() > 0)
+      inpFld = &this->getInp<Lucee::Field<NDIM, double> >(0);
+
+// pointer to input field (a hack)
+      Lucee::ConstFieldPtr<double> inpFldPtr = A.createConstPtr();
+      if (inpFld)
+        inpFldPtr = inpFld->createConstPtr();
+
 // create sequencer to loop over *each* 1D slice in 'dir' direction
     Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(bcDir));
 
@@ -191,9 +201,17 @@ namespace Lucee
             idxm[bcDir] = i+1;
 // set pointer to right/left cell and apply BC
           A.setPtr(Aptrm, idxm);
+
+// input field, if present
+          if (inpFld)
+            inpFld->setPtr(inpFldPtr, idxm);
+          
           for (std::vector<Lucee::BoundaryCondition*>::const_iterator bcItr = bcList.begin();
                bcItr != bcList.end(); ++bcItr)
+          {
+            (*bcItr)->setExtraInputField(&inpFldPtr);
             (*bcItr)->applyBc(t, xc, idxm, coordSys, Aptr, Aptr, Aptrm);
+          }
         }
       }
     }
