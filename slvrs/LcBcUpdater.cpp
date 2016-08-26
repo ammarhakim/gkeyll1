@@ -79,6 +79,12 @@ namespace Lucee
 
     int idx[NDIM], idxG[NDIM];
     double xc[3];
+
+    inpFld = 0;
+// check if we have an extra input field
+    if (this->getNumInpVars() > 0)
+      inpFld = &this->getInp<Lucee::Field<NDIM, double> >(0);
+    
 // loop over each array and apply boundary conditions
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
 // get array
@@ -86,6 +92,10 @@ namespace Lucee
       Lucee::ConstFieldPtr<double> iPtr = A.createConstPtr(); // skin
       Lucee::ConstFieldPtr<double> iPtr1 = A.createConstPtr(); // "left" of skin
       Lucee::FieldPtr<double> gPtr = A.createPtr();
+// pointer to input field (a hack)
+      Lucee::ConstFieldPtr<double> inpFldPtr = A.createConstPtr();
+      if (inpFld)
+        inpFldPtr = inpFld->createConstPtr();
 
 // create a region to represent ghost layer
       for (unsigned i=0; i<NDIM; ++i)
@@ -116,6 +126,9 @@ namespace Lucee
         grid.getCentroid(xc);
 
         A.setPtr(gPtr, idx);
+// input field, if present
+        if (inpFld)
+          inpFld->setPtr(inpFldPtr, idx);
 
 // set pointer to "left" of skin cell
         if (edge == LC_LOWER_EDGE)
@@ -137,6 +150,7 @@ namespace Lucee
         {
           (*bcItr)->setDir(dir);
           (*bcItr)->setEdge(edge);
+          (*bcItr)->setExtraInputField(&inpFldPtr);
           (*bcItr)->applyBc(t, xc, idxG, coordSys, iPtr1, iPtr, gPtr);
         }
       }

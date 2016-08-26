@@ -79,6 +79,8 @@ namespace Lucee
       unsigned edge;
 /** Boundary conditions to apply */
       std::vector<Lucee::BoundaryCondition*> bcList;
+/** Optional extra input field */
+      const Lucee::Field<NDIM, double> *inpFld;
   };
 }
 

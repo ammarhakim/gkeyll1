@@ -42,6 +42,7 @@
 #include <LcGridOdePointIntegratorUpdater.h>
 #include <LcHeatFluxAtEdge3DUpdater.h>
 #include <LcHeatFluxAtEdgeUpdater.h>
+#include <LcIdealInnerPlanetBoundaryCondition.h>
 #include <LcImplicitFiveMomentSrcUpdater.h>
 #include <LcImplicitHyperTwentyMomentSrcUpdater.h>
 #include <LcImplicitTenMomentCollisionUpdater.h>
@@ -406,6 +407,7 @@ namespace Lucee
       .append<Lucee::ZeroTangentBoundaryCondition>()
       .append<Lucee::FieldFunctionBoundaryCondition>()
       .append<Lucee::FunctionBoundaryCondition>()
+      .append<Lucee::IdealInnerPlanetBoundaryCondition>()
 
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<1> >()
       .append<Lucee::NodalDgZeroNormalBoundaryCondition<2> >()
@@ -418,6 +420,8 @@ namespace Lucee
       .append<Lucee::NodalDgCopyBoundaryCondition<1> >()
       .append<Lucee::NodalDgCopyBoundaryCondition<2> >()
       .append<Lucee::NodalDgCopyBoundaryCondition<3> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<4> >()
+      .append<Lucee::NodalDgCopyBoundaryCondition<5> >()
 
       .append<Lucee::NodalDgFunctionBoundaryCondition<1> >()
       .append<Lucee::NodalDgFunctionBoundaryCondition<2> >()
