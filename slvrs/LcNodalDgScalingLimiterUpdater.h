@@ -1,5 +1,5 @@
 /**
- * @file	LcVlasovPositivityUpdater.h
+ * @file	LcNodalDgScalingLimiterUpdater.h
  *
  * @brief	Updater to enforce positivity preservation of the distribution function in Vlasov simulations
  */
@@ -27,7 +27,7 @@ namespace Lucee
  * Updater to compute moments of distribution function f(x,v)
  */
   template <unsigned CDIM, unsigned VDIM>
-  class VlasovPositivityUpdater : public Lucee::UpdaterIfc
+  class NodalDgScalingLimiterUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
@@ -38,7 +38,7 @@ namespace Lucee
       static const unsigned CNC = Lucee::CDIM<CDIM>::N;
 
 /** Create new modal DG solver in CDIM dimensions */
-      VlasovPositivityUpdater();
+      NodalDgScalingLimiterUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.

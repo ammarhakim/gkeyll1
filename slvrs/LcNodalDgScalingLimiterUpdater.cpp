@@ -1,5 +1,5 @@
 /**
- * @file	LcVlasovPositivityUpdater.cpp
+ * @file	LcNodalDgScalingLimiterUpdater.cpp
  *
  * @brief	Updater to enforce positivity preservation of the distribution function in Vlasov simulations
  */
@@ -14,7 +14,7 @@
 #include <LcField.h>
 #include <LcLinAlgebra.h>
 #include <LcMathLib.h>
-#include <LcVlasovPositivityUpdater.h>
+#include <LcNodalDgScalingLimiterUpdater.h>
 #include <LcStructuredGridBase.h>
 
 // loki includes
@@ -23,22 +23,22 @@
 namespace Lucee
 {
 // set id for module system
-  template <> const char *VlasovPositivityUpdater<1,1>::id = "VlasovPositivity1X1V";
-  template <> const char *VlasovPositivityUpdater<1,2>::id = "VlasovPositivity1X2V";
-  template <> const char *VlasovPositivityUpdater<1,3>::id = "VlasovPositivity1X3V";
-  template <> const char *VlasovPositivityUpdater<2,2>::id = "VlasovPositivity2X2V";
-  template <> const char *VlasovPositivityUpdater<2,3>::id = "VlasovPositivity2X3V";
-  //template <> const char *VlasovPositivityUpdater<3,3>::id = "VlasovPositivity3X3V";
+  template <> const char *NodalDgScalingLimiterUpdater<1,1>::id = "NodalDgScalingLimiter1X1V";
+  template <> const char *NodalDgScalingLimiterUpdater<1,2>::id = "NodalDgScalingLimiter1X2V";
+  template <> const char *NodalDgScalingLimiterUpdater<1,3>::id = "NodalDgScalingLimiter1X3V";
+  template <> const char *NodalDgScalingLimiterUpdater<2,2>::id = "NodalDgScalingLimiter2X2V";
+  template <> const char *NodalDgScalingLimiterUpdater<2,3>::id = "NodalDgScalingLimiter2X3V";
+  //template <> const char *NodalDgScalingLimiterUpdater<3,3>::id = "NodalDgScalingLimiter3X3V";
 
   template <unsigned CDIM, unsigned VDIM>
-  VlasovPositivityUpdater<CDIM, VDIM>::VlasovPositivityUpdater()
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::NodalDgScalingLimiterUpdater()
     : Lucee::UpdaterIfc()
   {
   }
 
   template <unsigned CDIM, unsigned VDIM>  
   void
-  VlasovPositivityUpdater<CDIM, VDIM>::readInput(Lucee::LuaTable& tbl)
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::readInput(Lucee::LuaTable& tbl)
   {
     Lucee::UpdaterIfc::readInput(tbl);    
     const unsigned NDIM = CDIM+VDIM;
@@ -48,12 +48,12 @@ namespace Lucee
       phaseBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("phaseBasis");
     else
       throw Lucee::Except(
-        "VlasovPositivityUpdater::readInput: Must specify phase-space basis using 'phaseBasis'");
+        "NodalDgScalingLimiterUpdater::readInput: Must specify phase-space basis using 'phaseBasis'");
   }
 
   template <unsigned CDIM, unsigned VDIM>
   void
-  VlasovPositivityUpdater<CDIM, VDIM>::initialize()
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::initialize()
   {
     Lucee::UpdaterIfc::initialize();    
     const unsigned NDIM = CDIM+VDIM;
@@ -79,7 +79,7 @@ namespace Lucee
   }
   template <unsigned CDIM, unsigned VDIM>
   Lucee::UpdaterStatus
-  VlasovPositivityUpdater<CDIM, VDIM>::update(double t)
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::update(double t)
   {
     const unsigned NDIM = CDIM+VDIM;
     // get hold of grid
@@ -156,7 +156,7 @@ namespace Lucee
 
   template <unsigned CDIM, unsigned VDIM>  
   void
-  VlasovPositivityUpdater<CDIM, VDIM>::declareTypes()
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::declareTypes()
   {
     this->appendInpVarType(typeid(Lucee::Field<CDIM+VDIM, double>));
     this->appendOutVarType(typeid(Lucee::Field<CDIM, double>));
@@ -164,7 +164,7 @@ namespace Lucee
 
   template <unsigned CDIM, unsigned VDIM>
   void
-  VlasovPositivityUpdater<CDIM, VDIM>::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  NodalDgScalingLimiterUpdater<CDIM, VDIM>::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); ++rowIndex)
@@ -173,9 +173,9 @@ namespace Lucee
   }
 
   // instantiations
-  template class VlasovPositivityUpdater<1,1>;
-  template class VlasovPositivityUpdater<1,2>;
-  template class VlasovPositivityUpdater<1,3>;
-  template class VlasovPositivityUpdater<2,2>;
-  template class VlasovPositivityUpdater<2,3>;
+  template class NodalDgScalingLimiterUpdater<1,1>;
+  template class NodalDgScalingLimiterUpdater<1,2>;
+  template class NodalDgScalingLimiterUpdater<1,3>;
+  template class NodalDgScalingLimiterUpdater<2,2>;
+  template class NodalDgScalingLimiterUpdater<2,3>;
 }

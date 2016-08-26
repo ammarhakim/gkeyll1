@@ -93,6 +93,7 @@ set(lcslvrs_SOURCES
   LcNodalCopyFaceToInteriorUpdater.cpp
   LcNodalDgCopyBoundaryCondition.cpp
   LcNodalDgFunctionBoundaryCondition.cpp
+  LcNodalDgScalingLimiterUpdater.cpp
   LcNodalDgZeroNormalBoundaryCondition.cpp
   LcNodalDgZeroTangentBoundaryCondition.cpp
   LcNodalDisContHyperUpdater.cpp
@@ -155,7 +156,6 @@ set(lcslvrs_SOURCES
   LcUpdaterIfc.cpp
   LcUpdaterStatus.cpp
   LcVelocitiesFromMoments3DUpdater.cpp
-  LcVlasovPositivityUpdater.cpp
   LcVelocitiesFromMomentsUpdater.cpp
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
