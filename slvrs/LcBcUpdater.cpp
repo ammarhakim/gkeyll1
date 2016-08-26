@@ -83,7 +83,7 @@ namespace Lucee
     inpFld = 0;
 // check if we have an extra input field
     if (this->getNumInpVars() > 0)
-      inpFld = &this->getOut<Lucee::Field<NDIM, double> >(0);
+      inpFld = &this->getIn<Lucee::Field<NDIM, double> >(0);
     
 // loop over each array and apply boundary conditions
     for (unsigned n=0; n<this->getNumOutVars(); ++n) {
