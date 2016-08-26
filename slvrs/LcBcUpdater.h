@@ -80,7 +80,7 @@ namespace Lucee
 /** Boundary conditions to apply */
       std::vector<Lucee::BoundaryCondition*> bcList;
 /** Optional extra input field */
-      Lucee::Field<NDIM, double> *inpFld;
+      const Lucee::Field<NDIM, double> *inpFld;
   };
 }
 
