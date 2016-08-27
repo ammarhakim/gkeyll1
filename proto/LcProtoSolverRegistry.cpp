@@ -39,6 +39,7 @@
 #include <LcEnergyFromStreamFunctionUpdater.h>
 #include <LcEnstrophyUpdater.h>
 #include <LcFiniteVolumeToLinearDGUpdater.h>
+#include <LcFixBadStairSteppedCellsUpdater.h>
 #include <LcGradLinearDGToFiniteVolumeUpdater.h>
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
@@ -194,6 +195,9 @@ namespace Lucee
       .append<Lucee::IntegrateField<1> >()
       .append<Lucee::IntegrateField<2> >()
       .append<Lucee::IntegrateField<3> >()
+
+      .append<Lucee::FixBadStairSteppedCellsUpdater<2> >()
+      .append<Lucee::FixBadStairSteppedCellsUpdater<3> >()
       
       .append<Lucee::IntegrateGeneralField<1> >()
       .append<Lucee::IntegrateGeneralField<2> >()
