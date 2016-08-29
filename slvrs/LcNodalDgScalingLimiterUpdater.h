@@ -4,8 +4,8 @@
  * @brief	Updater to enforce positivity preservation of the distribution function in Vlasov simulations
  */
 
-#ifndef LC_VLASOV_POSITIVITY_UPDATER_H
-#define LC_VLASOV_POSITIVITY_UPDATER_H
+#ifndef LC_NODAL_DG_SCALING_LIMITER_UPDATER_H
+#define LC_NODAL_DG_SCALING_LIMITER_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -88,4 +88,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_VLASOV_POSITIVITY_UPDATER_H
+#endif // LC_NODAL_DG_SCALING_LIMITER_UPDATER_H

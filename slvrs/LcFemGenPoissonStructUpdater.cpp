@@ -223,6 +223,10 @@ namespace Lucee
     writeMatrix = false;
     if (tbl.hasBool("writeStiffnessMatrix"))
       writeMatrix = tbl.getBool("writeStiffnessMatrix");
+
+    fixedNumberDensity = false;
+    if (tbl.hasBool("fixedNumberDensity"))
+      fixedNumberDensity = tbl.getBool("fixedNumberDensity");
   }
 
   template <unsigned NDIM>
@@ -813,7 +817,15 @@ namespace Lucee
 
 // construct stiffness matrix
     clock_t tmStart = clock();
-    assembleStiffness(src, numDens);
+    if (fixedNumberDensity)
+    {
+      if (isFirst)
+        assembleStiffness(src, numDens);        
+    }
+    else
+    {
+      assembleStiffness(src, numDens);
+    }
     clock_t tmEnd = clock();
     totAssemblyTime = (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
     

@@ -196,6 +196,8 @@ namespace Lucee
 
 /** First flag */
       bool isFirst;
+/** Do only once flag */
+      bool fixedNumberDensity;
 
 /**
  * Function to parse out BC.
