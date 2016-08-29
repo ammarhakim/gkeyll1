@@ -77,6 +77,7 @@ namespace Lucee
     for (unsigned i=0; i<nlocalPhase; ++i)
       volWeights(i) = weights[i]/vol;
   }
+  
   template <unsigned CDIM, unsigned VDIM>
   Lucee::UpdaterStatus
   NodalDgScalingLimiterUpdater<CDIM, VDIM>::update(double t)
@@ -86,7 +87,6 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    // get output field (CDIM + VDIM) 
     Lucee::Field<NDIM, double>& distfOut = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     unsigned nlocalPhase = phaseBasis->getNumNodes();
