@@ -629,7 +629,7 @@ namespace Lucee
   void
   SerendipityElement<NDIM>::getWeights(std::vector<double>& w)
   {
-    if (NDIM == 2)
+    if (NDIM == 1)
     {
       if (polyOrder == 1)
       {
@@ -639,9 +639,9 @@ namespace Lucee
       }
       else if (polyOrder == 2)
       {
-        w[0] = 0.5*dq[0]*(-1.0)/3.0;
+        w[0] = 0.5*dq[0]*1.0/3.0;
         w[1] = 0.5*dq[0]*4.0/3.0;
-        w[2] = 0.5*dq[0]*(-1.0)/3.0;
+        w[2] = 0.5*dq[0]*1.0/3.0;
       }
       else if (polyOrder == 3)
       {
