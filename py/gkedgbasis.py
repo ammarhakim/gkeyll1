@@ -58,6 +58,57 @@ def interpOnMesh2D(cMat, qIn):
             n = n+1
     return qout
 
+def interpOnMesh3D(cMat, qIn):
+    nInterp, nNodes = int(cMat.shape[0] ** (1.0/3.0)), cMat.shape[1]
+    nx = qIn.shape[0]
+    ny = qIn.shape[1]
+    nz = qIn.shape[2]
+    qout = pylab.zeros((nInterp*nx,nInterp*ny,nInterp*nz), numpy.float)
+    vList = [qIn[:,:,:,i] for i in range(nNodes)]
+    n = 0
+    for k in range(nInterp):
+        for j in range(nInterp):
+            for i in range(nInterp):
+                qout[i:nInterp*nx:nInterp, j:nInterp*ny:nInterp, k:nInterp*nz:nInterp] = evalSum(cMat[n,:], vList)
+                n = n+1
+    return qout
+
+def interpOnMesh4D(cMat, qIn):
+    nInterp, nNodes = int(cMat.shape[0] ** (1.0/4.0)), cMat.shape[1]
+    nx = qIn.shape[0]
+    ny = qIn.shape[1]
+    nz = qIn.shape[2]
+    nv = qIn.shape[3]
+    qout = pylab.zeros((nInterp*nx,nInterp*ny,nInterp*nz,nInterp*nv), numpy.float)
+    vList = [qIn[:,:,:,:,i] for i in range(nNodes)]
+    n = 0
+    for l in range(nInterp):
+        for k in range(nInterp):
+            for j in range(nInterp):
+                for i in range(nInterp):
+                    qout[i:nInterp*nx:nInterp, j:nInterp*ny:nInterp, k:nInterp*nz:nInterp, l:nInterp*nv:nInterp] = evalSum(cMat[n,:], vList)
+                    n = n+1
+    return qout
+
+def interpOnMesh5D(cMat, qIn):
+    nInterp, nNodes = int(cMat.shape[0] ** (1.0/5.0)), cMat.shape[1]
+    nx = qIn.shape[0]
+    ny = qIn.shape[1]
+    nz = qIn.shape[2]
+    nv = qIn.shape[3]
+    nu = qIn.shape[4]
+    qout = pylab.zeros((nInterp*nx,nInterp*ny,nInterp*nz,nInterp*nv,nInterp*nu), numpy.float)
+    vList = [qIn[:,:,:,:,:,i] for i in range(nNodes)]
+    n = 0
+    for m in range(nInterp):
+        for l in range(nInterp):
+            for k in range(nInterp):
+                for j in range(nInterp):
+                    for i in range(nInterp):
+                        qout[i:nInterp*nx:nInterp, j:nInterp*ny:nInterp, k:nInterp*nz:nInterp, l:nInterp*nv:nInterp, m:nInterp*nu:nInterp] = evalSum(cMat[n,:], vList)
+                        n = n+1
+    return qout
+
 class GkeDgBasis:
     r"""__init__(dat : GkeData, numNodes : int) -> GkeDgData
 
@@ -296,3 +347,153 @@ class GkeDgSerendipNorm2DPolyOrder2Basis(GkeDgBasis):
         X, Y = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1])
         XX, YY = pylab.meshgrid(X, Y)
         return XX, YY, interpOnMesh2D(self.cMat_i3, qn)    
+
+#################
+class GkeDgSerendipNorm2DPolyOrder3Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 3 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 12)
+        self.cMat_i4 = gid.GkeDgSerendipNorm2DPolyOrder3Basis.cMat_i4
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(4, self.Xc[0]), makeMesh2(4, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i4, qn) 
+
+#################
+class GkeDgSerendipNorm2DPolyOrder4Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 4 basis, in 2D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 17)
+        self.cMat_i5 = gid.GkeDgSerendipNorm2DPolyOrder4Basis.cMat_i5
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y = makeMesh2(5, self.Xc[0]), makeMesh2(5, self.Xc[1])
+        XX, YY = pylab.meshgrid(X, Y)
+        return XX, YY, interpOnMesh2D(self.cMat_i5, qn) 
+
+#################
+class GkeDgSerendipNorm3DPolyOrder1Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 1 basis, in 3D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 8)
+        self.cMat_i2 = gid.GkeDgSerendipNorm3DPolyOrder1Basis.cMat_i2
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1]), makeMesh2(2, self.Xc[2])
+        XX, YY, ZZ = pylab.meshgrid(X, Y, Z)
+        return XX, YY, ZZ, interpOnMesh3D(self.cMat_i2, qn)
+
+#################
+class GkeDgSerendipNorm3DPolyOrder2Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 2 basis, in 3D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 20)
+        self.cMat_i3 = gid.GkeDgSerendipNorm3DPolyOrder2Basis.cMat_i3
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1]), makeMesh2(3, self.Xc[2])
+        XX, YY, ZZ = pylab.meshgrid(X, Y, Z)
+        return XX, YY, ZZ, interpOnMesh3D(self.cMat_i3, qn)   
+
+#################
+class GkeDgSerendipNorm3DPolyOrder3Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 3 basis, in 3D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 32)
+        self.cMat_i4 = gid.GkeDgSerendipNorm3DPolyOrder3Basis.cMat_i4
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z = makeMesh2(4, self.Xc[0]), makeMesh2(4, self.Xc[1]), makeMesh2(4, self.Xc[2])
+        XX, YY, ZZ = pylab.meshgrid(X, Y, Z)
+        return XX, YY, ZZ, interpOnMesh3D(self.cMat_i4, qn)
+
+#################
+class GkeDgSerendipNorm3DPolyOrder4Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 4 basis, in 3D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 50)
+        self.cMat_i5 = gid.GkeDgSerendipNorm3DPolyOrder4Basis.cMat_i5
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z = makeMesh2(5, self.Xc[0]), makeMesh2(5, self.Xc[1]), makeMesh2(5, self.Xc[2])
+        XX, YY, ZZ = pylab.meshgrid(X, Y, Z)
+        return XX, YY, ZZ, interpOnMesh3D(self.cMat_i5, qn)
+
+#################
+class GkeDgSerendipNorm4DPolyOrder1Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 1 basis, in 4D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 16)
+        self.cMat_i2 = gid.GkeDgSerendipNorm4DPolyOrder1Basis.cMat_i2
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z, V = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1]), makeMesh2(2, self.Xc[2]), makeMesh2(2, self.Xc[3])
+        XX, YY, ZZ, VV = pylab.meshgrid(X, Y, Z, V)
+        return XX, YY, ZZ, VV, interpOnMesh4D(self.cMat_i2, qn)
+
+#################
+class GkeDgSerendipNorm4DPolyOrder2Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 2 basis, in 4D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 48)
+        self.cMat_i3 = gid.GkeDgSerendipNorm4DPolyOrder2Basis.cMat_i3
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z, V = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1]), makeMesh2(3, self.Xc[2]), makeMesh2(3, self.Xc[3])
+        XX, YY, ZZ, VV = pylab.meshgrid(X, Y, Z, V)
+        return XX, YY, ZZ, VV, interpOnMesh4D(self.cMat_i3, qn)
+
+#################
+class GkeDgSerendipNorm5DPolyOrder1Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 1 basis, in 5D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 32)
+        self.cMat_i2 = gid.GkeDgSerendipNorm5DPolyOrder1Basis.cMat_i2
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z, V, U = makeMesh2(2, self.Xc[0]), makeMesh2(2, self.Xc[1]), makeMesh2(2, self.Xc[2]), makeMesh2(2, self.Xc[3]), makeMesh2(2, self.Xc[4])
+        XX, YY, ZZ, VV, UU = pylab.meshgrid(X, Y, Z, V, U)
+        return XX, YY, ZZ, VV, UU, interpOnMesh5D(self.cMat_i2, qn)
+
+#################
+class GkeDgSerendipNorm5DPolyOrder2Basis(GkeDgBasis):
+    r"""Serendipity basis (correct, normal layout), polyOrder = 2 basis, in 5D
+    """
+
+    def __init__(self, dat):
+        GkeDgBasis.__init__(self, dat, 112)
+        self.cMat_i3 = gid.GkeDgSerendipNorm5DPolyOrder2Basis.cMat_i3
+
+    def project(self, c):
+        qn = self._getRaw(c)
+        X, Y, Z, V, U = makeMesh2(3, self.Xc[0]), makeMesh2(3, self.Xc[1]), makeMesh2(3, self.Xc[2]), makeMesh2(3, self.Xc[3]), makeMesh2(3, self.Xc[4])
+        XX, YY, ZZ, VV, UU = pylab.meshgrid(X, Y, Z, V, U)
+        return XX, YY, ZZ, VV, UU, interpOnMesh5D(self.cMat_i3, qn)
