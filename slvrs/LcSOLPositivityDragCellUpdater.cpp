@@ -66,6 +66,14 @@ namespace Lucee
     Eigen::MatrixXd volQuad3d(nVolQuad3d, nlocal3d);
     copyLuceeToEigen(tempVolQuad3d, volQuad3d);
 
+    // Get 3D Mass Matrix
+    Lucee::Matrix<double> tempMassMatrix3d(nlocal3d, nlocal3d);
+    nodalBasis3d->getMassMatrix(tempMassMatrix3d);
+    Eigen::MatrixXd massMatrix3d(nlocal3d, nlocal3d);
+    copyLuceeToEigen(tempMassMatrix3d, massMatrix3d);
+    // Compute mom0Vector
+    mom0Vector = massMatrix3d.colwise().sum();
+
     // get volume interpolation matrices for 5d element
     int nVolQuad5d = nodalBasis5d->getNumGaussNodes();
     std::vector<double> volWeights5d(nVolQuad5d);
@@ -109,6 +117,10 @@ namespace Lucee
     const Lucee::Field<3, double>& energyModIn = this->getInp<Lucee::Field<3, double> >(2);
     // Desired energy at each node
     const Lucee::Field<3, double>& energyOrigIn = this->getInp<Lucee::Field<3, double> >(3);
+    // Mean velocity field n*u_parallel
+    const Lucee::Field<3, double>& nTimesUIn = this->getInp<Lucee::Field<3, double> >(4);
+    // Density field
+    const Lucee::Field<3, double>& nIn = this->getInp<Lucee::Field<3, double> >(5);
     // Distribution function after drag term
     Lucee::Field<5, double>& distfOut = this->getOut<Lucee::Field<5, double> >(0);
 
@@ -121,6 +133,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> bFieldInPtr      = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> energyModInPtr   = energyModIn.createConstPtr();
     Lucee::ConstFieldPtr<double> energyOrigInPtr  = energyOrigIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> nTimesUInPtr     = nTimesUIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> nInPtr           = nIn.createConstPtr();
 
     Lucee::FieldPtr<double> distfOutPtr = distfOut.createPtr(); // Output pointer
     distfOut = 0.0; // clear out current contents
@@ -141,11 +155,13 @@ namespace Lucee
     // Set grid to last parallel velocity cell (upper boundary)
     grid.setIndex(idx);
     grid.getCentroid(cellCentroid);
-    double alpha = 1/(cellCentroid[3] - 0.5*grid.getDx(3));
+    double maxPosV = (cellCentroid[3] - 0.5*grid.getDx(3));
 
     // Used in sequencer
     Eigen::VectorXd bFieldVec(nlocal3d);
     Eigen::VectorXd distfVec(nlocal5d);
+    Eigen::VectorXd nVec(nlocal3d);
+    Eigen::VectorXd nTimesUVec(nlocal3d);
 
     Lucee::RowMajorSequencer<5> seq(localRgn);
     
@@ -164,9 +180,18 @@ namespace Lucee
                 1e-10*energyOrigInPtr[0])
       {
         bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
+        nTimesUIn.setPtr(nTimesUInPtr, idx[0], idx[1], idx[2]);
+        nIn.setPtr(nInPtr, idx[0], idx[1], idx[2]);
 
         for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
+        {
           bFieldVec(nodeIndex) = bFieldInPtr[nodeIndex];
+          nTimesUVec(nodeIndex) = nTimesUInPtr[nodeIndex];
+          nVec(nodeIndex) = nInPtr[nodeIndex];
+        }
+
+        // Compute average value of u_parallel
+        double avgU = (mom0Vector.dot(nTimesUVec))/(mom0Vector.dot(nVec));
 
         distfIn.setPtr(distfInPtr, idx);
         for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
@@ -188,12 +213,12 @@ namespace Lucee
           //std::cout << "distfReduced" << std::endl << distfReduced << std::endl;
         }
         
-        // Copy idx idxUpwind
+        // Copy idx to idxUpwind
         for (int dimIndex = 0; dimIndex < 5; dimIndex++)
           idxUpwind[dimIndex] = idx[dimIndex];
 
         // Figure out which neighboring cell to use to calculate upwindAvg
-        if (cellCentroid[3] > 0.0)
+        if (cellCentroid[3]-avgU > 0.0)
         {
           fLowerAvg = fOldAvg;
           if (idx[3] < globalRgn.getUpper(3)-1)
@@ -205,7 +230,7 @@ namespace Lucee
             fUpperAvg = distfVec.dot(densityMatrix*bFieldVec);
           }
         }
-        else if (cellCentroid[3] < 0.0)
+        else if (cellCentroid[3]-avgU < 0.0)
         {
           fUpperAvg = fOldAvg;
           if (idx[3] > globalRgn.getLower(3))
@@ -224,8 +249,10 @@ namespace Lucee
         if (fLowerAvg < 0.0)
           fLowerAvg = 0.0;
 
-        double fIncrement = (cellCentroid[3] + 0.5*grid.getDx(3))*fUpperAvg -
-          (cellCentroid[3] - 0.5*grid.getDx(3))*fLowerAvg;
+        double alpha = 1/(maxPosV + std::fabs(avgU));
+        double fIncrement = (cellCentroid[3] + 0.5*grid.getDx(3) - avgU)*fUpperAvg -
+          (cellCentroid[3] - 0.5*grid.getDx(3) - avgU)*fLowerAvg;
+        // Compute new density of cell after maximum drag step
         double fNewAvg = fOldAvg + alpha*fIncrement;
 
         if (fNewAvg < 0.0)
@@ -266,6 +293,10 @@ namespace Lucee
     // Input: energy of modified distribution function at cells
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: energy of original distribition function at cells
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: n*u_parallel
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: n
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Output: another modified distribution function
     this->appendOutVarType(typeid(Lucee::Field<5, double>));

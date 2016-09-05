@@ -78,6 +78,11 @@ namespace Lucee
 /** Matrix used to compute total number in a cell */
       Eigen::MatrixXd densityMatrix;
 /**
+ * When multiplied by the solution in a 3d cell, returns the integrated cell quantity
+ * To get average, one should divide by the volume of the cell
+ */
+      Eigen::VectorXd mom0Vector;
+/**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
