@@ -108,6 +108,7 @@
 #include <LcSOLMaxwellianParameterNewtonCalc.h>
 #include <LcSOLPositivity3DUpdater.h>
 #include <LcSOLPositivityDragCellUpdater.h>
+#include <LcSOLPositivityDragCellInMuUpdater.h>
 #include <LcSOLPositivityDragNodeUpdater.h>
 #include <LcSOLPositivityScaleCellUpdater.h>
 #include <LcSOLPositivityScaleNodeUpdater.h>
@@ -229,6 +230,7 @@ namespace Lucee
       .append<Lucee::SOLPositivityUpdater>()
       .append<Lucee::SOLPositivity3DUpdater>()
       .append<Lucee::SOLPositivityDragCellUpdater>()
+      .append<Lucee::SOLPositivityDragCellInMuUpdater>()
       .append<Lucee::SOLPositivityDragNodeUpdater>()
       .append<Lucee::SOLPositivityScaleCellUpdater>()
       .append<Lucee::SOLPositivityScaleNodeUpdater>()
