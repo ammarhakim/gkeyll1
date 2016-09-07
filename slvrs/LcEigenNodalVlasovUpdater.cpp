@@ -350,36 +350,188 @@ namespace Lucee
       derivMatrices[dir] = derivMatrix;
     }
 
-    // get number of surface quadrature points
-    int nSurfQuad = phaseBasis->getNumSurfGaussNodes();
+    // Figure out how many surface quadrature gaussian points there are
+    nSurfQuadStream = 1;
+    nSurfQuadForce = 1;
+
+    for (int dimIndex=0; dimIndex<NDIM-1; ++dimIndex)
+    {
+      nSurfQuadStream *= gaussPoints1d.size();
+      if (dimIndex < CDIM)
+      {
+        nSurfQuadForce *= gaussPoints1dField.size();
+      }
+      else
+      {
+        nSurfQuadForce *= gaussPoints1d.size();
+      }
+    }
+
+    /* Due to the symmetry of the system, there are still only two node lists, one for the streaming term
+       and one for the forcing term. This is because the anisotropic quadrature is only used for the 
+       forcing term, which involves gradients in velocity space. In other words, the velocity space surfaces
+       require the quadrature information of all of the corresponding position in configuration space */
+
+    Eigen::MatrixXd gaussNodeListSurfStream = Eigen::MatrixXd::Zero(nSurfQuadStream, NDIM);
+    Eigen::MatrixXd gaussNodeListSurfForce = Eigen::MatrixXd::Zero(nSurfQuadForce, NDIM);
+
+    int surfShapeStream[NDIM-1];
+    int surfIdxStream[NDIM-1];
+    int surfShapeForce[NDIM-1];
+    int surfIdxForce[NDIM-1];
+
+    for (int dimIndex=0; dimIndex<NDIM-1; ++dimIndex)
+    {
+      surfShapeStream[dimIndex] = gaussPoints1d.size();
+      if (dimIndex < CDIM)
+      {
+        surfShapeForce[dimIndex] = gaussPoints1dField.size();
+      }
+      else
+      {
+        surfShapeForce[dimIndex] = gaussPoints1d.size();
+      }
+    }
+
+    Lucee::Region<NDIM-1, int> surfRegionStream(surfShapeStream);
+    Lucee::ColMajorSequencer<NDIM-1> surfSeqStream = ColMajorSequencer<NDIM-1>(surfRegionStream);
+    Lucee::ColMajorIndexer<NDIM-1> surfIdxrStream = ColMajorIndexer<NDIM-1>(surfRegionStream);
+
+    // Find all quadrature locations on a NDIM-1 surface for streaming term
+    while(surfSeqStream.step())
+    {
+      surfSeqStream.fillWithIndex(surfIdxStream);
+      int nodeNumberStream = surfIdxrStream.getIndex(surfIdxStream);
+
+      gaussNodeListSurfStream(nodeNumberStream, NDIM-1) = 1.0;
+      for (int dimIndex=0; dimIndex<NDIM-1; ++dimIndex)
+      {
+        gaussNodeListSurfStream(nodeNumberStream, dimIndex) = gaussPoints1d[surfIdxStream[dimIndex]];
+        gaussNodeListSurfStream(nodeNumberStream, NDIM-1)    *= gaussWeights1d[surfIdxStream[dimIndex]];
+      }
+    }
+
+    Lucee::Region<NDIM-1, int> surfRegionForce(surfShapeForce);
+    Lucee::ColMajorSequencer<NDIM-1> surfSeqForce = ColMajorSequencer<NDIM-1>(surfRegionForce);
+    Lucee::ColMajorIndexer<NDIM-1> surfIdxrForce = ColMajorIndexer<NDIM-1>(surfRegionForce);
+
+
+    // Find all quadrature locations on a NDIM-1 surface for force term
+    while(surfSeqForce.step())
+    {
+      surfSeqForce.fillWithIndex(surfIdxForce);
+      int nodeNumberForce = surfIdxrForce.getIndex(surfIdxForce);
+
+      gaussNodeListSurfForce(nodeNumberForce, NDIM-1) = 1.0;
+      for (int dimIndex=0; dimIndex<NDIM-1; ++dimIndex)
+      {
+        if (dimIndex < CDIM)
+        {
+          gaussNodeListSurfForce(nodeNumberForce, dimIndex) = gaussPoints1dField[surfIdxForce[dimIndex]];
+          gaussNodeListSurfForce(nodeNumberForce, NDIM-1)    *= gaussWeights1dField[surfIdxForce[dimIndex]];
+        }
+        else
+        {
+          gaussNodeListSurfForce(nodeNumberForce, dimIndex) = gaussPoints1d[surfIdxForce[dimIndex]];
+          gaussNodeListSurfForce(nodeNumberForce, NDIM-1)    *= gaussWeights1d[surfIdxForce[dimIndex]];
+        }
+      }
+    }
 
     // Get data for surface quadrature
     for (int dir=0; dir<NDIM; ++dir)
     {
-      // temporary variables
-      std::vector<double> tempSurfWeights(nSurfQuad);
-      Lucee::Matrix<double> tempSurfQuad(nSurfQuad, nlocal);
-      Lucee::Matrix<double> tempSurfCoords(nSurfQuad, PNC);
 
-      // Reset surface quadrature structures
-      surfLowerQuad[dir].reset(nSurfQuad, nlocal, PNC);
-      surfUpperQuad[dir].reset(nSurfQuad, nlocal, PNC);
-      
-      // lower surface data
-      phaseBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
-        tempSurfCoords, tempSurfWeights);
-      // copy data to appropriate structures
-      for (int quadIndex=0; quadIndex<nSurfQuad; ++quadIndex)
-        surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
-      copyLuceeToEigen(tempSurfQuad, surfLowerQuad[dir].interpMat);
+      double weightScale = 1.0;
 
-      // upper surface data
-      phaseBasis->getSurfUpperGaussQuadData(dir, tempSurfQuad,
-        tempSurfCoords, tempSurfWeights);
-      // copy data to appropriate structures
-      for (int quadIndex=0; quadIndex<nSurfQuad; ++quadIndex)
-        surfUpperQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
-      copyLuceeToEigen(tempSurfQuad, surfUpperQuad[dir].interpMat);
+      for (int dimIndex=0; dimIndex<NDIM; ++dimIndex)
+      {
+        if (dimIndex != dir)
+          weightScale *= 0.5*grid.getDx(dimIndex);
+      }
+
+      if (dir < CDIM)
+      {
+        // Reset surface quadrature structures
+        surfLowerQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
+        surfUpperQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
+
+        // Evaluate all basis functions at all upper and lower surfaces
+        for (int nodeIndex = 0; nodeIndex < gaussNodeListSurfStream.rows(); nodeIndex++)
+        {
+          int rollingIndex = 0;
+        
+          for (int coordIndex = 0; coordIndex < NDIM; coordIndex++)
+          {
+            if (coordIndex == dir)
+              xcTemp[dir] = 1;
+            else
+            {
+              xcTemp[coordIndex] = gaussNodeListSurfStream(nodeIndex, rollingIndex);
+              rollingIndex++;
+            }
+          }
+          //Upper and lower surface quadrature weights are the same, so compute and then copy in
+          surfUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfStream(nodeIndex, NDIM-1);
+          surfLowerQuad[dir].weights(nodeIndex) = surfUpperQuad[dir].weights(nodeIndex);
+
+          //Evaluate basis functions at upper surface quadrature nodes
+          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
+          {
+            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+
+          // Replace surface index for computation for lower surface matrices
+          xcTemp[dir] = -1;
+          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
+          {
+            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+        }
+      }
+      else
+      {
+        // Reset surface quadrature structures
+        surfLowerQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
+        surfUpperQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
+
+        // Evaluate all basis functions at all upper and lower surfaces
+        for (int nodeIndex = 0; nodeIndex < gaussNodeListSurfForce.rows(); nodeIndex++)
+        {
+          int rollingIndex = 0;
+        
+          for (int coordIndex = 0; coordIndex < NDIM; coordIndex++)
+          {
+            if (coordIndex == dir)
+              xcTemp[dir] = 1;
+            else
+            {
+              xcTemp[coordIndex] = gaussNodeListSurfForce(nodeIndex, rollingIndex);
+              rollingIndex++;
+            }
+          }
+          //Upper and lower surface quadrature weights are the same, so compute and then copy in
+          surfUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfForce(nodeIndex, NDIM-1);
+          surfLowerQuad[dir].weights(nodeIndex) = surfUpperQuad[dir].weights(nodeIndex);
+
+          //Evaluate basis functions at upper surface quadrature nodes
+          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
+          {
+            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+
+          // Replace surface index for computation for lower surface matrices
+          xcTemp[dir] = -1;
+          phaseBasis->evalBasis(xcTemp, evalBasisTemp);
+          for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
+          {
+            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+        }
+      }
     }
 
     bigStoredUpperSurfMatrices.resize(NDIM);
@@ -392,6 +544,7 @@ namespace Lucee
       bigStoredUpperSurfMatrices[dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
       bigStoredLowerSurfMatrices[dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
       bigStoredVolMatrices[dir] = massMatrixInv*derivMatrices[dir].transpose();
+      // The if statement is not strictly needed for the surface matrices, but this reduces the number of for loops 
       if (dir<CDIM)
       {
         for (int i=0; i<nlocal; ++i)
@@ -486,12 +639,20 @@ namespace Lucee
 
     Eigen::VectorXd rightData(nlocal);
     Eigen::VectorXd leftData(nlocal);
-    Eigen::VectorXd rightDataAtQuad(nSurfQuad);
-    Eigen::VectorXd leftDataAtQuad(nSurfQuad);
-    Eigen::VectorXd alphaRight(nSurfQuad);
-    Eigen::VectorXd alphaLeft(nSurfQuad);
-    Eigen::VectorXd maxFlux(nSurfQuad);
-    Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
+
+    Eigen::VectorXd rightDataAtQuadStream(nSurfQuadStream);
+    Eigen::VectorXd leftDataAtQuadStream(nSurfQuadStream);
+    Eigen::VectorXd alphaRightStream(nSurfQuadStream);
+    Eigen::VectorXd alphaLeftStream(nSurfQuadStream);
+    Eigen::VectorXd maxFluxStream(nSurfQuadStream);
+    Eigen::VectorXd numericalFluxAtQuadStream(nSurfQuadStream);
+
+    Eigen::VectorXd rightDataAtQuadForce(nSurfQuadForce);
+    Eigen::VectorXd leftDataAtQuadForce(nSurfQuadForce);
+    Eigen::VectorXd alphaRightForce(nSurfQuadForce);
+    Eigen::VectorXd alphaLeftForce(nSurfQuadForce);
+    Eigen::VectorXd maxFluxForce(nSurfQuadForce);
+    Eigen::VectorXd numericalFluxAtQuadForce(nSurfQuadForce);
 
     double localQ, localQl, localF;
 
@@ -598,25 +759,46 @@ namespace Lucee
             leftData(i) = qPtrl[i];
           }
 
-          rightDataAtQuad.noalias() = surfLowerQuad[dir].interpMat*rightData;
-          leftDataAtQuad.noalias() = surfUpperQuad[dir].interpMat*leftData;
-          calcFlux(dir, phaseNodeCoords, emPtr, flux);
-          alphaRight.noalias() = surfLowerQuad[dir].interpMat*flux;
-          calcFlux(dir, phaseNodeCoords, emPtrl, flux);
-          alphaLeft.noalias() = surfUpperQuad[dir].interpMat*flux;
-          maxFlux = (alphaLeft.cwiseAbs()).cwiseMax(alphaRight.cwiseAbs());
+          if (dir < CDIM)
+          {
+            rightDataAtQuadStream.noalias() = surfLowerQuad[dir].interpMat*rightData;
+            leftDataAtQuadStream.noalias() = surfUpperQuad[dir].interpMat*leftData;
+            calcFlux(dir, phaseNodeCoords, emPtr, flux);
+            alphaRightStream.noalias() = surfLowerQuad[dir].interpMat*flux;
+            calcFlux(dir, phaseNodeCoords, emPtrl, flux);
+            alphaLeftStream.noalias() = surfUpperQuad[dir].interpMat*flux;
+            maxFluxStream = (alphaLeftStream.cwiseAbs()).cwiseMax(alphaRightStream.cwiseAbs());
 
-          // Compute numerical flux
-          numericalFluxAtQuad.noalias() = 0.5*(alphaLeft.cwiseProduct(leftDataAtQuad) + alphaRight.cwiseProduct(rightDataAtQuad)) 
-            - 0.5*maxFlux.cwiseProduct(rightDataAtQuad - leftDataAtQuad);
+            // Compute numerical flux
+            numericalFluxAtQuadStream.noalias() = 0.5*(alphaLeftStream.cwiseProduct(leftDataAtQuadStream) + alphaRightStream.cwiseProduct(rightDataAtQuadStream)) 
+              - 0.5*maxFluxStream.cwiseProduct(rightDataAtQuadStream - leftDataAtQuadStream);
 
-          cfla = Lucee::max3(cfla, dtdx*maxFlux.maxCoeff(), -dtdx*maxFlux.maxCoeff());
+            cfla = Lucee::max3(cfla, dtdx*maxFluxStream.maxCoeff(), -dtdx*maxFluxStream.maxCoeff());
 
+            resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuadStream;
+            resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuadStream;
+          }
+          else
+          {
+            rightDataAtQuadForce.noalias() = surfLowerQuad[dir].interpMat*rightData;
+            leftDataAtQuadForce.noalias() = surfUpperQuad[dir].interpMat*leftData;
+            calcFlux(dir, phaseNodeCoords, emPtr, flux);
+            alphaRightForce.noalias() = surfLowerQuad[dir].interpMat*flux;
+            calcFlux(dir, phaseNodeCoords, emPtrl, flux);
+            alphaLeftForce.noalias() = surfUpperQuad[dir].interpMat*flux;
+            maxFluxForce = (alphaLeftForce.cwiseAbs()).cwiseMax(alphaRightForce.cwiseAbs());
+
+            // Compute numerical flux
+            numericalFluxAtQuadForce.noalias() = 0.5*(alphaLeftForce.cwiseProduct(leftDataAtQuadForce) + alphaRightForce.cwiseProduct(rightDataAtQuadForce)) 
+              - 0.5*maxFluxForce.cwiseProduct(rightDataAtQuadForce - leftDataAtQuadForce);
+
+            cfla = Lucee::max3(cfla, dtdx*maxFluxForce.maxCoeff(), -dtdx*maxFluxForce.maxCoeff());
+
+            resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuadForce;
+            resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuadForce;
+          }
           qNew.setPtr(qNewPtr, idx);
           qNew.setPtr(qNewPtrl, idxl);
-
-          resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuad;
-          resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuad;
 
           for (int i=0; i<nlocal; ++i)
           {
