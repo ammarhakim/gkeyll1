@@ -120,6 +120,10 @@ namespace Lucee
       int nvolQuadStream;
 /** Number of quadrature points for volume integral of forcing term */
       int nvolQuadForce;
+/** Number of quadrature points for surface integral of streaming term*/
+      int nSurfQuadStream;
+/** Number of quadrature points for surface integral of forcing term */
+      int nSurfQuadForce;
 
 
 /**
