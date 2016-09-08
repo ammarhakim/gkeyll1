@@ -161,6 +161,7 @@ set_target_properties(${LUCEE_STATIC} PROPERTIES
 )
 target_link_libraries(${LUCEE_STATIC} ${lucee_LIBRARIES})
 target_link_libraries(${LUCEE_STATIC} ${FacetsSt_EXT_LIBS})
+target_link_libraries(${LUCEE_STATIC} ${CMAKE_DL_LIBS})
 
 # This is unnecessary, at least on Edison
 #if (USE_STATIC_SYSLIBS)
