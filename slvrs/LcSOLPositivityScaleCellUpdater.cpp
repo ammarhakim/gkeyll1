@@ -96,6 +96,8 @@ namespace Lucee
       energyPosIn.setPtr(energyPosInPtr, idx[0], idx[1], idx[2]);
       energyDragIn.setPtr(energyDragInPtr, idx[0], idx[1], idx[2]);
 
+      // If the energy after positivity has changed by some threshold, then we need
+      // to make use of the maximum drag step
       if (std::fabs(energyPosInPtr[0] - energyOrigInPtr[0]) > 
         1e-10*energyOrigInPtr[0])
       {
@@ -106,10 +108,12 @@ namespace Lucee
         //Make sure scaleFactor is less than one
         if (positivityChecks == true && scaleFactor > 1.0)
         {
-          std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
-            << ") Drag term is larger than possible = " << scaleFactor << std::endl;
+          //std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+          //  << ") Drag term is larger than possible = " << scaleFactor << std::endl;
           scaleFactor = 1.0;
         }
+        else if (std::isinf(scaleFactor))
+          continue;
 
         distfDelta.setPtr(distfDeltaPtr, idx);
         distfOut.setPtr(distfOutPtr, idx);
