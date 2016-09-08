@@ -522,7 +522,7 @@ namespace Lucee
       double averageTemperature = mom0Vector.dot(temperatureVec)/volume;
       double averageN = mom0Vector.dot(numDensityVec)/volume;
       // Keep track of max CFL number
-      cfla = std::max( cfla, std::abs(alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
+      cfla = std::max( cfla, std::abs(4.0*alpha*averageN/(averageTemperature*sqrt(averageTemperature))*
         averageTemperature/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
       // Time-step was too large: return a suggestion with correct time-step
       if (cfla > cflm)
