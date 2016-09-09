@@ -9,6 +9,8 @@
 # include <config.h>
 #endif
 
+#define EIGEN_DONT_PARALLELIZE
+
 // lucee includes
 #include <LcAlignedRectCoordSys.h>
 #include <LcField.h>
