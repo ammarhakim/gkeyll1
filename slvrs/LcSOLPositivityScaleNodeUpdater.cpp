@@ -44,6 +44,11 @@ namespace Lucee
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
       throw Lucee::Except("SOLPositivityScaleNodeUpdater::readInput: Must specify element to use using 'basis2d'");
+
+    // check if positivity checks are required
+    positivityChecks = true;
+    if (tbl.hasBool("positivityChecks"))
+      positivityChecks = tbl.getBool("positivityChecks");
   }
 
   void
@@ -171,11 +176,13 @@ namespace Lucee
                 (energyDragInPtr[configNode]-energyPosInPtr[configNode]);
 
               // Make sure scaleFactor is less than one
-              if (scaleFactor > 1.0)
+              if (positivityChecks == true && scaleFactor > 1.0)
               {
-                std::cout << "Drag term is larger than possible = " << scaleFactor << std::endl;
+                //std::cout << "Drag term is larger than possible = " << scaleFactor << std::endl;
                 scaleFactor = 1.0;
               }
+              else if (std::isinf(scaleFactor))
+                continue;
 
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
@@ -192,7 +199,7 @@ namespace Lucee
                     distfOutPtr[nodalStencil[nodeIndex] + configNode] =
                       distfOutPtr[nodalStencil[nodeIndex] + configNode] +
                       scaleFactor*distfDeltaPtr[nodalStencil[nodeIndex] + configNode];
-                    if (distfOutPtr[nodalStencil[nodeIndex] + configNode] < 0.0)
+                    if (positivityChecks == true && distfOutPtr[nodalStencil[nodeIndex] + configNode] < 0.0)
                       std::cout << "distfOutPtr = " << distfOutPtr[nodalStencil[nodeIndex] + configNode] << std::endl;
                   }
                 }

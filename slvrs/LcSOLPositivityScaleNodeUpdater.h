@@ -79,6 +79,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
+/** Default true. If true, limits will be set on scale factors and positivity checks will be made */
+      bool positivityChecks;
 /**
  * Interpolation matrix used to compute integration in (v,mu) space
  */
