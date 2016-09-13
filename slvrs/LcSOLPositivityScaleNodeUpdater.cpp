@@ -39,12 +39,7 @@ namespace Lucee
       nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
     else
       throw Lucee::Except("SOLPositivityScaleNodeUpdater::readInput: Must specify element to use using 'basis3d'");
-
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
-      nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
-    else
-      throw Lucee::Except("SOLPositivityScaleNodeUpdater::readInput: Must specify element to use using 'basis2d'");
-
+    
     // check if positivity checks are required
     positivityChecks = true;
     if (tbl.hasBool("positivityChecks"))
@@ -85,33 +80,6 @@ namespace Lucee
       }
     }
     nodalStencil.resize(stencilIndex);
- 
-    // Get (v,mu) quadrature data from 2d element
-    int nSurfQuad = nodalBasis2d->getNumGaussNodes();
-    int nlocal2d = nodalBasis2d->getNumNodes();
-    interpMatrix2d = Eigen::MatrixXd(nSurfQuad, nlocal2d);
-    gaussWeights2d = std::vector<double>(nSurfQuad);
-    Lucee::Matrix<double> tempVolCoords(nSurfQuad, 3);
-    Lucee::Matrix<double> tempVolQuad(nSurfQuad, nlocal2d);
-
-    nodalBasis2d->getGaussQuadData(tempVolQuad, tempVolCoords, gaussWeights2d);
-    copyLuceeToEigen(tempVolQuad, interpMatrix2d);
-
-    // Scale gaussWeights2d to the right values since grid is (v,mu), not (x,y)
-    double scaleCorrection = grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
-    for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-      gaussWeights2d[quadIndex] = scaleCorrection*gaussWeights2d[quadIndex];
-
-    // Construct vector to integrate (v,mu) cell
-    mom0Vector = Eigen::VectorXd(nlocal2d);
-    // Integrate each basis function over entire cell
-    for (int nodeIndex = 0; nodeIndex < nlocal2d; nodeIndex++)
-    {
-      double integralResult = 0.0;
-      for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-        integralResult += gaussWeights2d[quadIndex]*interpMatrix2d(quadIndex, nodeIndex);
-      mom0Vector(nodeIndex) = integralResult;
-    }
   }
 
   Lucee::UpdaterStatus
@@ -144,9 +112,6 @@ namespace Lucee
 
     unsigned nlocal = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
-    int nSurfQuad = nodalBasis2d->getNumGaussNodes();
-
-    double cellCentroid[5];
     int idx[5];
 
     // Loop over each cell in configuration space

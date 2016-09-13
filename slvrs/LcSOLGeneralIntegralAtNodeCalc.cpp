@@ -51,7 +51,6 @@ namespace Lucee
     UpdaterIfc::initialize();
 
     unsigned nlocal = nodalBasis5d->getNumNodes();
-    std::vector<unsigned> zRef(nlocal), vRef(nlocal);
 
     // Get a copy of the nodal coordinates
     Lucee::Matrix<double> nodeCoordsLucee(nlocal, 5);
@@ -103,8 +102,6 @@ namespace Lucee
     const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(2);
     // Output field
     Lucee::Field<3, double>& integratedField = this->getOut<Lucee::Field<3, double> >(0);
-    
-    integratedField= 0.0; // clear out current contents
 
     Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
@@ -114,6 +111,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::FieldPtr<double> integratedFieldPtr = integratedField.createPtr(); // Output pointer
 
+    integratedField = 0.0; // clear out current contents
+    
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
 
@@ -127,13 +126,12 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
-      integratedField.setPtr(integratedFieldPtr, idx[0], idx[1], idx[2]);
-      // Get the coordinates of cell center
-      grid.setIndex(idx);
-
+      // Set input field pointers
       distfIn.setPtr(distfInPtr, idx);
       productIn.setPtr(productInPtr, idx);
       bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
+      // Set output field pointer
+      integratedField.setPtr(integratedFieldPtr, idx[0], idx[1], idx[2]);
 
       // Loop over the  configuration space vertices in this cell
       for (int configNode = 0; configNode < nlocal3d; configNode++)

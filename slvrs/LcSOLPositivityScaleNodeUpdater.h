@@ -75,24 +75,10 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** Pointer to 2d (v,mu) space basis functions */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
 /** Default true. If true, limits will be set on scale factors and positivity checks will be made */
       bool positivityChecks;
-/**
- * Interpolation matrix used to compute integration in (v,mu) space
- */
-      Eigen::MatrixXd interpMatrix2d;
-/**
- * Vector used to compute density of a (v,mu) cell
- */
-      Eigen::VectorXd mom0Vector;
-/**
- * Quadrature weights used to compute integration in (v,mu) space
- */
-      std::vector<double> gaussWeights2d;
 
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
