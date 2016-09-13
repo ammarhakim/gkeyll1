@@ -77,8 +77,10 @@ set(lcslvrs_SOURCES
   LcLagrangeTensorElement.cpp
   LcLenardBernsteinDiff3DUpdater.cpp
   LcLenardBernsteinDiff5DUpdater.cpp
+  LcLenardBernsteinDiff3D2VUpdater.cpp
   LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDrag3DUpdater.cpp
+  LcLenardBernsteinDrag3D2VUpdater.cpp
   LcLenardBernsteinDrag5DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp

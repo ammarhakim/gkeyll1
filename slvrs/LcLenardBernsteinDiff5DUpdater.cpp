@@ -286,7 +286,7 @@ namespace Lucee
     // To set indices on left and right cells of a boundary
     int idxr[5];
     int idxl[5];
-    
+
     int ivLower = localRgn.getLower(3);
     // Need one edge outside domain interior
     int ivUpper = localRgn.getUpper(3)+1;
