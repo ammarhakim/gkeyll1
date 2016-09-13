@@ -460,10 +460,6 @@ namespace Lucee
     evaluateFunction(*L, t, resultVector);
     double alpha = resultVector[0];
 
-    // Flag to keep track of whether or not CFL limit was exceeded.
-    // Don't exit immediately upon false because a more strict limit might appear
-    bool needToRetakeStep = false;
-
     // Should be size 4 for linear elements
     Eigen::VectorXd fReduced(nodalStencil.size());
     Eigen::VectorXd fLowerReduced(nodalStencil.size());
@@ -515,7 +511,7 @@ namespace Lucee
                 if (iv > globalRgn.getLower(3))
                 {
                   updateF = updateF + lowerCenter[0]*fReduced;
-                  idx[3] = idx[3] -1;
+                  idx[3] = idx[3] - 1;
                   fIn.setPtr(fInPtr, idx); // cell attached to lower face
                   for (int i = 0; i < fLowerReduced.size(); i++)
                     fLowerReduced(i) = fInPtr[configNode + nodalStencil[i]];
@@ -565,7 +561,6 @@ namespace Lucee
                 // Accumulate updateF to output
                 for (int i = 0; i < fReduced.size(); i++)
                   fOutPtr[configNode + nodalStencil[i]] = fOutPtr[configNode + nodalStencil[i]] + updateF(i);
-
               }
             }
           }

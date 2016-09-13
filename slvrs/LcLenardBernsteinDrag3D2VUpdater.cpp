@@ -269,8 +269,60 @@ namespace Lucee
     Eigen::VectorXd paraQuad(nVolQuad2d);
     Eigen::VectorXd muQuad(nVolQuad2d);
 
+    Lucee::RowMajorSequencer<5> seq(localRgn);   
+
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
+      numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
+      uIn.setPtr(uInPtr, idx[0], idx[1], idx[2]);
+      // Set pointers to current location on grid
+      fIn.setPtr(fInPtr, idx);
+      fOut.setPtr(fOutPtr, idx);
+      // Get the coordinates of cell center
+      grid.setIndex(idx);
+      grid.getCentroid(cellCentroid);
+
+      // At this location, loop over each configuration space grid node
+      for (int configNode = 0; configNode < nlocal3d; configNode++)
+      {
+        // Fill out fReduced at this location
+        for (int i = 0; i < fReduced.size(); i++)
+          fReduced(i) = fInPtr[configNode + nodalStencil[i]];
+
+        // Compute f at quadrature points
+        Eigen::VectorXd fVolQuad = interpVolMatrix2d*fReduced;
+
+        // Compute integrands for gaussian quadrature excluding basis function derivatives
+        for (int quadIndex = 0; quadIndex < nVolQuad2d; quadIndex++)
+        {
+          double paraCoord = cellCentroid[3] + 0.5*grid.getDx(3)*gaussVolOrdinates2d(quadIndex,0);
+          double muCoord = cellCentroid[4] + 0.5*grid.getDx(4)*gaussVolOrdinates2d(quadIndex,1);
+          paraQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*
+            (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode]);
+          muQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*2*muCoord;
+
+          // Keep track of max CFL number
+          // (from drag in mu)
+          cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
+            2*muCoord*dt/grid.getDx(4)));
+          // (from drag in v)
+          cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
+              (paraCoord-uInPtr[configNode]/numDensityInPtr[configNode])*dt/grid.getDx(3)));
+        }
+
+        // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
+        Eigen::VectorXd volIntegralResult = (basisDerivAtVolQuad[0]*paraQuad +
+          basisDerivAtVolQuad[1]*muQuad);
+
+        for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+          fOutPtr[configNode + nodalStencil[nodeIndex]] -= volIntegralResult(nodeIndex);
+      }
+    }
+
     // Volume integral stage
-    for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
+    /*for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
     {
       idx[0] = ix;
       for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
@@ -338,7 +390,7 @@ namespace Lucee
           }
         }
       }
-    }
+    }*/
 
     // Time-step was too large: return a suggestion with correct time-step
     // Only checking cfl condition at volume quadrature points for now
@@ -524,7 +576,7 @@ namespace Lucee
       }
     }
 
-    Lucee::RowMajorSequencer<5> seq(localRgn);
+    seq.reset();
     // Final sweep, update solution with forward Euler step
     while (seq.step())
     {
@@ -537,7 +589,7 @@ namespace Lucee
       if (onlyIncrement == false)
       {
         fIn.setPtr(fInPtr, idx);
-        for (int configNode = 0; configNode < 8; configNode++)
+        for (int configNode = 0; configNode < nlocal3d; configNode++)
         {
           for (int stencilIndex = 0; stencilIndex < nodalStencil.size(); stencilIndex++)
           {
@@ -549,7 +601,7 @@ namespace Lucee
       }
       else
       {
-        for (int configNode = 0; configNode < 8; configNode++)
+        for (int configNode = 0; configNode < nlocal3d; configNode++)
         {
           for (int stencilIndex = 0; stencilIndex < nodalStencil.size(); stencilIndex++)
           {
