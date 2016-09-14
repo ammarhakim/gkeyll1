@@ -9,8 +9,6 @@
 # include <config.h>
 #endif
 
-#define EIGEN_DONT_PARALLELIZE
-
 // lucee includes
 #include <LcAlignedRectCoordSys.h>
 #include <LcField.h>
@@ -150,6 +148,16 @@ namespace Lucee
     confBasis->setIndex(idx); // only first CDIM elements are used
     
     unsigned nlocal = phaseBasis->getNumNodes();
+
+// get node numbers on each lower and upper edges since only those nodes needed for surface updates
+    for (unsigned dir=0; dir<NDIM; ++dir)
+    {
+      lowerNodeNums[dir].nums.resize(phaseBasis->getNumSurfLowerNodes(dir));
+      phaseBasis->getSurfLowerNodeNums(dir, lowerNodeNums[dir].nums);
+
+      upperNodeNums[dir].nums.resize(phaseBasis->getNumSurfUpperNodes(dir));
+      phaseBasis->getSurfUpperNodeNums(dir, upperNodeNums[dir].nums);
+    }
 
 // compute mapping of phase-space nodes to configuration space
 // nodes. The assumption here is that the node layout in phase-space
@@ -352,6 +360,39 @@ namespace Lucee
       derivMatrices[dir] = derivMatrix;
     }
 
+    /* Since the streaming term just involves a coordinate, we can generate a quadrature free update by 
+       employing a local velocity coordinate, exactly like how we evaluate the moments in the moment 
+       calculation routine */
+
+    streamGVolMatrices = std::vector<Eigen::MatrixXd>(CDIM); 
+    streamVolMatrices = std::vector<Eigen::MatrixXd>(CDIM);
+    for (int h=0; h<CDIM; ++h)
+    {
+      streamGVolMatrices[h] = Eigen::MatrixXd::Zero(nlocal, nlocal);
+      streamVolMatrices[h] = Eigen::MatrixXd::Zero(nlocal, nlocal);
+      int updateDir = h+CDIM;
+      for (int i=0; i<nlocal; ++i)
+      {
+        for (int j=0; j<nlocal; ++j)
+        {
+          double integralResultCoordinate = 0.0;
+          for (int gaussIndex=0; gaussIndex<nvolQuadStream; ++gaussIndex)
+          {
+            double baseIntegral
+              = volQuadStream.weights(gaussIndex)*volQuadStream.interpMat(gaussIndex,i)*volQuadStream.interpMat(gaussIndex,j);
+            // get coordinate of quadrature point in direction updateDir
+            double coord2Val = gaussNodeListStream(gaussIndex, updateDir)*grid.getDx(updateDir)/2.0;
+            integralResultCoordinate += coord2Val*baseIntegral;
+          }
+          streamGVolMatrices[h](i,j) = integralResultCoordinate;
+        }
+      }
+      // multiply matrices by inverse of mass matrix
+      streamGVolMatrices[h] = massMatrixInv*streamGVolMatrices[h];
+      streamVolMatrices[h] = massMatrixInv*gradStiffnessMatrix[h];
+    }
+
+
     // Figure out how many surface quadrature gaussian points there are
     nSurfQuadStream = 1;
     nSurfQuadForce = 1;
@@ -452,11 +493,15 @@ namespace Lucee
           weightScale *= 0.5*grid.getDx(dimIndex);
       }
 
+      unsigned nface = lowerNodeNums[dir].nums.size();
+
       if (dir < CDIM)
       {
         // Reset surface quadrature structures
-        surfLowerQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
-        surfUpperQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
+        surfFullLowerQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
+        surfFullUpperQuad[dir].reset(nSurfQuadStream, nlocal, PNC);
+        surfLowerQuad[dir].reset(nSurfQuadStream, nface, PNC);
+        surfUpperQuad[dir].reset(nSurfQuadStream, nface, PNC);
 
         // Evaluate all basis functions at all upper and lower surfaces
         for (int nodeIndex = 0; nodeIndex < gaussNodeListSurfStream.rows(); nodeIndex++)
@@ -474,14 +519,19 @@ namespace Lucee
             }
           }
           //Upper and lower surface quadrature weights are the same, so compute and then copy in
-          surfUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfStream(nodeIndex, NDIM-1);
-          surfLowerQuad[dir].weights(nodeIndex) = surfUpperQuad[dir].weights(nodeIndex);
+          surfFullUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfStream(nodeIndex, NDIM-1);
+          surfFullLowerQuad[dir].weights(nodeIndex) = surfFullUpperQuad[dir].weights(nodeIndex);
 
           //Evaluate basis functions at upper surface quadrature nodes
           phaseBasis->evalBasis(xcTemp, evalBasisTemp);
           for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
           {
-            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+            surfFullUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+          for(int basisIndex=0; basisIndex<nface; ++basisIndex)
+          {
+            unsigned un = upperNodeNums[dir].nums[basisIndex];
+            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[un];
           }
 
           // Replace surface index for computation for lower surface matrices
@@ -489,15 +539,22 @@ namespace Lucee
           phaseBasis->evalBasis(xcTemp, evalBasisTemp);
           for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
           {
-            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+            surfFullLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+          for(int basisIndex=0; basisIndex<nface; ++basisIndex)
+          {
+            unsigned ln = lowerNodeNums[dir].nums[basisIndex];
+            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[ln];
           }
         }
       }
       else
       {
         // Reset surface quadrature structures
-        surfLowerQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
-        surfUpperQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
+        surfFullLowerQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
+        surfFullUpperQuad[dir].reset(nSurfQuadForce, nlocal, PNC);
+        surfLowerQuad[dir].reset(nSurfQuadForce, nface, PNC);
+        surfUpperQuad[dir].reset(nSurfQuadForce, nface, PNC);
 
         // Evaluate all basis functions at all upper and lower surfaces
         for (int nodeIndex = 0; nodeIndex < gaussNodeListSurfForce.rows(); nodeIndex++)
@@ -515,14 +572,19 @@ namespace Lucee
             }
           }
           //Upper and lower surface quadrature weights are the same, so compute and then copy in
-          surfUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfForce(nodeIndex, NDIM-1);
-          surfLowerQuad[dir].weights(nodeIndex) = surfUpperQuad[dir].weights(nodeIndex);
+          surfFullUpperQuad[dir].weights(nodeIndex) = weightScale*gaussNodeListSurfForce(nodeIndex, NDIM-1);
+          surfFullLowerQuad[dir].weights(nodeIndex) = surfFullUpperQuad[dir].weights(nodeIndex);
 
           //Evaluate basis functions at upper surface quadrature nodes
           phaseBasis->evalBasis(xcTemp, evalBasisTemp);
           for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
           {
-            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+            surfFullUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+          for(int basisIndex=0; basisIndex<nface; ++basisIndex)
+          {
+            unsigned un = upperNodeNums[dir].nums[basisIndex];
+            surfUpperQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[un];
           }
 
           // Replace surface index for computation for lower surface matrices
@@ -530,10 +592,75 @@ namespace Lucee
           phaseBasis->evalBasis(xcTemp, evalBasisTemp);
           for(int basisIndex=0; basisIndex<nlocal; ++basisIndex)
           {
-            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+            surfFullLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[basisIndex];
+          }
+          for(int basisIndex=0; basisIndex<nface; ++basisIndex)
+          {
+            unsigned ln = lowerNodeNums[dir].nums[basisIndex];
+            surfLowerQuad[dir].interpMat(nodeIndex, basisIndex) = evalBasisTemp[ln];
           }
         }
       }
+    }
+
+    /* Similar to the volume integral, since the streaming term just involves a coordinate, 
+       we can generate a quadrature free update by employing a local velocity coordinate;
+       however, here we must take care to keep track of the local coordinate on both the 
+       upper and lower surface */
+
+    //These matrices are used to transform to the lower coordinate
+    streamGUpperSurfMatrices = std::vector<Eigen::MatrixXd>(CDIM); 
+    streamGLowerSurfMatrices = std::vector<Eigen::MatrixXd>(CDIM);
+    surfPermutationUpperMatrices = std::vector<Eigen::MatrixXd>(CDIM); 
+    surfPermutationLowerMatrices = std::vector<Eigen::MatrixXd>(CDIM);
+    //These matrices are identical to the upper and lower mass matrices 
+    //and then multiplied by the inverse of the mass matrix
+    streamUpperSurfMatrices = std::vector<Eigen::MatrixXd>(CDIM);
+    streamLowerSurfMatrices = std::vector<Eigen::MatrixXd>(CDIM);
+
+    //Temporary arrays to hold lift matrices before copying them in to Eigen arrays
+    Lucee::Matrix<double> lowerLift;
+    Lucee::Matrix<double> upperLift;
+
+    for (int h=0; h<CDIM; ++h)
+    {
+      unsigned nface = lowerNodeNums[h].nums.size();
+      // compute lift matrices
+      upperLift = Lucee::Matrix<double>(nlocal, nface);
+
+      phaseBasis->getUpperFaceMassMatrix(h, upperLift);
+
+      lowerLift = Lucee::Matrix<double>(nlocal, nface);
+
+      phaseBasis->getLowerFaceMassMatrix(h, lowerLift);
+
+      streamGUpperSurfMatrices[h] = Eigen::MatrixXd::Zero(nface, nlocal);
+      streamGLowerSurfMatrices[h] = Eigen::MatrixXd::Zero(nface, nlocal);
+
+      surfPermutationUpperMatrices[h] = Eigen::MatrixXd::Zero(nface, nlocal);
+      surfPermutationLowerMatrices[h] = Eigen::MatrixXd::Zero(nface, nlocal);
+
+      streamUpperSurfMatrices[h] = Eigen::MatrixXd::Zero(nlocal, nface);
+      streamLowerSurfMatrices[h] = Eigen::MatrixXd::Zero(nlocal, nface);
+
+      for (int j=0; j<nface; ++j)
+      {
+        unsigned un = upperNodeNums[h].nums[j];
+        unsigned ln = lowerNodeNums[h].nums[j];
+
+        surfPermutationUpperMatrices[h](j, un) = 1.0;
+        surfPermutationLowerMatrices[h](j, ln) = 1.0; 
+      }
+
+      copyLuceeToEigen(upperLift, streamUpperSurfMatrices[h]);
+      copyLuceeToEigen(lowerLift, streamLowerSurfMatrices[h]);
+
+      // multiply matrices by inverse of mass matrix
+      streamGUpperSurfMatrices[h] = surfPermutationUpperMatrices[h]*streamGVolMatrices[h];
+      streamGLowerSurfMatrices[h] = surfPermutationLowerMatrices[h]*streamGVolMatrices[h];
+
+      streamUpperSurfMatrices[h] = massMatrixInv*streamUpperSurfMatrices[h];
+      streamLowerSurfMatrices[h] = massMatrixInv*streamLowerSurfMatrices[h];
     }
 
     bigStoredUpperSurfMatrices.resize(NDIM);
@@ -543,16 +670,16 @@ namespace Lucee
     // Store three matrices at each cell
     for (int dir=0; dir<NDIM; ++dir)
     {
-      bigStoredUpperSurfMatrices[dir] = massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-      bigStoredLowerSurfMatrices[dir] = massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+      bigStoredUpperSurfMatrices[dir] = massMatrixInv*surfFullUpperQuad[dir].interpMat.transpose();
+      bigStoredLowerSurfMatrices[dir] = massMatrixInv*surfFullLowerQuad[dir].interpMat.transpose();
       bigStoredVolMatrices[dir] = massMatrixInv*derivMatrices[dir].transpose();
       // The if statement is not strictly needed for the surface matrices, but this reduces the number of for loops 
       if (dir<CDIM)
       {
         for (int i=0; i<nlocal; ++i)
         {
-          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfUpperQuad[dir].weights.transpose());
-          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfLowerQuad[dir].weights.transpose());
+          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfFullUpperQuad[dir].weights.transpose());
+          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfFullLowerQuad[dir].weights.transpose());
           bigStoredVolMatrices[dir].row(i) = bigStoredVolMatrices[dir].row(i).cwiseProduct(volQuadStream.weights.transpose());
         }
       }
@@ -560,8 +687,8 @@ namespace Lucee
       {
         for (int i=0; i<nlocal; ++i)
         {
-          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfUpperQuad[dir].weights.transpose());
-          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfLowerQuad[dir].weights.transpose());
+          bigStoredUpperSurfMatrices[dir].row(i) = bigStoredUpperSurfMatrices[dir].row(i).cwiseProduct(surfFullUpperQuad[dir].weights.transpose());
+          bigStoredLowerSurfMatrices[dir].row(i) = bigStoredLowerSurfMatrices[dir].row(i).cwiseProduct(surfFullLowerQuad[dir].weights.transpose());
           bigStoredVolMatrices[dir].row(i) = bigStoredVolMatrices[dir].row(i).cwiseProduct(volQuadForce.weights.transpose());
         }
       }
@@ -628,9 +755,7 @@ namespace Lucee
 
     Eigen::VectorXd flux(nlocal);
     Eigen::VectorXd fVec(nlocal);
-
-    Eigen::VectorXd alphaStream(nvolQuadStream);
-    Eigen::VectorXd fAtQuadStream(nvolQuadStream);
+    Eigen::VectorXd fStreamVec(nlocal);
 
     Eigen::VectorXd alphaForce(nvolQuadForce);
     Eigen::VectorXd fAtQuadForce(nvolQuadForce);
@@ -638,9 +763,6 @@ namespace Lucee
     std::vector<Eigen::VectorXd> resultVectorDir = std::vector<Eigen::VectorXd>(NDIM);
     for (int i=0; i<NDIM; ++i)
       resultVectorDir[i] = Eigen::VectorXd::Zero(nlocal);
-
-    Eigen::VectorXd rightData(nlocal);
-    Eigen::VectorXd leftData(nlocal);
 
     Eigen::VectorXd rightDataAtQuadStream(nSurfQuadStream);
     Eigen::VectorXd leftDataAtQuadStream(nSurfQuadStream);
@@ -663,6 +785,7 @@ namespace Lucee
     qNew = 0.0; // use qNew to store increment initially    
     
     int idx[NDIM];
+    double xc[PNC];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
     clock_t t1, t2;
@@ -671,6 +794,9 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
+      grid.setIndex(idx);
+      grid.getCentroid(xc);
+
       q.setPtr(qPtr, idx);
       EM.setPtr(emPtr, idx); // only CDIM indices will be used
       qNew.setPtr(qNewPtr, idx);
@@ -681,16 +807,16 @@ namespace Lucee
       // Get a vector of f at quad points
       for (int i=0; i<nlocal; ++i)
         fVec(i) = qPtr[i];
-      fAtQuadStream.noalias() = volQuadStream.interpMat*fVec;
       fAtQuadForce.noalias() = volQuadForce.interpMat*fVec;
 
       for (int dir=0;  dir<NDIM; ++dir)
       {
         if (dir<CDIM)
         {
-          calcFlux(dir, phaseNodeCoords, emPtr, flux);
-          alphaStream.noalias() = volQuadStream.interpMat*flux;
-          resultVectorDir[dir].noalias() = bigStoredVolMatrices[dir]*(fAtQuadStream.cwiseProduct(alphaStream));
+          int updateDir = dir+CDIM;
+          fStreamVec.noalias() = streamGVolMatrices[dir]*fVec;
+          fStreamVec = fStreamVec + xc[updateDir]*fVec;
+          resultVectorDir[dir].noalias() = streamVolMatrices[dir]*fStreamVec;
         }
         else
         {
@@ -725,6 +851,7 @@ namespace Lucee
       int sliceUpper = localRgn.getUpper(dir)+1-upperZeroFluxOffset[dir];
 
       int idx[NDIM], idxl[NDIM];
+      double xc[PNC], xcl[PNC];
       double vCoord[3];
 // loop over each 1D slice
       while (seq.step())
@@ -744,8 +871,10 @@ namespace Lucee
 
           grid.setIndex(idxl);
           double dxL = grid.getDx(dir);
+          grid.getCentroid(xcl);
           grid.setIndex(idx);
           double dxR = grid.getDx(dir);
+          grid.getCentroid(xc);
 
           double dtdx = 2*dt/(dxL+dxR);
 
@@ -754,21 +883,58 @@ namespace Lucee
           EM.setPtr(emPtr, idx);
           EM.setPtr(emPtrl, idxl);
 
-          // Copy data to Eigen vectors
-          for (int i=0; i<nlocal; ++i)
-          {
-            rightData(i) = qPtr[i];
-            leftData(i) = qPtrl[i];
-          }
+// compute numerical fluxes on each face
+          unsigned nface = lowerNodeNums[dir].nums.size();
+
+          Eigen::VectorXd dataOnFace(nface);
+          Eigen::VectorXd fluxOnFace(nface);
 
           if (dir < CDIM)
           {
-            rightDataAtQuadStream.noalias() = surfLowerQuad[dir].interpMat*rightData;
-            leftDataAtQuadStream.noalias() = surfUpperQuad[dir].interpMat*leftData;
+            // int updateDir = dir+CDIM;
+
+            // for (int i=0; i<nlocal; ++i)
+            //   fVec(i) = qPtr[i];
+            // dataOnFace.noalias() = (streamGLowerSurfMatrices[dir] + xc[updateDir]*surfPermutationLowerMatrices[dir])*fVec;
+
+            // for (int i=0; i<nlocal; ++i)
+            //   fVec(i) = qPtrl[i];
+            // fluxOnFace.noalias() = (streamGUpperSurfMatrices[dir] + xcl[updateDir]*surfPermutationUpperMatrices[dir])*fVec;
+
+            // for (int i=0; i<nface; ++i)
+            // {
+            //   unsigned ln = lowerNodeNums[dir].nums[i];
+            //   cfla = Lucee::max3(cfla, dtdx*phaseNodeCoords(ln, updateDir), -dtdx*phaseNodeCoords(ln, updateDir));
+            //   if(phaseNodeCoords(ln, updateDir) > 0)
+            //   {
+            //     dataOnFace(i) = fluxOnFace(i);
+            //   }
+            // }
+            // resultVectorDir[0].noalias() = streamUpperSurfMatrices[dir]*dataOnFace;
+            // resultVectorDir[1].noalias() = streamLowerSurfMatrices[dir]*dataOnFace;
+
             calcFlux(dir, phaseNodeCoords, emPtr, flux);
-            alphaRightStream.noalias() = surfLowerQuad[dir].interpMat*flux;
+            // Copy data to Eigen vectors
+            for (int i=0; i<nface; ++i)
+            {
+              unsigned ln = lowerNodeNums[dir].nums[i];
+              dataOnFace(i) = qPtr[ln];
+              fluxOnFace(i) = flux[ln];
+            }
+            rightDataAtQuadStream.noalias() = surfLowerQuad[dir].interpMat*dataOnFace;
+            alphaRightStream.noalias() = surfLowerQuad[dir].interpMat*fluxOnFace;
+
             calcFlux(dir, phaseNodeCoords, emPtrl, flux);
-            alphaLeftStream.noalias() = surfUpperQuad[dir].interpMat*flux;
+            // Copy data to Eigen vectors
+            for (int i=0; i<nface; ++i)
+            {
+              unsigned un = upperNodeNums[dir].nums[i];
+              dataOnFace(i) = qPtrl[un];
+              fluxOnFace(i) = flux[un];
+            }
+            leftDataAtQuadStream.noalias() = surfUpperQuad[dir].interpMat*dataOnFace;
+            alphaLeftStream.noalias() = surfUpperQuad[dir].interpMat*fluxOnFace;
+
             maxFluxStream = (alphaLeftStream.cwiseAbs()).cwiseMax(alphaRightStream.cwiseAbs());
 
             // Compute numerical flux
@@ -776,18 +942,34 @@ namespace Lucee
               - 0.5*maxFluxStream.cwiseProduct(rightDataAtQuadStream - leftDataAtQuadStream);
 
             cfla = Lucee::max3(cfla, dtdx*maxFluxStream.maxCoeff(), -dtdx*maxFluxStream.maxCoeff());
-
             resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuadStream;
             resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuadStream;
+
           }
           else
           {
-            rightDataAtQuadForce.noalias() = surfLowerQuad[dir].interpMat*rightData;
-            leftDataAtQuadForce.noalias() = surfUpperQuad[dir].interpMat*leftData;
             calcFlux(dir, phaseNodeCoords, emPtr, flux);
-            alphaRightForce.noalias() = surfLowerQuad[dir].interpMat*flux;
+            // Copy data to Eigen vectors
+            for (int i=0; i<nface; ++i)
+            {
+              unsigned ln = lowerNodeNums[dir].nums[i];
+              dataOnFace(i) = qPtr[ln];
+              fluxOnFace(i) = flux[ln];
+            }
+            rightDataAtQuadForce.noalias() = surfLowerQuad[dir].interpMat*dataOnFace;
+            alphaRightForce.noalias() = surfLowerQuad[dir].interpMat*fluxOnFace;
+
             calcFlux(dir, phaseNodeCoords, emPtrl, flux);
-            alphaLeftForce.noalias() = surfUpperQuad[dir].interpMat*flux;
+            // Copy data to Eigen vectors
+            for (int i=0; i<nface; ++i)
+            {
+              unsigned un = upperNodeNums[dir].nums[i];
+              dataOnFace(i) = qPtrl[un];
+              fluxOnFace(i) = flux[un];
+            }
+            leftDataAtQuadForce.noalias() = surfUpperQuad[dir].interpMat*dataOnFace;
+            alphaLeftForce.noalias() = surfUpperQuad[dir].interpMat*fluxOnFace;
+
             maxFluxForce = (alphaLeftForce.cwiseAbs()).cwiseMax(alphaRightForce.cwiseAbs());
 
             // Compute numerical flux
