@@ -154,15 +154,47 @@ namespace Lucee
 /** Data for volume quadrature for forcing term (E + v x B) dot grad_v(f) */
       GaussQuadData volQuadForce;
 /** Data for quadrature on each lower face */
+/** First matrix is for interpolating all basis functions onto face */
+/** Second matrix is for just interpolating surface basis function */
+      GaussQuadData surfFullLowerQuad[CDIM+VDIM];
       GaussQuadData surfLowerQuad[CDIM+VDIM];
 /** Data for quadrature on each upper face */
+/** First matrix is for interpolating all basis functions onto face */
+/** Second matrix is for just interpolating surface basis function */
+      GaussQuadData surfFullUpperQuad[CDIM+VDIM];
       GaussQuadData surfUpperQuad[CDIM+VDIM];
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
-/** These matrices store the gradients of basis functions evaluated at quadrature points */
+/** These matrices store the gradients of basis functions evaluated at quadrature points for the forcing term */
       std::vector<Eigen::MatrixXd> bigStoredUpperSurfMatrices;
       std::vector<Eigen::MatrixXd> bigStoredLowerSurfMatrices;
       std::vector<Eigen::MatrixXd> bigStoredVolMatrices;
+/** These matrices are used to update the streaming term without using quadrature */
+/** The first three matrices are used to convert to cell center coordinates */
+      std::vector<Eigen::MatrixXd> streamGUpperSurfMatrices;
+      std::vector<Eigen::MatrixXd> streamGLowerSurfMatrices;
+      std::vector<Eigen::MatrixXd> streamGVolMatrices;
+/** The second three matrices are just the relevant updater matrices, e.g. invMass*gradStiffness for volume */
+      std::vector<Eigen::MatrixXd> streamUpperSurfMatrices;
+      std::vector<Eigen::MatrixXd> streamLowerSurfMatrices;
+      std::vector<Eigen::MatrixXd> streamVolMatrices;
+
+      std::vector<Eigen::MatrixXd> surfPermutationUpperMatrices;
+      std::vector<Eigen::MatrixXd> surfPermutationLowerMatrices;
+
+/**
+ * Structure to store node numbers on edges.
+ */
+      struct EdgeNodeNums
+      {
+/** Node numbers */
+          std::vector<int> nums;
+      };
+
+/** Vector to store lower node numbers */
+      EdgeNodeNums lowerNodeNums[CDIM+VDIM];
+/** Vector to store upper node numbers */
+      EdgeNodeNums upperNodeNums[CDIM+VDIM];
 
 /**
  * Compute physical flux at all nodes in direction 'dir'.
