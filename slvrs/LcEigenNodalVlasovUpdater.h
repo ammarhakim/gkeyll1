@@ -156,13 +156,13 @@ namespace Lucee
 /** Data for quadrature on each lower face */
 /** First matrix is for interpolating all basis functions onto face */
 /** Second matrix is for just interpolating surface basis function */
-      GaussQuadData surfFullLowerQuad[CDIM+VDIM];
-      GaussQuadData surfLowerQuad[CDIM+VDIM];
+      GaussQuadData surfFullLowerQuad[VDIM];
+      GaussQuadData surfLowerQuad[VDIM];
 /** Data for quadrature on each upper face */
 /** First matrix is for interpolating all basis functions onto face */
 /** Second matrix is for just interpolating surface basis function */
-      GaussQuadData surfFullUpperQuad[CDIM+VDIM];
-      GaussQuadData surfUpperQuad[CDIM+VDIM];
+      GaussQuadData surfFullUpperQuad[VDIM];
+      GaussQuadData surfUpperQuad[VDIM];
 /** Inverse of mass matrix */
       Eigen::MatrixXd massMatrixInv;
 /** These matrices store the gradients of basis functions evaluated at quadrature points for the forcing term */
@@ -171,14 +171,14 @@ namespace Lucee
       std::vector<Eigen::MatrixXd> bigStoredVolMatrices;
 /** These matrices are used to update the streaming term without using quadrature */
 /** The first three matrices are used to convert to cell center coordinates */
-      std::vector<Eigen::MatrixXd> streamGUpperSurfMatrices;
-      std::vector<Eigen::MatrixXd> streamGLowerSurfMatrices;
-      std::vector<Eigen::MatrixXd> streamGVolMatrices;
-/** The second three matrices are just the relevant updater matrices, e.g. invMass*gradStiffness for volume */
-      std::vector<Eigen::MatrixXd> streamUpperSurfMatrices;
-      std::vector<Eigen::MatrixXd> streamLowerSurfMatrices;
-      std::vector<Eigen::MatrixXd> streamVolMatrices;
-
+      std::vector<Eigen::MatrixXd> upperSurfStreamFluxMatrices;
+      std::vector<Eigen::MatrixXd> lowerSurfStreamFluxMatrices;
+      std::vector<Eigen::MatrixXd> volStreamFluxMatrices;
+/** The second three matrices are the relevant updater matrices, e.g. invMass*gradStiffness for volume */
+      std::vector<Eigen::MatrixXd> upperLiftMatrices;
+      std::vector<Eigen::MatrixXd> lowerLiftMatrices;
+      std::vector<Eigen::MatrixXd> volGradStiffnessMatrices;
+/** These matrices take volume data to surface data */
       std::vector<Eigen::MatrixXd> surfPermutationUpperMatrices;
       std::vector<Eigen::MatrixXd> surfPermutationLowerMatrices;
 
