@@ -764,6 +764,10 @@ namespace Lucee
     for (int i=0; i<NDIM; ++i)
       resultVectorDir[i] = Eigen::VectorXd::Zero(nlocal);
 
+    std::vector<Eigen::VectorXd> tempResultVectorDir = std::vector<Eigen::VectorXd>(NDIM);
+    for (int i=0; i<NDIM; ++i)
+      tempResultVectorDir[i] = Eigen::VectorXd::Zero(nlocal);
+
     Eigen::VectorXd rightDataAtQuadStream(nSurfQuadStream);
     Eigen::VectorXd leftDataAtQuadStream(nSurfQuadStream);
     Eigen::VectorXd alphaRightStream(nSurfQuadStream);
@@ -891,60 +895,61 @@ namespace Lucee
 
           if (dir < CDIM)
           {
-            // int updateDir = dir+CDIM;
+ // <--------------------------------------            
+            int updateDir = dir+CDIM;
 
-            // for (int i=0; i<nlocal; ++i)
-            //   fVec(i) = qPtr[i];
-            // dataOnFace.noalias() = (streamGLowerSurfMatrices[dir] + xc[updateDir]*surfPermutationLowerMatrices[dir])*fVec;
+            for (int i=0; i<nlocal; ++i)
+              fVec(i) = qPtr[i];
+            dataOnFace.noalias() = (streamGLowerSurfMatrices[dir] + xc[updateDir]*surfPermutationLowerMatrices[dir])*fVec;
 
-            // for (int i=0; i<nlocal; ++i)
-            //   fVec(i) = qPtrl[i];
-            // fluxOnFace.noalias() = (streamGUpperSurfMatrices[dir] + xcl[updateDir]*surfPermutationUpperMatrices[dir])*fVec;
+            for (int i=0; i<nlocal; ++i)
+              fVec(i) = qPtrl[i];
+            fluxOnFace.noalias() = (streamGUpperSurfMatrices[dir] + xcl[updateDir]*surfPermutationUpperMatrices[dir])*fVec;
 
-            // for (int i=0; i<nface; ++i)
-            // {
-            //   unsigned ln = lowerNodeNums[dir].nums[i];
-            //   cfla = Lucee::max3(cfla, dtdx*phaseNodeCoords(ln, updateDir), -dtdx*phaseNodeCoords(ln, updateDir));
-            //   if(phaseNodeCoords(ln, updateDir) > 0)
-            //   {
-            //     dataOnFace(i) = fluxOnFace(i);
-            //   }
-            // }
-            // resultVectorDir[0].noalias() = streamUpperSurfMatrices[dir]*dataOnFace;
-            // resultVectorDir[1].noalias() = streamLowerSurfMatrices[dir]*dataOnFace;
-
-            calcFlux(dir, phaseNodeCoords, emPtr, flux);
-            // Copy data to Eigen vectors
             for (int i=0; i<nface; ++i)
             {
               unsigned ln = lowerNodeNums[dir].nums[i];
-              dataOnFace(i) = qPtr[ln];
-              fluxOnFace(i) = flux[ln];
+              cfla = Lucee::max3(cfla, dtdx*phaseNodeCoords(ln, updateDir), -dtdx*phaseNodeCoords(ln, updateDir));
+              // this choice of velocity avoids problems when a node lies exactly at 0.0
+              double vel = phaseNodeCoords(ln, updateDir) + 1e-4*(xc[updateDir] - phaseNodeCoords(ln, updateDir));
+              if (vel > 0)
+                dataOnFace(i) = fluxOnFace(i);
             }
-            rightDataAtQuadStream.noalias() = surfLowerQuad[dir].interpMat*dataOnFace;
-            alphaRightStream.noalias() = surfLowerQuad[dir].interpMat*fluxOnFace;
+            resultVectorDir[0].noalias() = streamUpperSurfMatrices[dir]*dataOnFace;
+            resultVectorDir[1].noalias() = streamLowerSurfMatrices[dir]*dataOnFace;
+ // <--------------------------------------
+            
+            // calcFlux(dir, phaseNodeCoords, emPtr, flux);
+            // // Copy data to Eigen vectors
+            // for (int i=0; i<nface; ++i)
+            // {
+            //   unsigned ln = lowerNodeNums[dir].nums[i];
+            //   dataOnFace(i) = qPtr[ln];
+            //   fluxOnFace(i) = flux[ln];
+            // }
+            // rightDataAtQuadStream.noalias() = surfLowerQuad[dir].interpMat*dataOnFace;
+            // alphaRightStream.noalias() = surfLowerQuad[dir].interpMat*fluxOnFace;
 
-            calcFlux(dir, phaseNodeCoords, emPtrl, flux);
-            // Copy data to Eigen vectors
-            for (int i=0; i<nface; ++i)
-            {
-              unsigned un = upperNodeNums[dir].nums[i];
-              dataOnFace(i) = qPtrl[un];
-              fluxOnFace(i) = flux[un];
-            }
-            leftDataAtQuadStream.noalias() = surfUpperQuad[dir].interpMat*dataOnFace;
-            alphaLeftStream.noalias() = surfUpperQuad[dir].interpMat*fluxOnFace;
+            // calcFlux(dir, phaseNodeCoords, emPtrl, flux);
+            // // Copy data to Eigen vectors
+            // for (int i=0; i<nface; ++i)
+            // {
+            //   unsigned un = upperNodeNums[dir].nums[i];
+            //   dataOnFace(i) = qPtrl[un];
+            //   fluxOnFace(i) = flux[un];
+            // }
+            // leftDataAtQuadStream.noalias() = surfUpperQuad[dir].interpMat*dataOnFace;
+            // alphaLeftStream.noalias() = surfUpperQuad[dir].interpMat*fluxOnFace;
 
-            maxFluxStream = (alphaLeftStream.cwiseAbs()).cwiseMax(alphaRightStream.cwiseAbs());
+            // maxFluxStream = (alphaLeftStream.cwiseAbs()).cwiseMax(alphaRightStream.cwiseAbs());
 
-            // Compute numerical flux
-            numericalFluxAtQuadStream.noalias() = 0.5*(alphaLeftStream.cwiseProduct(leftDataAtQuadStream) + alphaRightStream.cwiseProduct(rightDataAtQuadStream)) 
-              - 0.5*maxFluxStream.cwiseProduct(rightDataAtQuadStream - leftDataAtQuadStream);
+            // // Compute numerical flux
+            // numericalFluxAtQuadStream.noalias() = 0.5*(alphaLeftStream.cwiseProduct(leftDataAtQuadStream) + alphaRightStream.cwiseProduct(rightDataAtQuadStream)) 
+            //   - 0.5*maxFluxStream.cwiseProduct(rightDataAtQuadStream - leftDataAtQuadStream);
 
-            cfla = Lucee::max3(cfla, dtdx*maxFluxStream.maxCoeff(), -dtdx*maxFluxStream.maxCoeff());
-            resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuadStream;
-            resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuadStream;
-
+            // cfla = Lucee::max3(cfla, dtdx*maxFluxStream.maxCoeff(), -dtdx*maxFluxStream.maxCoeff());
+            // resultVectorDir[0].noalias() = bigStoredUpperSurfMatrices[dir]*numericalFluxAtQuadStream;
+            // resultVectorDir[1].noalias() = bigStoredLowerSurfMatrices[dir]*numericalFluxAtQuadStream;
           }
           else
           {
