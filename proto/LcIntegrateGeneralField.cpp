@@ -102,6 +102,8 @@ namespace Lucee
     int idx[NDIM];
 
     double localInt = 0.0;
+    Eigen::VectorXd fieldVec(nlocal);
+
     // loop, performing integration
     while (seq.step())
     {
@@ -110,7 +112,6 @@ namespace Lucee
       nodalBasis->setIndex(idx);
       fld.setPtr(fldPtr, idx);
 
-      Eigen::VectorXd fieldVec(nlocal);
       for (int i = 0; i < nlocal; i++)
         fieldVec(i) = fldPtr[i];
 
