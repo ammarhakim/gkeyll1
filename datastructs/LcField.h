@@ -497,6 +497,14 @@ namespace Lucee
       static int luaAbs(lua_State *L);
 
 /**
+ * Lua callable method for zeroing out negative entries
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaClearNegative(lua_State *L);
+
+/**
  * Lua callable method for squaring the values of a field by node
  *
  * @param L Lua state to use.

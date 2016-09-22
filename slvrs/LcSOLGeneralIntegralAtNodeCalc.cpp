@@ -103,7 +103,6 @@ namespace Lucee
     // Output field
     Lucee::Field<3, double>& integratedField = this->getOut<Lucee::Field<3, double> >(0);
 
-    Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
     Lucee::ConstFieldPtr<double> distfInPtr = distfIn.createConstPtr();

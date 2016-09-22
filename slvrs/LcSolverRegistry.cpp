@@ -96,6 +96,7 @@
 #include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLBGKCollisionUpdater.h>
 #include <LcSOLDerivativeCalc.h>
+#include <LcSOLDesiredDensity5DUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLEnergyAtCellCalc.h>
@@ -112,6 +113,8 @@
 #include <LcSOLPositivityDragCellUpdater.h>
 #include <LcSOLPositivityDragCellInMuUpdater.h>
 #include <LcSOLPositivityDragNodeUpdater.h>
+#include <LcSOLPositivityDragSliceUpdater.h>
+#include <LcSOLPositivityDragSliceInMuUpdater.h>
 #include <LcSOLPositivityScaleCellUpdater.h>
 #include <LcSOLPositivityScaleNodeUpdater.h>
 #include <LcSOLPositivityUpdater.h>
@@ -218,6 +221,7 @@ namespace Lucee
       .append<Lucee::SOLDerivativeCalc<3> >()
       .append<Lucee::SOLDerivativeCalc<4> >()
       .append<Lucee::SOLDerivativeCalc<5> >()
+      .append<Lucee::SOLDesiredDensity5DUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLEnergyAtCellCalc>()
       .append<Lucee::SOLEnergyAtNodeCalc>()
@@ -234,6 +238,8 @@ namespace Lucee
       .append<Lucee::SOLPositivityDragCellUpdater>()
       .append<Lucee::SOLPositivityDragCellInMuUpdater>()
       .append<Lucee::SOLPositivityDragNodeUpdater>()
+      .append<Lucee::SOLPositivityDragSliceUpdater>()
+      .append<Lucee::SOLPositivityDragSliceInMuUpdater>()
       .append<Lucee::SOLPositivityScaleCellUpdater>()
       .append<Lucee::SOLPositivityScaleNodeUpdater>()
       .append<Lucee::SOLPressureAtNodeCalc>()

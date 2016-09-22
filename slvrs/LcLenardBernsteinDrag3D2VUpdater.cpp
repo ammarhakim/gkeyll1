@@ -321,77 +321,6 @@ namespace Lucee
       }
     }
 
-    // Volume integral stage
-    /*for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
-    {
-      idx[0] = ix;
-      for (int iy = localRgn.getLower(1); iy < localRgn.getUpper(1); iy++)
-      {
-        idx[1] = iy;
-        for (int iz = localRgn.getLower(2); iz < localRgn.getUpper(2); iz++)
-        {
-          idx[2] = iz;
-          temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
-          numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
-          uIn.setPtr(uInPtr, idx[0], idx[1], idx[2]);
-
-          // At this location, loop over each configuration space grid node
-          for (int configNode = 0; configNode < nlocal3d; configNode++)
-          {
-
-            // Loop over entire (vPar,mu) space
-            for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
-            {
-              idx[3] = iv;
-              for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
-              {
-                idx[4] = iMu;
-
-                // Set pointers to current location on grid
-                fIn.setPtr(fInPtr, idx);
-                fOut.setPtr(fOutPtr, idx);
-                // Get the coordinates of cell center
-                grid.setIndex(idx);
-                grid.getCentroid(cellCentroid);
-
-                // Fill out fReduced at this location
-                for (int i = 0; i < fReduced.size(); i++)
-                  fReduced(i) = fInPtr[configNode + nodalStencil[i]];
-
-                // Compute f at quadrature points
-                Eigen::VectorXd fVolQuad = interpVolMatrix2d*fReduced;
-
-                // Compute integrands for gaussian quadrature excluding basis function derivatives
-                for (int quadIndex = 0; quadIndex < nVolQuad2d; quadIndex++)
-                {
-                  double paraCoord = cellCentroid[3] + 0.5*grid.getDx(3)*gaussVolOrdinates2d(quadIndex,0);
-                  double muCoord = cellCentroid[4] + 0.5*grid.getDx(4)*gaussVolOrdinates2d(quadIndex,1);
-                  paraQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*
-                    (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode]);
-                  muQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*2*muCoord;
-
-                  // Keep track of max CFL number
-                  // (from drag in mu)
-                  cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-                    2*muCoord*dt/grid.getDx(4)));
-                  // (from drag in v)
-                  cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-                      (paraCoord-uInPtr[configNode]/numDensityInPtr[configNode])*dt/grid.getDx(3)));
-                }
-
-                // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
-                Eigen::VectorXd volIntegralResult = (basisDerivAtVolQuad[0]*paraQuad +
-                  basisDerivAtVolQuad[1]*muQuad);
-
-                for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                  fOutPtr[configNode + nodalStencil[nodeIndex]] -= volIntegralResult(nodeIndex);
-              }
-            }
-          }
-        }
-      }
-    }*/
-
     // Time-step was too large: return a suggestion with correct time-step
     // Only checking cfl condition at volume quadrature points for now
     if (cfla > cflm)
@@ -478,12 +407,16 @@ namespace Lucee
                 {
                   // Compute Lax flux at each surface quadrature point
                   double numFlux;
-                  if (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode] > 0)
+                  if (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode] > 0.0)
+                  {
                     numFlux = (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode])*
                       fRightSurfEvals(quadIndex);
+                  }
                   else
+                  {
                     numFlux = (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode])*
                       fLeftSurfEvals(quadIndex);
+                  }
 
                   // Store result of weight*(v-uIn)*f at this location in a vector
                   surfIntegralFluxes(quadIndex) = gaussSurfWeights2d[0][quadIndex]*numFlux;
@@ -528,13 +461,9 @@ namespace Lucee
 
                 // Fill out solution for this cell and neighboring cell
                 for (int i = 0; i < fReduced.size(); i++)
-                {
                   fReduced(i) = fInPtr[configNode + nodalStencil[i]];
-                  fReducedLower(i) = fInPtrLeft[configNode + nodalStencil[i]];
-                }
 
                 // Evaluate solution at quadrature nodes on same surface
-                Eigen::VectorXd fLeftSurfEvals = interpSurfMatrixUpper2d[1]*fReducedLower;
                 Eigen::VectorXd fRightSurfEvals = interpSurfMatrixLower2d[1]*fReduced;
 
                 // Need to know center of upper cell to figure out the global velocity coordinate

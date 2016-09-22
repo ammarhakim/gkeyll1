@@ -117,6 +117,7 @@ set(lcslvrs_SOURCES
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLBGKCollisionUpdater.cpp
   LcSOLDerivativeCalc.cpp
+  LcSOLDesiredDensity5DUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLEnergyAtCellCalc.cpp
@@ -133,6 +134,8 @@ set(lcslvrs_SOURCES
   LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragCellInMuUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp
+  LcSOLPositivityDragSliceUpdater.cpp
+  LcSOLPositivityDragSliceInMuUpdater.cpp
   LcSOLPositivityScaleCellUpdater.cpp
   LcSOLPositivityScaleNodeUpdater.cpp
   LcSOLPositivityUpdater.cpp

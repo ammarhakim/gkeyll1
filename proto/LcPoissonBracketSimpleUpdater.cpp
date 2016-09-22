@@ -301,6 +301,12 @@ namespace Lucee
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
+    // Used in volume integral loop
+    Eigen::VectorXd fVec(nlocal);
+    Eigen::MatrixXd alpha(NDIM, nVolQuad);
+    Eigen::VectorXd cflaVec(NDIM);
+    Eigen::VectorXd dtdqVec(NDIM);
+
     // Contributions from volume integrals
     while(seq.step())
     {
@@ -314,16 +320,13 @@ namespace Lucee
         hamilDerivAtQuad.noalias() += hamilPtr[i]*volQuad.pDiffMatrix[i];
 
       // Get alpha from appropriate function
-      Eigen::MatrixXd alpha(NDIM, nVolQuad);
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
       
       // Computing maximum cfla
       grid.setIndex(idx);
-      Eigen::VectorXd dtdqVec(NDIM);
       for (int i = 0; i < NDIM; i++)
         dtdqVec(i) = dt/grid.getDx(i);
 
-      Eigen::VectorXd cflaVec(NDIM);
       // Loop over each alpha vector evaluated at a quadrature point
       for (int i = 0; i < nVolQuad; i++)
       {
@@ -333,7 +336,6 @@ namespace Lucee
       }
 
       // Get a vector of f at quad points
-      Eigen::VectorXd fVec(nlocal);
       for (int i = 0; i < nlocal; i++)
         fVec(i) = aCurrPtr[i];
       Eigen::VectorXd fAtQuad = volQuad.interpMat*fVec;
@@ -353,6 +355,12 @@ namespace Lucee
     // Check to see if we need to retake time step
     if (cfla > cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+     
+    // Used in surface integral loop
+    Eigen::VectorXd rightData(nlocal);
+    Eigen::VectorXd leftData(nlocal);
+    Eigen::MatrixXd alphaSurf(NDIM, nSurfQuad);
+    Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
 
     // Contributions from surface integrals
     for (int d = 0; d < updateDirs.size(); d++)
@@ -393,17 +401,13 @@ namespace Lucee
           aCurr.setPtr(aCurrPtr_r, idxr);
           aCurr.setPtr(aCurrPtr_l, idxl);
           // Copy data to Eigen vectors
-          Eigen::VectorXd rightData(nlocal);
-          Eigen::VectorXd leftData(nlocal);
           for (int i = 0; i < nlocal; i++)
           {
-            rightData(i) = aCurrPtr_r[i];
-            leftData(i) = aCurrPtr_l[i];
+              rightData(i) = aCurrPtr_r[i];
+              leftData(i) = aCurrPtr_l[i];
           }
 
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
-          Eigen::MatrixXd alpha(NDIM, nSurfQuad);
-
           if (sliceIndex != globalRgn.getUpper(dir))
           {
             // Hamiltonian is continuous, so use right always
@@ -413,7 +417,7 @@ namespace Lucee
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
               hamilDerivAtQuad.noalias() += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
-            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alpha);
+            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alphaSurf);
           }
           else
           {
@@ -424,7 +428,7 @@ namespace Lucee
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
               hamilDerivAtQuad.noalias() += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
-            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idxl, alpha);
+            equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idxl, alphaSurf);
           }
 
           // Construct normal vector
@@ -432,10 +436,9 @@ namespace Lucee
           normalVec(dir) = 1.0;
           
           // Calculate alphaDotN at all quadrature points
-          Eigen::RowVectorXd alphaDotN = normalVec.transpose()*alpha;
+          Eigen::RowVectorXd alphaDotN = normalVec.transpose()*alphaSurf;
 
           // Compute numerical flux
-          Eigen::VectorXd numericalFluxAtQuad(nSurfQuad);
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
 
