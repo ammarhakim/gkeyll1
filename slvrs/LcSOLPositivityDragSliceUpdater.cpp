@@ -207,7 +207,11 @@ namespace Lucee
             if (std::fabs(energyModInPtr[configNode] - energyOrigInPtr[configNode]) > 
                 1e-10*energyOrigInPtr[configNode])
             {
-              double uVal = nTimesUInPtr[configNode]/nInPtr[configNode];
+              double uVal;
+              if (nInPtr[configNode] > 0.0)
+                uVal = nTimesUInPtr[configNode]/nInPtr[configNode];
+              else
+                uVal = 0.0;
 
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
