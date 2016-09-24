@@ -166,7 +166,11 @@ namespace Lucee
                       scaleFactor*distfDeltaPtr[nodalStencil[nodeIndex] + configNode];
 
                     if (positivityChecks == true && distfOutPtr[nodalStencil[nodeIndex] + configNode] < 0.0)
-                      std::cout << "distfOutPtr = " << distfOutPtr[nodalStencil[nodeIndex] + configNode] << std::endl;
+                    {
+                      // Set node to zero
+                      distfOutPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
+                      //std::cout << "distfOutPtr = " << distfOutPtr[nodalStencil[nodeIndex] + configNode] << std::endl;
+                    }
                   }
                 }
               }

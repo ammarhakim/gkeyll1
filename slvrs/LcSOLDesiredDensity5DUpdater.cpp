@@ -163,14 +163,25 @@ namespace Lucee
 
             if (targetDensity < 0.0)
             {
-              std::cout << "LcSOLDesiredDensity5DUpdater ran into a negative target density in a cell" << std::endl;
+              std::cout << "LcSOLDesiredDensity5DUpdater ran into a negative target density in a cell = " << targetDensity << ", numericalDensity = " << numericalDensity << std::endl;
               // Set density to zero if desired one is negative
-              targetDensity = 0.0;
+              //targetDensity = 0.0;
+              /*for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
+              {
+                idx[3] = iv;
+                for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
+                {
+                  idx[4] = imu;
+                  distf.setPtr(distfPtr, idx);
+                  for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
+                    distfPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
+                }
+              }*/
+              targetDensity *= -1.0;
             }
-
             // Loop through nodes a second time to scale to correct value
             // Only do this if density at point is non-zero (non-negative assumed)
-            if (numericalDensity != 0.0)
+            else if (numericalDensity != 0.0)
             {
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
