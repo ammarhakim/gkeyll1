@@ -44,7 +44,7 @@ namespace Lucee
 
 // now compute average bulk velocity
     for (unsigned i=0; i<3; ++i)
-      vel[i] = (qin[1+i]+qin[6+i])/(qin[0+i]+qin[5+i]);
+      vel[i] = (qin[1+i]+qin[6+i])/(qin[0]+qin[5]);
     c.rotateVecToLocal(vel, normVel);
 // flip sign of normal component
     normVel[0] = -normVel[0];
