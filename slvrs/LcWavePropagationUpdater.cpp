@@ -160,6 +160,10 @@ namespace Lucee
     if (hasSsBnd)
       inOut = &tbl.getObject<Lucee::Field<NDIM, double> >("inOutField");
 
+    zeroLimiterSsBnd = false;
+    if (hasSsBnd && tbl.hasBool("zeroLimiterSsBnd"))
+      zeroLimiterSsBnd = tbl.getBool("zeroLimiterSsBnd");
+
 // fetch pointer to flux bc field (if any)
     if (hasFluxBc)
       fluxBc = &tbl.getObject<Lucee::Field<NDIM, double> >("boundaryFluxField");
@@ -517,19 +521,36 @@ namespace Lucee
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
 
+        bool myLimiter = limiter;
         if (hasSsBnd)
         {
+// if one and only one of the two cells attached to this edge is
+// outside the domain, apply zeroLimiter only, since any higher order
+// limiter would use values on the second ghost cell outside the domain
+// which are not set by StairSteppedBcUpdater
+//
+// note that, if both cell are outside the domain, still apply limiter
+// so that the value of dotr carries over to next iteration
+// (Liang Wang Sept 2016)
+//
+// Previous comments:
+//
 // if both cells attached to this edge are outside the domain, do not
 // limit wave
 //
 // (I no longer recall why the following lines have been commented
 // out. AHH July 2015)
-          // cellIdx[dir] = i; // right cell
-          // inOut->setPtr(ioPtr, cellIdx);
-          // cellIdx[dir] = i-1; // left cell
-          // inOut->setPtr(ioPtr1, cellIdx);
-          // if (isOutside(ioPtr) && isOutside(ioPtr1))
-          //   continue; // skip to next cell
+          cellIdx[dir] = i; // right cell
+          inOut->setPtr(ioPtr, cellIdx);
+          cellIdx[dir] = i-1; // left cell
+          inOut->setPtr(ioPtr1, cellIdx);
+          if (isOutside(ioPtr) && isOutside(ioPtr1))
+          {
+            // continue; // do NOT skip to next cell
+          } else if (zeroLimiterSsBnd && (isOutside(ioPtr) || isOutside(ioPtr1)))
+          {
+            myLimiter = ZERO_LIMITER;
+          }
         }
 
         sp.setPtr(spPtr, i);
@@ -548,7 +569,7 @@ namespace Lucee
           else
             r = dotr/wnorm2;
 
-          switch (limiter)
+          switch (myLimiter)
           {
             case NO_LIMITER:
                 wlimitr = 1.0;

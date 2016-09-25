@@ -73,6 +73,8 @@ namespace Lucee
       std::vector<unsigned> updateDims;
 /** Limiter to use */
       unsigned limiter;
+/** Flag to apply zero limiter at stair stepped boundary */
+      bool zeroLimiterSsBnd;
 /** Equation to solve */
       Lucee::HyperEquation *equation;
 /** CFL number to use */
