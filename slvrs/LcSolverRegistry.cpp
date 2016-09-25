@@ -36,6 +36,7 @@
 #include <LcFieldArithmeticUpdater.h>
 #include <LcFieldFunctionBoundaryCondition.h>
 #include <LcFieldFunctionSource.h>
+#include <LcFieldFunctionUpdater.h>
 #include <LcFiveMomentNumDensityRelax.h>
 #include <LcFunctionBoundaryCondition.h>
 #include <LcFunctionSource.h>
@@ -185,6 +186,10 @@ namespace Lucee
       .append<StairSteppedBcUpdater<1> >()
       .append<StairSteppedBcUpdater<2> >()
       .append<StairSteppedBcUpdater<3> >()
+
+      .append<Lucee::FieldFunctionUpdater<1> >()
+      .append<Lucee::FieldFunctionUpdater<2> >()
+      .append<Lucee::FieldFunctionUpdater<3> >()
       
       // Probably used for SOL problem simulations
       .append<Lucee::BiasedSheath5DUpdater>()
