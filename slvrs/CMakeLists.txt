@@ -47,6 +47,7 @@ set(lcslvrs_SOURCES
   LcFieldArithmeticUpdater.cpp
   LcFieldFunctionBoundaryCondition.cpp
   LcFieldFunctionSource.cpp
+  LcFieldFunctionUpdater.cpp
   LcFiveMomentNumDensityRelax.cpp
   LcFunctionBoundaryCondition.cpp
   LcFunctionSource.cpp
