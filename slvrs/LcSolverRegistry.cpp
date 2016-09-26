@@ -97,6 +97,7 @@
 #include <LcSOL3DElectrostaticDistFuncReflectionBCUpdater.h>
 #include <LcSOLBGKCollisionUpdater.h>
 #include <LcSOLDerivativeCalc.h>
+#include <LcSOLDensityFloor5DUpdater.h>
 #include <LcSOLDesiredDensity5DUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
@@ -226,6 +227,7 @@ namespace Lucee
       .append<Lucee::SOLDerivativeCalc<3> >()
       .append<Lucee::SOLDerivativeCalc<4> >()
       .append<Lucee::SOLDerivativeCalc<5> >()
+      .append<Lucee::SOLDensityFloor5DUpdater>()
       .append<Lucee::SOLDesiredDensity5DUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLEnergyAtCellCalc>()

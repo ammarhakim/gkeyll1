@@ -118,6 +118,7 @@ set(lcslvrs_SOURCES
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLBGKCollisionUpdater.cpp
   LcSOLDerivativeCalc.cpp
+  LcSOLDensityFloor5DUpdater.cpp
   LcSOLDesiredDensity5DUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
