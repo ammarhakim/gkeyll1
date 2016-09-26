@@ -361,6 +361,9 @@ namespace Lucee
 // update solution
         for (unsigned i=0; i<6; ++i)
           prTen[6*n+i] = 2*prSol[i]-prRhs[i];
+
+        if ((prTen[6*n+0] <= 0.) || (prTen[6*n+3] <= 0.) || (prTen[6*n+5] <= 0.))
+          return Lucee::UpdaterStatus(false, 0., "Negative diagonal pressure tensor component(s) detected!");
       }
 
 // update solution for fluids
