@@ -377,9 +377,6 @@ namespace Lucee
           if (prTen[6*n+5] <= 0.)
             prTen[6*n+5] = prRhs[5];
         }
-
-        if ((prTen[6*n+0] <= 0.) || (prTen[6*n+3] <= 0.) || (prTen[6*n+5] <= 0.))
-          return Lucee::UpdaterStatus(false, 0., "Negative diagonal pressure tensor component(s) detected!");
       }
 
 // update solution for fluids
@@ -426,6 +423,13 @@ namespace Lucee
         emPtr[EX] = 2*sol(eidx(X)) - emPtr[EX];
         emPtr[EY] = 2*sol(eidx(Y)) - emPtr[EY];
         emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
+      }
+
+      for (unsigned n=0; n<nFluids; ++n)
+      {
+        if ((prTen[6*n+0] <= 0.) || (prTen[6*n+3] <= 0.) || (prTen[6*n+5] <= 0.))
+          return Lucee::UpdaterStatus(false, 0.,
+              " ** ImplicitTenMomentSrcUpdater: Negative diagonal pressure tensor component(s)!");
       }
     }
     
