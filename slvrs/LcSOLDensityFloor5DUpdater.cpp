@@ -1,7 +1,7 @@
 /**
- * @file	LcSOLDesiredDensity5DUpdater.cpp
+ * @file	LcSOLDensityFloor5DUpdater.cpp
  *
- * @brief	Scale the distribution function at each node to have a density
+ * @brief	Enforces a positive density floor in the domain by adding a source distribution function
  */
 
 // config stuff
@@ -10,36 +10,41 @@
 #endif
 
 // lucee includes
-#include <LcSOLDesiredDensity5DUpdater.h>
+#include <LcSOLDensityFloor5DUpdater.h>
 
 namespace Lucee
 {
-  const char *SOLDesiredDensity5DUpdater::id = "SOLDesiredDensity5D";
+  const char *SOLDensityFloor5DUpdater::id = "SOLDensityFloor5D";
 
-  SOLDesiredDensity5DUpdater::SOLDesiredDensity5DUpdater()
+  SOLDensityFloor5DUpdater::SOLDensityFloor5DUpdater()
     : fnRef(-1)
   {
   }
 
   void
-  SOLDesiredDensity5DUpdater::readInput(Lucee::LuaTable& tbl)
+  SOLDensityFloor5DUpdater::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<5> >("basis5d"))
       nodalBasis5d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<5> >("basis5d");
     else
-      throw Lucee::Except("SOLDesiredDensity5DUpdater::readInput: Must specify element to use using 'basis5d'");
+      throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify element to use using 'basis5d'");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<3> >("basis3d"))
       nodalBasis3d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<3> >("basis3d");
     else
-      throw Lucee::Except("SOLDesiredDensity5DUpdater::readInput: Must specify element to use using 'basis3d'");
+      throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify element to use using 'basis3d'");
 
     if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
       nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
     else
-      throw Lucee::Except("SOLDesiredDensity5DUpdater::readInput: Must specify element to use using 'basis2d'");
+      throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify element to use using 'basis2d'");
+
+    if (tbl.hasNumber("densityFloor"))
+      densityFloor = tbl.getNumber("densityFloor");
+    else
+      throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify density floor using 'densityFloor'");
 
     if (tbl.hasNumber("scaleFactor"))
       scaleFactor = tbl.getNumber("scaleFactor");
@@ -47,7 +52,7 @@ namespace Lucee
   }
 
   void
-  SOLDesiredDensity5DUpdater::initialize()
+  SOLDensityFloor5DUpdater::initialize()
   {
     UpdaterIfc::initialize();
 
@@ -96,13 +101,13 @@ namespace Lucee
   }
 
   Lucee::UpdaterStatus
-  SOLDesiredDensity5DUpdater::update(double t)
+  SOLDensityFloor5DUpdater::update(double t)
   {
     const Lucee::StructuredGridBase<5>& grid 
       = this->getGrid<Lucee::StructuredGridBase<5> >();
 
     // A 3D field containing the desired density at every node
-    const Lucee::Field<3, double>& targetDensityField = this->getInp<Lucee::Field<3, double> >(0);
+    const Lucee::Field<5, double>& distfSource = this->getInp<Lucee::Field<5, double> >(0);
     const Lucee::Field<3, double>& weightField = this->getInp<Lucee::Field<3, double> >(1);
     // Distribution function to be scaled
     Lucee::Field<5, double>& distf = this->getOut<Lucee::Field<5, double> >(0);
@@ -110,7 +115,7 @@ namespace Lucee
     Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
-    Lucee::ConstFieldPtr<double> targetDensityFieldPtr = targetDensityField.createConstPtr();
+    Lucee::ConstFieldPtr<double> distfSourcePtr = distfSource.createConstPtr();
     Lucee::ConstFieldPtr<double> weightFieldPtr = weightField.createConstPtr();
     Lucee::FieldPtr<double> distfPtr = distf.createPtr(); // Output pointer
 
@@ -134,15 +139,12 @@ namespace Lucee
           idx[3] = localRgn.getLower(3);
           idx[4] = localRgn.getLower(4);
           grid.setIndex(idx);
-          // Figure out what is the target density here
-          targetDensityField.setPtr(targetDensityFieldPtr, idx[0], idx[1], idx[2]);
-          // Set weighting factor
+          // Set weighting factor for density calculation
           weightField.setPtr(weightFieldPtr, idx[0], idx[1], idx[2]);
 
           // Fill out absolute node list using local node coordinate list
           for (int configNode = 0; configNode < nlocal3d; configNode++)
           {
-            double targetDensity = targetDensityFieldPtr[configNode];
             // Compute density of numerical solution at this configuration node
             double numericalDensity = 0.0;
             for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
@@ -161,28 +163,8 @@ namespace Lucee
             // Scale numericalDensity so that its in the same units as the input targetDensityField
             numericalDensity = scaleFactor*weightFieldPtr[configNode]*numericalDensity;
 
-            if (targetDensity < 0.0)
-            {
-              std::cout << "LcSOLDesiredDensity5DUpdater ran into a negative target density in a cell = " << targetDensity << ", numericalDensity = " << numericalDensity << std::endl;
-              // Set density to zero if desired one is negative
-              //targetDensity = 0.0;
-              /*for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
-              {
-                idx[3] = iv;
-                for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
-                {
-                  idx[4] = imu;
-                  distf.setPtr(distfPtr, idx);
-                  for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                    distfPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
-                }
-              }*/
-              //targetDensity *= -1.0;
-              targetDensity = 0.0;
-            }
-            // Loop through nodes a second time to scale to correct value
-            // Only do this if density at point is non-zero (non-negative assumed)
-            else if (numericalDensity != 0.0)
+            // If density is negative at this location, add enough of source to maintain density floor
+            if (numericalDensity < densityFloor)
             {
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
@@ -190,10 +172,11 @@ namespace Lucee
                 for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
                 {
                   idx[4] = imu;
+                  distfSource.setPtr(distfSourcePtr, idx);
                   distf.setPtr(distfPtr, idx);
                   for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                    distfPtr[nodalStencil[nodeIndex] + configNode] = (targetDensity/numericalDensity)*
-                      distfPtr[nodalStencil[nodeIndex] + configNode];
+                    distfPtr[nodalStencil[nodeIndex] + configNode] = distfPtr[nodalStencil[nodeIndex] + configNode] + 
+                      (densityFloor-numericalDensity)/densityFloor*distfSourcePtr[nodalStencil[nodeIndex] + configNode];
                 }
               }
             }
@@ -206,10 +189,10 @@ namespace Lucee
   }
 
   void
-  SOLDesiredDensity5DUpdater::declareTypes()
+  SOLDensityFloor5DUpdater::declareTypes()
   {
-    // A 3D field containing the desired density at every node
-    this->appendOutVarType(typeid(Lucee::Field<3, double>));
+    // A 5D field containing a source distribution function to offset negativity
+    this->appendOutVarType(typeid(Lucee::Field<5, double>));
     // A 3D field containing magnetic field weighting factoring for density calculation
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
     // Distribution function that will be modified to have the desired density given by
@@ -218,7 +201,7 @@ namespace Lucee
   }
 
   void
-  SOLDesiredDensity5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  SOLDensityFloor5DUpdater::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
@@ -231,7 +214,7 @@ namespace Lucee
   }
 
   bool
-  SOLDesiredDensity5DUpdater::sameConfigCoords(int srcIndex, int tarIndex, double dxMin,
+  SOLDensityFloor5DUpdater::sameConfigCoords(int srcIndex, int tarIndex, double dxMin,
     const Eigen::MatrixXd& nodeList)
   {
     for (int d = 0; d < 3; d++)

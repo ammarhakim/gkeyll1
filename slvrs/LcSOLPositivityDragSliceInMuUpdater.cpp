@@ -243,7 +243,10 @@ namespace Lucee
                     }
 
                     // Use cell to the right of the lower interface, i.e. the current cell
-                    fLowerAvg = fOldAvg;
+                    if (imu == globalRgn.getLower(4))
+                      fLowerAvg = 0.0;
+                    else
+                      fLowerAvg = fOldAvg;
 
 
                     // Put in limiters on cell average?
@@ -256,6 +259,8 @@ namespace Lucee
                     double fIncrement = (cellCentroid[4] + 0.5*grid.getDx(4))*fUpperAvg -
                       (cellCentroid[4] - 0.5*grid.getDx(4))*fLowerAvg;
                     double fNewAvg = fOldAvg + alpha*fIncrement;
+
+                    //fNewAvg = fOldAvg + fUpperAvg - fLowerAvg;
                     
                     if (fNewAvg < 0.0)
                     {
@@ -292,6 +297,8 @@ namespace Lucee
                         distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]] = fNewAvg;
                       }
                     }
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
                   }
                 }
               }
