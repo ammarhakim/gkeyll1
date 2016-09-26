@@ -34,7 +34,7 @@ namespace Lucee
 
   UpdaterStatus::UpdaterStatus(bool myStatus, double mySuggestedDt,
     const std::string& msg)
-    : status(myStatus), dt(mySuggestedDt)
+    : status(myStatus), dt(mySuggestedDt), message(msg)
   {
   }
 }
