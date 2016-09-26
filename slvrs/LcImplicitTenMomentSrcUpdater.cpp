@@ -106,6 +106,12 @@ namespace Lucee
       qbym[i] = charge[i]/mass[i];
       qbym2[i] = qbym[i]*qbym[i];
     }
+
+// flag to indicate if negative pressure components are restored
+// to previous values
+    resetPr = false;
+    if (tbl.hasBool("resetNegativePressure"))
+      resetPr = tbl.getBool("resetNegativePressure");
   }
 
   template <unsigned NDIM>
@@ -361,6 +367,16 @@ namespace Lucee
 // update solution
         for (unsigned i=0; i<6; ++i)
           prTen[6*n+i] = 2*prSol[i]-prRhs[i];
+
+        if (resetPr)
+        {
+          if (prTen[6*n+0] <= 0.)
+            prTen[6*n+0] = prRhs[0];
+          if (prTen[6*n+3] <= 0.)
+            prTen[6*n+3] = prRhs[3];
+          if (prTen[6*n+5] <= 0.)
+            prTen[6*n+5] = prRhs[5];
+        }
 
         if ((prTen[6*n+0] <= 0.) || (prTen[6*n+3] <= 0.) || (prTen[6*n+5] <= 0.))
           return Lucee::UpdaterStatus(false, 0., "Negative diagonal pressure tensor component(s) detected!");
