@@ -17,7 +17,6 @@
 #include <LcMatrix.h>
 #include <LcNodalFiniteElementIfc.h>
 #include <LcUpdaterIfc.h>
-#include <LcDynVector.h>
 
 // eigen includes
 #include <Eigen/Core>
