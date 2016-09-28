@@ -74,8 +74,6 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
-/** Pointer to 2d basis functions */
-      Lucee::NodalFiniteElementIfc<2> *nodalBasis2d;
 /** Keeps track of the offsets needed to get all nodes that share the same config. space location */
       std::vector<int> nodalStencil;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
@@ -83,16 +81,11 @@ namespace Lucee
 /** Number density floor to enforce everywhere */
       double densityFloor;
 /**
- * Integration vector used to compute integration in (v,mu) space
- */
-      Eigen::VectorXd integrationVector;
-/**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-
 /**
  * Determines if two nodes have the same configuration space coordinates
  */
