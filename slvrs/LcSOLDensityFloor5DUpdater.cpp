@@ -36,11 +36,6 @@ namespace Lucee
     else
       throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify element to use using 'basis3d'");
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<2> >("basis2d"))
-      nodalBasis2d = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis2d");
-    else
-      throw Lucee::Except("SOLDensityFloor5DUpdater::readInput: Must specify element to use using 'basis2d'");
-
     if (tbl.hasNumber("densityFloor"))
       densityFloor = tbl.getNumber("densityFloor");
     else
@@ -87,17 +82,6 @@ namespace Lucee
       }
     }
     nodalStencil.resize(stencilIndex);
-
-    // Compute matrix for v,mu integration
-    int nlocal2d = nodalBasis2d->getNumNodes();
-    Lucee::Matrix<double> tempMassMatrix(nlocal2d, nlocal2d);
-
-    Eigen::MatrixXd integrationMatrix(nlocal2d, nlocal2d);
-    nodalBasis2d->getMassMatrix(tempMassMatrix);
-    copyLuceeToEigen(tempMassMatrix, integrationMatrix);
-    integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
-
-    integrationVector = integrationMatrix.colwise().sum();
   }
 
   Lucee::UpdaterStatus
@@ -108,7 +92,8 @@ namespace Lucee
 
     // A 3D field containing the desired density at every node
     const Lucee::Field<5, double>& distfSource = this->getInp<Lucee::Field<5, double> >(0);
-    const Lucee::Field<3, double>& weightField = this->getInp<Lucee::Field<3, double> >(1);
+    const Lucee::Field<3, double>& selfDensity = this->getInp<Lucee::Field<3, double> >(1);
+    const Lucee::Field<3, double>& otherDensity = this->getInp<Lucee::Field<3, double> >(2);
     // Distribution function to be scaled
     Lucee::Field<5, double>& distf = this->getOut<Lucee::Field<5, double> >(0);
     
@@ -116,7 +101,9 @@ namespace Lucee
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
     Lucee::ConstFieldPtr<double> distfSourcePtr = distfSource.createConstPtr();
-    Lucee::ConstFieldPtr<double> weightFieldPtr = weightField.createConstPtr();
+    Lucee::ConstFieldPtr<double> selfDensityPtr = selfDensity.createConstPtr();
+    Lucee::ConstFieldPtr<double> otherDensityPtr = otherDensity.createConstPtr();
+
     Lucee::FieldPtr<double> distfPtr = distf.createPtr(); // Output pointer
 
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
@@ -124,7 +111,6 @@ namespace Lucee
 
     int idx[5];
     double xc[5];
-    Eigen::VectorXd distfReduced(nodalStencil.size());
 
     // Loop over each node in configuration space
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
@@ -136,35 +122,19 @@ namespace Lucee
           idx[0] = ix;
           idx[1] = iy;
           idx[2] = iz;
-          idx[3] = localRgn.getLower(3);
-          idx[4] = localRgn.getLower(4);
-          grid.setIndex(idx);
-          // Set weighting factor for density calculation
-          weightField.setPtr(weightFieldPtr, idx[0], idx[1], idx[2]);
+          // Set density pointeres to a position space cell
+          selfDensity.setPtr(selfDensityPtr, idx[0], idx[1], idx[2]);
+          otherDensity.setPtr(otherDensityPtr, idx[0], idx[1], idx[2]);
 
-          // Fill out absolute node list using local node coordinate list
+          // Loop over each 3d configuration space node
           for (int configNode = 0; configNode < nlocal3d; configNode++)
           {
-            // Compute density of numerical solution at this configuration node
-            double numericalDensity = 0.0;
-            for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
-            {
-              idx[3] = iv;
-              for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
-              {
-                idx[4] = imu;
-                distf.setPtr(distfPtr, idx);
-                for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
-                  distfReduced(nodeIndex) = distfPtr[nodalStencil[nodeIndex] + configNode];
-                numericalDensity += integrationVector.dot(distfReduced);
-              }
-            }
+            // Figure out amount of distfSource to add
+            double sourceDensity = std::max(std::max(densityFloor - selfDensityPtr[configNode],
+                  densityFloor - otherDensityPtr[configNode]), 0.0);
 
-            // Scale numericalDensity so that its in the same units as the input targetDensityField
-            numericalDensity = scaleFactor*weightFieldPtr[configNode]*numericalDensity;
-
-            // If density is negative at this location, add enough of source to maintain density floor
-            if (numericalDensity < densityFloor)
+            // If sourceDensity is nonzero, then add on extra source term
+            if (sourceDensity != 0.0)
             {
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
@@ -176,7 +146,7 @@ namespace Lucee
                   distf.setPtr(distfPtr, idx);
                   for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                     distfPtr[nodalStencil[nodeIndex] + configNode] = distfPtr[nodalStencil[nodeIndex] + configNode] + 
-                      (densityFloor-numericalDensity)/densityFloor*distfSourcePtr[nodalStencil[nodeIndex] + configNode];
+                      sourceDensity/densityFloor*distfSourcePtr[nodalStencil[nodeIndex] + configNode];
                 }
               }
             }
@@ -193,7 +163,9 @@ namespace Lucee
   {
     // A 5D field containing a source distribution function to offset negativity
     this->appendOutVarType(typeid(Lucee::Field<5, double>));
-    // A 3D field containing magnetic field weighting factoring for density calculation
+    // Density of this species
+    this->appendOutVarType(typeid(Lucee::Field<3, double>));
+    // Density of other species
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
     // Distribution function that will be modified to have the desired density given by
     // the input field
