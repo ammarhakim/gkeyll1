@@ -112,6 +112,9 @@ namespace Lucee
           //  << ") Drag term is larger than possible = " << scaleFactor << std::endl;
           scaleFactor = 1.0;
         }
+        else if (scaleFactor < 0.0)
+          std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+            << ") Drag term is negative = " << scaleFactor << std::endl;
         else if (std::isinf(scaleFactor))
           continue;
 
@@ -124,6 +127,9 @@ namespace Lucee
           distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + scaleFactor*distfDeltaPtr[nodeIndex];
           if (positivityChecks == true && distfOutPtr[nodeIndex] < 0.0)
           {
+            // Set node to zero
+            //distfOutPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
+            
             std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
             << ") distfOutPtr[" << nodeIndex << "] = " << distfOutPtr[nodeIndex] << std::endl <<
             "scaleFactor = " << scaleFactor << ", distf = " << startVal << std::endl <<

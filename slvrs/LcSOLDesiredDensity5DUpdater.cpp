@@ -177,7 +177,8 @@ namespace Lucee
                     distfPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
                 }
               }*/
-              targetDensity *= -1.0;
+              //targetDensity *= -1.0;
+              targetDensity = 0.0;
             }
             // Loop through nodes a second time to scale to correct value
             // Only do this if density at point is non-zero (non-negative assumed)
