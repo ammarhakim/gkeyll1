@@ -1,11 +1,11 @@
 /**
- * @file	LcSOLEnergyAtCellCalc.h
+ * @file	LcSOLDensityFloor5DUpdater.h
  *
- * @brief	Compute energy at each configuration space cell using a (x,y,z,v,mu) integration
+ * @brief	Enforces a positive density floor in the domain by adding a source distribution function
  */
 
-#ifndef LC_SOL_ENERGY_AT_CELL_CALC_H
-#define LC_SOL_ENERGY_AT_CELL_CALC_H
+#ifndef LC_SOL_DENSITY_FLOOR_5D_UPDATER_H
+#define LC_SOL_DENSITY_FLOOR_5D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,14 +26,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class SOLEnergyAtCellCalc : public Lucee::UpdaterIfc
+  class SOLDensityFloor5DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      SOLEnergyAtCellCalc();
+      SOLDensityFloor5DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -68,25 +68,29 @@ namespace Lucee
       void declareTypes();
 
     private:
+/** Reference to function to project */
+      int fnRef;
 /** Pointer to phase space basis functions to use */
       Lucee::NodalFiniteElementIfc<5> *nodalBasis5d;
 /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<3> *nodalBasis3d;
+/** Keeps track of the offsets needed to get all nodes that share the same config. space location */
+      std::vector<int> nodalStencil;
 /** Factor to multiply all results by (like 2*pi*B/m to account v_perp -> mu integration */
       double scaleFactor;
-/** Gaussian quadrature weights for volume integration */
-      std::vector<double> volWeights5d;
-/**
- * Integration matrix used to compute integration in 5d space
- */
-      Eigen::MatrixXd volQuad5d;
+/** Number density floor to enforce everywhere */
+      double densityFloor;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/**
+ * Determines if two nodes have the same configuration space coordinates
+ */
+      bool sameConfigCoords(int srcIndex, int tarIndex, double dxMin, const Eigen::MatrixXd& nodeList);
   };
 }
 
-#endif // LC_SOL_ENERGY_AT_CELL_CALC_H
+#endif // LC_SOL_DENSITY_FLOOR_5D_UPDATER_H

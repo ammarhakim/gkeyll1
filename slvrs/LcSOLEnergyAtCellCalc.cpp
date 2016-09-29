@@ -76,11 +76,7 @@ namespace Lucee
     const Lucee::Field<5, double>& hamilIn = this->getInp<Lucee::Field<5, double> >(2);
     // Output parallel velocity moments (0, 1) vs time
     Lucee::Field<3, double>& energyField = this->getOut<Lucee::Field<3, double> >(0);
-    // Output dynvector containing total energy in domain
-    Lucee::DynVector<double>& energyVecOut = this->getOut<Lucee::DynVector<double> >(1);
     
-    energyField= 0.0; // clear out current contents
-
     Lucee::Region<5, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<5, int> localRgn = grid.getLocalRegion();
     
@@ -88,6 +84,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> hamilInPtr = hamilIn.createConstPtr();
     Lucee::FieldPtr<double> energyFieldPtr = energyField.createPtr(); // Output pointer
+    
+    energyField = 0.0; // clear out current contents
 
     unsigned nlocal5d = nodalBasis5d->getNumNodes();
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
@@ -100,7 +98,6 @@ namespace Lucee
     Eigen::VectorXd bFieldVec(nlocal5d);
     Eigen::VectorXd hamilVec(nlocal5d);
     
-    double regionTotalEnergy = 0.0;
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -130,22 +127,10 @@ namespace Lucee
         localTotalEnergy += volWeights5d[quadIndex]*distfAtQuad(quadIndex)*
           bFieldAtQuad(quadIndex)*hamilAtQuad(quadIndex);
 
-      regionTotalEnergy += scaleFactor*localTotalEnergy;
-
       // Accumulate results of integration
       for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-        energyFieldPtr[nodeIndex] += localTotalEnergy;
+        energyFieldPtr[nodeIndex] += scaleFactor*localTotalEnergy;
     }
-
-    double totalEnergy = regionTotalEnergy;
-    // get hold of comm pointer to do all parallel messaging
-    TxCommBase *comm = this->getComm();
-    comm->allreduce(1, &regionTotalEnergy, &totalEnergy, TX_SUM);
-
-    std::vector<double> data(1);
-    data[0] = totalEnergy;
-
-    energyVecOut.appendData(t, data);
    
     return Lucee::UpdaterStatus();
   }
@@ -161,8 +146,6 @@ namespace Lucee
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
     // Output: 3d field containing energy at each node
     this->appendOutVarType(typeid(Lucee::Field<3, double>));
-    // Total energy vs. time
-    this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
   void

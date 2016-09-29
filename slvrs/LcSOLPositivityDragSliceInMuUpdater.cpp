@@ -223,7 +223,15 @@ namespace Lucee
 
                     // Compute density of distfReduced (for now just use average)
                     double fOldAvg = distfReduced.mean();
-                    double fLowerAvg = 0.0;
+
+                    // Add density to lowest-energy cell only
+                    idx[4] = localRgn.getLower(4);
+                    distfOut.setPtr(distfOutPtr, idx);
+                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] + 2*fOldAvg;
+                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
+                    
+
+                    /*double fLowerAvg = 0.0;
                     double fUpperAvg = 0.0;
 
                     if (fOldAvg < 0.0)
@@ -243,7 +251,10 @@ namespace Lucee
                     }
 
                     // Use cell to the right of the lower interface, i.e. the current cell
-                    fLowerAvg = fOldAvg;
+                    if (imu == globalRgn.getLower(4))
+                      fLowerAvg = 0.0;
+                    else
+                      fLowerAvg = fOldAvg;
 
 
                     // Put in limiters on cell average?
@@ -256,6 +267,8 @@ namespace Lucee
                     double fIncrement = (cellCentroid[4] + 0.5*grid.getDx(4))*fUpperAvg -
                       (cellCentroid[4] - 0.5*grid.getDx(4))*fLowerAvg;
                     double fNewAvg = fOldAvg + alpha*fIncrement;
+
+                    fNewAvg = fOldAvg + fUpperAvg - fLowerAvg;
                     
                     if (fNewAvg < 0.0)
                     {
@@ -292,6 +305,9 @@ namespace Lucee
                         distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]] = fNewAvg;
                       }
                     }
+                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;
+                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
+                    */
                   }
                 }
               }
