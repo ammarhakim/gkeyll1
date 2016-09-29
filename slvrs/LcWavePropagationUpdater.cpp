@@ -521,7 +521,7 @@ namespace Lucee
       for (int i=sliceLower; i<sliceUpper; ++i)
       {
 
-        bool myLimiter = limiter;
+        unsigned myLimiter = limiter;
         if (hasSsBnd)
         {
 // if one and only one of the two cells attached to this edge is
