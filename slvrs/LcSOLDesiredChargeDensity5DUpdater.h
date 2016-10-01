@@ -1,11 +1,11 @@
 /**
- * @file	LcSOLDensityFloor5DUpdater.h
+ * @file	LcSOLDesiredChargeDensity5DUpdater.h
  *
- * @brief	Enforces a positive density floor in the domain by adding a source distribution function
+ * @brief	Adds source particles until a desired charge density has been reached
  */
 
-#ifndef LC_SOL_DENSITY_FLOOR_5D_UPDATER_H
-#define LC_SOL_DENSITY_FLOOR_5D_UPDATER_H
+#ifndef LC_SOL_DESIRED_CHARGE_DENSITY_5D_UPDATER_H
+#define LC_SOL_DESIRED_CHARGE_DENSITY_5D_UPDATER_H
 
 // config stuff
 #ifdef HAVE_CONFIG_H
@@ -26,14 +26,14 @@ namespace Lucee
 /**
  * Applies particle refection BCs to distribution function
  */
-  class SOLDensityFloor5DUpdater : public Lucee::UpdaterIfc
+  class SOLDesiredChargeDensity5DUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
       static const char *id;
 
 /** Create new projection updater */
-      SOLDensityFloor5DUpdater();
+      SOLDesiredChargeDensity5DUpdater();
 
 /**
  * Bootstrap method: Read input from specified table.
@@ -91,4 +91,4 @@ namespace Lucee
   };
 }
 
-#endif // LC_SOL_DENSITY_FLOOR_5D_UPDATER_H
+#endif // LC_SOL_DESIRED_CHARGE_DENSITY_5D_UPDATER_H

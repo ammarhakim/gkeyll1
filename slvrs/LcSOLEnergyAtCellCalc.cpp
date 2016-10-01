@@ -127,9 +127,12 @@ namespace Lucee
         localTotalEnergy += volWeights5d[quadIndex]*distfAtQuad(quadIndex)*
           bFieldAtQuad(quadIndex)*hamilAtQuad(quadIndex);
 
+      // Convert integrated quantity to a cell-averaged physical quantity
+      localTotalEnergy = scaleFactor*localTotalEnergy/(grid.getDx(0)*grid.getDx(1)*grid.getDx(2));
+
       // Accumulate results of integration
       for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)
-        energyFieldPtr[nodeIndex] += scaleFactor*localTotalEnergy;
+        energyFieldPtr[nodeIndex] += localTotalEnergy;
     }
    
     return Lucee::UpdaterStatus();

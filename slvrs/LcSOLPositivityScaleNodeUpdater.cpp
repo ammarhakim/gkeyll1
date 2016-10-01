@@ -146,6 +146,8 @@ namespace Lucee
                 //std::cout << "Drag term is larger than possible = " << scaleFactor << std::endl;
                 scaleFactor = 1.0;
               }
+              else if (positivityChecks == true && scaleFactor < 0.0)
+                scaleFactor = 0.0;
               else if (std::isinf(scaleFactor))
                 continue;
 

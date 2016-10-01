@@ -230,8 +230,8 @@ namespace Lucee
                     distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] + 2*fOldAvg;
                     distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
                     
-
-                    /*double fLowerAvg = 0.0;
+                    /*
+                    double fLowerAvg = 0.0;
                     double fUpperAvg = 0.0;
 
                     if (fOldAvg < 0.0)
@@ -306,8 +306,8 @@ namespace Lucee
                       }
                     }
                     distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;
-                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
-                    */
+                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;*/
+                    
                   }
                 }
               }
