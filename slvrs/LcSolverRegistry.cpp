@@ -229,6 +229,7 @@ namespace Lucee
       .append<Lucee::SOLDerivativeCalc<4> >()
       .append<Lucee::SOLDerivativeCalc<5> >()
       .append<Lucee::SOLDensityFloor5DUpdater>()
+      .append<Lucee::SOLDesiredChargeDensity5DUpdater>()
       .append<Lucee::SOLDesiredDensity5DUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLEnergyAtCellCalc>()
