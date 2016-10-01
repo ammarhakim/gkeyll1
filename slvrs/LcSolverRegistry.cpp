@@ -98,6 +98,7 @@
 #include <LcSOLBGKCollisionUpdater.h>
 #include <LcSOLDerivativeCalc.h>
 #include <LcSOLDensityFloor5DUpdater.h>
+#include <LcSOLDesiredChargeDensity5DUpdater.h>
 #include <LcSOLDesiredDensity5DUpdater.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>

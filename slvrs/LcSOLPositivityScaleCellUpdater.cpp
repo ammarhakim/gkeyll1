@@ -108,13 +108,21 @@ namespace Lucee
         //Make sure scaleFactor is less than one
         if (positivityChecks == true && scaleFactor > 1.0)
         {
-          //std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
-          //  << ") Drag term is larger than possible = " << scaleFactor << std::endl;
+          /*std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+            << ") Drag term is larger than possible = " << scaleFactor << std::endl << "energyOrigInPtr = " << energyOrigInPtr[0] << std::endl <<
+            "energyPosInPtr = " << energyPosInPtr[0] << std::endl << 
+            "energyDragInPtr = " << energyDragInPtr[0] << std::endl;*/
           scaleFactor = 1.0;
         }
-        else if (scaleFactor < 0.0)
-          std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+        else if (positivityChecks == true && scaleFactor < 0.0)
+        {
+          scaleFactor = 0.0;
+          /*std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
             << ") Drag term is negative = " << scaleFactor << std::endl;
+          std::cout << "energyOrigInPtr = " << energyOrigInPtr[0] << std::endl <<
+            "energyPosInPtr = " << energyPosInPtr[0] << std::endl << 
+            "energyDragInPtr = " << energyDragInPtr[0] << std::endl;*/
+        }
         else if (std::isinf(scaleFactor))
           continue;
 
@@ -128,16 +136,16 @@ namespace Lucee
           if (positivityChecks == true && distfOutPtr[nodeIndex] < 0.0)
           {
             // Set node to zero
-            //distfOutPtr[nodalStencil[nodeIndex] + configNode] = 0.0;
+            distfOutPtr[nodeIndex] = 0.0;
             
-            std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
+            /*std::cout << "(" << idx[0] << "," << idx[1] << "," << idx[2] << "," << idx[3] << "," << idx[4] << ","
             << ") distfOutPtr[" << nodeIndex << "] = " << distfOutPtr[nodeIndex] << std::endl <<
             "scaleFactor = " << scaleFactor << ", distf = " << startVal << std::endl <<
             "delta = " << distfDeltaPtr[nodeIndex] << std::endl <<
             "energyOrigInPtr = " << energyOrigInPtr[0] << std::endl <<
             "energyPosInPtr = " << energyPosInPtr[0] << std::endl << 
             "energyDragInPtr = " << energyDragInPtr[0] << std::endl;
-            distfOutPtr[nodeIndex] = startVal;
+            distfOutPtr[nodeIndex] = startVal;*/
           }
         }
       }
