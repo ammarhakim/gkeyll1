@@ -567,9 +567,6 @@ namespace Lucee
         }
       }
     }
-    
-    if (cfla > cflm)
-      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     seq.reset();
     // Final sweep, update solution with forward Euler step
@@ -607,8 +604,11 @@ namespace Lucee
         }
       }
     }
-
-    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
+    
+    if (cfla > cflm)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+    else
+      return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   void
