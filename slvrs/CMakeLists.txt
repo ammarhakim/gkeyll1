@@ -79,13 +79,9 @@ set(lcslvrs_SOURCES
   LcLenardBernsteinDiff3DUpdater.cpp
   LcLenardBernsteinDiff5DUpdater.cpp
   LcLenardBernsteinDiff3D2VUpdater.cpp
-  LcLenardBernsteinDiffPara3D2VUpdater.cpp
-  LcLenardBernsteinDiffPerp3D2VUpdater.cpp
   LcLenardBernsteinDiffUpdater.cpp
   LcLenardBernsteinDrag3DUpdater.cpp
   LcLenardBernsteinDrag3D2VUpdater.cpp
-  LcLenardBernsteinDragPara3D2VUpdater.cpp
-  LcLenardBernsteinDragPerp3D2VUpdater.cpp
   LcLenardBernsteinDrag5DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
@@ -133,6 +129,7 @@ set(lcslvrs_SOURCES
   LcSOLHeatFluxCalc.cpp
   LcSOLInitializeDensity.cpp
   LcSOLIonDensityInitialization.cpp
+  LcSOLLenardBernsteinScaleCell5DUpdater.cpp
   LcSOLLocalPositivityUpdater.cpp
   LcSOLMaxwellianAtNodeCalc.cpp
   LcSOLMaxwellianParameterCalc.cpp

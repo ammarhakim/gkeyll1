@@ -321,11 +321,6 @@ namespace Lucee
       }
     }
 
-    // Time-step was too large: return a suggestion with correct time-step
-    // Only checking cfl condition at volume quadrature points for now
-    if (cfla > cflm)
-      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
-
     // Determine loop bounds for surface integrals
     int ivLower = localRgn.getLower(3);
     // Need one edge outside domain interior
@@ -541,7 +536,12 @@ namespace Lucee
       }
     }
 
-    return Lucee::UpdaterStatus(true, dt*cfl/cfla);
+    // Time-step was too large: return a suggestion with correct time-step
+    // Only checking cfl condition at volume quadrature points for now
+    if (cfla > cflm)
+      return Lucee::UpdaterStatus(false, dt*cfl/cfla);
+    else
+      return Lucee::UpdaterStatus(true, dt*cfl/cfla);
   }
 
   void
