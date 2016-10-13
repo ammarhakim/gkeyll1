@@ -88,7 +88,7 @@ namespace Lucee
  * @param inp Input vector of data.
  * @return value of integrand given data.
  */
-      double getIntegrand(unsigned nc, const double inp[]);
+      double getIntegrand(Lucee::LuaState& L, unsigned nc, const double inp[], std::vector<double>& res);
   };
 }
 
