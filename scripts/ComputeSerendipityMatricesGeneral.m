@@ -26,7 +26,7 @@ if dim == 1
     for i=1:length(nodeBase)
         nodeList = [nodeList, {[nodeBase(i)]}];
     end
-    celldisp(nodeList)
+    %celldisp(nodeList)
     
     for xIndex = 0:order
         basisList{end+1} = [xIndex];
@@ -85,7 +85,7 @@ if dim == 1
     %and data analysis.
     for i = 1:length(functionVector)
         functionVector(i);
-        int(functionVector(i), x, -1, 1)
+        int(functionVector(i), x, -1, 1);
     end
     if order == 1
         interpList = {-0.5, 0.5};

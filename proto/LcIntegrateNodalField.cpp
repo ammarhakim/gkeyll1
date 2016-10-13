@@ -81,15 +81,20 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
 
+// get hold of Lua state object
+    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
+
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
 
     unsigned nlocal = nodalBasis->getNumNodes();
     unsigned nc = fld.getNumComponents()/nlocal; // values at each node
+    unsigned nDyn = fldInt.getNumComponents();
     std::vector<double> localVals(nlocal);
     int idx[NDIM];
 
-    double localInt = 0.0;
+    std::vector<double> localInt(nDyn, 0.0);
+    std::vector<double> res(nDyn, 0.0);
 // loop, performing integration
     while (seq.step())
     {
@@ -110,17 +115,24 @@ namespace Lucee
 //       }
 
 // perform quadrature
-      for (unsigned k=0; k<nlocal; ++k)
-        localInt += weights[k]*getIntegrand(nc, &fldPtr[k*nc]);
-    }
 
-    double volInt = localInt;
+      for (unsigned k=0; k<nlocal; ++k)
+      {
+        getIntegrand(*L, nc, &fldPtr[k*nc], res);
+        for (int i=0; i<nDyn; ++i)
+          localInt[i] += weights[k]*res[i];
+      }
+    }
+    std::vector<double> volInt(nDyn);
+    for (int i=0; i<nDyn; ++i)
+      volInt[i] = localInt[i];
 // get hold of comm pointer to do all parallel messaging
     TxCommBase *comm = this->getComm();
-    comm->allreduce(1, &localInt, &volInt, TX_SUM);
+    comm->allreduce(nDyn, &localInt[0], &volInt[0], TX_SUM);
 
-    std::vector<double> data(1);
-    data[0] = volInt;
+    std::vector<double> data(nDyn);
+    for (int i=0; i<nDyn; ++i)
+      data[i] = volInt[i];
     fldInt.appendData(t, data);
 
     return Lucee::UpdaterStatus();
@@ -134,37 +146,37 @@ namespace Lucee
     this->appendOutVarType(typeid(Lucee::DynVector<double>));
   }
 
+
   template <unsigned NDIM>
   double
-  IntegrateNodalField<NDIM>::getIntegrand(unsigned nc, const double inp[])
+  IntegrateNodalField<NDIM>::getIntegrand(Lucee::LuaState& L, unsigned nc, const double inp[], std::vector<double>& res)
   {
     if (!hasFunction)
       return inp[0];
 
-// process field through Lua function
-    Lucee::LuaState *L = Loki::SingletonHolder<Lucee::Globals>::Instance().L;
 // push function object on stack
-    lua_rawgeti(*L, LUA_REGISTRYINDEX, fnRef);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
 // push variables on stack
     for (unsigned i=0; i<nc; ++i)
-      lua_pushnumber(*L, inp[i]);
+      lua_pushnumber(L, inp[i]);
 // call function
-    if (lua_pcall(*L, nc, 1, 0) != 0)
+    if (lua_pcall(L, nc, res.size(), 0) != 0)
     {
-      std::string err(lua_tostring(*L, -1));
-      lua_pop(*L, 1);
+      std::string err(lua_tostring(L, -1));
+      lua_pop(L, 1);
       Lucee::Except lce("IntegrateNodalField::getIntegrand: ");
       lce << "Problem evaluating function supplied as 'integrand' ";
       lce << std::endl << "[" << err << "]";
       throw lce;
     }
 // fetch results
-    if (!lua_isnumber(*L, -1))
-        throw Lucee::Except("IntegrateNodalField::getIntegrand: value not a number");
-    double res = lua_tonumber(*L, -1);
-    lua_pop(*L, 1);
-
-    return res;
+    for (int i=-res.size(); i<0; ++i)
+    {
+      if (!lua_isnumber(L, i))
+        throw Lucee::Except("IntegrateNodalField::getIntegrand: Return value not a number");
+      res[res.size()+i] = lua_tonumber(L, i);
+    }
+    lua_pop(L, 1);
   }
 
 // instantiations
