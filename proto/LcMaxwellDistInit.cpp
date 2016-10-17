@@ -169,123 +169,74 @@ namespace Lucee
     unsigned numNodesConf = confBasis->getNumNodes();
     
     std::vector<double> dens(numNodesConf);
-    std::vector<double> densInv(numNodesConf);
-    double densIn;
-    std::vector<double> vTerm2(numNodesConf);
-    double vTerm2In;
+    std::vector<double> invDens(numNodesConf);
+    Lucee::Matrix<double> invVTerm2(numNodesConf, VDIM);
+    Lucee::Matrix<double> invVTerm(numNodesConf, VDIM);
     Lucee::Matrix<double> vDrift(numNodesConf, VDIM);
+    double n;
     double v[VDIM];
-
-    // get an "area" of velocity space so the updater can return a
-    // uniform distribution with correct density in case the higher
-    // moments were not calculated correctly and vTerm2 < 0
-    double vSpaceArea = 1;
-    double vSpaceAreaInv;
-    for (int dim = 0; dim<VDIM; ++dim)
-    {
-      vSpaceArea *= compSpace.getShape(CDIM+dim);
-    }
-    vSpaceAreaInv = 1/vSpaceArea;
-
-    if (!arbitraryDensity)
-    {
-      while (seq.step())
-      {
-	seq.fillWithIndex(idx);
-	q.setPtr(qPtr, idx);
-	zerothMoment.setPtr(zerothMomentPtr, idx);
-	firstMoment.setPtr(firstMomentPtr, idx);
-	secondMoment.setPtr(secondMomentPtr, idx);
-
-	phaseBasis->setIndex(idx);
-	phaseBasis->getNodalCoordinates(phaseNodeCoords);
+    double invVt2[VDIM];
+    double invVt[VDIM];
+    
+    while (seq.step()) {
+      seq.fillWithIndex(idx);
+      q.setPtr(qPtr, idx);
+      zerothMoment.setPtr(zerothMomentPtr, idx);
+      firstMoment.setPtr(firstMomentPtr, idx);
+      secondMoment.setPtr(secondMomentPtr, idx);
       
-	for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
-	{
-	  dens[nodeIdx] = zerothMomentPtr[nodeIdx];
-	  densInv[nodeIdx] = 1/dens[nodeIdx];
-	  vTerm2[nodeIdx] = densInv[nodeIdx]*secondMomentPtr[nodeIdx];
+      phaseBasis->setIndex(idx);
+      phaseBasis->getNodalCoordinates(phaseNodeCoords);
+      
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
+	dens[nodeIdx] = zerothMomentPtr[nodeIdx];
+	invDens[nodeIdx] = 1/dens[nodeIdx];
+	for (unsigned dim = 0; dim<VDIM; ++dim) {
+	  vDrift(nodeIdx, dim) = invDens[nodeIdx] *
+	    firstMomentPtr[nodeIdx*VDIM + dim];
+	  
+	  double temp = invDens[nodeIdx] *
+	    secondMomentPtr[nodeIdx*VDIM + dim] -
+	    vDrift(nodeIdx, dim)*vDrift(nodeIdx, dim);
+	  if (temp < 0)
+	    return Lucee::UpdaterStatus(false, 0);
+	  invVTerm2(nodeIdx, dim) = 1/temp;
+	  invVTerm(nodeIdx, dim) = sqrt(invVTerm2(nodeIdx, dim));
+	}  	
+      }
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) {
+	// get number density
+	if (!arbitraryDensity)
+	  n = dens[phaseConfMap[nodeIdx]];
+	else {
+	  const Lucee::Field<CDIM, double>& zerothMomentOut =
+	    this->getInp<Lucee::Field<CDIM, double> >(3);
+	  Lucee::ConstFieldPtr<double> zerothMomentOutPtr = 
+	    zerothMomentOut.createConstPtr();
+	  zerothMomentOut.setPtr(zerothMomentOutPtr, idx);
+	  n = zerothMomentOutPtr[phaseConfMap[nodeIdx]];	  
+	}
+	
+	// get volocity for Maxwellian
+	if (zeroDriftOutput) 
 	  for (unsigned dim = 0; dim<VDIM; ++dim)
-	  {
-	    vDrift(nodeIdx, dim) = densInv[nodeIdx]*
-	      firstMomentPtr[nodeIdx*VDIM+dim];
-	    vTerm2[nodeIdx] = vTerm2[nodeIdx]-
-	      vDrift(nodeIdx, dim)*vDrift(nodeIdx, dim);
-	  }  	
+	    v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim);
+	else
+	  for (unsigned dim = 0; dim<VDIM; ++dim)
+	    v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-
+	      vDrift(phaseConfMap[nodeIdx], dim);
+	
+	// get thermal velocity
+	for (unsigned dim = 0; dim<VDIM; ++dim) {
+	  invVt2[dim] = invVTerm2(phaseConfMap[nodeIdx], dim);
+	  invVt[dim] = invVTerm(phaseConfMap[nodeIdx], dim);
 	}
-	for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
-	{
-	  if (zeroDriftOutput) 
-	    for (unsigned dim = 0; dim<VDIM; ++dim)
-	      v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim);
-	  else
-	    for (unsigned dim = 0; dim<VDIM; ++dim)
-	      v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-
-		vDrift(phaseConfMap[nodeIdx], dim);
-	  densIn = dens[phaseConfMap[nodeIdx]];
-
-	  vTerm2In = vTerm2[phaseConfMap[nodeIdx]];
-	  if (vTerm2In >= 0) 
-	    qPtr[nodeIdx] = evaluateMaxwell(v, densIn, vTerm2In);
-	  else
-	    qPtr[nodeIdx] = densIn*vSpaceAreaInv;
-	}
+	
+	qPtr[nodeIdx] = evaluateMaxwell(n, v, invVt, invVt2);
       }
     }
-    else
-    {
-      // declaration and usage of this field must be in one block
-      const Lucee::Field<CDIM, double>& zerothMomentOut =
-	this->getInp<Lucee::Field<CDIM, double> >(3);
-      Lucee::ConstFieldPtr<double> zerothMomentOutPtr = 
-	zerothMomentOut.createConstPtr();
-
-      while (seq.step())
-      {
-	seq.fillWithIndex(idx);
-	q.setPtr(qPtr, idx);
-	zerothMoment.setPtr(zerothMomentPtr, idx);
-	firstMoment.setPtr(firstMomentPtr, idx);
-	secondMoment.setPtr(secondMomentPtr, idx);
-	zerothMomentOut.setPtr(zerothMomentOutPtr, idx);
-
-	phaseBasis->setIndex(idx);
-	phaseBasis->getNodalCoordinates(phaseNodeCoords);
-      
-	for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
-	{
-	  dens[nodeIdx] = zerothMomentPtr[nodeIdx];
-	  densInv[nodeIdx] = 1/dens[nodeIdx];
-	  vTerm2[nodeIdx] = densInv[nodeIdx]*secondMomentPtr[nodeIdx];
-	  for (unsigned dim = 0; dim<VDIM; ++dim)
-	  {
-	    vDrift(nodeIdx, dim) = densInv[nodeIdx]*
-	      firstMomentPtr[nodeIdx*VDIM+dim];
-	    vTerm2[nodeIdx] = vTerm2[nodeIdx]-
-	      vDrift(nodeIdx, dim)*vDrift(nodeIdx, dim);
-	  }  	
-	}
-	for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
-	{
-	  if (zeroDriftOutput) 
-	    for (unsigned dim = 0; dim<VDIM; ++dim)
-	      v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim);
-	  else
-	    for (unsigned dim = 0; dim<VDIM; ++dim)
-	      v[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-
-		vDrift(phaseConfMap[nodeIdx], dim);
-	  densIn = zerothMomentOutPtr[phaseConfMap[nodeIdx]];
-
-	  vTerm2In = vTerm2[phaseConfMap[nodeIdx]];
-	  if (vTerm2In >= 0) 
-	    qPtr[nodeIdx] = evaluateMaxwell(v, densIn, vTerm2In);
-	  else
-	    qPtr[nodeIdx] = densIn*vSpaceAreaInv;
-	}
-      }
-    }
-
-    return Lucee::UpdaterStatus();
+    
+    return Lucee::UpdaterStatus(true, 0);
   }
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
@@ -295,16 +246,16 @@ namespace Lucee
   }
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
-  double MaxwellDistInit<CDIM, VDIM>::evaluateMaxwell(double v[VDIM], double n, 
-    double vTerm2)
+  double MaxwellDistInit<CDIM, VDIM>::evaluateMaxwell(double n, 
+						      double v[VDIM], 
+						      double invVt[VDIM],
+						      double invVt2[VDIM])
   {
-    double result = 0;
-    double factor = 1/sqrt(2*M_PI*vTerm2);
-    for (unsigned dim = 0; dim<VDIM; ++dim)
-      result += v[dim]*v[dim];
-    result = n*exp(-0.5*result/vTerm2);
-    for (unsigned dim = 0; dim<VDIM; ++dim)
-      result *= factor;
+    double result = n;
+    for (unsigned dim = 0; dim<VDIM; ++dim) {
+      result *= normFactor*invVt[dim];
+      result *= exp(-0.5*v[dim]*v[dim]*invVt2[dim]);
+    }
     return result;
   }
   //----------------------------------------------------------------------------
