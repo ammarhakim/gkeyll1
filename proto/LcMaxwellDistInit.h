@@ -79,7 +79,10 @@ namespace Lucee
  */
       void declareTypes();
 
-      double evaluateMaxwell(double v[VDIM], double n, double vTerm);
+      double evaluateMaxwell(double n, 
+			     double v[VDIM], 
+			     double invVt[VDIM],
+			     double invVt2[VDIM]);
 
     private:
       /** Flag to output Maxwellian with zero drift velocity */
@@ -97,6 +100,9 @@ namespace Lucee
 
       /** Mapping of node in phase-space to node in configuration space */
       std::vector<unsigned> phaseConfMap;
+
+      // Maxwell distribution normalization factor
+      static const double normFactor = 0.3989422804014327;
   };
 }
 
