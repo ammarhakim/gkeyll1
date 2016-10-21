@@ -325,7 +325,7 @@ namespace Lucee
       // Computing maximum cfla
       grid.setIndex(idx);
       for (int i = 0; i < NDIM; i++)
-        dtdqVec(i) = dt/grid.getDx(i);
+        dtdqVec(i) = dt/grid.getDx(i)/jacobianFactor;
 
       // Loop over each alpha vector evaluated at a quadrature point
       for (int i = 0; i < nVolQuad; i++)
