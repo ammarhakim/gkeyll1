@@ -32,6 +32,7 @@ namespace Lucee
   MaxwellDistInit<CDIM,VDIM>::MaxwellDistInit()
     : UpdaterIfc()
   {
+    normFactor  = 0.3989422804014327;
   }
   template <unsigned CDIM, unsigned VDIM>
   MaxwellDistInit<CDIM, VDIM>::~MaxwellDistInit()
