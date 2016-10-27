@@ -101,8 +101,8 @@ namespace Lucee
       /** Mapping of node in phase-space to node in configuration space */
       std::vector<unsigned> phaseConfMap;
 
-      // Maxwell distribution normalization factor
-      static const double normFactor = 0.3989422804014327;
+      // Maxwell distribution normalization factor 1/sqrt(2*pi)
+      double normFactor;
   };
 }
 
