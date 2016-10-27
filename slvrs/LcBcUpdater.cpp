@@ -78,7 +78,7 @@ namespace Lucee
     Lucee::AlignedRectCoordSys coordSys(dir);
 
     int idx[NDIM], idxG[NDIM];
-    double xc[3];
+    double xc[NDIM];
 
     inpFld = 0;
 // check if we have an extra input field
