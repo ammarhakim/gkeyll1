@@ -74,10 +74,14 @@ namespace Lucee
     const Lucee::Field<3, double>& energyDiffIn = this->getInp<Lucee::Field<3, double> >(2);
     // Temperature in joules
     const Lucee::Field<3, double>& temperatureIn = this->getInp<Lucee::Field<3, double> >(3);
+    // Parallel Temperature in joules
+    const Lucee::Field<3, double>& paraTemperatureIn = this->getInp<Lucee::Field<3, double> >(4);
+    // Perp Temperature in joules
+    const Lucee::Field<3, double>& perpTemperatureIn = this->getInp<Lucee::Field<3, double> >(5);
     // Magnetic field
-    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(4);
+    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(6);
     // Dimensionally correct number density from weighted moment calculation
-    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(5);
+    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(7);
     // Distribution function with drag already applied and diffusion to be added on in update()
     Lucee::Field<5, double>& distfOut = this->getOut<Lucee::Field<5, double> >(0);
     
@@ -85,6 +89,8 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> energyDragInPtr = energyDragIn.createConstPtr();
     Lucee::ConstFieldPtr<double> energyDiffInPtr = energyDiffIn.createConstPtr();
     Lucee::ConstFieldPtr<double> temperatureInPtr = temperatureIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> paraTemperatureInPtr = paraTemperatureIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> perpTemperatureInPtr = perpTemperatureIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> numDensityInPtr = numDensityIn.createConstPtr();
 
@@ -122,6 +128,8 @@ namespace Lucee
       energyDiffIn.setPtr(energyDiffInPtr, idx[0], idx[1], idx[2]);
       bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
       temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
+      paraTemperatureIn.setPtr(paraTemperatureInPtr, idx[0], idx[1], idx[2]);
+      perpTemperatureIn.setPtr(perpTemperatureInPtr, idx[0], idx[1], idx[2]);
       numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
 
       // Compute scale factor to scale diffusion term so that total energy is zero
@@ -135,12 +143,12 @@ namespace Lucee
       {
         // Keep track of max CFL number
         cfla = std::max( cfla, std::abs(4.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
-          *scaleFactor*temperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
+          *scaleFactor*paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
 
         if (idx[4] < globalRgn.getUpper(4)-1)
         {
           double muCoord = cellCentroid[4] + 0.5*grid.getDx(4);
-          double muTherm = scaleFactor*temperatureInPtr[configNode]/bFieldInPtr[configNode];
+          double muTherm = scaleFactor*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode];
           cfla = std::max(cfla, 8.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
             *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
         }
@@ -172,6 +180,10 @@ namespace Lucee
     // Input: Energy in each cell after drag step
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: Temperature in joules
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: Parallel Temperature in joules
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: Perp Temperature in joules
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: Magnetic field
     this->appendInpVarType(typeid(Lucee::Field<3, double>));

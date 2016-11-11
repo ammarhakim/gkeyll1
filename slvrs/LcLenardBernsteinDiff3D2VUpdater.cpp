@@ -415,10 +415,14 @@ namespace Lucee
     const Lucee::Field<5, double>& fIn = this->getInp<Lucee::Field<5, double> >(0);
     // Temperature in joules
     const Lucee::Field<3, double>& temperatureIn = this->getInp<Lucee::Field<3, double> >(1);
+    // Parallel Temperature in joules
+    const Lucee::Field<3, double>& paraTemperatureIn = this->getInp<Lucee::Field<3, double> >(2);
+    // Perpendicular Temperature in joules
+    const Lucee::Field<3, double>& perpTemperatureIn = this->getInp<Lucee::Field<3, double> >(3);
     // Magnetic field
-    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(2);
+    const Lucee::Field<3, double>& bFieldIn = this->getInp<Lucee::Field<3, double> >(4);
     // Dimensionally correct number density from weighted moment calculation
-    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(3);
+    const Lucee::Field<3, double>& numDensityIn = this->getInp<Lucee::Field<3, double> >(5);
     // Output distribution function
     Lucee::Field<5, double>& fOut = this->getOut<Lucee::Field<5, double> >(0);
 
@@ -427,6 +431,8 @@ namespace Lucee
     // Input fields
     Lucee::ConstFieldPtr<double> fInPtr = fIn.createConstPtr();
     Lucee::ConstFieldPtr<double> temperatureInPtr = temperatureIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> paraTemperatureInPtr = paraTemperatureIn.createConstPtr();
+    Lucee::ConstFieldPtr<double> perpTemperatureInPtr = perpTemperatureIn.createConstPtr();
     Lucee::ConstFieldPtr<double> bFieldInPtr = bFieldIn.createConstPtr();
     Lucee::ConstFieldPtr<double> numDensityInPtr = numDensityIn.createConstPtr();
     // Writeable fields
@@ -476,6 +482,8 @@ namespace Lucee
           idx[2] = iz;
           bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
           temperatureIn.setPtr(temperatureInPtr, idx[0], idx[1], idx[2]);
+          paraTemperatureIn.setPtr(paraTemperatureInPtr, idx[0], idx[1], idx[2]);
+          perpTemperatureIn.setPtr(perpTemperatureInPtr, idx[0], idx[1], idx[2]);
           numDensityIn.setPtr(numDensityInPtr, idx[0], idx[1], idx[2]);
 
           // At this location, loop over each configuration space grid node
@@ -483,7 +491,7 @@ namespace Lucee
           {
             // Keep track of max CFL number
             cfla = std::max( cfla, std::abs(4.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-              temperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
+              paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
 
             // Loop over entire (vPar,mu) space
             for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
@@ -504,57 +512,58 @@ namespace Lucee
                 for (int i = 0; i < fReduced.size(); i++)
                   fReduced(i) = fInPtr[configNode + nodalStencil[i]];
 
-                Eigen::VectorXd updateF = ( selfCenter[0] + 
-                  2*speciesMass/bFieldInPtr[configNode]*(cellCentroid[4]*selfCenter[1] + selfCenterTimesMu) )*fReduced;
+                Eigen::VectorXd updateF = ( paraTemperatureInPtr[configNode]/speciesMass*selfCenter[0] + 
+                  2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*
+                  (cellCentroid[4]*selfCenter[1] + selfCenterTimesMu) )*fReduced;
 
                 // add in contribution from cells attached to lower/upper faces in vPara
                 if (iv > globalRgn.getLower(3))
                 {
-                  updateF = updateF + lowerCenter[0]*fReduced;
+                  updateF = updateF + paraTemperatureInPtr[configNode]/speciesMass*lowerCenter[0]*fReduced;
                   idx[3] = idx[3] - 1;
                   fIn.setPtr(fInPtr, idx); // cell attached to lower face
                   for (int i = 0; i < fLowerReduced.size(); i++)
                     fLowerReduced(i) = fInPtr[configNode + nodalStencil[i]];
-                  updateF = updateF + lowerMat[0]*fLowerReduced;
+                  updateF = updateF + paraTemperatureInPtr[configNode]/speciesMass*lowerMat[0]*fLowerReduced;
                   idx[3] = idx[3] + 1;
                 }
 
                 if (iv < globalRgn.getUpper(3)-1)
                 {
-                  updateF = updateF + upperCenter[0]*fReduced;
+                  updateF = updateF + paraTemperatureInPtr[configNode]/speciesMass*upperCenter[0]*fReduced;
                   idx[3] = idx[3] + 1;
                   fIn.setPtr(fInPtr, idx); // cell attached to upper face
                   for (int i = 0; i < fUpperReduced.size(); i++)
                     fUpperReduced(i) = fInPtr[configNode + nodalStencil[i]];
-                  updateF = updateF + upperMat[0]*fUpperReduced;
+                  updateF = updateF + paraTemperatureInPtr[configNode]/speciesMass*upperMat[0]*fUpperReduced;
                   idx[3] = idx[3] - 1;
                 }
 
                 // add in contribution from cells attached to lower/upper faces in mu
                 if (iMu > globalRgn.getLower(4))
                 {
-                  updateF = updateF + 2*speciesMass/bFieldInPtr[configNode]*(cellCentroid[4]*lowerCenter[1] + lowerCenterTimesMu)*fReduced;
+                  updateF = updateF + 2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*(cellCentroid[4]*lowerCenter[1] + lowerCenterTimesMu)*fReduced;
                   idx[4] = idx[4] - 1;
                   fIn.setPtr(fInPtr, idx); // cell attached to lower face
                   for (int i = 0; i < fLowerReduced.size(); i++)
                     fLowerReduced(i) = fInPtr[configNode + nodalStencil[i]];
-                  updateF = updateF + 2*speciesMass/bFieldInPtr[configNode]*(cellCentroid[4]*lowerMat[1] + lowerMatTimesMu)*fLowerReduced;
+                  updateF = updateF + 2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*(cellCentroid[4]*lowerMat[1] + lowerMatTimesMu)*fLowerReduced;
                   idx[4] = idx[4] + 1;
                 }
 
                 if (iMu < globalRgn.getUpper(4)-1)
                 {
                   double muCoord = cellCentroid[4] + 0.5*grid.getDx(4);
-                  double muTherm = temperatureInPtr[configNode]/bFieldInPtr[configNode];
+                  double muTherm = perpTemperatureInPtr[configNode]/bFieldInPtr[configNode];
                   cfla = std::max(cfla, 8.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
                     *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
 
-                  updateF = updateF + 2*speciesMass/bFieldInPtr[configNode]*(cellCentroid[4]*upperCenter[1] + upperCenterTimesMu)*fReduced;
+                  updateF = updateF + 2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*(cellCentroid[4]*upperCenter[1] + upperCenterTimesMu)*fReduced;
                   idx[4] = idx[4] + 1;
                   fIn.setPtr(fInPtr, idx); // cell attached to upper face
                   for (int i = 0; i < fUpperReduced.size(); i++)
                     fUpperReduced(i) = fInPtr[configNode + nodalStencil[i]];
-                  updateF = updateF + 2*speciesMass/bFieldInPtr[configNode]*(cellCentroid[4]*upperMat[1] + upperMatTimesMu)*fUpperReduced;
+                  updateF = updateF + 2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*(cellCentroid[4]*upperMat[1] + upperMatTimesMu)*fUpperReduced;
                   idx[4] = idx[4] - 1;
                 }
 
@@ -586,8 +595,8 @@ namespace Lucee
           for (int stencilIndex = 0; stencilIndex < nodalStencil.size(); stencilIndex++)
           {
             fOutPtr[configNode + nodalStencil[stencilIndex]] = fInPtr[configNode + nodalStencil[stencilIndex]]
-              + dt*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-                  temperatureInPtr[configNode]/speciesMass*fOutPtr[configNode + nodalStencil[stencilIndex]];
+              + dt*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
+                  *fOutPtr[configNode + nodalStencil[stencilIndex]];
           }
         }
       }
@@ -599,7 +608,7 @@ namespace Lucee
           {
             fOutPtr[configNode + nodalStencil[stencilIndex]] = alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]
                 *sqrt(temperatureInPtr[configNode]))
-                *temperatureInPtr[configNode]/speciesMass*fOutPtr[configNode + nodalStencil[stencilIndex]];
+                *fOutPtr[configNode + nodalStencil[stencilIndex]];
           }
         }
       }
@@ -617,6 +626,10 @@ namespace Lucee
     // Input: Distribution function
     this->appendInpVarType(typeid(Lucee::Field<5, double>));
     // Input: Temperature in joules
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: Parallel Temperature in joules
+    this->appendInpVarType(typeid(Lucee::Field<3, double>));
+    // Input: Perpendicular Temperature in joules
     this->appendInpVarType(typeid(Lucee::Field<3, double>));
     // Input: Magnetic field
     this->appendInpVarType(typeid(Lucee::Field<3, double>));

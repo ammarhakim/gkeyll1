@@ -93,12 +93,12 @@ namespace Lucee
         {
           negativeTemperatureStatus = true;
           // Print out information
-          std::cout << "temperaturePtr[" << i << "] = " << temperaturePtr[i] << std::endl;
-          std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
-          std::cout << "n = " << numDensPtr[i] << std::endl;
-          std::cout << "E = " << energyPtr[i] << std::endl;
-          std::cout << "u = " << meanVelocityPtr[i] << std::endl;
-          std::cout << "m = " << speciesMass << std::endl;
+          //std::cout << "temperaturePtr[" << i << "] = " << temperaturePtr[i] << std::endl;
+          //std::cout << "idx = (" << idx[0] << "," << idx[1] << "," << idx[2] << ")" << std::endl;
+          //std::cout << "n = " << numDensPtr[i] << std::endl;
+          //std::cout << "E = " << energyPtr[i] << std::endl;
+          //std::cout << "u = " << meanVelocityPtr[i] << std::endl;
+          //std::cout << "m = " << speciesMass << std::endl;
         }
         else if (std::isnan(temperaturePtr[i]))
         {
