@@ -225,12 +225,11 @@ namespace Lucee
                     double fOldAvg = distfReduced.mean();
 
                     // Add density to lowest-energy cell only
-                    idx[4] = localRgn.getLower(4);
-                    distfOut.setPtr(distfOutPtr, idx);
-                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] + 2*fOldAvg;
-                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
+                    //idx[4] = localRgn.getLower(4);
+                    //distfOut.setPtr(distfOutPtr, idx);
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] + 2*fOldAvg;
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
                     
-                    /*
                     double fLowerAvg = 0.0;
                     double fUpperAvg = 0.0;
 
@@ -305,9 +304,8 @@ namespace Lucee
                         distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]] = fNewAvg;
                       }
                     }
-                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;
-                    distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;*/
-                    
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;
+                    //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[1]] = 0.0;
                   }
                 }
               }
