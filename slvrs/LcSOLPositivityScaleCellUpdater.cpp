@@ -99,7 +99,7 @@ namespace Lucee
       // If the energy after positivity has changed by some threshold, then we need
       // to make use of the maximum drag step
       if (std::fabs(energyPosInPtr[0] - energyOrigInPtr[0]) > 
-        1e-10*energyOrigInPtr[0])
+        1e-12*energyOrigInPtr[0])
       {
         // Compute scale factor to add delta f at this point
         double scaleFactor = (energyOrigInPtr[0]-energyPosInPtr[0])/

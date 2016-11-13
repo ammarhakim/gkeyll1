@@ -197,7 +197,7 @@ namespace Lucee
             // At this particular configuration node, loop in vPara and mu space
             // to perform drag step only if energy at point needs to be corrected
             if (std::fabs(energyModInPtr[configNode] - energyOrigInPtr[configNode]) > 
-                1e-10*energyOrigInPtr[configNode])
+                1e-12*energyOrigInPtr[configNode])
             {
 
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
