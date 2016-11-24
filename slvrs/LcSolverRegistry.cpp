@@ -103,11 +103,13 @@
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLElectronDensityInitialization.h>
 #include <LcSOLEnergyAtCellCalc.h>
+#include <LcSOLEnergyAtCellCalc3D.h>
 #include <LcSOLEnergyAtNodeCalc.h>
 #include <LcSOLGeneralIntegralAtNodeCalc.h>
 #include <LcSOLHeatFluxCalc.h>
 #include <LcSOLInitializeDensity.h>
 #include <LcSOLIonDensityInitialization.h>
+#include <LcSOLLenardBernsteinScaleCell3DUpdater.h>
 #include <LcSOLLenardBernsteinScaleCell5DUpdater.h>
 #include <LcSOLLocalPositivityUpdater.h>
 #include <LcSOLMaxwellianAtNodeCalc.h>
@@ -234,11 +236,13 @@ namespace Lucee
       .append<Lucee::SOLDesiredDensity5DUpdater>()
       .append<Lucee::SOLElectronDensityInitialization>()
       .append<Lucee::SOLEnergyAtCellCalc>()
+      .append<Lucee::SOLEnergyAtCellCalc3D>()
       .append<Lucee::SOLEnergyAtNodeCalc>()
       .append<Lucee::SOLGeneralIntegralAtNodeCalc>()
       .append<Lucee::SOLHeatFluxCalc>()
       .append<Lucee::SOLInitializeDensity>()
       .append<Lucee::SOLIonDensityInitialization>()
+      .append<Lucee::SOLLenardBernsteinScaleCell3DUpdater>()
       .append<Lucee::SOLLenardBernsteinScaleCell5DUpdater>()
       .append<Lucee::SOLLocalPositivityUpdater>()
       .append<Lucee::SOLMaxwellianAtNodeCalc>()

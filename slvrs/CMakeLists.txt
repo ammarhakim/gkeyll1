@@ -124,11 +124,13 @@ set(lcslvrs_SOURCES
   LcSOLElectronDensityInitialization.cpp
   LcSOLElectronDensityInitialization.cpp
   LcSOLEnergyAtCellCalc.cpp
+  LcSOLEnergyAtCellCalc3D.cpp
   LcSOLEnergyAtNodeCalc.cpp
   LcSOLGeneralIntegralAtNodeCalc.cpp
   LcSOLHeatFluxCalc.cpp
   LcSOLInitializeDensity.cpp
   LcSOLIonDensityInitialization.cpp
+  LcSOLLenardBernsteinScaleCell3DUpdater.cpp
   LcSOLLenardBernsteinScaleCell5DUpdater.cpp
   LcSOLLocalPositivityUpdater.cpp
   LcSOLMaxwellianAtNodeCalc.cpp
