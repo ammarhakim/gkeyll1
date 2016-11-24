@@ -91,7 +91,6 @@ set (proto_SOURCES
   LcPoissonBracketOptUpdater.cpp
   LcPoissonBracketSOL3D.cpp
   LcPoissonBracketSimpleUpdater.cpp
-  LcPoissonBracketSimpleOldUpdater.cpp
   LcPoissonBracketUpdater.cpp
   LcPoissonBracketVlasovPoissonEquation3D.cpp
   LcProtoSolverRegistry.cpp
