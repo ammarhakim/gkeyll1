@@ -150,7 +150,6 @@ namespace Lucee
       nodalBasis->setIndex(idx);
       grid.setIndex(idx);
       grid.getCentroid(cellCentroid);
-
       double vCellLower = cellCentroid[1] - grid.getDx(1)/2.0;
       double vCellUpper = cellCentroid[1] + grid.getDx(1)/2.0;
 
@@ -167,8 +166,12 @@ namespace Lucee
         // Make sure we integrate in vParallel from vCutoff to vCellUpper
         for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
         {
+          idx[0] = globalRgn.getUpper(0)-1;
+          idx[1] = vIndex;
           idx[2] = muIndex;
           distfIn.setPtr(distfPtr, idx);
+          grid.setIndex(idx);
+          grid.getCentroid(cellCentroid);
           for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
           {
             // calculate quadrature points to integrate over
@@ -193,7 +196,6 @@ namespace Lucee
             mom2ParaTotal += 0.5*(1-refCutoff)*gaussEdgeWeights[gaussNodeIndex]*fAtPoint*physicalV*physicalV;
           }
         }
-
         // Get out of for-loop
         break;
       }
@@ -204,6 +206,8 @@ namespace Lucee
         {
           idx[2] = muIndex;
           distfIn.setPtr(distfPtr, idx);
+          grid.setIndex(idx);
+          grid.getCentroid(cellCentroid);
           
           // Copy nodes on right edge into a vector
           Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());

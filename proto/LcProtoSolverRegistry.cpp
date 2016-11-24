@@ -72,6 +72,7 @@
 #include <LcPoissonBracketImpUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
 #include <LcPoissonBracketSimpleUpdater.h>
+#include <LcPoissonBracketSimpleOldUpdater.h>
 #include <LcPoissonBracketUpdater.h>
 #include <LcProtoSolverRegistry.h>
 #include <LcRecordFieldDerivInCell.h>
@@ -259,6 +260,11 @@ namespace Lucee
       .append<Lucee::PoissonBracketSimpleUpdater<3> >()
       .append<Lucee::PoissonBracketSimpleUpdater<4> >()
       .append<Lucee::PoissonBracketSimpleUpdater<5> >()
+      .append<Lucee::PoissonBracketSimpleOldUpdater<1> >()
+      .append<Lucee::PoissonBracketSimpleOldUpdater<2> >()
+      .append<Lucee::PoissonBracketSimpleOldUpdater<3> >()
+      .append<Lucee::PoissonBracketSimpleOldUpdater<4> >()
+      .append<Lucee::PoissonBracketSimpleOldUpdater<5> >()
       
       .append<Lucee::NodalPoissonBracketUpdater>()
 
