@@ -1,7 +1,7 @@
 /**
  * @file	LcBGKCollUpdater.h
  *
- * @brief	Updater to get a right-hand-side for the Boltzmann eqation. For more details see "Greene; Improved Bhatnagar-Gross-Krook model of electron-ion collisions; The Physics of fluids; 1973".
+ * @brief	Updater to calculate RHS BGK source term. Cross temperature and bulk velocity based on the Greene (1973, Phys. Ffuids)
  */
 
 #ifndef LC_BGK_COLL_UPDATER_H
@@ -33,7 +33,7 @@ namespace Lucee
  * Maxwellian distribution.
  */
   template <unsigned CDIM, unsigned VDIM>
-  class BGKCollUpdater: public Lucee::UpdaterIfc
+  class BGKCollUpdater : public Lucee::UpdaterIfc
   {
     // Number of components for coordinate arrays etc.
     static const unsigned PNC = Lucee::CDIM<CDIM+VDIM>::N;
@@ -79,27 +79,13 @@ namespace Lucee
  */
       void declareTypes();
 
-      double evaluateMaxwell(double v[VDIM], double n, double vTerm);
+      double evaluateMaxwell(double n, 
+			     double v[VDIM], 
+			     double invVt[VDIM],
+			     double invVt2[VDIM]);
 
     private:
-      /** Collision frequency within a species */
-      double nuSelf;
-      /** Collision frequency with other species */
-      double nuCross;
-      /** Arbitrary parameter from the Greene paper */
-      double beta;
-      /** Mass of the speciaes */
-      double massSelf;
-      double invMassSelf;
-      /** Mass of the other species */
-      double massOther;
-      double invMassOther;
-      /** Inverse of the sum of mass */
-      double invMassSum;
-      /** Coefficients to speed up the calculation of cross temperatures */
-      double precalculation;
-
-      /** Pointer to phase space basis functions */
+     
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
       /** Pointer to configuration space basis functions */
       Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
@@ -109,7 +95,17 @@ namespace Lucee
 
       /** Mapping of node in phase-space to node in configuration space */
       std::vector<unsigned> phaseConfMap;
+
+      // loaded physical constants
+      double mass, elemCharge, permitivity;
+
+      // Maxwell distribution normalization factor 1/sqrt(2*pi)
+      double maxwellNorm;
+      // collision frequency constant factor
+      double collFreqConst;
+      // plasma parameter constant factor
+      double plasmaParamConst;
   };
 }
 
-#endif // LC_BGK_COLL_UPDATER_H
+#endif // LC_MAXWELL_DIST_INIT_H
