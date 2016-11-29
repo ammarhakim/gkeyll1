@@ -263,8 +263,9 @@ namespace Lucee
 	}
 	
 	// BGK Righ-hand-side
-	rhsPtr[nodeIdx] = collFreq[nodeIdx]*
+	rhsPtr[nodeIdx] = collFreq[phaseConfMap[nodeIdx]]*
 	  (evaluateMaxwell(n, w, invVt, invVt2) - distfPtr[nodeIdx]);
+	//rhsPtr[nodeIdx] = (evaluateMaxwell(n, w, invVt, invVt2) - distfPtr[nodeIdx]);
       }
     }
     
@@ -279,9 +280,9 @@ namespace Lucee
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
   double BGKCollUpdater<CDIM, VDIM>::evaluateMaxwell(double n, 
-						      double w[VDIM], 
-						      double invVt[VDIM],
-						      double invVt2[VDIM])
+						     double w[VDIM], 
+						     double invVt[VDIM],
+						     double invVt2[VDIM])
   {
     double result = n;
     for (unsigned dim = 0; dim<VDIM; ++dim) {
