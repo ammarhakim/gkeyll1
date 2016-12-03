@@ -89,13 +89,11 @@ namespace Lucee
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     int vol = grid.getGlobalRegion().getVolume();
-    //    std::cout<< "volume is " << vol << "\n";
+    //        std::cout<< "volume is " << vol << "\n";
 
     // temporary restriction of number of processors due to interfacing with FFTW.
     //    int mpi_size = grid.getComm()->getNumProcs();
     //    int mpi_rank = grid.getComm()->getRank();
-    //    std::cout<< "rank is " << mpi_rank << "\n"; // serial returns zero
-    //    std::cout<< "size is " << mpi_size << "\n";
 
     // We should be able to use this for an odd # of processors
     /*    if (mpi_size%2 != 0 && mpi_size != 1) {
@@ -106,15 +104,30 @@ namespace Lucee
 #ifdef HAVE_MPI
     TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
     ptrdiff_t N[NDIM]; // Global grid size for parallel version
-    ptrdiff_t alloc_local, local_n0; 
+    ptrdiff_t alloc_local, local_n0, alloc_local_back; 
     // here we only implement the 2-d version.
     for (unsigned i = 0; i < NDIM; ++i){
       N[i] = grid.getNumCells(i);
     }
-    alloc_local = fftw_mpi_local_size_many(NDIM, N, PSIZE, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
+
+    if (NDIM == 1) {
+      ptrdiff_t local_out0, local_out0_start; 
+      alloc_local = fftw_mpi_local_size_many_1d(N[0], PSIZE, comm->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE, &local_n0, &local_0_start, &local_out0, &local_out0_start); 
+      // in 1-D the allocation depends on transform direction
+      // Note that the number of cells per processor is only equal if the total domain is divisible by number of processors squared! This restriction is inherent to FFTW
+      alloc_local_back = fftw_mpi_local_size_many_1d(N[0], PSIZE, comm->getMpiComm(), FFTW_BACKWARD, FFTW_MEASURE, &local_n0, &local_0_start, &local_out0, &local_out0_start); 
+      if (local_out0 != local_n0) {
+        Lucee::Except lce("PeriodicCollisionlessHeatFluxUpdater::initialize: 'dimension error: input block != output block' ");
+        lce << std::endl;
+        throw lce;
+      }
+    } else {
+      alloc_local = fftw_mpi_local_size_many(NDIM, N, PSIZE, FFTW_MPI_DEFAULT_BLOCK,comm->getMpiComm(), &local_n0, &local_0_start);
+      alloc_local_back = alloc_local; 
+    }
     // the parallel allocation can be larger than the volume*PSIZE
     src_in_out.resize(alloc_local); 
-    sol_in_out.resize(alloc_local);
+    sol_in_out.resize(alloc_local_back);
 #else
     int N[NDIM]; // Global grid size for parallel version
     for (unsigned i = 0; i < NDIM; ++i){
@@ -211,9 +224,10 @@ namespace Lucee
 // complex<double> is the same as double [2] which FFTW uses and is
 // typedef-ed as fftw_complex. It is possible that this can cause
 // problems if some C++ compiler does not support this.
+
     f_src_in_out = reinterpret_cast<fftw_complex*> (&src_in_out[0]);
     f_sol_in_out = reinterpret_cast<fftw_complex*> (&sol_in_out[0]);
-  
+
 // now create plans for forward and inverse FFTs
 // fft_plan_many_dft(int rank, const int *n, int howmany, fftw_complex *in, const int *inembed, int istride, int idist, fftw_complex * out, const int *oembed, int ostride, int odist, int sign, unsigned flags); 
     int howmany = PSIZE; // transform all 6 components
@@ -223,7 +237,7 @@ namespace Lucee
     int odist = 1; 
 #ifdef HAVE_MPI
     // FFTW_MEASURE gives better speed at the cost of setup time. FFTW_PATIENT is supposed to be even better than MEASURE, but it does not seem to have an effect for small systems.
-    f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, comm->getMpiComm(), FFTW_FORWARD, FFTW_PATIENT);
+    f_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_src_in_out, f_src_in_out, comm->getMpiComm(), FFTW_FORWARD, FFTW_MEASURE);
     b_plan = fftw_mpi_plan_many_dft(NDIM, N, howmany, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, f_sol_in_out, f_sol_in_out, comm->getMpiComm(), FFTW_BACKWARD, FFTW_MEASURE);
 #else
     f_plan = fftw_plan_many_dft(
@@ -290,17 +304,11 @@ namespace Lucee
     for (unsigned i = 0; i < PSIZE; ++i){
       avgvTcomp[i] = avgvTcomp[i]/vol;
     }
-    //    avgvTxx = avgvTxx/vol; 
-    //    avgvTyy = avgvTyy/vol; 
-    //    avgvTzz = avgvTzz/vol; 
-    // subtract isotopric temperature from input data
     seq.reset(); // reset the sequencer
       
     while (seq.step()) {
       seq.fillWithIndex(idx); 
       tmFluid.setPtr(ptr, idx);
-      // only subtract from the diagonal parts. There should be a "correct" way to do this in 3d. FIXME: this requires deciding what physical model to use
-      // interleaved data
       if (closure == CL_GLOBAL) {
         // relax to the global isotropic temperature
         src_in_out[idxr.getIndex(idx)*PSIZE ] -= avgvT;
@@ -323,8 +331,8 @@ namespace Lucee
         for (unsigned i =0; i<PSIZE; ++i){
           src_in_out[idxr.getIndex(idx)*PSIZE + i] -= avgvTcomp[i];
         }
-        // cannot reach here
       } else {
+        // cannot reach here
       }
     }
     seq.reset();
