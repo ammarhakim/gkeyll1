@@ -52,6 +52,10 @@ namespace Lucee
       fnRef = tbl.getFunctionRef("alpha");
     else
       throw Lucee::Except("SOLLenardBernsteinScaleCell5DUpdater::readInput: Must supply a collision frequency function as alpha.");
+
+    onlyIncrement = false;
+    if (tbl.hasBool("onlyIncrement"))
+      onlyIncrement = tbl.getBool("onlyIncrement");
   }
 
   void
@@ -159,8 +163,10 @@ namespace Lucee
       // Set fOut to give the right energy at this node
       for (int nodeIndex = 0; nodeIndex < nlocal5d; nodeIndex++)
       {
-        double startVal = distfOutPtr[nodeIndex];
-        distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + dt*scaleFactor*distfDiffPtr[nodeIndex];
+        if (onlyIncrement == false)
+          distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + dt*scaleFactor*distfDiffPtr[nodeIndex];
+        else
+          distfOutPtr[nodeIndex] = distfOutPtr[nodeIndex] + scaleFactor*distfDiffPtr[nodeIndex];
       }
     }
 

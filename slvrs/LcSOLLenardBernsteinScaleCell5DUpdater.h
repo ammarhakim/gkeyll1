@@ -83,7 +83,11 @@ namespace Lucee
       int fnRef;
 /** mass of species */
       double speciesMass;
-
+/** Flag to indicate if to only compute increments
+ *  This is not the usual onlyIncrement flag. Instead, it
+ *  ignores a dt factor accumulated to fOut (see .cpp)
+ */
+      bool onlyIncrement;
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

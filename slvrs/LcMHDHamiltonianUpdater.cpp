@@ -1,7 +1,7 @@
 /**
  * @file	LcMHDHamiltonianUpdater.cpp
  *
- * @brief	Computes the second-order gyrokinetic MHD Hamiltonian, without the mass factor
+ * @brief	Computes the second-order gyrokinetic MHD Hamiltonian, without the mass factor (n*phi*phi)
  */
 
 // config stuff
