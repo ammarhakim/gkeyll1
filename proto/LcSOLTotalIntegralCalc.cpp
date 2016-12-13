@@ -16,6 +16,7 @@
 namespace Lucee
 {
   template <> const char *SOLTotalIntegralCalc<1>::id = "SOLTotalIntegralCalc1D";
+  template <> const char *SOLTotalIntegralCalc<2>::id = "SOLTotalIntegralCalc2D";
   template <> const char *SOLTotalIntegralCalc<3>::id = "SOLTotalIntegralCalc3D";
 
   template <unsigned NDIM>
@@ -160,5 +161,6 @@ namespace Lucee
 
   // instantiations
   template class SOLTotalIntegralCalc<1>;
+  template class SOLTotalIntegralCalc<2>;
   template class SOLTotalIntegralCalc<3>;
 }

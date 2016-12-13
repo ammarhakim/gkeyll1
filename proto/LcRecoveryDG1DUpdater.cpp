@@ -3,7 +3,7 @@
  *
  * @brief	Updater to perform recovery DG calculation for 1d problems.
  * Currently supports calculation of second and third derivatives of input field
- * Note that first derivative calculation doesn't work
+ * Note that first derivative calculation "doesn't work"
  */
 
 // config stuff

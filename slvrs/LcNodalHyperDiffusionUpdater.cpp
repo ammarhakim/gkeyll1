@@ -101,7 +101,7 @@ namespace Lucee
     nodalBasis->setIndex(idx);
 
 // get various matrices needed
-    nodalBasis->getDiffusionMatrices(iMat, lowerMat, upperMat);
+    nodalBasis->getHyperDiffusionMatrices(iMat, lowerMat, upperMat);
 
 // pre-multiply each of the matrices by inverse matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
@@ -142,14 +142,14 @@ namespace Lucee
 
 // check time-step
     double cflm = 1.1*cfl;
-    double cfla = alpha*dt/(dxMin*dxMin);
+    double cfla = 16*std::fabs(alpha)*dt/(dxMin*dxMin*dxMin*dxMin);
     if (cfla>cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 
     double fact = 1.0;
     if (onlyIncrement)
     {
-// if only increments are requested, the updater computes alpha*d^2/dx^x inpFld
+// if only increments are requested, the updater computes alpha*d^4/dx^4 inpFld
       diffOut = 0.0;
       fact = alpha;
     }
