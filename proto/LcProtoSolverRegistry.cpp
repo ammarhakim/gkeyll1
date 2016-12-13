@@ -324,6 +324,7 @@ namespace Lucee
       .append<Lucee::SOLTotalEnergyCalc>()
       .append<Lucee::SOLUpperXPotentialBcUpdater>()
       .append<Lucee::SOLTotalIntegralCalc<1> >()
+      .append<Lucee::SOLTotalIntegralCalc<2> >()
       .append<Lucee::SOLTotalIntegralCalc<3> >()
 
       .append<Lucee::ThreeWaveInteractSrcUpdater>()
