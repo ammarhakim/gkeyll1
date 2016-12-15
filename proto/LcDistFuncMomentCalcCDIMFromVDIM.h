@@ -77,6 +77,8 @@ namespace Lucee
     private:
 /** Flag to only calculate total energy instead of all 6 stress tensor components */
       bool scalarPtclEnergy;
+/** Flag to only calculate vector heat flux instead of all 10 heat flux tensor components */
+      bool vectorHeatFlux;
 /** Pointer to nodal phase space (CDIM+VDIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
 /** Pointer to nodal configuration space (CDIM) basis functions to use */
@@ -96,6 +98,8 @@ namespace Lucee
       std::vector<Eigen::MatrixXd> mom1Matrix;
 /** Second moment matrix */
       std::vector<Eigen::MatrixXd> mom2Matrix;
+/** Third moment matrix */
+      std::vector<Eigen::MatrixXd> mom3Matrix;
 /** Number of moments being computed (vector or tensor) */
       unsigned nMom;
 /**

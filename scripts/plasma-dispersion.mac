@@ -43,6 +43,7 @@ writeDampRates(fname, kl, ku, steps) := block([sz, fh, kcurr, guess, r],
   guess : initialGuess(kl), /** One hopes this converges */
   for s : 0 thru steps do (
     r : findRoot(kcurr, guess, 1e-6),
+    print("Damping rate ", float(sqrt(2)*kcurr*imagpart(r)), " for k ", kcurr),
     write_data([kcurr, float(sqrt(2)*kcurr*imagpart(r))], fh),
     guess : r, /** Use previous value as a initial for next root */
     kcurr : kcurr + sz

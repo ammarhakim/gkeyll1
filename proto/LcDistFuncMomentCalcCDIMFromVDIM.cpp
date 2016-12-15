@@ -88,9 +88,14 @@ namespace Lucee
     if (tbl.hasBool("scalarPtclEnergy"))
       scalarPtclEnergy = tbl.getBool("scalarPtclEnergy");
 
-    if (calcMom > 2)
+    // flag for only calculating vector heat flux instead of all 10 heat flux tensor components
+    vectorHeatFlux = false;
+    if (tbl.hasBool("vectorHeatFlux"))
+      vectorHeatFlux = tbl.getBool("vectorHeatFlux");
+
+    if (calcMom > 3)
     {
-      Lucee::Except lce("DistFuncMomentCalcCDIMFromVDIM::readInput: Only 'moment' 0, 1, or 2 is supported. ");
+      Lucee::Except lce("DistFuncMomentCalcCDIMFromVDIM::readInput: Only 'moment' 0, 1, 2, or 3 is supported. ");
       lce << "Supplied " << calcMom << " instead";
       throw lce;
     }
@@ -184,6 +189,10 @@ namespace Lucee
       nMom = VDIM*(VDIM+1)/2;
     else if (calcMom == 2 && scalarPtclEnergy == true)
       nMom = 1;
+    else if (calcMom == 3 && vectorHeatFlux == false)
+      nMom = VDIM*(VDIM+1)*(VDIM+2)/6;
+    else if (calcMom == 3 && vectorHeatFlux == true)
+      nMom = VDIM;
 
     mom0Matrix = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);    
     for (int i=0; i<nlocalConf; ++i)
@@ -258,6 +267,45 @@ namespace Lucee
         ctr = ctr+1;
       }
     }
+
+    mom3Matrix = std::vector<Eigen::MatrixXd>(VDIM*(VDIM+1)*(VDIM+2)/6);  
+    int ctrHeatFlux = 0; // counter needed for indexing since tensor is symmetric    
+    for (int h=0; h<VDIM; ++h)
+    {
+      for (int g=h; g<VDIM; ++g)
+      {
+        for (int f=g; f<VDIM; ++f)
+        {
+          mom3Matrix[ctr] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
+          int momDir = h+CDIM;
+          int momDir2 = g+CDIM;
+          int momDir3 = f+CDIM;
+          // Compute integral of phiConf_i * phiPhase_j
+          for (int i=0; i<nlocalConf; ++i)
+          {
+            for (int j=0; j<nlocalPhase; ++j)
+            {
+              double integralResultThirdMoment = 0.0;
+              for (int gaussIndex = 0; gaussIndex < volWeightsPhase.size(); ++gaussIndex)
+              {
+                double baseIntegral 
+                  = volWeightsPhase[gaussIndex]*volQuadConf(phaseConfMap[gaussIndex], i)*volQuadPhase(gaussIndex, j);
+                // Get coordinate of quadrature point in direction momDir
+                double coord2Val1 = volCoordsPhase(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
+                double coord2Val2 = volCoordsPhase(gaussIndex, momDir2)*grid.getDx(momDir2)/2.0;
+                double coord2Val3 = volCoordsPhase(gaussIndex, momDir3)*grid.getDx(momDir3)/2.0;
+                integralResultThirdMoment += coord2Val1*coord2Val2*coord2Val3*baseIntegral;
+              }
+              mom3Matrix[ctrHeatFlux](i,j) = integralResultThirdMoment;
+            }
+          }
+          // Multiply matrices by inverse of mass matrix
+          mom3Matrix[ctrHeatFlux] = massMatrixConf.inverse()*mom3Matrix[ctrHeatFlux];
+          ctrHeatFlux = ctrHeatFlux+1;
+        }
+      }
+    }
+
   }
 
   template <unsigned CDIM, unsigned VDIM>
@@ -322,7 +370,7 @@ namespace Lucee
     // Temporary array to make computation of particle energy cleaner
     std::vector<Eigen::VectorXd> resultVectorEnergy = std::vector<Eigen::VectorXd>(VDIM);
     for (int i=0; i<VDIM; ++i)
-      resultVectorEnergy[i] = Eigen::VectorXd::Zero(nlocalConf);  
+      resultVectorEnergy[i] = Eigen::VectorXd::Zero(nlocalConf);
 
     // accumulate contribution to moment from this cell
     while(seq.step())
@@ -353,7 +401,6 @@ namespace Lucee
       {
         if (scalarPtclEnergy == true)
         { // only particle energy requested
-          resultVector[0] *= 0.0;
           int ctr = 0;
           for (int h=0; h<VDIM; ++h)
           {
@@ -380,11 +427,110 @@ namespace Lucee
           }
         }
       }
+      else if (calcMom == 3)
+      {
+        //The nature of this tensor makes it challenging to handle, so it is hard-coded
+        if (VDIM == 1)
+        {
+          if (vectorHeatFlux == true)
+          {
+            resultVector[0].noalias() = 0.5*(mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix)*distfVec;
+          }
+          else
+          {
+            resultVector[0].noalias() =
+              (mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix)*distfVec;
+          }
+        }
+        else if (VDIM == 2)
+        {
+          if (vectorHeatFlux == true)
+          {
+            resultVector[0].noalias() = 0.5*(mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix
+              +mom3Matrix[2] + xc[0+CDIM]*mom2Matrix[2] + 2.0*xc[1+CDIM]*mom2Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[0] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[1]
+                + xc[0+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[1].noalias() = 0.5*(mom3Matrix[1] + 2.0*xc[0+CDIM]*mom2Matrix[1] + xc[1+CDIM]*mom2Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[1] 
+              + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[1+CDIM]*mom0Matrix+mom3Matrix[3] + 3.0*xc[1+CDIM]*mom2Matrix[3] 
+              + 3.0*xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+          }
+          else
+          {
+            resultVector[0].noalias() =
+              (mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix)*distfVec;
+            resultVector[1].noalias() =
+              (mom3Matrix[1] + 2.0*xc[0+CDIM]*mom2Matrix[1] + xc[1+CDIM]*mom2Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[1] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[2].noalias() =
+              (mom3Matrix[2] + xc[0+CDIM]*mom2Matrix[2] + 2.0*xc[1+CDIM]*mom2Matrix[1] 
+                + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[0] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[1] 
+                + xc[0+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[3].noalias() =
+              (mom3Matrix[3] + 3.0*xc[1+CDIM]*mom2Matrix[2] + 3.0*xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+          }
+        }
+        else if (VDIM == 3)
+        {
+          if (vectorHeatFlux == true)
+          {
+            resultVector[0].noalias() = 0.5*(mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix
+              + mom3Matrix[3] + xc[0+CDIM]*mom2Matrix[3] + 2.0*xc[1+CDIM]*mom2Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[0] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[1] 
+              + xc[0+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix + mom3Matrix[5] + xc[0+CDIM]*mom2Matrix[5] + 2.0*xc[2+CDIM]*mom2Matrix[2] + xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[0] 
+              + 2.0*xc[0+CDIM]*xc[2+CDIM]*mom1Matrix[2] + xc[0+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[1].noalias() = 0.5*(mom3Matrix[1] + 2.0*xc[0+CDIM]*mom2Matrix[1] + xc[1+CDIM]*mom2Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[1] 
+              + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[1+CDIM]*mom0Matrix + mom3Matrix[6] + 3.0*xc[1+CDIM]*mom2Matrix[3] 
+              + 3.0*xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix + mom3Matrix[8] + xc[1+CDIM]*mom2Matrix[5] 
+              + 2.0*xc[2+CDIM]*mom2Matrix[4] + xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[1] + 2.0*xc[1+CDIM]*xc[2+CDIM]*mom1Matrix[2]+ xc[1+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[2].noalias() = 0.5*(mom3Matrix[2] + 2.0*xc[0+CDIM]*mom2Matrix[2] + xc[2+CDIM]*mom2Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[2] 
+              + 2.0*xc[0+CDIM]*xc[2+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[2+CDIM]*mom0Matrix + mom3Matrix[7] + xc[2+CDIM]*mom2Matrix[3] 
+              + 2.0*xc[1+CDIM]*mom2Matrix[4] + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[2] + 2.0*xc[1+CDIM]*xc[2+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*xc[2+CDIM]*mom0Matrix
+              + mom3Matrix[9] + 3.0*xc[2+CDIM]*mom2Matrix[5] + 3.0*xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[2] + xc[2+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+          }
+          else
+          {
+            resultVector[0].noalias() =
+              (mom3Matrix[0] + 3.0*xc[0+CDIM]*mom2Matrix[0] + 3.0*xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[0] + xc[0+CDIM]*xc[0+CDIM]*xc[0+CDIM]*mom0Matrix)*distfVec;
+            resultVector[1].noalias() =
+              (mom3Matrix[1] + 2.0*xc[0+CDIM]*mom2Matrix[1] + xc[1+CDIM]*mom2Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[1] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[2].noalias() =
+              (mom3Matrix[2] + 2.0*xc[0+CDIM]*mom2Matrix[2] + xc[2+CDIM]*mom2Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*mom1Matrix[2] + 2.0*xc[0+CDIM]*xc[2+CDIM]*mom1Matrix[0] 
+                + xc[0+CDIM]*xc[0+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[3].noalias() =
+              (mom3Matrix[3] + xc[0+CDIM]*mom2Matrix[3] + 2.0*xc[1+CDIM]*mom2Matrix[1] 
+                + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[0] + 2.0*xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[1] 
+                + xc[0+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[4].noalias() =
+              (mom3Matrix[4] + xc[0+CDIM]*mom2Matrix[4] + xc[1+CDIM]*mom2Matrix[2] + xc[2+CDIM]*mom2Matrix[1] 
+                + xc[0+CDIM]*xc[1+CDIM]*mom1Matrix[2] + xc[0+CDIM]*xc[2+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[2+CDIM]*mom1Matrix[0]
+                + xc[0+CDIM]*xc[1+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[5].noalias() =
+              (mom3Matrix[5] + xc[0+CDIM]*mom2Matrix[5] + 2.0*xc[2+CDIM]*mom2Matrix[2] 
+                + xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[0] + 2.0*xc[0+CDIM]*xc[2+CDIM]*mom1Matrix[2] 
+                + xc[0+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[6].noalias() =
+              (mom3Matrix[6] + 3.0*xc[1+CDIM]*mom2Matrix[3] + 3.0*xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[1] + xc[1+CDIM]*xc[1+CDIM]*xc[1+CDIM]*mom0Matrix)*distfVec;
+            resultVector[7].noalias() =
+              (mom3Matrix[7] + xc[2+CDIM]*mom2Matrix[3] + 2.0*xc[1+CDIM]*mom2Matrix[4] 
+                + xc[1+CDIM]*xc[1+CDIM]*mom1Matrix[2] + 2.0*xc[1+CDIM]*xc[2+CDIM]*mom1Matrix[1]
+                + xc[1+CDIM]*xc[1+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[8].noalias() =
+              (mom3Matrix[8] + xc[1+CDIM]*mom2Matrix[5] + 2.0*xc[2+CDIM]*mom2Matrix[4] 
+                + xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[1] + 2.0*xc[1+CDIM]*xc[2+CDIM]*mom1Matrix[2]
+                + xc[1+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+            resultVector[9].noalias() =
+              (mom3Matrix[9] + 3.0*xc[2+CDIM]*mom2Matrix[5] + 3.0*xc[2+CDIM]*xc[2+CDIM]*mom1Matrix[2] + xc[2+CDIM]*xc[2+CDIM]*xc[2+CDIM]*mom0Matrix)*distfVec;
+          }
+        }
+
+      }
 
       for (int i=0; i<nlocalConf; ++i)
         for (int j=0; j<nMom; ++j)
           momentPtr[i*nMom+j] += resultVector[j](i);
-    }
+      }
 
 // Above loop computes moments on local phase-space domain. We need to
 // sum across velocity space to get total moment on configuration
