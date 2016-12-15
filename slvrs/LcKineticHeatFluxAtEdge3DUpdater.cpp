@@ -103,21 +103,25 @@ namespace Lucee
       momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] +
       momentsAtEdgesElc[2]*B0;
 
-    /*if (elcHeatFluxRight < 0.0)
-    {
-      std::cout << "term1 = " << 0.5*elcMass*momentsAtEdgesElc[1] << std::endl;
-      std::cout << "term2 = " << -momentsAtEdgesElc[0]*ELEMENTARY_CHARGE*phiPtr[nlocal-1] << std::endl;
-      std::cout << "term3 = " << momentsAtEdgesElc[2]*B0 << std::endl;
-    }*/
+    // Find value of the following input fields at the left-most edge of the domain
+    phiIn.setPtr(phiPtr, globalRgn.getLower(0));
 
-    std::vector<double> data(3);
+    double ionHeatFluxLeft = 0.5*ionMass*momentsAtEdgesIon[4] + 
+      momentsAtEdgesIon[3]*ELEMENTARY_CHARGE*phiPtr[0] +
+      momentsAtEdgesIon[5]*B0;
+
+    double elcHeatFluxLeft = 0.5*elcMass*momentsAtEdgesElc[4] - 
+      momentsAtEdgesElc[3]*ELEMENTARY_CHARGE*phiPtr[0] +
+      momentsAtEdgesElc[5]*B0;
+
+    std::vector<double> data(6);
     data[0] = ionHeatFluxRight + elcHeatFluxRight;
     data[1] = ionHeatFluxRight;
     data[2] = elcHeatFluxRight;
+    data[3] = ionHeatFluxLeft + elcHeatFluxLeft;
+    data[4] = ionHeatFluxLeft;
+    data[5] = elcHeatFluxLeft;
 
-    //std::cout << "momentsAtEdgesElc[0] = " << momentsAtEdgesElc[0] << std::endl;
-    //std::cout << "momentsAtEdgesIon[0] = " << momentsAtEdgesIon[0] << std::endl;
-    
     qVsTime.appendData(t, data);
 
     if (computeSheathCoefficient == true)
