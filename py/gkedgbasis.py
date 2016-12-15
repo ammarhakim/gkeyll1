@@ -109,6 +109,77 @@ def interpOnMesh5D(cMat, qIn):
                         n = n+1
     return qout
 
+def computeIntegratedQuantity1D(weights, qIn, Xc):
+    nNodes = weights.shape[0]
+    nx = qIn.shape[0]
+    dx = Xc[1]-Xc[0]
+    qout = 0.0
+    for j in range(nx):
+        for i in range(nNodes):
+            qout = qout + 0.5*dx*weights[i]*qIn[j, i]
+    return qout
+
+def computeIntegratedQuantity2D(weights, qIn, Xc, Yc):
+    nNodes = weights.shape[0]
+    nx = qIn.shape[0]
+    ny = qIn.shape[1]
+    dx = Xc[1]-Xc[0]
+    dy = Yc[1]-Yc[0]
+    qout = 0.0
+    for k in range(nx):
+        for j in range(ny):
+            for i in range(nNodes):
+                qout = qout + 0.5*dx*dy*weights[i]*qIn[k, j, i]
+    return qout
+
+def computeIntegratedQuantity3D(weights, qIn, Xc, Yc, Zc):
+    nNodes = weights.shape[0]
+    nx = qIn.shape[0]
+    ny = qIn.shape[1]
+    nz = qIn.shape[2]
+    dx = Xc[1]-Xc[0]
+    dy = Yc[1]-Yc[0]
+    dz = Zc[1]-Zc[0]
+    qout = 0.0
+    for l in range(nx):
+        for k in range(ny):
+            for j in range(nz):
+                for i in range(nNodes):
+                    qout = qout + 0.5*dx*dy*dz*weights[i]*qIn[l, k, j, i]
+    return qout
+
+# def computeIntegratedQuantity4D(weights, qIn):
+#     nNodes = weights.shape[0]
+#     nx = qIn.shape[0]
+#     ny = qIn.shape[1]
+#     nz = qIn.shape[2]
+#     nv = qIn.shape[3]
+#     qout = 0.0
+#     for m in range(nx):
+#         for l in range(ny):
+#             for k in range(nz):
+#                 for j in range(nv):
+#                     for i in range(nNodes):
+#                         qout = qout +  weights[i]*qIn[m, l, k, j, i]
+#     return qout
+
+# def computeIntegratedQuantity5D(weights, qIn):
+#     nNodes = weights.shape[0]
+#     nx = qIn.shape[0]
+#     ny = qIn.shape[1]
+#     nz = qIn.shape[2]
+#     nv = qIn.shape[3]
+#     nu = qIn.shape[4]
+#     qout = 0.0
+#     for n in range(nx):
+#         for m in range(ny):
+#             for l in range(nz):
+#                 for k in range(nv):
+#                     for j in range(nu):
+#                         for i in range(nNodes):
+#                             qout = qout +  weights[i]*qIn[n, m, l, k, j, i]
+#     return qout
+
 class GkeDgBasis:
     r"""__init__(dat : GkeData, numNodes : int) -> GkeDgData
 
@@ -184,10 +255,15 @@ class GkeDgLobatto1DPolyOrder1Basis(GkeDgBasis):
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 2)
         self.cMat_i2 = gid.GkeDgLobatto1DPolyOrder1Basis.cMat_i2
+        self.cWeight_i2 = gid.GkeDgLobatto1DPolyOrder1Weights.cWeight_i2
 
     def project(self, c):
         qn = self._getRaw(c)
         return makeMesh(2, self.Xc[0]), interpOnMesh1D(self.cMat_i2, qn)
+
+    def integrate(self, c):
+        qn = self._getRaw(c)
+        return computeIntegratedQuantity1D(self.cWeight_i2, qn, self.Xc[0])
 
 #################
 class GkeDgLobatto1DPolyOrder2Basis(GkeDgBasis):
@@ -197,10 +273,15 @@ class GkeDgLobatto1DPolyOrder2Basis(GkeDgBasis):
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 3)
         self.cMat_i3 = gid.GkeDgLobatto1DPolyOrder2Basis.cMat_i3
+        self.cWeight_i3 = gid.GkeDgLobatto1DPolyOrder2Weights.cWeight_i3
 
     def project(self, c):
         qn = self._getRaw(c)
         return makeMesh(3, self.Xc[0]), interpOnMesh1D(self.cMat_i3, qn)
+
+    def integrate(self, c):
+        qn = self._getRaw(c)
+        return computeIntegratedQuantity1D(self.cWeight_i3, qn, self.Xc[0])
 
 #################
 class GkeDgLobatto1DPolyOrder3Basis(GkeDgBasis):
@@ -210,10 +291,15 @@ class GkeDgLobatto1DPolyOrder3Basis(GkeDgBasis):
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 4)
         self.cMat_i4 = gid.GkeDgLobatto1DPolyOrder3Basis.cMat_i4
+        self.cWeight_i4 = gid.GkeDgLobatto1DPolyOrder3Weights.cWeight_i4
 
     def project(self, c):
         qn = self._getRaw(c)
         return makeMesh(4, self.Xc[0]), interpOnMesh1D(self.cMat_i4, qn)
+
+    def integrate(self, c):
+        qn = self._getRaw(c)
+        return computeIntegratedQuantity1D(self.cWeight_i4, qn, self.Xc[0])
 
 #################
 class GkeDgLobatto1DPolyOrder4Basis(GkeDgBasis):
@@ -223,10 +309,15 @@ class GkeDgLobatto1DPolyOrder4Basis(GkeDgBasis):
     def __init__(self, dat):
         GkeDgBasis.__init__(self, dat, 5)
         self.cMat_i5 = gid.GkeDgLobatto1DPolyOrder4Basis.cMat_i5
+        self.cWeight_i5 = gid.GkeDgLobatto1DPolyOrder4Weights.cWeight_i5
 
     def project(self, c):
         qn = self._getRaw(c)
         return makeMesh(5, self.Xc[0]), interpOnMesh1D(self.cMat_i5, qn)
+
+    def integrate(self, c):
+        qn = self._getRaw(c)
+        return computeIntegratedQuantity1D(self.cWeight_i5, qn, self.Xc[0])
 
 #################
 class GkeDgLobatto2DPolyOrder1Basis(GkeDgBasis):
