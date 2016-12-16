@@ -276,7 +276,7 @@ namespace Lucee
       {
         for (int f=g; f<VDIM; ++f)
         {
-          mom3Matrix[ctr] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
+          mom3Matrix[ctrHeatFlux] = Eigen::MatrixXd::Zero(nlocalConf, nlocalPhase);
           int momDir = h+CDIM;
           int momDir2 = g+CDIM;
           int momDir3 = f+CDIM;
@@ -401,6 +401,7 @@ namespace Lucee
       {
         if (scalarPtclEnergy == true)
         { // only particle energy requested
+          resultVector[0] *= 0.0;
           int ctr = 0;
           for (int h=0; h<VDIM; ++h)
           {
@@ -530,7 +531,7 @@ namespace Lucee
       for (int i=0; i<nlocalConf; ++i)
         for (int j=0; j<nMom; ++j)
           momentPtr[i*nMom+j] += resultVector[j](i);
-      }
+    }
 
 // Above loop computes moments on local phase-space domain. We need to
 // sum across velocity space to get total moment on configuration
