@@ -72,12 +72,9 @@ namespace Lucee
     else
       throw Lucee::Except("BGKCollUpdater::readInput: Must specify permitivity using 'permitivity'");
 
-    // calculate constants parts of the collision frequency and plasma
-    // parameter
+    // calculate constants parts of the collision frequency 
     collFreqConst = elemCharge*elemCharge*elemCharge*elemCharge/
-      (2*M_PI*permitivity*permitivity*sqrt(mass));
-    double temp = sqrt(permitivity*mass/(elemCharge*elemCharge));
-    plasmaParamConst = temp*temp*temp;
+      (2*M_PI*permitivity*permitivity*mass*mass);
   }
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
@@ -197,11 +194,6 @@ namespace Lucee
     std::vector<double> invVTerm(numNodesConf);
     
     std::vector<double> collFreq(numNodesConf);
-
-    double n;
-    double w[VDIM]; // v - u (velocity with respect to the bulk velocity)
-    double invVt2;
-    double invVt;
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
@@ -239,8 +231,9 @@ namespace Lucee
 	    return Lucee::UpdaterStatus(false, 0);
 
 	  // ARBITRARY FLOOR! NEEDS MORE THINKING
-	  if (vt2 < 0.3)
-	    vt2 = 0.3;
+	  double floor = 0.3/mass;
+	  if (vt2 < floor)
+	    vt2 = floor;
 	  vTerm2i(nodeIdx, dim) = vt2;
 
 	}
@@ -263,16 +256,17 @@ namespace Lucee
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) {
 	// get number density
-	n = numDens[phaseConfMap[nodeIdx]];
+	double n = numDens[phaseConfMap[nodeIdx]];
 	
 	// get volocity for Maxwellian
+	double w[VDIM];
 	for (unsigned dim = 0; dim<VDIM; ++dim)
 	  w[dim] = phaseNodeCoords(nodeIdx, CDIM+dim)-
 	    vDrift(phaseConfMap[nodeIdx], dim);
 	
 	// get thermal velocity
-	invVt2 = invVTerm2[phaseConfMap[nodeIdx]];
-	invVt = invVTerm[phaseConfMap[nodeIdx]];
+	double invVt2 = invVTerm2[phaseConfMap[nodeIdx]];
+	double invVt = invVTerm[phaseConfMap[nodeIdx]];
 	
 	// BGK Righ-hand-side
 	rhsPtr[nodeIdx] = collFreq[phaseConfMap[nodeIdx]]*
