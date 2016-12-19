@@ -81,8 +81,8 @@ namespace Lucee
 
       double evaluateMaxwell(double n, 
 			     double v[VDIM], 
-			     double invVt[VDIM],
-			     double invVt2[VDIM]);
+			     double invVt,
+			     double invVt2);
 
     private:
      
