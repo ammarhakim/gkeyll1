@@ -75,7 +75,7 @@ namespace Lucee
     // calculate constants parts of the collision frequency and plasma
     // parameter
     collFreqConst = elemCharge*elemCharge*elemCharge*elemCharge/
-      (2*M_PI*permitivity*permitivity*mass*mass);
+      (2*M_PI*permitivity*permitivity*sqrt(mass));
     double temp = sqrt(permitivity*mass/(elemCharge*elemCharge));
     plasmaParamConst = temp*temp*temp;
   }
@@ -157,6 +157,9 @@ namespace Lucee
 
     Lucee::Field<NDIM, double>& rhs =
       this->getOut<Lucee::Field<NDIM, double> >(0);
+    Lucee::Field<CDIM, double>& collFreqOut =
+      this->getOut<Lucee::Field<CDIM, double> >(1);
+
 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     Lucee::Region<NDIM, double> compSpace = grid.getComputationalSpace();
@@ -171,6 +174,7 @@ namespace Lucee
       secondMoment.createConstPtr();
 
     Lucee::FieldPtr<double> rhsPtr = rhs.createPtr();
+    Lucee::FieldPtr<double> collFreqOutPtr = collFreqOut.createPtr();
 
     Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
 
@@ -187,66 +191,76 @@ namespace Lucee
 
     Lucee::Matrix<double> vDrift(numNodesConf, VDIM);
 
-    Lucee::Matrix<double> vTerm(numNodesConf, VDIM);
-    Lucee::Matrix<double> invVTerm2(numNodesConf, VDIM);
-    Lucee::Matrix<double> invVTerm(numNodesConf, VDIM);
+    Lucee::Matrix<double> vTerm2i(numNodesConf, VDIM);
+    std::vector<double> vTerm2(numNodesConf);
+    std::vector<double> invVTerm2(numNodesConf);
+    std::vector<double> invVTerm(numNodesConf);
     
-    std::vector<double> plasmaParam(numNodesConf);
     std::vector<double> collFreq(numNodesConf);
 
     double n;
     double w[VDIM]; // v - u (velocity with respect to the bulk velocity)
-    double invVt2[VDIM];
-    double invVt[VDIM];
+    double invVt2;
+    double invVt;
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
-      rhs.setPtr(rhsPtr, idx);
 
       distf.setPtr(distfPtr, idx);
       zerothMoment.setPtr(zerothMomentPtr, idx);
       firstMoment.setPtr(firstMomentPtr, idx);
       secondMoment.setPtr(secondMomentPtr, idx);
+
+      rhs.setPtr(rhsPtr, idx);
+      collFreqOut.setPtr(collFreqOutPtr, idx);
       
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
+	double vt2;
 	numDens[nodeIdx] = zerothMomentPtr[nodeIdx];
 	invNumDens[nodeIdx] = 1/numDens[nodeIdx];
 
 	// add number density dependance to the collision frequency
-	// and plasma parameter
-	collFreq[nodeIdx] = collFreqConst*numDens[nodeIdx];
-	plasmaParam[nodeIdx] = plasmaParamConst*sqrt(invNumDens[nodeIdx]);
+	// 10 is for Coulomb logarithm
+	collFreq[nodeIdx] = 10*collFreqConst*numDens[nodeIdx];
+	//plasmaParam[nodeIdx] = plasmaParamConst*sqrt(invNumDens[nodeIdx]);
 
 	// gather all velocity directions
 	for (unsigned dim = 0; dim<VDIM; ++dim) {
 	  vDrift(nodeIdx, dim) = invNumDens[nodeIdx] *
 	    firstMomentPtr[nodeIdx*VDIM + dim];
 	  
-	  double temp = invNumDens[nodeIdx] *
+	  vt2 = invNumDens[nodeIdx] *
 	    secondMomentPtr[nodeIdx*VDIM + dim] -
 	    vDrift(nodeIdx, dim)*vDrift(nodeIdx, dim);
-	  if (temp < 0)
+	  if (vt2 < 0)
 	    return Lucee::UpdaterStatus(false, 0);
-	  vTerm(nodeIdx, dim) = temp;
-	  invVTerm2(nodeIdx, dim) = 1/temp;
-	  invVTerm(nodeIdx, dim) = sqrt(invVTerm2(nodeIdx, dim));
 
-	  /* THIS IS A HACK 
+	  // ARBITRARY FLOOR! NEEDS MORE THINKING
+	  if (vt2 < 0.3)
+	    vt2 = 0.3;
+	  vTerm2i(nodeIdx, dim) = vt2;
 
-	     The code will only work for 1V. It is easier to adapt it
-	     for 3V, but 2V is a bit tricky. It is left to be dealt
-	     with in the future. */
-	  collFreq[nodeIdx] *= invVTerm(nodeIdx, dim)*
-	    invVTerm(nodeIdx, dim)*invVTerm(nodeIdx, dim);
-	  plasmaParam[nodeIdx] *= vTerm(nodeIdx, dim)*
-	    vTerm(nodeIdx, dim)*vTerm(nodeIdx, dim);
 	}
-	// I need to check 2 pi factor...
-	collFreq[nodeIdx] *= log(2*M_PI*plasmaParam[nodeIdx]);
+
+	if (VDIM == 1) {
+	  vTerm2[nodeIdx] = vTerm2i(nodeIdx, 0);
+	} else if (VDIM == 2) {
+	  vTerm2[nodeIdx] = (vTerm2i(nodeIdx, 0) + 2*vTerm2i(nodeIdx, 1))/3.f;
+	} else {
+	  vTerm2[nodeIdx] = 
+	    (vTerm2i(nodeIdx, 0)+vTerm2i(nodeIdx, 1)+vTerm2i(nodeIdx, 2))/3.f;
+	}
+	invVTerm2[nodeIdx] = 1/vTerm2[nodeIdx];
+	invVTerm[nodeIdx] = sqrt(invVTerm2[nodeIdx]);
+
+	collFreq[nodeIdx] *= 
+	  invVTerm[nodeIdx]*invVTerm[nodeIdx]*invVTerm[nodeIdx];
+	collFreqOutPtr[nodeIdx] = collFreq[nodeIdx];
       }
+
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) {
 	// get number density
 	n = numDens[phaseConfMap[nodeIdx]];
@@ -257,15 +271,12 @@ namespace Lucee
 	    vDrift(phaseConfMap[nodeIdx], dim);
 	
 	// get thermal velocity
-	for (unsigned dim = 0; dim<VDIM; ++dim) {
-	  invVt2[dim] = invVTerm2(phaseConfMap[nodeIdx], dim);
-	  invVt[dim] = invVTerm(phaseConfMap[nodeIdx], dim);
-	}
+	invVt2 = invVTerm2[phaseConfMap[nodeIdx]];
+	invVt = invVTerm[phaseConfMap[nodeIdx]];
 	
 	// BGK Righ-hand-side
 	rhsPtr[nodeIdx] = collFreq[phaseConfMap[nodeIdx]]*
 	  (evaluateMaxwell(n, w, invVt, invVt2) - distfPtr[nodeIdx]);
-	//rhsPtr[nodeIdx] = (evaluateMaxwell(n, w, invVt, invVt2) - distfPtr[nodeIdx]);
       }
     }
     
@@ -281,13 +292,13 @@ namespace Lucee
   template <unsigned CDIM, unsigned VDIM>
   double BGKCollUpdater<CDIM, VDIM>::evaluateMaxwell(double n, 
 						     double w[VDIM], 
-						     double invVt[VDIM],
-						     double invVt2[VDIM])
+						     double invVt,
+						     double invVt2)
   {
     double result = n;
     for (unsigned dim = 0; dim<VDIM; ++dim) {
-      result *= maxwellNorm*invVt[dim];
-      result *= exp(-0.5*w[dim]*w[dim]*invVt2[dim]);
+      result *= maxwellNorm*invVt;
+      result *= exp(-0.5*w[dim]*w[dim]*invVt2);
     }
     return result;
   }
