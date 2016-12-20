@@ -152,7 +152,12 @@ namespace Lucee
   IntegrateNodalField<NDIM>::getIntegrand(Lucee::LuaState& L, unsigned nc, const double inp[], std::vector<double>& res)
   {
     if (!hasFunction)
-      return inp[0];
+    {
+      Lucee::Except lce("IntegrateNodalField::getIntegrand: ");
+      lce << "No function supplied as 'integrand,' need to provide function ";
+      throw lce;
+      //return inp[0];
+    }
 
 // push function object on stack
     lua_rawgeti(L, LUA_REGISTRYINDEX, fnRef);
