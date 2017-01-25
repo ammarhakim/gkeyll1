@@ -82,6 +82,26 @@ namespace Lucee
     return res;
   }
 
+  std::vector<void *>
+  LuaTable::getAllUserdata() const
+  {
+    SHOW_LUA_STACK_SIZE("getAllUserdata", L);
+    std::vector<void *> res;
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    int t = lua_gettop(L);
+    lua_pushnil(L);
+    while (lua_next(L, t) != 0) 
+    {
+      if (lua_type(L, -1) == LUA_TLIGHTUSERDATA)
+        res.push_back(lua_touserdata(L, -1));
+      lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
+    SHOW_LUA_STACK_SIZE2(L);
+    return res;
+  }
+
   std::vector<std::string>
   LuaTable::getAllStrings() const
   {

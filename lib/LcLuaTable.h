@@ -96,6 +96,13 @@ namespace Lucee
       std::vector<double> getAllNumbers() const;
 
 /**
+ * Get all userdata items in table.
+ *
+ * @return userdata items in table.
+ */
+      std::vector<void *> getAllUserdata() const;
+
+/**
  * Get all strings in table.
  *
  * @return strings in table.
