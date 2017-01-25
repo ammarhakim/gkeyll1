@@ -44,9 +44,16 @@ namespace Lucee
 // call base class method
     StructuredGridBase<NDIM>::readInput(tbl);
 
+    std::vector<int> mapFnRefs;
+    std::vector<void *> vcoordsCptrs;
 // get list of mapping functions
-    Lucee::LuaTable mapTbl = tbl.getTable("mappings");
-    std::vector<int> mapFnRefs = mapTbl.getAllFunctionRefs();
+    if (tbl.hasTable("mappings")) {
+      Lucee::LuaTable mapTbl = tbl.getTable("mappings");
+      mapFnRefs = mapTbl.getAllFunctionRefs();
+    } else if (tbl.hasTable("vertices")) {
+      Lucee::LuaTable verticesTbl = tbl.getTable("vertices");
+      vcoordsCptrs = verticesTbl.getAllUserdata();
+    }
 
     typename Lucee::Region<NDIM, int> localRgn = this->getLocalRegion();
     typename Lucee::Region<NDIM, double> compSpace = this->getComputationalSpace();
@@ -66,8 +73,19 @@ namespace Lucee
 
       double low = compSpace.getLower(d);
       double dxc = this->getDx(d); // computational space cell-size
-      for (int i=lower[0]; i<upper[0]; ++i)
-        vcoords[d](i) = this->evalLuaFunc(*L, mapFnRefs[d], low+dxc*i);
+
+      if (tbl.hasTable("mappings")) {
+        for (int i=lower[0]; i<upper[0]; ++i)
+        {
+          vcoords[d](i) = this->evalLuaFunc(*L, mapFnRefs[d], low+dxc*i);
+        }
+      } else if (tbl.hasTable("vertices")) {
+        double * cptr = (double *) (vcoordsCptrs[d]);
+        for (int i=lower[0]; i<upper[0]; ++i)
+        {
+          vcoords[d](i) = cptr[i+3];
+        }
+      }
     }
 
 // compute cell sizes
