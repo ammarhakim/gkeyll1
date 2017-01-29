@@ -561,6 +561,14 @@ namespace Lucee
  */
       static int luaApplyCopyBc(lua_State *L);
 
+/**
+ * Lua callable method to retrieve pointer to actual data. 
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaGetPointer(lua_State *L);
+
     private:
 /**
  * Create a field attached to a given data space.
