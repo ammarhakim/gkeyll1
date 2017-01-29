@@ -461,6 +461,7 @@ namespace Lucee
     lfm.appendFunc("hasNan", luaHasNan);
     lfm.appendFunc("applyPeriodicBc", luaApplyPeriodicBc);
     lfm.appendFunc("applyCopyBc", luaApplyCopyBc);
+    lfm.appendFunc("getPointer", luaGetPointer);
   }
 
   template <unsigned NDIM, typename T>
@@ -758,6 +759,18 @@ namespace Lucee
     fld->applyCopyBc(dir, side);
 
     return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  Field<NDIM, T>::luaGetPointer(lua_State *L)
+  {
+    Field<NDIM, T> *fld
+      = Lucee::PointerHolder<Field<NDIM, T> >::getObj(L);
+
+    T &first_val = fld->first();
+    lua_pushlightuserdata(L, &first_val);
+    return 1;
   }
 
 // instantiations
