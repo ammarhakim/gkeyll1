@@ -170,6 +170,14 @@ namespace Lucee
       bool getBool(const std::string& key) const;
 
 /**
+ * Get a userdata from table.
+ *
+ * @param key Key in table.
+ * @return pointer (lightuserdata)
+ */
+      void* getUserdata(const std::string& key) const;
+
+/**
  * Get user data (i.e. pointer to Lucee object) from table. The object
  * type must be specified as the template parameter.
  *
@@ -332,6 +340,14 @@ namespace Lucee
  * @return true if exists, false otherwise.
  */
       bool hasBool(const std::string& key) const;
+
+/**
+ * Check if userdata is in table.
+ *
+ * @param key Key in table.
+ * @return true if exists, false otherwise.
+ */
+      bool hasUserdata(const std::string& key) const;
 
 /**
  * Check if vector of strings is in table.

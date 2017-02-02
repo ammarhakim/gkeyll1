@@ -210,6 +210,30 @@ namespace Lucee
     return res == 1 ? true : false;
   }
 
+  void *
+  LuaTable::getUserdata(const std::string& key) const
+  {
+    SHOW_LUA_STACK_SIZE("getUserdata", L);
+// push table object on stack
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+// get data from table
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TLIGHTUSERDATA)
+    {
+      lua_pop(L, 2);
+      Lucee::Except lce("LuaTable::getUserdata: ");
+      lce << key << " is not a lightuserdata (e.g., not a pointer)";
+      throw lce;
+    }
+    void *res = lua_touserdata(L, -1);
+
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return res;
+  }
+
+
   std::vector<std::string>
   LuaTable::getStrVec(const std::string& key) const
   {
@@ -394,6 +418,24 @@ namespace Lucee
     lua_pushstring(L, key.c_str());
     lua_gettable(L, -2);
     if (lua_type(L, -1) != LUA_TBOOLEAN)
+    {
+      lua_pop(L, 2);
+      SHOW_LUA_STACK_SIZE2(L);
+      return false;
+    }
+    lua_pop(L, 2);
+    SHOW_LUA_STACK_SIZE2(L);
+    return true;
+  }
+
+  bool
+  LuaTable::hasUserdata(const std::string& key) const
+  {
+    SHOW_LUA_STACK_SIZE("hasUserdata", L);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    lua_pushstring(L, key.c_str());
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) != LUA_TLIGHTUSERDATA)
     {
       lua_pop(L, 2);
       SHOW_LUA_STACK_SIZE2(L);
