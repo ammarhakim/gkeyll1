@@ -262,8 +262,14 @@ namespace Lucee
     if (isPar)
       localRgn = grid->getLocalRegion();
 // create new field and copy data to self
-    Field<NDIM, T>::operator=(
-      Field<NDIM, T>(globalRgn, localRgn, numComponents, lowerGhost, upperGhost));
+    if (tbl.hasUserdata("rawPointer")) {
+      T *dp = (T *)tbl.getUserdata("rawPointer");
+      Field<NDIM, T>::operator=(
+        Field<NDIM, T>(globalRgn, localRgn, numComponents, lowerGhost, upperGhost, dp));
+    } else {
+      Field<NDIM, T>::operator=(
+        Field<NDIM, T>(globalRgn, localRgn, numComponents, lowerGhost, upperGhost));
+    }
   }
 
   template <unsigned NDIM, typename T>
