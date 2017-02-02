@@ -128,7 +128,7 @@ namespace Lucee
   {
     Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
     Lucee::Region<NDIM, int> extRgn = this->getExtRegion(); // loop over extended region
-    Lucee::ColMajorSequencer<NDIM> seq(extRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(extRgn);
     int idx[NDIM];
     double xc[3];
     unsigned numOut = this->getNumComponents();
@@ -155,7 +155,7 @@ namespace Lucee
   {
     Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
     Lucee::Region<NDIM, int> extRgn = this->getExtRegion(); // loop over extended region
-    Lucee::ColMajorSequencer<NDIM> seq(extRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(extRgn);
     int idx[NDIM];
     double xc[3];
     unsigned numOut = this->getNumComponents();
