@@ -86,6 +86,20 @@ namespace Lucee
   }
 
   template <unsigned NDIM, typename T>
+  Field<NDIM, T>::Field(const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, int>& rgn,
+    unsigned nc, int lg[NDIM], int ug[NDIM], T *dp)
+    : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(
+      rgn.extend(lg, ug).inflate(0, nc), dp),
+      scIdx(0), numComponents(nc), rgn(rgn), globalRgn(globalRgn), rgnIdx(rgn.extend(lg, ug).inflate(0, nc))
+  {
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lowerGhost[i] = lg[i];
+      upperGhost[i] = ug[i];
+    }
+  }
+
+  template <unsigned NDIM, typename T>
   Field<NDIM, T>::Field(const Field<NDIM, T>& fld)
     : Lucee::Array<NDIM+1, T, Lucee::RowMajorIndexer>(fld),
       scIdx(fld.scIdx),
