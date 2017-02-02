@@ -105,6 +105,21 @@ namespace Lucee
         const T& init=(T)0);
 
 /**
+ * Create a new field indexing given region. This constructor set
+ * ghost region from specified array. Global and local regions are the same.
+ * 
+ * @param globalRgn Global region indexed by array.
+ * @param localRgn Local region indexed by array.
+ * @param nc Number of components at each index location.
+ * @param lg Ghost indexes along lower index range in each dimension.
+ * @param ug Ghost indexes along upper index range in each dimension.
+ * @param dp Pointer to data space to use.
+ */      
+      Field(const Lucee::Region<NDIM, int>& globalRgn, 
+        const Lucee::Region<NDIM, int>& localRgn, unsigned nc, int lg[NDIM], int ug[NDIM], 
+        T *dp);
+
+/**
  * Create a field from supplied one (shallow copy).
  *
  * @param fld Field to copy from.
