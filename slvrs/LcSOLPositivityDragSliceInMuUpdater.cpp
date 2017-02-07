@@ -164,17 +164,18 @@ namespace Lucee
     Eigen::VectorXd distfUpwindReduced(nodalStencilFixedVPar.size());
 
     double dt = t-this->getCurrTime();
-    // Figure out value of parallel velocity on last edge that flux is computed on
-    idx[0] = globalRgn.getUpper(0)-1;
-    idx[1] = globalRgn.getUpper(1)-1;
-    idx[2] = globalRgn.getUpper(2)-1;
-    idx[3] = globalRgn.getUpper(3)-1;
-    idx[4] = globalRgn.getUpper(4)-1;
-    // Set grid to last parallel velocity cell (upper boundary)
+    // Figure out value of velocity on last edge that flux is computed on
+    idx[0] = localRgn.getLower(0);
+    idx[1] = localRgn.getLower(1);
+    idx[2] = localRgn.getLower(2);
+    idx[3] = localRgn.getLower(3);
+    idx[4] = localRgn.getUpper(4)-1;
+    // Set grid to last velocity cell (upper boundary)
     grid.setIndex(idx);
     grid.getCentroid(cellCentroid);
     // Zero flux boundary conditions, so use max velocity - dmu
-    double maxPosMu = cellCentroid[4] - 0.5*grid.getDx(4);
+    double maxPosMu = cellCentroid[4] - 0.5*grid.getVolume()/grid.getSurfArea(4);
+    double maxDmu = grid.getVolume()/grid.getSurfArea(4);
 
     // Loop over each cell in configuration space
     for (int ix = localRgn.getLower(0); ix < localRgn.getUpper(0); ix++)
@@ -207,11 +208,9 @@ namespace Lucee
                 for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
                 {
                   idx[4] = imu;
+                  idxUpwind[4] = imu+1;
 
-                  // Get the coordinates of cell center
                   grid.setIndex(idx);
-                  grid.getCentroid(cellCentroid);
-
                   distfIn.setPtr(distfInPtr, idx);
 
                   // Loop over each slice at fixed vPar
@@ -221,8 +220,8 @@ namespace Lucee
                     for (int nodeIndex = 0; nodeIndex < nodalStencilFixedVPar.size(); nodeIndex++)
                       distfReduced(nodeIndex) = distfInPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]];
 
-                    // Compute density of distfReduced (for now just use average)
-                    double fOldAvg = distfReduced.mean();
+                    // Compute old particle density in this cell
+                    double fOldAvg = distfReduced.mean()*grid.getVolume()/grid.getSurfArea(4);
 
                     // Add density to lowest-energy cell only
                     //idx[4] = localRgn.getLower(4);
@@ -242,19 +241,19 @@ namespace Lucee
                     // Always use cell to the right of an interface to calculate upwinding for mu
                     if (imu < globalRgn.getUpper(4)-1)
                     {
-                      idxUpwind[4] = idx[4] + 1;
                       distfIn.setPtr(distfInUpwindPtr, idxUpwind);
                       for (int nodeIndex = 0; nodeIndex < nodalStencilFixedVPar.size(); nodeIndex++)
                         distfUpwindReduced(nodeIndex) = distfInUpwindPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]];
                       fUpperAvg = distfUpwindReduced.mean();
                     }
 
+                    grid.setIndex(idx);
+                    grid.getCentroid(cellCentroid);
                     // Use cell to the right of the lower interface, i.e. the current cell
                     if (imu == globalRgn.getLower(4))
                       fLowerAvg = 0.0;
                     else
-                      fLowerAvg = fOldAvg;
-
+                      fLowerAvg = fOldAvg/(grid.getVolume()/grid.getSurfArea(4));
 
                     // Put in limiters on cell average?
                     if (fUpperAvg < 0.0)
@@ -262,12 +261,19 @@ namespace Lucee
                     if (fLowerAvg < 0.0)
                       fLowerAvg = 0.0;
                     
-                    double alpha = 1.0/maxPosMu;
-                    double fIncrement = (cellCentroid[4] + 0.5*grid.getDx(4))*fUpperAvg -
-                      (cellCentroid[4] - 0.5*grid.getDx(4))*fLowerAvg;
-                    double fNewAvg = fOldAvg + alpha*fIncrement;
-
-                    fNewAvg = fOldAvg + fUpperAvg - fLowerAvg;
+                    // Compute change in cell number from incoming and outgoing flux
+                    double alpha = maxDmu/maxPosMu;
+                    double fIncrement = (cellCentroid[4] + 0.5*grid.getVolume()/grid.getSurfArea(4))*fUpperAvg -
+                      (cellCentroid[4] - 0.5*grid.getVolume()/grid.getSurfArea(4))*fLowerAvg;
+                    //double fNewAvg = fOldAvg + alpha*fIncrement;
+                    
+                    // MODIFICATION: assumes alpha is 1/mu instead of 1/mumax.
+                    // Consider removing this eventually.
+                    grid.setIndex(idxUpwind);
+                    double dMuUpper = grid.getVolume()/grid.getSurfArea(4);
+                    grid.setIndex(idx);
+                    double dMuLower = grid.getVolume()/grid.getSurfArea(4);
+                    double fNewAvg = fOldAvg + dMuUpper*fUpperAvg - dMuLower*fLowerAvg;
                     
                     if (fNewAvg < 0.0)
                     {
@@ -281,8 +287,8 @@ namespace Lucee
                         std::cout << "fNewAvg is negative! = " << fNewAvg << std::endl;
                         std::cout << "fOldAvg = " << fOldAvg << std::endl;
                         std::cout << "alpha*fIncrement = " << alpha*fIncrement << std::endl;
-                        std::cout << "fIncrement upper = " << alpha*(cellCentroid[3] + 0.5*grid.getDx(3))*fUpperAvg << std::endl;
-                        std::cout << "fIncrement lower = " << alpha*(cellCentroid[3] - 0.5*grid.getDx(3))*fLowerAvg << std::endl;
+                        std::cout << "fIncrement upper = " << alpha*(cellCentroid[4] + 0.5*grid.getVolume()/grid.getSurfArea(4))*fUpperAvg << std::endl;
+                        std::cout << "fIncrement lower = " << alpha*(cellCentroid[4] - 0.5*grid.getVolume()/grid.getSurfArea(4))*fLowerAvg << std::endl;
                       } 
                     }
                   
@@ -301,7 +307,7 @@ namespace Lucee
                         // to reach the desired density
                         //std::cout << "Setting new distribution function to a constant since initial density was zero." << std::endl;
                         //std::cout << "fNewAvg = " << fNewAvg << std::endl;
-                        distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]] = fNewAvg;
+                        distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[nodeIndex]] = fNewAvg/(grid.getVolume()/grid.getSurfArea(4));
                       }
                     }
                     //distfOutPtr[configNode + nodalStencilFixedMu[vSliceIndex] + nodalStencilFixedVPar[0]] = 2*fNewAvg;

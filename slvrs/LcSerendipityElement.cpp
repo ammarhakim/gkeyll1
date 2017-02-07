@@ -609,6 +609,12 @@ namespace Lucee
     grid.setIndex(this->currIdx);
     double xc[NC];
 
+    double physicalVol = grid.getVolume();
+    // Width of this cell in physical space
+    double physicalLengths[NDIM];
+    for (int dim = 0; dim < NDIM; dim++)
+      physicalLengths[dim] = physicalVol/grid.getSurfArea(dim);
+
     grid.getCentroid(xc);
 
     // Loop over all node locations on reference element and convert them
@@ -618,7 +624,7 @@ namespace Lucee
       for (int dim = 0; dim < NC; dim++)
       {
         if (dim < NDIM)
-          nodeCoords(i, dim) = xc[dim] + nodeList(i, dim)*0.5*dq[dim];
+          nodeCoords(i, dim) = xc[dim] + nodeList(i, dim)*0.5*physicalLengths[dim];
         else
           nodeCoords(i, dim) = 0;
       }

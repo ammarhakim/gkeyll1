@@ -36,6 +36,8 @@ namespace Lucee
       .append<Lucee::NonUniRectCartGrid<1> >()
       .append<Lucee::NonUniRectCartGrid<2> >()
       .append<Lucee::NonUniRectCartGrid<3> >()
+      .append<Lucee::NonUniRectCartGrid<4> >()
+      .append<Lucee::NonUniRectCartGrid<5> >()
 
       .append<Lucee::MappedCartGrid<1> >()
       .append<Lucee::MappedCartGrid<2> >()

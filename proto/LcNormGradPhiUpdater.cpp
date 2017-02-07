@@ -1,7 +1,7 @@
 /**
  * @file	LcNormGradPhiUpdater.cpp
  *
- * @brief	Updater to compute |grad.p| integrated over the domain.
+ * @brief	Updater to compute |grad.p|^2 integrated over the domain.
  */
 
 // config stuff

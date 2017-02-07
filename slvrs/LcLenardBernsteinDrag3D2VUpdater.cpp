@@ -118,17 +118,14 @@ namespace Lucee
     Eigen::MatrixXd massMatrix(nlocal2d, nlocal2d);
     nodalBasis2d->getMassMatrix(massMatrixLucee);
     copyLuceeToEigen(massMatrixLucee, massMatrix);
-    massMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
 
     // Element 0 is vpar (dir 0 in 2d),  Element 1 is mu (dir 1 in 2d)
     std::vector<Eigen::MatrixXd> gradStiffMatrix(2, Eigen::MatrixXd(nlocal2d, nlocal2d));
     nodalBasis2d->getGradStiffnessMatrix(0, gradStiffMatrixLucee);
     copyLuceeToEigen(gradStiffMatrixLucee, gradStiffMatrix[0]);
-    gradStiffMatrix[0] *= grid.getDx(4)/grid.getDx(1);
 
     nodalBasis2d->getGradStiffnessMatrix(1, gradStiffMatrixLucee);
     copyLuceeToEigen(gradStiffMatrixLucee, gradStiffMatrix[1]);
-    gradStiffMatrix[1] *= grid.getDx(3)/grid.getDx(0);
     
     // Get interpolation matrix, gaussian quadrature points, and weights
     Lucee::Matrix<double> interpVolMatrixLucee(nVolQuad2d, nlocal2d);
@@ -142,12 +139,11 @@ namespace Lucee
     
     // Get the interpolation matrix for the volume quadrature points
     interpVolMatrix2d = Eigen::MatrixXd(nVolQuad2d, nlocal2d);
+    // Note that no scale correction is needed as volume factors cancel out with inverse of mass matrix
     nodalBasis2d->getGaussQuadData(interpVolMatrixLucee, gaussVolOrdinatesLucee, gaussVolWeights2d);
-
     // Scale gaussVolWeights2d for (v,mu) integration
-    double scaleCorrection = grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
     for (int i = 0; i < gaussVolWeights2d.size(); i++)
-      gaussVolWeights2d[i] = scaleCorrection*gaussVolWeights2d[i];
+      gaussVolWeights2d[i] = gaussVolWeights2d[i]/(grid.getDx(0)*grid.getDx(1));
     
     copyLuceeToEigen(interpVolMatrixLucee, interpVolMatrix2d);
     copyLuceeToEigen(gaussVolOrdinatesLucee, gaussVolOrdinates2d);
@@ -168,9 +164,9 @@ namespace Lucee
     copyLuceeToEigen(interpSurfMatrixLower2dLucee, interpSurfMatrixLower2d[0]);
     copyLuceeToEigen(gaussSurfOrdinatesLucee, gaussSurfOrdinates2d[0]);
     
-    // Scale gaussSurfWeights2d[0] for (v,mu) integration
+    // Remove scale of gaussSurfWeights2d[0] for (v,mu) integration
     for (int i = 0; i < gaussSurfWeights2d[0].size(); i++)
-      gaussSurfWeights2d[0][i] = gaussSurfWeights2d[0][i]*grid.getDx(4)/grid.getDx(1);
+      gaussSurfWeights2d[0][i] = gaussSurfWeights2d[0][i]/grid.getDx(1);
 
     // Do the same thing as above in the mu direction
     nodalBasis2d->getSurfUpperGaussQuadData(1, interpSurfMatrixUpper2dLucee, gaussSurfOrdinatesLucee,
@@ -182,33 +178,30 @@ namespace Lucee
     copyLuceeToEigen(interpSurfMatrixLower2dLucee, interpSurfMatrixLower2d[1]);
     copyLuceeToEigen(gaussSurfOrdinatesLucee, gaussSurfOrdinates2d[1]);
 
-    // Scale gaussSurfWeights2d[1] for (v,mu) integration
+    // Remove scale of gaussSurfWeights2d[1] for (v,mu) integration
     for (int i = 0; i < gaussSurfWeights2d[1].size(); i++)
-      gaussSurfWeights2d[1][i] = gaussSurfWeights2d[1][i]*grid.getDx(3)/grid.getDx(0);
+      gaussSurfWeights2d[1][i] = gaussSurfWeights2d[1][i]/grid.getDx(0);
 
-    // Compute and store inverse of mass matrix
+    // Compute inverse of mass matrix
     Eigen::MatrixXd massMatrixInv = massMatrix.inverse();
     // Compute derivative of basis function evaluated at volume quadrature points
     basisDerivAtVolQuad.resize(2);
-    basisDerivAtVolQuad[0] = interpVolMatrix2d*massMatrixInv*gradStiffMatrix[0].transpose();
-    basisDerivAtVolQuad[1] = interpVolMatrix2d*massMatrixInv*gradStiffMatrix[1].transpose();
-    // Take transpose so same basis function evaluated at diff quad points in the same row
-    // Need to use transposeInPlace because otherwise there will be a bug!
-    basisDerivAtVolQuad[0].transposeInPlace();
-    basisDerivAtVolQuad[1].transposeInPlace();
+    // Need to divide by correct scale factor in update method
+    Eigen::MatrixXd basisDerivAtVolQuad0 = grid.getDx(0)*interpVolMatrix2d*massMatrixInv*gradStiffMatrix[0].transpose();
+    Eigen::MatrixXd basisDerivAtVolQuad1 = grid.getDx(1)*interpVolMatrix2d*massMatrixInv*gradStiffMatrix[1].transpose();
 
     // Pre-multiply by inverse mass matrix
-    basisDerivAtVolQuad[0] = massMatrixInv*basisDerivAtVolQuad[0];
-    basisDerivAtVolQuad[1] = massMatrixInv*basisDerivAtVolQuad[1];
+    basisDerivAtVolQuad[0] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*basisDerivAtVolQuad0.transpose();
+    basisDerivAtVolQuad[1] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*basisDerivAtVolQuad1.transpose();
 
     // Precompute two matrices for surface integrals
     surfIntegralMatrixLower2d.resize(2);
     surfIntegralMatrixUpper2d.resize(2);
     // Pre-multiply by inverse mass matrix
-    surfIntegralMatrixLower2d[0] = massMatrixInv*interpSurfMatrixLower2d[0].transpose();
-    surfIntegralMatrixUpper2d[0] = massMatrixInv*interpSurfMatrixUpper2d[0].transpose();
-    surfIntegralMatrixLower2d[1] = massMatrixInv*interpSurfMatrixLower2d[1].transpose();
-    surfIntegralMatrixUpper2d[1] = massMatrixInv*interpSurfMatrixUpper2d[1].transpose();
+    surfIntegralMatrixLower2d[0] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*interpSurfMatrixLower2d[0].transpose();
+    surfIntegralMatrixUpper2d[0] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*interpSurfMatrixUpper2d[0].transpose();
+    surfIntegralMatrixLower2d[1] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*interpSurfMatrixLower2d[1].transpose();
+    surfIntegralMatrixUpper2d[1] = grid.getDx(0)*grid.getDx(1)*massMatrixInv*interpSurfMatrixUpper2d[1].transpose();
   }
 
   Lucee::UpdaterStatus 
@@ -297,24 +290,26 @@ namespace Lucee
         // Compute integrands for gaussian quadrature excluding basis function derivatives
         for (int quadIndex = 0; quadIndex < nVolQuad2d; quadIndex++)
         {
-          double paraCoord = cellCentroid[3] + 0.5*grid.getDx(3)*gaussVolOrdinates2d(quadIndex,0);
-          double muCoord = cellCentroid[4] + 0.5*grid.getDx(4)*gaussVolOrdinates2d(quadIndex,1);
-          paraQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*
-            (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode]);
-          muQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*2*muCoord;
+          double paraCoord = cellCentroid[3] + 0.5*grid.getVolume()/grid.getSurfArea(3)*gaussVolOrdinates2d(quadIndex,0);
+          double muCoord = cellCentroid[4] + 0.5*grid.getVolume()/grid.getSurfArea(4)*gaussVolOrdinates2d(quadIndex,1);
 
           // Keep track of max CFL number
           // (from drag in mu)
           cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-            2*muCoord*dt/grid.getDx(4)));
+            2*muCoord*dt/(grid.getVolume()/grid.getSurfArea(4))) );
           // (from drag in v)
           cfla = std::max(cfla, std::abs(alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-              (paraCoord-uInPtr[configNode]/numDensityInPtr[configNode])*dt/grid.getDx(3)));
+              (paraCoord-uInPtr[configNode]/numDensityInPtr[configNode])*dt/(grid.getVolume()/grid.getSurfArea(3))) );
+          
+          // Compute integrand
+          paraQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*
+            (paraCoord - uInPtr[configNode]/numDensityInPtr[configNode]);
+          muQuad(quadIndex) = gaussVolWeights2d[quadIndex]*fVolQuad(quadIndex)*2*muCoord;
         }
 
         // Evaluate integral using gaussian quadrature (represented as matrix-vector multiply)
-        Eigen::VectorXd volIntegralResult = (basisDerivAtVolQuad[0]*paraQuad +
-          basisDerivAtVolQuad[1]*muQuad);
+        Eigen::VectorXd volIntegralResult = (grid.getSurfArea(3)/grid.getVolume()*basisDerivAtVolQuad[0]*paraQuad +
+          grid.getSurfArea(4)/grid.getVolume()*basisDerivAtVolQuad[1]*muQuad);
 
         for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
           fOutPtr[configNode + nodalStencil[nodeIndex]] -= volIntegralResult(nodeIndex);
@@ -396,7 +391,7 @@ namespace Lucee
                 // Need to know center of upper cell to figure out the global velocity coordinate
                 grid.setIndex(idx);
                 grid.getCentroid(cellCentroid);
-                double paraCoord = cellCentroid[3] - 0.5*grid.getDx(3);
+                double paraCoord = cellCentroid[3] - 0.5*grid.getVolume()/grid.getSurfArea(3);
 
                 for (int quadIndex = 0; quadIndex < gaussSurfWeights2d[0].size(); quadIndex++)
                 {
@@ -420,8 +415,11 @@ namespace Lucee
                 // Compute all surface integrals using a matrix multiply.
                 // Each row in result is a basis function times flux projection
                 // Then inverse of mass matrix is multiplied to find appropriate increments
-                Eigen::VectorXd leftSurfIntegralResult = surfIntegralMatrixUpper2d[0]*surfIntegralFluxes;
-                Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower2d[0]*surfIntegralFluxes;
+                Eigen::VectorXd rightSurfIntegralResult = grid.getSurfArea(3)/grid.getVolume()*
+                  surfIntegralMatrixLower2d[0]*surfIntegralFluxes;
+                grid.setIndex(idxLower);
+                Eigen::VectorXd leftSurfIntegralResult = grid.getSurfArea(3)/grid.getVolume()*
+                  surfIntegralMatrixUpper2d[0]*surfIntegralFluxes;
 
                 // Set index for cell right of interface
                 fOut.setPtr(fOutPtr, idx);
@@ -444,7 +442,7 @@ namespace Lucee
               idx[3] = iv;
               idxLower[3] = iv;
               
-              for (int iMu = localRgn.getLower(4); iMu < localRgn.getUpper(4); iMu++)
+              for (int iMu = iMuLower; iMu < iMuUpper; iMu++)
               {
                 idx[4] = iMu;
                 idxLower[4] = iMu-1;
@@ -464,7 +462,7 @@ namespace Lucee
                 // Need to know center of upper cell to figure out the global velocity coordinate
                 grid.setIndex(idx);
                 grid.getCentroid(cellCentroid);
-                double muCoord = cellCentroid[4] - 0.5*grid.getDx(4);
+                double muCoord = cellCentroid[4] - 0.5*grid.getVolume()/grid.getSurfArea(4);
 
                 for (int quadIndex = 0; quadIndex < gaussSurfWeights2d[1].size(); quadIndex++)
                 {
@@ -478,8 +476,11 @@ namespace Lucee
                 // Compute all surface integrals using a matrix multiply.
                 // Each row in result is a basis function times flux projection
                 // Then inverse of mass matrix is multiplied to find appropriate increments
-                Eigen::VectorXd leftSurfIntegralResult = surfIntegralMatrixUpper2d[1]*surfIntegralFluxes;
-                Eigen::VectorXd rightSurfIntegralResult = surfIntegralMatrixLower2d[1]*surfIntegralFluxes;
+                Eigen::VectorXd rightSurfIntegralResult = grid.getSurfArea(4)/grid.getVolume()*
+                  surfIntegralMatrixLower2d[1]*surfIntegralFluxes;
+                grid.setIndex(idxLower);
+                Eigen::VectorXd leftSurfIntegralResult = grid.getSurfArea(4)/grid.getVolume()*
+                  surfIntegralMatrixUpper2d[1]*surfIntegralFluxes;
 
                 // Set index for cell right of interface
                 fOut.setPtr(fOutPtr, idx);

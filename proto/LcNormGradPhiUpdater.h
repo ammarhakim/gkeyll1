@@ -1,7 +1,7 @@
 /**
  * @file	LcNormGradPhiUpdater.h
  *
- * @brief	Updater to compute |grad.p| integrated over the domain.
+ * @brief	Updater to compute |grad.p|^2 integrated over the domain.
  */
 
 #ifndef LC_NORM_GRAD_PHI_UPDATER_H
@@ -21,7 +21,7 @@
 namespace Lucee
 {
 /**
- * Updater to |grad.p| integrated over the domain.
+ * Updater to |grad.p|^2 integrated over the domain.
  */
   template <unsigned NDIM>
   class NormGradPhiUpdater : public Lucee::UpdaterIfc

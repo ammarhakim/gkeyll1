@@ -24,6 +24,8 @@ namespace Lucee
   template <> const char *NonUniRectCartGrid<1>::id = "NonUniformRectCart1D";
   template <> const char *NonUniRectCartGrid<2>::id = "NonUniformRectCart2D";
   template <> const char *NonUniRectCartGrid<3>::id = "NonUniformRectCart3D";
+  template <> const char *NonUniRectCartGrid<4>::id = "NonUniformRectCart4D";
+  template <> const char *NonUniRectCartGrid<5>::id = "NonUniformRectCart5D";
 
   template <unsigned NDIM>
   NonUniRectCartGrid<NDIM>::NonUniRectCartGrid()
@@ -240,6 +242,25 @@ namespace Lucee
     io.writeAttribute(dn, "vsType", "mesh");
     io.writeAttribute(dn, "vsKind", "structured");
 
+    // Code copied from LcRectCartGrid to make output fields
+    // compatible with RectCart plotting routines
+    std::vector<double> lower(NDIM), upper(NDIM);
+    std::vector<unsigned> numPhysCells(NDIM), start(NDIM);
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      lower[i] = this->compSpace.getLower(i);
+      upper[i] = this->compSpace.getUpper(i);
+      start[i] = this->globalRgn.getLower(i);
+      numPhysCells[i] = this->globalRgn.getShape(i);
+    }
+
+    io.template 
+      writeAttribute<unsigned>(dn, "vsNumCells", numPhysCells);
+    io.template
+      writeAttribute<double>(dn, "vsLowerBounds", lower);
+    io.template
+      writeAttribute<double>(dn, "vsUpperBounds", upper);
+
     return dn;
   }
 
@@ -277,4 +298,6 @@ namespace Lucee
   template class NonUniRectCartGrid<1>;
   template class NonUniRectCartGrid<2>;
   template class NonUniRectCartGrid<3>;
+  template class NonUniRectCartGrid<4>;
+  template class NonUniRectCartGrid<5>;
 }

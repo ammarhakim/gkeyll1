@@ -147,14 +147,14 @@ namespace Lucee
       {
         // Keep track of max CFL number
         cfla = std::max( cfla, std::abs(4.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
-          *scaleFactor*paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
+          *scaleFactor*paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(3))) );
 
         if (idx[4] < globalRgn.getUpper(4)-1)
         {
-          double muCoord = cellCentroid[4] + 0.5*grid.getDx(4);
+          double muCoord = cellCentroid[4] + 0.5*grid.getVolume()/grid.getSurfArea(4);
           double muTherm = scaleFactor*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode];
           cfla = std::max(cfla, 8.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
-            *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
+            *muTherm*muCoord*dt/(grid.getVolume()/grid.getSurfArea(4)*grid.getVolume()/grid.getSurfArea(4)));
         }
       }
 

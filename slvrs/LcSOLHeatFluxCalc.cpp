@@ -102,8 +102,8 @@ namespace Lucee
     nodalBasis2d->getGaussQuadData(tempVolQuad, tempVolCoords, gaussWeights2d);
     copyLuceeToEigen(tempVolQuad, interpMatrix2d);
 
-    // Scale gaussWeights2d to the right values since grid is (v,mu), not (x,y)
-    double scaleCorrection = grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    // Remove (x,y) scale to weights, will add correct weights in update method
+    double scaleCorrection = 1.0/(grid.getDx(0)*grid.getDx(1));
     for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
       gaussWeights2d[quadIndex] = scaleCorrection*gaussWeights2d[quadIndex];
 
@@ -206,7 +206,8 @@ namespace Lucee
             // Compute 2d integral
             double integralResult = 0.0;
             for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-              integralResult += scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
+              integralResult += (grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4)))*
+                scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
                 hamilReducedAtQuad(quadIndex)*hamilDerivReducedAtQuad(quadIndex)*distfReducedAtQuad(quadIndex);
 
             // Accumulate results of integration
@@ -242,7 +243,8 @@ namespace Lucee
             // Compute 2d integral
             double integralResult = 0.0;
             for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-              integralResult += scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
+              integralResult += (grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4)))*
+                scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
                 hamilReducedAtQuad(quadIndex)*hamilDerivReducedAtQuad(quadIndex)*distfReducedAtQuad(quadIndex);
 
             // Accumulate results of integration
@@ -303,7 +305,8 @@ namespace Lucee
             // Compute 2d integral
             double integralResult = 0.0;
             for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-              integralResult += scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
+              integralResult += (grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4)))*
+                scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
                 hamilReducedAtQuad(quadIndex)*hamilDerivReducedAtQuad(quadIndex)*distfReducedAtQuad(quadIndex);
 
             // Accumulate results of integration
@@ -339,7 +342,8 @@ namespace Lucee
             // Compute 2d integral
             double integralResult = 0.0;
             for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-              integralResult += scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
+              integralResult += (grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4)))*
+                scaleFactor*bFieldVal*gaussWeights2d[quadIndex]*
                 hamilReducedAtQuad(quadIndex)*hamilDerivReducedAtQuad(quadIndex)*distfReducedAtQuad(quadIndex);
 
             // Accumulate results of integration

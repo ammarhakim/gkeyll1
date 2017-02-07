@@ -65,6 +65,7 @@ namespace Lucee
     int idx[NDIM];
     seq.fillWithIndex(idx);
     nodalBasis->setIndex(idx);
+    grid.setIndex(idx);
 
     unsigned nlocal = nodalBasis->getNumNodes();
     // Store mass matrix inverse
@@ -76,8 +77,10 @@ namespace Lucee
     nodalBasis->getGradStiffnessMatrix(dir, tempMatrix);
     Eigen::MatrixXd gradStiffnessMatrix(nlocal, nlocal);
     copyLuceeToEigen(tempMatrix, gradStiffnessMatrix);
-    // Compute and store differention matrix
+    // Compute and store differention matrix (net scale factor of 1/(0.5*grid.getDx(dir)))
     gradMatrix = massMatrix.inverse()*gradStiffnessMatrix.transpose();
+    // Undo grid scale factors
+    gradMatrix *= grid.getDx(dir);
   }
 
   template <unsigned NDIM>
@@ -106,6 +109,7 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
+      grid.setIndex(idx);
       fieldIn.setPtr(fieldInPtr, idx);
       fieldOut.setPtr(fieldOutPtr, idx);
 
@@ -113,8 +117,10 @@ namespace Lucee
       for (int i = 0; i < nlocal; i++)
         fieldInVec(i) = fieldInPtr[i];
 
+      // Compute scale factor length(dir)
+      double cellWidth = grid.getVolume()/grid.getSurfArea(dir);
       // Compute derivative
-      Eigen::VectorXd fieldOutVec = gradMatrix*fieldInVec;
+      Eigen::VectorXd fieldOutVec = gradMatrix*fieldInVec/cellWidth;
 
       // Write result
       for (int i = 0; i < nlocal; i++)

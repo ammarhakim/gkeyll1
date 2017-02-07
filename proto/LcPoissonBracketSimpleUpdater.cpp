@@ -144,6 +144,7 @@ namespace Lucee
     int idx[NDIM];
     seq.fillWithIndex(idx);
     nodalBasis->setIndex(idx);
+    grid.setIndex(idx);
 
     // Store mass matrix inverse
     Lucee::Matrix<double> tempMass(nlocal, nlocal);
@@ -173,9 +174,13 @@ namespace Lucee
     Lucee::Matrix<double> tempVolCoords(nVolQuad, NC);
     volQuad.reset(nVolQuad, nlocal, NC);
 
+    double computationalScale = 1.0;
+    for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
+      computationalScale *= grid.getDx(dimIndex);
+
     nodalBasis->getGaussQuadData(tempVolQuad, tempVolCoords, volWeights);
     for (int volIndex = 0; volIndex < nVolQuad; volIndex++)
-      volQuad.weights(volIndex) = volWeights[volIndex];
+      volQuad.weights(volIndex) = volWeights[volIndex]/computationalScale;
     
     copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
     copyLuceeToEigen(tempVolCoords, volQuad.coordMat);
@@ -187,7 +192,8 @@ namespace Lucee
     {
       int dir = updateDirs[d];
       // Each row is a quadrature point; each column is a basis function with derivative applied
-      Eigen::MatrixXd derivMatrix = volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+      // grid.getDx(dir) multiplied on to remove grid scale. Proper value needs to be multiplied in update()
+      Eigen::MatrixXd derivMatrix = grid.getDx(dir)*volQuad.interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
       // Store gradients of the same basis function at various quadrature points
       for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
@@ -209,12 +215,20 @@ namespace Lucee
       surfLowerQuad[dir].reset(nSurfQuad, nlocal, NC);
       surfUpperQuad[dir].reset(nSurfQuad, nlocal, NC);
       
+      // Compute scale factor
+      double surfAreaComputational = 1.0;
+      for (int dirIndex = 0; dirIndex < NDIM; dirIndex++)
+      {
+        if (dirIndex != dir)
+          surfAreaComputational = surfAreaComputational*grid.getDx(dirIndex);
+      }
+
       // lower surface data
       nodalBasis->getSurfLowerGaussQuadData(dir, tempSurfQuad,
         tempSurfCoords, tempSurfWeights);
       // copy data to appropriate structures
       for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-        surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
+        surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex]/surfAreaComputational;
       copyLuceeToEigen(tempSurfQuad, surfLowerQuad[dir].interpMat);
       copyLuceeToEigen(tempSurfCoords, surfLowerQuad[dir].coordMat);
 
@@ -223,7 +237,7 @@ namespace Lucee
         tempSurfCoords, tempSurfWeights);
       // copy data to appropriate structures
       for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
-        surfUpperQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
+        surfUpperQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex]/surfAreaComputational;
       copyLuceeToEigen(tempSurfQuad, surfUpperQuad[dir].interpMat);
       copyLuceeToEigen(tempSurfCoords, surfUpperQuad[dir].coordMat);
     }
@@ -238,14 +252,15 @@ namespace Lucee
         // dir is direction gradient is taken in
         int dir = updateDirs[d];
         // Each row is a quadrature point; each column is a basis function with derivative applied
-        Eigen::MatrixXd derivMatrix = surfUpperQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+        // grid.getDx(dir) multiplied on to remove grid scale. Proper value needs to be multiplied in update()
+        Eigen::MatrixXd derivMatrix = grid.getDx(dir)*surfUpperQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
 
         // Use derivMatrix to create matrices for gradients of basis functions
         for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
           surfUpperQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
 
         // Do the same for the lower surface
-        derivMatrix = surfLowerQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
+        derivMatrix = grid.getDx(dir)*surfLowerQuad[surf].interpMat*massMatrixInv*gradStiffnessMatrix[dir].transpose();
         for (int basisIndex = 0; basisIndex < nlocal; basisIndex++)
           surfLowerQuad[surf].pDiffMatrix[basisIndex].row(dir) = derivMatrix.col(basisIndex);
       }
@@ -260,9 +275,13 @@ namespace Lucee
     for (int d = 0; d < updateDirs.size(); d++)
     {
       int dir = updateDirs[d];
-      bigStoredUpperSurfMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
-      bigStoredLowerSurfMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
-      bigStoredVolMatrices[d] = (1.0/jacobianFactor)*massMatrixInv*derivMatrices[d].transpose();
+
+      bigStoredUpperSurfMatrices[d] = computationalScale*
+        (1.0/jacobianFactor)*massMatrixInv*surfUpperQuad[dir].interpMat.transpose();
+      bigStoredLowerSurfMatrices[d] = computationalScale*
+        (1.0/jacobianFactor)*massMatrixInv*surfLowerQuad[dir].interpMat.transpose();
+      bigStoredVolMatrices[d] = computationalScale*
+        (1.0/jacobianFactor)*massMatrixInv*derivMatrices[d].transpose();
     }
   }
 
@@ -313,19 +332,22 @@ namespace Lucee
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
       hamil.setPtr(hamilPtr, idx);
+      grid.setIndex(idx);
 
       // Compute gradient of hamiltonian
       Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nVolQuad);
       for (int i = 0; i < nlocal; i++)
         hamilDerivAtQuad.noalias() += hamilPtr[i]*volQuad.pDiffMatrix[i];
+      // Scale components based on grid
+      for (int dirIndex = 0; dirIndex < NDIM; dirIndex++)
+        hamilDerivAtQuad.row(dirIndex) *= grid.getSurfArea(dirIndex)/grid.getVolume();
 
       // Get alpha from appropriate function
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, volQuad.interpMat, idx, alpha);
       
       // Computing maximum cfla
-      grid.setIndex(idx);
       for (int i = 0; i < NDIM; i++)
-        dtdqVec(i) = dt/grid.getDx(i)/jacobianFactor;
+        dtdqVec(i) = dt/(grid.getVolume()/grid.getSurfArea(i))/jacobianFactor;
 
       // Loop over each alpha vector evaluated at a quadrature point
       for (int i = 0; i < nVolQuad; i++)
@@ -344,10 +366,12 @@ namespace Lucee
       for (int d = 0;  d < updateDirs.size(); d++)
       {
         int dir = updateDirs[d];
+        // Scale factor
+        double gridScale = grid.getSurfArea(dir)/grid.getVolume();
         for (int i = 0; i < nlocal; i++)
         {
           for (int qp = 0; qp < nVolQuad; qp++)
-            aNewPtr[i] += volQuad.weights(qp)*bigStoredVolMatrices[d](i,qp)*alpha(dir,qp)*fAtQuad(qp);
+            aNewPtr[i] += gridScale*volQuad.weights(qp)*bigStoredVolMatrices[d](i,qp)*alpha(dir,qp)*fAtQuad(qp);
         }
       }
     }
@@ -413,10 +437,14 @@ namespace Lucee
             // Hamiltonian is continuous, so use right always
             // UNLESS left cell is globalRgn.getUpper(dir)
             hamil.setPtr(hamilPtr, idxr);
+            grid.setIndex(idxr);
             // Compute gradient of hamiltonian at surface nodes
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
               hamilDerivAtQuad.noalias() += hamilPtr[i]*surfLowerQuad[dir].pDiffMatrix[i];
+            // Scale components based on grid
+            for (int dirIndex = 0; dirIndex < NDIM; dirIndex++)
+              hamilDerivAtQuad.row(dirIndex) *= grid.getSurfArea(dirIndex)/grid.getVolume();
             equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idxr, alphaSurf);
           }
           else
@@ -424,10 +452,14 @@ namespace Lucee
             // Hamiltonian is continuous, so use right always
             // UNLESS left cell is globalRgn.getUpper(dir)
             hamil.setPtr(hamilPtr, idxl);
+            grid.setIndex(idxl);
             // Compute gradient of hamiltonian at surface nodes
             Eigen::MatrixXd hamilDerivAtQuad = Eigen::MatrixXd::Zero(NDIM, nSurfQuad);
             for (int i = 0; i < nlocal; i++)
               hamilDerivAtQuad.noalias() += hamilPtr[i]*surfUpperQuad[dir].pDiffMatrix[i];
+            // Scale components based on grid
+            for (int dirIndex = 0; dirIndex < NDIM; dirIndex++)
+              hamilDerivAtQuad.row(dirIndex) *= grid.getSurfArea(dirIndex)/grid.getVolume();
             equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfUpperQuad[dir].interpMat, idxl, alphaSurf);
           }
 
@@ -444,14 +476,19 @@ namespace Lucee
 
           aNew.setPtr(aNewPtr_r, idxr);
           aNew.setPtr(aNewPtr_l, idxl);
+          // Surface area will be the same for both cells
+          grid.setIndex(idxl);
+          double gridScaleLeft = grid.getSurfArea(dir)/grid.getVolume();
+          grid.setIndex(idxr);
+          double gridScaleRight = grid.getSurfArea(dir)/grid.getVolume();
           for (int i = 0; i < nlocal; i++)
           {
             for (int qp = 0; qp < nSurfQuad; qp++)
             {
               aNewPtr_l[i] -= bigStoredUpperSurfMatrices[d](i,qp)*
-                numericalFluxAtQuad(qp)*surfUpperQuad[dir].weights(qp);
+                numericalFluxAtQuad(qp)*surfUpperQuad[dir].weights(qp)*gridScaleLeft;
               aNewPtr_r[i] += bigStoredLowerSurfMatrices[d](i,qp)*
-                numericalFluxAtQuad(qp)*surfLowerQuad[dir].weights(qp);
+                numericalFluxAtQuad(qp)*surfLowerQuad[dir].weights(qp)*gridScaleRight;
             }
           }
         }

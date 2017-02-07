@@ -90,7 +90,7 @@ namespace Lucee
     Eigen::MatrixXd integrationMatrix(nlocal2d, nlocal2d);
     nodalBasis2d->getMassMatrix(tempMassMatrix);
     copyLuceeToEigen(tempMassMatrix, integrationMatrix);
-    integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    integrationMatrix *= 1.0/(grid.getDx(0)*grid.getDx(1));
 
     integrationVector = integrationMatrix.colwise().sum();
   }
@@ -151,10 +151,14 @@ namespace Lucee
               for (int imu = localRgn.getLower(4); imu < localRgn.getUpper(4); imu++)
               {
                 idx[4] = imu;
+                
                 distf.setPtr(distfPtr, idx);
+                grid.setIndex(idx);
+
                 for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                   distfReduced(nodeIndex) = distfPtr[nodalStencil[nodeIndex] + configNode];
-                numericalDensity += integrationVector.dot(distfReduced);
+                numericalDensity += grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(4)*
+                  integrationVector.dot(distfReduced);
               }
             }
 

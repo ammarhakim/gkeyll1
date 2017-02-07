@@ -85,7 +85,8 @@ namespace Lucee
     integrationMatrix = Eigen::MatrixXd(nlocal2d, nlocal2d);
     nodalBasis2d->getMassMatrix(tempMassMatrix);
     copyLuceeToEigen(tempMassMatrix, integrationMatrix);
-    integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    //integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    integrationMatrix *= 1.0/(grid.getDx(0)*grid.getDx(1));
   }
 
   Lucee::UpdaterStatus
@@ -125,6 +126,8 @@ namespace Lucee
     while (seq.step())
     {
       seq.fillWithIndex(idx);
+      // Set grid
+      grid.setIndex(idx);
       // Set input field pointers
       distfIn.setPtr(distfInPtr, idx);
       productIn.setPtr(productInPtr, idx);
@@ -143,8 +146,11 @@ namespace Lucee
           productReduced(nodeIndex) = productInPtr[nodalStencil[nodeIndex] + configNode];
         }
 
+        // Compute the area of cell dMu*dV to properly scale integral
+        double velocityArea = grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4));
+
         // Accumulate results of integration
-        integratedFieldPtr[configNode] += bFieldInPtr[configNode]*scaleFactor*
+        integratedFieldPtr[configNode] += velocityArea*bFieldInPtr[configNode]*scaleFactor*
           distfReduced.dot(integrationMatrix*productReduced);
       }
     }

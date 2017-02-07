@@ -70,12 +70,19 @@ namespace Lucee
 
     surfLowerQuad5d = Eigen::MatrixXd(nSurfQuad5d, nlocal5d);
     copyLuceeToEigen(tempSurfQuad5d, surfLowerQuad5d);
+    // Undo grid scale of quadrature weights
+    double computationalScale = grid.getDx(0)*grid.getDx(1)*grid.getDx(3)*grid.getDx(4);
+    for (int quadIndex = 0; quadIndex < surfLowerWeights5d.size(); quadIndex++)
+      surfLowerWeights5d[quadIndex] = surfLowerWeights5d[quadIndex]/computationalScale;
     
     surfUpperWeights5d = std::vector<double>(nSurfQuad5d);
     nodalBasis5d->getSurfUpperGaussQuadData(2, tempSurfQuad5d, tempSurfCoords5d, surfUpperWeights5d);
     
     surfUpperQuad5d = Eigen::MatrixXd(nSurfQuad5d, nlocal5d);
     copyLuceeToEigen(tempSurfQuad5d, surfUpperQuad5d);
+    // Undo grid scale of quadrature weights
+    for (int quadIndex = 0; quadIndex < surfUpperWeights5d.size(); quadIndex++)
+      surfUpperWeights5d[quadIndex] = surfUpperWeights5d[quadIndex]/computationalScale;
   }
 
   Lucee::UpdaterStatus
@@ -149,7 +156,7 @@ namespace Lucee
           hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
-            localLowerSurfaceFlux += surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+            localLowerSurfaceFlux += grid.getSurfArea(2)*surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
               bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
         else if (integrateGhosts == true)
@@ -173,7 +180,7 @@ namespace Lucee
           hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
-            localLowerSurfaceFlux += surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+            localLowerSurfaceFlux += grid.getSurfArea(2)*surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
               bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
       }
@@ -213,7 +220,7 @@ namespace Lucee
           hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
-            localUpperSurfaceFlux += surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+            localUpperSurfaceFlux += grid.getSurfArea(2)*surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
               bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
         else if (integrateGhosts == true)
@@ -237,7 +244,7 @@ namespace Lucee
           hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
-            localUpperSurfaceFlux += surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+            localUpperSurfaceFlux += grid.getSurfArea(2)*surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
               bFieldAtQuad(quadIndex)*hamilDerivAtQuad(quadIndex);
         }
       }
