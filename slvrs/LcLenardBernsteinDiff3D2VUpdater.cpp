@@ -130,8 +130,8 @@ namespace Lucee
     upperMatTimesMu = Eigen::MatrixXd(nlocal2d, nlocal2d);
 
     double dq[2];
-    dq[0] = grid.getDx(3);
-    dq[1] = grid.getDx(4);
+    dq[0] = grid.getVolume()/grid.getSurfArea(3);
+    dq[1] = grid.getVolume()/grid.getSurfArea(4);
 
     // Code generated from mathematica
     upperCenter[0](0,0)=dq[1]/(36*dq[0]);
@@ -382,7 +382,7 @@ namespace Lucee
     copyLuceeToEigen(massMatrixLucee, massMatrix);
 
     // Scale massMatrix so that it can be used for the (v,mu) grid
-    massMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    massMatrix *= dq[0]*dq[1]/(grid.getDx(0)*grid.getDx(1));
 
     Eigen::MatrixXd massMatrixInv = massMatrix.inverse();
 
@@ -491,7 +491,7 @@ namespace Lucee
           {
             // Keep track of max CFL number
             cfla = std::max( cfla, std::abs(4.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))*
-              paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getDx(3)*grid.getDx(3))) );
+              paraTemperatureInPtr[configNode]/speciesMass*dt/(grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(3))) );
 
             // Loop over entire (vPar,mu) space
             for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
@@ -556,7 +556,7 @@ namespace Lucee
                   double muCoord = cellCentroid[4] + 0.5*grid.getDx(4);
                   double muTherm = perpTemperatureInPtr[configNode]/bFieldInPtr[configNode];
                   cfla = std::max(cfla, 8.0*alpha*numDensityInPtr[configNode]/(temperatureInPtr[configNode]*sqrt(temperatureInPtr[configNode]))
-                    *muTherm*muCoord*dt/(grid.getDx(4)*grid.getDx(4)));
+                    *muTherm*muCoord*dt/(grid.getVolume()/grid.getSurfArea(4)*grid.getVolume()/grid.getSurfArea(4)));
 
                   updateF = updateF + 2*perpTemperatureInPtr[configNode]/bFieldInPtr[configNode]*(cellCentroid[4]*upperCenter[1] + upperCenterTimesMu)*fReduced;
                   idx[4] = idx[4] + 1;

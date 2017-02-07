@@ -115,7 +115,7 @@ namespace Lucee
     refCoord[1] = -1;
     refCoord[2] = -1;
     std::vector<double> basisAtPoint(nodalStencil.size());
-    double weightScale = 0.5*grid.getDx(3)*0.5*grid.getDx(4);
+    double weightScale = 0.5*0.5;
     for (int gaussIndexOuter = 0; gaussIndexOuter < numGaussPoints1d; gaussIndexOuter++)
     {
       refCoord[3] = gaussPoints1d[gaussIndexOuter];
@@ -207,6 +207,7 @@ namespace Lucee
         {
           distfIn.setPtr(distfInPtr, idx);
           hamilDerivIn.setPtr(hamilDerivInPtr, idx);
+          double velocityArea = grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(4);
 
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
@@ -219,7 +220,8 @@ namespace Lucee
               hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Accumulate results of integration
-            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += velocityArea*scaleFactor*
+              distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
         else if (integrateGhosts == true)
@@ -228,6 +230,8 @@ namespace Lucee
           idx[2] = localRgn.getLower(2)-1;
           distfIn.setPtr(distfInPtr, idx);
           hamilDerivIn.setPtr(hamilDerivInPtr, idx);
+          grid.setIndex(idx);
+          double velocityArea = grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(4);
 
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
@@ -240,7 +244,8 @@ namespace Lucee
               hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Goes into lowerEdgeNodeNums since we are putting data only in skin cells
-            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+            outputMomentPtr[ lowerEdgeNodeNums[configNode] ] += velocityArea*scaleFactor*
+              distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
       }
@@ -278,6 +283,7 @@ namespace Lucee
         {
           distfIn.setPtr(distfInPtr, idx);
           hamilDerivIn.setPtr(hamilDerivInPtr, idx);
+          double velocityArea = grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(4);
 
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
@@ -290,7 +296,8 @@ namespace Lucee
               hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Accumulate results
-            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += velocityArea*scaleFactor*
+              distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
         else if (integrateGhosts == true)
@@ -299,6 +306,8 @@ namespace Lucee
           idx[2] = localRgn.getUpper(2);
           distfIn.setPtr(distfInPtr, idx);
           hamilDerivIn.setPtr(hamilDerivInPtr, idx);
+          grid.setIndex(idx);
+          double velocityArea = grid.getVolume()/grid.getSurfArea(3)*grid.getVolume()/grid.getSurfArea(4);
 
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
@@ -311,7 +320,8 @@ namespace Lucee
               hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
             }
             // Goes into upperEdgeNodeNums since we are putting data only in skin cells
-            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+            outputMomentPtr[ upperEdgeNodeNums[configNode] ] += velocityArea*scaleFactor*
+              distfReduced.dot(momentMatrix*hamilReduced);
           }
         }
       }

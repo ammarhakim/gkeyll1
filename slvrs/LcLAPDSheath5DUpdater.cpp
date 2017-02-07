@@ -149,7 +149,8 @@ namespace Lucee
     // Compute a matrix used to calculate the total parallel flux across a surface
     // (Really a 2d mass matrix)
     momentMatrix = Eigen::MatrixXd(nodalStencil.size(), nodalStencil.size());
-    double weightScale = 0.5*grid.getDx(3)*0.5*grid.getDx(4);
+    // Need to multiply by Lv*Lmu in update loop
+    double weightScale = 0.5*0.5;
 
     for (int i = 0; i < nodalStencil.size(); i++)
     {
@@ -170,6 +171,7 @@ namespace Lucee
     nodalBasis3d->getSurfUpperNodeNums(2, upperEdgeNodeNums);
 
     // Get matrices used for interpolation of cutoff velocity
+    // Note: grid scale not important here because it gets cancelled out
     int nlocal2d = nodalBasis2d->getNumNodes();
     int nVolQuad2d = nodalBasis2d->getNumGaussNodes();
     gaussWeights2d = std::vector<double>(nVolQuad2d);
@@ -183,6 +185,7 @@ namespace Lucee
     nodalBasis2d->getMassMatrix(tempMassMatrix2d);
     Eigen::MatrixXd massMatrix2d(nlocal2d, nlocal2d);
     copyLuceeToEigen(tempMassMatrix2d, massMatrix2d);
+
     massMatrix2dInv = massMatrix2d.inverse();
   }
 
@@ -217,6 +220,20 @@ namespace Lucee
     Eigen::VectorXd phiAtNodes(nlocal2d);
     Eigen::VectorXd cutoffV(nlocal2d);
     Eigen::VectorXd rhsVector(nlocal2d);
+
+    // Compute vParaMin and vParaMax
+    idx[0] = localRgn.getLower(0);
+    idx[1] = localRgn.getLower(1);
+    idx[2] = localRgn.getLower(2);
+    idx[3] = localRgn.getLower(3);
+    idx[4] = localRgn.getLower(4);
+    grid.setIndex(idx);
+    grid.getCentroid(cellCentroid);
+    double vParaMin = cellCentroid[3] - 0.5*grid.getVolume()/grid.getSurfArea(3);
+    idx[3] = localRgn.getUpper(3)-1;
+    grid.setIndex(idx);
+    grid.getCentroid(cellCentroid);
+    double vParaMax = cellCentroid[3] + 0.5*grid.getVolume()/grid.getSurfArea(3);
 
     // Apply sheath boundary conditions on lower surface
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -287,7 +304,7 @@ namespace Lucee
             // Cutoff velocity at this node
             bool foundCutoffCell = false;
             // Check to see if cutoff v is above vmax
-            if (cutoffV(configNode) < -0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+            if (cutoffV(configNode) < vParaMin)
             {
               // Reflect everything
               foundCutoffCell = true;
@@ -312,8 +329,9 @@ namespace Lucee
                   std::cout << "(L) Unable to find a match to cutoff velocity" << std::endl;
                   std::cout << "charge = " << speciesCharge << std::endl;
                   std::cout << "cutoffV = " << cutoffV(configNode) << std::endl;
-                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
-                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
+                  std::cout << "vParaMin = " << vParaMin << std::endl;
+                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getVolume()/grid.getSurfArea(3) << std::endl;
+                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getVolume()/grid.getSurfArea(3) << std::endl;
                 }
                 break;
               }
@@ -321,8 +339,8 @@ namespace Lucee
               if (foundCutoffCell == false)
               {
                 // Check if cutoffV falls in this cell
-                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV(configNode) && 
-                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV(configNode))
+                if (cellCentroid[3] - 0.5*grid.getVolume()/grid.getSurfArea(3) <= cutoffV(configNode) && 
+                    cellCentroid[3] + 0.5*grid.getVolume()/grid.getSurfArea(3) >= cutoffV(configNode))
                 {
                   foundCutoffCell = true;
 
@@ -346,7 +364,8 @@ namespace Lucee
                       distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
                       hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
                     }
-                    speciesFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+                    double velocityArea = grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4));
+                    speciesFluxAtIv += velocityArea*scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                   }
 
                   // If flux is zero in this cell, then don't need to reflect anything
@@ -354,17 +373,17 @@ namespace Lucee
                     continue;
 
                   // Then compute outward flux only above cutoff velocity
-                  double a = -0.5*grid.getDx(3);
+                  double a = -0.5*grid.getVolume()/grid.getSurfArea(3);
                   double b = cutoffV(configNode) - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
                   // Integration weight scale for this modified integral
-                  double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                  double weightScale = 0.5*(b-a)*0.5*grid.getVolume()/grid.getSurfArea(4);
                   double speciesFluxAboveVc = 0.0;
                   double refCoord[2];
                   std::vector<double> basisAtPoint(nodalStencil.size());
                   
                   for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
                   {
-                    refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                    refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getVolume()/grid.getSurfArea(3));
                     refCoord[1] = gaussSurfCoords(gaussIndex,1);
                     nodalBasis2d->evalBasis(refCoord, basisAtPoint);
 
@@ -535,7 +554,7 @@ namespace Lucee
 
             bool foundCutoffCell = false;
             // Check to see if cutoff v is above vmax
-            if (cutoffV(configNode) > 0.5*grid.getDx(3)*(globalRgn.getUpper(3)-globalRgn.getLower(3)))
+            if (cutoffV(configNode) > vParaMax)
             {
               // Reflect everything
               foundCutoffCell = true;
@@ -560,8 +579,9 @@ namespace Lucee
                   std::cout << "(U) Unable to find a match to cutoff velocity" << std::endl;
                   std::cout << "charge = " << speciesCharge << std::endl;
                   std::cout << "cutoffV = " << cutoffV(configNode) << std::endl;
-                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getDx(3) << std::endl;
-                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getDx(3) << std::endl;
+                  std::cout << "vParaMax = " << vParaMax << std::endl;
+                  std::cout << "cellLower = " << cellCentroid[3]-0.5*grid.getVolume()/grid.getSurfArea(3) << std::endl;
+                  std::cout << "cellUpper = " << cellCentroid[3]+0.5*grid.getVolume()/grid.getSurfArea(3) << std::endl;
                 }
                 break;
               }
@@ -569,8 +589,8 @@ namespace Lucee
               if (foundCutoffCell == false)
               {
                 // Check if cutoffV falls in this cell
-                if (cellCentroid[3] - 0.5*grid.getDx(3) <= cutoffV(configNode) && 
-                    cellCentroid[3] + 0.5*grid.getDx(3) >= cutoffV(configNode))
+                if (cellCentroid[3] - 0.5*grid.getVolume()/grid.getSurfArea(3) <= cutoffV(configNode) && 
+                    cellCentroid[3] + 0.5*grid.getVolume()/grid.getSurfArea(3) >= cutoffV(configNode))
                 {
                   foundCutoffCell = true;
 
@@ -594,7 +614,8 @@ namespace Lucee
                       distfReduced(nodeIndex) = sknPtr[nodalStencil[nodeIndex] + configNodeIndex];
                       hamilReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
                     }
-                    speciesFluxAtIv += scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
+                    double velocityArea = grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4));
+                    speciesFluxAtIv += velocityArea*scaleFactor*distfReduced.dot(momentMatrix*hamilReduced);
                   }
                   // If flux is zero in this cell, then don't need to reflect anything
                   if (speciesFluxAtIv == 0.0)
@@ -602,16 +623,16 @@ namespace Lucee
 
                   // Then compute outward flux only above cutoff velocity
                   double a = cutoffV(configNode) - cellCentroid[3]; // Needs to be in local coordinates [-dv/2, dv/2]
-                  double b = 0.5*grid.getDx(3);
+                  double b = 0.5*grid.getVolume()/grid.getSurfArea(3);
                   // Integration weight scale for this modified integral
-                  double weightScale = 0.5*(b-a)*0.5*grid.getDx(4);
+                  double weightScale = 0.5*(b-a)*0.5*grid.getVolume()/grid.getSurfArea(4);
                   double speciesFluxAboveVc = 0.0;
                   double refCoord[2];
                   std::vector<double> basisAtPoint(nodalStencil.size());
                   
                   for (int gaussIndex = 0; gaussIndex < gaussSurfCoords.rows(); gaussIndex++)
                   {
-                    refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getDx(3));
+                    refCoord[0] = ( 0.5*(b-a)*gaussSurfCoords(gaussIndex,0) + 0.5*(a+b) )/(0.5*grid.getVolume()/grid.getSurfArea(3));
                     refCoord[1] = gaussSurfCoords(gaussIndex,1);
                     nodalBasis2d->evalBasis(refCoord, basisAtPoint);
 

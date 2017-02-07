@@ -122,9 +122,9 @@ namespace Lucee
     Eigen::MatrixXd basisIntegrals(numLocalNodes,nc);
     Eigen::MatrixXd projectF(numLocalNodes,nc);
     // Scaling factors
-    double coordScales[NDIM];
-    for (unsigned d = 0; d < NDIM; d++)
-      coordScales[d] = 0.5*grid.getDx(d);
+    //double coordScales[NDIM];
+    //for (unsigned d = 0; d < NDIM; d++)
+    //  coordScales[d] = 0.5*grid.getDx(d);
     double xc[NC];
 
     while (seq.step())
@@ -133,6 +133,9 @@ namespace Lucee
       q.setPtr(ptr, idx);
 
       nodalBasis->setIndex(idx);
+      // Translate and scale gaussOrdinates to physical space
+      grid.setIndex(idx);
+      grid.getCentroid(xc);
 
       // Get the mass matrix and invert it
       nodalBasis->getMassMatrix(localMass);
@@ -145,12 +148,9 @@ namespace Lucee
 
       // Get interpolation matrix, gaussian quadrature points, and weights
       nodalBasis->getGaussQuadData(interpMatrix,gaussOrdinates,gaussWeights);
-      // Translate and scale gaussOrdinates to physical space
-      grid.setIndex(idx);
-      grid.getCentroid(xc);
       for (int gaussPoint = 0; gaussPoint < numVolQuadNodes; gaussPoint++)
         for (int dimIndex = 0; dimIndex < NC; dimIndex ++)
-          gaussOrdinates(gaussPoint,dimIndex) = xc[dimIndex] + gaussOrdinates(gaussPoint,dimIndex)*coordScales[dimIndex];
+          gaussOrdinates(gaussPoint,dimIndex) = xc[dimIndex] + gaussOrdinates(gaussPoint,dimIndex)*0.5*grid.getVolume()/grid.getSurfArea(dimIndex);
 
       basisIntegrals.setZero(basisIntegrals.rows(),basisIntegrals.cols());
 

@@ -57,6 +57,13 @@ namespace Lucee
     Lucee::Matrix<double> tempSurfCoords5d(nVolQuad5d, 5);
 
     nodalBasis5d->getGaussQuadData(tempSurfQuad5d, tempSurfCoords5d, volWeights5d);
+    
+    // Remove computational grid scaling from weights
+    double computationalScale = 1.0;
+    for (int dimIndex = 0; dimIndex < 5; dimIndex++)
+      computationalScale *= grid.getDx(dimIndex);
+    for (int quadIndex = 0; quadIndex < volWeights5d.size(); quadIndex++)
+      volWeights5d[quadIndex] = volWeights5d[quadIndex]/computationalScale;
 
     volQuad5d = Eigen::MatrixXd(nVolQuad5d, nlocal5d);
     copyLuceeToEigen(tempSurfQuad5d, volQuad5d);
@@ -124,11 +131,13 @@ namespace Lucee
       // Compute energy integral in cell
       double localTotalEnergy = 0.0;
       for (int quadIndex = 0; quadIndex < nVolQuad5d; quadIndex++)
-        localTotalEnergy += volWeights5d[quadIndex]*distfAtQuad(quadIndex)*
+        localTotalEnergy += grid.getVolume()*volWeights5d[quadIndex]*distfAtQuad(quadIndex)*
           bFieldAtQuad(quadIndex)*hamilAtQuad(quadIndex);
 
+      double physicalVol3d = grid.getVolume()*grid.getVolume()*grid.getVolume()/
+        (grid.getSurfArea(0)*grid.getSurfArea(1)*grid.getSurfArea(2));
       // Convert integrated quantity to a cell-averaged physical quantity
-      localTotalEnergy = scaleFactor*localTotalEnergy/(grid.getDx(0)*grid.getDx(1)*grid.getDx(2));
+      localTotalEnergy = scaleFactor*localTotalEnergy/physicalVol3d;
 
       // Accumulate results of integration
       for (int nodeIndex = 0; nodeIndex < nlocal3d; nodeIndex++)

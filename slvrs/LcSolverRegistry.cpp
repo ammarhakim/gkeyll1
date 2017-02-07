@@ -60,6 +60,7 @@
 #include <LcLenardBernsteinDiff3DUpdater.h>
 #include <LcLenardBernsteinDiff5DUpdater.h>
 #include <LcLenardBernsteinDiff3D2VUpdater.h>
+#include <LcLenardBernsteinDiffAlternate3D2VUpdater.h>
 #include <LcLenardBernsteinDiffUpdater.h>
 #include <LcLenardBernsteinDrag3DUpdater.h>
 #include <LcLenardBernsteinDrag3D2VUpdater.h>
@@ -281,6 +282,7 @@ namespace Lucee
       .append<Lucee::LenardBernsteinDiffUpdater>()
       .append<Lucee::LenardBernsteinDiff3DUpdater>()
       .append<Lucee::LenardBernsteinDiff3D2VUpdater>()
+      .append<Lucee::LenardBernsteinDiffAlternate3D2VUpdater>()
       .append<Lucee::LenardBernsteinDiff5DUpdater>()
       
       .append<Lucee::NodalCopyFaceToInteriorUpdater>()

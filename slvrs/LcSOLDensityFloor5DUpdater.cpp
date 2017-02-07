@@ -132,6 +132,7 @@ namespace Lucee
             // If sourceDensity is nonzero, then add on extra source term
             if (sourceDensity != 0.0)
             {
+              //std::cout << "At (" << idx[0] << "," << idx[1] << "," << idx[2] << ") need to add " << sourceDensity << std::endl << "Self = " << selfDensityPtr[configNode] << ", other = " << otherDensityPtr[configNode] << std::endl;
               for (int iv = localRgn.getLower(3); iv < localRgn.getUpper(3); iv++)
               {
                 idx[3] = iv;

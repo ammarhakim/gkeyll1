@@ -96,7 +96,8 @@ namespace Lucee
     Eigen::MatrixXd integrationMatrix(nlocal2d, nlocal2d);
     nodalBasis2d->getMassMatrix(tempMassMatrix);
     copyLuceeToEigen(tempMassMatrix, integrationMatrix);
-    integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    //integrationMatrix *= grid.getDx(3)*grid.getDx(4)/(grid.getDx(0)*grid.getDx(1));
+    integrationMatrix *= 1.0/(grid.getDx(0)*grid.getDx(1));
 
     integrationVector = integrationMatrix.colwise().sum();
   }
@@ -123,7 +124,6 @@ namespace Lucee
     unsigned nlocal3d = nodalBasis3d->getNumNodes();
 
     int idx[5];
-    double xc[5];
     std::vector<double> result(1);
     Eigen::VectorXd distfReduced(nodalStencil.size());
     Lucee::Matrix<double> nodeCoords3dLucee(nlocal3d, 3);
@@ -139,8 +139,6 @@ namespace Lucee
           idx[2] = iz;
           idx[3] = localRgn.getLower(3);
           idx[4] = localRgn.getLower(4);
-          grid.setIndex(idx);
-          grid.getCentroid(xc);
           bField.setPtr(bFieldPtr, idx[0], idx[1], idx[2]);
 
           // Get a copy of the 3d node coordinates
@@ -162,7 +160,11 @@ namespace Lucee
                 distf.setPtr(distfPtr, idx);
                 for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
                   distfReduced(nodeIndex) = distfPtr[nodalStencil[nodeIndex] + configNode];
-                numericalDensity += integrationVector.dot(distfReduced);
+
+                // Compute the area of cell dMu*dV to properly scale integral
+                grid.setIndex(idx);
+                double velocityArea = grid.getVolume()*grid.getVolume()/(grid.getSurfArea(3)*grid.getSurfArea(4));
+                numericalDensity += velocityArea*integrationVector.dot(distfReduced);
               }
             }
             numericalDensity = numericalDensity*scaleFactor*bFieldPtr[configNode];
