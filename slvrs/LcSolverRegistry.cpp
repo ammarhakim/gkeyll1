@@ -20,6 +20,7 @@
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
+#include <LcDGImplicitFiveMomentSrcUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEigenNodalVlasovUpdater.h>
 #include <LcElectromagneticAUpdater.h>
@@ -387,6 +388,10 @@ namespace Lucee
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<1> >()
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<2> >()
       .append<Lucee::TenMomLocalAnisoHeatFluxUpdater<3> >()
+
+      .append<Lucee::DGImplicitFiveMomentSrcUpdater<1> >()
+      .append<Lucee::DGImplicitFiveMomentSrcUpdater<2> >()
+      .append<Lucee::DGImplicitFiveMomentSrcUpdater<3> >()
 
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()

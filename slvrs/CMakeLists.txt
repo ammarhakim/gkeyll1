@@ -29,6 +29,7 @@ set(lcslvrs_SOURCES
   LcCopyBoundaryCondition.cpp
   LcCopyContToDisContFieldUpdater.cpp
   LcCurrentSource.cpp
+  LcDGImplicitFiveMomentSrcUpdater.cpp
   LcDivEquation.cpp
   LcEdgeFaceCurlUpdater.cpp
   LcEigenNodalVlasovUpdater.cpp
