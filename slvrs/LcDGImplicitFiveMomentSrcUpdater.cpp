@@ -48,10 +48,10 @@ namespace Lucee
   {
     UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("confBasis"))
-      confBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("confBasis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
+      basis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
-      throw Lucee::Except("DGImplicitFiveMomentSrcUpdater::readInput: Must specify configuration-space basis using 'confBasis'");
+      throw Lucee::Except("DGImplicitFiveMomentSrcUpdater::readInput: Must specify configuration-space basis using 'basis'");
 
     nFluids = (int) tbl.getNumber("numFluids");
 
@@ -122,7 +122,7 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    unsigned nlocal = confBasis->getNumNodes();
+    unsigned nlocal = basis->getNumNodes();
 
     double dt = t-this->getCurrTime();
     double dt1 = 0.5*dt;
