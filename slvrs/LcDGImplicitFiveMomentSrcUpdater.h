@@ -68,7 +68,7 @@ namespace Lucee
 
     private:
 /** Pointer to configuration-space basis functions to use */
-      Lucee::NodalFiniteElementIfc<NDIM> *confBasis;
+      Lucee::NodalFiniteElementIfc<NDIM> *basis;
 /** Number of fluids */
       unsigned nFluids;
 /** Charges of each fluid */
