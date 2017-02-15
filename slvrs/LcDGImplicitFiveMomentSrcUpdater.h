@@ -81,6 +81,8 @@ namespace Lucee
       std::vector<double> qbym;
 /** Charge-mass ratio squared for each fluid */
       std::vector<double> qbym2;
+/** Flag to indicate if static EM field is present */
+      bool hasStatic;
 /** Flag to indicate if to update pressure equation */
       bool hasPressure;
 /** Propagation speed factor for electric field error potential. This

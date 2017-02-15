@@ -76,6 +76,11 @@ namespace Lucee
 // permittivity of free space
     epsilon0 = tbl.getNumber("epsilon0");
 
+// flag to indicate if there is a static field
+    hasStatic = false;
+    if (tbl.hasBool("hasStaticField"))
+      hasStatic = tbl.getBool("hasStaticField");
+
 // flag to indicate if there is a pressure equation
     hasPressure = true;
     if (tbl.hasBool("hasPressure"))
@@ -136,8 +141,18 @@ namespace Lucee
 // get EM field (this is last out parameter)
     Lucee::Field<NDIM, double>& emField = this->getOut<Lucee::Field<NDIM, double> >(nFluids);
 
+// get static EM field if one is present (it is the first and only
+// input field)
+    const Lucee::Field<NDIM, double>* staticField = 0;
+    if (hasStatic)
+      staticField = &this->getInp<Lucee::Field<NDIM, double> >(0);
+
     Lucee::FieldPtr<double> fPtr = fluids[0]->createPtr();
     Lucee::FieldPtr<double> emPtr = emField.createPtr();
+
+    std::vector<double> zeros(6);
+    for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
+    Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
 
     int idx[NDIM];
     Lucee::Region<NDIM, int> localRgn = emField.getRegion();
@@ -147,6 +162,9 @@ namespace Lucee
       seq.fillWithIndex(idx);
 
       emField.setPtr(emPtr, idx);
+
+      if (hasStatic)
+        staticField->setPtr(staticEmPtr, idx);
 
       std::vector<double> lambda(nFluids);
       std::vector<double> omega(nFluids);
@@ -163,7 +181,11 @@ namespace Lucee
         Eigen::Vector3d F(0,0,0); 
         Eigen::Vector3d K(0,0,0);// the k vector used to update the implicit solution in Smithe(2007)
 
-        B(0) = emPtr[i*numEMcomp+BX]; B(1) = emPtr[i*numEMcomp+BY]; B(2) = emPtr[i*numEMcomp+BZ];
+        double bx = (emPtr[i*numEMcomp+BX] + staticEmPtr[i*numEMcomp+BX]);
+        double by = (emPtr[i*numEMcomp+BY] + staticEmPtr[i*numEMcomp+BY]);
+        double bz = (emPtr[i*numEMcomp+BZ] + staticEmPtr[i*numEMcomp+BZ]);
+
+        B(0) = bx; B(1) = by; B(2) = bz;
         E(0) = emPtr[i*numEMcomp+EX]; E(1) = emPtr[i*numEMcomp+EY]; E(2) = emPtr[i*numEMcomp+EZ];
         double babs = std::sqrt(B(0)*B(0) + B(1)*B(1) + B(2)*B(2));
 
