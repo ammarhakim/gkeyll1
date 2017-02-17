@@ -150,8 +150,8 @@ namespace Lucee
     Lucee::FieldPtr<double> fPtr = fluids[0]->createPtr();
     Lucee::FieldPtr<double> emPtr = emField.createPtr();
 
-    std::vector<double> zeros(6);
-    for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
+    std::vector<double> zeros(6*nlocal);
+    for (unsigned i=0; i<6*nlocal; ++i) zeros[i] = 0.0;
     Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
 
     int idx[NDIM];
@@ -181,9 +181,9 @@ namespace Lucee
         Eigen::Vector3d F(0,0,0); 
         Eigen::Vector3d K(0,0,0);// the k vector used to update the implicit solution in Smithe(2007)
 
-        double bx = (emPtr[i*numEMcomp+BX] + staticEmPtr[i*numEMcomp+BX]);
-        double by = (emPtr[i*numEMcomp+BY] + staticEmPtr[i*numEMcomp+BY]);
-        double bz = (emPtr[i*numEMcomp+BZ] + staticEmPtr[i*numEMcomp+BZ]);
+        double bx = (emPtr[i*numEMcomp+BX] + staticEmPtr[i*6+BX]);
+        double by = (emPtr[i*numEMcomp+BY] + staticEmPtr[i*6+BY]);
+        double bz = (emPtr[i*numEMcomp+BZ] + staticEmPtr[i*6+BZ]);
 
         B(0) = bx; B(1) = by; B(2) = bz;
         E(0) = emPtr[i*numEMcomp+EX]; E(1) = emPtr[i*numEMcomp+EY]; E(2) = emPtr[i*numEMcomp+EZ];
