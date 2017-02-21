@@ -95,7 +95,8 @@ namespace Lucee
     
 // local region to index
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
+// extended region including ghost cells
+    Lucee::Region<NDIM, int> extRgn = A.getExtRegion();
 // A <- B
     A.copy(B);
 // loop, updating slices in each direction
@@ -103,7 +104,7 @@ namespace Lucee
     {
       double adtdx = alpha*dt/grid.getDx(dir);
 // create sequencer to loop over *each* 1D slice in 'dir' direction
-      Lucee::RowMajorSequencer<NDIM> seq(localRgn.deflate(dir));
+      Lucee::RowMajorSequencer<NDIM> seq(extRgn.deflate(dir));
 
 // lower and upper bounds of 1D slice
       int sliceLower = localRgn.getLower(dir) + ghostUpdates[0];
