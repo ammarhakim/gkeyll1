@@ -140,6 +140,15 @@ namespace Lucee
       qbym[i] = charge[i]/mass[i];
       qbym2[i] = qbym[i]*qbym[i];
     }
+    
+    if (tbl.hasBool("implicitB"))
+      implicitB = tbl.getBool("implicitB");
+    else 
+      implicitB = false;
+    
+    if (implicitB && linSolType != ANALYTIC) {
+      throw Lucee::Except("ImplicitFiveMomentSrcUpdater::reatInput: Implicit B field update only works with analytic solver"); 
+    }
   }
 
   template <unsigned NDIM>
@@ -167,6 +176,11 @@ namespace Lucee
 
 // get EM field (this is last out parameter)
     Lucee::Field<NDIM, double>& emField = this->getOut<Lucee::Field<NDIM, double> >(nFluids);
+    
+    Lucee::Field<NDIM, double>* elfNew = 0;
+    if (implicitB) { 
+      elfNew = &this->getOut<Lucee::Field<NDIM, double> >(nFluids+1);
+    }
 
 // get static EM field if one is present (it is the first and only
 // input field)
@@ -180,6 +194,10 @@ namespace Lucee
     std::vector<double> zeros(6);
     for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
     Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
+
+    std::vector<double> zeros3(3);
+    for (unsigned i=0; i<3;++i) zeros3[i] = 0.0;
+    Lucee::FieldPtr<double> elfNewPtr(zeros3);
 
     Eigen::MatrixXd lhs;
     lhs = Eigen::MatrixXd::Constant(3*nFluids+3, 3*nFluids+3, 0.0);
@@ -195,6 +213,8 @@ namespace Lucee
       emField.setPtr(emPtr, idx);
       if (hasStatic)
         staticField->setPtr(staticEmPtr, idx);
+      if (implicitB)
+        elfNew->setPtr(elfNewPtr, idx);
       std::vector<double> lambda(nFluids);
       std::vector<double> omega(nFluids);
       //      std::vector<double> K(3); 
@@ -209,6 +229,7 @@ namespace Lucee
       Eigen::Vector3d E;
       Eigen::Vector3d F(0,0,0); 
       Eigen::Vector3d K(0,0,0);// the k vector used to update the implicit solution in Smithe(2007)
+      Eigen::Vector3d curlBdt(0,0,0);
       B(0) = bx; B(1) = by; B(2) = bz;
       E(0) = emPtr[EX]; E(1) = emPtr[EY]; E(2) = emPtr[EZ];
       double babs = std::sqrt(bx*bx + by*by + bz*bz);
@@ -266,6 +287,15 @@ namespace Lucee
         }
       }
       F = F + E;
+      if (implicitB) {
+        // this is dt*c^2*curl B
+        curlBdt(0) = elfNewPtr[0] - E(0);
+        curlBdt(1) = elfNewPtr[1] - E(1);
+        curlBdt(2) = elfNewPtr[2] - E(2);
+      }
+      // if using the implicit method, add the additional curl B term to the generalised J 
+      K += 1.0*curlBdt;
+
 // fill in elements for electric field equations
       Eigen::VectorXd sol;
       if (linSolType != ANALYTIC) {
