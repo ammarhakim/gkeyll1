@@ -82,6 +82,7 @@
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
+#include <LcScalingPositivityLimiter.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc3D.h>
 #include <LcSOLSetPotentialAtBoundary.h>
@@ -309,6 +310,12 @@ namespace Lucee
     
       .append<Lucee::LinEmGke1dPertHamilUpdater>()
       .append<Lucee::NonLinEmGke1dHamilUpdater>()
+
+      .append<Lucee::ScalingPositivityLimiter<1, 1> >()
+      .append<Lucee::ScalingPositivityLimiter<1, 2> >()
+      .append<Lucee::ScalingPositivityLimiter<1, 3> >()
+      .append<Lucee::ScalingPositivityLimiter<2, 2> >()
+      .append<Lucee::ScalingPositivityLimiter<2, 3> >()
 
       .append<Lucee::SimpleSmoothToC0Updater<2> >()
       .append<Lucee::SimpleSmoothToC0Updater<3> >()
