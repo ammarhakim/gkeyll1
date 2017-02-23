@@ -101,6 +101,7 @@ set (proto_SOURCES
   LcRectFourthOrderCentralDiffUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp
+  LcScalingPositivityLimiter.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLFluxAcrossEdgeCalc3D.cpp
   LcSOLSetPotentialAtBoundary.cpp
