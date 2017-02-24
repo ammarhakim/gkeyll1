@@ -46,11 +46,6 @@ namespace Lucee
       phaseBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("ScalingPositivityLimiter::readInput: Must specify phase space basis to use using 'basis'");
-
-    // flag for storing energy
-    storeEnergy = false;
-    if (tbl.hasBool("storeEnergy"))
-      storeEnergy = tbl.getBool("storeEnergy");
   }
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
@@ -83,20 +78,12 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    const Lucee::Field<NDIM, double>& distfIn =
-      this->getInp<Lucee::Field<NDIM, double> >(0);
-    Lucee::Field<NDIM, double>&       distfOut =
+    Lucee::Field<NDIM, double>& distf =
       this->getOut<Lucee::Field<NDIM, double> >(0);
+    Lucee::FieldPtr<double> distfPtr = distf.createPtr();
 
     Lucee::Region<NDIM, int>    localRgn  = grid.getLocalRegion();
     Lucee::Region<NDIM, double> compSpace = grid.getComputationalSpace();
-
-    Lucee::ConstFieldPtr<double> distfInPtr  = distfIn.createConstPtr();
-    Lucee::FieldPtr<double>      distfOutPtr = distfOut.createPtr();
-
-    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
-
-    distfOut = 0.0; // use distfOut to store increment initially    
     
     int idx[NDIM];
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -106,35 +93,33 @@ namespace Lucee
     std::vector<double> weights(numNodesPhase);
     phaseBasis->getWeights(weights);
     
-    double cellAverage, cellMin, invCellVolume;
+    double cellAvg, cellMin, invCellVolume;
     double theta;
 
-    invCellVolume = 1.0/pow(2, NDIM);
+    invCellVolume = 1.0/grid.getVolume();
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
-      distfIn.setPtr(distfInPtr, idx);
-      distfOut.setPtr(distfInPtr, idx);
+      distf.setPtr(distfPtr, idx);
       
       phaseBasis->setIndex(idx);
-      
+            
       cellMin = 1e9;
-      cellAverage = 0;
+      cellAvg = 0;
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) {
-	cellAverage += weights[nodeIdx]*distfInPtr[nodeIdx];
-	if (distfInPtr[nodeIdx] < cellMin) {
-	  cellMin = distfInPtr[nodeIdx];
+	cellAvg += weights[nodeIdx]*distfPtr[nodeIdx];
+	if (distfPtr[nodeIdx] < cellMin) {
+	  cellMin = distfPtr[nodeIdx];
 	}
       }
-      cellAverage *= invCellVolume;
-      theta = std::min(1.0, cellAverage/(cellAverage-cellMin));
+      cellAvg *= invCellVolume;
+      theta = fmin(1.0, cellAvg/(cellAvg-cellMin));
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) {
-	distfOutPtr[nodeIdx] = cellAverage + 
-	  theta*(distfInPtr[nodeIdx] - cellAverage);
+	distfPtr[nodeIdx] = cellAvg + 
+	  theta*(distfPtr[nodeIdx] - cellAvg);
       }		  
     }
-    
     return Lucee::UpdaterStatus(true, 0);
   }
   //----------------------------------------------------------------------------
