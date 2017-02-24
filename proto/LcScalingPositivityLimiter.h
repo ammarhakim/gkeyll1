@@ -80,8 +80,6 @@ namespace Lucee
       void declareTypes();
 
     private:
-      /** Flagto store energy */
-      bool storeEnergy;
       /** Pointer to phase space basis functions */
       Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
  
