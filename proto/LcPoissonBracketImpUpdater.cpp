@@ -15,8 +15,6 @@
 #include <LcMathLib.h>
 #include <LcPoissonBracketImpUpdater.h>
 
-#include <ctime>
-
 namespace Lucee
 {
   static const unsigned UPWIND = 0;
@@ -34,10 +32,6 @@ namespace Lucee
   PoissonBracketImpUpdater<NDIM>::PoissonBracketImpUpdater()
     : UpdaterIfc()
   {
-    totalVolTime = totalSurfTime = jacAtQuad = 0.0;
-    computeVolAlphaAtQuadNodesTime = computeSurfAlphaAtQuadNodesTime = 0.0;
-    vol_loop1 = vol_loop2 = vol_loop3 = vol_loop4 = 0.0;
-    surf_loop1 = surf_loop2 = surf_loop3 = surf_loop4 = 0.0;
   }
 
   template <unsigned NDIM>
@@ -205,7 +199,7 @@ namespace Lucee
     nodalBasis->getMassMatrix(tempMass);
     Eigen::MatrixXd massMatrix(nlocal, nlocal);
     copyLuceeToEigen(tempMass, massMatrix);
-    massMatrixInv = massMatrix.inverse();
+    Eigen::MatrixXd massMatrixInv = massMatrix.inverse();
 
     // Store grad stiffness matrix in each direction
     std::vector<Eigen::MatrixXd> gradStiffnessMatrix(updateDirs.size());
@@ -235,9 +229,12 @@ namespace Lucee
     copyLuceeToEigen(tempVolQuad, volQuad.interpMat);
     copyLuceeToEigen(tempVolCoords, volQuad.coordMat);
 
-    std::vector<Eigen::MatrixXd> derivMatrices(updateDirs.size());
+    //std::vector<Eigen::MatrixXd> derivMatrices(updateDirs.size());
 
     // Get data for surface quadrature
+    upperInterpMatrices.resize(updateDirs.size());
+    lowerInterpMatrices.resize(updateDirs.size());
+
     for (int d = 0; d < updateDirs.size(); d++)
     {
       int dir = updateDirs[d];
@@ -260,11 +257,15 @@ namespace Lucee
       for (int quadIndex = 0; quadIndex < nSurfQuad; quadIndex++)
       {
         surfLowerQuad[dir].weights(quadIndex) = tempSurfWeights[quadIndex];
+        
+        // Only copy nodes that will contribute to surface integral
+        // into the interpolation matrix
         for (int nodeIndex = 0; nodeIndex < nSurfNodes; nodeIndex++)
           surfLowerQuad[dir].interpMat(quadIndex, nodeIndex) = 
             tempSurfQuad(quadIndex, surfLowerQuad[dir].nodeNums[nodeIndex]);
       }
-      //copyLuceeToEigen(tempSurfQuad, surfLowerQuad[dir].interpMat);
+      lowerInterpMatrices[d] = Eigen::MatrixXd(nSurfQuad, nlocal);
+      copyLuceeToEigen(tempSurfQuad, lowerInterpMatrices[d]);
       copyLuceeToEigen(tempSurfCoords, surfLowerQuad[dir].coordMat);
 
       // upper surface data
@@ -279,7 +280,8 @@ namespace Lucee
           surfUpperQuad[dir].interpMat(quadIndex, nodeIndex) = 
             tempSurfQuad(quadIndex, surfUpperQuad[dir].nodeNums[nodeIndex]);
       }
-      //copyLuceeToEigen(tempSurfQuad, surfUpperQuad[dir].interpMat);
+      upperInterpMatrices[d] = Eigen::MatrixXd(nSurfQuad, nlocal);
+      copyLuceeToEigen(tempSurfQuad,  upperInterpMatrices[d]);
       copyLuceeToEigen(tempSurfCoords, surfUpperQuad[dir].coordMat);
     }
 
@@ -291,7 +293,7 @@ namespace Lucee
       // of the dth direction derivative of basis function k
       gradMatrices[d] = massMatrixInv*gradStiffnessMatrix[d].transpose();
       // Each row is a quadrature point, each column is a basis function derivative
-      derivMatrices[d] = volQuad.interpMat*gradMatrices[d];
+      //derivMatrices[d] = volQuad.interpMat*gradMatrices[d];
     }
 
     // TotalSize keeps track of total number of cells we will need to store matrices for
@@ -308,9 +310,9 @@ namespace Lucee
     Lucee::RowMajorIndexer<NDIM> volIdxr = RowMajorIndexer<NDIM>(localRgn);
     
     // CONSIDER: instead of allocating NDIM size vectors, only store those needed in updateDirs
-    bigStoredUpperSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
-    bigStoredLowerSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
-    bigStoredVolMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
+    //bigStoredUpperSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
+    //bigStoredLowerSurfMatrices.resize(totalSize, std::vector<Eigen::MatrixXd>(updateDirs.size()));
+    bigStoredVolMatrices.resize(totalSize);
 
     Lucee::ConstFieldPtr<double> jacobianPtr = jacobianField->createConstPtr();
 
@@ -336,11 +338,12 @@ namespace Lucee
           for (int k = 0; k < nlocal; k++)
             tempJMassMatrix(j,k) = volQuad.interpMat.col(j).cwiseProduct(volQuad.interpMat.col(k)).cwiseProduct(jacobianAtQuad).dot(volQuad.weights);
 
-        massMatrixInv = tempJMassMatrix.inverse();
+        //massMatrixInv = tempJMassMatrix.inverse();
+        bigStoredVolMatrices[cellIndex] = tempJMassMatrix.inverse();
       }
 
       // Store three matrices at each cell
-      for (int d = 0; d < updateDirs.size(); d++)
+      /*for (int d = 0; d < updateDirs.size(); d++)
       {
         int dir = updateDirs[d];
 
@@ -374,7 +377,7 @@ namespace Lucee
         }
         // Each row is a basis function derivative, each column is a quadrature point location
         bigStoredVolMatrices[cellIndex][d] = massMatrixInv*derivMatrices[d].transpose();
-      }
+      }*/
     }
   }
 
@@ -449,7 +452,6 @@ namespace Lucee
     // Contributions from volume integrals
     while(seq.step())
     {
-      clock_t tm_totalVolTime_s = clock();
       seq.fillWithIndex(idx);
       aCurr.setPtr(aCurrPtr, idx);
       hamil.setPtr(hamilPtr, idx);
@@ -472,21 +474,13 @@ namespace Lucee
         hamilVec(i) = hamilPtr[i];
       // Loop through all directions
       // Compute gradient of hamiltonian
-      clock_t tm_1_s = clock();
       for (int dir = 0; dir < updateDirs.size(); dir++)
         hamilDeriv.row(updateDirs[dir]) = gradMatrices[dir]*hamilVec;
-      vol_loop1 += (double) (clock() - tm_1_s)/CLOCKS_PER_SEC;
       // Compute gradient of hamiltonian at all volume quadrature points
-      clock_t tm_2_s = clock();
       hamilDerivAtQuadVol.noalias() = hamilDeriv*volQuad.interpMat.transpose();
-      vol_loop2 += (double) (clock() - tm_2_s)/CLOCKS_PER_SEC;
 
-      clock_t tm_computeAlphaAtQuadNodesTime_s = clock();
       // Get alpha from appropriate function
       equation->computeAlphaAtQuadNodes(hamilDerivAtQuadVol, volQuad.interpMat, idx, alpha);
-      clock_t tm_computeAlphaAtQuadNodesTime_e = clock();
-      computeVolAlphaAtQuadNodesTime +=
-        (double) (tm_computeAlphaAtQuadNodesTime_e-tm_computeAlphaAtQuadNodesTime_s)/CLOCKS_PER_SEC;
       
       // Computing maximum cfla
       grid.setIndex(idx);
@@ -494,7 +488,6 @@ namespace Lucee
       for (int i = 0; i < NDIM; i++)
         dtdqVec(i) = dt/grid.getDx(i);
 
-      clock_t tm_3_s = clock();
       Eigen::VectorXd cflaVec(NDIM);
       // Loop over each alpha vector evaluated at a quadrature point
       for (int i = 0; i < nVolQuad; i++)
@@ -509,7 +502,6 @@ namespace Lucee
             needToRetakeStep = true;
         }
       }
-      vol_loop3 += (double) (clock() - tm_3_s)/CLOCKS_PER_SEC;
  
       // Only compute updates if CFL limit not violated already
       if (needToRetakeStep == false)
@@ -521,23 +513,18 @@ namespace Lucee
         fAtQuad = volQuad.weights.cwiseProduct(volQuad.interpMat*fVec);
 
         aNew.setPtr(aNewPtr, idx);
-        clock_t tm_4_s = clock();
         for (int d = 0;  d < updateDirs.size(); d++)
         {
           int dir = updateDirs[d];
-          resultVector = bigStoredVolMatrices[cellIndex][d]*alpha.row(dir).transpose().cwiseProduct(fAtQuad);
+          resultVector = bigStoredVolMatrices[cellIndex]*gradMatrices[d].transpose()*volQuad.interpMat.transpose()
+            *alpha.row(dir).transpose().cwiseProduct(fAtQuad);
 
           for (int i = 0; i < nlocal; i++)
             aNewPtr[i] += resultVector(i);
         }
-        vol_loop4 += (double) (clock() - tm_4_s)/CLOCKS_PER_SEC;
 
-        clock_t tm_totalVolTime_e = clock();
-        totalVolTime += (double) (tm_totalVolTime_e - tm_totalVolTime_s)/CLOCKS_PER_SEC;
         // Loop over surfaces on which integrals need to be calculated
         // Only do this if cfl limit has not been violated yet
-        clock_t tm_totalSurfTime_s = clock();
-
         for (int d = 0; d < updateDirs.size(); d++)
         {
           int dir = updateDirs[d];
@@ -570,16 +557,10 @@ namespace Lucee
           for (int i = 0; i < nSurfNodes; i++)
             hamilDerivSmall.col(i) = hamilDeriv.col( surfLowerQuad[dir].nodeNums[i] );
           // Compute gradient of hamiltonian at all (lower) surface quadrature points
-          clock_t tm_1_s = clock();
           hamilDerivAtQuad.noalias() = hamilDerivSmall*surfLowerQuad[dir].interpMat.transpose();
-          surf_loop1 += (double) (clock()-tm_1_s)/CLOCKS_PER_SEC;
           // Compute alpha at edge quadrature nodes (making use of alpha dot n being continuous)
-          clock_t tm_computeAlphaAtQuadNodesTime_s = clock();    
           equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat,
               surfLowerQuad[dir].nodeNums, idx, alphaDotN, dir);
-          clock_t tm_computeAlphaAtQuadNodesTime_e = clock();
-          computeSurfAlphaAtQuadNodesTime +=
-            (double) (tm_computeAlphaAtQuadNodesTime_e-tm_computeAlphaAtQuadNodesTime_s)/CLOCKS_PER_SEC;
 
           //equation->computeAlphaAtQuadNodes(hamilDerivAtQuad, surfLowerQuad[dir].interpMat, idx, alphaSurf);
           // Construct normal vector
@@ -597,12 +578,13 @@ namespace Lucee
           computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
               surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
           
-          clock_t tm_2_s = clock();
-          upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*numericalFluxAtQuad;
-          lowerResultVector = bigStoredLowerSurfMatrices[cellIndex][d]*numericalFluxAtQuad;
-          surf_loop2 += (double) (clock()-tm_2_s)/CLOCKS_PER_SEC;
+          upperResultVector = bigStoredVolMatrices[cellIndexLeft]*upperInterpMatrices[d].transpose()*
+            numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
+          //bigStoredUpperSurfMatrices[cellIndexLeft][d]*numericalFluxAtQuad;
+          lowerResultVector = bigStoredVolMatrices[cellIndex]*lowerInterpMatrices[d].transpose()*
+            numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
+          //bigStoredLowerSurfMatrices[cellIndex][d]*numericalFluxAtQuad;
 
-          clock_t tm_3_s = clock();
           // Accumulate to solution
           aNew.setPtr(aNewPtr_r, idx);
           aNew.setPtr(aNewPtr_l, idxl);
@@ -611,9 +593,7 @@ namespace Lucee
             aNewPtr_l[i] -= upperResultVector(i);
             aNewPtr_r[i] += lowerResultVector(i);
           }
-          surf_loop3 += (double) (clock()-tm_3_s)/CLOCKS_PER_SEC;
 
-          clock_t tm_4_s = clock();
           // Need to do integrals on the upper surface if we are on the upper boundary
           // because volume sequencer does not loop over ghost cells
           if(idx[dir] == localRgn.getUpper(dir)-1)
@@ -658,10 +638,10 @@ namespace Lucee
             computeNumericalFlux(alphaDotN, surfUpperQuad[dir].interpMat*leftData,
                 surfLowerQuad[dir].interpMat*rightData, numericalFluxAtQuad);
             
-            upperResultVector = bigStoredUpperSurfMatrices[cellIndexLeft][d]*
-              numericalFluxAtQuad;
-            lowerResultVector = bigStoredLowerSurfMatrices[cellIndexRight][d]*
-              numericalFluxAtQuad;
+            upperResultVector = bigStoredVolMatrices[cellIndexLeft]*upperInterpMatrices[d].transpose()*
+              numericalFluxAtQuad.cwiseProduct(surfUpperQuad[dir].weights);
+            lowerResultVector = bigStoredVolMatrices[cellIndexRight]*lowerInterpMatrices[d].transpose()*
+              numericalFluxAtQuad.cwiseProduct(surfLowerQuad[dir].weights);
 
             // Accumulate to solution
             aNew.setPtr(aNewPtr_r, idxr);
@@ -672,11 +652,7 @@ namespace Lucee
               aNewPtr_r[i] += lowerResultVector(i);
             }
           }
-          surf_loop4 += (double) (clock()-tm_4_s)/CLOCKS_PER_SEC;
         }
-
-        clock_t tm_totalSurfTime_e = clock();
-        totalSurfTime += (double) (tm_totalSurfTime_e - tm_totalSurfTime_s)/CLOCKS_PER_SEC;
       }
     }
     
@@ -684,7 +660,6 @@ namespace Lucee
     if (needToRetakeStep == true)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
      
-    
     /*
     clock_t tm_totalSurfTime_s = clock();
     // Contributions from surface integrals

@@ -131,11 +131,14 @@ namespace Lucee
       GaussQuadData surfUpperQuad[NDIM];
       std::vector<Eigen::MatrixXd> gradMatrices;
 /** Inverse of mass matrix */
-      Eigen::MatrixXd massMatrixInv;
+      //Eigen::MatrixXd massMatrixInv;
 /** Stored matrices for stupid testing */
-      std::vector<std::vector<Eigen::MatrixXd> > bigStoredUpperSurfMatrices;
-      std::vector<std::vector<Eigen::MatrixXd> > bigStoredLowerSurfMatrices;
-      std::vector<std::vector<Eigen::MatrixXd> > bigStoredVolMatrices;
+      //std::vector<std::vector<Eigen::MatrixXd> > bigStoredUpperSurfMatrices;
+      //std::vector<std::vector<Eigen::MatrixXd> > bigStoredLowerSurfMatrices;
+      //std::vector<std::vector<Eigen::MatrixXd> > bigStoredVolMatrices;
+      std::vector<Eigen::MatrixXd> bigStoredVolMatrices;
+      std::vector<Eigen::MatrixXd> upperInterpMatrices;
+      std::vector<Eigen::MatrixXd> lowerInterpMatrices;
 /** Flag to indicate if only increments should be computed */
       bool onlyIncrement;
 /** Flag to indicate if a Jacobian factor is supplied */
@@ -162,12 +165,6 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
-
-// Stuff for timing studies
-      double totalVolTime, totalSurfTime, jacAtQuad;
-      double computeVolAlphaAtQuadNodesTime, computeSurfAlphaAtQuadNodesTime;
-      double vol_loop1, vol_loop2, vol_loop3, vol_loop4;
-      double surf_loop1, surf_loop2, surf_loop3, surf_loop4;
   };
 }
 
