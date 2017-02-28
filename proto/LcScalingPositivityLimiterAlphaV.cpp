@@ -177,7 +177,6 @@ namespace Lucee
 	for (unsigned dim = 0; dim<VDIM; ++dim)
 	  alphaVPtr[nodeIdx*VDIM + dim] = 
 	    alpha[phaseConfMap[nodeIdx]]*phaseNodeCoords(nodeIdx, CDIM+dim);
-     
     }
     
     return Lucee::UpdaterStatus(true, 0);
