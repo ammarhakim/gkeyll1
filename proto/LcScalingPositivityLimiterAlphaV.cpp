@@ -171,7 +171,7 @@ namespace Lucee
       
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
 	alpha[nodeIdx] = 
-	  -0.5*log(energyOldPtr[nodeIdx]/energyNewPtr[nodeIdx]);
+	  0.5*log(energyOldPtr[nodeIdx]/energyNewPtr[nodeIdx]);
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
 	for (unsigned dim = 0; dim<VDIM; ++dim)
