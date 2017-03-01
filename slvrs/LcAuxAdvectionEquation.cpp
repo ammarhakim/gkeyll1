@@ -121,7 +121,7 @@ namespace Lucee
   AuxAdvectionEquation<NDIM>::flux(const Lucee::RectCoordSys& c, const double* q, 
     const std::vector<const double*>& auxVars, double* f)
   {
-    double uvec[4] = {0, 0, 0, 0}, uvecNorm[4];
+    double uvec[6] = {0, 0, 0, 0, 0, 0}, uvecNorm[6];
     for (unsigned i=0; i<NDIM; ++i)
       uvec[i] = auxVars[0][i];
 
@@ -139,7 +139,7 @@ namespace Lucee
     const std::vector<const double*>& auxVarsl, const std::vector<const double*>& auxVarsr,
     double* f)
   {
-    double uvecl[4] = {0, 0, 0, 0}, uvecr[4] = {0, 0, 0, 0};
+    double uvecl[6] = {0, 0, 0, 0, 0, 0}, uvecr[6] = {0, 0, 0, 0, 0, 0};
     double uvecNorml[4], uvecNormr[4];
     for (unsigned i=0; i<NDIM; ++i)
     {

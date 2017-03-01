@@ -58,13 +58,10 @@ namespace Lucee
     if (tbl.hasNumVec("updateDirections"))
     {
       std::vector<double> ud = tbl.getNumVec("updateDirections");
-      for (unsigned i=0; i<std::min<unsigned>(3, ud.size()); ++i)
+      for (unsigned i=0; i<ud.size(); ++i)
       {
         unsigned d = (unsigned) ud[i];
-        if (d<3)
-          updateDims.push_back(d);
-        else
-          throw Lucee::Except("updateDirections must be a table with 0, 1, or 2");
+        updateDims.push_back(d);
       }
     }
     else
