@@ -170,6 +170,7 @@ namespace Lucee
     invCellVolume = 1.0/cellVolume;
 
     double alpha;
+    double energyOldAvg, energyNewAvg;
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
@@ -180,12 +181,13 @@ namespace Lucee
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       
-      alpha = 0;
-      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
-	alpha += weights[nodeIdx]*0.5*
-	  (energyNewPtr[nodeIdx] - energyOldPtr[nodeIdx])/
-	  (dt*energyOldPtr[nodeIdx]);
-      alpha *= invCellVolume;
+      energyOldAvg = 0;
+      energyNewAvg = 0;
+      for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
+	energyOldAvg += weights[nodeIdx]*energyOldPtr[nodeIdx];
+	energyNewAvg += weights[nodeIdx]*energyNewPtr[nodeIdx];
+      }
+      alpha = 0.5*(energyNewAvg - energyOldAvg)/(dt*energyOldAvg);
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
 	for (unsigned dim = 0; dim<VDIM; ++dim)
