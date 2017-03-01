@@ -89,7 +89,7 @@ namespace Lucee
         const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC);
 
       /** Mapping of node in phase-space to node in configuration space */
-      std::vector<unsigned> phaseConfMap;
+      //std::vector<unsigned> phaseConfMap;
   };
 }
 

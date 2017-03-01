@@ -71,7 +71,7 @@ namespace Lucee
     UpdaterIfc::initialize();
  
     const unsigned NDIM = CDIM+VDIM;
-    unsigned nlocal = phaseBasis->getNumNodes();
+    //unsigned nlocal = phaseBasis->getNumNodes();
 
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -91,6 +91,7 @@ namespace Lucee
     // exactly one node co-located with it in configuration space. No
     // "orphan" phase-space node are allowed, and an exception is thrown
     // if that occurs.
+    /*
     phaseConfMap.resize(nlocal);
     Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
     Lucee::Matrix<double> confNodeCoords(confBasis->getNumNodes(), CNC);
@@ -118,7 +119,7 @@ namespace Lucee
         lce << n;
         throw lce;
       }
-    }
+      }*/
   }
   //----------------------------------------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
@@ -126,6 +127,8 @@ namespace Lucee
   ScalingPositivityLimiterAlphaV<CDIM, VDIM>::update(double t)
   {
     const unsigned NDIM = CDIM+VDIM;
+
+    double dt = t-this->getCurrTime();
 
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -158,7 +161,15 @@ namespace Lucee
     unsigned numNodesPhase = phaseBasis->getNumNodes();
     unsigned numNodesConf  = confBasis->getNumNodes();
 
-    std::vector<double> alpha(numNodesConf);
+    std::vector<double> weights(numNodesConf);
+    confBasis->getWeights(weights);
+
+    double cellVolume, invCellVolume = 0;
+    for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
+      cellVolume += weights[nodeIdx];
+    invCellVolume = 1.0/cellVolume;
+
+    double alpha;
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
@@ -169,14 +180,17 @@ namespace Lucee
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       
+      alpha = 0;
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
-	alpha[nodeIdx] = 
-	  0.5*log(energyOldPtr[nodeIdx]/energyNewPtr[nodeIdx]);
+	alpha += weights[nodeIdx]*0.5*
+	  (energyNewPtr[nodeIdx] - energyOldPtr[nodeIdx])/
+	  (dt*energyOldPtr[nodeIdx]);
+      alpha *= invCellVolume;
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
 	for (unsigned dim = 0; dim<VDIM; ++dim)
 	  alphaVPtr[nodeIdx*VDIM + dim] = 
-	    alpha[phaseConfMap[nodeIdx]]*phaseNodeCoords(nodeIdx, CDIM+dim);
+	    alpha*phaseNodeCoords(nodeIdx, CDIM+dim);
     }
     
     return Lucee::UpdaterStatus(true, 0);
