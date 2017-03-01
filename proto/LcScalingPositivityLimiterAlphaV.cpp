@@ -133,9 +133,9 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    const Lucee::Field<CDIM, double>& energyOld =
+    const Lucee::Field<CDIM, double>& energyGood =
       this->getInp<Lucee::Field<CDIM, double> >(0);
-    const Lucee::Field<CDIM, double>& energyNew =
+    const Lucee::Field<CDIM, double>& energyBad =
       this->getInp<Lucee::Field<CDIM, double> >(1);
       
     Lucee::Field<NDIM, double>& alphaV =
@@ -144,10 +144,10 @@ namespace Lucee
     Lucee::Region<NDIM, int>    localRgn  = grid.getLocalRegion();
     Lucee::Region<NDIM, double> compSpace = grid.getComputationalSpace();
 
-    Lucee::ConstFieldPtr<double> energyOldPtr =
-      energyOld.createConstPtr();
-    Lucee::ConstFieldPtr<double> energyNewPtr =
-      energyNew.createConstPtr();
+    Lucee::ConstFieldPtr<double> energyGoodPtr =
+      energyGood.createConstPtr();
+    Lucee::ConstFieldPtr<double> energyBadPtr =
+      energyBad.createConstPtr();
 
     Lucee::FieldPtr<double> alphaVPtr = alphaV.createPtr();
 
@@ -170,29 +170,29 @@ namespace Lucee
     invCellVolume = 1.0/cellVolume;
 
     double alpha;
-    double energyOldAvg, energyNewAvg;
+    double energyGoodAvg, energyBadAvg;
     
     while (seq.step()) {
       seq.fillWithIndex(idx);
-      energyOld.setPtr(energyOldPtr, idx);
-      energyNew.setPtr(energyNewPtr, idx);
+      energyGood.setPtr(energyGoodPtr, idx);
+      energyBad.setPtr(energyBadPtr, idx);
       alphaV.setPtr(alphaVPtr, idx);
       
       phaseBasis->setIndex(idx);
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       
-      energyOldAvg = 0;
-      energyNewAvg = 0;
+      energyGoodAvg = 0;
+      energyBadAvg = 0;
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
-	energyOldAvg += weights[nodeIdx]*energyOldPtr[nodeIdx];
-	energyNewAvg += weights[nodeIdx]*energyNewPtr[nodeIdx];
+	energyGoodAvg += weights[nodeIdx]*energyGoodPtr[nodeIdx];
+	energyBadAvg += weights[nodeIdx]*energyBadPtr[nodeIdx];
       }
-      alpha = 0.5*(energyNewAvg - energyOldAvg)/(dt*energyOldAvg);
+      alpha = 0.5*(energyBadAvg - energyGoodAvg)/(dt*energyBadAvg);
 
       for (unsigned nodeIdx = 0; nodeIdx<numNodesPhase; ++nodeIdx) 
 	for (unsigned dim = 0; dim<VDIM; ++dim)
-	  alphaVPtr[nodeIdx*VDIM + dim] = 
-	    alpha*phaseNodeCoords(nodeIdx, CDIM+dim);
+	  alphaVPtr[nodeIdx*NDIM + CDIM+dim] = 
+	    -alpha*phaseNodeCoords(nodeIdx, CDIM+dim);
     }
     
     return Lucee::UpdaterStatus(true, 0);
