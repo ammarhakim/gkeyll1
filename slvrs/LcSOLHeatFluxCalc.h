@@ -22,7 +22,6 @@
 
 // eigen includes
 #include <Eigen/Dense>
-#include <Eigen/LU>
 
 namespace Lucee
 {
