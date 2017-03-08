@@ -202,6 +202,7 @@ namespace Lucee
     DataStructIfc::appendLuaCallableMethods(lfm);
     lfm.appendFunc("lastInsertedData", luaLastInsertedData);
     lfm.appendFunc("lastInsertedTime", luaLastInsertedTime);
+    lfm.appendFunc("removeLastInsertedData", luaRemoveLastInsertedData);
   }
 
   template <typename T>
@@ -226,6 +227,16 @@ namespace Lucee
     lua_pushnumber(L, dynv->getLastInsertedTime());
     return 1;
   }
+
+  template <typename T>
+  int
+  DynVector<T>::luaRemoveLastInsertedData(lua_State *L)
+  {
+    DynVector<T> *dynv
+      = Lucee::PointerHolder<DynVector<T> >::getObjAsDerived(L);
+    dynv->removeLastInsertedData();
+    return 0;
+  }  
 
 // instantiations
   template class DynVector<float>;
