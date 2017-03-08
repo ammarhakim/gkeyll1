@@ -161,11 +161,11 @@ namespace Lucee
         }
         else if (integrateGhosts == true)
         {
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
           idx[2] = localRgn.getLower(2)-1;
           // Need to get ghost cell contribution for inward flux on this surface
           distfIn.setPtr(distfPtr, idx);
           bFieldIn.setPtr(bFieldPtr, idx);
-          hamilDerivIn.setPtr(hamilDerivPtr, idx);
 
           for (int i = 0; i < nlocal5d; i++)
           {
@@ -177,7 +177,7 @@ namespace Lucee
           // Compute three fields at quadrature points
           distfAtQuad = surfUpperQuad5d*distfVec;
           bFieldAtQuad = surfUpperQuad5d*bFieldVec;
-          hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
+          hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
             localLowerSurfaceFlux += grid.getSurfArea(2)*surfUpperWeights5d[quadIndex]*distfAtQuad(quadIndex)*
@@ -225,11 +225,11 @@ namespace Lucee
         }
         else if (integrateGhosts == true)
         {
+          hamilDerivIn.setPtr(hamilDerivPtr, idx);
           idx[2] = localRgn.getUpper(2);
           // Need to get ghost cell contribution for inward flux on this surface
           distfIn.setPtr(distfPtr, idx);
           bFieldIn.setPtr(bFieldPtr, idx);
-          hamilDerivIn.setPtr(hamilDerivPtr, idx);
 
           for (int i = 0; i < nlocal5d; i++)
           {
@@ -241,7 +241,7 @@ namespace Lucee
           // Compute three fields at quadrature points
           distfAtQuad = surfLowerQuad5d*distfVec;
           bFieldAtQuad = surfLowerQuad5d*bFieldVec;
-          hamilDerivAtQuad = surfLowerQuad5d*hamilDerivVec;
+          hamilDerivAtQuad = surfUpperQuad5d*hamilDerivVec;
 
           for (int quadIndex = 0; quadIndex < nSurfQuad5d; quadIndex++)
             localUpperSurfaceFlux += grid.getSurfArea(2)*surfLowerWeights5d[quadIndex]*distfAtQuad(quadIndex)*
