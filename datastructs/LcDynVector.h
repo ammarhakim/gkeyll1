@@ -155,6 +155,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaLastInsertedTime(lua_State *L);
+
+/**
+ * Lua callable method for removing last inserted time.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaRemoveLastInsertedData(lua_State *L);
   };
 }
 
