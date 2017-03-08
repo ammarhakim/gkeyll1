@@ -155,6 +155,7 @@ namespace Lucee
 
     double cellCentroid[5];
     int idx[5];
+    int idxSkin[5];
 
     // Check to see if we should integrate on the lower z plane
     if (localRgn.getLower(2) == globalRgn.getLower(2))
@@ -164,8 +165,10 @@ namespace Lucee
       while (seqLowerDim.step())
       {
         seqLowerDim.fillWithIndex(idx);
+        seqLowerDim.fillWithIndex(idxSkin);
         // Set the deflated index to the proper value
         idx[2] = localRgn.getLower(2);
+        idxSkin[2] = localRgn.getLower(2);
         heatFluxLower.setPtr(heatFluxLowerPtr, idx[0], idx[1]);
         // Get the coordinates of cell center
         grid.setIndex(idx);
@@ -219,21 +222,22 @@ namespace Lucee
           // V_PARA > 0.0 and on lower edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getLower(2)-1;
           distfIn.setPtr(distfInPtr, idx);
-          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
-          hamilIn.setPtr(hamilInPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivInPtr, idxSkin);
+          hamilIn.setPtr(hamilInPtr, idxSkin);
           bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
 
           for (int configNode = 0; configNode < upperEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = upperEdgeNodeNums[configNode];
+            int configNodeIndexSkin = lowerEdgeNodeNums[configNode];
             double bFieldVal = bFieldInPtr[configNodeIndex];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilDerivReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+              hamilDerivReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndexSkin];
+              hamilReduced(nodeIndex) = hamilInPtr[nodalStencil[nodeIndex] + configNodeIndexSkin];
             }
 
             // Compute fields at quadrature points
@@ -263,8 +267,10 @@ namespace Lucee
       while (seqLowerDim.step())
       {
         seqLowerDim.fillWithIndex(idx);
+        seqLowerDim.fillWithIndex(idxSkin);
         // Set the deflated index to the proper value
         idx[2] = localRgn.getUpper(2)-1;
+        idxSkin[2] = localRgn.getUpper(2)-1;
         heatFluxUpper.setPtr(heatFluxUpperPtr, idx[0], idx[1]);
         // Get the coordinates of cell center
         grid.setIndex(idx);
@@ -318,21 +324,22 @@ namespace Lucee
           // V_PARA < 0.0 and on upper edge, so do the ghost cell contribution only if asked for
           idx[2] = localRgn.getUpper(2);
           distfIn.setPtr(distfInPtr, idx);
-          hamilDerivIn.setPtr(hamilDerivInPtr, idx);
-          hamilIn.setPtr(hamilInPtr, idx);
+          hamilDerivIn.setPtr(hamilDerivInPtr, idxSkin);
+          hamilIn.setPtr(hamilInPtr, idxSkin);
           bFieldIn.setPtr(bFieldInPtr, idx[0], idx[1], idx[2]);
 
           for (int configNode = 0; configNode < lowerEdgeNodeNums.size(); configNode++)
           {
             int configNodeIndex = lowerEdgeNodeNums[configNode];
+            int configNodeIndexSkin = upperEdgeNodeNums[configNode];
             double bFieldVal = bFieldInPtr[configNodeIndex];
             // At this particular configuration space vertix, copy all
             // nodes that occupy this location to a vector
             for (int nodeIndex = 0; nodeIndex < nodalStencil.size(); nodeIndex++)
             {
               distfReduced(nodeIndex) = distfInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilDerivReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndex];
-              hamilReduced(nodeIndex) = hamilInPtr[nodalStencil[nodeIndex] + configNodeIndex];
+              hamilDerivReduced(nodeIndex) = hamilDerivInPtr[nodalStencil[nodeIndex] + configNodeIndexSkin];
+              hamilReduced(nodeIndex) = hamilInPtr[nodalStencil[nodeIndex] + configNodeIndexSkin];
             }
 
             // Compute fields at quadrature points
