@@ -692,7 +692,7 @@ namespace Lucee
 // make sure all processors return same answer
     TxCommBase *comm = fld->getComm();
     int globalResult;
-    comm->allreduce(1, &hasNan, &globalResult, TX_AND);
+    comm->allreduce(1, &hasNan, &globalResult, TX_OR);
 
 // push results on stack
     if (globalResult)
