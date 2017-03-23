@@ -64,6 +64,10 @@ namespace Lucee
     if (tbl.hasBool("hamilNodesShared"))
       hamilNodesShared = tbl.getBool("hamilNodesShared");
 
+    applyPositivityFluxFix = false;
+    if (tbl.hasBool("applyPositivityFluxFix"))
+      applyPositivityFluxFix = tbl.getBool("applyPositivityFluxFix");
+
 // zeroFluxOffset allows implementation of zero-flux BCs in specified
 // directions. This is needed to avoid "leakage" of particles when
 // doing Vlasov solves, as velocity space direction is bounded.

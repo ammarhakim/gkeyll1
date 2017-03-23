@@ -150,6 +150,8 @@ namespace Lucee
       int lowerZeroFluxOffset[2];
 /** Offsets for zero-flux directions  along upper edges */
       int upperZeroFluxOffset[2];
+/** Flag to indicate if we should apply positivity fix for numerical fluxes */
+      bool applyPositivityFluxFix;
 
 /**
  * Structure to store node numbers on edges.
