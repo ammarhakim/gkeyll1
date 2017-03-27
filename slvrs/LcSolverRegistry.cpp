@@ -21,6 +21,7 @@
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
 #include <LcDGImplicitFiveMomentSrcUpdater.h>
+#include <LcDGExplicitIncrementFiveMomentSrcUpdater.h>
 #include <LcEdgeFaceCurlUpdater.h>
 #include <LcEigenNodalVlasovUpdater.h>
 #include <LcElectromagneticAUpdater.h>
@@ -392,6 +393,10 @@ namespace Lucee
       .append<Lucee::DGImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::DGImplicitFiveMomentSrcUpdater<2> >()
       .append<Lucee::DGImplicitFiveMomentSrcUpdater<3> >()
+
+      .append<Lucee::DGExplicitIncrementFiveMomentSrcUpdater<1> >()
+      .append<Lucee::DGExplicitIncrementFiveMomentSrcUpdater<2> >()
+      .append<Lucee::DGExplicitIncrementFiveMomentSrcUpdater<3> >()
 
       .append<Lucee::ImplicitFiveMomentSrcUpdater<1> >()
       .append<Lucee::ImplicitFiveMomentSrcUpdater<2> >()
