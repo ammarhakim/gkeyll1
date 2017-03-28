@@ -19,6 +19,14 @@ namespace Lucee
   static const unsigned UPWIND = 0;
   static const unsigned CENTRAL = 1;
 
+// If any value is negative, sets it to zero  
+  static
+  void applyPositivityFix(std::vector<double>& vals)
+  {
+    for (unsigned k=0; k<vals.size(); ++k)
+      if (vals[k] < 0.0) vals[k] = 0.0;
+  }
+
 // set id for module system
   const char *NodalPoissonBracketUpdater::id = "PoissonBracket";
 
@@ -65,8 +73,8 @@ namespace Lucee
       hamilNodesShared = tbl.getBool("hamilNodesShared");
 
     applyPositivityFluxFix = false;
-    if (tbl.hasBool("applyPositivityFluxFix"))
-      applyPositivityFluxFix = tbl.getBool("applyPositivityFluxFix");
+    if (tbl.hasBool("applyPositivityFix"))
+      applyPositivityFluxFix = tbl.getBool("applyPositivityFix");
 
 // zeroFluxOffset allows implementation of zero-flux BCs in specified
 // directions. This is needed to avoid "leakage" of particles when
@@ -299,6 +307,9 @@ namespace Lucee
 
 // interpolate vorticity to quadrature points
         matVec(1.0, volQuad.interpMat.m, &aCurrPtr[0], 0.0, &quadChi[0]);
+// zero out negative values if positivity fix for flux is needed
+        if (applyPositivityFluxFix)
+          applyPositivityFix(quadChi);
 
 // compute fluxes at each interior node and accumulate contribution to
 // volume integral
@@ -393,6 +404,13 @@ namespace Lucee
 // edge of left cell, while right side is lower edge of right cell)
           matVec(1.0, surfUpperQuad[dir].interpMat.m, &aCurrPtr_l[0], 0.0, &chiQuad_l[0]);
           matVec(1.0, surfLowerQuad[dir].interpMat.m, &aCurrPtr[0], 0.0, &chiQuad_r[0]);
+
+// zero out negative values if positivity fix for flux is needed
+          if (applyPositivityFluxFix)
+          {
+            applyPositivityFix(chiQuad_l);
+            applyPositivityFix(chiQuad_r);
+          }
 
           for (unsigned qp=0; qp<nSurfQuad; ++qp)
             uflux[qp] = getUpwindFlux(udotn[qp], chiQuad_l[qp], chiQuad_r[qp]);
