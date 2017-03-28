@@ -127,6 +127,8 @@ namespace Lucee
     int idx[NDIM];
     Lucee::Region<NDIM, int> localRgn = emFieldNew.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+
+    double keold, kenew, newux, newuy, newuz; 
     while (seq.step())
     {
       seq.fillWithIndex(idx);
@@ -137,7 +139,9 @@ namespace Lucee
       for (unsigned i=0; i<nlocal; ++i)
       {
 
-        double keold = 0.0;
+        keold = 0.0; kenew = 0.0;
+        newux = 0.0; newuy = 0.0; newuz = 0.0;
+
         E(0) = 0.0; E(1) = 0.0; E(2) = 0.0;
 // update solution for fluids (solution is at half-time step)
         for (unsigned n=0; n<nFluids; ++n)
@@ -160,12 +164,15 @@ namespace Lucee
              + qbym2[n]*(fPtrIn[i*numFldcomp+RHOUZ]*emPtrIn[i*numEMcomp+BX] - fPtrIn[i*numFldcomp+RHOUX]*emPtrIn[i*numEMcomp+BZ]))/qbym[n];
           fPtrNew[i*numFldcomp+RHOUZ] = (wp2*epsilon0*emPtrIn[i*numEMcomp+EZ] 
              + qbym2[n]*(fPtrIn[i*numFldcomp+RHOUX]*emPtrIn[i*numEMcomp+BY] - fPtrIn[i*numFldcomp+RHOUY]*emPtrIn[i*numEMcomp+BX]))/qbym[n];
+
+// compute new kinetic energy from new momenta
+          newux = fPtrIn[i*numFldcomp+RHOUX] + dt*fPtrNew[i*numFldcomp+RHOUX];
+          newuy = fPtrIn[i*numFldcomp+RHOUY] + dt*fPtrNew[i*numFldcomp+RHOUY];
+          newuz = fPtrIn[i*numFldcomp+RHOUZ] + dt*fPtrNew[i*numFldcomp+RHOUZ];
+          kenew = 0.5*(newux*newux + newuy*newuy + newuz*newuz)/fPtrIn[i*numFldcomp+RHO];         
 // energy equation (there is no explicit energy source, so just
 // recompute new kinetic energy to update total energy)
-          fPtrNew[i*numFldcomp+ER] = fPtrIn[i*numFldcomp+ER] - keold 
-             + 0.5*(fPtrNew[i*numFldcomp+RHOUX]*fPtrNew[i*numFldcomp+RHOUX] 
-             + fPtrNew[i*numFldcomp+RHOUY]*fPtrNew[i*numFldcomp+RHOUY] 
-             + fPtrNew[i*numFldcomp+RHOUZ]*fPtrNew[i*numFldcomp+RHOUZ])/fPtrIn[i*numFldcomp+RHO];
+          fPtrNew[i*numFldcomp+ER] = (kenew - keold)/dt;
         }
         emPtrNew[i*numEMcomp+EX] = E(0);
         emPtrNew[i*numEMcomp+EY] = E(1);
