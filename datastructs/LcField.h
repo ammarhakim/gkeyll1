@@ -434,6 +434,20 @@ namespace Lucee
       virtual TxIoNodeType readFromFile(TxIoBase& io, TxIoNodeType& node,
         const std::string& nm);
 
+
+/**
+ * Read dataStruct from given node in HDF5 file including ghost cells.
+ *
+ * @param io I/O object for I/O.
+ * @param node Node to read data from.
+ * @param lg Lower ghost cells to write.
+ * @param ug Upper ghost cells to write.
+ * @param nm Name of the data-struct as it appears in input
+ * @return node from which data was read.
+ */      
+      virtual TxIoNodeType readFromFileWithGhost(TxIoBase& io, TxIoNodeType& node, int lg[NDIM], int ug[NDIM], const std::string& nm);
+
+
 /**
  * Copy field from supplied one. The input field must have the exact
  * same shape as this field.

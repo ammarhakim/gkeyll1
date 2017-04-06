@@ -285,6 +285,42 @@ namespace Lucee
     return dn;
   }
 
+  template <unsigned NDIM, typename T>
+  TxIoNodeType
+  Field<NDIM, T>::readFromFileWithGhost(TxIoBase& io, TxIoNodeType& node, 
+    int lg[NDIM], int ug[NDIM], const std::string& nm)
+  {
+    Lucee::Region<NDIM, int> globalRgnGst = globalRgn.extend(lg, ug);
+    Lucee::Region<NDIM, int> rgnGst = rgn.extend(lg, ug);
+
+    std::vector<size_t> dataSetSize(NDIM+1), dataSetBeg(NDIM+1), dataSetLen(NDIM+1);
+// construct sizes and shapes to write stuff out
+    for (unsigned i=0; i<NDIM; ++i)
+    {
+      dataSetSize[i] = globalRgnGst.getShape(i);
+// HDF5 expects global start index is always zero-based
+      dataSetBeg[i] = rgnGst.getLower(i) - globalRgnGst.getLower(i);
+      dataSetLen[i] = rgnGst.getShape(i);
+    }
+    dataSetSize[NDIM] = numComponents;
+    dataSetBeg[NDIM] = 0;
+    dataSetLen[NDIM] = numComponents;
+
+    Lucee::Region<NDIM+1, int> myRgn = rgnGst.inflate(0, numComponents);
+    std::vector<T> buff(myRgn.getVolume());
+    Lucee::RowMajorSequencer<NDIM+1> seq(myRgn); // must be row-major for HDF5
+// read data into buffer
+
+    TxIoNodeType dn = io.readDataSet(node, nm, dataSetBeg, dataSetLen, &buff[0]);
+
+    unsigned count = 0;
+    // copy data from buffer
+    while (seq.step())
+      this->operator()(seq.getIndex()) = buff[count++];
+
+    return dn;
+  }
+
     template <unsigned NDIM, typename T>
     TxIoNodeType
     Field<NDIM, T>::readFromFile(TxIoBase& io, TxIoNodeType& node, const std::string& nm)
