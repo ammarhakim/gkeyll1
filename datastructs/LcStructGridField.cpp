@@ -328,7 +328,7 @@ namespace Lucee
     const std::string& nm)
   {
     TxIoNodeType dn 
-      = Lucee::Field<NDIM, T>::readFromFile(io, node, "StructGridField");
+      = Lucee::Field<NDIM, T>::readFromFileWithGhost(io, node, lowerWriteGhost, upperWriteGhost, "StructGridField");
     return dn;
   }
 
