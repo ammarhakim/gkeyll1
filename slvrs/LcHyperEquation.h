@@ -18,6 +18,7 @@
 #include <LcMatrix.h>
 #include <LcRectCoordSys.h>
 #include <LcStructGridField.h>
+#include <iostream>
 
 namespace Lucee
 {
@@ -376,7 +377,8 @@ namespace Lucee
       checkInvariantDomain(const Lucee::StructGridField<NDIM, double>& cons) const 
       {
         Lucee::ConstFieldPtr<double> cPtr = cons.createConstPtr();
-
+        unsigned meqn = this->getNumEqns();
+        unsigned numNodes = cons.getNumComponents()/meqn;
         bool isOkay = true;
         int idx[NDIM];
 // loop over extended region and check invariant domain
@@ -386,10 +388,13 @@ namespace Lucee
           seq.fillWithIndex(idx);
           cons.setPtr(cPtr, idx);
 // compute primitive variables
-          if (this->isInvariantDomain(&cPtr[0]) == false)
-          {
-            isOkay = false;
-            break;
+          for (int k=0; k<numNodes; ++k)
+          { 
+            if (this->isInvariantDomain(&cPtr[k*meqn]) == false)
+            {
+              isOkay = false;
+              break;
+            }
           }
         }
         return isOkay;
