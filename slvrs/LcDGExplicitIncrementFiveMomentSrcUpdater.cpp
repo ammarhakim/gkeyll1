@@ -172,7 +172,8 @@ namespace Lucee
           kenew = 0.5*(newux*newux + newuy*newuy + newuz*newuz)/fPtrIn[i*numFldcomp+RHO];         
 // energy equation (there is no explicit energy source, so just
 // recompute new kinetic energy to update total energy)
-          fPtrNew[i*numFldcomp+ER] = (kenew - keold)/dt;
+          //fPtrNew[i*numFldcomp+ER] = (kenew - keold)/dt;
+          fPtrNew[i*numFldcomp+ER] = qbym[n]*fPtrIn[i*numFldcomp+RHOUX]*emPtrIn[i*numEMcomp+EX];
         }
         emPtrNew[i*numEMcomp+EX] = E(0);
         emPtrNew[i*numEMcomp+EY] = E(1);
