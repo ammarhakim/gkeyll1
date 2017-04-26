@@ -26,6 +26,7 @@ set(lcslvrs_SOURCES
   LcBoundaryCondition.cpp
   LcCompletePolynomialElement.cpp
   LcConstBoundaryCondition.cpp
+  LcConvertTenMomentPToTUpdater.cpp
   LcCopyBoundaryCondition.cpp
   LcCopyContToDisContFieldUpdater.cpp
   LcCurrentSource.cpp
