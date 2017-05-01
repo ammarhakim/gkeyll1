@@ -349,8 +349,6 @@ namespace Lucee
     Eigen::VectorXcd prSol(6);
     //    double chivtdt = vt*std::sqrt(8.0/Lucee::PI/9.0)*dt;
     double chivtdt;
-    double chivtdt1;
-    double chivtdt2;
     // do relaxation proportional to wavenumber
     while (seq.step()) {
       seq.fillWithIndex(idx); 
@@ -361,36 +359,53 @@ namespace Lucee
         }
 
         double kxLoc = kx[idx[0]-local_0_start];
-        double kyLoc = ky[idx[1]];
-        double kLoc = kabs[idxr.getIndex(idx)];
+        double kyLoc = 0; 
+        double kzLoc = 0;
+        if (NDIM > 1) {
+          kyLoc = ky[idx[1]];  
+          if (NDIM > 2) {
+            kzLoc = kz[idx[2]];
+          }
+        }
+        
+        double kLoc = (kabs[idxr.getIndex(idx)]);
         // chivtdt = C /|k|*sqrt(k_i Tij k_j)
         // for now we assume the off diagonal components are zero and kz = 0
-        chivtdt = std::sqrt(8.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
+        chivtdt = std::sqrt(8.0/Lucee::PI)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
         //        chivtdt1 = std::sqrt(Lucee::PI/18.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
-        chivtdt1 = chivtdt;
-        chivtdt2 = chivtdt;
+        // in principle, the other components of the conductivity tensor can take different values (usually O(1) difference)
         //        chivtdt2 = std::sqrt(2.0/Lucee::PI/9.0)*dt/kLoc*std::sqrt(kxLoc*kxLoc*avgvTcomp[0] + kyLoc*kyLoc*avgvTcomp[3])*scale_factor;
-        prLhs(0,0) = 1.0 + chivtdt*(3.0*kxLoc*kxLoc/kLoc) + chivtdt1*(1.0*kyLoc*kyLoc/kLoc);
-        prLhs(0,1) = 2.0*chivtdt1*kyLoc*kxLoc/kLoc;
-        prLhs(0,2) = 0; prLhs(0,3) = 0; prLhs(0,4) = 0; prLhs(0,5) = 0;
+
+        prLhs(0,0) = 1 + (chivtdt*((kxLoc*kxLoc) + (kyLoc*kyLoc)/3 + (kzLoc*kzLoc)/3))/kLoc; 
+        prLhs(0,1) = (2*chivtdt*kxLoc*kyLoc)/(3*kLoc); 
+        prLhs(0,2) = (2*chivtdt*kxLoc*kzLoc)/(3*kLoc); 
         
-        prLhs(1,0) = chivtdt1*kxLoc*kyLoc/kLoc; 
-        prLhs(1,1) = 1.0 + 2.0*chivtdt1*kLoc;
-        prLhs(1,2) = 0.0; 
-        prLhs(1,3) = chivtdt1*kyLoc*kxLoc/kLoc; prLhs(1,4) = 0.0; prLhs(1,5) = 0.0;
+        prLhs(1,0) = (chivtdt*kxLoc*kyLoc)/(3*kLoc); 
+        prLhs(1,1) = 1 + (chivtdt*((2*(kxLoc*kxLoc))/3 + (2*(kyLoc*kyLoc))/3 + (kzLoc*kzLoc)/3))/kLoc; 
+        prLhs(1,2) = (chivtdt*kyLoc*kzLoc)/(3*kLoc); 
+        prLhs(1,3) = (chivtdt*kxLoc*kyLoc)/(3*kLoc); 
+        prLhs(1,4) = (chivtdt*kxLoc*kzLoc)/(3*kLoc); 
         
-        prLhs(2,0) = 0.0; prLhs(2,1) = 0.0; prLhs(2,2) = 1.0 + chivtdt1*(2.0*kxLoc*kxLoc/kLoc) + chivtdt2*(kyLoc*kyLoc/kLoc);
-        prLhs(2,3) = 0.0; prLhs(2,4) = chivtdt2*kxLoc*kyLoc/kLoc; prLhs(2,5) = 0.0;
+        prLhs(2,0) = (chivtdt*kxLoc*kzLoc)/(3*kLoc); 
+        prLhs(2,1) = (chivtdt*kyLoc*kzLoc)/(3*kLoc);         
+        prLhs(2,2) = 1 + (chivtdt*((2*(kxLoc*kxLoc))/3 + (kyLoc*kyLoc)/3 + (2*(kzLoc*kzLoc))/3))/kLoc; 
+        prLhs(2,4) = (chivtdt*kxLoc*kyLoc)/(3*kLoc); 
+        prLhs(2,5) = (chivtdt*kxLoc*kzLoc)/(3*kLoc); 
+
+        prLhs(3,1) = (2*chivtdt*kxLoc*kyLoc)/(3*kLoc);
+        prLhs(3,3) = 1 + (chivtdt*((kxLoc*kxLoc)/3 + (kyLoc*kyLoc) + (kzLoc*kzLoc)/3))/kLoc;  
+        prLhs(3,4) = (2*chivtdt*kyLoc*kzLoc)/(3*kLoc); 
         
-        prLhs(3,0) = 0; prLhs(3,1) = 2.0*chivtdt1*kyLoc*kxLoc/kLoc; prLhs(3,2) = 0.0;
-        prLhs(3,3) = 1.0 + chivtdt*(3.0*kyLoc*kyLoc/kLoc) + chivtdt1*kxLoc*kxLoc/kLoc; prLhs(3,4) = 0.0; prLhs(3,5) = 0.0;
+        prLhs(4,1) = (chivtdt*kxLoc*kzLoc)/(3*kLoc); 
+        prLhs(4,2) = (chivtdt*kxLoc*kyLoc)/(3*kLoc); 
+        prLhs(4,3) = (chivtdt*kyLoc*kzLoc)/(3*kLoc);
+        prLhs(4,4) = 1 + (chivtdt*((kxLoc*kxLoc)/3 + (2*(kyLoc*kyLoc))/3 + (2*(kzLoc*kzLoc))/3))/kLoc;  
+        prLhs(4,5) = (chivtdt*kyLoc*kzLoc)/(3*kLoc); 
         
-        prLhs(4,0) = 0.0; prLhs(4,1) = 0.0; 
-        prLhs(4,2) = kxLoc*kyLoc/kLoc*chivtdt2; prLhs(4,3) = 0.0; 
-        prLhs(4,4) = 1.0 + chivtdt2*(kxLoc*kxLoc/kLoc) + chivtdt1*(2.0*kyLoc*kyLoc/kLoc); prLhs(4,5) = 0.0;
-        
-        prLhs(5,0) = 0; prLhs(5,1) = 0; prLhs(5,2) = 0; prLhs(5,3) = 0; prLhs(5,4) = 0; prLhs(5,5) = 1.0 + chivtdt1*(kLoc); 
-        
+        prLhs(5,2) = (2*chivtdt*kxLoc*kzLoc)/(3*kLoc); 
+        prLhs(5,4) = (2*chivtdt*kyLoc*kzLoc)/(3*kLoc); 
+        prLhs(5,5) = 1 + (chivtdt*((kxLoc*kxLoc)/3 + (kyLoc*kyLoc)/3 + (kzLoc*kzLoc)))/kLoc; 
+
         prSol = prLhs.partialPivLu().solve(prRhs);
       }
 
