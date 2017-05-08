@@ -84,6 +84,10 @@ namespace Lucee
       bool hasStatic;
 /** Fllag to indicate if negative pressure components are restored to previous values */
       bool resetPr;
+/** Direction of gravity */
+      unsigned grvDir;
+/** Gravitational acceleration */
+      double gravity;
 
 /**
  * Compute index for fluid current component.

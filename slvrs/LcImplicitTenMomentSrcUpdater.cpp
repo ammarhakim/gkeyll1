@@ -83,8 +83,12 @@ namespace Lucee
         linSolType = PARTIAL_PIV_LU;
       else if (tbl.getString("linearSolver") == "colPivHouseholderQr")
         linSolType = COL_PIV_HOUSEHOLDER_QR;
-      else if (tbl.getString("linearSolver") == "analytic")
+      else if (tbl.getString("linearSolver") == "analytic") {
         linSolType = ANALYTIC;
+        if (tbl.hasNumber("gravity")){
+	  Lucee::Except lce("ImplicitTenMomentSrcUpdater::readInput: gravity and not implemented in analytic solver "); 
+        }
+      }
       else
       {
         Lucee::Except lce("ImplicitTenMomentSrcUpdater::readInput: 'linearSolver' must be ");
@@ -98,6 +102,19 @@ namespace Lucee
     hasStatic = false;
     if (tbl.hasBool("hasStaticField"))
       hasStatic = tbl.getBool("hasStaticField");
+
+    grvDir = 0;
+    gravity = 0.0;
+    if (tbl.hasNumber("gravity"))
+    {
+      gravity = tbl.getNumber("gravity");
+      if (tbl.hasNumber("dir"))
+        grvDir = (unsigned) tbl.getNumber("dir");
+      else
+        throw Lucee::Except
+          ("ImplicitTenMomentSrcUpdater::readInput: If \"gravity\" is specified, \"dir\" must also be specified.");
+    }
+
 
     qbym.resize(nFluids);
     qbym2.resize(nFluids);
@@ -223,6 +240,9 @@ namespace Lucee
           rhs(fidx(n,X)) = qbym[n]*fPtr[RHOUX];
           rhs(fidx(n,Y)) = qbym[n]*fPtr[RHOUY];
           rhs(fidx(n,Z)) = qbym[n]*fPtr[RHOUZ];
+
+// add in gravity source term to appropriate current equation
+          rhs(fidx(n,grvDir)) += qbym[n]*fPtr[RHO]*gravity*dt1;
 
 // set current contribution to electric field equation
           lhs(eidx(X), fidx(n,X)) = dt2;
