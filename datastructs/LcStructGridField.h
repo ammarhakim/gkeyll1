@@ -88,6 +88,13 @@ namespace Lucee
       void divergence(Lucee::StructGridField<NDIM, T>& div) const;
 
 /**
+ * Compute curl of this field and store in supplied field.
+ *
+ * @param curl Curl is stored in this field.
+ */
+      void curl(Lucee::StructGridField<NDIM, T>& curl) const;
+
+/**
  * Copy from an external data block specified by a C pointer.
  *
  * @param cptr Address of the data block.
@@ -185,6 +192,14 @@ namespace Lucee
  * @return number of output parameters.
  */
       static int luaDivergence(lua_State *L);
+
+/**
+ * Lua callable method to compute curl of this field.
+ *
+ * @param L Lua state to use.
+ * @return number of output parameters.
+ */
+      static int luaCurl(lua_State *L);
 
 /**
  * Lua callable method to copy from an external data block specified by
