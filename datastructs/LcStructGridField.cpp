@@ -124,6 +124,89 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   void
+  StructGridField<NDIM, T>::curl(Lucee::StructGridField<NDIM, T>& curl) const
+  {
+// WARNING: THIS CODE PRESENTLY ONLY WORKS FOR RECTCART GRIDS
+
+    if (this->getNumComponents() != NDIM)
+    {
+      Lucee::Except lce("StructGridField::curl: Incorrect number of components. Should be ");
+      lce << NDIM << " but has " << this->getNumComponents() << " components." ;
+      throw lce;
+    }
+
+// create various iterators
+    Lucee::FieldPtr<T> curlPtr = curl.createPtr();
+    Lucee::ConstFieldPtr<T> rPtr = this->createConstPtr();
+    Lucee::ConstFieldPtr<T> lPtr = this->createConstPtr();
+
+    int idx[NDIM]; // for indexing
+
+    curl = 0.0; // clear curl field
+
+    double dx1 = 0.5/grid->getDx(0);
+    double dy1 = 0.5/grid->getDx(1);
+    double dz1 = 0.5/grid->getDx(2);
+
+    int dnx = NDIM >= 0? 1 : 0;
+    int dny = NDIM >= 1? 1 : 0;
+    int dnz = NDIM >= 2? 1 : 0;
+
+    Lucee::RowMajorSequencer<NDIM> seq(this->getRegion());
+    while (seq.step())
+    {
+      seq.fillWithIndex(idx);
+      curl.setPtr(curlPtr, idx); // current cell
+
+      // x component
+      idx[1] = idx[1]+dny;
+      this->setPtr(rPtr, idx); // right cell
+      idx[1] = idx[1]-dny-dny;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[0] += dy1*(rPtr[2]-lPtr[2]);
+      idx[1] = idx[1]+dny;
+
+      idx[2] = idx[2]+dnz;
+      this->setPtr(rPtr, idx); // right cell
+      idx[2] = idx[2]-dnz-dnz;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[0] += - dz1*(rPtr[1]-lPtr[1]);
+      idx[2] = idx[2]+dnz;
+
+      // y component
+      idx[2] = idx[2]+dnz;
+      this->setPtr(rPtr, idx); // right cell
+      idx[2] = idx[2]-dnz-dnz;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[1] += dz1*(rPtr[0]-lPtr[0]);
+      idx[2] = idx[2]+dnz;
+
+      idx[0] = idx[0]+dnx;
+      this->setPtr(rPtr, idx); // right cell
+      idx[0] = idx[0]-dnx-dnx;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[1] += - dx1*(rPtr[2]-lPtr[2]);
+      idx[0] = idx[0]+dnx;
+
+      // z component
+      idx[0] = idx[0]+dnx;
+      this->setPtr(rPtr, idx); // right cell
+      idx[0] = idx[0]-dnx-dnx;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[2] += dx1*(rPtr[1]-lPtr[1]);
+      idx[0] = idx[0]+dnx;
+
+      idx[1] = idx[1]+dny;
+      this->setPtr(rPtr, idx); // right cell
+      idx[1] = idx[1]-dny-dny;
+      this->setPtr(lPtr, idx); // left cell
+      curlPtr[2] += - dy1*(rPtr[0]-lPtr[0]);
+      idx[1] = idx[1]+dny;
+    }
+  }
+
+  template <unsigned NDIM, typename T>
+  void
   StructGridField<NDIM, T>::copyFromCptr(T *cptr)
   {
     Lucee::FieldPtr<T> ptr = this->createPtr(); // pointer to help in setting field
@@ -524,6 +607,7 @@ namespace Lucee
     lfm.appendFunc("alias", luaAlias);
     lfm.appendFunc("duplicate", luaDuplicate);
     lfm.appendFunc("div", luaDivergence);
+    lfm.appendFunc("curl", luaCurl);
     lfm.appendFunc("applyFuncBc", luaSetGhost);
     lfm.appendFunc("copy_from_cptr", luaCopyFromCptr);
     lfm.appendFunc("copy_to_cptr", luaCopyToCptr);
@@ -686,6 +770,25 @@ namespace Lucee
       (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_touserdata(L, 2);
 // compute divergence
     sgf->divergence(*fldPtr->pointer);
+
+    return 0;
+  }
+
+  template <unsigned NDIM, typename T>
+  int
+  StructGridField<NDIM, T>::luaCurl(lua_State *L)
+  {
+    StructGridField<NDIM, T> *sgf
+      = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+    if (lua_type(L, 2) != LUA_TUSERDATA)
+    {
+      Lucee::Except lce("StructGridField::luaDivergence: Must provide a field to 'curl' method");
+      throw lce;
+    }
+    Lucee::PointerHolder<StructGridField<NDIM, T> > *fldPtr =
+      (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_touserdata(L, 2);
+// compute curl
+    sgf->curl(*fldPtr->pointer);
 
     return 0;
   }
