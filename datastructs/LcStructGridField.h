@@ -92,7 +92,7 @@ namespace Lucee
  *
  * @param curl Curl is stored in this field.
  */
-      void curl(Lucee::StructGridField<NDIM, T>& curl) const;
+      void curl(Lucee::StructGridField<NDIM, T>& curl, double coeff) const;
 
 /**
  * Copy from an external data block specified by a C pointer.

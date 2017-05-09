@@ -124,7 +124,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   void
-  StructGridField<NDIM, T>::curl(Lucee::StructGridField<NDIM, T>& curl) const
+  StructGridField<NDIM, T>::curl(Lucee::StructGridField<NDIM, T>& curl, double coeff) const
   {
 // WARNING: THIS CODE PRESENTLY ONLY WORKS FOR RECTCART GRIDS
 
@@ -202,6 +202,10 @@ namespace Lucee
       this->setPtr(lPtr, idx); // left cell
       curlPtr[2] += - dy1*(rPtr[0]-lPtr[0]);
       idx[1] = idx[1]+dny;
+
+      curlPtr[0] *= coeff;
+      curlPtr[1] *= coeff;
+      curlPtr[2] *= coeff;
     }
   }
 
@@ -780,15 +784,30 @@ namespace Lucee
   {
     StructGridField<NDIM, T> *sgf
       = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
+    unsigned nArgs = lua_gettop(L);
+
     if (lua_type(L, 2) != LUA_TUSERDATA)
     {
-      Lucee::Except lce("StructGridField::luaDivergence: Must provide a field to 'curl' method");
+      Lucee::Except lce("StructGridField::luaCurl: Must provide a field to 'curl' method");
       throw lce;
     }
     Lucee::PointerHolder<StructGridField<NDIM, T> > *fldPtr =
       (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_touserdata(L, 2);
+
+    double coeff = 1.;
+    if (nArgs == 3)
+    {
+      if(!lua_isnumber(L, 3))
+      {
+        Lucee::Except lce("StructGridField::luaCurl: A second paraemter is provided but is not a number");
+        throw lce;
+      }
+      coeff = lua_tonumber(L, 3);
+    }
+
 // compute curl
-    sgf->curl(*fldPtr->pointer);
+    sgf->curl(*fldPtr->pointer, coeff);
 
     return 0;
   }
