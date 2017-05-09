@@ -85,7 +85,7 @@ namespace Lucee
  *
  * @param div Divergence is stored in this field.
  */
-      void divergence(Lucee::StructGridField<NDIM, T>& div) const;
+      void divergence(Lucee::StructGridField<NDIM, T>& div, double coeff) const;
 
 /**
  * Compute curl of this field and store in supplied field.
