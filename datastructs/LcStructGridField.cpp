@@ -85,7 +85,7 @@ namespace Lucee
 
   template <unsigned NDIM, typename T>
   void
-  StructGridField<NDIM, T>::divergence(Lucee::StructGridField<NDIM, T>& div) const
+  StructGridField<NDIM, T>::divergence(Lucee::StructGridField<NDIM, T>& div, double coeff) const
   {
 // WARNING: THIS CODE PRESENTLY ONLY WORKS FOR RECTCART GRIDS
 
@@ -120,6 +120,16 @@ namespace Lucee
       }
     }
 
+    if (coeff != 1)
+    {
+      Lucee::RowMajorSequencer<NDIM> seq(this->getRegion());
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        div.setPtr(divPtr, idx); // current cell
+        divPtr[0] *= coeff;
+      }
+    }
   }
 
   template <unsigned NDIM, typename T>
@@ -765,6 +775,9 @@ namespace Lucee
   {
     StructGridField<NDIM, T> *sgf
       = Lucee::PointerHolder<StructGridField<NDIM, T> >::getObjAsDerived(L);
+
+    unsigned nArgs = lua_gettop(L);
+
     if (lua_type(L, 2) != LUA_TUSERDATA)
     {
       Lucee::Except lce("StructGridField::luaDivergence: Must provide a field to 'div' method");
@@ -772,8 +785,20 @@ namespace Lucee
     }
     Lucee::PointerHolder<StructGridField<NDIM, T> > *fldPtr =
       (Lucee::PointerHolder<StructGridField<NDIM, T> >*) lua_touserdata(L, 2);
+
+    double coeff = 1.;
+    if (nArgs == 3)
+    {
+      if(!lua_isnumber(L, 3))
+      {
+        Lucee::Except lce("StructGridField::luaDivergence: A second paraemter is provided but is not a number");
+        throw lce;
+      }
+      coeff = lua_tonumber(L, 3);
+    }
+
 // compute divergence
-    sgf->divergence(*fldPtr->pointer);
+    sgf->divergence(*fldPtr->pointer, coeff);
 
     return 0;
   }
