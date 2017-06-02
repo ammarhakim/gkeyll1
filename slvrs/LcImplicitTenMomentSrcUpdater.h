@@ -82,6 +82,8 @@ namespace Lucee
       int linSolType;
 /** Flag to indicate if static magnetic field is present */
       bool hasStatic;
+/** Flag to indicate if sigma is present */
+      bool hasSigma; 
 /** Fllag to indicate if negative pressure components are restored to previous values */
       bool resetPr;
 /** Direction of gravity */

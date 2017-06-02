@@ -103,6 +103,10 @@ namespace Lucee
     if (tbl.hasBool("hasStaticField"))
       hasStatic = tbl.getBool("hasStaticField");
 
+    hasSigma = false;
+    if (tbl.hasBool("hasSigma"))
+      hasSigma = tbl.getBool("hasSigma");
+
     grvDir = 0;
     gravity = 0.0;
     if (tbl.hasNumber("gravity"))
@@ -157,18 +161,31 @@ namespace Lucee
 // get EM field (this is last out parameter)
     Lucee::Field<NDIM, double>& emField = this->getOut<Lucee::Field<NDIM, double> >(nFluids);
 
-// get static EM field if one is present (it is the first and only
-// input field)
+// get static EM field and sigma if one is present
     const Lucee::Field<NDIM, double>* staticField = 0;
+    const Lucee::Field<NDIM, double>* sigmaField = 0;
     if (hasStatic)
+    {
       staticField = &this->getInp<Lucee::Field<NDIM, double> >(0);
+      if (hasSigma)
+        sigmaField = &this->getInp<Lucee::Field<NDIM, double> >(1);
+    }
+    else
+    {
+      if (hasSigma)
+        sigmaField = &this->getInp<Lucee::Field<NDIM, double> >(0);
+    }
 
     Lucee::FieldPtr<double> fPtr = fluids[0]->createPtr();
     Lucee::FieldPtr<double> emPtr = emField.createPtr();
 
-    std::vector<double> zeros(6);
-    for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
-    Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
+    std::vector<double> zeros6(6);
+    for (unsigned i=0; i<6; ++i) zeros6[i] = 0.0;
+    Lucee::ConstFieldPtr<double> staticEmPtr(zeros6);
+
+    std::vector<double> zeros1(1);
+    for (unsigned i=0; i<1; ++i) zeros1[0] = 0.0;
+    Lucee::ConstFieldPtr<double> sigmaPtr(zeros1);
 
 // for momentum and electric field update
     Eigen::MatrixXd lhs;
@@ -182,7 +199,6 @@ namespace Lucee
 // updated pressure tensor
     std::vector<double> prTen(6*nFluids);
 
-
     int idx[NDIM];
     Lucee::Region<NDIM, int> localRgn = emField.getRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
@@ -193,6 +209,9 @@ namespace Lucee
       emField.setPtr(emPtr, idx);
       if (hasStatic)
         staticField->setPtr(staticEmPtr, idx);
+
+      if (hasSigma)
+        sigmaField->setPtr(sigmaPtr, idx);
 
       // variables needed for analytic solver
       std::vector<double> lambda(nFluids);
@@ -445,6 +464,10 @@ namespace Lucee
         emPtr[EZ] = 2*sol(eidx(Z)) - emPtr[EZ];
       }
 
+      emPtr[EX] = emPtr[EX]*exp(-sigmaPtr[0]*dt/epsilon0);
+      emPtr[EY] = emPtr[EY]*exp(-sigmaPtr[0]*dt/epsilon0);
+      emPtr[EZ] = emPtr[EZ]*exp(-sigmaPtr[0]*dt/epsilon0);
+      
       for (unsigned n=0; n<nFluids; ++n)
       {
         if ((prTen[6*n+0] <= 0.) || (prTen[6*n+3] <= 0.) || (prTen[6*n+5] <= 0.))
