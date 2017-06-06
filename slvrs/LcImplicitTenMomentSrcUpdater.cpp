@@ -133,6 +133,17 @@ namespace Lucee
     resetPr = false;
     if (tbl.hasBool("resetNegativePressure"))
       resetPr = tbl.getBool("resetNegativePressure");
+
+    if (tbl.hasBool("implicitB"))
+      implicitB = tbl.getBool("implicitB");
+    else 
+      implicitB = false;
+
+    if (implicitB && linSolType != ANALYTIC) {
+      throw Lucee::Except("ImplicitTenMomentSrcUpdater::readInput: Implicit B field update only works with analytic solver"); 
+    }
+
+
   }
 
   template <unsigned NDIM>
@@ -161,6 +172,16 @@ namespace Lucee
 // get EM field (this is last out parameter)
     Lucee::Field<NDIM, double>& emField = this->getOut<Lucee::Field<NDIM, double> >(nFluids);
 
+    Lucee::Field<NDIM, double>* elfNew = 0;
+    if (implicitB) { 
+      if (this->getNumOutVars() == nFluids+2) {
+        elfNew = &this->getOut<Lucee::Field<NDIM, double> >(nFluids+1);
+      } else {
+        throw Lucee::Except("ImplicitTenMomentSrcUpdater::update: Implicit B needs a the updated magnetic field"); 
+        
+      }
+    }
+
 // get static EM field and sigma if one is present
     const Lucee::Field<NDIM, double>* staticField = 0;
     const Lucee::Field<NDIM, double>* sigmaField = 0;
@@ -187,6 +208,10 @@ namespace Lucee
     for (unsigned i=0; i<1; ++i) zeros1[0] = 0.0;
     Lucee::ConstFieldPtr<double> sigmaPtr(zeros1);
 
+    std::vector<double> zeros3(3);
+    for (unsigned i=0; i<3;++i) zeros3[i] = 0.0;
+    Lucee::FieldPtr<double> elfNewPtr(zeros3);
+
 // for momentum and electric field update
     Eigen::MatrixXd lhs;
     lhs = Eigen::MatrixXd::Constant(3*nFluids+3, 3*nFluids+3, 0.0);
@@ -200,7 +225,7 @@ namespace Lucee
     std::vector<double> prTen(6*nFluids);
 
     int idx[NDIM];
-    Lucee::Region<NDIM, int> localRgn = emField.getRegion();
+    Lucee::Region<NDIM, int> localRgn = emField.getExtRegion();
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     while (seq.step())
     {
@@ -212,6 +237,9 @@ namespace Lucee
 
       if (hasSigma)
         sigmaField->setPtr(sigmaPtr, idx);
+
+      if (implicitB)
+        elfNew->setPtr(elfNewPtr, idx);
 
       // variables needed for analytic solver
       std::vector<double> lambda(nFluids);
@@ -226,6 +254,7 @@ namespace Lucee
       Eigen::Vector3d E;
       Eigen::Vector3d F(0,0,0); 
       Eigen::Vector3d K(0,0,0);// the k vector used to update the implicit solution in Smithe(2007)
+      Eigen::Vector3d curlBdt(0,0,0);
       B(0) = bx; B(1) = by; B(2) = bz;
       E(0) = emPtr[EX]; E(1) = emPtr[EY]; E(2) = emPtr[EZ];
       double babs = std::sqrt(bx*bx + by*by + bz*bz);
@@ -282,6 +311,15 @@ namespace Lucee
         }
       }
       F = F + E;
+      if (implicitB) {
+        // this is dt*c^2*curl B
+        curlBdt(0) = elfNewPtr[0] - E(0);
+        curlBdt(1) = elfNewPtr[1] - E(1);
+        curlBdt(2) = elfNewPtr[2] - E(2);
+      // if using the implicit method, add the additional curl B term to the generalised J 
+        K += 1.0*curlBdt;
+      }
+
 // fill in elements for electric field equations
       Eigen::VectorXd sol;
       if (linSolType != ANALYTIC){
