@@ -90,6 +90,9 @@ namespace Lucee
       unsigned grvDir;
 /** Gravitational acceleration */
       double gravity;
+/** Flag to fold the FDTD update into the semi-implicit E update */
+      bool implicitB; 
+
 
 /**
  * Compute index for fluid current component.
