@@ -205,7 +205,7 @@ namespace Lucee
     Lucee::ConstFieldPtr<double> staticEmPtr(zeros6);
 
     std::vector<double> zeros1(1);
-    for (unsigned i=0; i<1; ++i) zeros1[0] = 0.0;
+    for (unsigned i=0; i<1; ++i) zeros1[i] = 0.0;
     Lucee::ConstFieldPtr<double> sigmaPtr(zeros1);
 
     std::vector<double> zeros3(3);
