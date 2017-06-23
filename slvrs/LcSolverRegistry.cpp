@@ -15,7 +15,7 @@
 #include <LcBcUpdater.h>
 #include <LcBiasedSheath5DUpdater.h>
 #include <LcBoltzmannPhiUpdater.h>
-#include <LcCompletePolynomialElement.h>
+//#include <LcCompletePolynomialElement.h>
 #include <LcConstBoundaryCondition.h>
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
@@ -496,7 +496,7 @@ namespace Lucee
       ::Instance()
       .append<Lucee::LagrangeTensorElement<3> >()
       .append<Lucee::SerendipityElement<3> >()
-      .append<Lucee::CompletePolynomialElement<3> >();
+      /*.append<Lucee::CompletePolynomialElement<3> >()*/;
 
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::NodalFiniteElementIfc<4> > >
       ::Instance()
