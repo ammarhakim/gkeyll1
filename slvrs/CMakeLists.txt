@@ -24,7 +24,6 @@ set(lcslvrs_SOURCES
   LcBiasedSheath5DUpdater.cpp
   LcBoltzmannPhiUpdater.cpp
   LcBoundaryCondition.cpp
-  LcCompletePolynomialElement.cpp
   LcConstBoundaryCondition.cpp
   LcConvertTenMomentPToTUpdater.cpp
   LcCopyBoundaryCondition.cpp
