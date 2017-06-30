@@ -164,11 +164,6 @@ namespace Lucee
     std::vector<double> weights(numNodesConf);
     confBasis->getWeights(weights);
 
-    double cellVolume, invCellVolume = 0;
-    for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx)
-      cellVolume += weights[nodeIdx];
-    invCellVolume = 1.0/cellVolume;
-
     double alpha;
     double energyGoodAvg, energyBadAvg;
     
@@ -185,7 +180,7 @@ namespace Lucee
       energyBadAvg = 0;
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
 	energyGoodAvg += weights[nodeIdx]*energyGoodPtr[nodeIdx];
-	energyBadAvg += weights[nodeIdx]*energyBadPtr[nodeIdx];
+	energyBadAvg  += weights[nodeIdx]*energyBadPtr[nodeIdx];
       }
       alpha = 0.5*(energyBadAvg - energyGoodAvg)/(dt*energyBadAvg);
 

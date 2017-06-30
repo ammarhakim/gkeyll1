@@ -72,6 +72,11 @@ namespace Lucee
     else
       throw Lucee::Except("BGKCollUpdater::readInput: Must specify permitivity using 'permitivity'");
 
+    if (tbl.hasNumber("vt2floor"))
+      floor = tbl.getNumber("vt2floor");
+    else
+      floor = 0;
+
     // calculate constants parts of the collision frequency 
     collFreqConst = elemCharge*elemCharge*elemCharge*elemCharge/
       (2*M_PI*permitivity*permitivity*mass*mass);
@@ -231,7 +236,7 @@ namespace Lucee
 	    return Lucee::UpdaterStatus(false, 0);
 
 	  // ARBITRARY FLOOR! NEEDS MORE THINKING
-	  double floor = 0.3/mass;
+	  //double floor = 0.3/mass;
 	  if (vt2 < floor)
 	    vt2 = floor;
 	  vTerm2i(nodeIdx, dim) = vt2;
