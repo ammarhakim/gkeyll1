@@ -54,8 +54,8 @@ namespace Lucee
       if (gup.size() != 2)
         throw Lucee::Except(
           "RectYeeInterpolationUpdater:readInput: The 'ghostUpdate' table should have exactly two numbers");
-      ghostUpdates[0] = (unsigned) gup[0];
-      ghostUpdates[1] = (unsigned) gup[1];
+      ghostUpdates[0] = gup[0];
+      ghostUpdates[1] = gup[1];
     }
     else
     {
