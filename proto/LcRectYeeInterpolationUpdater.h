@@ -93,7 +93,7 @@ namespace Lucee
       /** Whether a Dual Yee cell or regular Yee cell is being used */
       bool dual; 
       /** Extra cells to update outside of interior */
-      unsigned ghostUpdates[2];
+      int ghostUpdates[2];
   };
 }
 
