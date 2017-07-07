@@ -117,11 +117,13 @@ set (proto_SOURCES
   LcThreeWaveInteractSrcUpdater.cpp
   LcZonalAverageCalc3D.cpp
   LcZonalVelocity1DUpdater.cpp
+  LcRectYeeInterpolationUpdater.cpp
 )
 
 if (FFTW3_FOUND)
   set (proto_SOURCES ${proto_SOURCES} LcPeriodicPoisson2DUpdater.cpp
-  LcPeriodicCollisionlessHeatFluxUpdater.cpp )
+  LcPeriodicCollisionlessHeatFluxUpdater.cpp
+  LcCollisionlessKurtosisUpdater.cpp )
   if (ENABLE_PARALLEL)
     set (proto_SOURCES ${proto_SOURCES} LcPeriodicParallelPoisson2DUpdater.cpp)
   endif (ENABLE_PARALLEL)
