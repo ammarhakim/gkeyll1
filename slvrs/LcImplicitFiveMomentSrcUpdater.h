@@ -82,6 +82,8 @@ namespace Lucee
       int linSolType;
 /** Flag to indicate if static EM field is present */
       bool hasStatic;
+/** Flag to indicate if sigma is present */
+      bool hasSigma; 
 /** Flag to indicate if to update pressure equation */
       bool hasPressure;
 /** Propagation speed factor for electric field error potential. This
