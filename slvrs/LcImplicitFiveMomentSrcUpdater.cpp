@@ -97,6 +97,10 @@ namespace Lucee
     hasStatic = false;
     if (tbl.hasBool("hasStaticField"))
       hasStatic = tbl.getBool("hasStaticField");
+// flag to indicate if there is conductivity
+    hasSigma = false;
+    if (tbl.hasBool("hasSigma"))
+      hasSigma = tbl.getBool("hasSigma");
 
 // flag to indicate if there is a pressure equation
     hasPressure = true;
@@ -185,15 +189,25 @@ namespace Lucee
 // get static EM field if one is present (it is the first and only
 // input field)
     const Lucee::Field<NDIM, double>* staticField = 0;
-    if (hasStatic)
+    const Lucee::Field<NDIM, double>* sigmaField = 0;
+    if (hasStatic) {
       staticField = &this->getInp<Lucee::Field<NDIM, double> >(0);
-
+      if (hasSigma)
+        sigmaField = &this->getInp<Lucee::Field<NDIM, double> >(1);
+    } else {
+      if (hasSigma)
+        sigmaField = &this->getInp<Lucee::Field<NDIM, double> >(0);
+    }
     Lucee::FieldPtr<double> fPtr = fluids[0]->createPtr();
     Lucee::FieldPtr<double> emPtr = emField.createPtr();
 
     std::vector<double> zeros(6);
     for (unsigned i=0; i<6; ++i) zeros[i] = 0.0;
     Lucee::ConstFieldPtr<double> staticEmPtr(zeros);
+
+    std::vector<double> zeros1(1);
+    for (unsigned i=0; i<1; ++i) zeros1[i] = 0.0;
+    Lucee::ConstFieldPtr<double> sigmaPtr(zeros1);
 
     std::vector<double> zeros3(3);
     for (unsigned i=0; i<3;++i) zeros3[i] = 0.0;
@@ -213,8 +227,13 @@ namespace Lucee
       emField.setPtr(emPtr, idx);
       if (hasStatic)
         staticField->setPtr(staticEmPtr, idx);
+
       if (implicitB)
         elfNew->setPtr(elfNewPtr, idx);
+
+      if (hasSigma)
+        sigmaField->setPtr(sigmaPtr, idx);
+
       std::vector<double> lambda(nFluids);
       std::vector<double> omega(nFluids);
       //      std::vector<double> K(3); 
@@ -396,6 +415,11 @@ namespace Lucee
       } else {
 
       }
+
+      emPtr[EX] = emPtr[EX]*exp(-sigmaPtr[0]*dt/epsilon0);
+      emPtr[EY] = emPtr[EY]*exp(-sigmaPtr[0]*dt/epsilon0);
+      emPtr[EZ] = emPtr[EZ]*exp(-sigmaPtr[0]*dt/epsilon0);
+
       double crhoc = chi_e*chargeDens/epsilon0;
 // update electric field error potential source
       if (damp_e > 0)

@@ -97,7 +97,7 @@ namespace Lucee
       std::vector<unsigned> phaseConfMap;
 
       // loaded physical constants
-      double mass, elemCharge, permitivity;
+      double mass, elemCharge, permitivity, floor;
 
       // Maxwell distribution normalization factor 1/sqrt(2*pi)
       double maxwellNorm;
