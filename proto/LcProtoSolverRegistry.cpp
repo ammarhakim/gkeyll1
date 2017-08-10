@@ -69,6 +69,7 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
+#include <LcOverlappingFieldAverage.h>
 #include <LcOverlappingFieldCopy.h>
 #include <LcPoissonBracketImpUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
@@ -352,6 +353,10 @@ namespace Lucee
       .append<Lucee::OverlappingFieldCopy<1> >()
       .append<Lucee::OverlappingFieldCopy<2> >()
       .append<Lucee::OverlappingFieldCopy<3> >()
+
+      .append<Lucee::OverlappingFieldAverage<1> >()
+      .append<Lucee::OverlappingFieldAverage<2> >()
+      .append<Lucee::OverlappingFieldAverage<3> >()
 
       .append<Lucee::SetSingleNodeToOneUpdater<1> >()
       .append<Lucee::SetSingleNodeToOneUpdater<2> >()
