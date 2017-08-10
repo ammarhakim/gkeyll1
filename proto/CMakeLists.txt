@@ -77,6 +77,7 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcOverlappingFieldCopy.cpp
   LcPoissonBracketAdvectionEquation1D.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketAdvectionEquation5D.cpp
@@ -100,15 +101,16 @@ set (proto_SOURCES
   LcRecoveryDG3DUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
+  LcRectYeeInterpolationUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp
-  LcScalingPositivityLimiter.cpp
-  LcScalingPositivityLimiterAlphaV.cpp
   LcSOLFluxAcrossEdgeCalc.cpp
   LcSOLFluxAcrossEdgeCalc3D.cpp
   LcSOLSetPotentialAtBoundary.cpp
   LcSOLTotalEnergyCalc.cpp
   LcSOLTotalIntegralCalc.cpp
   LcSOLUpperXPotentialBcUpdater.cpp
+  LcScalingPositivityLimiter.cpp
+  LcScalingPositivityLimiterAlphaV.cpp
   LcSetSingleNodeToOneUpdater.cpp
   LcSheathParticleSource1x1v.cpp
   LcSimpleSmoothToC0Updater.cpp
@@ -117,7 +119,6 @@ set (proto_SOURCES
   LcThreeWaveInteractSrcUpdater.cpp
   LcZonalAverageCalc3D.cpp
   LcZonalVelocity1DUpdater.cpp
-  LcRectYeeInterpolationUpdater.cpp
 )
 
 if (FFTW3_FOUND)

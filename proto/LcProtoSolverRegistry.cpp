@@ -69,6 +69,7 @@
 #include <LcNodalPoissonBracketUpdater.h>
 #include <LcNonLinEmGke1dHamilUpdater.h>
 #include <LcNormGradPhiUpdater.h>
+#include <LcOverlappingFieldCopy.h>
 #include <LcPoissonBracketImpUpdater.h>
 #include <LcPoissonBracketOptUpdater.h>
 #include <LcPoissonBracketSimpleUpdater.h>
@@ -82,14 +83,14 @@
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
-#include <LcScalingPositivityLimiter.h>
-#include <LcScalingPositivityLimiterAlphaV.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc3D.h>
 #include <LcSOLSetPotentialAtBoundary.h>
 #include <LcSOLTotalEnergyCalc.h>
 #include <LcSOLTotalIntegralCalc.h>
 #include <LcSOLUpperXPotentialBcUpdater.h>
+#include <LcScalingPositivityLimiter.h>
+#include <LcScalingPositivityLimiterAlphaV.h>
 #include <LcSetSingleNodeToOneUpdater.h>
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
@@ -347,6 +348,10 @@ namespace Lucee
       .append<Lucee::ConstGravitySrcUpdater<1> >()
       .append<Lucee::ConstGravitySrcUpdater<2> >()
       .append<Lucee::ConstGravitySrcUpdater<3> >()
+
+      .append<Lucee::OverlappingFieldCopy<1> >()
+      .append<Lucee::OverlappingFieldCopy<2> >()
+      .append<Lucee::OverlappingFieldCopy<3> >()
 
       .append<Lucee::SetSingleNodeToOneUpdater<1> >()
       .append<Lucee::SetSingleNodeToOneUpdater<2> >()
