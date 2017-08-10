@@ -77,6 +77,7 @@ set (proto_SOURCES
   LcNodalPoissonBracketUpdater.cpp
   LcNonLinEmGke1dHamilUpdater.cpp
   LcNormGradPhiUpdater.cpp
+  LcOverlappingFieldAverage.cpp
   LcOverlappingFieldCopy.cpp
   LcPoissonBracketAdvectionEquation1D.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
