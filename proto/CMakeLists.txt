@@ -79,6 +79,7 @@ set (proto_SOURCES
   LcNormGradPhiUpdater.cpp
   LcOverlappingFieldAverage.cpp
   LcOverlappingFieldCopy.cpp
+  LcOverlappingFieldSplit.cpp  
   LcPoissonBracketAdvectionEquation1D.cpp
   LcPoissonBracketAdvectionEquation4D.cpp
   LcPoissonBracketAdvectionEquation5D.cpp
