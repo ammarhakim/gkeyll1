@@ -80,11 +80,6 @@ namespace Lucee
       idxR[dir] = idxF[dir]-overlapLeftIdx; // adjust index
       qRight.setPtr(ptrR, idxR);
 
-      std::cout << "(" << idxF[0] << ", " << idxF[1] << ")"
-                << "(" << idxL[0] << ", " << idxL[1] << ")"
-                << "(" << idxR[0] << ", " << idxR[1] << ")"
-                << std::endl;
-
       if (idxF[dir] < overlapLeftIdx)
       { // left region
         for (unsigned k=0; k<qFull.getNumComponents(); ++k)

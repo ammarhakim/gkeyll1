@@ -65,7 +65,9 @@ namespace Lucee
 
     private:
 /* Number of cells that overlap */
-      unsigned numCells;
+      unsigned numOverlappingCells;
+/* Should we assume there is an additional periodic BC applied? */
+      bool copyPeriodicDirs;
 /* Direction of overlap */
       unsigned dir;
   };
