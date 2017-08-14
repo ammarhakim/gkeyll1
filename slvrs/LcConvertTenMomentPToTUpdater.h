@@ -27,7 +27,7 @@ namespace Lucee
  * collision frequency is large.
  */
   template <unsigned NDIM>
-  class ConvertUpdater : public Lucee::UpdaterIfc
+  class ConvertTToPUpdater : public Lucee::UpdaterIfc
   {
     public:
 /** Class id: this is used by registration system */
