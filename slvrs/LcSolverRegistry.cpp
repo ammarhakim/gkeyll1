@@ -17,6 +17,7 @@
 #include <LcBoltzmannPhiUpdater.h>
 //#include <LcCompletePolynomialElement.h>
 #include <LcConstBoundaryCondition.h>
+#include <LcConvertTenMomentPToTUpdater.h>
 #include <LcCopyBoundaryCondition.h>
 #include <LcCopyContToDisContFieldUpdater.h>
 #include <LcCurrentSource.h>
@@ -88,6 +89,8 @@
 #include <LcNodalHyperDiffusionUpdater.h>
 #include <LcNodalPositiveFilterUpdater.h>
 #include <LcNodalVlasovUpdater.h>
+#include <LcNonUniEdgeFaceCurlUpdater.h>
+#include <LcNonUniFaceEdgeCurlUpdater.h> 
 #include <LcPointSourceIfc.h>
 #include <LcPositivityUpdater.h>
 #include <LcPredicateUpdater.h>
@@ -184,6 +187,14 @@ namespace Lucee
       .append<Lucee::EdgeFaceCurlUpdater<1> >()
       .append<Lucee::EdgeFaceCurlUpdater<2> >()
       .append<Lucee::EdgeFaceCurlUpdater<3> >()
+
+      .append<Lucee::NonUniFaceEdgeCurlUpdater<1> >()
+      .append<Lucee::NonUniFaceEdgeCurlUpdater<2> >()
+      .append<Lucee::NonUniFaceEdgeCurlUpdater<3> >()
+
+      .append<Lucee::NonUniEdgeFaceCurlUpdater<1> >()
+      .append<Lucee::NonUniEdgeFaceCurlUpdater<2> >()
+      .append<Lucee::NonUniEdgeFaceCurlUpdater<3> >()
 
       .append<Lucee::BcUpdater<1> >()
       .append<Lucee::BcUpdater<2> >()
@@ -377,6 +388,10 @@ namespace Lucee
       .append<Lucee::CopyContToDisContFieldUpdater<1> >()
       .append<Lucee::CopyContToDisContFieldUpdater<2> >()
       .append<Lucee::CopyContToDisContFieldUpdater<3> >()
+
+      .append<Lucee::ConvertPToTUpdater<1> >()
+      .append<Lucee::ConvertPToTUpdater<2> >()
+      .append<Lucee::ConvertPToTUpdater<3> >()
 
       .append<Lucee::ImplicitTenMomentCollisionUpdater<1> >()
       .append<Lucee::ImplicitTenMomentCollisionUpdater<2> >()

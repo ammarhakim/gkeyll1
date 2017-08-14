@@ -15,13 +15,13 @@ namespace Lucee
 {
 
 // set ids for module system
-  template <> const char *ConvertTToPUpdater<1>::id = "ConvertTToP1D";
-  template <> const char *ConvertTToPUpdater<2>::id = "ConvertTToP2D";
-  template <> const char *ConvertTToPUpdater<3>::id = "ConvertTToP3D";
+  template <> const char *ConvertPToTUpdater<1>::id = "ConvertPToT1D";
+  template <> const char *ConvertPToTUpdater<2>::id = "ConvertPToT2D";
+  template <> const char *ConvertPToTUpdater<3>::id = "ConvertPToT3D";
 
   template <unsigned NDIM>
   void
-  ConvertTToPUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
+  ConvertPToTUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
     std::string nf = tbl.getString("mode");
@@ -30,7 +30,7 @@ namespace Lucee
     } else if (nf == "ToConservative") {
       mode = TO_CONSERVATIVE;
     } else {
-      Lucee::Except lce("ConvertTToPUpdater::readInput: 'mode' ");
+      Lucee::Except lce("ConvertPToTUpdater::readInput: 'mode' ");
       lce << nf << " not recognized!" << std::endl;
       throw lce;
     }
@@ -39,14 +39,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  ConvertTToPUpdater<NDIM>::initialize()
+  ConvertPToTUpdater<NDIM>::initialize()
   {
     UpdaterIfc::initialize();
   }
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  ConvertTToPUpdater<NDIM>::update(double t)
+  ConvertPToTUpdater<NDIM>::update(double t)
   {
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -101,15 +101,15 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  ConvertTToPUpdater<NDIM>::declareTypes()
+  ConvertPToTUpdater<NDIM>::declareTypes()
   {
     //this->setLastOutVarType(typeid(Lucee::Field<NDIM, double>));
         this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
 // instantiations
-  template class ConvertTToPUpdater<1>;
-  template class ConvertTToPUpdater<2>;
-  template class ConvertTToPUpdater<3>;
+  template class ConvertPToTUpdater<1>;
+  template class ConvertPToTUpdater<2>;
+  template class ConvertPToTUpdater<3>;
 }
 
