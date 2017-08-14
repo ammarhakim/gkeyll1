@@ -83,6 +83,7 @@
 #include <LcRecoveryDG3DUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
+#include <LcRectYeeInterpolationUpdater.h>
 #include <LcRegisteredObjList.h>
 #include <LcRunningAverageOfFieldCalc.h>
 #include <LcSOLFluxAcrossEdgeCalc.h>
@@ -111,6 +112,7 @@
 #endif
 
 #ifdef HAVE_FFTW3
+#include <LcCollisionlessKurtosisUpdater.h>
 #include <LcPeriodicPoisson2DUpdater.h>
 #include <LcPeriodicCollisionlessHeatFluxUpdater.h>
 #ifdef HAVE_MPI
@@ -303,6 +305,10 @@ namespace Lucee
       .append<Lucee::RectFourthOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectFourthOrderCentralDiffUpdater<3> >()
 
+      .append<Lucee::RectYeeInterpolationUpdater<1> >()
+      .append<Lucee::RectYeeInterpolationUpdater<2> >()
+      .append<Lucee::RectYeeInterpolationUpdater<3> >()
+
       .append<Lucee::RecoveryDG1DUpdater>()
       .append<Lucee::RecoveryDG3DUpdater>()
 
@@ -394,7 +400,11 @@ namespace Lucee
       
       .append<Lucee::PeriodicCollisionlessHeatFluxUpdater<1> >()
       .append<Lucee::PeriodicCollisionlessHeatFluxUpdater<2> >()
-      .append<Lucee::PeriodicCollisionlessHeatFluxUpdater<3> >();
+      .append<Lucee::PeriodicCollisionlessHeatFluxUpdater<3> >()
+
+      .append<Lucee::CollisionlessKurtosisUpdater<1> >()
+      .append<Lucee::CollisionlessKurtosisUpdater<2> >()
+      .append<Lucee::CollisionlessKurtosisUpdater<3> >();
 #ifdef HAVE_MPI
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::UpdaterIfc> >
       ::Instance()
