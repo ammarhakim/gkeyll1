@@ -64,8 +64,8 @@ namespace Lucee
     Lucee::Region<NDIM, int> rightRgn = qRight.getRegion();
     Lucee::Region<NDIM, int> fullRgn = qFull.getRegion();
 
-    unsigned overlapLeftIdx = fullRgn.getUpper(dir) - rightRgn.getShape(dir);
-    unsigned overlapRightIdx = fullRgn.getLower(dir) + leftRgn.getShape(dir);
+    int overlapLeftIdx = fullRgn.getUpper(dir) - rightRgn.getShape(dir);
+    int overlapRightIdx = fullRgn.getLower(dir) + leftRgn.getShape(dir);
 
     Lucee::RowMajorSequencer<NDIM> seqFull(qFull.getRegion());
     while (seqFull.step())

@@ -54,6 +54,71 @@ namespace Lucee
     Lucee::Field<NDIM, double>& qLeft = this->getOut<Lucee::Field<NDIM, double> >(0);;
     Lucee::Field<NDIM, double>& qRight = this->getOut<Lucee::Field<NDIM, double> >(1);
 
+    int idxF[NDIM], idxL[NDIM], idxR[NDIM];
+
+    Lucee::ConstFieldPtr<double> ptrF = qFull.createConstPtr();
+    Lucee::FieldPtr<double> ptrL = qLeft.createPtr();
+    Lucee::FieldPtr<double> ptrR = qRight.createPtr();
+
+    Lucee::Region<NDIM, int> leftRgn = qLeft.getRegion();
+    Lucee::Region<NDIM, int> rightRgn = qRight.getRegion();
+    Lucee::Region<NDIM, int> fullRgn = qFull.getRegion();
+
+    int overlapLeftIdx = fullRgn.getUpper(dir) - rightRgn.getShape(dir);
+    int overlapRightIdx = fullRgn.getLower(dir) + leftRgn.getShape(dir);
+
+    Lucee::RowMajorSequencer<NDIM> seqFull(qFull.getExtRegion());
+    while (seqFull.step())
+    {
+      seqFull.fillWithIndex(idxF);
+      seqFull.fillWithIndex(idxL);
+      seqFull.fillWithIndex(idxR);
+
+      qFull.setPtr(ptrF, idxF);
+
+      qLeft.setPtr(ptrL, idxL);
+      idxR[dir] = idxF[dir]-overlapLeftIdx; // adjust index
+      qRight.setPtr(ptrR, idxR);
+
+      std::cout << "(" << idxF[0] << ", " << idxF[1] << ")"
+                << "(" << idxL[0] << ", " << idxL[1] << ")"
+                << "(" << idxR[0] << ", " << idxR[1] << ")"
+                << std::endl;
+
+      if (idxF[dir] < overlapLeftIdx)
+      { // left region
+        for (unsigned k=0; k<qFull.getNumComponents(); ++k)
+          ptrL[k] = ptrF[k];
+
+        // set left ghost cell of right field
+        if (idxF[dir] == overlapLeftIdx-1)
+        {
+          for (unsigned k=0; k<qFull.getNumComponents(); ++k)
+            ptrR[k] = ptrF[k];
+        }
+      }
+      else if (idxF[dir] >= overlapRightIdx)
+      { // right region
+        for (unsigned k=0; k<qFull.getNumComponents(); ++k)
+          ptrR[k] = ptrF[k];
+
+        // set right ghost cell of left field
+        if (idxF[dir] == overlapRightIdx)
+        {
+          for (unsigned k=0; k<qFull.getNumComponents(); ++k)
+            ptrL[k] = ptrF[k];
+        }        
+      }
+      else
+      { // overlap region
+        for (unsigned k=0; k<qFull.getNumComponents(); ++k)
+        {
+          ptrL[k] = ptrF[k];
+          ptrR[k] = ptrF[k];
+        }
+      }
+    }
+
     return Lucee::UpdaterStatus();
   }
 
