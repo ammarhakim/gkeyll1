@@ -15,13 +15,13 @@ namespace Lucee
 {
 
 // set ids for module system
-  template <> const char *ConvertUpdater<1>::id = "Convert1D";
-  template <> const char *ConvertUpdater<2>::id = "Convert2D";
-  template <> const char *ConvertUpdater<3>::id = "Convert3D";
+  template <> const char *ConvertTToPUpdater<1>::id = "ConvertTToP1D";
+  template <> const char *ConvertTToPUpdater<2>::id = "ConvertTToP2D";
+  template <> const char *ConvertTToPUpdater<3>::id = "ConvertTToP3D";
 
   template <unsigned NDIM>
   void
-  ConvertUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
+  ConvertTToPUpdater<NDIM>::readInput(Lucee::LuaTable& tbl)
   {
     UpdaterIfc::readInput(tbl);
     std::string nf = tbl.getString("mode");
@@ -30,7 +30,7 @@ namespace Lucee
     } else if (nf == "ToConservative") {
       mode = TO_CONSERVATIVE;
     } else {
-      Lucee::Except lce("ConvertUpdater::readInput: 'mode' ");
+      Lucee::Except lce("ConvertTToPUpdater::readInput: 'mode' ");
       lce << nf << " not recognized!" << std::endl;
       throw lce;
     }
@@ -39,14 +39,14 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  ConvertUpdater<NDIM>::initialize()
+  ConvertTToPUpdater<NDIM>::initialize()
   {
     UpdaterIfc::initialize();
   }
 
   template <unsigned NDIM>
   Lucee::UpdaterStatus
-  ConvertUpdater<NDIM>::update(double t)
+  ConvertTToPUpdater<NDIM>::update(double t)
   {
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -101,15 +101,15 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  ConvertUpdater<NDIM>::declareTypes()
+  ConvertTToPUpdater<NDIM>::declareTypes()
   {
     //this->setLastOutVarType(typeid(Lucee::Field<NDIM, double>));
         this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
 // instantiations
-  template class ConvertUpdater<1>;
-  template class ConvertUpdater<2>;
-  template class ConvertUpdater<3>;
+  template class ConvertTToPUpdater<1>;
+  template class ConvertTToPUpdater<2>;
+  template class ConvertTToPUpdater<3>;
 }
 
