@@ -128,6 +128,7 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(xr);
           idx[0] = i-1;
+          grid.setIndex(idx);
           grid.getVertex(xc);
           grid.getCentroid(xl);
           //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
@@ -161,6 +162,7 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(xr);
           idx[0] = i-1;
+          grid.setIndex(idx);
           grid.getVertex(xc);
           grid.getCentroid(xl);
           //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
@@ -221,6 +223,7 @@ namespace Lucee
             grid.setIndex(idx);
             grid.getCentroid(xr);
             idx[0] = i-1; idx[1] = j-1;
+            grid.setIndex(idx);
             grid.getVertex(xc);
             grid.getCentroid(xl);
             //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
