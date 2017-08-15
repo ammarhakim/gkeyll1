@@ -176,6 +176,8 @@ set(lcslvrs_SOURCES
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
+  LcNonUniFaceEdgeCurlUpdater.cpp
+  LcNonUniEdgeFaceCurlUpdater.cpp
 )
 
 if (PETSC_FOUND)
