@@ -67,7 +67,7 @@ namespace Lucee
     int overlapLeftIdx = fullRgn.getUpper(dir) - rightRgn.getShape(dir);
     int overlapRightIdx = fullRgn.getLower(dir) + leftRgn.getShape(dir);
 
-    Lucee::RowMajorSequencer<NDIM> seqFull(qFull.getRegion());
+    Lucee::RowMajorSequencer<NDIM> seqFull(qFull.getExtRegion());
     while (seqFull.step())
     {
       seqFull.fillWithIndex(idxF);
