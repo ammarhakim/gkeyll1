@@ -78,13 +78,13 @@ set(lcslvrs_SOURCES
   LcLAPDSheath5DUpdater.cpp
   LcLagrangeTensorBasisCalc.cpp
   LcLagrangeTensorElement.cpp
+  LcLenardBernsteinDiff3D2VUpdater.cpp
   LcLenardBernsteinDiff3DUpdater.cpp
   LcLenardBernsteinDiff5DUpdater.cpp
-  LcLenardBernsteinDiff3D2VUpdater.cpp
   LcLenardBernsteinDiffAlternate3D2VUpdater.cpp
   LcLenardBernsteinDiffUpdater.cpp
-  LcLenardBernsteinDrag3DUpdater.cpp
   LcLenardBernsteinDrag3D2VUpdater.cpp
+  LcLenardBernsteinDrag3DUpdater.cpp
   LcLenardBernsteinDrag5DUpdater.cpp
   LcLenardBernsteinDragUpdater.cpp
   LcLenardBernsteinVParEquation.cpp
@@ -109,6 +109,8 @@ set(lcslvrs_SOURCES
   LcNodalHyperDiffusionUpdater.cpp
   LcNodalPositiveFilterUpdater.cpp
   LcNodalVlasovUpdater.cpp 
+  LcNonUniEdgeFaceCurlUpdater.cpp
+  LcNonUniFaceEdgeCurlUpdater.cpp
   LcPhMaxwellEquation.cpp
   LcPointSourceIfc.cpp
   LcPositivityUpdater.cpp
@@ -120,8 +122,8 @@ set(lcslvrs_SOURCES
   LcSOL3DElectronTempAtWallCalc.cpp
   LcSOL3DElectrostaticDistFuncReflectionBCUpdater.cpp
   LcSOLBGKCollisionUpdater.cpp
-  LcSOLDerivativeCalc.cpp
   LcSOLDensityFloor5DUpdater.cpp
+  LcSOLDerivativeCalc.cpp
   LcSOLDesiredChargeDensity5DUpdater.cpp
   LcSOLDesiredDensity5DUpdater.cpp
   LcSOLElectronDensityInitialization.cpp
@@ -140,11 +142,11 @@ set(lcslvrs_SOURCES
   LcSOLMaxwellianParameterCalc.cpp
   LcSOLMaxwellianParameterNewtonCalc.cpp
   LcSOLPositivity3DUpdater.cpp
-  LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragCellInMuUpdater.cpp
+  LcSOLPositivityDragCellUpdater.cpp
   LcSOLPositivityDragNodeUpdater.cpp
-  LcSOLPositivityDragSliceUpdater.cpp
   LcSOLPositivityDragSliceInMuUpdater.cpp
+  LcSOLPositivityDragSliceUpdater.cpp
   LcSOLPositivityScaleCellUpdater.cpp
   LcSOLPositivityScaleNodeUpdater.cpp
   LcSOLPositivityUpdater.cpp
@@ -176,8 +178,6 @@ set(lcslvrs_SOURCES
   LcWavePropagationUpdater.cpp
   LcZeroNormalBoundaryCondition.cpp
   LcZeroTangentBoundaryCondition.cpp
-  LcNonUniFaceEdgeCurlUpdater.cpp
-  LcNonUniEdgeFaceCurlUpdater.cpp
 )
 
 if (PETSC_FOUND)

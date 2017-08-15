@@ -14,11 +14,20 @@
 #include <LcOverlappingFieldCopy.h>
 #include <LcStructuredGridBase.h>
 
+// std library incudes
+#include <cstdlib>
+
 namespace Lucee
 {
   template <> const char *OverlappingFieldCopy<1>::id = "OverlappingFieldCopy1D";
   template <> const char *OverlappingFieldCopy<2>::id = "OverlappingFieldCopy2D";
   template <> const char *OverlappingFieldCopy<3>::id = "OverlappingFieldCopy3D";
+
+  static double
+  getRand()
+  {
+    return 2.0*((double) std::rand()/RAND_MAX - 0.5);
+  }
 
   template <unsigned NDIM>
   OverlappingFieldCopy<NDIM>::OverlappingFieldCopy()
@@ -44,6 +53,10 @@ namespace Lucee
     copyPeriodicDirs = false;
     if (tbl.hasBool("copyPeriodicDirs"))
       copyPeriodicDirs = tbl.getBool("copyPeriodicDirs");
+
+    noiseLevel = 0.0;
+    if (tbl.hasNumber("noiseLevel"))
+      noiseLevel = tbl.hasNumber("noiseLevel");
   }
 
   template <unsigned NDIM>
@@ -88,7 +101,7 @@ namespace Lucee
       qRight.setPtr(ptrR, idxI);
 
       for (unsigned k=0; k<qLeft.getNumComponents(); ++k)
-        ptrL[k] = ptrR[k];
+        ptrL[k] = ptrR[k] + noiseLevel*getRand();
     }
 
 // 
@@ -118,7 +131,7 @@ namespace Lucee
       qLeft.setPtr(ptrL, idxI);
 
       for (unsigned k=0; k<qLeft.getNumComponents(); ++k)
-        ptrR[k] = ptrL[k];
+        ptrR[k] = ptrL[k]  + noiseLevel*getRand();
     }
 
 // apply periodic BC is needed
