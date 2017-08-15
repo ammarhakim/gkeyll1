@@ -70,6 +70,8 @@ namespace Lucee
       bool copyPeriodicDirs;
 /* Direction of overlap */
       unsigned dir;
+/* Amount of noise to add */
+      double noiseLevel;
   };
 }
 
