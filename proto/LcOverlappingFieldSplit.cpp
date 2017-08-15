@@ -67,6 +67,7 @@ namespace Lucee
     int overlapLeftIdx = fullRgn.getUpper(dir) - rightRgn.getShape(dir);
     int overlapRightIdx = fullRgn.getLower(dir) + leftRgn.getShape(dir);
 
+
     Lucee::RowMajorSequencer<NDIM> seqFull(qFull.getExtRegion());
     while (seqFull.step())
     {
@@ -80,34 +81,15 @@ namespace Lucee
       idxR[dir] = idxF[dir]-overlapLeftIdx; // adjust index
       qRight.setPtr(ptrR, idxR);
 
-      std::cout << "(" << idxF[0] << ", " << idxF[1] << ")"
-                << "(" << idxL[0] << ", " << idxL[1] << ")"
-                << "(" << idxR[0] << ", " << idxR[1] << ")"
-                << std::endl;
-
       if (idxF[dir] < overlapLeftIdx)
       { // left region
         for (unsigned k=0; k<qFull.getNumComponents(); ++k)
           ptrL[k] = ptrF[k];
-
-        // set left ghost cell of right field
-        if (idxF[dir] == overlapLeftIdx-1)
-        {
-          for (unsigned k=0; k<qFull.getNumComponents(); ++k)
-            ptrR[k] = ptrF[k];
-        }
       }
       else if (idxF[dir] >= overlapRightIdx)
       { // right region
         for (unsigned k=0; k<qFull.getNumComponents(); ++k)
           ptrR[k] = ptrF[k];
-
-        // set right ghost cell of left field
-        if (idxF[dir] == overlapRightIdx)
-        {
-          for (unsigned k=0; k<qFull.getNumComponents(); ++k)
-            ptrL[k] = ptrF[k];
-        }        
       }
       else
       { // overlap region

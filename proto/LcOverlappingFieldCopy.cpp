@@ -1,7 +1,7 @@
 /**
  * @file	LcOverlappingFieldCopy.cpp
  *
- * @brief	Updater to compute increment from source terms for use in DG schemes
+ * @brief	Updater to copy data into ghost cells between two overlapping fields
  */
 
 // config stuff
@@ -38,8 +38,12 @@ namespace Lucee
 // call base class method first
     Lucee::UpdaterIfc::readInput(tbl);
 
-    numCells = tbl.getNumber("numOverlappingCells");
+    numOverlappingCells = tbl.getNumber("numOverlappingCells");
     dir = tbl.getNumber("dir");
+
+    copyPeriodicDirs = false;
+    if (tbl.hasBool("copyPeriodicDirs"))
+      copyPeriodicDirs = tbl.getBool("copyPeriodicDirs");
   }
 
   template <unsigned NDIM>
@@ -70,30 +74,15 @@ namespace Lucee
     }
 // adjust region so it only indexes ghost cells
     lo[dir] = qLeft.getGlobalUpper(dir);
-// region must be local to processor
-    Lucee::Region<NDIM, int> gstRgn = qLeft.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
-
-// create a region to represent interior layer of "right" field
-    for (unsigned i=0; i<NDIM; ++i)
-    { // whole region, including extended region
-      lo[i] = qRight.getGlobalLowerExt(i);
-      up[i] = qRight.getGlobalUpperExt(i);
-    }
-// adjust region so it only indexes interior layer
-    lo[dir] = qRight.getGlobalLower(dir) + numCells;
-// region must be local to processor
-    Lucee::Region<NDIM, int> intRgn = qRight.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
+    Lucee::Region<NDIM, int> gstRgn(lo, up);
 
 // loop over ghost cells, copying stuff over
-    Lucee::RowMajorSequencer<NDIM> seqGst(gstRgn), seqInt(intRgn);
+    Lucee::RowMajorSequencer<NDIM> seqGst(gstRgn);
     while (seqGst.step())
     {
-      seqInt.step(); // also bump interior field iterator
-
       seqGst.fillWithIndex(idxG);
-      seqInt.fillWithIndex(idxI);
+      seqGst.fillWithIndex(idxI);
+      idxI[dir] = numOverlappingCells;
 
       qLeft.setPtr(ptrL, idxG);
       qRight.setPtr(ptrR, idxI);
@@ -115,36 +104,84 @@ namespace Lucee
 // adjust region so it only indexes ghost cells
     up[dir] = qRight.getGlobalLower(dir);
 // region must be local to processor
-    gstRgn = qRight.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
-
-// create a region to represent interior layer of "left" field
-    for (unsigned i=0; i<NDIM; ++i)
-    { // whole region, including extended region
-      lo[i] = qLeft.getGlobalLowerExt(i);
-      up[i] = qLeft.getGlobalUpperExt(i);
-    }
-// adjust region so it only indexes interior layer
-    up[dir] = qRight.getGlobalUpper(dir) - numCells;
-// region must be local to processor
-    intRgn = qLeft.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
+    gstRgn = Lucee::Region<NDIM, int>(lo, up);
 
 // loop over ghost cells, copying stuff over
-    Lucee::RowMajorSequencer<NDIM> seqGst1(gstRgn), seqInt1(intRgn);
+    Lucee::RowMajorSequencer<NDIM> seqGst1(gstRgn);
     while (seqGst1.step())
     {
-      seqInt1.step(); // also bump interior field iterator
-
       seqGst1.fillWithIndex(idxG);
-      seqInt1.fillWithIndex(idxI);
+      seqGst1.fillWithIndex(idxI);
+      idxI[dir] = qLeft.getUpper(dir)-numOverlappingCells-1;
 
       qRight.setPtr(ptrR, idxG);
       qLeft.setPtr(ptrL, idxI);
 
       for (unsigned k=0; k<qLeft.getNumComponents(); ++k)
         ptrR[k] = ptrL[k];
-    }    
+    }
+
+// apply periodic BC is needed
+    if (copyPeriodicDirs)
+    {
+// 
+// Step 1: copy stuff into "left" field ghost cells
+//    
+    
+// create a region to represent ghost layer of "left" field
+      for (unsigned i=0; i<NDIM; ++i)
+      { // whole region, including extended region
+        lo[i] = qLeft.getGlobalLowerExt(i);
+        up[i] = qLeft.getGlobalUpperExt(i);
+      }
+// adjust region so it only indexes ghost cells
+      up[dir] = qLeft.getGlobalLower(dir);
+      Lucee::Region<NDIM, int> gstRgn(lo, up);
+
+// loop over ghost cells, copying stuff over
+      Lucee::RowMajorSequencer<NDIM> seqGst(gstRgn);
+      while (seqGst.step())
+      {
+        seqGst.fillWithIndex(idxG);
+        seqGst.fillWithIndex(idxI);
+        idxI[dir] = qRight.getUpper(dir)-1;
+
+        qLeft.setPtr(ptrL, idxG);
+        qRight.setPtr(ptrR, idxI);
+
+        for (unsigned k=0; k<qLeft.getNumComponents(); ++k)
+          ptrL[k] = ptrR[k];
+      }
+
+// 
+// Step 2: copy stuff into "right" field ghost cells
+//    
+    
+// create a region to represent ghost layer of "right" field
+      for (unsigned i=0; i<NDIM; ++i)
+      { // whole region, including extended region
+        lo[i] = qRight.getGlobalLowerExt(i);
+        up[i] = qRight.getGlobalUpperExt(i);
+      }
+// adjust region so it only indexes ghost cells
+      lo[dir] = qRight.getGlobalUpper(dir);
+      gstRgn = Lucee::Region<NDIM, int>(lo, up);
+
+// loop over ghost cells, copying stuff over
+      Lucee::RowMajorSequencer<NDIM> seqGst1(gstRgn);
+      while (seqGst1.step())
+      {
+        seqGst1.fillWithIndex(idxG);
+        seqGst1.fillWithIndex(idxI);
+        idxI[dir] = qLeft.getLower(dir);
+
+        qRight.setPtr(ptrR, idxG);
+        qLeft.setPtr(ptrL, idxI);
+
+        for (unsigned k=0; k<qLeft.getNumComponents(); ++k)
+          ptrR[k] = ptrL[k];
+      }      
+    }
 
     return Lucee::UpdaterStatus();
   }
