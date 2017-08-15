@@ -74,9 +74,7 @@ namespace Lucee
     }
 // adjust region so it only indexes ghost cells
     lo[dir] = qLeft.getGlobalUpper(dir);
-// region must be local to processor
-    Lucee::Region<NDIM, int> gstRgn = qLeft.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
+    Lucee::Region<NDIM, int> gstRgn(lo, up);
 
 // loop over ghost cells, copying stuff over
     Lucee::RowMajorSequencer<NDIM> seqGst(gstRgn);
@@ -106,8 +104,7 @@ namespace Lucee
 // adjust region so it only indexes ghost cells
     up[dir] = qRight.getGlobalLower(dir);
 // region must be local to processor
-    gstRgn = qRight.getExtRegion().intersect(
-      Lucee::Region<NDIM, int>(lo, up));
+    gstRgn = Lucee::Region<NDIM, int>(lo, up);
 
 // loop over ghost cells, copying stuff over
     Lucee::RowMajorSequencer<NDIM> seqGst1(gstRgn);
@@ -124,7 +121,7 @@ namespace Lucee
         ptrR[k] = ptrL[k];
     }
 
-// apply periodic BC is needed    
+// apply periodic BC is needed
     if (copyPeriodicDirs)
     {
 // 
@@ -139,9 +136,7 @@ namespace Lucee
       }
 // adjust region so it only indexes ghost cells
       up[dir] = qLeft.getGlobalLower(dir);
-// region must be local to processor
-      Lucee::Region<NDIM, int> gstRgn = qLeft.getExtRegion().intersect(
-        Lucee::Region<NDIM, int>(lo, up));
+      Lucee::Region<NDIM, int> gstRgn(lo, up);
 
 // loop over ghost cells, copying stuff over
       Lucee::RowMajorSequencer<NDIM> seqGst(gstRgn);
@@ -170,9 +165,7 @@ namespace Lucee
       }
 // adjust region so it only indexes ghost cells
       lo[dir] = qRight.getGlobalUpper(dir);
-// region must be local to processor
-      gstRgn = qRight.getExtRegion().intersect(
-        Lucee::Region<NDIM, int>(lo, up));
+      gstRgn = Lucee::Region<NDIM, int>(lo, up);
 
 // loop over ghost cells, copying stuff over
       Lucee::RowMajorSequencer<NDIM> seqGst1(gstRgn);
@@ -180,7 +173,7 @@ namespace Lucee
       {
         seqGst1.fillWithIndex(idxG);
         seqGst1.fillWithIndex(idxI);
-        idxI[dir] = 0;
+        idxI[dir] = qLeft.getLower(dir);
 
         qRight.setPtr(ptrR, idxG);
         qLeft.setPtr(ptrL, idxI);
