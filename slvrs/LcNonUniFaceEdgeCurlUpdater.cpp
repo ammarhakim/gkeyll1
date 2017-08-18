@@ -168,9 +168,6 @@ namespace Lucee
             V.setPtr(Vptr, idx);
             V.setPtr(Vptrr, idxr);
 
-// the vertex co-ordinates are offset by 1 compared to the cells 
-            idx[dir] = i-1;
-            idxr[dir] = i;
             // get right vertex
             grid.setIndex(idxr);
             grid.getVertex(vr);
@@ -193,9 +190,7 @@ namespace Lucee
             A.setPtr(Aptr, idx);
             V.setPtr(Vptr, idx);
             V.setPtr(Vptrr, idxr);
-// the vertex co-ordinates are offset by 1 compared to the cells 
-            idx[dir] = i-1;
-            idxr[dir] = i;
+
             // get right vertex
             grid.setIndex(idxr);
             grid.getVertex(vr);
@@ -220,9 +215,6 @@ namespace Lucee
             V.setPtr(Vptr, idx);
             V.setPtr(Vptrr, idxr);
 
-// the vertex co-ordinates are offset by 1 compared to the cells 
-            idx[dir] = i-1;
-            idxr[dir] = i;
             // get right vertex
             grid.setIndex(idxr);
             grid.getVertex(vr);

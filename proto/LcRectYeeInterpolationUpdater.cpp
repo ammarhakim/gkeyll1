@@ -127,20 +127,21 @@ namespace Lucee
           idx[0] = i;
           grid.setIndex(idx);
           grid.getCentroid(xr);
+          grid.getVertex(xc);
+
           idx[0] = i-1;
           grid.setIndex(idx);
-          grid.getVertex(xc);
           grid.getCentroid(xl);
           //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
           double dx = xr[0] - xl[0];
-          double dxl = xc[0] - xl[0];
-          double dxr = xr[0] - xc[0];
-          cdFld(i,0) = (inFld(i,0)*dxl + inFld(i-1,0)*dxr)/dx;
+          double dxl = (xc[0] - xl[0])/dx;
+          double dxr = (xr[0] - xc[0])/dx;
+          cdFld(i,0) = (inFld(i,0)*dxl + inFld(i-1,0)*dxr);
           cdFld(i,1) = inFld(i,1);
           cdFld(i,2) = inFld(i,2);
           cdFld(i,3) = inFld(i,3);
-          cdFld(i,4) = ( inFld(i,4)*dxl + inFld(i-1,4)*dxr )/dx;
-          cdFld(i,5) = ( inFld(i,5)*dxl + inFld(i-1,5)*dxr )/dx;
+          cdFld(i,4) = ( inFld(i,4)*dxl + inFld(i-1,4)*dxr );
+          cdFld(i,5) = ( inFld(i,5)*dxl + inFld(i-1,5)*dxr );
         }
       }
     } else {
@@ -161,21 +162,22 @@ namespace Lucee
           idx[0] = i;
           grid.setIndex(idx);
           grid.getCentroid(xr);
+          grid.getVertex(xc);
+
           idx[0] = i-1;
           grid.setIndex(idx);
-          grid.getVertex(xc);
           grid.getCentroid(xl);
           //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
           double dx = xr[0] - xl[0];
-          double dxl = xc[0] - xl[0];
-          double dxr = xr[0] - xc[0];
+          double dxl = (xc[0] - xl[0])/dx;
+          double dxr = (xr[0] - xc[0])/dx;
 
-          cdFld(i,3) = (inFld(i,3)*dxl + inFld(i-1,3)*dxr)/dx;
+          cdFld(i,3) = (inFld(i,3)*dxl + inFld(i-1,3)*dxr);
           cdFld(i,4) = inFld(i,4);
           cdFld(i,5) = inFld(i,5);
           cdFld(i,0) = inFld(i,0);
-          cdFld(i,1) = ( inFld(i,1)*dxl + inFld(i-1,1)*dxr )/dx;
-          cdFld(i,2) = ( inFld(i,2)*dxl + inFld(i-1,2)*dxr )/dx;
+          cdFld(i,1) = ( inFld(i,1)*dxl + inFld(i-1,1)*dxr );
+          cdFld(i,2) = ( inFld(i,2)*dxl + inFld(i-1,2)*dxr );
         }
       }
 
@@ -222,24 +224,25 @@ namespace Lucee
             idx[0] = i; idx[1] = j;
             grid.setIndex(idx);
             grid.getCentroid(xr);
+            grid.getVertex(xc);
+
             idx[0] = i-1; idx[1] = j-1;
             grid.setIndex(idx);
-            grid.getVertex(xc);
             grid.getCentroid(xl);
             //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
             double dx = xr[0] - xl[0];
-            double dxl = xc[0] - xl[0];
-            double dxr = xr[0] - xc[0];
+            double dxl = (xc[0] - xl[0])/dx;
+            double dxr = (xr[0] - xc[0])/dx;
             double dy = xr[1] - xl[1];
-            double dyl = xc[1] - xl[1];
-            double dyr = xr[1] - xc[1];
+            double dyl = (xc[1] - xl[1])/dy;
+            double dyr = (xr[1] - xc[1])/dy;
 
-            cdFld(i,j,0) = (inFld(i,j,0)*dxl + inFld(i-1,j,0)*dxr)/dx;
-            cdFld(i,j,1) = (inFld(i,j,1)*dyl + inFld(i,j-1,1)*dyr)/dy;
+            cdFld(i,j,0) = (inFld(i,j,0)*dxl + inFld(i-1,j,0)*dxr);
+            cdFld(i,j,1) = (inFld(i,j,1)*dyl + inFld(i,j-1,1)*dyr);
             cdFld(i,j,2) = inFld(i,j,2);
-            cdFld(i,j,3) = ( inFld(i,j,3)*dyl + inFld(i,j-1,3)*dyr )/dy;
-            cdFld(i,j,4) = ( inFld(i,j,4)*dxl + inFld(i-1,j,4)*dxr )/dx;
-            cdFld(i,j,5) = ( inFld(i,j,5)*dxl*dyl + inFld(i-1,j,5)*dxr*dyl + inFld(i,j-1,5)*dxl*dyr + inFld(i-1,j-1,5)*dxr*dyr )/dx/dy;
+            cdFld(i,j,3) = ( inFld(i,j,3)*dyl + inFld(i,j-1,3)*dyr );
+            cdFld(i,j,4) = ( inFld(i,j,4)*dxl + inFld(i-1,j,4)*dxr );
+            cdFld(i,j,5) = ( inFld(i,j,5)*dxl*dyl + inFld(i-1,j,5)*dxr*dyl + inFld(i,j-1,5)*dxl*dyr + inFld(i-1,j-1,5)*dxr*dyr );
           }
       }
     } else { // Regular Yee cell
@@ -263,25 +266,25 @@ namespace Lucee
             idx[0] = i; idx[1] = j;
             grid.setIndex(idx);
             grid.getCentroid(xr);
+            grid.getVertex(xc);
 
             idx[0] = i-1; idx[1] = j-1;
             grid.setIndex(idx);
-            grid.getVertex(xc);
             grid.getCentroid(xl);
             //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
             double dx = xr[0] - xl[0];
-            double dxl = xc[0] - xl[0];
-            double dxr = xr[0] - xc[0];
+            double dxl = (xc[0] - xl[0])/dx;
+            double dxr = (xr[0] - xc[0])/dx;
             double dy = xr[1] - xl[1];
-            double dyl = xc[1] - xl[1];
-            double dyr = xr[1] - xc[1];         
+            double dyl = (xc[1] - xl[1])/dy;
+            double dyr = (xr[1] - xc[1])/dy;         
 
-            cdFld(i,j,3) = (inFld(i,j,3)*dxl + inFld(i-1,j,3)*dxr)/dx;
-            cdFld(i,j,4) = (inFld(i,j,4)*dyl + inFld(i,j-1,4)*dyr)/dy;
+            cdFld(i,j,3) = (inFld(i,j,3)*dxl + inFld(i-1,j,3)*dxr);
+            cdFld(i,j,4) = (inFld(i,j,4)*dyl + inFld(i,j-1,4)*dyr);
             cdFld(i,j,5) = inFld(i,j,5);
-            cdFld(i,j,0) = ( inFld(i,j,0)*dyl + inFld(i,j-1,0)*dyr )/dy;
-            cdFld(i,j,1) = ( inFld(i,j,1)*dxl + inFld(i-1,j,1)*dxr )/dx;
-            cdFld(i,j,2) = ( inFld(i,j,2)*dxl*dyl + inFld(i-1,j,2)*dxr*dyl + inFld(i,j-1,2)*dxl*dyr + inFld(i-1,j-1,2)*dxr*dyr )/dx/dy;
+            cdFld(i,j,0) = ( inFld(i,j,0)*dyl + inFld(i,j-1,0)*dyr );
+            cdFld(i,j,1) = ( inFld(i,j,1)*dxl + inFld(i-1,j,1)*dxr );
+            cdFld(i,j,2) = ( inFld(i,j,2)*dxl*dyl + inFld(i-1,j,2)*dxr*dyl + inFld(i,j-1,2)*dxl*dyr + inFld(i-1,j-1,2)*dxr*dyr );
           }
       }
     }
@@ -323,28 +326,28 @@ namespace Lucee
               idx[0] = i; idx[1] = j; idx[2] = l;
               grid.setIndex(idx);
               grid.getCentroid(xr);
+              grid.getVertex(xc);
 
               idx[0] = i-1; idx[1] = j-1; idx[2] = l-1;
               grid.setIndex(idx);
-              grid.getVertex(xc);
               grid.getCentroid(xl);
               //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
               double dx = xr[0] - xl[0];
-              double dxl = xc[0] - xl[0];
-              double dxr = xr[0] - xc[0];
+              double dxl = (xc[0] - xl[0])/dx;
+              double dxr = (xr[0] - xc[0])/dx;
               double dy = xr[1] - xl[1];
-              double dyl = xc[1] - xl[1];
-              double dyr = xr[1] - xc[1];  
+              double dyl = (xc[1] - xl[1])/dy;
+              double dyr = (xr[1] - xc[1])/dy;  
               double dz = xr[2] - xl[2];
-              double dzl = xc[2] - xl[2];
-              double dzr = xr[2] - xc[2];
-              
-              cdFld(i,j,l,0) = (inFld(i,j,l,0)*dxl + inFld(i-1,j,l,0)*dxr)/dx;
-              cdFld(i,j,l,1) = (inFld(i,j,l,1)*dyl + inFld(i,j-1,l,1)*dyr)/dy;
-              cdFld(i,j,l,2) = (inFld(i,j,l,2)*dzl + inFld(i,j,l-1,2)*dzr)/dz;
-              cdFld(i,j,l,3) = ( inFld(i,j,l,3)*dzl*dyl + inFld(i,j-1,l,3)*dzl*dyr + inFld(i,j,l-1,3)*dzr*dyl + inFld(i,j-1,l-1,3)*dzr*dyr )/dy/dz;
-              cdFld(i,j,l,4) = ( inFld(i,j,l,4)*dxl*dzl + inFld(i-1,j,l,4)*dxr*dzl + inFld(i,j,l-1,4)*dxl*dzr + inFld(i-1,j,l-1,4)*dxr*dzr )/dx/dz;
-              cdFld(i,j,l,5) = ( inFld(i,j,l,5)*dxl*dyl + inFld(i-1,j,l,5)*dxr*dyl + inFld(i,j-1,l,5)*dxl*dyr + inFld(i-1,j-1,l,5)*dxr*dyr )/dx/dy;
+              double dzl = (xc[2] - xl[2])/dz;
+              double dzr = (xr[2] - xc[2])/dz;
+
+              cdFld(i,j,l,0) = (inFld(i,j,l,0)*dxl + inFld(i-1,j,l,0)*dxr);
+              cdFld(i,j,l,1) = (inFld(i,j,l,1)*dyl + inFld(i,j-1,l,1)*dyr);
+              cdFld(i,j,l,2) = (inFld(i,j,l,2)*dzl + inFld(i,j,l-1,2)*dzr);
+              cdFld(i,j,l,3) = ( inFld(i,j,l,3)*dzl*dyl + inFld(i,j-1,l,3)*dzl*dyr + inFld(i,j,l-1,3)*dzr*dyl + inFld(i,j-1,l-1,3)*dzr*dyr );
+              cdFld(i,j,l,4) = ( inFld(i,j,l,4)*dxl*dzl + inFld(i-1,j,l,4)*dxr*dzl + inFld(i,j,l-1,4)*dxl*dzr + inFld(i-1,j,l-1,4)*dxr*dzr );
+              cdFld(i,j,l,5) = ( inFld(i,j,l,5)*dxl*dyl + inFld(i-1,j,l,5)*dxr*dyl + inFld(i,j-1,l,5)*dxl*dyr + inFld(i-1,j-1,l,5)*dxr*dyr );
             }
       }
     } else { // Regular  Yee cell
@@ -371,27 +374,29 @@ namespace Lucee
               idx[0] = i; idx[1] = j; idx[2] = l;
               grid.setIndex(idx);
               grid.getCentroid(xr);
+              grid.getVertex(xc);
+
               idx[0] = i-1; idx[1] = j-1; idx[2] = l-1;
               grid.setIndex(idx);
-              grid.getVertex(xc);
               grid.getCentroid(xl);
               //assert( xc[0] > xl[0] && xc[0]  <xr[0]);
-              double dx = xr[0] - xl[0];
-              double dxl = xc[0] - xl[0];
-              double dxr = xr[0] - xc[0];
-              double dy = xr[1] - xl[1];
-              double dyl = xc[1] - xl[1];
-              double dyr = xr[1] - xc[1];  
-              double dz = xr[2] - xl[2];
-              double dzl = xc[2] - xl[2];
-              double dzr = xr[2] - xc[2];
 
-              cdFld(i,j,l,3) = (inFld(i,j,l,3)*dxl + inFld(i-1,j,l,3)*dxr)/dx;
-              cdFld(i,j,l,4) = (inFld(i,j,l,4)*dyl + inFld(i,j-1,l,4)*dyr)/dy;
-              cdFld(i,j,l,5) = (inFld(i,j,l,5)*dzl + inFld(i,j,l-1,5)*dzr)/dz;
-              cdFld(i,j,l,0) = ( inFld(i,j,l,0)*dyl*dzl + inFld(i,j-1,l,0)*dyr*dzl + inFld(i,j,l-1,0)*dzr*dyl + inFld(i,j-1,l-1,0)*dyr*dzr )/dy/dz;
-              cdFld(i,j,l,1) = ( inFld(i,j,l,1)*dxl*dzl + inFld(i-1,j,l,1)*dxr*dzl + inFld(i,j,l-1,1)*dxl*dzr + inFld(i-1,j,l-1,1)*dxr*dzr )/dx/dz;
-              cdFld(i,j,l,2) = ( inFld(i,j,l,2)*dxl*dyl + inFld(i-1,j,l,2)*dxr*dyl + inFld(i,j-1,l,2)*dxl*dyr + inFld(i-1,j-1,l,2)*dxr*dyr )/dx/dy;
+              double dx = xr[0] - xl[0];
+              double dxl = (xc[0] - xl[0])/dx;
+              double dxr = (xr[0] - xc[0])/dx;
+              double dy = xr[1] - xl[1];
+              double dyl = (xc[1] - xl[1])/dy;
+              double dyr = (xr[1] - xc[1])/dy;  
+              double dz = xr[2] - xl[2];
+              double dzl = (xc[2] - xl[2])/dz;
+              double dzr = (xr[2] - xc[2])/dz;
+
+              cdFld(i,j,l,3) = (inFld(i,j,l,3)*dxl + inFld(i-1,j,l,3)*dxr);
+              cdFld(i,j,l,4) = (inFld(i,j,l,4)*dyl + inFld(i,j-1,l,4)*dyr);
+              cdFld(i,j,l,5) = (inFld(i,j,l,5)*dzl + inFld(i,j,l-1,5)*dzr);
+              cdFld(i,j,l,0) = ( inFld(i,j,l,0)*dyl*dzl + inFld(i,j-1,l,0)*dyr*dzl + inFld(i,j,l-1,0)*dzr*dyl + inFld(i,j-1,l-1,0)*dyr*dzr );
+              cdFld(i,j,l,1) = ( inFld(i,j,l,1)*dxl*dzl + inFld(i-1,j,l,1)*dxr*dzl + inFld(i,j,l-1,1)*dxl*dzr + inFld(i-1,j,l-1,1)*dxr*dzr );
+              cdFld(i,j,l,2) = ( inFld(i,j,l,2)*dxl*dyl + inFld(i-1,j,l,2)*dxr*dyl + inFld(i,j-1,l,2)*dxl*dyr + inFld(i-1,j-1,l,2)*dxr*dyr );
             }
       }
     }
