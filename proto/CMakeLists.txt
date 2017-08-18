@@ -117,6 +117,7 @@ set (proto_SOURCES
   LcSheathParticleSource1x1v.cpp
   LcSimpleSmoothToC0Updater.cpp
   LcSmoothQuadPhiToC1Updater.cpp
+  LcThreeFluidCollisionSource.cpp
   LcThreeWaveInteractModSrcUpdater.cpp
   LcThreeWaveInteractSrcUpdater.cpp
   LcZonalAverageCalc3D.cpp

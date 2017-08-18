@@ -98,6 +98,7 @@
 #include <LcSheathParticleSource1x1v.h>
 #include <LcSimpleSmoothToC0Updater.h>
 #include <LcSmoothQuadPhiToC1Updater.h>
+#include <LcThreeFluidCollisionSource.h>
 #include <LcThreeWaveInteractModSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
 #include <LcThreeWaveInteractSrcUpdater.h>
@@ -383,6 +384,7 @@ namespace Lucee
       ::Instance()
       .append<Lucee::IonizationSource>()
       .append<Lucee::NeutralDragForceSource>()
+      .append<Lucee::ThreeFluidCollisionSource>()
       ;
 
 #ifdef HAVE_PETSC
