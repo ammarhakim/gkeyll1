@@ -118,7 +118,7 @@ namespace Lucee
   NonUniRectCartGrid<NDIM>::getVertex(double xc[]) const
   {
     for (unsigned d=0; d<NDIM; ++d)
-      xc[d] = vcoords[d](this->currIdx[d]+1);
+      xc[d] = vcoords[d](this->currIdx[d]);
     for (unsigned d=NDIM; d<3; ++d)
       xc[d] = 0.0;
   }
