@@ -94,6 +94,10 @@ namespace Lucee
       bool dual; 
       /** Extra cells to update outside of interior */
       int ghostUpdates[2];
+      /** to decide if copying skin cell instead of interpolation */
+      int bcL[NDIM], bcU[NDIM];
+      /** Holds the global upper and lower -- possibly unnecessary*/
+      int globalLower[NDIM], globalUpper[NDIM];
   };
 }
 
