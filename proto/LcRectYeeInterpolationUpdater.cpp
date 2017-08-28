@@ -48,8 +48,8 @@ namespace Lucee
 
     if (tbl.hasNumVec("ghostUpdate"))
     {
-      // It is generally necessary to do this as the last FV cell will 
-      // use an edge/face outside the regular domain
+      // This is sometimes important when the final edge cell must be updated
+      // and is not set by an explicit boundary condition. 
       std::vector<double> gup = tbl.getNumVec("ghostUpdate");
       if (gup.size() != 2)
         throw Lucee::Except(
@@ -63,6 +63,63 @@ namespace Lucee
       ghostUpdates[0] = ghostUpdates[1] = 0; 
     }
 
+    // 
+    // When using perfectly conducting boundaries, the interpolation of E can 
+    // cause a force imbalance at the boundary. This leads to an inward
+    // propagating grid-scale oscillation. 
+    // This effect is also present in the Dual cell but doesn't appear
+    // to be as obvious (likely because the reflected quantities do not
+    // live on the boundary) 
+    // This fix is only implemented for the regular cell and is off by default
+    // Set bcL/bcU [i] to zero if not intending to apply to said boundary. 
+   
+
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
+
+    for (unsigned i = 0; i < NDIM; ++i) {
+      // search for boundaries. 
+      if (localRgn.getLower(i) == globalRgn.getLower(i)) {
+        globalLower[i] = globalRgn.getLower(i);
+        // this is a lower boundary
+      }
+      if (localRgn.getUpper(i) == globalRgn.getUpper(i)) {
+        globalUpper[i] = globalRgn.getUpper(i); 
+        // this is an upper boundary 
+      }
+    }
+
+    if (tbl.hasNumVec("copyLowerSkinCell"))
+    {
+      std::vector<double> lowerSkin = tbl.getNumVec("copyLowerSkinCell");
+      if (lowerSkin.size() != NDIM)
+        throw Lucee::Except(
+          "RectYeeInterpolationUpdater:readInput: The 'lowerSkin' table should have exactly NDIM numbers");
+      for (int i = 0; i < NDIM; ++i)
+        bcL[i] = lowerSkin[i];
+      
+    } else {
+      for (int i = 0; i < NDIM; ++i) {
+        // by default do not copy the last cell
+        bcL[i] = 0;
+      }
+    }
+    if (tbl.hasNumVec("copyUpperSkinCell"))
+    {
+      std::vector<double> upperSkin = tbl.getNumVec("copyUpperSkinCell");
+      if (upperSkin.size() != NDIM)
+        throw Lucee::Except(
+          "RectYeeInterpolationUpdater:readInput: The 'lowerSkin' table should have exactly NDIM numbers");
+      for (int i = 0; i < NDIM; ++i)
+        bcU[i] = upperSkin[i];
+    } else {
+      for (int i = 0; i < NDIM; ++i) { 
+        // by default do not copy the last cell
+        bcU[i] = 0;
+      }
+    }
   }
 
   template <unsigned NDIM>
@@ -149,12 +206,18 @@ namespace Lucee
       // magnetic field on the cell centres.
       if (fwd) {// interpolate to cell centre
         for (int i=inFld.getLower(0)+ghostUpdates[0]; i<inFld.getUpper(0)+ghostUpdates[1]; ++i) {
-          cdFld(i,3) = 0.5*(inFld(i,3) + inFld(i+1,3));
+
+          int xLower = (i == globalLower[0])*bcL[0];
+          int xUpper = (i == globalUpper[0]-1)*bcU[0];
+          
+          int x0 = (1-xLower)*(1+xUpper); int x1 = (1+xLower)*(1-xUpper);
+            
+          cdFld(i,3) = 0.5*(inFld(i,3)*x0 + inFld(i+1,3)*x1);
           cdFld(i,4) = inFld(i,4);
           cdFld(i,5) = inFld(i,5);
           cdFld(i,0) = inFld(i,0);
-          cdFld(i,1) = 0.5*( inFld(i,1) + inFld(i+1,1) );
-          cdFld(i,2) = 0.5*( inFld(i,2) + inFld(i+1,2) );
+          cdFld(i,1) = 0.5*( inFld(i,1)*x0 + inFld(i+1,1)*x1 );
+          cdFld(i,2) = 0.5*( inFld(i,2)*x0 + inFld(i+1,2)*x1 );
         }
       } else { // interpolate back to edge/face
         for (int i=inFld.getLower(0)+ghostUpdates[0]; i<inFld.getUpper(0)+ghostUpdates[1]; ++i){
@@ -246,17 +309,28 @@ namespace Lucee
           }
       }
     } else { // Regular Yee cell
+      // Regular Yee cell with the electric fields on the edges and the 
+      // magnetic field on the cell centres.
+
       if (fwd) {// interpolate to cell centre
         for (int i=inFld.getLower(0)+ghostUpdates[0]; i<inFld.getUpper(0)+ghostUpdates[1]; ++i)
           for (int j=inFld.getLower(1)+ghostUpdates[0]; j<inFld.getUpper(1)+ghostUpdates[1]; ++j){
-            // in the dual yee cell, electric fields are at faces and 
-            // magnetic fields are at edges
-            cdFld(i,j,3) = 0.5*(inFld(i,j,3) + inFld(i+1,j,3));
-            cdFld(i,j,4) = 0.5*(inFld(i,j,4) + inFld(i,j+1,4));
+
+            
+            int xLower = (i == globalLower[0])*bcL[0];
+            int xUpper = (i == globalUpper[0]-1)*bcU[0];
+            int yLower = (j == globalLower[1])*bcL[1];
+            int yUpper = (j == globalUpper[1]-1)*bcU[1]; 
+            
+            int x0 = (1-xLower)*(1+xUpper); int x1 = (1+xLower)*(1-xUpper);
+            int y0 = (1-yLower)*(1+yUpper); int y1 = (1+yLower)*(1-yUpper);
+
+            cdFld(i,j,3) = 0.5*(inFld(i,j,3)*x0 + inFld(i+1,j,3)*x1);
+            cdFld(i,j,4) = 0.5*(inFld(i,j,4)*y0 + inFld(i,j+1,4)*y1);
             cdFld(i,j,5) = inFld(i,j,5);
-            cdFld(i,j,0) = 0.5*( inFld(i,j,0) + inFld(i,j+1,0) );
-            cdFld(i,j,1) = 0.5*( inFld(i,j,1) + inFld(i+1,j,1) );
-            cdFld(i,j,2) = 0.25*( inFld(i,j,2) + inFld(i+1,j,2) + inFld(i,j+1,2) + inFld(i+1,j+1,2) );
+            cdFld(i,j,0) = 0.5*( inFld(i,j,0)*y0 + inFld(i,j+1,0)*y1 );
+            cdFld(i,j,1) = 0.5*( inFld(i,j,1)*x0 + inFld(i+1,j,1)*x1 );
+            cdFld(i,j,2) = 0.25*( inFld(i,j,2)*x0*y0 + inFld(i+1,j,2)*x1*y0 + inFld(i,j+1,2)*x0*y1 + inFld(i+1,j+1,2)*x1*y1 );
             
           }
       } else { // interpolate back to edge/face
@@ -351,19 +425,32 @@ namespace Lucee
             }
       }
     } else { // Regular  Yee cell
+      // Regular Yee cell with the electric fields on the edges and the 
+      // magnetic field on the cell centres.
+
+
       if (fwd) {// interpolate to cell centre
         for (int i=inFld.getLower(0)+ghostUpdates[0]; i<inFld.getUpper(0)+ghostUpdates[1]; ++i)
           for (int j=inFld.getLower(1)+ghostUpdates[0]; j<inFld.getUpper(1)+ghostUpdates[1]; ++j)
             for (int l=inFld.getLower(2)+ghostUpdates[0]; l<inFld.getUpper(2)+ghostUpdates[1]; ++l){
-          
-            // in the dual yee cell, electric fields are at faces and 
-            // magnetic fields are at edges
-              cdFld(i,j,l,3) = 0.5*(inFld(i,j,l,3) + inFld(i+1,j,l,3));
-              cdFld(i,j,l,4) = 0.5*(inFld(i,j,l,4) + inFld(i,j+1,l,4));
-              cdFld(i,j,l,5) = 0.5*(inFld(i,j,l,5) + inFld(i,j,l+1,5));
-              cdFld(i,j,l,0) = 0.25*( inFld(i,j,l,0) + inFld(i,j+1,l,0) + inFld(i,j,l+1,0) + inFld(i,j+1,l+1,0) );
-              cdFld(i,j,l,1) = 0.25*( inFld(i,j,l,1) + inFld(i+1,j,l,1) + inFld(i,j,l+1,1) + inFld(i+1,j,l+1,1) );
-              cdFld(i,j,l,2) = 0.25*( inFld(i,j,l,2) + inFld(i+1,j,l,2) + inFld(i,j+1,l,2) + inFld(i+1,j+1,l,2) );
+              // This logic applies the interpolation to only the first/last cells.
+              int xLower = (i == globalLower[0])*bcL[0];
+              int xUpper = (i == globalUpper[0]-1)*bcU[0];
+              int yLower = (j == globalLower[1])*bcL[1];
+              int yUpper = (j == globalUpper[1]-1)*bcU[1]; 
+              int zLower = (l == globalLower[2])*bcL[2];
+              int zUpper = (l == globalUpper[2]-1)*bcU[2];
+
+              int x0 = (1-xLower)*(1+xUpper); int x1 = (1+xLower)*(1-xUpper);
+              int y0 = (1-yLower)*(1+yUpper); int y1 = (1+yLower)*(1-yUpper);
+              int z0 = (1-zLower)*(1+zUpper); int z1 = (1+zLower)*(1-zUpper);  
+
+              cdFld(i,j,l,3) = 0.5*(inFld(i,j,l,3)*x0 + inFld(i+1,j,l,3)*x1);
+              cdFld(i,j,l,4) = 0.5*(inFld(i,j,l,4)*y0 + inFld(i,j+1,l,4)*y1);
+              cdFld(i,j,l,5) = 0.5*(inFld(i,j,l,5)*z0 + inFld(i,j,l+1,5)*z1);
+              cdFld(i,j,l,0) = 0.25*( inFld(i,j,l,0)*y0*z0 + inFld(i,j+1,l,0)*y1*z0 + inFld(i,j,l+1,0)*y0*z1 + inFld(i,j+1,l+1,0)*y1*z1 );
+              cdFld(i,j,l,1) = 0.25*( inFld(i,j,l,1)*x0*z0 + inFld(i+1,j,l,1)*x1*z0 + inFld(i,j,l+1,1)*x0*z1 + inFld(i+1,j,l+1,1)*x1*z1 );
+              cdFld(i,j,l,2) = 0.25*( inFld(i,j,l,2)*x0*y0 + inFld(i+1,j,l,2)*x1*y0 + inFld(i,j+1,l,2)*x0*y1 + inFld(i+1,j+1,l,2)*x1*y1 );
               
             }
       } else { // interpolate back to edge/face
