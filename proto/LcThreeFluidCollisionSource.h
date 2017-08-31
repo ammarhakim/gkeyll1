@@ -69,8 +69,8 @@ namespace Lucee
       double voronovK;
 
       double gasGamma;
-      double massElc, massIon, massNeut;
-      double chargeElc, chargeIon;
+      double mass_e, mass_i, mass_n;
+      double charge_e, charge_i;
   };
 }
 
