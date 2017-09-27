@@ -312,12 +312,13 @@ namespace Lucee
       }
       F = F + E;
       if (implicitB) {
-        // this is dt*c^2*curl B
+        // this is dt*c^2*curl B = dt * curl B /mu0/e0
+        // to get it to the same units as J, multiply by e0
         curlBdt(0) = elfNewPtr[0] - E(0);
         curlBdt(1) = elfNewPtr[1] - E(1);
         curlBdt(2) = elfNewPtr[2] - E(2);
       // if using the implicit method, add the additional curl B term to the generalised J 
-        K += 1.0*curlBdt;
+        K += 1.0*curlBdt*epsilon0;
       }
 
 // fill in elements for electric field equations
@@ -481,7 +482,7 @@ namespace Lucee
           fPtr[RHOUX] = solj(0)/qbym[n];
           fPtr[RHOUY] = solj(1)/qbym[n];
           fPtr[RHOUZ] = solj(2)/qbym[n];
-
+          
         }
 
 // total pressure tensor equations (we have computed pressure tensor,

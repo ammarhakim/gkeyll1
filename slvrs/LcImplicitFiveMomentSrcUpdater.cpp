@@ -313,7 +313,7 @@ namespace Lucee
         curlBdt(2) = elfNewPtr[2] - E(2);
       }
       // if using the implicit method, add the additional curl B term to the generalised J 
-      K += 1.0*curlBdt;
+      K += 1.0*curlBdt*epsilon0;
 
 // fill in elements for electric field equations
       Eigen::VectorXd sol;
