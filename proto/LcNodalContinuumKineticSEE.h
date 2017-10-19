@@ -83,6 +83,10 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
 
       unsigned dir, edge;
+
+      std::vector<double> volWeightsPhase;
+      Eigen::MatrixXd volQuadPhase;
+      Eigen::MatrixXd invMassMatrixPhase;
   };
 }
 

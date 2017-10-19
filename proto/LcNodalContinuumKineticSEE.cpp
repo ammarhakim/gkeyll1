@@ -65,12 +65,6 @@ namespace Lucee
     else
       throw Lucee::Except("NodalContinuumKineticSEE::readInput: Must specify phase space basis to use using 'phaseBasis'");
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis"))
-      confBasis =
-	&tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<CDIM> >("confBasis");
-    else
-      throw Lucee::Except("NodalContinuumKineticSEE::readInput: Must specify configuration space basis to use using 'confBasis'");
-
     if (tbl.hasString("edge")) {
       std::string edgeStr = tbl.getString("edge");
       if (edgeStr == "lower")
@@ -98,55 +92,42 @@ namespace Lucee
   {
     UpdaterIfc::initialize();
  
-    const unsigned NDIM = CDIM+VDIM;
-    /*unsigned nlocal = phaseBasis->getNumNodes();
+    /*const unsigned NDIM = CDIM+VDIM;
 
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
     
+    // get handle on the local region
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     seq.step(); // just to get to first index
     int idx[NDIM];
     seq.fillWithIndex(idx);
-    phaseBasis->setIndex(idx);
-    confBasis->setIndex(idx); // only first CDIM elements are used
+    phaseBasis->setIndex(idx);*/
 
-    // compute mapping of phase-space nodes to configuration space
-    // nodes. The assumption here is that the node layout in phase-space
-    // and configuration space are such that each node in phase-space has
-    // exactly one node co-located with it in configuration space. No
-    // "orphan" phase-space node are allowed, and an exception is thrown
-    // if that occurs.
-    phaseConfMap.resize(nlocal);
-    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);
-    Lucee::Matrix<double> confNodeCoords(confBasis->getNumNodes(), CNC);
+    // get number of nodes in  phase space
+    unsigned numNodesPhase = phaseBasis->getNumNodes();
 
-    double dxMin = grid.getDx(0);
-    for (unsigned d=1; d<CDIM; ++d)
-      dxMin = std::min(dxMin, grid.getDx(d));
+    // get volume interpolation matrices for phase space element
+    int numVolQuadPhase = phaseBasis->getNumGaussNodes();
+    volWeightsPhase.resize(numVolQuadPhase.size());
+    Lucee::Matrix<double> tempVolQuadPhase(numVolQuadPhase, numNodesPhase);
+    Lucee::Matrix<double> tempVolCoordsPhase(numVolQuadPhase, (unsigned) PNC);
 
-    phaseBasis->getNodalCoordinates(phaseNodeCoords);
-    confBasis->getNodalCoordinates(confNodeCoords);
-    for (unsigned n=0; n<nlocal; ++n)
-    {
-      bool pcFound = false;
-      for (unsigned cn=0; cn<confBasis->getNumNodes(); ++cn)
-        if (sameConfigCoords(n, cn, dxMin, phaseNodeCoords, confNodeCoords))
-        {
-          phaseConfMap[n] = cn;
-          pcFound = true;
-          break;
-        }
-      if (!pcFound)
-      {
-        Lucee::Except lce(
-          "NodalContinuumKineticSEE::initialize: No matching configuration space node for phase-space node ");
-        lce << n;
-        throw lce;
-      }
-      }*/
+    phaseBasis->getGaussQuadData(tempVolQuadPhase,
+				 tempVolCoordsPhase,
+				 volWeightsPhase);
+
+    volQuadPhase = Eigen::MatrixXd::Zero(numVolQuadPhase, numNodesPhase);
+    copyLuceeToEigen(tempVolQuadPhase, volQuadPhase);
+
+    // Get phase space mass matrix
+    Lucee::Matrix<double> tempMassMatrixPhase(numNodesPhase, numNodesPhase);
+    phaseBasis->getMassMatrix(tempMassMatrixPhase);
+    Eigen::MatrixXd massMatrixPhase(numNodesPhase, numNodesPhase);
+    copyLuceeToEigen(tempMassMatrixPhase, massMatrixPhase);
+    invMassMatrixPhase = Eigen::MatrixXd::Zero(numNodesPhase, numNodesPhase);
+    invmassMatrixPhase = massMatrixPhase.inverse()
   }
 
   //------------------------------------------------------------------
@@ -160,35 +141,147 @@ namespace Lucee
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
-    Lucee::Field<NDIM, double>& f =
+    Lucee::Field<NDIM, double>& distf =
       this->getOut<Lucee::Field<NDIM, double> >(0);
-    Lucee::FieldPtr<double> fPtrEdge = f.createPtr();
-    Lucee::FieldPtr<double> fPtrGhost = f.createPtr();
+    Lucee::FieldPtr<double> distfPtrSkin = distf.createPtr();
+    Lucee::FieldPtr<double> distfPtrGhost = distf.createPtr();
 
-    Lucee::Matrix<double> phaseNodeCoords(phaseBasis->getNumNodes(), PNC);  
+    // get field for node coordinates (velocity and energetic) 
+    unsigned numNodes = phaseBasis->getNumNodes();
+    Lucee::Matrix<double> phaseNodeCoordsV(numNodes, PNC);  
+    Lucee::Matrix<double> phaseNodeCoordsESkin(numNodes, 2);  
+    Lucee::Matrix<double> phaseNodeCoordsEGhost(numNodes, 2);
 
-    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
-    Lucee::Region<NDIM, int> externalRgn = f.getExtRegion();
+    // Creating regions
+    Lucee::Region<NDIM, int> localRgn = distf.getRegion();
+    Lucee::Region<NDIM, int> externalRgn = distf.getExtRegion();
 
-    int lowerConf[CDIM], upperConf[CDIM];
-    for (int i = 0; i < VDIM; i++) {
-      lowerVel[i] = localRgn.getLower(CDIM+i);
-      upperVel[i] = localRgn.getUpper(CDIM+i);
+    int lowerConfSkin[CDIM], upperConfSkin[CDIM];
+    int lowerConfGhost[CDIM], upperConfGhost[CDIM];
+    for (int i = 0; i < CDIM; i++) {
+      lowerConfEdge[i] = localRgn.getLower(i);
+      upperConfEdge[i] = localRgn.getUpper(i);
+      lowerConfGhost[i] = localRgn.getLower(i);
+      upperConfGhost[i] = localRgn.getUpper(i);
     }
-    Lucee::Region<VDIM, int> velRgn(lower, upper);
-    int lowerVel[VDIM], upperVel[VDIM];
-    for (int i = 0; i < VDIM; i++) {
-      lowerVel[i] = localRgn.getLower(CDIM+i);
-      upperVel[i] = localRgn.getUpper(CDIM+i);
+    if (edge == LC_UPPER_EDGE) {
+      lowerConfEdge[dir] = localRng.getUpper(dir);
+      lowerConfGhost[dir] = externalRng.getUpper(dir);
+      upperConfGhost[dir] = externalRng.getUpper(dir);
+    } else {
+      upperConfEdge[dir] = localRng.getLower(dir);
+      lowerConfGhost[dir] = externalRng.getLower(dir);
+      upperConfGhost[dir] = externalRng.getLower(dir);
     }
-    Lucee::Region<VDIM, int> velRgn(lower, upper);
-    
-    int idx[NDIM], idxIn[VDIM], idxOut[VDIM];
-    Lucee::RowMajorSequencer<NDIM> seqVelIn(velRgn);
-    Lucee::RowMajorSequencer<NDIM> seqVelOut(velRgn);
+    Lucee::Region<CDIM, int> confSkinRgn(lowerConfSkin, upperConfSkin);
+    Lucee::Region<CDIM, int> confGhostRgn(lowerConfGhost, upperConfGhost);
 
-    unsigned numNodesPhase = phaseBasis->getNumNodes();
+    int lowerVel[CDIM], upperVel[CDIM];
+    for (int i = 0; i < VDIM; i++) {
+      lowerVel[i] = localRgn.getLower(CDIM + i);
+      upperVel[i] = localRgn.getUpper(CDIM + i);
+    }
+    Lucee::Region<VDIM, int> velRgn(lowerVel, upperVel);
     
+    // Creating sequencers
+    int idxSkin[NDIM], idxGhost[NDIM], idxVel[VDIM];
+    Lucee::RowMajorSequencer<CDIM> seqConfSkin(confSkinRgn);
+    Lucee::RowMajorSequencer<CDIM> seqConfGhost(confGhostRgn);
+    Lucee::RowMajorSequencer<VDIM> seqVelSkin(velRgn);
+    Lucee::RowMajorSequencer<VDIM> seqVelGhost(velRgn);
+
+    // Edge nodes
+    unsigned numSurfNodes = phaseBasis->getNumSurfLowerNodes(dir);
+    std::vector<int> surfNodesSkin(numSurfNodes), 
+      surfNodesGhost(numSurfNodes);
+    if (edge == LC_LOWER_EDGE) {
+      phaseBasis->getSurfUpperNodeNums(dir, surfNodesGhost);
+      phaseBasis->getSurfLowerNodeNums(dir, surfNodesSkin);
+    } else {
+      phaseBasis->getSurfLowerNodeNums(dir, surfNodesGhost);
+      phaseBasis->getSurfUpperNodeNums(dir, surfNodesSkin);
+    }
+
+    Eigen::MatrixXd rhsMatrix(numNodes, numNodes);
+    Eigen::VectorXd resultVector(numNodes), distfVector(numNodes);
+    double E, cosTheta, integralResult;
+    while (seqConfSkin.step()) {
+      seqConfSkin.fillWithIndex(idxSkin);
+      seqConfGhost.step();
+      seqConfGhost.fillWithIndex(idxGhost);
+
+      while (seqVelGhost.step()) {
+	seqVelGhost.fillWithIndex(*idxGhost + CDIM);
+	distf.setPtr(distfPtrGhost, idxGhost);
+
+	phaseBasis->setIndex(idxGhost);
+	phaseBasis->getNodalCoordinates(phaseNodeCoordsV);
+
+	// convert coordinates to energies and angles
+	for (int node = 0; node < numNodes; ++node) {
+	  E = 0;
+	  cosTheta = 0;
+	  for (int dim = 0; dim < VDIM; dim++)
+	    E += phaseNodeCoordsV(node, CDIM + dim) *
+	      phaseNodeCoordsV(node, CDIM + dim);
+	  cosTheta = sqrt((E - phaseNodeCoordsV(node, CDIM+dir) * 
+			   phaseNodeCoordsV(node, CDIM+dir))/E);
+	  phaseNodeCoordsEGhost(node, 0) = E;
+	  phaseNodeCoordsEGhost(node, 1) = cosTheta;
+
+	  distfPtrGhost[node] = 0;
+	}
+
+	while (seqVelSkin.step()) {
+	  seqVelSkin.fillWithIndex(*idxSkin + CDIM);
+	  distf.setPtr(distfPtrSkin, idxSkin);
+	  
+	  // convert coordinates to energies and angles
+	  phaseBasis->setIndex(idxSkin);
+	  phaseBasis->getNodalCoordinates(phaseNodeCoordsV);
+	  for (int node = 0; node < numNodes; ++node) {
+	    E = 0;
+	    cosTheta = 0;
+	    for (int dim = 0; dim < VDIM; dim++)
+	      E += phaseNodeCoordsV(node, CDIM + dim) *
+		phaseNodeCoordsV(node, CDIM + dim);
+	    cosTheta = sqrt((E - phaseNodeCoordsV(node, CDIM+dir) * 
+			     phaseNodeCoordsV(node, CDIM+dir))/E);
+	    phaseNodeCoordsESkin(node, 0) = E;
+	    phaseNodeCoordsESkin(node, 1) = cosTheta;
+	  }
+
+	  // integrate
+	  for (int i = 0; i < numNodes, ++i) {
+	    for (int j = 0; j < numNodes, ++j) {
+	      integralResult = 0;
+	      for (int gaussIdx = 0; gaussIdx < volWeightsPhase.size(); ++gaussIdx)
+		integralResult +=
+		  getSEE(phaseNodeCoordsESkin(gaussIdx, 0),
+			 phaseNodeCoordsESkin(gaussIdx, 1),
+			 phaseNodeCoordsEGhost(gaussIdx, 0),
+			 phaseNodeCoordsEGhost(gaussIdx, 1)) * 
+		  volWeightsPhase[gaussIdx] * 
+		  volQuadPhase(gaussIdx, i) * 
+		  volQuadPhase(gaussIdx, j);
+	      rhsMatrix(i, j) = integralResult;
+	    }
+	  }
+	  rhsMatrix = invMassMatrixPhase*rhsMatrix;
+
+	  for (int node = 0; node < numNodes, ++node)
+	    distfVector(node) = distfPtrSkin[node];
+	  resultVector.noalias() = rhsMatrix*distfVector;
+
+	  for (int node = 0; node < numSurfNodes, ++node)
+	    distfPtrGhost[surfNodesGhost[node]] = resultVector(surfNodesSkin[node])
+	  
+	}
+	seqVelIn.reset();
+      }
+      seqVelOut.reset();
+    }
+
     while (seqOut.step()) {
       seq.fillWithIndex(idx);
       q.setPtr(qPtr, idx);
@@ -196,8 +289,7 @@ namespace Lucee
       firstMoment.setPtr(firstMomentPtr, idx);
       secondMoment.setPtr(secondMomentPtr, idx);
       
-      phaseBasis->setIndex(idx);
-      phaseBasis->getNodalCoordinates(phaseNodeCoords);
+
       
       for (unsigned nodeIdx = 0; nodeIdx<numNodesConf; ++nodeIdx) {
 	dens[nodeIdx] = zerothMomentPtr[nodeIdx];
