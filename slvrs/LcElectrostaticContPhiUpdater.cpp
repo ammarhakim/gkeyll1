@@ -41,6 +41,7 @@ namespace Lucee
 {
 // set id for module system
   const char *ElectrostaticContPhiUpdater::id = "ElectrostaticContPhiUpdater";
+  const unsigned NDIM = 1;
 
   ElectrostaticContPhiUpdater::ElectrostaticContPhiUpdater()
     : UpdaterIfc()
@@ -65,8 +66,8 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::readInput(tbl);
 
-    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<1> >("basis"))
-      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<1> >("basis");
+    if (tbl.hasObject<Lucee::NodalFiniteElementIfc<NDIM> >("basis"))
+      nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<NDIM> >("basis");
     else
       throw Lucee::Except("ElectrostaticContPhiUpdater::readInput: Must specify element to use using 'basis'");
 
@@ -85,7 +86,7 @@ namespace Lucee
       useCutoffVelocities = tbl.getBool("useCutoffVelocities");
 
     // force all directions to be periodic
-    for (int i = 0; i < 1; i++) 
+    for (int i = 0; i < NDIM; i++) 
       periodicFlgs[i] = true;
   }
 
@@ -94,22 +95,29 @@ namespace Lucee
   {
     Lucee::UpdaterIfc::initialize();
 
+    // number of global nodes
+    int nglobal = nodalBasis->getNumGlobalNodes();
+    // number of local nodes
+    int nlocal = nodalBasis->getNumNodes();
+#ifdef HAVE_MPI
+    TxMpiBase *comm = static_cast<TxMpiBase*>(this->getComm());
+#endif
     // get hold of grid
-    const Lucee::StructuredGridBase<1>& grid 
-      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+    // local region
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
     // global region to update
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion();
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
 
-    Lucee::RowMajorSequencer<1> seq(globalRgn);
+//    Lucee::RowMajorSequencer<NDIM> seq(globalRgn);
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     seq.step(); // just to get to first index
-    int idx[1];
+    int idx[NDIM];
     seq.fillWithIndex(idx);
     nodalBasis->setIndex(idx);
     
-    int nlocal = nodalBasis->getNumNodes();
     int numQuadNodes = nodalBasis->getNumGaussNodes();
-    // number of global nodes
-    int nglobal = nodalBasis->getNumGlobalNodes();
 
     // Get mass matrix and then copy to Eigen format
     Lucee::Matrix<double> massMatrixLucee(nlocal, nlocal);
@@ -161,7 +169,15 @@ namespace Lucee
     }
 
 #ifdef HAVE_MPI
-    throw Lucee::Except("ElectrostaticContPhiUpdater does not yet work in parallel!");
+    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
+#if PETSC_VERSION_GE(3,6,0)
+    MatCreateAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal,
+#else
+    MatCreateMPIAIJ(comm->getMpiComm(), PETSC_DECIDE, PETSC_DECIDE, nglobal, nglobal,
+#endif
+      nz, PETSC_NULL,
+      nz, PETSC_NULL,
+      &stiffMat);
 #else
     // Explicit initialization of stiffness matrix speeds up
     // initialization tremendously.
@@ -170,16 +186,32 @@ namespace Lucee
       nz = 21; // HACK FOR NOW
     MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #endif
+
+#if PETSC_VERSION_GE(3,6,0)
+// From LcFemPoissonStructUpdater.cpp: NRM 3/10/16:
+// Depending on the type of BCs, we will be modifying stiffMat and adding new nonzero values.
+// In later versions of PETSc, we need to set the following in order for PETSc to not throw errors.
+    MatSetOption(stiffMat, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+#else
     MatSetFromOptions(stiffMat);
+#endif
     // Finalize assembly... is this needed?
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
     
-    // create and setup vector (NOTE: ACCORDING TO MIKE MCCOURT ONE SHOULD
+    // create and setup vector:
+    // (These work in serial)
+//    VecCreate(MPI_COMM_WORLD, &globalSrc);
+//    VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
+//    VecSetFromOptions(globalSrc);
+    // (NOTE: ACCORDING TO MIKE MCCOURT ONE SHOULD
     // USE MatGetVecs INSTEAD OF VecCreate. THIS ENSURES THAT THE PARALLEL
     // LAYOUT OF THE MATRIX & VECTOR ARE THE SAME)
-    VecCreate(MPI_COMM_WORLD, &globalSrc);
-    VecSetSizes(globalSrc, nglobal, PETSC_DECIDE);
+#if PETSC_VERSION_GE(3,6,0)
+    MatCreateVecs(stiffMat, &globalSrc, PETSC_NULL);
+#else
+    MatGetVecs(stiffMat, &globalSrc, PETSC_NULL);
+#endif
     VecSetFromOptions(globalSrc);
     
     // finalize assembly
@@ -189,20 +221,67 @@ namespace Lucee
     // create duplicate to store initial guess
     VecDuplicate(globalSrc, &initGuess); 
 
+// Create index set to copy data from parallel Petsc vector to locally
+// required data.
+//
+// NOTE: This is required to ensure that the solution is available
+// with same parallel layout as expected by Gkeyll. Otherwise, things
+// go hay-wire as Gkeyll and Petsc use slightly different parallel
+// layouts, causing mayhem and chaos.
+    std::vector<int> lgMap(nlocal);
+    std::vector<PetscInt> vecIs;
+    Lucee::RowMajorSequencer<NDIM> seqIs(localRgn);
+    while (seqIs.step())
+    {
+      seqIs.fillWithIndex(idx);
+      nodalBasis->setIndex(idx);
+      nodalBasis->getLocalToGlobal(lgMap);
+      for (unsigned k=0; k<nlocal; ++k)
+        vecIs.push_back(lgMap[k]);
+    }
+
+    PetscInt numIs = vecIs.size();
+#ifdef HAVE_MPI
+# if PETSC_VERSION_GE(3,6,0)
+    ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], PETSC_COPY_VALUES, &is);
+# else
+    ISCreateGeneral(comm->getMpiComm(), numIs, &vecIs[0], &is);
+# endif
+    VecCreateMPI(comm->getMpiComm(), numIs, PETSC_DETERMINE, &localData);
+
+#else
+# if PETSC_VERSION_GE(3,6,0)
+    ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], PETSC_COPY_VALUES, &is);
+# else
+    ISCreateGeneral(PETSC_COMM_SELF, numIs, &vecIs[0], &is);
+# endif
+    VecCreateSeq(PETSC_COMM_SELF, numIs, &localData);
+#endif
+
+// create a scatter context to get data onto local processors
+    VecScatterCreate(initGuess, is, localData, PETSC_NULL, &vecSctr);
+    
     // Create solver
     KSPCreate(MPI_COMM_WORLD, &ksp);
+#if PETSC_VERSION_GE(3,6,0)
+    KSPSetOperators(ksp, stiffMat, stiffMat);
+#else
+    KSPSetOperators(ksp, stiffMat, stiffMat, DIFFERENT_NONZERO_PATTERN);
+#endif
+    KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
+    KSPSetFromOptions(ksp);
   }
 
   Lucee::UpdaterStatus 
   ElectrostaticContPhiUpdater::update(double t)
   {
-    const Lucee::StructuredGridBase<1>& grid
-      = this->getGrid<Lucee::StructuredGridBase<1> >();
+    const Lucee::StructuredGridBase<NDIM>& grid
+      = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
 
     // Electron and ion densities
-    const Lucee::Field<1, double>& nElcIn = this->getInp<Lucee::Field<1, double> >(0);
-    const Lucee::Field<1, double>& nIonIn = this->getInp<Lucee::Field<1, double> >(1);
-    Lucee::Field<1, double>& phiOut = this->getOut<Lucee::Field<1, double> >(0);
+    const Lucee::Field<NDIM, double>& nElcIn = this->getInp<Lucee::Field<NDIM, double> >(0);
+    const Lucee::Field<NDIM, double>& nIonIn = this->getInp<Lucee::Field<NDIM, double> >(1);
+    Lucee::Field<NDIM, double>& phiOut = this->getOut<Lucee::Field<NDIM, double> >(0);
 
     Lucee::ConstFieldPtr<double> nElcPtr = nElcIn.createConstPtr();
     Lucee::ConstFieldPtr<double> nIonPtr = nIonIn.createConstPtr();
@@ -232,11 +311,11 @@ namespace Lucee
     std::vector<PetscScalar> vals(nlocal*nlocal);
 
     // global region for grid
-    Lucee::Region<1, int> globalRgn = grid.getGlobalRegion(); 
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
     // create sequencer for looping over local box
-    Lucee::Region<1, int> localRgn = grid.getLocalRegion(); 
-    Lucee::RowMajorSequencer<1> seq(localRgn);
-    int idx[1];
+    Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion(); 
+    Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+    int idx[NDIM];
 
     // loop, creating global stiffness matrix
     while (seq.step())
@@ -287,7 +366,7 @@ namespace Lucee
     // direction is also modified to take into account the contribution
     // from the layer of nodes just inside the corresponding upper
     // boundary.
-    for (int d = 0; d < 1; d++)
+    for (unsigned d = 0; d < NDIM; d++)
     {
       if (periodicFlgs[d] == true)
       {
@@ -303,13 +382,13 @@ namespace Lucee
         std::vector<double> modVals(nlocal*nlocal);
 
         // create region to loop over side
-        Lucee::Region<1, int> defRgnG = 
+        Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
         // only update if we are on the correct ranks
-        Lucee::Region<1, int> defRgn = defRgnG.intersect(localRgn);
+        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
         // loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<1> seqSide(defRgn);
+        Lucee::RowMajorSequencer<NDIM> seqSide(defRgn);
         while (seqSide.step())
         {
           seqSide.fillWithIndex(idx);
@@ -318,6 +397,9 @@ namespace Lucee
           nodalBasis->setIndex(idx);
           // set index of nIon
           nIonIn.setPtr(nIonPtr, idx);
+
+// this flag is needed to ensure we don't update the stiffness matrix twice
+          bool isIdxLocal = defRgn.isInside(idx);
 
           Eigen::VectorXd nIonVec(nlocal);
           
@@ -364,21 +446,27 @@ namespace Lucee
             lgMapMod[lgLocalNodeNum[k]] = lgLowerSurfMap[k];
 
           // zero out contribution
-          for (unsigned k=0; k<nlocal; ++k)
+          //for (unsigned k=0; k<nlocal; ++k)
+          for (unsigned k=0; k<nlocal*nlocal; ++k)
             modVals[k] = 0.0;
 
+// the following check is needed to ensure that the periodic BC
+// // modifications to stiffness matrix are not applied twice
+          if (isIdxLocal)
+          {
           // only make contributions to those rows which correspond to those
           // nodes on the lower edge
-          for (unsigned k=0; k<nlocal; ++k)
-          {
-            for (unsigned m=0; m<nlocal; ++m)
+            for (unsigned k=0; k<nlocal; ++k)
             {
-              if (lgMapMod[k] == lgMap[k])
-                modVals[nlocal*k+m] = 0.0;
-              else
-                modVals[nlocal*k+m] = vals[nlocal*k+m];
+              for (unsigned m=0; m<nlocal; ++m)
+              {
+                if (lgMapMod[k] == lgMap[k])
+                  modVals[nlocal*k+m] = 0.0;
+                else
+                  modVals[nlocal*k+m] = vals[nlocal*k+m];
+              }
             }
-          }
+	  }
 
           // insert into global stiffness matrix
           MatSetValues(stiffMat, nlocal, &lgMapMod[0], nlocal, &lgMapMod[0],
@@ -396,7 +484,7 @@ namespace Lucee
     // MatZeroRows and MatSetValues without an intervening calls to
     // MatAssemblyBegin/MatAssemblyEnd. So if Petsc was not so annoying
     // this extra mess would not be needed. (Ammar, April 4 2012).
-    for (int d = 0; d < 1; d++)
+    for (int d = 0; d < NDIM; d++)
     {
       if (periodicFlgs[d] == true)
       {
@@ -409,13 +497,13 @@ namespace Lucee
         std::vector<int> lgLocalNodeNum(nsl);
 
         // create region to loop over side
-        Lucee::Region<1, int> defRgnG = 
+        Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
         // only update if we are on the correct ranks
-        Lucee::Region<1, int> defRgn = defRgnG.intersect(localRgn);
+        Lucee::Region<NDIM, int> defRgn = defRgnG; //.intersect(localRgn);
 
         // loop, modifying stiffness matrix
-        Lucee::RowMajorSequencer<1> seqSide(defRgn);
+        Lucee::RowMajorSequencer<NDIM> seqSide(defRgn);
         while (seqSide.step())
         {
           seqSide.fillWithIndex(idx);
@@ -480,15 +568,15 @@ namespace Lucee
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
 
-    // clear out existing stuff in source vector: this is required
-    // otherwise successive calls to advance() will accumulate into source
-    // from prevous calls, which is of course not what we want.
-    VecSet(globalSrc, 0.0);
-
     // storage for computing source contribution
     std::vector<double> localMassSrc(nlocal);
     // create sequencer for looping over local box
-    Lucee::RowMajorSequencer<1> seqLocal(grid.getLocalRegion());
+    Lucee::RowMajorSequencer<NDIM> seqLocal(grid.getLocalRegion());
+
+    // clear out existing stuff in source vector: this is required
+    // otherwise successive calls to advance() will accumulate into source
+    // from previous calls, which is of course not what we want.
+    VecSet(globalSrc, 0.0);
 
     // loop, creating RHS (source terms)
     while (seqLocal.step())
@@ -509,10 +597,9 @@ namespace Lucee
       nElcIn.setPtr(nElcPtr, idx);
       nIonIn.setPtr(nIonPtr, idx);
 
-      Eigen::VectorXd nIonVec(nlocal);
       Eigen::VectorXd nDiffVec(nlocal);
       
-      for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+      for (unsigned componentIndex = 0; componentIndex < nlocal; componentIndex++)
       {
         nDiffVec(componentIndex) = nIonPtr[componentIndex] - nElcPtr[componentIndex];
         // Scale by various factors in the phi-equation
@@ -536,7 +623,7 @@ namespace Lucee
 
     // Now loop over each periodic direction, adding contribution from
     // last layer of cells on upper edges to lower edge nodes
-    for (int d = 0; d < 1; d++)
+    for (unsigned d = 0; d < NDIM; d++)
     {
       if (periodicFlgs[d] == true)
       {
@@ -551,13 +638,13 @@ namespace Lucee
         std::vector<double> localMassMod(nsl);
 
         // create region to loop over side
-        Lucee::Region<1, int> defRgnG = 
+        Lucee::Region<NDIM, int> defRgnG = 
           globalRgn.resetBounds(d, globalRgn.getUpper(d)-1, globalRgn.getUpper(d)) ;
         // only update if we are on the correct ranks
-        Lucee::Region<1, int> defRgn = defRgnG.intersect(localRgn);
+        Lucee::Region<NDIM, int> defRgn = defRgnG.intersect(localRgn);
 
         // loop, modifying source vector
-        Lucee::RowMajorSequencer<1> seqSide(defRgn);
+        Lucee::RowMajorSequencer<NDIM> seqSide(defRgn);
         while (seqSide.step())
         {
           seqSide.fillWithIndex(idx);
@@ -576,7 +663,6 @@ namespace Lucee
           nElcIn.setPtr(nElcPtr, idx);
           nIonIn.setPtr(nIonPtr, idx);
 
-          Eigen::VectorXd nIonVec(nlocal);
           Eigen::VectorXd nDiffVec(nlocal);
           
           for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
@@ -630,11 +716,7 @@ namespace Lucee
     VecAssemblyEnd(globalSrc);
 
     // copy solution for use as initial guess in KSP solve
-    PetscScalar *ptGuess;
-    unsigned count = 0;
-    VecGetArray(initGuess, &ptGuess);
-    nodalBasis->copyAllDataFromField(phiOut, ptGuess);
-    VecRestoreArray(initGuess, &ptGuess);
+    copyFromGkeyllField(phiOut, initGuess);
 
 #if PETSC_VERSION_GE(3,6,0)    
     KSPSetOperators(ksp, stiffMat, stiffMat);
@@ -672,10 +754,7 @@ namespace Lucee
             << ". Final residual norm was " << resNorm;
 
     // copy solution from PetSc array to solution field
-    PetscScalar *ptSol;
-    VecGetArray(initGuess, &ptSol);
-    nodalBasis->copyAllDataToField(ptSol, phiOut);
-    VecRestoreArray(initGuess, &ptSol);
+    copyFromPetscField(initGuess, phiOut);
 
     if (useCutoffVelocities == true)
     {
@@ -689,7 +768,7 @@ namespace Lucee
       std::vector<int> ndIds;
       nodalBasis->getExclusiveNodeIndices(ndIds);
 
-      Lucee::Region<1, int> globalRgnDup = phiOut.getExtRegion(); 
+      Lucee::Region<NDIM, int> globalRgnDup = phiOut.getExtRegion(); 
       // Add phiS to the solution
       for (int ix = globalRgnDup.getLower(0); ix < globalRgnDup.getUpper(0); ix++)
       {
@@ -708,12 +787,12 @@ namespace Lucee
   ElectrostaticContPhiUpdater::declareTypes()
   {
     // inputs n_e(x), n_i(x)
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
-    this->appendInpVarType(typeid(Lucee::Field<1, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
+    this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     // optional input: cutoff velocity at edges
     this->appendInpVarType(typeid(Lucee::DynVector<double>));
     // returns one output: phi(x) -- continuous version!
-    this->appendOutVarType(typeid(Lucee::Field<1, double>));
+    this->appendOutVarType(typeid(Lucee::Field<NDIM, double>));
   }
 
   void
@@ -723,5 +802,81 @@ namespace Lucee
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
       for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
+  }
+
+  void
+  ElectrostaticContPhiUpdater::copyFromPetscField(Vec ptFld, Lucee::Field<NDIM, double>& gkFld)
+  {
+    PetscScalar *ptFldPtr;
+#ifndef HAVE_MPI
+      VecGetArray(ptFld, &ptFldPtr);
+      nodalBasis->copyAllDataToField(ptFldPtr, gkFld);
+      VecRestoreArray(ptFld, &ptFldPtr);
+#else
+// get data local to this processor (this is needed as Petsc parallel
+// layout is slightly different than Gkeyll layout. Most data is
+// already local and does not require communication.)
+      VecScatterBegin(vecSctr, ptFld, localData, INSERT_VALUES, SCATTER_FORWARD);
+      VecScatterEnd(vecSctr, ptFld, localData, INSERT_VALUES, SCATTER_FORWARD);
+
+// copy data over to Gkeyll field
+      const Lucee::StructuredGridBase<NDIM>& grid
+        = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+      unsigned count = 0;
+      unsigned nlocal = nodalBasis->getNumNodes();
+      Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+      Lucee::FieldPtr<double> gkPtr = gkFld.createPtr();
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+      int idx[NDIM];
+
+      VecGetArray(localData, &ptFldPtr);
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        gkFld.setPtr(gkPtr, idx);
+        for (unsigned k=0; k<nlocal; ++k)
+          gkPtr[k] = ptFldPtr[count++];
+      }
+      VecRestoreArray(localData, &ptFldPtr);
+#endif
+  }
+
+  void
+  ElectrostaticContPhiUpdater::copyFromGkeyllField(const Lucee::Field<NDIM, double>& gkFld, Vec ptFld)
+  {
+    PetscScalar *ptFldPtr;
+#ifndef HAVE_MPI
+      VecGetArray(ptFld, &ptFldPtr);
+      nodalBasis->copyAllDataFromField(gkFld, ptFldPtr);
+      VecRestoreArray(ptFld, &ptFldPtr);
+#else
+// copy data from Gkeyll field
+      const Lucee::StructuredGridBase<NDIM>& grid
+        = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
+
+      unsigned count = 0;
+      unsigned nlocal = nodalBasis->getNumNodes();
+      Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
+      Lucee::ConstFieldPtr<double> gkPtr = gkFld.createConstPtr();
+      Lucee::RowMajorSequencer<NDIM> seq(localRgn);
+      int idx[NDIM];
+
+      VecGetArray(localData, &ptFldPtr);
+      while (seq.step())
+      {
+        seq.fillWithIndex(idx);
+        gkFld.setPtr(gkPtr, idx);
+        for (unsigned k=0; k<nlocal; ++k)
+          ptFldPtr[count++] = gkPtr[k];
+      }
+      VecRestoreArray(localData, &ptFldPtr);
+
+// get data local to this processor (this is needed as Petsc parallel
+// // layout is slightly different than Gkeyll layout. Most data is
+// // already local and does not require communication.)
+      VecScatterBegin(vecSctr, localData, ptFld, INSERT_VALUES, SCATTER_REVERSE);
+      VecScatterEnd(vecSctr, localData, ptFld, INSERT_VALUES, SCATTER_REVERSE);
+#endif
   }
 }

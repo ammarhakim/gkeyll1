@@ -153,15 +153,8 @@ namespace Lucee
     // Output cutoff velocities vs time
     Lucee::DynVector<double>& cutoffVelocities = this->getOut<Lucee::DynVector<double> >(1);
 
-#ifdef HAVE_MPI
-// This updater presently will not work in parallel. Eventually, we
-// need to fix this, but it requires some MPI-fu to collect the values
-// and put them on the appropriate processors. (Ammar Hakim,
-// 8/06/2013)
-    throw Lucee::Except("SOL3DElectrostaticDistFuncReflectionBCUpdater does not work in parallel!");
-#endif
-
     Lucee::Region<3, int> globalRgn = grid.getGlobalRegion();
+    Lucee::Region<3, int> localRgn = grid.getLocalRegion();
     const std::vector<double> momentsAtEdgesIon = momentsAtEdgesIonIn.getLastInsertedData();
     Lucee::FieldPtr<double> sknPtr = distf.createPtr(); // for skin-cell
     Lucee::FieldPtr<double> gstPtr = distf.createPtr(); // for ghost-cell
@@ -174,395 +167,417 @@ namespace Lucee
     data[0] = 0.0;
     data[1] = 0.0;
 
+#ifdef HAVE_MPI
+// I'm not sure this yet works with an MPI decomposition of velocity space.
+// But it should work with a decomposition of configuration space, or z in
+// this 1X2V case.(Manaure Francisquez, 11/06/2013)
+    if (localRgn.getUpper(1) != globalRgn.getUpper(1))
+      throw Lucee::Except("SOL3DElectrostaticDistFuncReflectionBCUpdater does not work with parallel decomposition of velocity space!");
+#endif
+
     if (applyRightEdge)
     {
-      int ix = globalRgn.getUpper(0)-1; // right skin cell x index
-      double cellCentroid[3];
-      int idx[3];
-      bool foundCutoffVelocity = false;
-      double totalFluxAlongEdge = 0.0; 
-
-      // Get ion flux at right edge
-      double totalIonFlux = momentsAtEdgesIon[0];
-
-      // start with cell at maximum v_para, looping down to zero until desired flux is reached
-      for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
+      if (localRgn.getUpper(0) == globalRgn.getUpper(0))
       {
-        idx[0] = ix;
-        idx[1] = js;
-        idx[2] = globalRgn.getLower(2);
-        
-        nodalBasis->setIndex(idx);
-        grid.setIndex(idx);
-        grid.getCentroid(cellCentroid);
-        
-        // Don't need to loop over left-moving cells
-        if (cellCentroid[1] < 0.0)
-          break;
-        
-        double fluxInEntireCell = 0.0;
-        // At this value of v_parallel, need to integrate flux over all mu
-        for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-        {
-          idx[2] = muIndex;
-          distf.setPtr(sknPtr, ix, js, muIndex);
+        int ix = globalRgn.getUpper(0)-1; // right skin cell x index
+        double cellCentroid[3];
+        int idx[3];
+        bool foundCutoffVelocity = false;
+        double totalFluxAlongEdge = 0.0; 
 
-          // Copy nodes on right edge into a vector
-          Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());
-          
-          for (int edgeNodeIndex = 0; edgeNodeIndex < rightEdgeData.rows(); edgeNodeIndex++)
-            rightEdgeData(edgeNodeIndex) = sknPtr[rightEdgeNodeNums[edgeNodeIndex]];
-          
-          // Interpolate nodal data to quadrature points on the edge
-          Eigen::VectorXd rightEdgeQuadData = edgeNodeInterpMatrix*rightEdgeData;
-        
-          // Integrate v*f over entire cell using gaussian quadrature
-          for (int quadNodeIndex = 0; quadNodeIndex < rightEdgeQuadData.rows(); quadNodeIndex++)
-          {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*physicalV*
-              rightEdgeQuadData(quadNodeIndex);
-          }
-        }
+        // Get ion flux at right edge
+        double totalIonFlux = momentsAtEdgesIon[0];
 
-        if (foundCutoffVelocity == false)
+        // start with cell at maximum v_para, looping down to zero until desired flux is reached
+        for (int js=globalRgn.getUpper(1)-1, jg=0; js>=0; --js, ++jg)
         {
-          if (totalFluxAlongEdge + fluxInEntireCell < totalIonFlux)
+          idx[0] = ix;
+          idx[1] = js;
+          idx[2] = globalRgn.getLower(2);
+          
+          nodalBasis->setIndex(idx);
+          grid.setIndex(idx);
+          grid.getCentroid(cellCentroid);
+          
+          // Don't need to loop over left-moving cells
+          if (cellCentroid[1] < 0.0)
+            break;
+          
+          double fluxInEntireCell = 0.0;
+          // At this value of v_parallel, need to integrate flux over all mu
+          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
           {
-            // Accumulate to total since cutoff velocity is not in this cell
-            totalFluxAlongEdge += fluxInEntireCell;
-            // Set to no inflow condition then go on to next cell
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+            idx[2] = muIndex;
+            distf.setPtr(sknPtr, ix, js, muIndex);
+
+            // Copy nodes on right edge into a vector
+            Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());
+            
+            for (int edgeNodeIndex = 0; edgeNodeIndex < rightEdgeData.rows(); edgeNodeIndex++)
+              rightEdgeData(edgeNodeIndex) = sknPtr[rightEdgeNodeNums[edgeNodeIndex]];
+            
+            // Interpolate nodal data to quadrature points on the edge
+            Eigen::VectorXd rightEdgeQuadData = edgeNodeInterpMatrix*rightEdgeData;
+          
+            // Integrate v*f over entire cell using gaussian quadrature
+            for (int quadNodeIndex = 0; quadNodeIndex < rightEdgeQuadData.rows(); quadNodeIndex++)
             {
-              distf.setPtr(gstPtr, ix+1, jg, muIndex);
+              double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
+              fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*physicalV*
+                rightEdgeQuadData(quadNodeIndex);
+            }
+          }
+
+          if (foundCutoffVelocity == false)
+          {
+            if (totalFluxAlongEdge + fluxInEntireCell < totalIonFlux)
+            {
+              // Accumulate to total since cutoff velocity is not in this cell
+              totalFluxAlongEdge += fluxInEntireCell;
+              // Set to no inflow condition then go on to next cell
+              for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+              {
+                distf.setPtr(gstPtr, ix+1, jg, muIndex);
+                
+                for (int k = 0; k < nlocal; k++)
+                  gstPtr[k] = 0.0;
+              }
+            }
+            else
+            {
+              // This is the cell that contains the cutoff velocity
               
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = 0.0;
+              // Figure out fraction of cell that contains the excess flux
+              // (Flux over what is needed for equivalence with Gamma_i)
+              double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+              //std::cout << "excessFraction (L) = " << excessFraction << std::endl;
+              // Search for cutoff velocity if needed
+              if (computeCutoffVelocities == true)
+              {
+                // desired result for integrating from flux vCutoff to vUpper in this cell
+                double exactResult = totalIonFlux - totalFluxAlongEdge;
+                double cellWidth = grid.getDx(1)/2.0;
+                double cutoffGuess;
+
+                if (exactResult != 0.0 && totalIonFlux != 0.0)
+                {
+                  double refCoord[3];
+                  refCoord[0] = 1;
+
+                  std::vector<double> basisAtPoint(rightEdgeNodeNums.size());
+
+                  // upper boundary for integration
+                  double b = grid.getDx(1)/2.0;
+                  // cutoffGuess is between -dV/2 and +dV/2
+                  double nextCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
+
+                  //double nextCutoffGuess = -grid.getDx(1)/fluxInEntireCell*( totalIonFlux - totalFluxAlongEdge - fluxInEntireCell/2.0 );
+                  
+                  double upperBound = grid.getDx(1)/2.0;
+                  double lowerBound = -grid.getDx(1)/2.0;
+                  
+                  double relError; 
+
+                  int iterCount = 0;
+
+                  do
+                  {
+                    cutoffGuess = nextCutoffGuess;
+
+                    if (upperBound == lowerBound || iterCount > 100)
+                      break;
+
+                    double integralResult = 0.0;
+                    // Integrate flux from vCutoff to vUpper
+                    for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+                    {
+                      // physicalCoord (vParallel) is between -deltaV/2 and +deltaV/2
+                      double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+                        + 0.5*(b + cutoffGuess);
+                      // refCoord is between -1 and +1
+                      refCoord[1] = physicalCoord/(grid.getDx(1)/2.0);
+                      refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
+                      // Evaluate all basis functions at coordinate
+                      nodalBasis->evalBasis(refCoord, basisAtPoint, rightEdgeNodeNums);
+                      
+                      for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                      {
+                        distf.setPtr(sknPtr, ix, js, muIndex);
+                        // Evaluate f at this quadrature point
+                        double fAtPoint = 0.0;
+                        // Loop over 2D basis functions
+                        for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
+                          fAtPoint += sknPtr[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
+
+                        // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
+                        // integration width
+                        integralResult += scaleFactor*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                      }
+                    }
+                    
+                    relError = (integralResult - exactResult)/exactResult;
+
+                    if (iterCount > 50)
+                    {
+                      std::cout << "iterCount = " << iterCount << std::endl;
+                      std::cout << "relError = " << fabs(relError) << std::endl;
+                      std::cout << "integralResult = " << integralResult << std::endl;
+                      std::cout << "exactResult = " << exactResult << std::endl;
+                      std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
+                      std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
+                    }
+
+                    if (relError < 0)
+                      upperBound = cutoffGuess;
+                    else
+                      lowerBound = cutoffGuess;
+
+                    nextCutoffGuess = 0.5*(lowerBound + upperBound);
+                    iterCount++;
+                  }
+                  while (fabs(relError) > cutoffTolerance);
+                  //std::cout << "Iterations (R) = " << iterCount << std::endl;
+                }
+
+                // store cutoff velocity
+                data[1] = cellCentroid[1] + cutoffGuess;
+              }
+              
+              foundCutoffVelocity = true;
+              // Scale all values by appropriate fraction to conserve flux
+              // Copy data into ghost after rotating skin cell data by 180 degrees
+              for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+              {
+                distf.setPtr(sknPtr, ix, js, muIndex);
+                distf.setPtr(gstPtr, ix+1, jg, muIndex);
+
+                for (int k = 0; k < nlocal; k++)
+                  gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+              }
             }
           }
           else
           {
-            // This is the cell that contains the cutoff velocity
-            
-            // Figure out fraction of cell that contains the excess flux
-            // (Flux over what is needed for equivalence with Gamma_i)
-            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-            //std::cout << "excessFraction (L) = " << excessFraction << std::endl;
-            // Search for cutoff velocity if needed
-            if (computeCutoffVelocities == true)
-            {
-              // desired result for integrating from flux vCutoff to vUpper in this cell
-              double exactResult = totalIonFlux - totalFluxAlongEdge;
-              double cellWidth = grid.getDx(1)/2.0;
-              double cutoffGuess;
-
-              if (exactResult != 0.0 && totalIonFlux != 0.0)
-              {
-                double refCoord[3];
-                refCoord[0] = 1;
-
-                std::vector<double> basisAtPoint(rightEdgeNodeNums.size());
-
-                // upper boundary for integration
-                double b = grid.getDx(1)/2.0;
-                // cutoffGuess is between -dV/2 and +dV/2
-                double nextCutoffGuess = -grid.getDx(1)/2.0 + excessFraction*grid.getDx(1);
-
-                //double nextCutoffGuess = -grid.getDx(1)/fluxInEntireCell*( totalIonFlux - totalFluxAlongEdge - fluxInEntireCell/2.0 );
-                
-                double upperBound = grid.getDx(1)/2.0;
-                double lowerBound = -grid.getDx(1)/2.0;
-                
-                double relError; 
-
-                int iterCount = 0;
-
-                do
-                {
-                  cutoffGuess = nextCutoffGuess;
-
-                  if (upperBound == lowerBound || iterCount > 100)
-                    break;
-
-                  double integralResult = 0.0;
-                  // Integrate flux from vCutoff to vUpper
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
-                  {
-                    // physicalCoord (vParallel) is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(b-cutoffGuess)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(b + cutoffGuess);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/(grid.getDx(1)/2.0);
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint, rightEdgeNodeNums);
-                    
-                    for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-                    {
-                      distf.setPtr(sknPtr, ix, js, muIndex);
-                      // Evaluate f at this quadrature point
-                      double fAtPoint = 0.0;
-                      // Loop over 2D basis functions
-                      for (int nodeIndex = 0; nodeIndex < rightEdgeNodeNums.size(); nodeIndex++)
-                        fAtPoint += sknPtr[rightEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
-
-                      // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
-                      // integration width
-                      integralResult += scaleFactor*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
-                    }
-                  }
-                  
-                  relError = (integralResult - exactResult)/exactResult;
-
-                  if (iterCount > 50)
-                  {
-                    std::cout << "iterCount = " << iterCount << std::endl;
-                    std::cout << "relError = " << fabs(relError) << std::endl;
-                    std::cout << "integralResult = " << integralResult << std::endl;
-                    std::cout << "exactResult = " << exactResult << std::endl;
-                    std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
-                    std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
-                  }
-
-                  if (relError < 0)
-                    upperBound = cutoffGuess;
-                  else
-                    lowerBound = cutoffGuess;
-
-                  nextCutoffGuess = 0.5*(lowerBound + upperBound);
-                  iterCount++;
-                }
-                while (fabs(relError) > cutoffTolerance);
-                //std::cout << "Iterations (R) = " << iterCount << std::endl;
-              }
-
-              // store cutoff velocity
-              data[1] = cellCentroid[1] + cutoffGuess;
-            }
-            
-            foundCutoffVelocity = true;
-            // Scale all values by appropriate fraction to conserve flux
+            // We have already iterated past and found the cutoff velocity.
             // Copy data into ghost after rotating skin cell data by 180 degrees
             for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
             {
-              distf.setPtr(sknPtr, ix, js, muIndex);
               distf.setPtr(gstPtr, ix+1, jg, muIndex);
+              distf.setPtr(sknPtr, ix, js, muIndex);
 
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+              for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+                gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
             }
-          }
-        }
-        else
-        {
-          // We have already iterated past and found the cutoff velocity.
-          // Copy data into ghost after rotating skin cell data by 180 degrees
-          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-          {
-            distf.setPtr(gstPtr, ix+1, jg, muIndex);
-            distf.setPtr(sknPtr, ix, js, muIndex);
-
-            for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-              gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
           }
         }
       }
     }
     
     
+#ifdef HAVE_MPI
+// I'm not sure this yet works with an MPI decomposition of velocity space.
+// But it should work with a decomposition of configuration space, or z in
+// this 1X2V case.(Manaure Francisquez, 11/06/2013)
+    if (localRgn.getLower(1) != globalRgn.getLower(1))
+      throw Lucee::Except("SOL3DElectrostaticDistFuncReflectionBCUpdater does not work with parallel decomposition of velocity space!");
+#endif
+
     if (applyLeftEdge)
     {
-      int ix = globalRgn.getLower(0); // left skin cell x index
-      double cellCentroid[3];
-      int idx[3];
-      bool foundCutoffVelocity = false;
-      double totalFluxAlongEdge = 0.0; 
-
-      // Find flux at left edge
-      double totalIonFlux = momentsAtEdgesIon[3];
-
-      for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
+      if (localRgn.getLower(0) == globalRgn.getLower(0))
       {
-        idx[0] = ix;
-        idx[1] = js;
-        idx[2] = globalRgn.getLower(2);
+        int ix = globalRgn.getLower(0); // left skin cell x index
+        double cellCentroid[3];
+        int idx[3];
+        bool foundCutoffVelocity = false;
+        double totalFluxAlongEdge = 0.0; 
 
-        nodalBasis->setIndex(idx);
-        grid.setIndex(idx);
-        grid.getCentroid(cellCentroid);
+        // Find flux at left edge
+        double totalIonFlux = momentsAtEdgesIon[3];
 
-        // Don't need to loop over right-moving cells
-        if (cellCentroid[1] > 0.0)
-          break;
-
-        double fluxInEntireCell = 0.0;
-        // At this value of v_parallel, need to integrate flux over all mu
-        for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+        for (int js=0, jg=globalRgn.getUpper(1)-1; jg>=0; ++js, --jg)
         {
-          idx[2] = muIndex;
-          distf.setPtr(sknPtr, ix, js, muIndex);
-          
-          // Copy nodes on left edge into a vector
-          Eigen::VectorXd leftEdgeData(leftEdgeNodeNums.size());
-          
-          for (int edgeNodeIndex = 0; edgeNodeIndex < leftEdgeData.rows(); edgeNodeIndex++)
-            leftEdgeData(edgeNodeIndex) = sknPtr[leftEdgeNodeNums[edgeNodeIndex]]; 
-          
-          // Interpolate nodal data to quadrature points on the edge
-          Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrixLeftEdge*leftEdgeData;
-        
-          // Integrate v*f over entire cell using gaussian quadrature
-          for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
-          {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*physicalV*
-              leftEdgeQuadData(quadNodeIndex);
-          }
-        }
+          idx[0] = ix;
+          idx[1] = js;
+          idx[2] = globalRgn.getLower(2);
 
-        if (foundCutoffVelocity == false)
-        {
-          if (totalFluxAlongEdge + fluxInEntireCell > totalIonFlux)
-          {
-            totalFluxAlongEdge += fluxInEntireCell;
+          nodalBasis->setIndex(idx);
+          grid.setIndex(idx);
+          grid.getCentroid(cellCentroid);
 
-            // Set to no inflow condition then go on to next cell
-            for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+          // Don't need to loop over right-moving cells
+          if (cellCentroid[1] > 0.0)
+            break;
+
+          double fluxInEntireCell = 0.0;
+          // At this value of v_parallel, need to integrate flux over all mu
+          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+          {
+            idx[2] = muIndex;
+            distf.setPtr(sknPtr, ix, js, muIndex);
+            
+            // Copy nodes on left edge into a vector
+            Eigen::VectorXd leftEdgeData(leftEdgeNodeNums.size());
+            
+            for (int edgeNodeIndex = 0; edgeNodeIndex < leftEdgeData.rows(); edgeNodeIndex++)
+              leftEdgeData(edgeNodeIndex) = sknPtr[leftEdgeNodeNums[edgeNodeIndex]]; 
+            
+            // Interpolate nodal data to quadrature points on the edge
+            Eigen::VectorXd leftEdgeQuadData = edgeNodeInterpMatrixLeftEdge*leftEdgeData;
+          
+            // Integrate v*f over entire cell using gaussian quadrature
+            for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
             {
-              distf.setPtr(gstPtr, ix-1, jg, muIndex);
+              double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*grid.getDx(1)/2.0;
+              fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*physicalV*
+                leftEdgeQuadData(quadNodeIndex);
+            }
+          }
+
+          if (foundCutoffVelocity == false)
+          {
+            if (totalFluxAlongEdge + fluxInEntireCell > totalIonFlux)
+            {
+              totalFluxAlongEdge += fluxInEntireCell;
+
+              // Set to no inflow condition then go on to next cell
+              for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+              {
+                distf.setPtr(gstPtr, ix-1, jg, muIndex);
+                
+                for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+                  gstPtr[componentIndex] = 0.0;
+              }
+            }
+            else
+            {
+              // This is the cell that contains the cutoff velocity
               
-              for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-                gstPtr[componentIndex] = 0.0;
+              // Figure out fraction of cell that contains the excess flux
+              // (Flux over what is needed for equivalence with Gamma_i)
+              double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
+              //std::cout << "excessFraction (R) = " << excessFraction << std::endl;
+
+              // Search for cutoff velocity if needed
+              if (computeCutoffVelocities == true)
+              {
+                // desired result for integrating from flux vCutoff to vUpper in this cell
+                double exactResult = totalIonFlux - totalFluxAlongEdge;
+                double cellWidth = grid.getDx(1)/2.0;
+                double cutoffGuess;
+
+                if (exactResult != 0.0 && totalIonFlux != 0.0)
+                {
+                  double refCoord[3];
+                  refCoord[0] = -1;
+
+                  std::vector<double> basisAtPoint(leftEdgeNodeNums.size());
+
+                  // upper boundary for integration
+                  double b = -grid.getDx(1)/2.0;
+                  // cutoffGuess is between -dV/2 and +dV/2
+                  double nextCutoffGuess = grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
+                  // Initial guess will be negative of cutoff velocity found on right edge
+                  if(applyRightEdge == true)
+                    nextCutoffGuess = -data[1] - cellCentroid[1];
+                  
+                  double upperBound = grid.getDx(1)/2.0;
+                  double lowerBound = -grid.getDx(1)/2.0;
+                  
+                  double relError; 
+
+                  int iterCount = 0;
+
+                  do
+                  {
+                    cutoffGuess = nextCutoffGuess;
+
+                    if (upperBound == lowerBound || iterCount > 100)
+                      break;
+
+                    double integralResult = 0.0;
+                    // Integrate flux from vCutoff to vUpper
+                    for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
+                    {
+                      // physicalCoord is between -deltaV/2 and +deltaV/2
+                      double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
+                        + 0.5*(cutoffGuess + b);
+                      // refCoord is between -1 and +1
+                      refCoord[1] = physicalCoord/cellWidth;
+                      refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
+                      
+                      // Evaluate all basis functions at coordinate
+                      nodalBasis->evalBasis(refCoord, basisAtPoint, leftEdgeNodeNums);
+                      for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+                      {
+                        distf.setPtr(sknPtr, ix, js, muIndex);
+                        // Evaluate f at this quadrature point
+                        double fAtPoint = 0.0;
+                        // Loop over 2D basis functions
+                        for (int nodeIndex = 0; nodeIndex < leftEdgeNodeNums.size(); nodeIndex++)
+                          fAtPoint += sknPtr[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
+
+                        // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
+                        // integration width
+                        integralResult += scaleFactor*(cutoffGuess-b)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                      }
+                    }
+                    
+                    relError = (integralResult - exactResult)/exactResult;
+
+                    if (iterCount > 50)
+                    {
+                      std::cout << "iterCount = " << iterCount << std::endl;
+                      std::cout << "relError = " << fabs(relError) << std::endl;
+                      std::cout << "integralResult = " << integralResult << std::endl;
+                      std::cout << "exactResult = " << exactResult << std::endl;
+                      std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
+                      std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
+                    }
+
+                    if (relError > 0)
+                      upperBound = cutoffGuess;
+                    else
+                      lowerBound = cutoffGuess;
+
+                    nextCutoffGuess = 0.5*(lowerBound + upperBound);
+                    iterCount++;
+                  }
+                  while (fabs(relError) > cutoffTolerance);
+                  //std::cout << "Iterations (L) = " << iterCount << std::endl;
+                }
+
+                // store cutoff velocity
+                data[0] = cellCentroid[1] + cutoffGuess;
+              }
+
+              foundCutoffVelocity = true;
+              
+              // Scale all values by appropriate fraction to conserve flux
+              // Copy data into ghost after rotating skin cell data by 180 degrees
+              for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
+              {
+                distf.setPtr(sknPtr, ix, js, muIndex);
+                distf.setPtr(gstPtr, ix-1, jg, muIndex);
+
+                for (int k = 0; k < nlocal; k++)
+                  gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+              }
             }
           }
           else
           {
-            // This is the cell that contains the cutoff velocity
-            
-            // Figure out fraction of cell that contains the excess flux
-            // (Flux over what is needed for equivalence with Gamma_i)
-            double excessFraction = (fluxInEntireCell + totalFluxAlongEdge - totalIonFlux)/fluxInEntireCell;
-            //std::cout << "excessFraction (R) = " << excessFraction << std::endl;
-
-            // Search for cutoff velocity if needed
-            if (computeCutoffVelocities == true)
-            {
-              // desired result for integrating from flux vCutoff to vUpper in this cell
-              double exactResult = totalIonFlux - totalFluxAlongEdge;
-              double cellWidth = grid.getDx(1)/2.0;
-              double cutoffGuess;
-
-              if (exactResult != 0.0 && totalIonFlux != 0.0)
-              {
-                double refCoord[3];
-                refCoord[0] = -1;
-
-                std::vector<double> basisAtPoint(leftEdgeNodeNums.size());
-
-                // upper boundary for integration
-                double b = -grid.getDx(1)/2.0;
-                // cutoffGuess is between -dV/2 and +dV/2
-                double nextCutoffGuess = grid.getDx(1)/2.0 - excessFraction*grid.getDx(1);
-                // Initial guess will be negative of cutoff velocity found on right edge
-                if(applyRightEdge == true)
-                  nextCutoffGuess = -data[1] - cellCentroid[1];
-                
-                double upperBound = grid.getDx(1)/2.0;
-                double lowerBound = -grid.getDx(1)/2.0;
-                
-                double relError; 
-
-                int iterCount = 0;
-
-                do
-                {
-                  cutoffGuess = nextCutoffGuess;
-
-                  if (upperBound == lowerBound || iterCount > 100)
-                    break;
-
-                  double integralResult = 0.0;
-                  // Integrate flux from vCutoff to vUpper
-                  for (int gaussNodeIndex = 0; gaussNodeIndex < gaussEdgeOrdinates.rows(); gaussNodeIndex++)
-                  {
-                    // physicalCoord is between -deltaV/2 and +deltaV/2
-                    double physicalCoord = 0.5*(cutoffGuess-b)*gaussEdgeOrdinates(gaussNodeIndex, 1)
-                      + 0.5*(cutoffGuess + b);
-                    // refCoord is between -1 and +1
-                    refCoord[1] = physicalCoord/cellWidth;
-                    refCoord[2] = gaussEdgeOrdinates(gaussNodeIndex, 2);
-                    
-                    // Evaluate all basis functions at coordinate
-                    nodalBasis->evalBasis(refCoord, basisAtPoint, leftEdgeNodeNums);
-                    for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-                    {
-                      distf.setPtr(sknPtr, ix, js, muIndex);
-                      // Evaluate f at this quadrature point
-                      double fAtPoint = 0.0;
-                      // Loop over 2D basis functions
-                      for (int nodeIndex = 0; nodeIndex < leftEdgeNodeNums.size(); nodeIndex++)
-                        fAtPoint += sknPtr[leftEdgeNodeNums[nodeIndex]]*basisAtPoint[nodeIndex];
-
-                      // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
-                      // integration width
-                      integralResult += scaleFactor*(cutoffGuess-b)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
-                    }
-                  }
-                  
-                  relError = (integralResult - exactResult)/exactResult;
-
-                  if (iterCount > 50)
-                  {
-                    std::cout << "iterCount = " << iterCount << std::endl;
-                    std::cout << "relError = " << fabs(relError) << std::endl;
-                    std::cout << "integralResult = " << integralResult << std::endl;
-                    std::cout << "exactResult = " << exactResult << std::endl;
-                    std::cout << "upperBound = " << upperBound/cellWidth << std::endl;
-                    std::cout << "lowerBound = " << lowerBound/cellWidth << std::endl;
-                  }
-
-                  if (relError > 0)
-                    upperBound = cutoffGuess;
-                  else
-                    lowerBound = cutoffGuess;
-
-                  nextCutoffGuess = 0.5*(lowerBound + upperBound);
-                  iterCount++;
-                }
-                while (fabs(relError) > cutoffTolerance);
-                //std::cout << "Iterations (L) = " << iterCount << std::endl;
-              }
-
-              // store cutoff velocity
-              data[0] = cellCentroid[1] + cutoffGuess;
-            }
-
-            foundCutoffVelocity = true;
-            
-            // Scale all values by appropriate fraction to conserve flux
+            // We have already iterated past and found the cutoff velocity.
             // Copy data into ghost after rotating skin cell data by 180 degrees
+            // Set to no inflow condition then go on to next cell
             for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
             {
               distf.setPtr(sknPtr, ix, js, muIndex);
               distf.setPtr(gstPtr, ix-1, jg, muIndex);
 
-              for (int k = 0; k < nlocal; k++)
-                gstPtr[k] = excessFraction*sknPtr[rotMap[k]];
+              for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
+                gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
             }
-          }
-        }
-        else
-        {
-          // We have already iterated past and found the cutoff velocity.
-          // Copy data into ghost after rotating skin cell data by 180 degrees
-          // Set to no inflow condition then go on to next cell
-          for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-          {
-            distf.setPtr(sknPtr, ix, js, muIndex);
-            distf.setPtr(gstPtr, ix-1, jg, muIndex);
-
-            for (int componentIndex = 0; componentIndex < nlocal; componentIndex++)
-              gstPtr[componentIndex] = sknPtr[rotMap[componentIndex]];
           }
         }
       }
