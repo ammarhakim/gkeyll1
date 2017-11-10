@@ -62,7 +62,7 @@ namespace Lucee
     private:
       // vector of neutral velocities and collision frequency
       std::vector<double> velocityNeut;
-      double nu;
+      double nu_ei, nu_en, nu_in;
   };
 }
 
