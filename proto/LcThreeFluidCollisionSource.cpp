@@ -174,7 +174,7 @@ namespace Lucee
     src[1] = gammaIonization*mass_e*ux_n + Rx_ei;
     src[2] = gammaIonization*mass_e*uy_n + Ry_ei;
     src[3] = gammaIonization*mass_e*uz_n + Rz_ei;
-    src[6] = gammaIonization*mass_i*ux_n;// - Rx_ei;
+    src[6] = gammaIonization*mass_i*ux_n - Rx_ei;
     src[7] = gammaIonization*mass_i*uy_n - Ry_ei;
     src[8] = gammaIonization*mass_i*uz_n - Rz_ei;
     src[11] = -gammaIonization*mass_n*ux_n; 
