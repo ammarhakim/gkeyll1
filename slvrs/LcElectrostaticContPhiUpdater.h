@@ -92,6 +92,12 @@ namespace Lucee
       Vec globalSrc, initGuess;
 /** Krylov subspace method context */
       KSP ksp;
+/** Index set for making copies of solution */
+      IS is;
+/** Petsc vectors for local copy of data */
+      Vec localData;
+/** Scatter object to get data onto local processor */
+      VecScatter vecSctr;
 /** Map of rows to Dirichlet BC values */
       std::map<int, double> rowBcValues;
 /** Flags to indicated periodic directions */
@@ -119,6 +125,21 @@ namespace Lucee
  * of the same size.
  */
       void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix, Eigen::MatrixXd& destinationMatrix);
+/**
+ * Copy data from Petsc field to Gkeyll fields.
+ *
+ * @param ptFld Input Petsc field.
+ * @param gkFld Output Gkeyll field.
+ */
+      void copyFromPetscField(Vec ptFld, Lucee::Field<1, double>& gkFld);
+
+/**
+ * Copy data from Gkeyll to Petsc fields.
+ *
+ * @param gkFld Input Gkeyll field.
+ * @param ptFld Output Petsc field.
+ */
+      void copyFromGkeyllField(const Lucee::Field<1, double>& gkFld, Vec ptFld);
   };
 }
 
