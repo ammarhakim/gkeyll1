@@ -18,7 +18,7 @@ namespace Lucee
   const char *NeutralDragForceSource::id = "NeutralDragForce";
 
   NeutralDragForceSource::NeutralDragForceSource()
-    : Lucee::PointSourceIfc(4, 4)
+    : Lucee::PointSourceIfc(10, 10)
   { 
     // takes in [rho, rho*u, rho*v, rho*w,] and computes
     // sources for [rho*u, rho*v, rho*w, Er]
