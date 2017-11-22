@@ -69,6 +69,7 @@ set (proto_SOURCES
   LcMultiplyFieldsUpdater.cpp
   LcMusclHancock1DUpdater.cpp
   LcNeutralDragForceSource.cpp
+  LcNodalContinuumKineticSEE.cpp
   LcNodalCopy1DTo3DFieldUpdater.cpp
   LcNodalCopy2DTo4DFieldUpdater.cpp
   LcNodalCopy3DTo5DFieldUpdater.cpp
