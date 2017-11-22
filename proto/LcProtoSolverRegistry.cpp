@@ -61,6 +61,7 @@
 #include <LcMultiplyFieldsUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNeutralDragForceSource.h>
+#include <LcNodalContinuumKineticSEE.h>
 #include <LcNodalCopy1DTo3DFieldUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNodalCopy3DTo5DFieldUpdater.h>
@@ -314,6 +315,12 @@ namespace Lucee
       .append<Lucee::RecoveryDG3DUpdater>()
 
       .append<Lucee::RunningAverageOfFieldCalc<3> >()
+
+      .append<Lucee::NodalContinuumKineticSEE<1, 1> >()
+      .append<Lucee::NodalContinuumKineticSEE<1, 2> >()
+      .append<Lucee::NodalContinuumKineticSEE<1, 3> >()
+      .append<Lucee::NodalContinuumKineticSEE<2, 2> >()
+      .append<Lucee::NodalContinuumKineticSEE<2, 3> >()
 
       .append<Lucee::NodalDgConstGravitySrcUpdater<1> >()
       .append<Lucee::NodalDgConstGravitySrcUpdater<2> >()
