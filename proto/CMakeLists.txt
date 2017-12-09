@@ -49,6 +49,7 @@ set (proto_SOURCES
   LcFiniteVolumeToLinearDGUpdater.cpp
   LcFixBadStairSteppedCellsUpdater.cpp  
   LcGradLinearDGToFiniteVolumeUpdater.cpp
+  LcGeneralZonalAverage.cpp
   LcInitNodesFromMatrixMarketUpdater.cpp
   LcIntegrateField.cpp
   LcIntegrateFieldAlongLine.cpp
