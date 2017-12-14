@@ -201,8 +201,8 @@ namespace Lucee
 	while (velSeq.step()) {
 	  int idx[VDIM];
 	  velSeq.fillWithIndex(idx);
-	  for (unsigned d = 0; d < VDIM; ++d)
-	    idxSkin[CDIM + d] = idx[d]; 
+	  for (unsigned dim = 0; dim < VDIM; ++dim)
+	    idxSkin[CDIM + dim] = idx[dim]; 
 	  distf.setPtr(distfPtrSkin, idxSkin);
 	  
 	  phaseBasis->setIndex(idxSkin);
@@ -248,7 +248,7 @@ namespace Lucee
   {
     double delta_e0 = P_inf + (P_hat-P_inf) * 
       exp(-pow(fabs(EIn-E_hat)/W, p_e)/p_e);
-    double delta_e = delta_e0 * (1 + e_1*(1 - cosThetaIn*cosThetaIn));
+    double delta_e = delta_e0 * (1 + e_1*(1 - pow(cosThetaIn, e_2)));
     double f_e = delta_e * 2 *
       exp(-(EOut-EIn)*(EOut-EIn)/(2*sigma_e*sigma_e)) / 
       (sqrt(2*M_PI)*sigma_e*erf(EIn/(sqrt(2)*sigma_e)));
