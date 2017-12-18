@@ -72,6 +72,10 @@ namespace Lucee
   {
     UpdaterIfc::initialize();
 
+    const Lucee::StructuredGridBase<3>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<3> >();
+    double surfAreaComputational = grid.getDx(1)*grid.getDx(2);
+
     unsigned nlocal = nodalBasis->getNumNodes();
     std::vector<unsigned> yRef(nlocal), xRef(nlocal);
 
@@ -94,6 +98,10 @@ namespace Lucee
     // Get the interpolation matrix for the right edge quadrature points.
     nodalBasis->getSurfUpperGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
       gaussEdgeWeights);
+    // Remove spatial scale from gauss weights to support non-uniform grid.
+    // Account for them in update section.
+    for (int quadIndex = 0; quadIndex < numEdgeQuadNodes; quadIndex++)
+      gaussEdgeWeights[quadIndex] = gaussEdgeWeights[quadIndex]/surfAreaComputational;
 
     rightEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfUpperNodes(0));
     leftEdgeNodeNums = std::vector<int>(nodalBasis->getNumSurfLowerNodes(0));
@@ -122,6 +130,11 @@ namespace Lucee
     gaussEdgeOrdinatesLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, 3);
     nodalBasis->getSurfLowerGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
       gaussEdgeWeightsLeftEdge);
+    // Remove spatial scale from gauss weights to support non-uniform grid.
+    // Account for them in update section.
+    for (int quadIndex = 0; quadIndex < numEdgeQuadNodes; quadIndex++)
+      gaussEdgeWeightsLeftEdge[quadIndex] = gaussEdgeWeightsLeftEdge[quadIndex]/surfAreaComputational;
+
     copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrix);
     copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinatesLeftEdge);
     edgeNodeInterpMatrixLeftEdge = Eigen::MatrixXd(numEdgeQuadNodes, leftEdgeNodeNums.size());
@@ -202,6 +215,9 @@ namespace Lucee
           // Don't need to loop over left-moving cells
           if (cellCentroid[1] < 0.0)
             break;
+
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);		// Vpar cell length.
           
           double fluxInEntireCell = 0.0;
           // At this value of v_parallel, need to integrate flux over all mu
@@ -209,6 +225,10 @@ namespace Lucee
           {
             idx[2] = muIndex;
             distf.setPtr(sknPtr, ix, js, muIndex);
+
+            grid.setIndex(idx);
+            dq[2] = grid.getVolume()/grid.getSurfArea(2);	// Mu cell length.
+            double SurfArea = dq[1]*dq[2];
 
             // Copy nodes on right edge into a vector
             Eigen::VectorXd rightEdgeData(rightEdgeNodeNums.size());
@@ -222,8 +242,8 @@ namespace Lucee
             // Integrate v*f over entire cell using gaussian quadrature
             for (int quadNodeIndex = 0; quadNodeIndex < rightEdgeQuadData.rows(); quadNodeIndex++)
             {
-              double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*grid.getDx(1)/2.0;
-              fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*physicalV*
+              double physicalV = cellCentroid[1] + gaussEdgeOrdinates(quadNodeIndex,1)*dq[1]/2.0;
+              fluxInEntireCell += scaleFactor*gaussEdgeWeights[quadNodeIndex]*SurfArea*physicalV*
                 rightEdgeQuadData(quadNodeIndex);
             }
           }
@@ -301,8 +321,13 @@ namespace Lucee
                       nodalBasis->evalBasis(refCoord, basisAtPoint, rightEdgeNodeNums);
                       
                       for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
-                      {
+                       {
                         distf.setPtr(sknPtr, ix, js, muIndex);
+
+                        grid.setIndex(ix, js, muIndex);
+                        dq[2] = grid.getVolume()/grid.getSurfArea(2);	// Mu cell length.
+                        double SurfArea = dq[1]*dq[2];
+
                         // Evaluate f at this quadrature point
                         double fAtPoint = 0.0;
                         // Loop over 2D basis functions
@@ -311,7 +336,7 @@ namespace Lucee
 
                         // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
                         // integration width
-                        integralResult += scaleFactor*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                        integralResult += scaleFactor*(b - cutoffGuess)*gaussEdgeWeights[gaussNodeIndex]*SurfArea/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
                       }
                     }
                     
@@ -405,6 +430,9 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(cellCentroid);
 
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);		// Vpar cell length.
+
           // Don't need to loop over right-moving cells
           if (cellCentroid[1] > 0.0)
             break;
@@ -415,6 +443,10 @@ namespace Lucee
           {
             idx[2] = muIndex;
             distf.setPtr(sknPtr, ix, js, muIndex);
+
+            grid.setIndex(idx);
+            dq[2] = grid.getVolume()/grid.getSurfArea(2);	// Mu cell length.
+            double SurfArea = dq[1]*dq[2];
             
             // Copy nodes on left edge into a vector
             Eigen::VectorXd leftEdgeData(leftEdgeNodeNums.size());
@@ -428,9 +460,9 @@ namespace Lucee
             // Integrate v*f over entire cell using gaussian quadrature
             for (int quadNodeIndex = 0; quadNodeIndex < leftEdgeQuadData.rows(); quadNodeIndex++)
             {
-              double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*grid.getDx(1)/2.0;
-              fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*physicalV*
-                leftEdgeQuadData(quadNodeIndex);
+              double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLeftEdge(quadNodeIndex,1)*dq[1]/2.0;
+              fluxInEntireCell += scaleFactor*gaussEdgeWeightsLeftEdge[quadNodeIndex]*SurfArea*
+                physicalV*leftEdgeQuadData(quadNodeIndex);
             }
           }
 
@@ -511,6 +543,11 @@ namespace Lucee
                       for (int muIndex = globalRgn.getLower(2); muIndex < globalRgn.getUpper(2); muIndex++)
                       {
                         distf.setPtr(sknPtr, ix, js, muIndex);
+
+                        grid.setIndex(ix, js, muIndex);
+                        dq[2] = grid.getVolume()/grid.getSurfArea(2);	// Mu cell length.
+                        double SurfArea = dq[1]*dq[2];
+            
                         // Evaluate f at this quadrature point
                         double fAtPoint = 0.0;
                         // Loop over 2D basis functions
@@ -519,7 +556,7 @@ namespace Lucee
 
                         // Need to divide by gaussEdgeWeights by cell width in V_parallel then multiply by
                         // integration width
-                        integralResult += scaleFactor*(cutoffGuess-b)*gaussEdgeWeights[gaussNodeIndex]/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
+                        integralResult += scaleFactor*(cutoffGuess-b)*gaussEdgeWeights[gaussNodeIndex]*SurfArea/grid.getDx(1)*fAtPoint*(cellCentroid[1] + physicalCoord);
                       }
                     }
                     
