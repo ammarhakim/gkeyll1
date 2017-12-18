@@ -319,6 +319,14 @@ namespace Lucee
       void setGridData(const Lucee::Region<NDIM, int>& localRgn,
         const Lucee::Region<NDIM, int>& globalRgn, const Lucee::Region<NDIM, double>& compSpace);
 
+/**
+ * Check if direction is periodic.
+ *
+ * @param dir Direction to check
+ * @return True if periodic, false otherwise
+ */
+      bool isPeriodicDir(unsigned dir) const { return isPeriodic[dir]; }
+
 /** Index into current cell */
       mutable int currIdx[NDIM];
 /** Local region indexed by grid */
