@@ -102,6 +102,10 @@ namespace Lucee
       std::map<int, double> rowBcValues;
 /** Flags to indicated periodic directions */
       bool periodicFlgs[1];
+/** Should source be adjusted? */
+      bool adjustSource;
+/** Flag to indicate if all directions are periodic */
+      bool allPeriodic;
 /**
  * Matrix of gaussian quadrature locations.
  * There are three columns by default for (x,y,z)
@@ -140,6 +144,17 @@ namespace Lucee
  * @param ptFld Output Petsc field.
  */
       void copyFromGkeyllField(const Lucee::Field<1, double>& gkFld, Vec ptFld);
+
+      void DoPetscAssembly(Mat& mat, bool isFinal = true);
+
+/**
+ ** Compute integral of field over the complete domain.
+ **
+ ** @param fld Field to integrate.
+ ** @param shareFlag Flag to indicate if nodes are shared.
+ ** @return integral of field over domain.
+ **/
+      double getFieldIntegral(const Lucee::Field<1, double>& fld, bool shareFlag);
   };
 }
 
