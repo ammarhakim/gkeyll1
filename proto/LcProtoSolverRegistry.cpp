@@ -41,6 +41,7 @@
 #include <LcFiniteVolumeToLinearDGUpdater.h>
 #include <LcFixBadStairSteppedCellsUpdater.h>
 #include <LcGradLinearDGToFiniteVolumeUpdater.h>
+//#include <LcGeneralZonalAverage.h>
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
@@ -61,6 +62,7 @@
 #include <LcMultiplyFieldsUpdater.h>
 #include <LcMusclHancock1DUpdater.h>
 #include <LcNeutralDragForceSource.h>
+#include <LcNodalContinuumKineticSEE.h>
 #include <LcNodalCopy1DTo3DFieldUpdater.h>
 #include <LcNodalCopy2DTo4DFieldUpdater.h>
 #include <LcNodalCopy3DTo5DFieldUpdater.h>
@@ -190,7 +192,13 @@ namespace Lucee
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<1> >()
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<2> >()
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<3> >()
-
+      
+      // .append<Lucee::GeneralZonalAverage<1> >()
+      // .append<Lucee::GeneralZonalAverage<2> >()
+      // .append<Lucee::GeneralZonalAverage<3> >()
+      // .append<Lucee::GeneralZonalAverage<4> >()
+      // .append<Lucee::GeneralZonalAverage<5> >()
+      
       .append<Lucee::InitNodesFromMatrixMarketUpdater<1> >()
       .append<Lucee::InitNodesFromMatrixMarketUpdater<2> >()
       .append<Lucee::InitNodesFromMatrixMarketUpdater<3> >()
@@ -314,6 +322,12 @@ namespace Lucee
       .append<Lucee::RecoveryDG3DUpdater>()
 
       .append<Lucee::RunningAverageOfFieldCalc<3> >()
+
+      .append<Lucee::NodalContinuumKineticSEE<1, 1> >()
+      .append<Lucee::NodalContinuumKineticSEE<1, 2> >()
+      .append<Lucee::NodalContinuumKineticSEE<1, 3> >()
+      .append<Lucee::NodalContinuumKineticSEE<2, 2> >()
+      .append<Lucee::NodalContinuumKineticSEE<2, 3> >()
 
       .append<Lucee::NodalDgConstGravitySrcUpdater<1> >()
       .append<Lucee::NodalDgConstGravitySrcUpdater<2> >()

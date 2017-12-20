@@ -112,28 +112,28 @@ namespace Lucee
  *
  * @param dx Grid spacing.  
  */
-      void calcLDGLStencil(double dx, double Delm, double Delp);
+      void calcLDGLStencil(double dx);
 
 /**
  * Set stencils for LDG-R scheme 
  *
  * @param dx Grid spacing.  
  */
-      void calcLDGRStencil(double dx, double Delm, double Delp);
+      void calcLDGRStencil(double dx);
 
 /**
  * Set stencils for LDG-S scheme 
  *
  * @param dx Grid spacing.  
  */
-      void calcLDGSStencil(double dx, double Delm, double Delp);
+      void calcLDGSStencil(double dx);
 
 /**
  * Set stencils for RDG scheme 
  *
  * @param dx Grid spacing.  
  */
-      void calcRDGStencil(double dx, double Delm, double Delp);
+      void calcRDGStencil(double dx, double dxL, double dxR);
   };
 }
 

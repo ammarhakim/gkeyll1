@@ -444,8 +444,8 @@ namespace Lucee
   FemGenPoissonStructUpdater<NDIM>::assembleStiffness(
     const Lucee::Field<NDIM, double>& src, const Lucee::Field<NDIM, double>& numDens)
   {
-//#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
-#define DMSG(s) ;
+#define DMSG(s) std::cout << "Rank " << this->getComm()->getRank() << ": " << s << std::endl;
+//#define DMSG(s) ;
 
     DMSG("Inside assembleStiffness");
 
@@ -477,6 +477,8 @@ namespace Lucee
 
     Lucee::ConstFieldPtr<double> numDensPtr = numDens.createConstPtr();
 
+    DMSG("** BASIC ASSEMBLY");
+    
     double tmsv_d = 0.0;
     tmStart = clock();
 // loop, creating global stiffness matrix
@@ -511,6 +513,8 @@ namespace Lucee
     
     DoPetscAssembly(stiffMat, false);
 
+    DMSG("** BASIC ASSEMBLY DONE! STARTING ON PERIODIC BC MODS PHASE I");
+
     tmStart = clock();
 // Begin process of modification to handle periodic BCs. The code in
 // the following two loops basically does the following. It modifies
@@ -525,6 +529,7 @@ namespace Lucee
     {
       if (periodicFlgs[d] == true)
       {
+        DMSG("**---> PERIODIC BC ");
 // fetch number of nodes on face of element
         unsigned nsl =  nodalBasis->getNumSurfUpperNodes(d);
 
@@ -613,10 +618,16 @@ namespace Lucee
             &modVals[0], ADD_VALUES);
         }
       }
+      DMSG("**---> DONE PERIODIC BC ");
     }
-    
+
+
+    DMSG("***** DOING ASSEMBLY AFTER PERIODIC PHASE I");
 // reassemble matrix after modification
     DoPetscAssembly(stiffMat, false);
+    DMSG("***** DONE! ASSEMBLY AFTER PERIODIC PHASE II");
+
+    DMSG("** PERIODIC BC MODS PHASE I DONE! STARTING ON PHASE II");
 
 // NOTE: This second loop is needed even though it is essentially the
 // same as the previous one as Petsc does not allow to call
@@ -678,6 +689,8 @@ namespace Lucee
     
 // reassemble matrix after modification
     DoPetscAssembly(stiffMat, false);
+
+    DMSG("** PERIODIC BC MODS PHASE II DONE!");
 
 // list of values to force periodicity
     double periodicVals[2] = {-1, 1};
@@ -806,6 +819,9 @@ namespace Lucee
   Lucee::UpdaterStatus
   FemGenPoissonStructUpdater<NDIM>::update(double t)
   {
+    std::cout << "***** INSIDE FemGenPoissonStructUpdater " << std::endl;
+
+    
 // set flag to indicate we should delete PetSc vectors/matrices
     runOnce = true;
 
@@ -815,6 +831,7 @@ namespace Lucee
     const Lucee::Field<NDIM, double>& numDens = this->getInp<Lucee::Field<NDIM, double> >(1);
     Lucee::Field<NDIM, double>& sol = this->getOut<Lucee::Field<NDIM, double> >(0);
 
+    std::cout << "***** Constructing matrix " << std::endl;    
 // construct stiffness matrix
     clock_t tmStart = clock();
     if (fixedNumberDensity)
@@ -828,6 +845,8 @@ namespace Lucee
     }
     clock_t tmEnd = clock();
     totAssemblyTime = (double) (tmEnd-tmStart)/CLOCKS_PER_SEC;
+
+    std::cout << "***** DONE Constructing matrix " << std::endl;    
     
     Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion(); 
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();

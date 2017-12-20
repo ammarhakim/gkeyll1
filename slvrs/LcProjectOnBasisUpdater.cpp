@@ -138,7 +138,7 @@ namespace Lucee
         ordSeq.fillWithIndex(ordIdx);
 // compute coordinate of ordinate
         for (unsigned n=0; n<NDIM; ++n)
-          xmu[n] = 0.5*grid.getDx(n)*mu[ordIdx[n]] + xc[n];
+          xmu[n] = 0.5*(grid.getVolume()/grid.getSurfArea(n))*mu[ordIdx[n]] + xc[n];
 // evaluate function at ordinate
         evaluateFunction(*L, t, xmu, res);
 
