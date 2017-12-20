@@ -86,16 +86,18 @@ namespace Lucee
     switch (schemeType)
     {
       case SC_LDG_L:
-          calcLDGLStencil(dx,1.0,1.0);
+          calcLDGLStencil(dx);
           break;
       case SC_LDG_R:
-          calcLDGRStencil(dx,1.0,1.0);
+          calcLDGRStencil(dx);
           break;
       case SC_LDG_S:
-          calcLDGSStencil(dx,1.0,1.0);
+          calcLDGSStencil(dx);
           break;
       case SC_RDG:
-          calcRDGStencil(dx,1.0,1.0);
+          // One doesn't actually need to precompute these because
+          // they are computed again in the update section.
+          // calcRDGStencil(dx,1.0,1.0);
           break;
       default:
           // can not happen
@@ -148,56 +150,77 @@ namespace Lucee
       seq.fillWithIndex(idx);
       diffOut.setPtr(diffOutPtr, idx);
 
-//    std::cout << "inpFld = " << inpFldPtr[0] << std::endl;
-      std::vector<double> tmpVec(polyOrder+1);
-      std::vector<double> outMod(polyOrder+1);
-
       grid.setIndex(idx);
       double dx = grid.getVolume()/grid.getSurfArea(0);
       idxL[0] = idx[0]-1; // cell attached to lower face
-      grid.setIndex(idxL);
-      double dxL = grid.getVolume()/grid.getSurfArea(0);
       idxR[0] = idx[0]+1; // cell attached to upper face
-      grid.setIndex(idxR);
-      double dxR = grid.getVolume()/grid.getSurfArea(0);
-    std::cout << "dx = " << dx << " | dxL = " << dxL << " | dxR = " << dxR << std::endl;
 
-      double DeltaM = dxL/dx;
-      double DeltaP = dx/dxR;
+      switch (schemeType)
+      {
+        // At the moment it seems that with non-uniform grid the LDG
+        // stencil only changes via the dx factor. Could be wrong though.
+        case SC_LDG_L:
+            fact *= dxMin*dxMin/(dx*dx);
+            break;
+        case SC_LDG_R:
+            fact *= dxMin*dxMin/(dx*dx);
+            break;
+        case SC_LDG_S:
+            fact *= dxMin*dxMin/(dx*dx);
+            break;
+        case SC_RDG:
+            grid.setIndex(idxL);
+            double dxL = grid.getVolume()/grid.getSurfArea(0);
+            grid.setIndex(idxR);
+            double dxR = grid.getVolume()/grid.getSurfArea(0);
 
-      calcRDGStencil(dx,DeltaM,DeltaP);
+            calcRDGStencil(dx,dxL,dxR);
+            break;
+        default:
+            // can not happen
+            ;
+      }
 
+//...........  USE THE FOLLOWING FOR A MODAL representation .............//
 // add in contribution to cell from current cell
       inpFld.setPtr(inpFldPtr, idx);
-//    translate nodal to modal.
-      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
-      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
-//      matVec(fact, iMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
-//      fact = pow(dxMin/dx,2.0);
-      matVec(fact, iMat, &tmpVec[0], 1.0, &outMod[0]);
+      matVec(fact, iMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
 // add in contribution from cells attached to lower/upper faces
-//      idxL[0] = idx[0]-1; // cell attached to lower face
       inpFld.setPtr(inpFldPtr, idxL);
-//    translate nodal to modal.
-      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
-      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
-//      matVec(fact, lowerMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
-//      fact = pow(dxMin/dxL,2.0);
-      matVec(fact, lowerMat, &tmpVec[0], 1.0, &outMod[0]);
+      matVec(fact, lowerMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
-//      idxR[0] = idx[0]+1; // cell attached to upper face
       inpFld.setPtr(inpFldPtr, idxR);
-//    translate nodal to modal.
-      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
-      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
-//      matVec(fact, upperMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
-//      fact = pow(dxMin/dxR,2.0);
-      matVec(fact, upperMat, &tmpVec[0], 1.0, &outMod[0]);
+      matVec(fact, upperMat, &inpFldPtr[0], 1.0, &diffOutPtr[0]);
 
-//    translate modal to nodal.
-      diffOutPtr[0] = outMod[0]-outMod[1];
-      diffOutPtr[1] = outMod[0]+outMod[1];
+//...........  USE THE FOLLOWING FOR A NODAL representation .............//
+// In this section the coefficients from a piecewise linear nodal expansion
+// are translated to coefficients of a modal expansion. 
+//      std::vector<double> tmpVec(polyOrder+1);
+//      std::vector<double> outMod(polyOrder+1);
+//// add in contribution to cell from current cell
+//      inpFld.setPtr(inpFldPtr, idx);
+////    translate nodal to modal.
+//      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
+//      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
+//      matVec(fact, iMat, &tmpVec[0], 1.0, &outMod[0]);
+//
+//// add in contribution from cells attached to lower/upper faces
+//      inpFld.setPtr(inpFldPtr, idxL);
+////    translate nodal to modal.
+//      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
+//      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
+//      matVec(fact, lowerMat, &tmpVec[0], 1.0, &outMod[0]);
+//
+//      inpFld.setPtr(inpFldPtr, idxR);
+////    translate nodal to modal.
+//      tmpVec[0] = 0.5*(inpFldPtr[0]+inpFldPtr[1]);
+//      tmpVec[1] = 0.5*(inpFldPtr[1]-inpFldPtr[0]);
+//      matVec(fact, upperMat, &tmpVec[0], 1.0, &outMod[0]);
+//
+////    translate modal to nodal.
+//      diffOutPtr[0] = outMod[0]-outMod[1];
+//      diffOutPtr[1] = outMod[0]+outMod[1];
     }
 
     return Lucee::UpdaterStatus(true, dt*cfl/cfla);
@@ -226,7 +249,7 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcLDGLStencil(double dx, double Delm, double Delp)
+  DGDiffusionUpdater1D::calcLDGLStencil(double dx)
   {
     double dx2 = dx*dx;
 
@@ -254,26 +277,26 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcLDGRStencil(double dx, double Delm, double Delp)
+  DGDiffusionUpdater1D::calcLDGRStencil(double dx)
   {
     double dx2 = dx*dx;
 
     if (polyOrder == 1)
     {
-      lowerMat(0,0) =  4/dx2;
-      lowerMat(0,1) =  4/dx2;
-      lowerMat(1,0) = -6/dx2;
-      lowerMat(1,1) = -6/dx2;
+      lowerMat(0,0) =  4.0/dx2;
+      lowerMat(0,1) =  4.0/dx2;
+      lowerMat(1,0) = -6.0/dx2;
+      lowerMat(1,1) = -6.0/dx2;
 
-      iMat(0,0) =  -8/dx2;
-      iMat(0,1) =  -2/dx2;
-      iMat(1,0) =  -6/dx2;
-      iMat(1,1) = -24/dx2;
+      iMat(0,0) =  -8.0/dx2;
+      iMat(0,1) =  -2.0/dx2;
+      iMat(1,0) =  -6.0/dx2;
+      iMat(1,1) = -24.0/dx2;
 
-      upperMat(0,0) =  4/dx2;
-      upperMat(0,1) = -2/dx2;
-      upperMat(1,0) = 12/dx2;
-      upperMat(1,1) = -6/dx2;
+      upperMat(0,0) =  4.0/dx2;
+      upperMat(0,1) = -2.0/dx2;
+      upperMat(1,0) = 12.0/dx2;
+      upperMat(1,1) = -6.0/dx2;
     }
     else
     {
@@ -282,26 +305,26 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcLDGSStencil(double dx, double Delm, double Delp)
+  DGDiffusionUpdater1D::calcLDGSStencil(double dx)
   {
     double dx2 = dx*dx;
 
     if (polyOrder == 1)
     {
-      lowerMat(0,0) =  4/dx2;
-      lowerMat(0,1) =  3/dx2;
-      lowerMat(1,0) = -9/dx2;
-      lowerMat(1,1) = -6/dx2;
+      lowerMat(0,0) =  4.0/dx2;
+      lowerMat(0,1) =  3.0/dx2;
+      lowerMat(1,0) = -9.0/dx2;
+      lowerMat(1,1) = -6.0/dx2;
 
-      iMat(0,0) = -8/dx2;
-      iMat(0,1) = 0;
-      iMat(1,0) = 0;
-      iMat(1,1) = -24/dx2;
+      iMat(0,0) =  -8.0/dx2;
+      iMat(0,1) =   0.0;
+      iMat(1,0) =   0.0;
+      iMat(1,1) = -24.0/dx2;
 
-      upperMat(0,0) =  4/dx2;
-      upperMat(0,1) = -3/dx2;
-      upperMat(1,0) =  9/dx2;
-      upperMat(1,1) = -6/dx2;
+      upperMat(0,0) =  4.0/dx2;
+      upperMat(0,1) = -3.0/dx2;
+      upperMat(1,0) =  9.0/dx2;
+      upperMat(1,1) = -6.0/dx2;
     }
     else
     {
@@ -310,38 +333,46 @@ namespace Lucee
   }
 
   void
-  DGDiffusionUpdater1D::calcRDGStencil(double dx, double Delm, double Delp)
+  DGDiffusionUpdater1D::calcRDGStencil(double dx, double dxL, double dxR)
   {
-    double rdxSq2  = 2.0/(dx*dx);
+    double Delm = dxL/dx;
+    double Delp = dx/dxR;
+    double rdxSq2    = 2.0/(dx*dx);
     double r1pDelmCu = 1.0/pow(1.0+Delm,3.0);
     double r1pDelpCu = 1.0/pow(1.0+Delp,3.0);
-    double DelmSq  = Delm*Delm;
-    double DelpSq  = Delp*Delp;
+    double DelmSq    = Delm*Delm;
+    double DelpSq    = Delp*Delp;
 
     if (polyOrder == 1)
     {
+        // The following are the matrices needed for uniform grids.
 //      lowerMat(0,0) = 9.0/(4.0*dx2);
 //      lowerMat(0,1) = 5.0/(4.0*dx2);
 //      lowerMat(1,0) = (-15.0)/(4.0*dx2);
 //      lowerMat(1,1) = (-7.0)/(4.0*dx2);
-      lowerMat(0,0) = rdxSq2*r1pDelmCu*9.0*Delm;
-      lowerMat(0,1) = rdxSq2*r1pDelmCu*(-1+Delm+5.0*DelmSq)/Delm; 
-      lowerMat(1,0) = rdxSq2*r1pDelmCu*3.0*(1.0-6.0*Delm);
-      lowerMat(1,1) = rdxSq2*r1pDelmCu*(3.0-10.0*DelmSq)/Delm;
 
 //      iMat(0,0) = (-9.0)/(2.0*dx2);
 //      iMat(0,1) = 0;
 //      iMat(1,0) = 0;
 //      iMat(1,1) = (-23.0)/(2.0*dx2);
-      iMat(0,0) = -rdxSq2*9.0*(r1pDelpCu*DelpSq+r1pDelmCu*Delm); 
-      iMat(0,1) = rdxSq2*(r1pDelpCu*(1.0-Delp-5.0*DelpSq)+r1pDelmCu*Delp*(5.0+Delp-DelpSq));
-      iMat(1,0) = rdxSq2*3.0*(r1pDelpCu*(-9.0*DelpSq-3.0*Delp-1)+r1pDelmCu*Delm*(9.0+3.0*Delm+DelmSq));
-      iMat(1,1) = rdxSq2*(-r1pDelpCu*Delp*(8.0+15.0*Delp)-r1pDelmCu*Delm*(15.0+8.0*Delm));
 
 //      upperMat(0,0) = 9.0/(4.0*dx2);
 //      upperMat(0,1) = (-5.0)/(4.0*dx2);
 //      upperMat(1,0) = 15.0/(4.0*dx2);
 //      upperMat(1,1) = (-7.0)/(4.0*dx2);
+
+      // Matrices needed in the non-uniform grid case.
+      // These equals the ones above when Delm=Delp=1.
+      lowerMat(0,0) = rdxSq2*r1pDelmCu*9.0*Delm;
+      lowerMat(0,1) = rdxSq2*r1pDelmCu*(-1.0+Delm+5.0*DelmSq)/Delm; 
+      lowerMat(1,0) = rdxSq2*r1pDelmCu*3.0*(1.0-6.0*Delm);
+      lowerMat(1,1) = rdxSq2*r1pDelmCu*(3.0-10.0*DelmSq)/Delm;
+
+      iMat(0,0) = -rdxSq2*9.0*(r1pDelpCu*DelpSq+r1pDelmCu*Delm); 
+      iMat(0,1) = rdxSq2*(r1pDelpCu*(1.0-Delp-5.0*DelpSq)+r1pDelmCu*Delm*(5.0+Delm-DelmSq));
+      iMat(1,0) = rdxSq2*3.0*(r1pDelpCu*(-9.0*DelpSq-3.0*Delp-1.0)+r1pDelmCu*Delm*(9.0+3.0*Delm+DelmSq));
+      iMat(1,1) = rdxSq2*(-r1pDelpCu*Delp*(8.0+15.0*Delp)-r1pDelmCu*Delm*(15.0+8.0*Delm));
+
       upperMat(0,0) = rdxSq2*DelpSq*r1pDelpCu*9.0; 
       upperMat(0,1) = rdxSq2*DelpSq*r1pDelpCu*(-5.0-Delp+DelpSq);
       upperMat(1,0) = rdxSq2*DelpSq*r1pDelpCu*3.0*(6.0-Delp);
