@@ -133,15 +133,18 @@ namespace Lucee
     unsigned numSurfNodes = phaseBasis->getNumSurfLowerNodes(dir);
     std::vector<int> surfNodesSkin(numSurfNodes),
       surfNodesGhost(numSurfNodes);
+    std::vector<double> surfWeightsSkin(numSurfNodes);
     //nodalBasis->setIndex(idx);
     if (edge == LC_LOWER_EDGE)
     {
       phaseBasis->getSurfLowerNodeNums(dir, surfNodesSkin);
+      phaseBasis->getSurfLowerWeights(dir, surfWeightsSkin);
       phaseBasis->getSurfUpperNodeNums(dir, surfNodesGhost);
     }
     else
     {
       phaseBasis->getSurfUpperNodeNums(dir, surfNodesSkin);
+      phaseBasis->getSurfUpperWeights(dir, surfWeightsSkin);
       phaseBasis->getSurfLowerNodeNums(dir, surfNodesGhost);
     }
 
@@ -185,19 +188,19 @@ namespace Lucee
       phaseBasis->getNodalCoordinates(phaseNodeCoords);
       for (int nodeGhost = 0; nodeGhost < numSurfNodes; ++nodeGhost) {
 	EOut = 0;
-	cosThetaOut = 0;
 	for (int dim = 0; dim < VDIM; dim++)
 	  EOut += phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM + dim) *
 	      phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM + dim);
 	if (EOut != 0) {
 	  cosThetaOut = 
-	    fabs(phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM+dir)) / sqrt(EOut); 
+	    fabs(phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM+dir)) / 
+	    sqrt(EOut); 
 	  EOut = 0.5*mass*EOut/elemCharge;
 	} else
 	  cosThetaOut = 1;
 
 	// inner loop over skin cells
-	distfPtrGhost[surfNodesGhost[nodeGhost]] = 0;
+	distfPtrGhost[surfNodesGhost[nodeGhost]] = 0.0;
 	while (velSeq.step()) {
 	  int idx[VDIM];
 	  velSeq.fillWithIndex(idx);
@@ -207,20 +210,22 @@ namespace Lucee
 	  
 	  phaseBasis->setIndex(idxSkin);
 	  phaseBasis->getNodalCoordinates(phaseNodeCoords);
+
 	  for (int nodeSkin = 0; nodeSkin < numSurfNodes; ++nodeSkin) {
 	    EIn = 0;
-	    cosThetaIn = 0;
 	    for (int dim = 0; dim < VDIM; ++dim)
 	      EIn += phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM + dim) *
 		phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM + dim);
 	    if (EIn != 0) {
-	      EIn = 0.5*mass*EIn/elemCharge;
 	      cosThetaIn =
-		fabs(phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM+dir)) / sqrt(EIn);
+		fabs(phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM+dir)) / 
+		sqrt(EIn);
+	      EIn = 0.5*mass*EIn/elemCharge;
 
 	      distfPtrGhost[surfNodesGhost[nodeGhost]] += 
 		Reflect(EIn, cosThetaIn, EOut, cosThetaOut) * 
-		distfPtrSkin[surfNodesSkin[nodeSkin]];
+		distfPtrSkin[surfNodesSkin[nodeSkin]] * 
+		surfWeightsSkin[nodeSkin] * mass;
 	    }
 	  }
 	}
