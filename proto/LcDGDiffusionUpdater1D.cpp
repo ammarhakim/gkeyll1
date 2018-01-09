@@ -152,6 +152,7 @@ namespace Lucee
 
       grid.setIndex(idx);
       double dx = grid.getVolume()/grid.getSurfArea(0);
+      double dxL, dxR;
       idxL[0] = idx[0]-1; // cell attached to lower face
       idxR[0] = idx[0]+1; // cell attached to upper face
 
@@ -170,9 +171,9 @@ namespace Lucee
             break;
         case SC_RDG:
             grid.setIndex(idxL);
-            double dxL = grid.getVolume()/grid.getSurfArea(0);
+            dxL = grid.getVolume()/grid.getSurfArea(0);
             grid.setIndex(idxR);
-            double dxR = grid.getVolume()/grid.getSurfArea(0);
+            dxR = grid.getVolume()/grid.getSurfArea(0);
 
             calcRDGStencil(dx,dxL,dxR);
             break;
