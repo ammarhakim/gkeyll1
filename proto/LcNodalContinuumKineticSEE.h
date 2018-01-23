@@ -81,17 +81,18 @@ namespace Lucee
   private:
     // Pointer to phase space basis functions 
     Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
-    // Pointer to configuration space basis functions
-    Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
     
     unsigned dir, edge;
     
-    std::vector<double> volWeightsPhase;
-    Eigen::MatrixXd volQuadPhase;
-    Eigen::MatrixXd invMassMatrixPhase;
+    double mass, elemCharge;
+
+    // Furman model - backscaterred electrons
+    double E_hat, P_hat, P_inf, W, p_e, e_1, e_2, sigma_e;
     
-    void copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
-			  Eigen::MatrixXd& destinationMatrix);
+    double Reflect(double EIn, 
+		   double cosThetaIn, 
+		   double EOut,
+		   double cosThetaOut);
   };
 }
 

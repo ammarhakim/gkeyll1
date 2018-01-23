@@ -15,10 +15,6 @@
 // loki includes
 #include <loki/Singleton.h>
 
-// std includes
-#include <cmath>
-#include <vector>
-
 namespace Lucee
 {
   static const unsigned LC_LOWER_EDGE = 0;
@@ -81,9 +77,28 @@ namespace Lucee
 	dir = tbl.getNumber("dir");
       else
 	throw Lucee::Except("NodalContinuumKineticSEE::readInput: Must specify direction using 'dir'");
-    } else {
+    } else 
       dir = 0;
-    }
+
+    if (tbl.hasNumber("mass")) 
+      mass = tbl.getNumber("mass");
+    else
+      throw Lucee::Except("NodalContinuumKineticSEE::readInput: Must specify mass using 'mass'");
+
+    if (tbl.hasNumber("elemCharge")) 
+      elemCharge = tbl.getNumber("elemCharge");
+    else
+      throw Lucee::Except("NodalContinuumKineticSEE::readInput: Must specify elementary charge using 'elemCharge'");
+
+    // Furman model -- needs to be done properly
+    E_hat = tbl.getNumber("E_hat");
+    P_hat = tbl.getNumber("P_hat");
+    P_inf = tbl.getNumber("P_inf");
+    W = tbl.getNumber("W");
+    p_e = tbl.getNumber("p_e");
+    e_1 = tbl.getNumber("e_1");
+    e_2 = tbl.getNumber("e_2");
+    sigma_e = tbl.getNumber("sigma_e");
   }
 
   //------------------------------------------------------------------
@@ -93,30 +108,6 @@ namespace Lucee
   NodalContinuumKineticSEE<CDIM, VDIM>::initialize()
   {
     UpdaterIfc::initialize();
-
-    // get number of nodes in  phase space
-    unsigned numNodesPhase = phaseBasis->getNumNodes();
-
-    // get volume interpolation matrices for phase space element
-    int numVolQuadPhase = phaseBasis->getNumGaussNodes();
-    volWeightsPhase.resize(numVolQuadPhase);
-    Lucee::Matrix<double> tempVolQuadPhase(numVolQuadPhase, numNodesPhase);
-    Lucee::Matrix<double> tempVolCoordsPhase(numVolQuadPhase, (unsigned) PNC);
-
-    phaseBasis->getGaussQuadData(tempVolQuadPhase,
-				 tempVolCoordsPhase,
-				 volWeightsPhase);
-
-    volQuadPhase = Eigen::MatrixXd::Zero(numVolQuadPhase, numNodesPhase);
-    copyLuceeToEigen(tempVolQuadPhase, volQuadPhase);
-
-    // Get phase space mass matrix
-    Lucee::Matrix<double> tempMassMatrixPhase(numNodesPhase, numNodesPhase);
-    phaseBasis->getMassMatrix(tempMassMatrixPhase);
-    Eigen::MatrixXd massMatrixPhase(numNodesPhase, numNodesPhase);
-    copyLuceeToEigen(tempMassMatrixPhase, massMatrixPhase);
-    invMassMatrixPhase = Eigen::MatrixXd::Zero(numNodesPhase, numNodesPhase);
-    invMassMatrixPhase = massMatrixPhase.inverse();
   }
 
   //------------------------------------------------------------------
@@ -128,7 +119,7 @@ namespace Lucee
     const unsigned NDIM = CDIM+VDIM;
     int idxGhost[NDIM], idxSkin[NDIM];
     int loGhost[NDIM], upGhost[NDIM];
-    int loVel[NDIM], upVel[NDIM];
+    int loVel[VDIM], upVel[VDIM];
 
     Lucee::Field<NDIM, double>& distf =
       this->getOut<Lucee::Field<NDIM, double> >(0);
@@ -137,9 +128,25 @@ namespace Lucee
 
     // get field for node coordinates (both velocity and energetic) 
     unsigned numNodes = phaseBasis->getNumNodes();
-    Lucee::Matrix<double> phaseNodeCoordsV(numNodes, PNC);  
-    Lucee::Matrix<double> phaseNodeCoordsESkin(numNodes, 2);  
-    Lucee::Matrix<double> phaseNodeCoordsEGhost(numNodes, 2);
+    Lucee::Matrix<double> phaseNodeCoords(numNodes, PNC);  
+    // get surface nodes
+    unsigned numSurfNodes = phaseBasis->getNumSurfLowerNodes(dir);
+    std::vector<int> surfNodesSkin(numSurfNodes),
+      surfNodesGhost(numSurfNodes);
+    std::vector<double> surfWeightsSkin(numSurfNodes);
+    //nodalBasis->setIndex(idx);
+    if (edge == LC_LOWER_EDGE)
+    {
+      phaseBasis->getSurfLowerNodeNums(dir, surfNodesSkin);
+      phaseBasis->getSurfLowerWeights(dir, surfWeightsSkin);
+      phaseBasis->getSurfUpperNodeNums(dir, surfNodesGhost);
+    }
+    else
+    {
+      phaseBasis->getSurfUpperNodeNums(dir, surfNodesSkin);
+      phaseBasis->getSurfUpperWeights(dir, surfWeightsSkin);
+      phaseBasis->getSurfLowerNodeNums(dir, surfNodesGhost);
+    }
 
     // Create a ghost layer (phase-space) region ...
     for (unsigned d = 0; d < NDIM; ++d) { 
@@ -160,90 +167,71 @@ namespace Lucee
       loVel[d] = distf.getLower(CDIM + d);
       upVel[d] = distf.getUpper(CDIM + d);
     }
-    Lucee::Region<NDIM, int> velRgn = 
-      Lucee::Region<NDIM, int>(loVel, upVel);
+    Lucee::Region<VDIM, int> velRgn = 
+      Lucee::Region<VDIM, int>(loVel, upVel);
     // .. and sequencer
-    Lucee::RowMajorSequencer<NDIM> velSeq(velRgn);
+    Lucee::RowMajorSequencer<VDIM> velSeq(velRgn);
 
-    Eigen::MatrixXd rhsMatrix(numNodes, numNodes);
-    Eigen::VectorXd resultVector(numNodes);
-    Eigen::VectorXd distfVector(numNodes);
-    double E, cosTheta, integralResult;
+
+    double EIn, cosThetaIn, EOut, cosThetaOut;
     while (ghostSeq.step()) {
       ghostSeq.fillWithIndex(idxGhost);
       distf.setPtr(distfPtrGhost, idxGhost);
 
       ghostSeq.fillWithIndex(idxSkin);
       if (edge == LC_LOWER_EDGE)
-	idxSkin[dir] = distf.getLower(dir);
+	idxSkin[dir] = idxSkin[dir] + 1;
       else
-	idxSkin[dir] = distf.getUpper(dir);
+	idxSkin[dir] = idxSkin[dir] - 1;
 
       phaseBasis->setIndex(idxGhost);
-      phaseBasis->getNodalCoordinates(phaseNodeCoordsV);
-      for (int node = 0; node < numNodes; ++node) {
-	E = 0;
-	cosTheta = 0;
+      phaseBasis->getNodalCoordinates(phaseNodeCoords);
+      for (int nodeGhost = 0; nodeGhost < numSurfNodes; ++nodeGhost) {
+	EOut = 0;
 	for (int dim = 0; dim < VDIM; dim++)
-	  E += phaseNodeCoordsV(node, CDIM + dim) *
-	      phaseNodeCoordsV(node, CDIM + dim);
-	cosTheta = sqrt((E - phaseNodeCoordsV(node, CDIM + dir) * 
-			   phaseNodeCoordsV(node, CDIM + dir) )/E);
-	phaseNodeCoordsEGhost(node, 0) = E;
-	phaseNodeCoordsEGhost(node, 1) = cosTheta;
+	  EOut += phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM + dim) *
+	      phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM + dim);
+	if (EOut != 0) {
+	  cosThetaOut = 
+	    fabs(phaseNodeCoords(surfNodesGhost[nodeGhost], CDIM+dir)) / 
+	    sqrt(EOut); 
+	  EOut = 0.5*mass*EOut/elemCharge;
+	} else
+	  cosThetaOut = 1;
 
-	distfPtrGhost[node] = 0;
-      }
+	// inner loop over skin cells
+	distfPtrGhost[surfNodesGhost[nodeGhost]] = 0.0;
+	while (velSeq.step()) {
+	  int idx[VDIM];
+	  velSeq.fillWithIndex(idx);
+	  for (unsigned dim = 0; dim < VDIM; ++dim)
+	    idxSkin[CDIM + dim] = idx[dim]; 
+	  distf.setPtr(distfPtrSkin, idxSkin);
+	  
+	  phaseBasis->setIndex(idxSkin);
+	  phaseBasis->getNodalCoordinates(phaseNodeCoords);
 
-      while (velSeq.step()) {
-	int idx[VDIM];
-	velSeq.fillWithIndex(idx);
-	for (unsigned d = 0; d < VDIM; ++d)
-	  idxSkin[CDIM + d] = idx[d]; 
-	distf.setPtr(distfPtrSkin, idxSkin);
+	  for (int nodeSkin = 0; nodeSkin < numSurfNodes; ++nodeSkin) {
+	    EIn = 0;
+	    for (int dim = 0; dim < VDIM; ++dim)
+	      EIn += phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM + dim) *
+		phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM + dim);
+	    if (EIn != 0) {
+	      cosThetaIn =
+		fabs(phaseNodeCoords(surfNodesSkin[nodeSkin], CDIM+dir)) / 
+		sqrt(EIn);
+	      EIn = 0.5*mass*EIn/elemCharge;
 
-	phaseBasis->setIndex(idxGhost);
-	phaseBasis->getNodalCoordinates(phaseNodeCoordsV);
-	for (int node = 0; node < numNodes; ++node) {
-	  E = 0;
-	  cosTheta = 0;
-	  for (int dim = 0; dim < VDIM; dim++)
-	    E += phaseNodeCoordsV(node, CDIM + dim) *
-	      phaseNodeCoordsV(node, CDIM + dim);
-	  cosTheta = sqrt((E - phaseNodeCoordsV(node, CDIM+dir) * 
-			   phaseNodeCoordsV(node, CDIM+dir))/E);
-	  phaseNodeCoordsESkin(node, 0) = E;
-	  phaseNodeCoordsESkin(node, 1) = cosTheta;
-	}
-
-	// integrate
-	for (int i = 0; i < numNodes; ++i) {
-	  for (int j = 0; j < numNodes; ++j) {
-	    integralResult = 0;
-	    for (int gaussIdx = 0; gaussIdx<volWeightsPhase.size(); ++gaussIdx)
-	      integralResult +=
-		//Rsee(phaseNodeCoordsESkin(gaussIdx, 0),
-		//     phaseNodeCoordsESkin(gaussIdx, 1),
-		//     phaseNodeCoordsEGhost(gaussIdx, 0),
-		//     phaseNodeCoordsEGhost(gaussIdx, 1)) * 
-		volWeightsPhase[gaussIdx] * 
-		volQuadPhase(gaussIdx, i) * 
-		volQuadPhase(gaussIdx, j);
-	    rhsMatrix(i, j) = integralResult;
+	      distfPtrGhost[surfNodesGhost[nodeGhost]] += 
+		Reflect(EIn, cosThetaIn, EOut, cosThetaOut) * 
+		distfPtrSkin[surfNodesSkin[nodeSkin]] * 
+		surfWeightsSkin[nodeSkin] * mass;
+	    }
 	  }
 	}
-	rhsMatrix = invMassMatrixPhase*rhsMatrix;
-
-	for (int node = 0; node < numNodes; ++node)
-	  distfVector(node) = distfPtrSkin[node];
-	resultVector.noalias() = rhsMatrix*distfVector;
-	
-	for (int node = 0; node < numNodes; ++node)
-	  distfPtrGhost[node] += resultVector(node);
+	velSeq.reset();
       }
-      velSeq.reset();
     }
-    
     return Lucee::UpdaterStatus(true, 0);
   }
 
@@ -256,15 +244,20 @@ namespace Lucee
   }
 
   //------------------------------------------------------------------
-  //-- Copy Lucee to Eigen -------------------------------------------
+  //-- Reflection Function -------------------------------------------
   template <unsigned CDIM, unsigned VDIM>
-  void
-  NodalContinuumKineticSEE<CDIM, VDIM>::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
-    Eigen::MatrixXd& destinationMatrix)
+  double NodalContinuumKineticSEE<CDIM, VDIM>::Reflect(double EIn, 
+						       double cosThetaIn, 
+						       double EOut,
+						       double cosThetaOut)
   {
-    for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); ++rowIndex)
-      for (int colIndex = 0; colIndex < destinationMatrix.cols(); ++colIndex)
-        destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
+    double delta_e0 = P_inf + (P_hat-P_inf) * 
+      exp(-pow(fabs(EIn-E_hat)/W, p_e)/p_e);
+    double delta_e = delta_e0 * (1 + e_1*(1 - pow(cosThetaIn, e_2)));
+    double f_e = delta_e * 2 *
+      exp(-(EOut-EIn)*(EOut-EIn)/(2*sigma_e*sigma_e)) / 
+      (sqrt(2*M_PI)*sigma_e*erf(EIn/(sqrt(2)*sigma_e)));
+    return f_e * cosThetaIn * cosThetaOut;
   }
  
   //------------------------------------------------------------------
