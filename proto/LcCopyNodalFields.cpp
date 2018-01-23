@@ -30,6 +30,7 @@ namespace Lucee
   template <> const char *CopyNodalFieldsUpdater<2,4>::id = "CopyNodalFields2D_4D";
   template <> const char *CopyNodalFieldsUpdater<2,5>::id = "CopyNodalFields2D_5D";
   template <> const char *CopyNodalFieldsUpdater<3,5>::id = "CopyNodalFields3D_5D";
+  template <> const char *CopyNodalFieldsUpdater<4,5>::id = "CopyNodalFields4D_5D";
 
 
   template <> const char *CopyNodalFieldsUpdater<1,1>::id = "CopyNodalFields1D"; 
@@ -241,6 +242,7 @@ namespace Lucee
   template class CopyNodalFieldsUpdater<2,4>;
   template class CopyNodalFieldsUpdater<2,5>;
   template class CopyNodalFieldsUpdater<3,5>;
+  template class CopyNodalFieldsUpdater<4,5>;
 
   template class CopyNodalFieldsUpdater<1,1>;
   template class CopyNodalFieldsUpdater<2,2>;

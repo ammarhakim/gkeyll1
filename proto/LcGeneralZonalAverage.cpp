@@ -24,16 +24,35 @@
 
 namespace Lucee
 {
-  template <> const char *GeneralZonalAverage<1>::id = "GeneralZonalAverage1D";
+  //template <> const char *GeneralZonalAverage<1>::id = "GeneralZonalAverage1D";
   template <> const char *GeneralZonalAverage<2>::id = "GeneralZonalAverage2D";
   template <> const char *GeneralZonalAverage<3>::id = "GeneralZonalAverage3D";
   template <> const char *GeneralZonalAverage<4>::id = "GeneralZonalAverage4D";
   template <> const char *GeneralZonalAverage<5>::id = "GeneralZonalAverage5D";
 
   template <unsigned NDIM>
+  bool
+  GeneralZonalAverage<NDIM>::sameAveCoords(unsigned n, unsigned cn, double dxMin,
+							      const Eigen::MatrixXd& phaseC, const Eigen::MatrixXd& confC)
+  {
+    const unsigned ADIM = NDIM-1;
+    for (unsigned dim = 0; dim<ADIM; ++dim)
+      if (! (std::fabs(phaseC(n, dim)-confC(cn, dim))<1e-4*dxMin) )
+        return false;
+    return true;
+  }
+
+  template <unsigned NDIM>
   GeneralZonalAverage<NDIM>::GeneralZonalAverage()
     : Lucee::UpdaterIfc()
   {
+    momentLocal = 0;
+  }
+
+  template <unsigned NDIM>
+  GeneralZonalAverage<NDIM>::~GeneralZonalAverage()
+  {
+    delete momentLocal;
   }
 
   template <unsigned NDIM>
@@ -62,7 +81,7 @@ namespace Lucee
 
   template <unsigned NDIM>
   void
-  GeneralZonalAverage::initialize()
+  GeneralZonalAverage<NDIM>::initialize()
   {
     Lucee::UpdaterIfc::initialize();
     const unsigned ADIM = NDIM-1;
@@ -128,7 +147,7 @@ namespace Lucee
     srcAveMap.resize(volWeightsSource.size());
     
     double dxMin = grid.getDx(0);
-    for (unsigned d=1; d<CDIM; ++d)
+    for (unsigned d=1; d<ADIM; ++d)
       dxMin = std::min(dxMin, grid.getDx(d));
 
     for (unsigned n=0; n<volWeightsSource.size(); ++n)
@@ -173,11 +192,13 @@ namespace Lucee
 
     // Multiply matrices by inverse of mass matrix
     mom0Matrix = massMatrixAve.inverse()*mom0Matrix;
+    //std::cout << " mom0Matrix " << mom0Matrix << std::endl;
     
   }
    
+  template <unsigned NDIM>
   Lucee::UpdaterStatus
-  GeneralZonalAverage::update(double t)
+  GeneralZonalAverage<NDIM>::update(double t)
   {
     const unsigned ADIM = NDIM-1;
     
@@ -186,8 +207,14 @@ namespace Lucee
 
     // get input field (NDIM)
     const Lucee::Field<NDIM, double>& fld = this->getInp<Lucee::Field<NDIM, double> >(0);
+    //std::cout << " input field " << fld << std::endl;
+    
     // get output field (ADIM = NDIM-1)
-    Lucee::Field<ADIM, double>& fldAve = this->getOut<Lucee::Field<ADIM, double> >(0);
+    Lucee::Field<ADIM, double>& momentGlobal = this->getOut<Lucee::Field<ADIM, double> >(0);
+    
+    std::vector<int> coordinateMap;
+    for (int i = 0; i < ADIM; i++)
+      coordinateMap.push_back(i);
 
     if (!momentLocal)
     {
@@ -236,15 +263,22 @@ namespace Lucee
       seq.fillWithIndex(idx);
 
       grid.setIndex(idx);
-      for (int aIndex = 0; aIndex < ADIM; aIndex++)
-        idxAve[aIndex] = idx[coordinateMap[aIndex]];
+      // for (int aIndex = 0; aIndex < ADIM; aIndex++)
+      //   idxAve[aIndex] = idx[coordinateMap[aIndex]];
       //momentLocal->setPtr(momentPtr, idx[0], idx[2], idx[3], idx[4]);  //hard code this?
+      // this is a very inelegant hack
+      idxAve[0] = idx[0]; 
+      idxAve[1] = idx[2];
+      idxAve[2] = idx[3];
+      idxAve[3] = idx[4];
+
       momentLocal->setPtr(momentPtr, idxAve);
       fld.setPtr(fldPtr, idx);
       
       for (int i = 0; i < nlocalSource; i++)
         fldVec(i) = fldPtr[i];
 
+      //std::cout << "fldVec in seq" << fldVec << std::endl;
       // Accumulate contribution to moment from this cell
       Eigen::VectorXd resultVector = mom0Matrix*fldVec;
 
@@ -280,26 +314,37 @@ namespace Lucee
     //       qTarPtr[ncTar*k+tc] = qSrcPtr[ncSrc*tarSrcMap[k]+sc];
     //     }
     //   }
-    }
-
+    // }
+  
     return Lucee::UpdaterStatus();
   }
 
+  template <unsigned NDIM>
   void
-  GeneralZonalAverage::declareTypes()
+  GeneralZonalAverage<NDIM>::declareTypes()
   {
+    const unsigned ADIM = NDIM-1;
     // Input potential on a NDIM field
     this->appendInpVarType(typeid(Lucee::Field<NDIM, double>));
     // Zonal-averaged potential on a NDIM-1 field
     this->appendOutVarType(typeid(Lucee::Field<ADIM, double>));
   }
 
+  template <unsigned NDIM>
   void
-  GeneralZonalAverage::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
+  GeneralZonalAverage<NDIM>::copyLuceeToEigen(const Lucee::Matrix<double>& sourceMatrix,
     Eigen::MatrixXd& destinationMatrix)
   {
     for (int rowIndex = 0; rowIndex < destinationMatrix.rows(); rowIndex++)
       for (int colIndex = 0; colIndex < destinationMatrix.cols(); colIndex++)
         destinationMatrix(rowIndex, colIndex) = sourceMatrix(rowIndex, colIndex);
   }
+
+  //instantiations
+  //template class GeneralZonalAverage<1>;
+  template class GeneralZonalAverage<2>;
+  template class GeneralZonalAverage<3>;
+  template class GeneralZonalAverage<4>;
+  template class GeneralZonalAverage<5>;
+
 }

@@ -36,6 +36,9 @@ namespace Lucee
   template <> const char *SubCartProdDecompRegionCalc<3,5>::id = "SubCartProd5D";
   template <> const char *SubCartProdDecompRegionCalc<3,6>::id = "SubCartProd6D";
 
+  template <> const char *SubCartProdDecompRegionCalc<4,5>::id = "SubCartProd5D";
+  template <> const char *SubCartProdDecompRegionCalc<4,6>::id = "SubCartProd6D";
+
 /**
  * Check if communicator is valid. This basically works under the
  * assumption that an invalid communicator is NULL.
@@ -283,4 +286,7 @@ namespace Lucee
   template class SubCartProdDecompRegionCalc<3,4>;
   template class SubCartProdDecompRegionCalc<3,5>;
   template class SubCartProdDecompRegionCalc<3,6>;
+
+  template class SubCartProdDecompRegionCalc<4,5>;
+  template class SubCartProdDecompRegionCalc<4,6>;
 }

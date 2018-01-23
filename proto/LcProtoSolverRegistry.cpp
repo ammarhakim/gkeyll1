@@ -40,8 +40,8 @@
 #include <LcEnstrophyUpdater.h>
 #include <LcFiniteVolumeToLinearDGUpdater.h>
 #include <LcFixBadStairSteppedCellsUpdater.h>
-#include <LcGradLinearDGToFiniteVolumeUpdater.h>
 #include <LcGeneralZonalAverage.h>
+#include <LcGradLinearDGToFiniteVolumeUpdater.h>
 #include <LcInitNodesFromMatrixMarketUpdater.h>
 #include <LcIntegrateField.h>
 #include <LcIntegrateFieldAlongLine.h>
@@ -193,7 +193,7 @@ namespace Lucee
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<2> >()
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<3> >()
       
-      .append<Lucee::GeneralZonalAverage<1> >()
+      //.append<Lucee::GeneralZonalAverage<1> >()
       .append<Lucee::GeneralZonalAverage<2> >()
       .append<Lucee::GeneralZonalAverage<3> >()
       .append<Lucee::GeneralZonalAverage<4> >()
@@ -289,6 +289,7 @@ namespace Lucee
       .append<Lucee::CopyNodalFieldsUpdater<2,4> >()
       .append<Lucee::CopyNodalFieldsUpdater<2,5> >()
       .append<Lucee::CopyNodalFieldsUpdater<3,5> >()
+      .append<Lucee::CopyNodalFieldsUpdater<4,5> >()
 
       .append<Lucee::CopyNodalFieldsUpdater<1,1> >()
       .append<Lucee::CopyNodalFieldsUpdater<2,2> >()
