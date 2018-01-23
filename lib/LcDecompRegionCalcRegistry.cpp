@@ -58,8 +58,11 @@ namespace Lucee
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<4> > >
       ::Instance()
       .append<Lucee::CartProdDecompRegionCalc<4> >()
-      .append<Lucee::CartGeneralDecompRegionCalc<4> >();
+      .append<Lucee::CartGeneralDecompRegionCalc<4> >()
 
+      .append<Lucee::SubCartProdDecompRegionCalc<4,5> >() 
+      .append<Lucee::SubCartProdDecompRegionCalc<4,6> >();
+    
     Loki::SingletonHolder<Lucee::RegisteredObjList<Lucee::DecompRegionCalcIfc<5> > >
       ::Instance()
       .append<Lucee::CartProdDecompRegionCalc<5> >()
