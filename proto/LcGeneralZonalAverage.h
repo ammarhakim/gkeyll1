@@ -80,6 +80,8 @@ namespace Lucee
       Lucee::NodalFiniteElementIfc<NDIM> *sourceBasis;
 /** Pointer to nodal configuration space (CDIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM-1> *aveBasis;
+/** Integration direction */
+      unsigned intDir;
 /** Zeroth moment matrix */
       Eigen::MatrixXd mom0Matrix;
 /** Space to store moment data for on a processor */
@@ -88,7 +90,7 @@ namespace Lucee
       std::vector<unsigned> srcAveMap;
 /** Boolean for determining if every configuration space node has a phase space node associated with it */
       bool sameAveCoords(unsigned n, unsigned cn, double dxMin,
-        const Eigen::MatrixXd& sourceC, const Eigen::MatrixXd& aveC);
+        unsigned srcDir[NDIM-1], const Eigen::MatrixXd& sourceC, const Eigen::MatrixXd& aveC);
 /**
  * Copy a Lucee-type matrix to an Eigen-type matrix.
  * No checks are performed to make sure source and destination matrices are

@@ -33,11 +33,11 @@ namespace Lucee
   template <unsigned NDIM>
   bool
   GeneralZonalAverage<NDIM>::sameAveCoords(unsigned n, unsigned cn, double dxMin,
-							      const Eigen::MatrixXd& phaseC, const Eigen::MatrixXd& confC)
+    unsigned srcDir[NDIM-1], const Eigen::MatrixXd& phaseC, const Eigen::MatrixXd& confC)
   {
     const unsigned ADIM = NDIM-1;
     for (unsigned dim = 0; dim<ADIM; ++dim)
-      if (! (std::fabs(phaseC(n, dim)-confC(cn, dim))<1e-4*dxMin) )
+      if (! (std::fabs(phaseC(n, srcDir[dim])-confC(cn, dim))<1e-4*dxMin) )
         return false;
     return true;
   }
@@ -76,7 +76,7 @@ namespace Lucee
       throw Lucee::Except(
         "GeneralZonalAverage::readInput: Must specify element to use using 'aveBasis'");
 
-
+    intDir = 1;
   }
 
   template <unsigned NDIM>
@@ -145,6 +145,13 @@ namespace Lucee
     // "orphan" source space nodes are allowed, and an exception is thrown
     // if that occurs.
     srcAveMap.resize(volWeightsSource.size());
+    unsigned srcDir[ADIM];
+    unsigned count = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (d != intDir) 
+        srcDir[count++] = d;
+    }
     
     double dxMin = grid.getDx(0);
     for (unsigned d=1; d<ADIM; ++d)
@@ -154,7 +161,7 @@ namespace Lucee
     {
       bool saFound = false;
       for (unsigned cn=0; cn<volWeightsAve.size(); ++cn)
-        if (sameAveCoords(n, cn, dxMin, volCoordsSource, volCoordsAve))
+        if (sameAveCoords(n, cn, dxMin, srcDir, volCoordsSource, volCoordsAve))
         {
           srcAveMap[n] = cn;
           saFound = true;
@@ -253,6 +260,14 @@ namespace Lucee
     // clear out contents of output field
     (*momentLocal) = 0.0;
 
+    unsigned srcDir[ADIM];
+    unsigned count = 0;
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (d != intDir) 
+        srcDir[count++] = d;
+    }    
+
     // iterators into fields
     Lucee::ConstFieldPtr<double> fldPtr = fld.createConstPtr();
     Lucee::FieldPtr<double> momentPtr = momentLocal->createPtr();
@@ -261,19 +276,12 @@ namespace Lucee
     while(seq.step())
     {
       seq.fillWithIndex(idx);
-
+      for (unsigned d=0; d<ADIM; ++d)
+        idxAve[d] = idx[srcDir[d]];
+      
       grid.setIndex(idx);
-      // for (int aIndex = 0; aIndex < ADIM; aIndex++)
-      //   idxAve[aIndex] = idx[coordinateMap[aIndex]];
-      //momentLocal->setPtr(momentPtr, idx[0], idx[2], idx[3], idx[4]);  //hard code this?
-      // this is a very inelegant hack
-      idxAve[0] = idx[0]; 
-      idxAve[1] = idx[2];
-      idxAve[2] = idx[3];
-      idxAve[3] = idx[4];
-
-      momentLocal->setPtr(momentPtr, idxAve);
       fld.setPtr(fldPtr, idx);
+      momentLocal->setPtr(momentPtr, idxAve);
       
       for (int i = 0; i < nlocalSource; i++)
         fldVec(i) = fldPtr[i];
@@ -292,29 +300,6 @@ namespace Lucee
     TxCommBase *momComm = momentGlobal.getMomComm();
     unsigned xsize = localPositionCells*nlocalAve; // amount to communicate, cells*nodes_per_cell
     momComm->allreduce(xsize, &momentLocal->first(), &momentGlobal.first(), TX_SUM);
-
-    // Copy back to original NDIM grid
-    // Lucee::ConstFieldPtr<double> qSrcPtr = qSrc.createConstPtr();
-    // Lucee::FieldPtr<double> qTarPtr = qTar.createPtr();
-    // // Copy ADIM field to NDIM field
-    // seq.reset(); //does this set grid to zero? 
-    // while (seq.step())
-    // {
-    //   seq.fillWithIndex(idx);
-    //   for (int aIndex = 0; aIndex < ADIM; aIndex++)
-    //     idxAve[aIndex] = idx[coordinateMap[aIndex]];
-    //   qAve.setPtr(qAvePtr, idxAve);
-    //   qSrc.setPtr(qSrcPtr, idx);
-
-    //   for (unsigned k=0; k<nlocalSource; ++k)
-    //   {
-    //     for (unsigned m=0; m<srcComponents.size(); ++m)
-    //     {
-    //       unsigned sc = srcComponents[m], tc = tarComponents[m];
-    //       qTarPtr[ncTar*k+tc] = qSrcPtr[ncSrc*tarSrcMap[k]+sc];
-    //     }
-    //   }
-    // }
   
     return Lucee::UpdaterStatus();
   }
