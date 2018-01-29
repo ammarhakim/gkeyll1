@@ -193,7 +193,6 @@ namespace Lucee
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<2> >()
       .append<Lucee::GradLinearDGToFiniteVolumeUpdater<3> >()
       
-      //.append<Lucee::GeneralZonalAverage<1> >()
       .append<Lucee::GeneralZonalAverage<2> >()
       .append<Lucee::GeneralZonalAverage<3> >()
       .append<Lucee::GeneralZonalAverage<4> >()

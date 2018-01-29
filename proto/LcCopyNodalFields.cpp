@@ -42,11 +42,12 @@ namespace Lucee
   CopyNodalFieldsUpdater<SDIM,TDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
     const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
-    for (unsigned d=0; d<SDIM; ++d)
-      if (! (std::fabs(phaseC(n,coordinateMap[d])-confC(cn,d))<1e-4*dxMin) )
-        return false;
-    return true;
+      for (unsigned d=0; d<SDIM; ++d)
+	if (! (std::fabs(phaseC(n,coordinateMap[d])-confC(cn,d))<1e-4*dxMin) )
+	  return false;
+      return true;
   }
+  
 
   template <unsigned SDIM, unsigned TDIM>
   CopyNodalFieldsUpdater<SDIM,TDIM>::CopyNodalFieldsUpdater()
@@ -115,7 +116,7 @@ namespace Lucee
     else
     {
       for (int i = 0; i < SDIM; i++)
-        coordinateMap.push_back(i);
+	coordinateMap.push_back(i);
     }
   }
 

@@ -76,10 +76,12 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Pointer to nodal phase space (CDIM+VDIM) basis functions to use */
+/** Pointer to nodal source space (NDIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *sourceBasis;
-/** Pointer to nodal configuration space (CDIM) basis functions to use */
+/** Pointer to nodal integrated space (ADIM) basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM-1> *aveBasis;
+/** Pointer to nodal source space (NDIM) basis functions to use */
+//      Lucee::NodalFiniteElementIfc<NDIM> *targetBasis;
 /** Integration direction */
       unsigned intDir;
 /** Zeroth moment matrix */
