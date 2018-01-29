@@ -24,7 +24,6 @@
 
 namespace Lucee
 {
-  //template <> const char *GeneralZonalAverage<1>::id = "GeneralZonalAverage1D";
   template <> const char *GeneralZonalAverage<2>::id = "GeneralZonalAverage2D";
   template <> const char *GeneralZonalAverage<3>::id = "GeneralZonalAverage3D";
   template <> const char *GeneralZonalAverage<4>::id = "GeneralZonalAverage4D";
@@ -37,7 +36,7 @@ namespace Lucee
   {
     const unsigned ADIM = NDIM-1;
     for (unsigned dim = 0; dim<ADIM; ++dim)
-      if (! (std::fabs(phaseC(n, srcDir[dim])-confC(cn, dim))<1e-4*dxMin) )
+      if (! (std::fabs(phaseC(n, srcDir[dim])-confC(cn, dim))<1e-10*dxMin) )
         return false;
     return true;
   }
@@ -96,17 +95,6 @@ namespace Lucee
     // local region to update
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
-    // // Add something like this? (from LcCopyNodalFields)
-    // Lucee::RowMajorSequencer<NDIM> seq(localRgn);
-    // seq.step(); // just to get to first index
-    // int idx[NDIM];
-    // seq.fillWithIndex(idx);
-    // sourceBasis->setIndex(idx);
-    // int idxAve[ADIM];
-    // for (int aIndex = 0; aIndex < ADIM; aIndex++)
-    //   idxAve[aIndex] = idx[coordinateMap[aIndex]];
-    // sourceBasis->setIndex(idxAve); // only first DIM elements are used
-    
     // get number of nodes in initial field and averaged field
     unsigned nlocalAve = aveBasis->getNumNodes();
     unsigned nlocalSource = sourceBasis->getNumNodes();
@@ -199,8 +187,7 @@ namespace Lucee
 
     // Multiply matrices by inverse of mass matrix
     mom0Matrix = massMatrixAve.inverse()*mom0Matrix;
-    //std::cout << " mom0Matrix " << mom0Matrix << std::endl;
-    
+        
   }
    
   template <unsigned NDIM>
@@ -211,14 +198,17 @@ namespace Lucee
     
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->getGrid<Lucee::StructuredGridBase<NDIM> >();
-
+    double L = grid.getComputationalSpace().getShape(intDir);
+    
     // get input field (NDIM)
     const Lucee::Field<NDIM, double>& fld = this->getInp<Lucee::Field<NDIM, double> >(0);
-    //std::cout << " input field " << fld << std::endl;
-    
-    // get output field (ADIM = NDIM-1)
+        
+    // get average input field (ADIM = NDIM-1)
     Lucee::Field<ADIM, double>& momentGlobal = this->getOut<Lucee::Field<ADIM, double> >(0);
-    
+
+    // get output field (NDIM)
+    // Lucee::Field<NDIM, double>& tarFld = this->getOut<Lucee::Field<NDIM, double> >(1);
+
     std::vector<int> coordinateMap;
     for (int i = 0; i < ADIM; i++)
       coordinateMap.push_back(i);
@@ -253,6 +243,7 @@ namespace Lucee
     Lucee::RowMajorSequencer<NDIM> seq(localRgn);
     unsigned nlocalAve = aveBasis->getNumNodes();
     unsigned nlocalSource = sourceBasis->getNumNodes();
+    //unsigned nlocalTarget = nlocalSource;
 
     // total number of local averaged-field space cells
     int localPositionCells = momentGlobal.getExtRegion().getVolume();
@@ -286,7 +277,6 @@ namespace Lucee
       for (int i = 0; i < nlocalSource; i++)
         fldVec(i) = fldPtr[i];
 
-      //std::cout << "fldVec in seq" << fldVec << std::endl;
       // Accumulate contribution to moment from this cell
       Eigen::VectorXd resultVector = mom0Matrix*fldVec;
 
