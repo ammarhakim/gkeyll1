@@ -90,6 +90,30 @@ namespace Lucee
       }
     }
 
+    for (unsigned d=0; d<NDIM; ++d)
+    {
+      if (this->isPeriodicDir(d))
+      {
+        // then go fetch the approproate indexes in 
+        // GLOBAL regions and reset vertex values.
+        int lowerL[1], upperL[1];
+        int lowerG[1], upperG[1];
+        typename Lucee::Region<NDIM, int> globalRgn = this->getGlobalRegion();
+        lowerL[0]  = localRgn.getLower(d);
+        upperL[0]  = localRgn.getUpper(d);
+        lowerG[0]  = globalRgn.getLower(d);
+        upperG[0]  = globalRgn.getUpper(d);
+        if (lowerL[0] == lowerG[0]) {
+          vcoords[d](lowerL[0]-1) = -(vcoords[d](upperG[0])-vcoords[d](upperG[0]-1));
+          vcoords[d](lowerL[0]-2) = -(vcoords[d](upperG[0])-vcoords[d](upperG[0]-2));
+        }
+        if (upperL[0] == upperG[0]) {
+          vcoords[d](upperL[0]+1) = vcoords[d](upperG[0])+(vcoords[d](lowerG[0]+1)-vcoords[d](lowerG[0]));
+          vcoords[d](upperL[0]+2) = vcoords[d](upperG[0])+(vcoords[d](lowerG[0]+2)-vcoords[d](lowerG[0]));
+        }
+      }
+    }
+
 // compute cell sizes
     for (unsigned d=0; d<NDIM; ++d)
     {

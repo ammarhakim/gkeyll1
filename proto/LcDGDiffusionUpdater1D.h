@@ -133,7 +133,7 @@ namespace Lucee
  *
  * @param dx Grid spacing.  
  */
-      void calcRDGStencil(double dx);
+      void calcRDGStencil(double dx, double dxL, double dxR);
   };
 }
 

@@ -20,6 +20,7 @@
 #include <LcUpdaterIfc.h>
 #include <LcVector.h>
 #include <LcDynVector.h>
+#include <LcStructGridField.h>
 
 // eigen includes
 #include <Eigen/Dense>

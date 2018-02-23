@@ -30,6 +30,7 @@ namespace Lucee
   template <> const char *CopyNodalFieldsUpdater<2,4>::id = "CopyNodalFields2D_4D";
   template <> const char *CopyNodalFieldsUpdater<2,5>::id = "CopyNodalFields2D_5D";
   template <> const char *CopyNodalFieldsUpdater<3,5>::id = "CopyNodalFields3D_5D";
+  template <> const char *CopyNodalFieldsUpdater<4,5>::id = "CopyNodalFields4D_5D";
 
 
   template <> const char *CopyNodalFieldsUpdater<1,1>::id = "CopyNodalFields1D"; 
@@ -41,11 +42,12 @@ namespace Lucee
   CopyNodalFieldsUpdater<SDIM,TDIM>::sameConfigCoords(unsigned n, unsigned cn, double dxMin,
     const Lucee::Matrix<double>& phaseC, const Lucee::Matrix<double>& confC)
   {
-    for (unsigned d=0; d<SDIM; ++d)
-      if (! (std::fabs(phaseC(n,coordinateMap[d])-confC(cn,d))<1e-4*dxMin) )
-        return false;
-    return true;
+      for (unsigned d=0; d<SDIM; ++d)
+	if (! (std::fabs(phaseC(n,coordinateMap[d])-confC(cn,d))<1e-4*dxMin) )
+	  return false;
+      return true;
   }
+  
 
   template <unsigned SDIM, unsigned TDIM>
   CopyNodalFieldsUpdater<SDIM,TDIM>::CopyNodalFieldsUpdater()
@@ -114,7 +116,7 @@ namespace Lucee
     else
     {
       for (int i = 0; i < SDIM; i++)
-        coordinateMap.push_back(i);
+	coordinateMap.push_back(i);
     }
   }
 
@@ -241,6 +243,7 @@ namespace Lucee
   template class CopyNodalFieldsUpdater<2,4>;
   template class CopyNodalFieldsUpdater<2,5>;
   template class CopyNodalFieldsUpdater<3,5>;
+  template class CopyNodalFieldsUpdater<4,5>;
 
   template class CopyNodalFieldsUpdater<1,1>;
   template class CopyNodalFieldsUpdater<2,2>;
