@@ -188,6 +188,10 @@ if (PETSC_FOUND)
     LcFemPoissonStructUpdater.cpp
     LcFemGenPoissonStructUpdater.cpp
   )
+else (PETSC_FOUND)
+  set (lcslvrs_SOURCES ${lcslvrs_SOURCES}
+    LcFemPoissonStructEigenUpdater.cpp
+  )
 endif (PETSC_FOUND)
 
 # Create the library

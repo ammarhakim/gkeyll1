@@ -98,10 +98,39 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  unsigned
+  NodalFiniteElementIfc<NDIM>::getNumGlobalNodes(bool periodicFlgs[NDIM]) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumGlobalNodes: Not implemented!");
+    return 0;
+  }
+
+  template <unsigned NDIM>
+  int
+  NodalFiniteElementIfc<NDIM>::getNumInteriorNodes() const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getNumInteriorNodes: Not implemented!");
+    return 0;
+  }
+
+  template <unsigned NDIM>
   void
   NodalFiniteElementIfc<NDIM>::getLocalToGlobal(std::vector<int>& lgMap) const
   {
     throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobal: Not implemented!");
+  }
+
+  template <unsigned NDIM>
+  void
+  NodalFiniteElementIfc<NDIM>::getLocalToGlobalInteriorBLRT(std::vector<int>& lgMap, bool periodicFlgs[NDIM]) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobalInteriorBLRT: Not implemented!");
+  }
+  template <unsigned NDIM>
+  int
+  NodalFiniteElementIfc<NDIM>::getLocalToGlobalInteriorBLRT(bool periodicFlgs[NDIM]) const
+  {
+    throw Lucee::Except("NodalFiniteElementIfc::getLocalToGlobalInteriorBLRT: Not implemented!");
   }
 
   template <unsigned NDIM>
