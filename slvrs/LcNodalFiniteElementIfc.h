@@ -119,12 +119,42 @@ namespace Lucee
       virtual unsigned getNumGlobalNodes() const;
 
 /**
+ * Get number of global nodes in element, modified to account for periodicity remaps (NDIM=2 only)
+ *
+ * @return number of nodes in element.
+ */
+      virtual unsigned getNumGlobalNodes(bool periodicFlgs[NDIM]) const;
+
+/**
+ * Get number of interior (non-boundary) nodes. NDIM=2 only.
+ * @return number of interior nodes.
+ */
+      virtual int getNumInteriorNodes() const;
+
+/**
  * Get mapping of local node numbers in the current cell to global
  * node number. The input vector must be pre-allocated.
  *
  * @param lgMap Local node number to global node number mapping.
  */
       virtual void getLocalToGlobal(std::vector<int>& lgMap) const;
+
+/**
+ * Get mapping of local node numbers in the current cell to global
+ * node number with new interior-boundary mapping. 
+ * The input vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getLocalToGlobalInteriorBLRT(std::vector<int>& lgMap, bool periodicFlgs[NDIM]) const;
+
+/**
+ * Get mapping of only local node 0 in the current cell to global
+ * node number with new interior-boundary mapping. 
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual int getLocalToGlobalInteriorBLRT(bool periodicFlgs[NDIM]) const;
 
 /**
  * Get mapping of local node numbers to global node numbers on lower

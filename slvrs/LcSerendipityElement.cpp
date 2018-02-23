@@ -77,7 +77,7 @@ namespace Lucee
     int shape[NDIM];
     
     for (int dimIndex = 0; dimIndex < NDIM; dimIndex++)
-      shape[dimIndex] = grgn.getShape(dimIndex) + 1;
+      shape[dimIndex] = grgn.getShape(dimIndex) + 1; // extend each dim by 1 cell to make local-to-global mapping easier
     Lucee::Region<NDIM, int> lgRgn(shape);
     
     idxr = RowMajorIndexer<NDIM>(lgRgn);
@@ -213,6 +213,57 @@ namespace Lucee
   }
 
   template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::F1_func(unsigned nx, unsigned ny, unsigned ninterior,
+                               int ix, int iy, bool periodicFlgs[NDIM]) const
+  {
+    // when periodic in the x (resp. y) direction, we will map the right boundary
+    // to the left boundary (resp. top boundary to the bottom boundary)
+    bool x_periodic = periodicFlgs[0];
+    bool y_periodic = periodicFlgs[1];
+    if(iy==0 || (iy==ny && y_periodic)) return ix+ninterior;
+    else if(iy==ny) {
+      //if mapping right side to left side because x-periodic, offset top so that there isn't a gap in the mapping where the right side usually is
+      if(x_periodic) return ix+nx*ny+1; // offset by -(ny-1)
+      else return ix+(nx+1)*ny;
+    }
+    else if(ix==0 || (ix==nx && x_periodic)) return iy+nx+ninterior;
+    else if(ix==nx) return iy+nx+ny+ninterior-1;
+    else return ix-1+(nx-1)*(iy-1);
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::F2_func(unsigned nx, unsigned ny, unsigned ninterior,
+                               int ix, int iy, bool periodicFlgs[NDIM]) const
+  {
+    // when periodic in the x (resp. y) direction, we will map the right boundary
+    // to the left boundary (resp. top boundary to the bottom boundary)
+    bool x_periodic = periodicFlgs[0];
+    bool y_periodic = periodicFlgs[1];
+    if(iy==0 || (iy==ny && y_periodic)) return 2*ix+ninterior;
+    else if(iy==ny) {
+      //if mapping right side to left side because x-periodic, offset top so that there isn't a gap in the mapping where the left side usually is
+      if(x_periodic) return 2*ix+(3*nx)*ny + 1; //offset
+      else return 2*ix+(3*nx+2)*ny;
+    }
+    else if(ix==0 || (ix==nx && x_periodic)) return 2*(iy+nx)+ninterior;
+    else if(ix==nx) return 2*(iy+nx+ny)+ninterior-1;
+    else return 2*(ix-1)+(3*nx-2)*(iy-1)+nx;
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::G2_func(unsigned nx, unsigned ny, unsigned ninterior,
+                               int ix, int iy, bool periodicFlgs[NDIM]) const
+  {
+    bool x_periodic = periodicFlgs[0];
+    if(ix==0 || (ix==nx && x_periodic)) return 2*(iy+nx)+ninterior+1;
+    else if(ix==nx) return 2*(iy+nx+ny)+ninterior;
+    else return ix+(3*nx-2)*iy-1;
+  }
+
+  template <unsigned NDIM>
   void
   SerendipityElement<NDIM>::getGlobalIndices(int ix, int iy, std::vector<int>& glob,
     std::vector<int>& loc)
@@ -281,7 +332,7 @@ namespace Lucee
   SerendipityElement<NDIM>::getNumGlobalNodes() const
   {
     if (NDIM > 3)
-      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 2!");
+      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 3!");
     // get hold of grid
     const Lucee::StructuredGridBase<NDIM>& grid 
       = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
@@ -322,6 +373,68 @@ namespace Lucee
     }
 
     return numGlobalNodes;
+  }
+
+  template <unsigned NDIM>
+  unsigned
+  SerendipityElement<NDIM>::getNumGlobalNodes(bool periodicFlgs[NDIM]) const
+  {
+    if (NDIM > 3)
+      throw Lucee::Except("SerendipityElement::getNumGlobalNodes: Not implemented for NDIM > 3!");
+    // get hold of grid
+    const Lucee::StructuredGridBase<NDIM>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<NDIM> >();
+    Lucee::Region<NDIM, int> gridRgn = grid.getGlobalRegion();
+    int numGlobalNodes = 0;
+
+    bool x_periodic = periodicFlgs[0];
+    bool y_periodic = periodicFlgs[1];
+
+    if (NDIM == 2)
+    {
+      int nx = gridRgn.getShape(0);
+      int ny = gridRgn.getShape(1);
+
+      if (polyOrder == 1) {
+        numGlobalNodes = (nx+1)*(ny+1);
+        // if x-periodic, subtract number of left boundary nodes
+        if(x_periodic) numGlobalNodes -= (ny - 1);
+        // if y-periodic, subtract number of top boundary nodes
+        if(y_periodic) numGlobalNodes -= (nx + 1);
+      }
+      else if (polyOrder ==2)
+      {
+        // there are 3 owned nodes per cell, 2*nx and 2*ny edge nodes along
+        // the top and right edges and the 1 accounts for the node on the
+        // top-right corner.
+        numGlobalNodes = 3*nx*ny + 2*nx + 2*ny + 1;
+        // if x-periodic, subtract number of left boundary nodes
+        if(x_periodic) numGlobalNodes -= (2*ny - 1);
+        // if y-periodic, subtract number of top boundary nodes
+        if(y_periodic) numGlobalNodes -= (2*nx + 1);
+      }
+    }
+    else numGlobalNodes = getNumGlobalNodes();
+ 
+    return numGlobalNodes;
+  }
+
+  template <unsigned NDIM>
+  int
+  SerendipityElement<NDIM>::getNumInteriorNodes() const
+  {
+    int ninterior = -1;
+    if(NDIM==2)
+    {
+      const Lucee::StructuredGridBase<2>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<2> >();
+      Lucee::Region<2, int> grgn = grid.getGlobalRegion();
+      int nx = grgn.getShape(0);
+      int ny = grgn.getShape(1);
+      ninterior = (2*polyOrder-1)*nx*ny - polyOrder*(nx+ny) + 1;
+    }
+    else throw Lucee::Except("SerendipityElement::getNumInteriorNodes: Not implemented for NDIM != 2!");
+    return ninterior;
   }
 
   template <unsigned NDIM>
@@ -386,6 +499,81 @@ namespace Lucee
       else throw Lucee::Except("SerendipityElement::getLocalToGlobal: polyOrder not implemented!");
     }
     else throw Lucee::Except("SerendipityElement::getLocalToGlobal: Dimension not implemented!");
+
+  }
+
+  template <unsigned NDIM>
+  void
+  SerendipityElement<NDIM>::getLocalToGlobalInteriorBLRT(std::vector<int>& lgMap, bool periodicFlgs[NDIM]) const
+  {
+    if (NDIM == 2)
+    {
+      int ix = this->currIdx[0];
+      int iy = this->currIdx[1];
+      const Lucee::StructuredGridBase<2>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<2> >();
+      Lucee::Region<2, int> grgn = grid.getGlobalRegion();
+      int nx = grgn.getShape(0);
+      int ny = grgn.getShape(1);
+      int ninterior = (2*polyOrder-1)*nx*ny-polyOrder*(nx+ny)+1;
+
+      if (polyOrder == 1)
+      {
+        lgMap[0] = F1_func(nx,ny,ninterior,ix,iy,periodicFlgs); // 0
+        lgMap[1] = F1_func(nx,ny,ninterior,ix+1,iy,periodicFlgs); // 1
+        lgMap[2] = F1_func(nx,ny,ninterior,ix,iy+1,periodicFlgs); // 2
+        lgMap[3] = F1_func(nx,ny,ninterior,ix+1,iy+1,periodicFlgs); // 3
+      }
+      else if (polyOrder == 2)
+      {
+        lgMap[0] = F2_func(nx,ny,ninterior,ix,iy,periodicFlgs); // 0
+        lgMap[1] = ix==0 ? 
+           F2_func(nx,ny,ninterior,ix+1,iy,periodicFlgs)-1 : 
+           F2_func(nx,ny,ninterior,ix,iy,periodicFlgs)+1; // 1
+        lgMap[2] = F2_func(nx,ny,ninterior,ix+1, iy,periodicFlgs); // 2
+        lgMap[3] = G2_func(nx,ny,ninterior,ix, iy,periodicFlgs); // 3
+        lgMap[4] = G2_func(nx,ny,ninterior,ix+1, iy,periodicFlgs); // 4
+        lgMap[5] = F2_func(nx,ny,ninterior,ix, iy+1,periodicFlgs); // 5
+        lgMap[6] = ix==0 ? 
+           F2_func(nx,ny,ninterior,ix+1,iy+1,periodicFlgs)-1 : 
+           F2_func(nx,ny,ninterior,ix,iy+1,periodicFlgs)+1; // 6
+        lgMap[7] = F2_func(nx,ny,ninterior,ix+1,iy+1,periodicFlgs); // 7
+      }
+      else throw Lucee::Except("SerendipityElement::getLocalToGlobalInteriorBLRT: polyOrder not implemented!");
+    }
+    else throw Lucee::Except("SerendipityElement::getLocalToGlobalInteriorBLRT: Dimension not implemented!");
+
+  }
+
+  template <unsigned NDIM>
+  int
+  SerendipityElement<NDIM>::getLocalToGlobalInteriorBLRT(bool periodicFlgs[NDIM]) const
+  {
+    int lgMap0 = -1;
+    if (NDIM == 2)
+    {
+      int ix = this->currIdx[0];
+      int iy = this->currIdx[1];
+      const Lucee::StructuredGridBase<2>& grid 
+      = this->template getGrid<Lucee::StructuredGridBase<2> >();
+      Lucee::Region<2, int> grgn = grid.getGlobalRegion();
+      int nx = grgn.getShape(0);
+      int ny = grgn.getShape(1);
+      int ninterior = (2*polyOrder-1)*nx*ny-polyOrder*(nx+ny)+1;
+
+      if (polyOrder == 1)
+      {
+        lgMap0 = F1_func(nx,ny,ninterior,ix,iy,periodicFlgs); // 0
+      }
+      else if (polyOrder == 2)
+      {
+        lgMap0 = F2_func(nx,ny,ninterior,ix,iy,periodicFlgs); // 0
+      }
+      else throw Lucee::Except("SerendipityElement::getLocalToGlobalInteriorBLRT: polyOrder not implemented!");
+    }
+    else throw Lucee::Except("SerendipityElement::getLocalToGlobalInteriorBLRT: Dimension not implemented!");
+
+    return lgMap0;
 
   }
 

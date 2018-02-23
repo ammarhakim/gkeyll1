@@ -28,6 +28,9 @@
 #include <vector>
 #include <limits>
 
+//
+//#include <Eigen>
+
 namespace Lucee
 {
   static const unsigned DX = 0;

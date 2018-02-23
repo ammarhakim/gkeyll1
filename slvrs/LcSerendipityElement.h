@@ -94,6 +94,19 @@ namespace Lucee
       virtual unsigned getNumGlobalNodes() const;
 
 /**
+ * Get number of global nodes in element, modified to account for periodicity remaps (NDIM=2 only)
+ *
+ * @return number of nodes in element.
+ */
+      virtual unsigned getNumGlobalNodes(bool periodicFlgs[NDIM]) const;
+
+/**
+ * Get number of interior (non-boundary) nodes. NDIM=2 only.
+ * @return number of interior nodes.
+ */
+      virtual int getNumInteriorNodes() const;
+
+/**
  * Get mapping of local node numbers in the current cell to global
  * node number. The input vector must be pre-allocated.
  *
@@ -101,6 +114,22 @@ namespace Lucee
  */
       virtual void getLocalToGlobal(std::vector<int>& lgMap) const;
 
+/**
+ * Get mapping of local node numbers in the current cell to global
+ * node number with new interior-boundary mapping. 
+ * The input vector must be pre-allocated.
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual void getLocalToGlobalInteriorBLRT(std::vector<int>& lgMap, bool periodicFlgs[NDIM]) const;
+
+/**
+ * Get mapping of only local node 0 in the current cell to global
+ * node number with new interior-boundary mapping. 
+ *
+ * @param lgMap Local node number to global node number mapping.
+ */
+      virtual int getLocalToGlobalInteriorBLRT(bool periodicFlgs[NDIM]) const;
 /**
  * Get mapping of local node numbers to global node numbers on lower
  * face of element in direction 'dir' in the current cell. The output
@@ -481,6 +510,20 @@ namespace Lucee
  * the row having 2 nodes (middle).
  */
       unsigned G_func(unsigned nx, unsigned ny, int ix, int iy) const;
+
+/**
+  * For local-to-global interior-boundary mapping, p=1
+  */
+      unsigned F1_func(unsigned nx, unsigned ny, unsigned ninterior, int ix, int iy, bool periodicFlgs[NDIM]) const;
+/**
+  * For local-to-global interior-boundary mapping, p=2 
+  */
+      unsigned F2_func(unsigned nx, unsigned ny, unsigned ninterior, int ix, int iy, bool periodicFlgs[NDIM]) const;
+/**
+  * For local-to-global interior-boundary mapping, p=2 
+  */
+      unsigned G2_func(unsigned nx, unsigned ny, unsigned ninterior, int ix, int iy, bool periodicFlgs[NDIM]) const;
+
 /**
  * Helper function to copy data from/to a flat array, given a Lucee
  * field. This method also takes into account the numbering of nodes
