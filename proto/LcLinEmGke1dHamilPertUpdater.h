@@ -70,6 +70,7 @@ namespace Lucee
       double charge;
 /** Mass of species */
       double mass;
+      bool sharedNodes;
   };
 }
 

@@ -32,6 +32,11 @@ namespace Lucee
       nodalBasis = &tbl.getObjectAsBase<Lucee::NodalFiniteElementIfc<2> >("basis");
     else
       throw Lucee::Except("EvalOnNodesUpdater::readInput: Must specify element to use using 'basis'");
+
+    sharedNodes = true;
+// check if there are shared nodes
+    if (tbl.hasBool("shareCommonNodes"))
+      sharedNodes = tbl.getBool("shareCommonNodes");
   }
 
   void
@@ -52,7 +57,14 @@ namespace Lucee
     Lucee::Field<2, double>& hamil = this->getOut<Lucee::Field<2, double> >(0);
 
     std::vector<int> ndIds;
-    nodalBasis->getExclusiveNodeIndices(ndIds);
+    if (sharedNodes)
+      nodalBasis->getExclusiveNodeIndices(ndIds);
+    else
+    { // create "unit" mapping
+      ndIds.resize(nodalBasis->getNumNodes());
+      for (unsigned i = 0; i<ndIds.size(); ++i)
+        ndIds[i] = i;
+    }
     unsigned numNodes = ndIds.size(); // number of nodes owned by each cell
 
     int idx[2];
