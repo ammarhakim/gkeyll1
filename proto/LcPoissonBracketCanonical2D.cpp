@@ -35,7 +35,7 @@ namespace Lucee
   PoissonBracketCanonical2D::computeAlphaAtQuadNodes(const Eigen::MatrixXd& hamiltonian, const Eigen::MatrixXd& interpMat,
           const int idx[], Eigen::MatrixXd& alpha)
   {
-    //alpha.setZero(alpha.rows(), alpha.cols());
+    alpha.setZero(alpha.rows(), alpha.cols());
     //alpha.row(0).setOnes();
     Eigen::Matrix2d poissonTensor = Eigen::Matrix2d::Zero();
     poissonTensor(0,1) = 1;
