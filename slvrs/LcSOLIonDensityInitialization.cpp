@@ -95,6 +95,7 @@ namespace Lucee
 
     int nlocal = nodalBasis->getNumNodes();
 
+    Lucee::Region<NDIM, int> globalRgn = grid.getGlobalRegion();
     Lucee::Region<NDIM, int> localRgn = grid.getLocalRegion();
 
     Lucee::ConstFieldPtr<double> nElcInPtr = nElcIn.createConstPtr();
@@ -102,10 +103,9 @@ namespace Lucee
 
     nIonOutPtr = 0.0;
 
-    int numCells = localRgn.getUpper(0)-localRgn.getLower(0);
-    double domainLength = numCells*grid.getDx(0);
+    double domainLength = grid.getNumCells(0)*grid.getDx(0);
 
-    Eigen::VectorXd nIonPrev = Eigen::VectorXd::Zero(numCells*nlocal);
+    Eigen::VectorXd nIonPrev = Eigen::VectorXd::Zero((localRgn.getUpper(0)-localRgn.getLower(0))*nlocal);
 
     // Calculate integrated electron density and electron-density-weighted ln(n_e) (one time)
     double intElcDensityLocal = 0.0;
@@ -138,14 +138,9 @@ namespace Lucee
         nIonOutPtr[nodeIndex] = nElcInPtr[nodeIndex];
 
     }
-#ifdef HAVE_MPI
     TxCommBase *zComm = grid.getComm();
     zComm->allreduce(1, &intElcDensityLocal, &intElcDensity, TX_SUM);
     zComm->allreduce(1, &avgLogElcDensityLocal, &avgLogElcDensity, TX_SUM);
-#else
-    intElcDensity    = intElcDensityLocal;
-    avgLogElcDensity = avgLogElcDensityLocal;
-#endif
     // Divide by n_e
     avgLogElcDensity = avgLogElcDensity/intElcDensity;
 
@@ -185,11 +180,7 @@ namespace Lucee
 	  }
         }
       }
-#ifdef HAVE_MPI
       zComm->allreduce(1, &ionDensityWeightedPhiLocal, &ionDensityWeightedPhi, TX_SUM);
-#else
-      ionDensityWeightedPhi = ionDensityWeightedPhiLocal;
-#endif
       ionDensityWeightedPhi = ionDensityWeightedPhi/intElcDensity;
 
       // Loop over all cells to calculate intermediate ion density
@@ -226,11 +217,7 @@ namespace Lucee
         for (int componentIndex = 0; componentIndex < nIonAtQuadPoints.rows(); componentIndex++)
           intIonDensityLocal += gaussWeights[componentIndex]*nIonAtQuadPoints(componentIndex);
       }
-#ifdef HAVE_MPI
       zComm->allreduce(1, &intIonDensityLocal, &intIonDensity, TX_SUM);
-#else
-      intIonDensity = intIonDensityLocal;
-#endif
       
       // Apply correction factor to nIon and calculate relative errors
       double maxResLocal = 0.0;
@@ -255,15 +242,10 @@ namespace Lucee
           nIonPrev((ix-localRgn.getLower(0))*nlocal + nodeIndex) = nIonOutPtr[nodeIndex];
         }
       }
-#ifdef HAVE_MPI
       // find max residual across all processes.
       zComm->allreduce(1, &maxIonDensityLocal, &maxIonDensity, TX_MAX);
       // find max residual across all processes.
       zComm->allreduce(1, &maxResLocal, &maxRes, TX_MAX);
-#else
-      maxIonDensity = maxIonDensityLocal;
-      maxRes = maxResLocal;
-#endif
       relError = maxRes/maxIonDensity;
       std::cout << "iter " << iter << " relerr = " << relError << std::endl;
       iter++;

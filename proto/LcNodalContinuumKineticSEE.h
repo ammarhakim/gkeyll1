@@ -79,20 +79,29 @@ namespace Lucee
     void declareTypes();
     
   private:
+    Lucee::NodalFiniteElementIfc<CDIM> *confBasis;
     // Pointer to phase space basis functions 
     Lucee::NodalFiniteElementIfc<CDIM+VDIM> *phaseBasis;
     
-    unsigned dir, edge;
+    unsigned dir, edge, polyOrder;
     
     double mass, elemCharge;
+
+    double Escale;
 
     // Furman model - backscaterred electrons
     double E_hat, P_hat, P_inf, W, p_e, e_1, e_2, sigma_e;
     
-    double Reflect(double EIn, 
-		   double cosThetaIn, 
-		   double EOut,
-		   double cosThetaOut);
+    double reflect(double eIn, double muIn, 
+		   double eOut, double muOut,
+		   double epsilon);
+
+    bool sameConfigCoords(unsigned n, unsigned cn, double dxMin,
+			  const Lucee::Matrix<double>& phaseC,
+			  const Lucee::Matrix<double>& confC);
+
+    /** Mapping of node in phase-space to node in configuration space */
+    std::vector<unsigned> phaseConfMap;
   };
 }
 

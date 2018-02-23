@@ -135,11 +135,15 @@ namespace Lucee
         double integralResult[3] = {};
         for (int gaussIndex = 0; gaussIndex < volWeights3d.size(); gaussIndex++)
         {
+          // volWeights is created with a factor of grid.getDx(dim). Here we divide
+          // by this factor along the non-uniform dimension and account for it when
+          // looping over cells in the update part below. 
           double baseIntegral = volWeights3d[gaussIndex]*volQuad1d(gaussIndex % nVolQuad1d, i)*
-            volQuad3d(gaussIndex, j);
+            volQuad3d(gaussIndex, j)/grid.getDx(2);
           integralResult[0] += baseIntegral;
-          // Get coordinate of quadrature point in direction momDir
-          double coord2Val = volCoords3d(gaussIndex, momDir)*grid.getDx(momDir)/2.0;
+          // Get coordinate of quadrature point in direction momDir.
+          // Will multiply by Dx in update section to support non-uniform grid.
+          double coord2Val = volCoords3d(gaussIndex, momDir)*0.50; //grid.getDx(momDir);
           integralResult[1] += coord2Val*baseIntegral;
           integralResult[2] += coord2Val*coord2Val*baseIntegral;
         }
@@ -223,6 +227,10 @@ namespace Lucee
 
       grid.setIndex(idx);
       grid.getCentroid(xc);
+      
+      double physicalVol = grid.getVolume();	// Volume of this cell (physical units).
+      double DxMu        = physicalVol/grid.getSurfArea(2); // Mu cell length.
+      double momDirDx    = physicalVol/grid.getSurfArea(momDir); // Cell length along momDir.
 
       momentLocal->setPtr(momentPtr, idx[0]);
       distF.setPtr(distFPtr, idx);
@@ -234,13 +242,14 @@ namespace Lucee
       // Accumulate contribution to momentGlobal from this cell
       Eigen::VectorXd resultVector(nlocal1d);
 
+      // Here volume/SurfArea gives the correct cell length along the non-uniform dimension.
       if (calcMom == 0)
-        resultVector.noalias() = mom0Matrix*distfVec;
+        resultVector.noalias() = mom0Matrix*distfVec*DxMu;
       else if (calcMom == 1)
-        resultVector.noalias() = (mom1Matrix + xc[momDir]*mom0Matrix)*distfVec;
+        resultVector.noalias() = (mom1Matrix*momDirDx + xc[momDir]*mom0Matrix)*DxMu*distfVec;
       else if (calcMom == 2)
-        resultVector.noalias() = (mom2Matrix + 2*xc[momDir]*mom1Matrix +
-          xc[momDir]*xc[momDir]*mom0Matrix)*distfVec;
+        resultVector.noalias() = (mom2Matrix*momDirDx*momDirDx + 2.0*xc[momDir]*mom1Matrix*momDirDx +
+          xc[momDir]*xc[momDir]*mom0Matrix)*DxMu*distfVec;
 
       for (int i = 0; i < nlocal1d; i++)
         momentPtr[i] = momentPtr[i] + resultVector(i);

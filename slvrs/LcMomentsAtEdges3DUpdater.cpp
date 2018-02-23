@@ -49,6 +49,11 @@ namespace Lucee
   {
     UpdaterIfc::initialize();
 
+    const Lucee::StructuredGridBase<3>& grid 
+      = this->getGrid<Lucee::StructuredGridBase<3> >();
+    // Compute scale factor
+    double surfAreaComputational = grid.getDx(1)*grid.getDx(2);
+
     unsigned numNodes = nodalBasis->getNumNodes();
 
     // Figure out what nodes are on the right edge
@@ -67,6 +72,9 @@ namespace Lucee
     // Get the interpolation matrix for the right edge of the domain
     nodalBasis->getSurfUpperGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
       gaussEdgeWeightsUpper);
+    // Remove physical spatial scale to support non-uniform grid. Include in update section.
+    for (int quadIndex = 0; quadIndex < numEdgeQuadNodes; quadIndex++)
+      gaussEdgeWeightsUpper[quadIndex] = gaussEdgeWeightsUpper[quadIndex]/surfAreaComputational;
     // Copy matrices to eigen objects
     copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrixUpper);
     copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinatesUpper);
@@ -74,6 +82,9 @@ namespace Lucee
     // Do the same for the left edge of the domain
     nodalBasis->getSurfLowerGaussQuadData(0, interpEdgeMatrixLucee, gaussEdgeOrdinatesLucee,
       gaussEdgeWeightsLower);
+    // Remove physical spatial scale to support non-uniform grid. Include in update section.
+    for (int quadIndex = 0; quadIndex < numEdgeQuadNodes; quadIndex++)
+      gaussEdgeWeightsLower[quadIndex] = gaussEdgeWeightsLower[quadIndex]/surfAreaComputational;
     // Copy matrices to eigen objects
     copyLuceeToEigen(interpEdgeMatrixLucee, interpEdgeMatrixLower);
     copyLuceeToEigen(gaussEdgeOrdinatesLucee, gaussEdgeOrdinatesLower);
@@ -90,6 +101,9 @@ namespace Lucee
     copyLuceeToEigen(gradStiffMatrixLucee, gradStiffMatrix);
 
     derivativeMatrix = massMatrix.inverse()*gradStiffMatrix.transpose();
+    // Spatial scales in massMattrix.inverse and gradStiffMatrix almost cancel.
+    // Account for remaining factor in update section.
+    derivativeMatrix = derivativeMatrix*grid.getDx(1);
   }
 
   Lucee::UpdaterStatus
@@ -142,6 +156,11 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(cellCentroid);
 
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);
+          dq[2] = grid.getVolume()/grid.getSurfArea(2);
+          double surfArea = dq[1]*dq[2];
+         
           // Don't want skin cell contributions for vPara < 0.0 (upwinding)
           if (cellCentroid[1] < 0.0)
             break;
@@ -161,12 +180,12 @@ namespace Lucee
 
           for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
           {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*grid.getDx(2)/2.0;
+            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*dq[1]/2.0;
+            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*dq[2]/2.0;
 
-            vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
-            vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
-            vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
+            vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*edgeQuadData(quadNodeIndex);
+            vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+            vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
           }
           
           vParaMom_r += vParaMom_cell;
@@ -187,6 +206,11 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(cellCentroid);
 
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);
+          dq[2] = grid.getVolume()/grid.getSurfArea(2);
+          double surfArea = dq[1]*dq[2];
+         
           // Don't want ghost cell contributions for v > 0.0 (upwinding)
           if (cellCentroid[1] > 0.0)
             break;
@@ -209,9 +233,9 @@ namespace Lucee
             double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLower(quadNodeIndex,1)*grid.getDx(1)/2.0;
             double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesLower(quadNodeIndex,2)*grid.getDx(2)/2.0;
             
-            vParaMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
-            vPara3Mom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
-            vParaMuMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
+            vParaMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*edgeQuadData(quadNodeIndex);
+            vPara3Mom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+            vParaMuMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
           }
           
           vParaMom_r += vParaMom_cell;
@@ -252,6 +276,11 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(cellCentroid);
 
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);
+          dq[2] = grid.getVolume()/grid.getSurfArea(2);
+          double surfArea = dq[1]*dq[2];
+         
           // Don't want skin cell contributions for vPara > 0.0 (upwinding)
           if (cellCentroid[1] > 0.0)
             break;
@@ -271,12 +300,12 @@ namespace Lucee
 
           for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
           {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLower(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesLower(quadNodeIndex,2)*grid.getDx(2)/2.0;
+            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesLower(quadNodeIndex,1)*dq[1]/2.0;
+            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesLower(quadNodeIndex,2)*dq[2]/2.0;
 
-            vParaMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
-            vPara3Mom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
-            vParaMuMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
+            vParaMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*edgeQuadData(quadNodeIndex);
+            vPara3Mom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+            vParaMuMom_cell += gaussEdgeWeightsLower[quadNodeIndex]*surfArea*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
           }
           
           vParaMom_l += vParaMom_cell;
@@ -297,6 +326,11 @@ namespace Lucee
           grid.setIndex(idx);
           grid.getCentroid(cellCentroid);
 
+          double dq[3];
+          dq[1] = grid.getVolume()/grid.getSurfArea(1);
+          dq[2] = grid.getVolume()/grid.getSurfArea(2);
+          double surfArea = dq[1]*dq[2];
+         
           // Don't want ghost cell contributions for v < 0.0 (upwinding)
           if (cellCentroid[1] < 0.0)
             break;
@@ -316,12 +350,12 @@ namespace Lucee
 
           for (int quadNodeIndex = 0; quadNodeIndex < edgeQuadData.rows(); quadNodeIndex++)
           {
-            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*grid.getDx(1)/2.0;
-            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*grid.getDx(2)/2.0;
+            double physicalV = cellCentroid[1] + gaussEdgeOrdinatesUpper(quadNodeIndex,1)*dq[1]/2.0;
+            double physicalMu = cellCentroid[2] + gaussEdgeOrdinatesUpper(quadNodeIndex,2)*dq[2]/2.0;
             
-            vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*edgeQuadData(quadNodeIndex);
-            vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
-            vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
+            vParaMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*edgeQuadData(quadNodeIndex);
+            vPara3Mom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*physicalV*physicalV*edgeQuadData(quadNodeIndex);
+            vParaMuMom_cell += gaussEdgeWeightsUpper[quadNodeIndex]*surfArea*physicalV*physicalMu*edgeQuadData(quadNodeIndex);
           }
 
           vParaMom_l += vParaMom_cell;

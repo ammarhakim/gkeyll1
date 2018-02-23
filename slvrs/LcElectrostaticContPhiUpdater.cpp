@@ -181,20 +181,23 @@ namespace Lucee
 #else
     // Explicit initialization of stiffness matrix speeds up
     // initialization tremendously.
-    int nz = 10; // number of non-zero entries per row (WHAT SHOULD IT REALLY BE?)
-    if (nodalBasis->getNumNodes() > 4)
-      nz = 21; // HACK FOR NOW
+    //int nz = 10; // number of non-zero entries per row (WHAT SHOULD IT REALLY BE?)
+    //if (nodalBasis->getNumNodes() > 4)
+    //  nz = 21; // HACK FOR NOW
+    int nz = nodalBasis->getNumNodes()*(std::pow(2.0, 1.0*NDIM)+1);
     MatCreateSeqAIJ(PETSC_COMM_SELF, nglobal, nglobal, nz, PETSC_NULL, &stiffMat);
 #endif
+    MatSetFromOptions(stiffMat);
 
 #if PETSC_VERSION_GE(3,6,0)
 // From LcFemPoissonStructUpdater.cpp: NRM 3/10/16:
 // Depending on the type of BCs, we will be modifying stiffMat and adding new nonzero values.
 // In later versions of PETSc, we need to set the following in order for PETSc to not throw errors.
     MatSetOption(stiffMat, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-#else
-    MatSetFromOptions(stiffMat);
 #endif
+// Keep non-zero pattern when zero-ing out matrix
+    MatSetOption(stiffMat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+
     // Finalize assembly... is this needed?
     MatAssemblyBegin(stiffMat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(stiffMat, MAT_FINAL_ASSEMBLY);
