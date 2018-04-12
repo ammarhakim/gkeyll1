@@ -162,9 +162,9 @@
 # include <LcFemGKPoissonStructUpdater.h>
 # include <LcFemPoissonStructUpdater.h>
 # include <LcFemGenPoissonStructUpdater.h>
-#endif
-
+#else
 #include <LcFemPoissonStructEigenUpdater.h>
+#endif
 
 namespace Lucee
 {
@@ -332,8 +332,9 @@ namespace Lucee
       .append<Lucee::ElectrostaticContPhiUpdater>()
 
       .append<Lucee::ElectromagneticContAUpdater>()
-#endif
+#else
       .append<Lucee::FemPoissonStructEigenUpdater<2> >()
+#endif
 
       .append<Lucee::EvalOnNodesUpdater<1> >()
       .append<Lucee::EvalOnNodesUpdater<2> >()
