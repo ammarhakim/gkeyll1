@@ -66,10 +66,13 @@ namespace Lucee
       void declareTypes();
 
     private:
-/** Average wave number */
+      /* determines if we convert to or from P + rho u u*/
       enum Mode {TO_CONSERVATIVE, TO_PRIMITIVE};
       Mode mode;
-      double T0;
+      /* determines if we convert to temperature or pressure */
+      enum OutType {OUT_TEMPERATURE, OUT_PRESSURE};
+      OutType outType;
+
   };
 }
 

@@ -104,6 +104,7 @@ set (proto_SOURCES
   LcRecoveryDG1DUpdater.cpp
   LcRecoveryDG3DUpdater.cpp
   LcRectFourthOrderCentralDiffUpdater.cpp
+  LcRectSecondOrderCentralDiffConductionUpdater.cpp
   LcRectSecondOrderCentralDiffUpdater.cpp
   LcRectYeeInterpolationUpdater.cpp
   LcRunningAverageOfFieldCalc.cpp

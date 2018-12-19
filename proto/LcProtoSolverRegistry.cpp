@@ -84,6 +84,7 @@
 #include <LcRecoveryDG1DUpdater.h>
 #include <LcRecoveryDG3DUpdater.h>
 #include <LcRectFourthOrderCentralDiffUpdater.h>
+#include <LcRectSecondOrderCentralDiffConductionUpdater.h>
 #include <LcRectSecondOrderCentralDiffUpdater.h>
 #include <LcRectYeeInterpolationUpdater.h>
 #include <LcRegisteredObjList.h>
@@ -309,6 +310,10 @@ namespace Lucee
       .append<Lucee::RectSecondOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<2> >()
       .append<Lucee::RectSecondOrderCentralDiffUpdater<3> >()
+
+      .append<Lucee::RectSecondOrderCentralDiffConductionUpdater<1> >()
+      .append<Lucee::RectSecondOrderCentralDiffConductionUpdater<2> >()
+      .append<Lucee::RectSecondOrderCentralDiffConductionUpdater<3> >()
 
       .append<Lucee::RectFourthOrderCentralDiffUpdater<1> >()
       .append<Lucee::RectFourthOrderCentralDiffUpdater<2> >()
