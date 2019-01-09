@@ -50,6 +50,11 @@ namespace Lucee
     if (tbl.hasBool("onlyIncrement"))
       onlyIncrement = tbl.getBool("onlyIncrement");
 
+// check if we are doing diffusion or hyper-diffusion
+    isDiffusion = false;
+    if (tbl.hasBool("calcDiffusion"))
+      isDiffusion = tbl.getBool("calcDiffusion");
+
 // directions to update
     if (tbl.hasNumVec("updateDirections"))
     {
@@ -101,7 +106,10 @@ namespace Lucee
     nodalBasis->setIndex(idx);
 
 // get various matrices needed
-    nodalBasis->getHyperDiffusionMatrices(iMat, lowerMat, upperMat);
+    if (isDiffusion)
+      nodalBasis->getDiffusionMatrices(iMat, lowerMat, upperMat);
+    else
+      nodalBasis->getHyperDiffusionMatrices(iMat, lowerMat, upperMat);
 
 // pre-multiply each of the matrices by inverse matrix
     Lucee::Matrix<double> massMatrix(nlocal, nlocal);
@@ -141,8 +149,12 @@ namespace Lucee
       dxMin = std::min(dxMin, grid.getDx(d));
 
 // check time-step
-    double cflm = 1.1*cfl;
-    double cfla = 16*std::fabs(alpha)*dt/(dxMin*dxMin*dxMin*dxMin);
+    double cflm = 1.1*cfl, cfla;
+    if (isDiffusion)
+      cfla = alpha*dt/(dxMin*dxMin);
+    else
+      cfla = 16*std::fabs(alpha)*dt/(dxMin*dxMin*dxMin*dxMin);
+
     if (cfla>cflm)
       return Lucee::UpdaterStatus(false, dt*cfl/cfla);
 

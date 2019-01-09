@@ -83,6 +83,8 @@ namespace Lucee
       double cfl;
 /** Flag to indicate if to compute only increments */
       bool onlyIncrement;
+/** Flag to indicate diffusion or hyper-diffusion */
+      bool isDiffusion;
 /** Pointer to nodal basis functions to use */
       Lucee::NodalFiniteElementIfc<NDIM> *nodalBasis;
 /** Directions to update */
