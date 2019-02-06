@@ -46,8 +46,8 @@ if (ENABLE_PARALLEL)
   endif ()
 endif ()
 
-add_executable(lcarray lcarray.cxx)
-target_link_libraries(lcarray lclib lcloki ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES})
+#add_executable(lcarray lcarray.cxx)
+#target_link_libraries(lcarray lclib lcloki ${Lua_STLIBS} ${Hdf5_Mpi_LIBRARIES})
 
 add_executable(lccolmajorindexer lccolmajorindexer.cxx)
 target_link_libraries(lccolmajorindexer lclib lcloki ${Lua_STLIBS} ${Gsl_STLIBS} ${Hdf5_Mpi_LIBRARIES})

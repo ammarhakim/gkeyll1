@@ -157,13 +157,13 @@ add_subdirectory(proto)
 add_subdirectory(pic)
 add_subdirectory(rte)
 add_subdirectory(gkeyll)
-add_subdirectory(unit)
+#add_subdirectory(unit)
 
 # Add individual tests
 ENABLE_TESTING()
 
 # add tests
-add_test(lcarray unit/lcarray)
+#add_test(lcarray unit/lcarray)
 add_test(lccolmajorindexer unit/lccolmajorindexer)
 add_test(lcrowmajorindexer unit/lcrowmajorindexer)
 add_test(lcfixedvector unit/lcfixedvector)
